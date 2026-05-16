@@ -1,0 +1,37 @@
+# Environment and secrets
+.env
+*.env.local
+
+# Runtime state (created during use)
+workspace/email-triage-state.json
+workspace/email-triage-log.jsonl
+workspace/learning-loop-state.json
+workspace/learning-journal.jsonl
+workspace/feedback.jsonl
+workspace/journal.jsonl
+workspace/journal-prompts.jsonl
+workspace/research-journal.md
+workspace/MEMORY.md
+
+# Generated content
+workspace/_archive/
+workspace/_janitor-backups/
+workspace/dashboard-deploy/
+
+# Reference images (user-specific, often large)
+workspace/reference-images/children/*.jpg
+workspace/reference-images/children/*.jpeg
+workspace/reference-images/children/*.png
+workspace/reference-images/family/*.jpg
+workspace/reference-images/family/*.jpeg
+workspace/reference-images/family/*.png
+workspace/reference-images/pets-toys/*.jpg
+workspace/reference-images/pets-toys/*.jpeg
+workspace/reference-images/pets-toys/*.png
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/

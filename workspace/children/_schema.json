@@ -1,0 +1,658 @@
+{
+  "schema_version": 1,
+  "name": "",
+  "dob": "",
+  "pronouns": "",
+  "age": {
+    "years": 0,
+    "months": 0,
+    "days": 0,
+    "total_months": 0,
+    "decimal_years": 0.0,
+    "computed_at": ""
+  },
+  "philosophy": {
+    "cognitive_academic_target": "24mo_ahead",
+    "motor_selfcare_social_target": "12mo_ahead",
+    "rationale": ""
+  },
+  "interests": [],
+  "sensory_notes": [],
+  "learning_style": [],
+  "domains": {
+    "math": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "rote_counting": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "cardinality": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "number_recognition": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "subitizing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "patterns": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "shapes_geometry": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "measurement": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "addition_concepts": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "ordinal_numbers": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "literacy": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "letter_recognition_uppercase": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "letter_recognition_lowercase": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "letter_sound_knowledge": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "rhyming": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "syllable_segmenting": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "blending": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "story_comprehension": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "print_awareness": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "phonics": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "phonemic_awareness": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "letter_sound_correspondence": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "blending": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "segmenting": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "writing_fine_motor": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "pencil_grip": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "letter_formation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "name_writing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "drawing_representation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "scissors_use": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "spanish": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "vocabulary_count": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "comprehension": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "production": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "science": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "life_sciences": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "physical_sciences": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "earth_space": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "scientific_inquiry": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "social_studies": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "self_family": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "community_helpers": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "geography_basics": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "cultures_traditions": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "art_creative": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "color_theory": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "drawing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "painting": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "art_appreciation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "gross_motor": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "running": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "jumping": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "balance_single_leg": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "ball_skills": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "climbing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "pedaling": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "fine_motor_general": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "stringing_beads": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "buttons_zippers": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "pouring_transferring": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "tower_building": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "puzzles": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "social_emotional": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "emotion_recognition_self": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "emotion_recognition_others": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "self_regulation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "peer_play": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "turn_taking_sharing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "empathy": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "self_care_independence": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "dressing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "toileting": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "feeding_utensils": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "personal_hygiene": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "cleanup_routines": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "executive_function": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "attention_span": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "working_memory": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "inhibitory_control": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "cognitive_flexibility": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "language_oral_english": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "vocabulary_breadth": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "sentence_complexity": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "narrative_skills": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "articulation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "question_use": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "grammar_morphology": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    },
+    "music": {
+      "score": null,
+      "target_months_ahead": null,
+      "subdomains": {
+        "rhythm": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "pitch_singing": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "instrument_exposure": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        },
+        "music_appreciation": {
+          "current": "",
+          "verified": null,
+          "confidence": "unknown",
+          "story_position": "unknown",
+          "notes": []
+        }
+      }
+    }
+  },
+  "interventions_active": [],
+  "interventions_dropped": [],
+  "last_full_rescore": null,
+  "last_research_run": null,
+  "next_measurement_protocol_due": null
+}

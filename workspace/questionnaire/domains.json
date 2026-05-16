@@ -1,0 +1,172 @@
+{
+  "_comment": "Developmental questionnaire — age-keyed question bank for all 15 domains. Homa selects questions based on child's age during onboarding.",
+  "domains": {
+    "math": {
+      "display_name": "Math",
+      "intro": "Let's talk about numbers and counting.",
+      "questions": [
+        {"subdomain": "rote_counting", "question": "How high can they count? (Just saying numbers in order)", "type": "count", "age_min": "2y0m"},
+        {"subdomain": "cardinality", "question": "If you put 5 blocks in front of them and ask 'how many?', can they count and tell you the answer?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "number_recognition", "question": "Can they recognize written numbers? Which ones?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "subitizing", "question": "If you hold up 3 fingers quickly, can they say '3' without counting one by one?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "patterns", "question": "Can they continue a simple pattern? Like red-blue-red-blue — what comes next?", "type": "yes_no", "age_min": "3y0m"},
+        {"subdomain": "shapes", "question": "What shapes can they name? (circle, square, triangle, rectangle, etc.)", "type": "list", "age_min": "2y6m"},
+        {"subdomain": "measurement", "question": "Do they understand bigger/smaller, taller/shorter, heavier/lighter?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "addition_subtraction", "question": "If you have 2 cookies and I give you 1 more, can they figure out how many? (with objects, not abstract)", "type": "yes_no_detail", "age_min": "3y6m"},
+        {"subdomain": "spatial", "question": "Do they use words like 'next to', 'behind', 'on top of', 'under'?", "type": "yes_no", "age_min": "2y6m"}
+      ]
+    },
+    "literacy": {
+      "display_name": "Literacy",
+      "intro": "Now let's talk about books and reading.",
+      "questions": [
+        {"subdomain": "letter_recognition", "question": "How many letters of the alphabet can they recognize by sight?", "type": "count", "age_min": "2y6m"},
+        {"subdomain": "letter_sounds", "question": "Do they know what sounds letters make? Which ones?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "print_awareness", "question": "Do they know which way to hold a book? That we read left to right?", "type": "yes_no", "age_min": "2y0m"},
+        {"subdomain": "vocabulary", "question": "When they talk, do strangers usually understand them?", "type": "yes_no", "age_min": "2y6m"},
+        {"subdomain": "comprehension", "question": "After you read a story, can they tell you what happened? Or just random details?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "sight_words", "question": "Can they read any words on sight? (their name, STOP, common words)", "type": "detail", "age_min": "3y6m"},
+        {"subdomain": "reading_interest", "question": "How many books do you read together in a day? Do they ask to be read to?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "name_writing", "question": "Can they write their own name?", "type": "yes_no_detail", "age_min": "3y6m"}
+      ]
+    },
+    "phonics": {
+      "display_name": "Phonics",
+      "intro": "A few questions about sounds and sounding out words.",
+      "questions": [
+        {"subdomain": "letter_sounds", "question": "How many letter sounds do they know? (the sound, not the letter name)", "type": "count", "age_min": "3y0m"},
+        {"subdomain": "blending", "question": "If you say 'c-a-t' slowly, can they blend it and say 'cat'?", "type": "yes_no", "age_min": "3y6m"},
+        {"subdomain": "rhyming", "question": "Can they tell you words that rhyme? Or finish a rhyme you start?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "segmenting", "question": "If you say 'dog', can they break it into sounds: d-o-g?", "type": "yes_no", "age_min": "4y0m"}
+      ]
+    },
+    "writing_fine_motor": {
+      "display_name": "Writing & Fine Motor",
+      "intro": "Let's talk about writing and hand skills.",
+      "questions": [
+        {"subdomain": "grip", "question": "How do they hold a pencil or crayon? (fist grip, three-finger, mature tripod)", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "letter_formation", "question": "Can they write any letters? Which ones?", "type": "detail", "age_min": "3y6m"},
+        {"subdomain": "drawing", "question": "Can they draw a person? How detailed? (circle head, stick limbs, face features?)", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "scissors", "question": "Can they use scissors? Cut on a line?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "tracing", "question": "Can they trace over dotted lines or shapes?", "type": "yes_no", "age_min": "3y0m"}
+      ]
+    },
+    "spanish": {
+      "display_name": "Spanish (or second language)",
+      "intro": "Are you teaching a second language? Tell me about it.",
+      "questions": [
+        {"subdomain": "vocabulary", "question": "How many words do they know in the second language?", "type": "count", "age_min": "2y0m"},
+        {"subdomain": "comprehension", "question": "Can they understand spoken phrases or just isolated words?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "production", "question": "Do they use the language spontaneously, or only when prompted?", "type": "detail", "age_min": "3y0m"}
+      ]
+    },
+    "science": {
+      "display_name": "Science",
+      "intro": "What about science and nature?",
+      "questions": [
+        {"subdomain": "observation", "question": "Do they notice and ask about natural things? (bugs, weather, plants, animals)", "type": "yes_no_detail", "age_min": "2y0m"},
+        {"subdomain": "classification", "question": "Can they sort things into groups? (animals vs. plants, big vs. small)", "type": "yes_no", "age_min": "3y0m"},
+        {"subdomain": "life_cycles", "question": "Do they understand that things grow and change? (seeds→plants, caterpillar→butterfly)", "type": "yes_no_detail", "age_min": "3y6m"},
+        {"subdomain": "experimentation", "question": "Do they like experiments? What happens when...? Mixing, pouring, building?", "type": "detail", "age_min": "2y6m"}
+      ]
+    },
+    "social_studies": {
+      "display_name": "Social Studies",
+      "intro": "A few about the world around them.",
+      "questions": [
+        {"subdomain": "self_family", "question": "Can they tell you their full name, age, and who's in their family?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "community", "question": "Do they know about community helpers? (firefighters, doctors, teachers)", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "geography", "question": "Do they know what city/state they live in? Any map awareness?", "type": "detail", "age_min": "3y6m"},
+        {"subdomain": "cultures_traditions", "question": "Any exposure to different cultures, holidays, or traditions?", "type": "detail", "age_min": "3y0m"}
+      ]
+    },
+    "art_creative": {
+      "display_name": "Art & Creative",
+      "intro": "Let's talk about art and creativity.",
+      "questions": [
+        {"subdomain": "drawing", "question": "What do they like to draw? How detailed?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "color_theory", "question": "Can they name colors? Mix colors?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "art_appreciation", "question": "Have they been to museums or looked at famous art? Any favorites?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "painting", "question": "Do they paint? Finger paint, brush, sponge?", "type": "detail", "age_min": "2y0m"}
+      ]
+    },
+    "gross_motor": {
+      "display_name": "Gross Motor",
+      "intro": "Physical stuff — running, jumping, balance.",
+      "questions": [
+        {"subdomain": "balance_single_leg", "question": "Can they stand on one foot? For how long?", "type": "detail", "age_min": "3y0m"},
+        {"subdomain": "jumping", "question": "Can they jump with both feet off the ground? Hop on one foot?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "ball_skills", "question": "Can they throw a ball overhand? Catch?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "climbing", "question": "Can they climb playground equipment? Stairs alternating feet?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "pedaling", "question": "Can they pedal a tricycle or bike?", "type": "yes_no", "age_min": "3y0m"},
+        {"subdomain": "running", "question": "How's their running? Coordinated? Can they stop and change direction easily?", "type": "detail", "age_min": "2y0m"}
+      ]
+    },
+    "fine_motor_general": {
+      "display_name": "Fine Motor (general)",
+      "intro": "Small hand skills beyond writing.",
+      "questions": [
+        {"subdomain": "puzzles", "question": "What level puzzles can they do? (knob, jigsaw, how many pieces?)", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "stringing_beads", "question": "Can they string beads or thread laces?", "type": "yes_no", "age_min": "3y0m"},
+        {"subdomain": "buttons_zippers", "question": "Can they do buttons, zippers, or snaps?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "tower_building", "question": "How high can they stack blocks?", "type": "count", "age_min": "2y0m"},
+        {"subdomain": "pouring_transferring", "question": "Can they pour water between cups without spilling much?", "type": "yes_no", "age_min": "2y6m"}
+      ]
+    },
+    "social_emotional": {
+      "display_name": "Social-Emotional",
+      "intro": "How they handle feelings and other kids.",
+      "questions": [
+        {"subdomain": "emotion_recognition", "question": "Can they name emotions? (happy, sad, mad, scared — how many?)", "type": "detail", "age_min": "2y6m"},
+        {"subdomain": "self_regulation", "question": "When they're frustrated, what do they do? Cry, hit, ask for help, use words?", "type": "detail", "age_min": "2y6m"},
+        {"subdomain": "empathy", "question": "Do they notice when someone else is upset? Try to comfort them?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "cooperative_play", "question": "Can they play WITH other kids? Share? Take turns?", "type": "detail", "age_min": "2y6m"},
+        {"subdomain": "independence", "question": "Can they play independently? For how long?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "social_comfort", "question": "How are they with new people? New kids? Shy, cautious, outgoing?", "type": "detail", "age_min": "2y0m"}
+      ]
+    },
+    "self_care_independence": {
+      "display_name": "Self-Care & Independence",
+      "intro": "Daily life skills.",
+      "questions": [
+        {"subdomain": "dressing", "question": "Can they dress themselves? Shoes? Which parts need help?", "type": "detail", "age_min": "2y6m"},
+        {"subdomain": "toileting", "question": "Where are they with potty training?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "feeding", "question": "Can they use a fork and spoon? Drink from an open cup?", "type": "yes_no_detail", "age_min": "2y0m"},
+        {"subdomain": "hygiene", "question": "Can they wash their hands independently? Brush teeth with help?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "safety", "question": "Do they understand basic safety rules? (hold hands crossing street, hot stove)", "type": "yes_no_detail", "age_min": "3y0m"}
+      ]
+    },
+    "executive_function": {
+      "display_name": "Executive Function",
+      "intro": "Thinking skills — focus, following directions, memory.",
+      "questions": [
+        {"subdomain": "attention_span", "question": "How long can they focus on one activity? (reading, puzzles, art)", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "working_memory", "question": "Can they follow 2-step directions? ('Get your shoes AND your jacket')", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "inhibitory_control", "question": "Can they wait their turn? Stop an action when asked?", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "cognitive_flexibility", "question": "How do they handle changes in routine or unexpected events?", "type": "detail", "age_min": "3y0m"}
+      ]
+    },
+    "language_oral_english": {
+      "display_name": "Language (Oral English)",
+      "intro": "How they talk and communicate.",
+      "questions": [
+        {"subdomain": "sentence_complexity", "question": "How long are their typical sentences? Single words, 3-word phrases, full sentences, paragraphs?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "questions", "question": "Do they ask questions? What kind? (what, why, how, when)", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "narrative", "question": "Can they tell you about something that happened earlier today? Yesterday?", "type": "yes_no_detail", "age_min": "2y6m"},
+        {"subdomain": "grammar", "question": "Do they use past tense? ('I went', even if they say 'I goed')", "type": "yes_no_detail", "age_min": "3y0m"},
+        {"subdomain": "articulation", "question": "Can strangers understand them most of the time?", "type": "yes_no", "age_min": "2y6m"},
+        {"subdomain": "conversation", "question": "Can they have a back-and-forth conversation? Stay on topic for a few turns?", "type": "yes_no_detail", "age_min": "3y0m"}
+      ]
+    },
+    "music": {
+      "display_name": "Music",
+      "intro": "Last one — music and rhythm.",
+      "questions": [
+        {"subdomain": "singing", "question": "Can they sing songs? Full songs or just parts? Which ones?", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "rhythm", "question": "Can they clap or tap along to a beat?", "type": "yes_no", "age_min": "2y6m"},
+        {"subdomain": "instrument_play", "question": "Do they play with instruments? (tambourine, xylophone, drums, piano)", "type": "detail", "age_min": "2y0m"},
+        {"subdomain": "music_appreciation", "question": "Do they have favorite songs or types of music?", "type": "detail", "age_min": "2y0m"}
+      ]
+    }
+  }
+}
