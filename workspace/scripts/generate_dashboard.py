@@ -15,7 +15,7 @@ Writes:
 
 The output is a single self-contained HTML file with Chart.js loaded from
 CDN. Open in any browser. the parent can double-click from Obsidian (it'll open
-in Safari) or Sidney can bookmark the file:// URL.
+in Safari) or bookmark the file:// URL.
 
 Idempotent. Safe to run repeatedly. Called by regenerate_vault.py.
 """
@@ -222,7 +222,7 @@ def domain_avg_months(snapshot, dom_key):
 
 # Friendlier subdomain names (used in next-steps prose).
 # Where the snake_case form already reads OK (e.g., "rote_counting" → "rote counting"),
-# we leave it. Only override when the technical term would confuse Less.
+# we leave it. Only override when the technical term would confuse parents.
 SUBDOMAIN_FRIENDLY = {
     "rote_counting": "counting out loud",
     "cardinality": "counting objects accurately",
@@ -301,7 +301,7 @@ def _join_friendly(keys, max_n=3):
 
 
 def next_steps_paragraph(profile, dom_key, dom_data, philosophy):
-    """Build a plain-English next-steps paragraph for Less.
+    """Build a plain-English next-steps paragraph for the parent.
     Answers: 'if I have 5 minutes for this domain today, what do I do?'"""
     interventions = [i for i in profile.get("interventions_active", []) if i.get("domain") == dom_key]
     subs = dom_data.get("subdomains", {})

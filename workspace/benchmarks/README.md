@@ -35,4 +35,4 @@ When the cron updates a file, it logs the change in `~/.openclaw/workspace/resea
 
 ## your child's target
 
-Sidney's philosophy: **12 months ahead, balanced.** your child's age (currently 3y5m) means his targets pull from the 4y0m–5y0m bands. Equal investment across all 15 domains; no over-specialization.
+Default philosophy: **12 months ahead, balanced.** Your child's age determines which targets pull from the 4y0m–5y0m bands. Equal investment across all 15 domains; no over-specialization.

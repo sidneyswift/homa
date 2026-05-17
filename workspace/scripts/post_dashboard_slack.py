@@ -294,7 +294,7 @@ def build_status_text(profile, counts, domain_traj_dict):
                 lines.append(f"   • *{DOMAIN_DISPLAY.get(dk, dk)}* — {sign}{val:.1f} mo{arrow}")
             lines.append("")
 
-    # Active interventions — removed from daily post per Sidney's feedback
+    # Active interventions — removed from daily post per feedback
     # (2026-05-15: "scissors, ball" repeating daily = noise).
     # Interventions now surface only when they change (weekly scoring cron).
 
