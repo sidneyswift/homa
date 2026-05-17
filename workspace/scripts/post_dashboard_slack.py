@@ -28,7 +28,32 @@ import urllib.request
 import urllib.parse
 from collections import Counter
 
-PROFILE = pathlib.Path.home() / ".openclaw" / "workspace" / "children/*.json"
+CHILDREN_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "children"
+
+
+def load_first_child():
+    """Load the first child profile. Multi-child dashboard views coming in a future update."""
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            return json.loads(f.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+    return None
+
+
+def load_all_children():
+    """Load all child profiles."""
+    children = []
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            children.append(json.loads(f.read_text()))
+        except (json.JSONDecodeError, OSError):
+            continue
+    return children
 HISTORY_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "profile-history"
 ENV_FILE = pathlib.Path.home() / ".openclaw" / ".env"
 CHART_PATH = pathlib.Path("/tmp/homa-dashboard-trajectory.png")
@@ -346,7 +371,7 @@ def main():
         print("⚠️  SLACK_BOT_TOKEN missing in ~/.openclaw/.env — skipping post.")
         return 0
 
-    profile = json.loads(PROFILE.read_text())
+    profile = load_first_child()
     counts = count_positions(profile)
     domain_traj_dict = trajectory_by_domain()
     text = build_status_text(profile, counts, domain_traj_dict)

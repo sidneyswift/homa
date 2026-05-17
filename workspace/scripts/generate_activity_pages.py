@@ -25,7 +25,32 @@ import json
 import datetime
 import pathlib
 
-PROFILE = pathlib.Path.home() / ".openclaw" / "workspace" / "children/*.json"
+CHILDREN_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "children"
+
+
+def load_first_child():
+    """Load the first child profile. Multi-child dashboard views coming in a future update."""
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            return json.loads(f.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+    return None
+
+
+def load_all_children():
+    """Load all child profiles."""
+    children = []
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            children.append(json.loads(f.read_text()))
+        except (json.JSONDecodeError, OSError):
+            continue
+    return children
 ACTIVITIES_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "activities"
 DEPLOY_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "dashboard-deploy"
 
@@ -419,7 +444,7 @@ footer {{
 
 
 def main():
-    profile = json.loads(PROFILE.read_text())
+    profile = load_first_child()
     written = 0
     rich = 0
     placeholders = 0

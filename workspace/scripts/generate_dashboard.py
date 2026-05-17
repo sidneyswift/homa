@@ -6,7 +6,7 @@ active interventions, and this week's suggested action items.
 
 Reads:
   - ~/.openclaw/workspace/children/*.json (current state)
-  - ~/.openclaw/workspace/profile-history/*.json (trajectory)
+  - ~/.openclaw/workspace/profile-history/{date}/{name}.json (trajectory)
   - ~/Documents/Homeschool/Research/* (latest research links)
   - ~/Documents/Homeschool/Weekly-Plans/* (latest plan)
 
@@ -27,8 +27,52 @@ import re
 from collections import Counter
 
 VAULT = pathlib.Path.home() / "Documents" / "Homeschool"
-PROFILE = pathlib.Path.home() / ".openclaw" / "workspace" / "children/*.json"
+CHILDREN_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "children"
+
+
+def load_first_child():
+    """Load the first child profile. Multi-child dashboard views coming in a future update."""
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            return json.loads(f.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+    return None
+
+
+def load_all_children():
+    """Load all child profiles."""
+    children = []
+    for f in sorted(CHILDREN_DIR.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            children.append(json.loads(f.read_text()))
+        except (json.JSONDecodeError, OSError):
+            continue
+    return children
 HISTORY_DIR = pathlib.Path.home() / ".openclaw" / "workspace" / "profile-history"
+
+def list_snapshots(child_name=None):
+    """List snapshot files, handling both flat (legacy) and dated-subdir layouts."""
+    if not HISTORY_DIR.exists():
+        return []
+    results = []
+    # New layout: profile-history/{date}/{name}.json
+    for date_dir in sorted(HISTORY_DIR.iterdir()):
+        if date_dir.is_dir() and len(date_dir.name) == 10:  # YYYY-MM-DD
+            for f in sorted(date_dir.glob("*.json")):
+                if child_name and f.stem.lower() != child_name.lower():
+                    continue
+                results.append(f)
+    # Legacy layout: profile-history/{date}.json (flat files)
+    for f in list_snapshots():
+        if f.parent == HISTORY_DIR:
+            results.append(f)
+    return results
+
 RESEARCH_DIR = VAULT / "Research"
 PLANS_DIR = VAULT / "Weekly-Plans"
 
@@ -126,7 +170,7 @@ def trajectory_data():
     """Read all snapshots, return ordered time series of position counts."""
     if not HISTORY_DIR.exists():
         return []
-    snapshots = sorted(HISTORY_DIR.glob("*.json"))
+    snapshots = list_snapshots()
     out = []
     for snap_file in snapshots:
         date = snap_file.stem  # YYYY-MM-DD
@@ -353,7 +397,7 @@ def trajectory_by_domain():
     leading data."""
     if not HISTORY_DIR.exists():
         return {}
-    snapshots = sorted(HISTORY_DIR.glob("*.json"))
+    snapshots = list_snapshots()
     if not snapshots:
         return {}
     # Discover all domain keys from the latest snapshot
@@ -439,7 +483,7 @@ def fmt_age(age):
 
 def main():
     today = datetime.date.today()
-    profile = json.loads(PROFILE.read_text())
+    profile = load_first_child()
 
     age = profile["age"]
     philosophy = profile.get("philosophy", {})
@@ -449,7 +493,7 @@ def main():
     trajectory = trajectory_data()
     domain_traj = trajectory_by_domain()
     # Compute projected x-max for chart (today in middle, future on right)
-    snapshots_sorted = sorted(HISTORY_DIR.glob("*.json")) if HISTORY_DIR.exists() else []
+    snapshots_sorted = list_snapshots() if HISTORY_DIR.exists() else []
     projected_max = projected_x_max(snapshots_sorted)
     research = recent_research()
     plan = latest_plan()
