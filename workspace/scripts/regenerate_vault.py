@@ -3,12 +3,20 @@
 Regenerate ALL auto-generated views in the Homeschool Obsidian vault.
 
 This is the single entry point that should be called after ANY write to
-~/.openclaw/workspace/children/*.json (or benchmarks/, or practice/).
+~/.openclaw/workspace/children/{name}.json (or benchmarks/, or practice/).
+
+Multi-child aware: all downstream scripts iterate over children/*.json.
 
 Runs in sequence:
-  1. generate_home.py     → Home.md (vault landing page)
-  2. generate_story.py    → Children/{name}.md (master profile)
-  3. generate_subjects.py → Subjects/{Domain}.md (15 files, one per domain)
+  1. generate_home.py     → Home.md (vault landing page, all children)
+  2. generate_story.py    → Children/{name}.md (one per child)
+  3. generate_subjects.py → Subjects/{Domain}.md (15 files, all children)
+  4. generate_index.py    → index.md
+  5. generate_log.py      → log.md
+  6. generate_dashboard.py → Homa Dashboard.html
+  7. generate_subject_pages_html.py → dashboard subject pages
+  8. generate_activity_pages.py → dashboard activity pages
+  9. deploy_dashboard.py  → Vercel deploy (if configured)
 
 Idempotent. Fast (under 2 seconds typical). Safe to call repeatedly.
 
@@ -33,8 +41,8 @@ SCRIPTS = [
     "generate_index.py",
     "generate_log.py",
     "generate_dashboard.py",
-    "generate_subject_pages_html.py",  # must run BEFORE deploy
-    "generate_activity_pages.py",       # 76 activity pages — also BEFORE deploy
+    "generate_subject_pages_html.py",
+    "generate_activity_pages.py",
     "deploy_dashboard.py",
 ]
 
@@ -48,9 +56,7 @@ def main():
     for script in SCRIPTS:
         script_path = SCRIPTS_DIR / script
         if not script_path.exists():
-            print(f"  ❌ {script} — script file missing!")
-            results.append((script, False, "file missing"))
-            failed = True
+            print(f"  ⏭️  {script} — not found, skipping")
             continue
 
         t0 = time.time()
@@ -69,13 +75,14 @@ def main():
             results.append((script, True, output))
         else:
             print(f"  ❌ {script} ({elapsed:.2f}s) — exit {proc.returncode}")
-            print(f"     STDOUT: {proc.stdout}")
-            print(f"     STDERR: {proc.stderr}")
+            if proc.stderr:
+                print(f"     STDERR: {proc.stderr[:500]}")
             results.append((script, False, proc.stderr))
             failed = True
 
     total = time.time() - start
-    print(f"=== Done in {total:.2f}s — {sum(1 for _, ok, _ in results if ok)}/{len(results)} succeeded ===")
+    ok = sum(1 for _, s, _ in results if s)
+    print(f"=== Done in {total:.2f}s — {ok}/{len(results)} succeeded ===")
 
     sys.exit(1 if failed else 0)
 

@@ -40,7 +40,7 @@ TODAY = NOW.date()
 # Hard "do not touch" list. Anything under these prefixes is refused, even if
 # a future tier adds a rule that would otherwise match.
 PROTECTED = [
-    WORKSPACE / "children/*.json",
+    WORKSPACE / "children",
     WORKSPACE / "profile-history",
     WORKSPACE / "benchmarks",
     WORKSPACE / "practice",
@@ -59,7 +59,7 @@ PROTECTED = [
     WORKSPACE / "research-journal.md",
     WORKSPACE / "learning-journal.jsonl",
     WORKSPACE / "learning-loop-state.json",
-    WORKSPACE / "children/*.json",
+    WORKSPACE / "children",
     pathlib.Path.home() / "Documents" / "Homeschool",
 ]
 
@@ -163,7 +163,7 @@ def backup_critical(state: State):
         ROOT / "cron" / "jobs.json",
         ROOT / "openclaw.json",
         WORKSPACE / "MEMORY.md",
-        WORKSPACE / "children/*.json",
+        WORKSPACE / "children",
         WORKSPACE / "learning-loop-state.json",
         WORKSPACE / "email-triage-state.json",
     ]
