@@ -1,82 +1,145 @@
 # executive-function
 
-> Research-backed milestones for executive function development (3y0m–5y6m). Three core components: working memory, inhibitory control, cognitive flexibility. Plus attention span as a practical subdomain.
+> ✅ FRESH — researched 2026-07-02
+
+> Research-backed milestones for executive function (EF) development, PreK–12. Diamond's framework: three **core** EFs — working memory, inhibitory control, cognitive flexibility — from which **higher-order** EFs (reasoning, problem-solving, planning) are built. Attention span is tracked as a practical fifth subdomain. Older-age subdomains added: planning & prioritization, organization & time management, goal-setting & goal-directed persistence, self-monitoring/metacognition, task initiation, and study skills.
 
 ## Frameworks used
 
-1. **Center on the Developing Child at Harvard University** — Gold standard for EF developmental science. "Air traffic control" metaphor. Key resource: *Executive Function Activities for 3-to-5-year-olds* and *Enhancing and Practicing EF Skills* guide. Why: most-cited, peer-reviewed, activity-linked milestones. Provides the activity categories (imaginary play, storytelling, movement, quiet games) that map directly to your child's home context.
+1. **Center on the Developing Child at Harvard University** — Gold standard for EF developmental science. "Air traffic control" metaphor: EF as the mental process for filtering distractions, holding information, prioritizing tasks, and adjusting to change. Key resource: *Activities Guide: Enhancing and Practicing Executive Function Skills with Children from Infancy to Adolescence* — discrete activity sets for 6–18mo, 18–36mo, 3–5y, 5–7y, 7–12y, and adolescents. Why: EF skills are not innate but built through practice; they predict school success from preschool through university, often more than IQ. Growth spikes in early childhood AND again in adolescence/early adulthood as prefrontal circuits are refined.
 
-2. **Tools of the Mind (Bodrova & Leong)** — Vygotskian curriculum targeting EF via mature dramatic play, play plans, and self-regulation mediators. CASEL-designated, multiple RCTs showing improvements in EF, working memory, math, and reduced behavior problems. Why: the play-based philosophy aligns with the parent's Montessori/Charlotte Mason approach, and the "play plan" technique is directly usable at home.
+2. **Adele Diamond — Executive Functions framework (Annu. Rev. Psychol. 2013; 2020 review)** — The canonical taxonomy: three *core* EFs (inhibition, working memory, cognitive flexibility) are the building blocks from which *higher-order* EFs — reasoning, problem-solving, planning — emerge. Why: gives the PreK–12 developmental spine. The core three dominate early childhood; the higher-order EFs come online through elementary, middle, and high school and are what "study skills"/"organization" ultimately depend on.
 
-3. **Reflection Sciences developmental stages** — Practical age-by-age EF breakdown from infancy through school age. Why: fills in the specific behavioral markers at each age band that Harvard doesn't break out as explicitly.
+3. **CASEL 5 — Self-Management competency** — SEL's K–12 self-management strand names the school-age EF applications explicitly: managing emotions, self-discipline/self-motivation, stress-management, **setting personal and collective goals**, **using planning and organizational skills**, and **showing the courage to take initiative** (task initiation). Why: the authoritative K–12 standards bridge from "EF the neuroscience" to "EF the classroom behaviors" schools actually teach and assess.
 
-4. **DCCS / Cognitive Flexibility research (Zelazo et al.)** — Dimensional Change Card Sort paradigm is the standard measure of cognitive flexibility in preschoolers. Key finding: age 3 is a milestone — most 3-year-olds perseverate on old rules, while 4-year-olds can switch. Newer stepwise paradigms show 81% of 3-year-olds can do simpler switches.
+4. **Dawson & Guare — *Smart but Scattered* / *Smart but Scattered Teens* (executive skills model)** — Practical 11-skill taxonomy (response inhibition, working memory, emotional control, sustained attention, task initiation, planning/prioritization, organization, time management, goal-directed persistence, flexibility, metacognition) with age-graded developmental expectations. Peg Dawson is a past president of NASP. Why: the most usable home/school breakdown of the *higher-order* skills by grade band, with concrete supports.
+
+5. **Tools of the Mind (Bodrova & Leong)** — Vygotskian curriculum targeting EF via mature dramatic play, play plans, and self-regulation mediators. CASEL-designated; multiple RCTs show improvements in EF, working memory, math, and reduced behavior problems. Why: the play-based philosophy suits early-years home learning, and the "play plan" technique is directly usable at home.
+
+6. **DCCS / Cognitive Flexibility research (Zelazo et al.)** — Dimensional Change Card Sort is the standard preschool CF measure. Age 3 is the classic milestone: most 3-year-olds perseverate on the old rule; 4-year-olds switch. Stepwise paradigms show ~81% of 3-year-olds pass at least one simpler switch. Why: anchors the PreK CF milestones in a validated paradigm.
+
+7. **Reflection Sciences developmental stages** — Age-by-age EF behavioral markers, infancy through school age. Why: fills in specific per-band markers that the framework bodies don't enumerate.
 
 ## Age-band milestones
 
+Bands: **PreK (ages 3–5)** · **Lower Elementary (K–2, ages 5–8)** · **Upper Elementary (grades 3–5, ages 8–11)** · **Middle (grades 6–8, ages 11–14)** · **High (grades 9–12, ages 14–18)**. Every band is grounded in a real framework; where a subdomain doesn't apply until later, the early bands say so.
+
 ### Attention span / Sustained attention
-| Age band | Typical | Advanced (12mo ahead) | Source |
-|---|---|---|---|
-| 3y0m–3y6m | 5–10 min focused play on a single activity. Easily distracted by new stimuli. Can listen to a short story. | 10–15 min sustained on a chosen activity. Returns to task after brief interruption. | Harvard EF guide; Reflection Sciences |
-| 3y6m–4y0m | 8–12 min focused engagement. Can attend to group activities with adult scaffolding. | 15+ min on preferred activities. Can filter moderate distractions. | Harvard EF guide |
-| 4y0m–4y6m | 10–15 min on non-preferred tasks with support. Longer on preferred. Beginning to sustain through multi-step activities. | 15–20 min across tasks. Self-redirects after minor distractions. | Harvard EF guide; CDC 4y milestones |
-| 4y6m–5y0m | 15 min on structured tasks. Can attend to teacher-led activities in group settings. | 20+ min. Can complete an art project or building task without adult redirection. | Kindergarten readiness literature |
-| 5y0m–5y6m | 15–20 min on varied tasks including non-preferred. Sustained attention in classroom-like settings. | 25+ min. Self-monitoring of attention ("I need to focus"). | School-age EF literature |
+- **PreK (3–5):** 5–15 min focused play, growing across the band; easily pulled off-task by novel stimuli early, self-redirecting after minor distraction by age 5. Attends to adult-led group activity with scaffolding. (Harvard EF guide; Reflection Sciences)
+- **Lower Elementary (K–2):** 10–20 min sustained on structured tasks; can attend to whole-group instruction and independent seatwork with reminders. Sustained attention is one of the foundational EFs actively consolidating at this stage. (Dawson & Guare; Harvard EF guide)
+- **Upper Elementary (3–5):** 20–30 min on non-preferred academic work; holds attention across a multi-step lesson and resumes after transitions. (Dawson & Guare)
+- **Middle (6–8):** 30–45+ min on a single task; sustains focus across class periods and multi-day assignments, filtering peer/social and digital distraction with increasing (not yet reliable) success. (Dawson & Guare Teens)
+- **High (9–12):** Extended, self-directed focus across long study blocks and multi-week projects; deliberately structures the environment to protect attention (phone away, work blocks). Refinement continues into early adulthood. (Harvard; Dawson & Guare Teens)
 
 ### Working memory
-| Age band | Typical | Advanced (12mo ahead) | Source |
-|---|---|---|---|
-| 3y0m–3y6m | Holds 2 pieces of information (2-step directions). Remembers routines (brush teeth → pajamas). Tells stories as loosely connected events. Needs realistic props for pretend play. | Holds 3 pieces / follows 2–3 step directions reliably. Remembers sequences from yesterday. | Harvard EF 3-5; Reflection Sciences |
-| 3y6m–4y0m | Follows 2–3 step instructions. Uses "self-talk" aloud to remember rules. Plays games with 2 rules. Recalls 3 items in a list. | Holds 3–4 items. Follows cumulative songs (added verses). Stories begin to have structure. | Harvard EF 3-5; Reflection Sciences |
-| 4y0m–4y6m | Self-talk becomes inner monologue. Holds ~4 pieces of information. Can follow multi-step cooking/craft instructions with reminders. | Holds 4–5 items. Creates complex organized plots in pretend play. Manages changing rules in sorting games. | Harvard EF 3-5; Reflection Sciences |
-| 4y6m–5y0m | Holds 4 items consistently. Follows 3-step instructions without reminders. Retells a story with beginning/middle/end. | 5 items. Creates complex plans. Manages multiple rules simultaneously. | Reflection Sciences; CDC 5y |
-| 5y0m–5y6m | Working memory approaches adult-like (~5 items). Complex planning. Manages multi-step academic tasks. | 5+ items with manipulation (e.g., reverse a sequence). Independently organizes multi-step projects. | Reflection Sciences |
+- **PreK (3–5):** Holds 2 items → ~4–5 by age 5; follows 2–3-step directions, remembers routines, retells a story with beginning/middle/end by 4y6m–5y. Self-talk moves from aloud to internal. (Harvard EF 3–5; Reflection Sciences)
+- **Lower Elementary (K–2):** Holds and follows multi-step instructions; keeps place in multi-step math and early decoding (holding phoneme–grapheme mappings + blending + meaning at once). Begins mental manipulation (reverse a short sequence). (Diamond; Dawson & Guare)
+- **Upper Elementary (3–5):** Holds instructions long enough to work independently; mentally manipulates information for multi-digit computation, multi-paragraph writing, and note-taking. WM increasingly supports *reasoning* (a higher-order EF per Diamond). (Diamond; Dawson & Guare)
+- **Middle (6–8):** Juggles information across subjects and days; uses WM to integrate sources, follow multi-step problem-solving, and track long-term assignments — usually with external supports (planners, checklists). (Dawson & Guare Teens; CASEL self-management)
+- **High (9–12):** Near-adult capacity; holds and manipulates complex, abstract information for analysis, argumentation, and synthesis across texts and disciplines. (Diamond; Dawson & Guare Teens)
 
 ### Inhibitory control
-| Age band | Typical | Advanced (12mo ahead) | Source |
-|---|---|---|---|
-| 3y0m–3y6m | Beginning to inhibit actions that don't fit a play role. Needs significant adult support. Can do simple stop/go games (Red Light Green Light). Responds to frustration primarily by crying or seeking adult. Waiting is hard. | Can wait a short turn in games even when tempted. Beginning to use simple strategies ("I'll wait"). | Harvard EF 3-5; Reflection Sciences |
-| 3y6m–4y0m | Can wait turn in games with support. Beginning to "think first, then act" with prompting. Freezes on command in dance games (with practice). Self-regulation improving in "hot" (emotional) contexts. | Freezes reliably. Stops a dominant response with verbal cue. Uses 1–2 self-calming strategies (belly breaths, counting). | Harvard EF 3-5; Reflection Sciences |
-| 4y0m–4y6m | Plans before acting more consistently. Freezes on command. Waits for instructions with less support. Can play "opposite" games (do opposite of instruction) with effort. | Inhibits dominant response independently. Can play Simon Says accurately. Uses multiple self-regulation strategies. | Harvard EF 3-5 |
-| 4y6m–5y0m | Evaluates others' self-regulation ("he's not waiting his turn"). Inhibits in both hot and cool contexts. Follows game rules with minimal cheating. | Proactive inhibition (anticipates and prevents). Reflects on own behavior ("I almost grabbed it but I waited"). | Reflection Sciences |
-| 5y0m–5y6m | Proactive rather than reactive inhibition. Can inhibit automatic responses and reflect. Manages impulses in classroom settings. | Consistent self-regulation across novel situations. Metacognitive awareness of own impulse control. | Reflection Sciences |
+- **PreK (3–5):** Emerges from "needs heavy adult support / crying as the frustration response" at 3 toward proactive inhibition and self-reflection ("I almost grabbed it but I waited") by 5. Stop/go and freeze games become reliable; 1–2 self-calming strategies. (Harvard EF 3–5; Reflection Sciences)
+- **Lower Elementary (K–2):** "Response inhibition" — stop and think before acting — is a core focus skill of this band; waits, raises hand, follows rules with fewer reminders; emotional control improving but variable under stress. (Dawson & Guare; Harvard EF guide)
+- **Upper Elementary (3–5):** Inhibits impulses across settings; resists immediate distractions to stay on task; manages emotional reactions to setbacks with taught strategies. (Dawson & Guare)
+- **Middle (6–8):** Delays gratification for longer payoffs (studying now for a later test); regulates impulses amid heightened social/emotional and digital temptation — a documented relative weakness as risk-taking rises. (CASEL self-management; Dawson & Guare Teens)
+- **High (9–12):** Applies self-discipline across autonomous settings; manages impulses and stress toward chosen goals ("capacity to delay gratification, manage stress, feel motivation and agency" — CASEL). Still maturing into the mid-20s. (CASEL; Harvard)
 
 ### Cognitive flexibility
-| Age band | Typical | Advanced (12mo ahead) | Source |
-|---|---|---|---|
-| 3y0m–3y6m | Very limited. Sorts by ONE dimension. Perseverates on old rules (classic DCCS finding). Can switch rules in simpler contexts (81% pass at least one switch in stepwise tasks). Limited ability to do "the opposite." Needs concrete, realistic props. | Can switch sorting rules after explicit prompt + pause. Repurposes a familiar object in play (box = boat). | DCCS literature (Zelazo); MDPI 2024 study; Harvard EF 3-5 |
-| 3y6m–4y0m | "Hot" (emotional) vs "cool" (cognitive) flexibility begins to differentiate. Can categorize objects in 2 ways with prompting. Begins to adjust plans when original idea doesn't work. Still struggles with standard DCCS switch. | Passes standard DCCS (sorts by color, then switches to shape). Plays pretend with repurposed objects easily. Adjusts when plans change. | DCCS literature; Reflection Sciences |
-| 4y0m–4y6m | Most can pass standard DCCS. Can think about own beliefs AND others' beliefs (early theory of mind). Switches rules with verbal prompting. "Opposite Day" games are achievable with effort. | Fluently switches between 2 sorting rules. Takes others' perspective in play. Adapts stories when peers add unexpected elements. | Harvard EF 3-5; DCCS literature |
-| 4y6m–5y0m | Rule-switching becomes reliable. Can manage 2–3 rule sets. Adapts behavior to different social contexts (home vs. class). | Switches between 3+ rule sets. Generates alternative solutions to social conflicts. | Reflection Sciences |
-| 5y0m–5y6m | Switching between rules is easy. Dynamic rule changes within a game. Manages multiple perspectives in cooperative play. | Near-adult flexibility for familiar domains. Creative problem-solving with novel materials. | Reflection Sciences |
+- **PreK (3–5):** Very limited at 3 (perseverates, sorts by one dimension) → passes standard DCCS by ~4 → switches among 2–3 rule sets and takes others' perspectives by 5. Repurposes objects in play (box = boat). CF develops most rapidly after age 5. (DCCS/Zelazo; Harvard EF 3–5; Reflection Sciences)
+- **Lower Elementary (K–2):** "Flexibility" — adapting to changes and unexpected obstacles — is an actively-building foundational skill; switches strategies with prompting, tolerates changed plans and rules. (Dawson & Guare; Harvard EF guide)
+- **Upper Elementary (3–5):** Shifts between problem-solving strategies and between perspectives in discussion/writing; generates alternative solutions; adapts when a first approach fails. Underpins emerging *problem-solving* (higher-order EF). (Diamond; Dawson & Guare)
+- **Middle (6–8):** Considers multiple viewpoints and methods; revises plans when circumstances change; transfers strategies across subjects. (Diamond; Dawson & Guare Teens)
+- **High (9–12):** Flexible, abstract thinking — weighs alternatives, adjusts to new information, and builds/adjusts working systems to find what fits at school and home. (Harvard; Dawson & Guare Teens)
+
+### Planning & prioritization  *(higher-order EF — emerges from the core three)*
+- **PreK (3–5):** Precursors only: "play plans" (draw/describe what you'll pretend before playing) and simple 2-step sequencing. (Tools of the Mind; Diamond)
+- **Lower Elementary (K–2):** Plans a short, familiar sequence (steps to a simple project) with adult support; begins to see that tasks have an order. (Dawson & Guare)
+- **Upper Elementary (3–5):** Breaks a multi-step assignment into steps and roughs out an order; distinguishes important from unimportant with guidance; a genuinely emerging skill here. (Dawson & Guare; CASEL "using planning skills")
+- **Middle (6–8):** Breaks large/long-term tasks into smaller steps and sequences them; prioritizes competing assignments — a defining developmental task of this band, usually still coached. (Dawson & Guare Teens; CASEL self-management)
+- **High (9–12):** Plans multi-week/multi-part projects largely independently; prioritizes across courses, activities, and deadlines; adjusts the plan as things change. (Harvard; CASEL)
+
+### Organization & time management  *(higher-order EF)*
+- **PreK (3–5):** Not yet applicable; supported entirely by adult-structured routines and environment. (Harvard)
+- **Lower Elementary (K–2):** Keeps track of belongings and materials with a system and reminders; follows a predictable daily routine; no reliable independent time sense yet. (Dawson & Guare)
+- **Upper Elementary (3–5):** Maintains a binder/backpack/desk system with support; begins estimating how long short tasks take and using a checklist. (Dawson & Guare)
+- **Middle (6–8):** Organization (keeping materials in order) and time management (estimating task duration, using time efficiently, meeting deadlines) become central expectations — actively developing, benefiting from planners/calendars. (Dawson & Guare Teens; CASEL "organizational skills")
+- **High (9–12):** Expected to organize time largely independently, keep track of assignments, and manage projects to completion — using self-created systems (calendars, task lists) they adjust for fit. (Harvard; Dawson & Guare Teens)
+
+### Goal-setting & goal-directed persistence  *(higher-order EF / CASEL self-management)*
+- **PreK (3–5):** Pursues a self-chosen immediate goal in play; persistence is short and adult-supported. (Reflection Sciences)
+- **Lower Elementary (K–2):** Sets and works toward a simple, short-term goal ("finish this puzzle/reader") with encouragement; sticks with a task through mild frustration. (Dawson & Guare; CASEL)
+- **Upper Elementary (3–5):** Sets short-term academic goals and monitors progress with support; sustains effort across a task even when it's not fun. (Dawson & Guare; CASEL "setting personal goals")
+- **Middle (6–8):** Goal-directed persistence — staying focused on a goal even when it's challenging — is a defining developmental task; sets goals spanning days/weeks and self-motivates toward them. (Dawson & Guare Teens; CASEL)
+- **High (9–12):** Sets and pursues longer-range personal and academic goals (course grades, college/career milestones) with self-motivation and agency; persists through obstacles. (CASEL self-management; Harvard)
+
+### Self-monitoring / metacognition  *(higher-order EF)*
+- **PreK (3–5):** Nascent — begins noticing others' self-regulation ("he's not waiting his turn") and, by 5, reflects on own behavior. (Reflection Sciences)
+- **Lower Elementary (K–2):** Checks work when reminded; beginning awareness of what one does/doesn't understand. (Dawson & Guare)
+- **Upper Elementary (3–5):** Monitors comprehension and catches errors with prompting; can describe a strategy they used. (Dawson & Guare; Diamond — reasoning/reflection)
+- **Middle (6–8):** Reflects on actions and outcomes; evaluates which strategies worked and adjusts; self-assesses against expectations — usually coached. (Dawson & Guare Teens)
+- **High (9–12):** Metacognition matures — self-monitors comprehension and performance, evaluates and refines strategies independently, and adjusts working systems for fit across settings. (Harvard; Dawson & Guare Teens)
+
+### Task initiation  *(higher-order EF / CASEL "courage to take initiative")*
+- **PreK (3–5):** Starts preferred activities readily; needs adult cueing for non-preferred. (Reflection Sciences)
+- **Lower Elementary (K–2):** Begins a task with a clear prompt and modest delay; needs help starting non-preferred work. (Dawson & Guare)
+- **Upper Elementary (3–5):** Starts routine assignments without much prompting; procrastination on hard/boring tasks is common and developmentally typical. (Dawson & Guare)
+- **Middle (6–8):** Initiates work in a reasonable timeframe with fewer prompts; managing "start" delay on long-term tasks is a key coaching target. (Dawson & Guare Teens; CASEL)
+- **High (9–12):** Independently initiates tasks — including aversive or long-term ones — and manages procrastination with self-devised strategies. (CASEL; Dawson & Guare Teens)
+
+### Study skills  *(integrated application of the higher-order EFs)*
+- **PreK (3–5):** Not applicable; foundation laid via routines, sustained attention, and working-memory games. (Harvard)
+- **Lower Elementary (K–2):** Learning-to-learn behaviors: following directions, checking work, keeping materials ready. (Dawson & Guare)
+- **Upper Elementary (3–5):** Emerging note-taking, using a checklist/planner, simple review before a quiz — heavily scaffolded. (Dawson & Guare)
+- **Middle (6–8):** Builds active study routines: chunking material, spaced review, self-testing, using a planner — the practical convergence of planning, WM, and metacognition. (Dawson & Guare Teens; CASEL)
+- **High (9–12):** Self-manages a full study system — prioritizing, scheduling, note-taking, self-quizzing, and metacognitive review — adjusted to what works. (Harvard; Dawson & Guare Teens)
 
 ## Child-specific notes
 
-_Add observations about your child here during onboarding and ongoing assessment._
-
+_Per-child scoring is written here once a child is onboarded (see the `homa-track-story-coach` skill). Left intentionally blank in the template._
 
 ## Evidence-based interventions for home
 
-### From Harvard's Center on the Developing Child (3–5 year-olds):
-1. **Imaginary play with play plans** (Tools of the Mind) — child draws/describes what they'll pretend before playing. Exercises all three EF components.
-2. **Freeze dance** — music + freeze in specific poses. Builds inhibitory control. Increase complexity with pose cards.
-3. **Opposite games** — "Opposite Day Challenge" where child does the opposite of what cards indicate. Builds cognitive flexibility + inhibitory control.
-4. **Sorting games with changing rules** — sort by color, then switch to shape. Direct cognitive flexibility training (maps to DCCS).
-5. **Cumulative songs** — songs where each verse adds a new element. Working memory training that your child already does naturally (Fifty Nifty!).
-6. **Cooking together** — multi-step directions, waiting, measuring. All three EF components.
+### Early years (PreK / Lower Elementary), from Harvard's Center & Tools of the Mind:
+1. **Imaginary play with play plans** (Tools of the Mind) — child draws/describes what they'll pretend before playing. Exercises all three core EFs.
+2. **Freeze dance** — music + freeze in specific poses. Builds inhibitory control; add pose cards to increase complexity.
+3. **Opposite games** — "Opposite Day": child does the opposite of the card. Builds cognitive flexibility + inhibitory control.
+4. **Sorting games with changing rules** — sort by color, then switch to shape. Direct CF training (maps to DCCS).
+5. **Cumulative songs** — each verse adds an element. Working-memory training.
+6. **Cooking together** — multi-step directions, waiting, measuring. All three core EFs.
+7. **Buddy reading** — paired reading with take-turns "reader"/"listener" roles and explicit rules.
 
-### From Tools of the Mind:
-7. **Play plans** — before pretend play, child draws their plan and narrates it. Evidence shows improvements in self-regulation and academic readiness.
-8. **Buddy reading** — paired reading where children take turns being "reader" and "listener" with explicit role-following rules.
+### Later years (Upper Elementary → High), from Dawson & Guare and CASEL:
+8. **Externalize the plan** — teach breaking large assignments into steps on a checklist or calendar; move the plan out of working memory and onto paper. Fades as the child internalizes it. (Planning, WM)
+9. **Visible time** — timers, time estimates ("how long will this take?") vs. actuals, and a shared family calendar to build time management. (Time management)
+10. **Launch routines for task initiation** — a fixed "start ritual" (materials out, phone away, first tiny step) to beat procrastination on aversive tasks. (Task initiation)
+11. **SMART goal-setting + progress check-ins** — set a specific short-range goal, then review what worked; grows goal-directed persistence and metacognition. (Goal-setting, metacognition — CASEL self-management)
+12. **Study-skill coaching** — self-testing, spaced review, and "how did that strategy work?" reflection instead of re-reading; explicitly teach the higher-order EFs rather than assuming they mature on their own. (Study skills, metacognition — Harvard)
 
 ## Recent research
 
-- [Harvard Center: EF Activities for 3-5 year-olds](https://developingchild.harvard.edu/wp-content/uploads/2024/10/Executive-Function-Activities-for-3-to-5-year-olds.pdf) — Categorizes EF activities into imaginary play, storytelling, movement, and quiet games. Key: adapt complexity to child's level, gradually reduce adult scaffolding.
-- [Reflection Sciences: EF Stages and Ages](https://reflectionsciences.com/executive-function-stages-and-ages/) — Age-by-age breakdown of WM, IC, and CF milestones from infancy through school age. Practical activities per stage.
-- [MDPI 2024: Age Three as CF Milestone](https://www.mdpi.com/2076-328X/14/7/578) — Stepwise rule-induction task shows 81% of 3-year-olds pass at least one rule switch. Age 3 is a genuine milestone for CF emergence. Inhibitory control plays a vital role in rule switching.
-- [Harvard: What is Executive Function infographic](https://developingchild.harvard.edu/resources/infographics/what-is-executive-function-and-how-does-it-relate-to-child-development/) — EF as "air traffic control." Early EF interventions improve both literacy and math outcomes. EF doesn't develop automatically with maturity — needs practice.
-- [CASEL: Tools of the Mind review](https://pg.casel.org/tools-of-the-mind/) — Multiple RCTs show improvements in EF, working memory, math, reduced behavior problems, and improved self-regulation in Pre-K/K.
-- [Chevalier & colleagues: CF in 3-year-olds](https://www.sciencedirect.com/science/article/abs/pii/S0885201417302150) — CF emerges clearly during preschool period. Around 3–4, children show dramatic improvement in switching abilities. CF is trainable.
+- **EF is built, not innate, and predicts school success more than IQ** — Harvard's Center on the Developing Child frames EF as "air traffic control" and stresses it must be practiced across all ages; growth spikes in early childhood and again in adolescence as prefrontal circuits are refined. [Harvard Center — Executive Function & Self-Regulation](https://developingchild.harvard.edu/science/key-concepts/executive-function/)
+- **Core three → higher-order EFs** — Diamond establishes that reasoning, problem-solving, and planning are *built from* inhibition, working memory, and cognitive flexibility; this is the developmental logic behind adding planning/organization/study-skills subdomains for older ages. [Diamond 2013, Annu. Rev. Psychol.](https://www.psychologie.uzh.ch/dam/jcr:b93485f4-7120-4fe4-9a5b-39a84f4e07e6/Diamond.AnnRevPsych.2013.pdf)
+- **CASEL self-management names the school-age EF skills explicitly** — goal-setting, planning & organizational skills, self-discipline/self-motivation, stress-management, and taking initiative — the K–12 standards bridge from neuroscience to classroom behaviors. [CASEL — What Is the CASEL Framework?](https://casel.org/fundamentals-of-sel/what-is-the-casel-framework/)
+- **Middle school is the pivot for planning/organization/time-management** — the literature converges on grades 6–8 as when breaking down large tasks, keeping materials organized, estimating task duration, and goal-directed persistence become central (and coachable) expectations. [Mental Health Center Kids — EF Skills By Age](https://mentalhealthcenterkids.com/blogs/articles/executive-function-skills-by-age); [Untapped Learning — EF Skills by Age](https://untappedlearning.com/executive-function-skills-by-age/)
+- **High schoolers are expected to self-manage time and projects** — organize time independently, track assignments, manage projects to completion, and build/adjust their own working systems; metacognition (self-monitoring, strategy refinement) matures here but continues into the mid-20s. [Life Skills Advocate — EF Skills By Age](https://lifeskillsadvocate.com/blog/executive-function-skills-by-age/)
+- **DCCS still anchors PreK cognitive flexibility** — age 3 perseveration → age 4 rule-switching remains the validated preschool milestone, with CF developing most rapidly after age 5. [MDPI 2024: Age Three as a CF Milestone](https://www.mdpi.com/2076-328X/14/7/578)
+- **Dawson & Guare's 11-skill model gives the usable higher-order taxonomy** — response inhibition, WM, emotional control, sustained attention, task initiation, planning/prioritization, organization, time management, goal-directed persistence, flexibility, metacognition — each with age-graded expectations and concrete supports. [Smart but Scattered (Guilford)](https://www.guilford.com/books/Smart-but-Scattered/Dawson-Guare-Guare/9781462554591); [Smart but Scattered Teens (Routledge)](https://www.routledge.com/Smart-but-Scattered-Teens-The-Executive-Skills-Program-for-Helping-Teens-Reach-Their-Potential/Guare-Dawson-Guare/p/book/9781609182298)
+
+## Sources
+
+- Center on the Developing Child at Harvard University — *Executive Function & Self-Regulation* (key concept): https://developingchild.harvard.edu/science/key-concepts/executive-function/
+- Center on the Developing Child — *Activities Guide: Enhancing and Practicing Executive Function Skills with Children from Infancy to Adolescence*: https://developingchild.harvard.edu/resources/handouts-tools/activities-guide-enhancing-and-practicing-executive-function-skills/
+- Diamond, A. (2013). *Executive Functions.* Annual Review of Psychology, 64, 135–168: https://www.psychologie.uzh.ch/dam/jcr:b93485f4-7120-4fe4-9a5b-39a84f4e07e6/Diamond.AnnRevPsych.2013.pdf
+- CASEL — *What Is the CASEL Framework?* (the CASEL 5, incl. Self-Management): https://casel.org/fundamentals-of-sel/what-is-the-casel-framework/
+- CASEL — *Frameworks, Competencies, Standards, and Guidelines*: https://casel.org/state-resource-center/frameworks-competencies-standards-and-guidelines/
+- Dawson, P. & Guare, R. — *Smart but Scattered* (2nd ed., Guilford): https://www.guilford.com/books/Smart-but-Scattered/Dawson-Guare-Guare/9781462554591
+- Guare, R., Dawson, P. & Guare, C. — *Smart but Scattered Teens* (Routledge): https://www.routledge.com/Smart-but-Scattered-Teens-The-Executive-Skills-Program-for-Helping-Teens-Reach-Their-Potential/Guare-Dawson-Guare/p/book/9781609182298
+- Mental Health Center Kids — *Executive Function Skills By Age*: https://mentalhealthcenterkids.com/blogs/articles/executive-function-skills-by-age
+- Untapped Learning — *Executive Function Skills by Age*: https://untappedlearning.com/executive-function-skills-by-age/
+- Life Skills Advocate — *Executive Function Skills By Age: A Guide For Parents & Teachers*: https://lifeskillsadvocate.com/blog/executive-function-skills-by-age/
+- Reflection Sciences — *Executive Function Stages and Ages*: https://reflectionsciences.com/executive-function-stages-and-ages/
+- CASEL — *Tools of the Mind* program review: https://pg.casel.org/tools-of-the-mind/
 
 ## Last researched
-2026-05-06
+2026-07-02

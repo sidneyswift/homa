@@ -15,7 +15,7 @@ These files capture Homa's evolving knowledge about **the practice of homeschool
 - `parent-sustainability.md` — routines, burnout signs, doing-less-better, spousal collaboration
 - `recent-research-studies.md` — fresh papers in early childhood ed (PubMed, ERIC) — rotating sub-focus
 - `homeschool-news-policy.md` — what's changing in the field, especially DC requirements
-- `local-resources-dc.md` — Smithsonian programs, field-trip ideas, DC-area homeschool community + co-ops
+- `local-resources.md` — Location-agnostic guide to finding local homeschool resources (libraries, museums, co-ops, nature programs, compliance portals).
 
 ## Conventions per file
 

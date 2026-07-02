@@ -129,7 +129,7 @@ The cron researches across **two tiers** — pick ONE domain per night from EITH
 Files: `~/.openclaw/workspace/benchmarks/{domain}.md`. Domains: math, literacy, phonics, writing_fine_motor, spanish, science, social_studies, art_creative, gross_motor, fine_motor_general, social_emotional, self_care_independence, executive_function, language_oral_english, music.
 
 **Tier B — Homeschooling practice** (10 domains, NOT scored against the child — feeds Homa's general wisdom)
-Files: `~/.openclaw/workspace/practice/{domain}.md`. Domains: pedagogy-methods, learning-science, teaching-techniques, curriculum-reviews, tools-and-apps, coop-and-social, parent-sustainability, recent-research-studies, homeschool-news-policy, local-resources-dc.
+Files: `~/.openclaw/workspace/practice/{domain}.md`. Domains: pedagogy-methods, learning-science, teaching-techniques, curriculum-reviews, tools-and-apps, coop-and-social, parent-sustainability, recent-research-studies, homeschool-news-policy, local-resources.
 
 Mission per run:
 1. Walk both directories. Compute staleness per file (using "Last researched" line or file mtime). Pick the **single most-stale** across all 25 files. Tie-break: prefer Tier A files with the most `unknown` subdomains summed across all `children/*.json`. Final tie-break: rotate.
