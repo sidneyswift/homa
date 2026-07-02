@@ -179,17 +179,40 @@ The parent can open any subject page and see a compiled, current picture — not
 
 ### 🧩 Skills (Quick Reference)
 
-- **`child-coach`** — Autonomous coaching loop. Nightly research, weekly scoring, developmental tracking across 15 domains × multiple subdomains. Single source of truth: `children/{name}.json`. **VAULT REGENERATION RULE: after ANY write to a child profile, immediately run `python3 scripts/regenerate_vault.py`.** This rebuilds vault pages from the JSON. The parent's view must update the same minute Homa's brain does.
-- **`picture-book`** — AI picture books: story writing → image generation → PDF assembly.
-- **`flash-cards`** — Flash card generation: AI illustrations + printable PDF layout.
-- **`coloring-pages`** — Line art coloring pages from photos or text prompts.
-- **`decodable-readers`** — Phonics-leveled books the child can read themselves.
-- **`curriculum-builder`** — Textbook transcription → structured lesson plans.
-- **`homeschool-log`** — Log lessons in Obsidian, update subject pages, maintain the compiled knowledge base.
-- **`homa-journal`** — Daily one-question journal prompt. Routes answers into all relevant systems.
-- **`vault-audit`** — Keep the Obsidian vault honest: freshness banners, staleness detection, drift checks.
-- **`email-triage`** — Hourly inbox scan, surface only what needs attention.
-- **`reaction-feedback`** — Capture 👍/👎/🤷 reactions as training signal.
+**Naming convention (RULE — all skills must follow it).** Every skill folder is named
+`homa-<category>-<what>`, all-lowercase kebab-case, readable on sight. Category is exactly one of:
+
+- **`system`** — Homa's own machinery (doctor, janitor, reflect, skillify, vault-audit)
+- **`make`** — generate learning materials (coloring pages, curriculum, readers, flash cards, worksheets, picture books)
+- **`google`** — Google Workspace via the `gog` CLI (sheets, calendar)
+- **`track`** — observe / score the homeschool over time (homeschool log, child coach)
+- **`capture`** — ingest inbound family signals (email, journal, reactions)
+
+When you create a skill (e.g. via `homa-system-skillify`), name it this way and add it to the list
+below. A skill that breaks the pattern, or isn't listed here, is a finding the `homa-system-doctor`
+flags (it enforces this rule). Need a category that doesn't exist yet? Add it here first, then use it.
+
+- **`homa-track-story-coach`** — The child's autonomous coaching loop. Two-tier nightly research: Tier A (15 child-development domains in `benchmarks/`, scored against age) + Tier B (10 homeschooling-practice domains in `practice/`, general wisdom not tied to the child). Weekly scoring, gap analysis, measurement protocols, thread-feedback fan-out. Single source of truth for the child: `story-profile.json` (see `story-profile.example.json`). Use before recommending any activity to verify the child's actual position first. **VAULT REGENERATION RULE: after ANY write to story-profile.json, immediately run `python3 scripts/regenerate_vault.py`.** This rebuilds Home.md, the child page, and all Subjects/{Domain}.md in the Obsidian vault from the JSON. The parent's view must update the same minute Homa's brain does.
+- **`homa-track-homeschool-log`** — How to log lessons in Obsidian, update subject pages, and maintain the compiled knowledge base.
+- **`homa-track-syllabus`** — Generate & maintain the parent's Charlotte Mason co-op syllabus (one fillable submission per subject she teaches — phonics, science & nature, sensory, …) from the co-op curriculum in `content/curriculum/co-op/`. Emits a Google Doc per subject (editable on her phone) + a combined printable PDF via `scripts/build-syllabus-pdf.py`. Confirms subjects & real form fields with the parent; never auto-submits.
+- **`homa-make-picture-book`** — Full pipeline for AI picture books: story writing, Nano Banana 2 prompts, PDF assembly. Includes template scripts and character reference docs.
+- **`homa-make-flash-cards`** — Flash card generation: AI illustrations + printable PDF layout. Includes build script template.
+- **`homa-make-coloring-pages`** — Generate printable coloring pages / line art for the child via fal (Nano Banana 2). Use for coloring sheets and coloring-style worksheets.
+- **`homa-make-curriculum`** — Build curriculum lesson plans from textbook photos or topic requests (transcribe pages, scope & sequence, multi-day plans).
+- **`homa-make-decodable-readers`** — Generate personalized decodable readers for the child — every word decodable at his phonics level or a known sight word, illustrated.
+- **`homa-make-handwriting-worksheet`** — Generate HWT (Handwriting Without Tears) letter-practice worksheets with coloring illustrations.
+- **`homa-make-sentence-pyramids`** — Generate Sentence Pyramid phonics worksheets (cumulative one-word-per-line decodable sentences) for the child.
+- **`homa-make-weekly-plan`** — Turn story-coach's scoring + proposed interventions into a follow-able Mon–Fri weekly plan PDF for the parent (the delivery vehicle). Reads `story-profile.json` (current levels + active interventions) + the parent's real weekly rhythm, picks 5 high-leverage at-age-edge nudges, weaves in the second-language communicative layer + time-sensitive out-&-about opportunities, emits a phone-readable PDF to `content/curriculum/weekly-plans/`.
+- **`homa-capture-email-triage`** — Hourly scan of the parent's inbox for important unanswered emails. Surfaces only what genuinely needs her, DMs a triage card directly to the parent (NOT to a group channel), drafts replies (never auto-sends) when she 👍s. State at `email-triage-state.json`.
+- **`homa-capture-journal`** — Daily one-question prompt to the parent in #homa-journal ({{JOURNAL_CHANNEL}}) at 8pm ET; skips silently if the previous question is unanswered. When the parent or the partner replies in that channel, capture to `journal.jsonl`, append to today's Obsidian Daily Log, and route child-related observations into story-profile.json, persistent facts into MEMORY.md, vault-worthy decisions into the relevant page. Never auto-create calendar events — surface and ask.
+- **`homa-capture-lesson`** — Turn a recorded lesson (the parent records ~10-15 min of school time and sends the audio) into what-works signal: transcribe via Whisper (`scripts/transcribe-audio.py`, OpenAI endpoint), then mine for the child's real engagement/resistance/what-landed and append to `content/learners/<child>/what-works.md` + story-profile. The richest signal source (hears the actual lesson, not a recap). Reads what-works.md first.
+- **`homa-capture-feedback`** — Capture the parent's 👍 / 👎 / 🤷 reactions to your messages as training signal. Log to `feedback.jsonl`, send ONE short follow-up on 👎/🤷, never nag.
+- **`homa-google-sheets`** — Create/maintain Google Sheets trackers (reading logs, story-coach scoreboard, math practice, budgets) via gog as {{PARENT_EMAIL}}. Bakes in the two gotchas: no `gog sheets create` (upload a CSV with `--convert-to sheet`), and use bare ranges (`A1`) not `Sheet1!A1`. Values are pipe-separated cells / comma-separated rows.
+- **`homa-google-sheet-to-calendar`** — Read a schedule sheet and create one Google Calendar event per row on the parent's calendar (curriculum terms, co-op blocks, class series). Confirms before bulk-creating.
+- **`homa-system-doctor`** — Read-only scored health check of the whole OS. Fast path `python3 scripts/doctor.py` (naming-convention compliance, dark-skill/quick-ref parity, skill structure, stale cursors, config sanity, draft-debt → score 0-100 + punch list in `operations/health.md`); the SKILL.md adds live checks (crons armed, dashboard truth, CLI-command currency). The verification surface the janitor and reflect gate on; fixes nothing.
+- **`homa-system-reflect`** — Make Homa better at her own job nightly + on demand. **Lens A:** fix recurring machinery friction (janitor/doctor findings, 👎/🤷, corrections) → permanent fix logged to `operations/improvements.md`. **Lens B:** mine the parent's actual usage (voice notes, journal, research) for gaps/unused-power/anticipated-needs → build or propose new skills, crons, artifacts, integrations, logged to `operations/roadmap.md` (the capability backlog). **Builds autonomously**: each night re-validates + re-ranks the roadmap queue against current reality, then ships the top grounded item(s) — dedup, verify-on-sample, doctor-clean — and re-prioritizes. Only hard line: build-ready-but-don't-auto-fire for outward/spendy/credential/new-key things. Fights bloat. Grounded-only; quiet night = clean no-op. The growth organ.
+- **`homa-system-skillify`** — When the parent says "skillify this", turn whatever she just worked through into a reusable skill in `skills/`. Build it and write it first, then report and invite tweaks (output-first, not plan-first). The meta-skill that lets Homa compound.
+- **`homa-system-vault-audit`** — Keep the Obsidian vault honest: freshness banners, staleness detection, drift checks. Use when running the weekly audit cron or before acting on any vault claim.
 
 ## Make It Yours
 

@@ -1,0 +1,20 @@
+[
+  {
+    "focus": "u",
+    "target": "tub",
+    "lines": ["Pip", "Pip the", "Pip the Pup", "Pip the Pup hops", "Pip the Pup hops in", "Pip the Pup hops in the", "Pip the Pup hops in the tub."],
+    "map_word": "tub"
+  },
+  {
+    "focus": "u",
+    "target": "sun",
+    "lines": ["Pug", "Pug can", "Pug can run", "Pug can run in", "Pug can run in the", "Pug can run in the sun."],
+    "map_word": "sun"
+  },
+  {
+    "focus": "a",
+    "target": "cat",
+    "lines": ["Sam", "Sam can", "Sam can pat", "Sam can pat the", "Sam can pat the cat."],
+    "map_word": "cat"
+  }
+]

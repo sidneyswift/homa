@@ -4,28 +4,28 @@
       "id": "nightly-research",
       "name": "Nightly Research",
       "schedule": {"kind": "cron", "expr": "14 2 * * *", "tz": "America/New_York"},
-      "task": "Run the nightly research cron per the child-coach skill. Pick the most stale domain across benchmarks/ and practice/, research it, update the file, update any child profiles if an intervention is proposed, regenerate the vault, and post a recap to the research channel.",
+      "task": "Run the nightly research cron per the homa-track-story-coach skill. Pick the most stale domain across benchmarks/ and practice/, research it, update the file, update any child profiles if an intervention is proposed, regenerate the vault, and post a recap to the research channel.",
       "state": {}
     },
     {
       "id": "weekly-scoring",
       "name": "Weekly Scoring",
       "schedule": {"kind": "cron", "expr": "18 22 * * 6", "tz": "America/New_York"},
-      "task": "Run the weekly scoring cron per the child-coach skill. For each child: recompute age, decay stale confidence, score all subdomains, identify gaps/strengths/unknowns, draft next week's focus and measurement protocol, snapshot the profile, regenerate the vault, and post a summary.",
+      "task": "Run the weekly scoring cron per the homa-track-story-coach skill. For each child: recompute age, decay stale confidence, score all subdomains, identify gaps/strengths/unknowns, draft next week's focus and measurement protocol, snapshot the profile, regenerate the vault, and post a summary.",
       "state": {}
     },
     {
       "id": "daily-journal",
       "name": "Homa Journal Prompt",
       "schedule": {"kind": "cron", "expr": "0 20 * * *", "tz": "America/New_York"},
-      "task": "Run the daily journal prompt per the homa-journal skill. Check if the previous question was answered. If yes, post a new question to the journal channel. If no, skip silently.",
+      "task": "Run the daily journal prompt per the homa-capture-journal skill. Check if the previous question was answered. If yes, post a new question to the journal channel. If no, skip silently.",
       "state": {}
     },
     {
       "id": "email-triage",
       "name": "Email Triage Hourly",
       "schedule": {"kind": "cron", "expr": "47 7-22 * * *", "tz": "America/New_York"},
-      "task": "Run the hourly email triage per the email-triage skill. Scan inbox for important unanswered emails, dedupe against prior pings, DM the parent with triage cards for anything that needs attention.",
+      "task": "Run the hourly email triage per the homa-capture-email-triage skill. Scan inbox for important unanswered emails, dedupe against prior pings, DM the parent with triage cards for anything that needs attention.",
       "state": {}
     },
     {
@@ -39,21 +39,21 @@
       "id": "vault-audit",
       "name": "Vault Audit Weekly",
       "schedule": {"kind": "cron", "expr": "13 15 * * 0", "tz": "America/New_York"},
-      "task": "Run the weekly vault audit per the vault-audit skill. Check for staleness, drift, missing capture, empty folders, and cross-link rot. Post an audit digest.",
+      "task": "Run the weekly vault audit per the homa-system-vault-audit skill. Check for staleness, drift, missing capture, empty folders, and cross-link rot. Post an audit digest.",
       "state": {}
     },
     {
       "id": "reaction-retro",
       "name": "Reaction Retro Weekly",
       "schedule": {"kind": "cron", "expr": "7 16 * * 0", "tz": "America/New_York"},
-      "task": "Run the weekly reaction retro per the reaction-feedback skill. Read the last 7 days of feedback.jsonl, cluster patterns, and post a digest.",
+      "task": "Run the weekly reaction retro per the homa-capture-feedback skill. Read the last 7 days of feedback.jsonl, cluster patterns, and post a digest.",
       "state": {}
     },
     {
       "id": "ambient-learning",
       "name": "Ambient Learning",
       "schedule": {"kind": "cron", "expr": "23,53 7-22 * * *", "tz": "America/New_York"},
-      "task": "Run the ambient learning loop per the child-coach skill. Read recent chat history from monitored channels, extract signals about children (observations, corrections, milestones, preferences), update profiles, journal the findings. Silent — no chat output.",
+      "task": "Run the ambient learning loop per the homa-track-story-coach skill. Read recent chat history from monitored channels, extract signals about children (observations, corrections, milestones, preferences), update profiles, journal the findings. Silent — no chat output.",
       "state": {}
     },
     {

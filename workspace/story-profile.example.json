@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "name": "<child name>",
+  "dob": "YYYY-MM-DD",
+  "pronouns": "he/him",
+  "age": {
+    "years": null,
+    "months": null,
+    "as_of": "YYYY-MM-DD"
+  },
+  "philosophy": {
+    "target": "<one-line description of the family's learning philosophy / target>",
+    "rationale": "<why this target>",
+    "tiers": [],
+    "review_cadence": "quarterly",
+    "previous_target": null,
+    "updated_at": "YYYY-MM-DD"
+  },
+  "domains": {
+    "math": {
+      "frameworks": ["Common Core PreK", "Singapore Math", "Montessori"],
+      "subdomains": {
+        "rote_counting": {
+          "current": "<what the child can do right now>",
+          "verified": "YYYY-MM-DD",
+          "confidence": "high | medium | low",
+          "story_position": "at_age | Nmo_ahead | Nmo_behind",
+          "months_ahead": 0.0,
+          "target_band": "5y0m-6y0m",
+          "notes": "<observation + benchmark reasoning>"
+        }
+      }
+    }
+  },
+  "interventions_active": [
+    {
+      "domain": "writing_fine_motor",
+      "subdomain": "scissors_use",
+      "intervention": "<the specific practice to run>",
+      "proposed_at": "YYYY-MM-DD",
+      "status": "proposed | active | consumed",
+      "source": "<what triggered this — benchmark assessment, observation, research>"
+    }
+  ],
+  "interventions_dropped": [],
+  "last_full_rescore": null,
+  "last_research_run": null,
+  "next_measurement_protocol_due": null
+}
