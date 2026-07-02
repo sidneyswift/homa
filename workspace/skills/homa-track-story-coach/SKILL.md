@@ -456,7 +456,7 @@ She'll say something like "he used belly breaths twice this week without prompti
 Activities are read by the parent, not the partner. Write for a busy mom on her phone:
 - Concrete actions, no jargon
 - "You" and the child's name, not "the parent" or "the child" (use the actual child's name in the rendered activity)
-- Imperative steps ("Hold up Mr Cow…") not descriptive ("The parent holds up the toy…")
+- Imperative steps ("Hold up Mr Moo…") not descriptive ("The parent holds up the toy…")
 - Acknowledge her constraints (toddler chaos, energy levels, prep time)
 - Make the "why" emotionally resonant, not just academic
 

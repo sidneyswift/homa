@@ -36,7 +36,7 @@ One JSON object per line. Append-only. Schema:
   "reaction": "thumbsdown",
   "user_msg": "make a picture book of the child at the dog park...",
   "user_msg_ts": "1777155792.732849",
-  "homa_msg_summary": "12-page PDF, illustrated, the child + Little",
+  "homa_msg_summary": "12-page PDF, illustrated, the child + Biscuit",
   "homa_msg_ts": "1777155799.111111",
   "tools_used": ["image_gen", "pdf_build"],
   "duration_s": 420,

@@ -111,9 +111,9 @@ PAGES = [
         "image": "page01-missing-bruno.jpg",
         "layout": "text_bottom",
         "text": [
-            "The child looked at a picture of his cousin Bruno.",
+            "The child looked at a picture of his cousin Mateo.",
             "",
-            "Bruno lived far away in Florida.",
+            "Mateo lived far away in Florida.",
             "He was turning two tomorrow!",
             "",
             '"I wish I could be there," the child whispered.',
@@ -126,7 +126,7 @@ PAGES = [
         "text": [
             "The child snuggled into bed and closed his eyes.",
             "",
-            '"Happy birthday, Bruno," he said softly.',
+            '"Happy birthday, Mateo," he said softly.',
             "",
             "And then... the stars began to sparkle.",
         ],
@@ -160,7 +160,7 @@ PAGES = [
         "layout": "text_center_bottom",
         "text": [
             '"The child! You came!"',
-            "Bruno ran over for a big hug.",
+            "Mateo ran over for a big hug.",
             "",
             '"To infinity and beyond!"',
             "they both shouted.",
@@ -186,11 +186,11 @@ PAGES = [
         "text": [
             "Then it was time for cake!",
             "",
-            "Bruno's cake had Buzz Lightyear on top",
+            "Mateo's cake had Buzz Lightyear on top",
             "and a big number 2.",
             "",
             "Everyone sang Happy Birthday.",
-            "Bruno blew out the candle!",
+            "Mateo blew out the candle!",
         ],
     },
     # Page 8
@@ -198,7 +198,7 @@ PAGES = [
         "image": "page08-playing.jpg",
         "layout": "text_bottom",
         "text": [
-            "The child and Bruno ran and laughed",
+            "The child and Mateo ran and laughed",
             "and played all afternoon.",
             "",
             "They chased bubbles. They ate ice cream.",
@@ -212,7 +212,7 @@ PAGES = [
         "text": [
             '"I have to go now," the child said.',
             "",
-            '"Will you come back?" asked Bruno.',
+            '"Will you come back?" asked Mateo.',
             "",
             '"I\'ll always come back in my dreams."',
             "",

@@ -56,7 +56,7 @@ Same pipeline as homa-make-picture-book skill:
 - 16:9 landscape, 1K resolution
 - Append style directive + no-text directive to every prompt
 - Use the child's character description from `picture-book/references/characters.md`
-- Include Little (the Frenchie) when the story calls for a dog
+- Include Biscuit (the Frenchie) when the story calls for a dog
 
 Style directive:
 ```
@@ -97,9 +97,9 @@ Key PDF specs (different from picture books):
 Make every book about the child's world:
 - **Paw Patrol**: rescue missions with pups, the child as team leader
 - **Monster trucks**: races, jumps, mud, loud sounds
-- **Animals**: the child's stuffed animals as characters (Mr Cow, Candy, etc.)
-- **Family**: Little the Frenchie, going to the park, home routines
-- **Friends**: Amalia, Felix, etc. as characters
+- **Animals**: the child's stuffed animals as characters (Mr Moo, Berry, etc.)
+- **Family**: Biscuit the Frenchie, going to the park, home routines
+- **Friends**: Sofia, Leo, etc. as characters
 
 ## Quality Checks
 
