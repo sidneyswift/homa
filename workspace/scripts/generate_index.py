@@ -28,7 +28,7 @@ HAND_MAINTAINED_FILES = ["Curriculum Overview", "Weekly Schedule", "What Homa Ca
 SECTION_LABELS = {
     "Subjects": "📖 Subjects (auto-generated per domain)",
     "Curriculum": "📚 Curriculum guides (hand-maintained source materials)",
-    "Lessons": "📝 Lesson logs (Less's daily reports)",
+    "Lessons": "📝 Lesson logs (the parent's daily reports)",
     "Weekly-Plans": "📅 Weekly plans",
     "Research": "🔬 Research notes (one per night, auto-generated)",
     "Activities": "🎨 Activity ideas",
@@ -159,7 +159,7 @@ def main():
             if len(files) > 15:
                 lines.append(f"- _…plus {len(files) - 15} older logs_")
         else:
-            lines.append("_No lesson logs yet — Less hasn't reported any lessons through the homeschool-log skill._")
+            lines.append("_No lesson logs yet — the parent hasn't reported any lessons through the homeschool-log skill._")
         lines.append("")
 
     # Curriculum (alphabetical, recursive — they have sub-pages)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate Homa Dashboard.html — a self-contained, mobile-friendly HTML
-dashboard showing where Story is vs benchmarks, trajectory over time,
+dashboard showing where the child is vs benchmarks, trajectory over time,
 active interventions, and this week's suggested action items.
 
 Reads:
@@ -369,7 +369,7 @@ def next_steps_paragraph(profile, dom_key, dom_data, philosophy):
     if unknown:
         names = _join_friendly(unknown)
         if len(unknown) == 1:
-            sentences.append(f"We haven't seen Story do {names} yet — Homa will include it in the next check-in with the parent.")
+            sentences.append(f"We haven't seen the child do {names} yet — Homa will include it in the next check-in with the parent.")
         elif len(unknown) <= 3:
             sentences.append(f"We don't have data on {names} yet — these will come up in the next check-in.")
         else:
@@ -971,7 +971,7 @@ th {{
         html += "<li class='empty'>None yet — proposed by weekly scoring cron Saturdays.</li>"
     html += '</ul>'
     if profile.get("next_measurement_protocol_due"):
-        html += f'<p style="margin-top:14px"><strong>📐 Next measurement check-in:</strong> {profile["next_measurement_protocol_due"]} <span class="tooltip">(Less\'s 5-question protocol from weekly scoring)</span></p>'
+        html += f'<p style="margin-top:14px"><strong>📐 Next measurement check-in:</strong> {profile["next_measurement_protocol_due"]} <span class="tooltip">(the parent\'s 5-question protocol from weekly scoring)</span></p>'
     html += '</div>'
 
     # Recent research

@@ -16,6 +16,10 @@ Built on [OpenClaw](https://openclaw.ai). Designed for non-technical parents.
 - **10-minute activities** — Research-backed activities for every subdomain, tailored to your child's current level.
 - **Email triage** — Scans your inbox hourly and surfaces only what needs your attention.
 - **Daily journal** — One simple question per day that feeds into the whole system.
+- **Weekly plans** — Turns scoring + suggested interventions into a follow-able, phone-readable Mon–Fri plan.
+- **Recorded-lesson capture** — Record a few minutes of school time; Homa transcribes it into real "what works" signal.
+- **Google Workspace** — Maintain Sheets trackers and turn schedule sheets into Calendar events.
+- **Self-maintaining** — A nightly health check (`doctor`) and self-improvement pass (`reflect`) keep the system honest and growing.
 - **Multi-child support** — Track multiple children, each with their own profile, benchmarks, and materials.
 
 ## What You Need
@@ -83,19 +87,54 @@ Homa (workspace + skills + crons)
 
 ## Skills
 
+Skills follow a `homa-<category>-<what>` naming convention. Category is one of `track`, `make`,
+`capture`, `google`, or `system`.
+
+**`track` — observe & score the homeschool over time**
+
 | Skill | What it does |
 |---|---|
-| `child-coach` | The brain — nightly research, weekly scoring, developmental tracking |
-| `picture-book` | AI-generated illustrated picture books starring your kids |
-| `flash-cards` | Printable flash card PDFs with AI illustrations |
-| `coloring-pages` | Line art coloring pages from photos or prompts |
-| `decodable-readers` | Phonics-leveled books your child can read themselves |
-| `curriculum-builder` | Transcribe textbooks → structured lesson plans |
-| `homeschool-log` | Log lessons to Obsidian, compile subject pages |
-| `homa-journal` | Daily one-question journal prompt |
-| `vault-audit` | Keep the knowledge base honest and current |
-| `email-triage` | Surface important emails, ignore the rest |
-| `reaction-feedback` | Learn from your 👍/👎 reactions |
+| `homa-track-story-coach` | The brain — nightly research, weekly scoring, developmental tracking (per child) |
+| `homa-track-homeschool-log` | Log lessons to Obsidian, compile subject pages |
+| `homa-track-syllabus` | Generate & maintain a co-op syllabus (Google Doc + printable PDF) |
+
+**`make` — generate learning materials**
+
+| Skill | What it does |
+|---|---|
+| `homa-make-picture-book` | AI-generated illustrated picture books starring your kids |
+| `homa-make-flash-cards` | Printable flash card PDFs with AI illustrations |
+| `homa-make-coloring-pages` | Line art coloring pages from photos or prompts |
+| `homa-make-decodable-readers` | Phonics-leveled books your child can read themselves |
+| `homa-make-curriculum` | Transcribe textbooks → structured lesson plans |
+| `homa-make-handwriting-worksheet` | HWT-style letter-practice worksheets |
+| `homa-make-sentence-pyramids` | Cumulative decodable-sentence phonics worksheets |
+| `homa-make-weekly-plan` | Turn scoring + interventions into a follow-able Mon–Fri plan PDF |
+
+**`capture` — ingest inbound family signals**
+
+| Skill | What it does |
+|---|---|
+| `homa-capture-email-triage` | Surface important emails, ignore the rest |
+| `homa-capture-journal` | Daily one-question journal prompt, routed into the system |
+| `homa-capture-lesson` | Transcribe a recorded lesson into what-works signal |
+| `homa-capture-feedback` | Learn from your 👍/👎/🤷 reactions |
+
+**`google` — Google Workspace via the `gog` CLI**
+
+| Skill | What it does |
+|---|---|
+| `homa-google-sheets` | Create/maintain Sheets trackers (reading logs, scoreboards) |
+| `homa-google-sheet-to-calendar` | Turn a schedule sheet into Calendar events |
+
+**`system` — Homa's own machinery**
+
+| Skill | What it does |
+|---|---|
+| `homa-system-doctor` | Read-only scored health check of the whole OS |
+| `homa-system-reflect` | Nightly self-improvement — fix friction, build new capability |
+| `homa-system-skillify` | Turn something you just worked through into a reusable skill |
+| `homa-system-vault-audit` | Keep the knowledge base honest and current |
 
 ## Cron Jobs
 
@@ -128,11 +167,14 @@ homa/
 │   ├── HEARTBEAT.md
 │   ├── children/               # Per-child profiles
 │   │   └── _schema.json
-│   ├── skills/                 # All 11 skills
-│   ├── scripts/                # Generators, dashboard, janitor
+│   ├── skills/                 # All 21 skills (homa-<category>-<what>)
+│   ├── scripts/                # Generators, dashboard, janitor, worksheet builders
 │   ├── benchmarks/             # 15 developmental benchmark files
 │   ├── practice/               # 10 homeschool practice files
 │   ├── activities/             # Activity schema + README
+│   ├── content/                # The "binder" — curriculum library + per-learner cursors
+│   ├── operations/             # Ops layer — roadmap, health, improvements
+│   ├── fonts/                  # Fonts used by worksheet/PDF generators
 │   ├── questionnaire/          # Onboarding question bank
 │   └── reference-images/       # Family photos (you add these)
 ├── vault-template/             # → ~/Documents/{Family} Homeschool/

@@ -429,7 +429,7 @@ footer {{
 
 <section class="card draft-card">
   <h2>📝 Ask Homa to draft this activity</h2>
-  <p>Tap the button to copy a prompt. Paste it into your Slack chat with Homa (the main channel). She'll draft a research-backed 10-minute activity tailored to where Story is right now. Once she saves it, this page will refresh with the activity.</p>
+  <p>Tap the button to copy a prompt. Paste it into your Slack chat with Homa (the main channel). She'll draft a research-backed 10-minute activity tailored to where the child is right now. Once she saves it, this page will refresh with the activity.</p>
   <div class="prompt-box">{prompt}</div>
   <button class="copy-btn" onclick="navigator.clipboard.writeText('{js_safe}').then(() => {{ this.innerText = '✓ Copied — paste to Homa in Slack'; setTimeout(() => this.innerText = '📋 Copy prompt for Homa', 2500); }})">📋 Copy prompt for Homa</button>
 </section>

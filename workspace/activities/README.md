@@ -29,13 +29,13 @@ The double-underscore separates domain from subdomain.
   "what_you_need": ["A stuffed animal the child knows by name", "5 quiet minutes one-on-one"],
   "instructions": [
     "Pick a calm moment, NOT during a meltdown.",
-    "Hold the stuffed animal: 'Mr Cow looks frustrated. What can he do?'",
+    "Hold the stuffed animal: 'Mr Moo looks frustrated. What can he do?'",
     "Offer 3 simple strategies: belly breaths, big squeeze, ask for help.",
-    "Have the child show Mr Cow how to do one of them.",
-    "Praise the strategy by name: 'You taught Mr Cow to breathe — that's a superpower.'"
+    "Have the child show Mr Moo how to do one of them.",
+    "Praise the strategy by name: 'You taught Mr Moo to breathe — that's a superpower.'"
   ],
   "why_this_works": "Self-regulation has to be learned in calm moments, not in the heat of frustration. Pretend play removes the personal pressure: the child is the coach, not the patient. Multiple studies show this narrate-rehearse-reinforce pattern outperforms direct instruction at 3-4y.",
-  "how_to_know_its_working": "Within 4-6 weeks: the child spontaneously names a strategy when frustrated, or asks Mr Cow to do one. Milestone: hearing 'I feel ___' come out unprompted.",
+  "how_to_know_its_working": "Within 4-6 weeks: the child spontaneously names a strategy when frustrated, or asks Mr Moo to do one. Milestone: hearing 'I feel ___' come out unprompted.",
   "graduate_when": "the child uses one of the calm-down strategies on his own during a real frustrating moment, 3+ times in one week.",
   "next_activity": "Naming feelings together — the parent narrates her own emotions out loud during the day, modeling the same toolkit.",
   "research_basis": ["Research/2026-05-04-social-emotional.md"],
