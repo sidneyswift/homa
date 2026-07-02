@@ -9,5 +9,5 @@ the **daily-log capture starts NOW**, here, so there's no impossible back-fill l
   want daily logs cluttering her view — but they're needed for the submission and the keepsake she said
   she'd love to look through with the child.
 - `<school-year>/` — `homa-system-reflect` materializes the actual reporting portfolio when
-  `story-profile.json` age crosses the compulsory threshold, assembled by pulling these daily logs +
+  `children/<child>.json` age crosses the compulsory threshold, assembled by pulling these daily logs +
   `curriculum/` progress + work samples + `fun/` projects that count. Assembled, not re-collected.

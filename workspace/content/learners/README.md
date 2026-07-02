@@ -15,5 +15,5 @@ Each child folder holds:
 just get their own `learners/<kid>/` cursor + what-works model, copied from `_TEMPLATE/`, advancing at
 their own pace. Build the worksheet once → reuse forever.
 
-Agent-owned; the child's academic *position* lives in `story-profile.json` (rendered to the Slack
+Agent-owned; the child's academic *position* lives in `children/<child>.json` (rendered to the Slack
 dashboard). This folder is the *learning-style + progress-cursor* layer the profile doesn't capture.

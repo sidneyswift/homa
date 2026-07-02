@@ -3,7 +3,7 @@
 `content/` is **Homa's store** for the homeschool — organized the way Homa needs to find and reuse
 things, NOT a mirror of the parent's Obsidian. The Obsidian vault is a *rendered view* (the parent's
 "binder"); it shows her the curriculum + worksheets and nothing she doesn't use. The spine (`scripts/`,
-`skills/`, `story-profile.json`, state, `memory/`…) is Homa's machinery — never in `content/`.
+`skills/`, `children/<child>.json`, state, `memory/`…) is Homa's machinery — never in `content/`.
 
 **Ground truth (how the parent actually works):** she works **curriculum-first**. A curriculum = a *book
 she bought* (e.g. Art Everywhere, Dimensions Math, HWT, Hegerty Phonics, Science Fusion, Social Studies)

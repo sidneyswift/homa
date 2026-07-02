@@ -5,7 +5,7 @@ score_observation.py — same-day re-scoring of ONE subdomain.
 This is what lets Homa update a single subdomain the MOMENT the parent reports
 something, instead of waiting for the Saturday batch rescore. It:
 
-  1. Loads story-profile.json
+  1. Loads the child's children/<child>.json profile
   2. Validates the domain + subdomain exist (clear error + closest matches)
   3. Updates that subdomain's: current (required), months_ahead, confidence,
      verified (= today), optionally story_position and notes
@@ -17,13 +17,15 @@ something, instead of waiting for the Saturday batch rescore. It:
 
 Usage:
   python3 score_observation.py \
+      --child NAME \
       --domain math --subdomain rote_counting \
       --current "Counts to 30 now" \
       --months-ahead 14 --confidence high \
       [--position 12mo_ahead] [--note "..."]
 
 Required: --domain, --subdomain, --current
-Optional: --months-ahead (float), --position, --confidence (default "high"),
+Optional: --child (which children/<child>.json; may be omitted when exactly one exists),
+          --months-ahead (float), --position, --confidence (default "high"),
           --note  (sets the subdomain's `notes` field)
 
 --confidence defaults to "high" because a direct fresh observation from the parent
@@ -39,7 +41,7 @@ import subprocess
 import sys
 
 WORKSPACE = pathlib.Path.home() / ".openclaw" / "workspace"
-PROFILE = WORKSPACE / "story-profile.json"
+CHILDREN_DIR = WORKSPACE / "children"
 SCRIPTS = WORKSPACE / "scripts"
 
 VALID_POSITIONS = {
@@ -67,6 +69,27 @@ def _insert_after(d, after_key, new_key, value):
             d[new_key] = value
 
 
+def resolve_child(name):
+    """Resolve the child profile path from a --child NAME.
+
+    - If name given: use children/<name>.json.
+    - If omitted and exactly ONE children/*.json exists (ignoring _-prefixed like
+      _schema.json): use it.
+    - If omitted and multiple exist: error listing the choices.
+    Returns (path, error_msg). On error, path is None.
+    """
+    if name:
+        return CHILDREN_DIR / f"{name}.json", None
+    children = sorted(p for p in CHILDREN_DIR.glob("*.json") if not p.name.startswith("_"))
+    if len(children) == 1:
+        return children[0], None
+    if not children:
+        return None, f"No children/*.json profiles found in {CHILDREN_DIR}"
+    choices = ", ".join(p.stem for p in children)
+    return None, ("Multiple children found — pass --child NAME. "
+                  f"Choices: {choices}")
+
+
 def _closest(name, candidates, n=5):
     matches = difflib.get_close_matches(name, candidates, n=n, cutoff=0.3)
     if not matches:
@@ -77,6 +100,8 @@ def _closest(name, candidates, n=5):
 
 def main():
     p = argparse.ArgumentParser(description="Re-score one subdomain from a fresh observation.")
+    p.add_argument("--child", default=None,
+                   help="Which child (children/<child>.json). Optional when exactly one exists.")
     p.add_argument("--domain", required=True)
     p.add_argument("--subdomain", required=True)
     p.add_argument("--current", required=True, help="New current-state observation text (required).")
@@ -91,11 +116,15 @@ def main():
                    help="Skip snapshot + vault regeneration (for testing only).")
     args = p.parse_args()
 
-    if not PROFILE.exists():
-        print(f"❌ Profile not found at {PROFILE}")
+    profile_path, err = resolve_child(args.child)
+    if err:
+        print(f"❌ {err}")
+        return 1
+    if not profile_path.exists():
+        print(f"❌ Profile not found at {profile_path}")
         return 1
 
-    profile = json.loads(PROFILE.read_text())
+    profile = json.loads(profile_path.read_text())
     domains = profile.get("domains", {})
 
     # Validate domain
@@ -146,7 +175,7 @@ def main():
         sd["notes"] = args.note
 
     # --- Write back (preserve formatting + key order) ---
-    PROFILE.write_text(
+    profile_path.write_text(
         json.dumps(profile, indent=2, ensure_ascii=False, sort_keys=False) + "\n"
     )
 

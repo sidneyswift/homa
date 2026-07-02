@@ -172,8 +172,8 @@ def check_heartbeat_state(findings):
 
 
 def check_feedback_loop(findings):
-    # The what-works keystone (shipped 2026-06-29) reads content/learners/story/
-    # what-works.md, which the 👍/👎 reaction loop is supposed to populate via
+    # The what-works keystone (shipped 2026-06-29) reads each child's
+    # content/learners/<child>/what-works.md, which the 👍/👎 reaction loop is supposed to populate via
     # homa-capture-feedback -> feedback.jsonl. But feedback.jsonl has been EMPTY
     # since 2026-04-25 (2+ months). Either the parent never reacts (UX reality) or the
     # inbound reaction event never reaches the agent (unwired catcher — config has
@@ -270,10 +270,12 @@ SPINE_ROOT = {
     # brain
     "AGENTS.md", "SOUL.md", "TOOLS.md", "USER.md", "HEARTBEAT.md", "IDENTITY.md", "MEMORY.md",
     # root-level state/data the runtime reads+writes by absolute path
-    "story-profile.json", "word-of-the-week.json", "research-journal.md",
+    # (per-child profiles live in children/, not root)
+    "word-of-the-week.json", "research-journal.md",
     "feedback.jsonl", "journal.jsonl", "journal-prompts.jsonl", "learning-loop-state.json",
     "learning-journal.jsonl", "email-triage-state.json", "email-triage-log.jsonl",
     # spine dirs
+    "children",
     "content", "scripts", "skills", "operations", "memory", "benchmarks", "practice",
     "research", "profile-history", "activities", "dashboard-deploy", "fonts", "clipart",
     "reference-images", "archive", "_janitor-backups",

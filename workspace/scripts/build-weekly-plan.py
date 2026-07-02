@@ -3,7 +3,7 @@
 build-weekly-plan.py — emit a follow-able Mon–Fri weekly homeschool plan PDF for the parent.
 
 The vehicle that turns story-coach's scoring + proposed interventions into a do-this-this-week
-plan the parent can actually follow. Reads the single source of truth (story-profile.json): current
+plan the parent can actually follow. Reads the child's children/<child>.json profile: current
 levels per domain + the active (proposed, unconsumed) interventions, maps them onto the parent's real
 weekly rhythm (Tue–Fri 9–11am school time; Spanish Tue PM, Art Wed, Pool Thu, Gymnastics Fri),
 and weaves in time-sensitive opportunities + the day's research findings.
@@ -17,7 +17,8 @@ Design notes:
   so the next reflect pass can refresh them without touching layout code.
 
 Usage:
-  python3 scripts/build-weekly-plan.py                 # auto week (next Mon)
+  python3 scripts/build-weekly-plan.py                 # auto week (next Mon), single child
+  python3 scripts/build-weekly-plan.py --child NAME    # pick which children/<child>.json
   python3 scripts/build-weekly-plan.py --week 2026-06-29
   python3 scripts/build-weekly-plan.py --out content/curriculum/weekly-plans/2026-06-29.pdf
 """
@@ -39,7 +40,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROFILE = os.path.join(ROOT, "story-profile.json")
+CHILDREN_DIR = os.path.join(ROOT, "children")
 FONTS = os.path.join(ROOT, "fonts")
 
 # the parent's real weekly rhythm (USER.md). School time Tue–Fri 9–11am; Mon open.
@@ -65,8 +66,32 @@ SPANISH_LAYER = ("Spanish this week: keep adding communicative phrases in daily 
                  "but his real gap is following connected speech. Phrases > flash cards.")
 
 
-def load_profile():
-    with open(PROFILE) as f:
+def resolve_child(name):
+    """Resolve the child profile path from a --child NAME.
+
+    - If name given: use children/<name>.json.
+    - If omitted and exactly ONE children/*.json exists (ignoring _-prefixed like
+      _schema.json): use it.
+    - If omitted and multiple exist: error listing the choices.
+    Returns (path, error_msg). On error, path is None.
+    """
+    import glob
+    if name:
+        return os.path.join(CHILDREN_DIR, f"{name}.json"), None
+    children = sorted(
+        p for p in glob.glob(os.path.join(CHILDREN_DIR, "*.json"))
+        if not os.path.basename(p).startswith("_")
+    )
+    if len(children) == 1:
+        return children[0], None
+    if not children:
+        return None, f"No children/*.json profiles found in {CHILDREN_DIR}"
+    choices = ", ".join(os.path.splitext(os.path.basename(p))[0] for p in children)
+    return None, f"Multiple children found — pass --child NAME. Choices: {choices}"
+
+
+def load_profile(profile_path):
+    with open(profile_path) as f:
         return json.load(f)
 
 
@@ -166,7 +191,7 @@ def build(profile, week_start, out_path):
     flow.append(Paragraph(
         f"{week_start.strftime('%B %-d')} – {wk_end.strftime('%B %-d, %Y')} &nbsp;·&nbsp; "
         f"the child is {age.get('years','?')}y{age.get('months','?')}m &nbsp;·&nbsp; "
-        f"built {dt.date.today().isoformat()} from story-profile.json", sub))
+        f"built {dt.date.today().isoformat()} from children/&lt;child&gt;.json", sub))
     flow.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#DDDDDD")))
 
     # --- This week's focus (the unconsumed interventions, finally delivered) ---
@@ -229,9 +254,16 @@ def build(profile, week_start, out_path):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--child", default=None,
+                    help="Which child (children/<child>.json). Optional when exactly one exists.")
     ap.add_argument("--week", help="week-start date YYYY-MM-DD (defaults to upcoming Monday)")
     ap.add_argument("--out", help="output PDF path")
     args = ap.parse_args()
+
+    profile_path, err = resolve_child(args.child)
+    if err:
+        print(f"❌ {err}")
+        sys.exit(1)
 
     if args.week:
         week_start = dt.date.fromisoformat(args.week)
@@ -240,12 +272,13 @@ def main():
 
     out = args.out
     if not out:
+        child_slug = os.path.splitext(os.path.basename(profile_path))[0]
         out_dir = os.path.join(ROOT, "content", "curriculum", "weekly-plans")
         os.makedirs(out_dir, exist_ok=True)
-        out = os.path.join(out_dir, f"{week_start.isoformat()}.pdf")
+        out = os.path.join(out_dir, f"{week_start.isoformat()}-{child_slug}.pdf")
     os.makedirs(os.path.dirname(out), exist_ok=True)
 
-    profile = load_profile()
+    profile = load_profile(profile_path)
     path = build(profile, week_start, out)
     print(f"weekly plan → {path}")
 

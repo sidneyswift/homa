@@ -1,6 +1,6 @@
 ---
 name: homa-capture-journal
-description: Daily one-question journal prompt to the parent in #homa-journal ({{JOURNAL_CHANNEL}}). Captures the parent's and partner's replies as the day-to-day signal of what's actually going on, then routes the info into the right systems (compliance log, story-profile, MEMORY, etc). Use when running the daily-prompt cron, AND whenever the parent or partner posts in #homa-journal.
+description: Daily one-question journal prompt to the parent in #homa-journal ({{JOURNAL_CHANNEL}}). Captures the parent's and partner's replies as the day-to-day signal of what's actually going on, then routes the info into the right systems (compliance log, the relevant child's children/<child>.json, MEMORY, etc). Use when running the daily-prompt cron, AND whenever the parent or partner posts in #homa-journal.
 ---
 
 # Homa Journal
@@ -60,8 +60,9 @@ When the parent or partner posts in `#homa-journal`, Homa is invoked because the
      "thread_ts": "1777155700.000000" | null,
      "prompt_question": "Anything new with the child?" | null,
      "text": "raw message text",
-     "tags": ["story", "math", "co-op", ...],
-     "routed_to": ["obsidian:daily-log", "story-profile:math", "memory:..."]
+     "tags": ["math", "co-op", ...],
+     "child": "<child>" | null,
+     "routed_to": ["obsidian:daily-log", "children/<child>:math", "memory:..."]
    }
    ```
 
@@ -69,9 +70,10 @@ When the parent or partner posts in `#homa-journal`, Homa is invoked because the
 
    - **Always** → append a bullet to today's **compliance log**: `~/.openclaw/workspace/content/compliance/{YYYY-MM-DD}.md` (create with a header if missing; one bullet per journal entry, prefixed with the time and `(the parent)` or `(the partner)`). **This is the state-report capture — NOT the vault.** The parent explicitly doesn't want daily logs cluttering her Obsidian binder ("I don't know why she's logging these"), but they're captured here for the state submission she'll need at the child's compulsory age (~2027). Her binder stays curriculum-only.
 
-   - **If child-related** (something he did, said, learned, struggled with) → consider updating `~/.openclaw/workspace/story-profile.json`:
-     - If it's an observation about a specific subdomain (e.g. "the child counted to 30 today") → bump that subdomain's `last_observed` and add a 1-line note. Don't overwrite confidence levels — that's the weekly scoring cron's job.
+   - **If child-related** (something a child did, said, learned, struggled with) → consider updating that child's `~/.openclaw/workspace/children/<child>.json` profile. First resolve **which child** the reply is about: if the reply names or clearly implies a specific child, use that child's `children/<child>.json`. If it's ambiguous and only ONE `children/*.json` exists, use that one. If it's ambiguous and multiple children exist, ask the parent which child it's about (or leave it in the compliance log only) rather than guessing. Then:
+     - If it's an observation about a specific subdomain (e.g. "she counted to 30 today") → bump that subdomain's `last_observed` and add a 1-line note. Don't overwrite confidence levels — that's the weekly scoring cron's job.
      - If it's a NEW skill emerging that isn't in the profile → add to the appropriate domain's `notes` array.
+     - **After ANY write to a `children/<child>.json`, run `python3 scripts/regenerate_vault.py`** (it rebuilds all children's vault views) so the vault stays in sync.
 
    - **If it's a persistent fact about the parent, partner, or the family** that future Homa sessions need to know (preferences, schedule changes, life events, decisions, vendor changes) → write a memory file under `/Users/mac/.claude/projects/-Users-mac--openclaw/memory/` and add a one-line index entry to `MEMORY.md` per the auto-memory rules.
 
@@ -123,4 +125,4 @@ Track recently-used questions in `~/.openclaw/workspace/journal-prompts.jsonl` (
 
 The partner should pin this in #homa-journal so the channel's purpose is obvious:
 
-> One question a day. Reply if you've got something, skip if you don't — Homa won't ask again until you've responded. She'll fold what you share into the vault, the child's profile, and memory.
+> One question a day. Reply if you've got something, skip if you don't — Homa won't ask again until you've responded. She'll fold what you share into the vault, the right child's profile, and memory.

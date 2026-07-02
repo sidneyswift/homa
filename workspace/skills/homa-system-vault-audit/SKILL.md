@@ -22,9 +22,9 @@ The vault contains three different kinds of files. The audit treats each differe
 
 ### 1. AUTO-GENERATED (most files)
 
-Pages rebuilt by `~/.openclaw/workspace/scripts/regenerate_vault.py` from `story-profile.json`:
+Pages rebuilt by `~/.openclaw/workspace/scripts/regenerate_vault.py` from the `children/*.json` profiles:
 - `Home.md`
-- `the-child.md`
+- `Children/<child>.md` (one per child)
 - `Subjects/{Domain}.md` (all 15)
 
 **Audit behavior:** These files are always fresh by definition (they get rewritten on every profile change). The audit skill should NOT apply staleness banners to them — they manage their own banners via the regen scripts. If an auto-gen file's mtime is unexpectedly old (>2 days, say), that's a signal the regen pipeline broke — flag it as a critical capture-gap finding, not a staleness issue.
@@ -107,7 +107,7 @@ Empty folders: {list — these are capture loops not running}
 ⚠️ Capture gaps:
 • Lessons/ has {n} files (expected ≥{X} for last 30 days)
 • Daily Log/ has {n} files
-• the-child.md last updated {age}d ago
+• Children/<child>.md last updated {age}d ago (per child)
 
 🎯 #1 verification priority this week:
 {single most important thing for the partner to ask the parent to verify}
@@ -122,7 +122,7 @@ Beyond mtime, also flag:
 1. **"This week" sections that name a past week.** A page saying "This Week (April 6–10)" when today is April 25 is masquerading as current state. Suggest moving to a `## Progression` section dated by week.
 2. **Empty capture folders** (`Lessons/`, `Daily Log/`). These mean a capture loop is dead. Highest-priority finding.
 3. **Cross-link rot.** A page that mentions a curriculum/subject not linked anywhere else in the vault — orphan claim, likely abandoned.
-4. **Conflicting facts.** the-child.md says "Spanish: 18 emotion words in progress"; Subjects/Spanish.md says "completed 18 emotion words." One of them is wrong.
+4. **Conflicting facts.** A child's Children/<child>.md says "Spanish: 18 emotion words in progress"; Subjects/Spanish.md says "completed 18 emotion words." One of them is wrong.
 
 ## When Homa Acts on Vault Content
 

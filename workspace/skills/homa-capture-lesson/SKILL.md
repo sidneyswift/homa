@@ -1,9 +1,13 @@
 ---
 name: homa-capture-lesson
-description: Turn a recorded lesson (the parent records ~10-15 min of school time on her phone and sends the audio) into what-works signal — transcribe it via Whisper, then mine it for the child's real engagement, resistance, and what landed, and append that to the what-works model + story-profile. The richest signal source Homa has: it hears the actual lesson, not a 30-second after-the-fact recap. Use when the parent sends a lesson recording / audio file, or says "here's a recording of today's lesson." Read content/learners/<child>/what-works.md FIRST.
+description: Turn a recorded lesson (the parent records ~10-15 min of school time on her phone and sends the audio) into what-works signal — transcribe it via Whisper, then mine it for the child's real engagement, resistance, and what landed, and append that to the what-works model + the child's children/<child>.json profile. The richest signal source Homa has: it hears the actual lesson, not a 30-second after-the-fact recap. Use when the parent sends a lesson recording / audio file, or says "here's a recording of today's lesson." A recording is about ONE child — identify which child it is first, then read content/learners/<child>/what-works.md FIRST.
 ---
 
 # Homa Capture — Lesson Recording
+
+A recording is of **one child**. First figure out **which child** the lesson is of (from the parent's
+message, the audio, or — if only one `children/*.json` exists — that child). That `<child>` is the same
+key used for `children/<child>.json` and `content/learners/<child>/what-works.md` below.
 
 **Read `content/learners/<child>/what-works.md` FIRST** — this skill *feeds* it, and you shape what you
 extract by what the model already knows.
@@ -46,8 +50,10 @@ this. This is for *in-lesson* audio.
 4. **Write the signal where it compounds:**
    - **`content/learners/<child>/what-works.md`** — append dated, cited lines under the right section
      (What's worked / What he resists / Interests & hooks). This is the primary payoff.
-   - **`story-profile.json`** — only if the lesson demonstrated a real position change (a new skill, a
-     confirmed regression). Follow the story-coach profile conventions; don't over-write.
+   - **`children/<child>.json`** (the profile for the child this lesson is of) — only if the lesson
+     demonstrated a real position change (a new skill, a confirmed regression). Follow the story-coach
+     profile conventions; don't over-write. **After writing to `children/<child>.json`, run
+     `python3 scripts/regenerate_vault.py`** (it rebuilds all children's vault views).
    - A short lesson note to the Obsidian vault (`_System/Research/` or the Daily Log) if it's worth the parent
      seeing.
 5. **Log** a one-line run summary to `learning-journal.jsonl` (source: lesson-recording, signals_extracted:
@@ -60,8 +66,8 @@ this. This is for *in-lesson* audio.
 - Don't invent signal — every extracted line needs a quote/moment behind it (same groundedness bar as the
   research + what-works loops).
 - Don't route Whisper through the Vercel gateway (404s). Use the helper as-is.
-- Don't over-update the profile from one lesson — engagement/resistance → what-works.md; hard position
-  changes only when clearly demonstrated.
+- Don't over-update the child's `children/<child>.json` profile from one lesson — engagement/resistance →
+  what-works.md; hard position changes only when clearly demonstrated.
 
 ## Why this is a skill (recurs) not a one-shot
 Recording lessons is meant to become a **habit** — the more the parent records, the sharper what-works gets,

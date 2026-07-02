@@ -26,7 +26,7 @@ Create illustrated books the child can read *himself*. The critical constraint: 
 
 ### 1. Determine the Level
 
-Check the child's current phonics level in `story-profile.json` → `phonics` subdomains. See `references/phonics-levels.md` for the full 6-level progression.
+Check the child's current phonics level in the child's `children/<child>.json` profile → `phonics` subdomains. (If it's not clear which child, and only one `children/*.json` exists, use that one; otherwise ask which child the reader is for.) See `references/phonics-levels.md` for the full 6-level progression.
 
 Currently: **Level 1 (CVC)** — all short vowels, consonant-vowel-consonant only.
 
@@ -89,7 +89,7 @@ Key PDF specs (different from picture books):
 
 - Upload PDF to Slack
 - Note the level and word list
-- Track in `story-profile.json` which levels have been completed
+- Track in the child's `children/<child>.json` which levels have been completed (after writing it, run `python3 scripts/regenerate_vault.py` to rebuild the vault views)
 - Advance to next level only when the parent confirms mastery
 
 ## Personalization Hooks
