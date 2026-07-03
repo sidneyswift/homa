@@ -79,7 +79,14 @@ never modify either).
 - **Phase A — Engine proof:** M0-01 adversarial prototype (STRICT timebox; GO/NO-GO
   criteria written BEFORE starting; throwaway code), M0-03 worksheet-in-sandbox,
   M0-04 voice-on-real-phones, M0-05 Supabase schema v0 + RLS, M0-09 monorepo
-  bootstrap (`apps/web`, `apps/agent`, `packages/core`).
+  bootstrap: **pnpm workspaces + Turborepo** — `apps/web` (Next.js, the ONE
+  deployable, with the eve agent mounted inside it via `withEve()` at
+  `apps/web/agent/`), `packages/core` (domain system ported from the
+  template-archive branch), `packages/design` (homa-design tokens/components as a
+  workspace package), `supabase/` (migrations at repo root — the Supabase GitHub
+  integration watches this; connect the integration right after migration #1
+  lands). Enable Vercel remote caching. The existing Supabase project is
+  **homa-prod** (org: Homa, East US N. Virginia; auto-RLS on, auto-expose off).
 - **Phase B — Walking skeleton, one family end-to-end:** FR-1 (invite+auth),
   FR-2 (3-minute wow), FR-4 (chat+voice), FR-5 (materials + photo consent floor),
   platform laws (M1-07 isolation suite in CI from the FIRST schema migration).
