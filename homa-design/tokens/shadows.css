@@ -1,0 +1,15 @@
+/* HOMA shadows, soft, warm-tinted (brown, not gray). Low spread, diffuse. */
+
+:root {
+  --shadow-xs:  0 1px 2px rgba(51, 42, 33, 0.06);
+  --shadow-sm:  0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
+  --shadow-md:  0 4px 12px rgba(51, 42, 33, 0.08), 0 2px 4px rgba(51, 42, 33, 0.05);
+  --shadow-lg:  0 12px 28px rgba(51, 42, 33, 0.10), 0 4px 10px rgba(51, 42, 33, 0.05);
+  --shadow-xl:  0 24px 48px rgba(51, 42, 33, 0.14), 0 8px 16px rgba(51, 42, 33, 0.06);
+
+  /* Focus glow (paired with outline) */
+  --shadow-focus: 0 0 0 4px rgba(208, 113, 74, 0.20);
+
+  /* Inset for pressed / sunken fields */
+  --shadow-inset: inset 0 1px 2px rgba(51, 42, 33, 0.06);
+}

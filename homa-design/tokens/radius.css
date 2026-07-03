@@ -1,0 +1,12 @@
+/* HOMA corner radii, soft and rounded, never sharp. */
+
+:root {
+  --radius-xs:   6px;
+  --radius-sm:   10px;
+  --radius-md:   14px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-pill: 999px;
+  --radius-card: var(--radius-lg);
+}

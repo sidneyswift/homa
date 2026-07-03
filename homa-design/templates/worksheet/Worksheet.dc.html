@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Printable Worksheet" description="Branded print-ready worksheet, name/date header, numbered exercises, HOMA's margin note." -->
+<helmet>
+<script src="./ds-base.js"></script>
+<style>
+@media print {
+  body { background: #fff !important; }
+}
+</style>
+</helmet>
+<div style="background:var(--bg-page-warm);min-height:100vh;padding:40px 24px;font-family:var(--font-sans);display:flex;justify-content:center;">
+  <div style="background:#fff;width:850px;max-width:100%;box-shadow:var(--shadow-lg);border-radius:6px;padding:64px 72px;box-sizing:border-box;position:relative;">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;">
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Logo" size="24" hint-size="110px,28px"></x-import>
+      <div style="display:flex;gap:28px;font-size:0.85rem;color:var(--text-muted);">
+        <span style="display:flex;align-items:baseline;gap:8px;">Name<span style="display:inline-block;width:150px;border-bottom:1.5px solid var(--stone-300);"></span></span>
+        <span style="display:flex;align-items:baseline;gap:8px;">Date<span style="display:inline-block;width:100px;border-bottom:1.5px solid var(--stone-300);"></span></span>
+      </div>
+    </div>
+
+    <div style="margin-top:44px;border-left:3px solid var(--clay-200);padding-left:20px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--brand);">Grade 3 &middot; Math &middot; Week 12</div>
+      <h1 style="font-family:var(--font-display);font-size:2.1rem;font-weight:500;color:var(--text-strong);letter-spacing:-0.02em;margin:8px 0 0;">Fractions practice</h1>
+      <p style="color:var(--text-muted);margin:8px 0 0;font-size:0.95rem;line-height:1.5;">Solve each one. Show your thinking in the space below the problem, pictures count!</p>
+    </div>
+
+    <ol style="margin:40px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0;counter-reset:ex;">
+      <li style="display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--stone-200);">
+        <span style="width:32px;height:32px;border-radius:50%;background:var(--clay-50);color:var(--clay-700);font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem;">1</span>
+        <div style="flex:1;"><div style="color:var(--text-strong);font-size:1.05rem;">Shade &#189; of the circle. Then shade &#188; of the square. Which shaded part is bigger?</div><div style="height:72px;display:flex;align-items:flex-end;"><sc-if value="{{ showAnswers }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-hand);font-size:1.4rem;color:var(--sage-600);padding-bottom:10px;transform:rotate(-1.5deg);">the &#189; circle wins, halves beat quarters</span></sc-if></div></div>
+      </li>
+      <li style="display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--stone-200);">
+        <span style="width:32px;height:32px;border-radius:50%;background:var(--clay-50);color:var(--clay-700);font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem;">2</span>
+        <div style="flex:1;"><div style="color:var(--text-strong);font-size:1.05rem;">Maya ate 3 of the 8 apple slices. What fraction of the slices is left?</div><div style="height:72px;display:flex;align-items:flex-end;"><sc-if value="{{ showAnswers }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-hand);font-size:1.4rem;color:var(--sage-600);padding-bottom:10px;transform:rotate(-1.5deg);">5/8 of the slices are left</span></sc-if></div></div>
+      </li>
+      <li style="display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--stone-200);">
+        <span style="width:32px;height:32px;border-radius:50%;background:var(--clay-50);color:var(--clay-700);font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem;">3</span>
+        <div style="flex:1;"><div style="color:var(--text-strong);font-size:1.05rem;">Write these in order from smallest to largest: &#8531;, &#189;, &#188;</div><div style="height:72px;display:flex;align-items:flex-end;"><sc-if value="{{ showAnswers }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-hand);font-size:1.4rem;color:var(--sage-600);padding-bottom:10px;transform:rotate(-1.5deg);">&#188;, then &#8531;, then &#189;</span></sc-if></div></div>
+      </li>
+      <li style="display:flex;gap:18px;padding:22px 0;">
+        <span style="width:32px;height:32px;border-radius:50%;background:var(--gold-100);color:#9a7118;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem;">&#10022;</span>
+        <div style="flex:1;"><div style="color:var(--text-strong);font-size:1.05rem;"><b>Challenge:</b> Draw a pizza cut so that you get &#190; and your brother gets &#188;. Is that fair? Why or why not?</div><div style="height:72px;display:flex;align-items:flex-end;"><sc-if value="{{ showAnswers }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-hand);font-size:1.4rem;color:var(--sage-600);padding-bottom:10px;transform:rotate(-1.5deg);">not fair! &#190; + &#188; make a whole, but the pieces aren&rsquo;t equal</span></sc-if></div></div>
+      </li>
+    </ol>
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:28px;padding-top:20px;border-top:1px solid var(--stone-200);">
+      <span style="font-family:var(--font-hand);font-size:1.7rem;color:var(--sage-600);line-height:1;transform:rotate(-2deg);">take your time, you&rsquo;ve got this &#10022;</span>
+      <span style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.08em;color:var(--text-subtle);">MADE WITH HOMA</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAnswers&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Worksheet&quot;}}"></script>
+</body>
+</html>

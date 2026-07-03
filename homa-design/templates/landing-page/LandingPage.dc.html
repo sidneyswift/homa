@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Landing Page" description="HOMA marketing landing, promise hero, feature cards, footer. Built on the design system." -->
+<helmet>
+<script src="./ds-base.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>(()=>{let n=0;const t=setInterval(()=>{if(window.lucide){window.lucide.createIcons();}if(++n>25)clearInterval(t);},200);})();</script>
+</helmet>
+<div style="background:var(--bg-page);font-family:var(--font-sans);min-height:100vh;">
+
+  <nav style="display:flex;align-items:center;gap:32px;padding:18px 40px;border-bottom:1px solid var(--border-subtle);background:var(--bg-page);position:sticky;top:0;z-index:10;">
+    <x-import component-from-global-scope="HOMADesignSystem_113bd2.Logo" size="28" hint-size="130px,32px"></x-import>
+    <div style="display:flex;gap:28px;margin-left:20px;">
+      <a href="#" style="color:var(--text-muted);text-decoration:none;font-weight:500;">How it works</a>
+      <a href="#" style="color:var(--text-muted);text-decoration:none;font-weight:500;">Features</a>
+      <a href="#" style="color:var(--text-muted);text-decoration:none;font-weight:500;">Pricing</a>
+      <a href="#" style="color:var(--text-muted);text-decoration:none;font-weight:500;">Stories</a>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:12px;align-items:center;">
+      <a href="#" style="color:var(--text-body);text-decoration:none;font-weight:600;">Sign in</a>
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Button" hint-size="120px,44px">Start free</x-import>
+    </div>
+  </nav>
+
+  <section style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;padding:72px 40px 64px;max-width:1200px;margin:0 auto;">
+    <div>
+      <span style="display:inline-flex;align-items:center;gap:6px;background:var(--clay-50);color:var(--clay-700);padding:6px 14px;border-radius:var(--radius-pill);font-weight:600;font-size:0.85rem;">In your corner, every school day</span>
+      <h1 style="font-family:var(--font-display);font-size:3.6rem;font-weight:500;line-height:1.02;letter-spacing:-0.025em;color:var(--text-strong);margin:20px 0 0;">You&rsquo;ve got this.<br>HOMA&rsquo;s got the <span style="font-style:italic;font-weight:400;color:var(--clay-600);">rest</span>.</h1>
+      <p style="font-size:1.2rem;color:var(--text-muted);line-height:1.55;margin:22px 0 0;max-width:470px;">The planning, the tracking, the what-do-we-do-today, hand it to HOMA. You get back to the part only you can do.</p>
+      <div style="display:flex;gap:12px;margin-top:30px;">
+        <x-import component-from-global-scope="HOMADesignSystem_113bd2.Button" size="lg" hint-size="200px,52px">Start free for 14 days</x-import>
+        <x-import component-from-global-scope="HOMADesignSystem_113bd2.Button" variant="secondary" size="lg" hint-size="150px,52px">Watch demo</x-import>
+      </div>
+    </div>
+    <div style="position:relative;">
+      <div style="width:100%;height:440px;border-radius:var(--radius-xl);background:linear-gradient(160deg,var(--clay-100),var(--sage-100));display:flex;align-items:center;justify-content:center;color:var(--text-subtle);font-family:var(--font-display);font-style:italic;font-size:1.1rem;">A warm family photo lives here</div>
+      <div style="position:absolute;top:-22px;right:18px;font-family:var(--font-hand);font-size:2.4rem;color:var(--sage-600);transform:rotate(-7deg);line-height:1;">you&rsquo;ve got this &#10022;</div>
+    </div>
+  </section>
+
+  <section style="padding:60px 40px;max-width:1200px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:44px;">
+      <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--brand);">Everything in one place</div>
+      <h2 style="font-family:var(--font-display);font-size:2.4rem;font-weight:500;color:var(--text-strong);margin:8px 0 0;letter-spacing:-0.02em;">Less admin. More teaching.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
+        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--clay-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="calendar-heart" style="color:var(--brand);"></i></span>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Plans that flex</h3>
+        <p style="color:var(--text-muted);line-height:1.55;margin:0;">Tell HOMA how your week looks and she builds a schedule around real life.</p>
+      </x-import>
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
+        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--sage-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sprout" style="color:var(--sage-600);"></i></span>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Progress you can see</h3>
+        <p style="color:var(--text-muted);line-height:1.55;margin:0;">Per-child mastery and milestones across every subject, mapped to your standards.</p>
+      </x-import>
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
+        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--gold-100);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sparkles" style="color:#9a7118;"></i></span>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Ideas on demand</h3>
+        <p style="color:var(--text-muted);line-height:1.55;margin:0;">Stuck? Ask for a rainy-day project, a spelling list, or a whole unit, in seconds.</p>
+      </x-import>
+    </div>
+  </section>
+
+  <footer style="background:var(--stone-900);color:var(--stone-300);padding:48px 40px;margin-top:40px;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+      <x-import component-from-global-scope="HOMADesignSystem_113bd2.Logo" size="26" tone="dark" hint-size="120px,30px"></x-import>
+      <span style="font-family:var(--font-display);font-style:italic;color:var(--stone-400);">homeschooling, made calm</span>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+</body>
+</html>

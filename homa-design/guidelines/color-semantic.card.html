@@ -1,0 +1,16 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Semantic status" subtitle="Success, warning, danger, info · soft + solid" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:20px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .item{display:flex;flex-direction:column;gap:6px;}
+  .solid{height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:700;font-size:0.8rem;}
+  .soft{height:30px;border-radius:var(--radius-sm);display:flex;align-items:center;padding:0 12px;font-weight:600;font-size:0.72rem;}
+</style></head><body>
+<div class="grid">
+  <div class="item"><div class="solid" style="background:var(--success)">Success</div><div class="soft" style="background:var(--success-soft);color:var(--sage-700)">soft</div></div>
+  <div class="item"><div class="solid" style="background:var(--warning);color:#402e05">Warning</div><div class="soft" style="background:var(--warning-soft);color:#8a6410">soft</div></div>
+  <div class="item"><div class="solid" style="background:var(--danger)">Danger</div><div class="soft" style="background:var(--danger-soft);color:var(--rose-600)">soft</div></div>
+  <div class="item"><div class="solid" style="background:var(--info)">Info</div><div class="soft" style="background:var(--info-soft);color:var(--sky-600)">soft</div></div>
+</div>
+</body></html>

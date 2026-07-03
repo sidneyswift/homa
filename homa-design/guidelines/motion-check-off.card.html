@@ -1,0 +1,33 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Micro-interaction · the check-off" subtitle="The core loop's celebration: pop, star, settle. Click to try" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:22px;display:flex;gap:24px;align-items:flex-start;}
+  .row{display:flex;align-items:center;gap:14px;background:var(--surface-card);border-radius:var(--radius-lg);padding:15px 16px;box-shadow:var(--shadow-sm);width:320px;}
+  .tile{width:42px;height:42px;border-radius:var(--radius-md);background:var(--clay-50);display:inline-flex;align-items:center;justify-content:center;transition:opacity .2s var(--ease-out);}
+  .t{font-weight:600;color:var(--text-strong);font-size:0.95rem;transition:color .2s var(--ease-out);}
+  .m{font-size:0.78rem;color:var(--text-subtle);margin-top:2px;}
+  .check{position:relative;width:26px;height:26px;border-radius:50%;flex-shrink:0;cursor:pointer;padding:0;border:1.5px solid var(--border-strong);background:transparent;display:inline-flex;align-items:center;justify-content:center;margin-left:auto;}
+  .row.done .tile{opacity:.55;}
+  .row.done .t{color:var(--text-subtle);text-decoration:line-through;text-decoration-color:var(--stone-300);}
+  .row.done .check{border:none;background:var(--sage-500);animation:pop .35s var(--ease-out);}
+  .check svg{display:none;}
+  .row.done .check svg{display:block;}
+  .star{position:absolute;top:-8px;right:-9px;font-size:13px;color:var(--gold-500);opacity:0;pointer-events:none;}
+  .row.done .star{animation:star .8s var(--ease-out) forwards;}
+  @keyframes pop{0%{transform:scale(.5)}55%{transform:scale(1.2)}100%{transform:scale(1)}}
+  @keyframes star{0%{opacity:0;transform:translateY(3px) scale(.4) rotate(-20deg)}30%{opacity:1}100%{opacity:0;transform:translateY(-18px) scale(1.15) rotate(10deg)}}
+  .spec{font-size:0.78rem;color:var(--text-muted);line-height:1.6;max-width:280px;}
+  .spec b{color:var(--text-body);}
+  .spec code{font-family:var(--font-mono);font-size:0.72rem;background:var(--stone-100);padding:1px 5px;border-radius:4px;}
+</style></head><body>
+<div class="row" id="demo">
+  <span class="tile"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--clay-600)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="5.01"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="19" x2="12" y2="19.01"/></svg></span>
+  <div><div class="t">Fractions review</div><div class="m">Math · 30m</div></div>
+  <button class="check" aria-label="Mark done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span class="star">✦</span></button>
+</div>
+<div class="spec">
+  <b>The check-off.</b> Circle fills sage with a <code>pop</code> (350ms, scale .5→1.2→1), a gold star <code>✦</code> floats up and fades (800ms), title quiets to a strike-through. Undoable, tap again. Never a modal, never confetti; one small deserved star.
+</div>
+<script>document.getElementById('demo').querySelector('.check').addEventListener('click',()=>document.getElementById('demo').classList.toggle('done'));</script>
+</body></html>

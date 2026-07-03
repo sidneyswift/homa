@@ -1,0 +1,15 @@
+<!-- @dsCard group="Brand" viewport="700x170" name="Motion & states" subtitle="Gentle ease-out, no bounce; hover lift, press shrink" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+  .demo{background:var(--brand);color:#fff;padding:12px 22px;border-radius:var(--radius-pill);font-weight:600;cursor:pointer;transition:all var(--dur-base) var(--ease-out);}
+  .demo:hover{background:var(--brand-hover);}
+  .demo:active{transform:scale(0.98);}
+  .card{background:var(--surface-card);border:1px solid var(--border-subtle);box-shadow:var(--shadow-sm);border-radius:var(--radius-lg);padding:16px 20px;transition:all var(--dur-base) var(--ease-out);cursor:pointer;}
+  .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+  .meta{font-size:0.72rem;color:var(--text-subtle);font-family:var(--font-mono);width:100%;}
+</style></head><body>
+  <div class="demo">Hover & press me</div>
+  <div class="card">Card, hover to lift</div>
+  <div class="meta">dur-base 200ms · ease-out cubic-bezier(.22,.8,.28,1) · press scale 0.98 · no bounce</div>
+</body></html>

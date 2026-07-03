@@ -1,0 +1,24 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Surfaces & text" subtitle="Page, card surfaces; text hierarchy on warm paper" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:20px;display:flex;gap:16px;}
+  .card{flex:1;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-sm);}
+  .strong{color:var(--text-strong);font-weight:700;font-size:1.05rem;}
+  .body{color:var(--text-body);font-size:0.9rem;margin-top:4px;}
+  .muted{color:var(--text-muted);font-size:0.85rem;margin-top:4px;}
+  .subtle{color:var(--text-subtle);font-size:0.8rem;margin-top:4px;}
+  .swatches{flex:0 0 200px;display:flex;flex-direction:column;gap:8px;}
+  .s{height:1fr;border-radius:var(--radius-sm);padding:6px 10px;font-size:0.7rem;font-family:var(--font-mono);flex:1;display:flex;align-items:center;}
+</style></head><body>
+<div class="card">
+  <div class="strong">text-strong · headings</div>
+  <div class="body">text-body, the default reading color for paragraphs.</div>
+  <div class="muted">text-muted, supporting copy and labels.</div>
+  <div class="subtle">text-subtle, hints, timestamps, captions.</div>
+</div>
+<div class="swatches">
+  <div class="s" style="background:var(--bg-page);border:1px solid var(--border-subtle)">bg-page #FBF7F0</div>
+  <div class="s" style="background:var(--bg-page-warm);border:1px solid var(--border-subtle)">bg-page-warm</div>
+  <div class="s" style="background:var(--surface-card);border:1px solid var(--border-default)">surface-card #FFF</div>
+</div>
+</body></html>

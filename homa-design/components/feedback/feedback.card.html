@@ -1,0 +1,44 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Feedback" subtitle="Callout banners + Dialog" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Callout, Icon, Button, Toast } = window.HOMADesignSystem_113bd2;
+  function Demo() {
+    return (
+      <div className="stack">
+        <Callout tone="sage" title="HOMA suggests" icon={<Icon name="sparkles" size={20} />}>
+          Maya's flying through fractions, ready to try some word problems this week?
+        </Callout>
+        <Callout tone="gold" title="Milestone" icon={<Icon name="award" size={20} />}>
+          Eli finished the Grade 2 reading list. Nice work!
+        </Callout>
+        <Callout tone="danger" title="Heads up" icon={<Icon name="alert-triangle" size={20} />}>
+          This standard is due for the term deadline.
+        </Callout>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Toast inline message="Added to Maya's week" icon={<Icon name="check" size={16} color="var(--gold-400)" />} action="Undo" />
+          <Toast inline tone="light" message="Worksheet saved" icon={<Icon name="check" size={16} color="var(--sage-600)" />} />
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+  setTimeout(() => window.lucide && window.lucide.createIcons(), 300);
+</script>
+</body>
+</html>

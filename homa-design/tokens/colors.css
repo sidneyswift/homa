@@ -1,0 +1,103 @@
+/* HOMA color system, "Quiet warmth".
+   Base scales first, then semantic aliases. Use semantic aliases in product UI. */
+
+:root {
+  /* --- Warm neutrals (stone) --- */
+  --stone-50:  #FBF7F0;
+  --stone-100: #F3ECE1;
+  --stone-200: #E7DDCE;
+  --stone-300: #D6C8B4;
+  --stone-400: #B3A492;
+  --stone-500: #8A7D6C;
+  --stone-600: #6B6259;
+  --stone-700: #4E463E;
+  --stone-800: #332E29;
+  --stone-900: #221E1A;
+
+  /* --- Clay / terracotta (primary) --- */
+  --clay-50:  #FBEDE6;
+  --clay-100: #F6D9C9;
+  --clay-200: #EDB79C;
+  --clay-300: #E0906C;
+  --clay-400: #D0714A;
+  --clay-500: #BE5F3C;
+  --clay-600: #A34E30;
+  --clay-700: #833E27;
+
+  /* --- Sage (secondary) --- */
+  --sage-50:  #EEF2E9;
+  --sage-100: #DAE3CE;
+  --sage-200: #BCCBA9;
+  --sage-300: #9AAF82;
+  --sage-400: #7C9367;
+  --sage-500: #627A50;
+  --sage-600: #4C6140;
+  --sage-700: #3B4C33;
+
+  /* --- Gold / butter (accent) --- */
+  --gold-100: #FBEECB;
+  --gold-300: #F2D48A;
+  --gold-400: #E8BE5E;
+  --gold-500: #D9A441;
+
+  /* --- Sky (info accent) --- */
+  --sky-100: #DCE9EE;
+  --sky-300: #A8C7D4;
+  --sky-500: #6E93A8;
+  --sky-600: #567A8E;
+
+  /* --- Support: soft red for errors --- */
+  --rose-100: #F7DED4;
+  --rose-500: #C0492E;
+  --rose-600: #A23B24;
+
+  /* =====================  SEMANTIC ALIASES  ===================== */
+
+  /* Surfaces & backgrounds */
+  --bg-page:        var(--stone-50);
+  --bg-page-warm:   #F7EFE2;      /* alt warm section band */
+  --surface-card:   #FFFFFF;
+  --surface-raised: #FFFDF9;
+  --surface-sunken: var(--stone-100);
+  --surface-inverse:var(--stone-900);
+
+  /* Text */
+  --text-strong:  var(--stone-900);
+  --text-body:    var(--stone-800);
+  --text-muted:   var(--stone-600);
+  --text-subtle:  var(--stone-500);
+  --text-inverse: var(--stone-50);
+  --text-on-clay: #FFFFFF;
+
+  /* Brand */
+  --brand:          var(--clay-500);
+  --brand-hover:    var(--clay-600);
+  --brand-active:   var(--clay-700);
+  --brand-soft:     var(--clay-50);
+  --brand-soft-2:   var(--clay-100);
+  --on-brand:       #FFFFFF;
+
+  --accent-sage:    var(--sage-500);
+  --accent-sage-soft: var(--sage-50);
+  --accent-gold:    var(--gold-500);
+  --accent-gold-soft: var(--gold-100);
+
+  /* Borders & lines */
+  --border-subtle:  var(--stone-200);
+  --border-default: var(--stone-300);
+  --border-strong:  var(--stone-400);
+  --border-brand:   var(--clay-300);
+
+  /* Focus ring */
+  --focus-ring: var(--clay-400);
+
+  /* Semantic status */
+  --success:      var(--sage-600);
+  --success-soft: var(--sage-50);
+  --warning:      var(--gold-500);
+  --warning-soft: var(--gold-100);
+  --danger:       var(--rose-500);
+  --danger-soft:  var(--rose-100);
+  --info:         var(--sky-500);
+  --info-soft:    var(--sky-100);
+}

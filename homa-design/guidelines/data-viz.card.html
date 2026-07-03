@@ -1,0 +1,44 @@
+<!-- @dsCard group="Brand" viewport="700x270" name="Data-viz language" subtitle="Warm, calm charts · bars, trend, no chart-slop" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:14px;}
+  .bars{display:flex;align-items:flex-end;gap:14px;height:120px;border-bottom:1px solid var(--stone-200);padding:0 6px;}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;justify-content:flex-end;height:100%;}
+  .fill{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--clay-300);}
+  .bar.hi .fill{background:var(--brand);}
+  .bar.goal .fill{background:var(--sage-400);}
+  .x{display:flex;gap:14px;padding:8px 6px 0;}
+  .x span{flex:1;text-align:center;font-family:var(--font-mono);font-size:0.62rem;color:var(--text-subtle);letter-spacing:0.04em;max-width:46px;}
+  .trend{position:relative;height:120px;border-bottom:1px solid var(--stone-200);}
+  .note{font-size:0.74rem;color:var(--text-muted);line-height:1.6;margin-top:12px;}
+  .note b{color:var(--text-body);}
+  .kpi{position:absolute;top:0;right:0;text-align:right;}
+  .kpi .n{font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:var(--text-strong);}
+  .kpi .d{font-size:0.68rem;color:var(--sage-600);font-weight:700;}
+</style></head><body>
+<div>
+  <div class="lbl">Weekly hours, bars</div>
+  <div class="bars">
+    <div class="bar"><div class="fill" style="height:52%"></div></div>
+    <div class="bar"><div class="fill" style="height:70%"></div></div>
+    <div class="bar hi"><div class="fill" style="height:88%"></div></div>
+    <div class="bar"><div class="fill" style="height:40%"></div></div>
+    <div class="bar goal"><div class="fill" style="height:64%"></div></div>
+  </div>
+  <div class="x"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span></div>
+  <div class="note"><b>Bars:</b> clay-300 base, clay-500 for today/emphasis, sage for goal-met. Rounded tops, hairline baseline only, no gridlines, no axis clutter.</div>
+</div>
+<div>
+  <div class="lbl">Mastery over time, trend</div>
+  <div class="trend">
+    <div class="kpi"><div class="n">82%</div><div class="d">▲ 6 this month</div></div>
+    <svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none">
+      <path d="M0 96 C40 90 60 84 90 78 C130 70 150 66 190 52 C230 40 260 34 300 24" fill="none" stroke="var(--sage-500)" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="300" cy="24" r="4" fill="var(--sage-500)"/>
+    </svg>
+  </div>
+  <div class="note"><b>Trends:</b> one sage line, one endpoint dot, serif KPI. Growth framing always, "▲ 6 this month," never red down-arrows on a child's chart.</div>
+</div>
+</body></html>

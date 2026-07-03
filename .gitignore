@@ -1,0 +1,22 @@
+# ── Secrets: never committed ────────────────────────────────────────────────
+.env
+.env.*
+*.local
+**/service-env/
+**/*.key
+**/*.crt
+
+# ── Local-only reference trees (contain live secrets + family data) ─────────
+# These NEVER go to GitHub. Product code ports FROM homa-template deliberately.
+homa-macmini/
+homa-research/
+
+# ── Junk ────────────────────────────────────────────────────────────────────
+.DS_Store
+node_modules/
+.vercel
+.eve/
+.workflow-data/
+
+# Template is canonical on the remote (branch+tag template-archive); local copy stays untracked
+homa-template/
