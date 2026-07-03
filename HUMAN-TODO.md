@@ -14,16 +14,18 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 - [ ] **fal.ai**: create a **new API key** for Homa (separate from the Mac Mini's) → fal.ai/dashboard/keys → label it `homa-cloud` → paste it somewhere safe (1Password), NOT into any repo file *(2 min)*
 - [ ] **Resend**: create account → resend.com → sign up with the hello@ email plan in mind (domain verification happens AFTER domain purchase below) *(2 min)*
 
-## Domain & handles — WAIT for the naming memo
+## Domain & handles — memo is in: `homa-planning/journeys/11-naming-domain-memo.md`
 
-An agent is researching gethoma.com vs heyhoma.com vs alternatives (availability,
-social handles, Homa Games collision) right now. When the memo lands at
-`homa-planning/journeys/11-naming-domain-memo.md`:
+Headline: **gethoma.com and heyhoma.com are both TAKEN** (registered May 2026 and
+Jan 2026 — someone is sweeping the homa-* namespace, so move tonight).
+Recommendation: **homahelps.com** (+ @homahelps everywhere). Read the memo before
+buying if you want the reasoning; the buy list:
 
-- [ ] Read the memo's recommendation (~2 min)
-- [ ] **Buy the primary domain** + the 1–2 defensive redirects it lists *(5 min, ~$15–40)*
-- [ ] **Register the social handles** it lists: Instagram, TikTok, Pinterest, Facebook page, X — even if empty for now (squatting protection) *(10 min)*
-- [ ] Point the domain's nameservers at **Vercel DNS** (registrar → nameservers → ns1.vercel-dns.com / ns2.vercel-dns.com) *(3 min)*
+- [ ] Skim the memo (~2 min) — especially the tryhoma.com trademark flag
+- [ ] **Buy homahelps.com** + defensive redirects **homaandme.com** and **homa.school** *(5 min, ~$35–55/yr total)*
+- [ ] **Register @homahelps** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min — do the memo's 2-min phone check for Pinterest/Facebook first, CLI checks were inconclusive there)*
+- [ ] Point homahelps.com nameservers at **Vercel DNS** (registrar → nameservers → ns1.vercel-dns.com / ns2.vercel-dns.com) *(3 min)*
+- [ ] If @homahelps is taken anywhere or the name doesn't sit right: the memo's runner-up is hihoma.com — decide, don't stall; the namespace is being swept
 
 ## Business
 
