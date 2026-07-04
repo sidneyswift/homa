@@ -22,8 +22,10 @@ import {
  * a valid email is submitted the UI confirms, while delivery retries in the
  * background and falls back to an on-device queue on dead wifi.
  *
- * Wireframe styling only: the visual design pass replaces the look, not the
- * behavior or the copy.
+ * WIREFRAME: behavior is binding; labels are neutral functional text on
+ * purpose (founder correction, 2026-07-04: no drafted voice copy in the
+ * wireframe). The copy kit (journeys/07 §5) restyles the words in the
+ * design pass, not the behavior.
  */
 
 type FormPhase = "editing" | "submitting" | "saved" | "queued";
@@ -90,12 +92,12 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         aria-live="polite"
         className="rounded-lg border border-neutral-400 bg-neutral-50 p-6"
       >
-        <p className="text-lg font-semibold">You&apos;re on the list.</p>
+        <p className="text-lg font-semibold">You&apos;re on the waitlist.</p>
         <p className="mt-2 text-neutral-700">Your invite will come by email.</p>
         {phase === "queued" ? (
           <p className="mt-3 text-sm text-neutral-600">
-            Weak signal here: your spot is saved on this phone and will send
-            itself when signal returns.
+            You&apos;re offline. Your signup is saved on this device and will
+            send automatically when connection returns.
           </p>
         ) : null}
       </div>
@@ -111,7 +113,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       className="rounded-lg border border-neutral-400 p-6"
     >
       <label className="block font-medium" htmlFor="waitlist-first-name">
-        Your first name
+        First name (optional)
       </label>
       <input
         id="waitlist-first-name"
@@ -123,7 +125,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       />
 
       <label className="mt-4 block font-medium" htmlFor="waitlist-email">
-        Your email
+        Email
       </label>
       <input
         id="waitlist-email"
@@ -138,15 +140,15 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       />
       {emailError ? (
         <p className="mt-2 text-sm" role="alert">
-          That email doesn&apos;t look complete. Mind checking it?
+          Enter a valid email address.
         </p>
       ) : null}
 
       <fieldset className="mt-6">
-        <legend className="font-medium">About your family (optional)</legend>
+        <legend className="font-medium">Family details (optional)</legend>
 
         <label className="mt-4 block text-sm font-medium" htmlFor="waitlist-state">
-          Your state
+          State
         </label>
         <select
           id="waitlist-state"
@@ -162,7 +164,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           ))}
         </select>
 
-        <p className="mt-4 text-sm font-medium">How many kids?</p>
+        <p className="mt-4 text-sm font-medium">Number of kids</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {Array.from({ length: KID_COUNT_MAX }, (_, i) => i + 1).map((count) => {
             const selected = kidCount === count;
@@ -184,7 +186,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           })}
         </div>
 
-        <p className="mt-4 text-sm font-medium">Your kids&apos; ages</p>
+        <p className="mt-4 text-sm font-medium">Kids&apos; ages</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {KID_AGE_BANDS.map((band) => {
             const selected = ageBands.includes(band);
@@ -225,10 +227,12 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         disabled={busy}
         className="mt-6 min-h-12 w-full rounded-full bg-neutral-900 px-6 py-3 text-base font-semibold text-white disabled:opacity-60"
       >
-        {busy ? "Saving your spot…" : "Join the waitlist"}
+        {busy ? "Submitting…" : "Join the waitlist"}
       </button>
+      {/* Privacy microcopy stays: form-adjacent trust note is a best practice,
+          and this exact claim is the vetted always-true one (build log #1). */}
       <p className="mt-3 text-center text-sm text-neutral-600">
-        We&apos;ll only use your email to send your invite.
+        Your email is only used to send your invite.
       </p>
     </form>
   );

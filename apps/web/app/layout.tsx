@@ -12,14 +12,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// WIREFRAME: neutral metadata only; SEO title/description come from the
+// copy kit (journeys/07 §5) with the design pass.
 export const metadata: Metadata = {
   metadataBase: new URL("https://thankshoma.com"),
   title: {
-    default: "HOMA · the homeschool assistant that shows you it's working",
+    default: "HOMA",
     template: "%s · HOMA",
   },
-  description:
-    "The calm homeschool assistant. HOMA learns each child, makes printable materials just for them, tracks hours for your state, and shows you it's working.",
+  description: "A homeschool assistant for families. Join the waitlist.",
 };
 
 export default function RootLayout({
