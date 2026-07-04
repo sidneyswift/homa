@@ -86,15 +86,11 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         className="rounded-lg border border-neutral-400 bg-neutral-50 p-6"
       >
         <p className="text-lg font-semibold">You&apos;re on the list.</p>
-        <p className="mt-2 text-neutral-700">
-          We&apos;re letting families in a few at a time, so every family gets
-          real attention. Your invite will come by email.
-        </p>
+        <p className="mt-2 text-neutral-700">Your invite will come by email.</p>
         {phase === "queued" ? (
           <p className="mt-3 text-sm text-neutral-600">
-            The wifi here is struggling, so your spot is saved on this phone
-            and will send itself the moment signal returns. Keep this page
-            open for a minute if you can.
+            Weak signal here: your spot is saved on this phone and will send
+            itself when signal returns.
           </p>
         ) : null}
       </div>
@@ -130,12 +126,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       ) : null}
 
       <fieldset className="mt-6">
-        <legend className="font-medium">
-          Optional: a little about your family
-        </legend>
-        <p className="mt-1 text-sm text-neutral-600">
-          So we invite families we&apos;re ready to serve well.
-        </p>
+        <legend className="font-medium">About your family (optional)</legend>
 
         <label className="mt-4 block text-sm font-medium" htmlFor="waitlist-state">
           Your state
@@ -146,7 +137,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           onChange={(event) => setUsState(event.target.value)}
           className="mt-2 w-full rounded-md border border-neutral-500 px-4 py-3 text-base"
         >
-          <option value="">Choose a state (optional)</option>
+          <option value="">Choose a state</option>
           {US_STATES.map((state) => (
             <option key={state.code} value={state.code}>
               {state.name}
@@ -195,11 +186,10 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         disabled={busy}
         className="mt-6 min-h-12 w-full rounded-full bg-neutral-900 px-6 py-3 text-base font-semibold text-white disabled:opacity-60"
       >
-        {busy ? "Saving your spot…" : "Join the founding families waitlist"}
+        {busy ? "Saving your spot…" : "Join the waitlist"}
       </button>
       <p className="mt-3 text-center text-sm text-neutral-600">
-        We&apos;ll only use your email to send your invite. No spam,
-        unsubscribe anytime.
+        We&apos;ll only use your email to send your invite.
       </p>
     </form>
   );
