@@ -71,6 +71,71 @@ logged here so decisions stay auditable. Newest entries first.
    `/conference` 308-redirects to `/waitlist` so anything already shared
    keeps working. The `conference` value stays in the source enum for future
    use.
+13. **Wireframe carries no drafted copy (founder correction, 2026-07-04).**
+   The first wireframe pass drafted voice-level copy (hero, trust points,
+   form microcopy, SEO metadata); founder ruled the wireframe must be
+   non-opinionated. Now: voice-level copy renders as labeled
+   `WireframeSlot` placeholders pointing at the copy kit (journeys/07 §5);
+   headings, form labels, buttons, and validation messages use neutral
+   functional text (best-practice defaults: visible labels, optional
+   marking, plain error text, form-adjacent privacy note); metadata is
+   neutral. The one voice sentence kept is the vetted always-true privacy
+   line (entry #1). Copy kit + design pass fill the slots.
+
+## 2026-07-04 · Blindspot pass + grilling session (finding-unknowns skill)
+
+A full BUILD.md/planning review (blindspot pass on the plan corpus + repo-state
+audit, then a one-question-at-a-time grilling interview) surfaced 9 gaps.
+Decisions made, in the order asked:
+
+1. **July 13 copy/design path:** agents draft final landing copy from the
+   `journeys/07 §5` kit (variant B) and apply the homa-design v2 pass,
+   replacing the wireframe slots; founder + Alessa do the read-aloud + phone
+   test after. BUILD.md's Deliverable 0 DoD line corrected to drop the
+   "at a booth" framing (there is no booth, per entry #11).
+2. **M0-07 conference kit:** re-scoped for no-booth reality, question card +
+   phone-based capture (no printed sheets), commitment ladder stops at the
+   waitlist-email rung, the $29/$19 Stripe preorder rung dropped (no Stripe
+   account exists yet, no booth to run a QR off). Entity/LLC filing deferred
+   until it actually blocks (Stripe activation, ahead of invite #1) rather
+   than done tonight. See `journeys/09 §2, §6.2` (re-scoped M0-07 spec).
+3. **IC-10 vs D4 photo contradiction resolved:** `journeys/05` IC-10 ("no
+   child-likeness uploads") is superseded by D4 (photo personalization ships
+   day one with consent). IC-10's decline copy now applies only to the
+   consent-declined path. Amended in `journeys/05` directly (the row + §4
+   example 8).
+4. **CI added now**, before any Phase A code: `.github/workflows/ci.yml` runs
+   typecheck + build + `check:isolation` on every push/PR to `main`. Required
+   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   — both public-safe publishable values) set on the GitHub repo. Satisfies
+   BUILD.md law #1 ("isolation tests green in CI always") for the first time;
+   extend with the MJ-08 events-registry check once that registry covers more
+   than `waitlist.joined`.
+5. **M0-01 timing:** next major agent task after the copy/design pass, not
+   run in parallel and not skipped. `eve` pinned to an exact version (`0.19.0`,
+   was `^0.19.0`) in `apps/web/package.json` so upgrades are always a
+   deliberate, logged decision; started `docs/homa-planning/eve-churn-log.md`
+   to feed the eject tripwire (`12-roadmap-okrs.md` §tripwires) with real data.
+6. **Email/invite bridge named explicitly:** BUILD.md's Phase B bullet list now
+   names **M1-08 minimal** (Resend transactional email: welcome, journal-prompt,
+   weekly-note, receipt templates + the opens/clicks/unsubscribes webhook
+   bridge that `journeys/06 §7` requires for the anti-guilt ratio law) and
+   **MJ-09** (waitlist read path + invite codes + invite email — today's
+   waitlist is write-only with no way to invite anyone off it) — previously
+   both were only implicit under FR-1/FR-3.
+7. **Cost-telemetry timing (Gateway `ai-reporting-*` headers + per-key budget
+   caps moved into Phase B vs staying in Phase C with FR-11): left open,
+   question skipped.** BUILD.md's Phase A section gained a platform-ceilings
+   summary (sandbox region/rate/snapshot limits, Workflow event/step caps,
+   function duration) so the next agent designing M0-01/M0-03 sees them, but
+   the FR-11/T2 telemetry sequencing itself was not changed.
+8. **Resend domain live:** `mail.thankshoma.com` verified in Resend (DKIM, SPF
+   MX+TXT, DMARC, tracking CNAME all green; click+open tracking on per
+   `journeys/06 §7`'s explicit opens/clicks webhook requirement; inbound
+   receiving deliberately left off — `journeys/02` line 890 defers
+   reply-to-email to POST-GA, v1 is deep-link-to-chat only).
+   `RESEND_API_KEY` is in `apps/web/.env.local` (gitignored) and in Vercel
+   production env (added via CLI, type Sensitive).
 
 ## File additions this session
 
@@ -89,7 +154,13 @@ logged here so decisions stay auditable. Newest entries first.
 - `apps/web/app/api/waitlist/route.ts`: validated capture endpoint; duplicate
   email = success (idempotent retries).
 - `apps/web/components/waitlist-form.tsx`: optimistic form, offline queue.
+- `apps/web/components/wireframe-slot.tsx`: labeled placeholder primitives
+  for undecided copy/media (deleted when the copy kit lands).
 - `apps/web/lib/waitlist-client.ts`: timeout + retry + localStorage queue +
   online-event flush (bad conference wifi survival).
 - `scripts/isolation-check.mjs`: anon-key isolation smoke checks (M1-07 seed);
   run with `pnpm check:isolation`.
+- `.github/workflows/ci.yml`: typecheck + build + isolation check on every
+  push/PR to `main` (see entry #14 above).
+- `docs/homa-planning/eve-churn-log.md`: dated log of eve version bumps and
+  breaking changes, feeding the eject tripwire.

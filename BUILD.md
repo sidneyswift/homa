@@ -46,7 +46,10 @@ Hard constraints (violations = do not ship):
   ever testing them — and watch the numbers move"), anchored per positioning doc.
 
 Definition of done: deployed to production URL, waitlist rows verified in Supabase,
-tested from a phone, Alessa can read every word out loud at a booth without wincing.
+tested from a phone, Alessa can read every word out loud without wincing (no booth,
+per build-log #11: she says "thankshoma.com" in conversation). Remaining before
+July 13: final copy from the journeys/07 §5 kit (variant B) + the homa-design v2
+pass replacing the wireframe slots, then the phone test + read-aloud check.
 
 ---
 
@@ -82,20 +85,45 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof:** M0-01 adversarial prototype (STRICT timebox; GO/NO-GO
-  criteria written BEFORE starting; throwaway code), M0-03 worksheet-in-sandbox,
-  M0-04 voice-on-real-phones, M0-05 Supabase schema v0 + RLS, M0-09 monorepo
-  bootstrap: **pnpm workspaces + Turborepo** — `apps/web` (Next.js, the ONE
-  deployable, with the eve agent mounted inside it via `withEve()` at
-  `apps/web/agent/`), `packages/core` (domain system ported from the
-  template-archive branch), `packages/design` (homa-design tokens/components as a
-  workspace package), `supabase/` (migrations at repo root — the Supabase GitHub
-  integration watches this; connect the integration right after migration #1
-  lands). Enable Vercel remote caching. The existing Supabase project is
-  **homa-prod** (org: Homa, East US N. Virginia; auto-RLS on, auto-expose off).
-- **Phase B — Walking skeleton, one family end-to-end:** FR-1 (invite+auth),
-  FR-2 (3-minute wow), FR-4 (chat+voice), FR-5 (materials + photo consent floor),
-  platform laws (M1-07 isolation suite in CI from the FIRST schema migration).
+- **Phase A — Engine proof:** **M0-01 is next** (immediate priority once the
+  Deliverable 0 copy/design pass lands): throwaway adversarial prototype, STRICT
+  timebox, GO/NO-GO criteria written BEFORE starting (eve upgrade drill, deploy +
+  rollback mid-run, kill the dispatcher mid-fan-out, rotate a session parked in
+  HITL, synthetic 100-family fan-out). **Pin `eve` to an exact version (no `^`) in
+  `apps/web/package.json` before M0-01 starts**, and log every eve
+  release/breaking-change encounter in `docs/homa-planning/eve-churn-log.md`
+  (feeds the eject tripwire: >2 breaking changes costing >1 day each in any
+  4-week window). Then M0-03 worksheet-in-sandbox, M0-04 voice-on-real-phones,
+  M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
+  Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent
+  mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`
+  (domain system ported from the template-archive branch), `packages/design`
+  (homa-design tokens/components as a workspace package), `supabase/`
+  (migrations at repo root — the Supabase GitHub integration watches this;
+  connect the integration right after migration #1 lands). Enable Vercel remote
+  caching. The existing Supabase project is **homa-prod** (org: Homa, East US
+  N. Virginia; auto-RLS on, auto-expose off). **CI now exists**
+  (`.github/workflows/ci.yml`: typecheck + build + `check:isolation` on every
+  push/PR) — keep it green; add the events-registry check (MJ-08) as soon as
+  the typed registry covers more than `waitlist.joined`.
+
+  **Platform ceilings to design around** (full detail: `05-vercel-platform-facts.md`):
+  Sandbox is `iad1`-region only, 200 vCPUs/min creation rate caps fan-out speed,
+  snapshots auto-expire after 30 days; Workflow runs cap at 25,000 events /
+  10,000 steps and retain only 7 days post-completion on Pro ($0.50/GB-mo
+  beyond); Function duration is 300s default, 30 min max (Pro). M0-01's
+  100-family fan-out test and M0-03's latency spike should be designed against
+  these numbers, not discovered by them.
+
+- **Phase B — Walking skeleton, one family end-to-end:** FR-1 (invite+auth,
+  **MJ-09**: waitlist read path + invite codes + invite email — the conference
+  waitlist is currently write-only and has no exit), FR-2 (3-minute wow), FR-4
+  (chat+voice), FR-5 (materials + photo consent floor), **M1-08 minimal**
+  (Resend transactional email: welcome, journal-prompt, weekly-note, receipt
+  templates + the opens/clicks/unsubscribes webhook bridge per
+  `journeys/06 §7` — domain `mail.thankshoma.com` is verified and
+  `RESEND_API_KEY` is in Vercel prod as of 2026-07-04), platform laws (M1-07
+  isolation suite in CI from the FIRST schema migration).
 - **Phase C — The living product:** FR-3 (drip), FR-6 (journal+hours), FR-7
   (dashboard), FR-9 (learning loop), FR-10 (trust floor), FR-11 (founder ops).
 - **Phase D — Money + gates:** FR-8 concierge tooling, Payment Link trial-with-card,

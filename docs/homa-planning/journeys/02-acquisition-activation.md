@@ -34,6 +34,19 @@ URL, never typed by hand on the happy path; no code ⇒ waitlist, not a dead end
 
 ### Journey A1 — Conference QR / waitlist [M-R]
 
+> **Correction (build-log #11–13, 2026-07-04): there is no booth.** Alessa walks
+> the floor and says "thankshoma.com" in conversation; there is no banner, no
+> booth printer, no QR flyer. `/conference` 308-redirects to `/waitlist`, which
+> is the one generic direct-to-form page (source=organic; utm params carry
+> channel attribution if a shared link ever has them). Everything below
+> describing a booth, a QR banner, a flyer, or a booth printer is the
+> **original design**, kept for its underlying logic (invite banners, saved
+> links, cohort codes) in case a future conference does have a booth — read it
+> as reference, not as this July 13's build spec. The MJ-09 invite/waitlist
+> service (codes, "email me this link", channel-variant bands) described here
+> is **not built yet** — cohort one's waitlist is capture-only (write-only RLS,
+> no read/invite path). See BUILD.md Phase B.
+
 **Frame.**
 - Persona: P2 primary (the conference-mom ask was hours tracking), P4 secondary.
 - Trigger: she stopped at the booth, watched Alessa's 90-second demo (M0-07 kit), or

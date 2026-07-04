@@ -91,10 +91,23 @@ synthesis.
 
 ## 2. The conference kit — Alessa's field guide
 
-**Replaces ticket M0-07** (see §6.2 for the ticket spec). Alessa is not a researcher
-and shouldn't have to be one. Everything here fits on: one laminated question card,
-one stack of capture sheets, one phone (Stripe link + waitlist QR), one laptop
-(demo — closed until the end).
+> **Correction (build-log #11, 2026-07-04; re-scoped in the 2026-07-04 grilling
+> session): there is no booth, no banner, no booth printer, and no live Stripe
+> account for a preorder link.** Alessa walks the floor and tells moms
+> "thankshoma.com" in conversation. The kit for July 13 is: the laminated
+> question card (§2.2), phone-based capture (fill the capture sheet questions
+> into her phone's notes app or a simple form — no printing required), and the
+> commitment ladder (§2.4) **stopping at the waitlist-email rung**; the $29/$19
+> Stripe preorder rung (§2.4, §6.2 deliverable #2) is **dropped for this
+> conference** — no Stripe account exists yet and there's no booth to run a QR
+> off. Below, treat every booth/printer/QR-banner reference as the original
+> design kept for its underlying logic (commitment ladder, capture-sheet
+> questions), not as this July 13's spec.
+
+**Replaces ticket M0-07** (see §6.2 for the re-scoped ticket spec). Alessa is not
+a researcher and shouldn't have to be one. Everything here fits on: one laminated
+question card, phone-based capture notes, one phone (waitlist link to hand
+someone), one laptop (demo — closed until the end).
 
 ### 2.0 Goals for the weekend (in priority order)
 
@@ -597,30 +610,33 @@ Every Friday (or Sunday night), timeboxed:
 
 ### 6.2 Replacement spec for ticket M0-07
 
-> **M0-07 (replaces the one-liner) — Conference research kit + evidence pipeline
-> bootstrap.** Size: **M** (was S — honest now). ⛔ for the conference date.
+> **M0-07 (re-scoped 2026-07-04, no-booth reality) — Conference research kit,
+> phone-only.** Size: **S** (back down from M — no printer, no Stripe rung).
+> ⛔ for the conference date.
 >
 > Deliverables:
 > 1. Field kit produced from §2 of `journeys/09-discovery-research-plan.md`:
->    laminated question card (K1–K15 + deflection scripts), 30 printed capture
->    sheets (§2.6), commitment-ladder card (§2.4).
-> 2. $29 refundable founding-family Stripe Payment Link + QR (existing Stripe);
->    $19 fallback link pre-made (E6 day-2 rule). Waitlist QR → landing page with
->    ages question + E3 older-kids fake door + E1 price variant + E2 feature ranking
->    (one page serves four experiments).
-> 3. E9 wow demo path rehearsed end-to-end (wizard-of-oz allowed; portable printer
->    tested) — demo-LAST protocol briefed with Alessa, including the §2.3
->    "what if he's behind?" answer, verbatim.
+>    laminated question card (K1–K15 + deflection scripts), phone-based capture
+>    (notes app or a simple form — no printed sheets, no booth), commitment-ladder
+>    card (§2.4) **stopping at the waitlist-email rung**.
+> 2. ~~$29 refundable founding-family Stripe Payment Link + QR~~ **Dropped for
+>    this conference**: no Stripe account exists yet and there is no booth to run
+>    a preorder QR off. Revisit once Stripe is live (Phase D) and/or a future
+>    conference has a booth.
+> 3. E9 wow demo path rehearsed end-to-end (wizard-of-oz allowed, verbal only,
+>    **no portable printer**) — demo-LAST protocol briefed with Alessa, including
+>    the §2.3 "what if he's behind?" answer, verbatim.
 > 4. `journeys/evidence/` scaffolded per §5.1 with `assumptions.md` seeded from the
 >    §1 register; nightly-tally ritual scheduled for each conference day.
 > 5. One 30-min dry run: Sidney plays a polite conference mom who compliments
->    everything and commits to nothing; Alessa must reach a rung-3 ask and log the
->    sheet in under 90 seconds.
+>    everything and commits to nothing; Alessa must reach the waitlist-email ask
+>    and log the note in under 90 seconds.
 >
-> Acceptance: kit exists, dry run done, links tested with a real $29 charge +
-> refund, evidence folder committed. Success metric for the conference itself:
-> ≥15 capture sheets, ≥20 rung-3 asks, and an honest commitment count — whatever
-> the number is, it's the first real datum this product has.
+> Acceptance: kit exists (question card + phone capture method briefed), dry run
+> done, evidence folder committed. Success metric for the conference itself:
+> real conversations logged with an honest commitment count (waitlist emails,
+> not preorders) — whatever the number is, it's the first real datum this
+> product has.
 
 ### 6.3 Cross-workstream notes
 

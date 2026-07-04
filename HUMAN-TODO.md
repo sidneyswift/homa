@@ -12,7 +12,7 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 - [x] **Supabase**: create org → supabase.com/dashboard → New organization → name: `Homa` *(verified via MCP; `homa-prod` project already live, Postgres 17, us-east-1)*
 - [ ] **Stripe**: dashboard → top-left account switcher → **Create new account** → name: `Homa` (do NOT reuse GPTWrapper/Recoup) *(3 min)*
 - [ ] **fal.ai**: create a **new API key** for Homa (separate from the Mac Mini's) → fal.ai/dashboard/keys → label it `homa-cloud` → paste it somewhere safe (1Password), NOT into any repo file *(2 min)*
-- [ ] **Resend**: create account → resend.com → sign up with the hello@ email plan in mind (domain verification happens AFTER domain purchase below) *(2 min)*
+- [x] **Resend**: account created, `mail.thankshoma.com` added and fully verified (DKIM, SPF, DMARC, click+open tracking all green), `RESEND_API_KEY` in `apps/web/.env.local` + Vercel production *(done 2026-07-04)*
 
 ## Domain & handles — memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
@@ -26,7 +26,7 @@ QR code). Remaining handle work:
 
 ## Business
 
-- [ ] **Entity**: pick the state (DC where you live, or WY/DE — 10 min of gut check, don't overthink; an LLC can be redomesticated later) and **start the online LLC filing** tonight (e.g., state portal or a service like Northwest ~$39+state fee). Needed for: Stripe live activation + SMS 10DLC later. *(15 min)*
+- [ ] **Entity**: pick the state (DC where you live, or WY/DE — 10 min of gut check, don't overthink; an LLC can be redomesticated later) and **start the online LLC filing** (e.g., state portal or a service like Northwest ~$39+state fee). Needed for: Stripe live activation + SMS 10DLC later. **Deferred, not tonight** (2026-07-04 grilling decision): file it when it actually blocks something (Stripe activation, ahead of invite #1), not before. *(15 min, whenever)*
 - [ ] **Stripe**: once the LLC application number exists, start account activation on the new Homa account (can finish later — trial billing needs it before invite #1, not before build) *(5 min, can defer)*
 
 ## Cursor / MCP (so agents can drive services during the build)
@@ -39,7 +39,7 @@ QR code). Remaining handle work:
 ## Family
 
 - [ ] **Ask Alessa**: is the phonics curriculum "Hegg" = **Heggerty**? (last open decision, D10) *(30 sec)*
-- [ ] **Show Alessa** the conference field kit → `docs/homa-planning/journeys/09-discovery-research-plan.md` §2 — she should read it before July 13, not the night before *(send link)*
+- [ ] **Show Alessa** the conference field kit → `docs/homa-planning/journeys/09-discovery-research-plan.md` §2 — she should read it before July 13, not the night before. **Re-scoped 2026-07-04**: no booth, phone-based capture only, no Stripe preorder ask, commitment ladder stops at "get her email on the waitlist." *(send link)*
 - [ ] **Tell Alessa the link**: say "thankshoma.com" out loud to moms, or text it; thankshoma.com/waitlist goes straight to the signup form *(30 sec)*
 
 ## Explicitly NOT tonight

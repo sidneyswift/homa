@@ -104,6 +104,8 @@ GA: **10 stranger families survive onboarding + their fourth usage week unassist
 
 1. **eve eject:** >2 breaking changes costing >1 day each in any 4-week window before
    M1 ends → eject to custom harness; after M2 starts → never eject, fork/vendor.
+   Tracked in `docs/homa-planning/eve-churn-log.md`; `eve` is pinned to an exact
+   version in `apps/web/package.json` so every bump is a logged decision.
 2. **8–12 rigor bar (D3):** the parallel track never fronts a family until its
    benchmarks match the 2–7 core's citation standard — reviewed like M3-04 publishes.
 3. **Anti-guilt ratio law:** re-engagement response ≥20% & unsubs <1%/mo or sends stop.
