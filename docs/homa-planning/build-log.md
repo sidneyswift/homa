@@ -41,16 +41,17 @@ logged here so decisions stay auditable. Newest entries first.
    on `public.rls_auto_enable()` (Supabase auto-RLS trigger helper) plus our
    `is_family_member()`, per security advisors 0028/0029.
 
-9. **Deployed to production.** Vercel project `homa-web` (team Homa,
-   `rootDirectory: apps/web`, git-connected to sidneyswift/homa main, so every
-   push to main auto-deploys). Live at https://homa-web-phi.vercel.app (plus
-   /conference). Env vars set: NEXT_PUBLIC_SUPABASE_URL,
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1
-   (eve beta requirement). Verified live: both pages render, a POST from
-   production landed in public.waitlist with its waitlist.joined event, then
-   was cleaned. eve's /eve routes fail closed (no auth policy configured yet),
-   which is correct until FR-1. When homahelps.com is bought, add it to this
-   project and the same deployment serves it.
+9. **Deployed to production; canonical project is `homa`.** Sidney bought
+   **thankshoma.com** and attached it (via the dashboard) to a Vercel project
+   named `homa` (team Homa) rather than the agent-created `homa-web`; both
+   pointed at the same repo/rootDirectory. Consolidated on `homa`: copied the
+   env vars over (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+   VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1), redeployed from main, added
+   www.thankshoma.com as a 308 redirect to apex, deleted the duplicate
+   `homa-web` project, relinked the local checkout. Verified on the domain:
+   /, /conference, www redirect, and a waitlist POST that landed in Supabase
+   (then cleaned). Nameservers were already on Vercel DNS. eve's /eve routes
+   fail closed (no auth policy configured yet), which is correct until FR-1.
 10. **Deliverable 0 definition-of-done status:** deployed ✓, waitlist rows
    verified in Supabase ✓, phone test ☐ (Sidney), Alessa read-aloud ☐
    (Sidney + design pass).

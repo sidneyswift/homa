@@ -16,16 +16,13 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 
 ## Domain & handles — memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
-Headline: **gethoma.com and heyhoma.com are both TAKEN** (registered May 2026 and
-Jan 2026 — someone is sweeping the homa-* namespace, so move tonight).
-Recommendation: **homahelps.com** (+ @homahelps everywhere). Read the memo before
-buying if you want the reasoning; the buy list:
+**DECIDED 2026-07-04: bought thankshoma.com.** Domain is live on Vercel project
+`homa` (team Homa) with nameservers already on Vercel DNS; www redirects to apex.
+The site + waitlist are LIVE at **https://thankshoma.com** (+ /conference for the
+QR code). Remaining handle work:
 
-- [ ] Skim the memo (~2 min) — especially the tryhoma.com trademark flag
-- [ ] **Buy homahelps.com** + defensive redirects **homaandme.com** and **homa.school** *(5 min, ~$35–55/yr total)*
-- [ ] **Register @homahelps** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min — do the memo's 2-min phone check for Pinterest/Facebook first, CLI checks were inconclusive there)*
-- [ ] Point homahelps.com nameservers at **Vercel DNS** (registrar → nameservers → ns1.vercel-dns.com / ns2.vercel-dns.com), then add the domain to Vercel project `homa-web` (team Homa). The site is already live at homa-web-phi.vercel.app (+ /conference for the QR code) *(3 min)*
-- [ ] If @homahelps is taken anywhere or the name doesn't sit right: the memo's runner-up is hihoma.com — decide, don't stall; the namespace is being swept
+- [ ] **Register @thankshoma** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min — do the memo's 2-min phone check for Pinterest/Facebook first)*
+- [ ] Optional defensive redirects if still available: homaandme.com, homa.school *(memo's list; cheap insurance)*
 
 ## Business
 

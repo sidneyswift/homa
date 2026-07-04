@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://thankshoma.com"),
   title: {
     default: "HOMA · the homeschool assistant that shows you it's working",
     template: "%s · HOMA",
