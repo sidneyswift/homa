@@ -56,6 +56,15 @@ logged here so decisions stay auditable. Newest entries first.
    verified in Supabase ✓, phone test ☐ (Sidney), Alessa read-aloud ☐
    (Sidney + design pass).
 
+11. **No booth at the conference (founder correction, 2026-07-04).** Alessa
+   tells moms "thankshoma.com" in conversation; there is no QR banner. So `/`
+   is the primary conference capture surface (spoken-word signups arrive as
+   source=organic), and `/conference` is repurposed as the link Alessa texts
+   a mom mid-conversation, keeping clean source=conference attribution when a
+   link can carry the path. Post-conference, conference-weekend organic rows
+   can be classified in SQL at invite time. Booth-presuming copy removed from
+   the page.
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +

@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import { WaitlistForm } from "../../components/waitlist-form";
 
 /**
- * Conference variant (BUILD.md Deliverable 0): the QR-friendly page behind
- * the booth code. One job: capture the email before the hall swallows her
- * attention, on bad convention-center wifi. Form first, minimal payload.
+ * Conference variant (BUILD.md Deliverable 0). There is no booth: Alessa
+ * tells moms "thankshoma.com" in conversation (those signups land on / as
+ * organic), and when she can, she texts this link instead, which stamps
+ * source=conference. One job: capture the email before the hall swallows
+ * her attention, on bad convention-center wifi. Form first, minimal payload.
  *
  * WIREFRAME: styling is placeholder for the design pass; copy is binding
  * (journeys/07 §5 conference one-liner + journeys/02 A1).
@@ -32,8 +34,7 @@ export default function ConferencePage() {
         </h1>
         <p className="mt-3 text-neutral-700">
           We&apos;re inviting founding families a few at a time. Leave your
-          email and your invite comes to you, no need to remember anything
-          from the booth.
+          email and your invite comes to you, nothing to remember later.
         </p>
       </header>
 
