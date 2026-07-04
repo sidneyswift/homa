@@ -65,6 +65,12 @@ tested from a phone, Alessa can read every word out loud at a booth without winc
    - Event names/properties for EVERYTHING → `journeys/06` (emit via typed registry;
      no feature merges without its events)
 5. `docs/homa-design/SKILL.md` → tokens/components for all UI.
+   - **Chat UI stack (decided 2026-07-03):** eve `useEveAgent` drives state →
+     **shadcn** chat components render (init shadcn in `apps/web` during M1-04; verify
+     current component APIs via the shadcn skill) → homa-design tokens re-theme them.
+     Never ship the default shadcn look. eve messages are AI-SDK `UIMessage`-shaped, so
+     they feed shadcn's AI-SDK primitives directly. Do not use shadcn's own data/chat
+     hooks — eve owns session state.
 6. Reference when relevant: `docs/homa-planning/05` (platform limits/pricing),
    `docs/homa-planning/07` (eve source-code findings), `docs/homa-planning/11` (Hermes
    implementation patterns for the learning loop/memory/search),
