@@ -24,7 +24,7 @@ buying if you want the reasoning; the buy list:
 - [ ] Skim the memo (~2 min) — especially the tryhoma.com trademark flag
 - [ ] **Buy homahelps.com** + defensive redirects **homaandme.com** and **homa.school** *(5 min, ~$35–55/yr total)*
 - [ ] **Register @homahelps** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min — do the memo's 2-min phone check for Pinterest/Facebook first, CLI checks were inconclusive there)*
-- [ ] Point homahelps.com nameservers at **Vercel DNS** (registrar → nameservers → ns1.vercel-dns.com / ns2.vercel-dns.com) *(3 min)*
+- [ ] Point homahelps.com nameservers at **Vercel DNS** (registrar → nameservers → ns1.vercel-dns.com / ns2.vercel-dns.com), then add the domain to Vercel project `homa-web` (team Homa). The site is already live at homa-web-phi.vercel.app (+ /conference for the QR code) *(3 min)*
 - [ ] If @homahelps is taken anywhere or the name doesn't sit right: the memo's runner-up is hihoma.com — decide, don't stall; the namespace is being swept
 
 ## Business

@@ -41,6 +41,20 @@ logged here so decisions stay auditable. Newest entries first.
    on `public.rls_auto_enable()` (Supabase auto-RLS trigger helper) plus our
    `is_family_member()`, per security advisors 0028/0029.
 
+9. **Deployed to production.** Vercel project `homa-web` (team Homa,
+   `rootDirectory: apps/web`, git-connected to sidneyswift/homa main, so every
+   push to main auto-deploys). Live at https://homa-web-phi.vercel.app (plus
+   /conference). Env vars set: NEXT_PUBLIC_SUPABASE_URL,
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1
+   (eve beta requirement). Verified live: both pages render, a POST from
+   production landed in public.waitlist with its waitlist.joined event, then
+   was cleaned. eve's /eve routes fail closed (no auth policy configured yet),
+   which is correct until FR-1. When homahelps.com is bought, add it to this
+   project and the same deployment serves it.
+10. **Deliverable 0 definition-of-done status:** deployed ✓, waitlist rows
+   verified in Supabase ✓, phone test ☐ (Sidney), Alessa read-aloud ☐
+   (Sidney + design pass).
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
