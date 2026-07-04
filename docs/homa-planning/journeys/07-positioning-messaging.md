@@ -3,7 +3,7 @@
 > Workstream 7 of the journey library. Methods: pm-os positioning, press-release
 > (working backwards), objection-scan, cta-copy, winning-position. Sources:
 > 00-pm-kickoff.md (personas P1–P5), 00-product-brief.md §value stack,
-> 09-council-synthesis.md (#9 positioning adoption + open calls), homa-design/readme.md
+> 09-council-synthesis.md (#9 positioning adoption + open calls), docs/homa-design/readme.md
 > (voice law), 07-deep-research-notes.md (competitors, COPPA, economics).
 >
 > Voice law applies to every piece of customer-facing copy below: sentence case, no em

@@ -8,7 +8,7 @@
 > **Inputs honored:** 00-product-brief §value stack (the efficacy loop IS the renewal
 > argument), 08-billing-credits-design (grace buffer, opt-in auto top-up, trial =
 > promotional credits with no card, Payment Link for cohort one), 09-council-synthesis
-> (open call #2 covered in both branches below), homa-design/readme §brand foundation
+> (open call #2 covered in both branches below), docs/homa-design/readme §brand foundation
 > (anti-guilt law, reassurance-first data, "a lighter day is still a good day").
 >
 > **Pricing branch key** (open call #2 is Sidney's; both branches designed here):
@@ -966,7 +966,7 @@ recipient's first paid renewal — rewarding retained referrals, not signups). B
 could pay in credits, but give-a-month reads cleaner in both branches and doesn't
 entangle open call #2. The share artifact is a **redacted proof card** — the before/after
 chart with the child's name replaced by first initial, in the brand's social template
-(homa-design/social/) — because the *proof* is the word-of-mouth artifact (00 §value
+(docs/homa-design/social/) — because the *proof* is the word-of-mouth artifact (00 §value
 stack), not a coupon code.
 
 ### The moment that decides

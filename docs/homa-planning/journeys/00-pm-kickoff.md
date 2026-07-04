@@ -37,7 +37,7 @@ research (05/07). The personas workstream deepens these; nobody renames them.
 
 - Write for a builder: every stage must be concrete enough to design a screen or a prompt from.
 - Voice/emotion constraints are LAW: reassurance-first, no guilt mechanics, metrics lead
-  but never "behind" framing (homa-design/readme.md §brand foundation + §content fundamentals).
+  but never "behind" framing (docs/homa-design/readme.md §brand foundation + §content fundamentals).
 - Phone-first always. She is standing in a kitchen holding a 4-year-old.
 - The child is never the user. Voice/likeness constraint per 09 §open-call-4 (assume
   option (a): parent is the speaker/uploader) unless marked ❓.

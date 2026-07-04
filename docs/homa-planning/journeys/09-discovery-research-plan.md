@@ -500,7 +500,7 @@ confidence, and we learn the report format from real filings.
 ### 5.1 Folder structure
 
 ```
-homa-planning/journeys/evidence/
+docs/homa-planning/journeys/evidence/
 ├── README.md                  # this section, copied — the operating manual
 ├── assumptions.md             # the living register (§1 table + status/evidence columns)
 ├── raw/

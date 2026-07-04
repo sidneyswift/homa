@@ -5,7 +5,7 @@ homeschooling mothers. One Vercel deployment (Next.js + the eve agent framework)
 serves all families; Supabase Postgres holds all durable state; Stripe handles money.
 The planning phase is complete — your job is execution, not re-planning.
 
-**The contract you build against is `homa-planning/13-mr-prd.md`.** Everything else
+**The contract you build against is `docs/homa-planning/13-mr-prd.md`.** Everything else
 below tells you what to read, in what order, and what to build first.
 
 ---
@@ -28,10 +28,10 @@ gates are what matter.
 
 | What | Where the spec lives |
 |---|---|
-| Copy: hero variants (3), CTAs, taglines, pitch | `homa-planning/journeys/07-positioning-messaging.md` §copy kit |
+| Copy: hero variants (3), CTAs, taglines, pitch | `docs/homa-planning/journeys/07-positioning-messaging.md` §copy kit |
 | Positioning rules (category, anchor, never-say list) | same doc §1 and §6 |
-| Landing structure + channel-variant bands, waitlist flow | `homa-planning/journeys/02-acquisition-activation.md` §1 + MJ-09 in `homa-planning/journeys/10-reconciliation.md` §2 |
-| Visual system: tokens, components, landing UI kit | `homa-design/` — read `homa-design/SKILL.md` first, then `readme.md`; kit at `homa-design/ui_kits/landing/` |
+| Landing structure + channel-variant bands, waitlist flow | `docs/homa-planning/journeys/02-acquisition-activation.md` §1 + MJ-09 in `docs/homa-planning/journeys/10-reconciliation.md` §2 |
+| Visual system: tokens, components, landing UI kit | `docs/homa-design/` — read `docs/homa-design/SKILL.md` first, then `readme.md`; kit at `docs/homa-design/ui_kits/landing/` |
 | Waitlist storage | Supabase table `waitlist` (email, source/utm, state, kids' age bands optional, created_at) + confirmation state. RLS on. Double-opt-in email can wait; reliable capture cannot. |
 | Conference mode | A QR-friendly URL (e.g. `/conference`) with the conference band variant; capture works flawlessly on a phone on bad convention-center wifi (optimistic UI + retry) |
 
@@ -52,10 +52,10 @@ tested from a phone, Alessa can read every word out loud at a booth without winc
 
 ## Reading order (before writing product code beyond Deliverable 0)
 
-1. `homa-planning/13-mr-prd.md` — THE CONTRACT. FR-1…FR-11, non-goals, launch gates.
-2. `homa-planning/01-architecture.md` — tenancy model, state model, session rotation,
+1. `docs/homa-planning/13-mr-prd.md` — THE CONTRACT. FR-1…FR-11, non-goals, launch gates.
+2. `docs/homa-planning/01-architecture.md` — tenancy model, state model, session rotation,
    verified eve facts. The "laws" in it are binding.
-3. `homa-planning/journeys/10-reconciliation.md` §5 — every founder decision
+3. `docs/homa-planning/journeys/10-reconciliation.md` §5 — every founder decision
    (D1–D9, T1–T3). Do not relitigate any of these in code.
 4. Feature specs as you build each FR:
    - Onboarding/wow/drip → `journeys/02` (copy is binding)
@@ -64,11 +64,11 @@ tested from a phone, Alessa can read every word out loud at a booth without winc
    - Edge behavior catalog (launch-blocking rows = acceptance criteria) → `journeys/05`
    - Event names/properties for EVERYTHING → `journeys/06` (emit via typed registry;
      no feature merges without its events)
-5. `homa-design/SKILL.md` → tokens/components for all UI.
-6. Reference when relevant: `homa-planning/05` (platform limits/pricing),
-   `homa-planning/07` (eve source-code findings), `homa-planning/11` (Hermes
+5. `docs/homa-design/SKILL.md` → tokens/components for all UI.
+6. Reference when relevant: `docs/homa-planning/05` (platform limits/pricing),
+   `docs/homa-planning/07` (eve source-code findings), `docs/homa-planning/11` (Hermes
    implementation patterns for the learning loop/memory/search),
-   `homa-planning/10-real-usage-cost-model.md` (real usage numbers).
+   `docs/homa-planning/10-real-usage-cost-model.md` (real usage numbers).
 
 The `homa-macmini/` and `homa-template/` folders are READ-ONLY reference (the working
 single-family system and its templatized domain assets — port from `homa-template/`,
@@ -119,4 +119,4 @@ Prefer the PRD over journey docs, journey docs over your judgment, and founder
 decisions (journeys/10 §5) over everything. If two documents conflict, check
 `journeys/10-reconciliation.md` §1 rulings first; if still unresolved, stop and ask
 Sidney rather than inventing policy. Log anything you were forced to decide alone in
-`homa-planning/build-log.md` (create it) so decisions stay auditable.
+`docs/homa-planning/build-log.md` (create it) so decisions stay auditable.

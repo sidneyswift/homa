@@ -24,7 +24,7 @@ knowledge we don't have.
 | `[SIG-F]` | Friend demand signal: saw the system, said "I want one" (00-product-brief) | Real, thin (n=1 reaction) |
 | `[SIG-C]` | Conference moms asked for hours-to-state tracking and per-child customization (00-product-brief) | Real, thin (unstructured) |
 | `[MD]` | Market data: competitors at $5–15/mo trackers with AI sprinkles; none with a persistent child profile (00-product-brief); state-reg landscape (07-deep-research-notes §3) | Secondary, medium reliability |
-| `[BRAND]` | Design-system brand research (homa-design/readme §Brand foundation): "short on bandwidth and reassurance", the "Am I doing enough?" fear, isolation, Instagram comparison | Synthesized research, treated as informed assumption |
+| `[BRAND]` | Design-system brand research (docs/homa-design/readme §Brand foundation): "short on bandwidth and reassurance", the "Am I doing enough?" fear, isolation, Instagram comparison | Synthesized research, treated as informed assumption |
 | `[COUNCIL]` | 09-council-synthesis: median family 2–3 kids ages 5–12; age-range ICP tension; invite-gated rollout | Internal analysis |
 | `[A-H] [A-M] [A-L]` | Assumption at High / Medium / Low confidence | Ours to validate |
 

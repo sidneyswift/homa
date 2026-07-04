@@ -11,7 +11,7 @@
 > name the child, offer never command, ≤1 emoji, contractions. Tags: [M-R] invite-gated
 > revenue cohort, [GA] public launch, [POST-GA].
 >
-> **Design-system consistency note.** These journeys build on `homa-design/` (M1-17)
+> **Design-system consistency note.** These journeys build on `docs/homa-design/` (M1-17)
 > and explicitly improve three things in the existing kits: (1) `Onboarding.jsx` collects
 > grade via select; we collect birth month + year instead because age bands drive
 > benchmarks and grade is ambiguous for homeschoolers. (2) `Onboarding.jsx` has a
@@ -187,7 +187,7 @@ M4-07 [GA]. Share-from-settings is NT-2 adjacent (Part 7).
   "where do I even start"), P2 secondary.
 - Trigger: a thread: "what are you all using to track hours?" and a member reply
   mentions Homa with a screenshot. Or [POST-GA] our own social templates
-  (`homa-design/social/`) circulating.
+  (`docs/homa-design/social/`) circulating.
 - Job story: *When a mom in my group posts a before/after of an app that says her kid
   is on track, I want to check whether it's legit, so I don't waste money or hand my
   kid's data to something sketchy.*
@@ -255,7 +255,7 @@ invite-open <40% (the re-warm email is failing).
    M-R wk6 concierge).
 
 **Ticket mapping:** NT-1 (waitlist), M4-07 [GA] incl. FAQ, M4-08 (support inbox
-watch). Social templates exist in `homa-design/social/` [POST-GA activation].
+watch). Social templates exist in `docs/homa-design/social/` [POST-GA activation].
 
 ---
 

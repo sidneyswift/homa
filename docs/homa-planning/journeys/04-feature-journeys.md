@@ -2,7 +2,7 @@
 
 > Status: PLANNING. Written 2026-07-02 against 00-pm-kickoff.md (template + persona cast),
 > 00-product-brief.md (§value stack), 03-backlog.md (M-R plan of record), 06-harness-gap-analysis.md,
-> 09-council-synthesis.md, homa-design/readme.md + web-app UI kit, homa-template skills +
+> 09-council-synthesis.md, docs/homa-design/readme.md + web-app UI kit, homa-template skills +
 > questionnaire. Methods: use-case-map, jtbd-jobs, gherkin-stories (pm-os).
 >
 > How to read: each feature gets (a) a use case, (b) job stories, (c) a journey per the

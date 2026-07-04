@@ -14,7 +14,7 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 - [ ] **fal.ai**: create a **new API key** for Homa (separate from the Mac Mini's) → fal.ai/dashboard/keys → label it `homa-cloud` → paste it somewhere safe (1Password), NOT into any repo file *(2 min)*
 - [ ] **Resend**: create account → resend.com → sign up with the hello@ email plan in mind (domain verification happens AFTER domain purchase below) *(2 min)*
 
-## Domain & handles — memo is in: `homa-planning/journeys/11-naming-domain-memo.md`
+## Domain & handles — memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
 Headline: **gethoma.com and heyhoma.com are both TAKEN** (registered May 2026 and
 Jan 2026 — someone is sweeping the homa-* namespace, so move tonight).
@@ -42,7 +42,7 @@ buying if you want the reasoning; the buy list:
 ## Family
 
 - [ ] **Ask Alessa**: is the phonics curriculum "Hegg" = **Heggerty**? (last open decision, D10) *(30 sec)*
-- [ ] **Show Alessa** the conference field kit → `homa-planning/journeys/09-discovery-research-plan.md` §2 — she should read it before July 13, not the night before *(send link)*
+- [ ] **Show Alessa** the conference field kit → `docs/homa-planning/journeys/09-discovery-research-plan.md` §2 — she should read it before July 13, not the night before *(send link)*
 
 ## Explicitly NOT tonight
 
