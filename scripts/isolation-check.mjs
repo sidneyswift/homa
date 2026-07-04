@@ -1,0 +1,96 @@
+#!/usr/bin/env node
+/**
+ * Isolation smoke check (seed of the M1-07 adversarial suite).
+ * Verifies, using only the PUBLIC key, that the database enforces:
+ *   1. waitlist and events are write-only (reads return nothing)
+ *   2. tenancy tables are invisible and unwritable to anonymous traffic
+ *   3. the events namespace and waitlist status cannot be abused on insert
+ *
+ * Usage: node scripts/isolation-check.mjs
+ * Env: reads apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL / _PUBLISHABLE_KEY).
+ * Exit code 0 = all checks passed.
+ */
+
+import { loadEnvFile } from "node:process";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+try {
+  loadEnvFile(path.join(repoRoot, "apps/web/.env.local"));
+} catch {
+  // Fine in CI, where the vars arrive via the environment.
+}
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+if (!url || !key) {
+  console.error("Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+  process.exit(2);
+}
+
+const failures = [];
+
+async function rest(pathname, init = {}) {
+  const response = await fetch(`${url}/rest/v1/${pathname}`, {
+    ...init,
+    headers: {
+      apikey: key,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+      ...init.headers,
+    },
+  });
+  return response;
+}
+
+async function expectEmptyRead(table) {
+  const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
+  const body = response.ok ? await response.json() : [];
+  const ok = !response.ok || (Array.isArray(body) && body.length === 0);
+  report(`anon read of ${table} exposes nothing`, ok, `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`);
+}
+
+async function expectInsertDenied(table, row, label) {
+  const response = await rest(table, { method: "POST", body: JSON.stringify(row) });
+  const ok = response.status === 401 || response.status === 403;
+  report(label, ok, `HTTP ${response.status}`);
+}
+
+function report(label, ok, detail) {
+  console.log(`${ok ? "PASS" : "FAIL"}  ${label}${ok ? "" : `  (${detail})`}`);
+  if (!ok) failures.push(label);
+}
+
+await expectEmptyRead("waitlist");
+await expectEmptyRead("events");
+await expectEmptyRead("families");
+await expectEmptyRead("family_members");
+await expectEmptyRead("children");
+
+await expectInsertDenied(
+  "families",
+  { name: "intruder family" },
+  "anon cannot create families",
+);
+await expectInsertDenied(
+  "children",
+  { family_id: "00000000-0000-0000-0000-000000000000", name: "x", birth_month: "2022-01-01" },
+  "anon cannot create children",
+);
+await expectInsertDenied(
+  "events",
+  { name: "account.signup_completed", props: {} },
+  "anon cannot emit non-waitlist events",
+);
+await expectInsertDenied(
+  "waitlist",
+  { email: `probe-${Date.now()}@example.com`, status: "invited" },
+  "anon cannot self-invite via waitlist status",
+);
+
+if (failures.length > 0) {
+  console.error(`\n${failures.length} isolation check(s) FAILED`);
+  process.exit(1);
+}
+console.log("\nAll isolation checks passed.");

@@ -4,6 +4,7 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "turbo run build",
+    "check:isolation": "node scripts/isolation-check.mjs",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
