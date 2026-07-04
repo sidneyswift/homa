@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Radio group, pick one. Renders a set of options.
+ * Homa Radio group, pick one. Renders a set of options.
  */
 export function Radio({ options = [], value, onChange, name = 'radio', disabled = false, style = {} }) {
   return (

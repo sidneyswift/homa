@@ -1,5 +1,7 @@
-// HOMA mobile app, screens rendered inside a phone frame.
-const { Icon: MIcon, Avatar: MAvatar, ProgressBar: MProgress, Badge: MBadge, Chip: MChip, Callout: MCallout, Logo: MLogo } = window.HOMADesignSystem_113bd2;
+// Homa mobile app, screens rendered inside a phone frame.
+const { Icon: MIcon, Avatar: MAvatar, ProgressBar: MProgress, Badge: MBadge, Chip: MChip, Callout: MCallout, Logo: MLogo, Doodle: MDoodleRaw } = window.HOMADesignSystem_113bd2;
+// Guard against a stale bundle: decoration degrades to nothing, never a crash.
+const MDoodle = MDoodleRaw || (() => null);
 
 function StatusBar() {
   return (
@@ -13,7 +15,7 @@ function StatusBar() {
 }
 
 function TabBar({ active, onNav }) {
-  const tabs = [['home', 'Home'], ['sparkles', 'Ask'], ['compass', 'Discover'], ['clipboard-check', 'Kids']];
+  const tabs = [['home', 'Home'], ['sparkles', 'Ask'], ['calendar', 'Plan'], ['compass', 'Discover'], ['clipboard-check', 'Kids']];
   return (
     <div style={{ height: 76, flexShrink: 0, display: 'flex', borderTop: '1px solid var(--border-subtle)', background: 'var(--surface-card)', paddingBottom: 14 }}>
       {tabs.map(([ic, lbl]) => {
@@ -58,18 +60,18 @@ function HomeScreen() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', margin: '6px 0 26px' }}>
         <div>
           <Eyebrow>Tuesday, May 13</Eyebrow>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, color: 'var(--text-strong)', letterSpacing: '-0.02em', marginTop: 6 }}>Morning, Sarah</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, color: 'var(--text-strong)', letterSpacing: '-0.02em', marginTop: 6, display: 'flex', alignItems: 'center', gap: 10 }}>Morning, Sarah <MDoodle name="sun" size={22} color="var(--gold-400)" rotate={10} /></div>
         </div>
         <MAvatar name="Sarah Rivera" size={42} tone="var(--sage-500)" />
       </div>
 
-      <div style={{ background: 'var(--surface-card)', borderRadius: 'var(--radius-xl)', padding: '20px 22px', boxShadow: 'var(--shadow-md)', marginBottom: 30 }}>
+      <div style={{ background: 'var(--gold-100)', borderRadius: 'var(--radius-xl)', padding: '20px 22px', boxShadow: 'var(--shadow-sm)', marginBottom: 30 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <MIcon name="sparkles" size={16} color="var(--brand)" />
-          <Eyebrow style={{ color: 'var(--brand)' }}>Today&rsquo;s focus</Eyebrow>
+          <Eyebrow style={{ color: 'var(--clay-600)' }}>Today&rsquo;s focus</Eyebrow>
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-          Three subjects for Maya, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)' }}>about 1h 45m</span>.
+          Three subjects for Maya, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>about 1h 45m</span>.
         </div>
       </div>
 
@@ -118,11 +120,11 @@ function HomeScreen() {
       <div style={{ display: 'flex', gap: 14, background: 'var(--sage-50)', borderLeft: '3px solid var(--sage-400)', borderRadius: 'var(--radius-md)', padding: '18px 20px', marginTop: 22 }}>
         <MIcon name="sparkles" size={18} color="var(--sage-600)" style={{ flexShrink: 0, marginTop: 3 }} />
         <div>
-          <Eyebrow style={{ color: 'var(--sage-700)', marginBottom: 6 }}>A note from HOMA</Eyebrow>
+          <Eyebrow style={{ color: 'var(--sage-700)', marginBottom: 6 }}>A note from Homa</Eyebrow>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.12rem', lineHeight: 1.4, color: 'var(--text-strong)' }}>
             Maya&rsquo;s right on pace, and her reading is really taking off. Nothing to worry about this week.
           </div>
-          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.55rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>
+          <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.55rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>
             you&rsquo;re doing great &#10022;
           </div>
         </div>
@@ -137,7 +139,7 @@ function AskScreen() {
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 18px' }}>
         <div style={{ textAlign: 'center', margin: '10px 0 20px' }}>
           <MLogo variant="mark" size={34} style={{ justifyContent: 'center' }} />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-strong)', marginTop: 8 }}>Ask HOMA</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-strong)', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Ask Homa <MDoodle name="sparkle" size={16} color="var(--pop-cobalt)" rotate={12} /></div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
           <div style={{ maxWidth: '82%', background: 'var(--brand)', color: '#fff', padding: '11px 15px', borderRadius: 'var(--radius-lg)', borderBottomRightRadius: 6, fontSize: '0.92rem' }}>Give me a rainy-day science idea for a 6-year-old.</div>
@@ -153,7 +155,7 @@ function AskScreen() {
           <MChip>Make a printable</MChip><MChip>Another idea</MChip>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-card)', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '7px 7px 7px 16px' }}>
-          <input placeholder="Message HOMA…" style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '0.95rem' }} />
+          <input placeholder="Message Homa…" style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '0.95rem' }} />
           <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><MIcon name="arrow-up" size={18} color="#fff" /></span>
         </div>
       </div>
@@ -169,7 +171,7 @@ function DiscoverScreen() {
 
       <div style={{ background: 'var(--surface-card)', borderRadius: 'var(--radius-xl)', padding: '18px 20px', boxShadow: 'var(--shadow-md)', marginBottom: 22 }}>
         <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--clay-600)', marginBottom: 8 }}>Maya · Space unit</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Family space day at the Bullock, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)' }}>Saturday</span>.</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Family space day at the Bullock, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>Saturday</span>.</div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>Planetarium shows at 10 & 2, lines up with her astronomy week.</div>
         <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
           <span style={{ background: 'var(--brand)', color: '#fff', padding: '9px 18px', borderRadius: 'var(--radius-pill)', fontWeight: 700, fontSize: '0.85rem' }}>Get tickets</span>
@@ -195,7 +197,7 @@ function DiscoverScreen() {
         <div style={{ display: 'flex' }}>
           {['Ana M', 'Dana K', 'Priya S'].map((n, i) => <span key={n} style={{ marginLeft: i ? -8 : 0 }}><MAvatar name={n} size={30} /></span>)}
         </div>
-        <div style={{ fontSize: '0.82rem', color: 'var(--text-body)', lineHeight: 1.4 }}><b>4 HOMA families</b> homeschool within 5 miles.</div>
+        <div style={{ fontSize: '0.82rem', color: 'var(--text-body)', lineHeight: 1.4 }}><b>4 Homa families</b> homeschool within 5 miles.</div>
       </div>
     </div>
   );
@@ -227,13 +229,50 @@ function KidsScreen() {
 
       <div style={{ background: 'var(--sage-50)', borderRadius: 'var(--radius-xl)', padding: '18px 20px' }}>
         <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--sage-700)', marginBottom: 8 }}>It's working</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Math is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)' }}>12 points</span> since the fractions set.</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Math is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)', fontFamily: 'var(--font-serif)' }}>12 points</span> since the fractions set.</div>
         <svg width="100%" height="44" viewBox="0 0 260 44" preserveAspectRatio="none" style={{ margin: '10px 0 2px' }}>
           <path d="M0 36 C30 34 60 31 90 27 C130 22 170 15 210 9 C230 6 245 5 260 4" fill="none" stroke="var(--sage-500)" strokeWidth="2.5" strokeLinecap="round" />
           <circle cx="260" cy="4" r="3.5" fill="var(--sage-500)" />
         </svg>
-        <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.4rem', color: 'var(--sage-600)', marginTop: 8, lineHeight: 1 }}>your work is paying off ✦</div>
+        <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.4rem', color: 'var(--sage-600)', marginTop: 8, lineHeight: 1 }}>your work is paying off ✦</div>
       </div>
+    </div>
+  );
+}
+
+function PlanScreen() {
+  const tint = {
+    Math: ['var(--clay-50)', 'var(--clay-600)'],
+    Reading: ['var(--sage-50)', 'var(--sage-600)'],
+    Science: ['var(--gold-100)', '#8a6d00'],
+    Writing: ['var(--sky-100)', 'var(--sky-600)'],
+    Art: ['var(--clay-100)', 'var(--clay-700)'],
+  };
+  const week = [
+    ['Mon', [['Math', '30m'], ['Reading', '30m'], ['Science', '45m']]],
+    ['Tue', [['Math', '30m'], ['Writing', '40m']]],
+    ['Wed', [['Reading', '30m'], ['Art', '60m']]],
+    ['Thu', [['Math', '25m'], ['Science', '60m'], ['Reading', '30m']]],
+    ['Fri', [['Writing', '40m'], ['Math', '30m']]],
+  ];
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '10px 22px 24px' }}>
+      <Eyebrow>This week · Maya</Eyebrow>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 600, color: 'var(--text-strong)', letterSpacing: '-0.02em', margin: '6px 0 18px' }}>May 12&ndash;16</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+        {week.map(([day, items]) => (
+          <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--surface-card)', borderRadius: 'var(--radius-lg)', padding: '13px 16px', boxShadow: 'var(--shadow-sm)' }}>
+            <span style={{ width: 40, fontWeight: 800, color: 'var(--text-strong)', fontFamily: 'var(--font-display)', flexShrink: 0 }}>{day}</span>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+              {items.map(([s, d]) => {
+                const [bg, fg] = tint[s];
+                return <span key={s + d} style={{ background: bg, color: fg, fontSize: '0.72rem', fontWeight: 700, padding: '5px 10px', borderRadius: 'var(--radius-pill)', whiteSpace: 'nowrap' }}>{s} · {d}</span>;
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <button style={{ width: '100%', border: 'none', background: 'var(--brand)', color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '0.95rem', padding: '15px 0', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}>Auto-plan with Homa</button>
     </div>
   );
 }
@@ -241,9 +280,9 @@ function KidsScreen() {
 function MobileApp() {
   const [tab, setTab] = React.useState('Home');
   React.useEffect(() => { setTimeout(() => window.lucide && window.lucide.createIcons(), 60); });
-  const screens = { Home: <HomeScreen />, Ask: <AskScreen />, Discover: <DiscoverScreen />, Kids: <KidsScreen /> };
+  const screens = { Home: <HomeScreen />, Ask: <AskScreen />, Plan: <PlanScreen />, Discover: <DiscoverScreen />, Kids: <KidsScreen /> };
   return (
-    <div style={{ width: 390, height: 812, background: 'var(--bg-page)', borderRadius: 44, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-xl)', border: '10px solid #221E1A' }}>
+    <div style={{ width: 390, height: 812, background: 'var(--bg-page)', borderRadius: 44, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-xl)', border: '10px solid #221E1A', fontFamily: 'var(--font-sans)' }}>
       <StatusBar />
       {screens[tab]}
       <TabBar active={tab} onNav={setTab} />

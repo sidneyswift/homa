@@ -1,4 +1,4 @@
-// HOMA web app, weekly planner view.
+// Homa web app, weekly planner view.
 const { Card: PCard, Badge: PBadge, Icon: PIcon, IconButton: PIconButton, Button: PButton } = window.HOMADesignSystem_113bd2;
 
 function PlannerView() {
@@ -37,7 +37,7 @@ function PlannerView() {
         <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', alignItems: 'center' }}>
           <PIconButton variant="outline" ariaLabel="Previous week"><PIcon name="chevron-left" size={18} /></PIconButton>
           <PIconButton variant="outline" ariaLabel="Next week"><PIcon name="chevron-right" size={18} /></PIconButton>
-          <PButton variant="primary" iconLeft={<PIcon name="sparkles" size={17} color="#fff" />}>Auto-plan with HOMA</PButton>
+          <PButton variant="primary" iconLeft={<PIcon name="sparkles" size={17} color="#fff" />}>Auto-plan with Homa</PButton>
         </div>
       </div>
 

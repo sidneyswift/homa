@@ -1,4 +1,4 @@
-The base surface for HOMA layouts, white, soft rounded (18px), subtle warm shadow and border.
+The base surface for Homa layouts, white, soft rounded (18px), subtle warm shadow and border.
 
 ```jsx
 <Card padding="md"><h3>Today's plan</h3>…</Card>

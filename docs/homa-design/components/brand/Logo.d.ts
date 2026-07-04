@@ -13,7 +13,7 @@ export interface LogoProps {
 }
 
 /**
- * HOMA brand lockup, "The bright home" mark + Newsreader wordmark.
- * @startingPoint section="Brand" subtitle="HOMA logo lockup & app-icon mark" viewport="700x200"
+ * Homa brand lockup, "The bright home" mark + Newsreader wordmark.
+ * @startingPoint section="Brand" subtitle="Homa logo lockup & app-icon mark" viewport="700x200"
  */
 export function Logo(props: LogoProps): JSX.Element;

@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Toast, quiet confirmation pill, fixed bottom-center.
+ * Homa Toast, quiet confirmation pill, fixed bottom-center.
  */
 export function Toast({ open = true, message, icon = null, action, onAction, tone = 'dark', inline = false, style = {} }) {
   if (!open) return null;

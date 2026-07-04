@@ -1,11 +1,12 @@
-// HOMA web app, Discover: lessons connected to the real world, and to other families.
-const { Card: VCard, Badge: VBadge, Icon: VIcon, Button: VButton, Avatar: VAvatar } = window.HOMADesignSystem_113bd2;
+// Homa web app, Discover: lessons connected to the real world, and to other families.
+const { Card: VCard, Badge: VBadge, Icon: VIcon, Button: VButton, Avatar: VAvatar, Squiggle: VSquiggleRaw } = window.HOMADesignSystem_113bd2;
+const VSquiggle = VSquiggleRaw || (() => null);
 
 function VSuggestion({ eyebrow, title, body, icon, tint, fg, primary, secondary }) {
   return (
     <VCard padding="lg" style={{ flex: 1 }}>
       <div style={{ display: 'flex', gap: 16 }}>
-        <span style={{ width: 52, height: 52, borderRadius: 'var(--radius-lg)', background: tint, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ width: 52, height: 52, borderRadius: 'var(--blob-1)', background: tint, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <VIcon name={icon} size={24} color={fg} />
         </span>
         <div style={{ flex: 1 }}>
@@ -35,12 +36,13 @@ function DiscoverView() {
         <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>Discover · Austin, TX</div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text-strong)', margin: '6px 0 0' }}>This week, out in the world</h1>
         <div style={{ color: 'var(--text-muted)', marginTop: 6 }}>Matched to what you're teaching, not just what's nearby.</div>
+        <VSquiggle style={{ maxWidth: 280, marginTop: 14 }} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
         <VSuggestion
           eyebrow="Maya · Space unit"
-          title={<span>The Bullock has a family space day <span style={{ fontStyle: 'italic', color: 'var(--clay-600)' }}>this Saturday</span>.</span>}
+          title={<span>The Bullock has a family space day <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>this Saturday</span>.</span>}
           body="Planetarium shows at 10 and 2, and it lines up with her astronomy week. Want me to hold tickets?"
           icon="telescope" tint="var(--clay-50)" fg="var(--clay-600)"
           primary="Get tickets" secondary="Not this week"
@@ -71,7 +73,7 @@ function DiscoverView() {
           {['Ana M', 'Dana K', 'Priya S', 'Lena R'].map((n, i) => <span key={n} style={{ marginLeft: i ? -10 : 0 }}><VAvatar name={n} size={40} /></span>)}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-strong)' }}>4 HOMA families homeschool within 5 miles.</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-strong)' }}>4 Homa families homeschool within 5 miles.</div>
           <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: 3 }}>Two are planning park days this month. You don't have to do this alone.</div>
         </div>
         <VButton variant="secondary" iconLeft={<VIcon name="hand" size={16} />}>Say hi</VButton>

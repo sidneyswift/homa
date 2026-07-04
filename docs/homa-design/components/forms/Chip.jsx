@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Chip, selectable/removable pill. Great for subjects & filters.
+ * Homa Chip, selectable/removable pill. Great for subjects & filters.
  */
 export function Chip({ children, selected = false, onClick, onRemove, iconLeft = null, style = {} }) {
   const [hover, setHover] = React.useState(false);

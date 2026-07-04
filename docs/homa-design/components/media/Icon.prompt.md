@@ -1,4 +1,4 @@
-Renders a Lucide icon, HOMA's canonical icon set (rounded, 1.75 stroke). Requires the Lucide CDN script on the page.
+Renders a Lucide icon, Homa's canonical icon set (rounded, 1.75 stroke). Requires the Lucide CDN script on the page.
 
 ```jsx
 <Icon name="sparkles" size={20} />

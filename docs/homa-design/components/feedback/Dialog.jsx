@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Dialog, centered modal over a warm scrim.
+ * Homa Dialog, centered modal over a warm scrim.
  */
 export function Dialog({ open, onClose, title, children, footer, width = 480, style = {} }) {
   if (!open) return null;

@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Input, text field with optional label, hint, error, and leading icon.
+ * Homa Input, text field with optional label, hint, error, and leading icon.
  */
 export function Input({
   label,

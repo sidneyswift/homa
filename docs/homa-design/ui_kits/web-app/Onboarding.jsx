@@ -1,4 +1,4 @@
-// HOMA web app, first-run onboarding: add kids → pick subjects → HOMA drafts the week.
+// Homa web app, first-run onboarding: add kids → pick subjects → Homa drafts the week.
 const { Logo: OLogo, Button: OButton, Input: OInput, Select: OSelect, Chip: OChip, Switch: OSwitch, Skeleton: OSkeleton, Callout: OCallout, Icon: OIcon, Avatar: OAvatar } = window.HOMADesignSystem_113bd2;
 
 function ODots({ step }) {
@@ -36,7 +36,7 @@ function OStepKids({ kids, setKids }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 18, minHeight: 64 }}>
         {kids.length === 0 && (
-          <div style={{ color: 'var(--text-subtle)', fontSize: '0.9rem', textAlign: 'center', padding: '16px 0', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>No pressure, you can always add more later.</div>
+          <div style={{ color: 'var(--text-subtle)', fontSize: '0.9rem', textAlign: 'center', padding: '16px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>No pressure, you can always add more later.</div>
         )}
         {kids.map((k, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface-card)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-xs)' }}>
@@ -121,9 +121,9 @@ function OStepDraft({ kids, subjects, onDone }) {
           </div>
         ))}
       </div>
-      <OCallout tone="sage" title="A note from HOMA" icon={<OIcon name="sparkles" size={18} />}>
+      <OCallout tone="sage" title="A note from Homa" icon={<OIcon name="sparkles" size={18} />}>
         I kept it light on purpose, it's easier to add than to take away.
-        <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>we'll adjust as we go &#10022;</div>
+        <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>we'll adjust as we go &#10022;</div>
       </OCallout>
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 22 }}>
         <OButton size="lg" onClick={onDone} iconRight={<OIcon name="arrow-right" size={17} color="#fff" />}>Looks good, take me home</OButton>
@@ -140,7 +140,7 @@ function Onboarding() {
   React.useEffect(() => { setTimeout(() => window.lucide && window.lucide.createIcons(), 80); });
   const canNext = step === 0 ? kids.length > 0 : step === 1 ? subjects.length > 0 : false;
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-page-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-sans)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page-warm)', backgroundImage: 'var(--bg-paper)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-sans)' }}>
       <div style={{ width: 560, maxWidth: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}><OLogo size={30} /></div>
         <div style={{ background: 'var(--surface-card)', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-lg)', padding: '40px 44px 34px' }}>

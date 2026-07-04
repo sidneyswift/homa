@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"HOMADesignSystem_113bd2","components":[{"name":"Button","sourcePath":"components/actions/Button.jsx"},{"name":"IconButton","sourcePath":"components/actions/IconButton.jsx"},{"name":"Logo","sourcePath":"components/brand/Logo.jsx"},{"name":"Avatar","sourcePath":"components/data-display/Avatar.jsx"},{"name":"Badge","sourcePath":"components/data-display/Badge.jsx"},{"name":"ProgressBar","sourcePath":"components/data-display/ProgressBar.jsx"},{"name":"Callout","sourcePath":"components/feedback/Callout.jsx"},{"name":"Dialog","sourcePath":"components/feedback/Dialog.jsx"},{"name":"Toast","sourcePath":"components/feedback/Toast.jsx"},{"name":"Checkbox","sourcePath":"components/forms/Checkbox.jsx"},{"name":"Chip","sourcePath":"components/forms/Chip.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"Radio","sourcePath":"components/forms/Radio.jsx"},{"name":"Select","sourcePath":"components/forms/Select.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"},{"name":"Textarea","sourcePath":"components/forms/Textarea.jsx"},{"name":"Card","sourcePath":"components/layout/Card.jsx"},{"name":"Icon","sourcePath":"components/media/Icon.jsx"},{"name":"Tabs","sourcePath":"components/navigation/Tabs.jsx"},{"name":"EmptyState","sourcePath":"components/states/EmptyState.jsx"},{"name":"Skeleton","sourcePath":"components/states/Skeleton.jsx"}],"sourceHashes":{"components/actions/Button.jsx":"2a299fd2ed3d","components/actions/IconButton.jsx":"fcd54c8284ea","components/brand/Logo.jsx":"50a66d18e2bc","components/data-display/Avatar.jsx":"e1e9115f451b","components/data-display/Badge.jsx":"809e72b6ae74","components/data-display/ProgressBar.jsx":"7c795662f74f","components/feedback/Callout.jsx":"d458bcd6a38b","components/feedback/Dialog.jsx":"bcebdf00e408","components/feedback/Toast.jsx":"fe282413c927","components/forms/Checkbox.jsx":"16c7bcc5a8ba","components/forms/Chip.jsx":"aaa3008e11c1","components/forms/Input.jsx":"e4c4c289b084","components/forms/Radio.jsx":"362eb12e9614","components/forms/Select.jsx":"7e46a11c5938","components/forms/Switch.jsx":"3a95d7d452e8","components/forms/Textarea.jsx":"a07a39f398a4","components/layout/Card.jsx":"d24e6d2da82a","components/media/Icon.jsx":"43781948a0c5","components/navigation/Tabs.jsx":"a6786b409f67","components/states/EmptyState.jsx":"7a3277605318","components/states/Skeleton.jsx":"16634d88dd6a","ui_kits/landing/LandingPage.jsx":"1e89e706a31d","ui_kits/landing/image-slot.js":"ab557420166f","ui_kits/mobile-app/MobileApp.jsx":"14c7e11b1653","ui_kits/web-app/App.jsx":"851dafd03630","ui_kits/web-app/BenchmarksView.jsx":"4654a4a4b958","ui_kits/web-app/ChatView.jsx":"af4c6083aad5","ui_kits/web-app/CurriculumView.jsx":"7dd70e2c008b","ui_kits/web-app/DashboardView.jsx":"39d3e29b2007","ui_kits/web-app/DiscoverView.jsx":"6c0b07a18798","ui_kits/web-app/Onboarding.jsx":"68738f30c6fd","ui_kits/web-app/PlannerView.jsx":"3eca09c3a157","ui_kits/web-app/Sidebar.jsx":"b9c3681e3125"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":4,"namespace":"HOMADesignSystem_113bd2","components":[{"name":"Button","sourcePath":"components/actions/Button.jsx"},{"name":"IconButton","sourcePath":"components/actions/IconButton.jsx"},{"name":"Logo","sourcePath":"components/brand/Logo.jsx"},{"name":"Avatar","sourcePath":"components/data-display/Avatar.jsx"},{"name":"Badge","sourcePath":"components/data-display/Badge.jsx"},{"name":"ProgressBar","sourcePath":"components/data-display/ProgressBar.jsx"},{"name":"Callout","sourcePath":"components/feedback/Callout.jsx"},{"name":"Dialog","sourcePath":"components/feedback/Dialog.jsx"},{"name":"Toast","sourcePath":"components/feedback/Toast.jsx"},{"name":"Checkbox","sourcePath":"components/forms/Checkbox.jsx"},{"name":"Chip","sourcePath":"components/forms/Chip.jsx"},{"name":"Input","sourcePath":"components/forms/Input.jsx"},{"name":"Radio","sourcePath":"components/forms/Radio.jsx"},{"name":"Select","sourcePath":"components/forms/Select.jsx"},{"name":"Switch","sourcePath":"components/forms/Switch.jsx"},{"name":"Textarea","sourcePath":"components/forms/Textarea.jsx"},{"name":"Card","sourcePath":"components/layout/Card.jsx"},{"name":"Icon","sourcePath":"components/media/Icon.jsx"},{"name":"Tabs","sourcePath":"components/navigation/Tabs.jsx"},{"name":"Doodle","sourcePath":"components/playful/Doodle.jsx"},{"name":"Squiggle","sourcePath":"components/playful/Squiggle.jsx"},{"name":"EmptyState","sourcePath":"components/states/EmptyState.jsx"},{"name":"Skeleton","sourcePath":"components/states/Skeleton.jsx"}],"sourceHashes":{"components/actions/Button.jsx":"6b235bd68e46","components/actions/IconButton.jsx":"a20b44779860","components/brand/Logo.jsx":"01ed71c5a5fc","components/data-display/Avatar.jsx":"c3fc11530663","components/data-display/Badge.jsx":"c13d7d8bb401","components/data-display/ProgressBar.jsx":"094e77f1d013","components/feedback/Callout.jsx":"6850f1bc0bfb","components/feedback/Dialog.jsx":"15e69fe8cec8","components/feedback/Toast.jsx":"21f2aa67f9e8","components/forms/Checkbox.jsx":"c746a5b65703","components/forms/Chip.jsx":"a9ed7e4da026","components/forms/Input.jsx":"542378830449","components/forms/Radio.jsx":"2513aa364449","components/forms/Select.jsx":"59f568cfa6ee","components/forms/Switch.jsx":"fd7f3d030705","components/forms/Textarea.jsx":"fa13e91eb3ee","components/layout/Card.jsx":"dbe08a6fbbcd","components/media/Icon.jsx":"845736b56487","components/navigation/Tabs.jsx":"12c96b717146","components/playful/Doodle.jsx":"0d3b86dd7431","components/playful/Squiggle.jsx":"58cdf1ca0b52","components/states/EmptyState.jsx":"4331ce44b942","components/states/Skeleton.jsx":"0305ce0a3b6e","ui_kits/landing/LandingPage.jsx":"8c57961ecc1b","ui_kits/landing/image-slot.js":"ab557420166f","ui_kits/mobile-app/MobileApp.jsx":"f96d0431f125","ui_kits/web-app/App.jsx":"538a56a95cbb","ui_kits/web-app/BenchmarksView.jsx":"65af2f6f3710","ui_kits/web-app/ChatView.jsx":"4da3bb35d29b","ui_kits/web-app/CurriculumView.jsx":"5655e46d56b3","ui_kits/web-app/DashboardView.jsx":"a369701dda0e","ui_kits/web-app/DiscoverView.jsx":"8a26c0b15e70","ui_kits/web-app/Onboarding.jsx":"699e35c3c74f","ui_kits/web-app/PlannerView.jsx":"c165b6bc8252","ui_kits/web-app/Sidebar.jsx":"4a6efa654733"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
@@ -12,7 +12,7 @@ const __ds_scope = {};
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA Button, primary interactive element.
+ * Homa Button, primary interactive element.
  * Variants: primary (clay), secondary (sage-outline), ghost, soft, danger.
  */
 function Button({
@@ -81,7 +81,7 @@ function Button({
     justifyContent: 'center',
     gap: sizes[size].gap,
     fontFamily: 'var(--font-sans)',
-    fontWeight: 'var(--weight-semibold)',
+    fontWeight: 700,
     fontSize: sizes[size].fontSize,
     lineHeight: 1,
     padding: sizes[size].padding,
@@ -137,7 +137,7 @@ Object.assign(__ds_scope, { Button });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA IconButton, square/circular button holding a single Icon.
+ * Homa IconButton, square/circular button holding a single Icon.
  */
 function IconButton({
   variant = 'ghost',
@@ -215,9 +215,9 @@ Object.assign(__ds_scope, { IconButton });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA logo, "The bright home" mark (a home with a spark of magic inside)
- * paired with the Newsreader wordmark. Single source of truth for the brand
- * lockup across every surface.
+ * Homa logo, "The bright home" mark (a home with a spark of magic inside)
+ * paired with the chunky lowercase wordmark. Single source of truth for the
+ * brand lockup across every surface.
  */
 function Logo({
   size = 32,
@@ -240,7 +240,7 @@ function Logo({
     viewBox: "0 0 48 48",
     fill: "none",
     stroke: stroke,
-    strokeWidth: "3",
+    strokeWidth: "3.4",
     strokeLinejoin: "round",
     strokeLinecap: "round",
     style: {
@@ -259,7 +259,7 @@ function Logo({
   if (variant === 'mark') {
     return /*#__PURE__*/React.createElement("span", _extends({
       role: "img",
-      "aria-label": "HOMA",
+      "aria-label": "Homa",
       style: {
         display: 'inline-flex',
         ...style
@@ -268,7 +268,7 @@ function Logo({
   }
   return /*#__PURE__*/React.createElement("span", _extends({
     role: "img",
-    "aria-label": "HOMA",
+    "aria-label": "Homa",
     style: {
       display: 'inline-flex',
       alignItems: 'center',
@@ -279,12 +279,13 @@ function Logo({
     style: {
       fontFamily: 'var(--font-display)',
       fontWeight: 600,
-      fontSize: size * 0.92,
+      fontSize: size * 1.02,
       lineHeight: 1,
-      letterSpacing: '0.005em',
-      color: word
+      letterSpacing: '-0.01em',
+      color: word,
+      marginTop: size * -0.06
     }
-  }, "HOMA"));
+  }, "homa"));
 }
 Object.assign(__ds_scope, { Logo });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "components/brand/Logo.jsx", error: String((e && e.message) || e) }); }
@@ -292,7 +293,7 @@ Object.assign(__ds_scope, { Logo });
 // components/data-display/Avatar.jsx
 try { (() => {
 /**
- * HOMA Avatar, circular initials/photo. Warm auto-color from name.
+ * Homa Avatar, circular initials/photo. Warm auto-color from name.
  */
 function Avatar({
   name = '',
@@ -340,7 +341,7 @@ Object.assign(__ds_scope, { Avatar });
 // components/data-display/Badge.jsx
 try { (() => {
 /**
- * HOMA Badge, small status/label pill.
+ * Homa Badge, small status/label pill.
  */
 function Badge({
   tone = 'neutral',
@@ -408,7 +409,7 @@ Object.assign(__ds_scope, { Badge });
 // components/data-display/ProgressBar.jsx
 try { (() => {
 /**
- * HOMA ProgressBar, rounded track, clay/sage fill. Optional label + value.
+ * Homa ProgressBar, rounded track, clay/sage fill. Optional label + value.
  */
 function ProgressBar({
   value = 0,
@@ -476,7 +477,7 @@ Object.assign(__ds_scope, { ProgressBar });
 // components/feedback/Callout.jsx
 try { (() => {
 /**
- * HOMA Callout, inline banner for tips, notes, and HOMA suggestions.
+ * Homa Callout, inline banner for tips, notes, and Homa suggestions.
  */
 function Callout({
   tone = 'brand',
@@ -538,7 +539,7 @@ Object.assign(__ds_scope, { Callout });
 // components/feedback/Dialog.jsx
 try { (() => {
 /**
- * HOMA Dialog, centered modal over a warm scrim.
+ * Homa Dialog, centered modal over a warm scrim.
  */
 function Dialog({
   open,
@@ -609,7 +610,7 @@ Object.assign(__ds_scope, { Dialog });
 // components/feedback/Toast.jsx
 try { (() => {
 /**
- * HOMA Toast, quiet confirmation pill, fixed bottom-center.
+ * Homa Toast, quiet confirmation pill, fixed bottom-center.
  */
 function Toast({
   open = true,
@@ -667,7 +668,7 @@ Object.assign(__ds_scope, { Toast });
 // components/forms/Checkbox.jsx
 try { (() => {
 /**
- * HOMA Checkbox, soft rounded box with clay check when selected.
+ * Homa Checkbox, soft rounded box with clay check when selected.
  */
 function Checkbox({
   checked = false,
@@ -736,7 +737,7 @@ Object.assign(__ds_scope, { Checkbox });
 // components/forms/Chip.jsx
 try { (() => {
 /**
- * HOMA Chip, selectable/removable pill. Great for subjects & filters.
+ * Homa Chip, selectable/removable pill. Great for subjects & filters.
  */
 function Chip({
   children,
@@ -817,7 +818,7 @@ Object.assign(__ds_scope, { Chip });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA Input, text field with optional label, hint, error, and leading icon.
+ * Homa Input, text field with optional label, hint, error, and leading icon.
  */
 function Input({
   label,
@@ -919,7 +920,7 @@ Object.assign(__ds_scope, { Input });
 // components/forms/Radio.jsx
 try { (() => {
 /**
- * HOMA Radio group, pick one. Renders a set of options.
+ * Homa Radio group, pick one. Renders a set of options.
  */
 function Radio({
   options = [],
@@ -993,7 +994,7 @@ Object.assign(__ds_scope, { Radio });
 // components/forms/Select.jsx
 try { (() => {
 /**
- * HOMA Select, styled native select with chevron.
+ * Homa Select, styled native select with chevron.
  */
 function Select({
   label,
@@ -1092,7 +1093,7 @@ Object.assign(__ds_scope, { Select });
 // components/forms/Switch.jsx
 try { (() => {
 /**
- * HOMA Switch, pill toggle, clay when on.
+ * Homa Switch, pill toggle, clay when on.
  */
 function Switch({
   checked = false,
@@ -1158,7 +1159,7 @@ Object.assign(__ds_scope, { Switch });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA Textarea, multi-line field, auto-styled to match Input.
+ * Homa Textarea, multi-line field, auto-styled to match Input.
  */
 function Textarea({
   label,
@@ -1228,7 +1229,7 @@ Object.assign(__ds_scope, { Textarea });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA Card, soft warm surface container. The workhorse of every layout.
+ * Homa Card, soft warm surface container. The workhorse of every layout.
  */
 function Card({
   padding = 'md',
@@ -1273,7 +1274,7 @@ Object.assign(__ds_scope, { Card });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * HOMA Icon, thin wrapper over Lucide (loaded from CDN). Renders an <i> that
+ * Homa Icon, thin wrapper over Lucide (loaded from CDN). Renders an <i> that
  * lucide.createIcons() upgrades to an SVG. In this design system Lucide is the
  * canonical icon set: rounded joins, 1.75 stroke, friendly but precise.
  */
@@ -1317,7 +1318,7 @@ Object.assign(__ds_scope, { Icon });
 // components/navigation/Tabs.jsx
 try { (() => {
 /**
- * HOMA Tabs, underline tab bar. Controlled via value/onChange.
+ * Homa Tabs, underline tab bar. Controlled via value/onChange.
  */
 function Tabs({
   tabs = [],
@@ -1369,10 +1370,183 @@ function Tabs({
 Object.assign(__ds_scope, { Tabs });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "components/navigation/Tabs.jsx", error: String((e && e.message) || e) }); }
 
+// components/playful/Doodle.jsx
+try { (() => {
+/**
+ * Homa Doodle, small hand-drawn decorative shapes scattered like margin
+ * stickers: star, heart, sun, sparkle, squiggle. Decoration only, never UI.
+ */
+function Doodle({
+  name = 'star',
+  size = 24,
+  color = 'var(--pop-cobalt)',
+  rotate = 0,
+  style = {}
+}) {
+  const fills = {
+    star: /*#__PURE__*/React.createElement("path", {
+      d: "M12 1 C13.1 8.2 15.8 10.9 23 12 C15.8 13.1 13.1 15.8 12 23 C10.9 15.8 8.2 13.1 1 12 C8.2 10.9 10.9 8.2 12 1 Z",
+      fill: color
+    }),
+    heart: /*#__PURE__*/React.createElement("path", {
+      d: "M12 21.5 C5.4 16 2.5 12.2 2.5 8.6 C2.5 5.8 4.7 3.8 7.2 3.8 C9.1 3.8 10.9 4.9 12 6.7 C13.1 4.9 14.9 3.8 16.8 3.8 C19.3 3.8 21.5 5.8 21.5 8.6 C21.5 12.2 18.6 16 12 21.5 Z",
+      fill: color
+    }),
+    sun: /*#__PURE__*/React.createElement("g", {
+      stroke: color,
+      strokeWidth: "2",
+      strokeLinecap: "round"
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "12",
+      cy: "12",
+      r: "4.2",
+      fill: color,
+      stroke: "none"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "1.5",
+      x2: "12",
+      y2: "4.5"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "19.5",
+      x2: "12",
+      y2: "22.5"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "1.5",
+      y1: "12",
+      x2: "4.5",
+      y2: "12"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "19.5",
+      y1: "12",
+      x2: "22.5",
+      y2: "12"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "4.6",
+      y1: "4.6",
+      x2: "6.7",
+      y2: "6.7"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "17.3",
+      y1: "17.3",
+      x2: "19.4",
+      y2: "19.4"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "4.6",
+      y1: "19.4",
+      x2: "6.7",
+      y2: "17.3"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "17.3",
+      y1: "6.7",
+      x2: "19.4",
+      y2: "4.6"
+    })),
+    sparkle: /*#__PURE__*/React.createElement("g", {
+      stroke: color,
+      strokeWidth: "2.4",
+      strokeLinecap: "round"
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "2.5",
+      x2: "12",
+      y2: "21.5"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "2.5",
+      y1: "12",
+      x2: "21.5",
+      y2: "12"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "5.5",
+      y1: "5.5",
+      x2: "18.5",
+      y2: "18.5"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "5.5",
+      y1: "18.5",
+      x2: "18.5",
+      y2: "5.5"
+    })),
+    squiggle: /*#__PURE__*/React.createElement("path", {
+      d: "M2 14 Q5.5 7.5 9 12.5 T16 11.5 T22 8.5",
+      fill: "none",
+      stroke: color,
+      strokeWidth: "2.4",
+      strokeLinecap: "round"
+    })
+  };
+  return /*#__PURE__*/React.createElement("svg", {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    "aria-hidden": "true",
+    style: {
+      display: 'inline-block',
+      transform: rotate ? `rotate(${rotate}deg)` : 'none',
+      flexShrink: 0,
+      ...style
+    }
+  }, fills[name] || fills.star);
+}
+Object.assign(__ds_scope, { Doodle });
+})(); } catch (e) { __ds_ns.__errors.push({ path: "components/playful/Doodle.jsx", error: String((e && e.message) || e) }); }
+
+// components/playful/Squiggle.jsx
+try { (() => {
+/**
+ * Homa Squiggle, the playful heading divider: a short hand-drawn wave that
+ * settles into a thin rule. Sits under section headings.
+ */
+function Squiggle({
+  color = 'var(--text-strong)',
+  segments = 5,
+  line = true,
+  style = {}
+}) {
+  const w = segments * 20;
+  let d = 'M0 4';
+  for (let i = 0; i < segments * 2; i++) {
+    d += ` Q${i * 10 + 5} ${i % 2 ? 8 : 0} ${i * 10 + 10} 4`;
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+      ...style
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: w,
+    height: 10,
+    viewBox: `0 0 ${w} 8`,
+    fill: "none",
+    style: {
+      flexShrink: 0,
+      display: 'block',
+      overflow: 'visible'
+    },
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: d,
+    stroke: color,
+    strokeWidth: "1.6",
+    strokeLinecap: "round"
+  })), line && /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      borderTop: `1.2px solid ${color}`,
+      opacity: 0.9
+    }
+  }));
+}
+Object.assign(__ds_scope, { Squiggle });
+})(); } catch (e) { __ds_ns.__errors.push({ path: "components/playful/Squiggle.jsx", error: String((e && e.message) || e) }); }
+
 // components/states/EmptyState.jsx
 try { (() => {
 /**
- * HOMA EmptyState, a warm invitation, never a dead end.
+ * Homa EmptyState, a warm invitation, never a dead end.
  */
 function EmptyState({
   icon = null,
@@ -1427,6 +1601,7 @@ function EmptyState({
   }, action), hand && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.5rem',
       color: 'var(--sage-600)',
       marginTop: 16,
@@ -1440,7 +1615,7 @@ Object.assign(__ds_scope, { EmptyState });
 // components/states/Skeleton.jsx
 try { (() => {
 /**
- * HOMA Skeleton, warm shimmer placeholder while content loads.
+ * Homa Skeleton, warm shimmer placeholder while content loads.
  */
 function Skeleton({
   width = '100%',
@@ -1474,15 +1649,20 @@ Object.assign(__ds_scope, { Skeleton });
 
 // ui_kits/landing/LandingPage.jsx
 try { (() => {
-// HOMA marketing landing page.
+// Homa marketing landing page. Color bands divided by waves + squiggle ribbons.
 const {
   Button: LButton,
   Icon: LIcon,
   Card: LCard,
   Badge: LBadge,
   Avatar: LAvatar,
-  Logo: LLogo
+  Logo: LLogo,
+  Squiggle: LSquiggleRaw,
+  Doodle: LDoodleRaw
 } = window.HOMADesignSystem_113bd2;
+// Guard against a stale bundle: decoration degrades to nothing, never a crash.
+const LSquiggle = LSquiggleRaw || (() => null);
+const LDoodle = LDoodleRaw || (() => null);
 function Wordmark({
   light
 }) {
@@ -1490,6 +1670,91 @@ function Wordmark({
     size: 28,
     tone: light ? 'dark' : 'light'
   });
+}
+function Wave({
+  color = 'var(--band-sky)',
+  flip = false
+}) {
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 1440 48",
+    preserveAspectRatio: "none",
+    "aria-hidden": "true",
+    style: {
+      display: 'block',
+      width: '100%',
+      height: 44,
+      margin: '-1px 0',
+      transform: flip ? 'scaleY(-1)' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    fill: color,
+    d: "M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z"
+  }));
+}
+
+/* Squiggle ribbon divider: a fat wavy band with a repeating phrase riding the
+   curve. Purely decorative; straddles the seam between two sections. */
+function Ribbon({
+  text,
+  color = 'var(--pop-cobalt)',
+  ink = '#FFFFFF',
+  phase = 0
+}) {
+  const rid = 'ribbon-' + text.replace(/[^a-z]/gi, '').toLowerCase().slice(0, 16) + phase;
+  const paths = ['M-60 96 C 240 30, 480 152, 750 88 C 1020 26, 1240 142, 1500 62', 'M-60 72 C 220 146, 470 28, 760 92 C 1050 154, 1260 40, 1500 104'];
+  const phrase = Array(9).fill(text).join('  ·  ') + '  ·  ';
+  return /*#__PURE__*/React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'relative',
+      zIndex: 6,
+      height: 150,
+      margin: '-48px 0 -44px',
+      pointerEvents: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 1440 176",
+    preserveAspectRatio: "xMidYMid slice",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      display: 'block'
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    id: rid,
+    d: paths[phase % 2],
+    fill: "none",
+    stroke: color,
+    strokeWidth: "54",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("text", {
+    dominantBaseline: "middle",
+    style: {
+      fontFamily: 'var(--font-sans)',
+      fontWeight: 700,
+      fontSize: 18,
+      letterSpacing: '0.2em',
+      fill: ink
+    }
+  }, /*#__PURE__*/React.createElement("textPath", {
+    href: '#' + rid
+  }, phrase))));
+}
+function Eyebrow({
+  color = 'var(--brand)',
+  children
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '0.8rem',
+      fontWeight: 700,
+      letterSpacing: '0.16em',
+      textTransform: 'uppercase',
+      color
+    }
+  }, children);
 }
 function Nav() {
   return /*#__PURE__*/React.createElement("nav", {
@@ -1518,7 +1783,8 @@ function Nav() {
       color: 'var(--text-muted)',
       textDecoration: 'none',
       fontWeight: 500,
-      fontSize: '0.95rem'
+      fontSize: '0.95rem',
+      whiteSpace: 'nowrap'
     }
   }, l))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1533,7 +1799,8 @@ function Nav() {
       color: 'var(--text-body)',
       textDecoration: 'none',
       fontWeight: 600,
-      fontSize: '0.95rem'
+      fontSize: '0.95rem',
+      whiteSpace: 'nowrap'
     }
   }, "Sign in"), /*#__PURE__*/React.createElement(LButton, {
     variant: "primary"
@@ -1542,11 +1809,44 @@ function Nav() {
 function Hero() {
   return /*#__PURE__*/React.createElement("section", {
     style: {
+      background: 'var(--band-sky)',
+      position: 'relative',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "star",
+    size: 34,
+    rotate: -12,
+    style: {
+      position: 'absolute',
+      top: 46,
+      left: '4%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "sun",
+    size: 34,
+    color: "var(--gold-500)",
+    style: {
+      position: 'absolute',
+      top: 40,
+      left: '46%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "squiggle",
+    size: 44,
+    color: "var(--pop-cobalt)",
+    style: {
+      position: 'absolute',
+      bottom: 52,
+      left: '44%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
       display: 'grid',
       gridTemplateColumns: '1.05fr 1fr',
       gap: 48,
       alignItems: 'center',
-      padding: '72px 40px 60px',
+      padding: '72px 40px 64px',
       maxWidth: 1200,
       margin: '0 auto'
     }
@@ -1555,12 +1855,13 @@ function Hero() {
       display: 'inline-flex',
       alignItems: 'center',
       gap: 6,
-      background: 'var(--clay-50)',
-      color: 'var(--clay-700)',
-      padding: '6px 14px',
+      background: 'var(--surface-card)',
+      color: 'var(--clay-600)',
+      padding: '7px 16px',
       borderRadius: 'var(--radius-pill)',
-      fontWeight: 600,
-      fontSize: '0.85rem'
+      fontWeight: 700,
+      fontSize: '0.85rem',
+      boxShadow: 'var(--shadow-sm)'
     }
   }, /*#__PURE__*/React.createElement(LIcon, {
     name: "sparkles",
@@ -1571,25 +1872,26 @@ function Hero() {
       fontSize: '3.6rem',
       fontWeight: 500,
       lineHeight: 1.02,
-      letterSpacing: '-0.025em',
+      letterSpacing: '-0.015em',
       color: 'var(--text-strong)',
       margin: '20px 0 0'
     }
-  }, "You\u2019ve got this.", /*#__PURE__*/React.createElement("br", null), "HOMA\u2019s got the ", /*#__PURE__*/React.createElement("span", {
+  }, "You\u2019ve got this.", /*#__PURE__*/React.createElement("br", null), "Homa\u2019s got the ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: 'var(--clay-600)',
       fontStyle: 'italic',
-      fontWeight: 400
+      fontWeight: 400,
+      fontFamily: 'var(--font-serif)'
     }
   }, "rest"), "."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: '1.2rem',
-      color: 'var(--text-muted)',
+      color: 'var(--stone-700)',
       lineHeight: 1.55,
       margin: '22px 0 0',
       maxWidth: 470
     }
-  }, "The planning, the tracking, the what-do-we-do-today, hand it to HOMA. You get back to the part only you can do."), /*#__PURE__*/React.createElement("div", {
+  }, "The planning, the tracking, the what-do-we-do-today, hand it to Homa. You get back to the part only you can do."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 12,
@@ -1604,20 +1906,24 @@ function Hero() {
       color: "#fff"
     })
   }, "Start free for 14 days"), /*#__PURE__*/React.createElement(LButton, {
-    variant: "secondary",
+    variant: "ghost",
     size: "lg",
     iconLeft: /*#__PURE__*/React.createElement(LIcon, {
       name: "play",
       size: 16
-    })
+    }),
+    style: {
+      background: 'var(--surface-card)'
+    }
   }, "Watch demo")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
       gap: 10,
       marginTop: 22,
-      color: 'var(--text-subtle)',
-      fontSize: '0.9rem'
+      color: 'var(--stone-700)',
+      fontSize: '0.9rem',
+      fontWeight: 500
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1635,72 +1941,78 @@ function Hero() {
     style: {
       position: 'relative'
     }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderRadius: 'var(--blob-1)',
+      overflow: 'hidden'
+    }
   }, /*#__PURE__*/React.createElement("image-slot", {
     id: "homa-hero",
     style: {
       width: '100%',
       height: 440
     },
-    shape: "rounded",
-    radius: "24",
+    shape: "rect",
     placeholder: "Drop a warm family / learning photo"
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "heart",
+    size: 30,
+    color: "var(--pop-blush)",
+    rotate: 10,
     style: {
       position: 'absolute',
-      top: -22,
-      right: 18,
-      fontFamily: 'var(--font-hand)',
-      fontSize: '2.4rem',
-      color: 'var(--sage-600)',
-      transform: 'rotate(-7deg)',
-      lineHeight: 1
+      bottom: -6,
+      left: -14
     }
-  }, "you\u2019ve got this \u2726")));
+  }))));
 }
 function Features() {
-  const items = [['clipboard-check', 'Know where they stand', 'A gentle skills checklist, for you, never a test for them, mapped to your state\'s standards.'], ['chart-line', 'Proof it\'s working', 'Watch HOMA\'s practice sets move the numbers. Math up 12 points since April, that kind of proof.'], ['file-pen', 'Practice that targets', 'Workbook pages and sensory activities tuned to exactly what each child is growing through.'], ['calendar-heart', 'Plans that flex', 'Tell HOMA how your week looks and she builds a schedule around real life, sick days, field trips, and all.'], ['compass', 'Your town, in the plan', 'Space week? There\'s a planetarium day Saturday. Museums, story hours, zoos, and co-ops, matched to your lessons.'], ['scale', 'Compare curriculums', 'Side-by-side, in plain language, against how your child actually learns, before you spend a dime.']];
+  const items = [['clipboard-check', 'Know where they stand', 'A gentle skills checklist, for you, never a test for them, mapped to your state\'s standards.', 'var(--clay-50)', 'var(--clay-600)'], ['chart-line', 'Proof it\'s working', 'Watch Homa\'s practice sets move the numbers. Math up 12 points since April, that kind of proof.', 'var(--sage-50)', 'var(--sage-600)'], ['file-pen', 'Practice that targets', 'Workbook pages and sensory activities tuned to exactly what each child is growing through.', 'var(--gold-100)', '#8a6d00'], ['calendar-heart', 'Plans that flex', 'Tell Homa how your week looks and she builds a schedule around real life, sick days, field trips, and all.', 'var(--sky-100)', 'var(--sky-600)'], ['compass', 'Your town, in the plan', 'Space week? There\'s a planetarium day Saturday. Museums, story hours, zoos, and co-ops, matched to your lessons.', 'var(--clay-50)', 'var(--clay-600)'], ['scale', 'Compare curriculums', 'Side-by-side, in plain language, against how your child actually learns, before you spend a dime.', 'var(--sage-50)', 'var(--sage-600)']];
   return /*#__PURE__*/React.createElement("section", {
     style: {
-      padding: '60px 40px',
+      padding: '76px 40px 60px',
       maxWidth: 1200,
-      margin: '0 auto'
+      margin: '0 auto',
+      position: 'relative'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "sparkle",
+    size: 26,
+    color: "var(--pop-blush)",
+    rotate: 12,
     style: {
-      textAlign: 'center',
-      marginBottom: 44
+      position: 'absolute',
+      top: 70,
+      right: '5%'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '0.8rem',
-      fontWeight: 700,
-      letterSpacing: '0.06em',
-      textTransform: 'uppercase',
-      color: 'var(--brand)'
+      marginBottom: 40,
+      maxWidth: 560
     }
-  }, "Everything in one place"), /*#__PURE__*/React.createElement("h2", {
+  }, /*#__PURE__*/React.createElement(Eyebrow, null, "Everything in one place"), /*#__PURE__*/React.createElement("h2", {
     style: {
       fontFamily: 'var(--font-display)',
       fontSize: '2.4rem',
       fontWeight: 600,
       color: 'var(--text-strong)',
-      margin: '8px 0 0'
+      margin: '8px 0 14px'
     }
-  }, "Less admin. More teaching.")), /*#__PURE__*/React.createElement("div", {
+  }, "Less admin. More teaching."), /*#__PURE__*/React.createElement(LSquiggle, null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
       gap: 20
     }
-  }, items.map(([ic, t, d]) => /*#__PURE__*/React.createElement(LCard, {
+  }, items.map(([ic, t, d, tint, fg]) => /*#__PURE__*/React.createElement(LCard, {
     key: t,
     padding: "lg"
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 48,
-      height: 48,
-      borderRadius: 'var(--radius-md)',
-      background: 'var(--clay-50)',
+      width: 52,
+      height: 52,
+      borderRadius: 'var(--blob-2)',
+      background: tint,
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -1708,7 +2020,7 @@ function Features() {
   }, /*#__PURE__*/React.createElement(LIcon, {
     name: ic,
     size: 24,
-    color: "var(--brand)"
+    color: fg
   })), /*#__PURE__*/React.createElement("h3", {
     style: {
       fontFamily: 'var(--font-display)',
@@ -1726,14 +2038,187 @@ function Features() {
     }
   }, d)))));
 }
-function HowItWorks() {
-  const steps = [['1', 'Add your kids', 'Tell HOMA their ages, grades, and what you want to cover this year.'], ['2', 'Get your week', 'HOMA drafts a balanced weekly plan. Tweak anything with a tap or a message.'], ['3', 'Teach & track', 'Check off lessons, and watch progress fill in across every subject.']];
+function WeekPeek() {
+  const chip = (label, bg, fg) => /*#__PURE__*/React.createElement("span", {
+    key: label,
+    style: {
+      background: bg,
+      color: fg,
+      fontWeight: 600,
+      fontSize: '0.85rem',
+      padding: '5px 12px',
+      borderRadius: 'var(--radius-pill)',
+      whiteSpace: 'nowrap'
+    }
+  }, label);
+  const days = [['Mon', [chip('Math · Fractions', 'var(--clay-100)', 'var(--clay-700)'), chip('Reading', 'var(--sage-100)', 'var(--sage-700)'), chip('Art', 'var(--gold-100)', '#8a6d00')]], ['Tue', [chip('Math', 'var(--clay-100)', 'var(--clay-700)'), chip('Science · Space', 'var(--sky-100)', 'var(--sky-600)'), chip('Reading', 'var(--sage-100)', 'var(--sage-700)')]], ['Wed', [chip('Field trip · Planetarium', 'var(--sky-100)', 'var(--sky-600)'), chip('Journal', 'var(--gold-100)', '#8a6d00')]], ['Thu', [chip('Math', 'var(--clay-100)', 'var(--clay-700)'), chip('Writing', 'var(--sage-100)', 'var(--sage-700)'), chip('Music', 'var(--gold-100)', '#8a6d00')]], ['Fri', [chip('Review game', 'var(--clay-100)', 'var(--clay-700)')]]];
+  const points = ['Balanced across every subject', 'Shaped around your family\'s rhythm', 'Reshuffles itself when life happens'];
   return /*#__PURE__*/React.createElement("section", {
     style: {
       background: 'var(--bg-page-warm)',
-      padding: '64px 40px'
+      backgroundImage: 'var(--bg-paper)',
+      padding: '72px 40px',
+      position: 'relative',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "star",
+    size: 30,
+    color: "var(--gold-500)",
+    rotate: 14,
+    style: {
+      position: 'absolute',
+      top: 44,
+      right: '7%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1.1fr',
+      gap: 56,
+      alignItems: 'center',
+      maxWidth: 1140,
+      margin: '0 auto'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Eyebrow, {
+    color: "var(--sky-600)"
+  }, "A week with Homa"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '2.4rem',
+      fontWeight: 600,
+      color: 'var(--text-strong)',
+      margin: '8px 0 14px'
+    }
+  }, "Your week, already sorted"), /*#__PURE__*/React.createElement(LSquiggle, {
+    style: {
+      maxWidth: 300
+    }
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: 'var(--text-muted)',
+      lineHeight: 1.6,
+      margin: '18px 0 20px',
+      maxWidth: 420
+    }
+  }, "Every Sunday, a draft of the week is waiting. Tweak anything with a tap or a message, Homa keeps the balance for you."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      marginBottom: 26
+    }
+  }, points.map(p => /*#__PURE__*/React.createElement("div", {
+    key: p,
+    style: {
+      display: 'flex',
+      gap: 10,
+      alignItems: 'center',
+      color: 'var(--text-body)',
+      fontWeight: 500
+    }
+  }, /*#__PURE__*/React.createElement(LIcon, {
+    name: "check",
+    size: 18,
+    color: "var(--sage-600)"
+  }), " ", p))), /*#__PURE__*/React.createElement(LButton, {
+    variant: "secondary",
+    iconRight: /*#__PURE__*/React.createElement(LIcon, {
+      name: "arrow-right",
+      size: 16
+    })
+  }, "See a sample week")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface-card)',
+      borderRadius: 'var(--radius-xl)',
+      boxShadow: 'var(--shadow-md)',
+      padding: '24px 26px',
+      transform: 'rotate(0.6deg)'
     }
   }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontWeight: 600,
+      fontSize: '1.15rem',
+      color: 'var(--text-strong)'
+    }
+  }, "Maya \xB7 Grade 3"), /*#__PURE__*/React.createElement(LBadge, {
+    tone: "sage"
+  }, "On track")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }
+  }, days.map(([d, chips]) => /*#__PURE__*/React.createElement("div", {
+    key: d,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      paddingBottom: 12,
+      borderBottom: d === 'Fri' ? 'none' : '1px solid var(--stone-100)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 38,
+      flexShrink: 0,
+      fontWeight: 700,
+      fontSize: '0.8rem',
+      color: 'var(--text-subtle)'
+    }
+  }, d), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexWrap: 'wrap',
+      alignItems: 'center'
+    }
+  }, chips, d === 'Fri' && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'var(--font-serif)',
+      fontStyle: 'italic',
+      color: 'var(--text-muted)',
+      fontSize: '0.92rem'
+    }
+  }, "light on purpose"))))))));
+}
+function HowItWorks() {
+  const steps = [['1', 'Add your kids', 'Tell Homa their ages, grades, and what you want to cover this year.'], ['2', 'Get your week', 'Homa drafts a balanced weekly plan. Tweak anything with a tap or a message.'], ['3', 'Teach & track', 'Check off lessons, and watch progress fill in across every subject.']];
+  return /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: 'var(--band-mint)',
+      padding: '64px 40px',
+      position: 'relative',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "sun",
+    size: 36,
+    color: "var(--gold-500)",
+    style: {
+      position: 'absolute',
+      top: 40,
+      right: '6%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "heart",
+    size: 26,
+    color: "var(--pop-blush)",
+    rotate: -14,
+    style: {
+      position: 'absolute',
+      bottom: 46,
+      left: '5%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 1000,
       margin: '0 auto'
@@ -1753,17 +2238,17 @@ function HowItWorks() {
       gridTemplateColumns: 'repeat(3, 1fr)',
       gap: 32
     }
-  }, steps.map(([n, t, d]) => /*#__PURE__*/React.createElement("div", {
+  }, steps.map(([n, t, d], i) => /*#__PURE__*/React.createElement("div", {
     key: n,
     style: {
       textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 56,
-      height: 56,
-      borderRadius: '50%',
-      background: 'var(--brand)',
+      width: 60,
+      height: 60,
+      borderRadius: ['var(--blob-1)', 'var(--blob-2)', 'var(--blob-3)'][i],
+      background: ['var(--brand)', 'var(--pop-cobalt)', 'var(--sage-500)'][i],
       color: '#fff',
       fontFamily: 'var(--font-display)',
       fontSize: '1.5rem',
@@ -1783,63 +2268,228 @@ function HowItWorks() {
     }
   }, t), /*#__PURE__*/React.createElement("p", {
     style: {
-      color: 'var(--text-muted)',
+      color: 'var(--stone-700)',
       lineHeight: 1.55,
       margin: 0
     }
   }, d))))));
 }
-function Quote() {
+function Community() {
   return /*#__PURE__*/React.createElement("section", {
     style: {
-      padding: '72px 40px',
-      maxWidth: 820,
+      padding: '84px 40px 64px',
+      maxWidth: 1140,
       margin: '0 auto',
-      textAlign: 'center'
-    }
-  }, /*#__PURE__*/React.createElement(LIcon, {
-    name: "quote",
-    size: 36,
-    color: "var(--clay-300)"
-  }), /*#__PURE__*/React.createElement("blockquote", {
-    style: {
-      fontFamily: 'var(--font-display)',
-      fontSize: '2rem',
-      fontWeight: 500,
-      lineHeight: 1.35,
-      color: 'var(--text-strong)',
-      margin: '18px 0 24px'
-    }
-  }, "\u201CI was drowning in printables and half-made plans. HOMA gave me a calm week, every week, and my kids are further ahead than ever.\u201D"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement(LAvatar, {
-    name: "Priya Shah",
-    size: 48
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: 'left'
+      position: 'relative'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
+      display: 'grid',
+      gridTemplateColumns: '1.1fr 1fr',
+      gap: 56,
+      alignItems: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Eyebrow, {
+    color: "var(--sage-700)"
+  }, "Find your people"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '2.4rem',
+      fontWeight: 600,
+      color: 'var(--text-strong)',
+      margin: '8px 0 14px'
+    }
+  }, "You don\u2019t have to do this alone."), /*#__PURE__*/React.createElement(LSquiggle, {
+    style: {
+      maxWidth: 300
+    },
+    color: "var(--sage-600)"
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: 'var(--text-muted)',
+      lineHeight: 1.6,
+      margin: '18px 0 24px',
+      maxWidth: 440
+    }
+  }, "Homa introduces you to nearby families, co-ops, and park days, matched to your kids\u2019 ages and what you\u2019re teaching."), /*#__PURE__*/React.createElement(LButton, {
+    variant: "secondary",
+    iconRight: /*#__PURE__*/React.createElement(LIcon, {
+      name: "arrow-right",
+      size: 16
+    })
+  }, "Find families near you")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface-card)',
+      borderRadius: 'var(--radius-xl)',
+      boxShadow: 'var(--shadow-md)',
+      padding: '26px 28px',
+      transform: 'rotate(-0.6deg)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      marginBottom: 14
+    }
+  }, ['Ana M', 'Dana K', 'June P', 'Sara T'].map((n, i) => /*#__PURE__*/React.createElement("span", {
+    key: n,
+    style: {
+      marginLeft: i ? -10 : 0
+    }
+  }, /*#__PURE__*/React.createElement(LAvatar, {
+    name: n,
+    size: 40
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '1.2rem',
+      fontWeight: 500,
+      color: 'var(--text-strong)',
+      lineHeight: 1.3
+    }
+  }, "4 Homa families homeschool within 5 miles."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--text-muted)',
+      fontSize: '0.92rem',
+      marginTop: 6,
+      lineHeight: 1.5
+    }
+  }, "Two are planning park days this month."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement(LBadge, {
+    tone: "sage"
+  }, "Park day \xB7 Sat 10 am"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      color: 'var(--text-subtle)',
+      fontSize: '0.85rem'
+    }
+  }, /*#__PURE__*/React.createElement(LIcon, {
+    name: "map-pin",
+    size: 14
+  }), " Austin, TX")))));
+}
+function Stories() {
+  const quotes = [['I was drowning in printables and half-made plans. Homa gave me a calm week, every week.', 'Priya Shah', 'Homeschooling 3 · Austin, TX'], ['The benchmarks finally quieted the am-I-doing-enough voice in my head.', 'Dana Kim', 'Homeschooling 2 · Boise, ID'], ['My son asked if we could do school on a Saturday. That never used to happen.', 'Lena Ruiz', 'Homeschooling 1 · Asheville, NC']];
+  return /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: 'var(--band-blush)',
+      padding: '68px 40px 76px',
+      position: 'relative',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "heart",
+    size: 30,
+    color: "var(--clay-600)",
+    rotate: -10,
+    style: {
+      position: 'absolute',
+      top: 42,
+      left: '6%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "sparkle",
+    size: 26,
+    color: "#fff",
+    rotate: 18,
+    style: {
+      position: 'absolute',
+      bottom: 52,
+      right: '5%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 1140,
+      margin: '0 auto'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      marginBottom: 40
+    }
+  }, /*#__PURE__*/React.createElement(Eyebrow, {
+    color: "var(--clay-700)"
+  }, "Stories"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '2.4rem',
+      fontWeight: 600,
+      color: 'var(--text-strong)',
+      margin: '8px 0 10px'
+    }
+  }, "From the kitchen table"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(LSquiggle, {
+    segments: 4,
+    line: false,
+    color: "var(--clay-700)",
+    style: {
+      width: 'auto'
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: 20,
+      alignItems: 'stretch'
+    }
+  }, quotes.map(([q, name, meta]) => /*#__PURE__*/React.createElement("div", {
+    key: name,
+    style: {
+      background: 'var(--surface-card)',
+      borderRadius: 'var(--radius-xl)',
+      boxShadow: 'var(--shadow-sm)',
+      padding: '26px 26px 22px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 18
+    }
+  }, /*#__PURE__*/React.createElement("blockquote", {
+    style: {
+      fontFamily: 'var(--font-serif)',
+      fontSize: '1.18rem',
+      lineHeight: 1.45,
+      color: 'var(--text-strong)',
+      margin: 0,
+      flex: 1
+    }
+  }, "\u201C", q, "\u201D"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement(LAvatar, {
+    name: name,
+    size: 36
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
       fontWeight: 700,
+      fontSize: '0.92rem',
       color: 'var(--text-strong)'
     }
-  }, "Priya Shah"), /*#__PURE__*/React.createElement("div", {
+  }, name), /*#__PURE__*/React.createElement("div", {
     style: {
       color: 'var(--text-subtle)',
-      fontSize: '0.9rem'
+      fontSize: '0.8rem'
     }
-  }, "Homeschooling 3 \xB7 Austin, TX"))));
+  }, meta))))))));
 }
 function Pricing() {
   const tiers = [['Solo', '$9', '/mo', 'For one learner', ['1 child', 'Weekly planning', 'Progress tracking', 'Worksheet generator'], false], ['Family', '$19', '/mo', 'Most popular', ['Up to 5 children', 'Everything in Solo', 'Standards benchmarking', 'Priority support'], true], ['Co-op', '$39', '/mo', 'For groups', ['Unlimited children', 'Shared plans', 'Group reporting', 'Admin tools'], false]];
   return /*#__PURE__*/React.createElement("section", {
     style: {
-      padding: '60px 40px 80px',
+      padding: '72px 40px 60px',
       maxWidth: 1100,
       margin: '0 auto'
     }
@@ -1932,10 +2582,150 @@ function Pricing() {
     fullWidth: true
   }, "Choose ", name)))));
 }
+function Faq() {
+  const items = [['Does Homa follow my state\'s standards?', 'Yes. Pick your state and every subject maps to it, you can see coverage at a glance.'], ['Can I use my own curriculum?', 'Bring it. Homa plans around any mix of bought, borrowed, and homemade.'], ['What ages does it cover?', 'Pre-K through 8th grade today. High school is on the roadmap.'], ['What if a week falls apart?', 'Tell Homa. She reshuffles, nothing is lost, and nobody is behind.']];
+  return /*#__PURE__*/React.createElement("section", {
+    style: {
+      padding: '20px 40px 84px',
+      maxWidth: 1000,
+      margin: '0 auto'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 34,
+      maxWidth: 560
+    }
+  }, /*#__PURE__*/React.createElement(Eyebrow, {
+    color: "var(--pop-cobalt)"
+  }, "Good to know"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '2rem',
+      fontWeight: 600,
+      color: 'var(--text-strong)',
+      margin: '8px 0 14px'
+    }
+  }, "Questions, answered"), /*#__PURE__*/React.createElement(LSquiggle, {
+    color: "var(--pop-cobalt)"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '26px 40px'
+    }
+  }, items.map(([q, a]) => /*#__PURE__*/React.createElement("div", {
+    key: q
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: 'var(--text-strong)',
+      marginBottom: 6,
+      fontSize: '1.02rem'
+    }
+  }, q), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--text-muted)',
+      lineHeight: 1.55,
+      fontSize: '0.95rem'
+    }
+  }, a)))));
+}
+function CtaBand() {
+  return /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: 'var(--band-sunshine)',
+      padding: '76px 40px 84px',
+      position: 'relative',
+      overflow: 'hidden',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(LDoodle, {
+    name: "star",
+    size: 38,
+    color: "var(--pop-cobalt)",
+    rotate: -14,
+    style: {
+      position: 'absolute',
+      top: 52,
+      left: '9%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "heart",
+    size: 30,
+    color: "var(--clay-600)",
+    rotate: 12,
+    style: {
+      position: 'absolute',
+      bottom: 64,
+      right: '9%'
+    }
+  }), /*#__PURE__*/React.createElement(LDoodle, {
+    name: "sparkle",
+    size: 24,
+    color: "#fff",
+    rotate: 20,
+    style: {
+      position: 'absolute',
+      top: 66,
+      right: '22%'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: 'absolute',
+      top: 44,
+      right: '38%',
+      transform: 'rotate(-6deg)',
+      background: 'var(--surface-card)',
+      color: 'var(--text-strong)',
+      fontWeight: 700,
+      fontSize: '0.85rem',
+      padding: '7px 16px',
+      borderRadius: 'var(--radius-pill)',
+      boxShadow: 'var(--shadow-sm)'
+    }
+  }, "No card needed"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '2.8rem',
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+      color: 'var(--text-strong)',
+      margin: '18px 0 10px'
+    }
+  }, "Ready for a calm Monday?"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'var(--font-serif)',
+      fontStyle: 'italic',
+      fontSize: '1.25rem',
+      color: 'var(--stone-700)',
+      margin: '0 0 30px'
+    }
+  }, "Set-up takes an afternoon. The calm shows up the same week."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(LButton, {
+    variant: "primary",
+    size: "lg",
+    iconRight: /*#__PURE__*/React.createElement(LIcon, {
+      name: "arrow-right",
+      size: 18,
+      color: "#fff"
+    })
+  }, "Start free for 14 days"), /*#__PURE__*/React.createElement(LButton, {
+    variant: "ghost",
+    size: "lg",
+    style: {
+      background: 'var(--surface-card)'
+    }
+  }, "Talk to Homa")));
+}
 function Footer() {
   return /*#__PURE__*/React.createElement("footer", {
     style: {
-      background: 'var(--stone-900)',
+      background: 'var(--pop-navy)',
       color: 'var(--stone-300)',
       padding: '56px 40px 32px'
     }
@@ -1985,11 +2775,11 @@ function Footer() {
       maxWidth: 1100,
       margin: '32px auto 0',
       paddingTop: 20,
-      borderTop: '1px solid var(--stone-700)',
+      borderTop: '1px solid rgba(255,255,255,0.18)',
       fontSize: '0.85rem',
-      color: 'var(--stone-500)'
+      color: 'var(--stone-400)'
     }
-  }, "\xA9 2026 HOMA. Made for families who teach."));
+  }, "\xA9 2026 Homa. Made for families who teach."));
 }
 function LandingPage() {
   React.useEffect(() => {
@@ -1998,9 +2788,46 @@ function LandingPage() {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: 'var(--bg-page)',
-      fontFamily: 'var(--font-sans)'
+      fontFamily: 'var(--font-sans)',
+      overflowX: 'hidden'
     }
-  }, /*#__PURE__*/React.createElement(Nav, null), /*#__PURE__*/React.createElement(Hero, null), /*#__PURE__*/React.createElement(Features, null), /*#__PURE__*/React.createElement(HowItWorks, null), /*#__PURE__*/React.createElement(Quote, null), /*#__PURE__*/React.createElement(Pricing, null), /*#__PURE__*/React.createElement(Footer, null));
+  }, /*#__PURE__*/React.createElement(Nav, null), /*#__PURE__*/React.createElement(Hero, null), /*#__PURE__*/React.createElement(Wave, null), /*#__PURE__*/React.createElement(Ribbon, {
+    text: "LESS ADMIN \xB7 MORE TEACHING",
+    color: "var(--pop-cobalt)",
+    phase: 0
+  }), /*#__PURE__*/React.createElement(Features, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--bg-page-warm)",
+    flip: true
+  }), /*#__PURE__*/React.createElement(WeekPeek, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--bg-page-warm)"
+  }), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-mint)",
+    flip: true
+  }), /*#__PURE__*/React.createElement(HowItWorks, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-mint)"
+  }), /*#__PURE__*/React.createElement(Ribbon, {
+    text: "YOU DON'T HAVE TO DO THIS ALONE",
+    color: "var(--brand)",
+    phase: 1
+  }), /*#__PURE__*/React.createElement(Community, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-blush)",
+    flip: true
+  }), /*#__PURE__*/React.createElement(Stories, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-blush)"
+  }), /*#__PURE__*/React.createElement(Pricing, null), /*#__PURE__*/React.createElement(Faq, null), /*#__PURE__*/React.createElement(Ribbon, {
+    text: "PLAN LESS \xB7 BREATHE MORE",
+    color: "var(--pop-navy)",
+    ink: "var(--gold-400)",
+    phase: 0
+  }), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-sunshine)",
+    flip: true
+  }), /*#__PURE__*/React.createElement(CtaBand, null), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--band-sunshine)"
+  }), /*#__PURE__*/React.createElement(Wave, {
+    color: "var(--pop-navy)",
+    flip: true
+  }), /*#__PURE__*/React.createElement(Footer, null));
 }
 Object.assign(window, {
   LandingPage
@@ -2654,7 +3481,7 @@ try { (() => {
 
 // ui_kits/mobile-app/MobileApp.jsx
 try { (() => {
-// HOMA mobile app, screens rendered inside a phone frame.
+// Homa mobile app, screens rendered inside a phone frame.
 const {
   Icon: MIcon,
   Avatar: MAvatar,
@@ -2662,8 +3489,11 @@ const {
   Badge: MBadge,
   Chip: MChip,
   Callout: MCallout,
-  Logo: MLogo
+  Logo: MLogo,
+  Doodle: MDoodleRaw
 } = window.HOMADesignSystem_113bd2;
+// Guard against a stale bundle: decoration degrades to nothing, never a crash.
+const MDoodle = MDoodleRaw || (() => null);
 function StatusBar() {
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2698,7 +3528,7 @@ function TabBar({
   active,
   onNav
 }) {
-  const tabs = [['home', 'Home'], ['sparkles', 'Ask'], ['compass', 'Discover'], ['clipboard-check', 'Kids']];
+  const tabs = [['home', 'Home'], ['sparkles', 'Ask'], ['calendar', 'Plan'], ['compass', 'Discover'], ['clipboard-check', 'Kids']];
   return /*#__PURE__*/React.createElement("div", {
     style: {
       height: 76,
@@ -2790,18 +3620,26 @@ function HomeScreen() {
       fontWeight: 500,
       color: 'var(--text-strong)',
       letterSpacing: '-0.02em',
-      marginTop: 6
+      marginTop: 6,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
     }
-  }, "Morning, Sarah")), /*#__PURE__*/React.createElement(MAvatar, {
+  }, "Morning, Sarah ", /*#__PURE__*/React.createElement(MDoodle, {
+    name: "sun",
+    size: 22,
+    color: "var(--gold-400)",
+    rotate: 10
+  }))), /*#__PURE__*/React.createElement(MAvatar, {
     name: "Sarah Rivera",
     size: 42,
     tone: "var(--sage-500)"
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: 'var(--surface-card)',
+      background: 'var(--gold-100)',
       borderRadius: 'var(--radius-xl)',
       padding: '20px 22px',
-      boxShadow: 'var(--shadow-md)',
+      boxShadow: 'var(--shadow-sm)',
       marginBottom: 30
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -2817,7 +3655,7 @@ function HomeScreen() {
     color: "var(--brand)"
   }), /*#__PURE__*/React.createElement(Eyebrow, {
     style: {
-      color: 'var(--brand)'
+      color: 'var(--clay-600)'
     }
   }, "Today\u2019s focus")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2831,7 +3669,8 @@ function HomeScreen() {
   }, "Three subjects for Maya, ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontStyle: 'italic',
-      color: 'var(--clay-600)'
+      color: 'var(--clay-600)',
+      fontFamily: 'var(--font-serif)'
     }
   }, "about 1h 45m"), ".")), /*#__PURE__*/React.createElement(Eyebrow, {
     style: {
@@ -3003,7 +3842,7 @@ function HomeScreen() {
       color: 'var(--sage-700)',
       marginBottom: 6
     }
-  }, "A note from HOMA"), /*#__PURE__*/React.createElement("div", {
+  }, "A note from Homa"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-display)',
       fontSize: '1.12rem',
@@ -3013,6 +3852,7 @@ function HomeScreen() {
   }, "Maya\u2019s right on pace, and her reading is really taking off. Nothing to worry about this week."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.55rem',
       color: 'var(--sage-600)',
       marginTop: 6,
@@ -3050,9 +3890,18 @@ function AskScreen() {
       fontSize: '1.3rem',
       fontWeight: 600,
       color: 'var(--text-strong)',
-      marginTop: 8
+      marginTop: 8,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8
     }
-  }, "Ask HOMA")), /*#__PURE__*/React.createElement("div", {
+  }, "Ask Homa ", /*#__PURE__*/React.createElement(MDoodle, {
+    name: "sparkle",
+    size: 16,
+    color: "var(--pop-cobalt)",
+    rotate: 12
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end',
@@ -3108,7 +3957,7 @@ function AskScreen() {
       padding: '7px 7px 7px 16px'
     }
   }, /*#__PURE__*/React.createElement("input", {
-    placeholder: "Message HOMA\u2026",
+    placeholder: "Message Homa\u2026",
     style: {
       flex: 1,
       border: 'none',
@@ -3177,7 +4026,8 @@ function DiscoverScreen() {
   }, "Family space day at the Bullock, ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontStyle: 'italic',
-      color: 'var(--clay-600)'
+      color: 'var(--clay-600)',
+      fontFamily: 'var(--font-serif)'
     }
   }, "Saturday"), "."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3283,7 +4133,7 @@ function DiscoverScreen() {
       color: 'var(--text-body)',
       lineHeight: 1.4
     }
-  }, /*#__PURE__*/React.createElement("b", null, "4 HOMA families"), " homeschool within 5 miles.")));
+  }, /*#__PURE__*/React.createElement("b", null, "4 Homa families"), " homeschool within 5 miles.")));
 }
 function KidsScreen() {
   const standings = [['Reading', 'Ahead', 'gold'], ['Math', 'On track', 'sage'], ['Writing', 'On track', 'sage'], ['Science', 'Ready for review', 'warning']];
@@ -3362,7 +4212,8 @@ function KidsScreen() {
   }, "Math is up ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontStyle: 'italic',
-      color: 'var(--sage-700)'
+      color: 'var(--sage-700)',
+      fontFamily: 'var(--font-serif)'
     }
   }, "12 points"), " since the fractions set."), /*#__PURE__*/React.createElement("svg", {
     width: "100%",
@@ -3386,12 +4237,99 @@ function KidsScreen() {
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.4rem',
       color: 'var(--sage-600)',
       marginTop: 8,
       lineHeight: 1
     }
   }, "your work is paying off \u2726")));
+}
+function PlanScreen() {
+  const tint = {
+    Math: ['var(--clay-50)', 'var(--clay-600)'],
+    Reading: ['var(--sage-50)', 'var(--sage-600)'],
+    Science: ['var(--gold-100)', '#8a6d00'],
+    Writing: ['var(--sky-100)', 'var(--sky-600)'],
+    Art: ['var(--clay-100)', 'var(--clay-700)']
+  };
+  const week = [['Mon', [['Math', '30m'], ['Reading', '30m'], ['Science', '45m']]], ['Tue', [['Math', '30m'], ['Writing', '40m']]], ['Wed', [['Reading', '30m'], ['Art', '60m']]], ['Thu', [['Math', '25m'], ['Science', '60m'], ['Reading', '30m']]], ['Fri', [['Writing', '40m'], ['Math', '30m']]]];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '10px 22px 24px'
+    }
+  }, /*#__PURE__*/React.createElement(Eyebrow, null, "This week \xB7 Maya"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-display)',
+      fontSize: '1.6rem',
+      fontWeight: 600,
+      color: 'var(--text-strong)',
+      letterSpacing: '-0.02em',
+      margin: '6px 0 18px'
+    }
+  }, "May 12\u201316"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      marginBottom: 20
+    }
+  }, week.map(([day, items]) => /*#__PURE__*/React.createElement("div", {
+    key: day,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      background: 'var(--surface-card)',
+      borderRadius: 'var(--radius-lg)',
+      padding: '13px 16px',
+      boxShadow: 'var(--shadow-sm)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 40,
+      fontWeight: 800,
+      color: 'var(--text-strong)',
+      fontFamily: 'var(--font-display)',
+      flexShrink: 0
+    }
+  }, day), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexWrap: 'wrap',
+      flex: 1
+    }
+  }, items.map(([s, d]) => {
+    const [bg, fg] = tint[s];
+    return /*#__PURE__*/React.createElement("span", {
+      key: s + d,
+      style: {
+        background: bg,
+        color: fg,
+        fontSize: '0.72rem',
+        fontWeight: 700,
+        padding: '5px 10px',
+        borderRadius: 'var(--radius-pill)',
+        whiteSpace: 'nowrap'
+      }
+    }, s, " \xB7 ", d);
+  }))))), /*#__PURE__*/React.createElement("button", {
+    style: {
+      width: '100%',
+      border: 'none',
+      background: 'var(--brand)',
+      color: '#fff',
+      fontFamily: 'var(--font-sans)',
+      fontWeight: 700,
+      fontSize: '0.95rem',
+      padding: '15px 0',
+      borderRadius: 'var(--radius-pill)',
+      cursor: 'pointer'
+    }
+  }, "Auto-plan with Homa"));
 }
 function MobileApp() {
   const [tab, setTab] = React.useState('Home');
@@ -3401,6 +4339,7 @@ function MobileApp() {
   const screens = {
     Home: /*#__PURE__*/React.createElement(HomeScreen, null),
     Ask: /*#__PURE__*/React.createElement(AskScreen, null),
+    Plan: /*#__PURE__*/React.createElement(PlanScreen, null),
     Discover: /*#__PURE__*/React.createElement(DiscoverScreen, null),
     Kids: /*#__PURE__*/React.createElement(KidsScreen, null)
   };
@@ -3414,7 +4353,8 @@ function MobileApp() {
       display: 'flex',
       flexDirection: 'column',
       boxShadow: 'var(--shadow-xl)',
-      border: '10px solid #221E1A'
+      border: '10px solid #221E1A',
+      fontFamily: 'var(--font-sans)'
     }
   }, /*#__PURE__*/React.createElement(StatusBar, null), screens[tab], /*#__PURE__*/React.createElement(TabBar, {
     active: tab,
@@ -3428,20 +4368,23 @@ Object.assign(window, {
 
 // ui_kits/web-app/App.jsx
 try { (() => {
-// HOMA web app, shell: login gate + authenticated app frame.
+// Homa web app, shell: login gate + authenticated app frame.
 const {
   Button: AButton,
   Input: AInput,
   Icon: AIcon,
-  Logo: ALogo
+  Logo: ALogo,
+  Doodle: ADoodleRaw
 } = window.HOMADesignSystem_113bd2;
+const ADoodle = ADoodleRaw || (() => null);
 function Login({
   onEnter
 }) {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       height: '100%',
-      display: 'flex'
+      display: 'flex',
+      fontFamily: 'var(--font-sans)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3520,13 +4463,35 @@ function Login({
   }, "Start free")))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      background: 'linear-gradient(160deg, var(--clay-400), var(--clay-600))',
+      background: 'var(--pop-cobalt)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 40
+      padding: 40,
+      position: 'relative',
+      overflow: 'hidden'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(ADoodle, {
+    name: "star",
+    size: 40,
+    color: "var(--gold-400)",
+    rotate: -12,
+    style: {
+      position: 'absolute',
+      top: 48,
+      right: 56
+    }
+  }), /*#__PURE__*/React.createElement(ADoodle, {
+    name: "heart",
+    size: 30,
+    color: "var(--pop-blush)",
+    rotate: 10,
+    style: {
+      position: 'absolute',
+      bottom: 60,
+      left: 48
+    }
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 380,
       color: '#fff'
@@ -3537,13 +4502,13 @@ function Login({
     color: "#fff"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'var(--font-display)',
+      fontFamily: 'var(--font-serif)',
       fontSize: '1.9rem',
       fontWeight: 500,
       lineHeight: 1.25,
       marginTop: 16
     }
-  }, "\u201CHOMA plans our week in five minutes. I finally have my evenings back.\u201D"), /*#__PURE__*/React.createElement("div", {
+  }, "\u201CHoma plans our week in five minutes. I finally have my evenings back.\u201D"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
       opacity: 0.9,
@@ -3590,7 +4555,8 @@ function App() {
     style: {
       display: 'flex',
       height: '100%',
-      background: 'var(--bg-page)'
+      background: 'var(--bg-page)',
+      fontFamily: 'var(--font-sans)'
     }
   }, /*#__PURE__*/React.createElement(Sidebar, {
     active: view,
@@ -3642,7 +4608,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/BenchmarksView.jsx
 try { (() => {
-// HOMA web app, Benchmarks: where the child stands, gently. The proof loop.
+// Homa web app, Benchmarks: where the child stands, gently. The proof loop.
 const {
   Card: BCard,
   Badge: BBadge,
@@ -3811,6 +4777,7 @@ function BenchmarksView() {
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.4rem',
       color: 'var(--sage-600)',
       marginTop: 18,
@@ -3842,9 +4809,9 @@ function BenchmarksView() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 36,
-      height: 36,
-      borderRadius: 'var(--radius-md)',
+      width: 38,
+      height: 38,
+      borderRadius: 'var(--blob-3)',
       background: 'var(--clay-50)',
       display: 'inline-flex',
       alignItems: 'center',
@@ -3909,7 +4876,8 @@ function BenchmarksView() {
   }, "Math mastery is up ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontStyle: 'italic',
-      color: 'var(--sage-700)'
+      color: 'var(--sage-700)',
+      fontFamily: 'var(--font-serif)'
     }
   }, "12 points"), " since the fractions set."), /*#__PURE__*/React.createElement("svg", {
     width: "100%",
@@ -3942,6 +4910,7 @@ function BenchmarksView() {
   }, /*#__PURE__*/React.createElement("span", null, "APR"), /*#__PURE__*/React.createElement("span", null, "6 WEEKS"), /*#__PURE__*/React.createElement("span", null, "NOW \xB7 82%")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.45rem',
       color: 'var(--sage-600)',
       marginTop: 12,
@@ -3956,14 +4925,16 @@ Object.assign(window, {
 
 // ui_kits/web-app/ChatView.jsx
 try { (() => {
-// HOMA web app, Ask HOMA chat view (assistant interface).
+// Homa web app, Ask Homa chat view (assistant interface).
 const {
   Icon: CIcon,
   IconButton: CIconButton,
   Button: CButton,
   Callout: CCallout,
-  Chip: CChip
+  Chip: CChip,
+  Doodle: CDoodleRaw
 } = window.HOMADesignSystem_113bd2;
+const CDoodle = CDoodleRaw || (() => null);
 function ChatBubble({
   from,
   children
@@ -4029,11 +5000,20 @@ function ChatView() {
       fontSize: '2rem',
       fontWeight: 500,
       letterSpacing: '-0.02em',
-      color: 'var(--text-strong)'
+      color: 'var(--text-strong)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10
     }
-  }, "Good morning, Sarah"), /*#__PURE__*/React.createElement("div", {
+  }, "Good morning, Sarah ", /*#__PURE__*/React.createElement(CDoodle, {
+    name: "sun",
+    size: 24,
+    color: "var(--gold-400)",
+    rotate: 10
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'var(--font-display)',
+      fontFamily: 'var(--font-serif)',
       fontStyle: 'italic',
       color: 'var(--text-muted)',
       marginTop: 6,
@@ -4108,6 +5088,7 @@ function ChatView() {
   }, "Lighter weeks are part of the plan, not a setback. Maya's still on track for her term goals.", /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.45rem',
       color: 'var(--sage-600)',
       marginTop: 6,
@@ -4152,7 +5133,7 @@ function ChatView() {
   }), /*#__PURE__*/React.createElement("input", {
     value: input,
     onChange: e => setInput(e.target.value),
-    placeholder: "Ask HOMA anything\u2026",
+    placeholder: "Ask Homa anything\u2026",
     style: {
       flex: 1,
       border: 'none',
@@ -4177,7 +5158,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/CurriculumView.jsx
 try { (() => {
-// HOMA web app, Compare curriculums: side-by-side, in plain language, against how the child learns.
+// Homa web app, Compare curriculums: side-by-side, in plain language, against how the child learns.
 const {
   Card: CCCard,
   Badge: CCBadge,
@@ -4330,7 +5311,7 @@ function CurriculumView() {
     value: o.cost
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'var(--font-display)',
+      fontFamily: 'var(--font-serif)',
       fontStyle: 'italic',
       color: 'var(--text-muted)',
       fontSize: '0.95rem',
@@ -4343,7 +5324,7 @@ function CurriculumView() {
     fullWidth: true
   }, "Try a sample week")))), /*#__PURE__*/React.createElement(CCCallout, {
     tone: "sage",
-    title: "A note from HOMA",
+    title: "A note from Homa",
     icon: /*#__PURE__*/React.createElement(CCIcon, {
       name: "sparkles",
       size: 18
@@ -4357,7 +5338,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/DashboardView.jsx
 try { (() => {
-// HOMA web app, kid progress dashboard.
+// Homa web app, kid progress dashboard.
 const {
   Card: DCard,
   Badge: DBadge,
@@ -4388,9 +5369,9 @@ function StatTile({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 36,
-      height: 36,
-      borderRadius: 'var(--radius-md)',
+      width: 38,
+      height: 38,
+      borderRadius: 'var(--blob-2)',
       background: tone,
       display: 'inline-flex',
       alignItems: 'center',
@@ -4579,7 +5560,7 @@ function DashboardView() {
     tone: s.badge[1]
   }, s.badge[0])))))), /*#__PURE__*/React.createElement(DCallout, {
     tone: "sage",
-    title: "A note from HOMA",
+    title: "A note from Homa",
     icon: /*#__PURE__*/React.createElement(DIcon, {
       name: "sparkles",
       size: 19
@@ -4587,6 +5568,7 @@ function DashboardView() {
   }, "Maya\u2019s right on pace for the term, and she\u2019s mastered every fractions objective, reading is really flying. Nothing to worry about this week.", /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.5rem',
       color: 'var(--sage-600)',
       marginTop: 8,
@@ -4601,14 +5583,16 @@ Object.assign(window, {
 
 // ui_kits/web-app/DiscoverView.jsx
 try { (() => {
-// HOMA web app, Discover: lessons connected to the real world, and to other families.
+// Homa web app, Discover: lessons connected to the real world, and to other families.
 const {
   Card: VCard,
   Badge: VBadge,
   Icon: VIcon,
   Button: VButton,
-  Avatar: VAvatar
+  Avatar: VAvatar,
+  Squiggle: VSquiggleRaw
 } = window.HOMADesignSystem_113bd2;
+const VSquiggle = VSquiggleRaw || (() => null);
 function VSuggestion({
   eyebrow,
   title,
@@ -4633,7 +5617,7 @@ function VSuggestion({
     style: {
       width: 52,
       height: 52,
-      borderRadius: 'var(--radius-lg)',
+      borderRadius: 'var(--blob-1)',
       background: tint,
       display: 'inline-flex',
       alignItems: 'center',
@@ -4719,7 +5703,12 @@ function DiscoverView() {
       color: 'var(--text-muted)',
       marginTop: 6
     }
-  }, "Matched to what you're teaching, not just what's nearby.")), /*#__PURE__*/React.createElement("div", {
+  }, "Matched to what you're teaching, not just what's nearby."), /*#__PURE__*/React.createElement(VSquiggle, {
+    style: {
+      maxWidth: 280,
+      marginTop: 14
+    }
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -4731,7 +5720,8 @@ function DiscoverView() {
     title: /*#__PURE__*/React.createElement("span", null, "The Bullock has a family space day ", /*#__PURE__*/React.createElement("span", {
       style: {
         fontStyle: 'italic',
-        color: 'var(--clay-600)'
+        color: 'var(--clay-600)',
+        fontFamily: 'var(--font-serif)'
       }
     }, "this Saturday"), "."),
     body: "Planetarium shows at 10 and 2, and it lines up with her astronomy week. Want me to hold tickets?",
@@ -4822,7 +5812,7 @@ function DiscoverView() {
       fontWeight: 500,
       color: 'var(--text-strong)'
     }
-  }, "4 HOMA families homeschool within 5 miles."), /*#__PURE__*/React.createElement("div", {
+  }, "4 Homa families homeschool within 5 miles."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '0.88rem',
       color: 'var(--text-muted)',
@@ -4843,7 +5833,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/Onboarding.jsx
 try { (() => {
-// HOMA web app, first-run onboarding: add kids → pick subjects → HOMA drafts the week.
+// Homa web app, first-run onboarding: add kids → pick subjects → Homa drafts the week.
 const {
   Logo: OLogo,
   Button: OButton,
@@ -4952,7 +5942,7 @@ function OStepKids({
       fontSize: '0.9rem',
       textAlign: 'center',
       padding: '16px 0',
-      fontFamily: 'var(--font-display)',
+      fontFamily: 'var(--font-serif)',
       fontStyle: 'italic'
     }
   }, "No pressure, you can always add more later."), kids.map((k, i) => /*#__PURE__*/React.createElement("div", {
@@ -5172,7 +6162,7 @@ function OStepDraft({
     }
   }, d))))), /*#__PURE__*/React.createElement(OCallout, {
     tone: "sage",
-    title: "A note from HOMA",
+    title: "A note from Homa",
     icon: /*#__PURE__*/React.createElement(OIcon, {
       name: "sparkles",
       size: 18
@@ -5180,6 +6170,7 @@ function OStepDraft({
   }, "I kept it light on purpose, it's easier to add than to take away.", /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'var(--font-hand)',
+      fontWeight: 600,
       fontSize: '1.45rem',
       color: 'var(--sage-600)',
       marginTop: 6,
@@ -5217,6 +6208,7 @@ function Onboarding() {
     style: {
       minHeight: '100vh',
       background: 'var(--bg-page-warm)',
+      backgroundImage: 'var(--bg-paper)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -5293,7 +6285,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/PlannerView.jsx
 try { (() => {
-// HOMA web app, weekly planner view.
+// Homa web app, weekly planner view.
 const {
   Card: PCard,
   Badge: PBadge,
@@ -5398,7 +6390,7 @@ function PlannerView() {
       size: 17,
       color: "#fff"
     })
-  }, "Auto-plan with HOMA"))), /*#__PURE__*/React.createElement("div", {
+  }, "Auto-plan with Homa"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
       gridTemplateColumns: 'repeat(5, 1fr)',
@@ -5463,7 +6455,7 @@ Object.assign(window, {
 
 // ui_kits/web-app/Sidebar.jsx
 try { (() => {
-// HOMA web app, left navigation sidebar.
+// Homa web app, left navigation sidebar.
 const {
   Avatar: HAvatar,
   Icon: HIcon,
@@ -5478,7 +6470,7 @@ function Sidebar({
   const nav = [{
     id: 'chat',
     icon: 'sparkles',
-    label: 'Ask HOMA'
+    label: 'Ask Homa'
   }, {
     id: 'dashboard',
     icon: 'chart-line',
@@ -5680,6 +6672,10 @@ __ds_ns.Card = __ds_scope.Card;
 __ds_ns.Icon = __ds_scope.Icon;
 
 __ds_ns.Tabs = __ds_scope.Tabs;
+
+__ds_ns.Doodle = __ds_scope.Doodle;
+
+__ds_ns.Squiggle = __ds_scope.Squiggle;
 
 __ds_ns.EmptyState = __ds_scope.EmptyState;
 

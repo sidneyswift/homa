@@ -1,11 +1,11 @@
-// HOMA web app, kid progress dashboard.
+// Homa web app, kid progress dashboard.
 const { Card: DCard, Badge: DBadge, ProgressBar: DProgress, Avatar: DAvatar, Icon: DIcon, Tabs: DTabs, Callout: DCallout } = window.HOMADesignSystem_113bd2;
 
 function StatTile({ icon, label, value, sub, tone }) {
   return (
     <DCard padding="md" style={{ flex: 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: tone, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: 38, height: 38, borderRadius: 'var(--blob-2)', background: tone, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <DIcon name={icon} size={19} color="#fff" />
         </span>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{label}</span>
@@ -62,9 +62,9 @@ function DashboardView() {
         </div>
       </DCard>
 
-      <DCallout tone="sage" title="A note from HOMA" icon={<DIcon name="sparkles" size={19} />}>
+      <DCallout tone="sage" title="A note from Homa" icon={<DIcon name="sparkles" size={19} />}>
         Maya&rsquo;s right on pace for the term, and she&rsquo;s mastered every fractions objective, reading is really flying. Nothing to worry about this week.
-        <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.5rem', color: 'var(--sage-600)', marginTop: 8, lineHeight: 1 }}>you&rsquo;re doing great &#10022;</div>
+        <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.5rem', color: 'var(--sage-600)', marginTop: 8, lineHeight: 1 }}>you&rsquo;re doing great &#10022;</div>
       </DCallout>
     </div>
   );

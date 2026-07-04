@@ -1,0 +1,15 @@
+/* Homa base rules. The one place the system sets page-level defaults, so no
+   surface ever falls back to the UA serif. Every page that links styles.css
+   inherits these; components may still set fonts inline as usual. */
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-body);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}

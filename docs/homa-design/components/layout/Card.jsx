@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Card, soft warm surface container. The workhorse of every layout.
+ * Homa Card, soft warm surface container. The workhorse of every layout.
  */
 export function Card({ padding = 'md', interactive = false, elevated = false, children, onClick, style = {}, ...rest }) {
   const [hover, setHover] = React.useState(false);

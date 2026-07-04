@@ -1,4 +1,4 @@
-// HOMA web app, Benchmarks: where the child stands, gently. The proof loop.
+// Homa web app, Benchmarks: where the child stands, gently. The proof loop.
 const { Card: BCard, Badge: BBadge, Icon: BIcon, Button: BButton, Checkbox: BCheckbox, Select: BSelect } = window.HOMADesignSystem_113bd2;
 
 function BStanding({ subject, note, badge, tone }) {
@@ -55,7 +55,7 @@ function BenchmarksView() {
               <BCheckbox key={skill} label={skill} checked={on} onChange={v => setSkills({ ...skills, [skill]: v })} />
             ))}
           </div>
-          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.4rem', color: 'var(--sage-600)', marginTop: 18, lineHeight: 1 }}>
+          <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.4rem', color: 'var(--sage-600)', marginTop: 18, lineHeight: 1 }}>
             blanks are fine, they're just what's next &#10022;
           </div>
         </BCard>
@@ -65,7 +65,7 @@ function BenchmarksView() {
             <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-strong)', marginBottom: 12 }}>Growing right now</div>
             {[['file-pen', 'Two-step word problems', '3 practice pages, tuned to where she is'], ['hand', 'Regrouping', 'A hands-on activity with beans & cups, 15 min']].map(([ic, t, d]) => (
               <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--stone-100)' }}>
-                <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--clay-50)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ width: 38, height: 38, borderRadius: 'var(--blob-3)', background: 'var(--clay-50)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <BIcon name={ic} size={17} color="var(--clay-600)" />
                 </span>
                 <div style={{ flex: 1 }}>
@@ -80,7 +80,7 @@ function BenchmarksView() {
           <BCard padding="lg" style={{ background: 'var(--sage-50)', border: 'none' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--sage-700)', marginBottom: 8 }}>It's working</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3, letterSpacing: '-0.01em' }}>
-              Math mastery is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)' }}>12 points</span> since the fractions set.
+              Math mastery is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)', fontFamily: 'var(--font-serif)' }}>12 points</span> since the fractions set.
             </div>
             <svg width="100%" height="54" viewBox="0 0 260 54" preserveAspectRatio="none" style={{ margin: '12px 0 4px' }}>
               <path d="M0 44 C30 42 50 40 80 36 C120 31 150 26 190 16 C220 9 240 7 260 5" fill="none" stroke="var(--sage-500)" strokeWidth="2.5" strokeLinecap="round" />
@@ -89,7 +89,7 @@ function BenchmarksView() {
             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', color: 'var(--text-subtle)', letterSpacing: '0.06em' }}>
               <span>APR</span><span>6 WEEKS</span><span>NOW · 82%</span>
             </div>
-            <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 12, lineHeight: 1 }}>your work is paying off &#10022;</div>
+            <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 12, lineHeight: 1 }}>your work is paying off &#10022;</div>
           </BCard>
         </div>
       </div>

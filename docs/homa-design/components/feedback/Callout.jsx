@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Callout, inline banner for tips, notes, and HOMA suggestions.
+ * Homa Callout, inline banner for tips, notes, and Homa suggestions.
  */
 export function Callout({ tone = 'brand', title, icon = null, children, style = {} }) {
   const tones = {

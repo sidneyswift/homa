@@ -1,4 +1,4 @@
-Pill-shaped button for HOMA's primary and secondary actions; use `primary` (clay) for the single main action per view and `secondary`/`ghost` for the rest.
+Pill-shaped button for Homa's primary and secondary actions; use `primary` (clay) for the single main action per view and `secondary`/`ghost` for the rest.
 
 ```jsx
 <Button variant="primary" size="md" onClick={save}>Save plan</Button>

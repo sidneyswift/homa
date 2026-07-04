@@ -1,4 +1,5 @@
-/* HOMA type scale. Display uses Newsreader serif; UI/body uses Hanken Grotesk. */
+/* Homa type scale. Display uses Newsreader (which is also the italic accent,
+   one family, two jobs); UI/body uses Hanken Grotesk. */
 
 :root {
   /* Font sizes */

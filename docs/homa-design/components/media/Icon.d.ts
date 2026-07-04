@@ -12,7 +12,7 @@ export interface IconProps {
 }
 
 /**
- * Lucide icon wrapper, HOMA's canonical icon set. Requires the Lucide CDN
+ * Lucide icon wrapper, Homa's canonical icon set. Requires the Lucide CDN
  * script on the page: <script src="https://unpkg.com/lucide@latest"></script>
  * and a lucide.createIcons() call after mount.
  */

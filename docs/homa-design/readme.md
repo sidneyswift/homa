@@ -1,16 +1,16 @@
-# HOMA Design System
+# Homa Design System
 
-**HOMA** is an AI assistant for homeschooling moms, a calm, capable co-pilot. She plans the week and tracks progress, but the heart of the product is deeper: she **benchmarks each child against state/national standards through a gentle parent checklist** (a test for the mother, never the child), **generates practice targeted at exactly what's growing** (workbook pages, sensory activities), and then **proves the loop closed**, showing that the work moved the numbers. She also **connects lessons to the real world**: comparing curriculums, finding co-ops and story hours, suggesting the planetarium during space week or the zoo during the animal unit, and introducing nearby HOMA families. HOMA ships as a **web app** (chat + dashboards + benchmarks + discover), a **mobile app**, and a **marketing landing page**, with a growing set of **social templates**.
+**Homa** is an AI assistant for homeschooling moms, a calm, capable co-pilot. She plans the week and tracks progress, but the heart of the product is deeper: she **benchmarks each child against state/national standards through a gentle parent checklist** (a test for the mother, never the child), **generates practice targeted at exactly what's growing** (workbook pages, sensory activities), and then **proves the loop closed**, showing that the work moved the numbers. She also **connects lessons to the real world**: comparing curriculums, finding co-ops and story hours, suggesting the planetarium during space week or the zoo during the animal unit, and introducing nearby Homa families. Homa ships as a **web app** (chat + dashboards + benchmarks + discover), a **mobile app**, and a **marketing landing page**, with a growing set of **social templates**.
 
-This repository is the single source of truth for HOMA's brand: design tokens, fonts, reusable UI components, full-screen UI kits, foundation specimens, and social layouts.
+This repository is the single source of truth for Homa's brand: design tokens, fonts, reusable UI components, full-screen UI kits, foundation specimens, and social layouts.
 
-> **Origin & sources:** This system was designed **from scratch**, no prior logo, brand assets, codebase, or Figma file was provided. All colors, type, and components below are original choices for HOMA. If you have existing brand assets, share them and we'll reconcile the system to match (see *Caveats* at the bottom).
+> **Origin & sources:** This system was designed **from scratch**, no prior logo, brand assets, codebase, or Figma file was provided. All colors, type, and components below are original choices for Homa. If you have existing brand assets, share them and we'll reconcile the system to match (see *Caveats* at the bottom).
 
 ---
 
-## Direction: "Quiet warmth"
+## Direction: "Warm and playful"
 
-HOMA is warm, but the warmth is **quiet and editorial**, premium the way fine stationery or a well-made journal is premium, not cozy-craft. Cream paper, terracotta restraint, sage calm, a whisper of gold. The system leans on **serif headlines with italic accents, hairline rules, generous negative space, small letter-spaced labels, and a single accent per surface**. Color whispers; type does the work. Nothing shouts, and nothing feels cheap.
+Homa is warm at heart and playful at the edges: the schoolbook charm of a children's museum, held together by editorial restraint. Cream paper (sometimes ruled like a notebook), a coral primary with mint, sunshine, and pool-aqua friends, chunky rounded headlines (Bricolage Grotesque) with serif-italic accent words, a lowercase wordmark, chunky pill buttons, blob-masked photos, squiggle dividers, wavy section edges, and little hand-placed doodles. The warmth and the reassuring voice stay; the serif moved into the accents; the color turned up and the shapes loosened. Rule of restraint: one or two playful devices per surface, never all of them at once.
 
 ---
 
@@ -24,27 +24,27 @@ HOMA is warm, but the warmth is **quiet and editorial**, premium the way fine st
 
 ### The promise (say it everywhere)
 
-> **You've got this. HOMA's got the rest.**
+> **You've got this. Homa's got the rest.**
 
 It affirms *her*, the teaching, the patience, the love, the part only she can do, and offloads the doubt and admin (planning, tracking, "what do we do today?"). Every surface should express one feeling, **calm**, and one relationship, **a companion in your corner.** Tagline: *"Homeschooling, made calm."*
 
 ### Five things that make it *feel* like the solution
 
-1. **HOMA is a presence, not a product.** A consistent, reassuring voice with signature moments, a warm daily greeting, gentle nudges, and *permission* ("a lighter day is still a good day"). It shows up in the UI as the recurring **"A note from HOMA"** pattern (see the `Callout` component and the mobile Home screen).
-2. **An ownable, homeschool-specific device, "HOMA's hand."** Two signatures rooted in her world: the **notebook margin-rule** (a clay vertical line, the workbook margin) and **HOMA's handwriting** (the Caveat accent, used deliberately as a personal margin note, *one per surface, max*). Plus a **checkmark / gold-star** language for progress: the "good job" of childhood, reclaimed. See `guidelines/brand-device.card.html` and `social/brand-promise.html`.
+1. **Homa is a presence, not a product.** A consistent, reassuring voice with signature moments, a warm daily greeting, gentle nudges, and *permission* ("a lighter day is still a good day"). It shows up in the UI as the recurring **"A note from Homa"** pattern (see the `Callout` component and the mobile Home screen).
+2. **An ownable, homeschool-specific device, "Homa's hand."** Two signatures rooted in her world: the **notebook margin-rule** (a clay vertical line, the workbook margin) and **Homa's handwriting** (the Caveat accent, always **sage**, used deliberately as a personal margin note, *one per surface, max*). Plus a **checkmark / gold-star** language for progress: the "good job" of childhood, reclaimed. See `guidelines/brand-device.card.html` and `social/brand-promise.html`.
 3. **Reassurance-first data.** Progress never triggers the "are they behind?" fear. **No red "BEHIND" labels, ever.** Lead with growth, effort, streaks, and "on track"; celebrate small wins. The dashboard should *calm* her, not audit her.
-4. **Proof, gently, the ultimate selling point.** The benchmark checklist is *a test for the mother, never the child* ("Does he count to 120? Not yet, that's just what's next"). HOMA targets practice at what's growing, then **shows the needle move**: "Math is up 12 points since the fractions set." Validation of her journey is the deepest value HOMA delivers. See `ui_kits/web-app/BenchmarksView.jsx`.
-5. **Connected to her world.** Lessons reach outward, the planetarium during space week, red pandas at the zoo during the animal unit, story hour Thursday, the Tuesday co-op, four HOMA families within five miles. She is not alone, and the plan knows her town. See `ui_kits/web-app/DiscoverView.jsx`.
+4. **Proof, gently, the ultimate selling point.** The benchmark checklist is *a test for the mother, never the child* ("Does he count to 120? Not yet, that's just what's next"). Homa targets practice at what's growing, then **shows the needle move**: "Math is up 12 points since the fractions set." Validation of her journey is the deepest value Homa delivers. See `ui_kits/web-app/BenchmarksView.jsx`.
+5. **Connected to her world.** Lessons reach outward, the planetarium during space week, red pandas at the zoo during the animal unit, story hour Thursday, the Tuesday co-op, four Homa families within five miles. She is not alone, and the plan knows her town. See `ui_kits/web-app/DiscoverView.jsx`.
 
 ---
 
 ## Content fundamentals
 
-**Voice:** HOMA is a warm, competent companion, the friend who's also a veteran homeschooler. She *offers*, she never *commands*.
+**Voice:** Homa is a warm, competent companion, the friend who's also a veteran homeschooler. She *offers*, she never *commands*.
 
-- **Person:** Second person ("you," "your kids," "Maya"). HOMA refers to herself as "I" sparingly and only when helpful ("I'll draft that for you").
+- **Person:** Second person ("you," "your kids," "Maya"). Homa refers to herself as "I" sparingly and only when helpful ("I'll draft that for you").
 - **Tone:** Encouraging, concrete, calm. Celebrates effort and progress; normalizes lighter weeks and off days. Never preachy, never guilt-inducing, never corporate.
-- **Casing:** Sentence case everywhere, headings, buttons, labels. The wordmark **HOMA** is the only all-caps element. Overlines/eyebrows may be uppercase with wide tracking.
+- **Casing:** Sentence case everywhere, headings, buttons, labels. The brand name is written **Homa** in copy, never all-caps; the wordmark/logo is lowercase **homa**. Overlines/eyebrows may be uppercase with wide tracking.
 - **Length:** Short. A sentence beats a paragraph. Lead with the helpful thing.
 - **Emoji:** Rare and warm, at most one per message, and only where it adds warmth (a ☀️ on a morning greeting). Never as bullet decoration or in dense UI.
 - **Punctuation:** **no em dashes, ever** (hard rule). Use a comma, a period, a colon, or a mid-dot (·) separator instead.
@@ -58,23 +58,26 @@ It affirms *her*, the teaching, the patience, the love, the part only she can do
 - ❌ "The system has generated a curriculum for the student."
 - ❌ "You must complete all assigned modules to proceed."
 
-The handwritten Caveat accent ("try this ✎", "swipe up") is HOMA's margin-note voice, used **once per layout at most**, for delight, never for critical information.
+The handwritten Caveat accent ("try this ✎", "swipe up") is Homa's margin-note voice, used **once per layout at most**, for delight, never for critical information.
 
 ---
 
 ## Visual foundations
 
-**Color.** Warm, earthy, low-saturation. The palette is built on warm-tinted neutrals (stone), not gray.
-- **Primary, Clay/Terracotta** (`--brand` = `#BE5F3C`): main actions, active nav, brand moments. Hover darkens to `--clay-600`; active to `--clay-700`.
-- **Secondary, Sage** (`#627A50`): success, "on track," calm accents, outline buttons.
-- **Accent, Gold/Butter** (`#D9A441`): milestones, highlights, "ahead" states.
-- **Info, Sky** (`#6E93A8`). **Danger, a soft clay-red** (`#C0492E`), never a harsh pure red.
-- **Surfaces:** page is warm cream `--bg-page` (`#FBF7F0`); an alternate warm band `--bg-page-warm` creates section rhythm; cards are pure white.
+**Color.** Warm and bright, built on warm-tinted neutrals (stone), not gray.
+- **Primary, Clay/Coral** (`--brand` = `#E7602F`): main actions, active nav, brand moments. Hover darkens to `--clay-600`; active to `--clay-700`.
+- **Secondary, Sage/Mint** (`#3D9A50`): success, "on track," fresh accents, outline buttons.
+- **Accent, Gold/Sunshine** (`#F0BE00`, tints up to `#FFD43B`): milestones, highlights, "ahead" states, the sunshine CTA feeling.
+- **Info, Sky/Aqua** (`#4FB4D6`). **Danger, a warm coral-red** (`#E2593B`), never a harsh pure red.
+- **Pops** (sparingly: doodles, bands, moments): `--pop-cobalt` `#2E6BE6`, `--pop-blush` `#F49A90`, `--pop-navy` `#23304F`.
+- **Section bands** (full-bleed playful backgrounds): `--band-sky`, `--band-mint`, `--band-blush`, `--band-sunshine`. Use one or two bands per page for rhythm; body text on bands uses `--text-strong` / `--stone-700`.
+- **Surfaces:** page is warm cream `--bg-page` (`#FBF7F0`); cards are pure white; `--bg-paper` layers ruled notebook lines over cream.
 - **Dark theme (experimental):** "quiet evening", set `data-theme="dark"` on any subtree. Warm espresso surfaces, remapped tint roles so components adapt wholesale. Defined in `tokens/dark.css`, demoed in `guidelines/dark-mode.card.html`. Light is the default and primary theme.
 - **Text:** warm near-black `--text-strong` down through `--text-body / muted / subtle`, all warm-tinted stones, never cool gray.
 
 **Type.**
-- **Display, Newsreader** (serif, optical sizing): all headlines, hero copy, big numbers, dialog titles. Weights 500–600. Occasional *italic* on an emphasis word (the "calm" in "made calm").
+- **Display, Newsreader** (`--font-display`, editorial serif with optical sizes): all headlines, the lowercase wordmark, big numbers, dialog titles. Weights 500–600. It is the same family as the italic accent, so headline and accent are one voice.
+- **Serif accent** (`--font-serif`, an alias of the same Newsreader family): the *italic* emphasis word inside a headline (the "calm" in "made calm"), editorial pull quotes, testimonial copy. Never for UI chrome.
 - **UI & body, Hanken Grotesk** (humanist sans): everything in the interface and all reading copy. 400 body, 500–700 for emphasis/labels.
 - **Accent, Caveat** (handwritten): sparingly, for delight only.
 - **Mono, JetBrains Mono**: data, scores, percentages, code.
@@ -82,9 +85,9 @@ The handwritten Caveat accent ("try this ✎", "swipe up") is HOMA's margin-note
 
 **Spacing & layout.** 4px base scale (`--space-1..24`). Generous, airy padding, cards breathe. Content maxes out at comfortable reading widths (`--container-md` 820px for prose, `--container-xl` 1280px for app shells). Grid + flex with `gap`, never margin hacks. Responsive: collapse multi-column grids to one column below ~720px; the app sidebar becomes a bottom tab bar on mobile (see the mobile kit); keep 44px+ hit targets throughout.
 
-**Copy kit.** HOMA's reusable phrases, encouragement, empty/loading, errors, nudges, live in `guidelines/copy-kit.card.html`. Core rules: reassure before you inform; name the child, name the win; offer, never command; errors reassure first ("your work is safe") then give the fix.
+**Copy kit.** Homa's reusable phrases, encouragement, empty/loading, errors, nudges, live in `guidelines/copy-kit.card.html`. Core rules: reassure before you inform; name the child, name the win; offer, never command; errors reassure first ("your work is safe") then give the fix.
 
-**Corners.** Soft and rounded, never sharp. Cards use `--radius-lg` (18px); buttons and chips are fully **pill** (`--radius-pill`); inputs `--radius-md` (14px); modals `--radius-xl` (24px).
+**Corners & shapes.** Soft and rounded, never sharp. Cards use `--radius-lg` (22px); buttons and chips are fully **pill**; inputs `--radius-md` (16px); modals `--radius-xl` (28px). Playful shapes on top: **blob masks** for photos and tinted tiles (`--blob-1/2/3` as border-radius), the **Squiggle** heading divider, **wavy band edges** (any full-bleed band may enter or exit with a wave, in marketing and product alike), ruled **notebook paper** (`--bg-paper`), and **Doodle** stickers (star, heart, sun, sparkle, squiggle) in pop colors, rotated a few degrees. One or two per surface.
 
 **Shadows.** Soft, diffuse, **warm-tinted** (brown `rgba(51,42,33,…)`, never black/gray). `--shadow-sm` on resting cards, `--shadow-lg` on hover/lift, `--shadow-xl` on modals. Inputs get a clay focus glow (`--shadow-focus`), not a blue one.
 
@@ -111,7 +114,7 @@ The handwritten Caveat accent ("try this ✎", "swipe up") is HOMA's margin-note
 - **Substitution flag:** Lucide is used because no in-house icon set was provided. It's loaded from `unpkg.com/lucide@latest` in every card and kit. To pin or self-host, swap the CDN `<script>` and adjust `Icon.jsx`.
 - **No hand-rolled SVGs** for UI glyphs, always use `Icon`. (A handful of tiny inline SVGs exist *inside* components for check/chevron/close marks that must render without the icon font.)
 - **Emoji:** occasional and warm, per Content Fundamentals, never as an icon system.
-- **Common glyphs:** `sparkles` (HOMA / AI), `book-open`, `graduation-cap`, `calendar`, `chart-line`, `pencil`/`file-pen` (worksheets), `heart`, `award`, `clipboard-list`.
+- **Common glyphs:** `sparkles` (Homa / AI), `book-open`, `graduation-cap`, `calendar`, `chart-line`, `pencil`/`file-pen` (worksheets), `heart`, `award`, `clipboard-list`.
 
 ---
 
@@ -125,11 +128,12 @@ Reusable primitives live in `components/<group>/`, each with `.jsx` + `.d.ts` + 
 - **layout/**, `Card`
 - **data-display/**, `Badge`, `Avatar`, `ProgressBar`
 - **feedback/**, `Callout`, `Dialog`, `Toast`
-- **states/**, `Skeleton`, `EmptyState` (loading & empty, in HOMA's voice)
+- **states/**, `Skeleton`, `EmptyState` (loading & empty, in Homa's voice)
+- **playful/**, `Squiggle` (heading divider), `Doodle` (hand-placed decorative shapes)
 - **navigation/**, `Tabs`
 - **media/**, `Icon` (Lucide wrapper)
 
-**Intentional additions** (not from a source inventory, this was a from-scratch build): `Icon` (needed to standardize Lucide usage), `Callout` (HOMA's in-page "voice"), `Chip` (subject/topic selection is central to the product), `ProgressBar` (progress tracking is a core feature). Each earns its place against HOMA's feature set.
+**Intentional additions** (not from a source inventory, this was a from-scratch build): `Icon` (needed to standardize Lucide usage), `Callout` (Homa's in-page "voice"), `Chip` (subject/topic selection is central to the product), `ProgressBar` (progress tracking is a core feature). Each earns its place against Homa's feature set.
 
 ---
 
@@ -137,8 +141,8 @@ Reusable primitives live in `components/<group>/`, each with `.jsx` + `.d.ts` + 
 
 Full-screen, interactive recreations in `ui_kits/<product>/` (each has its own README):
 
-- **web-app/**, desktop app: login → shell with **Ask HOMA** chat, **Progress** dashboard, **Benchmarks** (skills checklist + standards + impact proof), **Week planner**, **Discover** (lesson-matched outings, co-ops, nearby HOMA families), **Curriculum** (side-by-side comparison, fit-matched); plus **onboarding** (`onboarding.html`: add kids → subjects → HOMA drafts the week).
-- **mobile-app/**, phone-framed app: Home (check-off celebration), Ask HOMA, Discover, and Kids (benchmarks) with bottom-tab nav.
+- **web-app/**, desktop app: login → shell with **Ask Homa** chat, **Progress** dashboard, **Benchmarks** (skills checklist + standards + impact proof), **Week planner**, **Discover** (lesson-matched outings, co-ops, nearby Homa families), **Curriculum** (side-by-side comparison, fit-matched); plus **onboarding** (`onboarding.html`: add kids → subjects → Homa drafts the week).
+- **mobile-app/**, phone-framed app: Home (check-off celebration), Ask Homa, Discover, and Kids (benchmarks) with bottom-tab nav.
 - **landing/**, marketing site: hero, features, how-it-works, testimonial, pricing, footer.
 
 ---
@@ -161,7 +165,7 @@ Full-screen, interactive recreations in `ui_kits/<product>/` (each has its own R
 
 This is a **complete first pass built from scratch**, so a few things are placeholders awaiting your input:
 
-- **Fonts are Google-hosted substitutions** (Newsreader / Hanken Grotesk / Caveat / JetBrains Mono), not custom brand fonts. They load via CDN, so the manifest reports 0 self-hosted `@font-face` files. If HOMA has (or wants) bespoke fonts, send the files and I'll self-host them.
+- **Fonts are Google-hosted substitutions** (Newsreader / Hanken Grotesk / Caveat / JetBrains Mono), not custom brand fonts. They load via CDN, so the manifest reports 0 self-hosted `@font-face` files. If Homa has (or wants) bespoke fonts, send the files and I'll self-host them.
 - **No logo → chosen: "A · The bright home."** A home with a spark of magic inside, homeschool + assistant in one glyph. It lives as the reusable **`Logo`** component (`components/brand/`), specced in `guidelines/brand-logo-lockup.card.html` (clear-space, size ramp, app icon, reversed), and is wired into the web app, mobile app, landing page, and social templates. Two earlier alternates (seedling, warm-morning) are preserved in `guidelines/brand-logo-directions.card.html`. The mark is drawn in CSS/SVG from geometry, if you'd like a hand-refined vector or a different color treatment, say so.
 - **Imagery is placeholder slots.** Drop in real warm lifestyle photography to finalize the landing page and social posts.
 

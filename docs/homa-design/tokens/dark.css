@@ -1,4 +1,4 @@
-/* HOMA dark theme, "quiet evening". Experimental v1.
+/* Homa dark theme, "quiet evening". Experimental v1.
    Opt-in: set data-theme="dark" on <html>, <body>, or any subtree.
    Overrides semantic aliases AND the raw tint roles components lean on
    (hover fills, chip tints, progress tracks) so UI adapts wholesale.
@@ -22,34 +22,34 @@
   --text-on-clay: #FFFFFF;
 
   /* Brand */
-  --brand:        #D0714A;
-  --brand-hover:  #DB8560;
-  --brand-active: #E0906C;
-  --brand-soft:   rgba(208, 113, 74, 0.14);
-  --brand-soft-2: rgba(208, 113, 74, 0.22);
+  --brand:        #F1793F;
+  --brand-hover:  #FB9868;
+  --brand-active: #FFBE9C;
+  --brand-soft:   rgba(241, 121, 63, 0.16);
+  --brand-soft-2: rgba(241, 121, 63, 0.24);
   --on-brand:     #FFFFFF;
 
-  --accent-sage:      #9AAF82;
-  --accent-sage-soft: rgba(124, 147, 103, 0.16);
-  --accent-gold:      #E8BE5E;
-  --accent-gold-soft: rgba(217, 164, 65, 0.16);
+  --accent-sage:      #7CC689;
+  --accent-sage-soft: rgba(85, 175, 102, 0.18);
+  --accent-gold:      #FFD43B;
+  --accent-gold-soft: rgba(240, 190, 0, 0.16);
 
   /* Borders & focus */
   --border-subtle:  #322B22;
   --border-default: #3D352A;
   --border-strong:  #55493A;
-  --border-brand:   #8A4A30;
-  --focus-ring:     #D0714A;
+  --border-brand:   #C44C22;
+  --focus-ring:     #F1793F;
 
   /* Status */
-  --success:      #9AAF82;
-  --success-soft: rgba(124, 147, 103, 0.16);
-  --warning:      #E8BE5E;
-  --warning-soft: rgba(217, 164, 65, 0.16);
-  --danger:       #E07A5A;
-  --danger-soft:  rgba(192, 73, 46, 0.22);
-  --info:         #A8C7D4;
-  --info-soft:    rgba(110, 147, 168, 0.18);
+  --success:      #7CC689;
+  --success-soft: rgba(85, 175, 102, 0.18);
+  --warning:      #FFD43B;
+  --warning-soft: rgba(240, 190, 0, 0.16);
+  --danger:       #F07B5E;
+  --danger-soft:  rgba(226, 89, 59, 0.24);
+  --info:         #9FDCEC;
+  --info-soft:    rgba(79, 180, 214, 0.18);
 
   /* Raw tint roles remapped so components adapt (hover fills, chips, tracks, soft text) */
   --stone-50:  #171310;
@@ -57,23 +57,23 @@
   --stone-200: #362E24;
   --stone-300: #4A4033;
   --stone-400: #6B6252;
-  --clay-50:   rgba(208, 113, 74, 0.14);
-  --clay-100:  rgba(208, 113, 74, 0.20);
-  --clay-200:  #8A4A30;
-  --clay-600:  #E0906C;
-  --clay-700:  #EDB79C;
-  --sage-50:   rgba(124, 147, 103, 0.16);
-  --sage-100:  rgba(124, 147, 103, 0.24);
-  --sage-300:  #627A50;
-  --sage-400:  #7C9367;
-  --sage-600:  #9AAF82;
-  --sage-700:  #BCCBA9;
-  --gold-100:  rgba(217, 164, 65, 0.18);
-  --gold-300:  #9a7118;
-  --rose-100:  rgba(192, 73, 46, 0.22);
-  --rose-500:  #E07A5A;
-  --rose-600:  #E8987E;
-  --sky-100:   rgba(110, 147, 168, 0.18);
-  --sky-300:   #567A8E;
-  --sky-600:   #A8C7D4;
+  --clay-50:   rgba(241, 121, 63, 0.16);
+  --clay-100:  rgba(241, 121, 63, 0.24);
+  --clay-200:  #9C3B1B;
+  --clay-600:  #FB9868;
+  --clay-700:  #FFBE9C;
+  --sage-50:   rgba(85, 175, 102, 0.16);
+  --sage-100:  rgba(85, 175, 102, 0.26);
+  --sage-300:  #2F7C40;
+  --sage-400:  #55AF66;
+  --sage-600:  #7CC689;
+  --sage-700:  #A9DBB1;
+  --gold-100:  rgba(240, 190, 0, 0.16);
+  --gold-300:  #D9AC1E;
+  --rose-100:  rgba(226, 89, 59, 0.24);
+  --rose-500:  #F07B5E;
+  --rose-600:  #F59D87;
+  --sky-100:   rgba(79, 180, 214, 0.18);
+  --sky-300:   #3A8FA9;
+  --sky-600:   #9FDCEC;
 }

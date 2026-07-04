@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA ProgressBar, rounded track, clay/sage fill. Optional label + value.
+ * Homa ProgressBar, rounded track, clay/sage fill. Optional label + value.
  */
 export function ProgressBar({ value = 0, max = 100, tone = 'brand', label, showValue = false, size = 'md', style = {} }) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));

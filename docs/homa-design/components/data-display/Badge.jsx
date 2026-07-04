@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Badge, small status/label pill.
+ * Homa Badge, small status/label pill.
  */
 export function Badge({ tone = 'neutral', variant = 'soft', children, iconLeft = null, style = {} }) {
   const tones = {

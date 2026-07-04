@@ -6,7 +6,7 @@ export interface EmptyStateProps {
   body?: React.ReactNode;
   /** Usually a Button. */
   action?: React.ReactNode;
-  /** Optional handwritten sign-off (HOMA's hand), e.g. "no rush ✎". */
+  /** Optional handwritten sign-off (Homa's hand), e.g. "no rush ✎". */
   hand?: React.ReactNode;
   style?: React.CSSProperties;
 }

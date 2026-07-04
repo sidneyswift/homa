@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Skeleton, warm shimmer placeholder while content loads.
+ * Homa Skeleton, warm shimmer placeholder while content loads.
  */
 export function Skeleton({ width = '100%', height = 16, radius = 'var(--radius-sm)', style = {} }) {
   React.useEffect(() => {

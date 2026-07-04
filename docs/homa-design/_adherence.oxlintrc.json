@@ -24,6 +24,7 @@
               "components/layout/**",
               "components/media/**",
               "components/navigation/**",
+              "components/playful/**",
               "components/states/**",
               "ui_kits/landing/**",
               "ui_kits/mobile-app/**",
@@ -109,6 +110,14 @@
         "message": "<Dialog> doesn't accept that prop. Declared props: open, onClose, title, children, footer, width, style."
       },
       {
+        "selector": "JSXOpeningElement[name.name='Doodle'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|size|color|rotate|style|key|ref|className|style|children)$/]",
+        "message": "<Doodle> doesn't accept that prop. Declared props: name, size, color, rotate, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Doodle'] > JSXAttribute[name.name='name'] > Literal[value!=/^(?:star|heart|sun|sparkle|squiggle)$/]",
+        "message": "<Doodle> name must be one of 'star' | 'heart' | 'sun' | 'sparkle' | 'squiggle'."
+      },
+      {
         "selector": "JSXOpeningElement[name.name='EmptyState'] > JSXAttribute > JSXIdentifier[name!=/^(?:icon|title|body|action|hand|style|key|ref|className|style|children)$/]",
         "message": "<EmptyState> doesn't accept that prop. Declared props: icon, title, body, action, hand, style."
       },
@@ -177,6 +186,10 @@
         "message": "<Skeleton> doesn't accept that prop. Declared props: width, height, radius, style."
       },
       {
+        "selector": "JSXOpeningElement[name.name='Squiggle'] > JSXAttribute > JSXIdentifier[name!=/^(?:color|segments|line|style|key|ref|className|style|children)$/]",
+        "message": "<Squiggle> doesn't accept that prop. Declared props: color, segments, line, style."
+      },
+      {
         "selector": "JSXOpeningElement[name.name='Switch'] > JSXAttribute > JSXIdentifier[name!=/^(?:checked|onChange|label|disabled|size|style|key|ref|className|style|children)$/]",
         "message": "<Switch> doesn't accept that prop. Declared props: checked, onChange, label, disabled, size, style."
       },
@@ -238,6 +251,9 @@
       "Dialog": {
         "replaces": []
       },
+      "Doodle": {
+        "replaces": []
+      },
       "EmptyState": {
         "replaces": []
       },
@@ -265,6 +281,9 @@
       "Skeleton": {
         "replaces": []
       },
+      "Squiggle": {
+        "replaces": []
+      },
       "Switch": {
         "replaces": []
       },
@@ -283,8 +302,16 @@
       "--accent-gold-soft",
       "--accent-sage",
       "--accent-sage-soft",
+      "--band-blush",
+      "--band-mint",
+      "--band-sky",
+      "--band-sunshine",
       "--bg-page",
       "--bg-page-warm",
+      "--bg-paper",
+      "--blob-1",
+      "--blob-2",
+      "--blob-3",
       "--border-brand",
       "--border-default",
       "--border-strong",
@@ -318,6 +345,7 @@
       "--font-hand",
       "--font-mono",
       "--font-sans",
+      "--font-serif",
       "--gold-100",
       "--gold-300",
       "--gold-400",
@@ -329,6 +357,11 @@
       "--leading-snug",
       "--leading-tight",
       "--on-brand",
+      "--paper-rule",
+      "--pop-blush",
+      "--pop-cobalt",
+      "--pop-cobalt-deep",
+      "--pop-navy",
       "--press-scale",
       "--radius-2xl",
       "--radius-card",
@@ -373,6 +406,7 @@
       "--space-5",
       "--space-6",
       "--space-8",
+      "--squiggle-ink",
       "--stone-100",
       "--stone-200",
       "--stone-300",
@@ -418,6 +452,7 @@
     ],
     "tokenKinds": {
       "--font-display": "font",
+      "--font-serif": "font",
       "--font-sans": "font",
       "--font-hand": "font",
       "--font-mono": "font",
@@ -458,6 +493,14 @@
       "--rose-100": "color",
       "--rose-500": "color",
       "--rose-600": "color",
+      "--pop-cobalt": "color",
+      "--pop-cobalt-deep": "color",
+      "--pop-blush": "color",
+      "--pop-navy": "color",
+      "--band-sky": "color",
+      "--band-mint": "color",
+      "--band-blush": "color",
+      "--band-sunshine": "color",
       "--bg-page": "color",
       "--bg-page-warm": "color",
       "--surface-card": "color",
@@ -493,6 +536,12 @@
       "--danger-soft": "color",
       "--info": "color",
       "--info-soft": "color",
+      "--blob-1": "other",
+      "--blob-2": "other",
+      "--blob-3": "other",
+      "--paper-rule": "color",
+      "--bg-paper": "other",
+      "--squiggle-ink": "other",
       "--text-2xs": "font",
       "--text-xs": "font",
       "--text-sm": "font",

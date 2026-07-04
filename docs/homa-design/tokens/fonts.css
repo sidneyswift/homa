@@ -1,18 +1,20 @@
-/* HOMA webfonts.
-   NOTE: These are Google Fonts loaded over CDN, chosen from scratch (no custom
-   brand fonts were provided). To self-host, download the binaries and replace
-   the @import below with local @font-face rules pointing at tokens/fonts/*.woff2.
+/* Homa webfonts.
+   NOTE: Google Fonts over CDN (no custom brand fonts were provided). To
+   self-host, download the binaries and replace the @import with local
+   @font-face rules pointing at tokens/fonts/*.woff2.
 
-   - Newsreader   -> editorial serif for display/headlines (warm, optical sizes)
-   - Hanken Grotesk -> humanist sans for UI + body (clean, friendly)
-   - Caveat        -> handwritten accent, used sparingly (margin notes, labels)
-   - JetBrains Mono -> data / code / numeric readouts
+   - Newsreader     -> display serif: headlines, wordmark, big numbers, AND
+                       the italic accent word. One family, two jobs.
+   - Hanken Grotesk -> humanist sans for UI + body
+   - Caveat         -> Homa's hand: product margin notes, one per surface, max
+   - JetBrains Mono -> data / numeric readouts
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
   --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif; /* same family as display, kept as an alias for accent usage */
   --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-hand: 'Caveat', 'Segoe Script', cursive;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;

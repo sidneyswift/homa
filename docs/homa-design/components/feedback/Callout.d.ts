@@ -9,5 +9,5 @@ export interface CalloutProps {
   style?: React.CSSProperties;
 }
 
-/** Inline banner for tips, notes, and HOMA suggestions. */
+/** Inline banner for tips, notes, and Homa suggestions. */
 export function Callout(props: CalloutProps): JSX.Element;

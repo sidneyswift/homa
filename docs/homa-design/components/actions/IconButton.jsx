@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA IconButton, square/circular button holding a single Icon.
+ * Homa IconButton, square/circular button holding a single Icon.
  */
 export function IconButton({
   variant = 'ghost',

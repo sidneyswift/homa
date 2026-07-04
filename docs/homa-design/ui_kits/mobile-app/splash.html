@@ -1,14 +1,13 @@
 <!-- @dsCard group="Brand" viewport="400x680" name="App splash · launch moment" subtitle="The home draws in, the spark wakes, the promise settles" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,600&family=Hanken+Grotesk:wght@600&display=swap" rel="stylesheet">
 <style>
   html,body{margin:0;height:100%;}
   .screen{width:100%;height:100vh;min-height:640px;background:var(--bg-page);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-sans);position:relative;overflow:hidden;}
   .mark{width:96px;height:96px;}
   .house{stroke:var(--brand);stroke-width:3;fill:none;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:170;stroke-dashoffset:170;animation:draw 1.1s var(--ease-out) .2s forwards;}
   .spark{fill:var(--brand);transform-box:fill-box;transform-origin:center;opacity:0;animation:wake 0.7s var(--ease-out) 1.05s forwards, breathe 3.2s ease-in-out 1.9s infinite;}
-  .word{font-family:var(--font-display);font-weight:600;font-size:2.6rem;color:var(--text-strong);letter-spacing:0.01em;margin-top:26px;opacity:0;transform:translateY(10px);animation:rise .7s var(--ease-out) 1.25s forwards;}
-  .tag{font-family:var(--font-display);font-style:italic;font-size:1.15rem;color:var(--text-muted);margin-top:8px;opacity:0;animation:fade .8s var(--ease-out) 1.7s forwards;}
+  .word{font-family:var(--font-display);font-weight:600;font-size:2.7rem;color:var(--text-strong);letter-spacing:-0.01em;margin-top:22px;opacity:0;transform:translateY(10px);animation:rise .7s var(--ease-out) 1.25s forwards;}
+  .tag{font-family:var(--font-serif);font-style:italic;font-size:1.15rem;color:var(--text-muted);margin-top:6px;opacity:0;animation:fade .8s var(--ease-out) 1.7s forwards;}
   .foot{position:absolute;bottom:40px;font-size:0.78rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-subtle);opacity:0;animation:fade .8s var(--ease-out) 2s forwards;}
   @keyframes draw{to{stroke-dashoffset:0;}}
   @keyframes wake{0%{opacity:0;transform:scale(0) rotate(-40deg);}60%{opacity:1;transform:scale(1.18) rotate(6deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
@@ -26,7 +25,7 @@
     <path class="house" d="M9 22 L24 9 L39 22 V37 A2 2 0 0 1 37 39 H11 A2 2 0 0 1 9 37 Z"/>
     <path class="spark" d="M24 20 C24.7 25 25.5 25.8 30 26.5 C25.5 27.2 24.7 28 24 33 C23.3 28 22.5 27.2 18 26.5 C22.5 25.8 23.3 25 24 20 Z"/>
   </svg>
-  <div class="word">HOMA</div>
+  <div class="word">homa</div>
   <div class="tag">homeschooling, made calm</div>
   <div class="foot">You&rsquo;ve got this</div>
 </div>

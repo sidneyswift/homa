@@ -1,4 +1,4 @@
-/* HOMA motion, gentle, no bounce. Ease-out for entrances, quick for hovers. */
+/* Homa motion, gentle, no bounce. Ease-out for entrances, quick for hovers. */
 
 :root {
   --ease-out:   cubic-bezier(0.22, 0.8, 0.28, 1); /* @kind other */

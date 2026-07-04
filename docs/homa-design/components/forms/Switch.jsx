@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Switch, pill toggle, clay when on.
+ * Homa Switch, pill toggle, clay when on.
  */
 export function Switch({ checked = false, onChange, label, disabled = false, size = 'md', style = {} }) {
   const dims = { sm: { w: 38, h: 22, k: 16 }, md: { w: 46, h: 26, k: 20 } }[size];

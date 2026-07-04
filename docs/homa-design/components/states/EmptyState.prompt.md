@@ -1,4 +1,4 @@
-Empty state as a warm invitation, never a dead end. HOMA always offers the next step.
+Empty state as a warm invitation, never a dead end. Homa always offers the next step.
 
 ```jsx
 <EmptyState
@@ -10,4 +10,4 @@ Empty state as a warm invitation, never a dead end. HOMA always offers the next 
 />
 ```
 
-Copy pattern: state the fact gently, then offer help in HOMA's voice.
+Copy pattern: state the fact gently, then offer help in Homa's voice.

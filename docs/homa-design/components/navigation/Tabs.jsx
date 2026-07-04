@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Tabs, underline tab bar. Controlled via value/onChange.
+ * Homa Tabs, underline tab bar. Controlled via value/onChange.
  */
 export function Tabs({ tabs = [], value, onChange, style = {} }) {
   const [focused, setFocused] = React.useState(null);

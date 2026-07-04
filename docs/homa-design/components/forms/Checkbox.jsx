@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Checkbox, soft rounded box with clay check when selected.
+ * Homa Checkbox, soft rounded box with clay check when selected.
  */
 export function Checkbox({ checked = false, onChange, label, disabled = false, id, style = {} }) {
   const fieldId = id || (label ? 'cb-' + label.toLowerCase().replace(/\s+/g, '-') : undefined);

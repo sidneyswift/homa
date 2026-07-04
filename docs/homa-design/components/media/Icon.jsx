@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Icon, thin wrapper over Lucide (loaded from CDN). Renders an <i> that
+ * Homa Icon, thin wrapper over Lucide (loaded from CDN). Renders an <i> that
  * lucide.createIcons() upgrades to an SVG. In this design system Lucide is the
  * canonical icon set: rounded joins, 1.75 stroke, friendly but precise.
  */

@@ -1,5 +1,7 @@
-/* HOMA color system, "Quiet warmth".
-   Base scales first, then semantic aliases. Use semantic aliases in product UI. */
+/* Homa color system, "Warm and playful".
+   Base scales first, then semantic aliases. Use semantic aliases in product UI.
+   Playful pass: scales brightened toward coral, mint, sunshine, and pool aqua,
+   plus pop accents and section band colors drawn from the reference kit. */
 
 :root {
   /* --- Warm neutrals (stone) --- */
@@ -14,42 +16,54 @@
   --stone-800: #332E29;
   --stone-900: #221E1A;
 
-  /* --- Clay / terracotta (primary) --- */
-  --clay-50:  #FBEDE6;
-  --clay-100: #F6D9C9;
-  --clay-200: #EDB79C;
-  --clay-300: #E0906C;
-  --clay-400: #D0714A;
-  --clay-500: #BE5F3C;
-  --clay-600: #A34E30;
-  --clay-700: #833E27;
+  /* --- Clay / coral (primary) --- */
+  --clay-50:  #FFF0E8;
+  --clay-100: #FFDDC9;
+  --clay-200: #FFBE9C;
+  --clay-300: #FB9868;
+  --clay-400: #F1793F;
+  --clay-500: #E7602F;
+  --clay-600: #C44C22;
+  --clay-700: #9C3B1B;
 
-  /* --- Sage (secondary) --- */
-  --sage-50:  #EEF2E9;
-  --sage-100: #DAE3CE;
-  --sage-200: #BCCBA9;
-  --sage-300: #9AAF82;
-  --sage-400: #7C9367;
-  --sage-500: #627A50;
-  --sage-600: #4C6140;
-  --sage-700: #3B4C33;
+  /* --- Sage / mint (secondary) --- */
+  --sage-50:  #EAF6EC;
+  --sage-100: #D2ECD6;
+  --sage-200: #A9DBB1;
+  --sage-300: #7CC689;
+  --sage-400: #55AF66;
+  --sage-500: #3D9A50;
+  --sage-600: #2F7C40;
+  --sage-700: #275F34;
 
-  /* --- Gold / butter (accent) --- */
-  --gold-100: #FBEECB;
-  --gold-300: #F2D48A;
-  --gold-400: #E8BE5E;
-  --gold-500: #D9A441;
+  /* --- Gold / sunshine (accent) --- */
+  --gold-100: #FFF3C2;
+  --gold-300: #FFE175;
+  --gold-400: #FFD43B;
+  --gold-500: #F0BE00;
 
-  /* --- Sky (info accent) --- */
-  --sky-100: #DCE9EE;
-  --sky-300: #A8C7D4;
-  --sky-500: #6E93A8;
-  --sky-600: #567A8E;
+  /* --- Sky / pool aqua (info accent) --- */
+  --sky-100: #DDF3F9;
+  --sky-300: #9FDCEC;
+  --sky-500: #4FB4D6;
+  --sky-600: #3A8FA9;
 
-  /* --- Support: soft red for errors --- */
-  --rose-100: #F7DED4;
-  --rose-500: #C0492E;
-  --rose-600: #A23B24;
+  /* --- Support: warm coral-red for errors --- */
+  --rose-100: #FDE1D8;
+  --rose-500: #E2593B;
+  --rose-600: #BC4527;
+
+  /* --- Pop accents (playful, use sparingly: doodles, bands, moments) --- */
+  --pop-cobalt:      #2E6BE6;
+  --pop-cobalt-deep: #2456BF;
+  --pop-blush:       #F49A90;
+  --pop-navy:        #23304F;
+
+  /* --- Section bands (full-bleed playful backgrounds) --- */
+  --band-sky:      #9FE0EE;
+  --band-mint:     #BDE7C5;
+  --band-blush:    #F8B7AE;
+  --band-sunshine: #FFDB4D;
 
   /* =====================  SEMANTIC ALIASES  ===================== */
 

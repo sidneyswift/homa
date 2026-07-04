@@ -1,5 +1,6 @@
-// HOMA web app, Ask HOMA chat view (assistant interface).
-const { Icon: CIcon, IconButton: CIconButton, Button: CButton, Callout: CCallout, Chip: CChip } = window.HOMADesignSystem_113bd2;
+// Homa web app, Ask Homa chat view (assistant interface).
+const { Icon: CIcon, IconButton: CIconButton, Button: CButton, Callout: CCallout, Chip: CChip, Doodle: CDoodleRaw } = window.HOMADesignSystem_113bd2;
+const CDoodle = CDoodleRaw || (() => null);
 
 function ChatBubble({ from, children }) {
   const isHoma = from === 'homa';
@@ -28,8 +29,8 @@ function ChatView() {
       <div style={{ flex: 1, overflowY: 'auto', padding: '32px 32px 24px', maxWidth: 780, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
         <div style={{ textAlign: 'center', marginBottom: 34 }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 8 }}>Tuesday, May 13</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text-strong)' }}>Good morning, Sarah</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6, fontSize: '1.05rem' }}>What are we tackling today?</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>Good morning, Sarah <CDoodle name="sun" size={24} color="var(--gold-400)" rotate={10} /></div>
+          <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6, fontSize: '1.05rem' }}>What are we tackling today?</div>
         </div>
 
         <ChatBubble from="user">Can you plan a lighter week for Maya? She's been a bit burned out.</ChatBubble>
@@ -47,7 +48,7 @@ function ChatView() {
         </div>
         <CCallout tone="sage" title="A gentle reminder" icon={<CIcon name="heart" size={18} />}>
           Lighter weeks are part of the plan, not a setback. Maya's still on track for her term goals.
-          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>you&rsquo;re doing great &#10022;</div>
+          <div style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.45rem', color: 'var(--sage-600)', marginTop: 6, lineHeight: 1 }}>you&rsquo;re doing great &#10022;</div>
         </CCallout>
       </div>
 
@@ -62,7 +63,7 @@ function ChatView() {
             boxShadow: 'var(--shadow-md)',
           }}>
             <CIcon name="sparkles" size={20} color="var(--brand)" />
-            <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask HOMA anything…"
+            <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask Homa anything…"
               style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'var(--text-strong)' }} />
             <CIconButton variant="primary" ariaLabel="Send"><CIcon name="arrow-up" color="#fff" /></CIconButton>
           </div>

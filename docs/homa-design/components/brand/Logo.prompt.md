@@ -1,4 +1,4 @@
-The HOMA logo, "the bright home" mark (a home with a spark of magic inside) plus the Newsreader wordmark. Use this everywhere the brand appears; never redraw the mark by hand.
+The Homa logo, "the bright home" mark (a home with a spark of magic inside) plus the Newsreader wordmark. Use this everywhere the brand appears; never redraw the mark by hand.
 
 ```jsx
 <Logo size={32} />                         {/* full lockup on light bg */}

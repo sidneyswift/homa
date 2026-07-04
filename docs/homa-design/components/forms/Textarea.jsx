@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Textarea, multi-line field, auto-styled to match Input.
+ * Homa Textarea, multi-line field, auto-styled to match Input.
  */
 export function Textarea({
   label, hint, error, rows = 4, disabled = false,

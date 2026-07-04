@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Select, styled native select with chevron.
+ * Homa Select, styled native select with chevron.
  */
 export function Select({ label, hint, options = [], value, onChange, disabled = false, id, placeholder, style = {} }) {
   const [focus, setFocus] = React.useState(false);

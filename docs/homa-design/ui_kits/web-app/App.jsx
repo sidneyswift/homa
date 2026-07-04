@@ -1,9 +1,10 @@
-// HOMA web app, shell: login gate + authenticated app frame.
-const { Button: AButton, Input: AInput, Icon: AIcon, Logo: ALogo } = window.HOMADesignSystem_113bd2;
+// Homa web app, shell: login gate + authenticated app frame.
+const { Button: AButton, Input: AInput, Icon: AIcon, Logo: ALogo, Doodle: ADoodleRaw } = window.HOMADesignSystem_113bd2;
+const ADoodle = ADoodleRaw || (() => null);
 
 function Login({ onEnter }) {
   return (
-    <div style={{ height: '100%', display: 'flex' }}>
+    <div style={{ height: '100%', display: 'flex', fontFamily: 'var(--font-sans)' }}>
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-page)' }}>
         <div style={{ width: 340, textAlign: 'center' }}>
           <div style={{ display: 'inline-flex', marginBottom: 22 }}>
@@ -19,11 +20,13 @@ function Login({ onEnter }) {
           <div style={{ color: 'var(--text-subtle)', fontSize: '0.85rem', marginTop: 18 }}>New here? <a href="onboarding.html" style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>Start free</a></div>
         </div>
       </div>
-      <div style={{ flex: 1, background: 'linear-gradient(160deg, var(--clay-400), var(--clay-600))', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+      <div style={{ flex: 1, background: 'var(--pop-cobalt)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40, position: 'relative', overflow: 'hidden' }}>
+        <ADoodle name="star" size={40} color="var(--gold-400)" rotate={-12} style={{ position: 'absolute', top: 48, right: 56 }} />
+        <ADoodle name="heart" size={30} color="var(--pop-blush)" rotate={10} style={{ position: 'absolute', bottom: 60, left: 48 }} />
         <div style={{ maxWidth: 380, color: '#fff' }}>
           <AIcon name="sparkles" size={30} color="#fff" />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', fontWeight: 500, lineHeight: 1.25, marginTop: 16 }}>
-            “HOMA plans our week in five minutes. I finally have my evenings back.”
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.9rem', fontWeight: 500, lineHeight: 1.25, marginTop: 16 }}>
+            “Homa plans our week in five minutes. I finally have my evenings back.”
           </div>
           <div style={{ marginTop: 16, opacity: 0.9, fontWeight: 600 }}>Dana, mom of three</div>
         </div>
@@ -57,7 +60,7 @@ function App() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: 'var(--bg-page)' }}>
+    <div style={{ display: 'flex', height: '100%', background: 'var(--bg-page)', fontFamily: 'var(--font-sans)' }}>
       <Sidebar active={view} onNavigate={setView} kids={kids} />
       <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {views[view]}

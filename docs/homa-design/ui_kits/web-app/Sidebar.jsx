@@ -1,9 +1,9 @@
-// HOMA web app, left navigation sidebar.
+// Homa web app, left navigation sidebar.
 const { Avatar: HAvatar, Icon: HIcon, Badge: HBadge, Logo: HLogo } = window.HOMADesignSystem_113bd2;
 
 function Sidebar({ active, onNavigate, kids }) {
   const nav = [
-    { id: 'chat', icon: 'sparkles', label: 'Ask HOMA' },
+    { id: 'chat', icon: 'sparkles', label: 'Ask Homa' },
     { id: 'dashboard', icon: 'chart-line', label: 'Progress' },
     { id: 'benchmarks', icon: 'clipboard-check', label: 'Benchmarks' },
     { id: 'planner', icon: 'calendar', label: 'Week planner' },

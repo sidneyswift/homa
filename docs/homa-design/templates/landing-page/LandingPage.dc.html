@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<!-- @template name="Landing Page" description="HOMA marketing landing, promise hero, feature cards, footer. Built on the design system." -->
+<!-- @template name="Landing Page" description="Homa marketing landing, promise hero, feature cards, footer. Built on the design system." -->
 <helmet>
 <script src="./ds-base.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,50 +29,55 @@
     </div>
   </nav>
 
-  <section style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;padding:72px 40px 64px;max-width:1200px;margin:0 auto;">
+  <section style="background:var(--band-sky);position:relative;overflow:hidden;">
+  <svg style="position:absolute;top:42px;left:4%;transform:rotate(-12deg)" width="34" height="34" viewBox="0 0 24 24"><path d="M12 1 C13.1 8.2 15.8 10.9 23 12 C15.8 13.1 13.1 15.8 12 23 C10.9 15.8 8.2 13.1 1 12 C8.2 10.9 10.9 8.2 12 1 Z" fill="var(--pop-cobalt)"></path></svg>
+  <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;padding:72px 40px 64px;max-width:1200px;margin:0 auto;">
     <div>
-      <span style="display:inline-flex;align-items:center;gap:6px;background:var(--clay-50);color:var(--clay-700);padding:6px 14px;border-radius:var(--radius-pill);font-weight:600;font-size:0.85rem;">In your corner, every school day</span>
-      <h1 style="font-family:var(--font-display);font-size:3.6rem;font-weight:500;line-height:1.02;letter-spacing:-0.025em;color:var(--text-strong);margin:20px 0 0;">You&rsquo;ve got this.<br>HOMA&rsquo;s got the <span style="font-style:italic;font-weight:400;color:var(--clay-600);">rest</span>.</h1>
-      <p style="font-size:1.2rem;color:var(--text-muted);line-height:1.55;margin:22px 0 0;max-width:470px;">The planning, the tracking, the what-do-we-do-today, hand it to HOMA. You get back to the part only you can do.</p>
+      <span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface-card);color:var(--clay-600);padding:7px 16px;border-radius:var(--radius-pill);font-weight:700;font-size:0.85rem;box-shadow:var(--shadow-sm);">In your corner, every school day</span>
+      <h1 style="font-family:var(--font-display);font-size:3.6rem;font-weight:500;line-height:1.02;letter-spacing:-0.015em;color:var(--text-strong);margin:20px 0 0;">You&rsquo;ve got this.<br>Homa&rsquo;s got the <span style="font-style:italic;font-weight:400;color:var(--clay-600);font-family:var(--font-serif);">rest</span>.</h1>
+      <p style="font-size:1.2rem;color:var(--text-muted);line-height:1.55;margin:22px 0 0;max-width:470px;">The planning, the tracking, the what-do-we-do-today, hand it to Homa. You get back to the part only you can do.</p>
       <div style="display:flex;gap:12px;margin-top:30px;">
         <x-import component-from-global-scope="HOMADesignSystem_113bd2.Button" size="lg" hint-size="200px,52px">Start free for 14 days</x-import>
         <x-import component-from-global-scope="HOMADesignSystem_113bd2.Button" variant="secondary" size="lg" hint-size="150px,52px">Watch demo</x-import>
       </div>
     </div>
     <div style="position:relative;">
-      <div style="width:100%;height:440px;border-radius:var(--radius-xl);background:linear-gradient(160deg,var(--clay-100),var(--sage-100));display:flex;align-items:center;justify-content:center;color:var(--text-subtle);font-family:var(--font-display);font-style:italic;font-size:1.1rem;">A warm family photo lives here</div>
-      <div style="position:absolute;top:-22px;right:18px;font-family:var(--font-hand);font-size:2.4rem;color:var(--sage-600);transform:rotate(-7deg);line-height:1;">you&rsquo;ve got this &#10022;</div>
+      <div style="width:100%;height:440px;border-radius:var(--blob-1);background:linear-gradient(160deg,var(--clay-100),var(--sage-100));display:flex;align-items:center;justify-content:center;color:var(--stone-600);font-family:var(--font-display);font-style:italic;font-size:1.1rem;">A warm family photo lives here</div>
     </div>
+  </div>
   </section>
+  <svg viewBox="0 0 1440 48" preserveAspectRatio="none" style="display:block;width:100%;height:44px;margin:-1px 0;"><path fill="var(--band-sky)" d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z"></path></svg>
 
   <section style="padding:60px 40px;max-width:1200px;margin:0 auto;">
-    <div style="text-align:center;margin-bottom:44px;">
+    <div style="margin-bottom:40px;max-width:560px;">
       <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--brand);">Everything in one place</div>
-      <h2 style="font-family:var(--font-display);font-size:2.4rem;font-weight:500;color:var(--text-strong);margin:8px 0 0;letter-spacing:-0.02em;">Less admin. More teaching.</h2>
+      <h2 style="font-family:var(--font-display);font-size:2.4rem;font-weight:500;color:var(--text-strong);margin:8px 0 14px;letter-spacing:-0.02em;">Less admin. More teaching.</h2>
+      <div style="display:flex;align-items:center;"><svg width="100" height="10" viewBox="0 0 100 8" fill="none" style="flex-shrink:0;overflow:visible;"><path d="M0 4 Q5 0 10 4 Q15 8 20 4 Q25 0 30 4 Q35 8 40 4 Q45 0 50 4 Q55 8 60 4 Q65 0 70 4 Q75 8 80 4 Q85 0 90 4 Q95 8 100 4" stroke="var(--text-strong)" stroke-width="1.6" stroke-linecap="round"></path></svg><span style="flex:1;border-top:1.2px solid var(--text-strong);opacity:0.9;"></span></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
-        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--clay-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="calendar-heart" style="color:var(--brand);"></i></span>
+        <span style="width:52px;height:52px;border-radius:var(--blob-2);background:var(--clay-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="calendar-heart" style="color:var(--brand);"></i></span>
         <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Plans that flex</h3>
-        <p style="color:var(--text-muted);line-height:1.55;margin:0;">Tell HOMA how your week looks and she builds a schedule around real life.</p>
+        <p style="color:var(--text-muted);line-height:1.55;margin:0;">Tell Homa how your week looks and she builds a schedule around real life.</p>
       </x-import>
       <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
-        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--sage-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sprout" style="color:var(--sage-600);"></i></span>
+        <span style="width:52px;height:52px;border-radius:var(--blob-2);background:var(--sage-50);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sprout" style="color:var(--sage-600);"></i></span>
         <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Progress you can see</h3>
         <p style="color:var(--text-muted);line-height:1.55;margin:0;">Per-child mastery and milestones across every subject, mapped to your standards.</p>
       </x-import>
       <x-import component-from-global-scope="HOMADesignSystem_113bd2.Card" padding="lg" hint-size="100%,220px">
-        <span style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--gold-100);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sparkles" style="color:#9a7118;"></i></span>
+        <span style="width:52px;height:52px;border-radius:var(--blob-2);background:var(--gold-100);display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="sparkles" style="color:#9a7118;"></i></span>
         <h3 style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;color:var(--text-strong);margin:16px 0 6px;">Ideas on demand</h3>
         <p style="color:var(--text-muted);line-height:1.55;margin:0;">Stuck? Ask for a rainy-day project, a spelling list, or a whole unit, in seconds.</p>
       </x-import>
     </div>
   </section>
 
-  <footer style="background:var(--stone-900);color:var(--stone-300);padding:48px 40px;margin-top:40px;">
+  <svg viewBox="0 0 1440 48" preserveAspectRatio="none" style="display:block;width:100%;height:44px;margin:40px 0 -1px;transform:scaleY(-1);"><path fill="var(--pop-navy)" d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z"></path></svg>
+  <footer style="background:var(--pop-navy);color:var(--stone-300);padding:48px 40px;">
     <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
       <x-import component-from-global-scope="HOMADesignSystem_113bd2.Logo" size="26" tone="dark" hint-size="120px,30px"></x-import>
-      <span style="font-family:var(--font-display);font-style:italic;color:var(--stone-400);">homeschooling, made calm</span>
+      <span style="font-family:var(--font-serif);font-style:italic;font-size:1.05rem;color:var(--stone-400);">homeschooling, made calm</span>
     </div>
   </footer>
 

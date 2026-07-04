@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Avatar, circular initials/photo. Warm auto-color from name.
+ * Homa Avatar, circular initials/photo. Warm auto-color from name.
  */
 export function Avatar({ name = '', src = null, size = 40, tone, style = {} }) {
   const palette = ['var(--clay-400)', 'var(--sage-500)', 'var(--gold-500)', 'var(--sky-500)', 'var(--clay-500)'];

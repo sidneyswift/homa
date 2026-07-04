@@ -1,0 +1,20 @@
+/* Homa playful shapes. Blob masks, squiggle divider, ruled notebook paper.
+   Drawn from the reference kit: organic blob photo masks, wavy heading
+   dividers, and schoolbook rule lines. Use one or two per surface, not all. */
+
+:root {
+  /* Organic blob corner radii. Apply as border-radius on images or tinted
+     shapes. Rotate between the three so blobs never repeat side by side. */
+  --blob-1: 61% 39% 55% 45% / 49% 56% 44% 51%; /* @kind other */
+  --blob-2: 42% 58% 47% 53% / 56% 41% 59% 44%; /* @kind other */
+  --blob-3: 55% 45% 62% 38% / 46% 61% 39% 54%; /* @kind other */
+
+  /* Ruled notebook paper. Layer over a cream background:
+     background-image: var(--bg-paper); (32px line rhythm) */
+  --paper-rule: rgba(46, 107, 230, 0.07);
+  --bg-paper: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--paper-rule) 31px, var(--paper-rule) 32px); /* @kind other */
+
+  /* Squiggle divider segment, repeat-x on a 40x8 tile. For custom colors use
+     the Squiggle component; this token is the ink version for static HTML. */
+  --squiggle-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23221E1A' stroke-width='1.6'/%3E%3C/svg%3E"); /* @kind other */
+}

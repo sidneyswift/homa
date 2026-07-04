@@ -13,7 +13,7 @@ export interface CardProps {
 }
 
 /**
- * Soft warm surface container, the base of every HOMA layout.
+ * Soft warm surface container, the base of every Homa layout.
  * @startingPoint section="Layout" subtitle="Rounded warm card container" viewport="700x220"
  */
 export function Card(props: CardProps): JSX.Element;

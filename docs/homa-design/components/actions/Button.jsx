@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * HOMA Button, primary interactive element.
+ * Homa Button, primary interactive element.
  * Variants: primary (clay), secondary (sage-outline), ghost, soft, danger.
  */
 export function Button({
@@ -57,7 +57,7 @@ export function Button({
     justifyContent: 'center',
     gap: sizes[size].gap,
     fontFamily: 'var(--font-sans)',
-    fontWeight: 'var(--weight-semibold)',
+    fontWeight: 700,
     fontSize: sizes[size].fontSize,
     lineHeight: 1,
     padding: sizes[size].padding,
