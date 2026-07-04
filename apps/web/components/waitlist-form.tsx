@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   KID_AGE_BANDS,
   KID_AGE_BAND_LABELS,
+  KID_COUNT_MAX,
   US_STATES,
   type KidAgeBand,
   type WaitlistSource,
@@ -34,6 +35,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [usState, setUsState] = useState("");
+  const [kidCount, setKidCount] = useState<number | null>(null);
   const [ageBands, setAgeBands] = useState<KidAgeBand[]>([]);
   const [honeypot, setHoneypot] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -74,6 +76,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       email: normalizedEmail,
       firstName: firstName.trim() || undefined,
       usState: usState || undefined,
+      kidCount: kidCount ?? undefined,
       kidAgeBands: ageBands,
       source,
       utm: readUtmFromLocation(),
@@ -158,6 +161,28 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
             </option>
           ))}
         </select>
+
+        <p className="mt-4 text-sm font-medium">How many kids?</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {Array.from({ length: KID_COUNT_MAX }, (_, i) => i + 1).map((count) => {
+            const selected = kidCount === count;
+            return (
+              <button
+                key={count}
+                type="button"
+                onClick={() => setKidCount(selected ? null : count)}
+                aria-pressed={selected}
+                className={`min-h-11 min-w-11 rounded-full border px-4 py-2 text-sm ${
+                  selected
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-neutral-500 bg-white text-neutral-900"
+                }`}
+              >
+                {count === KID_COUNT_MAX ? `${KID_COUNT_MAX}+` : count}
+              </button>
+            );
+          })}
+        </div>
 
         <p className="mt-4 text-sm font-medium">Your kids&apos; ages</p>
         <div className="mt-2 flex flex-wrap gap-2">

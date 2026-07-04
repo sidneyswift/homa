@@ -16,6 +16,7 @@ export interface WaitlistPayload {
   email: string;
   firstName?: string;
   usState?: string;
+  kidCount?: number;
   kidAgeBands: KidAgeBand[];
   source: WaitlistSource;
   utm: Record<string, string>;

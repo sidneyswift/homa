@@ -41,10 +41,14 @@ export type WaitlistSource = (typeof WAITLIST_SOURCES)[number];
  * Validated shape of one waitlist submission. Email is normalized here
  * (trim + lowercase) because the database enforces lowercase storage.
  */
+/** UI chips 1–4 store their number; the "5+" chip stores 5. */
+export const KID_COUNT_MAX = 5;
+
 export const waitlistSubmissionSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
   firstName: z.string().trim().max(100).optional(),
   usState: z.string().length(2).optional(),
+  kidCount: z.number().int().min(1).max(KID_COUNT_MAX).optional(),
   kidAgeBands: z.array(z.enum(KID_AGE_BANDS)).max(KID_AGE_BANDS.length).default([]),
   source: z.enum(WAITLIST_SOURCES).default("organic"),
   utm: z.record(z.string(), z.string()).default({}),

@@ -17,6 +17,7 @@ interface WaitlistRequestBody {
   email?: unknown;
   firstName?: unknown;
   usState?: unknown;
+  kidCount?: unknown;
   kidAgeBands?: unknown;
   source?: unknown;
   utm?: unknown;
@@ -46,6 +47,7 @@ export async function POST(request: Request): Promise<Response> {
     email: body.email,
     firstName: typeof body.firstName === "string" && body.firstName.trim() ? body.firstName : undefined,
     usState: body.usState,
+    kidCount: body.kidCount ?? undefined,
     kidAgeBands: body.kidAgeBands,
     source: body.source,
     utm: body.utm,
@@ -68,6 +70,7 @@ export async function POST(request: Request): Promise<Response> {
       source: submission.source,
       utm: submission.utm,
       us_state: submission.usState ?? null,
+      kid_count: submission.kidCount ?? null,
       kid_age_bands: submission.kidAgeBands,
     }),
   });

@@ -1,6 +1,7 @@
 export {
   KID_AGE_BANDS,
   KID_AGE_BAND_LABELS,
+  KID_COUNT_MAX,
   WAITLIST_SOURCES,
   waitlistSubmissionSchema,
   type KidAgeBand,
