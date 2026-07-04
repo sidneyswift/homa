@@ -43,6 +43,7 @@ export type WaitlistSource = (typeof WAITLIST_SOURCES)[number];
  */
 export const waitlistSubmissionSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
+  firstName: z.string().trim().max(100).optional(),
   usState: z.string().length(2).optional(),
   kidAgeBands: z.array(z.enum(KID_AGE_BANDS)).max(KID_AGE_BANDS.length).default([]),
   source: z.enum(WAITLIST_SOURCES).default("organic"),

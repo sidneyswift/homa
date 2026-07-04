@@ -15,6 +15,7 @@ const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 interface WaitlistRequestBody {
   email?: unknown;
+  firstName?: unknown;
   usState?: unknown;
   kidAgeBands?: unknown;
   source?: unknown;
@@ -43,6 +44,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const parsed = waitlistSubmissionSchema.safeParse({
     email: body.email,
+    firstName: typeof body.firstName === "string" && body.firstName.trim() ? body.firstName : undefined,
     usState: body.usState,
     kidAgeBands: body.kidAgeBands,
     source: body.source,
@@ -62,6 +64,7 @@ export async function POST(request: Request): Promise<Response> {
     },
     body: JSON.stringify({
       email: submission.email,
+      first_name: submission.firstName ?? null,
       source: submission.source,
       utm: submission.utm,
       us_state: submission.usState ?? null,

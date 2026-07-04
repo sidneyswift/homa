@@ -14,6 +14,7 @@ import type { KidAgeBand, WaitlistSource } from "@homa/core";
 
 export interface WaitlistPayload {
   email: string;
+  firstName?: string;
   usState?: string;
   kidAgeBands: KidAgeBand[];
   source: WaitlistSource;

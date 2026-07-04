@@ -32,6 +32,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function WaitlistForm({ source }: { source: WaitlistSource }) {
   const [phase, setPhase] = useState<FormPhase>("editing");
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [usState, setUsState] = useState("");
   const [ageBands, setAgeBands] = useState<KidAgeBand[]>([]);
   const [honeypot, setHoneypot] = useState("");
@@ -71,6 +72,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
 
     const outcome = await submitWaitlist({
       email: normalizedEmail,
+      firstName: firstName.trim() || undefined,
       usState: usState || undefined,
       kidAgeBands: ageBands,
       source,
@@ -105,7 +107,19 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       noValidate
       className="rounded-lg border border-neutral-400 p-6"
     >
-      <label className="block font-medium" htmlFor="waitlist-email">
+      <label className="block font-medium" htmlFor="waitlist-first-name">
+        Your first name
+      </label>
+      <input
+        id="waitlist-first-name"
+        type="text"
+        autoComplete="given-name"
+        value={firstName}
+        onChange={(event) => setFirstName(event.target.value)}
+        className="mt-2 w-full rounded-md border border-neutral-500 px-4 py-3 text-base"
+      />
+
+      <label className="mt-4 block font-medium" htmlFor="waitlist-email">
         Your email
       </label>
       <input
