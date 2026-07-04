@@ -3,31 +3,28 @@ import type { Metadata } from "next";
 import { WaitlistForm } from "../../components/waitlist-form";
 
 /**
- * Conference variant (BUILD.md Deliverable 0). There is no booth: Alessa
- * tells moms "thankshoma.com" in conversation (those signups land on / as
- * organic), and when she can, she texts this link instead, which stamps
- * source=conference. One job: capture the email before the hall swallows
- * her attention, on bad convention-center wifi. Form first, minimal payload.
+ * /waitlist: the direct-to-form page (BUILD.md Deliverable 0). The one link
+ * to share anywhere: Alessa says "thankshoma.com" or texts
+ * thankshoma.com/waitlist, and either way the mom is one screen from
+ * captured. Minimal payload, form first, works on bad convention-center
+ * wifi. Channel attribution rides on utm params when a link carries them.
  *
  * WIREFRAME: styling is placeholder for the design pass; copy is binding
- * (journeys/07 §5 conference one-liner + journeys/02 A1).
+ * (journeys/07 §5 conference one-liner, founding-families framing).
  */
 
 export const metadata: Metadata = {
-  title: "HOMA · you found us at the conference",
+  title: "HOMA · join the founding families",
   description:
     "HOMA shows you exactly where each child stands, no tests, then makes the materials to help them grow, and proves it worked.",
   robots: { index: false },
 };
 
-export default function ConferencePage() {
+export default function WaitlistPage() {
   return (
     <main className="mx-auto w-full max-w-xl px-6 py-10">
       <header>
         <p className="text-sm font-semibold tracking-wide">HOMA</p>
-        <p className="mt-2 text-sm text-neutral-600">
-          You found us at the conference.
-        </p>
         <h1 className="mt-4 text-3xl font-bold leading-tight">
           Exactly where each child stands, no tests. Then the materials to
           help them grow, and proof it worked.
@@ -39,7 +36,7 @@ export default function ConferencePage() {
       </header>
 
       <div className="mt-8">
-        <WaitlistForm source="conference" />
+        <WaitlistForm source="organic" />
       </div>
 
       <section className="mt-10 space-y-3 text-sm text-neutral-600">

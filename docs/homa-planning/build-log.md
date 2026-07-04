@@ -64,6 +64,13 @@ logged here so decisions stay auditable. Newest entries first.
    link can carry the path. Post-conference, conference-weekend organic rows
    can be classified in SQL at invite time. Booth-presuming copy removed from
    the page.
+12. **`/conference` renamed to `/waitlist` (founder call, 2026-07-04:
+   "waitlist instead of conference, let's not overcomplicate it").** One
+   generic direct-to-form page, source=organic, channel attribution via utm
+   params if a shared link ever carries them, plus created_at time windows.
+   `/conference` 308-redirects to `/waitlist` so anything already shared
+   keeps working. The `conference` value stays in the source enum for future
+   use.
 
 ## File additions this session
 

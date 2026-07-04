@@ -40,7 +40,7 @@ QR code). Remaining handle work:
 
 - [ ] **Ask Alessa**: is the phonics curriculum "Hegg" = **Heggerty**? (last open decision, D10) *(30 sec)*
 - [ ] **Show Alessa** the conference field kit → `docs/homa-planning/journeys/09-discovery-research-plan.md` §2 — she should read it before July 13, not the night before *(send link)*
-- [ ] **Tell Alessa the two links**: say "thankshoma.com" out loud to moms; when she can, TEXT them thankshoma.com/conference instead (texted link = we know they came from her at the conference) *(30 sec)*
+- [ ] **Tell Alessa the link**: say "thankshoma.com" out loud to moms, or text it; thankshoma.com/waitlist goes straight to the signup form *(30 sec)*
 
 ## Explicitly NOT tonight
 
