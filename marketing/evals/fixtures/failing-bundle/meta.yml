@@ -1,0 +1,10 @@
+id: 2026-01-02-failing-fixture
+source: marketing/signals/does-not-exist.md
+lanes: [article, email]
+formats:
+  - {file: article.mdx, channel: blog, status: draft}
+  - {file: captions/tiktok.md, channel: tiktok, status: draft}
+  - {file: email/email.md, channel: email, status: draft}
+gates:
+  article: "never ran, this is a fixture"
+scorecard: marketing/evals/scorecards/never.json
