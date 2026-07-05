@@ -1,0 +1,136 @@
+import type { CSSProperties } from "react";
+
+/**
+ * Homa doodle, a small hand-drawn decorative shape. Decoration only, never
+ * UI. Ported from docs/homa-design/components/playful/Doodle.jsx (source of
+ * truth); keep in sync until packages/design exists (M1-17).
+ */
+
+type DoodleName =
+  | "star"
+  | "heart"
+  | "sun"
+  | "sparkle"
+  | "squiggle"
+  | "flower"
+  | "cloud"
+  | "moon"
+  | "zigzag"
+  | "loop";
+
+const SHAPES: Record<DoodleName, (color: string) => React.ReactNode> = {
+  star: (color) => (
+    <path
+      d="M12 1 C13.1 8.2 15.8 10.9 23 12 C15.8 13.1 13.1 15.8 12 23 C10.9 15.8 8.2 13.1 1 12 C8.2 10.9 10.9 8.2 12 1 Z"
+      fill={color}
+    />
+  ),
+  heart: (color) => (
+    <path
+      d="M12 21.5 C5.4 16 2.5 12.2 2.5 8.6 C2.5 5.8 4.7 3.8 7.2 3.8 C9.1 3.8 10.9 4.9 12 6.7 C13.1 4.9 14.9 3.8 16.8 3.8 C19.3 3.8 21.5 5.8 21.5 8.6 C21.5 12.2 18.6 16 12 21.5 Z"
+      fill={color}
+    />
+  ),
+  sun: (color) => (
+    <g stroke={color} strokeWidth="2" strokeLinecap="round">
+      <circle cx="12" cy="12" r="4.2" fill={color} stroke="none" />
+      <line x1="12" y1="1.5" x2="12" y2="4.5" />
+      <line x1="12" y1="19.5" x2="12" y2="22.5" />
+      <line x1="1.5" y1="12" x2="4.5" y2="12" />
+      <line x1="19.5" y1="12" x2="22.5" y2="12" />
+      <line x1="4.6" y1="4.6" x2="6.7" y2="6.7" />
+      <line x1="17.3" y1="17.3" x2="19.4" y2="19.4" />
+      <line x1="4.6" y1="19.4" x2="6.7" y2="17.3" />
+      <line x1="17.3" y1="6.7" x2="19.4" y2="4.6" />
+    </g>
+  ),
+  sparkle: (color) => (
+    <g stroke={color} strokeWidth="2.4" strokeLinecap="round">
+      <line x1="12" y1="2.5" x2="12" y2="21.5" />
+      <line x1="2.5" y1="12" x2="21.5" y2="12" />
+      <line x1="5.5" y1="5.5" x2="18.5" y2="18.5" />
+      <line x1="5.5" y1="18.5" x2="18.5" y2="5.5" />
+    </g>
+  ),
+  squiggle: (color) => (
+    <path
+      d="M2 14 Q5.5 7.5 9 12.5 T16 11.5 T22 8.5"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.4"
+      strokeLinecap="round"
+    />
+  ),
+  flower: (color) => (
+    <g fill={color}>
+      <circle cx="12" cy="5" r="3.6" />
+      <circle cx="18.7" cy="9.9" r="3.6" />
+      <circle cx="16.1" cy="17.8" r="3.6" />
+      <circle cx="7.9" cy="17.8" r="3.6" />
+      <circle cx="5.3" cy="9.9" r="3.6" />
+      <circle cx="12" cy="12" r="2.6" />
+    </g>
+  ),
+  cloud: (color) => (
+    <path
+      d="M6 17.5 C3.5 17.5 2 15.8 2 13.9 C2 12 3.4 10.6 5.2 10.4 C5.6 7.3 8.2 5 11.4 5 C14.2 5 16.6 6.8 17.4 9.4 C19.9 9.6 22 11.6 22 14 C22 16 20.4 17.5 18.4 17.5 Z"
+      fill={color}
+    />
+  ),
+  moon: (color) => (
+    <path
+      d="M20.5 15.5 A9.5 9.5 0 1 1 8.5 3.5 A7.5 7.5 0 0 0 20.5 15.5 Z"
+      fill={color}
+    />
+  ),
+  zigzag: (color) => (
+    <path
+      d="M2 16 L7 8 L12 16 L17 8 L22 16"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  loop: (color) => (
+    <path
+      d="M2 14 C4 8 8 7 9.5 10.5 C11 14 7.5 16.5 6.5 13.5 C5.5 10.5 10 7 14 8.5 C18 10 18.5 14 22 12.5"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+    />
+  ),
+};
+
+export function Doodle({
+  name = "star",
+  size = 24,
+  color = "var(--pop-cobalt)",
+  rotate = 0,
+  style = {},
+}: {
+  name?: DoodleName;
+  size?: number;
+  color?: string;
+  rotate?: number;
+  style?: CSSProperties;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        transform: rotate ? `rotate(${rotate}deg)` : "none",
+        flexShrink: 0,
+        ...style,
+      }}
+    >
+      {SHAPES[name](color)}
+    </svg>
+  );
+}

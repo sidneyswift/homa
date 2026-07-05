@@ -2,10 +2,13 @@
 
 /* ============================================================================
    Homa Design System v3 tokens, copied from docs/homa-design/tokens/colors.css,
-   radius.css, shadows.css, spacing.css (verbatim) for the Deliverable 0 design
-   pass. A formal `packages/design` workspace package lands with ticket M1-17;
-   until then, keep this block in sync by hand with docs/homa-design/tokens/.
-   Read docs/homa-design/SKILL.md before extending this page's visual system.
+   radius.css, shadows.css, spacing.css, motion.css (verbatim) for the
+   Deliverable 0 design pass, including the sky/pop/band tokens the landing
+   page's hero and footer use. A formal `packages/design` workspace package
+   lands with ticket M1-17; until then, keep this block in sync by hand with
+   docs/homa-design/tokens/. Read docs/homa-design/SKILL.md before extending
+   this page's visual system, and the emil-design-eng / review-animations
+   skills (.agents/skills/) before adding any new motion.
    ========================================================================= */
 :root {
   /* --- Warm neutrals (stone) --- */
@@ -32,6 +35,7 @@
 
   /* --- Sage / mint (secondary) --- */
   --sage-50: #eaf6ec;
+  --sage-100: #d2ecd6;
   --sage-500: #3d9a50;
   --sage-600: #2f7c40;
 
@@ -40,9 +44,20 @@
   --gold-500: #f0be00;
   --gold-ink: #8a6410; /* the ONE text/icon color on gold tints */
 
+  /* --- Sky / pool aqua (info accent) --- */
+  --sky-100: #ddf3f9;
+  --sky-500: #4fb4d6;
+  --sky-600: #3a8fa9;
+
   /* --- Support: warm coral-red for errors --- */
   --rose-100: #fde1d8;
   --rose-500: #e2593b;
+
+  /* --- Pop accents + section bands (playful, use sparingly) --- */
+  --pop-cobalt: #2e6be6;
+  --pop-navy: #23304f;
+  --band-sky: #9fe0ee;
+  --band-mint: #bde7c5;
 
   /* =====================  SEMANTIC ALIASES  ===================== */
   --bg-page: var(--stone-50);
@@ -80,6 +95,23 @@
   --shadow-sm: 0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
   --shadow-lg: 0 12px 28px rgba(51, 42, 33, 0.1), 0 4px 10px rgba(51, 42, 33, 0.05);
 
+  /* --- Motion: gentle, no bounce. ease-out for entrances, quick for hovers.
+     Feeds the Tailwind `ease-out`/`ease-in-out` override below (every
+     transition in the app inherits the brand curve for free) and the
+     `duration-(--dur-fast)` / `active:scale-[var(--press-scale)]` custom-
+     property syntax used inline; see docs/homa-design/tokens/motion.css. --- */
+  --motion-ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
+  --motion-ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --press-scale: 0.98;
+
+  /* --- Organic blob corner radii (docs/homa-design/tokens/shapes.css), for
+     photo frames only, rotate between them so blobs never repeat side by side --- */
+  --blob-1: 61% 39% 55% 45% / 49% 56% 44% 51%;
+  --blob-2: 42% 58% 47% 53% / 56% 41% 59% 44%;
+
   /* --- Fonts: next/font variables (set on <html> in layout.tsx) feed these --- */
   --font-display: var(--font-schibsted), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-wordmark: var(--font-fredoka), var(--font-hanken), sans-serif; /* the bounced Homa lockup only */
@@ -113,6 +145,14 @@
 
   --shadow-sm: var(--shadow-sm);
   --shadow-lg: var(--shadow-lg);
+
+  /* Redefines Tailwind's built-in `ease-out`/`ease-in-out` utilities with the
+     brand's strong, no-bounce curves. Every `ease-out` in the app now matches
+     docs/homa-design/tokens/motion.css. Durations use Tailwind's `duration-
+     (--dur-fast)` custom-property syntax directly (`duration-200` already
+     equals --dur-base), no theme entry needed for those. */
+  --ease-out: var(--motion-ease-out);
+  --ease-in-out: var(--motion-ease-in-out);
 
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);

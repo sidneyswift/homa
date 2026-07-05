@@ -89,7 +89,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
     return (
       <div
         aria-live="polite"
-        className="rounded-lg border border-border bg-card p-6 shadow-sm"
+        className="translate-y-0 rounded-lg border border-border bg-card p-6 opacity-100 shadow-sm transition duration-(--dur-base) ease-out starting:translate-y-1 starting:opacity-0 motion-reduce:starting:translate-y-0"
       >
         <p className="font-display text-lg font-semibold text-strong">
           You&apos;re on the waitlist.
@@ -122,7 +122,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         autoComplete="given-name"
         value={firstName}
         onChange={(event) => setFirstName(event.target.value)}
-        className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
       />
 
       <label className="mt-4 block font-medium text-strong" htmlFor="waitlist-email">
@@ -137,7 +137,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         placeholder="you@example.com"
-        className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
       />
       {emailError ? (
         <p className="mt-2 text-sm text-danger" role="alert">
@@ -155,7 +155,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           id="waitlist-state"
           value={usState}
           onChange={(event) => setUsState(event.target.value)}
-          className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+          className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
         >
           <option value="">Choose a state</option>
           {US_STATES.map((state) => (
@@ -175,7 +175,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
                 type="button"
                 onClick={() => setKidCount(selected ? null : count)}
                 aria-pressed={selected}
-                className={`min-h-11 min-w-11 rounded-pill border px-4 py-2 text-sm transition-colors ${
+                className={`min-h-11 min-w-11 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
                   selected
                     ? "border-brand bg-brand text-on-brand"
                     : "border-border bg-card text-strong hover:border-brand"
@@ -197,7 +197,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
                 type="button"
                 onClick={() => toggleAgeBand(band)}
                 aria-pressed={selected}
-                className={`min-h-11 rounded-pill border px-4 py-2 text-sm transition-colors ${
+                className={`min-h-11 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
                   selected
                     ? "border-brand bg-brand text-on-brand"
                     : "border-border bg-card text-strong hover:border-brand"
@@ -226,7 +226,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       <button
         type="submit"
         disabled={busy}
-        className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+        className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
       >
         {busy ? "Submitting…" : "Join the waitlist"}
       </button>

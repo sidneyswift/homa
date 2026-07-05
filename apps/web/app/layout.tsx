@@ -45,11 +45,11 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://thankshoma.com"),
   title: {
-    default: "HOMA \u00b7 the homeschool assistant that shows you it's working",
-    template: "%s \u00b7 HOMA",
+    default: "Homa \u00b7 the homeschool assistant that shows you it's working",
+    template: "%s \u00b7 Homa",
   },
   description:
-    "The calm homeschool assistant. HOMA learns each child, makes printable materials just for them, tracks hours for your state, and shows you it's working.",
+    "The calm homeschool assistant. Homa learns each child, makes printable materials just for them, tracks hours for your state, and shows you it's working.",
 };
 
 export default function RootLayout({

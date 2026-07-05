@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { Logo } from "../../components/brand/Logo";
+import { Footer } from "../../components/marketing/Footer";
+import { Nav } from "../../components/marketing/Nav";
 import { WaitlistForm } from "../../components/waitlist-form";
 
 /**
@@ -16,20 +17,23 @@ export const metadata: Metadata = {
 
 export default function WaitlistPage() {
   return (
-    <main className="mx-auto w-full max-w-xl px-6 py-12">
-      <header>
-        <Logo size={28} />
-        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
-          Join the founding families
-        </h1>
-        <p className="mt-3 text-body">
-          We invite families a few at a time. Your invite comes by email.
-        </p>
-      </header>
+    <>
+      <Nav />
+      <main className="mx-auto w-full max-w-xl px-6 py-16">
+        <header>
+          <h1 className="font-display text-3xl font-semibold leading-tight text-strong">
+            Join the founding families
+          </h1>
+          <p className="mt-3 text-body">
+            We invite families a few at a time. Your invite comes by email.
+          </p>
+        </header>
 
-      <div className="mt-8">
-        <WaitlistForm source="organic" />
-      </div>
-    </main>
+        <div className="mt-8">
+          <WaitlistForm source="organic" />
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }
