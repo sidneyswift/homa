@@ -145,6 +145,55 @@ non-negotiable bar given the audience).
   ambiguous result; log what's known, stop the clock, and escalate to Sidney
   rather than guessing with children's data on the line.
 
+## Result (2026-07-04): NO-GO
+
+**Test (a) failed decisively, which settles the gate on its own per the
+verdict rule above.** Tests (b)–(e) were not run: once (a) hits the automatic
+NO-GO bar, running the rest doesn't change the verdict, and burning more of
+the timebox on them wasn't worth it today. They remain open if a
+custom-harness spike (M0-02) or an eve fix wants the full five-test suite
+re-run.
+
+**What happened, precisely:** ran locally (not the Vercel preview originally
+planned — test (a) alone doesn't need Vercel-specific infra, and local is
+cheaper/faster for a pure session-durability check; tests (c)/(e) genuinely
+need the dispatcher/fan-out environment described above and should use it).
+Started eve **0.18.2**, parked a session at `input.requested` via the
+built-in `ask_question` tool, stopped the server, bumped to **0.19.0**
+(today's actual `latest`; no newer release exists yet, so this substitutes
+the most recent real version transition for a true forward-upgrade test),
+restarted, and sent the pending answer back on the saved `continuationToken`.
+
+**Outcome:**
+- Server logs: 3 `REPLAY_DIVERGENCE` recovery attempts, then a terminal
+  `CorruptedEventLogError`. Confirmed reproducible on retry, not a fluke.
+- **Worse than an error: the resume call returned `{"ok": true}` with a
+  different `sessionId`.** eve silently opened a brand-new, memoryless
+  session instead of resuming the corrupted one, or reporting that it
+  couldn't. The original parked question and its answer are permanently
+  lost, and nothing in the HTTP response would tell a caller that happened.
+- Likely cause: 0.19.0 changed how tool-call results get recorded in the
+  durable event log (a *patch-level* changelog entry, not flagged breaking).
+  A session parked exactly at a tool-call boundary under the old shape can't
+  replay under the new one. Full detail, evidence, and the retest in
+  `eve-churn-log.md`.
+
+**Against the fail bars written above, before any of this ran:** test (a)'s
+fail bar was "the parked session cannot resume, resumes into a corrupted or
+wrong state without surfacing an error, **or** the answer is lost." All three
+happened at once. This was not a close call.
+
+**Decision needed from Sidney:** per the verdict rule, NO-GO means ejecting
+to M0-02 (custom harness on AI SDK + Workflow SDK + Sandbox + AI Gateway, per
+`01-architecture.md`'s fallback plan) before any Phase B code depends on eve.
+This is a real architectural fork, not something to decide unilaterally.
+Options on the table: (1) eject now per the rule as written; (2) treat this
+as a narrower, patchable risk (e.g. "drain HITL-parked sessions before every
+upgrade" as an operational rule) and re-run the full five-test suite before
+deciding; (3) report upstream and wait for a fix, re-testing this exact repro
+before trusting upgrades again. Logged as an open decision, not resolved by
+this document.
+
 ## After the gate
 
 1. Record the verdict and each test's outcome in `docs/homa-planning/build-log.md`.

@@ -182,6 +182,32 @@ regardless of the other four; eject to M0-02 on failure). BUILD.md now links
 it. **The spike itself has not been run yet** — this session only produced
 the criteria, per the gate's own requirement that they exist first.
 
+## 2026-07-04 · M0-01 test (a) run: NO-GO
+
+Ran the eve upgrade drill (test a of `m0-01-adversarial-prototype-gate.md`)
+locally, isolated on a throwaway `spike/m0-01` branch (deleted after, no code
+diff to keep — this was a pure test, nothing to merge). Parked a session in
+HITL under eve 0.18.2, bumped to 0.19.0 (today's `latest`; no newer version
+exists to test a true forward upgrade), and tried to resume it.
+
+**Result: reproducible failure.** The parked session's event log corrupts on
+replay (`CorruptedEventLogError`, 3 failed recovery attempts, confirmed on
+retry), and the resume API silently opens a fresh, memoryless session instead
+of erroring, `{"ok": true}` with no indication anything went wrong. The
+original question and its answer are permanently lost. Likely cause: a
+patch-level (not flagged breaking) change to how 0.19.0 records tool-call
+results in the durable workflow log. Full evidence in `eve-churn-log.md`;
+gate writeup in `m0-01-adversarial-prototype-gate.md`.
+
+**Per the gate's own verdict rule, this single failure is enough: NO-GO.**
+Tests (b)–(e) were not run — the verdict doesn't change once (a) fails this
+decisively, and they remain available for a custom-harness retest later.
+**This is now an open decision for Sidney**, not resolved here: eject to
+M0-02 (custom harness) per the rule as written, treat it as a narrower
+operational risk (drain HITL-parked sessions before every upgrade) and
+re-test, or report upstream and wait for a fix. Phase B work should not
+proceed on eve, as-is, until this is decided.
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +

@@ -85,15 +85,21 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof:** **M0-01 is next.** GO/NO-GO criteria are written:
-  `docs/homa-planning/m0-01-adversarial-prototype-gate.md` (five adversarial
-  tests, pass/fail bars, contained-blast-radius environment plan, strict
-  timebox). Read it before running the spike; do not add scope beyond its
-  five tests. `eve` is already pinned to an exact version (no `^`) in
-  `apps/web/package.json`, and every release/breaking-change encounter gets
-  logged in `docs/homa-planning/eve-churn-log.md` (feeds the eject tripwire:
-  >2 breaking changes costing >1 day each in any 4-week window). Then M0-03
-  worksheet-in-sandbox, M0-04 voice-on-real-phones,
+- **Phase A — Engine proof: 🛑 BLOCKED, M0-01 returned NO-GO (2026-07-04).**
+  Test (a) of `docs/homa-planning/m0-01-adversarial-prototype-gate.md` found
+  a reproducible eve failure: a session parked in HITL across an 0.18.2 →
+  0.19.0 version bump corrupts on resume, and the API silently opens a new,
+  memoryless session instead of erroring, with no signal to the caller.
+  Per the gate's own rule, one such failure is enough: NO-GO. **Do not start
+  Phase B on eve as-is.** Full evidence: `eve-churn-log.md`. This is an open
+  decision for Sidney (eject to M0-02 custom harness / treat as a narrower
+  "drain HITL sessions before upgrading" operational rule and retest / report
+  upstream and wait for a fix) — not resolved by an agent. `eve` stays pinned
+  to an exact version (no `^`) in `apps/web/package.json` either way. Once
+  decided: either M0-02 (custom harness on AI SDK + Workflow SDK + Sandbox)
+  re-runs the same five tests, or a patched eve retests test (a) specifically
+  before Phase A is considered passed. Then M0-03 worksheet-in-sandbox,
+  M0-04 voice-on-real-phones,
   M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
   Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent
   mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`
