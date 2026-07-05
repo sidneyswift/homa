@@ -24,6 +24,13 @@ QR code). Remaining handle work:
 - [ ] **Register @thankshoma** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min — do the memo's 2-min phone check for Pinterest/Facebook first)*
 - [ ] Optional defensive redirects if still available: homaandme.com, homa.school *(memo's list; cheap insurance)*
 
+## Marketing demand engine · spec: `docs/homa-planning/14-marketing-demand-engine.md`
+
+- [ ] **Postiz**: run `postiz auth:login` in a terminal (browser flow) so agents can stage/schedule social posts *(1 min)*
+- [ ] **Postiz**: after registering the @thankshoma handles (above), connect each account inside Postiz: TikTok, Instagram, Pinterest, Facebook page, YouTube, X *(10 min)*
+- [ ] **YouTube**: create the @thankshoma channel (needed for Shorts; not in the original handle list) *(5 min)*
+- [ ] **Ruling DM7**: waitlist form promises "email only used to send your invite". Pick: (a) pipeline emails stay invite/launch-scoped, or (b) update form copy to ask ongoing-content consent going forward. Until ruled, emails are staged, never sent *(2 min gut check)*
+
 ## Business
 
 - [ ] **Entity**: pick the state (DC where you live, or WY/DE — 10 min of gut check, don't overthink; an LLC can be redomesticated later) and **start the online LLC filing** (e.g., state portal or a service like Northwest ~$39+state fee). Needed for: Stripe live activation + SMS 10DLC later. **Deferred, not tonight** (2026-07-04 grilling decision): file it when it actually blocks something (Stripe activation, ahead of invite #1), not before. *(15 min, whenever)*

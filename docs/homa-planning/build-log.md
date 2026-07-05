@@ -3,6 +3,27 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-05 · Marketing demand engine spec (14-marketing-demand-engine.md)
+
+Founder-approved design session for the B2C demand-gen pipeline, ported from the
+founder's B2B consulting content engine. Founder rulings recorded as DM1 to DM6 in
+the spec: lives inside this repo as `marketing/` (not a separate repo), blog built
+in `apps/web` as part of the project, all six social channels plus blog plus
+waitlist email at launch, manual trigger first with routines shipped disabled,
+full-engine scope, email lane day one.
+
+Agent calls made alone (all in the spec): raw/ and signals/ live beside content/
+(reservoir vs outputs lifecycle), micro-copy formats get a batched gate pass
+instead of nine full double-gates (cost), skills named `marketing-*` in
+`.agents/skills/`, scorer is stdlib Python local-only (not in CI yet), no empty
+growth-map folders.
+
+Tension flagged, not resolved: **DM7**, the live waitlist form promises "email
+only used to send your invite," so pipeline nurture emails are staged but never
+sent until the founder rules on consent scope (options in spec §10). Sources
+honored: `homa-macmini/`, `homa-research/`, `homa-template/` were not read and are
+banned as signal sources in the spec's safety rails.
+
 ## 2026-07-05 · Lead magnet v2 planning session (artifacts only, no product code)
 
 Founder asked for a plan to replace the write-only waitlist with a
