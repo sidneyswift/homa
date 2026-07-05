@@ -1,5 +1,6 @@
 "use client";
 
+import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 import { useEveAgent, type EveMessage, type EveMessagePart } from "eve/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +15,28 @@ import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
  * per request from the Supabase browser client (which auto-refreshes), so
  * the eve channel's supabaseAuth() can validate every call. shadcn chat
  * components arrive with M1-04 proper; this stays deliberately lean.
+ *
+ * The transcript + session cursor persist to localStorage per user (the
+ * eve-documented resumable-sessions pattern), so a reload rejoins the same
+ * durable conversation instead of silently starting a new one. Snapshots
+ * save on turn finish; a reload mid-turn keeps everything up to the last
+ * completed turn. M1-02's Postgres conversations table replaces this.
  */
+
+interface SavedChat {
+  events?: readonly HandleMessageStreamEvent[];
+  session?: SessionState;
+}
+
+function loadSavedChat(storageKey: string): SavedChat {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    return raw ? (JSON.parse(raw) as SavedChat) : {};
+  } catch {
+    return {};
+  }
+}
 
 function MessagePartView({ part }: { part: EveMessagePart }) {
   if (part.type === "text") {
@@ -71,8 +93,9 @@ const SUGGESTIONS = [
   "We had a rough morning, help me reset",
 ] as const;
 
-export function ChatClient() {
+export function ChatClient({ storageKey }: { storageKey: string }) {
   const supabase = createSupabaseBrowserClient();
+  const [saved] = useState<SavedChat>(() => loadSavedChat(storageKey));
   const agent = useEveAgent({
     auth: {
       bearer: async () => {
@@ -80,11 +103,32 @@ export function ChatClient() {
         return data.session?.access_token ?? "";
       },
     },
+    initialEvents: saved.events ?? [],
+    initialSession: saved.session,
+    onFinish(snapshot) {
+      try {
+        window.localStorage.setItem(
+          storageKey,
+          JSON.stringify({ events: snapshot.events, session: snapshot.session }),
+        );
+      } catch {
+        // Storage full or blocked: the durable session still lives server-side.
+      }
+    },
   });
 
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const busy = agent.status === "submitted" || agent.status === "streaming";
+
+  function startNewChat() {
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // Best effort; reset() clears the in-memory state regardless.
+    }
+    agent.reset();
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,12 +145,24 @@ export function ChatClient() {
     <div className="flex h-dvh flex-col">
       <header className="flex items-center justify-between border-b border-border-subtle bg-card px-6 py-3">
         <Logo size={24} />
-        <Link
-          href="/home"
-          className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
-        >
-          Home
-        </Link>
+        <div className="flex gap-2">
+          {agent.data.messages.length > 0 ? (
+            <button
+              type="button"
+              onClick={startNewChat}
+              disabled={busy}
+              className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand disabled:opacity-60"
+            >
+              New chat
+            </button>
+          ) : null}
+          <Link
+            href="/home"
+            className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
+          >
+            Home
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">

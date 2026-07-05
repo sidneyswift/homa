@@ -346,6 +346,43 @@ UI doesn't rehydrate it yet), real invite codes (MJ-09), the reportlab/fal
 worksheet pipeline (M0-03/M2-05 — current output is text-exercise layouts),
 proper session-tracking table.
 
+## 2026-07-05 · Fixes: signup dead-ended, chat history lost on reload
+
+Two real defects in the MVP slice, both found and fixed:
+
+1. **Signup dead-ended.** The project has email confirmation ON, so the
+   first real signup returned no session and parked on a confirmation email
+   (default Supabase mailer, not our Resend, rate-limited/spammy). Also the
+   app-layer HOMA_SIGNUP_CODE check was bypassable by calling the Supabase
+   auth API directly with the publishable key. **Fix (migration #7):** a
+   `before insert` trigger on auth.users enforces the invite code (from
+   `private.settings`, not exposed over the Data API) at the database
+   boundary and auto-confirms the account when the code matches, so
+   password sign-in works immediately with no email round-trip. The signup
+   action now passes the code in user metadata and signs in right after;
+   the trigger's 500 rejection is translated to a friendly "invite code
+   isn't right" message. Invite code required in the UI now.
+2. **Chat history vanished on reload.** The chat didn't persist the eve
+   session cursor, so every reload silently started a fresh, memoryless
+   conversation. **Fix:** wired eve's documented resumable-sessions pattern
+   into chat-client.tsx — initialEvents/initialSession from localStorage
+   (keyed per user id), snapshot saved onFinish. Added a "New chat" button
+   to deliberately start fresh. /chat is now a server component that resolves
+   the user id for the storage key.
+
+Verified end to end with Playwright against the real stack: UI signup with
+the code confirms and lands on /home (no email), wrong code shows the
+friendly error, family+child setup works, chat knows the child; a hard
+reload restores the transcript AND a follow-up resumes the SAME durable
+session (POSTs to /eve/v1/session/{id}, and Homa correctly recalled a
+secret word set before the reload — real continuity, not just restored
+pixels). All test users deleted from homa-prod after (0 users remain).
+Typecheck, build, lints green.
+
+Note the deferred item is now smaller: chat history persists client-side
+(localStorage); the Postgres conversations table (cross-device history,
+M1-02) is still the future proper version.
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
