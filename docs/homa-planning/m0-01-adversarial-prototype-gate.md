@@ -183,16 +183,89 @@ fail bar was "the parked session cannot resume, resumes into a corrupted or
 wrong state without surfacing an error, **or** the answer is lost." All three
 happened at once. This was not a close call.
 
-**Decision needed from Sidney:** per the verdict rule, NO-GO means ejecting
-to M0-02 (custom harness on AI SDK + Workflow SDK + Sandbox + AI Gateway, per
-`01-architecture.md`'s fallback plan) before any Phase B code depends on eve.
-This is a real architectural fork, not something to decide unilaterally.
-Options on the table: (1) eject now per the rule as written; (2) treat this
-as a narrower, patchable risk (e.g. "drain HITL-parked sessions before every
-upgrade" as an operational rule) and re-run the full five-test suite before
-deciding; (3) report upstream and wait for a fix, re-testing this exact repro
-before trusting upgrades again. Logged as an open decision, not resolved by
-this document.
+**Decided (2026-07-05, Sidney): stay on eve.** Not ejecting to M0-02. The
+three mitigations built 2026-07-04 (`apps/web/lib/harness/
+resume-session.ts`, `scripts/eve-upgrade-check.mjs`,
+`docs/homa-planning/runbooks/eve-version-bump.md`) are the standing answer to
+test (a)'s failure: every resume goes through the guard, every version bump
+goes through the script and runbook. Reporting the bug upstream is a
+parallel, non-blocking task. Since we're committing to eve rather than
+re-running these tests against a hypothetical custom harness, tests (b) and
+an adapted (e) were run against eve itself on 2026-07-05 — results below.
+Tests (c) and (d) remain deferred (see why below); Phase B is clear to start
+with the mitigations in place, the deploy/rollback finding logged as a
+tracked risk, and (c)/(d) revisited once the app-level code they actually
+test exists.
+
+## Results: (b) and adapted (e), run 2026-07-05
+
+### Adapted (e): concurrent-session tenancy isolation — PASS
+
+The original test (e) assumed a schedule dispatcher (M3-10/M1-02 machinery)
+that doesn't exist yet; building it just to throw away would be a large
+detour disproportionate to a spike. Adapted to test what's actually eve's
+own responsibility today: does eve's session/runtime ever let one
+concurrent session's context leak into another's response. Fired 12
+concurrent sessions, each seeded with a unique synthetic secret code and
+instructed to echo it back. Checked every response for its own code and for
+every other session's code.
+
+**Result: 0/12 sessions ever produced another session's code, in either of
+two runs.** This is the single most safety-critical property for this
+product (per the gate's own rationale: "this is the cheapest, earliest
+point to catch a tenancy bug"), and eve's core session handling passes it
+cleanly under concurrency.
+
+### (b) Deploy + rollback with an in-flight workflow run — FAIL, with an important caveat
+
+Started a turn, then stopped the server ~300ms later (before the model call
+likely completed) and restarted it, simulating a deploy mid-flight. Tried
+three variants: a hard `SIGKILL`, a graceful `SIGTERM` with a drain window,
+and an explicit follow-up "nudge" POST after restart. **All three produced
+the identical result**: the session stream shows `session.started →
+turn.started → message.received → step.started` and then nothing —
+no completion, no failure event, no error in the server logs at all, for
+at least 60 seconds. The turn is permanently stuck, silently, with zero
+diagnostic trail (worse than test (a) in one respect: test (a) at least
+logged an explicit `CorruptedEventLogError` server-side; this produced no
+server-side signal whatsoever).
+
+**Important caveat this needs before it's treated as equally serious as
+test (a):** this ran against eve's **local, disk-backed workflow world**
+(`eve dev`'s default), not real Vercel Workflow. The architecture docs
+describe these as different durability substrates — Vercel Workflow is a
+managed service with its own commit protocol; the local world persists to
+disk under `.workflow-data` in a way that may simply not survive a kill this
+early in a step's lifecycle the same way. This finding may be a local-dev
+testing artifact rather than a production-relevant gap. **Do not treat this
+as resolved either way** — it needs a fourth attempt against an actual
+Vercel preview deployment (kill via `vercel` redeploy or a forced function
+restart, not a local process signal) before concluding whether this is real
+for production.
+
+**What this means for Phase B, right now:** the identical failure mode as
+test (a) applies as a mitigation: a resume-style guard that verifies real
+forward progress (not just a synchronous `ok: true`) rather than trusting
+eve's response — `apps/web/lib/harness/resume-session.ts` already does this
+for the resume path; the same pattern should extend to the initial
+session-start path once real chat UI work begins (M1-04), so a stuck
+first-turn is caught the same way a stuck resume already is.
+
+### (c) and (d): deferred, not skipped
+
+Both tests need application-level code that doesn't exist yet:
+- **(c) kill the dispatcher mid-fan-out** needs a real `ScheduleStore`
+  (atomic claim/lease/release) and CRUD tools per eve's dynamic-scheduling
+  pattern — that's M1-02/M3-10 scope, not written yet. Testing crash-recovery
+  of a dispatcher we haven't designed would mean building throwaway
+  scaffolding disproportionate to a spike.
+- **(d) rotate a session parked in HITL** needs our own session-rotation
+  state machine (M1-15) — eve has no built-in "rotate," we were always going
+  to build that logic ourselves per `01-architecture.md`. There's nothing to
+  test yet.
+
+Both get re-run the moment the code they test exists, using the same rigor
+as (a), (b), and adapted (e) above — not skipped, just sequenced correctly.
 
 ## After the gate
 

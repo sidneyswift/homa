@@ -85,23 +85,28 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof: ⚠️ MITIGATED, not resolved (2026-07-04).** M0-01
-  test (a) found a reproducible eve failure: a session parked in HITL across
-  a version bump silently fails to resume (either a substitute memoryless
-  session, or a matching session that never processes the message) with no
-  signal in the synchronous response either way. Per the gate's own rule,
-  one such failure is enough: NO-GO on eve as tested. **Three mitigations now
-  exist** so Phase B is not fully blocked: (1) `apps/web/agent/harness/
-  resume-session.ts` — every resume MUST go through this, it watches the
-  event stream for real progress instead of trusting `ok: true`, and throws
-  loudly on a silent failure; (2) `scripts/eve-upgrade-check.mjs` — run
+- **Phase A — Engine proof: ✅ CLEARED for Phase B, with two tracked risks
+  (decided 2026-07-05: staying on eve, not ejecting to M0-02).** M0-01 found
+  a reproducible eve failure (test a: a session parked in HITL across a
+  version bump silently fails to resume) and a second one while continuing
+  the spike (test b: a step killed mid-flight never resumes, no error
+  logged — caveat: found against the local dev workflow world, not yet
+  confirmed against real Vercel Workflow, retest before treating as
+  production-relevant). An adapted test (e) passed clean: zero cross-session
+  leakage under concurrency, the single most safety-critical property.
+  Tests (c)/(d) are deferred until the dispatcher/rotation code they test
+  exists (M3-10/M1-02, M1-15). **Standing mitigations, required going
+  forward:** (1) `apps/web/lib/harness/resume-session.ts` — every resume
+  MUST go through this; it watches the event stream for real progress
+  instead of trusting `ok: true`; extend the same pattern to session-start
+  once M1-04's chat UI exists, since test (b) showed a stuck *first* turn is
+  just as silent as a stuck resume; (2) `scripts/eve-upgrade-check.mjs` — run
   before ANY eve version change, no exceptions; (3) `docs/homa-planning/
-  runbooks/eve-version-bump.md` — the procedure tying both together. None of
-  this fixes eve's bug, it makes the bug survivable. **The bigger decision is
-  still open for Sidney**: eject to M0-02 (custom harness on AI SDK +
-  Workflow SDK + Sandbox), stay on eve with these mitigations plus report
-  upstream, or something else. Full evidence: `eve-churn-log.md`. Then M0-03
-  worksheet-in-sandbox, M0-04 voice-on-real-phones,
+  runbooks/eve-version-bump.md` — the procedure tying both together.
+  Reporting both bugs upstream is a parallel, non-blocking task. Full
+  evidence and the test (b) Vercel-preview retest TODO: `eve-churn-log.md`
+  and `m0-01-adversarial-prototype-gate.md`. Then M0-03 worksheet-in-sandbox,
+  M0-04 voice-on-real-phones,
   M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
   Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent
   mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`

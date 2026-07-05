@@ -214,7 +214,7 @@ Asked "what would fix this without diverging too much" after the NO-GO.
 Built three things, all in our own code/process, none touching eve
 internals:
 
-1. `apps/web/agent/harness/resume-session.ts` — narrow seed of M1-14. Every
+1. `apps/web/lib/harness/resume-session.ts` — narrow seed of M1-14. Every
    resume of an eve session must go through this. It doesn't trust eve's
    synchronous `ok: true` alone (the finding showed that's not confirmation);
    it watches the event stream for a real new turn or an explicit failure
@@ -233,6 +233,36 @@ This does not resolve the open decision (eject to M0-02 vs. stay on eve with
 these mitigations vs. report upstream and wait) — that's still Sidney's call.
 It does mean Phase B is no longer flatly blocked: BUILD.md now says
 "mitigated, not resolved" instead of "blocked."
+
+## 2026-07-05 · Founder decision: stay on eve; spike continued
+
+Sidney: "stay and continue." Resolved the open M0-01 decision — not
+ejecting to M0-02, staying on eve with the mitigations from 2026-07-04.
+Continued the spike since committing to eve means the other adversarial
+tests should actually be checked against it:
+
+- **Adapted test (e)** (concurrent sessions, no schedule dispatcher exists
+  yet to test the original version): 12 concurrent synthetic-tenant
+  sessions, zero cross-session leakage, confirmed twice. Clean pass on the
+  single most safety-critical property.
+- **Test (b)** (deploy + rollback mid-turn): failed, reproducibly, across
+  three variants (hard kill, graceful stop, explicit nudge) — a step killed
+  between start and completion never resumes, with zero server-side error
+  logged. **Important caveat**: this is against the local dev workflow
+  world, not real Vercel Workflow, which the docs describe as a different,
+  managed durability substrate. Needs a Vercel-preview retest before being
+  trusted as production-relevant. Logged in full in `eve-churn-log.md` and
+  `m0-01-adversarial-prototype-gate.md`.
+- Tests (c) and (d) stay deferred — they need a schedule dispatcher and a
+  session-rotation state machine that don't exist yet (M3-10/M1-02, M1-15).
+  Not skipped, just correctly sequenced.
+- Relocated `resume-session.ts` from `apps/web/agent/harness/` to
+  `apps/web/lib/harness/` — the old path is an eve-discovered directory
+  convention and eve's discovery warned on it; the module is app code
+  calling eve's API, not an eve capability.
+
+Phase B is clear to start with the mitigations in place and the deploy/
+rollback finding tracked as an open risk, not a blocker.
 
 ## File additions this session
 
@@ -266,8 +296,9 @@ It does mean Phase B is no longer flatly blocked: BUILD.md now says
   breaking changes, feeding the eject tripwire.
 - `docs/homa-planning/m0-01-adversarial-prototype-gate.md`: GO/NO-GO criteria
   for the M0-01 spike, written before the spike runs.
-- `apps/web/agent/harness/resume-session.ts`: resume-identity + forward-
-  progress guard (M1-14 seed), mitigating the M0-01 finding.
+- `apps/web/lib/harness/resume-session.ts`: resume-identity + forward-
+  progress guard (M1-14 seed), mitigating the M0-01 finding. Lives in
+  `lib/`, not `agent/` — it calls eve's API, it isn't an eve capability.
 - `scripts/eve-upgrade-check.mjs`: automated pre-bump regression check for
   any eve version change.
 - `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for

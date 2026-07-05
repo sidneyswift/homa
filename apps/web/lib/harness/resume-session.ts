@@ -22,6 +22,10 @@
  * function rather than calling eve's HTTP endpoint directly, so a silently
  * dropped resume is a loud failure here instead of a silently corrupted
  * conversation three layers up.
+ *
+ * Lives in `lib/`, not `agent/`: this calls eve's HTTP API from the outside,
+ * it is not an eve-discovered capability (eve's own discovery warns on
+ * unrecognized subdirectories under `agent/`, e.g. `agent/harness/`).
  */
 
 export interface ResumeSessionParams {

@@ -10,12 +10,40 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-07-05 · Decision: stay on eve; two more tests run, one clean, one new finding
+
+Sidney decided: stay on eve (no eject to M0-02), given the mitigations
+below already cover test (a)'s failure mode. Continued the spike with an
+adapted test (e) and test (b) from `m0-01-adversarial-prototype-gate.md`
+(full detail there):
+
+- **Adapted (e), concurrent-session tenancy isolation: PASS.** 12 concurrent
+  sessions, each with a unique secret, zero cross-session leakage across two
+  runs. The single most safety-critical property, confirmed clean.
+- **(b), deploy+rollback mid-turn: FAIL, with a caveat.** A step killed
+  between `step.started` and `step.completed` never resumes — confirmed
+  identically across a hard kill, a graceful stop with a drain window, and
+  an explicit nudge POST after restart. Zero server-side error logged at
+  all (worse than test (a) in that respect). **Caveat: this ran against the
+  local disk-backed workflow world (`eve dev`), not real Vercel Workflow** —
+  the docs describe these as different durability substrates, so this needs
+  a retest against an actual Vercel preview before it's trusted as a
+  production-relevant finding rather than a local-dev artifact.
+- (c) and (d) remain deferred — they need app-level code (a schedule
+  dispatcher, a rotation state machine) that doesn't exist yet. Not skipped,
+  sequenced to run once that code is written.
+
+Also relocated the harness guard from `apps/web/agent/harness/` to
+`apps/web/lib/harness/` — eve's own discovery process warned on the
+unrecognized `agent/harness/` subdirectory, since it's app code that calls
+eve's API, not an eve-discovered capability.
+
 ## 2026-07-04 · Mitigations shipped (not a fix — eve's bug is still open)
 
 Three defenses against the finding below, all in our own code/process, none
 touching eve internals ("fix without diverging too much"):
 
-1. **`apps/web/agent/harness/resume-session.ts`** — a narrow seed of M1-14.
+1. **`apps/web/lib/harness/resume-session.ts`** — a narrow seed of M1-14.
    Wraps eve's resume endpoint and refuses to trust the synchronous `ok:
    true` response alone: it also watches the session's event stream for a
    real new turn (or an explicit failure event) before calling a resume
