@@ -85,21 +85,23 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof: 🛑 BLOCKED, M0-01 returned NO-GO (2026-07-04).**
-  Test (a) of `docs/homa-planning/m0-01-adversarial-prototype-gate.md` found
-  a reproducible eve failure: a session parked in HITL across an 0.18.2 →
-  0.19.0 version bump corrupts on resume, and the API silently opens a new,
-  memoryless session instead of erroring, with no signal to the caller.
-  Per the gate's own rule, one such failure is enough: NO-GO. **Do not start
-  Phase B on eve as-is.** Full evidence: `eve-churn-log.md`. This is an open
-  decision for Sidney (eject to M0-02 custom harness / treat as a narrower
-  "drain HITL sessions before upgrading" operational rule and retest / report
-  upstream and wait for a fix) — not resolved by an agent. `eve` stays pinned
-  to an exact version (no `^`) in `apps/web/package.json` either way. Once
-  decided: either M0-02 (custom harness on AI SDK + Workflow SDK + Sandbox)
-  re-runs the same five tests, or a patched eve retests test (a) specifically
-  before Phase A is considered passed. Then M0-03 worksheet-in-sandbox,
-  M0-04 voice-on-real-phones,
+- **Phase A — Engine proof: ⚠️ MITIGATED, not resolved (2026-07-04).** M0-01
+  test (a) found a reproducible eve failure: a session parked in HITL across
+  a version bump silently fails to resume (either a substitute memoryless
+  session, or a matching session that never processes the message) with no
+  signal in the synchronous response either way. Per the gate's own rule,
+  one such failure is enough: NO-GO on eve as tested. **Three mitigations now
+  exist** so Phase B is not fully blocked: (1) `apps/web/agent/harness/
+  resume-session.ts` — every resume MUST go through this, it watches the
+  event stream for real progress instead of trusting `ok: true`, and throws
+  loudly on a silent failure; (2) `scripts/eve-upgrade-check.mjs` — run
+  before ANY eve version change, no exceptions; (3) `docs/homa-planning/
+  runbooks/eve-version-bump.md` — the procedure tying both together. None of
+  this fixes eve's bug, it makes the bug survivable. **The bigger decision is
+  still open for Sidney**: eject to M0-02 (custom harness on AI SDK +
+  Workflow SDK + Sandbox), stay on eve with these mitigations plus report
+  upstream, or something else. Full evidence: `eve-churn-log.md`. Then M0-03
+  worksheet-in-sandbox, M0-04 voice-on-real-phones,
   M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
   Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent
   mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`

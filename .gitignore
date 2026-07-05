@@ -12,6 +12,9 @@
 homa-macmini/
 homa-research/
 
+# ── Scratch output from scripts ─────────────────────────────────────────────
+.eve-upgrade-check.log
+
 # ── Junk ────────────────────────────────────────────────────────────────────
 .DS_Store
 node_modules/

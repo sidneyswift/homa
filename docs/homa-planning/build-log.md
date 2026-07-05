@@ -208,6 +208,32 @@ operational risk (drain HITL-parked sessions before every upgrade) and
 re-test, or report upstream and wait for a fix. Phase B work should not
 proceed on eve, as-is, until this is decided.
 
+## 2026-07-04 · Mitigations for the M0-01 finding (fix without diverging)
+
+Asked "what would fix this without diverging too much" after the NO-GO.
+Built three things, all in our own code/process, none touching eve
+internals:
+
+1. `apps/web/agent/harness/resume-session.ts` — narrow seed of M1-14. Every
+   resume of an eve session must go through this. It doesn't trust eve's
+   synchronous `ok: true` alone (the finding showed that's not confirmation);
+   it watches the event stream for a real new turn or an explicit failure
+   before calling a resume successful, and throws a typed error otherwise.
+   Verified against the live bug: 2/2 correctly caught the real corruption,
+   1/1 correctly passed a healthy same-version control (no false positive).
+2. `scripts/eve-upgrade-check.mjs` — automates the exact repro against any
+   candidate version pair. Verified: correctly passes a same-version no-op,
+   correctly fails the known-bad 0.18.2→0.19.0 pair (twice).
+3. `docs/homa-planning/runbooks/eve-version-bump.md` — the procedure: read
+   the changelog for tool/replay/workflow language, run the script, check
+   for live parked sessions (stubbed until M1-02), deploy, smoke-test, log
+   the outcome in `eve-churn-log.md` either way.
+
+This does not resolve the open decision (eject to M0-02 vs. stay on eve with
+these mitigations vs. report upstream and wait) — that's still Sidney's call.
+It does mean Phase B is no longer flatly blocked: BUILD.md now says
+"mitigated, not resolved" instead of "blocked."
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
@@ -240,3 +266,9 @@ proceed on eve, as-is, until this is decided.
   breaking changes, feeding the eject tripwire.
 - `docs/homa-planning/m0-01-adversarial-prototype-gate.md`: GO/NO-GO criteria
   for the M0-01 spike, written before the spike runs.
+- `apps/web/agent/harness/resume-session.ts`: resume-identity + forward-
+  progress guard (M1-14 seed), mitigating the M0-01 finding.
+- `scripts/eve-upgrade-check.mjs`: automated pre-bump regression check for
+  any eve version change.
+- `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for
+  bumping the pinned eve version safely.
