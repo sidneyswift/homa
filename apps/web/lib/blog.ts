@@ -19,7 +19,14 @@ const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 const frontmatterSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1).max(160),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // gray-matter's YAML parser turns an unquoted 2026-07-05 into a Date
+  // object; accept both and normalize to the yyyy-mm-dd string.
+  date: z
+    .union([z.string(), z.date()])
+    .transform((value) =>
+      value instanceof Date ? value.toISOString().slice(0, 10) : value,
+    )
+    .pipe(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
   tags: z.array(z.string()).default([]),
   hero: z.string().optional(),
   ogImage: z.string().optional(),
