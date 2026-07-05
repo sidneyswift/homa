@@ -336,3 +336,42 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   .lp-film-card { transition: opacity var(--dur-base) var(--ease-out); @starting-style { transform: none; } }
   .lp-peek { transition: opacity var(--dur-base) var(--ease-out); }
 }
+
+/* ============================================================================
+   Blog article prose (/blog/[slug], rendered MDX). Tokens only, no new
+   values: display font headings, body text at a comfortable measure, brand
+   links. Spec: docs/homa-planning/14-marketing-demand-engine.md §9.
+   ========================================================================= */
+.blog-prose {
+  color: var(--text-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  max-width: 65ch;
+}
+.blog-prose h2, .blog-prose h3 {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  line-height: var(--leading-snug);
+  margin: var(--space-10) 0 var(--space-3);
+}
+.blog-prose h2 { font-size: var(--text-2xl); font-weight: var(--weight-semibold); }
+.blog-prose h3 { font-size: var(--text-xl); font-weight: var(--weight-semibold); }
+.blog-prose p { margin: 0 0 var(--space-5); }
+.blog-prose ul, .blog-prose ol { margin: 0 0 var(--space-5); padding-left: var(--space-6); }
+.blog-prose li { margin-bottom: var(--space-2); }
+.blog-prose a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.blog-prose a:hover { color: var(--brand-hover); }
+.blog-prose blockquote {
+  border-left: 3px solid var(--brand-soft-2);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-5);
+  padding-left: var(--space-5);
+}
+.blog-prose img { border-radius: var(--radius-lg); max-width: 100%; height: auto; }
+.blog-prose strong { color: var(--text-strong); }
+.blog-prose hr { border: none; border-top: 1px solid var(--border-subtle); margin: var(--space-10) 0; }
