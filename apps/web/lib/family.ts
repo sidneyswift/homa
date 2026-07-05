@@ -1,0 +1,49 @@
+import { createSupabaseServerClient } from "./supabase/server";
+
+/**
+ * Server-side family/child reads for signed-in pages. All queries run under
+ * the caller's RLS context (publishable key + session JWT), so every row is
+ * family-scoped by the database itself, not by trust in this code.
+ */
+
+export interface FamilyRecord {
+  id: string;
+  name: string;
+  us_state: string | null;
+}
+
+export interface ChildRecord {
+  id: string;
+  family_id: string;
+  name: string;
+  birth_month: string;
+  profile: ChildProfile;
+}
+
+export interface ChildProfile {
+  interests?: string[];
+  focus?: string;
+  notes?: string;
+}
+
+export async function getMyFamily(): Promise<FamilyRecord | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("families")
+    .select("id, name, us_state")
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`families read failed: ${error.message}`);
+  return data;
+}
+
+export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("children")
+    .select("id, family_id, name, birth_month, profile")
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`children read failed: ${error.message}`);
+  return (data ?? []) as ChildRecord[];
+}

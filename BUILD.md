@@ -129,15 +129,27 @@ never modify either).
   100-family fan-out test and M0-03's latency spike should be designed against
   these numbers, not discovered by them.
 
-- **Phase B — Walking skeleton, one family end-to-end:** FR-1 (invite+auth,
-  **MJ-09**: waitlist read path + invite codes + invite email — the conference
-  waitlist is currently write-only and has no exit), FR-2 (3-minute wow), FR-4
-  (chat+voice), FR-5 (materials + photo consent floor), **M1-08 minimal**
-  (Resend transactional email: welcome, journal-prompt, weekly-note, receipt
-  templates + the opens/clicks/unsubscribes webhook bridge per
-  `journeys/06 §7` — domain `mail.thankshoma.com` is verified and
-  `RESEND_API_KEY` is in Vercel prod as of 2026-07-04), platform laws (M1-07
-  isolation suite in CI from the FIRST schema migration).
+- **Phase B — Walking skeleton, one family end-to-end: ⏳ STARTED
+  (2026-07-05, playable MVP live).** Built and E2E-verified: Supabase Auth
+  email/password (minimal M1-01; `proxy.ts` session refresh + route gating),
+  `create_my_family()` RPC (migration #6), child intake writing
+  `children.profile` (minimal M2-03i), eve channel auth stamping
+  familyId from the caller's own RLS context (`agent/channels/eve.ts`),
+  first two agent tools (`get_children`, `create_worksheet` — caller-scoped
+  DB access via `lib/agent-db.ts`, no service key), and a /chat surface on
+  `useEveAgent` with a printable worksheet card. Signup is gated by the
+  `HOMA_SIGNUP_CODE` env var until MJ-09's real invite codes. **Still open
+  in Phase B:** FR-1 proper (MJ-09: waitlist read path + invite codes +
+  invite email — the conference waitlist is still write-only), FR-2's real
+  3-minute wow funnel, FR-4 voice, FR-5 materials pipeline + photo consent
+  floor (current worksheets are text-exercise layouts, not the
+  reportlab/fal pipeline — M0-03 spike still pending), chat history
+  rehydration, **M1-08 minimal** (Resend transactional email: welcome,
+  journal-prompt, weekly-note, receipt templates + the
+  opens/clicks/unsubscribes webhook bridge per `journeys/06 §7` — domain
+  `mail.thankshoma.com` is verified and `RESEND_API_KEY` is in Vercel prod
+  as of 2026-07-04), platform laws (M1-07 isolation suite in CI from the
+  FIRST schema migration — smoke version running in CI now).
 - **Phase C — The living product:** FR-3 (drip), FR-6 (journal+hours), FR-7
   (dashboard), FR-9 (learning loop), FR-10 (trust floor), FR-11 (founder ops).
 - **Phase D — Money + gates:** FR-8 concierge tooling, Payment Link trial-with-card,

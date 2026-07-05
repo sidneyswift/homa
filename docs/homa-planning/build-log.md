@@ -294,6 +294,58 @@ tests should actually be checked against it:
 Phase B is clear to start with the mitigations in place and the deploy/
 rollback finding tracked as an open risk, not a blocker.
 
+## 2026-07-05 · Playable MVP: auth → family → child → chat → worksheet
+
+Founder asked "can we get an mvp shipped so i can start playing with it" —
+built the trimmed walking-skeleton slice end to end, real code not hacks:
+
+1. **Auth (minimal M1-01):** Supabase Auth email/password via @supabase/ssr.
+   `lib/supabase/{server,client}.ts` helpers, `proxy.ts` (Next 16's renamed
+   middleware) refreshes sessions per request and gates /home + /chat with
+   `getClaims()` (JWT-verified, not spoofable). /signin page with a
+   founding-family gate: signup requires the invite code in
+   `HOMA_SIGNUP_CODE` (set in Vercel prod env; unset locally = open signup
+   for dev). MJ-09's real invite codes replace this.
+2. **Family creation (migration #6):** `create_my_family()` RPC — an
+   authenticated user with no membership creates exactly one family
+   atomically; the one-family rule lives in the function body. RLS advisor
+   warning is intentional (documented in the migration).
+3. **Child intake (minimal M2-03i):** /home shows create-family → add-child
+   → children list; children write to `children.profile` jsonb (interests,
+   focus) under the existing "members add children" RLS policy.
+4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn — chat
+   sends the caller's Supabase access token as a bearer (resolved fresh per
+   request by useEveAgent), the channel verifies it via `auth.getUser()`,
+   resolves familyId under the caller's OWN RLS, and stamps
+   `{ principalId: userId, attributes: { familyId, supabaseAccessToken } }`.
+   The raw token in attributes is server-custody state, never model-visible,
+   refreshed per turn; M1-02's SET LOCAL pattern replaces it.
+5. **Agent tools (first two):** `get_children` (reads the family's kids +
+   profiles as the caller — RLS is the wall inside tools too, no service
+   key exists in the app) and `create_worksheet` (schema-validates the
+   worksheet the model composes; the UI renders it as a printable card).
+   `lib/agent-db.ts` is the shared caller-scoped DB helper. Instructions
+   updated: call get_children at conversation start, worksheet composition
+   rules, voice laws.
+6. **Chat UI (trimmed M1-04):** /chat with useEveAgent, on-brand bubbles,
+   suggestion chips, worksheet card with a print button (browser print
+   dialog → paper/PDF; v0 of MJ-01). shadcn integration stays with M1-04
+   proper.
+
+**Verified end to end with Playwright against the real stack** (Next dev +
+eve dev + homa-prod Supabase + real model calls): unauthenticated /chat
+bounces to /signin; sign in lands on /home; create family; add child (Maya,
+5, dinosaurs+drawing, letter sounds); chat "make Maya a worksheet" →
+get_children + create_worksheet tool calls → on-brand printable "Maya's
+Dino Letter Sounds" card with 5 themed exercises. Test rows deleted from
+homa-prod after. Typecheck, production build, and isolation checks green.
+
+Known deferrals: voice, photo personalization, conversation persistence
+(chat history resets on reload — eve session is durable server-side but the
+UI doesn't rehydrate it yet), real invite codes (MJ-09), the reportlab/fal
+worksheet pipeline (M0-03/M2-05 — current output is text-exercise layouts),
+proper session-tracking table.
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
