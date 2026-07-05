@@ -70,25 +70,6 @@ export function SignInForm() {
           className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
         />
 
-        {mode === "signup" ? (
-          <>
-            <label className="mt-4 block font-medium text-strong" htmlFor="auth-invite-code">
-              Invite code
-            </label>
-            <input
-              id="auth-invite-code"
-              name="invite_code"
-              type="text"
-              autoComplete="off"
-              required
-              className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
-            />
-            <p className="mt-1 text-sm text-muted">
-              Homa is invite-only while we get started.
-            </p>
-          </>
-        ) : null}
-
         {active.error ? (
           <p className="mt-3 text-sm text-danger" role="alert">
             {active.error}

@@ -39,39 +39,21 @@ export async function signUpAction(
 ): Promise<AuthFormState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const inviteCode = String(formData.get("invite_code") ?? "").trim();
   if (!email || password.length < 8) {
     return { error: "Enter an email and a password of at least 8 characters." };
-  }
-  if (!inviteCode) {
-    return { error: "An invite code is required while Homa is invite-only." };
   }
 
   const supabase = await createSupabaseServerClient();
 
-  // The founding-family gate is enforced IN the database (migration #7):
-  // a trigger on auth.users rejects signups whose metadata lacks the valid
-  // code and auto-confirms the account when it matches, so there is no
-  // confirmation-email round-trip and no bypass via the raw auth API.
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { invite_code: inviteCode } },
-  });
+  // Open signup: accounts are auto-confirmed at creation by a DB trigger
+  // (migration #8), so there is no email round-trip.
+  const { error } = await supabase.auth.signUp({ email, password });
   if (error) {
-    // The trigger's rejection surfaces from the auth API as a 500 whose
-    // message is unusable (supabase-js wraps it as a retryable fetch error
-    // with message "{}"). The invite gate is the only insert trigger on
-    // auth.users, so a 500 here means the code was wrong; translate it.
-    const messageIsGarbage = !error.message || error.message === "{}";
-    if (error.status === 500 || messageIsGarbage || /database error/i.test(error.message)) {
-      return { error: "That invite code isn't right. Check it and try again." };
-    }
     return { error: error.message };
   }
 
-  // The account is confirmed at creation, so password sign-in works
-  // immediately and deterministically establishes the session cookie.
+  // Sign in right after so the session cookie is set deterministically even
+  // if the project's email-confirmation setting is still on.
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
     password,

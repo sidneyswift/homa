@@ -3,6 +3,46 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-05 · Lead magnet v2 planning session (artifacts only, no product code)
+
+Founder asked for a plan to replace the write-only waitlist with a
+context-grab lead magnet ("see where your child ranks" report per child,
+ages 2 to 16, benchmark-compared, emailed). Produced five reviewable HTML
+artifacts in `docs/homa-planning/lead-magnet/` (index + decisions, flow
+chart, user journey, states + backend map, full report mock). No decisions
+were made unilaterally; eight decision points (D1 to D8: conference timing,
+claim framing, account-vs-lead storage, checklist depth, delivery, existing
+waitlist emails, out-of-range capture, narrative source) are presented with
+recommendations and await founder rulings via the artifact composer.
+
+Tensions flagged for the record, not resolved here:
+
+1. "See where your child ranks" vs the never-say law: artifacts recommend
+   "see where your child stands" + months-ahead vs national benchmarks
+   (the shipped hero's own promise), never percentile/"national average"
+   claims we cannot substantiate.
+2. Real accounts during the flow would touch the PRD non-goal ("public
+   signup: invite codes only") and would put family-creation on a public
+   surface before the M1-07 adversarial suite exists; artifacts recommend
+   lead tables + claim-at-invite instead (rides MJ-09).
+3. Report generation needs the first server-only Supabase secret in
+   `apps/web` (build-log 2026-07-04 #3 anticipated this moment for MJ-09).
+4. Privacy policy (launch gate 7) effectively pulls forward: this feature
+   holds children's names, birth months, and developmental answers, not
+   just emails, and the current form promise ("email only used for your
+   invite") must be re-vetted.
+5. Pre-existing violation spotted in shipped code: `Hero.tsx` renders the
+   kit's "Loved by 12,000+ homeschooling families" avatar row (fabricated
+   social proof, ruling C2) and a "Start free for 14 days" CTA (pricing
+   claim, T2 + Deliverable 0 hard constraint). Journeys/02's header note
+   explicitly says both may not ship. Needs a fix regardless of v2.
+
+Sources honored: `homa-macmini/` was NOT read (repo law; founder-provided
+screenshots used instead). Reference material came from `homa-template/`
+(read-only): the 15-domain questionnaire bank (2y0m to 7y0m) and the
+PreK-12 citation-backed benchmark files, which is the ported asset M0-10
+already names.
+
 ## 2026-07-04 · Deliverable 0 build session
 
 1. **"Never used to train AI" claim withheld from the landing page.** The
@@ -382,6 +422,32 @@ Typecheck, build, lints green.
 Note the deferred item is now smaller: chat history persists client-side
 (localStorage); the Postgres conversations table (cross-device history,
 M1-02) is still the future proper version.
+
+## 2026-07-05 · Open signup (founder decision: "as easy as possible, no hoops")
+
+Founder chose fully open signup over the invite-only gate. This reverses the
+PRD's "public signup (invite codes only)" non-goal and the founding-families
+framing — a deliberate founder call, logged here as the auditable override.
+
+- **Migration #8:** dropped the invite-enforcing trigger + `private.settings`
+  code store from migration #7; replaced with a plain `autoconfirm_new_user`
+  trigger that confirms every new account at creation. So signup is email +
+  password with an immediate session and no email round-trip, regardless of
+  the project's email-confirmation setting.
+- **Signup action:** removed the invite-code handling; plain signUp +
+  signInWithPassword.
+- **Signup form:** removed the invite-code field.
+- **Vercel:** removed the now-unused `HOMA_SIGNUP_CODE` production env var.
+
+On email confirmation itself: the project-level setting can't be toggled with
+the tools available here (no admin/management token; the MCP is DB-scoped).
+The auto-confirm trigger makes it moot for signup either way. If the founder
+turns off "Confirm email" in the dashboard (Authentication → Sign In /
+Providers → Email), the trigger becomes redundant and can be dropped.
+
+Verified: raw-API signup with no code returns a confirmed session; full UI
+flow (signup with just email+password → family → child → chat) passes E2E.
+Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
 
 ## File additions this session
 
