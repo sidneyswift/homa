@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   Homa Design System v2 tokens, copied from docs/homa-design/tokens/colors.css,
+   radius.css, shadows.css, spacing.css (verbatim) for the Deliverable 0 design
+   pass. A formal `packages/design` workspace package lands with ticket M1-17;
+   until then, keep this block in sync by hand with docs/homa-design/tokens/.
+   Read docs/homa-design/SKILL.md before extending this page's visual system.
+   ========================================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Warm neutrals (stone) --- */
+  --stone-50: #fbf7f0;
+  --stone-100: #f3ece1;
+  --stone-200: #e7ddce;
+  --stone-300: #d6c8b4;
+  --stone-400: #b3a492;
+  --stone-500: #8a7d6c;
+  --stone-600: #6b6259;
+  --stone-700: #4e463e;
+  --stone-800: #332e29;
+  --stone-900: #221e1a;
+
+  /* --- Clay / coral (primary) --- */
+  --clay-50: #fff0e8;
+  --clay-100: #ffddc9;
+  --clay-200: #ffbe9c;
+  --clay-300: #fb9868;
+  --clay-400: #f1793f;
+  --clay-500: #e7602f;
+  --clay-600: #c44c22;
+  --clay-700: #9c3b1b;
+
+  /* --- Sage / mint (secondary) --- */
+  --sage-50: #eaf6ec;
+  --sage-500: #3d9a50;
+  --sage-600: #2f7c40;
+
+  /* --- Gold / sunshine (accent) --- */
+  --gold-100: #fff3c2;
+  --gold-500: #f0be00;
+
+  /* --- Support: warm coral-red for errors --- */
+  --rose-100: #fde1d8;
+  --rose-500: #e2593b;
+
+  /* =====================  SEMANTIC ALIASES  ===================== */
+  --bg-page: var(--stone-50);
+  --surface-card: #ffffff;
+
+  --text-strong: var(--stone-900);
+  --text-body: var(--stone-800);
+  --text-muted: var(--stone-600);
+  --text-subtle: var(--stone-500);
+
+  --brand: var(--clay-500);
+  --brand-hover: var(--clay-600);
+  --brand-soft: var(--clay-50);
+  --on-brand: #ffffff;
+
+  --accent-sage: var(--sage-500);
+  --accent-sage-soft: var(--sage-50);
+  --accent-gold: var(--gold-500);
+  --accent-gold-soft: var(--gold-100);
+
+  --border-subtle: var(--stone-200);
+  --border-default: var(--stone-300);
+  --border-strong: var(--stone-400);
+
+  --danger: var(--rose-500);
+  --danger-soft: var(--rose-100);
+
+  /* --- Radii, soft and rounded, never sharp --- */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* --- Shadows, soft, warm-tinted (brown, not gray) --- */
+  --shadow-sm: 0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
+  --shadow-lg: 0 12px 28px rgba(51, 42, 33, 0.1), 0 4px 10px rgba(51, 42, 33, 0.05);
+
+  /* --- Fonts: next/font variables (set on <html> in layout.tsx) feed these --- */
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-caveat), "Segoe Script", cursive;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--bg-page);
+  --color-card: var(--surface-card);
+  --color-strong: var(--text-strong);
+  --color-body: var(--text-body);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-sage: var(--accent-sage);
+  --color-gold: var(--accent-gold);
+  --color-border: var(--border-default);
+  --color-border-subtle: var(--border-subtle);
+  --color-danger: var(--danger);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-lg: var(--shadow-lg);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-hand: var(--font-hand);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Homa base rules (docs/homa-design/tokens/base.css): no surface falls back
+   to the UA serif; headings always use the display font. Dark theme is
+   experimental and opt-in per docs/homa-design/SKILL.md, so this marketing
+   page does not follow prefers-color-scheme. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-body);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
 }

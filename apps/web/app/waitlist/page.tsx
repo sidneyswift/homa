@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
+import { Logo } from "../../components/brand/Logo";
 import { WaitlistForm } from "../../components/waitlist-form";
-import { WireframeSlot } from "../../components/wireframe-slot";
 
 /**
- * /waitlist: the direct-to-form page. WIREFRAME: structure only, no drafted
- * copy (founder correction, 2026-07-04); the copy kit (journeys/07 §5) fills
- * the slots during the design pass.
+ * /waitlist: the direct-to-form page. Copy final per journeys/07 §5 (the
+ * founding-families framing BUILD.md's hard constraints require); design
+ * matches the landing page's homa-design v2 pass.
  */
 
 export const metadata: Metadata = {
@@ -16,17 +16,14 @@ export const metadata: Metadata = {
 
 export default function WaitlistPage() {
   return (
-    <main className="mx-auto w-full max-w-xl px-6 py-10">
+    <main className="mx-auto w-full max-w-xl px-6 py-12">
       <header>
-        <p className="text-sm font-semibold tracking-wide">HOMA</p>
-        <h1 className="mt-4 text-3xl font-bold leading-tight">
-          Join the waitlist
+        <Logo size={28} />
+        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+          Join the founding families
         </h1>
-        <p className="mt-3 text-neutral-700">
-          <WireframeSlot
-            label="waitlist expectation copy"
-            hint="founding-families framing · journeys/07 §5"
-          />
+        <p className="mt-3 text-body">
+          We invite families a few at a time. Your invite comes by email.
         </p>
       </header>
 

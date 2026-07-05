@@ -137,6 +137,36 @@ Decisions made, in the order asked:
    `RESEND_API_KEY` is in `apps/web/.env.local` (gitignored) and in Vercel
    production env (added via CLI, type Sensitive).
 
+## 2026-07-04 · Deliverable 0 copy + design pass (grilling decision Q1)
+
+Replaced the wireframe's placeholder slots with final copy and the homa-design
+v2 visual system, closing the loop the grilling session opened.
+
+1. **Copy**: hero is variant B verbatim from `journeys/07 §5` ("Know exactly
+   where your child stands. Without ever testing them."). How-it-works,
+   trust, and paperwork bands pull from pillars A/B/C one-liners. Trust point
+   #3 uses the vetted honest claim from entry #1 ("we'll publish our full
+   privacy policy before the first family joins"), not the gated "never
+   trains AI" line. Waitlist band uses "Founding families" framing per
+   BUILD.md's hard constraint (no pricing, T2). CTA stays functional ("Join
+   the waitlist") rather than the kit's more evocative "Meet your child's
+   map" — no product exists yet for that CTA to honestly lead to.
+2. **Design**: homa-design v2 tokens (colors, radius, shadows, fonts) copied
+   into `apps/web/app/globals.css` and wired through Tailwind v4's
+   `@theme inline`, so classes like `bg-brand`, `text-strong`, `rounded-pill`
+   work directly. Fonts (Newsreader, Hanken Grotesk, Caveat, JetBrains Mono)
+   load via `next/font/google` instead of the design system's raw `@import`,
+   for self-hosting and zero layout shift. `Logo` component ported from
+   `docs/homa-design/components/brand/Logo.jsx`. This is a hand-copied
+   subset, not the formal `packages/design` workspace package; M1-17 still
+   owns porting the full component library.
+3. **Verification**: typecheck + production build green; rendered and
+   screenshotted at desktop and mobile (390px) widths via Playwright for
+   both `/` and `/waitlist` — readable, on-brand, touch-friendly. Founder
+   phone test + Alessa read-aloud (build-log #10's two remaining DoD boxes)
+   are next.
+4. Deleted `wireframe-slot.tsx` (no slots remain, per its own comment).
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
@@ -149,7 +179,10 @@ Decisions made, in the order asked:
   sources (shared by form, API, future invite service).
 - `packages/core/src/events.ts`: typed event registry (MJ-08) + `emitEvent()`.
 - `packages/core/src/us-states.ts`: US state list for the form.
-- `apps/web/app/page.tsx`: landing page (hero variant B, efficacy lead).
+- `apps/web/app/page.tsx`: landing page (hero variant B, efficacy lead; final
+  copy + homa-design v2 styling as of the copy/design pass above).
+- `apps/web/components/brand/Logo.tsx`: brand lockup, ported from
+  `docs/homa-design/components/brand/Logo.jsx`.
 - `apps/web/app/conference/page.tsx`: QR conference variant (`/conference`).
 - `apps/web/app/api/waitlist/route.ts`: validated capture endpoint; duplicate
   email = success (idempotent retries).
