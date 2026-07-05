@@ -7,21 +7,25 @@ exactly what's growing, proves the work moved the numbers, and does the paperwor
 
 ## For engineering agents
 
-**Start at [BUILD.md](BUILD.md).** It is the entry point: the one real deadline,
-Deliverable 0, reading order, build phases, and the non-negotiable laws.
+**Read [AGENTS.md](AGENTS.md) first** (symlinked as `CLAUDE.md` for tools that look
+for that name). It covers commands, code style, security boundaries, and points you
+to [BUILD.md](BUILD.md), the entry point for the one real deadline, Deliverable 0,
+reading order, build phases, and the non-negotiable laws.
 The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-mr-prd.md).
 
 ## Repo map
 
 | Path | What |
 |---|---|
-| `BUILD.md` | Engineering entry point — read first |
+| `AGENTS.md` | What agents read first — commands, style, boundaries (symlinked as `CLAUDE.md`) |
+| `BUILD.md` | Engineering entry point — read next |
+| `DESIGN.md` | Spec-compliant design-token summary for design tooling (source: `docs/homa-design/`) |
 | `apps/web/` | The one deployable: Next.js app with the eve agent mounted inside (`withEve`) |
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
 | `packages/design/` | Design tokens/components as a workspace package (source: `docs/homa-design/`) |
 | `supabase/` | Database migrations (Supabase GitHub integration watches this) |
 | `docs/homa-planning/` | The planning corpus: PRD, architecture, backlog, PM library, decisions |
-| `docs/homa-design/` | Brand + UI source of truth ("Quiet warmth"): tokens, UI kits, voice rules |
+| `docs/homa-design/` | Brand + UI source of truth ("Warm and playful"): tokens, UI kits, voice rules |
 | `HUMAN-TODO.md` | Founder's one-time setup checklist (temporary) |
 
 Local-only (untracked, never pushed): `homa-macmini/` (the original single-family
