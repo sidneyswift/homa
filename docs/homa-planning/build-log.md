@@ -167,6 +167,21 @@ v2 visual system, closing the loop the grilling session opened.
    are next.
 4. Deleted `wireframe-slot.tsx` (no slots remain, per its own comment).
 
+## 2026-07-04 · M0-01 GO/NO-GO criteria written (not yet run)
+
+Per the council re-scope's requirement ("GO/NO-GO criteria written BEFORE
+starting"), wrote `docs/homa-planning/m0-01-adversarial-prototype-gate.md`
+covering the five adversarial tests from `03-backlog.md` (eve upgrade drill,
+deploy+rollback mid-run, dispatcher kill mid-fan-out, HITL-parked rotation,
+100-family fan-out), each with a concrete pass/fail bar, plus: a strict
+2-session/≤2-day timebox distinct from BUILD.md's no-calendar-estimates
+roadmap stance, a contained-blast-radius environment plan (Vercel preview
+branch, real homa-prod schema with tagged+cleaned-up synthetic rows, never
+production), and a verdict rule (any leakage/data-loss/stuck-state = NO-GO
+regardless of the other four; eject to M0-02 on failure). BUILD.md now links
+it. **The spike itself has not been run yet** — this session only produced
+the criteria, per the gate's own requirement that they exist first.
+
 ## File additions this session
 
 - `supabase/migrations/20260704033725_waitlist_and_events.sql`: waitlist +
@@ -197,3 +212,5 @@ v2 visual system, closing the loop the grilling session opened.
   push/PR to `main` (see entry #14 above).
 - `docs/homa-planning/eve-churn-log.md`: dated log of eve version bumps and
   breaking changes, feeding the eject tripwire.
+- `docs/homa-planning/m0-01-adversarial-prototype-gate.md`: GO/NO-GO criteria
+  for the M0-01 spike, written before the spike runs.

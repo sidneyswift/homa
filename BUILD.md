@@ -85,15 +85,15 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof:** **M0-01 is next** (immediate priority once the
-  Deliverable 0 copy/design pass lands): throwaway adversarial prototype, STRICT
-  timebox, GO/NO-GO criteria written BEFORE starting (eve upgrade drill, deploy +
-  rollback mid-run, kill the dispatcher mid-fan-out, rotate a session parked in
-  HITL, synthetic 100-family fan-out). **Pin `eve` to an exact version (no `^`) in
-  `apps/web/package.json` before M0-01 starts**, and log every eve
-  release/breaking-change encounter in `docs/homa-planning/eve-churn-log.md`
-  (feeds the eject tripwire: >2 breaking changes costing >1 day each in any
-  4-week window). Then M0-03 worksheet-in-sandbox, M0-04 voice-on-real-phones,
+- **Phase A — Engine proof:** **M0-01 is next.** GO/NO-GO criteria are written:
+  `docs/homa-planning/m0-01-adversarial-prototype-gate.md` (five adversarial
+  tests, pass/fail bars, contained-blast-radius environment plan, strict
+  timebox). Read it before running the spike; do not add scope beyond its
+  five tests. `eve` is already pinned to an exact version (no `^`) in
+  `apps/web/package.json`, and every release/breaking-change encounter gets
+  logged in `docs/homa-planning/eve-churn-log.md` (feeds the eject tripwire:
+  >2 breaking changes costing >1 day each in any 4-week window). Then M0-03
+  worksheet-in-sandbox, M0-04 voice-on-real-phones,
   M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
   Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent
   mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`
