@@ -1,116 +1,209 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   Homa Design System v3 tokens, copied from docs/homa-design/tokens/colors.css,
-   radius.css, shadows.css, spacing.css, motion.css (verbatim) for the
-   Deliverable 0 design pass, including the sky/pop/band tokens the landing
-   page's hero and footer use. A formal `packages/design` workspace package
-   lands with ticket M1-17; until then, keep this block in sync by hand with
-   docs/homa-design/tokens/. Read docs/homa-design/SKILL.md before extending
-   this page's visual system, and the emil-design-eng / review-animations
-   skills (.agents/skills/) before adding any new motion.
+   Homa Design System v3 tokens, copied VERBATIM and in full from
+   docs/homa-design/tokens/{colors,shapes,typography,spacing,radius,shadows,
+   motion}.css for the Deliverable 0 design pass. A formal `packages/design`
+   workspace package lands with ticket M1-17; until then, keep this block in
+   sync by hand with docs/homa-design/tokens/. Read docs/homa-design/SKILL.md
+   before extending this page's visual system, and the emil-design-eng /
+   review-animations skills (.agents/skills/) before adding any new motion.
    ========================================================================= */
 :root {
   /* --- Warm neutrals (stone) --- */
-  --stone-50: #fbf7f0;
-  --stone-100: #f3ece1;
-  --stone-200: #e7ddce;
-  --stone-300: #d6c8b4;
-  --stone-400: #b3a492;
-  --stone-500: #8a7d6c;
-  --stone-600: #6b6259;
-  --stone-700: #4e463e;
-  --stone-800: #332e29;
-  --stone-900: #221e1a;
+  --stone-50:  #FBF7F0;
+  --stone-100: #F3ECE1;
+  --stone-200: #E7DDCE;
+  --stone-300: #D6C8B4;
+  --stone-400: #B3A492;
+  --stone-500: #8A7D6C;
+  --stone-600: #6B6259;
+  --stone-700: #4E463E;
+  --stone-800: #332E29;
+  --stone-900: #221E1A;
 
   /* --- Clay / coral (primary) --- */
-  --clay-50: #fff0e8;
-  --clay-100: #ffddc9;
-  --clay-200: #ffbe9c;
-  --clay-300: #fb9868;
-  --clay-400: #f1793f;
-  --clay-500: #e7602f;
-  --clay-600: #c44c22;
-  --clay-700: #9c3b1b;
+  --clay-50:  #FFF0E8;
+  --clay-100: #FFDDC9;
+  --clay-200: #FFBE9C;
+  --clay-300: #FB9868;
+  --clay-400: #F1793F;
+  --clay-500: #E7602F;
+  --clay-600: #C44C22;
+  --clay-700: #9C3B1B;
 
   /* --- Sage / mint (secondary) --- */
-  --sage-50: #eaf6ec;
-  --sage-100: #d2ecd6;
-  --sage-500: #3d9a50;
-  --sage-600: #2f7c40;
+  --sage-50:  #EAF6EC;
+  --sage-100: #D2ECD6;
+  --sage-200: #A9DBB1;
+  --sage-300: #7CC689;
+  --sage-400: #55AF66;
+  --sage-500: #3D9A50;
+  --sage-600: #2F7C40;
+  --sage-700: #275F34;
 
   /* --- Gold / sunshine (accent) --- */
-  --gold-100: #fff3c2;
-  --gold-500: #f0be00;
-  --gold-ink: #8a6410; /* the ONE text/icon color on gold tints */
+  --gold-100: #FFF3C2;
+  --gold-300: #FFE175;
+  --gold-400: #FFD43B;
+  --gold-500: #F0BE00;
+  --gold-ink: #8A6410;        /* the ONE text/icon color on gold tints (gold-100/300) */
+  --gold-ink-strong: #402E05; /* text/icons on solid gold (gold-400/500) */
 
   /* --- Sky / pool aqua (info accent) --- */
-  --sky-100: #ddf3f9;
-  --sky-500: #4fb4d6;
-  --sky-600: #3a8fa9;
+  --sky-100: #DDF3F9;
+  --sky-300: #9FDCEC;
+  --sky-500: #4FB4D6;
+  --sky-600: #3A8FA9;
 
   /* --- Support: warm coral-red for errors --- */
-  --rose-100: #fde1d8;
-  --rose-500: #e2593b;
+  --rose-100: #FDE1D8;
+  --rose-500: #E2593B;
+  --rose-600: #BC4527;
 
-  /* --- Pop accents + section bands (playful, use sparingly) --- */
-  --pop-cobalt: #2e6be6;
-  --pop-navy: #23304f;
-  --band-sky: #9fe0ee;
-  --band-mint: #bde7c5;
+  /* --- Pop accents (playful, use sparingly: doodles, bands, moments) --- */
+  --pop-cobalt:      #2E6BE6;
+  --pop-cobalt-deep: #2456BF;
+  --pop-blush:       #F49A90;
+  --pop-navy:        #23304F;
+
+  /* --- Section bands (full-bleed playful backgrounds) --- */
+  --band-sky:      #9FE0EE;
+  --band-mint:     #BDE7C5;
+  --band-blush:    #F8B7AE;
+  --band-sunshine: #FFDB4D;
 
   /* =====================  SEMANTIC ALIASES  ===================== */
-  --bg-page: var(--stone-50);
-  --surface-card: #ffffff;
 
-  --text-strong: var(--stone-900);
-  --text-body: var(--stone-800);
-  --text-muted: var(--stone-600);
-  --text-subtle: var(--stone-500);
+  /* Surfaces & backgrounds */
+  --bg-page:        var(--stone-50);
+  --bg-page-warm:   #F7EFE2;      /* alt warm section band */
+  --surface-card:   #FFFFFF;
+  --surface-raised: #FFFDF9;
+  --surface-sunken: var(--stone-100);
+  --surface-inverse:var(--stone-900);
 
-  --brand: var(--clay-500);
-  --brand-hover: var(--clay-600);
-  --brand-soft: var(--clay-50);
-  --on-brand: #ffffff;
+  /* Text */
+  --text-strong:  var(--stone-900);
+  --text-body:    var(--stone-800);
+  --text-muted:   var(--stone-600);
+  --text-subtle:  var(--stone-500);
+  --text-inverse: var(--stone-50);
+  --text-on-clay: #FFFFFF;
 
-  --accent-sage: var(--sage-500);
+  /* Brand */
+  --brand:          var(--clay-500);
+  --brand-hover:    var(--clay-600);
+  --brand-active:   var(--clay-700);
+  --brand-soft:     var(--clay-50);
+  --brand-soft-2:   var(--clay-100);
+  --on-brand:       #FFFFFF;
+
+  --accent-sage:    var(--sage-500);
   --accent-sage-soft: var(--sage-50);
-  --accent-gold: var(--gold-500);
+  --accent-gold:    var(--gold-500);
   --accent-gold-soft: var(--gold-100);
 
-  --border-subtle: var(--stone-200);
+  /* Borders & lines */
+  --border-subtle:  var(--stone-200);
   --border-default: var(--stone-300);
-  --border-strong: var(--stone-400);
+  --border-strong:  var(--stone-400);
+  --border-brand:   var(--clay-300);
 
-  --danger: var(--rose-500);
-  --danger-soft: var(--rose-100);
+  /* Focus ring */
+  --focus-ring: var(--clay-400);
 
-  /* --- Radii, soft and rounded, never sharp --- */
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-pill: 999px;
+  /* Semantic status */
+  --success:      var(--sage-600);
+  --success-soft: var(--sage-50);
+  --warning:      var(--gold-500);
+  --warning-soft: var(--gold-100);
+  --danger:       var(--rose-500);
+  --danger-soft:  var(--rose-100);
+  --info:         var(--sky-500);
+  --info-soft:    var(--sky-100);
 
-  /* --- Shadows, soft, warm-tinted (brown, not gray) --- */
-  --shadow-sm: 0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
-  --shadow-lg: 0 12px 28px rgba(51, 42, 33, 0.1), 0 4px 10px rgba(51, 42, 33, 0.05);
-
-  /* --- Motion: gentle, no bounce. ease-out for entrances, quick for hovers.
-     Feeds the Tailwind `ease-out`/`ease-in-out` override below (every
-     transition in the app inherits the brand curve for free) and the
-     `duration-(--dur-fast)` / `active:scale-[var(--press-scale)]` custom-
-     property syntax used inline; see docs/homa-design/tokens/motion.css. --- */
-  --motion-ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
-  --motion-ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
-  --dur-fast: 120ms;
-  --dur-base: 200ms;
-  --dur-slow: 320ms;
-  --press-scale: 0.98;
-
-  /* --- Organic blob corner radii (docs/homa-design/tokens/shapes.css), for
-     photo frames only, rotate between them so blobs never repeat side by side --- */
+  /* --- Playful shapes (docs/homa-design/tokens/shapes.css) --- */
   --blob-1: 61% 39% 55% 45% / 49% 56% 44% 51%;
   --blob-2: 42% 58% 47% 53% / 56% 41% 59% 44%;
+  --blob-3: 55% 45% 62% 38% / 46% 61% 39% 54%;
+  --blob-4: 48% 52% 41% 59% / 60% 45% 55% 40%;
+  --blob-5: 63% 37% 44% 56% / 41% 58% 42% 59%;
+  --paper-rule: rgba(46, 107, 230, 0.07);
+  --bg-paper: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--paper-rule) 31px, var(--paper-rule) 32px);
+  --squiggle-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23221E1A' stroke-width='1.6'/%3E%3C/svg%3E");
+
+  /* --- Type scale (docs/homa-design/tokens/typography.css) --- */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+  --text-4xl:  3rem;
+  --text-5xl:  4rem;
+  --leading-tight:   1.1;
+  --leading-snug:    1.25;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.06em;
+
+  /* --- Spacing (docs/homa-design/tokens/spacing.css) --- */
+  --space-0:  0;
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --container-sm: 640px;
+  --container-md: 820px;
+  --container-lg: 1100px;
+  --container-xl: 1280px;
+
+  /* --- Radii (docs/homa-design/tokens/radius.css) --- */
+  --radius-xs:   6px;
+  --radius-sm:   10px;
+  --radius-md:   16px;
+  --radius-lg:   22px;
+  --radius-xl:   28px;
+  --radius-2xl:  40px;
+  --radius-pill: 999px;
+  --radius-card: var(--radius-lg);
+
+  /* --- Shadows (docs/homa-design/tokens/shadows.css) --- */
+  --shadow-xs:  0 1px 2px rgba(51, 42, 33, 0.06);
+  --shadow-sm:  0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
+  --shadow-md:  0 4px 12px rgba(51, 42, 33, 0.08), 0 2px 4px rgba(51, 42, 33, 0.05);
+  --shadow-lg:  0 12px 28px rgba(51, 42, 33, 0.10), 0 4px 10px rgba(51, 42, 33, 0.05);
+  --shadow-xl:  0 24px 48px rgba(51, 42, 33, 0.14), 0 8px 16px rgba(51, 42, 33, 0.06);
+  --shadow-focus: 0 0 0 4px rgba(241, 121, 63, 0.22);
+  --shadow-inset: inset 0 1px 2px rgba(51, 42, 33, 0.06);
+
+  /* --- Motion (docs/homa-design/tokens/motion.css): gentle, no bounce --- */
+  --ease-out:   cubic-bezier(0.22, 0.8, 0.28, 1);
+  --ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --motion-ease-out: var(--ease-out);       /* alias for the Tailwind @theme wiring below */
+  --motion-ease-in-out: var(--ease-in-out);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   320ms;
+  --press-scale: 0.98;
 
   /* --- Fonts: next/font variables (set on <html> in layout.tsx) feed these --- */
   --font-display: var(--font-schibsted), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -147,15 +240,15 @@
   --shadow-lg: var(--shadow-lg);
 
   /* Redefines Tailwind's built-in `ease-out`/`ease-in-out` utilities with the
-     brand's strong, no-bounce curves. Every `ease-out` in the app now matches
-     docs/homa-design/tokens/motion.css. Durations use Tailwind's `duration-
-     (--dur-fast)` custom-property syntax directly (`duration-200` already
-     equals --dur-base), no theme entry needed for those. */
+     brand's strong, no-bounce curves. The :root aliases exist so this inline
+     mapping never self-references. Durations use Tailwind's
+     `duration-(--dur-fast)` custom-property syntax directly. */
   --ease-out: var(--motion-ease-out);
   --ease-in-out: var(--motion-ease-in-out);
 
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
   --font-hand: var(--font-hand);
   --font-mono: var(--font-mono);
 }
@@ -174,4 +267,72 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
+}
+
+/* ============================================================================
+   Landing page kit CSS, ported verbatim from
+   docs/homa-design/ui_kits/landing/index.html. Scroll reveals are armed by
+   JS (html.rv-armed) so no-JS, print, and reduced-motion always see content.
+   Gentle rise, no bounce, per the emil-design-eng motion rules (opacity +
+   transform only, ease-out, 30-80ms stagger).
+   ========================================================================= */
+@media (max-width: 880px) {
+  .ht-grid { grid-template-columns: 1fr !important; }
+  .ht-gutter, .ht-line { display: none !important; }
+  .ht-step { grid-template-columns: 1fr !important; }
+  .ht-step .ht-vig { justify-content: flex-start !important; }
+
+  /* Responsive collapses the 1280px-viewport kit needs to render on phones
+     (BUILD.md: capture works flawlessly on a phone). Desktop is untouched. */
+  .lp-nav-links { display: none !important; }
+  .lp-hero-grid, .lp-2col { grid-template-columns: 1fr !important; }
+  .lp-3col { grid-template-columns: 1fr !important; }
+  .lp-4col { grid-template-columns: 1fr 1fr !important; }
+  .lp-pad { padding-left: 20px !important; padding-right: 20px !important; }
+}
+
+html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
+html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { opacity: 1; transform: none; }
+[data-reveal-kids] > *:nth-child(2) { transition-delay: 70ms; }
+[data-reveal-kids] > *:nth-child(3) { transition-delay: 140ms; }
+[data-reveal-kids] > *:nth-child(4) { transition-delay: 210ms; }
+[data-reveal-kids] > *:nth-child(5) { transition-delay: 280ms; }
+[data-reveal-kids] > *:nth-child(6) { transition-delay: 350ms; }
+.rv-d1 { transition-delay: 80ms !important; }
+.rv-d2 { transition-delay: 160ms !important; }
+@keyframes bd-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.bd-sum { animation: bd-pop 360ms var(--ease-out); }
+
+/* Film modal entrance: modal exemption keeps transform-origin center; scale
+   starts at 0.97 (never 0) + opacity, ease-out, interruptible transition via
+   @starting-style. Backdrop fades. */
+.lp-film-backdrop {
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+  @starting-style { opacity: 0; }
+}
+.lp-film-card {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  @starting-style { opacity: 0; transform: scale(0.97); }
+}
+
+/* Peek-under-the-hood accordion: grid-rows expand (the one deliberate
+   layout-property animation on the page, accordions inherently move layout;
+   the alternative is no motion, which feels broken on a hand-opened panel). */
+.lp-peek {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--dur-slow) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+.lp-peek[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.lp-peek > div { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce), print {
+  html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .bd-sum { animation: none; }
+  .lp-film-card { transition: opacity var(--dur-base) var(--ease-out); @starting-style { transform: none; } }
+  .lp-peek { transition: opacity var(--dur-base) var(--ease-out); }
 }

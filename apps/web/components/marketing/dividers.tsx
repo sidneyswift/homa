@@ -1,17 +1,13 @@
+import type { ReactNode } from "react";
+
 /**
- * Soft wave section-seam divider. Ported from
- * docs/homa-design/templates/landing-page/LandingPage.dc.html (source of
- * truth); keep in sync until packages/design exists (M1-17). Purely
- * decorative.
+ * Section-seam dividers + the Eyebrow section label, ported verbatim from
+ * docs/homa-design/ui_kits/landing/LandingPage.jsx (source of truth); keep
+ * in sync until packages/design exists (M1-17). Purely decorative, static
+ * SVG, no motion.
  */
 
-export function Wave({
-  color = "var(--band-sky)",
-  flip = false,
-}: {
-  color?: string;
-  flip?: boolean;
-}) {
+export function Wave({ color = "var(--band-sky)", flip = false }: { color?: string; flip?: boolean }) {
   return (
     <svg
       viewBox="0 0 1440 48"
@@ -25,27 +21,73 @@ export function Wave({
         transform: flip ? "scaleY(-1)" : "none",
       }}
     >
-      <path
-        fill={color}
-        d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z"
-      />
+      <path fill={color} d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z" />
     </svg>
   );
 }
 
-/** A hand-drawn squiggle trailing into a straight rule, under a heading. */
-export function SquiggleRule({ color = "var(--text-strong)" }: { color?: string }) {
+/**
+ * Squiggle ribbon divider: a fat wavy band with a repeating phrase riding
+ * the curve. The ribbon IS the seam: `top` and `bottom` section colors meet
+ * along its centerline, hidden under the band, so no other transition ever
+ * shows behind it.
+ */
+export function Ribbon({
+  text,
+  color = "var(--pop-cobalt)",
+  ink = "#FFFFFF",
+  phase = 0,
+  top = "var(--bg-page)",
+  bottom = "var(--bg-page)",
+}: {
+  text: string;
+  color?: string;
+  ink?: string;
+  phase?: number;
+  top?: string;
+  bottom?: string;
+}) {
+  const rid = `ribbon-${text.replace(/[^a-z]/gi, "").toLowerCase().slice(0, 16)}${phase}`;
+  const paths = [
+    "M-60 96 C 240 30, 480 152, 750 88 C 1020 26, 1240 142, 1500 62",
+    "M-60 72 C 220 146, 470 28, 760 92 C 1050 154, 1260 40, 1500 104",
+  ];
+  const d = paths[phase % 2];
+  const phrase = `${Array(9).fill(text).join("  \u00b7  ")}  \u00b7  `;
   return (
-    <div className="flex items-center" aria-hidden="true">
-      <svg width="100" height="10" viewBox="0 0 100 8" fill="none" style={{ flexShrink: 0, overflow: "visible" }}>
-        <path
-          d="M0 4 Q5 0 10 4 Q15 8 20 4 Q25 0 30 4 Q35 8 40 4 Q45 0 50 4 Q55 8 60 4 Q65 0 70 4 Q75 8 80 4 Q85 0 90 4 Q95 8 100 4"
-          stroke={color}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
+    <div aria-hidden="true" style={{ position: "relative", height: 150, margin: "-1px 0", pointerEvents: "none" }}>
+      <svg
+        viewBox="0 0 1440 176"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+      >
+        <path d={`${d} L 1500 -40 L -60 -40 Z`} fill={top} />
+        <path d={`${d} L 1500 216 L -60 216 Z`} fill={bottom} />
+        <path id={rid} d={d} fill="none" stroke={color} strokeWidth="54" strokeLinecap="round" />
+        <text
+          dominantBaseline="middle"
+          style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 18, letterSpacing: "0.2em", fill: ink }}
+        >
+          <textPath href={`#${rid}`}>{phrase}</textPath>
+        </text>
       </svg>
-      <span className="flex-1" style={{ borderTop: `1.2px solid ${color}`, opacity: 0.9 }} />
+    </div>
+  );
+}
+
+/** Uppercase tracked section label above headings. */
+export function Eyebrow({ color = "var(--brand)", children }: { color?: string; children: ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: "0.8rem",
+        fontWeight: 700,
+        letterSpacing: "0.16em",
+        textTransform: "uppercase",
+        color,
+      }}
+    >
+      {children}
     </div>
   );
 }
