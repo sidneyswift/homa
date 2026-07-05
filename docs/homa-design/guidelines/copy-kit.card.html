@@ -1,31 +1,63 @@
-<!-- @dsCard group="Brand" viewport="700x300" name="Copy kit" subtitle="Homa's phrases · encouragement, empty, errors, nudges" -->
+<!-- @dsCard group="Brand" viewport="700x400" name="Copy kit" subtitle="The sentence shape, Homa's phrases, and the never-say list" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:24px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px 28px;}
   h5{margin:0 0 10px;font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);font-weight:700;}
-  .q{font-size:0.85rem;color:var(--text-body);line-height:1.5;padding:8px 0;border-bottom:1px solid var(--stone-100);}
+  .anatomy{background:var(--bg-page);border-radius:var(--radius-md);padding:16px 18px 13px;margin-bottom:18px;}
+  .a-line{font-size:1.02rem;color:var(--text-strong);font-weight:500;display:flex;flex-wrap:wrap;column-gap:6px;row-gap:14px;}
+  .seg{display:inline-flex;flex-direction:column;gap:5px;}
+  .seg i{font-style:normal;border-bottom:2.5px solid;padding-bottom:3px;}
+  .seg em{font-style:normal;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;}
+  .s1 i{border-color:var(--stone-400);} .s1 em{color:var(--stone-500);}
+  .s2 i{border-color:var(--sage-400);} .s2 em{color:var(--sage-700);}
+  .s3 i{border-color:var(--clay-400);} .s3 em{color:var(--clay-600);}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;}
+  .q{font-size:0.84rem;color:var(--text-body);line-height:1.5;padding:8px 0;border-bottom:1px solid var(--stone-100);}
   .q:last-child{border-bottom:none;}
-  .q em{color:var(--text-subtle);font-style:normal;font-size:0.75rem;display:block;margin-top:1px;}
-  .rule{grid-column:1 / -1;font-size:0.78rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--stone-200);padding-top:12px;}
-  .rule b{color:var(--text-body);}
+  .q em{color:var(--text-subtle);font-style:normal;font-size:0.73rem;display:block;margin-top:1px;}
+  .never{margin-top:16px;border-top:1px solid var(--stone-200);padding-top:13px;display:flex;gap:8px 20px;flex-wrap:wrap;align-items:baseline;}
+  .swap{font-size:0.8rem;color:var(--text-body);}
+  .swap s{color:var(--text-subtle);text-decoration-color:var(--rose-500);text-decoration-thickness:1.5px;margin-right:6px;}
+  .swap b{color:var(--sage-700);font-weight:600;}
 </style></head><body>
+
+<div class="anatomy">
+  <h5>The sentence shape</h5>
+  <div class="a-line">
+    <span class="seg s1"><i>That didn't save,</i><em>name it plainly</em></span>
+    <span class="seg s2"><i>your work is safe,</i><em>settle the nerves</em></span>
+    <span class="seg s3"><i>try once more.</i><em>offer the next step</em></span>
+  </div>
+</div>
+
+<div class="grid">
 <div>
   <h5>Encouragement</h5>
-  <div class="q">“Right on pace, nothing to worry about this week.”<em>weekly summary</em></div>
-  <div class="q">“That was a heavy week, and you did it.”<em>after a busy stretch</em></div>
-  <div class="q">“Maya's reading is really taking off.”<em>progress insight, name the child, name the win</em></div>
+  <div class="q">&ldquo;Right on pace, nothing to worry about this week.&rdquo;<em>weekly summary</em></div>
+  <div class="q">&ldquo;That was a heavy week, and you did it.&rdquo;<em>after a busy stretch</em></div>
+  <div class="q">&ldquo;Maya's reading is really taking off.&rdquo;<em>name the child, name the win</em></div>
 </div>
 <div>
-  <h5>Empty & loading</h5>
-  <div class="q">“Nothing planned yet. Tell me how this week looks and I'll draft it.”<em>empty planner</em></div>
-  <div class="q">“Pulling Maya's week together…”<em>loading, always working *for* her</em></div>
-  <div class="q">“No worksheets yet, want one for tomorrow's lesson?”<em>empty library</em></div>
+  <h5>Empty &amp; loading</h5>
+  <div class="q">&ldquo;Nothing planned yet. Tell me how this week looks and I'll draft it.&rdquo;<em>empty planner</em></div>
+  <div class="q">&ldquo;Pulling Maya's week together&hellip;&rdquo;<em>loading, always working *for* her</em></div>
+  <div class="q">&ldquo;No worksheets yet, want one for tomorrow's lesson?&rdquo;<em>empty library</em></div>
 </div>
 <div>
-  <h5>Errors & nudges</h5>
-  <div class="q">“That didn't save, your work is safe, try once more.”<em>error: reassure first, then the fix</em></div>
-  <div class="q">“Science hasn't come up in a bit. Want a light idea for Friday?”<em>nudge: observation + offer, never guilt</em></div>
-  <div class="q">“A lighter day is still a good day.”<em>reframe, permission, not pressure</em></div>
+  <h5>Errors &amp; nudges</h5>
+  <div class="q">&ldquo;That didn't save, your work is safe, try once more.&rdquo;<em>error, the shape above</em></div>
+  <div class="q">&ldquo;Science hasn't come up in a bit. Want a light idea for Friday?&rdquo;<em>nudge: observation + offer</em></div>
+  <div class="q">&ldquo;A lighter day is still a good day.&rdquo;<em>permission, not pressure</em></div>
 </div>
-<div class="rule"><b>Rules:</b> reassure before you inform · name the child, name the win · offer, never command · no red "behind" language, reframe as "ready for review" · one emoji max, rarely · contractions always ("didn't," "you've") · Homa says "I" only when offering to help · no em dashes, ever.</div>
+</div>
+
+<div class="never">
+  <h5 style="width:100%;margin-bottom:2px;">Never say &rarr; say instead</h5>
+  <span class="swap"><s>behind</s><b>ready for review</b></span>
+  <span class="swap"><s>overdue</s><b>waiting for you</b></span>
+  <span class="swap"><s>failed</s><b>didn't stick yet</b></span>
+  <span class="swap"><s>you must</s><b>want to?</b></span>
+  <span class="swap"><s>streak broken</s><b>fresh start Monday</b></span>
+</div>
+
 </body></html>

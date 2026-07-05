@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   Homa Design System v2 tokens, copied from docs/homa-design/tokens/colors.css,
+   Homa Design System v3 tokens, copied from docs/homa-design/tokens/colors.css,
    radius.css, shadows.css, spacing.css (verbatim) for the Deliverable 0 design
    pass. A formal `packages/design` workspace package lands with ticket M1-17;
    until then, keep this block in sync by hand with docs/homa-design/tokens/.
@@ -38,6 +38,7 @@
   /* --- Gold / sunshine (accent) --- */
   --gold-100: #fff3c2;
   --gold-500: #f0be00;
+  --gold-ink: #8a6410; /* the ONE text/icon color on gold tints */
 
   /* --- Support: warm coral-red for errors --- */
   --rose-100: #fde1d8;
@@ -80,8 +81,9 @@
   --shadow-lg: 0 12px 28px rgba(51, 42, 33, 0.1), 0 4px 10px rgba(51, 42, 33, 0.05);
 
   /* --- Fonts: next/font variables (set on <html> in layout.tsx) feed these --- */
-  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
-  --font-serif: var(--font-display);
+  --font-display: var(--font-schibsted), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-wordmark: var(--font-fredoka), var(--font-hanken), sans-serif; /* the bounced Homa lockup only */
+  --font-serif: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-hand: var(--font-caveat), "Segoe Script", cursive;
   --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;

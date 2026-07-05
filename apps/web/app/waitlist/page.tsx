@@ -6,7 +6,7 @@ import { WaitlistForm } from "../../components/waitlist-form";
 /**
  * /waitlist: the direct-to-form page. Copy final per journeys/07 §5 (the
  * founding-families framing BUILD.md's hard constraints require); design
- * matches the landing page's homa-design v2 pass.
+ * matches the landing page's homa-design v3 pass.
  */
 
 export const metadata: Metadata = {

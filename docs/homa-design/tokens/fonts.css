@@ -3,18 +3,26 @@
    self-host, download the binaries and replace the @import with local
    @font-face rules pointing at tokens/fonts/*.woff2.
 
-   - Newsreader     -> display serif: headlines, wordmark, big numbers, AND
-                       the italic accent word. One family, two jobs.
+   - Schibsted Grotesk -> display sans: headlines, big numbers, dialog
+                       titles. Clean and modern with warm curves; 700 at
+                       hero scale, 600 for mid titles, tracked -0.015em.
+   - EB Garamond    -> the serif accent: ALL italics (the accent word inside
+                       a headline, taglines) at weight 400, plus pull quotes
+                       and testimonials (roman 400–500).
+   - Fredoka        -> the wordmark ONLY: the bounced "Homa" lockup (600).
+                       Never running text, never headlines.
    - Hanken Grotesk -> humanist sans for UI + body
    - Caveat         -> Homa's hand: product margin notes, one per surface, max
    - JetBrains Mono -> data / numeric readouts
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fredoka:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif; /* same family as display, kept as an alias for accent usage */
+  --font-display: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-wordmark: 'Fredoka', 'Hanken Grotesk', sans-serif; /* the bounced Homa lockup only */
+  --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif; /* italics: EB Garamond italic, weight 400 */
   --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-hand: 'Caveat', 'Segoe Script', cursive;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;

@@ -1,9 +1,9 @@
-Small hand-drawn decorative shapes, scattered like stickers in a margin. Decoration only, never functional UI (use Icon for that).
+Small hand-drawn decorative shapes, scattered like margin stickers around headlines, cards, and bands; decoration only, never UI or icons.
 
 ```jsx
-<Doodle name="star" color="var(--pop-cobalt)" rotate={-12} />
-<Doodle name="heart" color="var(--pop-blush)" size={18} rotate={8} />
-<Doodle name="sun" color="var(--gold-400)" />
+<Doodle name="star" rotate={-10} />
+<Doodle name="flower" color="var(--pop-blush)" size={28} rotate={-6} />
+<Doodle name="cloud" color="var(--sky-500)" size={28} />
 ```
 
-Names: star, heart, sun, sparkle, squiggle. Rotate a few degrees so they feel placed by hand. Two or three per surface, max, in pop colors.
+Names: `star`, `heart`, `sun`, `sparkle`, `squiggle`, `flower`, `cloud`, `moon`, `zigzag`, `loop`. Props: `size` (px, default 24), `color` (any token, default `--pop-cobalt`), `rotate` (deg). Rotate a few degrees so they feel hand-placed; one or two per surface, max.

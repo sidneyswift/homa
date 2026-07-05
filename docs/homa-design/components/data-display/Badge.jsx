@@ -8,9 +8,9 @@ export function Badge({ tone = 'neutral', variant = 'soft', children, iconLeft =
     neutral: { soft: ['var(--stone-100)', 'var(--stone-700)'], solid: ['var(--stone-700)', '#fff'] },
     brand:   { soft: ['var(--clay-50)', 'var(--clay-700)'], solid: ['var(--brand)', '#fff'] },
     sage:    { soft: ['var(--sage-50)', 'var(--sage-700)'], solid: ['var(--sage-600)', '#fff'] },
-    gold:    { soft: ['var(--gold-100)', '#8a6410'], solid: ['var(--gold-500)', '#402e05'] },
+    gold:    { soft: ['var(--gold-100)', 'var(--gold-ink)'], solid: ['var(--gold-500)', 'var(--gold-ink-strong)'] },
     success: { soft: ['var(--success-soft)', 'var(--sage-700)'], solid: ['var(--success)', '#fff'] },
-    warning: { soft: ['var(--warning-soft)', '#8a6410'], solid: ['var(--warning)', '#402e05'] },
+    warning: { soft: ['var(--warning-soft)', 'var(--gold-ink)'], solid: ['var(--warning)', 'var(--gold-ink-strong)'] },
     danger:  { soft: ['var(--danger-soft)', 'var(--rose-600)'], solid: ['var(--danger)', '#fff'] },
     info:    { soft: ['var(--info-soft)', 'var(--sky-600)'], solid: ['var(--info)', '#fff'] },
   };

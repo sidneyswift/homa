@@ -1,7 +1,7 @@
 /* Homa Design System, global entry point.
    Consumers link this one file. Contains only @import lines. */
 
-@import url('./tokens/fonts.css');
+@import url('./tokens/fonts.css?v=ebg');
 @import url('./tokens/colors.css');
 @import url('./tokens/dark.css');
 @import url('./tokens/shapes.css');

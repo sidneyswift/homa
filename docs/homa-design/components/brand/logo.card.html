@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" viewport="700x220" name="Logo" subtitle="Brand lockup component · full, mark, reversed" -->
+<!-- @dsCard group="Components" viewport="700x330" name="Logo" subtitle="The little home · lockup, line, mark, reversed · where each lives" -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,22 +10,40 @@
 <script src="../../_ds_bundle.js"></script>
 <style>
   body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
-  .row { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
-  .dark { background: var(--stone-900); border-radius: var(--radius-lg); padding: 16px 22px; }
+  .row { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .cell { display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+  .cell > span { font-size: 0.68rem; color: var(--text-subtle); }
+  .dark { background: #151B27; border-radius: var(--radius-lg); padding: 14px 18px; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-  const { Logo } = window.HOMADesignSystem_113bd2;
+  const { Logo } = window.HomaDesignSystem_5e2305;
   function Demo() {
     return (
-      <div className="row">
-        <Logo size={40} />
-        <Logo size={40} treatment="duo" />
-        <Logo variant="mark" size={40} />
-        <Logo variant="mark" size={40} treatment="duo" />
-        <div className="dark"><Logo size={32} tone="dark" treatment="duo" /></div>
+      <div>
+        <div className="row">
+          <div className="cell"><Logo size={40} /><span>Lockup · default</span></div>
+          <div className="cell"><Logo size={40} treatment="line" /><span>Line · stamps &amp; print</span></div>
+          <div className="cell"><Logo variant="mark" size={40} /><span>Mark alone</span></div>
+          <div className="cell"><div className="dark"><Logo size={32} tone="dark" /></div><span>Reversed</span></div>
+        </div>
+        <div className="row" style={{ marginTop: 20, alignItems: 'center' }}>
+          <div className="cell">
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}><Logo variant="mark" size={16} /><Logo variant="mark" size={24} /><Logo size={20} /></div>
+            <span>Min sizes · mark 16px, lockup 20px</span>
+          </div>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', maxWidth: 300 }}>Clear space: half the mark's height on all sides. Never redrawn, stretched, or recolored beyond clay / white.</span>
+        </div>
+        <div style={{ marginTop: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'var(--surface-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '12px 18px', maxWidth: 460 }}>
+            <Logo size={22} />
+            <span style={{ marginLeft: 'auto', fontSize: '0.82rem', fontWeight: 600, color: 'var(--clay-700)', background: 'var(--clay-50)', borderRadius: 999, padding: '6px 14px' }}>Ask Homa</span>
+            <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--band-mint)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--sage-700)' }}>S</span>
+          </div>
+          <div style={{ marginTop: 8, fontSize: '0.7rem', color: 'var(--text-subtle)' }}>In context · app header at 22px · favicon &amp; app tile = mark · print &amp; stamps = line treatment</div>
+        </div>
       </div>
     );
   }

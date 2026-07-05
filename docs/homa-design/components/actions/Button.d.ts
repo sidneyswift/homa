@@ -1,5 +1,8 @@
 import * as React from 'react';
 
+/**
+ * Props for Homa's pill button.
+ */
 export interface ButtonProps {
   /** Visual style. @default "primary" */
   variant?: 'primary' | 'secondary' | 'soft' | 'ghost' | 'danger';
@@ -17,6 +20,5 @@ export interface ButtonProps {
 
 /**
  * Primary interactive control for Homa. Pill-shaped, warm clay primary.
- * @startingPoint section="Actions" subtitle="Pill buttons in every variant" viewport="700x180"
  */
 export function Button(props: ButtonProps): JSX.Element;

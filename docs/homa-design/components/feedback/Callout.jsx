@@ -7,9 +7,9 @@ export function Callout({ tone = 'brand', title, icon = null, children, style = 
   const tones = {
     brand:   ['var(--clay-50)', 'var(--clay-200)', 'var(--clay-700)'],
     sage:    ['var(--sage-50)', 'var(--sage-200)', 'var(--sage-700)'],
-    gold:    ['var(--gold-100)', 'var(--gold-300)', '#8a6410'],
+    gold:    ['var(--gold-100)', 'var(--gold-300)', 'var(--gold-ink)'],
     info:    ['var(--info-soft)', 'var(--sky-300)', 'var(--sky-600)'],
-    warning: ['var(--warning-soft)', 'var(--gold-300)', '#8a6410'],
+    warning: ['var(--warning-soft)', 'var(--gold-300)', 'var(--gold-ink)'],
     danger:  ['var(--danger-soft)', 'var(--rose-500)', 'var(--rose-600)'],
   };
   const [bg, border, fg] = tones[tone];

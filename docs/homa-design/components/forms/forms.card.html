@@ -1,10 +1,10 @@
-<!-- @dsCard group="Components" viewport="700x360" name="Form controls" subtitle="Input, Select, Checkbox, Radio, Switch, Chip" -->
+<!-- @dsCard group="Components" viewport="700x470" name="Form controls" subtitle="Input, Textarea, Select, Checkbox, Radio, Switch, Chip · labels in her words" -->
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -13,13 +13,14 @@
   body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
+  .lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-subtle); }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-  const { Input, Select, Checkbox, Radio, Switch, Chip, Icon } = window.HOMADesignSystem_113bd2;
+  const { Input, Textarea, Select, Checkbox, Radio, Switch, Chip, Icon } = window.HomaDesignSystem_5e2305;
   function Demo() {
     const [chk, setChk] = React.useState(true);
     const [sw, setSw] = React.useState(true);
@@ -28,8 +29,10 @@
     return (
       <div className="grid">
         <div className="stack">
-          <Input label="Child's name" placeholder="e.g. Maya" iconLeft={<Icon name="user" size={18} />} />
+          <div className="lbl">Fields &amp; chips</div>
+          <Input label="Child's name" placeholder="e.g. Maya" hint="She'll see this in her greetings" iconLeft={<Icon name="user" size={18} />} />
           <Select label="Grade level" options={['K','1st','2nd','3rd']} value={r} onChange={e=>setR(e.target.value)} />
+          <Textarea label="Anything I should know?" placeholder="Nora naps 1–2pm, co-op on Fridays…" rows={2} />
           <div className="chips">
             <Chip selected>Math</Chip>
             <Chip>Reading</Chip>
@@ -38,9 +41,14 @@
           </div>
         </div>
         <div className="stack">
+          <div className="lbl">Choices &amp; toggles</div>
           <Checkbox label="Include a spelling list" checked={chk} onChange={setChk} />
           <Switch label="Weekly progress email" checked={sw} onChange={setSw} />
           <Radio options={['Kindergarten','1st','2nd']} value={r} onChange={setR} />
+          <Input label="Email" placeholder="you@example.com" error="That email needs an @, mind checking?" />
+        </div>
+        <div style={{ gridColumn: '1 / -1', fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, borderTop: '1px solid var(--stone-200)', paddingTop: 10 }}>
+          Labels are questions in her words (“Anything I should know?”), never metadata. Errors reassure and point the way, they never blame. Placeholders are examples, not instructions, meaning never lives in a placeholder alone.
         </div>
       </div>
     );

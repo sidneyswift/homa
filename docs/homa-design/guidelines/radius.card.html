@@ -1,19 +1,41 @@
-<!-- @dsCard group="Spacing" viewport="700x150" name="Corner radii" subtitle="Soft and rounded · sm 10 → pill" -->
+<!-- @dsCard group="Spacing" viewport="700x230" name="Corner radii" subtitle="Soft, never sharp · the nesting rule in practice" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px;}
-  .row{display:flex;gap:16px;align-items:center;}
-  .item{display:flex;flex-direction:column;align-items:center;gap:8px;}
-  .box{width:74px;height:74px;background:var(--clay-100);border:1.5px solid var(--clay-300);}
-  .lbl{font-size:0.68rem;color:var(--text-subtle);font-family:var(--font-mono);}
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:22px 26px;}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:start;}
+  .ramp{display:flex;gap:12px;align-items:flex-end;}
+  .r{width:72px;height:64px;background:var(--surface-card);box-shadow:var(--shadow-sm);border:1px solid var(--border-subtle);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;box-sizing:border-box;}
+  .r span{font-family:var(--font-mono);font-size:0.62rem;color:var(--text-subtle);}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin:0 0 10px;}
+  .roles{display:flex;flex-direction:column;gap:7px;margin-top:14px;font-size:0.82rem;color:var(--text-muted);}
+  .roles b{color:var(--text-body);font-weight:600;}
+  .demo{background:var(--surface-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:16px;}
+  .demo .field{border:1.5px solid var(--border-default);border-radius:var(--radius-md);padding:10px 14px;font-size:0.88rem;color:var(--text-subtle);margin-bottom:10px;}
+  .demo .btn{display:inline-block;background:var(--brand);color:#fff;border-radius:var(--radius-pill);padding:9px 20px;font-size:0.88rem;font-weight:600;}
 </style></head><body>
-<div class="row">
-  <div class="item"><div class="box" style="border-radius:var(--radius-xs)"></div><span class="lbl">xs·6</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-sm)"></div><span class="lbl">sm·10</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-md)"></div><span class="lbl">md·16</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-lg)"></div><span class="lbl">lg·22 ·card</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-xl)"></div><span class="lbl">xl·28</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-2xl)"></div><span class="lbl">2xl·40</span></div>
-  <div class="item"><div class="box" style="border-radius:var(--radius-pill)"></div><span class="lbl">pill</span></div>
+<div class="grid">
+  <div>
+    <div class="lbl">The scale</div>
+    <div class="ramp">
+      <div class="r" style="border-radius:var(--radius-xs)"><span>xs 6</span></div>
+      <div class="r" style="border-radius:var(--radius-sm)"><span>sm 10</span></div>
+      <div class="r" style="border-radius:var(--radius-md)"><span>md 16</span></div>
+      <div class="r" style="border-radius:var(--radius-lg)"><span>lg 22</span></div>
+      <div class="r" style="border-radius:var(--radius-xl)"><span>xl 28</span></div>
+      <div class="r" style="border-radius:var(--radius-pill);width:84px;height:44px;align-items:center;padding:0;"><span>pill</span></div>
+    </div>
+    <div class="roles">
+      <span><b>Cards</b> lg 22 &nbsp;·&nbsp; <b>Inputs</b> md 16 &nbsp;·&nbsp; <b>Modals</b> xl 28 &nbsp;·&nbsp; <b>Buttons &amp; chips</b> always pill</span>
+      <span>Tiny elements (tags, thumbnails) take xs&ndash;sm. Nothing square, nothing sharp.</span>
+    </div>
+  </div>
+  <div>
+    <div class="lbl">Nested: one step down</div>
+    <div class="demo">
+      <div class="field">Child's name&hellip;</div>
+      <span class="btn">Add child</span>
+    </div>
+    <div class="roles"><span>Inside an <b>xl</b> container, fields drop to <b>md</b>, actions stay <b>pill</b>. Inner radius is always smaller than outer.</span></div>
+  </div>
 </div>
 </body></html>

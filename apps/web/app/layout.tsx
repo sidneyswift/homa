@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
-import { Caveat, Hanken_Grotesk, JetBrains_Mono, Newsreader } from "next/font/google";
+import { Caveat, EB_Garamond, Fredoka, Hanken_Grotesk, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 
-// Homa Design System v2 fonts (docs/homa-design/tokens/fonts.css), loaded via
+// Homa Design System v3 fonts (docs/homa-design/tokens/fonts.css), loaded via
 // next/font for self-hosting + zero layout shift instead of the DS's raw
 // Google Fonts @import. Weights mirror the token file exactly.
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const schibstedGrotesk = Schibsted_Grotesk({
+  variable: "--font-schibsted",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+const ebGaramond = EB_Garamond({
+  variable: "--font-eb-garamond",
   subsets: ["latin"],
   style: ["normal", "italic"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
+});
+
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["500", "600"],
 });
 
 const hankenGrotesk = Hanken_Grotesk({
@@ -48,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${schibstedGrotesk.variable} ${ebGaramond.variable} ${fredoka.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

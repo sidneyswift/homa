@@ -1,5 +1,5 @@
 // Homa mobile app, screens rendered inside a phone frame.
-const { Icon: MIcon, Avatar: MAvatar, ProgressBar: MProgress, Badge: MBadge, Chip: MChip, Callout: MCallout, Logo: MLogo, Doodle: MDoodleRaw } = window.HOMADesignSystem_113bd2;
+const { Icon: MIcon, Avatar: MAvatar, ProgressBar: MProgress, Badge: MBadge, Chip: MChip, Callout: MCallout, Logo: MLogo, Doodle: MDoodleRaw } = window.HomaDesignSystem_5e2305;
 // Guard against a stale bundle: decoration degrades to nothing, never a crash.
 const MDoodle = MDoodleRaw || (() => null);
 
@@ -48,7 +48,7 @@ function HomeScreen() {
   const tint = {
     Math: ['var(--clay-50)', 'var(--clay-600)'],
     Reading: ['var(--sage-50)', 'var(--sage-600)'],
-    Science: ['var(--gold-100)', '#9a7118'],
+    Science: ['var(--gold-100)', 'var(--gold-ink)'],
   };
   const tasks = [
     ['Fractions review', 'Math', '30m', 'divide'],
@@ -71,7 +71,7 @@ function HomeScreen() {
           <Eyebrow style={{ color: 'var(--clay-600)' }}>Today&rsquo;s focus</Eyebrow>
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-          Three subjects for Maya, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>about 1h 45m</span>.
+          Three subjects for Maya, <span style={{ color: 'var(--clay-600)' }}>about 1h 45m</span>.
         </div>
       </div>
 
@@ -171,7 +171,7 @@ function DiscoverScreen() {
 
       <div style={{ background: 'var(--surface-card)', borderRadius: 'var(--radius-xl)', padding: '18px 20px', boxShadow: 'var(--shadow-md)', marginBottom: 22 }}>
         <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--clay-600)', marginBottom: 8 }}>Maya · Space unit</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Family space day at the Bullock, <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>Saturday</span>.</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Family space day at the Bullock, <span style={{ color: 'var(--clay-600)' }}>Saturday</span>.</div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>Planetarium shows at 10 & 2, lines up with her astronomy week.</div>
         <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
           <span style={{ background: 'var(--brand)', color: '#fff', padding: '9px 18px', borderRadius: 'var(--radius-pill)', fontWeight: 700, fontSize: '0.85rem' }}>Get tickets</span>
@@ -229,7 +229,7 @@ function KidsScreen() {
 
       <div style={{ background: 'var(--sage-50)', borderRadius: 'var(--radius-xl)', padding: '18px 20px' }}>
         <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--sage-700)', marginBottom: 8 }}>It's working</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Math is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)', fontFamily: 'var(--font-serif)' }}>12 points</span> since the fractions set.</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3 }}>Math is up <span style={{ color: 'var(--sage-700)' }}>12 points</span> since the fractions set.</div>
         <svg width="100%" height="44" viewBox="0 0 260 44" preserveAspectRatio="none" style={{ margin: '10px 0 2px' }}>
           <path d="M0 36 C30 34 60 31 90 27 C130 22 170 15 210 9 C230 6 245 5 260 4" fill="none" stroke="var(--sage-500)" strokeWidth="2.5" strokeLinecap="round" />
           <circle cx="260" cy="4" r="3.5" fill="var(--sage-500)" />
@@ -244,7 +244,7 @@ function PlanScreen() {
   const tint = {
     Math: ['var(--clay-50)', 'var(--clay-600)'],
     Reading: ['var(--sage-50)', 'var(--sage-600)'],
-    Science: ['var(--gold-100)', '#8a6d00'],
+    Science: ['var(--gold-100)', 'var(--gold-ink)'],
     Writing: ['var(--sky-100)', 'var(--sky-600)'],
     Art: ['var(--clay-100)', 'var(--clay-700)'],
   };

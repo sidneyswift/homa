@@ -1,61 +1,57 @@
 import type { CSSProperties } from "react";
 
 /**
- * Homa logo, "the bright home" mark (a home with a spark of magic inside)
- * paired with the chunky lowercase wordmark. Ported from
+ * Homa logo, "the little home": a chunky rounded clay house with bright eyes,
+ * Homa personified, warm, watchful, a little playful, beside the bounced
+ * Fredoka wordmark (each letter nudged off the baseline). Ported from
  * docs/homa-design/components/brand/Logo.jsx (source of truth for the brand
  * lockup); keep in sync until packages/design exists (M1-17).
  */
+
+const HOUSE_PATH =
+  "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
+
+// [letter, baseline offset, rotation] per docs/homa-design's bounced wordmark.
+const WORDMARK_LETTERS: ReadonlyArray<readonly [string, string, number]> = [
+  ["H", "-0.06em", -3],
+  ["o", "0.05em", 0],
+  ["m", "-0.04em", 2],
+  ["a", "0.06em", -2],
+];
+
 export function Logo({
   size = 32,
   variant = "full",
   tone = "light",
-  treatment = "line",
+  treatment = "solid",
   style = {},
 }: {
   size?: number;
   variant?: "full" | "mark";
   tone?: "light" | "dark";
-  treatment?: "line" | "duo";
+  treatment?: "solid" | "line";
   style?: CSSProperties;
 }) {
-  const onDark = tone === "dark";
-  const duo = treatment === "duo";
-  const stroke = onDark ? "var(--clay-400)" : "var(--brand)";
-  const spark = duo
-    ? onDark
-      ? "var(--gold-400)"
-      : "var(--gold-500)"
-    : onDark
-      ? "var(--gold-400)"
-      : "var(--brand)";
-  const houseFill = duo ? (onDark ? "rgba(224,144,108,0.16)" : "var(--clay-50)") : "none";
-  const word = onDark ? "#FFFFFF" : "var(--text-strong)";
+  const body = tone === "dark" ? "var(--clay-400)" : "var(--brand)";
+  const word = tone === "dark" ? "#FFFFFF" : "var(--text-strong)";
+  const svgStyle: CSSProperties = { display: "block", flexShrink: 0 };
 
-  const mark = (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      stroke={stroke}
-      strokeWidth="3.4"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      style={{ display: "block", flexShrink: 0 }}
-      aria-hidden="true"
-    >
-      <path
-        d="M9 22 L24 9 L39 22 V37 A2 2 0 0 1 37 39 H11 A2 2 0 0 1 9 37 Z"
-        fill={houseFill}
-      />
-      <path
-        d="M24 20 C24.7 25 25.5 25.8 30 26.5 C25.5 27.2 24.7 28 24 33 C23.3 28 22.5 27.2 18 26.5 C22.5 25.8 23.3 25 24 20 Z"
-        fill={spark}
-        stroke="none"
-      />
-    </svg>
-  );
+  const mark =
+    treatment === "line" ? (
+      <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" style={svgStyle}>
+        <path d={HOUSE_PATH} fill="none" stroke={body} strokeWidth="3.2" strokeLinejoin="round" />
+        <circle cx="17.4" cy="26" r="2.7" fill={body} />
+        <circle cx="30.6" cy="26" r="2.7" fill={body} />
+      </svg>
+    ) : (
+      <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" style={svgStyle}>
+        <path d={HOUSE_PATH} fill={body} />
+        <circle cx="17.4" cy="26" r="4.8" fill="#FFFFFF" />
+        <circle cx="30.6" cy="26" r="4.8" fill="#FFFFFF" />
+        <circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A" />
+        <circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A" />
+      </svg>
+    );
 
   if (variant === "mark") {
     return (
@@ -69,21 +65,29 @@ export function Logo({
     <span
       role="img"
       aria-label="Homa"
-      style={{ display: "inline-flex", alignItems: "center", gap: size * 0.34, ...style }}
+      style={{ display: "inline-flex", alignItems: "center", gap: size * 0.3, ...style }}
     >
       {mark}
       <span
+        aria-hidden="true"
         style={{
-          fontFamily: "var(--font-display)",
+          fontFamily: "var(--font-wordmark)",
           fontWeight: 600,
-          fontSize: size * 1.02,
+          fontSize: size * 0.98,
           lineHeight: 1,
-          letterSpacing: "-0.01em",
           color: word,
-          marginTop: size * -0.06,
+          display: "inline-flex",
+          marginTop: size * -0.04,
         }}
       >
-        homa
+        {WORDMARK_LETTERS.map(([letter, offsetY, rotateDeg]) => (
+          <span
+            key={letter}
+            style={{ display: "inline-block", transform: `translateY(${offsetY}) rotate(${rotateDeg}deg)` }}
+          >
+            {letter}
+          </span>
+        ))}
       </span>
     </span>
   );

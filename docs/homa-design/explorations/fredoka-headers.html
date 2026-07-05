@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="design_doc_mode" content="canvas">
+<title>Headers · Fredoka vs EB Garamond</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; }
+  .tile { position: absolute; width: 880px; background: var(--bg-page); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 44px 48px; box-sizing: border-box; }
+  .chip { position: absolute; top: 14px; right: 16px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--text-subtle); }
+  .eyebrow { font-family: var(--font-sans); font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand); margin-bottom: 14px; }
+  .body { font-family: var(--font-sans); font-size: 19px; line-height: 1.55; color: var(--stone-700); max-width: 470px; margin-top: 18px; }
+  .h-g { font-family: var(--font-display); font-weight: 500; font-size: 58px; line-height: 1.02; color: var(--text-strong); }
+  .h-f { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 54px; line-height: 1.06; color: var(--text-strong); }
+  .h2-g { font-family: var(--font-display); font-weight: 600; font-size: 38px; color: var(--text-strong); }
+  .h2-f { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 35px; color: var(--text-strong); }
+  .card-t-g { font-family: var(--font-display); font-weight: 600; font-size: 21px; color: var(--text-strong); }
+  .card-t-f { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 20px; color: var(--text-strong); }
+  .em-i { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--clay-600); }
+  .em-c { color: var(--clay-600); }
+  .mini { background: var(--surface-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 20px 22px; max-width: 340px; margin-top: 16px; }
+  .mini p { font-family: var(--font-sans); font-size: 14.5px; color: var(--text-muted); line-height: 1.5; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+
+<div class="tile" id="6a" style="left:40px;top:40px;">
+  <span class="chip">6a · CURRENT · EB Garamond 500</span>
+  <div class="eyebrow">In your corner, every school day</div>
+  <div class="h-g">You&rsquo;ve got this.<br>Homa&rsquo;s got the <span class="em-i">rest</span>.</div>
+  <div class="body">The planning, the tracking, the what-do-we-do-today, hand it to Homa.</div>
+</div>
+
+<div class="tile" id="6b" style="left:960px;top:40px;">
+  <span class="chip">6b · Fredoka 500, clay accent</span>
+  <div class="eyebrow">In your corner, every school day</div>
+  <div class="h-f">You&rsquo;ve got this.<br>Homa&rsquo;s got the <span class="em-c">rest</span>.</div>
+  <div class="body">The planning, the tracking, the what-do-we-do-today, hand it to Homa.</div>
+</div>
+
+<div class="tile" id="6c" style="left:40px;top:400px;">
+  <span class="chip">6c · CURRENT section + card</span>
+  <div class="h2-g">Less admin. More teaching.</div>
+  <div class="mini">
+    <div class="card-t-g">Know where they stand</div>
+    <p>A gentle skills checklist, mapped to your state's standards.</p>
+  </div>
+</div>
+
+<div class="tile" id="6d" style="left:960px;top:400px;">
+  <span class="chip">6d · Fredoka section + card</span>
+  <div class="h2-f">Less admin. More teaching.</div>
+  <div class="mini">
+    <div class="card-t-f">Know where they stand</div>
+    <p>A gentle skills checklist, mapped to your state's standards.</p>
+  </div>
+</div>
+
+<div class="tile" id="6e" style="left:40px;top:730px;">
+  <span class="chip">6e · Fredoka + EB Garamond italic accent</span>
+  <div class="h-f" style="font-size:46px;">From Sunday night to <span class="em-i">proof</span>.</div>
+</div>
+
+<div class="tile" id="6f" style="left:960px;top:730px;">
+  <span class="chip">6f · Hybrid: Fredoka eyebrow + Garamond headline</span>
+  <div style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--brand);margin-bottom:14px;">How Homa works</div>
+  <div class="h-g" style="font-size:46px;">From Sunday night to <span class="em-i">proof</span>.</div>
+</div>
+
+</body>
+</html>

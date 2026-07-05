@@ -1,31 +1,52 @@
-<!-- @dsCard group="Components" viewport="700x220" name="Icons" subtitle="Lucide · Homa's canonical icon set" -->
+<!-- @dsCard group="Components" viewport="700x330" name="Icons" subtitle="Lucide, pinned 0.525.0 · sizes, tinted tiles, what the core glyphs mean" -->
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="../../_ds_bundle.js"></script>
 <style>
   body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
-  .grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 18px; color: var(--text-body); }
-  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-subtle); }
+  .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 16px; color: var(--text-body); }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.66rem; color: var(--text-subtle); }
+  .use { display: flex; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-subtle); }
+  .tile { width: 34px; height: 34px; border-radius: var(--blob-2); display: inline-flex; align-items: center; justify-content: center; }
+  .meta { font-size: 0.7rem; color: var(--text-subtle); margin-left: auto; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-  const { Icon } = window.HOMADesignSystem_113bd2;
-  const names = ['sparkles','book-open','graduation-cap','chart-line','calendar','pencil','heart','users','search','lightbulb','clipboard-list','award','clock','settings','message-circle','folder','check','bell','home'];
+  const { Icon } = window.HomaDesignSystem_5e2305;
+  const names = ['sparkles','book-open','graduation-cap','chart-line','calendar','pencil','heart','users','search','lightbulb','clipboard-list','award','clock','settings','message-circle','folder','check','bell','home','map-pin'];
   function Demo() {
     return (
-      <div className="grid">
-        {names.map(n => (
-          <div className="cell" key={n}><Icon name={n} size={24} color="var(--brand)" /><span>{n}</span></div>
-        ))}
+      <div>
+        <div className="grid">
+          {names.map(n => (
+            <div className="cell" key={n}><Icon name={n} size={24} color="var(--brand)" /><span>{n}</span></div>
+          ))}
+        </div>
+        <div style={{ marginTop: 18, display: 'flex', gap: '8px 14px', flexWrap: 'wrap' }}>
+          {[['sparkles','Homa / AI'],['file-pen','worksheets'],['compass','discover'],['chart-line','progress'],['calendar','planner'],['award','milestones']].map(([n, m]) => (
+            <span key={n} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--stone-100)', borderRadius: 999, padding: '5px 12px', fontSize: '0.72rem', color: 'var(--text-body)', fontWeight: 600 }}>
+              <Icon name={n} size={14} color="var(--clay-600)" /> {m}
+            </span>
+          ))}
+        </div>
+        <div className="use">
+          <span className="chip"><Icon name="calendar" size={16} color="var(--text-subtle)" /> 16 meta</span>
+          <span className="chip"><Icon name="calendar" size={20} color="var(--text-body)" /> 20 rows &amp; nav</span>
+          <span className="tile" style={{ background: 'var(--clay-50)' }}><Icon name="book-open" size={19} color="var(--clay-600)" /></span>
+          <span className="tile" style={{ background: 'var(--sage-50)' }}><Icon name="chart-line" size={19} color="var(--sage-600)" /></span>
+          <span className="chip">tinted tiles for stats &amp; subjects</span>
+          <span className="meta">lucide@0.525.0 · 1.75 stroke · never hand-drawn · in nav, never without a label</span>
+        </div>
       </div>
     );
   }

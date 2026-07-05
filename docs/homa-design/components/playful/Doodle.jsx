@@ -2,7 +2,8 @@ import React from 'react';
 
 /**
  * Homa Doodle, small hand-drawn decorative shapes scattered like margin
- * stickers: star, heart, sun, sparkle, squiggle. Decoration only, never UI.
+ * stickers: star, heart, sun, sparkle, squiggle, flower, cloud, moon,
+ * zigzag, loop. Decoration only, never UI.
  */
 export function Doodle({ name = 'star', size = 24, color = 'var(--pop-cobalt)', rotate = 0, style = {} }) {
   const fills = {
@@ -24,6 +25,16 @@ export function Doodle({ name = 'star', size = 24, color = 'var(--pop-cobalt)', 
       </g>
     ),
     squiggle: <path d="M2 14 Q5.5 7.5 9 12.5 T16 11.5 T22 8.5" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" />,
+    flower: (
+      <g fill={color}>
+        <circle cx="12" cy="5" r="3.6" /><circle cx="18.7" cy="9.9" r="3.6" /><circle cx="16.1" cy="17.8" r="3.6" />
+        <circle cx="7.9" cy="17.8" r="3.6" /><circle cx="5.3" cy="9.9" r="3.6" /><circle cx="12" cy="12" r="2.6" />
+      </g>
+    ),
+    cloud: <path d="M6 17.5 C3.5 17.5 2 15.8 2 13.9 C2 12 3.4 10.6 5.2 10.4 C5.6 7.3 8.2 5 11.4 5 C14.2 5 16.6 6.8 17.4 9.4 C19.9 9.6 22 11.6 22 14 C22 16 20.4 17.5 18.4 17.5 Z" fill={color} />,
+    moon: <path d="M20.5 15.5 A9.5 9.5 0 1 1 8.5 3.5 A7.5 7.5 0 0 0 20.5 15.5 Z" fill={color} />,
+    zigzag: <path d="M2 16 L7 8 L12 16 L17 8 L22 16" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />,
+    loop: <path d="M2 14 C4 8 8 7 9.5 10.5 C11 14 7.5 16.5 6.5 13.5 C5.5 10.5 10 7 14 8.5 C18 10 18.5 14 22 12.5" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" />,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"

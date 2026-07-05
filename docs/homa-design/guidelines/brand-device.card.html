@@ -1,41 +1,59 @@
-<!-- @dsCard group="Brand" viewport="700x240" name="Brand device · Homa's hand" subtitle="Margin rule · handwriting · check/star · reassurance" -->
+<!-- @dsCard group="Brand" viewport="700x360" name="Brand device · Homa's hand" subtitle="Margin rule · handwriting · check/star · reassurance, composed with restraint" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:26px 30px;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
-  .item{display:flex;flex-direction:column;gap:8px;}
-  .lbl{font-size:0.68rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);}
-  .margin-demo{border-left:3px solid var(--clay-300);padding-left:16px;}
-  .margin-demo .h{font-family:var(--font-display);font-size:1.25rem;color:var(--text-strong);font-weight:500;}
-  .hand{font-family:var(--font-hand);font-weight:600;font-size:2rem;color:var(--sage-600);line-height:1;}
-  .marks{display:flex;gap:10px;align-items:center;}
-  .star{width:40px;height:40px;border-radius:50%;background:var(--sage-50);display:inline-flex;align-items:center;justify-content:center;}
-  .gold{width:40px;height:40px;border-radius:50%;background:var(--gold-100);display:inline-flex;align-items:center;justify-content:center;}
-  .voice{background:var(--sage-50);border-left:3px solid var(--sage-400);border-radius:var(--radius-md);padding:12px 16px;}
-  .voice .e{font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage-700);}
-  .voice .b{font-family:var(--font-display);font-size:1.05rem;color:var(--text-strong);margin-top:3px;line-height:1.35;}
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:24px 28px;}
+  .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:20px 26px;align-items:start;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:10px;}
+  .stage{background:var(--bg-page);border-radius:var(--radius-lg);padding:16px;}
+  .mini{background:var(--surface-card);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);padding:14px 16px;}
+  .mini .head{border-left:3px solid var(--clay-300);padding-left:12px;}
+  .mini .h{font-family:var(--font-display);font-size:1.05rem;font-weight:600;color:var(--text-strong);}
+  .mini .s{font-size:0.75rem;color:var(--text-muted);margin-top:1px;}
+  .task{display:flex;align-items:center;gap:10px;padding:9px 0 0;font-size:0.85rem;font-weight:500;color:var(--text-body);}
+  .ck{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;}
+  .ck.done{background:var(--sage-500);}
+  .ck.todo{border:1.5px solid var(--border-strong);}
+  .task.done .t{color:var(--text-subtle);text-decoration:line-through;text-decoration-color:var(--stone-300);}
+  .star{color:var(--gold-500);font-size:12px;margin-left:auto;}
+  .cap{font-size:0.74rem;color:var(--text-muted);line-height:1.5;margin-top:10px;}
+  .hand{font-family:var(--font-hand);font-weight:600;font-size:1.8rem;color:var(--sage-600);line-height:1;transform:rotate(-2deg);display:inline-block;}
+  .voice{background:var(--sage-50);border-radius:var(--radius-md);padding:11px 14px;}
+  .voice .e{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage-700);}
+  .voice .b{font-family:var(--font-display);font-size:0.98rem;font-weight:500;color:var(--text-strong);margin-top:3px;line-height:1.35;}
+  .rules{grid-column:1 / -1;display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--stone-200);padding-top:12px;font-size:0.76rem;color:var(--text-muted);line-height:1.55;}
+  .rules b{color:var(--text-body);}
 </style></head><body>
 <div class="grid">
-  <div class="item">
-    <span class="lbl">Notebook margin rule</span>
-    <div class="margin-demo"><div class="h">A calm week for Maya</div><div style="color:var(--text-muted);font-size:0.85rem;margin-top:2px;">Clay vertical rule, the workbook margin, our quiet frame.</div></div>
-  </div>
-  <div class="item">
-    <span class="lbl">Homa's hand, used sparingly</span>
-    <div class="hand">you've got this &#10022;</div>
-    <div style="color:var(--text-muted);font-size:0.85rem;">Caveat as Homa's personal margin note. One per surface, max.</div>
-  </div>
-  <div class="item">
-    <span class="lbl">Marks of progress</span>
-    <div class="marks">
-      <span class="star"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sage-600)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-      <span class="gold"><svg width="20" height="20" viewBox="0 0 24 24" fill="var(--gold-500)" stroke="var(--gold-500)" stroke-width="1.5" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16 14 18 21 12 17 6 21 8 14 2 9 9 9"/></svg></span>
-      <span style="color:var(--text-muted);font-size:0.85rem;">Check &amp; gold star, the "good job" of childhood, reclaimed.</span>
+
+  <div>
+    <div class="lbl">In context · two devices is the ceiling</div>
+    <div class="stage">
+      <div class="mini">
+        <div class="head"><div class="h">Tuesday, a calm one</div><div class="s">Two things, then the park.</div></div>
+        <div class="task done"><span class="ck done"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">Fractions review</span><span class="star">&#10022;</span></div>
+        <div class="task"><span class="ck todo"></span><span class="t">Read aloud &middot; Charlotte's Web</span></div>
+      </div>
+      <div class="cap">Here: the margin rule frames the day, the check &amp; star mark the win. The hand note and the sage callout stayed home. <b style="color:var(--text-body);">Pick one or two devices per surface, never all four.</b></div>
     </div>
   </div>
-  <div class="item">
-    <span class="lbl">Reassurance voice</span>
-    <div class="voice"><div class="e">A note from Homa</div><div class="b">Right on pace, nothing to worry about this week.</div></div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div>
+      <div class="lbl">Homa's hand · one note per surface, max</div>
+      <span class="hand">you've got this &#10022;</span>
+      <div class="cap">Caveat 600, always sage, always tilted a degree or two. Delight only, never instructions, never data.</div>
+    </div>
+    <div>
+      <div class="lbl">Reassurance voice · "a note from Homa"</div>
+      <div class="voice"><div class="e">A note from Homa</div><div class="b">Right on pace, nothing to worry about this week.</div></div>
+    </div>
   </div>
+
+  <div class="rules">
+    <span><b>Margin rule:</b> clay hairline on titled blocks, one per page.</span>
+    <span><b>Check &amp; star:</b> earned by her tap, never auto-granted.</span>
+    <span><b>Never:</b> red "behind" labels, guilt copy, a second hand note.</span>
+  </div>
+
 </div>
 </body></html>

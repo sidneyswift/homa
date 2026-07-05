@@ -1,10 +1,10 @@
-<!-- @dsCard group="Components" viewport="700x260" name="Cards" subtitle="Surface container · flat, elevated, interactive" -->
+<!-- @dsCard group="Components" viewport="700x310" name="Cards" subtitle="Surface container · flat, elevated, interactive · in use" -->
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -12,6 +12,7 @@
 <style>
   body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-subtle); margin: 0 0 8px; }
   h4 { font-family: var(--font-display); font-weight: 600; margin: 0 0 6px; color: var(--text-strong); font-size: 1.125rem; }
   p { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
 </style>
@@ -19,13 +20,22 @@
 <body>
 <div id="root"></div>
 <script type="text/babel">
-  const { Card, Badge } = window.HOMADesignSystem_113bd2;
+  const { Card, Badge } = window.HomaDesignSystem_5e2305;
   function Demo() {
     return (
-      <div className="grid">
-        <Card><h4>Flat card</h4><p>Subtle shadow, the default surface.</p></Card>
-        <Card elevated><h4>Elevated</h4><p>Starts at a deeper shadow for emphasis.</p></Card>
-        <Card interactive elevated><h4>Interactive</h4><p>Lifts on hover, use for clickable tiles.</p></Card>
+      <div>
+        <div className="lbl">Three postures</div>
+        <div className="grid">
+          <Card><h4>Flat card</h4><p>Subtle shadow, the default surface.</p></Card>
+          <Card elevated><h4>Elevated</h4><p>Starts at a deeper shadow for emphasis.</p></Card>
+          <Card interactive elevated><h4>Interactive</h4><p>Lifts on hover, use for clickable tiles.</p></Card>
+        </div>
+        <div className="lbl" style={{ margin: '18px 0 8px' }}>In use</div>
+        <Card interactive style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: 430 }}>
+          <span style={{ width: 40, height: 40, borderRadius: 'var(--blob-2)', background: 'var(--sage-50)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--sage-600)' }}>M</span>
+          <span style={{ flex: 1 }}><h4>Maya · Grade 3</h4><p>12-day streak · reading is taking off</p></span>
+          <Badge tone="sage">On track</Badge>
+        </Card>
       </div>
     );
   }

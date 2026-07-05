@@ -23,7 +23,7 @@ import {
  * background and falls back to an on-device queue on dead wifi.
  *
  * Labels stay neutral functional text on purpose (form UX best practice:
- * visible labels, plain error text); visual system is homa-design v2 via the
+ * visible labels, plain error text); visual system is homa-design v3 via the
  * token pass in globals.css.
  */
 

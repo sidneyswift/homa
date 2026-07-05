@@ -1,17 +1,28 @@
-<!-- @dsCard group="Spacing" viewport="700x180" name="Shadows" subtitle="Soft, warm-tinted elevation · xs → xl" -->
+<!-- @dsCard group="Spacing" viewport="700x240" name="Shadows" subtitle="Warm-tinted elevation, brown never black · plus focus & inset" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:28px;}
-  .row{display:flex;gap:26px;align-items:center;}
-  .item{display:flex;flex-direction:column;align-items:center;gap:10px;}
-  .box{width:96px;height:70px;background:var(--surface-card);border-radius:var(--radius-md);}
-  .lbl{font-size:0.68rem;color:var(--text-subtle);font-family:var(--font-mono);}
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:22px 26px;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin:0 0 12px;}
+  .ramp{display:flex;gap:16px;}
+  .s{flex:1;height:84px;background:var(--surface-card);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+  .s b{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-body);font-weight:600;}
+  .s span{font-size:0.68rem;color:var(--text-subtle);}
+  .row2{display:flex;gap:16px;margin-top:18px;align-items:center;}
+  .focus{background:var(--surface-card);border:1.5px solid var(--brand);border-radius:var(--radius-pill);box-shadow:var(--shadow-focus);padding:9px 20px;font-size:0.85rem;font-weight:600;color:var(--text-body);}
+  .inset{background:var(--stone-100);border-radius:var(--radius-md);box-shadow:var(--shadow-inset);padding:10px 16px;font-size:0.85rem;color:var(--text-subtle);flex:1;}
+  .note{margin-left:auto;font-size:0.78rem;color:var(--text-subtle);max-width:220px;text-align:right;}
 </style></head><body>
-<div class="row">
-  <div class="item"><div class="box" style="box-shadow:var(--shadow-xs)"></div><span class="lbl">xs</span></div>
-  <div class="item"><div class="box" style="box-shadow:var(--shadow-sm)"></div><span class="lbl">sm ·card</span></div>
-  <div class="item"><div class="box" style="box-shadow:var(--shadow-md)"></div><span class="lbl">md</span></div>
-  <div class="item"><div class="box" style="box-shadow:var(--shadow-lg)"></div><span class="lbl">lg ·hover</span></div>
-  <div class="item"><div class="box" style="box-shadow:var(--shadow-xl)"></div><span class="lbl">xl ·modal</span></div>
+<div class="lbl">Elevation &middot; every layer is warm brown, rgba(51,42,33)</div>
+<div class="ramp">
+  <div class="s" style="box-shadow:var(--shadow-xs)"><b>xs</b><span>hairline UI</span></div>
+  <div class="s" style="box-shadow:var(--shadow-sm)"><b>sm</b><span>resting card</span></div>
+  <div class="s" style="box-shadow:var(--shadow-md)"><b>md</b><span>dropdown</span></div>
+  <div class="s" style="box-shadow:var(--shadow-lg)"><b>lg</b><span>hover lift</span></div>
+  <div class="s" style="box-shadow:var(--shadow-xl)"><b>xl</b><span>modal</span></div>
+</div>
+<div class="row2">
+  <span class="focus">Focused field</span>
+  <span class="inset">Pressed / sunken</span>
+  <span class="note">Focus is a clay glow, never blue. Hover = one step up + translateY(-2px).</span>
 </div>
 </body></html>

@@ -13,7 +13,7 @@ export interface IconProps {
 
 /**
  * Lucide icon wrapper, Homa's canonical icon set. Requires the Lucide CDN
- * script on the page: <script src="https://unpkg.com/lucide@latest"></script>
+ * script on the page: <script src="https://unpkg.com/lucide@0.525.0"></script>
  * and a lucide.createIcons() call after mount.
  */
 export function Icon(props: IconProps): JSX.Element;

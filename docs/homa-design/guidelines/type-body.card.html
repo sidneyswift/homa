@@ -1,16 +1,35 @@
-<!-- @dsCard group="Type" viewport="700x200" name="UI & body · Hanken Grotesk" subtitle="Humanist sans for interface + reading" -->
+<!-- @dsCard group="Type" viewport="700x230" name="UI & body · Hanken Grotesk" subtitle="One humanist sans for every interface role" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px;color:var(--text-body);}
-  .r{margin-bottom:8px;display:flex;align-items:baseline;gap:14px;}
-  .lbl{font-size:0.7rem;color:var(--text-subtle);font-family:var(--font-mono);width:110px;flex-shrink:0;}
-  .a{font-size:1.375rem;font-weight:700;color:var(--text-strong);}
-  .b{font-size:1rem;font-weight:400;line-height:1.5;}
-  .c{font-size:0.875rem;font-weight:500;}
-  .d{font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);}
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:22px 26px;}
+  .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:start;}
+  .card{background:var(--surface-card);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:18px 20px;}
+  .eyebrow{font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--clay-600);}
+  .title{font-size:1rem;font-weight:700;color:var(--text-strong);margin-top:6px;}
+  .body{font-size:0.92rem;line-height:1.65;color:var(--text-body);margin-top:6px;}
+  .caption{font-size:0.75rem;color:var(--text-subtle);margin-top:10px;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin:0 0 10px;}
+  .w{display:flex;align-items:baseline;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-subtle);color:var(--text-body);}
+  .w:last-child{border-bottom:none;}
+  .w span{font-size:1.05rem;}
+  .w b{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-subtle);font-weight:500;}
 </style></head><body>
-  <div class="r"><span class="lbl">xl · 700</span><span class="a">Section heading</span></div>
-  <div class="r"><span class="lbl">base · 400</span><span class="b">Body copy, the friendly, readable default for paragraphs and lists.</span></div>
-  <div class="r"><span class="lbl">sm · 500</span><span class="c">Labels, table cells, secondary UI</span></div>
-  <div class="r"><span class="lbl">xs · 600 caps</span><span class="d">Overline / eyebrow</span></div>
+<div class="grid">
+  <div>
+    <div class="lbl">Every role, one family</div>
+    <div class="card">
+      <div class="eyebrow">This week</div>
+      <div class="title">Label &middot; 700, tight and clear</div>
+      <div class="body">Body reads at 15&ndash;16px with relaxed 1.65 leading, warm near-black on cream. A sentence beats a paragraph.</div>
+      <div class="caption">Caption &middot; 12px, warm subtle, for meta and timestamps</div>
+    </div>
+  </div>
+  <div>
+    <div class="lbl">Weights in use</div>
+    <div class="w"><span style="font-weight:400">Regular, body</span><b>400</b></div>
+    <div class="w"><span style="font-weight:500">Medium, nav &amp; hints</span><b>500</b></div>
+    <div class="w"><span style="font-weight:600">Semibold, labels</span><b>600</b></div>
+    <div class="w"><span style="font-weight:700">Bold, buttons &amp; titles</span><b>700</b></div>
+  </div>
+</div>
 </body></html>

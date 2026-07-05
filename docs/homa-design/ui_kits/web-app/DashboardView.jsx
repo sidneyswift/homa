@@ -1,12 +1,12 @@
 // Homa web app, kid progress dashboard.
-const { Card: DCard, Badge: DBadge, ProgressBar: DProgress, Avatar: DAvatar, Icon: DIcon, Tabs: DTabs, Callout: DCallout } = window.HOMADesignSystem_113bd2;
+const { Card: DCard, Badge: DBadge, ProgressBar: DProgress, Avatar: DAvatar, Icon: DIcon, Tabs: DTabs, Callout: DCallout } = window.HomaDesignSystem_5e2305;
 
-function StatTile({ icon, label, value, sub, tone }) {
+function StatTile({ icon, label, value, sub, tone: [bg, ink] }) {
   return (
     <DCard padding="md" style={{ flex: 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <span style={{ width: 38, height: 38, borderRadius: 'var(--blob-2)', background: tone, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <DIcon name={icon} size={19} color="#fff" />
+        <span style={{ width: 38, height: 38, borderRadius: 'var(--blob-2)', background: bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <DIcon name={icon} size={19} color={ink} />
         </span>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{label}</span>
       </div>
@@ -40,9 +40,9 @@ function DashboardView() {
       </div>
 
       <div style={{ display: 'flex', gap: 16, marginBottom: 22 }}>
-        <StatTile icon="flame" label="Streak" value="12 days" sub="Longest this term" tone="var(--clay-500)" />
-        <StatTile icon="clock" label="This week" value="9.5 hrs" sub="Goal: 10 hrs" tone="var(--sage-500)" />
-        <StatTile icon="star" label="Milestones" value="7" sub="+2 this month" tone="var(--gold-500)" />
+        <StatTile icon="flame" label="Streak" value="12 days" sub="Longest this term" tone={['var(--clay-50)', 'var(--clay-600)']} />
+        <StatTile icon="clock" label="This week" value="9.5 hrs" sub="Goal: 10 hrs" tone={['var(--sage-50)', 'var(--sage-600)']} />
+        <StatTile icon="star" label="Milestones" value="7" sub="+2 this month" tone={['var(--gold-100)', 'var(--gold-ink)']} />
       </div>
 
       <DCard padding="lg" style={{ marginBottom: 22 }}>

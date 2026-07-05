@@ -1,5 +1,5 @@
 // Homa web app, left navigation sidebar.
-const { Avatar: HAvatar, Icon: HIcon, Badge: HBadge, Logo: HLogo } = window.HOMADesignSystem_113bd2;
+const { Avatar: HAvatar, Icon: HIcon, Badge: HBadge, Logo: HLogo } = window.HomaDesignSystem_5e2305;
 
 function Sidebar({ active, onNavigate, kids }) {
   const nav = [

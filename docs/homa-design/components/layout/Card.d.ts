@@ -1,5 +1,8 @@
 import * as React from 'react';
 
+/**
+ * Props for the Homa card surface.
+ */
 export interface CardProps {
   /** @default "md" */
   padding?: 'none' | 'sm' | 'md' | 'lg';
@@ -14,6 +17,5 @@ export interface CardProps {
 
 /**
  * Soft warm surface container, the base of every Homa layout.
- * @startingPoint section="Layout" subtitle="Rounded warm card container" viewport="700x220"
  */
 export function Card(props: CardProps): JSX.Element;

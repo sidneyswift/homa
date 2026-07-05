@@ -21,7 +21,7 @@ export function IconButton({
     ghost:   { background: 'transparent', color: 'var(--text-muted)', border: '1px solid transparent' },
     soft:    { background: 'var(--stone-100)', color: 'var(--text-body)', border: '1px solid transparent' },
     outline: { background: 'var(--surface-card)', color: 'var(--text-body)', border: '1px solid var(--border-default)' },
-    primary: { background: 'var(--brand)', color: '#fff', border: '1px solid transparent' },
+    primary: { background: 'var(--brand)', color: 'var(--on-brand)', border: '1px solid transparent' },
   };
 
   const hoverBg = {

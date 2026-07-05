@@ -1,5 +1,5 @@
 // Homa web app, Discover: lessons connected to the real world, and to other families.
-const { Card: VCard, Badge: VBadge, Icon: VIcon, Button: VButton, Avatar: VAvatar, Squiggle: VSquiggleRaw } = window.HOMADesignSystem_113bd2;
+const { Card: VCard, Badge: VBadge, Icon: VIcon, Button: VButton, Avatar: VAvatar, Squiggle: VSquiggleRaw } = window.HomaDesignSystem_5e2305;
 const VSquiggle = VSquiggleRaw || (() => null);
 
 function VSuggestion({ eyebrow, title, body, icon, tint, fg, primary, secondary }) {
@@ -42,7 +42,7 @@ function DiscoverView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
         <VSuggestion
           eyebrow="Maya · Space unit"
-          title={<span>The Bullock has a family space day <span style={{ fontStyle: 'italic', color: 'var(--clay-600)', fontFamily: 'var(--font-serif)' }}>this Saturday</span>.</span>}
+          title={<span>The Bullock has a family space day <span style={{ color: 'var(--clay-600)' }}>this Saturday</span>.</span>}
           body="Planetarium shows at 10 and 2, and it lines up with her astronomy week. Want me to hold tickets?"
           icon="telescope" tint="var(--clay-50)" fg="var(--clay-600)"
           primary="Get tickets" secondary="Not this week"

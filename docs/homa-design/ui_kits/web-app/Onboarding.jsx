@@ -1,5 +1,5 @@
 // Homa web app, first-run onboarding: add kids → pick subjects → Homa drafts the week.
-const { Logo: OLogo, Button: OButton, Input: OInput, Select: OSelect, Chip: OChip, Switch: OSwitch, Skeleton: OSkeleton, Callout: OCallout, Icon: OIcon, Avatar: OAvatar } = window.HOMADesignSystem_113bd2;
+const { Logo: OLogo, Button: OButton, Input: OInput, Select: OSelect, Chip: OChip, Switch: OSwitch, Skeleton: OSkeleton, Callout: OCallout, Icon: OIcon, Avatar: OAvatar } = window.HomaDesignSystem_5e2305;
 
 function ODots({ step }) {
   return (
@@ -36,7 +36,7 @@ function OStepKids({ kids, setKids }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 18, minHeight: 64 }}>
         {kids.length === 0 && (
-          <div style={{ color: 'var(--text-subtle)', fontSize: '0.9rem', textAlign: 'center', padding: '16px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>No pressure, you can always add more later.</div>
+          <div style={{ color: 'var(--text-subtle)', fontSize: '0.9rem', textAlign: 'center', padding: '16px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 400 }}>No pressure, you can always add more later.</div>
         )}
         {kids.map((k, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface-card)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-xs)' }}>
@@ -80,7 +80,7 @@ function OStepDraft({ kids, subjects, onDone }) {
   const rows = [
     [subjects[0] || 'Math', 'Short daily rhythm, 30m', 'var(--clay-50)', 'var(--clay-600)', 'divide'],
     [subjects[1] || 'Reading', 'A chapter + read-aloud', 'var(--sage-50)', 'var(--sage-600)', 'book-open'],
-    [subjects[2] || 'Science', 'One hands-on afternoon', 'var(--gold-100)', '#9a7118', 'leaf'],
+    [subjects[2] || 'Science', 'One hands-on afternoon', 'var(--gold-100)', 'var(--gold-ink)', 'leaf'],
   ];
   if (!ready) {
     return (

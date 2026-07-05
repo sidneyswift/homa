@@ -1,14 +1,15 @@
-<!-- @dsCard group="Colors" viewport="700x330" name="Dark theme · quiet evening" subtitle='Experimental. data-theme="dark" on any subtree' -->
+<!-- @dsCard group="Colors" viewport="700x330" name="Dark theme · quiet evening" subtitle="Night sky: sunshine buttons, baby-blue accents · opt-in per subtree · tweak the base tone" -->
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="../_ds_bundle.js"></script>
+<script type="text/babel" src="../tweaks-panel.jsx"></script>
 <style>
   body { margin: 0; font-family: var(--font-sans); }
   .dark-stage { background: var(--bg-page); padding: 24px; min-height: 100vh; box-sizing: border-box; }
@@ -18,19 +19,52 @@
 </style>
 </head>
 <body>
-<div class="dark-stage" data-theme="dark">
-  <div id="root"></div>
-</div>
+<div id="root"></div>
 <script type="text/babel">
-  const { Logo, Button, Badge, Callout, Icon, ProgressBar, Chip } = window.HOMADesignSystem_113bd2;
+  const { Logo, Button, Badge, Callout, Icon, ProgressBar, Chip } = window.HomaDesignSystem_5e2305;
+  const { useTweaks, TweaksPanel, TweakSection, TweakRadio } = window;
+
+  /* Base-tone alternatives for "quiet evening": the night-sky slate v3 as
+     shipped (default), plus the earlier warm and charcoal cuts for compare.
+     Picking one here = overriding surfaces/neutrals; brand + accents stay. */
+  const TONES = {
+    slate: {},
+    warm: {
+      '--bg-page': '#181411', '--bg-page-warm': '#1D1813', '--surface-card': '#231E18',
+      '--surface-raised': '#2A241D', '--surface-sunken': '#110F0B',
+      '--border-subtle': '#2E2820', '--border-default': '#3A332A', '--border-strong': '#524A3E',
+      '--stone-50': '#1D1913', '--stone-100': '#2B251D', '--stone-200': '#372F25',
+      '--stone-300': '#4A4134', '--stone-400': '#6A5F50',
+    },
+    charcoal: {
+      '--bg-page': '#191715', '--bg-page-warm': '#1E1C19', '--surface-card': '#23211E',
+      '--surface-raised': '#2A2825', '--surface-sunken': '#121110',
+      '--border-subtle': '#2D2B27', '--border-default': '#393733', '--border-strong': '#504D47',
+      '--stone-50': '#1E1C19', '--stone-100': '#2A2825', '--stone-200': '#363431',
+      '--stone-300': '#484540', '--stone-400': '#67635C',
+    },
+  };
+  const TEXTS = {
+    cool: {},
+    cream: { '--text-strong': '#F4EEE3', '--text-body': '#E3DACB', '--text-muted': '#A99C8A', '--text-subtle': '#85796A' },
+  };
+
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "baseTone": "slate",
+    "textTone": "cool"
+  }/*EDITMODE-END*/;
+
   function Demo() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    const vars = { ...(TONES[t.baseTone] || {}), ...(TEXTS[t.textTone] || {}) };
+    React.useEffect(() => { const id = setTimeout(() => window.lucide && window.lucide.createIcons(), 250); return () => clearTimeout(id); });
     return (
-      <div>
+      <div className="dark-stage" data-theme="dark" style={vars}>
         <div className="sw">
           <div className="s" style={{ background: 'var(--bg-page)' }}>bg-page</div>
           <div className="s" style={{ background: 'var(--surface-card)' }}>surface-card</div>
           <div className="s" style={{ background: 'var(--surface-raised)' }}>raised</div>
-          <div className="s" style={{ background: 'var(--brand)', color: '#fff' }}>brand</div>
+          <div className="s" style={{ background: 'var(--brand)', color: 'var(--on-brand)' }}>brand</div>
         </div>
         <div className="row">
           <Logo size={26} tone="dark" />
@@ -38,20 +72,36 @@
           <Button size="sm" variant="secondary">Add subject</Button>
           <Button size="sm" variant="ghost">Cancel</Button>
           <Badge tone="sage">On track</Badge>
+          <Badge tone="gold">2 milestones</Badge>
           <Chip selected>Math</Chip>
           <Chip>Reading</Chip>
         </div>
         <div style={{ maxWidth: 420, marginBottom: 14 }}>
           <ProgressBar label="Reading" value={82} showValue tone="sage" size="sm" />
         </div>
+        <div className="row" style={{ alignItems: 'center', gap: 24 }}>
+          <span style={{ fontFamily: 'var(--font-hand)', fontWeight: 600, fontSize: '1.45rem', color: 'var(--sage-600)', transform: 'rotate(-2deg)', display: 'inline-block', whiteSpace: 'nowrap' }}>still cozy after dark &#10022;</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-pill)', padding: '8px 16px', whiteSpace: 'nowrap' }}>
+            <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--sage-500)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="check" size={12} color="#151B27" /></span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', textDecoration: 'line-through', textDecorationColor: 'var(--stone-300)' }}>Fractions review</span>
+            <span style={{ color: 'var(--gold-500)', fontSize: 13 }}>&#10022;</span>
+          </span>
+        </div>
         <Callout tone="sage" title="A note from Homa" icon={<Icon name="sparkles" size={18} />}>
           Evening planning? The whole system holds up after dark.
         </Callout>
+        <div style={{ marginTop: 14, fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          <b style={{ color: 'var(--text-body)' }}>Flips:</b> surfaces to night-sky navy, buttons to sunshine (deep ink, never white on gold), growth accents to baby blue. <b style={{ color: 'var(--text-body)' }}>Stays:</b> the coral character mark and the warm voice. Light is the default; dark is opt-in per subtree.
+        </div>
+        <TweaksPanel>
+          <TweakSection label="Quiet evening" />
+          <TweakRadio label="Base tone" value={t.baseTone} options={['slate', 'warm', 'charcoal']} onChange={v => setTweak('baseTone', v)} />
+          <TweakRadio label="Text" value={t.textTone} options={['cool', 'cream']} onChange={v => setTweak('textTone', v)} />
+        </TweaksPanel>
       </div>
     );
   }
   ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
-  setTimeout(() => window.lucide && window.lucide.createIcons(), 300);
 </script>
 </body>
 </html>

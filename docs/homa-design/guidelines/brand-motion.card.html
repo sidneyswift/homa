@@ -1,15 +1,44 @@
-<!-- @dsCard group="Brand" viewport="700x170" name="Motion & states" subtitle="Gentle ease-out, no bounce; hover lift, press shrink" -->
+<!-- @dsCard group="Brand" viewport="700x250" name="Motion & states" subtitle="Gentle ease-out, no bounce · hover, press, focus glow · try them" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
-  .demo{background:var(--brand);color:#fff;padding:12px 22px;border-radius:var(--radius-pill);font-weight:600;cursor:pointer;transition:all var(--dur-base) var(--ease-out);}
+  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px 26px;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:10px;}
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .demo{background:var(--brand);color:#fff;padding:11px 22px;border-radius:var(--radius-pill);font-weight:600;cursor:pointer;border:none;font-family:var(--font-sans);font-size:0.9rem;transition:all var(--dur-fast) var(--ease-out);}
   .demo:hover{background:var(--brand-hover);}
   .demo:active{transform:scale(0.98);}
-  .card{background:var(--surface-card);border:1px solid var(--border-subtle);box-shadow:var(--shadow-sm);border-radius:var(--radius-lg);padding:16px 20px;transition:all var(--dur-base) var(--ease-out);cursor:pointer;}
+  .demo:focus-visible{outline:none;box-shadow:var(--shadow-focus);}
+  .card{background:var(--surface-card);border:1px solid var(--border-subtle);box-shadow:var(--shadow-sm);border-radius:var(--radius-lg);padding:13px 20px;transition:all var(--dur-base) var(--ease-out);cursor:pointer;font-size:0.9rem;color:var(--text-body);}
   .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
-  .meta{font-size:0.72rem;color:var(--text-subtle);font-family:var(--font-mono);width:100%;}
+  .enter{background:var(--sage-50);border-radius:var(--radius-lg);padding:13px 20px;font-size:0.9rem;color:var(--text-body);cursor:pointer;}
+  .enter.play{animation:enter 320ms var(--ease-out) both;}
+  @keyframes enter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .scale{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .t{display:inline-flex;align-items:baseline;gap:7px;background:var(--stone-100);border-radius:999px;padding:6px 13px;font-size:0.76rem;color:var(--text-body);font-weight:600;}
+  .t code{font-family:var(--font-mono);font-size:0.7rem;color:var(--text-subtle);font-weight:400;}
+  .meta{margin-top:14px;border-top:1px solid var(--stone-200);padding-top:11px;font-size:0.75rem;color:var(--text-muted);line-height:1.6;}
+  .meta b{color:var(--text-body);}
+  .meta code{font-family:var(--font-mono);font-size:0.7rem;background:var(--stone-100);padding:1px 5px;border-radius:4px;}
 </style></head><body>
-  <div class="demo">Hover & press me</div>
+
+<div class="lbl">Live · hover, press, tab to it, click to replay the entrance</div>
+<div class="row">
+  <button class="demo">Hover &amp; press me</button>
   <div class="card">Card, hover to lift</div>
-  <div class="meta">dur-base 200ms · ease-out cubic-bezier(.22,.8,.28,1) · press scale 0.98 · no bounce</div>
+  <div class="enter" id="enter">Entrance, click to replay</div>
+</div>
+
+<div class="scale">
+  <span class="t">hover &amp; press <code>--dur-fast 120ms</code></span>
+  <span class="t">state changes <code>--dur-base 200ms</code></span>
+  <span class="t">entrances <code>--dur-slow 320ms</code></span>
+  <span class="t">one ease <code>cubic-bezier(.22,.8,.28,1)</code></span>
+</div>
+
+<div class="meta"><b>Hover</b> darkens buttons, lifts cards 2px. <b>Press</b> scales 0.98. <b>Focus</b> is a clay glow (<code>--shadow-focus</code>), never blue. <b>Never in UI:</b> bounce, spin, parallax, confetti, infinite loops. The splash character's landing bounce is the one sanctioned exception. Motion reassures, it doesn't perform.</div>
+
+<script>
+  const e=document.getElementById('enter');
+  e.addEventListener('click',()=>{e.classList.remove('play');void e.offsetWidth;e.classList.add('play');});
+</script>
 </body></html>

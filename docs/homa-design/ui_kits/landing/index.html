@@ -1,13 +1,13 @@
-<!-- @dsCard group="Landing" viewport="1280x760" name="Homa landing page" subtitle="Marketing site · color bands, squiggle ribbons, stories, pricing" -->
+<!-- @dsCard group="Landing" viewport="1280x760" name="Homa landing page" subtitle="Marketing site · scroll story thread, ribbons, stories, pricing" -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Homa, Homeschooling, made calm</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23BE5F3C' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M9 22 L24 9 L39 22 V37 A2 2 0 0 1 37 39 H11 A2 2 0 0 1 9 37 Z'/%3E%3Cpath d='M24 20 C24.7 25 25.5 25.8 30 26.5 C25.5 27.2 24.7 28 24 33 C23.3 28 22.5 27.2 18 26.5 C22.5 25.8 23.3 25 24 20 Z' fill='%23BE5F3C' stroke='none'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z' fill='%23E7602F'/%3E%3Ccircle cx='17.4' cy='26' r='4.8' fill='white'/%3E%3Ccircle cx='30.6' cy='26' r='4.8' fill='white'/%3E%3Ccircle cx='18.3' cy='26.7' r='2.2' fill='%23221E1A'/%3E%3Ccircle cx='31.5' cy='26.7' r='2.2' fill='%23221E1A'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="image-slot.js"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -15,6 +15,29 @@
 <script src="../../_ds_bundle.js"></script>
 <style>
   html, body { margin: 0; background: var(--bg-page); }
+  @media (max-width: 880px) {
+    .ht-grid { grid-template-columns: 1fr !important; }
+    .ht-gutter, .ht-line { display: none !important; }
+    .ht-step { grid-template-columns: 1fr !important; }
+    .ht-step .ht-vig { justify-content: flex-start !important; }
+  }
+  /* Scroll reveals: armed by JS (html.rv-armed), so no-JS, print, and
+     reduced-motion always see content. Gentle rise, no bounce. */
+  html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
+  html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { opacity: 1; transform: none; }
+  [data-reveal-kids] > *:nth-child(2) { transition-delay: 70ms; }
+  [data-reveal-kids] > *:nth-child(3) { transition-delay: 140ms; }
+  [data-reveal-kids] > *:nth-child(4) { transition-delay: 210ms; }
+  [data-reveal-kids] > *:nth-child(5) { transition-delay: 280ms; }
+  [data-reveal-kids] > *:nth-child(6) { transition-delay: 350ms; }
+  .rv-d1 { transition-delay: 80ms !important; }
+  .rv-d2 { transition-delay: 160ms !important; }
+  @keyframes bd-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .bd-sum { animation: bd-pop 360ms var(--ease-out); }
+  @media (prefers-reduced-motion: reduce), print {
+    html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .bd-sum { animation: none; }
+  }
 </style>
 </head>
 <body>

@@ -21,7 +21,7 @@ export function Chip({ children, selected = false, onClick, onRemove, iconLeft =
         fontFamily: 'var(--font-sans)', fontSize: '0.875rem', fontWeight: 600,
         padding: '7px 14px', borderRadius: 'var(--radius-pill)', cursor: onClick ? 'pointer' : 'default',
         background: selected ? 'var(--brand)' : (hover && onClick ? 'var(--stone-100)' : 'var(--surface-card)'),
-        color: selected ? '#fff' : 'var(--text-body)',
+        color: selected ? 'var(--on-brand)' : 'var(--text-body)',
         border: `1.5px solid ${selected ? 'var(--brand)' : 'var(--border-default)'}`,
         outline: 'none',
         boxShadow: focus ? 'var(--shadow-focus)' : 'none',

@@ -4,10 +4,12 @@
 
 :root {
   /* Organic blob corner radii. Apply as border-radius on images or tinted
-     shapes. Rotate between the three so blobs never repeat side by side. */
+     shapes. Rotate between the five so blobs never repeat side by side. */
   --blob-1: 61% 39% 55% 45% / 49% 56% 44% 51%; /* @kind other */
   --blob-2: 42% 58% 47% 53% / 56% 41% 59% 44%; /* @kind other */
   --blob-3: 55% 45% 62% 38% / 46% 61% 39% 54%; /* @kind other */
+  --blob-4: 48% 52% 41% 59% / 60% 45% 55% 40%; /* @kind other */
+  --blob-5: 63% 37% 44% 56% / 41% 58% 42% 59%; /* @kind other */
 
   /* Ruled notebook paper. Layer over a cream background:
      background-image: var(--bg-paper); (32px line rhythm) */

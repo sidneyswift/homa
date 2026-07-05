@@ -26,6 +26,7 @@
               "components/navigation/**",
               "components/playful/**",
               "components/states/**",
+              "tweaks-panel.jsx",
               "ui_kits/landing/**",
               "ui_kits/mobile-app/**",
               "ui_kits/web-app/**"
@@ -46,8 +47,8 @@
         "message": "Raw px value — use a design-system spacing token via var()."
       },
       {
-        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Newsreader|Hanken Grotesk|Caveat|JetBrains Mono))/i]",
-        "message": "Font not provided by the design system. Available: Newsreader, Hanken Grotesk, Caveat, JetBrains Mono."
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Schibsted Grotesk|EB Garamond|Fredoka|Hanken Grotesk|Caveat|JetBrains Mono))/i]",
+        "message": "Font not provided by the design system. Available: Schibsted Grotesk, EB Garamond, Fredoka, Hanken Grotesk, Caveat, JetBrains Mono."
       },
       {
         "selector": "JSXOpeningElement[name.name='Avatar'] > JSXAttribute > JSXIdentifier[name!=/^(?:name|src|size|tone|style|key|ref|className|style|children)$/]",
@@ -158,8 +159,8 @@
         "message": "<Logo> tone must be one of 'light' | 'dark'."
       },
       {
-        "selector": "JSXOpeningElement[name.name='Logo'] > JSXAttribute[name.name='treatment'] > Literal[value!=/^(?:line|duo)$/]",
-        "message": "<Logo> treatment must be one of 'line' | 'duo'."
+        "selector": "JSXOpeningElement[name.name='Logo'] > JSXAttribute[name.name='treatment'] > Literal[value!=/^(?:solid|line)$/]",
+        "message": "<Logo> treatment must be one of 'solid' | 'line'."
       },
       {
         "selector": "JSXOpeningElement[name.name='ProgressBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|max|tone|label|showValue|size|style|key|ref|className|style|children)$/]",
@@ -312,6 +313,8 @@
       "--blob-1",
       "--blob-2",
       "--blob-3",
+      "--blob-4",
+      "--blob-5",
       "--border-brand",
       "--border-default",
       "--border-strong",
@@ -346,10 +349,13 @@
       "--font-mono",
       "--font-sans",
       "--font-serif",
+      "--font-wordmark",
       "--gold-100",
       "--gold-300",
       "--gold-400",
       "--gold-500",
+      "--gold-ink",
+      "--gold-ink-strong",
       "--info",
       "--info-soft",
       "--leading-normal",
@@ -452,6 +458,7 @@
     ],
     "tokenKinds": {
       "--font-display": "font",
+      "--font-wordmark": "font",
       "--font-serif": "font",
       "--font-sans": "font",
       "--font-hand": "font",
@@ -486,6 +493,8 @@
       "--gold-300": "color",
       "--gold-400": "color",
       "--gold-500": "color",
+      "--gold-ink": "color",
+      "--gold-ink-strong": "color",
       "--sky-100": "color",
       "--sky-300": "color",
       "--sky-500": "color",
@@ -536,10 +545,13 @@
       "--danger-soft": "color",
       "--info": "color",
       "--info-soft": "color",
+      "--shadow-focus": "shadow",
+      "--paper-rule": "color",
       "--blob-1": "other",
       "--blob-2": "other",
       "--blob-3": "other",
-      "--paper-rule": "color",
+      "--blob-4": "other",
+      "--blob-5": "other",
       "--bg-paper": "other",
       "--squiggle-ink": "other",
       "--text-2xs": "font",
@@ -594,7 +606,6 @@
       "--shadow-md": "shadow",
       "--shadow-lg": "shadow",
       "--shadow-xl": "shadow",
-      "--shadow-focus": "shadow",
       "--shadow-inset": "shadow",
       "--ease-out": "other",
       "--ease-in-out": "other",
@@ -605,9 +616,11 @@
     },
     "fontFamilies": [
       "Caveat",
+      "EB Garamond",
+      "Fredoka",
       "Hanken Grotesk",
       "JetBrains Mono",
-      "Newsreader"
+      "Schibsted Grotesk"
     ]
   }
 }

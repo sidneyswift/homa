@@ -1,5 +1,5 @@
 // Homa web app, Compare curriculums: side-by-side, in plain language, against how the child learns.
-const { Card: CCCard, Badge: CCBadge, Button: CCButton, Icon: CCIcon, Callout: CCCallout, Chip: CCChip } = window.HOMADesignSystem_113bd2;
+const { Card: CCCard, Badge: CCBadge, Button: CCButton, Icon: CCIcon, Callout: CCCallout, Chip: CCChip } = window.HomaDesignSystem_5e2305;
 
 function CCRow({ icon, label, value }) {
   return (
@@ -57,7 +57,7 @@ function CurriculumView() {
             <CCRow icon="shapes" label="Approach" value={o.approach} />
             <CCRow icon="clock" label="Time" value={o.time} />
             <CCRow icon="wallet" label="Cost" value={o.cost} />
-            <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.5, margin: '12px 0 14px' }}>
+            <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.5, margin: '12px 0 14px' }}>
               &ldquo;{o.take}&rdquo;
             </div>
             <CCButton size="sm" variant={o.fit[1] === 'sage' ? 'primary' : 'secondary'} fullWidth>Try a sample week</CCButton>

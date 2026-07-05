@@ -1,5 +1,5 @@
 // Homa web app, shell: login gate + authenticated app frame.
-const { Button: AButton, Input: AInput, Icon: AIcon, Logo: ALogo, Doodle: ADoodleRaw } = window.HOMADesignSystem_113bd2;
+const { Button: AButton, Input: AInput, Icon: AIcon, Logo: ALogo, Doodle: ADoodleRaw, EmptyState: AEmptyState } = window.HomaDesignSystem_5e2305;
 const ADoodle = ADoodleRaw || (() => null);
 
 function Login({ onEnter }) {
@@ -71,10 +71,12 @@ function App() {
 
 function Placeholder({ title, icon }) {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)' }}>
-      <AIcon name={icon} size={40} color="var(--stone-400)" />
-      <div style={{ marginTop: 12, fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--text-muted)' }}>{title}</div>
-      <div style={{ fontSize: '0.9rem' }}>Coming together soon.</div>
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <AEmptyState
+        icon={<AIcon name={icon} size={24} />}
+        title={`${title} is coming together`}
+        body="Homa is setting up this corner. Everything you've planned and tracked is safe."
+      />
     </div>
   );
 }

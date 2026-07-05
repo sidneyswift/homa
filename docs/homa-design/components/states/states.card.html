@@ -1,10 +1,10 @@
-<!-- @dsCard group="Components" viewport="700x340" name="States" subtitle="EmptyState + Skeleton · loading & empty, in Homa's voice" -->
+<!-- @dsCard group="Components" viewport="700x430" name="States" subtitle="EmptyState, Skeleton, offline · never a dead end" -->
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../../styles.css">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/lucide@0.525.0"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -13,16 +13,19 @@
   body { margin: 0; background: var(--bg-page); font-family: var(--font-sans); padding: 24px; }
   .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: start; }
   .panel { background: var(--surface-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 18px; }
+  .lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-subtle); margin: 0 0 8px; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-  const { EmptyState, Skeleton, Button, Icon } = window.HOMADesignSystem_113bd2;
+  const { EmptyState, Skeleton, Button, Icon } = window.HomaDesignSystem_5e2305;
   function Demo() {
     return (
       <div className="grid">
-        <div className="panel">
+        <div>
+          <div className="lbl">Empty · a warm invitation</div>
+          <div className="panel">
           <EmptyState
             icon={<Icon name="calendar" size={24} />}
             title="Nothing planned yet"
@@ -31,8 +34,11 @@
             hand={<span>no rush &#x270E;</span>}
             style={{ padding: '20px 10px' }}
           />
+          </div>
         </div>
-        <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
+          <div className="lbl">Loading · skeleton, then offline</div>
+          <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Skeleton width={44} height={44} radius="50%" />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -43,6 +49,13 @@
           <Skeleton height={12} />
           <Skeleton height={12} width="85%" />
           <Skeleton height={90} radius="var(--radius-md)" />
+          <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12, display: 'flex', gap: 10, alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            <Icon name="wifi-off" size={16} color="var(--stone-400)" /> Offline just now. Your work is safe on this device.
+          </div>
+          </div>
+        </div>
+        <div style={{ gridColumn: '1 / -1', fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, borderTop: '1px solid var(--stone-200)', paddingTop: 10 }}>
+          The recipe: one warm line + one action + at most one hand note. Loading always works <i>for</i> her (“Pulling Maya's week together…”), skeletons shimmer, never spin. Errors and offline lead with “your work is safe.” Never a dead end, never a sad-face illustration.
         </div>
       </div>
     );

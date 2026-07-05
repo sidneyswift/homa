@@ -1,5 +1,8 @@
 import * as React from 'react';
 
+/**
+ * Props for the Homa brand lockup.
+ */
 export interface LogoProps {
   /** Height of the mark in px (wordmark scales with it). @default 32 */
   size?: number;
@@ -7,13 +10,13 @@ export interface LogoProps {
   variant?: 'full' | 'mark';
   /** The background the logo sits on. @default "light" */
   tone?: 'light' | 'dark';
-  /** "line" = outlined mark; "duo" = 2-tone (soft-filled home + gold spark). @default "line" */
-  treatment?: 'line' | 'duo';
+  /** "solid" = the character (clay body, bright eyes); "line" = quiet one-color outline. @default "solid" */
+  treatment?: 'solid' | 'line';
   style?: React.CSSProperties;
 }
 
 /**
- * Homa brand lockup, "The bright home" mark + Newsreader wordmark.
- * @startingPoint section="Brand" subtitle="Homa logo lockup & app-icon mark" viewport="700x200"
+ * Homa brand lockup, "the little home" character mark + the bounced Fredoka
+ * "Homa" wordmark (capital H, letters nudged off the baseline).
  */
 export function Logo(props: LogoProps): JSX.Element;

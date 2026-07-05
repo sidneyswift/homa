@@ -1,14 +1,14 @@
 // Homa web app, weekly planner view.
-const { Card: PCard, Badge: PBadge, Icon: PIcon, IconButton: PIconButton, Button: PButton } = window.HOMADesignSystem_113bd2;
+const { Card: PCard, Badge: PBadge, Icon: PIcon, IconButton: PIconButton, Button: PButton } = window.HomaDesignSystem_5e2305;
 
 function PlannerView() {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const subjectTone = {
-    Math: ['var(--clay-50)', 'var(--clay-700)', 'var(--clay-300)'],
-    Reading: ['var(--sage-50)', 'var(--sage-700)', 'var(--sage-300)'],
-    Science: ['var(--gold-100)', '#8a6410', 'var(--gold-300)'],
-    Writing: ['var(--info-soft)', 'var(--sky-600)', 'var(--sky-300)'],
-    Art: ['var(--clay-100)', 'var(--clay-700)', 'var(--clay-300)'],
+    Math: ['var(--clay-50)', 'var(--clay-700)'],
+    Reading: ['var(--sage-50)', 'var(--sage-700)'],
+    Science: ['var(--gold-100)', 'var(--gold-ink)'],
+    Writing: ['var(--info-soft)', 'var(--sky-600)'],
+    Art: ['var(--clay-100)', 'var(--clay-700)'],
   };
   const plan = {
     Mon: [['Math', 'Fractions review', '30m'], ['Reading', 'Chapter 4', '30m'], ['Science', 'Plant journal', '45m']],
@@ -18,12 +18,14 @@ function PlannerView() {
     Fri: [['Writing', 'Finish story', '40m'], ['Math', 'Quiz', '30m']],
   };
   function block([subj, title, dur], key) {
-    const [bg, fg, bar] = subjectTone[subj];
+    const [bg, fg] = subjectTone[subj];
     return (
-      <div key={key} style={{ background: bg, borderLeft: `3px solid ${bar}`, borderRadius: 'var(--radius-sm)', padding: '9px 11px' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: fg, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{subj}</div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-body)', fontWeight: 500, marginTop: 2 }}>{title}</div>
-        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: 3 }}>{dur}</div>
+      <div key={key} style={{ background: bg, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: fg, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{subj}</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: fg, opacity: 0.75, fontVariantNumeric: 'tabular-nums' }}>{dur}</span>
+        </div>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-body)', fontWeight: 500, marginTop: 3 }}>{title}</div>
       </div>
     );
   }

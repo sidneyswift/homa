@@ -1,12 +1,32 @@
-<!-- @dsCard group="Type" viewport="700x150" name="Accent & mono" subtitle="Caveat hand accent (sparingly) + JetBrains Mono" -->
+<!-- @dsCard group="Type" viewport="700x210" name="Accent & mono" subtitle="Caveat, Homa's hand (sage, one per surface) · JetBrains Mono for data" -->
 <!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
 <style>
-  body{margin:0;background:var(--surface-card);font-family:var(--font-sans);padding:22px;display:flex;gap:32px;align-items:center;}
-  .hand{font-family:var(--font-hand);font-size:2.2rem;color:var(--brand);font-weight:600;}
-  .mono{font-family:var(--font-mono);font-size:1rem;color:var(--text-body);background:var(--stone-100);padding:10px 14px;border-radius:var(--radius-sm);}
-  .note{font-family:var(--font-sans);font-size:0.72rem;color:var(--text-subtle);margin-top:6px;}
-  .col{display:flex;flex-direction:column;}
+  body{margin:0;background:var(--bg-page);font-family:var(--font-sans);padding:22px 26px;}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start;}
+  .lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-subtle);margin:0 0 10px;}
+  .paper{background:var(--surface-card);background-image:var(--bg-paper);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);padding:16px 18px 20px;position:relative;}
+  .hand{font-family:var(--font-hand);font-weight:600;font-size:1.6rem;color:var(--sage-600);transform:rotate(-2deg);display:inline-block;}
+  .rule{font-size:0.78rem;color:var(--text-subtle);margin-top:10px;line-height:1.55;}
+  .mono{background:var(--surface-card);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);padding:14px 18px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+  .mrow{display:flex;justify-content:space-between;align-items:baseline;font-size:0.8rem;color:var(--text-body);padding:5px 0;border-bottom:1px solid var(--border-subtle);}
+  .mrow:last-child{border-bottom:none;}
+  .mrow .up{color:var(--sage-600);font-weight:600;}
+  .mrow .k{color:var(--text-subtle);font-size:0.68rem;letter-spacing:0.08em;}
 </style></head><body>
-  <div class="col"><span class="hand">a little note from Homa ✎</span><span class="note">Caveat, margin notes, delight only. Never body.</span></div>
-  <div class="col"><span class="mono">3rd grade · 68%</span><span class="note">JetBrains Mono, data, scores, code.</span></div>
+<div class="grid">
+  <div>
+    <div class="lbl">Homa's hand &middot; Caveat 600</div>
+    <div class="paper"><span class="hand">a lighter day is still a good day ✎</span></div>
+    <div class="rule">Always sage, always rotated a degree or two, <b>one margin note per surface, max</b>. Delight only, never UI, never body text.</div>
+  </div>
+  <div>
+    <div class="lbl">Data voice &middot; JetBrains Mono</div>
+    <div class="mono">
+      <div class="mrow"><span class="k">MATH</span><span>68 &rarr; 74 <span class="up">&#9650;6</span></span></div>
+      <div class="mrow"><span class="k">READING</span><span>82 &rarr; 88 <span class="up">&#9650;6</span></span></div>
+      <div class="mrow"><span class="k">STREAK</span><span>12 days</span></div>
+    </div>
+    <div class="rule">Scores, durations, dates: tabular figures, growth framing.</div>
+  </div>
+</div>
 </body></html>

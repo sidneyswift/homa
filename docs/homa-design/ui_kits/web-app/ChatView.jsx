@@ -1,5 +1,5 @@
 // Homa web app, Ask Homa chat view (assistant interface).
-const { Icon: CIcon, IconButton: CIconButton, Button: CButton, Callout: CCallout, Chip: CChip, Doodle: CDoodleRaw } = window.HOMADesignSystem_113bd2;
+const { Icon: CIcon, IconButton: CIconButton, Button: CButton, Callout: CCallout, Chip: CChip, Doodle: CDoodleRaw } = window.HomaDesignSystem_5e2305;
 const CDoodle = CDoodleRaw || (() => null);
 
 function ChatBubble({ from, children }) {
@@ -30,7 +30,7 @@ function ChatView() {
         <div style={{ textAlign: 'center', marginBottom: 34 }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 8 }}>Tuesday, May 13</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>Good morning, Sarah <CDoodle name="sun" size={24} color="var(--gold-400)" rotate={10} /></div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6, fontSize: '1.05rem' }}>What are we tackling today?</div>
+          <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 400, color: 'var(--text-muted)', marginTop: 6, fontSize: '1.05rem' }}>What are we tackling today?</div>
         </div>
 
         <ChatBubble from="user">Can you plan a lighter week for Maya? She's been a bit burned out.</ChatBubble>

@@ -6,7 +6,7 @@ import { WaitlistForm } from "../components/waitlist-form";
  * `journeys/07-positioning-messaging.md` §5 (hero variant B: the fear,
  * answered; pillar A/B/C one-liners for the three bands; trust points from
  * objections O1/O3 + build-log #1's vetted privacy claim). Visual system is
- * homa-design v2 (docs/homa-design/), applied via the token pass in
+ * homa-design v3 (docs/homa-design/), applied via the token pass in
  * globals.css pending the formal packages/design workspace package (M1-17).
  * Hard constraints still hold: no pricing, no fabricated proof (the worksheet
  * sample stays an empty slot until a real artifact exists), no gated data

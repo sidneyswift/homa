@@ -1,5 +1,6 @@
-/* Homa type scale. Display uses Newsreader (which is also the italic accent,
-   one family, two jobs); UI/body uses Hanken Grotesk. */
+/* Homa type scale. Display is Schibsted Grotesk (600–700, tracked -0.015em);
+   the serif accent (all italics, quotes) is EB Garamond; UI/body is Hanken
+   Grotesk. */
 
 :root {
   /* Font sizes */

@@ -1,5 +1,5 @@
 // Homa web app, Benchmarks: where the child stands, gently. The proof loop.
-const { Card: BCard, Badge: BBadge, Icon: BIcon, Button: BButton, Checkbox: BCheckbox, Select: BSelect } = window.HOMADesignSystem_113bd2;
+const { Card: BCard, Badge: BBadge, Icon: BIcon, Button: BButton, Checkbox: BCheckbox, Select: BSelect } = window.HomaDesignSystem_5e2305;
 
 function BStanding({ subject, note, badge, tone }) {
   return (
@@ -80,7 +80,7 @@ function BenchmarksView() {
           <BCard padding="lg" style={{ background: 'var(--sage-50)', border: 'none' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--sage-700)', marginBottom: 8 }}>It's working</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 500, color: 'var(--text-strong)', lineHeight: 1.3, letterSpacing: '-0.01em' }}>
-              Math mastery is up <span style={{ fontStyle: 'italic', color: 'var(--sage-700)', fontFamily: 'var(--font-serif)' }}>12 points</span> since the fractions set.
+              Math mastery is up <span style={{ color: 'var(--sage-700)' }}>12 points</span> since the fractions set.
             </div>
             <svg width="100%" height="54" viewBox="0 0 260 54" preserveAspectRatio="none" style={{ margin: '12px 0 4px' }}>
               <path d="M0 44 C30 42 50 40 80 36 C120 31 150 26 190 16 C220 9 240 7 260 5" fill="none" stroke="var(--sage-500)" strokeWidth="2.5" strokeLinecap="round" />
