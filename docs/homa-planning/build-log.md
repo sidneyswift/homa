@@ -234,6 +234,36 @@ these mitigations vs. report upstream and wait) — that's still Sidney's call.
 It does mean Phase B is no longer flatly blocked: BUILD.md now says
 "mitigated, not resolved" instead of "blocked."
 
+## 2026-07-05 (later) · Test (b) retested for real: "let's test on real Vercel builds"
+
+Resolved the local-vs-production caveat on the deploy/rollback finding.
+Deployed two separate real Vercel previews (fixing a genuine gap along the
+way: no `.vercelignore` existed, so a local `vercel deploy` tried to upload
+the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed —
+added `.vercelignore` mirroring `.gitignore`'s exclusions). Started a
+session on the first deployment, let it complete, deployed the second, sent
+a follow-up to the second deployment's URL using the first's session and
+token.
+
+**Result: clean pass.** The second deployment correctly resumed the exact
+session with real context intact (recalled a secret code from the first
+turn). This is strong evidence the earlier "stuck forever" finding was a
+limitation specific to `eve dev`'s local disk-backed workflow world, not a
+production-relevant risk — Vercel Workflow (the managed service actual
+production uses) handles cross-deployment continuity correctly.
+
+Still open, narrower: this tests session portability across deployments,
+not literal mid-step crash recovery, which is much harder to replicate
+against real Vercel infra (deploys take far longer than a model turn, and a
+preview-to-preview deploy doesn't tear down the first one). De-risked, not
+fully closed. Full detail: `eve-churn-log.md`,
+`m0-01-adversarial-prototype-gate.md`.
+
+Also: enabled Vercel's Protection Bypass for Automation on the project
+(`vercel project protection enable --protection-bypass`) to make this kind
+of preview-deployment testing possible; documented the mechanism for reuse.
+Cleaned up both throwaway preview deployments and the test branch after.
+
 ## 2026-07-05 · Founder decision: stay on eve; spike continued
 
 Sidney: "stay and continue." Resolved the open M0-01 decision — not

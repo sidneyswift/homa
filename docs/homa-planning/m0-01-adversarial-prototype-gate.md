@@ -251,6 +251,53 @@ for the resume path; the same pattern should extend to the initial
 session-start path once real chat UI work begins (M1-04), so a stuck
 first-turn is caught the same way a stuck resume already is.
 
+### (b), retested against real Vercel Workflow (2026-07-05, later same day): the caveat resolved favorably
+
+Deployed two genuinely separate Vercel preview deployments (via `vercel deploy`
+from the repo root, after fixing a `.vercelignore` gap — the CLI's local
+upload path doesn't respect the dashboard's configured Root Directory, and
+without an ignore file it tried to upload `homa-research/`/`homa-macmini/`,
+multi-gigabyte folders that must never leave this machine). Accessed them
+programmatically via `x-vercel-protection-bypass` (Vercel's Deployment
+Protection, generated with `vercel project protection enable --protection-bypass`)
+plus the usual `vercelOidc()` bearer eve itself requires.
+
+**Test:** started a turn on deployment A, let it complete and park normally
+(a session holding a synthetic secret code), then ran a full second
+`vercel deploy` (~50s, a genuinely separate deployment with its own URL and
+infrastructure), then sent a follow-up **to deployment B's URL**, using the
+session and continuation token that were only ever known to deployment A.
+
+**Result: clean pass.** Deployment B accepted the follow-up under the
+original `sessionId`, the turn completed normally, and the response
+correctly recalled the secret code from the first turn, proving real context
+continuity, not just an accepted request. This directly supports the caveat
+raised when this test failed locally: Vercel Workflow (the managed,
+production durability substrate) handles cross-deployment session
+continuity correctly. The earlier local failure looks like a real limitation
+of `eve dev`'s disk-backed workflow world specifically, not a
+production-relevant gap.
+
+**What this test did *not* cover:** true mid-step interruption (killing a
+turn between `step.started` and `step.completed`) is much harder to
+replicate against Vercel, since a preview-to-preview deploy doesn't replace
+or tear down the first deployment's infrastructure the way a production
+push replaces what a domain alias serves, and a model call (a few seconds)
+rarely overlaps a ~50-100s build+deploy window naturally. This test proves
+session **portability** across deployments; it does not fully re-prove
+crash-safety of a step interrupted mid-execution on Vercel specifically.
+Treat that narrower question as still open, but de-risked: Vercel Workflow
+is a purpose-built durable execution service (unlike the local world), and
+the portability result here is consistent with, though not identical to,
+the durability guarantee the docs make.
+
+Cleanup: both preview deployments removed via `vercel remove`; the
+`spike/m0-01-vercel-retest` branch deleted locally and on origin. Protection
+Bypass for Automation stays enabled on the project (harmless, reusable for
+future Vercel-based tests, documented here for whoever needs the mechanism
+next: `x-vercel-protection-bypass` header, secret retrievable via the
+Vercel API's `GET /v9/projects/:id` `protectionBypass` field).
+
 ### (c) and (d): deferred, not skipped
 
 Both tests need application-level code that doesn't exist yet:

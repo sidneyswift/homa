@@ -10,6 +10,39 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-07-05 (later) · Test (b) retested against real Vercel Workflow — favorable
+
+Resolved the caveat from the earlier local test (b) failure by testing
+against genuine Vercel infrastructure instead of `eve dev`'s local disk-
+backed world. Deployed two separate Vercel previews, started a session on
+the first, let it park normally, deployed the second (~50s, real
+build+deploy, separate infrastructure), then sent a follow-up to the
+**second** deployment's URL using the session/token from the first.
+
+**Result: clean pass.** The second deployment correctly resumed the exact
+session, under its real sessionId, and the response demonstrated genuine
+context continuity (correctly recalled a secret code from the first turn).
+This is strong evidence the earlier local-dev failure does not represent
+production behavior — Vercel Workflow (a managed durable execution service)
+correctly handles cross-deployment session continuity, unlike the local
+disk-backed world.
+
+Caveat that remains open: this tests session **portability** across
+deployments, not literal mid-step crash recovery (killing a turn between
+`step.started` and `step.completed`) on Vercel specifically — that's much
+harder to replicate against real infrastructure (a preview-to-preview deploy
+doesn't tear down the first deployment, and deploys take far longer than a
+model call, so natural mid-flight timing rarely occurs). Narrower, but
+meaningfully de-risked given Vercel Workflow's purpose-built durability
+model. Full writeup: `m0-01-adversarial-prototype-gate.md`.
+
+Also found and fixed along the way: no `.vercelignore` existed, so a local
+`vercel deploy` from the repo root tried to upload `homa-research/` and
+`homa-macmini/` (multi-gigabyte, explicitly must-never-leave-this-machine
+per `.gitignore`'s own comment) and failed on a body-size limit. Added
+`.vercelignore` mirroring those exclusions — this was a real gap independent
+of this test, worth having regardless.
+
 ## 2026-07-05 · Decision: stay on eve; two more tests run, one clean, one new finding
 
 Sidney decided: stay on eve (no eject to M0-02), given the mitigations

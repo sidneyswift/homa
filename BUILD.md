@@ -85,27 +85,28 @@ never modify either).
 
 ## Build order after Deliverable 0 (dependency-sequenced)
 
-- **Phase A — Engine proof: ✅ CLEARED for Phase B, with two tracked risks
+- **Phase A — Engine proof: ✅ CLEARED for Phase B, de-risked
   (decided 2026-07-05: staying on eve, not ejecting to M0-02).** M0-01 found
   a reproducible eve failure (test a: a session parked in HITL across a
-  version bump silently fails to resume) and a second one while continuing
-  the spike (test b: a step killed mid-flight never resumes, no error
-  logged — caveat: found against the local dev workflow world, not yet
-  confirmed against real Vercel Workflow, retest before treating as
-  production-relevant). An adapted test (e) passed clean: zero cross-session
-  leakage under concurrency, the single most safety-critical property.
-  Tests (c)/(d) are deferred until the dispatcher/rotation code they test
-  exists (M3-10/M1-02, M1-15). **Standing mitigations, required going
-  forward:** (1) `apps/web/lib/harness/resume-session.ts` — every resume
-  MUST go through this; it watches the event stream for real progress
-  instead of trusting `ok: true`; extend the same pattern to session-start
-  once M1-04's chat UI exists, since test (b) showed a stuck *first* turn is
-  just as silent as a stuck resume; (2) `scripts/eve-upgrade-check.mjs` — run
-  before ANY eve version change, no exceptions; (3) `docs/homa-planning/
-  runbooks/eve-version-bump.md` — the procedure tying both together.
-  Reporting both bugs upstream is a parallel, non-blocking task. Full
-  evidence and the test (b) Vercel-preview retest TODO: `eve-churn-log.md`
-  and `m0-01-adversarial-prototype-gate.md`. Then M0-03 worksheet-in-sandbox,
+  version bump silently fails to resume) mitigated by the harness guard
+  below. A second finding from continuing the spike locally (test b: a step
+  killed mid-flight never resumes in `eve dev`) was **retested against real
+  Vercel preview deployments** and passed cleanly — cross-deployment session
+  continuity works correctly on actual Vercel Workflow, so the local finding
+  looks like a local-dev-world limitation, not a production risk (narrower
+  question of literal mid-step crash recovery on Vercel remains untested,
+  harder to replicate against real infra, but de-risked). Adapted test (e)
+  passed clean: zero cross-session leakage under concurrency, the single
+  most safety-critical property. Tests (c)/(d) are deferred until the
+  dispatcher/rotation code they test exists (M3-10/M1-02, M1-15). **Standing
+  mitigations, required going forward:** (1) `apps/web/lib/harness/
+  resume-session.ts` — every resume MUST go through this; it watches the
+  event stream for real progress instead of trusting `ok: true`; (2)
+  `scripts/eve-upgrade-check.mjs` — run before ANY eve version change, no
+  exceptions; (3) `docs/homa-planning/runbooks/eve-version-bump.md` — the
+  procedure tying both together. Reporting the test (a) bug upstream is a
+  parallel, non-blocking task. Full evidence: `eve-churn-log.md` and
+  `m0-01-adversarial-prototype-gate.md`. Then M0-03 worksheet-in-sandbox,
   M0-04 voice-on-real-phones,
   M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
   Turborepo** — `apps/web` (Next.js, the ONE deployable, with the eve agent

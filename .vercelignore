@@ -1,0 +1,17 @@
+# Vercel CLI deploys upload from the repo root before applying the
+# dashboard's configured Root Directory (apps/web), so anything gitignored
+# for size/secrets reasons still needs excluding here too, or a local
+# `vercel deploy` tries to upload it and fails (or worse, succeeds).
+
+# ── Local-only reference trees (contain live secrets + family data) ────────
+# Multiple GB each; never uploaded anywhere, per .gitignore's own comment.
+homa-macmini/
+homa-research/
+homa-template/
+
+# ── Never upload ─────────────────────────────────────────────────────────
+node_modules/
+.git/
+.turbo/
+.eve/
+.workflow-data/
