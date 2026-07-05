@@ -51,6 +51,17 @@ per build-log #11: she says "thankshoma.com" in conversation). Remaining before
 July 13: final copy from the journeys/07 §5 kit (variant B) + the homa-design v2
 pass replacing the wireframe slots, then the phone test + read-aloud check.
 
+**Superseded surface (founder decision 2026-07-05, "ship all"):** the bare
+waitlist form was replaced by the child's-map lead magnet at `/map` (email
+first, per-child observable checklist for ages 2 to 7, deterministic
+benchmark scoring in `packages/core/src/map/`, report page + Resend email,
+deny-all `lead_*` tables behind server routes). `/waitlist` and `/conference`
+308-redirect to `/map`; every lead still writes a `public.waitlist` row, so
+MJ-09's invite path is unchanged. Plan + decisions: `docs/homa-planning/
+lead-magnet/` and build-log 2026-07-05. Ages 8 to 16 ship band by band into
+`packages/core/src/map/content.ts` behind `pnpm check:map` and the D3 rigor
+bar (each new band: cited items, linter green, founder read-aloud).
+
 ---
 
 ## Reading order (before writing product code beyond Deliverable 0)

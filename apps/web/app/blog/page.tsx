@@ -43,13 +43,13 @@ export default function BlogIndexPage() {
               Notes are on their way
             </p>
             <p className="mt-2 text-body">
-              We&rsquo;re writing. While you wait, the waitlist is open.
+              We&rsquo;re writing. While you wait, your child&rsquo;s map takes five minutes.
             </p>
             <Link
-              href="/waitlist"
+              href="/map"
               className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
             >
-              Join the waitlist
+              Meet your child&rsquo;s map
             </Link>
           </div>
         ) : (

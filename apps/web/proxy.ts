@@ -61,9 +61,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip static assets, the public waitlist API, and the eve agent routes
-  // (eve does its own auth; interfering with its streaming here buys nothing).
+  // Skip static assets, the public waitlist/map APIs (they do their own
+  // lead-cookie auth and get chatty per-tap traffic), and the eve agent
+  // routes (eve does its own auth; interfering with its streaming here
+  // buys nothing).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/waitlist|eve|_eve_internal|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/waitlist|api/map|eve|_eve_internal|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

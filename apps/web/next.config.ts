@@ -6,8 +6,10 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@homa/core"],
   async redirects() {
     return [
-      // The QR/share page was briefly /conference; keep old links working.
-      { source: "/conference", destination: "/waitlist", permanent: true },
+      // The child's-map flow replaced the bare waitlist (lead magnet v2);
+      // every link ever shared keeps working.
+      { source: "/conference", destination: "/map", permanent: true },
+      { source: "/waitlist", destination: "/map", permanent: true },
     ];
   },
 };

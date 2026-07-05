@@ -13,8 +13,8 @@ import { Button } from "./ds/Button";
 const LINKS: ReadonlyArray<readonly [string, string]> = [
   ["How it works", "/#how"],
   ["Features", "/#features"],
-  ["Pricing", "/#pricing"],
-  ["Stories", "/#stories"],
+  ["Try it", "/#try"],
+  ["Our story", "/#stories"],
 ];
 
 export function Nav() {
@@ -69,8 +69,8 @@ export function Nav() {
         >
           Sign in
         </Link>
-        <Button variant="primary" href="/waitlist">
-          Start free
+        <Button variant="primary" href="/map">
+          Your child&rsquo;s map
         </Button>
       </div>
     </nav>

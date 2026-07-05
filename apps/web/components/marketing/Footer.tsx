@@ -6,10 +6,10 @@ import { Logo } from "../brand/Logo";
  * Company / Support link columns + copyright rule.
  */
 
-const COLUMNS: ReadonlyArray<readonly [string, readonly string[]]> = [
-  ["Product", ["Features", "Pricing", "Worksheets", "Mobile app"]],
-  ["Company", ["About", "Blog", "Careers", "Contact"]],
-  ["Support", ["Help center", "Community", "Privacy", "Terms"]],
+const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
+  ["Product", [["Your child's map", "/map"], ["How the map works", "/map/method"], ["Features", "/#features"], ["Try it", "/#try"]]],
+  ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Founding families", "/#pricing"]]],
+  ["Support", [["Privacy", "/privacy"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
 ];
 
 export function Footer() {
@@ -26,8 +26,8 @@ export function Footer() {
           <div key={heading}>
             <div style={{ color: "#fff", fontWeight: 700, marginBottom: 12, fontSize: "0.95rem" }}>{heading}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-              {links.map((label) => (
-                <a key={label} href="#" style={{ color: "var(--stone-400)", textDecoration: "none", fontSize: "0.9rem" }}>
+              {links.map(([label, href]) => (
+                <a key={label} href={href} style={{ color: "var(--stone-400)", textDecoration: "none", fontSize: "0.9rem" }}>
                   {label}
                 </a>
               ))}

@@ -102,13 +102,14 @@ export default async function BlogPostPage({
             You&rsquo;ve got this. Homa&rsquo;s got the rest.
           </p>
           <p className="mt-2 text-body">
-            We invite families a few at a time. Want your invite?
+            Start with your child&rsquo;s map: a five-minute checklist for you, never a test for
+            them, free.
           </p>
           <Link
-            href="/waitlist"
+            href="/map"
             className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
           >
-            Join the waitlist
+            Meet your child&rsquo;s map
           </Link>
         </aside>
       </main>

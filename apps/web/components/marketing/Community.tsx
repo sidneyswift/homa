@@ -1,6 +1,5 @@
 import { ArrowRight, MapPin } from "lucide-react";
 
-import { Avatar } from "./ds/Avatar";
 import { Badge } from "./ds/Badge";
 import { Button } from "./ds/Button";
 import { Squiggle } from "./ds/Squiggle";
@@ -33,10 +32,12 @@ export function Community() {
             Homa introduces you to nearby families, co-ops, and park days, matched to your kids&rsquo; ages and what
             you&rsquo;re teaching.
           </p>
-          <Button variant="secondary" href="/waitlist" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
-            Find families near you
+          <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
+            Join the founding families
           </Button>
         </div>
+        {/* Honest roadmap card (ruling C2: no invented families or stats;
+            journeys/07 open question 7: community is roadmap language only). */}
         <div
           data-reveal=""
           className="rv-d1"
@@ -48,24 +49,15 @@ export function Community() {
             transform: "rotate(-0.6deg)",
           }}
         >
-          <div style={{ display: "flex", marginBottom: 14 }}>
-            {["Ana M", "Dana K", "June P", "Sara T"].map((n, i) => (
-              <span key={n} style={{ marginLeft: i ? -10 : 0 }}>
-                <Avatar name={n} size={40} />
-              </span>
-            ))}
+          <Badge tone="sage">On the roadmap</Badge>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.3, marginTop: 14 }}>
+            Homa families near you: co-ops, park days, and friends who get it.
           </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.3 }}>
-            4 Homa families homeschool within 5 miles.
+          <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 8, lineHeight: 1.5 }}>
+            Coming as the founding families grow. Opt-in, always.
           </div>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 6, lineHeight: 1.5 }}>
-            Two are planning park days this month.
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
-            <Badge tone="sage">Park day &middot; Sat 10 am</Badge>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--text-subtle)", fontSize: "0.85rem" }}>
-              <MapPin size={14} aria-hidden="true" /> Austin, TX
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 16, color: "var(--text-subtle)", fontSize: "0.85rem" }}>
+            <MapPin size={14} aria-hidden="true" /> Wherever you homeschool
           </div>
         </div>
       </div>

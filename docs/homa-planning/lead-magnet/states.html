@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>States + backend · lead magnet v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;
+    --stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+    --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;--clay-700:#9C3B1B;
+    --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-500:#3D9A50;--sage-600:#2F7C40;--sage-700:#275F34;
+    --gold-100:#FFF3C2;--gold-300:#FFE175;--gold-400:#FFD43B;--gold-500:#F0BE00;--gold-ink:#8A6410;
+    --sky-100:#DDF3F9;--sky-300:#9FDCEC;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
+    --bg-page:var(--stone-50);--surface:#fff;--text-strong:var(--stone-900);--text-body:var(--stone-800);
+    --text-muted:var(--stone-600);--text-subtle:var(--stone-500);--border:var(--stone-200);
+    --display:"Schibsted Grotesk",sans-serif;--body:"Hanken Grotesk",sans-serif;--hand:"Caveat",cursive;
+    --mono:"JetBrains Mono",monospace;--wordmark:"Fredoka",sans-serif;
+    --r-md:16px;--r-lg:22px;--pill:999px;
+    --shadow-sm:0 1px 2px rgba(78,70,62,.08),0 2px 8px rgba(78,70,62,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 96px}
+  .topbar{display:flex;align-items:center;gap:14px;padding:20px 0 0}
+  .wordmark{font-family:var(--wordmark);font-weight:600;font-size:1.35rem;color:var(--clay-500)}
+  .topbar .meta{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--text-subtle);text-transform:uppercase}
+  .artifact-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+  .artifact-nav a{font-weight:600;font-size:.86rem;text-decoration:none;color:var(--text-body);background:var(--surface);border:1px solid var(--border);border-radius:var(--pill);padding:8px 16px;box-shadow:var(--shadow-sm)}
+  .artifact-nav a.active{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+  .artifact-nav a:hover{border-color:var(--clay-300)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.3rem);letter-spacing:-.015em;color:var(--text-strong);margin:48px 0 8px}
+  .lede{color:var(--text-muted);max-width:800px}
+  h2{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--text-strong);margin:56px 0 12px}
+  h3{font-family:var(--display);font-weight:600;font-size:1.02rem;color:var(--text-strong);margin:18px 0 8px}
+  .mono{font-family:var(--mono);font-size:.84em}
+  .kbd{font-family:var(--mono);font-size:.78em;background:var(--stone-100);border:1px solid var(--border);border-radius:6px;padding:1px 7px;white-space:nowrap}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-sm)}
+  th{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle);text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+  td{padding:10px 14px;border-bottom:1px solid var(--stone-100);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.state{font-family:var(--mono);font-size:.78rem;color:var(--clay-600);white-space:nowrap;font-weight:500}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:20px 24px;margin:14px 0}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:860px){.cols2{grid-template-columns:1fr}}
+  .callout{border-left:4px solid var(--sky-500);background:var(--sky-100);border-radius:0 var(--r-md) var(--r-md) 0;padding:13px 17px;margin:14px 0;font-size:.92rem;color:var(--stone-800)}
+  .callout.warn{border-left-color:var(--gold-400);background:var(--gold-100);color:var(--gold-ink)}
+  .callout.law{border-left-color:var(--clay-500);background:var(--clay-50);color:var(--clay-700)}
+  pre{background:var(--stone-900);color:var(--stone-100);border-radius:var(--r-md);padding:16px 18px;font-family:var(--mono);font-size:.78rem;line-height:1.55;overflow-x:auto}
+  pre .c{color:var(--stone-500)} pre .k{color:var(--sky-300)} pre .s{color:var(--gold-300)} pre .f{color:var(--sage-100)}
+  .lane{display:grid;grid-template-columns:120px 1fr;gap:0;border-bottom:1px solid var(--stone-100)}
+  .lane:last-child{border-bottom:none}
+  .lane .who{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:12px 12px;color:var(--text-subtle)}
+  .lane .what{padding:10px 14px 12px;font-size:.9rem}
+  ul.tight{margin:6px 0;padding-left:20px}
+  ul.tight li{margin:5px 0}
+  .fb{background:var(--stone-900);border-radius:var(--r-lg);padding:22px 26px;color:var(--stone-100);margin-top:64px}
+  .fb h2{color:#fff;margin:0 0 6px}
+  .fb p{color:var(--stone-300);margin:0 0 12px;font-size:.95rem}
+  .chip{display:inline-block;border:1.5px solid var(--stone-600);border-radius:var(--pill);padding:7px 14px;margin:4px 6px 4px 0;font-size:.85rem;color:var(--stone-100);cursor:pointer;user-select:none}
+  .chip.on{background:var(--clay-500);border-color:var(--clay-500)}
+  .copybtn{display:inline-flex;background:var(--clay-500);color:#fff;border:none;border-radius:var(--pill);padding:11px 24px;font-family:var(--body);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:12px}
+  .copyout{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;background:var(--stone-800);border-radius:var(--r-md);padding:14px;margin-top:12px;color:var(--sage-100);display:none}
+  footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-subtle);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="wordmark">homa</span>
+    <span class="meta">artifact 4 of 5 · ui states + backend map</span>
+  </div>
+  <nav class="artifact-nav">
+    <a href="index.html">1 · Overview + decisions</a>
+    <a href="flow.html">2 · Flow chart</a>
+    <a href="journey.html">3 · User journey</a>
+    <a class="active" href="states.html">4 · States + backend</a>
+    <a href="report-mock.html">5 · Report mock</a>
+  </nav>
+
+  <h1>Every state, front end and back end</h1>
+  <p class="lede">The engineering contract: the full state machine, the data model, the routes, the scoring math, the security posture, and the build order. Written against the repo as it exists today (Next.js app in <span class="mono">apps/web</span>, shared domain code in <span class="mono">packages/core</span>, migrations in <span class="mono">supabase/</span>). Assumes recommended decisions D1 to D8; deltas noted where a different ruling changes the shape.</p>
+
+  <h2>1 · The state machine</h2>
+  <table>
+    <tr><th>State</th><th>Screen / condition</th><th>Front end does</th><th>Back end does</th><th>Goes to</th></tr>
+    <tr><td class="state">S0.landing</td><td>Landing page, map CTA band (replaces waitlist band). <span class="kbd">/map</span> is the direct URL; <span class="kbd">/waitlist</span> 308-redirects to it.</td><td>Render CTA + sample-report link; carry utm in URL untouched.</td><td>Nothing.</td><td>S1</td></tr>
+    <tr><td class="state">S1.email</td><td>Email + first name + state.</td><td>Validate email shape; optimistic submit with existing timeout/retry/offline queue; honeypot.</td><td><span class="kbd">POST /api/map/start</span>: zod, rate limit, honeypot check, insert <span class="mono">lead_families</span> (+ a <span class="mono">waitlist</span> row for invite-list continuity, dup = ok), set httpOnly resume cookie, emit <span class="mono">map.started</span>.</td><td>S2 · or S1.resume if email known</td></tr>
+    <tr><td class="state">S1.resume</td><td>"Welcome back" interstitial.</td><td>Show progress summary ("Maya: 12 of 27 answered"); continue button.</td><td>Look up lead by email; re-issue resume token; email a fresh magic resume link (works cross-device).</td><td>wherever she left off</td></tr>
+    <tr><td class="state">S1.offline</td><td>Network down at submit.</td><td>Queue to localStorage (existing pattern), confirm honestly, flush on reconnect.</td><td>Nothing until flush.</td><td>S2 (optimistic)</td></tr>
+    <tr><td class="state">S2.kids</td><td>Add kids: name, birth month + year, interests chips, help-with chips.</td><td>Add-kid list; month/year pickers (no day); kid cap 5; inline sage card when a birth date lands outside scored bands.</td><td><span class="kbd">POST /api/map/children</span> per kid: compute age band server-side, insert <span class="mono">lead_children</span>, set <span class="mono">pending_band</span> if unscored, emit <span class="mono">map.child_added</span>.</td><td>S3 per in-range kid · S6.pending if none in range</td></tr>
+    <tr><td class="state">S3.intro</td><td>Checklist contract screen per kid.</td><td>Time promise, skip promise, "never a test for her" line.</td><td><span class="kbd">GET /api/map/questions?child=...</span>: select items for band (+1 above held back until unlocked), return ordered list. Bank version pinned to the session.</td><td>S3.q</td></tr>
+    <tr><td class="state">S3.q</td><td>One question, four chips (easily · getting there · not yet · not sure), skip.</td><td>Save on tap then advance (no submit button); progress dots by domain; micro-affirmations after "easily" streaks only; back navigation safe.</td><td><span class="kbd">POST /api/map/answer</span>: upsert <span class="mono">lead_answers</span>; adaptive ladder decides next item (band-above unlocks on "easily"); emit <span class="mono">map.question_answered</span>.</td><td>S3.q (next) · S3.done · exit = S7.parked</td></tr>
+    <tr><td class="state">S3.done</td><td>Kid's checklist complete.</td><td>"That's Maya mapped" beat; if more kids: now-or-later choice.</td><td>Emit <span class="mono">map.child_completed</span> {duration, skips, not_sure_count}.</td><td>S3.intro (next kid) · S4 · S7.parked (deferred kid)</td></tr>
+    <tr><td class="state">S4.scoring</td><td>"Drawing Maya's map..." theater beat, 2 to 3 s.</td><td>Sequential status lines; reduced-motion = fade.</td><td><span class="kbd">POST /api/map/score</span>: run deterministic scorer, insert <span class="mono">lead_reports</span> {scores jsonb, bank_version, token}; enqueue Resend send; emit <span class="mono">map.report_generated</span>.</td><td>S5</td></tr>
+    <tr><td class="state">S5.report</td><td>The report (artifact 5), at <span class="kbd">/map/r/[token]</span>.</td><td>Strengths-first render; print CSS; share; "looks off?" mailto; per-domain citations.</td><td>Server component fetches by token (service read); stamp <span class="mono">viewed_at</span>; emit <span class="mono">map.report_viewed</span>.</td><td>terminal (revisitable forever)</td></tr>
+    <tr><td class="state">S5.email</td><td>(async) "Maya's map is ready" in her inbox.</td><td>n/a</td><td>Resend send with tokenized link; opens/clicks via webhook <span class="kbd">POST /api/hooks/resend</span>; stamp <span class="mono">emailed_at</span>; retries + founder-dashboard alert on hard failure.</td><td>S5.report on click</td></tr>
+    <tr><td class="state">S6.pending</td><td>All kids outside scored bands.</td><td>Thanks + sage promise screen; waitlist status confirmed.</td><td>Kids stored with <span class="mono">pending_band</span>; when a band ships, a job emails the checklist link automatically, emit <span class="mono">map.band_ready_emailed</span>.</td><td>terminal (returns via that email)</td></tr>
+    <tr><td class="state">S7.parked</td><td>Abandoned anywhere past S1.</td><td>n/a (state was saved tap by tap).</td><td>After ~24h, ONE reminder ("Maya's map is 12 taps away") with resume link. Never a sequence. Emit <span class="mono">map.reminder_sent</span>.</td><td>S1.resume on return</td></tr>
+    <tr><td class="state">S8.claim</td><td>(invite day, ships with MJ-09) Claim link from invite email.</td><td>Set password / OAuth; confirm family.</td><td>Create auth user → <span class="mono">create_my_family()</span> → copy lead_children into <span class="mono">children.profile</span> with provenance + dates → mark lead claimed → emit <span class="mono">auth.account_created</span> {from_lead}.</td><td>product onboarding, pre-filled</td></tr>
+    <tr><td class="state">ERR.token</td><td>Bad or revoked report token.</td><td>Soft page: "This map link isn't active. Want yours? Two minutes." + email field.</td><td>404 semantics, no enumeration (constant-time lookup).</td><td>S1</td></tr>
+  </table>
+
+  <h2>2 · Data model</h2>
+  <p class="lede">Four new tables, deny-all RLS (no anon or authenticated policies at all). Every access goes through server routes holding the server-only secret key. The existing <span class="mono">waitlist</span> table keeps working untouched: the flow drops a row into it at S1 so the invite machinery keeps one source of truth.</p>
+<pre>
+<span class="c">-- migration: lead magnet v2 (names draft)</span>
+<span class="k">create table</span> lead_families (
+  id uuid <span class="k">primary key default</span> gen_random_uuid(),
+  email text <span class="k">not null unique</span>,          <span class="c">-- lowercase, same law as waitlist</span>
+  first_name text,
+  us_state text,
+  source text <span class="k">not null default</span> <span class="s">'organic'</span>,
+  utm jsonb <span class="k">not null default</span> <span class="s">'{}'</span>,
+  resume_token_hash text,               <span class="c">-- hashed, never the raw token</span>
+  status text <span class="k">not null default</span> <span class="s">'open'</span>   <span class="c">-- open | complete | claimed | deleted</span>,
+  created_at timestamptz <span class="k">default</span> now()
+);
+<span class="k">create table</span> lead_children (
+  id uuid <span class="k">primary key default</span> gen_random_uuid(),
+  lead_family_id uuid <span class="k">not null references</span> lead_families <span class="k">on delete cascade</span>,
+  name text <span class="k">not null</span>,
+  birth_month date <span class="k">not null</span>,            <span class="c">-- day always 01, mirrors children table</span>
+  interests text[] <span class="k">default</span> <span class="s">'{}'</span>,
+  help_with text,
+  band text <span class="k">not null</span>,                    <span class="c">-- computed server-side, e.g. '4y0m-4y6m'</span>
+  pending_band boolean <span class="k">not null default</span> false,
+  created_at timestamptz <span class="k">default</span> now()
+);
+<span class="k">create table</span> lead_answers (
+  lead_child_id uuid <span class="k">not null references</span> lead_children <span class="k">on delete cascade</span>,
+  question_id text <span class="k">not null</span>,            <span class="c">-- 'math.cardinality.3y0m' from the bank</span>
+  answer text <span class="k">not null</span>,                  <span class="c">-- easily | getting_there | not_yet | not_sure | skip</span>
+  answered_at timestamptz <span class="k">default</span> now(),
+  <span class="k">primary key</span> (lead_child_id, question_id)   <span class="c">-- upsert = resume-safe</span>
+);
+<span class="k">create table</span> lead_reports (
+  id uuid <span class="k">primary key default</span> gen_random_uuid(),
+  lead_child_id uuid <span class="k">not null references</span> lead_children <span class="k">on delete cascade</span>,
+  scores jsonb <span class="k">not null</span>,                <span class="c">-- per-domain {position, months_ahead, confidence}</span>
+  bank_version text <span class="k">not null</span>,           <span class="c">-- content-addressed, the M3-04 pattern in miniature</span>
+  token text <span class="k">not null unique</span>,           <span class="c">-- unguessable, in the report URL</span>
+  generated_at timestamptz <span class="k">default</span> now(),
+  emailed_at timestamptz, viewed_at timestamptz, revoked_at timestamptz
+);
+<span class="c">-- RLS: enable on all four, create ZERO policies. Server key only.</span>
+</pre>
+    <div class="callout law"><b>Posture change, flagged for the record:</b> until now the app held no server secret at all (write-only publishable key everywhere). Report generation must read lead rows, so the server-only secret key enters <span class="mono">apps/web</span> env (Vercel, type Sensitive, never <span class="mono">NEXT_PUBLIC_</span>). The build log anticipated exactly this moment for the invite service; the lead magnet gets there first. Deny-all RLS on lead tables makes the posture stricter, not looser: the isolation script gains cases proving anon and authenticated roles read nothing.</div>
+    <div class="callout"><b>Why the schema mirrors the product's tables on purpose:</b> <span class="mono">lead_children.birth_month</span> matches <span class="mono">children.birth_month</span>, interests/help_with match the <span class="mono">children.profile</span> jsonb keys the walking skeleton already writes, and positions carry provenance. S8.claim is a copy, not a migration puzzle.</div>
+
+  <h2>3 · Scoring, in plain words</h2>
+  <div class="cols2">
+    <div class="card">
+      <h3>The estimate</h3>
+      <ul class="tight">
+        <li>Every question belongs to a domain and carries the age band where that skill is typical (from the citation-backed bank).</li>
+        <li><b>easily</b> at her band = at age for that item. <b>easily</b> at the band above = about +12 months of signal. <b>getting there</b> = emerging (half credit). <b>not yet</b> at her band = the domain's growing edge sits here (0-floor months, flagged "growing"). <b>not sure</b>/skip = no signal, never a penalty.</li>
+        <li>Domain position = evidence-weighted average of its items' month-deltas, exactly the template rubric (below_age / at_age / 12mo_ahead / 24mo_ahead) expressed as months. The report prints one number per domain: "+14 mo" or "right in the band" or "growing right now".</li>
+        <li>Confidence per domain = answered items / total items. Below 50%, the domain renders as "not mapped yet" instead of a number. Honesty beats coverage.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Worked example: Maya, 4y 2m, math</h3>
+      <ul class="tight">
+        <li>"Counts past 20 without a wobble" (typical 4y6m) → <b>easily</b> → +12 mo signal, unlocks band-above item</li>
+        <li>"Adds small numbers with objects" (typical 5y0m) → <b>getting there</b> → +5 mo signal</li>
+        <li>"Recognizes written numbers to 10" (typical 4y0m) → <b>easily</b> → at-age signal</li>
+        <li>Domain math: weighted mean ≈ <b>+7 months ahead</b>, confidence high (3 of 3 answered) → gold "Ahead" chip.</li>
+        <li>Same answers always produce the same map: deterministic, unit-tested, zero model calls, versioned with the bank that scored it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout warn"><b>The claims wall (enforced by a content linter in CI):</b> bank items and sentence templates may never contain: behind, delay, disorder, diagnose, screening, assessment, test (as what this is), percentile (until D2 says otherwise), or an em dash. The linter runs on the JSON content the same way the isolation check runs on the schema.</div>
+
+  <h2>4 · Content: bands, volume, and the rigor bar</h2>
+  <table>
+    <tr><th>Band group</th><th>Ages</th><th>Status</th><th>Work</th></tr>
+    <tr><td>Proven core</td><td>2y0m to 7y0m (8 half-year/year bands)</td><td>Bank exists in <span class="mono">homa-template/workspace/questionnaire/domains.json</span>, benchmarks cited</td><td>Port to <span class="mono">packages/core</span> (this is the start of ticket M0-10), add per-item citation refs, pass the content linter, Alessa read-aloud.</td></tr>
+    <tr><td>Elementary + middle</td><td>7 to 13 (yearly bands)</td><td>Benchmark backbone exists (template benchmark files span PreK to 12: Common Core, NGSS, C3, CASEL, SHAPE...)</td><td>Write parent-observable items per domain per band (~1 to 2 each, roughly 200 items), citations required, founder decision D3's rigor bar: reviewed before it fronts families. Agent-built in parallel, shipped band by band.</td></tr>
+    <tr><td>Teen</td><td>13 to 16 (yearly bands)</td><td>Same backbone, hardest face validity</td><td>Items lean on artifacts a parent has seen (essays, projects, budgeting, independence) rather than quiz-the-kid prompts. Ships last, same bar.</td></tr>
+  </table>
+  <div class="callout">Content lives as versioned JSON in <span class="mono">packages/core/content/map/</span> (one file per domain: items with <span class="mono">age_min</span>, citation keys, sentence-bank ids). A tiny CI check validates shape, citation presence, banned words, and band coverage, so a content PR can never silently break scoring.</div>
+
+  <h2>5 · Routes, modules, events</h2>
+  <div class="cols2">
+    <div class="card">
+      <h3>API routes (apps/web/app/api/map/)</h3>
+      <ul class="tight">
+        <li><span class="kbd">POST /api/map/start</span> · lead + waitlist row, resume cookie</li>
+        <li><span class="kbd">POST /api/map/children</span> · add kids, band calc</li>
+        <li><span class="kbd">GET /api/map/questions</span> · item selection per child</li>
+        <li><span class="kbd">POST /api/map/answer</span> · upsert one answer, return next item</li>
+        <li><span class="kbd">POST /api/map/score</span> · score + report row + email enqueue</li>
+        <li><span class="kbd">POST /api/map/resume</span> · email in, magic resume link out</li>
+        <li><span class="kbd">POST /api/hooks/resend</span> · opens/clicks/bounces webhook</li>
+        <li>Page: <span class="kbd">/map</span> (the flow) · <span class="kbd">/map/r/[token]</span> (report) · <span class="kbd">/map/method</span> (methodology)</li>
+        <li>All POSTs: zod, per-IP rate limit, payload caps, no PII in logs</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>packages/core additions</h3>
+      <ul class="tight">
+        <li><span class="kbd">map/bands.ts</span> · age math (birth_month → band), shared with product</li>
+        <li><span class="kbd">map/bank.ts</span> · content loader + types + selection ladder</li>
+        <li><span class="kbd">map/scoring.ts</span> · the deterministic scorer, pure functions, unit-tested against fixture kids</li>
+        <li><span class="kbd">map/sentences.ts</span> · the reviewed sentence bank keyed by position + domain</li>
+        <li><span class="kbd">events.ts</span> · registry grows the <span class="mono">map.*</span> namespace (emitted server-side, so the anon events policy stays waitlist-only)</li>
+      </ul>
+      <h3 style="margin-top:16px">Event names (typed registry)</h3>
+      <p class="mono" style="font-size:.75rem;line-height:1.9">map.landing_viewed · map.started · map.child_added · map.out_of_range_shown · map.question_answered · map.child_completed · map.abandoned · map.report_generated · map.report_viewed · map.report_shared · map.reminder_sent · map.band_ready_emailed</p>
+    </div>
+  </div>
+
+  <h2>6 · What changes in existing code</h2>
+  <table>
+    <tr><th>Today</th><th>Becomes</th></tr>
+    <tr><td><span class="mono">apps/web/components/waitlist-form.tsx</span> + <span class="kbd">/waitlist</span> page</td><td>S1 of the map flow (the form's optimistic/offline client, <span class="mono">lib/waitlist-client.ts</span>, is reused nearly as-is). <span class="kbd">/waitlist</span> 308-redirects to <span class="kbd">/map</span>; the <span class="mono">waitlist</span> table keeps receiving a row per lead.</td></tr>
+    <tr><td>Landing CTA band ("Join the waitlist")</td><td>"Meet your child's map" band + sample-report link. Same pass fixes the hero's kit leftovers ("12,000+ families", "Start free for 14 days"), which violate standing rulings today.</td></tr>
+    <tr><td><span class="mono">scripts/isolation-check.mjs</span></td><td>Gains lead-table cases: anon reads nothing, authenticated reads nothing, tokens don't enumerate.</td></tr>
+    <tr><td>Privacy microcopy ("email only used for your invite")</td><td>Re-vetted line covering maps + invite + delete-anytime; 1-page privacy policy naming Supabase, Vercel, Resend ships with this feature (pulled forward from launch gate 7).</td></tr>
+    <tr><td>Founder view of signups (SQL by hand)</td><td>Funnel tiles: started → kids → completed → viewed, split by source and band; band-coverage map for the content build. (Concierge-scale: one internal page or a nightly SQL, the NT-3 pattern.)</td></tr>
+  </table>
+
+  <h2>7 · Build order (dependency-sequenced, no dates)</h2>
+  <table>
+    <tr><th>#</th><th>Slice</th><th>Depends on</th><th>Proves</th></tr>
+    <tr><td class="state">LM-1</td><td>Migration: four lead tables, deny-all RLS + isolation cases + server secret into env</td><td>nothing</td><td><span class="mono">pnpm check:isolation</span> green with the new tables</td></tr>
+    <tr><td class="state">LM-2</td><td>Port the 2 to 7 bank into <span class="mono">packages/core</span> content + content linter in CI</td><td>nothing (parallel)</td><td>Bank loads, lints, every item cited</td></tr>
+    <tr><td class="state">LM-3</td><td>Scorer + sentence bank + fixture tests (golden kids: ahead, mixed, sparse, struggling)</td><td>LM-2</td><td>Same answers, same map, every time; struggling-kid fixture reads kind out loud</td></tr>
+    <tr><td class="state">LM-4</td><td>The flow UI (S1 to S4) with resume + offline + events</td><td>LM-1</td><td>Phone test on throttled network end to end</td></tr>
+    <tr><td class="state">LM-5</td><td>Report page + email (artifact 5 made real) + methodology page + privacy policy</td><td>LM-3, LM-4</td><td>The five-second read passes on a phone; email lands in a real inbox</td></tr>
+    <tr><td class="state">LM-6</td><td>Reminder job, band-ready job, founder funnel tiles</td><td>LM-5</td><td>Parked leads come back; promises keep themselves</td></tr>
+    <tr><td class="state">LM-7</td><td>Band expansion 7 to 16, band by band, behind the rigor bar</td><td>LM-2 pipeline</td><td>Each band: citations resolve, linter passes, read-aloud done, pending emails fire</td></tr>
+    <tr><td class="state">LM-8</td><td>Claim bridge (S8), lands with MJ-09 invites</td><td>MJ-09</td><td>Lead → family copy verified; onboarding opens pre-filled</td></tr>
+  </table>
+  <div class="callout"><b>Ticket lineage, so nothing is double-planned:</b> LM-2/LM-3 are the first real slice of <b>M0-10</b> (extract packages/core: questionnaire bank + benchmarks). LM-7 is <b>M5-06</b> (age expansion, pulled forward by D3). LM-8 rides <b>MJ-09</b>. The report's confidence/position language is the same engine <b>M2-04</b> will grow into. The lead magnet is not a detour; it is the platform's first paying passenger.</div>
+
+  <div class="fb" id="fb">
+    <h2>React to this artifact</h2>
+    <p>Tap what applies, copy, paste into chat.</p>
+    <div>
+      <span class="chip" data-t="states: state machine complete enough to build">state machine is buildable</span>
+      <span class="chip" data-t="states: schema looks right">schema looks right</span>
+      <span class="chip" data-t="states: uncomfortable with server secret key now">server secret makes me nervous</span>
+      <span class="chip" data-t="states: want real auth accounts instead (D3=B)">prefer real accounts (D3=B)</span>
+      <span class="chip" data-t="states: scoring approach approved">scoring approach approved</span>
+      <span class="chip" data-t="states: scoring needs more rigor (say what in notes)">scoring needs more rigor</span>
+      <span class="chip" data-t="states: build order approved">build order approved</span>
+      <span class="chip" data-t="states: something is missing (say what in notes)">something is missing</span>
+    </div>
+    <button class="copybtn" onclick="copyChips(this)">Copy my reactions</button>
+    <div class="copyout"></div>
+  </div>
+
+  <footer>
+    <span>Planning artifact · disposable · table/route names are draft until the migration lands</span>
+    <span style="font-family:var(--hand);font-size:1.2rem;color:var(--sage-500)">postgres is truth ✎</span>
+  </footer>
+</div>
+<script>
+  document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on')})});
+  function copyChips(btn){
+    var box = btn.parentElement;
+    var picked = Array.prototype.slice.call(box.querySelectorAll('.chip.on')).map(function(c){return '- '+c.getAttribute('data-t')});
+    var text = 'States + backend feedback:\n' + (picked.length?picked.join('\n'):'(no chips picked)');
+    var out = box.querySelector('.copyout'); out.style.display='block'; out.textContent=text;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);}
+  }
+</script>
+</body>
+</html>

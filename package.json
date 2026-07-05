@@ -5,12 +5,14 @@
   "scripts": {
     "build": "turbo run build",
     "check:isolation": "node scripts/isolation-check.mjs",
+    "check:map": "tsx scripts/map-check.mts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "tsx": "^4.23.0",
     "turbo": "^2.5.0"
   }
 }

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User journey · lead magnet v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=EB+Garamond:ital@1&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;
+    --stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+    --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;--clay-700:#9C3B1B;
+    --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-500:#3D9A50;--sage-600:#2F7C40;--sage-700:#275F34;
+    --gold-100:#FFF3C2;--gold-300:#FFE175;--gold-400:#FFD43B;--gold-500:#F0BE00;--gold-ink:#8A6410;
+    --sky-100:#DDF3F9;--sky-300:#9FDCEC;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
+    --bg-page:var(--stone-50);--surface:#fff;--text-strong:var(--stone-900);--text-body:var(--stone-800);
+    --text-muted:var(--stone-600);--text-subtle:var(--stone-500);--border:var(--stone-200);
+    --display:"Schibsted Grotesk",sans-serif;--body:"Hanken Grotesk",sans-serif;--serif:"EB Garamond",serif;
+    --hand:"Caveat",cursive;--mono:"JetBrains Mono",monospace;--wordmark:"Fredoka",sans-serif;
+    --r-md:16px;--r-lg:22px;--pill:999px;
+    --shadow-sm:0 1px 2px rgba(78,70,62,.08),0 2px 8px rgba(78,70,62,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px 96px}
+  .topbar{display:flex;align-items:center;gap:14px;padding:20px 0 0}
+  .wordmark{font-family:var(--wordmark);font-weight:600;font-size:1.35rem;color:var(--clay-500)}
+  .topbar .meta{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--text-subtle);text-transform:uppercase}
+  .artifact-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+  .artifact-nav a{font-weight:600;font-size:.86rem;text-decoration:none;color:var(--text-body);background:var(--surface);border:1px solid var(--border);border-radius:var(--pill);padding:8px 16px;box-shadow:var(--shadow-sm)}
+  .artifact-nav a.active{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+  .artifact-nav a:hover{border-color:var(--clay-300)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.3rem);letter-spacing:-.015em;color:var(--text-strong);margin:48px 0 8px}
+  .lede{color:var(--text-muted);max-width:780px}
+  h2{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--text-strong);margin:56px 0 14px}
+
+  .arc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:22px 26px;margin-top:24px;overflow-x:auto}
+  .arcline{display:flex;gap:0;min-width:760px}
+  .arcpt{flex:1;text-align:center;position:relative;padding-top:44px}
+  .arcpt .dot{position:absolute;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--stone-300)}
+  .arcpt .lbl{font-size:.78rem;color:var(--text-muted);line-height:1.3}
+  .arcpt .feel{font-weight:700;font-size:.85rem;color:var(--text-strong)}
+
+  .stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin:20px 0;overflow:hidden}
+  .stage .head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:18px 24px 4px}
+  .stage .num{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--clay-600)}
+  .stage h3{font-family:var(--display);font-weight:600;font-size:1.15rem;color:var(--text-strong);margin:0}
+  .stage .feelchip{margin-left:auto;font-size:.78rem;font-weight:700;border-radius:var(--pill);padding:3px 12px}
+  .stage .body{padding:6px 24px 20px}
+  .stage p.her{margin:8px 0 12px;max-width:800px}
+  .copydraft{border-left:3.5px solid var(--clay-300);background:var(--clay-50);border-radius:0 var(--r-md) var(--r-md) 0;padding:12px 16px;margin:12px 0;font-size:.93rem}
+  .copydraft .tag{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay-600);display:block;margin-bottom:4px}
+  .febe{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media(max-width:760px){.febe{grid-template-columns:1fr}}
+  .febe .col{background:var(--stone-100);border-radius:var(--r-md);padding:12px 16px;font-size:.86rem}
+  .febe .col b{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+  .febe .fe b{color:var(--clay-600)}
+  .febe .be b{color:var(--sky-600)}
+  .febe ul{margin:0;padding-left:18px}
+  .febe li{margin:4px 0}
+  .fr{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+  .fr .box{flex:1;min-width:240px;border-radius:var(--r-md);padding:11px 15px;font-size:.85rem}
+  .fr .risk{background:var(--gold-100);color:var(--gold-ink)}
+  .fr .risk b{color:var(--gold-ink)}
+  .fr .joy{background:var(--sage-50);color:var(--sage-700)}
+  .fr .joy b{color:var(--sage-700)}
+  .events{font-family:var(--mono);font-size:.72rem;color:var(--sky-600);margin-top:12px}
+
+  .moment{background:var(--stone-900);color:var(--stone-100);border-radius:var(--r-lg);padding:24px 28px;margin:26px 0}
+  .moment .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-400)}
+  .moment h3{color:#fff;font-family:var(--display);margin:8px 0 8px;font-size:1.25rem}
+  .moment p{color:var(--stone-200);margin:0;max-width:820px}
+  .moment .serif{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--gold-300)}
+
+  table.personas{width:100%;border-collapse:collapse;font-size:.9rem;background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-sm)}
+  table.personas th{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle);text-align:left;padding:12px 16px;border-bottom:1px solid var(--border)}
+  table.personas td{padding:11px 16px;border-bottom:1px solid var(--stone-100);vertical-align:top}
+  table.personas tr:last-child td{border-bottom:none}
+  table.personas td:first-child{font-weight:700;color:var(--text-strong);white-space:nowrap}
+
+  .fb{background:var(--stone-900);border-radius:var(--r-lg);padding:22px 26px;color:var(--stone-100);margin-top:64px}
+  .fb h2{color:#fff;margin:0 0 6px}
+  .fb p{color:var(--stone-300);margin:0 0 12px;font-size:.95rem}
+  .chip{display:inline-block;border:1.5px solid var(--stone-600);border-radius:var(--pill);padding:7px 14px;margin:4px 6px 4px 0;font-size:.85rem;color:var(--stone-100);cursor:pointer;user-select:none}
+  .chip.on{background:var(--clay-500);border-color:var(--clay-500)}
+  .copybtn{display:inline-flex;background:var(--clay-500);color:#fff;border:none;border-radius:var(--pill);padding:11px 24px;font-family:var(--body);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:12px}
+  .copyout{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;background:var(--stone-800);border-radius:var(--r-md);padding:14px;margin-top:12px;color:var(--sage-100);display:none}
+  footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-subtle);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="wordmark">homa</span>
+    <span class="meta">artifact 3 of 5 · user journey</span>
+  </div>
+  <nav class="artifact-nav">
+    <a href="index.html">1 · Overview + decisions</a>
+    <a href="flow.html">2 · Flow chart</a>
+    <a class="active" href="journey.html">3 · User journey</a>
+    <a href="states.html">4 · States + backend</a>
+    <a href="report-mock.html">5 · Report mock</a>
+  </nav>
+
+  <h1>Her journey, beat by beat</h1>
+  <p class="lede">Written for P3, the anxious newcomer, because she is the hardest test: if the flow feels safe to the mom who fears the answer, it works for everyone. She is on a phone, one-handed, possibly with a child on her hip. All quoted copy is draft, shown so you can react to tone, not final.</p>
+
+  <div class="arc">
+    <div style="font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:6px">The emotional arc we are engineering</div>
+    <div class="arcline">
+      <div class="arcpt"><span class="dot" style="background:var(--stone-400);top:22px"></span><div class="feel">Skeptical hope</div><div class="lbl">"another quiz?"</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--stone-400);top:18px"></span><div class="feel">Guarded</div><div class="lbl">gives the email</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--sky-500);top:12px"></span><div class="feel">Warming</div><div class="lbl">names her kids</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--sage-500);top:6px"></span><div class="feel">"Oh, she DOES do that"</div><div class="lbl">the mirror moment</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--gold-400);top:0"></span><div class="feel">The exhale</div><div class="lbl">strengths first</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--gold-500);top:4px"></span><div class="feel">Pride</div><div class="lbl">prints it, sends it to her husband</div></div>
+      <div class="arcpt"><span class="dot" style="background:var(--clay-500);top:8px"></span><div class="feel">Wanting more</div><div class="lbl">"watch the numbers move" = the product</div></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 1 · LANDING</span><h3>The promise she has heard before, made specific</h3><span class="feelchip" style="background:var(--stone-100);color:var(--text-muted)">skeptical hope</span></div>
+    <div class="body">
+      <p class="her">She arrives from a group thread or from Alessa saying "thankshoma.com". She has taken Pinterest checklists before; they ended in guilt. She scans for the catch: is it a test for my kid, will it call him behind, what do they want from me.</p>
+      <div class="copydraft"><span class="tag">draft copy · CTA band</span>
+        <b>Know exactly where your child stands. Without ever testing them.</b><br>
+        Answer a 5-minute checklist about what you've seen your child do. Homa maps it against national benchmarks and sends you their map, free.<br>
+        <b>[Meet your child's map]</b> · a checklist for you, never a test for them
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Landing keeps hero variant B; the waitlist band becomes the map CTA</li><li>Same page answers the two fears in one scroll: "your child never uses it" + data promise</li><li>Old /waitlist links redirect into the flow</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>Nothing yet; utm and referrer wait in the URL until submit</li></ul></div>
+      </div>
+      <div class="fr">
+        <div class="box risk"><b>Friction risk:</b> "free report" pattern-matches to email-farm printables. The counter is specificity: name the frameworks, show a real (sample-labeled) report page a tap away.</div>
+        <div class="box joy"><b>Delight:</b> the sample map link. Skeptics get to inspect the exact artifact before giving anything.</div>
+      </div>
+      <div class="events">events: map.landing_viewed {channel, utm}</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 2 · S1</span><h3>The email, asked plainly, secured instantly</h3><span class="feelchip" style="background:var(--stone-100);color:var(--text-muted)">guarded</span></div>
+    <div class="body">
+      <p class="her">The moment of maximum guardedness. She has been burned by "enter your email for the PDF" farms. We ask before the work on purpose (the lead is the floor; everything after is upside), so the ask has to carry its own why.</p>
+      <div class="copydraft"><span class="tag">draft copy · email screen</span>
+        <b>Where should I send the maps?</b><br>
+        Email · first name (optional) · your state (optional)<br>
+        <span style="color:var(--text-muted)">Your email gets each child's map and your founding-family invite. That's it, and you can delete everything anytime.</span>
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>One screen, three fields, submit is optimistic (existing retry + offline queue)</li><li>Honeypot rides along; state select is searchable</li><li>On dup email: "welcome back" + resume</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>POST /api/map/start: zod validate, rate limit, insert lead_families</li><li>Issue resume token (httpOnly cookie + emailed link later)</li><li>emit map.started</li></ul></div>
+      </div>
+      <div class="fr">
+        <div class="box risk"><b>Friction risk:</b> the old form promised "email only used for your invite". This flow's promise must be re-vetted once, then said identically everywhere (form, report, email footer).</div>
+        <div class="box joy"><b>Delight:</b> zero password, zero verification gate. She is never blocked from the thing she came for.</div>
+      </div>
+      <div class="events">events: map.started {source, utm, has_state}</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 3 · S2</span><h3>Naming her kids warms the whole thing up</h3><span class="feelchip" style="background:var(--sky-100);color:var(--sky-600)">warming</span></div>
+    <div class="body">
+      <p class="her">Typing "Maya" changes her posture: this stopped being a form about her email and became a thing about her daughter. Interests chips are fun to tap. The help-with question quietly tells us her real worry, the single most valuable field in the funnel.</p>
+      <div class="copydraft"><span class="tag">draft copy · kids screen</span>
+        <b>Who are we mapping?</b><br>
+        Per kid: name · born (month + year) · "what's Maya loving right now?" (chips: dinosaurs, horses, space, drawing, trucks, ocean...) · "what would you love a hand with first?" (chips keyed to age)<br>
+        <span style="color:var(--text-muted)">No pressure, you can always add more later.</span>
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Add-kid list pattern from the onboarding spec (month + year pickers, no day)</li><li>Out-of-range kid gets the sage card inline, never a rejection</li><li>Kid cap 5, "add another" stays visible</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>POST /api/map/children per kid: insert lead_children (band computed server-side)</li><li>pending_band flag for unscored ages</li><li>emit map.child_added {band, in_range}</li></ul></div>
+      </div>
+      <div class="fr">
+        <div class="box risk"><b>Friction risk:</b> "why do you need birth month?" One line answers it: "so Maya's checklist asks about her age, not a grade." Grade is ambiguous for homeschoolers; the planning docs already ruled birth month over grade.</div>
+        <div class="box joy"><b>Delight:</b> the moment the flow says her kid's name back to her, correctly, in the very next screen.</div>
+      </div>
+      <div class="events">events: map.child_added · map.out_of_range_shown {choice}</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 4 · S3</span><h3>The checklist: her noticing becomes the instrument</h3><span class="feelchip" style="background:var(--sage-50);color:var(--sage-700)">"oh, she does do that"</span></div>
+    <div class="body">
+      <p class="her">One question per screen, four chips, thumb-reach. The questions are things she has watched happen at the kitchen table ("if you put 5 blocks down and ask how many, can she count and tell you?"). Around the third one she realizes she can answer from memory. That reframe, "I am the instrument, and I'm credible", is the product's emotional patent, borrowed here in miniature.</p>
+      <div class="copydraft"><span class="tag">draft copy · checklist intro</span>
+        <b>Maya's checklist</b><br>
+        About 5 minutes. Answer from what you've seen her do, day to day. Skip anything, "not sure" is a real answer, and blanks are fine, they're just what's next.<br>
+        <span style="font-family:var(--hand);color:var(--sage-600);font-size:1.15rem">a checklist for you, never a test for her ✎</span>
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Chips: easily · getting there · not yet · not sure (+ skip)</li><li>Domain intro micro-headers ("Let's talk about numbers")</li><li>Progress dots by domain; micro-affirmation after a streak of "easily", never after blanks</li><li>Every tap saved instantly; back button safe</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>POST /api/map/answer per tap: upsert lead_answers</li><li>Adaptive ladder: server returns next question (band-above on "easily")</li><li>emit map.question_answered {domain, answer_type}</li></ul></div>
+      </div>
+      <div class="fr">
+        <div class="box risk"><b>Friction risk:</b> fatigue around domain 10. Mitigations: visible progress, domains ordered to lead with likely-yes items (the early-yes bias rule from the drip design), and a "finish later" exit that keeps everything.</div>
+        <div class="box joy"><b>Delight:</b> occasional echo of what she said: "noted, she's counting past 20, that's ahead of her band." Tiny, factual, never gushing.</div>
+      </div>
+      <div class="events">events: map.question_answered · map.child_completed {duration, skips, not_sure_count} · map.abandoned {at_question}</div>
+    </div>
+  </div>
+
+  <div class="moment">
+    <div class="k">Make-or-break moment 1</div>
+    <h3>The third checkbox</h3>
+    <p>The instant she realizes her ordinary noticing IS the assessment. If items read clinical, or she has to go quiz the child, we have become the thing she fled and she quietly closes the tab. Every question must pass one test in review: <span class="serif">can a tired mom answer this from memory, tonight?</span></p>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 5 · S4</span><h3>Drawing the map, a beat of theater</h3><span class="feelchip" style="background:var(--stone-100);color:var(--text-muted)">anticipation</span></div>
+    <div class="body">
+      <p class="her">Scoring is instant (deterministic TypeScript, no model). We spend two or three seconds anyway: anticipation is part of the gift, and the status lines teach her what the map is made of.</p>
+      <div class="copydraft"><span class="tag">draft copy · generating screen</span>
+        <b>Drawing Maya's map...</b><br>
+        Checking her counting against national benchmarks ✓<br>
+        Placing 15 domains for age 4y 2m ✓<br>
+        Finding her strengths ✓
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Skeleton + sequential status lines (the wait-as-a-stage pattern)</li><li>2 to 3 seconds fixed, reduced-motion collapses to a spinner-free fade</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>POST /api/map/score: run scorer against the benchmark bank version, insert lead_reports {scores, bank_version, token}</li><li>Queue the report email</li><li>emit map.report_generated {domains_mapped, months_ahead_avg}</li></ul></div>
+      </div>
+      <div class="events">events: map.report_generated</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 6 · S5</span><h3>The map opens on strengths, and she exhales</h3><span class="feelchip" style="background:var(--gold-100);color:var(--gold-ink)">the exhale</span></div>
+    <div class="body">
+      <p class="her">She braces before she reads, every mother does. The first thing she sees must be true and kind at once: what is strong, named plainly, with the number in gold. Growth areas come after, each holding an activity, never a verdict. Full mock in <a href="report-mock.html">artifact 5</a>.</p>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Report renders on screen immediately (D5 = A)</li><li>Strengths first, always; "growing right now" after, activity attached</li><li>Print styles; share button; "does something look off?" link</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>Resend sends "Maya's map is ready" with the permanent tokenized link</li><li>Open/click webhooks recorded; emailed_at stamped</li><li>emit map.report_viewed {entry: instant|email}</li></ul></div>
+      </div>
+      <div class="fr">
+        <div class="box risk"><b>Friction risk:</b> a genuinely struggling child's map. This is the red-team drill from the positioning doc: run the report for the hardest honest case and read it aloud. If it cannot be read without wincing, the sentence bank is not done.</div>
+        <div class="box joy"><b>Delight:</b> "made with Homa for Maya" in the footer, and a map that prints beautifully for the fridge or the co-op conversation.</div>
+      </div>
+      <div class="events">events: map.report_viewed · map.report_shared · map.report_printed</div>
+    </div>
+  </div>
+
+  <div class="moment">
+    <div class="k">Make-or-break moment 2</div>
+    <h3>The five-second read</h3>
+    <p>She judges the map the way she judges the worksheet wow: about five seconds, phone at arm's length. Pass = her shoulders drop before a single number is parsed (strengths first, warm palette, her kid's name in the title). Fail = anything that smells like a report card. Everything upstream is logistics; this screen is the product's thesis, <span class="serif">standards positioning as validation, not judgment</span>, rehearsed a year early.</p>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 7 · AFTER</span><h3>The quiet weeks between map and invite</h3><span class="feelchip" style="background:var(--clay-50);color:var(--clay-700)">wanting more</span></div>
+    <div class="body">
+      <p class="her">The report's close is honest about what she cannot have yet: Homa is invite-only, founding families first. The map is the "before" picture; the product is watching it move. She forwards the email to her husband, which is the O8 objection (household sign-off) answering itself.</p>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Report CTA band: "You're on the founding families list. Your invite comes by email."</li><li>Share card sized for the group chat</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>No drip, no sequence. Only promise-keeping emails: a pending band ships → the checklist email goes out; her invite opens → MJ-09 claim email</li><li>Founder dashboard: leads by state, band coverage, completion funnel</li></ul></div>
+      </div>
+      <div class="events">events: map.band_ready_emailed · acquisition.invite_email_sent (existing plan)</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="head"><span class="num">BEAT 8 · INVITE DAY</span><h3>The payoff: Homa already knows her family</h3><span class="feelchip" style="background:var(--sage-50);color:var(--sage-700)">believing</span></div>
+    <div class="body">
+      <p class="her">Months later her invite arrives. She claims her account and the product does not ask her to start over: it greets her with what she told us, asks only what changed, and aims the first worksheet at the exact help-with she named. The lead magnet was secretly onboarding all along.</p>
+      <div class="copydraft"><span class="tag">draft copy · first product screen after claim</span>
+        <b>Welcome back, Sarah.</b><br>
+        I kept Maya's map from July. She was counting past 20 then, shall we see what's moved? Two minutes and her first page is ready.
+      </div>
+      <div class="febe">
+        <div class="col fe"><b>Front end</b><ul><li>Claim link → set password (or OAuth) → onboarding with pre-filled family</li><li>"What changed?" refresh instead of a blank questionnaire</li></ul></div>
+        <div class="col be"><b>Back end</b><ul><li>Create auth user → create_my_family() → copy lead_children into children.profile with provenance ("map, parent-reported, 2026-07")</li><li>Positions seed the profile at low-but-real confidence; the drip sharpens them</li><li>Lead rows marked claimed (kept for attribution, PII pruned per retention rule)</li></ul></div>
+      </div>
+      <div class="events">events: auth.account_created {from_lead: true} · onboarding.prefilled {children, answers_age_days}</div>
+    </div>
+  </div>
+
+  <h2>Persona variants worth designing for</h2>
+  <table class="personas">
+    <tr><th>Persona</th><th>What changes in the flow</th></tr>
+    <tr><td>P1 · validation-seeker</td><td>She wants the gold. Ahead states render proudly (gold is allowed to feel good), the band-above ladder gives her headroom to prove it, and the share card is built for her group chat. Her report close leans "watch the numbers move".</td></tr>
+    <tr><td>P2 · three kids, mixed ages</td><td>The whole deferral design exists for her: map the 4-year-old now, link for the 7-year-old tonight, sage-card promise for the 10-year-old. Her report emails arrive per kid; nothing ever compares them.</td></tr>
+    <tr><td>P3 · anxious newcomer</td><td>The baseline persona above. Extra: her state (if given) adds one reassuring line to the report footer ("Ohio lets you homeschool with a simple notice"), the seed of the state-pages SEO play.</td></tr>
+    <tr><td>P4 · compliance-focused fact-checker</td><td>She will check one citation. The methodology section carries resolvable sources per domain and a "last verified" date. One wrong claim and she is gone forever; this is why the sentence bank is human-reviewed (D8 = A).</td></tr>
+    <tr><td>P5 · evenings-only, voice-first</td><td>She starts on the couch at 9pm and finishes across two nights. Resume links are her rail. Checklist stays chips (voice comes with the product, not the lead magnet), each screen answerable in one thumb tap.</td></tr>
+  </table>
+
+  <div class="fb" id="fb">
+    <h2>React to this artifact</h2>
+    <p>Tap what applies, copy, paste into chat.</p>
+    <div>
+      <span class="chip" data-t="journey: arc is right">the arc is right</span>
+      <span class="chip" data-t="journey: beat 2 why-line needs work">email why-line needs work</span>
+      <span class="chip" data-t="journey: checklist tone is right">checklist tone is right</span>
+      <span class="chip" data-t="journey: add a voice option to the checklist">want voice in the checklist</span>
+      <span class="chip" data-t="journey: report close should push harder on invite">push the invite harder</span>
+      <span class="chip" data-t="journey: report close is right (quiet)">quiet close is right</span>
+      <span class="chip" data-t="journey: draft copy voice is off (say how in notes)">draft copy voice is off</span>
+      <span class="chip" data-t="journey: missing a beat (say which in notes)">missing a beat</span>
+    </div>
+    <button class="copybtn" onclick="copyChips(this)">Copy my reactions</button>
+    <div class="copyout"></div>
+  </div>
+
+  <footer>
+    <span>Planning artifact · disposable · quoted copy is draft, personas from journeys/01</span>
+    <span style="font-family:var(--hand);font-size:1.2rem;color:var(--sage-500)">she exhales here ✎</span>
+  </footer>
+</div>
+<script>
+  document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on')})});
+  function copyChips(btn){
+    var box = btn.parentElement;
+    var picked = Array.prototype.slice.call(box.querySelectorAll('.chip.on')).map(function(c){return '- '+c.getAttribute('data-t')});
+    var text = 'User journey feedback:\n' + (picked.length?picked.join('\n'):'(no chips picked)');
+    var out = box.querySelector('.copyout'); out.style.display='block'; out.textContent=text;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);}
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report mock · Maya's map · lead magnet v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=EB+Garamond:ital@0;1&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;
+    --stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+    --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;--clay-700:#9C3B1B;
+    --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-300:#7CC689;--sage-500:#3D9A50;--sage-600:#2F7C40;--sage-700:#275F34;
+    --gold-100:#FFF3C2;--gold-300:#FFE175;--gold-400:#FFD43B;--gold-500:#F0BE00;--gold-ink:#8A6410;--gold-ink-strong:#402E05;
+    --sky-100:#DDF3F9;--sky-300:#9FDCEC;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
+    --band-sky:#9FE0EE;
+    --bg-page:var(--stone-50);--surface:#fff;--text-strong:var(--stone-900);--text-body:var(--stone-800);
+    --text-muted:var(--stone-600);--text-subtle:var(--stone-500);--border:var(--stone-200);
+    --display:"Schibsted Grotesk",sans-serif;--body:"Hanken Grotesk",sans-serif;--serif:"EB Garamond",serif;
+    --hand:"Caveat",cursive;--mono:"JetBrains Mono",monospace;--wordmark:"Fredoka",sans-serif;
+    --r-md:16px;--r-lg:22px;--r-xl:28px;--pill:999px;
+    --shadow-sm:0 1px 2px rgba(78,70,62,.08),0 2px 8px rgba(78,70,62,.06);
+    --shadow-md:0 2px 6px rgba(78,70,62,.08),0 10px 28px rgba(78,70,62,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:0 24px 96px}
+  .topbar{display:flex;align-items:center;gap:14px;padding:20px 0 0}
+  .wordmark{font-family:var(--wordmark);font-weight:600;font-size:1.35rem;color:var(--clay-500)}
+  .topbar .meta{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--text-subtle);text-transform:uppercase}
+  .artifact-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+  .artifact-nav a{font-weight:600;font-size:.86rem;text-decoration:none;color:var(--text-body);background:var(--surface);border:1px solid var(--border);border-radius:var(--pill);padding:8px 16px;box-shadow:var(--shadow-sm)}
+  .artifact-nav a.active{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+  .artifact-nav a:hover{border-color:var(--clay-300)}
+  .samplebar{display:flex;align-items:center;gap:10px;background:var(--gold-100);color:var(--gold-ink);border-radius:var(--r-md);padding:10px 16px;margin:26px 0 0;font-size:.85rem;font-weight:600}
+
+  .emailmock{margin:26px 0 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+  .emailmock .bar{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-subtle);padding:10px 18px;border-bottom:1px solid var(--stone-100);background:var(--stone-100)}
+  .emailmock .row{display:flex;gap:10px;padding:7px 18px;font-size:.9rem;border-bottom:1px solid var(--stone-100)}
+  .emailmock .row .k{color:var(--text-subtle);width:64px;flex-shrink:0;font-size:.8rem;padding-top:2px}
+  .emailmock .subject{font-weight:700;color:var(--text-strong)}
+  .emailmock .preheader{color:var(--text-muted)}
+  .emailmock .body{padding:16px 18px;font-size:.93rem;color:var(--text-body)}
+  .emailmock .body .btn{display:inline-block;background:var(--clay-500);color:#fff;border-radius:var(--pill);padding:10px 22px;font-weight:700;text-decoration:none;margin:10px 0 4px}
+
+  .report{margin-top:36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--shadow-md);overflow:hidden}
+  .r-head{background:var(--band-sky);padding:36px 40px 30px;position:relative}
+  .r-head .lockup{display:flex;align-items:center;gap:10px}
+  .r-head .lockup .wm{font-family:var(--wordmark);font-weight:600;font-size:1.2rem;color:var(--clay-600)}
+  .r-head .lockup .made{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--stone-700)}
+  .r-head h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,6vw,2.9rem);letter-spacing:-.015em;color:var(--text-strong);margin:18px 0 6px;line-height:1.03}
+  .r-head h1 .accent{color:var(--clay-600)}
+  .r-head .sub{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--stone-700);margin:0}
+  .r-head .facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:20px;font-family:var(--mono);font-size:.75rem;color:var(--stone-700)}
+  .r-head .facts b{color:var(--text-strong)}
+  .r-pad{padding:30px 40px}
+  @media(max-width:640px){.r-pad{padding:24px 20px}.r-head{padding:28px 20px 24px}}
+
+  .homanote{display:flex;gap:14px;background:var(--sage-50);border:1px solid var(--sage-100);border-radius:var(--r-lg);padding:18px 20px;margin:0 0 8px}
+  .homanote .dot{width:38px;height:38px;border-radius:50%;background:var(--sage-500);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--wordmark);font-weight:600;flex-shrink:0}
+  .homanote .tag{font-family:var(--mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-600);margin-bottom:3px}
+  .homanote p{margin:0;color:var(--stone-800);font-size:.96rem}
+
+  h2.rsec{font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--text-strong);margin:34px 0 4px;letter-spacing:-.01em}
+  .rsub{color:var(--text-muted);font-size:.92rem;margin:0 0 16px}
+
+  .strengths{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.strengths{grid-template-columns:1fr}}
+  .sCard{background:var(--gold-100);border-radius:var(--r-lg);padding:16px 18px;position:relative}
+  .sCard .star{position:absolute;top:14px;right:14px;color:var(--gold-500);font-size:1rem}
+  .sCard .dom{font-weight:700;color:var(--gold-ink-strong);font-size:1rem}
+  .sCard .num{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--gold-ink);margin:6px 0 4px}
+  .sCard .num small{font-size:.8rem}
+  .sCard .note{font-size:.82rem;color:var(--gold-ink);line-height:1.45}
+
+  .chart{margin-top:8px;border:1px solid var(--stone-100);border-radius:var(--r-lg);padding:18px 18px 10px;background:var(--surface)}
+  .chart .scale{position:relative;height:22px;margin-left:172px;margin-right:12px;font-family:var(--mono);font-size:.64rem;color:var(--text-subtle)}
+  .chart .scale span{position:absolute;transform:translateX(-50%)}
+  .crow{display:flex;align-items:center;min-height:34px}
+  .crow .lbl{width:160px;flex-shrink:0;font-size:.85rem;font-weight:600;color:var(--text-body);padding-right:12px;text-align:right}
+  .crow .track{position:relative;flex:1;height:34px;margin-right:12px}
+  .crow .gridline{position:absolute;top:0;bottom:0;width:1px;background:var(--stone-100)}
+  .crow .atage{position:absolute;top:0;bottom:0;width:2px;background:var(--stone-300)}
+  .crow .banddot{position:absolute;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(78,70,62,.18)}
+  .crow .val{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.7rem;color:var(--text-subtle);padding-left:12px;white-space:nowrap}
+  .chart .axislabel{display:flex;justify-content:space-between;margin:8px 12px 4px 172px;font-family:var(--mono);font-size:.64rem;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.1em}
+  .chart .legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 4px 6px;font-size:.78rem;color:var(--text-muted)}
+  .chart .legend span{display:inline-flex;align-items:center;gap:6px}
+  .ldot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  @media(max-width:640px){.crow .lbl{width:104px;font-size:.74rem}.chart .scale{margin-left:116px}.chart .axislabel{margin-left:116px}}
+
+  .domlist{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .dom{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--stone-100);border-radius:var(--r-md);padding:13px 16px}
+  .dom .badge{flex-shrink:0;border-radius:var(--pill);padding:4px 13px;font-size:.74rem;font-weight:700;margin-top:1px;white-space:nowrap}
+  .badge.gold{background:var(--gold-100);color:var(--gold-ink)}
+  .badge.sage{background:var(--sage-50);color:var(--sage-700)}
+  .badge.sky{background:var(--sky-100);color:var(--sky-600)}
+  .badge.stone{background:var(--stone-100);color:var(--text-muted)}
+  .dom .txt{flex:1}
+  .dom .dn{font-weight:700;color:var(--text-strong);font-size:.95rem}
+  .dom .ds{font-size:.88rem;color:var(--text-muted);margin-top:2px}
+  .dom .src{font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;color:var(--text-subtle);margin-top:6px;text-transform:uppercase}
+  .dom .mn{font-family:var(--mono);font-size:.95rem;color:var(--text-strong);flex-shrink:0;padding-top:2px;min-width:64px;text-align:right}
+
+  .next{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.next{grid-template-columns:1fr}}
+  .nCard{background:var(--sky-100);border-radius:var(--r-lg);padding:16px 18px}
+  .nCard .tag{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky-600)}
+  .nCard .t{font-weight:700;color:var(--text-strong);margin:4px 0 4px}
+  .nCard p{margin:0;font-size:.88rem;color:var(--stone-800)}
+  .nCard .mins{font-family:var(--mono);font-size:.7rem;color:var(--sky-600);margin-top:8px}
+
+  .method{background:var(--stone-100);border-radius:var(--r-lg);padding:20px 22px;margin-top:34px;font-size:.88rem}
+  .method h3{font-family:var(--display);font-weight:600;margin:0 0 8px;color:var(--text-strong);font-size:1.02rem}
+  .method p{margin:6px 0;color:var(--text-muted)}
+  .method .srcs{font-family:var(--mono);font-size:.7rem;line-height:1.9;color:var(--text-subtle)}
+  .method a{color:var(--clay-600)}
+
+  .ctaband{background:var(--stone-900);border-radius:var(--r-lg);padding:26px 28px;margin-top:34px;color:var(--stone-100)}
+  .ctaband h3{font-family:var(--display);font-weight:700;font-size:1.45rem;color:#fff;margin:0 0 8px;letter-spacing:-.01em}
+  .ctaband p{color:var(--stone-300);margin:0 0 16px;max-width:560px}
+  .ctaband .btn{display:inline-block;background:var(--clay-500);color:#fff;border-radius:var(--pill);padding:12px 26px;font-weight:700;text-decoration:none}
+  .ctaband .quiet{font-size:.8rem;color:var(--stone-400);margin-top:12px}
+  .r-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 40px 26px;font-size:.8rem;color:var(--text-subtle)}
+  .r-foot a{color:var(--clay-600)}
+  @media(max-width:640px){.r-foot{padding:16px 20px 22px}}
+
+  .fb{background:var(--stone-900);border-radius:var(--r-lg);padding:22px 26px;color:var(--stone-100);margin-top:56px}
+  .fb h2{color:#fff;margin:0 0 6px;font-family:var(--display)}
+  .fb p{color:var(--stone-300);margin:0 0 12px;font-size:.95rem}
+  .chip{display:inline-block;border:1.5px solid var(--stone-600);border-radius:var(--pill);padding:7px 14px;margin:4px 6px 4px 0;font-size:.85rem;color:var(--stone-100);cursor:pointer;user-select:none}
+  .chip.on{background:var(--clay-500);border-color:var(--clay-500)}
+  .copybtn{display:inline-flex;background:var(--clay-500);color:#fff;border:none;border-radius:var(--pill);padding:11px 24px;font-family:var(--body);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:12px}
+  .copyout{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;background:var(--stone-800);border-radius:var(--r-md);padding:14px;margin-top:12px;color:var(--sage-100);display:none}
+  footer.page{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-subtle);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  @media print{.artifact-nav,.topbar,.samplebar,.emailmock,.fb,footer.page,h2.pagesec,.pagesub{display:none!important}body{background:#fff}.report{box-shadow:none;border:none;margin-top:0}}
+  h2.pagesec{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--text-strong);margin:44px 0 4px}
+  .pagesub{color:var(--text-muted);font-size:.95rem;margin:0 0 10px;max-width:720px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="wordmark">homa</span>
+    <span class="meta">artifact 5 of 5 · the report, mocked</span>
+  </div>
+  <nav class="artifact-nav">
+    <a href="index.html">1 · Overview + decisions</a>
+    <a href="flow.html">2 · Flow chart</a>
+    <a href="journey.html">3 · User journey</a>
+    <a href="states.html">4 · States + backend</a>
+    <a class="active" href="report-mock.html">5 · Report mock</a>
+  </nav>
+
+  <div class="samplebar">⚠ Sample. Maya is a fictional child; every number and sentence below is fake demonstration data. Print this page to preview the printed map.</div>
+
+  <h2 class="pagesec">First, the email that carries it</h2>
+  <p class="pagesub">One per completed child. No numbers in the email itself, so siblings never end up side by side in an inbox thread, and the click carries the curiosity.</p>
+  <div class="emailmock">
+    <div class="bar">email preview · resend · from mail.thankshoma.com</div>
+    <div class="row"><span class="k">From</span><span>Homa &lt;hello@mail.thankshoma.com&gt;</span></div>
+    <div class="row"><span class="k">Subject</span><span class="subject">Maya's map is ready</span></div>
+    <div class="row"><span class="k">Preview</span><span class="preheader">A first look at where she stands, strengths first.</span></div>
+    <div class="body">
+      Hi Sarah,<br><br>
+      Maya's map is ready. It's built from what you told me you've seen her do, checked against national benchmarks for her age. It opens with her strengths, because that's the truest place to start.<br>
+      <a class="btn" href="#report">Open Maya's map</a><br>
+      <span style="color:var(--text-muted);font-size:.85rem">This link is yours to keep, it will always show her map. Reply to this email and a real person answers.</span>
+    </div>
+  </div>
+
+  <h2 class="pagesec">The map itself</h2>
+  <p class="pagesub">What the tokenized link opens, and what she prints. The chart is your dashboard chart, rebuilt for a single sitting: one dot per domain instead of a trajectory (the trajectory is what the product earns later; that becomes the pitch at the bottom).</p>
+
+  <div class="report" id="report">
+    <div class="r-head">
+      <div class="lockup"><span class="wm">homa</span><span class="made">· made for Maya · July 5, 2026</span></div>
+      <h1>Maya's <span class="accent">map</span></h1>
+      <p class="sub">a first look at where she stands, from what you've seen her do</p>
+      <div class="facts">
+        <span>age <b>4y 2m</b></span>
+        <span>domains mapped <b>14 of 15</b></span>
+        <span>your observations <b>27</b></span>
+        <span>benchmarks <b>national</b></span>
+      </div>
+    </div>
+
+    <div class="r-pad">
+      <div class="homanote">
+        <div class="dot">h</div>
+        <div>
+          <div class="tag">A note from Homa</div>
+          <p>Sarah, here's the honest picture: Maya is ahead of her age band in six domains, right in the band in six more, and has two spots that are simply what's next. You gave me 27 real observations, that's a strong first map. Nothing here is a test result, it's your own noticing, organized.</p>
+        </div>
+      </div>
+
+      <h2 class="rsec">Her strengths, first</h2>
+      <p class="rsub">Where Maya is working ahead of what's typical for 4y 2m.</p>
+      <div class="strengths">
+        <div class="sCard"><span class="star">★</span><div class="dom">Language</div><div class="num">+16<small> mo ahead</small></div><div class="note">She's telling full stories and using words like "actually". That's typical of a child well past five.</div></div>
+        <div class="sCard"><span class="star">★</span><div class="dom">Phonics</div><div class="num">+14<small> mo ahead</small></div><div class="note">Naming letter sounds and rhyming on purpose. Reading readiness is arriving early.</div></div>
+        <div class="sCard"><span class="star">★</span><div class="dom">Science</div><div class="num">+12<small> mo ahead</small></div><div class="note">Predicting what happens next in little experiments. A five-year-old's habit of mind.</div></div>
+      </div>
+
+      <h2 class="rsec">The whole map</h2>
+      <p class="rsub">One dot per domain. The line is "typical for her age". Gold is ahead, sage is right in the band, sky is growing right now (with something to try below).</p>
+      <div class="chart" id="chart"></div>
+
+      <h2 class="rsec">Domain by domain</h2>
+      <p class="rsub">Every line is grounded in your answers and the national benchmark it was checked against.</p>
+      <div class="domlist">
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Language</div><div class="ds">Retells stories with a beginning and end, asks what new words mean. You said "easily" to items typical of 5y 6m.</div><div class="src">benchmark: CDC LTSAE · Head Start ELOF</div></div><div class="mn">+16 mo</div></div>
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Phonics</div><div class="ds">Knows most letter sounds, plays rhyming games on purpose.</div><div class="src">benchmark: Head Start ELOF · CCSS foundational reading</div></div><div class="mn">+14 mo</div></div>
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Science</div><div class="ds">Makes predictions and checks them ("the ice will melt faster in the sun").</div><div class="src">benchmark: NGSS K-2 practices</div></div><div class="mn">+12 mo</div></div>
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Social-emotional</div><div class="ds">Names her feelings and, on good days, a reason for them.</div><div class="src">benchmark: CASEL competencies</div></div><div class="mn">+10 mo</div></div>
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Math</div><div class="ds">Counts past 20 and adds small numbers with her fingers or blocks.</div><div class="src">benchmark: CCSS-M counting + cardinality</div></div><div class="mn">+7 mo</div></div>
+        <div class="dom"><span class="badge gold">Ahead</span><div class="txt"><div class="dn">Literacy</div><div class="ds">Pretend-reads favorite books from memory and recognizes her name and a few words.</div><div class="src">benchmark: Head Start ELOF · CCSS-ELA</div></div><div class="mn">+6 mo</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Music</div><div class="ds">Keeps a simple beat and remembers songs. Right where 4 looks.</div><div class="src">benchmark: NAfME / National Core Arts</div></div><div class="mn">+5 mo</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Social studies</div><div class="ds">Understands family roles and simple community helpers.</div><div class="src">benchmark: NCSS C3 early bands</div></div><div class="mn">+4 mo</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Art + creative</div><div class="ds">Draws people with heads, arms, and legs; tells you what the picture is.</div><div class="src">benchmark: National Core Arts</div></div><div class="mn">+3 mo</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Gross motor</div><div class="ds">Hops on one foot, climbs confidently, catches a big ball most of the time.</div><div class="src">benchmark: SHAPE America · CDC</div></div><div class="mn">+2 mo</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Executive function</div><div class="ds">Follows two-step directions and waits her turn, most of the time, which is exactly age-typical.</div><div class="src">benchmark: Harvard EF milestones · ELOF</div></div><div class="mn">at age</div></div>
+        <div class="dom"><span class="badge sage">On track</span><div class="txt"><div class="dn">Spanish</div><div class="ds">A handful of words and songs. Every bit of exposure counts at 4.</div><div class="src">benchmark: ACTFL novice descriptors</div></div><div class="mn">at age</div></div>
+        <div class="dom"><span class="badge sky">Growing right now</span><div class="txt"><div class="dn">Fine motor</div><div class="ds">Scissors are emerging: she snips but doesn't steer yet. Completely normal at 4, and easy to grow. Something to try is below.</div><div class="src">benchmark: CDC LTSAE · ELOF perceptual-motor</div></div><div class="mn">growing</div></div>
+        <div class="dom"><span class="badge sky">Growing right now</span><div class="txt"><div class="dn">Self-care</div><div class="ds">Dressing herself is the current frontier, buttons especially. That's just what's next.</div><div class="src">benchmark: CDC LTSAE self-help</div></div><div class="mn">growing</div></div>
+        <div class="dom"><span class="badge stone">Not mapped yet</span><div class="txt"><div class="dn">Writing</div><div class="ds">We haven't seen enough about writing to place it honestly. Four quick questions would fill it in.</div><div class="src">4 questions · about a minute</div></div><div class="mn">·</div></div>
+      </div>
+
+      <h2 class="rsec">Two things worth trying this week</h2>
+      <p class="rsub">Free, five minutes, aimed at exactly what's growing. Offers, never homework.</p>
+      <div class="next">
+        <div class="nCard"><div class="tag">Fine motor · scissors</div><div class="t">Snipping strips</div><p>Cut paper into strips and let Maya snip them into confetti, then along a drawn straight line, then a curve. Child-safe scissors, tiny doses.</p><div class="mins">5 min a day · this is how steering arrives</div></div>
+        <div class="nCard"><div class="tag">Self-care · dressing</div><div class="t">The button board</div><p>An old shirt buttoned around a cushion turns buttons into a game instead of a morning standoff. Race the timer, not each other.</p><div class="mins">5 min · mornings get easier first</div></div>
+      </div>
+
+      <div class="method">
+        <h3>How this map is made (and what it is not)</h3>
+        <p>Your answers describe what Maya does day to day. Each one is checked against published national benchmarks for her age, the same sources schools and pediatric milestones draw from. When you said "easily" to something typical of an older child, that showed up here as months ahead. Where you said "not sure", the map says so instead of guessing.</p>
+        <p>This is a map made from a parent's observations, not a test, a screening, or a diagnosis. Every child grows in their own order, and a first map is an estimate: it sharpens with more observations over time.</p>
+        <p class="srcs">SOURCES · CDC Learn the Signs Act Early (2022 revision) · Head Start Early Learning Outcomes Framework · Common Core State Standards (ELA + Math) · NGSS · NCSS C3 · National Core Arts Standards · SHAPE America · CASEL · ACTFL · benchmark bank v2026.07 · <a href="#">how the map works, in full</a></p>
+      </div>
+
+      <div class="ctaband">
+        <h3>The map is the "before" picture.</h3>
+        <p>Homa is the assistant that moves it: materials made for exactly what's growing, hours tracked for your state, and this same map redrawn as Maya grows, so you can watch the numbers move.</p>
+        <a class="btn" href="#">You're on the founding families list ✓</a>
+        <div class="quiet">We invite families a few at a time. Your invite comes by email, and Maya's map will be waiting inside.</div>
+      </div>
+    </div>
+
+    <div class="r-foot">
+      <span>made with Homa for Maya</span>
+      <span><a href="#">share this map</a> · <a href="#">print it</a> · <a href="#">something look off? tell me</a> · <a href="#">delete my family's data</a></span>
+    </div>
+  </div>
+
+  <div class="fb" id="fb">
+    <h2>React to this artifact</h2>
+    <p>This one matters most: it is the thing moms will screenshot. Tap, copy, paste into chat.</p>
+    <div>
+      <span class="chip" data-t="report: overall look approved">overall look approved</span>
+      <span class="chip" data-t="report: chart works (dot per domain)">the chart works</span>
+      <span class="chip" data-t="report: want the ranked-bar style from the dashboard instead">prefer ranked bars like the dashboard</span>
+      <span class="chip" data-t="report: strengths-first order is right">strengths-first is right</span>
+      <span class="chip" data-t="report: growing-right-now framing lands">"growing right now" lands</span>
+      <span class="chip" data-t="report: growing framing too soft, want plainer honesty">growth framing too soft</span>
+      <span class="chip" data-t="report: methodology block is right">methodology block is right</span>
+      <span class="chip" data-t="report: CTA close too quiet">CTA close too quiet</span>
+      <span class="chip" data-t="report: CTA close is right">CTA close is right</span>
+      <span class="chip" data-t="report: voice is off somewhere (say where in notes)">voice is off somewhere</span>
+    </div>
+    <button class="copybtn" onclick="copyChips(this)">Copy my reactions</button>
+    <div class="copyout"></div>
+  </div>
+
+  <footer class="page">
+    <span>Planning artifact · disposable · all data fake, all copy draft</span>
+    <span style="font-family:var(--hand);font-size:1.2rem;color:var(--sage-500)">she screenshots this ✎</span>
+  </footer>
+</div>
+
+<script>
+  // Chart: one dot per domain on a months-ahead axis. Axis 0 ("at age") to +24mo.
+  // "Growing" domains render just left of the at-age line in sky, honest but never
+  // labeled with a negative number (anti-guilt display law).
+  var DOMAINS = [
+    {n:"Language", m:16, k:"gold"},
+    {n:"Phonics", m:14, k:"gold"},
+    {n:"Science", m:12, k:"gold"},
+    {n:"Social-emotional", m:10, k:"gold"},
+    {n:"Math", m:7, k:"gold"},
+    {n:"Literacy", m:6, k:"gold"},
+    {n:"Music", m:5, k:"sage"},
+    {n:"Social studies", m:4, k:"sage"},
+    {n:"Art + creative", m:3, k:"sage"},
+    {n:"Gross motor", m:2, k:"sage"},
+    {n:"Executive function", m:0, k:"sage"},
+    {n:"Spanish", m:0, k:"sage"},
+    {n:"Fine motor", m:-3, k:"sky", lbl:"growing"},
+    {n:"Self-care", m:-3, k:"sky", lbl:"growing"}
+  ];
+  var COLORS = {gold:"var(--gold-400)", sage:"var(--sage-300)", sky:"var(--sky-500)"};
+  var AXIS_MIN = -6, AXIS_MAX = 24; // months
+  function pct(m){ return ((m - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * 100; }
+  var chart = document.getElementById('chart');
+  var scale = document.createElement('div'); scale.className = 'scale';
+  [[0,'at age'],[6,'+6'],[12,'+12'],[18,'+18'],[24,'+24 mo']].forEach(function(t){
+    var s = document.createElement('span'); s.style.left = pct(t[0])+'%'; s.textContent = t[1]; scale.appendChild(s);
+  });
+  chart.appendChild(scale);
+  DOMAINS.forEach(function(d){
+    var row = document.createElement('div'); row.className = 'crow';
+    var lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = d.n;
+    var track = document.createElement('div'); track.className = 'track';
+    [6,12,18,24].forEach(function(g){
+      var gl = document.createElement('div'); gl.className='gridline'; gl.style.left = pct(g)+'%'; track.appendChild(gl);
+    });
+    var at = document.createElement('div'); at.className = 'atage'; at.style.left = pct(0)+'%'; track.appendChild(at);
+    var dot = document.createElement('div'); dot.className = 'banddot';
+    dot.style.left = pct(d.m)+'%'; dot.style.background = COLORS[d.k]; track.appendChild(dot);
+    var val = document.createElement('div'); val.className = 'val';
+    val.style.left = pct(Math.max(d.m,0))+'%';
+    val.textContent = d.lbl ? d.lbl : (d.m > 0 ? '+'+d.m+' mo' : 'at age');
+    track.appendChild(val);
+    row.appendChild(lbl); row.appendChild(track); chart.appendChild(row);
+  });
+  var leg = document.createElement('div'); leg.className = 'legend';
+  leg.innerHTML = '<span><span class="ldot" style="background:var(--gold-400)"></span> ahead of the band</span>'+
+                  '<span><span class="ldot" style="background:var(--sage-300)"></span> right in the band</span>'+
+                  '<span><span class="ldot" style="background:var(--sky-500)"></span> growing right now</span>';
+  chart.appendChild(leg);
+
+  document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on')})});
+  function copyChips(btn){
+    var box = btn.parentElement;
+    var picked = Array.prototype.slice.call(box.querySelectorAll('.chip.on')).map(function(c){return '- '+c.getAttribute('data-t')});
+    var text = 'Report mock feedback:\n' + (picked.length?picked.join('\n'):'(no chips picked)');
+    var out = box.querySelector('.copyout'); out.style.display='block'; out.textContent=text;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);}
+  }
+</script>
+</body>
+</html>

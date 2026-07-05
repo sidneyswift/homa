@@ -18,6 +18,46 @@ export const EVENT_SCHEMAS = {
     us_state: z.string().optional(),
     kid_age_bands: z.array(z.enum(KID_AGE_BANDS)).default([]),
   }),
+  // Map (lead magnet v2) funnel. Emitted server-side only, with the
+  // server key: the anon events policy stays waitlist-only on purpose.
+  // Props carry pseudonymous ids, never names or emails.
+  "map.started": z.object({
+    lead_id: z.uuid(),
+    source: z.enum(WAITLIST_SOURCES),
+    has_state: z.boolean(),
+    returning: z.boolean(),
+  }),
+  "map.child_added": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    age_months: z.number().int().min(0),
+    in_range: z.boolean(),
+  }),
+  "map.question_answered": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+    answer: z.enum(["easily", "getting_there", "not_yet", "not_sure", "skip"]),
+  }),
+  "map.report_generated": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    mapped_domains: z.number().int().min(0),
+    observations: z.number().int().min(0),
+    bank_version: z.string(),
+  }),
+  "map.report_viewed": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    entry: z.enum(["instant", "link"]),
+  }),
+  "map.reminder_sent": z.object({
+    lead_id: z.uuid(),
+  }),
+  "map.band_ready_emailed": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+  }),
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;

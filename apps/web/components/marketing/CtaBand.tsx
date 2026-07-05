@@ -34,15 +34,15 @@ export function CtaBand() {
         Set-up takes an afternoon. The calm shows up the same week.
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-        <Button variant="primary" size="lg" href="/waitlist" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-          Start free for 14 days
+        <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+          Meet your child&rsquo;s map
         </Button>
-        <Button variant="ghost" size="lg" href="/waitlist" style={{ background: "var(--surface-card)" }}>
-          Talk to Homa
+        <Button variant="ghost" size="lg" href="/map/method" style={{ background: "var(--surface-card)" }}>
+          How the map works
         </Button>
       </div>
       <div data-reveal="" className="rv-d2" style={{ marginTop: 16, fontSize: "0.88rem", fontWeight: 600, color: "var(--stone-700)" }}>
-        No card needed &middot; cancel anytime
+        Free &middot; about five minutes &middot; a checklist for you, never a test for them
       </div>
     </section>
   );

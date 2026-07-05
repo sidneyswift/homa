@@ -1,0 +1,150 @@
+import { reportEmailPreview, reportEmailSubject } from "@homa/core";
+
+/**
+ * Transactional email for the map flow, sent through Resend's REST API
+ * (M1-08 minimal). Every send here is something the parent explicitly asked
+ * for: her child's report, a resume link, one single reminder, or the
+ * promised "his checklist is ready" note. No sequences exist by design.
+ */
+
+const FROM = "Homa <hello@mail.thankshoma.com>";
+
+export function siteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://thankshoma.com";
+}
+
+interface SendArgs {
+  to: string;
+  subject: string;
+  preview: string;
+  heading: string;
+  bodyLines: string[];
+  cta?: { label: string; url: string };
+  footerNote: string;
+}
+
+async function send(args: SendArgs): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.error("map email: RESEND_API_KEY not set, skipping send");
+    return false;
+  }
+
+  const paragraphs = args.bodyLines
+    .map(
+      (line) =>
+        `<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#332E29;">${line}</p>`,
+    )
+    .join("");
+  const cta = args.cta
+    ? `<a href="${args.cta.url}" style="display:inline-block;background:#E7602F;color:#ffffff;border-radius:999px;padding:12px 26px;font-weight:700;font-size:16px;text-decoration:none;margin:6px 0 14px;">${args.cta.label}</a>`
+    : "";
+
+  const html = `<!doctype html>
+<html><body style="margin:0;background:#FBF7F0;padding:24px 12px;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;">
+  <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;">${args.preview}</span>
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:22px;padding:32px 30px;border:1px solid #E7DDCE;">
+    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">homa</div>
+    <h1 style="font-size:24px;line-height:1.2;color:#221E1A;margin:0 0 16px;">${args.heading}</h1>
+    ${paragraphs}
+    ${cta}
+    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${args.footerNote}</p>
+  </div>
+  <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
+    You asked for this email at thankshoma.com. Reply and a real person answers.
+    We only email you your children's maps and your founding-family invite.
+  </p>
+</body></html>`;
+
+  const text = [args.heading, "", ...args.bodyLines.map(stripTags), args.cta ? `${args.cta.label}: ${args.cta.url}` : "", "", stripTags(args.footerNote)].join("\n");
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: FROM, to: [args.to], subject: args.subject, html, text }),
+    });
+    if (!response.ok) {
+      console.error(`map email: send failed HTTP ${response.status}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("map email: send failed:", error);
+    return false;
+  }
+}
+
+function stripTags(value: string): string {
+  return value.replace(/<[^>]+>/g, "");
+}
+
+export async function sendReportEmail(to: string, childName: string, reportToken: string): Promise<boolean> {
+  const url = `${siteUrl()}/map/r/${reportToken}`;
+  return send({
+    to,
+    subject: reportEmailSubject(childName),
+    preview: reportEmailPreview(),
+    heading: `${childName}'s map is ready`,
+    bodyLines: [
+      `${childName}'s map is built from what you told me you've seen, checked against national benchmarks for their age.`,
+      "It opens with strengths, because that's the truest place to start.",
+    ],
+    cta: { label: `Open ${childName}'s map`, url },
+    footerNote: "This link is yours to keep, it will always show this map. Want it gone instead? Reply with 'delete' and we'll remove your family's answers.",
+  });
+}
+
+export async function sendResumeEmail(to: string, resumeToken: string): Promise<boolean> {
+  const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
+  return send({
+    to,
+    subject: "Pick up where you left off",
+    preview: "Your map answers are saved. This link continues on any device.",
+    heading: "Everything you told me is saved",
+    bodyLines: ["Tap below to keep going exactly where you stopped, on any device."],
+    cta: { label: "Continue the checklist", url },
+    footerNote: "Didn't ask for this? You can ignore it, nothing changes without you.",
+  });
+}
+
+export async function sendReminderEmail(
+  to: string,
+  childName: string | null,
+  resumeToken: string,
+): Promise<boolean> {
+  const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
+  const who = childName ?? "your child";
+  return send({
+    to,
+    subject: childName ? `${childName}'s map is a few taps away` : "Your child's map is a few taps away",
+    preview: "Your answers are saved. A few minutes finishes the map.",
+    heading: `${who}'s map is almost drawn`,
+    bodyLines: [
+      "Everything you answered is saved. A few more taps and the map is ready.",
+      "No rush at all, the link works whenever you are.",
+    ],
+    cta: { label: "Finish the checklist", url },
+    footerNote: "This is the only reminder we'll send.",
+  });
+}
+
+export async function sendBandReadyEmail(
+  to: string,
+  childName: string,
+  resumeToken: string,
+): Promise<boolean> {
+  const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
+  return send({
+    to,
+    subject: `${childName}'s checklist is ready`,
+    preview: "The checklist for their age just shipped, as promised.",
+    heading: `As promised: ${childName}'s checklist is ready`,
+    bodyLines: [
+      `When you signed up, ${childName}'s age band wasn't mapped yet, and I said I'd tell you the moment it was. It is.`,
+      "About five minutes, from what you've already seen them do.",
+    ],
+    cta: { label: `Start ${childName}'s checklist`, url },
+    footerNote: "Everything you told me about your family is already saved.",
+  });
+}

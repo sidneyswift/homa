@@ -154,6 +154,15 @@ export function BenchmarkDemo() {
           >
             <Doodle name="sparkle" size={16} color={startNames.length ? "var(--brand)" : "var(--stone-400)"} /> {summary}
           </div>
+          {/* The demo's real payoff: this exact mechanic, run properly for
+              her own kid, is the /map lead magnet. */}
+          <div style={{ marginTop: 12, fontSize: "0.9rem", color: "var(--text-muted)" }}>
+            That was three questions. The real thing is a 5-minute checklist that maps 15 domains
+            for your own kid, free.{" "}
+            <a href="/map" style={{ color: "var(--clay-600)", fontWeight: 700 }}>
+              Meet your child&rsquo;s map
+            </a>
+          </div>
         </div>
       </div>
 

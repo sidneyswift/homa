@@ -67,6 +67,12 @@ await expectEmptyRead("events");
 await expectEmptyRead("families");
 await expectEmptyRead("family_members");
 await expectEmptyRead("children");
+// Map lead tables (migration #7): deny-all RLS, zero policies, privileges
+// revoked. Anonymous traffic must see nothing and write nothing.
+await expectEmptyRead("lead_families");
+await expectEmptyRead("lead_children");
+await expectEmptyRead("lead_answers");
+await expectEmptyRead("lead_reports");
 
 await expectInsertDenied(
   "families",
@@ -87,6 +93,16 @@ await expectInsertDenied(
   "waitlist",
   { email: `probe-${Date.now()}@example.com`, status: "invited" },
   "anon cannot self-invite via waitlist status",
+);
+await expectInsertDenied(
+  "lead_families",
+  { email: `probe-${Date.now()}@example.com` },
+  "anon cannot insert lead_families directly",
+);
+await expectInsertDenied(
+  "lead_reports",
+  { lead_child_id: "00000000-0000-0000-0000-000000000000", scores: {}, bank_version: "x", token: "probe" },
+  "anon cannot forge lead_reports",
 );
 
 if (failures.length > 0) {

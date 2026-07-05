@@ -32,6 +32,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Map content + scorer checks (claims law, citations, golden kids)
+        run: pnpm check:map
+
       - name: Build
         run: pnpm build
         env:

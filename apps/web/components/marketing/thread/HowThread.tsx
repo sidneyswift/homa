@@ -41,8 +41,8 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
     body: "A balanced draft for every child, shaped around your family\u2019s rhythm. Tweak anything with a tap or a message, Homa keeps the balance for you.",
     vignette: <WeekVignette />,
     action: (
-      <Button variant="secondary" href="/waitlist" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
-        See a sample week
+      <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
+        Start with your child&rsquo;s map
       </Button>
     ),
   },

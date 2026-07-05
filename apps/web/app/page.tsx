@@ -7,22 +7,22 @@ import { Features } from "../components/marketing/Features";
 import { Footer } from "../components/marketing/Footer";
 import { Hero } from "../components/marketing/Hero";
 import { Nav } from "../components/marketing/Nav";
+import { FoundingFamilies } from "../components/marketing/FoundingFamilies";
 import { RevealObserver } from "../components/marketing/RevealObserver";
 import { Stories } from "../components/marketing/Stories";
-import { Pricing } from "../components/marketing/Pricing";
 import { HowThread } from "../components/marketing/thread/HowThread";
 
 /**
- * Landing page (BUILD.md Deliverable 0), a full port of the designed page at
- * docs/homa-design/ui_kits/landing/LandingPage.jsx, every section in the
- * kit's order: sticky nav, hero (with the 15s brand film overlay), ribbon,
- * feature grid, the story thread, the benchmark demo, community, stories,
- * pricing, FAQ, sunshine CTA band, footer. Section seams are the kit's
- * waves/ribbons (a ribbon IS the seam; never stack a wave at the same
- * boundary). Motion follows the emil-design-eng / review-animations skills:
- * brand ease-out + duration tokens, transform/opacity reveals armed by JS
- * with reduced-motion fallbacks, press scale on every pressable. Every CTA
- * routes to /waitlist, the live conversion path until invites open.
+ * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
+ * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
+ * the claims pass applied: no fabricated social proof (C2), no pricing
+ * (T2), founding-families framing, and every CTA routes to /map, the
+ * child's-map flow that replaced the bare waitlist. Section seams are the
+ * kit's waves/ribbons (a ribbon IS the seam; never stack a wave at the
+ * same boundary). Motion follows the emil-design-eng / review-animations
+ * skills: brand ease-out + duration tokens, transform/opacity reveals
+ * armed by JS with reduced-motion fallbacks, press scale on every
+ * pressable.
  */
 export default function LandingPage() {
   return (
@@ -41,7 +41,7 @@ export default function LandingPage() {
       <Wave color="var(--band-blush)" flip />
       <Stories />
       <Wave color="var(--band-blush)" />
-      <Pricing />
+      <FoundingFamilies />
       <Faq />
       <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
       <CtaBand />

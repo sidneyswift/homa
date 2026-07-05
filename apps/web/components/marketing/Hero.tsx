@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ArrowRight, Play, Sparkles, X } from "lucide-react";
 
-import { Avatar } from "./ds/Avatar";
 import { Button } from "./ds/Button";
 import { Doodle } from "./Doodle";
 
@@ -89,8 +88,8 @@ export function Hero() {
             can do.
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
-            <Button variant="primary" size="lg" href="/waitlist" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-              Start free for 14 days
+            <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+              Meet your child&rsquo;s map
             </Button>
             <Button
               variant="ghost"
@@ -102,25 +101,19 @@ export function Hero() {
               Watch the film
             </Button>
           </div>
+          {/* Honest trust line (rulings C2 + T2: no fabricated social proof,
+              no pricing). The map claim is real: /map delivers it today. */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
               marginTop: 24,
               color: "var(--stone-700)",
               fontSize: "0.9rem",
               fontWeight: 500,
+              maxWidth: 440,
             }}
           >
-            <div style={{ display: "flex" }}>
-              {["Ana M", "Dana K", "Priya S", "Lena R"].map((n, i) => (
-                <span key={n} style={{ marginLeft: i ? -10 : 0 }}>
-                  <Avatar name={n} size={30} />
-                </span>
-              ))}
-            </div>
-            Loved by 12,000+ homeschooling families
+            Free: a five-minute checklist for you, never a test for them, and your
+            child&rsquo;s map lands in your inbox. Built by a homeschool family.
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

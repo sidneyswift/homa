@@ -3,6 +3,90 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-05 · Lead magnet v2 SHIPPED (founder: "ship all, start with your recommendations, make room to improve")
+
+Founder ruled all eight planning decisions to the recommended options
+(D1 two-stage ages 2-7 first · D2 "where your child stands" vs national
+benchmarks, months-ahead framing · D3 lead tables + claim-at-invite ·
+D4 full adaptive checklist · D5 report on screen + email · D6 one announce
+email to the existing waitlist · D7 capture out-of-range kids + automatic
+promise-keeping · D8 human-reviewed sentence banks, zero model calls).
+Built and verified end to end this session:
+
+1. **Migration #7 (`20260705223838_map_lead_tables`)**: lead_families /
+   lead_children / lead_answers / lead_reports, RLS enabled with ZERO
+   policies plus privileges revoked from anon+authenticated (stricter than
+   the waitlist). Applied to homa-prod via MCP; file renamed to the applied
+   version. `scripts/isolation-check.mjs` gained 6 lead-table cases, all
+   green.
+2. **Server data path**: first server-only secret enters `apps/web`
+   (SUPABASE_DB_PASSWORD via the Supabase transaction pooler,
+   `lib/map/db.ts` + postgres.js, prepare=false, max=2). Added to Vercel
+   prod+preview (Sensitive) via CLI. Lead ids never come from the client:
+   an httpOnly resume cookie (sha256-stored token) is the only session
+   mechanism, and every child-scoped write re-checks ownership.
+3. **packages/core `map/`**: bands math, versioned content bank
+   (v2026.07.0: 15 domains, 113 parent-observable items, ages 2 to 7,
+   every item cited to CDC/ELOF/CCSS/NGSS/C3/NCA/SHAPE/CASEL/ACTFL/
+   Harvard-EF/Clements-Sarama/HWT), adaptive ladder (base + up to 2 rungs,
+   unlocked only by "easily"), deterministic scorer (frontier months-ahead,
+   +24 cap, growing floor, confidence), sentence bank, map.* typed events.
+   Bank content derives from homa-template's questionnaire + benchmark
+   library (the M0-10 asset), extended to cover 4.5-7 where the template
+   bank thinned out.
+4. **`pnpm check:map` + CI step**: content linter (banned words per the
+   never-say law, em dash ban, citation presence, sane anchors) + golden-kid
+   scorer fixtures (ahead/mixed/sparse/struggling, determinism, no negative
+   number ever rendered). Caught one real violation pre-ship ("behind" in a
+   social-studies item, rewritten).
+5. **The flow at `/map`**: email-first (lead secured before any work, dup =
+   welcome back), kids with interests + help-with chips and the sage
+   out-of-range card, per-kid checklist (4 chips + skip, tap-to-save with
+   retry queue, finish-later), 2.2s scoring theater, report page at
+   `/map/r/[token]` (strengths first, server-rendered SVG dot chart, per-
+   domain evidence echoing her own answers, growing activities attached,
+   methodology + sources, founding-families close, print styles), report
+   email via Resend, `/map/method` methodology page, `/privacy` (launch
+   gate 7 pulled forward: we now hold child names + birth months + answers,
+   so the policy ships with the feature naming Supabase/Vercel/Resend and
+   the delete-anytime path).
+6. **Promise-keeping cron** (`/api/map/cron`, hourly via apps/web/
+   vercel.json, CRON_SECRET-gated): the single 24h reminder (one send ever)
+   and the band-ready email that fires automatically when a pending child's
+   age band ships.
+7. **Landing claims pass**: hero "Loved by 12,000+ homeschooling families"
+   avatar row and "Start free for 14 days" CTA (rulings C2/T2 violations,
+   ported from the kit) replaced with the honest map CTA + trust line;
+   pricing tier grid replaced by a founding-families band (D9's unlimited-
+   children promise is the only plan claim); invented testimonial quotes
+   replaced by the true our-story band with an explicit no-invented-
+   testimonials promise; community section's fake "4 families within 5
+   miles" stat reframed as roadmap; FAQ rewritten honestly (ages 2-7 today,
+   child never uses it, pricing published before anyone is charged);
+   benchmark demo now hands off to /map. `/waitlist` + `/conference` 308 to
+   `/map`; old form + page deleted; every lead still mirrors into
+   public.waitlist so MJ-09 invites read one list. This also resolves DM7's
+   flagged tension for map leads: the S1 microcopy now says "your email gets
+   each child's map and your founding-family invite," which is the consent
+   scope for everything the flow sends.
+8. **Verified**: typecheck, build, check:isolation, check:map all green;
+   live e2e against homa-prod (start → dup → 2 kids → 26 answers → score →
+   report page renders lawfully → Resend delivery to delivered@resend.dev →
+   viewed_at stamped → cron auth + run → resume no-enumeration → bad token
+   soft page); report + /map + landing screenshotted; all test rows deleted
+   after.
+
+Agent-made calls within the founder's mandate, logged: ladder capped at 2
+rungs per domain (reaches the +24 display cap; more taps add fatigue, not
+signal) · offline S1 falls back to the existing waitlist queue so a dead-
+wifi lead is still captured · exposure-based domain (second language) never
+produces a months number · report email contains no numbers (sibling-
+comparison law applied to inboxes) · cron reminder requires 4h of
+inactivity and one child unfinished. Founder still owes: read-aloud pass on
+the 113 item statements + report sentences (same bar as the copy kit), the
+D6 announce email send (draft: `docs/homa-planning/map-announcement-draft.md`),
+and the phone test.
+
 ## 2026-07-05 · Marketing demand engine spec (14-marketing-demand-engine.md)
 
 Founder-approved design session for the B2C demand-gen pipeline, ported from the
