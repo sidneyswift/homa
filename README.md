@@ -24,6 +24,7 @@ The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
 | `packages/design/` | Design tokens/components as a workspace package (source: `docs/homa-design/`) |
 | `supabase/` | Database migrations (Supabase GitHub integration watches this) |
+| `marketing/` | Demand-gen engine state: signal reservoir, staged/published bundles, personas, voice, routines (spec: `docs/homa-planning/14-marketing-demand-engine.md`) |
 | `docs/homa-planning/` | The planning corpus: PRD, architecture, backlog, PM library, decisions |
 | `docs/homa-design/` | Brand + UI source of truth ("Warm and playful"): tokens, UI kits, voice rules |
 | `HUMAN-TODO.md` | Founder's one-time setup checklist (temporary) |
