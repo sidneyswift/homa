@@ -6,8 +6,8 @@ source:
   type: planning-doc
   ref: marketing/raw/2026-07-05-planning-doc-mining.md
   locator: "L9-36"
-status: new
-used_by: null
+status: used
+used_by: 2026-07-05-how-to-track-homeschool-hours
 
 Hours tracking is the one externally validated demand (conference moms asked
 for it unprompted). The median mom reconstructs a legally required log from
