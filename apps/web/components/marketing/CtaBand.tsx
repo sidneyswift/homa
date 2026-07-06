@@ -35,14 +35,14 @@ export function CtaBand() {
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
         <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-          Meet your child&rsquo;s map
+          Get your free progress report
         </Button>
         <Button variant="ghost" size="lg" href="/map/method" style={{ background: "var(--surface-card)" }}>
           How the map works
         </Button>
       </div>
       <div data-reveal="" className="rv-d2" style={{ marginTop: 16, fontSize: "0.88rem", fontWeight: 600, color: "var(--stone-700)" }}>
-        Free &middot; about five minutes &middot; a checklist for you, never a test for them
+        Free &middot; about five minutes
       </div>
     </section>
   );

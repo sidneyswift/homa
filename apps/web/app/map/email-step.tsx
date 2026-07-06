@@ -99,11 +99,11 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
   return (
     <div>
       <h1 className="font-display text-3xl font-bold leading-tight text-strong">
-        Meet your child&apos;s map
+        See where your child stands
       </h1>
       <p className="mt-3 text-body">
         Answer a five-minute checklist about what you&apos;ve seen your child do. Homa checks it
-        against national benchmarks for their age and draws their map, free.
+        against national benchmarks for their age and sends you a free progress report.
       </p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -182,7 +182,7 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
           {busy ? "Saving\u2026" : "Start the checklist"}
         </button>
         <p className="mt-3 text-center text-sm text-muted">
-          Your email gets each child&apos;s map and your founding-family invite. That&apos;s it,
+          Your email gets each child&apos;s progress report and your founding-family invite. That&apos;s it,
           and you can delete everything anytime.
         </p>
       </form>

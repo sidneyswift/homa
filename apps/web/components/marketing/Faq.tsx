@@ -9,10 +9,10 @@ import { Eyebrow } from "./dividers";
 const ITEMS: ReadonlyArray<readonly [string, string]> = [
   ["Does Homa follow my state's standards?", "Yes. Pick your state and every subject maps to it, you can see coverage at a glance."],
   ["Can I use my own curriculum?", "Bring it. Homa plans around any mix of bought, borrowed, and homemade."],
-  ["What ages does it cover?", "Your child's map covers every age from 2 to 16, with a checklist tuned to each age. Homa's personalized materials start richest for the early years and grow from there."],
-  ["Does my child ever use it?", "Never. Homa is for you: the checklist is a conversation with you, not a test for them, and your child never talks to an AI."],
+  ["What ages does it cover?", "The progress report covers every age from 2 to 16, with a checklist tuned to each age. Homa's personalized materials start richest for the early years and grow from there."],
+  ["Does my child ever use it?", "Never. Homa is for you: your child never sees the checklist and never talks to an AI."],
   ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost, and a lighter week is still a school week."],
-  ["What does it cost?", "The map is free. Homa itself is invite-only while founding families shape it; pricing will be published before anyone is charged a cent."],
+  ["What does it cost?", "The progress report is free. Homa itself is invite-only while founding families shape it; pricing will be published before anyone is charged a cent."],
 ];
 
 export function Faq() {

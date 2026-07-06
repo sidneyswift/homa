@@ -132,9 +132,7 @@ export function ChecklistStep({
             anything, &ldquo;not sure&rdquo; is a real answer, and blanks are fine, they&apos;re
             just what&apos;s next.
           </p>
-          <p className="mt-4 font-hand text-xl text-sage">
-            a checklist for you, never a test for {child.name} {"\u270e"}
-          </p>
+
           <button
             type="button"
             onClick={() => setStarted(true)}
@@ -151,7 +149,7 @@ export function ChecklistStep({
     return (
       <div aria-busy="true" className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          That&apos;s {child.name} mapped.
+          {child.name}&apos;s report is ready.
         </p>
         <p className="mt-2 text-body">Saving the last answers{"\u2026"}</p>
       </div>

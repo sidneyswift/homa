@@ -42,9 +42,9 @@ export default function PrivacyPage() {
             ranges. Used to send your founding-family invite and to plan who we can serve well.
           </li>
           <li>
-            <b>Your child&apos;s map:</b> each child&apos;s first name, birth month and year (never
-            a full birth date), interests you tap, and your checklist answers. Used to draw the map
-            you asked for, and, when your invite opens, to start Homa off already knowing your
+            <b>Your child&apos;s progress report:</b> each child&apos;s first name, birth month and year (never
+            a full birth date), interests you tap, and your checklist answers. Used to build the progress
+            report you asked for, and, when your invite opens, to start Homa off already knowing your
             family. Your child never uses Homa and is never asked anything.
           </li>
           <li>
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
           <li><b>Resend</b> (email): delivers the emails you asked for.</li>
         </ul>
         <p className="mt-3 text-body">
-          No AI provider receives your map answers: the map is scored by plain, human-reviewed
+          No AI provider receives your checklist answers: the report is scored by plain, human-reviewed
           arithmetic. If that ever changes, this page changes first and says so plainly.
         </p>
 
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>We never sell your data or share it with advertisers.</li>
           <li>We never use your family&apos;s data to train AI models.</li>
-          <li>We never email you beyond your children&apos;s maps and your invite, unless you ask.</li>
+          <li>We never email you beyond your children&apos;s progress reports and your invite, unless you ask.</li>
         </ul>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Delete anytime</h2>

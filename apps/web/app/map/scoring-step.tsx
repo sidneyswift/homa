@@ -81,7 +81,7 @@ export function ScoringStep({ child }: { child: FlowChild }) {
   return (
     <div aria-busy="true">
       <h1 className="font-display text-3xl font-bold leading-tight text-strong">
-        Drawing {child.name}&apos;s map{"\u2026"}
+        Building {child.name}&apos;s progress report{"\u2026"}
       </h1>
       <div className="mt-6 rounded-lg border border-border bg-card p-6 shadow-sm">
         {lines.slice(0, lineCount).map((line, index) => (

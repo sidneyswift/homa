@@ -160,7 +160,7 @@ export function BenchmarkDemo() {
             That was three questions. The real thing is a 5-minute checklist that maps 15 domains
             for your own kid, free.{" "}
             <a href="/map" style={{ color: "var(--clay-600)", fontWeight: 700 }}>
-              Meet your child&rsquo;s map
+              Get your free progress report
             </a>
           </div>
         </div>

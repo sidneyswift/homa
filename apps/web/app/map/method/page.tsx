@@ -14,7 +14,7 @@ import { Logo } from "../../../components/brand/Logo";
 export const metadata: Metadata = {
   title: "How the map is made",
   description:
-    "The child's map is built from a parent's observations, checked against published national benchmarks. Here is the method, the sources, and what the map is not.",
+    "The progress report is built from a parent's observations, checked against published national benchmarks. Here is the method, the sources, and what the report is not.",
 };
 
 export default function MethodPage() {
@@ -30,8 +30,7 @@ export default function MethodPage() {
         </h1>
         <p className="mt-4 text-body">
           You answer a short checklist about what you&apos;ve seen your child do, day to day.
-          Nothing is asked of your child, ever: it&apos;s a checklist for you, never a test for
-          them.
+          Nothing is asked of your child, ever.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">The method, plainly</h2>
@@ -57,12 +56,12 @@ export default function MethodPage() {
           </li>
         </ol>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">What the map is not</h2>
+        <h2 className="mt-8 font-display text-xl font-semibold text-strong">What the report is not</h2>
         <p className="mt-3 text-body">
-          The map is not a test, not a medical or developmental evaluation, and not advice. It is
+          The report is not a test, not a medical or developmental evaluation, and not advice. It is
           an organized picture of your own observations, compared with national benchmarks. Every
-          child grows in their own order, and a first map is an estimate that sharpens with more
-          observations over time. If something on a map ever worries you, your pediatrician is the
+          child grows in their own order, and a first report is an estimate that sharpens with more
+          observations over time. If something on a report ever worries you, your pediatrician is the
           right person to ask.
         </p>
 
@@ -96,7 +95,7 @@ export default function MethodPage() {
             href="/map"
             className="inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
           >
-            Meet your child&apos;s map
+            Get your free progress report
           </Link>
         </p>
       </main>

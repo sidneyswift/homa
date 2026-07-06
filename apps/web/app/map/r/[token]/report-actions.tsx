@@ -29,7 +29,7 @@ export function ReportActions({
 
   async function share() {
     const url = `${window.location.origin}/map/r/${token}`;
-    const payload = { title: `${childName}'s map`, text: `A first look at where ${childName} stands.`, url };
+    const payload = { title: `${childName}'s progress report`, text: `A first look at where ${childName} stands.`, url };
     try {
       if (navigator.share) {
         await navigator.share(payload);
@@ -55,7 +55,7 @@ export function ReportActions({
         print it
       </button>
       <a
-        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s map`)}`}
+        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s report`)}`}
         className="text-brand underline-offset-2 hover:underline"
       >
         something look off? tell me

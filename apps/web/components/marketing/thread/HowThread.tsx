@@ -42,7 +42,7 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
     vignette: <WeekVignette />,
     action: (
       <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
-        Start with your child&rsquo;s map
+        Get your free progress report
       </Button>
     ),
   },
@@ -55,7 +55,7 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
   {
     n: "04",
     title: "Watch the needle move",
-    body: "A gentle checklist, answered by you, never a test for them, maps each child against your state\u2019s standards. Then Homa targets practice at what\u2019s growing and shows the work paying off.",
+    body: "A gentle checklist maps each child against your state\u2019s standards. Then Homa targets practice at what\u2019s growing and shows the work paying off.",
     vignette: <ProofVignette />,
   },
 ];

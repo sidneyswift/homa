@@ -27,7 +27,7 @@ import { ReportChart } from "./report-chart";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Your child's map",
+  title: "Your child's progress report",
   robots: { index: false },
 };
 
@@ -40,17 +40,17 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       <main className="mx-auto w-full max-w-xl px-6 py-20">
         <Logo size={26} />
         <h1 className="mt-8 font-display text-2xl font-bold text-strong">
-          This map link isn&apos;t active.
+          This report link isn&apos;t active.
         </h1>
         <p className="mt-3 text-body">
-          Want your own child&apos;s map? It takes about five minutes, from what you&apos;ve
+          Want your own child&apos;s progress report? It takes about five minutes, from what you&apos;ve
           already seen them do.
         </p>
         <Link
           href="/map"
           className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
         >
-          Meet your child&apos;s map
+          Get your free progress report
         </Link>
       </main>
     );
@@ -92,7 +92,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               </span>
             </div>
             <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong sm:text-5xl">
-              {report.childName}&apos;s <span style={{ color: "var(--clay-600)" }}>map</span>
+              {report.childName}&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
             </h1>
             <p className="mt-2 font-serif text-lg italic text-strong/75">{reportSubtitle(months)}</p>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-strong/70">
@@ -263,12 +263,12 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               <p className="mt-2 text-muted">
                 Your answers describe what {report.childName} does day to day. Each one is checked
                 against published national benchmarks for their age, the same sources schools and
-                pediatric milestones draw from. Where you said &ldquo;not sure&rdquo;, the map says
+                pediatric milestones draw from. Where you said &ldquo;not sure&rdquo;, the report says
                 so instead of guessing.
               </p>
               <p className="mt-2 text-muted">
-                This is a map made from a parent&apos;s observations, not a test and not medical
-                advice. Every child grows in their own order, and a first map is an estimate: it
+                This is a progress report built from a parent&apos;s observations, not a test and not medical
+                advice. Every child grows in their own order, and a first report is an estimate: it
                 sharpens with more observations over time.
               </p>
               <p className="mt-3 font-mono text-[0.65rem] leading-relaxed text-subtle">
@@ -282,11 +282,11 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             {/* CTA band */}
             <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
               <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
-                The map is the &ldquo;before&rdquo; picture.
+                This report is the &ldquo;before&rdquo; picture.
               </h3>
               <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
                 Homa is the assistant that moves it: materials made for exactly what&apos;s growing,
-                hours tracked for your state, and this same map redrawn as {report.childName} grows,
+                hours tracked for your state, and this report redrawn as {report.childName} grows,
                 so you can watch the numbers move.
               </p>
               <p
@@ -297,7 +297,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               </p>
               <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
                 We invite families a few at a time. Your invite comes by email, and{" "}
-                {report.childName}&apos;s map will be waiting inside.
+                {report.childName}&apos;s report will be waiting inside.
               </p>
             </div>
           </div>

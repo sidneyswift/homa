@@ -89,7 +89,7 @@ export function Hero() {
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
             <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-              Meet your child&rsquo;s map
+              See where your child stands
             </Button>
             <Button
               variant="ghost"
@@ -112,8 +112,8 @@ export function Hero() {
               maxWidth: 440,
             }}
           >
-            Free: a five-minute checklist for you, never a test for them, and your
-            child&rsquo;s map lands in your inbox. Built by a homeschool family.
+            Free: answer a five-minute checklist and get a progress report
+            showing exactly where your child stands. Built by a homeschool family.
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

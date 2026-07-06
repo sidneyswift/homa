@@ -75,7 +75,7 @@ export function HubStep({
                   href={`/map/r/${child.reportToken}`}
                   className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover"
                 >
-                  Open {child.name}&apos;s map
+                  Open {child.name}&apos;s report
                 </a>
               </div>
             );
@@ -86,7 +86,7 @@ export function HubStep({
               <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
               <p className="mt-1 text-body">
                 {started
-                  ? `${child.answered} answers saved. A few more minutes finishes the map.`
+                  ? `${child.answered} answers saved. A few more minutes finishes the report.`
                   : "About 5 minutes, from what you've already seen them do."}
               </p>
               <button

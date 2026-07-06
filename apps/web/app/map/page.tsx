@@ -12,9 +12,9 @@ import { MapFlow } from "./map-flow";
  */
 
 export const metadata: Metadata = {
-  title: "Meet your child's map",
+  title: "See where your child stands",
   description:
-    "Answer a five-minute checklist about what you've seen your child do. Homa maps it against national benchmarks and sends you their map, free.",
+    "Answer a five-minute checklist about what you've seen your child do. Homa scores it against national benchmarks and sends you a free progress report.",
 };
 
 export default function MapPage() {
@@ -24,14 +24,14 @@ export default function MapPage() {
         <Link href="/" aria-label="Homa home" className="inline-flex">
           <Logo size={26} />
         </Link>
-        <span className="text-sm text-subtle">a checklist for you, never a test for them</span>
+        <span className="text-sm text-subtle">about five minutes, totally free</span>
       </header>
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
         <MapFlow />
       </main>
       <footer className="mx-auto w-full max-w-xl px-6 pb-8 text-sm text-subtle">
         <p>
-          We only email you your children&apos;s maps and your founding-family invite. Delete
+          We only email you your children&apos;s progress reports and your founding-family invite. Delete
           anytime. <Link className="text-brand underline" href="/map/method">How the map is made</Link>
           {" \u00b7 "}
           <Link className="text-brand underline" href="/privacy">Privacy</Link>

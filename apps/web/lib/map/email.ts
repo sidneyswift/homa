@@ -52,7 +52,7 @@ async function send(args: SendArgs): Promise<boolean> {
   </div>
   <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
     You asked for this email at thankshoma.com. Reply and a real person answers.
-    We only email you your children's maps and your founding-family invite.
+    We only email you your children's progress reports and your founding-family invite.
   </p>
 </body></html>`;
 
@@ -85,12 +85,12 @@ export async function sendReportEmail(to: string, childName: string, reportToken
     to,
     subject: reportEmailSubject(childName),
     preview: reportEmailPreview(),
-    heading: `${childName}'s map is ready`,
+    heading: `${childName}'s progress report is ready`,
     bodyLines: [
-      `${childName}'s map is built from what you told me you've seen, checked against national benchmarks for their age.`,
+      `${childName}'s progress report is built from what you told me you've seen, checked against national benchmarks for their age.`,
       "It opens with strengths, because that's the truest place to start.",
     ],
-    cta: { label: `Open ${childName}'s map`, url },
+    cta: { label: `Open ${childName}'s report`, url },
     footerNote: "This link is yours to keep, it will always show this map. Want it gone instead? Reply with 'delete' and we'll remove your family's answers.",
   });
 }
@@ -117,7 +117,7 @@ export async function sendReminderEmail(
   const who = childName ?? "your child";
   return send({
     to,
-    subject: childName ? `${childName}'s map is a few taps away` : "Your child's map is a few taps away",
+    subject: childName ? `${childName}'s progress report is a few taps away` : "Your child's progress report is a few taps away",
     preview: "Your answers are saved. A few minutes finishes the map.",
     heading: `${who}'s map is almost drawn`,
     bodyLines: [
