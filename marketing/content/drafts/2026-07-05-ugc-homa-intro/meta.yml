@@ -5,6 +5,6 @@ formats:
   - {file: video/video-captioned.mp4, channel: tiktok+instagram+youtube+facebook, status: draft}
   - {file: video/video.mp4, channel: master-no-captions, status: draft}
 gates:
-  script: "reviewer(shortform-viewer) -> editor, both ran 2026-07-05, rewrites applied (pace halved, hook moved into speech, overlays sentence-cased, unverified scarcity line cut)"
+  script: "take 2: reviewer(shortform-viewer) -> editor, 2026-07-05. Take 3 (founder redirect: conversational, benchmarks feature, no props, real logo): reviewer -> editor ran again 2026-07-05; must-fixes applied (32 words for 13s, 5-word hook, 'exactly' cut as precision overclaim, for-you idea on screen)"
 scorecard: marketing/evals/scorecards/2026-07-05-ugc-homa-intro.json
-notes: "Video-only bundle (founder-requested Marketing Studio UGC asset). Per-channel caption files are not derived yet; derive them before any social publish, or reuse the hours-log bundle's caption pattern. Publishing remains blocked on Postiz setup (HUMAN-TODO)."
+notes: "Video-only bundle (founder-requested Marketing Studio UGC asset). Per-channel caption files are not derived yet; derive them before any social publish. Publishing blocked on Postiz setup (HUMAN-TODO) AND on the /map lead-magnet feature going live (the ad's free-checklist claim)."
