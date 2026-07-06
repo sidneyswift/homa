@@ -3,6 +3,27 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-05 (later) · Map bank v2026.07.1: ages 8 to 16 shipped (LM-7)
+
+Continuation of the "ship all" mandate: 75 new upper-band items across all
+15 domains, anchored to school grade bands (gr 3 ~108mo, gr 5 ~132mo, gr 8
+~168mo, gr 10 ~192mo, ladder headroom to ~17.5y) and cited to the same
+frameworks the template benchmark library carries for PreK-12 (CCSS math +
+ELA, NGSS MS/HS, C3, National Core Arts, SHAPE, CASEL, ACTFL Seal-of-
+Biliteracy path, plus three new source keys: Dawson & Guare executive
+skills, AAP HealthyChildren life-skills/chores guidance, ASHA school-age
+language). Scored range now 2y0m to 17y0m; under-2s keep the pending-band
+promise flow. Each domain gained an age-appropriate "growing" activity for
+kids 8+ (report picks by age). Agent calls made alone: plateaued skills
+(e.g. phonics for teens) deliberately read "at age" rather than
+manufacturing ahead-months; teen items lean on artifacts a parent has seen
+(essays, laundry, schedules, ensembles) rather than quiz-the-kid prompts,
+per the plan's face-validity risk note. Verified: check:map extended to the
+full range with 10yo and 15yo golden-kid fixtures (all green), live 12yo
+e2e against homa-prod (base selection, scoring, teen report render, older
+activity swap, no toddler copy leaks), test rows cleaned. The read-aloud
+debt now covers all 188 items.
+
 ## 2026-07-05 · Lead magnet v2 SHIPPED (founder: "ship all, start with your recommendations, make room to improve")
 
 Founder ruled all eight planning decisions to the recommended options
