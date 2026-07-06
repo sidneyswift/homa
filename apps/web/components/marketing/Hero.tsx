@@ -86,8 +86,8 @@ export function Hero() {
             <span style={{ color: "var(--clay-600)" }}>assistant</span>.
           </h1>
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "24px 0 0", maxWidth: 470 }}>
-            The planning, the tracking, the what-do-we-do-today, hand it to Homa. You&rsquo;ve got
-            this. Homa&rsquo;s got the rest.
+            Homa plans the week, makes materials for each kid, and tracks your hours.
+            You&rsquo;ve got this. Homa&rsquo;s got the rest.
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
             <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
@@ -114,8 +114,8 @@ export function Hero() {
               maxWidth: 440,
             }}
           >
-            Free: answer a five-minute checklist and get a progress report showing
-            exactly where your child stands. Built by a homeschool family.
+            Free to start: a five-minute checklist gets you a progress report showing exactly
+            where your child stands. Built by a homeschool family.
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

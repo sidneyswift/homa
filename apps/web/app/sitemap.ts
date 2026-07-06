@@ -9,7 +9,7 @@ import { listBlogPosts } from "../lib/blog";
 const BASE = "https://thankshoma.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes: MetadataRoute.Sitemap = ["", "/map", "/map/method", "/privacy", "/blog"].map(
+  const staticRoutes: MetadataRoute.Sitemap = ["", "/map", "/map/method", "/privacy", "/terms", "/blog"].map(
     (route) => ({
       url: `${BASE}${route}`,
       lastModified: new Date(),

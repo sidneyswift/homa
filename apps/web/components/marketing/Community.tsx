@@ -29,8 +29,8 @@ export function Community() {
           </h2>
           <Squiggle style={{ maxWidth: 300 }} color="var(--sage-600)" />
           <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "18px 0 24px", maxWidth: 440 }}>
-            Homa introduces you to nearby families, co-ops, and park days, matched to your kids&rsquo; ages and what
-            you&rsquo;re teaching.
+            Homa will introduce you to nearby families, co-ops, and park days, matched to your
+            kids&rsquo; ages and what you&rsquo;re teaching.
           </p>
           <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
             Join the founding families
@@ -51,10 +51,10 @@ export function Community() {
         >
           <Badge tone="sage">On the roadmap</Badge>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.3, marginTop: 14 }}>
-            Homa families near you: co-ops, park days, and friends who get it.
+            Homa families near you: co-ops, park days, friends who get it.
           </div>
           <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 8, lineHeight: 1.5 }}>
-            Coming as the founding families grow. Opt-in, always.
+            Coming as founding families grow. Opt-in, always.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 16, color: "var(--text-subtle)", fontSize: "0.85rem" }}>
             <MapPin size={14} aria-hidden="true" /> Wherever you homeschool

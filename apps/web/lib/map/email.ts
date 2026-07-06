@@ -87,11 +87,11 @@ export async function sendReportEmail(to: string, childName: string, reportToken
     preview: reportEmailPreview(),
     heading: `${childName}'s progress report is ready`,
     bodyLines: [
-      `${childName}'s progress report is built from what you told me you've seen, checked against national benchmarks for their age.`,
+      `${childName}'s progress report is ready: what you've seen, checked against national benchmarks for their age.`,
       "It opens with strengths, because that's the truest place to start.",
     ],
     cta: { label: `Open ${childName}'s report`, url },
-    footerNote: "This link is yours to keep, it will always show this report. Want it gone instead? Reply with 'delete' and we'll remove your family's answers.",
+    footerNote: "This link is yours to keep. Want it gone instead? Reply 'delete' and we'll remove your family's answers.",
   });
 }
 
@@ -100,11 +100,11 @@ export async function sendResumeEmail(to: string, resumeToken: string): Promise<
   return send({
     to,
     subject: "Pick up where you left off",
-    preview: "Your answers are saved. This link continues on any device.",
+    preview: "Your answers are saved. This link picks up on any device.",
     heading: "Everything you told me is saved",
-    bodyLines: ["Tap below to keep going exactly where you stopped, on any device."],
+    bodyLines: ["Tap below to pick up exactly where you stopped, on any device."],
     cta: { label: "Continue the checklist", url },
-    footerNote: "Didn't ask for this? You can ignore it, nothing changes without you.",
+    footerNote: "Didn't ask for this? Ignore it. Nothing changes without you.",
   });
 }
 
@@ -121,8 +121,8 @@ export async function sendReminderEmail(
     preview: "Your answers are saved. A few minutes finishes the report.",
     heading: `${who}'s progress report is almost ready`,
     bodyLines: [
-      "Everything you answered is saved. A few more taps and the report is ready.",
-      "No rush at all, the link works whenever you are.",
+      "Your answers are saved. A few more taps and the report is done.",
+      "No rush. The link works whenever you are.",
     ],
     cta: { label: "Finish the checklist", url },
     footerNote: "This is the only reminder we'll send.",
@@ -143,8 +143,8 @@ export async function sendRetestEmail(
     preview: "Four weeks of work deserve a fresh number.",
     heading: `It's retest week for ${childName}`,
     bodyLines: [
-      `Four weeks ago you started a ${subjectName.toLowerCase()} plan for ${childName}. This is the fun part: a two-minute re-check to see what moved.`,
-      "Answer from what you've seen lately, and the progress report updates itself.",
+      `Four weeks ago you started ${childName}'s ${subjectName.toLowerCase()} plan. Now the fun part: a two-minute re-check to see what moved.`,
+      "Answer from what you've seen lately and the report updates itself.",
     ],
     cta: { label: `Retest ${childName}'s ${subjectName.toLowerCase()}`, url },
     footerNote: "A slower month is normal too. The numbers are a map, never a grade.",
@@ -163,10 +163,10 @@ export async function sendBandReadyEmail(
     preview: "The checklist for their age just shipped, as promised.",
     heading: `As promised: ${childName}'s checklist is ready`,
     bodyLines: [
-      `When you signed up, ${childName}'s age band wasn't mapped yet, and I said I'd tell you the moment it was. It is.`,
-      "About five minutes, from what you've already seen them do.",
+      `When you signed up, ${childName}'s checklist wasn't ready yet, and I promised to tell you the moment it was. It is.`,
+      "About five minutes, from what you've seen them do.",
     ],
     cta: { label: `Start ${childName}'s checklist`, url },
-    footerNote: "Everything you told me about your family is already saved.",
+    footerNote: "Everything you shared is already saved.",
   });
 }

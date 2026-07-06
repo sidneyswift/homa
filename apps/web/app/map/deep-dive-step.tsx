@@ -104,8 +104,8 @@ export function DeepDiveStep({
           Going deeper on {domain.displayName.toLowerCase()}
         </h1>
         <p className="mt-3 text-body">
-          A few more questions to pin down exactly where {child.name} stands, and exactly where a
-          plan should start. Two ways to do it, both completely fine:
+          A few more questions to pin down where {child.name} stands and where a plan should
+          start. Two ways to do it:
         </p>
         <div className="mt-6 flex flex-col gap-3">
           <button
@@ -115,7 +115,7 @@ export function DeepDiveStep({
           >
             <p className="font-display text-lg font-semibold text-strong">Answer from what you&apos;ve seen</p>
             <p className="mt-1 text-sm text-muted">
-              Same as the checklist: your own noticing, from memory, right now.
+              Your own noticing, from memory, right now.
             </p>
           </button>
           <button
@@ -125,8 +125,7 @@ export function DeepDiveStep({
           >
             <p className="font-display text-lg font-semibold text-strong">Sit with {child.name} and try them</p>
             <p className="mt-1 text-sm text-muted">
-              Have {child.name} next to you and try each one together, casually. No test energy,
-              just the two of you finding out.
+              Try each one together, casually. No test energy, just the two of you finding out.
             </p>
           </button>
         </div>
@@ -145,7 +144,7 @@ export function DeepDiveStep({
     return (
       <div aria-busy="true" className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          That&apos;s the deep dive done.
+          Deep dive done.
         </p>
         <p className="mt-2 text-body">Updating {child.name}&apos;s report{"\u2026"}</p>
       </div>
@@ -165,8 +164,8 @@ export function DeepDiveStep({
 
       {mode === "together" && sittingCount === 0 ? (
         <p className="mt-4 rounded-md bg-[var(--accent-sage-soft)] px-4 py-3 text-sm text-body">
-          Keep it playful: &ldquo;hey {child.name}, want to try something?&rdquo; Stop whenever
-          either of you is done, everything saves as you go.
+          Keep it playful: &ldquo;hey {child.name}, want to try something?&rdquo; Stop anytime,
+          everything saves as you go.
         </p>
       ) : null}
 
@@ -196,7 +195,7 @@ export function DeepDiveStep({
             onClick={() => finish()}
             className="text-sm text-subtle underline-offset-2 hover:underline"
           >
-            that&apos;s enough, update the report
+            stop here and update the report
           </button>
         </div>
       </div>

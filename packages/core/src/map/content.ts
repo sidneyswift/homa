@@ -107,17 +107,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "math",
     displayName: "Math",
-    intro: "Numbers and counting first.",
+    intro: "First up: numbers.",
     exposureBased: false,
     growingActivity: {
       title: "Count the stairs",
       description:
-        "Count everything today: stairs, crackers, toy cars. Touch each one while counting, and stop at one more than yesterday.",
+        "Count everything today: stairs, crackers, toy cars. Touch each one as you count, and go one higher than yesterday.",
     },
     growingActivityOlder: {
       title: "Real-money math",
       description:
-        "Hand them the receipt math: the grocery total, the tip, the discount. Real stakes beat worksheets.",
+        "Hand them the real math: the grocery total, the tip, the discount. Real stakes beat worksheets.",
     },
     items: [
       { id: "math.counts-to-5", statement: "Counts out loud from 1 to 5, mostly in order", typicalMonths: 30, sources: ["elof", "clements-sarama"] },
@@ -140,17 +140,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "literacy",
     displayName: "Literacy",
-    intro: "Books and reading next.",
+    intro: "Next: books and reading.",
     exposureBased: false,
     growingActivity: {
       title: "The letter hunt",
       description:
-        "Pick one letter for the day and hunt it everywhere: cereal boxes, street signs, book covers. Loud celebration on every find.",
+        "Pick one letter for the day and hunt it everywhere: cereal boxes, street signs, book covers. Celebrate every find.",
     },
     growingActivityOlder: {
       title: "The book they pick",
       description:
-        "Twenty minutes with any book they chose, then one honest question: what do you think happens next, and why?",
+        "Twenty minutes with any book they chose, then one question: what happens next, and why?",
     },
     items: [
       { id: "literacy.book-handling", statement: "Turns book pages and points at pictures when you name them", typicalMonths: 30, sources: ["cdc", "elof"] },
@@ -172,17 +172,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "phonics",
     displayName: "Phonics",
-    intro: "Sounds, rhymes, and sounding words out.",
+    intro: "Sounds, rhymes, and sounding out words.",
     exposureBased: false,
     growingActivity: {
       title: "Sound I-spy",
       description:
-        "Play I-spy with sounds instead of colors: 'I spy something that starts with mmm.' Works in the car, the bath, the grocery line.",
+        "Play I-spy with sounds: 'I spy something that starts with mmm.' Works in the car, the bath, the grocery line.",
     },
     growingActivityOlder: {
       title: "Word autopsy",
       description:
-        "Pick one big word from the day (photosynthesis, ridiculous) and take it apart together: roots, prefixes, where it came from.",
+        "Pick one big word from the day (photosynthesis, ridiculous) and take it apart: roots, prefixes, where it came from.",
     },
     items: [
       { id: "phonics.joins-rhymes", statement: "Joins in on rhymes and rhyming songs they know", typicalMonths: 36, sources: ["elof"] },
@@ -202,17 +202,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "writing",
     displayName: "Writing",
-    intro: "Handwriting, from scribbles to sentences.",
+    intro: "Writing, from scribbles to sentences.",
     exposureBased: false,
     growingActivity: {
       title: "Rainbow name",
       description:
-        "Write their name big in marker. They trace over it in two more colors, then decorate the letters. Name practice that feels like art.",
+        "Write their name big in marker. They trace it in two more colors, then decorate it. Name practice that feels like art.",
     },
     growingActivityOlder: {
       title: "The two-draft trick",
       description:
-        "One paragraph tonight on anything they care about. Tomorrow, ten minutes making it better. Revision is the whole skill.",
+        "One paragraph tonight on anything they care about. Tomorrow, ten minutes making it better. Revising IS the skill.",
     },
     items: [
       { id: "writing.purposeful-marks", statement: "Scribbles on purpose and copies a straight line after you draw one", typicalMonths: 30, sources: ["cdc", "hwt"] },
@@ -234,17 +234,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "language",
     displayName: "Language",
-    intro: "Talking, telling, and conversation.",
+    intro: "Talking and telling stories.",
     exposureBased: false,
     growingActivity: {
       title: "Tell it back",
       description:
-        "After anything fun, hand them the story: 'tell daddy what happened at the park.' Let them narrate, you just add the oohs.",
+        "After anything fun, hand them the story: 'tell daddy what happened at the park.' They narrate, you add the oohs.",
     },
     growingActivityOlder: {
       title: "Dinner-table talk",
       description:
-        "Two minutes on a topic they love, no notes, then one follow-up question. Holding the room is a practicable skill.",
+        "Two minutes on a topic they love, no notes, then one follow-up question. Holding the room is a skill you can practice.",
     },
     items: [
       { id: "language.two-words", statement: "Puts two words together, like 'more milk' or 'go park'", typicalMonths: 26, sources: ["cdc"] },
@@ -266,17 +266,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "science",
     displayName: "Science",
-    intro: "Noticing, wondering, and finding out.",
+    intro: "Science: noticing and finding out.",
     exposureBased: false,
     growingActivity: {
       title: "Sink or float",
       description:
-        "Fill a bowl, gather five small things, and guess before each one goes in. The guessing is the science; the splashing is the fun.",
+        "Fill a bowl, gather five small things, and guess before each one goes in. The guessing is the science.",
     },
     growingActivityOlder: {
       title: "Change one thing",
       description:
-        "Next recipe or project, change exactly one variable and predict what happens before it does. That's the scientific method, at home.",
+        "Next recipe or project, change one thing and predict what happens. That's the scientific method, at home.",
     },
     items: [
       { id: "science.notices-nature", statement: "Notices bugs, weather, and animals and points them out to you", typicalMonths: 30, sources: ["elof"] },
@@ -297,17 +297,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "social_studies",
     displayName: "Social studies",
-    intro: "Their world: family, places, and people.",
+    intro: "Their world: people, places, the past.",
     exposureBased: false,
     growingActivity: {
       title: "Map of home",
       description:
-        "Draw a map of your house together and mark everyone's bed with a star. First map, first legend, zero prep.",
+        "Draw a map of your house together and mark everyone's bed with a star. Their first map and first legend, zero prep.",
     },
     growingActivityOlder: {
       title: "One story, two tellings",
       description:
-        "Read the same news story from two different sources and hunt the differences together. Source-reading is the skill.",
+        "Read the same news story from two sources and hunt the differences together. That's source-reading.",
     },
     items: [
       { id: "social_studies.name-age", statement: "Says their first name and age when someone asks", typicalMonths: 33, sources: ["cdc", "elof"] },
@@ -329,17 +329,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "art",
     displayName: "Art & creative",
-    intro: "Making things, their way.",
+    intro: "Art: making things their way.",
     exposureBased: false,
     growingActivity: {
       title: "Draw the song",
       description:
-        "Play one song and draw how it feels: fast scribbles for fast parts, soft colors for the quiet bit. No wrong answers.",
+        "Play one song and draw how it feels: fast scribbles for fast parts, soft colors for quiet parts. No wrong answers.",
     },
     growingActivityOlder: {
       title: "Draw what's there",
       description:
-        "Ten minutes drawing a real object in front of them, shoes, a mug, a hand. Observation is where realism comes from.",
+        "Ten minutes drawing a real object: shoes, a mug, a hand. Realism comes from observation.",
     },
     items: [
       { id: "art.happy-making", statement: "Makes marks, paints, or glues happily (the doing matters more than the result)", typicalMonths: 30, sources: ["nca", "elof"] },
@@ -358,17 +358,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "music",
     displayName: "Music",
-    intro: "Rhythm, songs, and listening.",
+    intro: "Music: rhythm, songs, listening.",
     exposureBased: false,
     growingActivity: {
       title: "Copy my clap",
       description:
-        "Clap a short pattern, they echo it back, then swap leaders. Wooden spoons and pot lids welcome.",
+        "Clap a short pattern, they echo it, then swap leaders. Wooden spoons and pot lids welcome.",
     },
     growingActivityOlder: {
       title: "Find it by ear",
       description:
-        "Pick a melody they love and find it by ear on any instrument or a piano app. Ears first, notation later.",
+        "Pick a melody they love and find it by ear on any instrument or piano app. Ears first, notation later.",
     },
     items: [
       { id: "music.moves-to-music", statement: "Bounces, sways, or dances when music plays", typicalMonths: 30, sources: ["cdc", "nca"] },
@@ -387,17 +387,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "gross_motor",
     displayName: "Gross motor",
-    intro: "Running, jumping, and balance.",
+    intro: "Big movement: running, jumping, balance.",
     exposureBased: false,
     growingActivity: {
       title: "Animal races",
       description:
-        "Race down the hallway as animals: bear crawl, crab walk, frog jump. Different animal each round, giggles guaranteed.",
+        "Race down the hallway as animals: bear crawl, crab walk, frog jump. New animal each round.",
     },
     growingActivityOlder: {
       title: "Pick your sweat",
       description:
-        "They choose 20 minutes of movement a day this week, any kind, and keep their own tally. Ownership builds the habit.",
+        "They pick 20 minutes of movement a day this week, any kind, and keep their own tally. Owning it builds the habit.",
     },
     items: [
       { id: "gross_motor.runs-climbs", statement: "Runs without falling and climbs onto furniture by themselves", typicalMonths: 28, sources: ["cdc"] },
@@ -418,17 +418,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "fine_motor",
     displayName: "Fine motor",
-    intro: "Small hands, precise moves.",
+    intro: "Small-hand skills.",
     exposureBased: false,
     growingActivity: {
       title: "Snipping strips",
       description:
-        "Cut paper into strips and let them snip confetti into a jar, then snip along a drawn line. Child-safe scissors, tiny doses.",
+        "Cut paper into strips and let them snip confetti into a jar, then along a drawn line. Child-safe scissors, five minutes.",
     },
     growingActivityOlder: {
       title: "Fix-it project",
       description:
-        "One small real repair or build together: a loose screw, a model kit, a hem. Real tools, real result.",
+        "One small repair or build together: a loose screw, a model kit, a hem. Real tools, real result.",
     },
     items: [
       { id: "fine_motor.tower-4", statement: "Stacks a tower of 4 or more blocks", typicalMonths: 28, sources: ["cdc"] },
@@ -448,17 +448,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "social_emotional",
     displayName: "Social-emotional",
-    intro: "Feelings, friends, and bounce-back.",
+    intro: "Feelings and friends.",
     exposureBased: false,
     growingActivity: {
       title: "Name it to tame it",
       description:
-        "When big feelings hit, help them name the feeling first, then offer two choices for what to do next. Naming is half the calming.",
+        "When big feelings hit, name the feeling first, then offer two choices for what to do next. Naming is half the calming.",
     },
     growingActivityOlder: {
       title: "Rose, thorn, bud",
       description:
-        "At dinner: one good thing, one hard thing, one thing they're looking forward to. Naming feelings stays the skill at every age.",
+        "At dinner: one good thing, one hard thing, one thing they're looking forward to. Naming feelings is the skill at every age.",
     },
     items: [
       { id: "social_emotional.notices-upset", statement: "Notices when someone is upset and reacts (a pat, bringing a toy)", typicalMonths: 30, sources: ["cdc", "casel"] },
@@ -484,12 +484,12 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     growingActivity: {
       title: "The button board",
       description:
-        "Button an old shirt around a cushion and it becomes a game instead of a morning standoff. Race the timer, never each other.",
+        "Button an old shirt around a cushion and buttons become a game instead of a morning fight. Race the timer, never each other.",
     },
     growingActivityOlder: {
       title: "Own one meal",
       description:
-        "They own one family meal a week: plan it, list it, cook it, serve it. Independence tastes like dinner.",
+        "They own one family meal a week: plan it, shop the list, cook it, serve it.",
     },
     items: [
       { id: "self_care.spoon-cup", statement: "Feeds themselves with a spoon and drinks from an open cup", typicalMonths: 28, sources: ["cdc"] },
@@ -510,17 +510,17 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
   {
     id: "executive_function",
     displayName: "Executive function",
-    intro: "Focus, memory, and flexible thinking.",
+    intro: "Focus, memory, follow-through.",
     exposureBased: false,
     growingActivity: {
       title: "Freeze dance",
       description:
-        "Music on, dance big; music off, freeze completely. Impulse control dressed up as a dance party.",
+        "Music on, dance big. Music off, freeze. Impulse control, dressed up as a dance party.",
     },
     growingActivityOlder: {
       title: "The backwards plan",
       description:
-        "Take one due date and plan backwards on paper: what has to be true the day before, the week before. Do it together once, then hand it over.",
+        "Take one due date and plan backwards on paper: what has to happen the day before, the week before. Do it together once, then hand it over.",
     },
     items: [
       { id: "executive_function.focus-5", statement: "Sticks with one activity for 5-plus minutes when interested", typicalMonths: 30, sources: ["harvard-ef", "elof"] },
@@ -546,12 +546,12 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     growingActivity: {
       title: "One phrase week",
       description:
-        "Pick one useful phrase ('¿dónde está...?') and use it all week at natural moments. One phrase that sticks beats ten that don't.",
+        "Pick one useful phrase and use it all week at natural moments. One phrase that sticks beats ten that don't.",
     },
     growingActivityOlder: {
       title: "Subtitles flip",
       description:
-        "Watch a favorite show in the language with subtitles on, ten minutes at a time. Comprehensible input, zero fight.",
+        "Watch a favorite show in the language with subtitles on, ten minutes at a time. Learning that feels like screen time.",
     },
     items: [
       { id: "spanish.understands-words", statement: "Understands common everyday words in that language (water, milk, more)", typicalMonths: 36, sources: ["actfl"] },

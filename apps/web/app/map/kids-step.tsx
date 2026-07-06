@@ -90,8 +90,7 @@ export function KidsStep({
     <div>
       <h1 className="font-display text-3xl font-bold leading-tight text-strong">Add your kids</h1>
       <p className="mt-3 text-body">
-        {welcomeBack ? "Welcome back. " : ""}Just names and ages. A nickname is completely fine
-        (&ldquo;Kid 1&rdquo; works), we&apos;re not after anyone&apos;s information.
+        {welcomeBack ? "Welcome back. " : ""}Names and ages, nothing else. A nickname works fine (&ldquo;Kid 1&rdquo; counts).
       </p>
 
       {added.map((kid) => (
@@ -106,8 +105,8 @@ export function KidsStep({
             </p>
           ) : (
             <p className="text-body">
-              <span className="font-semibold text-strong">{kid.name}</span> is saved. The checklist
-              starts at age 2, and I&apos;ll email you the moment {kid.name}&apos;s is ready.
+              <span className="font-semibold text-strong">{kid.name}</span> is saved. The checklist starts
+              at age 2, and I&apos;ll email you the moment {kid.name}&apos;s is ready.
             </p>
           )}
         </div>
@@ -127,7 +126,7 @@ export function KidsStep({
 
         <p className="mt-4 font-medium text-strong">Born</p>
         <p className="mt-1 text-sm text-muted">
-          Month and year only, so the checklist fits their age exactly.
+          Month and year only. The checklist fits their exact age.
         </p>
         <div className="mt-2 flex gap-2">
           <select
@@ -184,7 +183,7 @@ export function KidsStep({
             </button>
           ) : null}
         </div>
-        <p className="mt-3 text-center text-sm text-muted">You can always add more kids later.</p>
+        <p className="mt-3 text-center text-sm text-muted">You can add more kids later.</p>
       </div>
     </div>
   );

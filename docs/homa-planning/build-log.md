@@ -3,6 +3,50 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 (later still) · Full copy simplification pass
+
+Founder: "do a pass that simplifies and clarifies all copy." Ran the
+copy-editing skill's clarity/voice/word-level sweeps over every parent-
+facing string: the sentence bank (domainLine, homaNote, tryHeading), all
+15 domain intros and both growing-activity sets, all ~45 plan practice
+patterns and 9 style notes, every flow screen (email, kids, checklist,
+extras, deep dive, scoring, hub), the report, plan, method, and privacy
+pages, the four transactional emails, and the landing sections. Rules
+applied: cut weak intensifiers (completely/totally/genuinely), one idea
+per sentence, front-load the point, verbs over abstractions, keep the
+warmth but never at the cost of the meaning. ~130 strings tightened; the
+banned-word/em-dash linter guarded the whole pass.
+
+Two real fixes surfaced by reading rendered output during the pass:
+
+1. homaNote grammar: with zero ahead subjects the note read "on track in
+   12 more" with no preceding clause; "more" now only follows an "ahead
+   in N" clause.
+2. Plan floor bug: when a subject had ONLY a not-yet answer (no confirmed
+   easier skills), plan targets fell to the bottom of the bank, so a
+   6-year-old's fine-motor plan targeted block-stacking. The target floor
+   now anchors at the named not-yet itself (the deep dive refines it
+   downward only with evidence). Regression fixture added to check:map.
+
+Verified: check:map, typecheck, build green; fresh 6-year-old e2e with
+screenshots of the report, plan, /map, and hero; scoped test cleanup (the
+two real leads untouched). Committed together with the parallel session's
+/terms page (below), which was verified in the same build.
+
+## 2026-07-06 (later still) · /terms shipped for Google OAuth branding
+
+Google's consent-screen branding form (part of making the Google sign-in
+screen say "Homa" instead of the raw Supabase URL) requires public privacy
+and terms URLs. /privacy existed; /terms did not, so it was written in the
+same plain-language voice and shipped at apps/web/app/terms/page.tsx
+(+ footer Support column + sitemap). Two deliberate omissions, both because
+the LLC filing is deferred until Stripe activation (entry #11 above): no
+legal entity name and no governing-law clause. Revisit both when the entity
+exists. Content commitments mirror what is already true in code and copy:
+free today, parents only (18+), children never use Homa, not-a-test and
+not-medical-advice disclaimers matching /map/method, data terms deferring
+to /privacy, delete-anytime via hello@mail.thankshoma.com.
+
 ## 2026-07-06 (later) · The go-deeper loop shipped (founder: "don't defer these, BOIL THE OCEAN")
 
 The read-through session's "deferred" list, built the same night on founder

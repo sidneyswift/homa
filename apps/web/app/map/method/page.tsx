@@ -36,33 +36,30 @@ export default function MethodPage() {
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">The method, plainly</h2>
         <ol className="mt-3 list-decimal space-y-3 pl-5 text-body">
           <li>
-            Every checklist item is anchored to the age by which that behavior is typical,
-            according to the published frameworks below (the same sources schools and pediatric
-            milestone checklists draw from).
+            Every question is tied to the age when that skill is typical, per the published
+            frameworks below (the same sources schools and pediatricians use).
           </li>
           <li>
-            When you say &ldquo;easily&rdquo; to something typical of an older child, that shows up
-            as months ahead. &ldquo;Getting there&rdquo; counts as emerging. &ldquo;Not sure&rdquo;
-            and skipped items are never held against a child: they simply mean less certainty, and
-            the map says so.
+            &ldquo;Easily&rdquo; on something typical of an older child counts as months ahead.
+            &ldquo;Getting there&rdquo; counts as emerging. &ldquo;Not sure&rdquo; and skips are
+            never held against a child; they just mean less certainty, and the report says so.
           </li>
           <li>
-            Each domain&apos;s position is the strongest behavior you&apos;ve actually observed,
-            compared with your child&apos;s age in months, capped at 24 months ahead.
+            Each subject&apos;s number is the strongest skill you&apos;ve seen, compared with your
+            child&apos;s age in months, capped at 24 months ahead.
           </li>
           <li>
-            The scoring is deterministic arithmetic, reviewed by a person. No AI model reads or
-            scores your answers, and the same answers always produce the same map.
+            The scoring is plain arithmetic, reviewed by a person. No AI reads or scores your
+            answers, and the same answers always produce the same report.
           </li>
         </ol>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What the report is not</h2>
         <p className="mt-3 text-body">
-          The report is not a test, not a medical or developmental evaluation, and not advice. It is
-          an organized picture of your own observations, compared with national benchmarks. Every
-          child grows in their own order, and a first report is an estimate that sharpens with more
-          observations over time. If something on a report ever worries you, your pediatrician is
-          the right person to ask.
+          Not a test. Not a medical or developmental evaluation. Not advice. It is your own
+          observations, organized and compared with national benchmarks. Every child grows in
+          their own order, and a first report is an estimate that sharpens as you answer more.
+          If something ever worries you, ask your pediatrician.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Sources</h2>
@@ -78,16 +75,15 @@ export default function MethodPage() {
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Coverage today</h2>
         <p className="mt-3 text-body">
-          The checklist covers ages 2 to 16 across {MAP_DOMAINS.length} domains
-          ({MAP_DOMAINS.map((domain) => domain.displayName).join(", ")}). Early ages anchor to
-          developmental milestones; school ages anchor to national grade-band standards, asked as
-          things a parent has actually seen (work on the table, habits around the house), never as
-          quiz questions for the child. For children under 2, we save what you share and email you
-          the moment their checklist is ready at age 2.
+          The checklist covers ages 2 to 16 across {MAP_DOMAINS.length} subjects
+          ({MAP_DOMAINS.map((domain) => domain.displayName).join(", ")}). Early ages use
+          developmental milestones; school ages use national grade standards, asked as things a
+          parent has seen (work on the table, habits around the house), never as quiz questions
+          for the child. Under 2, we save what you share and email you at age 2.
         </p>
         <p className="mt-3 font-mono text-xs text-subtle">
-          benchmark bank version {MAP_BANK_VERSION}. Reports record the version that scored them,
-          so a later content correction never silently rewrites an existing report.
+          benchmark bank {MAP_BANK_VERSION}. Every report records the version that scored it, so
+          a later correction never silently rewrites an existing report.
         </p>
 
         <p className="mt-10">

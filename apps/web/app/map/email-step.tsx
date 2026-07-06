@@ -143,8 +143,7 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
           {busy ? "Saving\u2026" : "Get started"}
         </button>
         <p className="mt-3 text-center text-sm text-muted">
-          Your email gets the progress report and your founding-family invite. That&apos;s it,
-          and you can delete everything anytime.
+          We email you the report and, later, your invite. Nothing else. Delete anytime.
         </p>
       </form>
     </div>

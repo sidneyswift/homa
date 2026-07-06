@@ -79,7 +79,7 @@ export default async function PlanPage({
               {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>{plan.subjectName.toLowerCase()}</span> month
             </h1>
             <p className="mt-2 font-serif text-lg italic text-strong/75">
-              four weeks, five-ish minutes a day, then a retest to see what moved
+              four weeks, a few minutes a day, then a retest to see what moved
             </p>
           </div>
 
@@ -90,15 +90,14 @@ export default async function PlanPage({
                   The starting line (already solid)
                 </p>
                 <p className="mt-1 text-body">
-                  {plan.startingLine}. That&apos;s real footing, and the month builds straight on
-                  top of it.
+                  {plan.startingLine}. That&apos;s real footing. The month builds on top of it.
                 </p>
               </div>
             ) : (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
                 <p className="text-body">
-                  We&apos;re starting fresh here, which is a perfectly good place to start. The
-                  first week will find the footing on its own.
+                  We&apos;re starting fresh here, and that&apos;s a fine place to start. Week one
+                  finds the footing.
                 </p>
               </div>
             )}
@@ -132,20 +131,19 @@ export default async function PlanPage({
                 Retest week: around {retestDate}
               </p>
               <p className="mt-1 text-sm" style={{ color: "var(--gold-ink)" }}>
-                I&apos;ll email you a two-minute re-check for {plan.subjectName.toLowerCase()} so
-                you can see what moved on {childName}&apos;s progress report. A slower month is
-                normal too; the numbers are a map, never a grade.
+                I&apos;ll email you a two-minute re-check so you can see what moved on{" "}
+                {childName}&apos;s report. A slower month is normal too. The numbers are a map,
+                never a grade.
               </p>
             </div>
 
             <div className="mt-7 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
               <p className="font-display text-xl font-bold" style={{ color: "#fff" }}>
-                Homa runs months like this one for every subject at once.
+                Homa runs a month like this for every subject at once.
               </p>
               <p className="mt-2 max-w-lg text-sm" style={{ color: "var(--stone-300)" }}>
-                Materials made for {childName} specifically, woven around your family, with the
-                numbers tracked for you. You&apos;re on the founding families list; your invite
-                comes by email.
+                Materials made for {childName}, woven around your family, numbers tracked for you.
+                You&apos;re on the founding families list. Your invite comes by email.
               </p>
             </div>
           </div>
@@ -153,7 +151,7 @@ export default async function PlanPage({
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
             <span>made with Homa for {childName}</span>
             <Link href={`/map/r/${token}`} className="text-brand underline-offset-2 hover:underline print:hidden">
-              back to the progress report
+              back to the report
             </Link>
           </div>
         </div>

@@ -9,7 +9,7 @@ import { Logo } from "../brand/Logo";
 const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
   ["Product", [["Your child's progress report", "/map"], ["How the report works", "/map/method"], ["Features", "/#features"], ["Try it", "/#try"]]],
   ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Founding families", "/#pricing"]]],
-  ["Support", [["Privacy", "/privacy"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
+  ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
 ];
 
 export function Footer() {

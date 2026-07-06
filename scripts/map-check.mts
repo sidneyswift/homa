@@ -277,6 +277,13 @@ report(
         }
       }
       if (plan.styleNote) checkCopy(`plan.${domain.id}.style`, plan.styleNote);
+      // A not-yet on the base must make the base itself the first target,
+      // never a much easier item from the bottom of the bank.
+      const firstTarget = domain.items.find((item) => item.statement === plan.targets[0]);
+      if (firstTarget && firstTarget.typicalMonths < base.typicalMonths - 6) {
+        plansOk = false;
+        failures.push(`plan ${domain.id}@${age}: first target far below the base`);
+      }
     }
   }
   report("plan builder: 4 clean weeks for all 15 subjects at 4 ages", plansOk && failures.every((f) => !f.startsWith("plan ")));

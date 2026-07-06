@@ -179,17 +179,17 @@ export function ExtrasStep({
   return (
     <div>
       <h1 className="font-display text-3xl font-bold leading-tight text-strong">
-        Checklist done. The report is next.
+        Done. The report is next.
       </h1>
       <p className="mt-3 text-body">
-        While I check the benchmarks: a few optional extras that make {child.name}&apos;s report
-        (and everything Homa makes later) fit your family better. Skip any of it.
+        A few optional extras while I check the benchmarks. Each one makes {child.name}&apos;s
+        report and future materials fit your family better. Skip any of it.
       </p>
 
       <div className="mt-6 rounded-lg border border-border bg-card p-6 shadow-sm">
         <TagInput
           label={`What is ${child.name} loving right now?`}
-          hint="Tap or type anything: characters, songs, obsessions. It shows up in their materials."
+          hint="Tap or type anything: characters, songs, obsessions. It ends up in their materials."
           suggestions={interestSuggestions(child.ageMonths)}
           tags={interests}
           setTags={setInterests}
@@ -207,7 +207,7 @@ export function ExtrasStep({
 
         <TagInput
           label={`Activities outside school?`}
-          hint="Gymnastics, co-op, Spanish class, swim team. It all shapes the plans."
+          hint="Gymnastics, co-op, Spanish class, swim team."
           suggestions={["gymnastics", "co-op", "swim", "dance", "sports team", "music lessons", "church group", "scouts"]}
           tags={activities}
           setTags={setActivities}
@@ -217,7 +217,7 @@ export function ExtrasStep({
         <div className="mt-5">
           <p className="font-medium text-strong">Anything else about {child.name}?</p>
           <p className="mt-1 text-sm text-muted">
-            Activities, health, temperament, the neighbor kid they adore. Whatever helps.
+            Activities, health, temperament, anything that helps me know them.
           </p>
           <textarea
             value={notes}
@@ -233,7 +233,7 @@ export function ExtrasStep({
             <div className="mt-6 border-t border-border-subtle pt-5">
               <p className="font-display text-lg font-semibold text-strong">About your homeschool</p>
               <p className="mt-1 text-sm text-muted">
-                So anything Homa builds works WITH what you&apos;re already doing.
+                So everything Homa builds fits what you&apos;re already doing.
               </p>
             </div>
 
@@ -305,7 +305,7 @@ export function ExtrasStep({
 
             <TagInput
               label="The crew?"
-              hint="Family members, pets, stuffed animals, the neighbor kid. They can star in personalized materials later. Names only, photos come after our privacy paperwork is signed."
+              hint="Family, pets, stuffed animals, best friends. They can star in personalized materials later. Names only for now."
               suggestions={["dad", "grandma", "the dog", "baby sister"]}
               tags={crew}
               setTags={setCrew}
@@ -315,7 +315,7 @@ export function ExtrasStep({
             <div className="mt-5">
               <p className="font-medium text-strong">Anything that matters to your family?</p>
               <p className="mt-1 text-sm text-muted">
-                Faith, values, aesthetics, screen rules. Materials get made around it.
+                Faith, values, aesthetics, screen rules. Materials will respect it.
               </p>
               <textarea
                 value={values}
@@ -342,7 +342,7 @@ export function ExtrasStep({
           disabled={busy}
           className="mt-2 w-full text-center text-sm text-subtle underline-offset-2 hover:underline"
         >
-          skip, straight to the report
+          skip this, show the report
         </button>
       </div>
     </div>

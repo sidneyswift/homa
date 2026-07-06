@@ -30,16 +30,15 @@ export default function PrivacyPage() {
         <p className="mt-2 text-sm text-subtle">Last updated {UPDATED}</p>
 
         <p className="mt-6 text-body">
-          Homa is built by a homeschool family, for homeschool families. The short version: we
-          collect only what the product needs, children never use Homa, and you can have
-          everything deleted with one email.
+          Built by a homeschool family, for homeschool families. The short version: we collect
+          only what we need, children never use Homa, and one email deletes everything.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we collect, and why</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>
-            <b>Waitlist:</b> your email, and optionally your first name, state, and kids&apos; age
-            ranges. Used to send your founding-family invite and to plan who we can serve well.
+            <b>Waitlist:</b> your email, plus optional name, state, and kids&apos; ages. Used to
+            send your invite and plan who we can serve well.
           </li>
           <li>
             <b>Your child&apos;s progress report:</b> each child&apos;s first name (a nickname is fine), birth month and year (never
@@ -48,14 +47,14 @@ export default function PrivacyPage() {
             family. Your child never uses Homa and is never asked anything.
           </li>
           <li>
-            <b>Product analytics:</b> anonymous usage events (which step of a flow was reached).
-            Event records never contain names or emails.
+            <b>Product analytics:</b> anonymous usage events (which step was reached). Never
+            names, never emails.
           </li>
         </ul>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Who processes data for us</h2>
         <p className="mt-3 text-body">
-          Three companies process data on our behalf, and this is the complete list today:
+          Three companies process data for us. This is the complete list:
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li><b>Supabase</b> (database hosting, US East): stores everything above.</li>

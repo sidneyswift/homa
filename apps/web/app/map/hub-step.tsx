@@ -50,7 +50,7 @@ export function HubStep({
       <p className="mt-3 text-body">
         {childrenList.length === 0
           ? "Add your kids and we'll get mapping."
-          : "Everything saves as you go. Pick up wherever you like."}
+          : "Everything saves as you go. Pick up anywhere."}
       </p>
 
       <div className="mt-6 flex flex-col gap-4">
@@ -60,8 +60,8 @@ export function HubStep({
               <div key={child.id} className="rounded-lg border border-sage/40 bg-[var(--accent-sage-soft)] p-5">
                 <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
                 <p className="mt-1 text-body">
-                  The checklist starts at age 2. I&apos;ll email you the moment {child.name}&apos;s
-                  is ready, and everything you&apos;ve told me is saved.
+                  The checklist starts at age 2. I&apos;ll email you the moment {child.name}&apos;s is
+                  ready. Everything you&apos;ve shared is saved.
                 </p>
               </div>
             );
@@ -70,7 +70,7 @@ export function HubStep({
             return (
               <div key={child.id} className="rounded-lg border border-border bg-card p-5 shadow-sm">
                 <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
-                <p className="mt-1 text-body">The progress report is ready, and it&apos;s in your inbox too.</p>
+                <p className="mt-1 text-body">The report is ready, and it&apos;s in your inbox too.</p>
                 <a
                   href={`/map/r/${child.reportToken}`}
                   className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover"
@@ -86,8 +86,8 @@ export function HubStep({
               <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
               <p className="mt-1 text-body">
                 {started
-                  ? `${child.answered} answers saved. A few more minutes finishes the report.`
-                  : "About 5 minutes, from what you've already seen them do."}
+                  ? `${child.answered} answers saved. A few minutes finishes the report.`
+                  : "About 5 minutes, from what you've seen them do."}
               </p>
               <button
                 type="button"
@@ -103,7 +103,7 @@ export function HubStep({
 
       {anyPending && childrenList.every((child) => !child.inRange) ? (
         <p className="mt-4 text-body">
-          You&apos;re on the founding families list either way, and your invite comes by email.
+          You&apos;re on the founding families list. Your invite comes by email.
         </p>
       ) : null}
 
@@ -126,7 +126,7 @@ export function HubStep({
               onClick={() => void emailMeThisLink()}
               className="self-start text-brand underline-offset-2 hover:underline"
             >
-              email me this link for later (or another device)
+              email me this link (for later, or another device)
             </button>
           )
         ) : null}

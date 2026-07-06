@@ -49,92 +49,92 @@ export interface PlanContext {
  */
 const PRACTICE_PATTERNS: Record<string, readonly [string, string, string]> = {
   math: [
-    "Ten minutes a day of {skill}, disguised as play: dice, cards, cooking measurements, or keeping score.",
-    "Let {interest} carry the math: count it, sort it, add it, chart it. The skill sticks to what they love.",
-    "Errand math: at the store or the kitchen, hand over one real {skill} moment a day and let them own it.",
+    "Ten minutes a day of {skill}, played not taught: dice, cards, cooking, keeping score.",
+    "Let {interest} carry the math: count it, sort it, add it, chart it.",
+    "One real {skill} moment a day, at the store or in the kitchen, and they own it.",
   ],
   literacy: [
-    "A daily 15-minute reading rhythm where {skill} is the quiet goal. Same couch, same time, their pick.",
-    "Tie it to {interest}: books, articles, or comics about it count double, because they'll actually finish them.",
-    "Library trip: they choose anything on the shelf that touches {interest}, you sneak one that stretches toward {skill}.",
+    "Fifteen minutes of reading a day, same couch, same time, their pick. {skill} is the quiet goal.",
+    "Books, articles, or comics about {interest} count double, because they'll finish them.",
+    "Library trip: they pick anything about {interest}, you sneak in one that stretches toward {skill}.",
   ],
   phonics: [
-    "Five minutes of sound play a day aimed at {skill}: in the car, in the bath, no table required.",
-    "Label the world of {interest}: sound out its names and words together, one at a time.",
-    "A read-aloud where they take every word you point at, pointing only at words that practice {skill}.",
+    "Five minutes of sound play a day aimed at {skill}: in the car, in the bath. No table needed.",
+    "Sound out the words of {interest} together, one at a time.",
+    "During read-alouds, they read every word you point at. Point only at words that practice {skill}.",
   ],
   writing: [
-    "One small daily write aimed at {skill}: a list, a sign, a text to grandma. Tiny and real beats long and forced.",
-    "A {interest} journal: two sentences a day about it. The subject does the motivating, {skill} does the growing.",
-    "Mail something weekly: a letter or card to a real person. Envelopes are the best handwriting trick ever invented.",
+    "One tiny real write a day aimed at {skill}: a list, a sign, a text to grandma.",
+    "A {interest} journal: two sentences a day. The topic motivates, {skill} grows.",
+    "Mail something weekly: a letter or card to a real person. Envelopes make kids want to write.",
   ],
   language: [
-    "Dinner-table turns: two minutes each on the day, practicing {skill} without anyone calling it practice.",
-    "Interview them about {interest} and swap: real questions, real answers, real back-and-forth.",
-    "One retell a day: they tell someone who wasn't there what happened, aiming quietly at {skill}.",
+    "Dinner-table turns: two minutes each about the day. {skill} practice nobody calls practice.",
+    "Interview them about {interest}, then swap. Real questions, real back-and-forth.",
+    "One retell a day: they tell someone who wasn't there what happened. That builds {skill}.",
   ],
   science: [
-    "One kitchen-counter experiment a week plus a daily 'what do you notice?', aimed at {skill}.",
-    "Chase {interest} scientifically: one why-question about it a day, then find out together.",
-    "A weekly outside wander (yard, park, or a science museum morning) with one thing to observe for {skill}.",
+    "One kitchen experiment a week, plus a daily 'what do you notice?'. Both build {skill}.",
+    "One why-question about {interest} a day, then find out together.",
+    "A weekly wander (yard, park, or a museum morning) with one thing to observe for {skill}.",
   ],
   social_studies: [
-    "One map moment a day: find where dinner came from, where grandma lives, where {interest} happens.",
-    "Story time from the past: one true story a week connected to {interest}, then talk about {skill}.",
-    "A field trip this month (a historic spot, a museum, city hall steps) pointed gently at {skill}.",
+    "One map moment a day: where dinner came from, where grandma lives, where {interest} happens.",
+    "One true story from the past each week, tied to {interest}, then talk about {skill}.",
+    "One field trip this month (a historic spot, a museum, city hall) pointed at {skill}.",
   ],
   art: [
-    "Ten unhurried minutes of making a day, with {skill} as the quiet stretch. Product optional, mess allowed.",
+    "Ten minutes of making a day, with {skill} as the quiet stretch. Mess allowed.",
     "Draw or build {interest} three ways this week: from memory, from a picture, from life.",
-    "An artist date: a gallery, a mural walk, or one great art book, then make something back at the table.",
+    "An artist date: a gallery, a mural walk, or one great art book. Then make something at the table.",
   ],
   music: [
-    "Five minutes of daily music play aimed at {skill}: clap it, hum it, tap it on the table.",
-    "Soundtrack {interest}: find its songs, learn one together, notice what the music is doing.",
-    "One live-music moment this month, anything from a busker to a concert, then talk about what you heard.",
+    "Five minutes of music play a day aimed at {skill}: clap it, hum it, tap it.",
+    "Find the songs of {interest}, learn one together, notice what the music does.",
+    "One live-music moment this month, busker to concert, then talk about what you heard.",
   ],
   gross_motor: [
-    "Twenty minutes of daily movement that sneaks up on {skill}: chase games, obstacle courses, the good tired.",
-    "Turn {interest} into the workout: build the game around it and let {skill} hide inside.",
-    "A weekly bigger outing: playground, pool, trail, or field, with one playful rep of {skill}.",
+    "Twenty minutes of movement a day that sneaks up on {skill}: chase games, obstacle courses.",
+    "Build the game around {interest} and let {skill} hide inside it.",
+    "One bigger outing a week: playground, pool, trail, field, with one playful rep of {skill}.",
   ],
   fine_motor: [
-    "Five-minute hands sessions aimed at {skill}: tongs, beads, tape, dough, real tools with supervision.",
-    "Build {interest} small: models, crafts, or kits about it are {skill} practice wearing a costume.",
-    "Give real jobs: pouring, spreading, buttoning, fixing. The household is the best fine-motor gym there is.",
+    "Five minutes of hand work a day aimed at {skill}: tongs, beads, tape, dough, real tools.",
+    "Build {interest} small: models, crafts, and kits are {skill} practice in disguise.",
+    "Give real jobs: pouring, spreading, buttoning, fixing. The house is the best fine-motor gym.",
   ],
   social_emotional: [
-    "Name one feeling a day out loud (yours count too), building toward {skill} without a single lecture.",
-    "Use {interest} stories: when a character struggles, wonder together what they felt and what helped.",
-    "One planned peer moment a week (park day, co-op, cousins) with a gentle eye on {skill}.",
+    "Name one feeling a day out loud (yours count too). It builds {skill} without a lecture.",
+    "In {interest} stories, when a character struggles, wonder together what they felt and what helped.",
+    "One peer moment a week (park day, co-op, cousins) with a quiet eye on {skill}.",
   ],
   self_care: [
-    "Hand over one real job this week aimed at {skill}, and resist the urge to redo it. Done beats perfect.",
-    "Make a picture list or checklist they own. The list does the nagging so you never have to.",
-    "Race the clock, never each other: beat yesterday's time at {skill} and celebrate loudly.",
+    "Hand over one real job this week aimed at {skill}. Don't redo it. Done beats perfect.",
+    "Make a checklist they own. The list does the nagging so you don't.",
+    "Race the clock, never each other: beat yesterday's time at {skill}.",
   ],
   executive_function: [
-    "One backwards plan a week: pick something they want, put it on paper, work out the steps together, aiming at {skill}.",
-    "Let them run one {interest} project start to finish this month. You consult, they own it, {skill} grows.",
-    "A visible family calendar they update themselves: one entry a day is executive function in disguise.",
+    "One backwards plan a week: something they want, on paper, steps worked out together. That's {skill}.",
+    "They run one {interest} project start to finish this month. You consult. {skill} grows.",
+    "A family calendar they update themselves: one entry a day builds {skill} quietly.",
   ],
   spanish: [
-    "Ten minutes of daily exposure aimed at {skill}: a song, a show with subtitles, a phrase used for real.",
-    "Bring {interest} into the language: its words first, because motivation is half of vocabulary.",
-    "One out-loud win a day: a greeting, an order, a question actually used with a real person.",
+    "Ten minutes of the language a day aimed at {skill}: a song, a show with subtitles, a phrase used for real.",
+    "Learn the words of {interest} first. Motivation is half of vocabulary.",
+    "One out-loud win a day: a greeting, an order, a question used with a real person.",
   ],
 };
 
 const STYLE_NOTES: Record<string, string> = {
-  montessori: "Shaped Montessori-friendly: real materials, real jobs, child-led pace, observation over correction.",
-  charlotte_mason: "Shaped for a Charlotte Mason home: short lessons, living books, narration, and time outdoors.",
-  classical: "Shaped for a classical rhythm: memory work first, then understanding, then expression.",
-  reggio: "Shaped Reggio-style: follow the child's questions and document what they discover.",
-  waldorf: "Shaped Waldorf-friendly: rhythm, story, handwork, and warmth before worksheets.",
-  unit_studies: "Shaped for unit studies: fold these into your current theme rather than running them separately.",
-  unschooling: "Shaped for an unschooling home: every activity here is an invitation, never an assignment.",
-  eclectic: "Shaped for an eclectic mix: take what fits this month, drop what doesn't, nothing is precious.",
-  traditional: "Shaped for a traditional structure: short daily slots that fit a planner beautifully.",
+  montessori: "Shaped for a Montessori home: real materials, real jobs, child-led pace.",
+  charlotte_mason: "Shaped for a Charlotte Mason home: short lessons, living books, narration, time outdoors.",
+  classical: "Shaped for a classical home: memory first, then understanding, then expression.",
+  reggio: "Shaped Reggio-style: follow their questions, document what they find.",
+  waldorf: "Shaped for a Waldorf home: rhythm, story, handwork, warmth before worksheets.",
+  unit_studies: "Shaped for unit studies: fold these into your current theme.",
+  unschooling: "Shaped for an unschooling home: everything here is an invitation, never an assignment.",
+  eclectic: "Shaped for an eclectic home: take what fits, drop what doesn't.",
+  traditional: "Shaped for a traditional home: short daily slots that fit a planner.",
 };
 
 function fill(template: string, skill: string, interest: string): string {
@@ -183,24 +183,36 @@ export function buildFourWeekPlan(
   // The highest anchor she confirmed, in months: nothing below it can be a
   // target (re-proving the obvious is busywork, not a plan).
   let reachedMonths = -Infinity;
+  let lowestNotYet: number | null = null;
   for (const item of sorted) {
     const answer = answered.get(item.id);
     if (answer === "easily") reachedMonths = Math.max(reachedMonths, item.typicalMonths);
     if (answer === "getting_there") reachedMonths = Math.max(reachedMonths, item.typicalMonths - 6);
+    if (answer === "not_yet" && (lowestNotYet === null || item.typicalMonths < lowestNotYet)) {
+      lowestNotYet = item.typicalMonths;
+    }
   }
+  // With nothing confirmed, the honest aim is the named not-yet itself, not
+  // the bottom of the bank (a 6-year-old's plan must never target
+  // block-stacking). The deep dive refines this floor further.
+  const floor = Number.isFinite(reachedMonths)
+    ? reachedMonths
+    : lowestNotYet !== null
+      ? lowestNotYet - 1
+      : -Infinity;
 
-  // Targets: the first two rungs above everything confirmed that aren't
-  // themselves confirmed (a not-yet names the frontier directly).
+  // Targets: the first two rungs above the floor that aren't confirmed
+  // (a not-yet names the frontier directly).
   const targets: string[] = [];
   for (const item of sorted) {
     if (targets.length >= 2) break;
     if (answered.get(item.id) === "easily") continue;
-    if (item.typicalMonths <= reachedMonths) continue;
+    if (item.typicalMonths <= floor) continue;
     targets.push(item.statement);
   }
   if (targets.length === 0) {
     // Everything in the bank confirmed: aim the plan at depth, not rungs.
-    targets.push(`Going deeper and wider in ${domain.displayName.toLowerCase()}, past every benchmark on file`);
+    targets.push(`Going wider in ${domain.displayName.toLowerCase()}: past every benchmark on file`);
   }
 
   const interest = context.interests?.[0] ?? "whatever they love most right now";
@@ -216,7 +228,7 @@ export function buildFourWeekPlan(
     ];
     if (week === 1) base.push(`${activity.title}: ${lowerFirst(activity.description)}`);
     if (week === 2 || week === 4) base.push(fill(patterns[2], skill, interest));
-    if (week === 3) base.push("A lighter week is allowed and expected. Repeat the favorite from weeks 1 and 2.");
+    if (week === 3) base.push("A lighter week is normal. Repeat the favorite from weeks 1 and 2.");
     return { week, focus, activities: base };
   });
 

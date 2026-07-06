@@ -42,15 +42,13 @@ export function Stories() {
           }}
         >
           <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
-            Homa began as the system one homeschool family built for their own kitchen table:
-            plans for the week, materials made for one specific kid, and a map of where she
-            stands that never once tested her.
+            Homa began at one family&rsquo;s kitchen table: weekly plans, materials made for one
+            specific kid, and a picture of where she stands that never once tested her.
           </p>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "16px 0 0", fontSize: "0.98rem" }}>
-            Homa is that same system, rebuilt so it can run your family&rsquo;s homeschool too.
-            And a promise while we grow: no invented testimonials on this page, ever. When
-            founding families say things worth quoting, you&rsquo;ll read them here with their
-            permission.
+            Homa is that same system, rebuilt for your family. And a promise: no invented
+            testimonials on this page, ever. When founding families say quotable things,
+            you&rsquo;ll read them here with permission.
           </p>
         </div>
       </div>

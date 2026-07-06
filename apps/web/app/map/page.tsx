@@ -32,8 +32,7 @@ export default function MapPage() {
       </main>
       <footer className="mx-auto w-full max-w-xl px-6 pb-8 text-sm text-subtle">
         <p>
-          We only email you your children&apos;s progress reports and your founding-family invite.
-          Delete anytime.{" "}
+          We email you the reports and, later, your invite. Nothing else. Delete anytime.{" "}
           <Link className="text-brand underline" href="/map/method">How the report is made</Link>
           {" \u00b7 "}
           <Link className="text-brand underline" href="/privacy">Privacy</Link>

@@ -50,13 +50,13 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
       return {
         badge: "Part of your world",
         numberLabel: "exploring",
-        sentence: `A second language is alive in your home, and every bit of it counts. ${evidence}`.trim(),
+        sentence: `A second language is part of your home, and every bit counts. ${evidence}`.trim(),
       };
     }
     return {
       badge: "Whenever you like",
       numberLabel: "\u00b7",
-      sentence: "Not part of home life right now, and that's completely fine. The door is always open.",
+      sentence: "Not part of home life right now, and that's fine. The door is always open.",
     };
   }
 
@@ -65,24 +65,24 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
       return {
         badge: "Ahead",
         numberLabel: `+${score.monthsAhead} mo`,
-        sentence: `${childName} is working ahead of what's typical for their age here. ${evidence}`.trim(),
+        sentence: `${childName} is ahead of what's typical for their age here. ${evidence}`.trim(),
       };
     case "on_track":
       return {
         badge: "On track",
         numberLabel:
           score.monthsAhead && score.monthsAhead > 0 ? `+${score.monthsAhead} mo` : "at age",
-        sentence: `Right where this typically looks at their age. ${evidence}`.trim(),
+        sentence: `Right where most kids their age are. ${evidence}`.trim(),
       };
     case "growing": {
       const openers = nextStep
         ? [
             `The next step here is clear: ${nextStep}. That's where to start.`,
-            `${childName} is right at the edge of one specific thing: ${nextStep}.`,
-            `What's next for ${childName}: ${nextStep}. One skill, very learnable.`,
+            `Next up for ${childName}: ${nextStep}.`,
+            `What's next for ${childName}: ${nextStep}. One specific, learnable skill.`,
           ]
         : [
-            `This one is simply what's next for ${childName}, and there's a place to start below.`,
+            `This is just what's next for ${childName}. There's a place to start below.`,
           ];
       return {
         badge: "Growing right now",
@@ -94,7 +94,7 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
       return {
         badge: "Not mapped yet",
         numberLabel: "\u00b7",
-        sentence: "We haven't seen enough here to place it honestly. A few more observations would fill it in.",
+        sentence: "Not enough answers yet to place this honestly. A few more would fill it in.",
       };
   }
 }
@@ -118,8 +118,8 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
 
   if (scores.mappedCount === 0) {
     return (
-      `${opening} where we are: ${childName}'s picture is just getting started, and that's a fine place to be. ` +
-      `Answer a few more whenever you like and it fills in. ${noticing}`
+      `${opening} where we are: ${childName}'s picture is just getting started, and that's fine. ` +
+      `Answer more whenever you like and it fills in. ${noticing}`
     );
   }
 
@@ -131,15 +131,22 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
         ? `${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and a clear next step in the ones marked blue.`
         : `${childName} has a clear next step in every subject marked blue.`;
     return (
-      `${opening} the honest picture, and honest is what makes it useful: ${footingLine} ` +
-      `That's not a verdict on ${childName} or on you. It's a starting line, and each blue card below says exactly where to begin. ` +
+      `${opening} the honest picture: ${footingLine} ` +
+      `That's a starting line, not a verdict. Each blue card below says exactly where to begin. ` +
       noticing
     );
   }
 
   const parts: string[] = [];
-  if (ahead > 0) parts.push(`ahead of what's typical for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}`);
-  if (onTrack > 0) parts.push(`right on track in ${onTrack} more`);
+  if (ahead > 0) parts.push(`ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}`);
+  if (onTrack > 0) {
+    // "12 more" only reads right after an "ahead in N" clause.
+    parts.push(
+      ahead > 0
+        ? `on track in ${onTrack} more`
+        : `on track in ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}`,
+    );
+  }
   const standing = parts.length > 0 ? `${childName} is ${parts.join(" and ")}` : `${childName}'s picture is filling in`;
   const growingLine =
     growing > 0
@@ -168,7 +175,7 @@ export function tryHeading(growingCount: number): { title: string; sub: string }
   if (growingCount > 2) {
     return {
       title: "Where to start",
-      sub: "Not all at once. Pick one for this week, that's genuinely enough.",
+      sub: "Not all at once. Pick one for this week. That's enough.",
     };
   }
   return {

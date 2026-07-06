@@ -11,10 +11,10 @@ import { Eyebrow } from "./dividers";
  */
 
 const POINTS = [
-  "Start with your child's progress report, free, today",
-  "Founding families are invited in small groups, with real attention",
-  "Every plan will include unlimited children, always",
-  "Your family's answers are saved, so Homa knows your kids on day one",
+  "Get your child's free progress report today",
+  "Families join in small groups, with real attention",
+  "Unlimited children on every plan, always",
+  "Your answers are saved, so Homa knows your kids on day one",
 ] as const;
 
 export function FoundingFamilies() {
@@ -34,8 +34,8 @@ export function FoundingFamilies() {
           We&rsquo;re letting families in a few at a time.
         </h2>
         <p style={{ color: "var(--text-muted)", fontSize: "1.05rem", lineHeight: 1.6, margin: "0 auto", maxWidth: 560 }}>
-          So every family gets real attention while Homa grows. Your child&rsquo;s progress report is
-          the first step, and it&rsquo;s yours to keep either way.
+          So every family gets real attention while Homa grows. The progress report is step
+          one, free, and yours to keep either way.
         </p>
       </div>
       <div

@@ -57,8 +57,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           This report link isn&apos;t active.
         </h1>
         <p className="mt-3 text-body">
-          Want your own child&apos;s progress report? It takes about five minutes, from what
-          you&apos;ve already seen them do.
+          Want your own child&apos;s progress report? It takes about five minutes.
         </p>
         <Link
           href="/map"
@@ -161,7 +160,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                   {report.childName}&apos;s strengths, first
                 </h2>
                 <p className="mt-1 text-sm text-muted">
-                  Where {report.childName} is working ahead of what&apos;s typical for {ageLabel(months)}.
+                  Where {report.childName} is ahead of what&apos;s typical for {ageLabel(months)}.
                 </p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   {strengths.map((score) => {
@@ -201,8 +200,8 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             {/* The whole picture */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">The whole picture</h2>
             <p className="mt-1 text-sm text-muted">
-              One dot per subject. The line is &ldquo;typical for {ageLabel(months)}&rdquo;. Yellow
-              is ahead, green is on track, blue is growing right now, with a place to start below.
+              One dot per subject. The line marks typical for {ageLabel(months)}. Yellow is ahead,
+              green is on track, blue is growing right now.
             </p>
             <div className="mt-4 rounded-lg border border-border-subtle bg-card p-4">
               <ReportChart scores={ordered} />
@@ -211,8 +210,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             {/* Subject by subject */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">Subject by subject</h2>
             <p className="mt-1 text-sm text-muted">
-              Tap any subject to see exactly what I asked, what you answered, and the national
-              benchmarks it was checked against.
+              Tap a subject to see what I asked, what you answered, and the benchmarks behind it.
             </p>
             <div className="mt-4 flex flex-col gap-2.5">
               {ordered.map((score) => {
@@ -244,7 +242,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                         <span className="block font-semibold text-strong">{domain?.displayName}</span>
                         <span className="mt-0.5 block text-sm text-muted">{line.sentence}</span>
                         <span className="mt-1 block text-xs font-medium text-brand group-open:hidden">
-                          see what I asked and the benchmarks {"\u2193"}
+                          see the questions and benchmarks {"\u2193"}
                         </span>
                       </span>
                       <span className="flex-shrink-0 pt-0.5 font-mono text-sm text-strong">
@@ -277,7 +275,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                         </>
                       ) : (
                         <p className="text-sm text-muted">
-                          No answers here yet. A few more observations would fill this subject in.
+                          No answers here yet. A few would fill this subject in.
                         </p>
                       )}
 
@@ -286,9 +284,8 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                           <p className="text-sm font-semibold text-strong">{activity.title}</p>
                           <p className="mt-0.5 text-sm text-body">{activity.description}</p>
                           <p className="mt-2 text-xs text-muted">
-                            When your Homa invite opens, this is exactly the kind of spot she builds
-                            a plan around: materials, a pace, and a re-check a few weeks later so
-                            you can watch this number move.
+                            This is the kind of spot Homa builds a plan around: materials, a pace,
+                            and a re-check so you can watch the number move.
                           </p>
                         </div>
                       ) : null}
@@ -369,13 +366,13 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               <p className="mt-2 text-muted">
                 Your answers describe what {report.childName} does day to day. Each one is checked
                 against published national benchmarks for their age, the same sources schools and
-                pediatric milestones draw from. Where you said &ldquo;not sure&rdquo;, the report
-                says so instead of guessing.
+                pediatricians use. Where you said &ldquo;not sure&rdquo;, the report says so
+                instead of guessing.
               </p>
               <p className="mt-2 text-muted">
-                This is a progress report built from a parent&apos;s observations, not a test and
-                not medical advice. Every child grows in their own order, and a first report is an
-                estimate: it sharpens with more observations over time.
+                This is built from a parent&apos;s observations. It is not a test and not medical
+                advice. Every child grows in their own order, and a first report is an estimate
+                that sharpens as you answer more.
               </p>
               <p className="mt-3 font-mono text-[0.65rem] leading-relaxed text-subtle">
                 SOURCES {"\u00b7"} {Array.from(sourceKeys).map((key) => MAP_SOURCES[key]?.label).filter(Boolean).join(" \u00b7 ")} {"\u00b7"} bank {report.bankVersion} {"\u00b7"}{" "}
@@ -391,9 +388,9 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                 This report is the &ldquo;before&rdquo; picture.
               </h3>
               <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
-                Homa is the assistant that moves it: a plan for each blue subject, materials made
-                for exactly what&apos;s growing, and this same report re-drawn as {report.childName}{" "}
-                grows, so you can watch the numbers move.
+                Homa moves it: a plan for every blue subject, materials made for exactly
+                what&apos;s growing, and this report re-drawn as {report.childName} grows, so you
+                watch the numbers move.
               </p>
               <p
                 className="mt-4 inline-flex items-center rounded-pill px-5 py-2.5 text-sm font-bold"
@@ -402,8 +399,8 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                 You&apos;re on the founding families list {"\u2713"}
               </p>
               <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
-                We invite families a few at a time. Your invite comes by email, and{" "}
-                {report.childName}&apos;s report will be waiting inside.
+                We invite families a few at a time. Your invite comes by email, with{" "}
+                {report.childName}&apos;s report waiting inside.
               </p>
             </div>
           </div>

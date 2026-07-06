@@ -125,7 +125,7 @@ export function ChecklistStep({
     return (
       <div aria-busy="true" className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          That&apos;s the checklist done.
+          Checklist done.
         </p>
         <p className="mt-2 text-body">Saving the last answers{"\u2026"}</p>
       </div>
@@ -136,8 +136,8 @@ export function ChecklistStep({
     <div>
       {answeredCount === 0 ? (
         <p className="mb-4 rounded-md bg-[var(--accent-sage-soft)] px-4 py-3 text-sm text-body">
-          Answer from what you&apos;ve seen {child.name} do, day to day. Skip anything, and
-          &ldquo;not sure&rdquo; is a real answer.
+          Answer from what you&apos;ve seen {child.name} do. Skip anything. &ldquo;Not sure&rdquo;
+          is a real answer.
         </p>
       ) : null}
 
@@ -200,7 +200,7 @@ export function ChecklistStep({
         onClick={onExit}
         className="mt-6 text-sm text-subtle underline-offset-2 hover:underline"
       >
-        finish later (everything so far is saved)
+        finish later (your answers are saved)
       </button>
     </div>
   );

@@ -48,8 +48,8 @@ export function WhatsWorkingForm({
   if (state === "saved") {
     return (
       <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--gold-ink)" }}>
-        Saved. Whatever you&apos;re doing here, it&apos;s working, and I&apos;ll fold it into the
-        plans for the growing subjects too.
+        Saved. Whatever you&apos;re doing here works, and I&apos;ll fold it into the plans for
+        the growing subjects.
       </p>
     );
   }
@@ -62,7 +62,7 @@ export function WhatsWorkingForm({
         className="mt-2 text-left text-xs font-semibold underline-offset-2 hover:underline print:hidden"
         style={{ color: "var(--gold-ink)" }}
       >
-        What are you doing in {subjectName.toLowerCase()} that works? Tell me {"\u2192"}
+        What&apos;s working in {subjectName.toLowerCase()}? Tell me {"\u2192"}
       </button>
     );
   }
@@ -79,8 +79,8 @@ export function WhatsWorkingForm({
       />
       {state === "no-session" ? (
         <p className="mt-1 text-xs" style={{ color: "var(--gold-ink)" }}>
-          This needs the device you did the checklist on. Open your email link there and this box
-          will work.
+          This box works on the device you used for the checklist. Or open your email link here
+          first.
         </p>
       ) : (
         <button

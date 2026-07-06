@@ -61,11 +61,10 @@ export function ScoringStep({ child }: { child: FlowChild }) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          The report didn&apos;t build just now.
+          The report didn&apos;t build.
         </p>
         <p className="mt-2 text-body">
-          Every answer is saved, nothing is lost. Try once more, or come back later, the link in
-          your inbox will bring you right here.
+          Your answers are saved. Try again now, or come back later with the link in your inbox.
         </p>
         <button
           type="button"
