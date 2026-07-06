@@ -23,4 +23,5 @@ export type FlowPhase =
   | "kids"
   | "hub"
   | "checklist"
+  | "extras"
   | "scoring";

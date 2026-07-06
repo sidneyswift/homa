@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-import { US_STATES } from "@homa/core";
-
 import { flushWaitlistQueue, submitWaitlist } from "../../lib/waitlist-client";
 
 /**
- * S1: email first, before any work is asked. The lead is the floor;
- * everything after it is upside. If the map session can't start (dead
- * conference wifi), the email still lands via the battle-tested waitlist
- * queue (timeout, retry, localStorage, flush-on-reconnect), so the lead
- * is never lost even when the checklist has to wait.
+ * S1: one field, zero friction (read-through ruling: "enter email to get
+ * started", nothing else on the first screen). Name and state moved to the
+ * extras step after the checklist, where she's already invested. If the
+ * session can't start (dead wifi), the email still lands via the offline
+ * waitlist queue, so the lead is never lost.
  */
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,8 +25,6 @@ function readUtm(): Record<string, string> {
 
 export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) {
   const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [usState, setUsState] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,13 +55,7 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
       const response = await fetch("/api/map/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: normalized,
-          firstName: firstName.trim() || undefined,
-          usState: usState || undefined,
-          source: "organic",
-          utm: readUtm(),
-        }),
+        body: JSON.stringify({ email: normalized, source: "organic", utm: readUtm() }),
       });
       const data = (await response.json()) as { ok: boolean; returning?: boolean };
       if (!data.ok) {
@@ -79,8 +69,6 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
       // the email is never lost, and say so honestly.
       const outcome = await submitWaitlist({
         email: normalized,
-        firstName: firstName.trim() || undefined,
-        usState: usState || undefined,
         kidCount: undefined,
         kidAgeBands: [],
         source: "organic",
@@ -102,13 +90,15 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
         See where your child stands
       </h1>
       <p className="mt-3 text-body">
-        Answer a five-minute checklist about what you&apos;ve seen your child do. Homa checks it
-        against national benchmarks for their age and sends you a free progress report.
+        Answer a five-minute checklist about what your child can do.
+      </p>
+      <p className="mt-1 text-body">
+        Homa checks it against national benchmarks and sends you a free progress report.
       </p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm">
-        <label className="block font-medium text-strong" htmlFor="map-email">
-          Where should I send the maps?
+        <label className="block font-display text-lg font-semibold text-strong" htmlFor="map-email">
+          Enter your email to get started
         </label>
         <input
           id="map-email"
@@ -119,7 +109,7 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
-          className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+          className="mt-3 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
         />
         {error ? (
           <p className="mt-2 text-sm text-danger" role="alert">
@@ -131,35 +121,6 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
             {notice}
           </p>
         ) : null}
-
-        <label className="mt-4 block font-medium text-strong" htmlFor="map-first-name">
-          First name (optional)
-        </label>
-        <input
-          id="map-first-name"
-          type="text"
-          autoComplete="given-name"
-          value={firstName}
-          onChange={(event) => setFirstName(event.target.value)}
-          className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
-        />
-
-        <label className="mt-4 block font-medium text-strong" htmlFor="map-state">
-          Your state (optional)
-        </label>
-        <select
-          id="map-state"
-          value={usState}
-          onChange={(event) => setUsState(event.target.value)}
-          className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
-        >
-          <option value="">Choose a state</option>
-          {US_STATES.map((state) => (
-            <option key={state.code} value={state.code}>
-              {state.name}
-            </option>
-          ))}
-        </select>
 
         {/* Honeypot: visually hidden, tabbed past by humans, filled by bots. */}
         <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
@@ -177,12 +138,12 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
         <button
           type="submit"
           disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="mt-5 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
-          {busy ? "Saving\u2026" : "Start the checklist"}
+          {busy ? "Saving\u2026" : "Get started"}
         </button>
         <p className="mt-3 text-center text-sm text-muted">
-          Your email gets each child&apos;s progress report and your founding-family invite. That&apos;s it,
+          Your email gets the progress report and your founding-family invite. That&apos;s it,
           and you can delete everything anytime.
         </p>
       </form>

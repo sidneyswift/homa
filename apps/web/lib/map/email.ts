@@ -91,7 +91,7 @@ export async function sendReportEmail(to: string, childName: string, reportToken
       "It opens with strengths, because that's the truest place to start.",
     ],
     cta: { label: `Open ${childName}'s report`, url },
-    footerNote: "This link is yours to keep, it will always show this map. Want it gone instead? Reply with 'delete' and we'll remove your family's answers.",
+    footerNote: "This link is yours to keep, it will always show this report. Want it gone instead? Reply with 'delete' and we'll remove your family's answers.",
   });
 }
 
@@ -100,7 +100,7 @@ export async function sendResumeEmail(to: string, resumeToken: string): Promise<
   return send({
     to,
     subject: "Pick up where you left off",
-    preview: "Your map answers are saved. This link continues on any device.",
+    preview: "Your answers are saved. This link continues on any device.",
     heading: "Everything you told me is saved",
     bodyLines: ["Tap below to keep going exactly where you stopped, on any device."],
     cta: { label: "Continue the checklist", url },
@@ -118,10 +118,10 @@ export async function sendReminderEmail(
   return send({
     to,
     subject: childName ? `${childName}'s progress report is a few taps away` : "Your child's progress report is a few taps away",
-    preview: "Your answers are saved. A few minutes finishes the map.",
-    heading: `${who}'s map is almost drawn`,
+    preview: "Your answers are saved. A few minutes finishes the report.",
+    heading: `${who}'s progress report is almost ready`,
     bodyLines: [
-      "Everything you answered is saved. A few more taps and the map is ready.",
+      "Everything you answered is saved. A few more taps and the report is ready.",
       "No rush at all, the link works whenever you are.",
     ],
     cta: { label: "Finish the checklist", url },

@@ -39,6 +39,11 @@ export const EVENT_SCHEMAS = {
     domain: z.string(),
     answer: z.enum(["easily", "getting_there", "not_yet", "not_sure", "skip"]),
   }),
+  "map.context_added": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid().optional(),
+    keys: z.array(z.string()).default([]),
+  }),
   "map.report_generated": z.object({
     lead_id: z.uuid(),
     child_id: z.uuid(),

@@ -70,7 +70,7 @@ export function Nav() {
           Sign in
         </Link>
         <Button variant="primary" href="/map">
-          Free progress report
+          Where your child stands
         </Button>
       </div>
     </nav>

@@ -68,6 +68,8 @@ export function Hero() {
           >
             <Sparkles size={15} aria-hidden="true" /> In your corner, every school day
           </span>
+          {/* Clarity-first headline (founder read-through 2026-07-05: "say
+              exactly what it is"). The beloved tagline moves to the line below. */}
           <h1
             style={{
               fontFamily: "var(--font-display)",
@@ -79,13 +81,13 @@ export function Hero() {
               margin: "22px 0 0",
             }}
           >
-            You&rsquo;ve got this.
+            Your homeschool
             <br />
-            Homa&rsquo;s got the <span style={{ color: "var(--clay-600)" }}>rest</span>.
+            <span style={{ color: "var(--clay-600)" }}>assistant</span>.
           </h1>
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "24px 0 0", maxWidth: 470 }}>
-            The planning, the tracking, the what-do-we-do-today, hand it to Homa. You get back to the part only you
-            can do.
+            The planning, the tracking, the what-do-we-do-today, hand it to Homa. You&rsquo;ve got
+            this. Homa&rsquo;s got the rest.
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
             <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
@@ -102,7 +104,7 @@ export function Hero() {
             </Button>
           </div>
           {/* Honest trust line (rulings C2 + T2: no fabricated social proof,
-              no pricing). The map claim is real: /map delivers it today. */}
+              no pricing). The report claim is real: /map delivers it today. */}
           <div
             style={{
               marginTop: 24,
@@ -112,8 +114,8 @@ export function Hero() {
               maxWidth: 440,
             }}
           >
-            Free: answer a five-minute checklist and get a progress report
-            showing exactly where your child stands. Built by a homeschool family.
+            Free: answer a five-minute checklist and get a progress report showing
+            exactly where your child stands. Built by a homeschool family.
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

@@ -41,6 +41,11 @@ export interface DomainScore {
   observations: number;
   /** Statement of the strongest item she confirmed, for honest evidence lines. */
   strongestObservedStatement: string | null;
+  /**
+   * Statement of the specific next step (the lowest "not yet" item), so a
+   * growing subject can be named concretely instead of generically.
+   */
+  frontierStatement: string | null;
   exposureBased: boolean;
 }
 
@@ -79,6 +84,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         highConfidence: false,
         observations: 0,
         strongestObservedStatement: null,
+        frontierStatement: null,
         exposureBased: domain.exposureBased,
       };
     }
@@ -86,6 +92,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     let frontier: number | null = null;
     let strongestStatement: string | null = null;
     let sawNotYet = false;
+    let frontierStatement: string | null = null;
+    let frontierAnchor: number | null = null;
 
     for (const entry of observations) {
       const found = getMapItem(entry.itemId);
@@ -102,8 +110,17 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
           frontier = reached;
           strongestStatement = found.item.statement;
         }
+        if (frontierAnchor === null || anchor < frontierAnchor) {
+          frontierAnchor = anchor;
+          frontierStatement = found.item.statement;
+        }
       } else if (entry.answer === "not_yet") {
         sawNotYet = true;
+        // The lowest not-yet item names the concrete next step.
+        if (frontierAnchor === null || anchor < frontierAnchor) {
+          frontierAnchor = anchor;
+          frontierStatement = found.item.statement;
+        }
       }
     }
 
@@ -118,6 +135,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: strongestStatement,
+        frontierStatement,
         exposureBased: true,
       };
     }
@@ -131,6 +149,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: null,
+        frontierStatement,
         exposureBased: false,
       };
     }
@@ -157,6 +176,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       highConfidence,
       observations: observations.length,
       strongestObservedStatement: strongestStatement,
+      frontierStatement,
       exposureBased: false,
     };
   });

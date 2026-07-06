@@ -60,8 +60,8 @@ export function HubStep({
               <div key={child.id} className="rounded-lg border border-sage/40 bg-[var(--accent-sage-soft)] p-5">
                 <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
                 <p className="mt-1 text-body">
-                  The checklist for {child.name}&apos;s age is nearly ready. I&apos;ll email you the
-                  moment it is, and everything you&apos;ve told me is saved.
+                  The checklist starts at age 2. I&apos;ll email you the moment {child.name}&apos;s
+                  is ready, and everything you&apos;ve told me is saved.
                 </p>
               </div>
             );
@@ -70,7 +70,7 @@ export function HubStep({
             return (
               <div key={child.id} className="rounded-lg border border-border bg-card p-5 shadow-sm">
                 <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
-                <p className="mt-1 text-body">The map is ready, and it&apos;s in your inbox too.</p>
+                <p className="mt-1 text-body">The progress report is ready, and it&apos;s in your inbox too.</p>
                 <a
                   href={`/map/r/${child.reportToken}`}
                   className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover"

@@ -157,10 +157,10 @@ export function BenchmarkDemo() {
           {/* The demo's real payoff: this exact mechanic, run properly for
               her own kid, is the /map lead magnet. */}
           <div style={{ marginTop: 12, fontSize: "0.9rem", color: "var(--text-muted)" }}>
-            That was three questions. The real thing is a 5-minute checklist that maps 15 domains
-            for your own kid, free.{" "}
+            That was three questions. The real thing is a 5-minute checklist across 15 subjects
+            for your own kid, with a free progress report at the end.{" "}
             <a href="/map" style={{ color: "var(--clay-600)", fontWeight: 700 }}>
-              Get your free progress report
+              See where your child stands
             </a>
           </div>
         </div>

@@ -305,6 +305,8 @@ export interface ReportView {
   leadId: string;
   childId: string;
   firstView: boolean;
+  /** The parent's raw answers, for the expandable "what I asked" sections. */
+  answers: { itemId: string; answer: MapAnswer }[];
 }
 
 /** Loads a report by URL token and stamps first view. Null when revoked/unknown. */
@@ -344,6 +346,10 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     await sql`update public.lead_reports set viewed_at = now() where token = ${token}`;
   }
 
+  const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
+    select question_id, answer from public.lead_answers where lead_child_id = ${row.child_id}
+  `;
+
   return {
     token: row.token,
     scores: row.scores,
@@ -357,12 +363,57 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     leadId: row.lead_id,
     childId: row.child_id,
     firstView,
+    answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
   };
 }
 
 async function touchLead(leadId: string): Promise<void> {
   const sql = mapDb();
   await sql`update public.lead_families set updated_at = now() where id = ${leadId}`;
+}
+
+/** Deep-merges an extras patch into a child's context bag (server-validated). */
+export async function saveChildContext(
+  leadId: string,
+  childId: string,
+  patch: Record<string, unknown>,
+): Promise<boolean> {
+  if (!(await childBelongsToLead(childId, leadId))) return false;
+  const sql = mapDb();
+  await sql`
+    update public.lead_children
+    set context = context || ${sql.json(patch as unknown as DbJson)}
+    where id = ${childId}
+  `;
+  await touchLead(leadId);
+  return true;
+}
+
+/** Merges family-level extras; name and state also fill their real columns. */
+export async function saveFamilyContext(
+  leadId: string,
+  patch: Record<string, unknown>,
+  firstName?: string,
+  usState?: string,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.lead_families
+    set context = context || ${sql.json(patch as unknown as DbJson)},
+        first_name = coalesce(${firstName ?? null}, first_name),
+        us_state = coalesce(${usState ?? null}, us_state),
+        updated_at = now()
+    where id = ${leadId}
+  `;
+}
+
+/** Whether family-level extras were already collected (extras step shows once). */
+export async function hasFamilyContext(leadId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ has: boolean }[]>`
+    select context <> '{}'::jsonb as has from public.lead_families where id = ${leadId}
+  `;
+  return rows[0]?.has ?? false;
 }
 
 /** Mirrors the lead into the waitlist table so the invite list stays one list. */

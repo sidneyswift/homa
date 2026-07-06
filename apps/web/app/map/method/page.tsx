@@ -6,15 +6,15 @@ import { MAP_BANK_VERSION, MAP_DOMAINS, MAP_SOURCES } from "@homa/core";
 import { Logo } from "../../../components/brand/Logo";
 
 /**
- * /map/method: how the map is made. The credibility page for the
+ * /map/method: how the progress report is made. The credibility page for the
  * fact-checkers (persona P4): plain method, resolvable sources per domain,
  * the honest list of what the map is not, and the current bank version.
  */
 
 export const metadata: Metadata = {
-  title: "How the map is made",
+  title: "How the progress report is made",
   description:
-    "The progress report is built from a parent's observations, checked against published national benchmarks. Here is the method, the sources, and what the report is not.",
+    "The progress report is built from a parent's observations, checked against published national benchmarks. Here is the method, the sources, and what it is not.",
 };
 
 export default function MethodPage() {
@@ -26,7 +26,7 @@ export default function MethodPage() {
         </Link>
 
         <h1 className="mt-8 font-display text-3xl font-bold leading-tight text-strong">
-          How the map is made
+          How the progress report is made
         </h1>
         <p className="mt-4 text-body">
           You answer a short checklist about what you&apos;ve seen your child do, day to day.
@@ -61,8 +61,8 @@ export default function MethodPage() {
           The report is not a test, not a medical or developmental evaluation, and not advice. It is
           an organized picture of your own observations, compared with national benchmarks. Every
           child grows in their own order, and a first report is an estimate that sharpens with more
-          observations over time. If something on a report ever worries you, your pediatrician is the
-          right person to ask.
+          observations over time. If something on a report ever worries you, your pediatrician is
+          the right person to ask.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Sources</h2>
@@ -87,7 +87,7 @@ export default function MethodPage() {
         </p>
         <p className="mt-3 font-mono text-xs text-subtle">
           benchmark bank version {MAP_BANK_VERSION}. Reports record the version that scored them,
-          so a later content correction never silently rewrites an existing map.
+          so a later content correction never silently rewrites an existing report.
         </p>
 
         <p className="mt-10">

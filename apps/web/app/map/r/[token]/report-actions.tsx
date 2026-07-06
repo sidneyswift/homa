@@ -49,19 +49,19 @@ export function ReportActions({
   return (
     <span className="inline-flex flex-wrap gap-x-4 gap-y-1 print:hidden">
       <button type="button" onClick={() => void share()} className="text-brand underline-offset-2 hover:underline">
-        share this map
+        share this report
       </button>
       <button type="button" onClick={() => window.print()} className="text-brand underline-offset-2 hover:underline">
         print it
       </button>
       <a
-        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s report`)}`}
+        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s progress report`)}`}
         className="text-brand underline-offset-2 hover:underline"
       >
         something look off? tell me
       </a>
       <a
-        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent("Please delete my family's map data")}`}
+        href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent("Please delete my family's data")}`}
         className="text-brand underline-offset-2 hover:underline"
       >
         delete my family&apos;s data

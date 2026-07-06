@@ -1,5 +1,5 @@
 import { requireLead } from "../../../../lib/map/session";
-import { getLeadState } from "../../../../lib/map/store";
+import { getLeadState, hasFamilyContext } from "../../../../lib/map/store";
 
 /**
  * GET /api/map/state
@@ -16,9 +16,11 @@ export async function GET(): Promise<Response> {
 
   try {
     const state = await getLeadState(lead);
+    const familyContextDone = await hasFamilyContext(lead.id);
     return Response.json({
       ok: true,
       firstName: state.lead.first_name,
+      familyContextDone,
       // The caller's own email (cookie-authenticated), for the
       // "send this link to my other device" button.
       email: state.lead.email,

@@ -43,7 +43,7 @@ export default function BlogIndexPage() {
               Notes are on their way
             </p>
             <p className="mt-2 text-body">
-              We&rsquo;re writing. While you wait, get a free progress report in five minutes.
+              We&rsquo;re writing. While you wait, your child&rsquo;s progress report takes five minutes.
             </p>
             <Link
               href="/map"

@@ -61,18 +61,25 @@ export {
   reportEmailPreview,
   reportEmailSubject,
   reportSubtitle,
+  tryHeading,
   type DomainLine,
 } from "./map/sentences";
 
 export {
+  HOMESCHOOL_STYLES,
   MAP_INTERESTS_CAP,
   MAP_KID_CAP,
   mapAnswerSchema,
+  mapChildExtrasSchema,
   mapChildSchema,
+  mapExtrasSchema,
+  mapFamilyExtrasSchema,
   mapResumeRequestSchema,
   mapScoreRequestSchema,
   mapStartSchema,
   type MapAnswerPayload,
+  type MapChildExtras,
   type MapChildInput,
+  type MapFamilyExtras,
   type MapStartInput,
 } from "./map/schemas";

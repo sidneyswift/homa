@@ -10,7 +10,9 @@ import {
   homaNote,
   MAP_SOURCES,
   reportSubtitle,
+  tryHeading,
   type DomainScore,
+  type MapAnswer,
 } from "@homa/core";
 
 import { Logo } from "../../../../components/brand/Logo";
@@ -19,9 +21,12 @@ import { ReportActions } from "./report-actions";
 import { ReportChart } from "./report-chart";
 
 /**
- * The child's map (report page). Strengths first, always; growth areas
- * arrive with an activity attached; every domain cites its framework; no
- * red, no "behind", ever (BUILD.md law #4). Printable via the browser.
+ * The progress report. Strengths first, always; growing subjects arrive
+ * with a named next step and an activity; every subject card expands to
+ * show exactly what was asked, what she answered, and which national
+ * benchmark it was checked against (read-through ruling: "where did you
+ * get that benchmark?" must be answerable in two taps). No red, no
+ * "behind", ever (BUILD.md law #4). Printable via the browser.
  */
 
 export const dynamic = "force-dynamic";
@@ -29,6 +34,14 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Your child's progress report",
   robots: { index: false },
+};
+
+const ANSWER_LABELS: Record<MapAnswer, string> = {
+  easily: "Easily",
+  getting_there: "Getting there",
+  not_yet: "Not yet",
+  not_sure: "Not sure",
+  skip: "Skipped",
 };
 
 export default async function ReportPage({ params }: { params: Promise<{ token: string }> }) {
@@ -43,14 +56,14 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           This report link isn&apos;t active.
         </h1>
         <p className="mt-3 text-body">
-          Want your own child&apos;s progress report? It takes about five minutes, from what you&apos;ve
-          already seen them do.
+          Want your own child&apos;s progress report? It takes about five minutes, from what
+          you&apos;ve already seen them do.
         </p>
         <Link
           href="/map"
           className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
         >
-          Get your free progress report
+          See where your child stands
         </Link>
       </main>
     );
@@ -67,6 +80,19 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
     .filter((score) => score.position === "ahead" && !score.exposureBased)
     .slice(0, 3);
   const growing = scores.filter((score) => score.position === "growing" && !score.exposureBased);
+  const trySection = tryHeading(growing.length);
+
+  const answersByDomain = new Map<string, { statement: string; typicalMonths: number; answer: MapAnswer }[]>();
+  for (const entry of report.answers) {
+    const found = getMapDomain(entry.itemId.split(".")[0]);
+    const domainId = found?.id ?? entry.itemId.split(".")[0];
+    const item = found?.items.find((candidate) => candidate.id === entry.itemId);
+    if (!item) continue;
+    const list = answersByDomain.get(domainId) ?? [];
+    list.push({ statement: item.statement, typicalMonths: item.typicalMonths, answer: entry.answer });
+    answersByDomain.set(domainId, list);
+  }
+
   const sourceKeys = new Set<string>();
   for (const score of scores) {
     if (score.position === "not_mapped") continue;
@@ -100,7 +126,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                 age <b className="text-strong">{ageLabel(months)}</b>
               </span>
               <span>
-                domains mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalDomains}</b>
+                subjects mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalDomains}</b>
               </span>
               <span>
                 your observations <b className="text-strong">{report.scores.observationCount}</b>
@@ -112,14 +138,10 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           </div>
 
           <div className="px-7 py-7 sm:px-10">
-            {/* Note from Homa */}
+            {/* Note from Homa, spoken by the little home itself. */}
             <div className="flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
-              <div
-                aria-hidden="true"
-                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white"
-                style={{ background: "var(--sage-500)", fontFamily: "var(--font-wordmark)" }}
-              >
-                h
+              <div className="flex-shrink-0 pt-0.5">
+                <Logo variant="mark" size={34} />
               </div>
               <div>
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
@@ -169,27 +191,27 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               </>
             ) : null}
 
-            {/* The whole map */}
-            <h2 className="mt-9 font-display text-xl font-semibold text-strong">The whole map</h2>
+            {/* The whole picture */}
+            <h2 className="mt-9 font-display text-xl font-semibold text-strong">The whole picture</h2>
             <p className="mt-1 text-sm text-muted">
-              One dot per domain. The line is &ldquo;typical for {ageLabel(months)}&rdquo;. Gold is
-              ahead, sage is right in the band, sky is growing right now, with something to try
-              below.
+              One dot per subject. The line is &ldquo;typical for {ageLabel(months)}&rdquo;. Yellow
+              is ahead, green is on track, blue is growing right now, with a place to start below.
             </p>
             <div className="mt-4 rounded-lg border border-border-subtle bg-card p-4">
               <ReportChart scores={ordered} />
             </div>
 
-            {/* Domain by domain */}
-            <h2 className="mt-9 font-display text-xl font-semibold text-strong">Domain by domain</h2>
+            {/* Subject by subject */}
+            <h2 className="mt-9 font-display text-xl font-semibold text-strong">Subject by subject</h2>
             <p className="mt-1 text-sm text-muted">
-              Every line is grounded in your answers and the national benchmark it was checked
-              against.
+              Tap any subject to see exactly what I asked, what you answered, and the national
+              benchmarks it was checked against.
             </p>
             <div className="mt-4 flex flex-col gap-2.5">
               {ordered.map((score) => {
                 const domain = getMapDomain(score.domainId);
                 const line = domainLine(score, report.childName);
+                const domainAnswers = answersByDomain.get(score.domainId) ?? [];
                 const badgeStyle =
                   score.position === "ahead"
                     ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
@@ -198,31 +220,95 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                       : score.position === "growing"
                         ? { background: "var(--info-soft)", color: "var(--sky-600)" }
                         : { background: "var(--surface-sunken)", color: "var(--text-muted)" };
-                const sourceLabels = Array.from(
+                const domainSources = Array.from(
                   new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
-                )
-                  .slice(0, 3)
-                  .map((key) => MAP_SOURCES[key]?.label.split(",")[0] ?? key)
-                  .join(" \u00b7 ");
+                );
+                const activity = domain ? growingActivityFor(domain, months) : null;
                 return (
-                  <div key={score.domainId} className="flex items-start gap-3 rounded-md border border-border-subtle p-4">
-                    <span
-                      className="mt-0.5 flex-shrink-0 whitespace-nowrap rounded-pill px-3 py-1 text-xs font-bold"
-                      style={badgeStyle}
-                    >
-                      {line.badge}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-strong">{domain?.displayName}</p>
-                      <p className="mt-0.5 text-sm text-muted">{line.sentence}</p>
-                      <p className="mt-1.5 font-mono text-[0.6rem] uppercase tracking-wider text-subtle">
-                        benchmark: {sourceLabels}
+                  <details key={score.domainId} className="group rounded-md border border-border-subtle">
+                    <summary className="flex cursor-pointer list-none items-start gap-3 p-4 [&::-webkit-details-marker]:hidden">
+                      <span
+                        className="mt-0.5 flex-shrink-0 whitespace-nowrap rounded-pill px-3 py-1 text-xs font-bold"
+                        style={badgeStyle}
+                      >
+                        {line.badge}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-strong">{domain?.displayName}</span>
+                        <span className="mt-0.5 block text-sm text-muted">{line.sentence}</span>
+                        <span className="mt-1 block text-xs font-medium text-brand group-open:hidden">
+                          see what I asked and the benchmarks {"\u2193"}
+                        </span>
+                      </span>
+                      <span className="flex-shrink-0 pt-0.5 font-mono text-sm text-strong">
+                        {line.numberLabel}
+                      </span>
+                    </summary>
+                    <div className="border-t border-border-subtle px-4 pb-4 pt-3">
+                      {domainAnswers.length > 0 ? (
+                        <>
+                          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                            What I asked, and your answers
+                          </p>
+                          <ul className="mt-2 flex flex-col gap-2">
+                            {domainAnswers
+                              .sort((a, b) => a.typicalMonths - b.typicalMonths)
+                              .map((entry) => (
+                                <li key={entry.statement} className="flex items-start justify-between gap-3 text-sm">
+                                  <span className="text-body">
+                                    {entry.statement}?
+                                    <span className="block text-xs text-subtle">
+                                      typical by {ageLabel(entry.typicalMonths)}
+                                    </span>
+                                  </span>
+                                  <span className="flex-shrink-0 rounded-pill bg-[var(--surface-sunken)] px-3 py-1 text-xs font-semibold text-strong">
+                                    {ANSWER_LABELS[entry.answer]}
+                                  </span>
+                                </li>
+                              ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted">
+                          No answers here yet. A few more observations would fill this subject in.
+                        </p>
+                      )}
+
+                      {score.position === "growing" && activity ? (
+                        <div className="mt-4 rounded-md p-3" style={{ background: "var(--info-soft)" }}>
+                          <p className="text-sm font-semibold text-strong">{activity.title}</p>
+                          <p className="mt-0.5 text-sm text-body">{activity.description}</p>
+                          <p className="mt-2 text-xs text-muted">
+                            When your Homa invite opens, this is exactly the kind of spot she builds
+                            a plan around: materials, a pace, and a re-check a few weeks later so
+                            you can watch this number move.
+                          </p>
+                        </div>
+                      ) : null}
+
+                      <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                        Benchmarks checked against
                       </p>
+                      <ul className="mt-1 flex flex-col gap-0.5">
+                        {domainSources.map((key) => {
+                          const source = MAP_SOURCES[key];
+                          if (!source) return null;
+                          return (
+                            <li key={key} className="text-xs">
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand underline-offset-2 hover:underline"
+                              >
+                                {source.label}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </div>
-                    <span className="flex-shrink-0 pt-0.5 font-mono text-sm text-strong">
-                      {line.numberLabel}
-                    </span>
-                  </div>
+                  </details>
                 );
               })}
             </div>
@@ -230,12 +316,8 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             {/* Things to try */}
             {growing.length > 0 ? (
               <>
-                <h2 className="mt-9 font-display text-xl font-semibold text-strong">
-                  {growing.length === 1 ? "One thing" : "A couple of things"} worth trying this week
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Free, five minutes, aimed at exactly what&apos;s growing. Offers, never homework.
-                </p>
+                <h2 className="mt-9 font-display text-xl font-semibold text-strong">{trySection.title}</h2>
+                <p className="mt-1 text-sm text-muted">{trySection.sub}</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {growing.slice(0, 2).map((score) => {
                     const domain = getMapDomain(score.domainId);
@@ -258,23 +340,23 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             {/* Methodology */}
             <div className="mt-9 rounded-lg bg-[var(--surface-sunken)] p-5 text-sm">
               <h3 className="font-display text-base font-semibold text-strong">
-                How this map is made (and what it is not)
+                How this report is made (and what it is not)
               </h3>
               <p className="mt-2 text-muted">
                 Your answers describe what {report.childName} does day to day. Each one is checked
                 against published national benchmarks for their age, the same sources schools and
-                pediatric milestones draw from. Where you said &ldquo;not sure&rdquo;, the report says
-                so instead of guessing.
+                pediatric milestones draw from. Where you said &ldquo;not sure&rdquo;, the report
+                says so instead of guessing.
               </p>
               <p className="mt-2 text-muted">
-                This is a progress report built from a parent&apos;s observations, not a test and not medical
-                advice. Every child grows in their own order, and a first report is an estimate: it
-                sharpens with more observations over time.
+                This is a progress report built from a parent&apos;s observations, not a test and
+                not medical advice. Every child grows in their own order, and a first report is an
+                estimate: it sharpens with more observations over time.
               </p>
               <p className="mt-3 font-mono text-[0.65rem] leading-relaxed text-subtle">
                 SOURCES {"\u00b7"} {Array.from(sourceKeys).map((key) => MAP_SOURCES[key]?.label).filter(Boolean).join(" \u00b7 ")} {"\u00b7"} bank {report.bankVersion} {"\u00b7"}{" "}
                 <Link href="/map/method" className="text-brand underline">
-                  how the map works, in full
+                  how the report works, in full
                 </Link>
               </p>
             </div>
@@ -285,9 +367,9 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                 This report is the &ldquo;before&rdquo; picture.
               </h3>
               <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
-                Homa is the assistant that moves it: materials made for exactly what&apos;s growing,
-                hours tracked for your state, and this report redrawn as {report.childName} grows,
-                so you can watch the numbers move.
+                Homa is the assistant that moves it: a plan for each blue subject, materials made
+                for exactly what&apos;s growing, and this same report re-drawn as {report.childName}{" "}
+                grows, so you can watch the numbers move.
               </p>
               <p
                 className="mt-4 inline-flex items-center rounded-pill px-5 py-2.5 text-sm font-bold"

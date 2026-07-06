@@ -12,12 +12,12 @@ import {
 import type { FlowChild } from "./flow-types";
 
 /**
- * S3: the checklist, one question per screen, four chips, thumb-reach.
- * The adaptive ladder from the bank: the band item first, and an "easily"
- * unlocks the band-above item, which is how months-ahead is detected.
- * Every tap saves to the server immediately (upsert, so retries are safe);
- * failed saves queue and flush before scoring, so a wifi blip never loses
- * an answer or blocks the flow.
+ * S3: the checklist, straight in with no intro screen (read-through ruling:
+ * the /map page already set the contract, so the hint rides quietly above
+ * the first question instead). One question per screen, four chips, fixed
+ * card height so nothing jumps between questions. The adaptive ladder:
+ * "easily" unlocks the next rung up, anything else moves on. Every tap
+ * saves immediately; failed saves queue and flush before scoring.
  */
 
 const CHIP_LABELS: ReadonlyArray<readonly [MapAnswer, string]> = [
@@ -70,9 +70,9 @@ export function ChecklistStep({
 }) {
   const plans = useMemo(() => planQuestions(child.ageMonths), [child.ageMonths]);
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
-  const [started, setStarted] = useState(Object.keys(child.answers).length > 0);
   const [flushing, setFlushing] = useState(false);
   const [easilyStreak, setEasilyStreak] = useState(0);
+  const [answeredCount, setAnsweredCount] = useState(Object.keys(child.answers).length);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
 
   const queue = buildQueue(plans, answers);
@@ -107,6 +107,7 @@ export function ChecklistStep({
     if (!current) return;
     previousDomainId.current = current.domainId;
     setEasilyStreak(answer === "easily" ? easilyStreak + 1 : 0);
+    setAnsweredCount((count) => count + 1);
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.item.id]: answer }));
     void postAnswer(current.item.id, answer);
 
@@ -120,36 +121,11 @@ export function ChecklistStep({
     }
   }
 
-  if (!started) {
-    return (
-      <div>
-        <h1 className="font-display text-3xl font-bold leading-tight text-strong">
-          {child.name}&apos;s checklist
-        </h1>
-        <div className="mt-6 rounded-lg border border-border bg-card p-6 shadow-sm">
-          <p className="text-body">
-            About 5 minutes. Answer from what you&apos;ve seen {child.name} do, day to day. Skip
-            anything, &ldquo;not sure&rdquo; is a real answer, and blanks are fine, they&apos;re
-            just what&apos;s next.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => setStarted(true)}
-            className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
-          >
-            Let&apos;s go
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (flushing || !current || !domain) {
     return (
       <div aria-busy="true" className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          {child.name}&apos;s report is ready.
+          That&apos;s the checklist done.
         </p>
         <p className="mt-2 text-body">Saving the last answers{"\u2026"}</p>
       </div>
@@ -158,12 +134,19 @@ export function ChecklistStep({
 
   return (
     <div>
+      {answeredCount === 0 ? (
+        <p className="mb-4 rounded-md bg-[var(--accent-sage-soft)] px-4 py-3 text-sm text-body">
+          Answer from what you&apos;ve seen {child.name} do, day to day. Skip anything, and
+          &ldquo;not sure&rdquo; is a real answer.
+        </p>
+      ) : null}
+
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted">
           {child.name} {"\u00b7"} {domain.displayName}
         </p>
         <p className="font-mono text-xs text-subtle">
-          {domainsDone + 1} of {plans.length} areas
+          subject {Math.min(domainsDone + 1, plans.length)} of {plans.length}
         </p>
       </div>
       <div className="mt-2 flex gap-1" aria-hidden="true">
@@ -175,19 +158,18 @@ export function ChecklistStep({
         ))}
       </div>
 
-      {isNewDomain ? <p className="mt-5 text-sm text-muted">{domain.intro}</p> : null}
+      <p className={`mt-5 text-sm text-muted ${isNewDomain ? "" : "invisible"}`}>{domain.intro}</p>
 
-      <div className="mt-3 rounded-lg border border-border bg-card p-6 shadow-sm">
-        {current.isLadder ? (
-          <p className="text-sm font-medium text-[var(--gold-ink)]">
-            One more, since that was easy{"\u2026"}
-          </p>
-        ) : null}
+      {/* Fixed minimum height so the card never jumps as question length changes. */}
+      <div className="mt-3 flex min-h-[19rem] flex-col rounded-lg border border-border bg-card p-6 shadow-sm">
+        <p className={`text-sm font-medium text-[var(--gold-ink)] ${current.isLadder ? "" : "invisible"}`}>
+          One more, since that was easy{"\u2026"}
+        </p>
         <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-strong">
           {current.item.statement}?
         </h2>
 
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
           {CHIP_LABELS.map(([value, label]) => (
             <button
               key={value}

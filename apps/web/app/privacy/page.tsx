@@ -42,9 +42,9 @@ export default function PrivacyPage() {
             ranges. Used to send your founding-family invite and to plan who we can serve well.
           </li>
           <li>
-            <b>Your child&apos;s progress report:</b> each child&apos;s first name, birth month and year (never
-            a full birth date), interests you tap, and your checklist answers. Used to build the progress
-            report you asked for, and, when your invite opens, to start Homa off already knowing your
+            <b>Your child&apos;s progress report:</b> each child&apos;s first name (a nickname is fine), birth month and year (never
+            a full birth date), your checklist answers, and any optional extras you share (interests,
+            homeschool style, curriculums). Used to build the report you asked for, and, when your invite opens, to start Homa off already knowing your
             family. Your child never uses Homa and is never asked anything.
           </li>
           <li>
@@ -63,8 +63,8 @@ export default function PrivacyPage() {
           <li><b>Resend</b> (email): delivers the emails you asked for.</li>
         </ul>
         <p className="mt-3 text-body">
-          No AI provider receives your checklist answers: the report is scored by plain, human-reviewed
-          arithmetic. If that ever changes, this page changes first and says so plainly.
+          No AI provider receives your checklist answers: the report is scored by plain,
+          human-reviewed arithmetic. If that ever changes, this page changes first and says so plainly.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we never do</h2>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
         <p className="mt-3 text-body">
           Email <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Please%20delete%20my%20family%27s%20data">hello@mail.thankshoma.com</a>{" "}
           with the address you signed up with and we delete your family&apos;s records, including
-          map answers and reports. A real person confirms within a few days.
+          checklist answers and reports. A real person confirms within a few days.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Questions</h2>

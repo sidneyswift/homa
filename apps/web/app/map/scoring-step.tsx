@@ -18,7 +18,7 @@ export function ScoringStep({ child }: { child: FlowChild }) {
 
   const lines = [
     `Checking ${child.name}'s answers against national benchmarks\u2026`,
-    `Placing 15 domains for age ${ageLabel(child.ageMonths)}\u2026`,
+    `Placing 15 subjects for age ${ageLabel(child.ageMonths)}\u2026`,
     `Finding ${child.name}'s strengths\u2026`,
   ];
 
@@ -61,7 +61,7 @@ export function ScoringStep({ child }: { child: FlowChild }) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <p className="font-display text-lg font-semibold text-strong">
-          The map didn&apos;t draw just now.
+          The report didn&apos;t build just now.
         </p>
         <p className="mt-2 text-body">
           Every answer is saved, nothing is lost. Try once more, or come back later, the link in

@@ -5,16 +5,17 @@ import { Logo } from "../../components/brand/Logo";
 import { MapFlow } from "./map-flow";
 
 /**
- * /map: the child's map flow (lead magnet v2, replaces the plain waitlist).
- * Email first, then kids, then a five-minute observable checklist per child,
- * then the report. Every answer auto-saves server-side; the httpOnly resume
- * cookie restores the flow on return visits.
+ * /map: the progress-report flow (lead magnet v2, replaces the plain
+ * waitlist). Email first, then kids, then a five-minute observable
+ * checklist per child, then optional extras, then the report. Every answer
+ * auto-saves server-side; the httpOnly resume cookie restores the flow on
+ * return visits.
  */
 
 export const metadata: Metadata = {
   title: "See where your child stands",
   description:
-    "Answer a five-minute checklist about what you've seen your child do. Homa scores it against national benchmarks and sends you a free progress report.",
+    "Answer a five-minute checklist about what your child can do. Homa checks it against national benchmarks and sends you a free progress report.",
 };
 
 export default function MapPage() {
@@ -31,8 +32,9 @@ export default function MapPage() {
       </main>
       <footer className="mx-auto w-full max-w-xl px-6 pb-8 text-sm text-subtle">
         <p>
-          We only email you your children&apos;s progress reports and your founding-family invite. Delete
-          anytime. <Link className="text-brand underline" href="/map/method">How the map is made</Link>
+          We only email you your children&apos;s progress reports and your founding-family invite.
+          Delete anytime.{" "}
+          <Link className="text-brand underline" href="/map/method">How the report is made</Link>
           {" \u00b7 "}
           <Link className="text-brand underline" href="/privacy">Privacy</Link>
         </p>

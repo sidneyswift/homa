@@ -7,13 +7,15 @@ import type { MapAnswer } from "@homa/core";
 import { ChecklistStep } from "./checklist-step";
 import { EmailStep } from "./email-step";
 import type { FlowChild, FlowPhase } from "./flow-types";
+import { ExtrasStep } from "./extras-step";
 import { HubStep } from "./hub-step";
 import { KidsStep } from "./kids-step";
 import { ScoringStep } from "./scoring-step";
 
 /**
- * Orchestrator for the map flow's state machine (states S1 to S5 in the
- * plan). Every mutation is already persisted server-side by the steps;
+ * Orchestrator for the progress-report flow: email, kids, checklist per
+ * kid, the optional extras step (context, once she's invested), scoring,
+ * report. Every mutation is already persisted server-side by the steps;
  * this component only decides which screen shows and carries the shared
  * children list.
  */
@@ -21,6 +23,7 @@ export function MapFlow() {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const [children, setChildren] = useState<FlowChild[]>([]);
   const [email, setEmail] = useState<string | null>(null);
+  const [familyContextDone, setFamilyContextDone] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
 
@@ -30,6 +33,7 @@ export function MapFlow() {
       const data = (await response.json()) as {
         ok: boolean;
         email?: string;
+        familyContextDone?: boolean;
         children?: Array<{
           id: string;
           name: string;
@@ -41,6 +45,7 @@ export function MapFlow() {
       };
       if (!data.ok) return null;
       setEmail(data.email ?? null);
+      setFamilyContextDone(Boolean(data.familyContextDone));
       const restored = (data.children ?? []).map((child) => ({
         id: child.id,
         name: child.name,
@@ -106,8 +111,19 @@ export function MapFlow() {
         welcomeBack={welcomeBack && children.length === 0}
         onDone={() => {
           void (async () => {
-            await refreshState();
-            setPhase("hub");
+            const restored = await refreshState();
+            // Straight into the first unstarted checklist (read-through
+            // ruling: no interstitial screens between adding kids and
+            // the first question).
+            const next = (restored ?? []).find(
+              (child) => child.inRange && !child.reportToken && child.answered === 0,
+            );
+            if (next) {
+              setActiveChildId(next.id);
+              setPhase("checklist");
+            } else {
+              setPhase("hub");
+            }
           })();
         }}
       />
@@ -118,13 +134,26 @@ export function MapFlow() {
     return (
       <ChecklistStep
         child={activeChild}
-        onComplete={() => setPhase("scoring")}
+        onComplete={() => setPhase("extras")}
         onExit={() => {
           void (async () => {
             await refreshState();
             setActiveChildId(null);
             setPhase("hub");
           })();
+        }}
+      />
+    );
+  }
+
+  if (phase === "extras" && activeChild) {
+    return (
+      <ExtrasStep
+        child={activeChild}
+        askFamily={!familyContextDone}
+        onDone={() => {
+          setFamilyContextDone(true);
+          setPhase("scoring");
         }}
       />
     );

@@ -11,9 +11,9 @@
 > getting better, not a new pitch, which is the reading D6=A approved. If
 > anyone replies unhappy, a human apologizes and that's that.
 
-**Subject:** your waitlist spot now comes with your child's map
+**Subject:** your waitlist spot now comes with your child's progress report
 
-**Preview text:** a five-minute checklist for you, and a map of where they stand.
+**Preview text:** a five-minute checklist for you, and a progress report on where they stand.
 
 ---
 
@@ -21,15 +21,15 @@ Hi, it's Homa.
 
 You joined the founding families waitlist, and your spot just got better.
 
-While you wait for your invite, I can draw your child's map: an honest
-first look at where they stand, checked against national benchmarks
+While you wait for your invite, I can build your child's progress report:
+an honest first look at where they stand, checked against national benchmarks
 (the same sources schools and pediatric milestones use), from a
 five-minute checklist about what you've already seen them do.
 
 No test for your child, ever. You answer, they never do. Strengths come
 first, and anything still growing arrives with one small thing to try.
 
-[Meet your child's map](https://thankshoma.com/map)
+[See where your child stands](https://thankshoma.com/map)
 
 It's free, it lands in your inbox to keep, and everything you share is
 saved, so when your invite opens, Homa already knows your kids.
