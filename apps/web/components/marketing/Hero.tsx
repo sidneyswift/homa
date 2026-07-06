@@ -115,7 +115,10 @@ export function Hero() {
             }}
           >
             Free to start: a five-minute checklist gets you a progress report showing exactly
-            where your child stands. Built by a homeschool family.
+            where your child stands. Built by a homeschool family.{" "}
+            <a href="/map/sample" style={{ color: "var(--clay-700)", fontWeight: 700 }}>
+              See a sample report
+            </a>
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

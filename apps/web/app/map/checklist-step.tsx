@@ -73,6 +73,8 @@ export function ChecklistStep({
   const [flushing, setFlushing] = useState(false);
   const [easilyStreak, setEasilyStreak] = useState(0);
   const [answeredCount, setAnsweredCount] = useState(Object.keys(child.answers).length);
+  /** Item ids answered this sitting, so "back" can undo a mis-tap. */
+  const [sittingHistory, setSittingHistory] = useState<string[]>([]);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
 
   const queue = buildQueue(plans, answers);
@@ -108,6 +110,7 @@ export function ChecklistStep({
     previousDomainId.current = current.domainId;
     setEasilyStreak(answer === "easily" ? easilyStreak + 1 : 0);
     setAnsweredCount((count) => count + 1);
+    setSittingHistory((history) => [...history, current.item.id]);
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.item.id]: answer }));
     void postAnswer(current.item.id, answer);
 
@@ -119,6 +122,20 @@ export function ChecklistStep({
         onComplete();
       })();
     }
+  }
+
+  /** Undo the last tap of this sitting; the re-answer overwrites the save. */
+  function goBack() {
+    const lastId = sittingHistory[sittingHistory.length - 1];
+    if (!lastId) return;
+    setSittingHistory((history) => history.slice(0, -1));
+    setAnswers((currentAnswers) => {
+      const next = { ...currentAnswers };
+      delete next[lastId];
+      return next;
+    });
+    setAnsweredCount((count) => Math.max(0, count - 1));
+    setEasilyStreak(0);
   }
 
   if (flushing || !current || !domain) {
@@ -182,13 +199,24 @@ export function ChecklistStep({
           ))}
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => answerCurrent("skip")}
-            className="text-sm text-subtle underline-offset-2 hover:underline"
-          >
-            skip this one
-          </button>
+          <span className="flex items-center gap-4">
+            {sittingHistory.length > 0 ? (
+              <button
+                type="button"
+                onClick={goBack}
+                className="text-sm text-subtle underline-offset-2 hover:underline"
+              >
+                {"\u2190"} back
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => answerCurrent("skip")}
+              className="text-sm text-subtle underline-offset-2 hover:underline"
+            >
+              skip this one
+            </button>
+          </span>
           {easilyStreak >= 3 ? (
             <span className="font-hand text-lg text-sage">on a roll {"\u270e"}</span>
           ) : null}

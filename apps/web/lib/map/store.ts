@@ -164,6 +164,24 @@ export async function addChild(
   return { childId: rows[0].id, ageMonths: months, inRange };
 }
 
+/**
+ * Hard-deletes a child and, via the schema's on-delete cascades, their
+ * answers, report, and plans (the "delete anytime" promise, kept). The
+ * where clause carries the tenancy re-scope: a childId belonging to a
+ * different lead deletes nothing.
+ */
+export async function removeChild(leadId: string, childId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    delete from public.lead_children
+    where id = ${childId} and lead_family_id = ${leadId}
+    returning id
+  `;
+  if (rows.length === 0) return false;
+  await touchLead(leadId);
+  return true;
+}
+
 /** True when the child exists and belongs to this lead. */
 async function childBelongsToLead(childId: string, leadId: string): Promise<boolean> {
   const sql = mapDb();
@@ -255,7 +273,20 @@ export interface ScoredReport {
   childId: string;
 }
 
-/** Scores a child from their stored answers and upserts the report row. */
+/** One archived scoring, kept so the report can show dated movement. */
+export interface ScoreSnapshot {
+  scores: MapScores;
+  generated_at: string;
+  bank_version: string;
+}
+
+const HISTORY_CAP = 12;
+
+/**
+ * Scores a child from their stored answers and upserts the report row.
+ * A rescore archives the previous scores into history (newest first,
+ * capped), which powers the "+4 mo since June 6" movement chips.
+ */
 export async function createReport(leadId: string, childId: string): Promise<ScoredReport | null> {
   if (!(await childBelongsToLead(childId, leadId))) return null;
   const sql = mapDb();
@@ -275,12 +306,32 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
     answerRows.map((row) => ({ itemId: row.question_id, answer: row.answer })),
   );
 
+  const existing = await sql<
+    { scores: MapScores; generated_at: string; bank_version: string; history: ScoreSnapshot[] }[]
+  >`
+    select scores, generated_at::text as generated_at, bank_version, history
+    from public.lead_reports where lead_child_id = ${childId}
+  `;
+  const history: ScoreSnapshot[] =
+    existing.length > 0
+      ? [
+          {
+            scores: existing[0].scores,
+            generated_at: existing[0].generated_at,
+            bank_version: existing[0].bank_version,
+          },
+          ...existing[0].history,
+        ].slice(0, HISTORY_CAP)
+      : [];
+
   const token = newToken();
   const rows = await sql<{ token: string }[]>`
-    insert into public.lead_reports (lead_child_id, scores, bank_version, token)
-    values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION}, ${token})
+    insert into public.lead_reports (lead_child_id, scores, bank_version, token, history)
+    values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION}, ${token},
+            ${sql.json(history as unknown as DbJson)})
     on conflict (lead_child_id) do update
-      set scores = excluded.scores, bank_version = excluded.bank_version, generated_at = now()
+      set scores = excluded.scores, bank_version = excluded.bank_version,
+          generated_at = now(), history = excluded.history
     returning token
   `;
 
@@ -451,6 +502,10 @@ export interface ReportView {
   firstView: boolean;
   /** The parent's raw answers, for the expandable "what I asked" sections. */
   answers: { itemId: string; answer: MapAnswer }[];
+  /** Prior scorings, newest first, for the movement chips. */
+  history: ScoreSnapshot[];
+  /** The lead's other kids, for the map-the-next-kid handoff. */
+  otherKids: { id: string; name: string; inRange: boolean; started: boolean; hasReport: boolean }[];
 }
 
 /** Loads a report by URL token and stamps first view. Null when revoked/unknown. */
@@ -463,6 +518,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
       bank_version: string;
       generated_at: string;
       viewed_at: string | null;
+      history: ScoreSnapshot[];
       child_id: string;
       child_name: string;
       birth_month: string;
@@ -473,7 +529,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     }[]
   >`
     select r.token, r.scores, r.bank_version, r.generated_at::text as generated_at,
-           r.viewed_at::text as viewed_at,
+           r.viewed_at::text as viewed_at, r.history,
            c.id as child_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM') as birth_month, c.interests,
            f.id as lead_id, f.first_name, f.us_state
@@ -494,6 +550,17 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     select question_id, answer from public.lead_answers where lead_child_id = ${row.child_id}
   `;
 
+  const siblingRows = await sql<
+    { id: string; name: string; birth_month: string; answered: string; has_report: boolean }[]
+  >`
+    select c.id, c.name, to_char(c.birth_month, 'YYYY-MM') as birth_month,
+           (select count(*)::text from public.lead_answers a where a.lead_child_id = c.id) as answered,
+           exists (select 1 from public.lead_reports r2 where r2.lead_child_id = c.id) as has_report
+    from public.lead_children c
+    where c.lead_family_id = ${row.lead_id} and c.id <> ${row.child_id}
+    order by c.created_at
+  `;
+
   return {
     token: row.token,
     scores: row.scores,
@@ -508,6 +575,14 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     childId: row.child_id,
     firstView,
     answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
+    history: row.history ?? [],
+    otherKids: siblingRows.map((kid) => ({
+      id: kid.id,
+      name: kid.name,
+      inRange: isInScoredRange(ageInMonths(kid.birth_month)),
+      started: Number(kid.answered) > 0,
+      hasReport: kid.has_report,
+    })),
   };
 }
 

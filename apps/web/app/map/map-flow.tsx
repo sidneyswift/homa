@@ -75,7 +75,8 @@ export function MapFlow() {
       }
       setWelcomeBack(true);
 
-      const deepDive = new URLSearchParams(window.location.search).get("dd");
+      const params = new URLSearchParams(window.location.search);
+      const deepDive = params.get("dd");
       if (deepDive) {
         const [childId, domainId] = deepDive.split(".");
         const target = restored.find((child) => child.id === childId && child.inRange);
@@ -83,6 +84,20 @@ export function MapFlow() {
           setActiveChildId(target.id);
           setDeepDiveDomain(domainId);
           setPhase("deepdive");
+          return;
+        }
+      }
+
+      // ?start=childId (the report's map-the-next-kid handoff) opens that
+      // kid's checklist directly.
+      const startChild = params.get("start");
+      if (startChild) {
+        const target = restored.find(
+          (child) => child.id === startChild && child.inRange && !child.reportToken,
+        );
+        if (target) {
+          setActiveChildId(target.id);
+          setPhase("checklist");
           return;
         }
       }
@@ -208,6 +223,14 @@ export function MapFlow() {
         setPhase("checklist");
       }}
       onAddKids={() => setPhase("kids")}
+      onChildRemoved={() => {
+        void (async () => {
+          const restored = await refreshState();
+          // Removing the last kid lands on the add-kids form, same as a
+          // fresh resume with zero kids.
+          if (restored !== null && restored.length === 0) setPhase("kids");
+        })();
+      }}
     />
   );
 }

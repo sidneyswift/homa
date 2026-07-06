@@ -41,6 +41,8 @@ export function DeepDiveStep({
   const [mode, setMode] = useState<"parent" | "together" | null>(null);
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
   const [sittingCount, setSittingCount] = useState(0);
+  /** Item ids answered this sitting, so "back" can undo a mis-tap. */
+  const [sittingHistory, setSittingHistory] = useState<string[]>([]);
   const [flushing, setFlushing] = useState(false);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
 
@@ -85,11 +87,25 @@ export function DeepDiveStep({
     const updated = { ...answers, [current.id]: answer };
     setAnswers(updated);
     setSittingCount((count) => count + 1);
+    setSittingHistory((history) => [...history, current.id]);
     void postAnswer(current.id, answer);
 
     if (nextDeepDiveItem(domainId, child.ageMonths, updated, sittingCount + 1) === null) {
       finish();
     }
+  }
+
+  /** Undo the last tap of this sitting; the re-answer overwrites the save. */
+  function goBack() {
+    const lastId = sittingHistory[sittingHistory.length - 1];
+    if (!lastId) return;
+    setSittingHistory((history) => history.slice(0, -1));
+    setAnswers((currentAnswers) => {
+      const next = { ...currentAnswers };
+      delete next[lastId];
+      return next;
+    });
+    setSittingCount((count) => Math.max(0, count - 1));
   }
 
   if (!domain) {
@@ -189,7 +205,16 @@ export function DeepDiveStep({
             </button>
           ))}
         </div>
-        <div className="mt-3">
+        <div className="mt-3 flex items-center gap-4">
+          {sittingHistory.length > 0 ? (
+            <button
+              type="button"
+              onClick={goBack}
+              className="text-sm text-subtle underline-offset-2 hover:underline"
+            >
+              {"\u2190"} back
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => finish()}

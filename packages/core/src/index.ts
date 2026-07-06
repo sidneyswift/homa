@@ -80,6 +80,7 @@ export {
   MAP_KID_CAP,
   mapAnswerSchema,
   mapChildExtrasSchema,
+  mapChildRemoveSchema,
   mapChildSchema,
   mapExtrasSchema,
   mapFamilyExtrasSchema,

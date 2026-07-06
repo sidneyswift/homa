@@ -3,6 +3,72 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 · Movement pass: the report becomes a living document
+
+Founder asked "what would make this better for the user," then "do this
+all." Shipped the full movement layer on top of the deep-dive loop:
+
+1. Score history (migration #11, `lead_reports.history` jsonb): every
+   rescore snapshots the prior per-subject scores with a timestamp before
+   overwriting. History is capped at 12 snapshots.
+2. Movement on the report, anti-guilt enforced: subjects that moved up
+   since the last sitting get a "+N mo since last time" chip and the note
+   from Homa celebrates the count ("1 subject moved since last time. Your
+   work is showing up in the numbers."). Drops render nothing, silence,
+   never a down arrow. The picture chart shows a faded hollow ring at the
+   prior position, connected to the solid dot, only when movement is
+   positive.
+3. Shared `ReportView` server component now renders the live token page
+   and `/map/sample`. The sample is a fictional demonstration child
+   ("Maya", clearly bannered as sample data) so parents can see a finished
+   report before giving an email. Linked from the hero's secondary CTA.
+4. Next-kid handoff: when a family has another kid without a report, the
+   report page ends with "[Name] is next" linking to `/map?start=<id>`,
+   which drops straight into that kid's checklist.
+5. Back button in the checklist and deep dive: undoes the last answer
+   (server-persisted answers are simply overwritten on re-answer).
+6. Plan check-offs: each plan activity gets a checkbox persisted in
+   localStorage (key `homa-plan-<child>-<domain>`), no schema change,
+   celebration line when a week completes.
+7. State legal line: if the family gave a US state in extras, the report
+   footer says homeschooling is legal in all 50 states including theirs,
+   worded as reassurance, no legal advice. Sample shows Texas.
+
+Decisions made alone: movement chips only ever show gains (drops are
+noise at this sample size and violate the anti-guilt law); prior rings
+capped at one per subject (latest prior, not the whole trail); the sample
+child's answers climb full ladders so the sample shows a strengths-first
+report, matching what a real strong sitting produces.
+
+## 2026-07-06 (overnight) · National benchmark corpus commissioned
+
+Founder: capture national benchmarks on all subjects and milestones for
+ages 2 to 16, via deep parallel research, kept so progress reports get
+better anchors. Decisions made alone, in the ICP-research pattern:
+
+1. Location: new tracked folder `docs/homa-benchmarks/` (README + 10 lane
+   files + synthesis). `homa-research/` is off-limits by repo law, and the
+   corpus must be tracked and agent-readable. Root README repo map updated.
+2. Shape: internal reference docs, never parent-facing. Assessment
+   vocabulary is allowed inside the corpus; anything ported to product
+   surfaces still passes the map content laws (parent-observable, banned
+   words, citations) and the anti-guilt display law.
+3. Anchor convention: whole months, end-of-grade grade-to-month table in
+   the folder README matching the anchors already in content.ts (gr 3 =
+   108mo etc). Grade conversions are marked convention, not fact.
+4. Nothing auto-flows into `packages/core/src/map/content.ts`: porting is
+   deliberate, per item, with a MAP_BANK_VERSION bump and check:map green.
+   Each lane file ends with "Product porting notes" naming its candidate
+   anchors.
+5. Sourcing law copied from the ICP folder: every claim linked with access
+   date, FACT vs INFERENCE labeled, unverifiable numbers go to "dry wells"
+   sections instead of being estimated.
+
+Ten research agents dispatched in parallel (early childhood 2 to 5, math,
+reading, writing and language, science, social studies, arts/PE/health,
+SEL/EF/life skills, world languages/CS/digital, assessment norms and the
+homeschool testing landscape). Synthesis file written after their return.
+
 ## 2026-07-06 · Deep dive now ends in the curriculum (founder live-test feedback)
 
 Founder, testing on production: "when I click dive deeper and answer more

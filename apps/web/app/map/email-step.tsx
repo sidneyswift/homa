@@ -145,6 +145,11 @@ export function EmailStep({ onDone }: { onDone: (returning: boolean) => void }) 
         <p className="mt-3 text-center text-sm text-muted">
           We email you the report and, later, your invite. Nothing else. Delete anytime.
         </p>
+        <p className="mt-2 text-center text-sm">
+          <a href="/map/sample" className="text-brand underline-offset-2 hover:underline">
+            See a sample report first
+          </a>
+        </p>
       </form>
     </div>
   );

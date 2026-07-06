@@ -5,6 +5,7 @@ import { useState } from "react";
 import { MAP_KID_CAP } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
+import { RemoveKid } from "./remove-kid";
 
 /**
  * The family hub: one card per child with the honest next action. Map
@@ -17,12 +18,14 @@ export function HubStep({
   welcomeBack,
   onStartChecklist,
   onAddKids,
+  onChildRemoved,
 }: {
   childrenList: FlowChild[];
   email: string | null;
   welcomeBack: boolean;
   onStartChecklist: (childId: string) => void;
   onAddKids: () => void;
+  onChildRemoved: () => void;
 }) {
   const [linkSent, setLinkSent] = useState(false);
 
@@ -63,6 +66,7 @@ export function HubStep({
                   The checklist starts at age 2. I&apos;ll email you the moment {child.name}&apos;s is
                   ready. Everything you&apos;ve shared is saved.
                 </p>
+                <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
               </div>
             );
           }
@@ -77,6 +81,7 @@ export function HubStep({
                 >
                   Open {child.name}&apos;s report
                 </a>
+                <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
               </div>
             );
           }
@@ -96,6 +101,7 @@ export function HubStep({
               >
                 {started ? "Continue the checklist" : `Start ${child.name}'s checklist`}
               </button>
+              <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
             </div>
           );
         })}

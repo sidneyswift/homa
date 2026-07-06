@@ -1,9 +1,9 @@
-import { MAP_KID_CAP, mapChildSchema } from "@homa/core";
+import { MAP_KID_CAP, mapChildRemoveSchema, mapChildSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireLead } from "../../../../lib/map/session";
-import { addChild, countChildren } from "../../../../lib/map/store";
+import { addChild, countChildren, removeChild } from "../../../../lib/map/store";
 
 /**
  * POST /api/map/children
@@ -54,6 +54,51 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: true, childId, ageMonths, inRange });
   } catch (error) {
     console.error("map/children failed:", error instanceof Error ? error.message : "unknown");
+    return Response.json({ ok: false }, { status: 502 });
+  }
+}
+
+/**
+ * DELETE /api/map/children
+ * Removes one child from the caller's lead. The delete is scoped to the
+ * cookie-resolved lead in the store, so a foreign childId is a no-op 404.
+ * Cascades take the child's answers, report, and plans with them.
+ */
+export async function DELETE(request: Request): Promise<Response> {
+  if (rateLimited(`children-delete:${clientIp(request)}`, 30)) {
+    return Response.json({ ok: false }, { status: 429 });
+  }
+
+  const lead = await requireLead();
+  if (!lead) {
+    return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
+  }
+  const parsed = mapChildRemoveSchema.safeParse(raw);
+  if (!parsed.success) {
+    return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
+  }
+
+  try {
+    const removed = await removeChild(lead.id, parsed.data.childId);
+    if (!removed) {
+      return Response.json({ ok: false, reason: "unknown-child" }, { status: 404 });
+    }
+
+    await emitMapEvent("map.child_removed", {
+      lead_id: lead.id,
+      child_id: parsed.data.childId,
+    });
+
+    return Response.json({ ok: true });
+  } catch (error) {
+    console.error("map/children delete failed:", error instanceof Error ? error.message : "unknown");
     return Response.json({ ok: false }, { status: 502 });
   }
 }

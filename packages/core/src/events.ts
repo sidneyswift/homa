@@ -33,6 +33,10 @@ export const EVENT_SCHEMAS = {
     age_months: z.number().int().min(0),
     in_range: z.boolean(),
   }),
+  "map.child_removed": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+  }),
   "map.question_answered": z.object({
     lead_id: z.uuid(),
     child_id: z.uuid(),
@@ -79,6 +83,16 @@ export const EVENT_SCHEMAS = {
     lead_id: z.uuid(),
     child_id: z.uuid(),
   }),
+  // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
+  // token and family_id (events policy, migration #13). No message content.
+  "chat.turn_completed": z.object({
+    status: z.enum(["ok", "error"]),
+    error_class: z.enum(["turn_failed", "send_failed", "unknown"]).optional(),
+    modality: z.enum(["text", "voice"]),
+    latency_ms: z.number().int().min(0),
+    model_tier: z.enum(["fast", "mid", "premium"]),
+    tool_calls: z.number().int().min(0),
+  }),
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;
@@ -87,6 +101,11 @@ export type EventProps<N extends EventName> = z.input<(typeof EVENT_SCHEMAS)[N]>
 export interface EventSink {
   supabaseUrl: string;
   supabaseKey: string;
+  /** Signed-in caller's JWT. Required for family-scoped events (chat.*):
+   *  the RLS policy checks membership of family_id under this token. */
+  accessToken?: string;
+  /** Stamped onto the row's family_id column (never into props). */
+  familyId?: string;
 }
 
 /**
@@ -108,8 +127,15 @@ export async function emitEvent<N extends EventName>(
         apikey: sink.supabaseKey,
         "Content-Type": "application/json",
         Prefer: "return=minimal",
+        ...(sink.accessToken
+          ? { Authorization: `Bearer ${sink.accessToken}` }
+          : {}),
       },
-      body: JSON.stringify({ name, props: parsed }),
+      body: JSON.stringify({
+        name,
+        props: parsed,
+        ...(sink.familyId ? { family_id: sink.familyId } : {}),
+      }),
     });
     if (!response.ok) {
       console.error(`emitEvent(${name}) failed: HTTP ${response.status}`);

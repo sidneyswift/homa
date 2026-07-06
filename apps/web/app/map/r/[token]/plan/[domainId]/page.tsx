@@ -6,6 +6,7 @@ import { getMapDomain } from "@homa/core";
 import { Logo } from "../../../../../../components/brand/Logo";
 import { emitMapEvent } from "../../../../../../lib/map/events";
 import { getOrBuildPlan } from "../../../../../../lib/map/store";
+import { PlanWeeks } from "./plan-weeks";
 
 /**
  * The four-week plan for one subject, built deterministically from the
@@ -123,19 +124,7 @@ export default async function PlanPage({
             </ol>
             {plan.styleNote ? <p className="mt-2 text-sm text-muted">{plan.styleNote}</p> : null}
 
-            <div className="mt-7 flex flex-col gap-4">
-              {plan.weeks.map((week) => (
-                <div key={week.week} className="rounded-lg border border-border-subtle p-5">
-                  <h3 className="font-display text-lg font-semibold text-strong">Week {week.week}</h3>
-                  <p className="mt-0.5 text-sm text-muted">Focus: {week.focus.charAt(0).toLowerCase()}{week.focus.slice(1)}</p>
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
-                    {week.activities.map((activity) => (
-                      <li key={activity}>{activity}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <PlanWeeks weeks={plan.weeks} storageKey={`homa-plan-${token}-${domainId}`} />
 
             <div className="mt-7 rounded-lg p-5" style={{ background: "var(--gold-100)" }}>
               <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>

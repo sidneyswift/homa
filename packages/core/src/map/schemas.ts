@@ -91,6 +91,11 @@ export const mapScoreRequestSchema = z.object({
   childId: z.uuid(),
 });
 
+/** Body of DELETE /api/map/children. The lead comes from the cookie, never here. */
+export const mapChildRemoveSchema = z.object({
+  childId: z.uuid(),
+});
+
 export const mapResumeRequestSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
 });
