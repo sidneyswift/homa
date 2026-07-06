@@ -3,6 +3,71 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 · Progress report v2: founder + Alessa read-through implemented
+
+Source: the recorded 45-minute walkthrough (founder + Alessa driving the live
+flow, transcript in Downloads). Every actionable ruling extracted and shipped:
+
+1. **Vocabulary, everywhere user-facing:** "progress report" not map,
+   "subject" not domain, plain age words not "band", color words
+   yellow/green/blue in copy (tokens stay gold/sage/sky in code). Rebased
+   over and merged with the parallel copy commit 5f861c4 (same direction,
+   subset), keeping its further ruling: the "a checklist for you, never a
+   test for them" tagline is dropped everywhere as confusing without
+   context.
+2. **Landing hero says what it is:** "Your homeschool assistant." with the
+   old tagline demoted into the sub-line; CTAs are "See where your child
+   stands" (hero/nav/founding families) and "Get your free progress report"
+   (blog/method).
+3. **Flow simplification:** S1 is email-only ("Enter your email to get
+   started"); kids are name + age only with an explicit nickname-is-fine
+   line; no interstitial before question one (a one-time hint rides above
+   it); fixed-height question card so nothing jumps; "subject 4 of 15".
+   Item fixes: "without a wobble" and "for a few turns" rewritten; the
+   second-language questions are now self-explanatory and lead with "skip
+   if it's not part of your home."
+4. **The extras step (new):** after the checklist, before the report, all
+   optional: typeable interest tags with age-aware suggestions, multi-select
+   help-with, per-kid notes, and (first time only) what to call her,
+   homeschool style + how-closely, current curriculums as tags, and a
+   family-values free text. Migration #8 (`20260706023548_lead_context_jsonb`)
+   adds jsonb context bags on lead_families and lead_children; new
+   /api/map/extras route + map.context_added event. Rationale from the
+   session: ask context AFTER she's invested, and style/curriculums are
+   load-bearing for future curriculum generation.
+5. **Report fixes:** the note-from-Homa is spoken by the logo mark (the
+   "h" circle read as a mystery); growing subjects name the child's actual
+   next skill (frontierStatement from the scorer) with rotating phrasings
+   instead of one repeated sentence 13 times; the top note reads the room
+   (a growing-heavy picture gets "solid footing in N subjects, a clear
+   next step in the blues", never a defeating tally); "with something
+   small to try attached" phrasing gone; the things-to-try section
+   right-sizes to "Where to start, pick one for this week" when 3+
+   subjects are growing; every subject card expands (details/summary) to
+   show what was asked, her answers, "typical by [age]" anchors, the
+   growing activity, and linked benchmark sources, answering "where did
+   you get that benchmark?" in two taps.
+6. **Verified:** typecheck, build, check:map, check:isolation green; live
+   e2e as a struggling 10-year-old (12 not-yets) confirming the kind
+   read-the-room note, named frontiers, expanders, and context persistence;
+   screenshots reviewed; test rows cleaned.
+
+Deferred to the product backlog, captured from the session but NOT built
+into the lead magnet (they are product scope): click-to-go-deeper quizzes
+per subject with optional kid-sits-with-you mode, build-a-curriculum from
+a growing subject + retest in four weeks (the retention loop, ties to
+FR-9/M3-03), what-are-you-doing-right follow-up on far-ahead subjects,
+photo upload + family members for personalization (D4 consent floor
+applies), location-aware activity suggestions (museum trips), and health/
+weight/social context capture (sensitive: MJ-13/D6 firewall applies).
+The extras step's notes field captures the light version of the last one.
+
+Operational notes: two real leads existed in prod during this session (one
+with 2 kids + 2 reports generated), so the map.* events cleanup used during
+testing wiped their funnel events too, analytics-only loss, lesson logged:
+future test cleanup must filter by the test lead's ids, not by event name.
+Announcement draft updated to progress-report wording; still unsent.
+
 ## 2026-07-05 (later) · Map bank v2026.07.1: ages 8 to 16 shipped (LM-7)
 
 Continuation of the "ship all" mandate: 75 new upper-band items across all
