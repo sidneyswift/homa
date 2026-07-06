@@ -138,24 +138,67 @@ const STYLE_NOTES: Record<string, string> = {
 };
 
 function fill(template: string, skill: string, interest: string): string {
-  return template.replaceAll("{skill}", skill).replaceAll("{interest}", interest);
+  const filled = template.replaceAll("{skill}", skill).replaceAll("{interest}", interest);
+  // A gerund landing at a sentence start must be capitalized
+  // ("their pick. reading..." reads broken).
+  return filled.replace(/(^|[.!?] )([a-z])/g, (_m, boundary: string, letter: string) => `${boundary}${letter.toUpperCase()}`);
 }
 
 function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
+/** Third-person verb to gerund: "knows" to "knowing", "writes" to
+ * "writing", "runs" to "running", "studies" to "studying". */
+function gerundize(word: string): string {
+  // Hyphenated verbs conjugate their last segment (skip-counts).
+  const hyphen = word.lastIndexOf("-");
+  if (hyphen > 0) return word.slice(0, hyphen + 1) + gerundize(word.slice(hyphen + 1));
+  if (!/^[a-z]+s$/.test(word)) return word;
+
+  let stem: string;
+  if (word.endsWith("ies")) stem = `${word.slice(0, -3)}y`;
+  else if (/(sses|shes|ches|xes|zes)$/.test(word)) stem = word.slice(0, -2);
+  else stem = word.slice(0, -1);
+
+  if (stem.endsWith("ie")) return `${stem.slice(0, -2)}ying`;
+  if (stem.endsWith("e") && !stem.endsWith("ee")) return `${stem.slice(0, -1)}ing`;
+  // Short consonant-vowel-consonant verbs double the last letter (run, cut).
+  if (stem.length <= 4 && /[^aeiou][aeiou][^aeiouwxy]$/.test(stem)) {
+    return `${stem}${stem.slice(-1)}ing`;
+  }
+  return `${stem}ing`;
+}
+
 /**
- * A skill statement trimmed to read naturally inside a sentence: long
- * two-clause statements keep only their first clause ("skip-counts by 5s,
- * 10s, and 100s, and reads 3-digit numbers" becomes the part before the
- * final ", and").
+ * A skill statement shaped to read naturally inside a sentence:
+ *   1. examples after a colon drop ("...with control: measures, chops"),
+ *   2. a trailing second verb clause drops ("reads a novel and follows
+ *      the plot" keeps "reads a novel"), list items ("beginning, middle,
+ *      and end") survive because "end" is not a verb,
+ *   3. the leading third-person verb becomes a gerund ("knows
+ *      multiplication facts" reads as "knowing multiplication facts"
+ *      after "ten minutes a day of...").
  */
 function skillPhrase(statement: string): string {
-  const lowered = lowerFirst(statement);
-  if (lowered.length <= 50) return lowered;
-  const cut = lowered.lastIndexOf(", and ");
-  return cut > 20 ? lowered.slice(0, cut) : lowered;
+  let phrase = lowerFirst(statement);
+
+  if (phrase.length > 45) {
+    const colon = phrase.indexOf(":");
+    if (colon > 20) phrase = phrase.slice(0, colon);
+  }
+  if (phrase.length > 45) {
+    const andClause = /,? and ([a-z]+s)\b/g;
+    let cutAt = -1;
+    for (const match of phrase.matchAll(andClause)) {
+      if ((match.index ?? 0) > 20) cutAt = match.index ?? -1;
+    }
+    if (cutAt > 20) phrase = phrase.slice(0, cutAt);
+  }
+
+  const spaceIndex = phrase.indexOf(" ");
+  if (spaceIndex === -1) return phrase;
+  return `${gerundize(phrase.slice(0, spaceIndex))}${phrase.slice(spaceIndex)}`;
 }
 
 /**

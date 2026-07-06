@@ -3,6 +3,29 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 · Deep dive now ends in the curriculum (founder live-test feedback)
+
+Founder, testing on production: "when I click dive deeper and answer more
+questions, it just brings me back to the progress report. Expected: it
+creates a custom curriculum for the next month." Fixed: a deep-dive
+sitting now rescores and lands directly on that subject's four-week plan,
+REBUILT from the refined answers (`getOrBuildPlan` gained a rebuild mode:
+fresh targets from the just-found starting line, retest clock restarted,
+retest email re-armed, which IS the monthly loop). The plan page shows a
+"built from your deep dive" banner; the report's go-deeper buttons now
+promise the plan ("pin down the start, get the plan"). The first full
+checklist still lands on the report, deep dives land on the plan.
+
+Also fixed while reading rendered plans: skill statements now conjugate
+into sentences (gerundize: "Knows multiplication facts" reads as "ten
+minutes a day of knowing multiplication facts", with colon-example and
+second-verb-clause trimming so week focuses stay short). Verified live:
+initial plan targeted multiplication, deep dive walked down to the 7y
+foothold, rebuilt plan re-targeted skip-counting first, retest clock
+reset and email re-armed, banner rendered. Test rows cleaned scoped by
+email; one real lead (with a plan) appeared during the session and was
+left untouched.
+
 ## 2026-07-06 (later still) · Full copy simplification pass
 
 Founder: "do a pass that simplifies and clarifies all copy." Ran the

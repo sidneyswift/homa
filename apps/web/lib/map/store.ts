@@ -322,10 +322,15 @@ const RETEST_DAYS = 28;
  * retest on first request. Access is via the report token, so the plan page
  * needs no cookie: the token IS the family's shareable artifact, and the
  * builder is deterministic with no PII beyond what the report already shows.
+ *
+ * `rebuild` recomputes the plan from the latest answers and restarts the
+ * four-week clock: the deep-dive flow ends here, so the month always aims
+ * at the freshly found starting line.
  */
 export async function getOrBuildPlan(
   reportToken: string,
   domainId: string,
+  options: { rebuild?: boolean } = {},
 ): Promise<{ plan: FourWeekPlan; childName: string; leadId: string; childId: string; wasNew: boolean; retestAt: string } | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -355,7 +360,7 @@ export async function getOrBuildPlan(
     from public.lead_plans
     where lead_child_id = ${row.child_id} and domain_id = ${domainId}
   `;
-  if (existing.length > 0) {
+  if (existing.length > 0 && !options.rebuild) {
     return {
       plan: existing[0].plan,
       childName: row.child_name,
@@ -383,11 +388,17 @@ export async function getOrBuildPlan(
   );
   if (!plan) return null;
 
+  // A rebuild restarts the month: fresh plan, fresh retest clock, and the
+  // retest email re-armed (this is the monthly loop working as designed).
   const inserted = await sql<{ retest_at: string }[]>`
     insert into public.lead_plans (lead_child_id, domain_id, plan, bank_version, retest_at)
     values (${row.child_id}, ${domainId}, ${sql.json(plan as unknown as DbJson)},
             ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
-    on conflict (lead_child_id, domain_id) do update set plan = excluded.plan
+    on conflict (lead_child_id, domain_id) do update
+      set plan = excluded.plan,
+          bank_version = excluded.bank_version,
+          retest_at = excluded.retest_at,
+          retest_emailed_at = null
     returning retest_at::text as retest_at
   `;
   await touchLead(row.lead_id);
@@ -397,7 +408,7 @@ export async function getOrBuildPlan(
     childName: row.child_name,
     leadId: row.lead_id,
     childId: row.child_id,
-    wasNew: true,
+    wasNew: existing.length === 0,
     retestAt: inserted[0].retest_at,
   };
 }

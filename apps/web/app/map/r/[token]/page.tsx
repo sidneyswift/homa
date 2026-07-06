@@ -324,7 +324,9 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                             href={`/map?dd=${report.childId}.${score.domainId}`}
                             className="inline-flex min-h-10 items-center rounded-pill border border-border bg-card px-4 py-2 text-xs font-semibold text-strong hover:border-brand"
                           >
-                            Go deeper ({score.position === "growing" ? "find the exact starting line" : "see how far it goes"})
+                            {score.position === "growing"
+                              ? "Go deeper: pin down the start, get the plan"
+                              : "Go deeper: see how far, then push further"}
                           </Link>
                         </div>
                       ) : null}

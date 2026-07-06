@@ -23,12 +23,18 @@ export const metadata: Metadata = {
 
 export default async function PlanPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string; domainId: string }>;
+  searchParams: Promise<{ rebuilt?: string }>;
 }) {
   const { token, domainId } = await params;
+  const { rebuilt } = await searchParams;
   const domain = getMapDomain(domainId);
-  const result = domain ? await getOrBuildPlan(token, domainId) : null;
+  // Arriving from a deep dive rebuilds the month from the refined answers.
+  const result = domain
+    ? await getOrBuildPlan(token, domainId, { rebuild: rebuilt === "1" })
+    : null;
 
   if (!result || !domain) {
     return (
@@ -84,6 +90,11 @@ export default async function PlanPage({
           </div>
 
           <div className="px-7 py-7 sm:px-10">
+            {rebuilt === "1" ? (
+              <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
+                Built from your deep dive: this month aims at exactly what you just pinned down.
+              </p>
+            ) : null}
             {plan.startingLine ? (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">

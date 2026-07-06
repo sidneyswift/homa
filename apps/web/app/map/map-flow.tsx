@@ -193,7 +193,9 @@ export function MapFlow() {
   }
 
   if (phase === "scoring" && activeChild) {
-    return <ScoringStep child={activeChild} />;
+    // A deep-dive sitting ends in that subject's rebuilt four-week plan;
+    // the first full checklist ends on the report.
+    return <ScoringStep child={activeChild} planDomain={deepDiveDomain} />;
   }
 
   return (

@@ -7,20 +7,35 @@ import { ageLabel } from "@homa/core";
 import type { FlowChild } from "./flow-types";
 
 /**
- * S4: "drawing the map." Scoring is deterministic and instant server-side;
- * this screen is a short beat of theater whose status lines teach what the
- * map is made of. Minimum display time ~2.2s, then straight to the report.
+ * S4: the scoring beat. Deterministic and instant server-side; this screen
+ * is a short beat of theater whose status lines teach what the report is
+ * made of. Minimum display time ~2.2s, then straight to the report, or,
+ * when the sitting was a subject deep dive, straight into that subject's
+ * freshly rebuilt four-week plan (the founder-expected payoff: deeper
+ * answers end in a curriculum, not back where you started).
  */
-export function ScoringStep({ child }: { child: FlowChild }) {
+export function ScoringStep({
+  child,
+  planDomain = null,
+}: {
+  child: FlowChild;
+  planDomain?: string | null;
+}) {
   const [lineCount, setLineCount] = useState(1);
   const [failed, setFailed] = useState(false);
   const startedAt = useRef(Date.now());
 
-  const lines = [
-    `Checking ${child.name}'s answers against national benchmarks\u2026`,
-    `Placing 15 subjects for age ${ageLabel(child.ageMonths)}\u2026`,
-    `Finding ${child.name}'s strengths\u2026`,
-  ];
+  const lines = planDomain
+    ? [
+        `Re-checking ${child.name}'s answers against national benchmarks\u2026`,
+        `Updating ${child.name}'s progress report\u2026`,
+        "Building the four-week plan\u2026",
+      ]
+    : [
+        `Checking ${child.name}'s answers against national benchmarks\u2026`,
+        `Placing 15 subjects for age ${ageLabel(child.ageMonths)}\u2026`,
+        `Finding ${child.name}'s strengths\u2026`,
+      ];
 
   useEffect(() => {
     const timers = [
@@ -43,8 +58,11 @@ export function ScoringStep({ child }: { child: FlowChild }) {
         }
         const elapsed = Date.now() - startedAt.current;
         const wait = Math.max(0, 2_200 - elapsed);
+        const destination = planDomain
+          ? `/map/r/${data.token}/plan/${planDomain}?rebuilt=1`
+          : `/map/r/${data.token}?fresh=1`;
         setTimeout(() => {
-          if (!cancelled) window.location.assign(`/map/r/${data.token}?fresh=1`);
+          if (!cancelled) window.location.assign(destination);
         }, wait);
       } catch {
         if (!cancelled) setFailed(true);
@@ -55,7 +73,7 @@ export function ScoringStep({ child }: { child: FlowChild }) {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [child.id, child.name]);
+  }, [child.id, child.name, planDomain]);
 
   if (failed) {
     return (
