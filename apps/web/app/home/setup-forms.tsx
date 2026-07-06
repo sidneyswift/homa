@@ -29,6 +29,11 @@ export function CreateFamilyForm() {
       </label>
       <input id="family-name" name="family_name" type="text" placeholder="The Swift family" className={inputClass} />
 
+      <label className="mt-4 block font-medium text-strong" htmlFor="parent-name">
+        What should Homa call you?
+      </label>
+      <input id="parent-name" name="parent_name" type="text" placeholder="Sarah" className={inputClass} />
+
       <label className="mt-4 block font-medium text-strong" htmlFor="family-state">
         State (optional)
       </label>

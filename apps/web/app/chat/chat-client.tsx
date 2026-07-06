@@ -1,27 +1,32 @@
 "use client";
 
+import { emitEvent } from "@homa/core";
 import type { HandleMessageStreamEvent, SessionState } from "eve/client";
-import { useEveAgent, type EveMessage, type EveMessagePart } from "eve/react";
+import { useEveAgent, type EveMessage } from "eve/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
-import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
+import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
+import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 
 /**
  * The chat surface (trimmed M1-04). useEveAgent drives session state against
  * the same-origin eve routes; auth rides as a bearer token resolved fresh
- * per request from the Supabase browser client (which auto-refreshes), so
- * the eve channel's supabaseAuth() can validate every call. shadcn chat
- * components arrive with M1-04 proper; this stays deliberately lean.
+ * per request from the Supabase browser client. Homa's per-family context
+ * (family, children, memories) is injected server-side on every turn by
+ * agent/instructions/family-context.ts, so even a brand-new session starts
+ * already knowing the family.
  *
  * The transcript + session cursor persist to localStorage per user (the
- * eve-documented resumable-sessions pattern), so a reload rejoins the same
- * durable conversation instead of silently starting a new one. Snapshots
- * save on turn finish; a reload mid-turn keeps everything up to the last
- * completed turn. M1-02's Postgres conversations table replaces this.
+ * eve-documented resumable-sessions pattern); M1-02's Postgres conversations
+ * table replaces this. chat.turn_completed events emit per journeys/06 §4.4
+ * under the caller's own token (events policy, migration #13).
  */
+
+// agent.ts pins anthropic/claude-sonnet-5: the mid tier in journeys/06 terms.
+const MODEL_TIER = "mid" as const;
 
 interface SavedChat {
   events?: readonly HandleMessageStreamEvent[];
@@ -38,64 +43,51 @@ function loadSavedChat(storageKey: string): SavedChat {
   }
 }
 
-function MessagePartView({ part }: { part: EveMessagePart }) {
-  if (part.type === "text") {
-    return <p className="whitespace-pre-wrap">{part.text}</p>;
-  }
-  if (
-    part.type === "dynamic-tool" &&
-    part.toolName === "create_worksheet" &&
-    part.state === "output-available"
-  ) {
-    const output = part.output as { worksheet?: WorksheetPayload } | undefined;
-    if (output?.worksheet) {
-      return (
-        <div className="mt-2">
-          <WorksheetCard worksheet={output.worksheet} />
-        </div>
-      );
-    }
-  }
-  return null;
-}
-
-function MessageView({ message }: { message: EveMessage }) {
-  const isUser = message.role === "user";
-  const hasRenderableContent = message.parts.some(
-    (part) =>
-      (part.type === "text" && part.text.trim().length > 0) ||
-      (part.type === "dynamic-tool" &&
-        part.toolName === "create_worksheet" &&
-        part.state === "output-available"),
-  );
-  if (!hasRenderableContent) return null;
-
-  return (
-    <div className={isUser ? "flex justify-end" : "flex justify-start"}>
-      <div
-        className={
-          isUser
-            ? "max-w-[85%] rounded-lg rounded-br-sm bg-brand px-4 py-3 text-on-brand"
-            : "max-w-[85%] rounded-lg rounded-bl-sm bg-card px-4 py-3 text-body shadow-sm"
-        }
-      >
-        {message.parts.map((part, index) => (
-          <MessagePartView key={index} part={part} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const SUGGESTIONS = [
   "What should we work on this week?",
   "Make a worksheet for today",
   "We had a rough morning, help me reset",
 ] as const;
 
-export function ChatClient({ storageKey }: { storageKey: string }) {
+export function ChatClient({
+  storageKey,
+  familyId,
+  parentName,
+}: {
+  storageKey: string;
+  familyId: string | null;
+  parentName: string | null;
+}) {
   const supabase = createSupabaseBrowserClient();
   const [saved] = useState<SavedChat>(() => loadSavedChat(storageKey));
+  const messagesRef = useRef<readonly EveMessage[]>([]);
+  const reportedErrorRef = useRef<Error | null>(null);
+
+  async function emitTurnCompleted(
+    status: "ok" | "error",
+    errorClass?: "turn_failed" | "send_failed" | "unknown",
+  ) {
+    if (!familyId) return;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return;
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) return;
+    await emitEvent(
+      { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
+      "chat.turn_completed",
+      {
+        status,
+        ...(errorClass ? { error_class: errorClass } : {}),
+        modality: "text",
+        latency_ms: takeTurnLatencyMs(),
+        model_tier: MODEL_TIER,
+        tool_calls: countLastTurnToolCalls(messagesRef.current),
+      },
+    );
+  }
+
   const agent = useEveAgent({
     auth: {
       bearer: async () => {
@@ -114,12 +106,26 @@ export function ChatClient({ storageKey }: { storageKey: string }) {
       } catch {
         // Storage full or blocked: the durable session still lives server-side.
       }
+      void emitTurnCompleted("ok");
     },
   });
 
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const busy = agent.status === "submitted" || agent.status === "streaming";
+
+  useEffect(() => {
+    messagesRef.current = agent.data.messages;
+  }, [agent.data.messages]);
+
+  useEffect(() => {
+    if (agent.error && agent.error !== reportedErrorRef.current) {
+      reportedErrorRef.current = agent.error;
+      void emitTurnCompleted("error", "turn_failed");
+    }
+    // emitTurnCompleted is re-created per render; agent.error is the real dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agent.error]);
 
   function startNewChat() {
     try {
@@ -138,6 +144,7 @@ export function ChatClient({ storageKey }: { storageKey: string }) {
     const message = text.trim();
     if (message.length === 0 || busy) return;
     setDraft("");
+    markTurnStarted();
     void agent.send({ message });
   }
 
@@ -169,7 +176,7 @@ export function ChatClient({ storageKey }: { storageKey: string }) {
         {agent.data.messages.length === 0 ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
-              Hi, I&apos;m Homa.
+              {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
             </h1>
             <p className="mt-2 text-body">
               Ask me anything about your homeschool day.
@@ -192,17 +199,17 @@ export function ChatClient({ storageKey }: { storageKey: string }) {
             <MessageView key={message.id} message={message} />
           ))
         )}
-        {busy &&
-        agent.data.messages.at(-1)?.role === "user" ? (
+        {busy && busyLabel(agent.data.messages) ? (
           <div className="flex justify-start">
             <div className="rounded-lg rounded-bl-sm bg-card px-4 py-3 text-muted shadow-sm">
-              thinking&hellip;
+              {busyLabel(agent.data.messages)}
             </div>
           </div>
         ) : null}
         {agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
-            Something went wrong: {agent.error.message}
+            Your conversation is safe; that last message didn&apos;t go through. Try
+            sending it again.
           </p>
         ) : null}
         <div ref={bottomRef} />

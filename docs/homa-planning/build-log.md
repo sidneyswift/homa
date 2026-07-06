@@ -3,6 +3,102 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 · The chat gets a brain: persona + durable memory (M2-01, M2-02 slice)
+
+Founder direction: "make the chat incredible, Homa should be so smart; turn
+onboarding info into files eve can use, maintain, and grow." Design answer
+first: eve has no file memory, and sandbox files die on every deploy, so the
+"files" are Postgres rows injected into context every turn (eve's documented
+multi-tenant memory pattern; 01-architecture.md state model). Shipped:
+
+1. **Migration #13** (`family_memory`, applied to homa-prod):
+   `family_memories` table (kind fact / what_works / daily_note-reserved,
+   500-char check, RLS: members CRUD their own family's rows, child
+   coherence enforced through the caller's own RLS view of children);
+   `families.parent_display_name` + `create_my_family(family_name,
+   family_us_state, parent_name)` (old 2-arg signature dropped so
+   PostgREST stays unambiguous); events INSERT policy for authenticated
+   members emitting `chat.%` stamped with their own family_id.
+2. **Per-turn family context** (`agent/instructions/family-context.ts`,
+   defineDynamic on turn.started): family name/state/parent name, children
+   with computed ages + interests + focus + child ids, and saved memories
+   with budget usage, rendered as a labeled data-not-instructions block.
+   A fresh session starts already knowing the family, which is what makes
+   session rotation free, and turn 2 of the E2E proved it (new session,
+   zero tools, correct recall).
+3. **Memory tools**: `remember` (dedupe, 4,000-char family budget with the
+   Hermes consolidate-on-full error shape, write-time injection scan:
+   invisible-unicode blocklist + threat regexes in `lib/agent-memory.ts`),
+   `forget` (substring match, ambiguity returns candidates, deleted content
+   returned for undo-by-resave), `update_child_profile` (schema-bounded
+   interests/focus only, scanned like memory). All caller-scoped via
+   lib/agent-db (RLS is the tenancy wall); get_children demoted to a
+   mid-conversation refresher.
+4. **Persona port (M2-01)**: instructions.md now carries the SOUL/IDENTITY
+   voice (opinions with conviction, proactive-when-earned, coach-the-parent,
+   multi-child disambiguation, boundaries) merged with the design-system
+   content fundamentals (offers never commands, reassure-before-inform,
+   never "behind", sibling-comparison ban, one nudge max, no sycophant
+   openers) + memory laws incl. the distress-data firewall (D5: acute
+   distress is never written to memory).
+5. **Onboarding → context**: "What should Homa call you?" field on family
+   setup writes parent_display_name; child intake (interests/focus) already
+   flows into the context block, so everything collected at onboarding now
+   reaches Homa's head every turn without seeding duplicate rows.
+6. **Chat surface**: assistant replies render markdown (react-markdown +
+   remark-gfm, DS-token styles); busy bubble shows named tool activity
+   ("saving a note…", "putting the worksheet together…") and hides while
+   text streams; sage "Noted / Forgot / Profile updated" chips make memory
+   effects visible in the transcript (MJ-02 confirmation spirit); error
+   copy reassures first. Greeting uses the parent's name.
+7. **Events (MJ-08)**: `chat.turn_completed` added to the typed registry
+   (status/error_class/modality/latency_ms/model_tier/tool_calls);
+   emitEvent gained optional accessToken + familyId so browser emits ride
+   the caller's own RLS. Emitted from the chat client on finish and on
+   error.
+
+Verified against the real stack (next+eve dev, homa-prod, real model):
+full E2E passed: signup → create_my_family with parent name → child →
+turn 1 shares "co-op every Friday" → Homa calls remember unprompted → row
+in family_memories → brand-new session answers "Fridays!" with zero tool
+calls (pure injected context) → member can emit chat.turn_completed, cannot
+emit for a foreign family_id. Test rows + user deleted after (0 remain).
+Typecheck, build, isolation checks (extended with family_memories + chat
+event probes) all green. Security advisors: no new findings (the
+create_my_family SECURITY DEFINER warn is the documented, intended one).
+
+Decisions made alone (auditable):
+- **Memory medium is Postgres rows, not files**: forced by verified eve
+  behavior (deploy-scoped sandboxes); the template's MEMORY.md layering
+  survives as kinds on rows.
+- **Timezone**: context date pinned to US Eastern for cohort one (families
+  have no timezone column yet; the drip scheduler MJ-05 owns per-family
+  timezones). TODO for human if a non-Eastern family joins earlier.
+- **No approval gate on forget**: eve HITL parking would strand the lean
+  chat UI (no approval surface yet, M1-04 proper). Guardrails instead:
+  family-scoped RLS, single-row deletes, deleted content returned so the
+  model can restore on "keep that".
+- **Client-side event emit**: journeys/06 marks chat.turn_completed source
+  "agent", but eve hooks don't expose auth attributes, so the browser emits
+  under the caller's token until M1-02's server-side event persistence.
+  tool_calls counts the last assistant message's tool parts (honest v0).
+- **No memory.saved event invented**: the registry law forbids inventing
+  names; the closest spec'd event (observation.logged) requires domain
+  codes M2-13 owns. Logged as a known gap for M2-13.
+- **Migration file named to the remote-assigned version** (20260706061222)
+  so local files match `supabase migration list`. (A parallel agent session
+  running tonight committed migration #11's file and this session's
+  events.ts registry change mid-build; reconciled, no divergence left.)
+- Pre-existing `pnpm lint` failures in map/* files (react-hooks purity
+  rules) left untouched; CI gates typecheck + build + isolation, not lint.
+  New chat code lints clean.
+
+Still open toward "incredible chat": M1-04 proper (shadcn chat components
++ streaming scroll polish), cross-device history (M1-02 conversations
+table), voice notes (M1-05), the M2-13 post-turn learning review (the
+automated "gets smarter" loop; today Homa saves memories in-turn per her
+instructions), M2-15 recall_conversations search.
+
 ## 2026-07-06 · Movement pass: the report becomes a living document
 
 Founder asked "what would make this better for the user," then "do this

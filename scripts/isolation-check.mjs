@@ -67,6 +67,8 @@ await expectEmptyRead("events");
 await expectEmptyRead("families");
 await expectEmptyRead("family_members");
 await expectEmptyRead("children");
+// Homa's durable memory (migration #13): family-scoped, members only.
+await expectEmptyRead("family_memories");
 // Map lead tables (migration #7): deny-all RLS, zero policies, privileges
 // revoked. Anonymous traffic must see nothing and write nothing.
 await expectEmptyRead("lead_families");
@@ -89,6 +91,16 @@ await expectInsertDenied(
   "events",
   { name: "account.signup_completed", props: {} },
   "anon cannot emit non-waitlist events",
+);
+await expectInsertDenied(
+  "events",
+  { name: "chat.turn_completed", props: {}, family_id: "00000000-0000-0000-0000-000000000000" },
+  "anon cannot emit chat events",
+);
+await expectInsertDenied(
+  "family_memories",
+  { family_id: "00000000-0000-0000-0000-000000000000", content: "intruder note" },
+  "anon cannot write family memories",
 );
 await expectInsertDenied(
   "waitlist",

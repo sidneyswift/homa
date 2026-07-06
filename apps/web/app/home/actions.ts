@@ -20,11 +20,13 @@ export async function createFamilyAction(
 ): Promise<SetupFormState> {
   const name = String(formData.get("family_name") ?? "").trim() || "My family";
   const usState = String(formData.get("us_state") ?? "").trim() || null;
+  const parentName = String(formData.get("parent_name") ?? "").trim() || null;
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc("create_my_family", {
     family_name: name,
     family_us_state: usState,
+    parent_name: parentName,
   });
   if (error) {
     return { error: error.message };

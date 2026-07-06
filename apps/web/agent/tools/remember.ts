@@ -1,0 +1,111 @@
+import { defineTool } from "eve/tools";
+import { z } from "zod";
+
+import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import {
+  FAMILY_MEMORY_CHAR_BUDGET,
+  MEMORY_ENTRY_MAX_CHARS,
+  MEMORY_KINDS,
+  memoryUsageChars,
+  scanMemoryContent,
+} from "../../lib/agent-memory";
+
+/**
+ * Writes one durable memory row for this family (M2-02). The family scope
+ * comes from session auth; a model-supplied child id only works when that
+ * child exists inside the caller's own RLS view. Content is scanned before
+ * it can re-enter future system prompts (M2-14 floor), and the family
+ * character budget forces consolidation instead of hoarding.
+ */
+export default defineTool({
+  description:
+    "Save one durable fact about this family so future conversations remember it. Use for stable facts (routines, preferences, family rhythm) or per-child what-works teaching signal. Save facts the moment you learn them. Not for task progress, one-off logistics, secrets, or anything sensitive shared in distress.",
+  inputSchema: z.object({
+    content: z
+      .string()
+      .min(4)
+      .max(MEMORY_ENTRY_MAX_CHARS)
+      .describe("The fact, as one compact self-contained sentence."),
+    kind: z
+      .enum(MEMORY_KINDS)
+      .default("fact")
+      .describe("'fact' for family/child facts, 'what_works' for teaching signal."),
+    childId: z
+      .uuid()
+      .optional()
+      .describe("Attach to one child (id from the family context block). Omit for family-wide facts."),
+  }),
+  async execute(input, ctx) {
+    let clientBundle;
+    try {
+      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+    } catch (error) {
+      if (error instanceof MissingFamilyContextError) {
+        return { saved: false, note: error.message };
+      }
+      throw error;
+    }
+    const { db, familyId } = clientBundle;
+
+    const blocked = scanMemoryContent(input.content);
+    if (blocked) {
+      return { saved: false, note: blocked };
+    }
+
+    if (input.childId) {
+      const { data: child } = await db
+        .from("children")
+        .select("id")
+        .eq("id", input.childId)
+        .eq("family_id", familyId)
+        .maybeSingle();
+      if (!child) {
+        return {
+          saved: false,
+          note: "That child id is not in this family. Use an id from the family context block.",
+        };
+      }
+    }
+
+    const { data: existing, error: readError } = await db
+      .from("family_memories")
+      .select("id, child_id, kind, content, source, created_at")
+      .eq("family_id", familyId)
+      .in("kind", [...MEMORY_KINDS]);
+    if (readError) {
+      return { saved: false, note: `Could not read memory: ${readError.message}` };
+    }
+
+    const rows = existing ?? [];
+    if (rows.some((row) => row.content === input.content)) {
+      return { saved: true, done: true, note: "Already saved (no duplicate added)." };
+    }
+
+    const usage = memoryUsageChars(rows);
+    if (usage + input.content.length > FAMILY_MEMORY_CHAR_BUDGET) {
+      return {
+        saved: false,
+        note: `Memory is at ${usage.toLocaleString()} of ${FAMILY_MEMORY_CHAR_BUDGET.toLocaleString()} characters and this entry will not fit. Consolidate now: forget stale or overlapping entries (see current_memories), then retry this save in the same turn.`,
+        current_memories: rows.map((row) => row.content),
+      };
+    }
+
+    const { error: insertError } = await db.from("family_memories").insert({
+      family_id: familyId,
+      child_id: input.childId ?? null,
+      kind: input.kind,
+      content: input.content,
+      source: "homa",
+    });
+    if (insertError) {
+      return { saved: false, note: `Could not save: ${insertError.message}` };
+    }
+
+    return {
+      saved: true,
+      done: true,
+      content: input.content,
+      note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
+    };
+  },
+});
