@@ -6,6 +6,7 @@ import {
   ageLabel,
   domainLine,
   getMapDomain,
+  growingActivityFor,
   homaNote,
   MAP_SOURCES,
   reportSubtitle,
@@ -239,13 +240,14 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                   {growing.slice(0, 2).map((score) => {
                     const domain = getMapDomain(score.domainId);
                     if (!domain) return null;
+                    const activity = growingActivityFor(domain, months);
                     return (
                       <div key={score.domainId} className="rounded-lg p-4" style={{ background: "var(--info-soft)" }}>
                         <p className="font-mono text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--sky-600)" }}>
                           {domain.displayName}
                         </p>
-                        <p className="mt-1 font-semibold text-strong">{domain.growingActivity.title}</p>
-                        <p className="mt-1 text-sm text-body">{domain.growingActivity.description}</p>
+                        <p className="mt-1 font-semibold text-strong">{activity.title}</p>
+                        <p className="mt-1 text-sm text-body">{activity.description}</p>
                       </div>
                     );
                   })}

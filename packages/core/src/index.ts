@@ -33,6 +33,7 @@ export {
 export {
   getMapDomain,
   getMapItem,
+  growingActivityFor,
   MAP_ANSWERS,
   MAP_BANK_VERSION,
   MAP_DOMAINS,

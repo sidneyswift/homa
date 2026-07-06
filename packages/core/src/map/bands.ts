@@ -4,9 +4,10 @@
  * "YYYY-MM" (day is never collected, matching public.children.birth_month).
  */
 
-/** Scored range for v1: 2y0m up to (not including) 7y0m. */
+/** Scored range: 2y0m up to (not including) 17y0m, so every age 2 to 16
+ * gets a checklist. Under-2s are captured with the pending-band promise. */
 export const SCORED_MIN_MONTHS = 24;
-export const SCORED_MAX_MONTHS = 84;
+export const SCORED_MAX_MONTHS = 204;
 
 /** Hard cap on how far ahead a single domain can read, per the position rubric. */
 export const MONTHS_AHEAD_CAP = 24;

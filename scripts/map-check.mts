@@ -53,7 +53,9 @@ for (const domain of MAP_DOMAINS) {
     for (const key of item.sources) {
       if (!MAP_SOURCES[key]) failures.push(`${item.id}: unknown source key "${key}"`);
     }
-    if (item.typicalMonths < 20 || item.typicalMonths > 130) {
+    // 20mo floor (bank starts at 2y) to ~17.5y ceiling (ladder headroom for
+    // detecting ahead at the top of the 2-16 range).
+    if (item.typicalMonths < 20 || item.typicalMonths > 210) {
       failures.push(`${item.id}: typicalMonths ${item.typicalMonths} outside sane range`);
     }
   }
@@ -63,7 +65,7 @@ report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cit
 // ---------- 2. Selection ladder sanity ----------
 
 let ladderOk = true;
-for (let age = 24; age < 84; age += 3) {
+for (let age = 24; age < 204; age += 3) {
   const plans = planQuestions(age);
   if (plans.length !== MAP_DOMAINS.length) ladderOk = false;
   // Worst case is base + two rungs in all 15 domains; typical kids see far
@@ -84,7 +86,7 @@ for (let age = 24; age < 84; age += 3) {
     }
   }
 }
-report("selection ladder: base + ladder sane for every age 2y to 7y", ladderOk);
+report("selection ladder: base + ladder sane for every age 2y to 16y", ladderOk);
 
 // ---------- 3. Scorer fixtures ----------
 
@@ -173,10 +175,42 @@ report(
 const again = scoreMap(AGE, answersFor(AGE, () => "easily"));
 report("determinism: same answers produce the same map", JSON.stringify(again) === JSON.stringify(aheadKid));
 
+// Golden kid 5: a 10-year-old (120mo), mixed profile across the new bands.
+const TEN = 120;
+const tenKid = scoreMap(
+  TEN,
+  answersFor(TEN, (domainId, rungIndex) => {
+    if (domainId === "math") return rungIndex <= 1 ? "easily" : "getting_there";
+    if (domainId === "executive_function") return "not_yet";
+    if (domainId === "self_care") return "getting_there";
+    return rungIndex === 0 ? "easily" : null;
+  }),
+);
+const tenById = new Map(tenKid.domains.map((d) => [d.domainId, d]));
+report(
+  "10yo kid: math ahead, executive function growing, everything scorable",
+  tenById.get("math")?.position === "ahead" &&
+    tenById.get("executive_function")?.position === "growing" &&
+    tenKid.mappedCount === tenKid.totalDomains,
+  JSON.stringify([tenById.get("math")?.position, tenById.get("executive_function")?.position, tenKid.mappedCount]),
+);
+
+// Golden kid 6: a 15-year-old (180mo) who answers everything easily. Ahead
+// where headroom exists, honestly "at age" in domains mastered years ago
+// (phonics), never a growing state from strength alone.
+const FIFTEEN = 180;
+const teenKid = scoreMap(FIFTEEN, answersFor(FIFTEEN, () => "easily"));
+report(
+  "15yo kid: strengths cap at +24, plateaued domains read on track, none growing",
+  teenKid.domains.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
+    teenKid.domains.every((d) => (d.monthsAhead ?? 0) <= 24),
+  JSON.stringify(teenKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
+);
+
 // ---------- 4. Rendered sentences obey the laws ----------
 
 const before = failures.length;
-for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid]) {
+for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid, tenKid, teenKid]) {
   checkCopy("homaNote", homaNote(scores, "Maya", "Sarah"));
   for (const domain of scores.domains) {
     const line = domainLine(domain, "Maya");

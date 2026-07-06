@@ -13,7 +13,7 @@ import { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent } from "./content";
  */
 
 /** Bumped whenever content meaningfully changes; stored on every report. */
-export const MAP_BANK_VERSION = "2026.07.0";
+export const MAP_BANK_VERSION = "2026.07.1";
 
 export const MAP_ANSWERS = ["easily", "getting_there", "not_yet", "not_sure", "skip"] as const;
 export type MapAnswer = (typeof MAP_ANSWERS)[number];
@@ -41,7 +41,18 @@ export interface MapDomain {
   exposureBased: boolean;
   /** The free five-minute activity attached to a "growing right now" state. */
   growingActivity: { title: string; description: string };
+  /** Age-appropriate swap for kids ~8 and up. */
+  growingActivityOlder?: { title: string; description: string };
   items: readonly MapItem[];
+}
+
+/** The right growing activity for the child's age (older variant from ~8y). */
+export function growingActivityFor(
+  domain: MapDomain,
+  ageMonths: number,
+): { title: string; description: string } {
+  if (ageMonths >= 96 && domain.growingActivityOlder) return domain.growingActivityOlder;
+  return domain.growingActivity;
 }
 
 export { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent };

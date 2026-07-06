@@ -79,11 +79,12 @@ export default function MethodPage() {
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Coverage today</h2>
         <p className="mt-3 text-body">
-          The checklist currently covers ages 2 to 7 across {MAP_DOMAINS.length} domains
-          ({MAP_DOMAINS.map((domain) => domain.displayName).join(", ")}). Checklists for older ages
-          are being built against the same sources and review bar, band by band. If your child&apos;s
-          age isn&apos;t covered yet, we save what you share and email you the moment their
-          checklist is ready.
+          The checklist covers ages 2 to 16 across {MAP_DOMAINS.length} domains
+          ({MAP_DOMAINS.map((domain) => domain.displayName).join(", ")}). Early ages anchor to
+          developmental milestones; school ages anchor to national grade-band standards, asked as
+          things a parent has actually seen (work on the table, habits around the house), never as
+          quiz questions for the child. For children under 2, we save what you share and email you
+          the moment their checklist is ready at age 2.
         </p>
         <p className="mt-3 font-mono text-xs text-subtle">
           benchmark bank version {MAP_BANK_VERSION}. Reports record the version that scored them,
