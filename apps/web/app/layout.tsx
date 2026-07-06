@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Caveat, EB_Garamond, Fredoka, Hanken_Grotesk, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // Homa Design System v3 fonts (docs/homa-design/tokens/fonts.css), loaded via
@@ -62,7 +63,14 @@ export default function RootLayout({
       lang="en"
       className={`${schibstedGrotesk.variable} ${ebGaramond.variable} ${fredoka.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Pageview beacon for the landing -> signup conversion denominator
+            (docs/homa-planning/journeys/06-metrics-instrumentation.md). Product
+            events stay first-party in public.events; pageviews are the one
+            metric allowed outside it. No-ops when Vercel Analytics is off. */}
+        <Analytics />
+      </body>
     </html>
   );
 }
