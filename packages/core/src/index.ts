@@ -31,6 +31,7 @@ export {
 } from "./map/bands";
 
 export {
+  DEEP_DIVE_CAP,
   getMapDomain,
   getMapItem,
   growingActivityFor,
@@ -38,12 +39,20 @@ export {
   MAP_BANK_VERSION,
   MAP_DOMAINS,
   MAP_SOURCES,
+  nextDeepDiveItem,
   planQuestions,
   type MapAnswer,
   type MapDomain,
   type MapItem,
   type MapQuestionPlan,
 } from "./map/bank";
+
+export {
+  buildFourWeekPlan,
+  type FourWeekPlan,
+  type PlanContext,
+  type PlanWeek,
+} from "./map/plans";
 
 export {
   AHEAD_THRESHOLD_MONTHS,

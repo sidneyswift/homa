@@ -27,6 +27,12 @@ export async function GET(request: NextRequest): Promise<Response> {
         maxAge: 60 * 60 * 24 * 90,
       });
       destination.searchParams.set("resumed", "1");
+      // Retest emails carry a deep-dive target ("childId.domainId"); pass it
+      // through so the flow opens straight on the subject's re-check.
+      const deepDive = request.nextUrl.searchParams.get("dd");
+      if (deepDive && /^[0-9a-f-]{36}\.[a-z_]+$/.test(deepDive)) {
+        destination.searchParams.set("dd", deepDive);
+      }
     }
   }
 

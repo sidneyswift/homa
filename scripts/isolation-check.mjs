@@ -73,6 +73,7 @@ await expectEmptyRead("lead_families");
 await expectEmptyRead("lead_children");
 await expectEmptyRead("lead_answers");
 await expectEmptyRead("lead_reports");
+await expectEmptyRead("lead_plans");
 
 await expectInsertDenied(
   "families",

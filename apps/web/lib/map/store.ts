@@ -1,9 +1,11 @@
 import {
   ageInMonths,
+  buildFourWeekPlan,
   getMapItem,
   isInScoredRange,
   MAP_BANK_VERSION,
   scoreMap,
+  type FourWeekPlan,
   type MapAnswer,
   type MapScores,
 } from "@homa/core";
@@ -89,13 +91,19 @@ export async function upsertLead(
   return { leadId: inserted[0].id, returning: false, resumeToken };
 }
 
-/** Resolves a lead from a raw resume token. Null when unknown or deleted. */
+/**
+ * Resolves a lead from a raw token: either the device cookie's resume token
+ * or an emailed link token. Both are honored so an emailed link never
+ * invalidates the cookie already living on her original device.
+ */
 export async function getLeadByResumeToken(rawToken: string): Promise<LeadRow | null> {
   const sql = mapDb();
+  const hash = hashToken(rawToken);
   const rows = await sql<LeadRow[]>`
     select id, email, first_name, us_state, status
     from public.lead_families
-    where resume_token_hash = ${hashToken(rawToken)} and status <> 'deleted'
+    where (resume_token_hash = ${hash} or link_token_hash = ${hash})
+      and status <> 'deleted'
   `;
   return rows[0] ?? null;
 }
@@ -108,16 +116,20 @@ export async function getLeadByEmail(email: string): Promise<{ id: string } | nu
   return rows[0] ?? null;
 }
 
-/** Rotates and returns a fresh resume token for an existing lead. */
-export async function rotateResumeToken(leadId: string): Promise<string> {
+/**
+ * Mints a fresh emailed-link token for a lead. Deliberately separate from
+ * the device cookie's resume token: sending an email must never log out
+ * the device she's already using.
+ */
+export async function mintLinkToken(leadId: string): Promise<string> {
   const sql = mapDb();
-  const resumeToken = newToken();
+  const linkToken = newToken();
   await sql`
     update public.lead_families
-    set resume_token_hash = ${hashToken(resumeToken)}, updated_at = now()
+    set link_token_hash = ${hashToken(linkToken)}
     where id = ${leadId}
   `;
-  return resumeToken;
+  return linkToken;
 }
 
 export async function countChildren(leadId: string): Promise<number> {
@@ -292,6 +304,127 @@ export async function markReportEmailed(childId: string): Promise<void> {
   await sql`update public.lead_reports set emailed_at = now() where lead_child_id = ${childId}`;
 }
 
+/** True when this child's report has already gone out by email (rescores
+ * after a deep dive must not re-send it). */
+export async function reportAlreadyEmailed(childId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ emailed: boolean }[]>`
+    select emailed_at is not null as emailed
+    from public.lead_reports where lead_child_id = ${childId}
+  `;
+  return rows[0]?.emailed ?? false;
+}
+
+const RETEST_DAYS = 28;
+
+/**
+ * Returns the stored four-week plan for a subject, building and arming its
+ * retest on first request. Access is via the report token, so the plan page
+ * needs no cookie: the token IS the family's shareable artifact, and the
+ * builder is deterministic with no PII beyond what the report already shows.
+ */
+export async function getOrBuildPlan(
+  reportToken: string,
+  domainId: string,
+): Promise<{ plan: FourWeekPlan; childName: string; leadId: string; childId: string; wasNew: boolean; retestAt: string } | null> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      child_id: string;
+      child_name: string;
+      birth_month: string;
+      child_context: Record<string, unknown>;
+      lead_id: string;
+      family_context: Record<string, unknown>;
+    }[]
+  >`
+    select c.id as child_id, c.name as child_name,
+           to_char(c.birth_month, 'YYYY-MM') as birth_month,
+           c.context as child_context,
+           f.id as lead_id, f.context as family_context
+    from public.lead_reports r
+    join public.lead_children c on c.id = r.lead_child_id
+    join public.lead_families f on f.id = c.lead_family_id
+    where r.token = ${reportToken} and r.revoked_at is null and f.status <> 'deleted'
+  `;
+  const row = rows[0];
+  if (!row) return null;
+
+  const existing = await sql<{ plan: FourWeekPlan; retest_at: string }[]>`
+    select plan, retest_at::text as retest_at
+    from public.lead_plans
+    where lead_child_id = ${row.child_id} and domain_id = ${domainId}
+  `;
+  if (existing.length > 0) {
+    return {
+      plan: existing[0].plan,
+      childName: row.child_name,
+      leadId: row.lead_id,
+      childId: row.child_id,
+      wasNew: false,
+      retestAt: existing[0].retest_at,
+    };
+  }
+
+  const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
+    select question_id, answer from public.lead_answers where lead_child_id = ${row.child_id}
+  `;
+  const childInterests = Array.isArray(row.child_context?.interests)
+    ? (row.child_context.interests as string[])
+    : [];
+  const familyStyle =
+    typeof row.family_context?.style === "string" ? row.family_context.style : undefined;
+
+  const plan = buildFourWeekPlan(
+    domainId,
+    ageInMonths(row.birth_month),
+    answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
+    { interests: childInterests, style: familyStyle },
+  );
+  if (!plan) return null;
+
+  const inserted = await sql<{ retest_at: string }[]>`
+    insert into public.lead_plans (lead_child_id, domain_id, plan, bank_version, retest_at)
+    values (${row.child_id}, ${domainId}, ${sql.json(plan as unknown as DbJson)},
+            ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
+    on conflict (lead_child_id, domain_id) do update set plan = excluded.plan
+    returning retest_at::text as retest_at
+  `;
+  await touchLead(row.lead_id);
+
+  return {
+    plan,
+    childName: row.child_name,
+    leadId: row.lead_id,
+    childId: row.child_id,
+    wasNew: true,
+    retestAt: inserted[0].retest_at,
+  };
+}
+
+/** Plans whose four weeks are up and whose retest email hasn't gone out. */
+export async function plansNeedingRetest(): Promise<
+  { plan_id: string; domain_id: string; child_id: string; child_name: string; lead_id: string; email: string }[]
+> {
+  const sql = mapDb();
+  return sql<
+    { plan_id: string; domain_id: string; child_id: string; child_name: string; lead_id: string; email: string }[]
+  >`
+    select p.id as plan_id, p.domain_id, c.id as child_id, c.name as child_name,
+           f.id as lead_id, f.email
+    from public.lead_plans p
+    join public.lead_children c on c.id = p.lead_child_id
+    join public.lead_families f on f.id = c.lead_family_id
+    where p.retest_at < now() and p.retest_emailed_at is null and f.status <> 'deleted'
+    limit 100
+  `;
+}
+
+export async function markRetestEmailed(planId: string): Promise<void> {
+  const sql = mapDb();
+  await sql`update public.lead_plans set retest_emailed_at = now() where id = ${planId}`;
+}
+
 export interface ReportView {
   token: string;
   scores: MapScores;
@@ -372,7 +505,11 @@ async function touchLead(leadId: string): Promise<void> {
   await sql`update public.lead_families set updated_at = now() where id = ${leadId}`;
 }
 
-/** Deep-merges an extras patch into a child's context bag (server-validated). */
+/**
+ * Deep-merges an extras patch into a child's context bag (server-validated).
+ * whatsWorking merges per-subject so a note about math never clobbers the
+ * earlier note about reading.
+ */
 export async function saveChildContext(
   leadId: string,
   childId: string,
@@ -380,9 +517,22 @@ export async function saveChildContext(
 ): Promise<boolean> {
   if (!(await childBelongsToLead(childId, leadId))) return false;
   const sql = mapDb();
+
+  let merged = patch;
+  if (patch.whatsWorking && typeof patch.whatsWorking === "object") {
+    const rows = await sql<{ context: Record<string, unknown> }[]>`
+      select context from public.lead_children where id = ${childId}
+    `;
+    const existing = (rows[0]?.context?.whatsWorking ?? {}) as Record<string, unknown>;
+    merged = {
+      ...patch,
+      whatsWorking: { ...existing, ...(patch.whatsWorking as Record<string, unknown>) },
+    };
+  }
+
   await sql`
     update public.lead_children
-    set context = context || ${sql.json(patch as unknown as DbJson)}
+    set context = context || ${sql.json(merged as unknown as DbJson)}
     where id = ${childId}
   `;
   await touchLead(leadId);

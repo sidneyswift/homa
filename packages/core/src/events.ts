@@ -59,6 +59,22 @@ export const EVENT_SCHEMAS = {
   "map.reminder_sent": z.object({
     lead_id: z.uuid(),
   }),
+  "map.deep_dive_started": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+    mode: z.enum(["parent", "together"]),
+  }),
+  "map.plan_built": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+  }),
+  "map.retest_emailed": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+  }),
   "map.band_ready_emailed": z.object({
     lead_id: z.uuid(),
     child_id: z.uuid(),

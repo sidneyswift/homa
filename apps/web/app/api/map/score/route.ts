@@ -4,7 +4,7 @@ import { sendReportEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireLead } from "../../../../lib/map/session";
-import { createReport, markReportEmailed } from "../../../../lib/map/store";
+import { createReport, markReportEmailed, reportAlreadyEmailed } from "../../../../lib/map/store";
 
 /**
  * POST /api/map/score
@@ -35,6 +35,10 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    // Rescores (after a deep dive) update the same report row and must not
+    // re-send the email; only the first scoring of a child emails her.
+    const alreadyEmailed = await reportAlreadyEmailed(parsed.data.childId);
+
     const report = await createReport(lead.id, parsed.data.childId);
     if (!report) {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
@@ -48,8 +52,10 @@ export async function POST(request: Request): Promise<Response> {
       bank_version: MAP_BANK_VERSION,
     });
 
-    const emailed = await sendReportEmail(report.email, report.childName, report.token);
-    if (emailed) await markReportEmailed(report.childId);
+    if (!alreadyEmailed) {
+      const emailed = await sendReportEmail(report.email, report.childName, report.token);
+      if (emailed) await markReportEmailed(report.childId);
+    }
 
     return Response.json({ ok: true, token: report.token });
   } catch (error) {

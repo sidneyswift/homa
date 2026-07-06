@@ -1,0 +1,163 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { getMapDomain } from "@homa/core";
+
+import { Logo } from "../../../../../../components/brand/Logo";
+import { emitMapEvent } from "../../../../../../lib/map/events";
+import { getOrBuildPlan } from "../../../../../../lib/map/store";
+
+/**
+ * The four-week plan for one subject, built deterministically from the
+ * child's answers + extras context on first view, retest armed for four
+ * weeks out (the read-through's loop: implement, retest, watch the number
+ * move). Tokenized like the report itself: printable, shareable, no login.
+ */
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Four-week plan",
+  robots: { index: false },
+};
+
+export default async function PlanPage({
+  params,
+}: {
+  params: Promise<{ token: string; domainId: string }>;
+}) {
+  const { token, domainId } = await params;
+  const domain = getMapDomain(domainId);
+  const result = domain ? await getOrBuildPlan(token, domainId) : null;
+
+  if (!result || !domain) {
+    return (
+      <main className="mx-auto w-full max-w-xl px-6 py-20">
+        <Logo size={26} />
+        <h1 className="mt-8 font-display text-2xl font-bold text-strong">
+          This plan link isn&apos;t active.
+        </h1>
+        <p className="mt-3 text-body">
+          Start with your child&apos;s free progress report and every subject gets a plan button.
+        </p>
+        <Link
+          href="/map"
+          className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
+        >
+          Get your free progress report
+        </Link>
+      </main>
+    );
+  }
+
+  if (result.wasNew) {
+    await emitMapEvent("map.plan_built", {
+      lead_id: result.leadId,
+      child_id: result.childId,
+      domain: domainId,
+    });
+  }
+
+  const { plan, childName } = result;
+  const retestDate = new Date(result.retestAt).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <div className="min-h-screen bg-page pb-16">
+      <main className="mx-auto w-full max-w-2xl px-4 pt-6">
+        <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
+          <div style={{ background: "var(--band-mint)" }} className="px-7 pb-7 pt-8 sm:px-10">
+            <div className="flex items-center gap-3">
+              <Logo size={24} />
+              <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
+                a four-week plan {"\u00b7"} made for {childName}
+              </span>
+            </div>
+            <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong">
+              {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>{plan.subjectName.toLowerCase()}</span> month
+            </h1>
+            <p className="mt-2 font-serif text-lg italic text-strong/75">
+              four weeks, five-ish minutes a day, then a retest to see what moved
+            </p>
+          </div>
+
+          <div className="px-7 py-7 sm:px-10">
+            {plan.startingLine ? (
+              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
+                <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+                  The starting line (already solid)
+                </p>
+                <p className="mt-1 text-body">
+                  {plan.startingLine}. That&apos;s real footing, and the month builds straight on
+                  top of it.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
+                <p className="text-body">
+                  We&apos;re starting fresh here, which is a perfectly good place to start. The
+                  first week will find the footing on its own.
+                </p>
+              </div>
+            )}
+
+            <h2 className="mt-7 font-display text-xl font-semibold text-strong">
+              What this month aims at
+            </h2>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-body">
+              {plan.targets.map((target) => (
+                <li key={target}>{target}</li>
+              ))}
+            </ol>
+            {plan.styleNote ? <p className="mt-2 text-sm text-muted">{plan.styleNote}</p> : null}
+
+            <div className="mt-7 flex flex-col gap-4">
+              {plan.weeks.map((week) => (
+                <div key={week.week} className="rounded-lg border border-border-subtle p-5">
+                  <h3 className="font-display text-lg font-semibold text-strong">Week {week.week}</h3>
+                  <p className="mt-0.5 text-sm text-muted">Focus: {week.focus.charAt(0).toLowerCase()}{week.focus.slice(1)}</p>
+                  <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
+                    {week.activities.map((activity) => (
+                      <li key={activity}>{activity}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-7 rounded-lg p-5" style={{ background: "var(--gold-100)" }}>
+              <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
+                Retest week: around {retestDate}
+              </p>
+              <p className="mt-1 text-sm" style={{ color: "var(--gold-ink)" }}>
+                I&apos;ll email you a two-minute re-check for {plan.subjectName.toLowerCase()} so
+                you can see what moved on {childName}&apos;s progress report. A slower month is
+                normal too; the numbers are a map, never a grade.
+              </p>
+            </div>
+
+            <div className="mt-7 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
+              <p className="font-display text-xl font-bold" style={{ color: "#fff" }}>
+                Homa runs months like this one for every subject at once.
+              </p>
+              <p className="mt-2 max-w-lg text-sm" style={{ color: "var(--stone-300)" }}>
+                Materials made for {childName} specifically, woven around your family, with the
+                numbers tracked for you. You&apos;re on the founding families list; your invite
+                comes by email.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
+            <span>made with Homa for {childName}</span>
+            <Link href={`/map/r/${token}`} className="text-brand underline-offset-2 hover:underline print:hidden">
+              back to the progress report
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

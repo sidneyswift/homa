@@ -55,6 +55,63 @@ export function growingActivityFor(
   return domain.growingActivity;
 }
 
+/** Deep dives ask at most this many new questions per sitting. */
+export const DEEP_DIVE_CAP = 8;
+
+interface AnsweredLookup {
+  [itemId: string]: "easily" | "getting_there" | "not_yet" | "not_sure" | "skip";
+}
+
+/**
+ * Where the deep dive should probe next, from the child's answers so far:
+ * the midpoint between the strongest confirmed skill and the lowest
+ * "not yet" (the read-through's exact ask: "how far back does the struggle
+ * begin?" walks DOWN to find the real starting line; strong kids walk UP
+ * past the report's two-rung cap).
+ */
+function probeMonths(domain: MapDomain, ageMonths: number, answers: AnsweredLookup): number {
+  let reached: number | null = null;
+  let ceiling: number | null = null;
+  for (const item of domain.items) {
+    const answer = answers[item.id];
+    if (answer === "easily") {
+      reached = Math.max(reached ?? -Infinity, item.typicalMonths);
+    } else if (answer === "getting_there") {
+      reached = Math.max(reached ?? -Infinity, item.typicalMonths - 6);
+    } else if (answer === "not_yet") {
+      ceiling = Math.min(ceiling ?? Infinity, item.typicalMonths);
+    }
+  }
+  if (reached !== null && ceiling !== null) return Math.round((reached + ceiling) / 2);
+  if (reached !== null) return reached + 6;
+  if (ceiling !== null) return ceiling - 6;
+  return ageMonths;
+}
+
+/**
+ * The next question of a subject deep dive, or null when the sitting is
+ * done (bank exhausted or DEEP_DIVE_CAP new answers). Deterministic given
+ * the answers, so the client can recompute after every tap, exactly like
+ * the main checklist's queue.
+ */
+export function nextDeepDiveItem(
+  domainId: string,
+  ageMonths: number,
+  answers: AnsweredLookup,
+  answeredThisSitting: number,
+): MapItem | null {
+  const domain = getMapDomain(domainId);
+  if (!domain || answeredThisSitting >= DEEP_DIVE_CAP) return null;
+  const unanswered = domain.items.filter((item) => answers[item.id] === undefined);
+  if (unanswered.length === 0) return null;
+  const probe = probeMonths(domain, ageMonths, answers);
+  return [...unanswered].sort(
+    (a, b) =>
+      Math.abs(a.typicalMonths - probe) - Math.abs(b.typicalMonths - probe) ||
+      a.typicalMonths - b.typicalMonths,
+  )[0];
+}
+
 export { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent };
 
 const itemIndex = new Map<string, { domain: MapDomain; item: MapItem }>();

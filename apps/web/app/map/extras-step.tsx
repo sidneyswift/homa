@@ -131,11 +131,13 @@ export function ExtrasStep({
 }) {
   const [interests, setInterests] = useState<string[]>([]);
   const [helpWith, setHelpWith] = useState<string[]>([]);
+  const [activities, setActivities] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [firstName, setFirstName] = useState("");
   const [style, setStyle] = useState<string | null>(null);
   const [strictness, setStrictness] = useState<string | null>(null);
   const [curriculums, setCurriculums] = useState<string[]>([]);
+  const [crew, setCrew] = useState<string[]>([]);
   const [values, setValues] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -147,6 +149,7 @@ export function ExtrasStep({
           childId: child.id,
           interests: interests.length > 0 ? interests : undefined,
           helpWith: helpWith.length > 0 ? helpWith : undefined,
+          activities: activities.length > 0 ? activities : undefined,
           notes: notes.trim() || undefined,
         },
       };
@@ -156,6 +159,7 @@ export function ExtrasStep({
           style: style ?? undefined,
           strictness: strictness ?? undefined,
           curriculums: curriculums.length > 0 ? curriculums : undefined,
+          crew: crew.length > 0 ? crew : undefined,
           values: values.trim() || undefined,
         };
       }
@@ -199,6 +203,15 @@ export function ExtrasStep({
           tags={helpWith}
           setTags={setHelpWith}
           max={6}
+        />
+
+        <TagInput
+          label={`Activities outside school?`}
+          hint="Gymnastics, co-op, Spanish class, swim team. It all shapes the plans."
+          suggestions={["gymnastics", "co-op", "swim", "dance", "sports team", "music lessons", "church group", "scouts"]}
+          tags={activities}
+          setTags={setActivities}
+          max={12}
         />
 
         <div className="mt-5">
@@ -288,6 +301,15 @@ export function ExtrasStep({
               tags={curriculums}
               setTags={setCurriculums}
               max={12}
+            />
+
+            <TagInput
+              label="The crew?"
+              hint="Family members, pets, stuffed animals, the neighbor kid. They can star in personalized materials later. Names only, photos come after our privacy paperwork is signed."
+              suggestions={["dad", "grandma", "the dog", "baby sister"]}
+              tags={crew}
+              setTags={setCrew}
+              max={16}
             />
 
             <div className="mt-5">

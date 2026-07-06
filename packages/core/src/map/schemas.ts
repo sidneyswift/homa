@@ -50,9 +50,11 @@ export const mapChildExtrasSchema = z.object({
   childId: z.uuid(),
   interests: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
   helpWith: z.array(z.string().trim().min(1).max(60)).max(6).optional(),
-  /** For ahead subjects: what the family is doing that works. Pure gold. */
-  whatsWorking: z.string().trim().max(500).optional(),
-  /** Catch-all: activities, health, anything she wants Homa to know. */
+  /** Per-subject "what we're doing that works" (the ahead follow-up). */
+  whatsWorking: z.record(z.string().max(40), z.string().trim().min(1).max(500)).optional(),
+  /** Activities and clubs outside school: gymnastics, Spanish class... */
+  activities: z.array(z.string().trim().min(1).max(60)).max(12).optional(),
+  /** Catch-all: health, temperament, anything she wants Homa to know. */
   notes: z.string().trim().max(1000).optional(),
 });
 export type MapChildExtras = z.infer<typeof mapChildExtrasSchema>;
@@ -64,6 +66,10 @@ export const mapFamilyExtrasSchema = z.object({
   /** How closely the style is followed. */
   strictness: z.enum(["closely", "loosely", "exploring"]).optional(),
   curriculums: z.array(z.string().trim().min(1).max(60)).max(12).optional(),
+  /** The crew that can appear in personalized materials later: family
+   * members, pets, stuffed animals, the neighbor kid. Names only, no
+   * photos (the D4 consent floor gates photo upload until DPAs exist). */
+  crew: z.array(z.string().trim().min(1).max(60)).max(16).optional(),
   /** Values, faith, aesthetic, anything that should shape materials. */
   values: z.string().trim().max(500).optional(),
 });

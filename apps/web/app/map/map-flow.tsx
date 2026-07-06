@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { MapAnswer } from "@homa/core";
 
 import { ChecklistStep } from "./checklist-step";
+import { DeepDiveStep } from "./deep-dive-step";
 import { EmailStep } from "./email-step";
 import type { FlowChild, FlowPhase } from "./flow-types";
 import { ExtrasStep } from "./extras-step";
@@ -26,6 +27,7 @@ export function MapFlow() {
   const [familyContextDone, setFamilyContextDone] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
+  const [deepDiveDomain, setDeepDiveDomain] = useState<string | null>(null);
 
   const refreshState = useCallback(async (): Promise<FlowChild[] | null> => {
     try {
@@ -62,7 +64,8 @@ export function MapFlow() {
     }
   }, []);
 
-  // On mount: does the resume cookie know this browser?
+  // On mount: does the resume cookie know this browser? A ?dd=childId.domain
+  // param (report buttons, retest emails) opens straight on the deep dive.
   useEffect(() => {
     void (async () => {
       const restored = await refreshState();
@@ -71,6 +74,19 @@ export function MapFlow() {
         return;
       }
       setWelcomeBack(true);
+
+      const deepDive = new URLSearchParams(window.location.search).get("dd");
+      if (deepDive) {
+        const [childId, domainId] = deepDive.split(".");
+        const target = restored.find((child) => child.id === childId && child.inRange);
+        if (target && domainId) {
+          setActiveChildId(target.id);
+          setDeepDiveDomain(domainId);
+          setPhase("deepdive");
+          return;
+        }
+      }
+
       setPhase(restored.length === 0 ? "kids" : "hub");
     })();
   }, [refreshState]);
@@ -154,6 +170,23 @@ export function MapFlow() {
         onDone={() => {
           setFamilyContextDone(true);
           setPhase("scoring");
+        }}
+      />
+    );
+  }
+
+  if (phase === "deepdive" && activeChild && deepDiveDomain) {
+    return (
+      <DeepDiveStep
+        child={activeChild}
+        domainId={deepDiveDomain}
+        onComplete={() => setPhase("scoring")}
+        onExit={() => {
+          void (async () => {
+            await refreshState();
+            setDeepDiveDomain(null);
+            setPhase("hub");
+          })();
         }}
       />
     );

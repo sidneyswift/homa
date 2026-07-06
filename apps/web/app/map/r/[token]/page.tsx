@@ -19,6 +19,7 @@ import { Logo } from "../../../../components/brand/Logo";
 import { getReportByToken } from "../../../../lib/map/store";
 import { ReportActions } from "./report-actions";
 import { ReportChart } from "./report-chart";
+import { WhatsWorkingForm } from "./whats-working-form";
 
 /**
  * The progress report. Strengths first, always; growing subjects arrive
@@ -184,6 +185,12 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                             {line.sentence}
                           </p>
                         )}
+                        <WhatsWorkingForm
+                          childId={report.childId}
+                          domainId={score.domainId}
+                          subjectName={domain?.displayName ?? score.domainId}
+                          childName={report.childName}
+                        />
                       </div>
                     );
                   })}
@@ -307,6 +314,23 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                           );
                         })}
                       </ul>
+
+                      {!score.exposureBased && score.position !== "not_mapped" ? (
+                        <div className="mt-4 flex flex-wrap gap-2 print:hidden">
+                          <Link
+                            href={`/map/r/${report.token}/plan/${score.domainId}`}
+                            className="inline-flex min-h-10 items-center rounded-pill bg-brand px-4 py-2 text-xs font-semibold text-on-brand hover:bg-brand-hover"
+                          >
+                            Build the 4-week plan
+                          </Link>
+                          <Link
+                            href={`/map?dd=${report.childId}.${score.domainId}`}
+                            className="inline-flex min-h-10 items-center rounded-pill border border-border bg-card px-4 py-2 text-xs font-semibold text-strong hover:border-brand"
+                          >
+                            Go deeper ({score.position === "growing" ? "find the exact starting line" : "see how far it goes"})
+                          </Link>
+                        </div>
+                      ) : null}
                     </div>
                   </details>
                 );

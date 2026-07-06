@@ -3,6 +3,67 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 (later) · The go-deeper loop shipped (founder: "don't defer these, BOIL THE OCEAN")
+
+The read-through session's "deferred" list, built the same night on founder
+order. What shipped:
+
+1. **Subject deep dives** (the click-into-a-subject ask): up to 8 extra
+   questions per sitting via an adaptive probe (`nextDeepDiveItem` in
+   packages/core): walks DOWN after a not-yet to find the honest starting
+   line ("how far back does the struggle begin", framed as footing, never
+   as testing-at-N-years-old), climbs UP past the report's two-rung cap
+   for strong subjects. Mode chooser first, straight from the transcript:
+   answer from memory, or sit with the kid and try them together (mode
+   captured in map.deep_dive_started). Rescoring updates the same report
+   token; the report email is now sent once ever (rescores never re-mail).
+   Entry points: per-subject "Go deeper" buttons on the report and the
+   `?dd=childId.domainId` param the retest email uses.
+2. **Four-week plans + the retest loop** (the addiction mechanic): pure
+   deterministic builder (`buildFourWeekPlan`): the child's confirmed
+   footing sets the starting line, the bank's next two rungs become week
+   1-2 and 3-4 focuses, ~45 hand-written practice patterns (3 per subject:
+   daily rep, interest-flavored rep, out-in-the-world rep) fill the weeks,
+   the first interest flavors the copy, and the family's homeschool style
+   adds a one-line bend (9 style notes). Plan page at
+   /map/r/[token]/plan/[subject], tokenized + printable, built on first
+   view (migration #9 `20260706035723_lead_plans`, deny-all RLS). Building
+   a plan arms retest_at (+28 days); cron job 3 sends the one retest email
+   into the subject's deep dive, so the number can visibly move. Verified
+   once-only send.
+3. **What-are-you-doing-right capture**: strength cards on the report ask
+   "what are you doing in [subject] that works?", saving per-subject into
+   the child's context (deep-merged so subjects never clobber each other).
+4. **Extras additions**: per-kid activities tags (gymnastics, co-op...)
+   and the family "crew" tags (family members, pets, stuffed animals, the
+   neighbor kid) for future personalized materials. Names only.
+5. **Bug found and fixed live (migration #10 `20260706040958_lead_link_token`):**
+   every cron/resume email used to ROTATE resume_token_hash, which silently
+   logged out the device the mom actually used. Emailed links now mint a
+   separate link token; both are honored on lookup, so an email never kills
+   the cookie. Also fixed: plan targets could aim below already-confirmed
+   skills after a deep dive (now floored at the highest confirmed anchor),
+   and long two-clause skill statements are trimmed to their first clause
+   inside plan sentences.
+
+NOT built, still law-gated (not scope-gated): photo upload for
+personalization. BUILD.md law 5 / D4 requires the dedicated consent screen,
+TTL on raws, and executed no-training DPAs first; those are founder
+artifacts. The crew capture is the text-only forerunner. Location-aware
+suggestions stayed generic-outing level on purpose (PRD non-goal:
+discover/local engine); health/weight capture stays in the notes field per
+MJ-13/D6.
+
+Checks grew with the surface: deep-dive direction fixtures (down after
+not-yet, up after easily, sitting cap), plan fixtures (4 clean weeks × 15
+subjects × 4 ages, no placeholders, no banned words). Verified live end to
+end as a 10-year-old with growing math: base checklist → deep dive walking
+down to the 7-year-old foothold → rescore (no duplicate email) → plan
+targeting skip-counting and multiplication (not baby skills) flavored with
+minecraft + Montessori → forced retest_at → cron sent exactly one retest
+email → whats-working deep merge kept two subjects. Test rows cleaned,
+scoped by lead id; the two real production leads untouched.
+
 ## 2026-07-06 · Progress report v2: founder + Alessa read-through implemented
 
 Source: the recorded 45-minute walkthrough (founder + Alessa driving the live

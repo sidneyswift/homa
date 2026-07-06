@@ -24,4 +24,5 @@ export type FlowPhase =
   | "hub"
   | "checklist"
   | "extras"
+  | "deepdive"
   | "scoring";

@@ -129,6 +129,28 @@ export async function sendReminderEmail(
   });
 }
 
+export async function sendRetestEmail(
+  to: string,
+  childName: string,
+  subjectName: string,
+  resumeToken: string,
+  deepDiveParam: string,
+): Promise<boolean> {
+  const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}&dd=${encodeURIComponent(deepDiveParam)}`;
+  return send({
+    to,
+    subject: `Retest week: see what moved in ${childName}'s ${subjectName.toLowerCase()}`,
+    preview: "Four weeks of work deserve a fresh number.",
+    heading: `It's retest week for ${childName}`,
+    bodyLines: [
+      `Four weeks ago you started a ${subjectName.toLowerCase()} plan for ${childName}. This is the fun part: a two-minute re-check to see what moved.`,
+      "Answer from what you've seen lately, and the progress report updates itself.",
+    ],
+    cta: { label: `Retest ${childName}'s ${subjectName.toLowerCase()}`, url },
+    footerNote: "A slower month is normal too. The numbers are a map, never a grade.",
+  });
+}
+
 export async function sendBandReadyEmail(
   to: string,
   childName: string,

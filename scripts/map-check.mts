@@ -11,11 +11,14 @@
  */
 
 import {
+  buildFourWeekPlan,
+  DEEP_DIVE_CAP,
   domainLine,
   homaNote,
   MAP_DOMAINS,
   MAP_SOURCES,
   maxQuestionsForAge,
+  nextDeepDiveItem,
   planQuestions,
   scoreMap,
   type MapAnswer,
@@ -207,7 +210,79 @@ report(
   JSON.stringify(teenKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
 );
 
-// ---------- 4. Rendered sentences obey the laws ----------
+// ---------- 4. Deep dive: probes down for strugglers, up for the strong ----------
+
+{
+  const AGE_10 = 126;
+  const mathBase = planQuestions(AGE_10).find((plan) => plan.domainId === "math")!.base;
+  // Struggler: base was "not yet". The next probe must sit BELOW the base
+  // anchor (walking down to find the honest starting line).
+  const downAnswers: Record<string, MapAnswer> = { [mathBase.id]: "not_yet" };
+  const downProbe = nextDeepDiveItem("math", AGE_10, downAnswers, 0);
+  report(
+    "deep dive walks down after a not-yet",
+    downProbe !== null && downProbe.typicalMonths < mathBase.typicalMonths,
+    `probe=${downProbe?.id}`,
+  );
+
+  // Strong kid: everything easily. The probe must climb above the base.
+  const upAnswers: Record<string, MapAnswer> = { [mathBase.id]: "easily" };
+  const upProbe = nextDeepDiveItem("math", AGE_10, upAnswers, 0);
+  report(
+    "deep dive climbs up after an easily",
+    upProbe !== null && upProbe.typicalMonths > mathBase.typicalMonths,
+    `probe=${upProbe?.id}`,
+  );
+
+  // The sitting cap holds, and a full walk terminates.
+  let walked = 0;
+  const walkAnswers: Record<string, MapAnswer> = { [mathBase.id]: "not_yet" };
+  for (;;) {
+    const item = nextDeepDiveItem("math", AGE_10, walkAnswers, walked);
+    if (!item) break;
+    walkAnswers[item.id] = "not_yet";
+    walked += 1;
+    if (walked > 50) break;
+  }
+  report("deep dive sitting caps at DEEP_DIVE_CAP", walked <= DEEP_DIVE_CAP, `walked=${walked}`);
+}
+
+// ---------- 5. Plan builder: four honest weeks for every subject and age ----------
+
+{
+  let plansOk = true;
+  for (const domain of MAP_DOMAINS) {
+    for (const age of [30, 50, 126, 180]) {
+      const base = planQuestions(age).find((plan) => plan.domainId === domain.id)!.base;
+      const plan = buildFourWeekPlan(domain.id, age, [{ itemId: base.id, answer: "not_yet" }], {
+        interests: ["dinosaurs"],
+        style: "charlotte_mason",
+      });
+      if (!plan || plan.weeks.length !== 4 || plan.targets.length === 0) {
+        plansOk = false;
+        failures.push(`plan ${domain.id}@${age}: malformed`);
+        continue;
+      }
+      for (const week of plan.weeks) {
+        if (week.activities.length < 2) {
+          plansOk = false;
+          failures.push(`plan ${domain.id}@${age} week ${week.week}: too few activities`);
+        }
+        for (const activity of week.activities) {
+          checkCopy(`plan.${domain.id}.w${week.week}`, activity);
+          if (activity.includes("{skill}") || activity.includes("{interest}")) {
+            plansOk = false;
+            failures.push(`plan ${domain.id}@${age}: unfilled placeholder`);
+          }
+        }
+      }
+      if (plan.styleNote) checkCopy(`plan.${domain.id}.style`, plan.styleNote);
+    }
+  }
+  report("plan builder: 4 clean weeks for all 15 subjects at 4 ages", plansOk && failures.every((f) => !f.startsWith("plan ")));
+}
+
+// ---------- 6. Rendered sentences obey the laws ----------
 
 const before = failures.length;
 for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid, tenKid, teenKid]) {

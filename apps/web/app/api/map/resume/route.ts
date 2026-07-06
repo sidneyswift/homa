@@ -2,7 +2,7 @@ import { mapResumeRequestSchema } from "@homa/core";
 
 import { sendResumeEmail } from "../../../../lib/map/email";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { getLeadByEmail, rotateResumeToken } from "../../../../lib/map/store";
+import { getLeadByEmail, mintLinkToken } from "../../../../lib/map/store";
 
 /**
  * POST /api/map/resume
@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const lead = await getLeadByEmail(parsed.data.email);
     if (lead) {
-      const token = await rotateResumeToken(lead.id);
+      const token = await mintLinkToken(lead.id);
       await sendResumeEmail(parsed.data.email, token);
     }
     return Response.json({ ok: true });
