@@ -22,6 +22,11 @@ export async function POST(request: Request): Promise<Response> {
   if (!lead) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
+  // Signup (email) always runs right before this call; a null email here
+  // means the client skipped ahead of the flow it was given.
+  if (!lead.email) {
+    return Response.json({ ok: false, reason: "not-claimed" }, { status: 409 });
+  }
 
   let raw: unknown;
   try {
@@ -52,7 +57,7 @@ export async function POST(request: Request): Promise<Response> {
       bank_version: MAP_BANK_VERSION,
     });
 
-    if (!alreadyEmailed) {
+    if (!alreadyEmailed && report.email) {
       const emailed = await sendReportEmail(report.email, report.childName, report.token);
       if (emailed) await markReportEmailed(report.childId);
     }

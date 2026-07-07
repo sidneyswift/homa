@@ -37,8 +37,10 @@ gates are what matter.
 
 Hard constraints (violations = do not ship):
 - **NO fabricated social proof** (no invented family counts/testimonials — ruling C2).
-- **No pricing on the page** — "Founding families" framing + waitlist only (pricing is
-  deliberately undecided until real margin data exists — decision T2).
+- **No pricing on the page** — invite-only framing + waitlist only (pricing is
+  deliberately undecided until real margin data exists — decision T2). The
+  "founding families" phrase is retired everywhere (founder ruling 2026-07-06):
+  say "invite list", "first families", or "invite-only" instead.
 - Brand voice law: sentence case, **no em dashes ever**, reassure-before-inform, HOMA
   in UI surfaces / Homa in prose (D8). Never claim "first/only AI homeschool
   assistant" (ruling C3).
@@ -52,11 +54,12 @@ July 13: final copy from the journeys/07 §5 kit (variant B) + the homa-design v
 pass replacing the wireframe slots, then the phone test + read-aloud check.
 
 **Superseded surface (founder decision 2026-07-05, "ship all"):** the bare
-waitlist form was replaced by the child's-map lead magnet at `/map` (email
-first, per-child observable checklist for ages 2 to 7, deterministic
-benchmark scoring in `packages/core/src/map/`, report page + Resend email,
-deny-all `lead_*` tables behind server routes). `/waitlist` and `/conference`
-308-redirect to `/map`; every lead still writes a `public.waitlist` row, so
+waitlist form was replaced by the child's-map lead magnet at `/onboarding`
+(renamed from `/map` on 2026-07-06, founder call; email first, per-child
+observable checklist for ages 2 to 7, deterministic benchmark scoring in
+`packages/core/src/map/`, report page + Resend email, deny-all `lead_*`
+tables behind server routes). `/waitlist`, `/conference`, and `/map`
+308-redirect to `/onboarding`; every lead still writes a `public.waitlist` row, so
 MJ-09's invite path is unchanged. Plan + decisions: `docs/homa-planning/
 lead-magnet/` and build-log 2026-07-05. Ages 8 to 16 ship band by band into
 `packages/core/src/map/content.ts` behind `pnpm check:map` and the D3 rigor

@@ -19,7 +19,7 @@
 
 Hi, it's Homa.
 
-You joined the founding families waitlist, and your spot just got better.
+You joined the Homa waitlist, and your spot just got better.
 
 While you wait for your invite, I can build your child's progress report:
 an honest first look at where they stand, checked against national benchmarks
@@ -29,7 +29,7 @@ five-minute checklist about what you've already seen them do.
 No test for your child, ever. You answer, they never do. Strengths come
 first, and anything still growing arrives with one small thing to try.
 
-[See where your child stands](https://thankshoma.com/map)
+[See where your child stands](https://thankshoma.com/onboarding)
 
 It's free, it lands in your inbox to keep, and everything you share is
 saved, so when your invite opens, Homa already knows your kids.

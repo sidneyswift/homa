@@ -32,8 +32,8 @@ export function Community() {
             Homa will introduce you to nearby families, co-ops, and park days, matched to your
             kids&rsquo; ages and what you&rsquo;re teaching.
           </p>
-          <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
-            Join the founding families
+          <Button variant="secondary" href="/onboarding" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
+            Join the first families
           </Button>
         </div>
         {/* Honest roadmap card (ruling C2: no invented families or stats;
@@ -54,7 +54,7 @@ export function Community() {
             Homa families near you: co-ops, park days, friends who get it.
           </div>
           <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 8, lineHeight: 1.5 }}>
-            Coming as founding families grow. Opt-in, always.
+            Coming as the first families grow. Opt-in, always.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 16, color: "var(--text-subtle)", fontSize: "0.85rem" }}>
             <MapPin size={14} aria-hidden="true" /> Wherever you homeschool

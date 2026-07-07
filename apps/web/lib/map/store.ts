@@ -22,15 +22,22 @@ import { hashToken, newToken } from "./tokens";
 
 export interface LeadRow {
   id: string;
-  email: string;
+  /** Null until signup: kids and the checklist auto-save anonymously. */
+  email: string | null;
   first_name: string | null;
+  last_name: string | null;
   us_state: string | null;
   status: string;
+  source: string;
+  /** Null until she has a real Supabase Auth account (Google, immediately,
+   * or password, as the last question before the report). */
+  auth_user_id: string | null;
 }
 
 export interface LeadChildRow {
   id: string;
   name: string;
+  /** "YYYY-MM-DD", the real birthday. */
   birth_month: string;
   interests: string[];
   help_with: string | null;
@@ -47,48 +54,152 @@ export interface LeadState {
   answers: Record<string, { itemId: string; answer: MapAnswer }[]>;
 }
 
-interface UpsertLeadInput {
-  email: string;
-  firstName?: string;
-  usState?: string;
+interface StartAnonymousInput {
   source: string;
   utm: Record<string, string>;
 }
 
 /**
- * Creates or refreshes a lead and rotates its resume token. Returns the raw
- * token (cookie + emailed links); only the hash is stored.
+ * S1: opens a brand-new anonymous session, no email required. Kids and the
+ * checklist auto-save under this cookie-only lead from the very first tap;
+ * see claimLead for the signup moment that later attaches an email.
  */
-export async function upsertLead(
-  input: UpsertLeadInput,
+export async function startAnonymousLead(
+  input: StartAnonymousInput,
+): Promise<{ leadId: string; resumeToken: string }> {
+  const sql = mapDb();
+  const resumeToken = newToken();
+  const tokenHash = hashToken(resumeToken);
+  const inserted = await sql<{ id: string }[]>`
+    insert into public.lead_families (email, source, utm, resume_token_hash)
+    values (null, ${input.source}, ${sql.json(input.utm)}, ${tokenHash})
+    returning id
+  `;
+  return { leadId: inserted[0].id, resumeToken };
+}
+
+interface ClaimLeadInput {
+  /** The caller's own (already anonymous) lead, resolved from the cookie. */
+  leadId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  usState?: string;
+}
+
+/**
+ * Signup: attaches an email to the caller's anonymous lead, rotating its
+ * resume token. If that email already belongs to a different, older lead
+ * (a previous sitting on another device, most likely), this sitting's kids
+ * fold into that account instead of splitting the family across two rows;
+ * nothing typed on either side is lost.
+ */
+export async function claimLead(
+  input: ClaimLeadInput,
 ): Promise<{ leadId: string; returning: boolean; resumeToken: string }> {
   const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
 
   const existing = await sql<{ id: string }[]>`
-    select id from public.lead_families where email = ${input.email}
+    select id from public.lead_families where email = ${input.email} and id <> ${input.leadId}
   `;
 
   if (existing.length > 0) {
+    const targetId = existing[0].id;
+    await sql`
+      update public.lead_children set lead_family_id = ${targetId}
+      where lead_family_id = ${input.leadId}
+    `;
     await sql`
       update public.lead_families set
         first_name = coalesce(${input.firstName ?? null}, first_name),
+        last_name = coalesce(${input.lastName ?? null}, last_name),
         us_state = coalesce(${input.usState ?? null}, us_state),
         resume_token_hash = ${tokenHash},
         updated_at = now()
-      where id = ${existing[0].id}
+      where id = ${targetId}
     `;
-    return { leadId: existing[0].id, returning: true, resumeToken };
+    await sql`delete from public.lead_families where id = ${input.leadId}`;
+    return { leadId: targetId, returning: true, resumeToken };
   }
 
-  const inserted = await sql<{ id: string }[]>`
-    insert into public.lead_families (email, first_name, us_state, source, utm, resume_token_hash)
-    values (${input.email}, ${input.firstName ?? null}, ${input.usState ?? null},
-            ${input.source}, ${sql.json(input.utm)}, ${tokenHash})
-    returning id
+  await sql`
+    update public.lead_families set
+      email = ${input.email},
+      first_name = coalesce(${input.firstName ?? null}, first_name),
+      last_name = coalesce(${input.lastName ?? null}, last_name),
+      us_state = coalesce(${input.usState ?? null}, us_state),
+      resume_token_hash = ${tokenHash},
+      updated_at = now()
+    where id = ${input.leadId}
   `;
-  return { leadId: inserted[0].id, returning: false, resumeToken };
+  return { leadId: input.leadId, returning: false, resumeToken };
+}
+
+interface LinkAuthUserInput {
+  /** The caller's own (already anonymous, or email-only) lead. */
+  leadId: string;
+  authUserId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+/**
+ * Attaches a real Supabase Auth account to a lead: either right away
+ * (Google, at S1, matched by the profile's email or a prior auth_user_id
+ * from another device) or at the last question (password, where the
+ * email already matches this exact lead, so no merge ever triggers).
+ * Mirrors claimLead's fold-together behavior so a returning family never
+ * splits across two rows just because their second sitting started
+ * anonymous again.
+ */
+export async function linkAuthUser(
+  input: LinkAuthUserInput,
+): Promise<{ leadId: string; returning: boolean; resumeToken: string }> {
+  const sql = mapDb();
+  const resumeToken = newToken();
+  const tokenHash = hashToken(resumeToken);
+
+  const existing = await sql<{ id: string }[]>`
+    select id from public.lead_families
+    where id <> ${input.leadId}
+      and (auth_user_id = ${input.authUserId} or email = ${input.email})
+    limit 1
+  `;
+
+  if (existing.length > 0) {
+    const targetId = existing[0].id;
+    await sql`
+      update public.lead_children set lead_family_id = ${targetId}
+      where lead_family_id = ${input.leadId}
+    `;
+    await sql`
+      update public.lead_families set
+        auth_user_id = ${input.authUserId},
+        email = ${input.email},
+        first_name = coalesce(${input.firstName ?? null}, first_name),
+        last_name = coalesce(${input.lastName ?? null}, last_name),
+        resume_token_hash = ${tokenHash},
+        updated_at = now()
+      where id = ${targetId}
+    `;
+    await sql`delete from public.lead_families where id = ${input.leadId}`;
+    return { leadId: targetId, returning: true, resumeToken };
+  }
+
+  await sql`
+    update public.lead_families set
+      auth_user_id = ${input.authUserId},
+      email = ${input.email},
+      first_name = coalesce(${input.firstName ?? null}, first_name),
+      last_name = coalesce(${input.lastName ?? null}, last_name),
+      resume_token_hash = ${tokenHash},
+      updated_at = now()
+    where id = ${input.leadId}
+  `;
+  return { leadId: input.leadId, returning: false, resumeToken };
 }
 
 /**
@@ -100,7 +211,7 @@ export async function getLeadByResumeToken(rawToken: string): Promise<LeadRow | 
   const sql = mapDb();
   const hash = hashToken(rawToken);
   const rows = await sql<LeadRow[]>`
-    select id, email, first_name, us_state, status
+    select id, email, first_name, last_name, us_state, status, source, auth_user_id
     from public.lead_families
     where (resume_token_hash = ${hash} or link_token_hash = ${hash})
       and status <> 'deleted'
@@ -142,7 +253,7 @@ export async function countChildren(leadId: string): Promise<number> {
 
 interface AddChildInput {
   name: string;
-  birthMonth: string; // YYYY-MM
+  birthDate: string; // YYYY-MM-DD, the real birthday
   interests: string[];
   helpWith?: string;
 }
@@ -152,11 +263,11 @@ export async function addChild(
   input: AddChildInput,
 ): Promise<{ childId: string; ageMonths: number; inRange: boolean }> {
   const sql = mapDb();
-  const months = ageInMonths(input.birthMonth);
+  const months = ageInMonths(input.birthDate);
   const inRange = isInScoredRange(months);
   const rows = await sql<{ id: string }[]>`
     insert into public.lead_children (lead_family_id, name, birth_month, interests, help_with, pending_band)
-    values (${leadId}, ${input.name}, ${`${input.birthMonth}-01`}, ${input.interests},
+    values (${leadId}, ${input.name}, ${input.birthDate}, ${input.interests},
             ${input.helpWith ?? null}, ${!inRange})
     returning id
   `;
@@ -226,7 +337,7 @@ export async function getLeadState(lead: LeadRow): Promise<LeadState> {
       report_token: string | null;
     }[]
   >`
-    select c.id, c.name, to_char(c.birth_month, 'YYYY-MM') as birth_month,
+    select c.id, c.name, to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
            c.interests, c.help_with, c.pending_band, r.token as report_token
     from public.lead_children c
     left join public.lead_reports r on r.lead_child_id = c.id and r.revoked_at is null
@@ -269,7 +380,8 @@ export interface ScoredReport {
   scores: MapScores;
   childName: string;
   ageMonths: number;
-  email: string;
+  /** Null only if scoring somehow ran before signup; callers must guard. */
+  email: string | null;
   childId: string;
 }
 
@@ -292,7 +404,7 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
   const sql = mapDb();
 
   const childRows = await sql<{ name: string; birth_month: string }[]>`
-    select name, to_char(birth_month, 'YYYY-MM') as birth_month
+    select name, to_char(birth_month, 'YYYY-MM-DD') as birth_month
     from public.lead_children where id = ${childId}
   `;
   if (childRows.length === 0) return null;
@@ -335,7 +447,7 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
     returning token
   `;
 
-  const leadRows = await sql<{ email: string }[]>`
+  const leadRows = await sql<{ email: string | null }[]>`
     select email from public.lead_families where id = ${leadId}
   `;
   await touchLead(leadId);
@@ -395,7 +507,7 @@ export async function getOrBuildPlan(
     }[]
   >`
     select c.id as child_id, c.name as child_name,
-           to_char(c.birth_month, 'YYYY-MM') as birth_month,
+           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
            c.context as child_context,
            f.id as lead_id, f.context as family_context
     from public.lead_reports r
@@ -531,7 +643,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     select r.token, r.scores, r.bank_version, r.generated_at::text as generated_at,
            r.viewed_at::text as viewed_at, r.history,
            c.id as child_id, c.name as child_name,
-           to_char(c.birth_month, 'YYYY-MM') as birth_month, c.interests,
+           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.interests,
            f.id as lead_id, f.first_name, f.us_state
     from public.lead_reports r
     join public.lead_children c on c.id = r.lead_child_id
@@ -553,7 +665,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
   const siblingRows = await sql<
     { id: string; name: string; birth_month: string; answered: string; has_report: boolean }[]
   >`
-    select c.id, c.name, to_char(c.birth_month, 'YYYY-MM') as birth_month,
+    select c.id, c.name, to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
            (select count(*)::text from public.lead_answers a where a.lead_child_id = c.id) as answered,
            exists (select 1 from public.lead_reports r2 where r2.lead_child_id = c.id) as has_report
     from public.lead_children c
@@ -668,7 +780,13 @@ export async function mirrorToWaitlist(input: {
   `;
 }
 
-/** Leads eligible for the single 24h reminder. */
+/**
+ * Leads eligible for the single 24h reminder. Email-gated: since signup now
+ * happens at the end of the checklist (not the start), most stalled leads
+ * have no email yet and are simply unreachable until they return on the
+ * same device, this only nudges the ones who reached signup, stalled after
+ * (e.g. mid-extras), and never scored.
+ */
 export async function leadsNeedingReminder(): Promise<
   { id: string; email: string; first_child: string | null }[]
 > {
@@ -681,6 +799,7 @@ export async function leadsNeedingReminder(): Promise<
         order by c.created_at limit 1) as first_child
     from public.lead_families f
     where f.status = 'open'
+      and f.email is not null
       and f.reminder_sent_at is null
       and f.created_at < now() - interval '24 hours'
       and f.updated_at < now() - interval '4 hours'
@@ -698,7 +817,12 @@ export async function markReminderSent(leadId: string): Promise<void> {
   await sql`update public.lead_families set reminder_sent_at = now() where id = ${leadId}`;
 }
 
-/** Pending-band children whose age is now inside the scored range. */
+/**
+ * Pending-band children whose age is now inside the scored range.
+ * Email-gated: a pending-band-only family is routed through signup before
+ * ever reaching the hub, but a defensive filter here means an abandoned
+ * signup just retries later instead of failing every cron run.
+ */
 export async function childrenNowInBand(): Promise<
   { child_id: string; child_name: string; lead_id: string; email: string; birth_month: string }[]
 > {
@@ -707,10 +831,11 @@ export async function childrenNowInBand(): Promise<
     { child_id: string; child_name: string; lead_id: string; email: string; birth_month: string }[]
   >`
     select c.id as child_id, c.name as child_name, f.id as lead_id, f.email,
-           to_char(c.birth_month, 'YYYY-MM') as birth_month
+           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month
     from public.lead_children c
     join public.lead_families f on f.id = c.lead_family_id
     where c.pending_band and c.band_ready_emailed_at is null and f.status <> 'deleted'
+      and f.email is not null
     limit 200
   `;
   return rows.filter((row) => isInScoredRange(ageInMonths(row.birth_month)));

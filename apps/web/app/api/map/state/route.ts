@@ -1,5 +1,10 @@
+import { cookies } from "next/headers";
+
+import { emitMapEvent } from "../../../../lib/map/events";
 import { requireLead } from "../../../../lib/map/session";
-import { getLeadState, hasFamilyContext } from "../../../../lib/map/store";
+import { getLeadByResumeToken, getLeadState, hasFamilyContext, linkAuthUser } from "../../../../lib/map/store";
+import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
+import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
 /**
  * GET /api/map/state
@@ -9,17 +14,63 @@ import { getLeadState, hasFamilyContext } from "../../../../lib/map/store";
  * client-side from the same bank (pure data, same package). Returns
  * ok:false (not 401) for cookieless visitors: a fresh start is a normal
  * state, not an error.
+ *
+ * Also the landing spot for a Google sign-up: the OAuth callback redirects
+ * back here with a Supabase Auth session cookie already set (separate from
+ * the map resume cookie), and the client's next call to this route is
+ * always /api/map/state (the mount effect calls it first). If the lead has
+ * no account yet, resolve the auth session server-side and link it, so the
+ * client never needs a dedicated "did Google work" round trip.
  */
 export async function GET(): Promise<Response> {
-  const lead = await requireLead();
+  let lead = await requireLead();
   if (!lead) return Response.json({ ok: false });
 
   try {
+    if (!lead.auth_user_id) {
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.email) {
+        const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+        const givenName = typeof meta.given_name === "string" ? meta.given_name.trim() : "";
+        const fullName = typeof meta.full_name === "string" ? meta.full_name.trim() : "";
+        const firstName = givenName || (fullName ? fullName.split(" ")[0] : undefined);
+        const lastName =
+          typeof meta.family_name === "string" && meta.family_name.trim()
+            ? meta.family_name.trim()
+            : fullName.split(" ").slice(1).join(" ") || undefined;
+
+        const { leadId, returning, resumeToken } = await linkAuthUser({
+          leadId: lead.id,
+          authUserId: user.id,
+          email: user.email,
+          firstName,
+          lastName,
+        });
+
+        const cookieStore = await cookies();
+        cookieStore.set(MAP_RESUME_COOKIE, resumeToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 90,
+        });
+
+        const relinked = await getLeadByResumeToken(resumeToken);
+        if (relinked) lead = relinked;
+        await emitMapEvent("map.account_created", { lead_id: leadId, method: "google", returning });
+      }
+    }
+
     const state = await getLeadState(lead);
     const familyContextDone = await hasFamilyContext(lead.id);
     return Response.json({
       ok: true,
       firstName: state.lead.first_name,
+      hasAccount: state.lead.auth_user_id !== null,
       familyContextDone,
       // The caller's own email (cookie-authenticated), for the
       // "send this link to my other device" button.
@@ -27,7 +78,7 @@ export async function GET(): Promise<Response> {
       children: state.children.map((child) => ({
         id: child.id,
         name: child.name,
-        birthMonth: child.birth_month,
+        birthDate: child.birth_month,
         interests: child.interests,
         helpWith: child.help_with,
         ageMonths: child.age_months,

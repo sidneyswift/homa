@@ -15,6 +15,12 @@ export interface AuthFormState {
   error: string | null;
 }
 
+/** Only same-origin paths; anything else falls back to /home. */
+function safeNext(formData: FormData): string {
+  const next = String(formData.get("next") ?? "");
+  return next.startsWith("/") ? next : "/home";
+}
+
 export async function signInAction(
   _prev: AuthFormState,
   formData: FormData,
@@ -30,7 +36,7 @@ export async function signInAction(
   if (error) {
     return { error: error.message };
   }
-  redirect("/home");
+  redirect(safeNext(formData));
 }
 
 export async function signUpAction(
@@ -61,7 +67,7 @@ export async function signUpAction(
   if (signInError) {
     return { error: signInError.message };
   }
-  redirect("/home");
+  redirect(safeNext(formData));
 }
 
 export async function signOutAction(): Promise<void> {

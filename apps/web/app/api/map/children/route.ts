@@ -39,7 +39,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const { childId, ageMonths, inRange } = await addChild(lead.id, {
       name: parsed.data.name,
-      birthMonth: parsed.data.birthMonth,
+      birthDate: parsed.data.birthDate,
       interests: parsed.data.interests,
       helpWith: parsed.data.helpWith,
     });

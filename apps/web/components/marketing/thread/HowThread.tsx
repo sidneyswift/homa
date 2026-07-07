@@ -41,7 +41,7 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
     body: "A balanced draft for every child, shaped around your family\u2019s rhythm. Tweak anything with a tap or a message, Homa keeps the balance for you.",
     vignette: <WeekVignette />,
     action: (
-      <Button variant="secondary" href="/map" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
+      <Button variant="secondary" href="/onboarding" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
         Get your free progress report
       </Button>
     ),
@@ -55,7 +55,7 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
   {
     n: "04",
     title: "Watch the needle move",
-    body: "A gentle checklist maps each child against your state\u2019s standards. Then Homa targets practice at what\u2019s growing and shows the work paying off.",
+    body: "A gentle questionnaire maps each child against your state\u2019s standards. Then Homa targets practice at what\u2019s growing and shows the work paying off.",
     vignette: <ProofVignette />,
   },
 ];

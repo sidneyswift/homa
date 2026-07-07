@@ -229,7 +229,7 @@ read both before clicking.
 
 **Invite-code flow [M-R]:** social mentions won't carry codes. This channel lands on
 the waitlist by design in M-R. Waitlist copy must convert skepticism into scarcity
-patience: "we're onboarding a small group of founding families first. Join the list
+patience: "we're onboarding a small group of families first. Join the list
 and we'll invite you with real attention, not a drip campaign."
 
 **Stage table.**

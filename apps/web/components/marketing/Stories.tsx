@@ -4,7 +4,7 @@ import { Eyebrow } from "./dividers";
 
 /**
  * Our-story band. Replaces the kit's three invented mom quotes, which
- * violated ruling C2 (no fabricated social proof, ever). Until founding
+ * violated ruling C2 (no fabricated social proof, ever). Until real
  * families say quotable things with their permission, the honest story is
  * the only story: Homa ran one real homeschool first.
  */
@@ -47,7 +47,7 @@ export function Stories() {
           </p>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "16px 0 0", fontSize: "0.98rem" }}>
             Homa is that same system, rebuilt for your family. And a promise: no invented
-            testimonials on this page, ever. When founding families say quotable things,
+            testimonials on this page, ever. When real families say quotable things,
             you&rsquo;ll read them here with permission.
           </p>
         </div>

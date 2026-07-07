@@ -56,6 +56,11 @@ for (const domain of MAP_DOMAINS) {
     for (const key of item.sources) {
       if (!MAP_SOURCES[key]) failures.push(`${item.id}: unknown source key "${key}"`);
     }
+    // Standard codes are optional but never empty or dashed when present.
+    for (const code of item.standards ?? []) {
+      if (!code.trim()) failures.push(`${item.id}: empty standards code`);
+      if (EM_DASH.test(code)) failures.push(`${item.id}: em dash in standards code`);
+    }
     // 20mo floor (bank starts at 2y) to ~17.5y ceiling (ladder headroom for
     // detecting ahead at the top of the 2-16 range).
     if (item.typicalMonths < 20 || item.typicalMonths > 210) {
@@ -71,7 +76,7 @@ let ladderOk = true;
 for (let age = 24; age < 204; age += 3) {
   const plans = planQuestions(age);
   if (plans.length !== MAP_DOMAINS.length) ladderOk = false;
-  // Worst case is base + two rungs in all 15 domains; typical kids see far
+  // Worst case is base + two rungs in every domain; typical kids see far
   // fewer because rungs only unlock on "easily".
   const total = maxQuestionsForAge(age);
   if (total < plans.length || total > plans.length * 3) {
@@ -286,7 +291,7 @@ report(
       }
     }
   }
-  report("plan builder: 4 clean weeks for all 15 subjects at 4 ages", plansOk && failures.every((f) => !f.startsWith("plan ")));
+  report(`plan builder: 4 clean weeks for all ${MAP_DOMAINS.length} subjects at 4 ages`, plansOk && failures.every((f) => !f.startsWith("plan ")));
 }
 
 // ---------- 6. Rendered sentences obey the laws ----------

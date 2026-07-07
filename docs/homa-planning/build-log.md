@@ -3,6 +3,520 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 (late evening) · "Founding families" framing retired everywhere (founder ruling)
+
+Founder: "remove all references to founding families. everywhere." Scrubbed
+and replaced across product surfaces, active specs, and forward-looking
+drafts; replacement vocabulary is plain: "invite list", "first families",
+"invite-only", "first cohort".
+
+- Web copy: report CTA band, plan-page band, hub pending line ("You're on
+  the invite list"), FAQ, Community section, footer link (now "Joining
+  Homa"), Stories promise line, terms, email footer, signin comment.
+- `components/marketing/FoundingFamilies.tsx` renamed to `InviteBand.tsx`
+  (eyebrow now "Joining Homa"); `app/page.tsx` updated.
+- Active specs and drafts: BUILD.md hard-constraints row (now also records
+  this ruling), journeys/02 waitlist copy guidance, journeys/09 preorder
+  experiment language (E6, ladder rungs, open question 2: now
+  "first-cohort"), map-announcement-draft, lead-magnet mocks.
+
+Judgment calls on scope, flagged for review:
+1. LEFT INTACT: historical build-log entries and the already-superseded
+   migration #7 (applied migrations and audit history stay immutable; the
+   invite-code store it seeded was dropped by migration #8).
+2. LEFT INTACT: icp-research citations of competitors' founding-family
+   rates (Homeschool Managed) and the dated A11 research verdicts; they
+   are evidence about the market, not our copy. The pattern (early price
+   lock) is not retired, only the phrase.
+3. LEFT INTACT: "founding story" / "founding documents" usages (different
+   sense of the word).
+
+## 2026-07-06 (late evening) · Post-review polish rounds: kids copy arc, checklist consolidation, extras split, report drawer rebuilt twice
+
+A string of founder read-throughs after the "do it all" overhaul, each
+implemented and verified live the same evening:
+
+1. **Kids step copy, four rounds.** "Nice to meet you, Sidney." + "Now,
+   add your family." was ruled two disconnected beats ("I hate this");
+   collapsed to one headline, finally "Let's add your kids(, Sidney)".
+   The subtitle was cut entirely (its one job, "a nickname is fine",
+   already lives in the field label), the label became "Your child's
+   name (or nickname)" after the greeting-adjacency made a bare "Name or
+   nickname" re-enterable as HER name, and the birthday reason moved to
+   a muted parenthetical, reworded once more because "(for their exact
+   age)" restated what a birthday is instead of why it's asked:
+   "(so questions match their age)".
+2. **"+ Add a sibling" fix.** After saving kid one, the primary CTA
+   latched onto the first saved kid's name ("Start Story's
+   questionnaire") right as she'd asked to add another, read as the flow
+   forgetting her. The button now only ever names the kid being typed
+   right now; empty form = generic label, two-plus kids = plural.
+3. **Checklist consolidated to one meta row + card** ("still seems like
+   a lot going on"): hint bar, domain intro, and ladder note now share
+   the card's single kicker slot (also killing a whole-screen jump on
+   the first answer), the 16-segment dots died (the rail is desktop
+   progress, one hairline bar on mobile), the mobile report strip died,
+   the question centers in the card's fixed height, the card took the
+   screen's strongest elevation, undo renamed "undo last answer", and
+   the exit label became "back to your family" (the header already says
+   everything saves; the hub is also where "add another kid" lives,
+   answering a real founder question). "1 answers saved" pluralization
+   fixed on the hub.
+4. **Extras split to one question per card** with an "extra 1 of 2"
+   counter; saving moved to the end so skipping question two never
+   discards question one. "Done. The report is next." became a
+   hand-note celebration ("questionnaire done ✓") over one beat ("Two
+   quick extras while I build Story's report"). Selected chips use the
+   soft clay tint (solid clay stays reserved for the CTA), free text
+   became a dashed "add your own..." pill.
+5. **Report subject drawer, two passes.** First: "at age"/"growing"
+   right-column labels removed (numberLabel in sentences.ts now speaks
+   only when it adds beyond the badge), plan CTA clay only on growing
+   subjects, the "Go deeper..." riddle became "Answer a few deeper
+   questions", sources muted, answer pills flattened to text, "often
+   solid by" replaced "typical by", mid-dot eyebrow, "hide ↑"
+   affordance. Second ("make the national average vs the child
+   legible"): each answer is now a soft block reading top-down
+   (question, "You said: Easily", age strip), where the strip puts the
+   national benchmark (grey dot, "most kids by 4y 6m") and the child
+   (clay marker, "Maya · 4y 2m") on one shared hairline per drawer, so
+   the comparison is read, not computed. Every drawer zone opens with a
+   one-line plain-language explainer, per the data-viz guideline (dots
+   on one baseline, stages not scores, no red, no "behind").
+6. Housekeeping: deleted the dead `email-step.tsx` (orphaned since the
+   auth restructure made ParentStep the email screen).
+
+All verified with Playwright walkthroughs (desktop + narrow) against the
+sample report and live flow; typecheck, lint, build, isolation, and
+map-check green after every round; every test lead removed from
+homa-prod afterward.
+
+## 2026-07-06 (evening) · Stripe payment rails stood up (founder: "create the recurring product + payment link so we can test; paywall placement decided later")
+
+Live Stripe activated as sole proprietor (founder canceled the Atlas LLC
+application after the cost discussion; entity deferred per the existing
+HUMAN-TODO ruling). Created via API in BOTH environments, per the cohort-one
+mechanism in 08-billing-credits-design ("Payment Link $29/mo, usage watched
+manually"):
+
+- Product "Homa", $29/mo recurring (price lookup_key `homa_monthly_29`),
+  statement descriptor THANKSHOMA.
+  - Test (sandbox acct_1TqIhu…): prod_Uq01TGhJROfVQ5 /
+    price_1TqK1oLyeN6YfdNkoCqM9HbM
+  - Live (acct_1TqJCq…, charges_enabled: true): prod_Uq02Zo8DUidRnH /
+    price_1TqK24GnIMAiH0MJcLf0aoyB
+- Payment Links recorded in `apps/web/.env.local` + `.env.example` as
+  `NEXT_PUBLIC_STRIPE_{TEST,LIVE}_PAYMENT_LINK_URL`. No product code reads
+  them yet.
+- Live keys mirrored to Vercel Production (Sensitive):
+  `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_RESTRICTED_KEY`,
+  `NEXT_PUBLIC_STRIPE_LIVE_PUBLISHABLE_KEY`. Local `.env.local` renamed the
+  test pair to `STRIPE_TEST_*` so test/live can never be confused.
+
+Judgment calls made alone, flagged for review:
+1. Product description written honest-to-today ("A fresh progress report for
+   every kid, every month."), NOT the Branch B plan copy (materials daily,
+   weekly notes), because none of that exists yet and a live link can charge
+   a real card. Editable in the dashboard when the offer is decided.
+2. No trial on the link: trial shape is open founder question #2 in
+   journeys/10-reconciliation §Open questions (300 credits vs 2-weekly-notes
+   sizing), and T1's card-upfront ruling can be honored later by adding
+   `trial_period_days` when the offer ships.
+3. Paywall placement, price framing ($29 first-cohort membership vs
+   report-only price), and fake-door vs real-charge remain UNDECIDED founder
+   calls; the 07-04 ruling "no Stripe preorder ask at the conference" still
+   stands.
+
+## 2026-07-06 · Onboarding UX review implemented in full (founder: "do it all, boil the ocean")
+
+A senior-designer review of the whole onboarding flow was delivered and the
+founder approved implementing everything in one pass. Shipped, in priority
+order, with the judgment calls noted:
+
+1. **Two real defects fixed.** (a) The page shell centered steps with
+   flexbox `justify-center`, which clips a too-tall step's heading up
+   underneath the nav, unreachable by scrolling (seen live on the account
+   step); auto margins center-when-room / top-align-when-not instead.
+   (b) A returning parent whose email already had an account hit
+   `signUp` failure with a "try again" that could never succeed; the
+   signup route now returns `reason: "exists"` and the step offers
+   "sign in and you'll come right back here" (`/signin?next=/onboarding`;
+   the signin page + actions grew a validated `next` param). The
+   sign-in return path works because `/api/map/state` links ANY live
+   Supabase session to the lead, not just Google ones.
+2. **Quiet chrome mid-flow.** The founder's earlier "use the nav bar and
+   the footer" ruling stands on the page-like moments (entry, hub) via
+   the new `OnboardingShell`, but during kids/questionnaire/extras/
+   signup/scoring the marketing nav (whose Sign Up button navigates to
+   /onboarding itself and dumped mid-questionnaire parents onto the hub)
+   gives way to logo + "everything saves as you go" + the original
+   two-link footer. Judgment call: this narrows, not reverses, the
+   founder's nav ruling; flagging here in case it should be reversed.
+3. **The live-assembling report rail.** The entry page's report-preview
+   mock disappeared for the whole questionnaire, exactly when motivation
+   is spent. New `ReportRail` (desktop) and `ReportRailStrip` (mobile):
+   the subjects fill in with sage checks as she answers, "N subjects to
+   go" underneath, same visual language as the entry mock.
+4. **Kids step**: numeric MM/DD/YYYY fields with auto-advance replace the
+   three `<select>`s; the primary button stays enabled and explains
+   what's missing on tap; it personalizes ("Start Maya's questionnaire")
+   the moment a name is typed; "+ Add another kid first" (ambiguous)
+   became a quiet "+ add another kid" link; the 2-to-16 range is stated
+   up front; name field autofocuses.
+5. **Checklist**: chips in scale order (single row desktop, ordered stack
+   mobile, the 2x2 grid shuffled the scale); a tapped chip flashes
+   selected ~140ms before advancing; "subject 4 of 16" became "about
+   N min left" (16 subjects read as long; time was the promise).
+6. **Extras dieted from nine asks to two** (interests + help-with, the
+   ones that feed the report). "About your homeschool" (style,
+   curriculums, values) moved to the report page as
+   `HomeschoolContextCard`, gated by `hasFamilyContext`, saving through
+   the same cookie-authed extras route as the whats-working boxes.
+   Judgment call: activities/crew/notes were dropped from the lead flow
+   entirely (product-stage context, collectable in-app later).
+7. **Account step re-offers Google** (one tap beats name+password at the
+   moment friction costs most), autofocuses, and gained a show-password
+   toggle. Entry email label now carries the why: "Where should I send
+   the report?".
+8. **Routing**: a fully-answered unscored child now resumes at the finish
+   line (signup/scoring) instead of the hub, closing the Google-redirect
+   loop; focus moves to fresh step content on phase changes.
+9. **Housekeeping found along the way**: fixed "Mayadoes" (the Turbopack
+   JSX leading-space strip) in the report's method section; fixed the
+   three pre-existing React lint errors (ref-read during render in the
+   checklist, `Date.now()` in a ref initializer in scoring, and
+   setState-in-effect in plan-weeks, now `useSyncExternalStore`), so
+   `pnpm lint` is green again.
+
+Verified end to end against homa-prod with a real account creation
+(desktop + mobile Playwright walkthroughs, every step screenshotted);
+all test leads and the test auth user deleted afterward. Typecheck,
+lint, build, isolation all green.
+
+## 2026-07-06 · S1 becomes the parent's name; birthdates are now real days, not month/year
+
+Founder call, same session as the email-to-signup reversal above, one step
+further: "I don't want the first question to be the kids' name, collect the
+parent's name (first, last), then add your family," plus "get the actual
+birthday, not just month, year." Two changes:
+
+1. **New true S1: `ParentStep`.** First and last name, both required,
+   right after the silent anonymous bootstrap, carrying the hero headline
+   and the benchmark trust strip that used to live on `KidsStep`. New
+   `/api/map/name` route + `saveParentName` (migration `lead_last_name`
+   adds the column, applied to homa-prod) update the caller's own
+   cookie-resolved lead directly, no upsert-by-anything needed since the
+   lead already exists from the anonymous bootstrap. `KidsStep` drops back
+   to a plain "add your family" step, no hero, no entry branching.
+   `MapFlow`'s name gate (`!firstName`) takes priority over every other
+   routing decision, including resume-link `?dd=`/`?start=` params (moot
+   in practice: anyone holding such a link already claimed, and claiming
+   is downstream of naming).
+2. **Since name is now known before signup, `SignupStep` shrank back to
+   one field: email.** Re-collecting the name there would have meant
+   asking twice. `mapClaimSchema.firstName` stays accepted for backward
+   compatibility (a route contract, not a UI field anymore); the claim
+   route now forwards the already-known `lead.first_name`/`last_name`
+   into both `claimLead` and the waitlist mirror instead of trusting the
+   client for it.
+3. **Real birthdates.** `mapChildSchema.birthMonth` (YYYY-MM) became
+   `birthDate` (YYYY-MM-DD, validated as a real calendar date, e.g.
+   rejects Feb 30). `lead_children.birth_month` already a bare `date`
+   column, no migration needed, just stopped force-appending `-01`.
+   `ageInMonths` became day-precise (a child isn't credited a whole month
+   until the calendar reaches their exact birth day), verified live: a
+   kid born 2022-05-17 read 4y 1m on 2026-07-06 (not 4y 2m, which the old
+   month-only math would have shown). Backward compatible with bare
+   "YYYY-MM" callers (the pinned sample report): a missing day just skips
+   the day-adjustment, identical to the old behavior. Six `to_char(...,
+   'YYYY-MM')` reads in `store.ts` (report view, plan builder,
+   band-ready cron, etc.) all widened to `'YYYY-MM-DD'` so the stored day
+   actually reaches `ageInMonths`. `KidsStep` gained a Day select between
+   Month and Year, clamped to the real day count for the chosen month
+   (handles Feb 28/29 without a separate leap-year check).
+4. **Scoped to the lead-magnet only.** `public.children`/`lib/family.ts`/
+   `lib/child-age.ts` (the real, post-signup product's family system) were
+   deliberately left untouched: separate table, separate age math, out of
+   the ask, and changing it risks the live chat agent's age-targeted
+   material selection for no requested benefit.
+
+Verified live end to end twice against homa-prod: the full happy path
+(name → family → checklist → extras → signup-by-email-only → scored
+report, name and real birthday confirmed in Postgres) and the
+all-pending-band edge case (name → family with only an out-of-range kid →
+pre-hub signup, personalized off the still-known name → hub with the
+email-me-this-link option now live). All test rows deleted after.
+
+## 2026-07-06 · Email moves from S1 to signup: "no email needed, sign up as the last question"
+
+Founder call, reversing the /onboarding lead magnet's original zero-friction
+ruling (email first, S1): kids and the checklist now auto-save under a fully
+anonymous session, and email is asked for once, framed as creating the
+account, right before the report scores. Real architecture change, not copy:
+
+1. **Schema.** Migration `lead_email_optional` (applied to homa-prod):
+   `lead_families.email` drops `not null`, the unique constraint becomes a
+   partial index (`where email is not null`), so many anonymous rows can
+   share null. `mapStartSchema` shrank to `{source, utm}` (no email, no
+   name); a new `mapClaimSchema` (email, optional firstName/usState) covers
+   the signup moment. `map.claimed` added to the event registry rather than
+   reusing `map.started`, since this is now a genuinely separate moment
+   from session start (a lead can answer the whole checklist before it
+   fires).
+2. **Store.** `upsertLead` split into `startAnonymousLead` (always inserts,
+   email null) and `claimLead` (attaches email to the caller's own
+   cookie-resolved lead). If that email already belongs to a different,
+   older lead, `claimLead` reparents this sitting's `lead_children` onto
+   the older account and deletes the now-empty anonymous row, so a second
+   sitting on a new device never splits or loses a family. Verified live:
+   claim against a pre-existing email correctly merged and left one row.
+3. **Routes.** `/api/map/start` is now the silent, idempotent anonymous
+   bootstrap (a caller who already holds a valid cookie gets a no-op
+   success). New `/api/map/claim` is the only place email is ever asked
+   for; `/api/map/score` now 409s defensively if a lead somehow reaches it
+   unclaimed.
+4. **The honesty gap this reversal opens, closed:** the hub already
+   promises "I'll email you the moment the checklist is ready" for
+   out-of-range kids. A family whose only kids are outside the scored band
+   never reaches the checklist/signup path at all, so `needsPreHubSignup()`
+   routes to signup before the hub whenever there is no reachable
+   checklist and no email yet, keeping that promise honest. Verified live
+   with a same-day-born kid: lands on signup ("...I'll email you the
+   moment X's checklist is ready"), then the hub, with the email-me-this-
+   link option now available.
+5. **First name moved with it.** It had just been added to the old email
+   step; rather than ask it twice (once vaguely upfront, once again at
+   signup), it now lives only in signup, paired with email as "create your
+   account." `ExtrasStep`'s "what should Homa call you" question is
+   removed to match (it would have fired before signup on a fresh lead).
+6. **Known trade-off, not fixed:** the 24h "you started but didn't finish"
+   reminder cron is now mostly unreachable for a first sitting, since a
+   family stalled mid-checklist has no email yet by design. Only a family
+   that reached signup and stalled after (mid-extras) can still be
+   nudged. `leadsNeedingReminder` and `childrenNowInBand` were both
+   email-gated defensively so a null email can never reach a send
+   attempt; this is a real reduction in recoverable abandonment, accepted
+   as the direct cost of removing the upfront email ask.
+7. **Also fixed while in this code:** `checklist-step.tsx`'s "answer from
+   what you've seen {name} do" hint was silently rendering as one word
+   ("Mayado") in Turbopack/SWC's build, not Babel's: a multi-line JSX text
+   node right after an expression loses its leading space differently
+   than the documented Babel algorithm. Rewritten with an explicit
+   `{" "}` rather than relying on source whitespace across the line
+   break; other `{child.name}` interpolations elsewhere in the app were
+   spot-checked but not exhaustively swept for the same pattern.
+
+## 2026-07-06 · The Homa skills bank: shared craft, targeted by age and capability
+
+Founder: "we should have a homa skills bank... per age (or capability) or
+general, so great family skills can be generalized for all users", with
+the concrete example that a letter-worksheets skill should load for kids
+learning letters and never for families that don't need it. Shipped:
+
+1. **Migration #15** (`skill_bank`, applied to homa-prod): fleet-wide
+   curated skills with targeting metadata: nullable min/max_age_months,
+   lowercase stem tags (text[]), published flag, provenance note. RLS:
+   members READ published rows only; deliberately NO write policies over
+   the Data API, so nothing (member, anon, or a compromised model turn)
+   can write fleet-wide instructions. Unpublish = one-action revert
+   (M3-04 quarantine reasoning applied to skills).
+2. **Targeting semantics** (pure functions in lib/agent-skills.ts): a
+   bank skill advertises when at least ONE child passes EVERY gate it
+   sets: inside the age band (when set) and matching a capability stem
+   against the child's focus + interests text (when set). Both gates on
+   the same child on purpose (a teen whose focus mentions letters must
+   not summon the ages 2.5-7 letter skill). No gates = general, always
+   advertised. 15 deterministic checks in
+   `scripts/skills-targeting-check.mjs` (node --experimental-strip-types,
+   no model, no network).
+3. **One merged resolver** (`agent/skills/skill-library.ts`, replaces
+   family-skills.ts): family_skills + filtered skill_bank in one map;
+   family skill overrides a same-named bank skill (personalization, and
+   also required: two dynamic resolvers emitting one name is a runtime
+   ambiguity error in eve).
+4. **Seeded the first two bank skills** (data insert, not migration):
+   `letter-sounds-worksheets` (30-84 months, stems letter/phonic/
+   alphabet/abc/sound/read; sound-first craft, the founder's Alessa
+   example generalized) and `counting-worksheets` (24-72 months, stems
+   count/number/math; cardinality + just-past-the-edge aiming).
+5. Instructions now tell Homa the advertised set includes shared Homa
+   craft skills and to load a match before improvising.
+
+E2E on the real stack: member reads published bank rows; member POST to
+skill_bank rejected (403); fresh session for a 5-year-old with focus
+"letter sounds" loaded `letter-sounds-worksheets` via load_skill and
+produced a D-and-M letter page themed to her dinosaurs ("tracing, letter
+hunts, and a name finish": the seeded craft, followed). Test family and
+user deleted (0 remain); the 2 bank rows stay, they are product content.
+Typecheck, build, isolation (with skill_bank probes) all green.
+
+Decisions made alone (auditable):
+- **Promotion policy · FOUNDER RULING 2026-07-06 (overrides the agent's
+  initial consent-first call, logged here for the audit trail)**: during
+  beta, promotion from a family skill to the bank is founder-curated
+  only. No family notification or consent step: "the objective is to
+  make the product amazing; families won't (and don't need to) know."
+  What stays regardless: the founder generalizes and strips anything
+  family-identifiable before a row goes fleet-wide (that part is privacy
+  posture, not permission), promotion happens outside the product via
+  SQL, and no auto-promotion by the model ever. Revisit the consent
+  question at the M4-04 privacy-policy lawyer pass before public GA.
+- **Tags are curator-chosen lowercase stems**, substring-matched, because
+  child focus is free text; stems ("letter", "count") hit the natural
+  phrasings without a taxonomy. A real capability taxonomy can ride in
+  when M2-04 gives profiles structured domain positions.
+- **No audience enum column**: generality is derived (no age gate + no
+  tag gate), one less thing to keep consistent.
+- Bank read query capped at 100 published rows; advertised-per-family
+  stays small by targeting, and the count cap on family skills (20)
+  still bounds the family tier.
+- markdownlint's first-line-heading warning on agent/instructions.md is
+  pre-existing (the file is a prompt, not a doc); left alone.
+
+## 2026-07-06 · Hero background warmed (founder screenshot: "update the hero bg like this")
+
+The flat band-sky hero background is now warm cream with a soft gold glow
+rising from the top-right, matching the founder's reference screenshot.
+Calls made alone, keeping it in-system per the design law (never invent new
+colors): the reference's sampled corner color (#FDEEC3) maps to the existing
+`--gold-100` (#FFF3C2) and the base to `--bg-page`, rendered as one radial
+gradient, no new tokens. The ribbon seam below the hero previously filled
+its top half with band-sky to match the old hero; both halves are now
+bg-page. Only the landing hero changed; the report page's band-sky header
+and the Wave default are untouched.
+
+## 2026-07-06 · Hero slimmed to one CTA, brand-named headline (founder call: "remove watch the film, remove the free-to-start trust line, add Homa is your homeschool assistant")
+
+Founder gave three hero edits. Removals were literal: the "Watch the film"
+button and the "Free to start ... See a sample report" trust line are gone.
+The film modal (video element, resume-position localStorage, Escape handler)
+only existed for that button, so it left too, along with the `.lp-film-*`
+CSS; Hero no longer holds state and became a server component. The brand
+film asset stays in `public/videos/` (unreferenced, cheap, likely reusable
+for social). Call made alone: "add Homa is your homeschool assistant" was
+read as the headline, replacing "Your homeschool assistant.", because it is
+that exact sentence with the brand name added and the founder's 2026-07-05
+ruling was already "say exactly what it is"; the accent color moved with the
+word "assistant". /onboarding/sample keeps its other entry points (email
+step, sitemap); the report promise now lives only in the onboarding flow
+itself.
+
+## 2026-07-06 · Benchmark demo removed from landing (founder call: "remove the where would homa start section, keep the Curious how Homa works card")
+
+The "Where would Homa start?" three-question demo (BenchmarkDemo + DemoMap +
+ds/Chip) is gone from the landing page. The surviving peek card now lives in
+`components/marketing/HowHomaWorksCard.tsx` with `SkillWeb.tsx` moved up
+beside it (the `benchmark/` folder no longer described anything). Calls made
+alone, as consequences of the removal rather than new policy: the "Try it"
+links in the nav and footer pointed at the removed section's `#try` anchor,
+so they were removed rather than left dead (a "How it works" nav link still
+covers the how-does-this-work intent); the demo's `.bd-sum` pop animation
+CSS was dead and removed; the demo's inline "See where your child stands"
+lead-magnet link is gone with the section, the hero, nav, and CTA band still
+route to /onboarding.
+
+Founder asked for a senior design review of the /onboarding first screen.
+All changes use existing tokens; the surface now carries exactly two playful
+devices (ruled paper + one hand note) per the restraint rule. Decisions made
+alone, auditable:
+
+- **Found a real layout bug**: the :root `--container-*` tokens (820/1100/
+  1280) shadow Tailwind v4's `max-w-md/lg/xl` scale, so the page's `max-w-xl`
+  column rendered 1280px wide (the near-full-bleed card in the founder's
+  screenshot). /onboarding now uses explicit rem widths. Still shadowed
+  elsewhere (signin `max-w-md` renders 820px, report fallback `max-w-xl`
+  1280px); flagged for a follow-up sweep.
+- Page shell: warm paper schoolbook background (`--bg-page-warm` +
+  `--bg-paper`, the web-app onboarding kit's treatment), the trust line as a
+  quiet pill chip, the flow column vertically centered, and a 260ms ease-out
+  rise on step change (opacity + transform only).
+- Footer no longer repeats the card's reassurance sentence on the same
+  viewport; it slims to the method + privacy links. The sentence stays inside
+  the card at the decision point. All ruled copy kept verbatim.
+- "See a sample report first" moved from inside the action card to just
+  below it: one action per card.
+- Flow cards moved from `border-default` to `border-subtle` per the tokens
+  doc (default is the input tone); answer chips keep default. Email step gets
+  the kit's elevated single-card treatment (shadow-lg), DS-spec input (1.5px
+  border, 54px, clay focus glow), arrow on the CTA, danger border on the
+  invalid state.
+- Pre-existing lint: eslint fails on 3 react-hooks errors that fail on clean
+  HEAD too (checklist-step ref-read-in-render, plan-weeks setState-in-effect,
+  scoring-step Date.now-in-render). Not introduced here; typecheck and build
+  are green.
+
+## 2026-07-06 · Skillify: "save this as a skill" works in the cloud (family skill library)
+
+Founder asked whether eve can do what the Mac Mini's OpenClaw setup did:
+Alessa says "make a worksheet that looks like Paw Patrol", then "save this
+as a skill", and Homa can reuse it forever. Answer: yes, via eve's dynamic
+skills (defineDynamic in agent/skills/ resolving per turn from the caller's
+auth), with rows replacing files since deploys orphan sandbox filesystems.
+Shipped the whole loop:
+
+1. **Migration #14** (`family_skills`, applied to homa-prod): name
+   (kebab-case, unique per family), description (the always-advertised
+   routing hint, capped 200 chars), markdown (the procedure, capped 6,000
+   chars, loaded only on demand), source, RLS member-CRUD like
+   family_memories.
+2. **Dynamic resolver** (`agent/skills/family-skills.ts`): turn.started,
+   reads the caller's rows under their own RLS token, returns a map of
+   defineSkill entries. eve advertises each description next to its
+   built-in load_skill; the body enters context only when loaded
+   (progressive disclosure). Failure posture: on DB error skills are
+   absent for a turn rather than failing the turn.
+3. **Tools**: `save_skill` (same injection scan as memory, count cap 20
+   with a retire-one-first error, upsert-by-name so "tweak that skill"
+   works) and `forget_skill` (exact name match, deleted body returned so
+   "keep it" can re-save).
+4. **Instructions**: new section drawing the line (memory = facts, skills
+   = repeatable procedures), when to offer ("at most once per
+   conversation, never nag"), and to load a matching skill instead of
+   re-deriving.
+5. **Chat chips**: "Skill saved / updated / removed" + busy labels
+   ("looking up how we do this…" while load_skill runs).
+
+E2E on the real stack, the founder's literal scenario: turn 1 made a
+Chase-and-Skye letter-sounds worksheet; turn 2 "save this as a skill" →
+save_skill wrote `paw-patrol-worksheet` with a proper routing description
+(model-authored); a BRAND NEW session asked for "your Paw Patrol skill,
+counting this time" → load_skill fired, create_worksheet followed the
+saved style ("the whole pup crew helping her count to 5"). Both test
+families and users deleted after (0 remain). Typecheck, build, isolation
+(with new family_skills probes) all green.
+
+Decisions made alone (auditable):
+- **Two-tier skill model**: fleet skills (authored, git, ship by deploy)
+  vs family skills (these rows). A family skill sharing a future fleet
+  skill's name overrides it for that family only, eve's documented
+  behavior, kept deliberately as personalization.
+- **Skill saves are explicit-request or accepted-offer only** (Hermes
+  staging insight, adapted): the model never silently grows the library,
+  and every save/delete is chip-visible in the transcript.
+- **Count cap 20** so the advertised list stays one bounded block of
+  context; consolidation is a conversation ("which one should we retire?").
+- **No skill events emitted**: same registry gap as memory (journeys/06
+  §4 has no skill.* names and inventing names is banned); flagged for the
+  registry v2 pass alongside M2-13's events.
+- First E2E run's turn 1 "failed" only in the harness: 300s stream timeout
+  during dev-server cold compile; the turn completed server-side (turn 2
+  proved it). Rerun on the warm server passed 14/14. Noting so nobody
+  chases a phantom.
+
+## 2026-07-06 · /map renamed /onboarding (founder call: "instead of /map can we call it /onboarding")
+
+The public route only. `app/map` moved to `app/onboarding` (report pages now
+`/onboarding/r/[token]`, sample and method pages likewise), every internal
+link, the sitemap, the emailed report URL, the share button, and the
+resume-link redirect target updated. Permanent redirects added in
+`next.config.ts` (`/map` and `/map/:path*`, plus `/conference` and
+`/waitlist` now pointing at `/onboarding`), so every report or resume link
+already sitting in an inbox keeps working. Deliberately NOT renamed, to keep
+the change shippable and honest to the founder's ask (the URL): the
+`/api/map/*` endpoints, `lib/map/`, `@homa/core` map modules, `map.*` event
+names, `check:map` tooling, and the `lead_*` tables. "Map" stays the internal
+concept name; "onboarding" is the public word.
+
 ## 2026-07-06 · The chat gets a brain: persona + durable memory (M2-01, M2-02 slice)
 
 Founder direction: "make the chat incredible, Homa should be so smart; turn
@@ -135,6 +649,128 @@ noise at this sample size and violate the anti-guilt law); prior rings
 capped at one per subject (latest prior, not the whole trail); the sample
 child's answers climb full ladders so the sample shows a strengths-first
 report, matching what a real strong sitting produces.
+
+## 2026-07-06 (morning, wave 2) · World-class benchmark push: provenance codes, freshness loop, re-norm loop, 6 new research lanes
+
+Founder: "do everything except 5&6 [paid instruments, expert review].
+Boil the ocean." Four workstreams, decisions made alone:
+
+1. **Provenance codes.** `MapItemContent` gained an optional `standards`
+   field; 89 of 220 items now carry formal codes (CCSS, NGSS, CSTA, CEE,
+   ELOF, C3, ACTFL, NCAS, SHAPE) populated only where the corpus verified
+   the code. Re-verification after a standards revision is now a grep,
+   not a research project. check:map validates the field.
+2. **Freshness loop.** `pnpm check:sources`
+   (scripts/benchmarks-freshness.mts): probes all 24 MAP_SOURCES URLs,
+   enforces a verified-date manifest both directions, warns at 180 days
+   stale, carries a revision watchlist (CSTA 2026, NCAS review, CEE 3rd
+   ed, CCSS site move). Deliberately not in CI (network). First run
+   caught two dead government URLs (CDC and ELOF both moved hosts in
+   2025 site redesigns): fixed in MAP_SOURCES, which also fixes the
+   public /onboarding/method source links. Paywalled journal hosts that
+   reject probes are marked botBlocked (warning, not failure). Runbook:
+   runbooks/benchmark-freshness.md.
+3. **Re-norm loop (Homa-native norms).** `pnpm report:norms`
+   (scripts/map-norms-report.mts): founder-ops, read-only, aggregate-only
+   report over lead_answers x lead_children.birth_month, per item per
+   6-month age bucket, next to the published anchor. Privacy posture:
+   no PII in output, buckets under n=30 render as "low n", runs locally
+   with the server-only DB credential, never deployed. Anchor-move gates
+   (100+ observations, selection-bias check, wording check, conservative
+   direction) live in runbooks/map-renorm.md. Smoke-tested against prod:
+   38 answers, 1 child, everything correctly "insufficient data". No
+   schema changes. Root devDep added: postgres (for the script only).
+4. **Research wave 2, 6 parallel lanes** into docs/homa-benchmarks/:
+   11 score distributions (percentile curves: Wordbank CDI, MAP, ORF,
+   Lexile, NIH Toolbox), 12 ND/2e trajectories (tolerance implications
+   per domain, D5 boundary respected), 13 math curriculum crosswalk
+   (Saxon, Singapore, Math-U-See, and 7 more mapped to bank items),
+   14 ELA curriculum crosswalk (AAR, Logic of English, IEW, and more),
+   15 refresh sweep (executes the synthesis follow-up queue: CSTA 2026
+   status, NAEP gaps, ORF grades 7 to 8, World Book missing grades,
+   ELOF indicators, and more), 16 the 50-state homeschool assessment
+   sweep (not legal advice; product re-verifies before display).
+   Corpus README index updated with all six lanes.
+
+Verified: check:map green (220 items, 89 coded), check:sources green,
+typecheck green, build green, norms report runs against prod read-only.
+
+Wave-2 outcome (all six lanes returned by 09:19): 1,793 corpus lines
+added, dash law clean, every lane structured with porting notes and dry
+wells. Load-bearing results folded into 00-synthesis.md sections 5 to 7:
+the 14-item follow-up queue fully executed (NAEP civics cuts and grade 4
+math average recovered, Ohio language hours table recovered, ELOF
+indicators completed, tooth brushing and monkey bars anchored); one
+supersession (Florida has NO statutory percentile line, correcting lane
+10's unverified figure; Ohio abolished homeschool assessment Oct 2023,
+lane 16 now canonical for states); one policy shift (AAP replaced its
+2016 media policy Feb 2026, displacement model, affects future screen
+copy); tolerance-band method with 13 verified bank-item windows (lane
+11); the 16-domain ND/2e tolerance table (lane 12); and 134 curriculum
+level rows mapped to bank items (lanes 13, 14). CSTA 2026 final text
+lands July 13 to 15: computer_science re-verify is calendared.
+
+## 2026-07-06 (morning, later) · Computer science ships as the 16th domain
+
+Founder: "add the computer science domain." Decisions made alone:
+
+1. Exposure-based, like spanish. CSTA anchors are when-taught placements,
+   not developmental norms; a child who never met Scratch is not "growing"
+   in anything. Exposure domains never render months-ahead, and the report
+   frames them as "part of your world / whenever you like", which is the
+   honest framing for CS. Anchors (66 to 192mo) order the ladder rungs.
+2. 8 items on CSTA 2017 (the published edition): unplugged robot game,
+   block sequence, debugging, loops and events, variables, decomposition
+   and planning, text language, ships-something-real. New `csta` source
+   key renders on /onboarding/method. Placed before spanish so spanish's
+   "Last one:" intro stays true; checklist grows to 16 base questions.
+3. Exposure copy in sentences.ts generalized (the "second language" line
+   was hardcoded for all exposure domains); CS gets its own line. CS
+   practice patterns added to plans.ts (the fallback would have served
+   math patterns). Hardcoded "15 subjects" copy fixed: scoring step and
+   map-check now derive from MAP_DOMAINS.length, BenchmarkDemo says 16.
+4. Same MAP_BANK_VERSION (2026.07.2): the version has not shipped yet
+   today, one bump covers the day's change set.
+5. Queued for the CSTA 2026 release (this month): re-verify item wording
+   against the renamed concepts, consider an AI-literacy rung (UNESCO
+   2024 / AI4K12 were captured in corpus lane 09).
+
+Verified: check:map green (16 domains, 220 items), typecheck green, build
+green.
+
+## 2026-07-06 (morning) · Benchmark corpus ported into the bank (v2026.07.2)
+
+Founder: "do everything you need to use this to make our product better,
+update everything." First porting pass from docs/homa-benchmarks/ into
+`packages/core/src/map/content.ts`, 188 to 212 items, MAP_BANK_VERSION
+2026.07.1 to 2026.07.2. Decisions made alone:
+
+1. Applied the synthesis's top corrections: focus-5/focus-15 lost their
+   minute claims (the minutes-per-year rule is unsourced folklore per lane
+   08); short-sentences re-anchored to familiar listeners with a new
+   stranger-clear item at 46mo (Hustad 2021); counts-to-100 moved 72 to 78
+   (CCSS vs Clements-Sarama tension split, dual-cited); rides-bike moved
+   108 to 84 (AAP 4-to-7 window). Anchor moves are safe: every stored
+   report records the bank version that scored it (method page states
+   this), and rescoring only happens on a new sitting.
+2. Added 24 ladder items across 13 domains from lane porting notes, only
+   parent-observable statements with verified anchors: theory of mind at
+   56mo, Lowenfeld drawing stages, Tabors/Hoff-Core spanish exposure rungs,
+   gallop/swim/bike sequence, rhythm notation, savings plan (CEE),
+   continents and oceans, stop-and-go inhibition game, time estimation.
+   7 new source keys (hustad, crowe-mcleod, wellman, lowenfeld, ufli, cee,
+   hoff-core) render automatically on /onboarding/method.
+3. Deliberately NOT ported: per-minute fluency rates (field disagrees 2x),
+   topic-placement items (no national grade placement exists), legal ages
+   (facts, not development), FitnessGram zones (display-law risk). The CS
+   domain is deferred: CSTA 2026 lands this month and a 16th domain
+   lengthens every child's checklist, so that is a founder call, queued.
+4. Plans/sentences needed no changes: practice patterns are per-domain and
+   new statements were written to read correctly through skillPhrase's
+   gerund transform (verified by check:map plan fixtures).
+
+Verified: check:map green (212 items, all fixtures pass), typecheck green,
+build green. Corpus synthesis and README updated with porting status.
 
 ## 2026-07-06 (overnight) · National benchmark corpus commissioned
 

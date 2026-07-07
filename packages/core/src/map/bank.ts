@@ -13,7 +13,7 @@ import { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent } from "./content";
  */
 
 /** Bumped whenever content meaningfully changes; stored on every report. */
-export const MAP_BANK_VERSION = "2026.07.1";
+export const MAP_BANK_VERSION = "2026.07.2";
 
 export const MAP_ANSWERS = ["easily", "getting_there", "not_yet", "not_sure", "skip"] as const;
 export type MapAnswer = (typeof MAP_ANSWERS)[number];

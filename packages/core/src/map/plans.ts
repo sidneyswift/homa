@@ -123,6 +123,11 @@ const PRACTICE_PATTERNS: Record<string, readonly [string, string, string]> = {
     "Learn the words of {interest} first. Motivation is half of vocabulary.",
     "One out-loud win a day: a greeting, an order, a question used with a real person.",
   ],
+  computer_science: [
+    "Ten minutes of building a day aimed at {skill}: blocks of code, not worksheets.",
+    "Let {interest} pick the project: a game about it, an animation, a quiz. {skill} rides along.",
+    "One real automation this week (a timer, a shortcut, a spreadsheet formula), built together, then theirs.",
+  ],
 };
 
 const STYLE_NOTES: Record<string, string> = {

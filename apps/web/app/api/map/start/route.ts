@@ -4,25 +4,22 @@ import { mapStartSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { mirrorToWaitlist, upsertLead } from "../../../../lib/map/store";
+import { requireLead } from "../../../../lib/map/session";
+import { startAnonymousLead } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
  * POST /api/map/start
- * Step S1: secure the lead before any work is asked. Creates (or refreshes)
- * the lead, mirrors it into the waitlist table so the invite list stays one
- * list, and sets the httpOnly resume cookie the rest of the flow rides on.
- * Duplicate emails are success, never an error.
+ * S1: opens an anonymous session, silently, before she's typed anything.
+ * Kids and the checklist auto-save under this cookie-only lead; email is
+ * asked for once, at signup, right before the report is scored (see
+ * /api/map/claim). Idempotent: a caller who already holds a valid resume
+ * cookie gets a no-op success rather than a second row.
  */
 
 interface StartBody {
-  email?: unknown;
-  firstName?: unknown;
-  usState?: unknown;
   source?: unknown;
   utm?: unknown;
-  /** Honeypot: humans never see this field; bots fill it. */
-  website?: unknown;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -30,42 +27,26 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
+  const existing = await requireLead();
+  if (existing) {
+    return Response.json({ ok: true, returning: true });
+  }
+
   let body: StartBody;
   try {
     body = (await request.json()) as StartBody;
   } catch {
-    return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
+    body = {};
   }
 
-  if (typeof body.website === "string" && body.website.length > 0) {
-    // Bot filled the honeypot: pretend success, store nothing.
-    return Response.json({ ok: true, returning: false });
-  }
-
-  const parsed = mapStartSchema.safeParse({
-    email: body.email,
-    firstName: typeof body.firstName === "string" && body.firstName.trim() ? body.firstName : undefined,
-    usState: typeof body.usState === "string" && body.usState ? body.usState : undefined,
-    source: body.source,
-    utm: body.utm,
-  });
+  const parsed = mapStartSchema.safeParse({ source: body.source, utm: body.utm });
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
   const input = parsed.data;
 
   try {
-    const { leadId, returning, resumeToken } = await upsertLead({
-      email: input.email,
-      firstName: input.firstName,
-      usState: input.usState,
-      source: input.source,
-      utm: input.utm,
-    });
-    await mirrorToWaitlist({
-      email: input.email,
-      firstName: input.firstName,
-      usState: input.usState,
+    const { leadId, resumeToken } = await startAnonymousLead({
       source: input.source,
       utm: input.utm,
     });
@@ -82,13 +63,12 @@ export async function POST(request: Request): Promise<Response> {
     await emitMapEvent("map.started", {
       lead_id: leadId,
       source: input.source,
-      has_state: Boolean(input.usState),
-      returning,
+      has_state: false,
+      returning: false,
     });
 
-    return Response.json({ ok: true, returning });
+    return Response.json({ ok: true, returning: false });
   } catch (error) {
-    // No email in server logs, ever.
     console.error("map/start failed:", error instanceof Error ? error.message : "unknown");
     return Response.json({ ok: false }, { status: 502 });
   }

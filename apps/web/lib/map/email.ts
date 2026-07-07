@@ -52,7 +52,7 @@ async function send(args: SendArgs): Promise<boolean> {
   </div>
   <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
     You asked for this email at thankshoma.com. Reply and a real person answers.
-    We only email you your children's progress reports and your founding-family invite.
+    We only email you your children's progress reports and your invite.
   </p>
 </body></html>`;
 
@@ -80,7 +80,7 @@ function stripTags(value: string): string {
 }
 
 export async function sendReportEmail(to: string, childName: string, reportToken: string): Promise<boolean> {
-  const url = `${siteUrl()}/map/r/${reportToken}`;
+  const url = `${siteUrl()}/onboarding/r/${reportToken}`;
   return send({
     to,
     subject: reportEmailSubject(childName),
@@ -103,7 +103,7 @@ export async function sendResumeEmail(to: string, resumeToken: string): Promise<
     preview: "Your answers are saved. This link picks up on any device.",
     heading: "Everything you told me is saved",
     bodyLines: ["Tap below to pick up exactly where you stopped, on any device."],
-    cta: { label: "Continue the checklist", url },
+    cta: { label: "Continue the questionnaire", url },
     footerNote: "Didn't ask for this? Ignore it. Nothing changes without you.",
   });
 }
@@ -124,7 +124,7 @@ export async function sendReminderEmail(
       "Your answers are saved. A few more taps and the report is done.",
       "No rush. The link works whenever you are.",
     ],
-    cta: { label: "Finish the checklist", url },
+    cta: { label: "Finish the questionnaire", url },
     footerNote: "This is the only reminder we'll send.",
   });
 }
@@ -159,14 +159,14 @@ export async function sendBandReadyEmail(
   const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
   return send({
     to,
-    subject: `${childName}'s checklist is ready`,
-    preview: "The checklist for their age just shipped, as promised.",
-    heading: `As promised: ${childName}'s checklist is ready`,
+    subject: `${childName}'s questionnaire is ready`,
+    preview: "The questionnaire for their age just shipped, as promised.",
+    heading: `As promised: ${childName}'s questionnaire is ready`,
     bodyLines: [
-      `When you signed up, ${childName}'s checklist wasn't ready yet, and I promised to tell you the moment it was. It is.`,
+      `When you signed up, ${childName}'s questionnaire wasn't ready yet, and I promised to tell you the moment it was. It is.`,
       "About five minutes, from what you've seen them do.",
     ],
-    cta: { label: `Start ${childName}'s checklist`, url },
+    cta: { label: `Start ${childName}'s questionnaire`, url },
     footerNote: "Everything you shared is already saved.",
   });
 }

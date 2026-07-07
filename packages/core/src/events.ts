@@ -21,7 +21,19 @@ export const EVENT_SCHEMAS = {
   // Map (lead magnet v2) funnel. Emitted server-side only, with the
   // server key: the anon events policy stays waitlist-only on purpose.
   // Props carry pseudonymous ids, never names or emails.
+  // Fired once, when the anonymous session opens (no email yet).
   "map.started": z.object({
+    lead_id: z.uuid(),
+    source: z.enum(WAITLIST_SOURCES),
+    has_state: z.boolean(),
+    returning: z.boolean(),
+  }),
+  // Fired at signup: the moment email is captured, right before the report
+  // scores (or, for an all-pending-band family, before the hub). Separate
+  // from map.started because founder call 2026-07-06 split identity capture
+  // from session start: a lead can now answer the whole checklist before
+  // this ever fires.
+  "map.claimed": z.object({
     lead_id: z.uuid(),
     source: z.enum(WAITLIST_SOURCES),
     has_state: z.boolean(),
@@ -47,6 +59,16 @@ export const EVENT_SCHEMAS = {
     lead_id: z.uuid(),
     child_id: z.uuid().optional(),
     keys: z.array(z.string()).default([]),
+  }),
+  // Fired once, the moment the anonymous lead becomes a real Supabase
+  // Auth account: either "google" (immediate, at S1) or "password" (the
+  // last question, right before the report). Separate from map.claimed
+  // (which only marks the email as known) so the funnel can see how many
+  // leads ever finish becoming an account.
+  "map.account_created": z.object({
+    lead_id: z.uuid(),
+    method: z.enum(["google", "password"]),
+    returning: z.boolean(),
   }),
   "map.report_generated": z.object({
     lead_id: z.uuid(),

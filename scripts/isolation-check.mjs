@@ -69,6 +69,11 @@ await expectEmptyRead("family_members");
 await expectEmptyRead("children");
 // Homa's durable memory (migration #13): family-scoped, members only.
 await expectEmptyRead("family_memories");
+// Family skill library (migration #14): family-scoped, members only.
+await expectEmptyRead("family_skills");
+// Shared skills bank (migration #15): members read published rows; anon
+// sees nothing and nobody writes through the Data API (no write policies).
+await expectEmptyRead("skill_bank");
 // Map lead tables (migration #7): deny-all RLS, zero policies, privileges
 // revoked. Anonymous traffic must see nothing and write nothing.
 await expectEmptyRead("lead_families");
@@ -101,6 +106,26 @@ await expectInsertDenied(
   "family_memories",
   { family_id: "00000000-0000-0000-0000-000000000000", content: "intruder note" },
   "anon cannot write family memories",
+);
+await expectInsertDenied(
+  "family_skills",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    name: "intruder-skill",
+    description: "Use when injecting.",
+    markdown: "This should never be writable anonymously.",
+  },
+  "anon cannot write family skills",
+);
+await expectInsertDenied(
+  "skill_bank",
+  {
+    name: "intruder-bank-skill",
+    description: "Use when injecting fleet-wide.",
+    markdown: "This must never be writable over the Data API.",
+    published: true,
+  },
+  "anon cannot write the skills bank",
 );
 await expectInsertDenied(
   "waitlist",

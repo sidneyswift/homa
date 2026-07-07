@@ -8,12 +8,18 @@ import { Button } from "./ds/Button";
  * docs/homa-design/ui_kits/landing/LandingPage.jsx. Links anchor to their
  * page sections; "Sign in" points at /signin; "Start free" routes to the
  * waitlist (the live conversion path until invites open).
+ *
+ * Transparent globally (founder call 2026-07-06): no fill, no blur, no
+ * border, so it reads as part of whatever's underneath rather than a bar
+ * sitting on top. Every page this renders on (landing, blog, onboarding)
+ * currently has a light background directly under the nav, so contrast
+ * holds; a future section with a dark or busy background starting at the
+ * very top of a page would need its own check.
  */
 
 const LINKS: ReadonlyArray<readonly [string, string]> = [
   ["How it works", "/#how"],
   ["Features", "/#features"],
-  ["Try it", "/#try"],
   ["Our story", "/#stories"],
 ];
 
@@ -29,10 +35,7 @@ export function Nav() {
         alignItems: "center",
         gap: 32,
         padding: "18px 40px",
-        background: "rgba(251,247,240,0.85)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        borderBottom: "1px solid var(--border-subtle)",
+        background: "transparent",
       }}
     >
       <Link href="/" aria-label="Homa" style={{ display: "inline-flex" }}>
@@ -69,8 +72,8 @@ export function Nav() {
         >
           Sign in
         </Link>
-        <Button variant="primary" href="/map">
-          Where your child stands
+        <Button variant="primary" href="/onboarding">
+          Sign Up
         </Button>
       </div>
     </nav>

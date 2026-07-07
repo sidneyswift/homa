@@ -3,13 +3,13 @@ import { listBlogPosts } from "../lib/blog";
 
 /**
  * Sitemap for thankshoma.com: static marketing routes + every published blog
- * article. Report pages (/map/r/*) are deliberately absent and noindex.
+ * article. Report pages (/onboarding/r/*) are deliberately absent and noindex.
  */
 
 const BASE = "https://thankshoma.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes: MetadataRoute.Sitemap = ["", "/map", "/map/sample", "/map/method", "/privacy", "/terms", "/blog"].map(
+  const staticRoutes: MetadataRoute.Sitemap = ["", "/onboarding", "/onboarding/sample", "/onboarding/method", "/privacy", "/terms", "/blog"].map(
     (route) => ({
       url: `${BASE}${route}`,
       lastModified: new Date(),

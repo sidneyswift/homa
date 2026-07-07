@@ -46,7 +46,7 @@ export default function BlogIndexPage() {
               We&rsquo;re writing. While you wait, your child&rsquo;s progress report takes five minutes.
             </p>
             <Link
-              href="/map"
+              href="/onboarding"
               className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
             >
               Get your free progress report

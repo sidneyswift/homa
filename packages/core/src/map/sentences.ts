@@ -20,7 +20,11 @@ import type { DomainScore, MapScores } from "./scoring";
 export interface DomainLine {
   /** The chip label: Ahead, On track, Growing right now, Not mapped yet. */
   badge: string;
-  /** The right-column number: "+14 mo", "at age", "growing", "\u00b7". */
+  /** The right-column number, e.g. "+14 mo". Empty when it would only
+   * restate the badge ("at age" next to an "On track" chip, "growing"
+   * next to "Growing right now" said the same fact in two vocabularies,
+   * UI review 2026-07-06). It speaks only when it ADDS information,
+   * which also makes "+14 mo" rarer and therefore louder. */
   numberLabel: string;
   /** The sentence under the subject name. */
   sentence: string;
@@ -47,15 +51,21 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
 
   if (score.exposureBased) {
     if (score.position === "on_track") {
+      // Exposure domains track what the family does, never age norms, so
+      // each one gets its own warm line instead of a position sentence.
+      const opener =
+        score.domainId === "computer_science"
+          ? "Code and computers are part of their world, and every build teaches."
+          : "A second language is part of your home, and every bit counts.";
       return {
         badge: "Part of your world",
-        numberLabel: "exploring",
-        sentence: `A second language is part of your home, and every bit counts. ${evidence}`.trim(),
+        numberLabel: "",
+        sentence: `${opener} ${evidence}`.trim(),
       };
     }
     return {
       badge: "Whenever you like",
-      numberLabel: "\u00b7",
+      numberLabel: "",
       sentence: "Not part of home life right now, and that's fine. The door is always open.",
     };
   }
@@ -70,8 +80,7 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
     case "on_track":
       return {
         badge: "On track",
-        numberLabel:
-          score.monthsAhead && score.monthsAhead > 0 ? `+${score.monthsAhead} mo` : "at age",
+        numberLabel: score.monthsAhead && score.monthsAhead > 0 ? `+${score.monthsAhead} mo` : "",
         sentence: `Right where most kids their age are. ${evidence}`.trim(),
       };
     case "growing": {
@@ -86,14 +95,14 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
           ];
       return {
         badge: "Growing right now",
-        numberLabel: "growing",
+        numberLabel: "",
         sentence: openers[rotate(score.domainId, openers.length)],
       };
     }
     case "not_mapped":
       return {
         badge: "Not mapped yet",
-        numberLabel: "\u00b7",
+        numberLabel: "",
         sentence: "Not enough answers yet to place this honestly. A few more would fill it in.",
       };
   }

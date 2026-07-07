@@ -37,6 +37,12 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Profile updated", detail: output.childName };
   }
+  if (part.toolName === "save_skill" && output.saved === true && typeof output.name === "string") {
+    return { label: output.updated === true ? "Skill updated" : "Skill saved", detail: output.name };
+  }
+  if (part.toolName === "forget_skill" && output.deleted === true && typeof output.name === "string") {
+    return { label: "Skill removed", detail: output.name };
+  }
   return null;
 }
 
@@ -108,6 +114,9 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   remember: "saving a note…",
   forget: "tidying my notes…",
   update_child_profile: "updating the profile…",
+  save_skill: "saving that as a skill…",
+  forget_skill: "removing the skill…",
+  load_skill: "looking up how we do this…",
 };
 
 /**

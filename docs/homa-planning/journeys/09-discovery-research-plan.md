@@ -68,7 +68,7 @@ Sorted by risk score. Top block (≥16) must have evidence before the M-R week-6
 | A8 | The **religious/conservative homeschool segment** (largest US segment) will let an AI near their homeschool | D | P2, S3 | 4 | 4 | 16 | TAM halves; FB-group channel hostile | K13 + E10 targeted interviews at conference (it will be full of this segment) |
 | A9 | Moms will hand a **child's developmental data to an AI company** — privacy objection is manageable at signup | D | all | 4 | 4 | 16 | Activation cliff at the intake questionnaire | K13; DP-a intake objections; watch E2 waitlist→intake drop |
 | A10 | A mom whose kid is "fine" still feels **"am I doing enough?"** acutely enough to seek an external answer | D | P1, P2 | 4 | 4 | 16 | Core hook (brand foundation) only works on anxious newcomers | K7–K9; count who *did something* about the worry vs shrugged |
-| A11 | **Founding families will pre-pay** before the product exists ($29 preorder / deposit) | V | P1–P3 | 4 | 4 | 16 | Invite cohort fills with tourists; revenue-in-6-weeks slips | E6 — the conference IS the test |
+| A11 | **First families will pre-pay** before the product exists ($29 preorder / deposit) | V | P1–P3 | 4 | 4 | 16 | Invite cohort fills with tourists; revenue-in-6-weeks slips | E6 — the conference IS the test |
 | A12 | The **week-one drip questionnaire completes** (3 q/day × 7) instead of dying at day 2 | U | all | 4 | 4 | 16 | Sparse profiles → generic materials → wow decays; council re-scope of M2-03 wrong | E4/cohort telemetry `onboarding.drip_day_completed`; DP-b |
 | A13 | **Hours/compliance is a purchase trigger**, not a satisfied-elsewhere checkbox (the "externally validated" demand was words) | D | P2, P4 | 4 | 3 | 12 | First-build-wave priority misallocated | K5–K6 (what do they use now, what did it cost); E12 concierge state report |
 | A14 | Moms **print daily** — printer access + habit make paper worksheets the right artifact | U | P2, P5 | 3 | 4 | 12 | Materials pivot to screen/tablet delivery | K4 ("what did you last print?"); DP-b photo of the fridge/binder |
@@ -200,7 +200,7 @@ higher than feels comfortable.
 
 | Rung | The ask (verbatim) | Counts as | Log as |
 |---|---|---|---|
-| 3 — Money | "We're taking **25 founding families** — $29 preorder locks the first month, founding rate for a year, and you're in the first cohort in ~6 weeks. Fully refundable anytime. Want in?" *(Stripe Payment Link QR on the phone — existing Stripe, set up before the conference)* | **STRONG.** She spent money on a promise. | 💰 PREORDER |
+| 3 — Money | "We're taking **25 first families** — $29 preorder locks the first month, first-cohort rate for a year, and you're in the first cohort in ~6 weeks. Fully refundable anytime. Want in?" *(Stripe Payment Link QR on the phone — existing Stripe, set up before the conference)* | **STRONG.** She spent money on a promise. | 💰 PREORDER |
 | 2 — Reputation | "Would you **introduce me to 2 friends** who'd want this? Text them right now and I'll wait — or give me their info and tell them I'll reach out." *(The on-the-spot text is the real test; "I'll mention it" is nothing.)* | **STRONG.** She staked her name. | 🤝 INTRO ×N |
 | 1 — Time | "Can I get **30 minutes on a video call** in two weeks to show you the real thing and get your honest reaction? Here's the calendar link." *(Booked = evidence. "Email me" = nothing.)* | Medium. | 📅 CALL |
 | 0 — Email | Waitlist QR. | **WEAK — floor, not signal.** | ✉️ LIST |
@@ -355,7 +355,7 @@ so the commitment ask is genuine.
    would definitely make you cancel?" And the counter: "What would have to be true
    for this to be a no-brainer at renewal?"
 5. **The commitment ladder, cohort edition (6 min).** In order, stop at first no:
-   - 💰 "Founding annual: **$290/yr locked forever**, starting now — in?" *(prepaid
+   - 💰 "First-cohort annual: **$290/yr locked forever**, starting now — in?" *(prepaid
      annual = the strongest renewal-intent evidence that exists)*
    - 💰 "Then month-to-month at $29 continues after cohort — keep the card on?"
    - 🤝 "Two homeschool moms you'd *actually* text about this — can you intro us
@@ -379,7 +379,7 @@ can't grade on a curve later.
 
 | # | Experiment | Assumptions | Unblocks |
 |---|---|---|---|
-| E6 | Founding-family preorder at conference | A11, A3 | Q4 price point; M-R cohort fill |
+| E6 | First-cohort preorder at conference | A11, A3 | Q4 price point; M-R cohort fill |
 | E9 | Wizard-of-oz 3-min wow at booth | A7, A22 | Onboarding-inversion bet (council #1) |
 | E3 | Older-kids fake door | A6 | **Open call #3 (age-range ICP)** |
 | E1 | Waitlist pricing A/B | A3 | Q4 |
@@ -392,10 +392,10 @@ can't grade on a curve later.
 | E11 | Card-upfront vs card-after-trial split | A17 | Q9; **open call #1 context** (payment-trust posture) |
 | E12 | Concierge state-report ("ask Homa") | A13, A21 | Hours/compliance priority; P4 wedge |
 
-**E6 — Founding-family preorder (at conference).**
+**E6 — First-cohort preorder (at conference).**
 Hypothesis: ≥15% of demo'd, engaged conversations will pay $29 today for a product
-shipping in ~6 weeks. Method: Stripe Payment Link ($29, refundable, "Founding
-Family — first cohort, founding rate for year one"), QR on Alessa's phone, offered
+shipping in ~6 weeks. Method: Stripe Payment Link ($29, refundable, "First
+cohort — price locked for year one"), QR on Alessa's phone, offered
 per commitment ladder §2.4. Sample: every rung-3 ask (target ≥20 asks).
 **Success: ≥3 preorders.** 0–1 = A11/A3 falsified at this price → run the $19 link
 day 2 (prepared in advance). Cost: 1h setup, $0. Decision: Q4 anchor; cohort seeding.
@@ -488,7 +488,7 @@ and the top objection is addressable in copy (not doctrinal).** Cost: 4h. Decisi
 channel + copy strategy for the biggest US segment; A8 stays or TAM re-cut.
 
 **E11 — Card timing split (cohort invites, weeks 6–10).**
-Hypothesis: card-upfront (with founding framing) does NOT depress invite→active by
+Hypothesis: card-upfront (with first-cohort framing) does NOT depress invite→active by
 more than 25% vs card-after-trial. Method: alternate invite batches — batch A:
 card-upfront w/ 30-day full refund; batch B: no card, promotional credits, card at
 day 14. Compare invite→onboarded→week-2-active. Sample: ~10 per arm (directional
@@ -588,9 +588,9 @@ Every Friday (or Sunday night), timeboxed:
    Stripe link, printed capture sheets, booth printer, and E9 wizard-of-oz dry run —
    minimum 3 evenings of prep), and does Alessa have a booth or is she walking the
    floor? (§2.1 flow works for both; the printer doesn't.)
-2. ❓ **Preorder terms:** is "$29 refundable founding-family preorder, founding rate
+2. ❓ **Preorder terms:** is "$29 refundable first-cohort preorder, price locked
    for year one" approved as written? It creates a price commitment before M0-06's
-   cost floor lands — acceptable, or cap founding seats at 25 to bound it?
+   cost floor lands — acceptable, or cap first-cohort seats at 25 to bound it?
 3. ❓ **Disclosure line for Alessa:** "we're building" vs "my husband built this for
    us." The second is a better story but maximizes compliment bias (§2.5). Which
    does she lead with, and does she get to choose per conversation?

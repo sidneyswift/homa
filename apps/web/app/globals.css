@@ -300,23 +300,6 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 [data-reveal-kids] > *:nth-child(6) { transition-delay: 350ms; }
 .rv-d1 { transition-delay: 80ms !important; }
 .rv-d2 { transition-delay: 160ms !important; }
-@keyframes bd-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.bd-sum { animation: bd-pop 360ms var(--ease-out); }
-
-/* Film modal entrance: modal exemption keeps transform-origin center; scale
-   starts at 0.97 (never 0) + opacity, ease-out, interruptible transition via
-   @starting-style. Backdrop fades. */
-.lp-film-backdrop {
-  opacity: 1;
-  transition: opacity var(--dur-base) var(--ease-out);
-  @starting-style { opacity: 0; }
-}
-.lp-film-card {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
-  @starting-style { opacity: 0; transform: scale(0.97); }
-}
 
 /* Peek-under-the-hood accordion: grid-rows expand (the one deliberate
    layout-property animation on the page, accordions inherently move layout;
@@ -332,9 +315,44 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 
 @media (prefers-reduced-motion: reduce), print {
   html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .bd-sum { animation: none; }
-  .lp-film-card { transition: opacity var(--dur-base) var(--ease-out); @starting-style { transform: none; } }
   .lp-peek { transition: opacity var(--dur-base) var(--ease-out); }
+}
+
+/* ============================================================================
+   Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
+   step change, opacity + transform only, brand ease-out, under 300ms per the
+   emil-design-eng motion rules. Keyframes are fine here: steps mount once,
+   they are never retargeted mid-flight.
+   ========================================================================= */
+@keyframes flow-step-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.flow-step-in { animation: flow-step-in 260ms var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce), print {
+  .flow-step-in { animation: none; }
+}
+
+/* Report-rail check-ins (/onboarding checklist): each freshly completed
+   subject's checkmark lands with a soft scale/fade instead of popping in.
+   @starting-style, so it fires exactly once, when the check first mounts.
+   Scale starts at .6, never 0 (nothing real appears from nothing). */
+.rail-check {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-check {
+    transition: opacity var(--dur-base) ease;
+    @starting-style {
+      transform: none;
+    }
+  }
 }
 
 /* ============================================================================

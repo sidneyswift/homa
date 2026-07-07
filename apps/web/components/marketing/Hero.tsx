@@ -1,36 +1,45 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { ArrowRight, Play, Sparkles, X } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 
 import { Button } from "./ds/Button";
 import { Doodle } from "./Doodle";
 
 /**
- * Landing hero, ported verbatim from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx: promise headline, twin
- * CTAs (waitlist + the 15s brand film in a modal), avatar row, blob-framed
- * family photo, three scattered doodles. Film playback position persists in
- * localStorage so a reopened modal resumes. Modal motion per the
- * emil-design-eng skill: centered origin (modals are exempt from
- * origin-aware scaling), scale 0.97 to 1 + fade via @starting-style, and
- * Escape closes.
+ * Landing hero, ported from docs/homa-design/ui_kits/landing/LandingPage.jsx
+ * and since slimmed by founder calls (2026-07-05 "say exactly what it is",
+ * 2026-07-06 "remove watch the film, remove the trust line"): brand-named
+ * promise headline, one CTA into /onboarding, three scattered doodles. The
+ * brand-film modal left with its button; no state remains, so this is a
+ * server component.
+ *
+ * Background per founder screenshot 2026-07-06: warm page cream with a
+ * soft gold-100 glow rising from the top-right corner (was flat band-sky).
+ * Lives on the page-level wrapper (app/page.tsx), not this section: it
+ * wraps Nav + Hero together so the glow reads through the transparent nav
+ * instead of stopping at Hero's own top edge. This section used to also
+ * carry its own copy of the same gradient, which is harmless where the
+ * two colors agree but silently painted over anything else layered onto
+ * the wrapper underneath it (found while adding the sky-100 accent
+ * below), so it was removed here.
+ *
+ * Photo per founder screenshot 2026-07-06 (second pass): plain rounded
+ * rectangle (radius-xl + shadow-xl), not the earlier organic blob crop,
+ * with a floating "proof" stat card at its bottom-left corner echoing
+ * Features' "Proof it's working" card (same ChartLine icon, sage tint,
+ * same "12 points since April" number) so the hero previews that payoff
+ * before the visitor ever scrolls to it. The heart doodle that lived in
+ * that corner moved out to make room.
+ *
+ * Copy per founder call 2026-07-06 (third pass): headline leads with "Meet
+ * Homa" instead of "Homa is", the warmer introduction of the two while
+ * keeping the 07-05 ruling (name the product, say exactly what it is); the
+ * subhead adopts the reference's longer version, minus its em dash (house
+ * style, AGENTS.md: never one, anywhere), the hero CTA reads "Get started
+ * for free" (T2: no pricing exists yet, so "free" is accurate, not a claim).
  */
 export function Hero() {
-  const [film, setFilm] = useState(false);
-
-  useEffect(() => {
-    if (!film) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFilm(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [film]);
-
   return (
-    <section style={{ background: "var(--band-sky)", position: "relative", overflow: "hidden" }}>
+    <section style={{ position: "relative", overflow: "hidden" }}>
       <Doodle name="star" size={34} rotate={-12} style={{ position: "absolute", top: 46, left: "4%" }} />
       <Doodle name="sun" size={34} color="var(--gold-500)" style={{ position: "absolute", top: 40, left: "46%" }} />
       <Doodle
@@ -68,8 +77,9 @@ export function Hero() {
           >
             <Sparkles size={15} aria-hidden="true" /> In your corner, every school day
           </span>
-          {/* Clarity-first headline (founder read-through 2026-07-05: "say
-              exactly what it is"). The beloved tagline moves to the line below. */}
+          {/* Brand-named headline (founder call 2026-07-06, third pass),
+              continuing the 2026-07-05 clarity ruling: say exactly what it
+              is, now with "Meet Homa" as the warmer opener. */}
           <h1
             style={{
               fontFamily: "var(--font-display)",
@@ -81,48 +91,22 @@ export function Hero() {
               margin: "22px 0 0",
             }}
           >
-            Your homeschool
+            Meet Homa,
             <br />
-            <span style={{ color: "var(--clay-600)" }}>assistant</span>.
+            your homeschool <span style={{ color: "var(--clay-600)" }}>assistant</span>.
           </h1>
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "24px 0 0", maxWidth: 470 }}>
-            Homa plans the week, makes materials for each kid, and tracks your hours.
-            You&rsquo;ve got this. Homa&rsquo;s got the rest.
+            Homa plans your week, makes materials for each kid, and tracks your hours for
+            your state, so Sunday-night prep becomes a five-minute check-in.
           </p>
-          <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
-            <Button variant="primary" size="lg" href="/map" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-              See where your child stands
+          <div style={{ marginTop: 32 }}>
+            <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+              Get started for free
             </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              iconLeft={<Play size={16} aria-hidden="true" />}
-              style={{ background: "var(--surface-card)" }}
-              onClick={() => setFilm(true)}
-            >
-              Watch the film
-            </Button>
-          </div>
-          {/* Honest trust line (rulings C2 + T2: no fabricated social proof,
-              no pricing). The report claim is real: /map delivers it today. */}
-          <div
-            style={{
-              marginTop: 24,
-              color: "var(--stone-700)",
-              fontSize: "0.9rem",
-              fontWeight: 500,
-              maxWidth: 440,
-            }}
-          >
-            Free to start: a five-minute checklist gets you a progress report showing exactly
-            where your child stands. Built by a homeschool family.{" "}
-            <a href="/map/sample" style={{ color: "var(--clay-700)", fontWeight: 700 }}>
-              See a sample report
-            </a>
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>
-          <div style={{ borderRadius: "var(--blob-1)", overflow: "hidden" }}>
+          <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-xl)" }}>
             <Image
               src="/images/hero-family.png"
               alt="A mom and her son working through a workbook together at the kitchen table"
@@ -132,85 +116,54 @@ export function Hero() {
               style={{ width: "100%", height: 440, objectFit: "cover", display: "block" }}
             />
           </div>
-          <Doodle
-            name="heart"
-            size={30}
-            color="var(--pop-blush)"
-            rotate={10}
-            style={{ position: "absolute", bottom: -6, left: -14 }}
-          />
-        </div>
-      </div>
-      {film && (
-        <div
-          className="lp-film-backdrop"
-          onClick={() => setFilm(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Homa brand film"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 120,
-            background: "rgba(51,42,33,0.42)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-        >
-          <div className="lp-film-card" onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "min(920px, 92vw)" }}>
-            <video
-              src="/videos/homa-brand-film.mp4"
-              controls
-              autoPlay
-              playsInline
-              onLoadedMetadata={(e) => {
-                const video = e.currentTarget;
-                const t = parseFloat(localStorage.getItem("homa-film-t") || "0");
-                if (t > 0.5 && t < video.duration - 0.5) video.currentTime = t;
-              }}
-              onTimeUpdate={(e) => {
-                try {
-                  localStorage.setItem("homa-film-t", String(e.currentTarget.currentTime));
-                } catch {
-                  /* private mode: resume is a nicety, not a requirement */
-                }
-              }}
+          <div
+            style={{
+              position: "absolute",
+              left: -16,
+              bottom: -24,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: "var(--surface-card)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-md)",
+              padding: "12px 18px 12px 12px",
+            }}
+          >
+            <span
               style={{
-                width: "100%",
-                display: "block",
-                borderRadius: "var(--radius-xl)",
-                boxShadow: "var(--shadow-xl)",
-                background: "#000",
-              }}
-            />
-            <button
-              onClick={() => setFilm(false)}
-              aria-label="Close film"
-              style={{
-                position: "absolute",
-                top: -14,
-                right: -14,
-                width: 40,
-                height: 40,
+                width: 38,
+                height: 38,
                 borderRadius: "50%",
-                border: "none",
-                background: "var(--surface-card)",
-                boxShadow: "var(--shadow-md)",
-                cursor: "pointer",
+                background: "var(--sage-50)",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
-              <X size={18} color="var(--text-body)" aria-hidden="true" />
-            </button>
+              <TrendingUp size={19} color="var(--sage-600)" aria-hidden="true" />
+            </span>
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: "1.05rem",
+                  color: "var(--sage-600)",
+                  lineHeight: 1.1,
+                }}
+              >
+                {"\u25b2"} 12 pts
+              </p>
+              <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                Maya {"\u00b7"} Math, since April
+              </p>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }

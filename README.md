@@ -27,6 +27,7 @@ The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-
 | `marketing/` | Demand-gen engine state: signal reservoir, staged/published bundles, personas, voice, routines (spec: `docs/homa-planning/14-marketing-demand-engine.md`) |
 | `docs/homa-planning/` | The planning corpus: PRD, architecture, backlog, PM library, decisions |
 | `docs/homa-design/` | Brand + UI source of truth ("Warm and playful"): tokens, UI kits, voice rules |
+| `docs/homa-benchmarks/` | Internal national-benchmark corpus (ages 2 to 16, all subjects): sourced anchor base for the map bank and progress reports |
 | `HUMAN-TODO.md` | Founder's one-time setup checklist (temporary) |
 
 Local-only (untracked, never pushed): `homa-macmini/` (the original single-family

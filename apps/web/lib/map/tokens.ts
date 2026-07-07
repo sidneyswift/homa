@@ -5,7 +5,7 @@ import { createHash, randomBytes } from "node:crypto";
  *   - resume token: lives in an httpOnly cookie (and in emailed resume
  *     links); only its sha256 is stored, so a database read never yields
  *     a usable credential.
- *   - report token: the permanent /map/r/[token] URL. Stored as-is because
+ *   - report token: the permanent /onboarding/r/[token] URL. Stored as-is because
  *     the URL itself is the shareable artifact (decision D7 lineage:
  *     sharing is the marketing).
  */

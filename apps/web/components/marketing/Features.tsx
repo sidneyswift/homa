@@ -14,7 +14,7 @@ const ITEMS: ReadonlyArray<readonly [LucideIcon, string, string, string, string]
   [
     ClipboardCheck,
     "Know where they stand",
-    "A gentle skills checklist mapped to your state's standards.",
+    "A gentle skills questionnaire mapped to your state's standards.",
     "var(--clay-50)",
     "var(--clay-600)",
   ],

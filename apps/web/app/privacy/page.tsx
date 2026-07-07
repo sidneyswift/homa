@@ -6,7 +6,7 @@ import { Logo } from "../../components/brand/Logo";
 /**
  * /privacy: the one-page policy, written in plain language. Pulled forward
  * from launch gate 7 because the map flow holds more than emails (children's
- * first names, birth months, and a parent's checklist answers). Every claim
+ * first names, birthdays, and a parent's questionnaire answers). Every claim
  * here must stay true in code; update this page in the same PR as any change
  * to what is collected or who processes it.
  */
@@ -41,8 +41,7 @@ export default function PrivacyPage() {
             send your invite and plan who we can serve well.
           </li>
           <li>
-            <b>Your child&apos;s progress report:</b> each child&apos;s first name (a nickname is fine), birth month and year (never
-            a full birth date), your checklist answers, and any optional extras you share (interests,
+            <b>Your child&apos;s progress report:</b> each child&apos;s first name (a nickname is fine), their birthday, your questionnaire answers, and any optional extras you share (interests,
             homeschool style, curriculums). Used to build the report you asked for, and, when your invite opens, to start Homa off already knowing your
             family. Your child never uses Homa and is never asked anything.
           </li>
@@ -62,7 +61,7 @@ export default function PrivacyPage() {
           <li><b>Resend</b> (email): delivers the emails you asked for.</li>
         </ul>
         <p className="mt-3 text-body">
-          No AI provider receives your checklist answers: the report is scored by plain,
+          No AI provider receives your questionnaire answers: the report is scored by plain,
           human-reviewed arithmetic. If that ever changes, this page changes first and says so plainly.
         </p>
 
@@ -77,7 +76,7 @@ export default function PrivacyPage() {
         <p className="mt-3 text-body">
           Email <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Please%20delete%20my%20family%27s%20data">hello@mail.thankshoma.com</a>{" "}
           with the address you signed up with and we delete your family&apos;s records, including
-          checklist answers and reports. A real person confirms within a few days.
+          questionnaire answers and reports. A real person confirms within a few days.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Questions</h2>
