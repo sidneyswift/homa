@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { formatUsPhone } from "@homa/core";
+
 import { Logo } from "../../components/brand/Logo";
+import { getFamilyPhone } from "../../lib/family-phone";
 import { getMyChildren, getMyFamily } from "../../lib/family";
 import { signOutAction } from "../signin/actions";
 import { AddChildForm, CreateFamilyForm } from "./setup-forms";
+import { TextingCard } from "./texting-card";
 
 /**
  * /home: the signed-in landing (minimal walking-skeleton slice). One of three
@@ -30,6 +34,12 @@ function childAgeLabel(birthMonth: string): string {
 export default async function HomePage() {
   const family = await getMyFamily();
   const children = family ? await getMyChildren(family.id) : [];
+  const familyPhone = family ? await getFamilyPhone(family.id) : null;
+  // The texting card only renders once this deployment has a live line.
+  const homaNumber =
+    process.env.TELNYX_SMS_ENABLED === "true"
+      ? (process.env.TELNYX_FROM_NUMBER ?? null)
+      : null;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
@@ -107,6 +117,17 @@ export default async function HomePage() {
           <div className="mt-10">
             <AddChildForm familyId={family.id} />
           </div>
+
+          {homaNumber ? (
+            <div className="mt-6">
+              <TextingCard
+                linkedPhoneDisplay={
+                  familyPhone ? formatUsPhone(familyPhone.phone_e164) : null
+                }
+                homaNumberDisplay={formatUsPhone(homaNumber)}
+              />
+            </div>
+          ) : null}
         </section>
       )}
     </main>

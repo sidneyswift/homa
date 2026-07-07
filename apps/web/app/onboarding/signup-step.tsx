@@ -38,6 +38,7 @@ export function SignupStep({
 }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +86,12 @@ export function SignupStep({
       const response = await fetch("/api/map/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, password }),
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          password,
+          ...(phone.trim() ? { phone: phone.trim() } : {}),
+        }),
       });
       const data = (await response.json()) as { ok: boolean; reason?: string };
       if (!data.ok) {
@@ -173,6 +179,24 @@ export function SignupStep({
               error ? "border-danger" : "border-border"
             }`}
           />
+          <label
+            className="mt-4 block text-sm font-medium text-strong"
+            htmlFor="signup-phone"
+          >
+            Cell number{" "}
+            <span className="font-normal text-muted">(optional, so you can text Homa)</span>
+          </label>
+          <input
+            id="signup-phone"
+            type="tel"
+            autoComplete="mobile tel"
+            inputMode="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            placeholder="(954) 555-0123"
+            className="mt-2 min-h-[54px] w-full rounded-md border-[1.5px] border-border px-4 py-3.5 text-[1.0625rem] text-strong transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
+          />
+
           {error ? (
             <p id="signup-form-error" className="mt-2 text-sm text-danger" role="alert">
               {error}

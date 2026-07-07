@@ -2,12 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 
+import { normalizeUsPhoneE164 } from "@homa/core";
+
+import { clearFamilyPhone, setFamilyPhone } from "../../lib/family-phone";
+import { getMyFamily } from "../../lib/family";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 /**
  * Family + child setup actions (minimal M2-03(i) form intake). Writes go
  * through RLS: family creation via the create_my_family RPC (migration #6),
  * children via the "members add children" INSERT policy from tenancy v0.
+ * The texting-line actions are the exception by design: family_phones is
+ * deny-all, so they write through lib/family-phone on the server-only
+ * connection, with familyId derived from the caller's OWN membership
+ * (getMyFamily under RLS), never from the form.
  */
 
 export interface SetupFormState {
@@ -30,6 +38,44 @@ export async function createFamilyAction(
   });
   if (error) {
     return { error: error.message };
+  }
+  revalidatePath("/home");
+  return { error: null };
+}
+
+export async function setFamilyPhoneAction(
+  _prev: SetupFormState,
+  formData: FormData,
+): Promise<SetupFormState> {
+  const raw = String(formData.get("phone") ?? "").trim();
+
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+
+  if (!raw) {
+    await clearFamilyPhone(family.id);
+    revalidatePath("/home");
+    return { error: null };
+  }
+
+  const phoneE164 = normalizeUsPhoneE164(raw);
+  if (!phoneE164) {
+    return { error: "That doesn't look like a US cell number yet. Ten digits does it." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const result = await setFamilyPhone({
+    familyId: family.id,
+    phoneE164,
+    addedBy: user?.id ?? null,
+    source: "home",
+  });
+  if (!result.ok) {
+    return { error: "That number is already linked to another Homa family." };
   }
   revalidatePath("/home");
   return { error: null };

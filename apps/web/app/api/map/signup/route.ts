@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { mapSignupSchema } from "@homa/core";
+import { mapSignupSchema, normalizeUsPhoneE164 } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
@@ -91,12 +91,16 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ ok: false, reason: "auth-failed" }, { status: 400 });
     }
 
+    // Optional field: an unparseable number is skipped, never a failure.
+    const phoneE164 = input.phone ? normalizeUsPhoneE164(input.phone) : null;
+
     const { leadId, returning, resumeToken } = await linkAuthUser({
       leadId: lead.id,
       authUserId: signUpData.user.id,
       email: lead.email,
       firstName: input.firstName,
       lastName: input.lastName,
+      phoneE164: phoneE164 ?? undefined,
     });
 
     const cookieStore = await cookies();
