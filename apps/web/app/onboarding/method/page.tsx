@@ -15,11 +15,30 @@ export const metadata: Metadata = {
   title: "How the progress report is made",
   description:
     "The progress report is built from a parent's observations, checked against published national benchmarks. Here is the method, the sources, and what it is not.",
+  alternates: { canonical: "/onboarding/method" },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://thankshoma.com" },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "How the progress report is made",
+      item: "https://thankshoma.com/onboarding/method",
+    },
+  ],
 };
 
 export default function MethodPage() {
   return (
     <div className="min-h-screen bg-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }}
+      />
       <main className="mx-auto w-full max-w-2xl px-6 py-10">
         <Link href="/" aria-label="Homa home" className="inline-flex">
           <Logo size={26} />
@@ -49,8 +68,10 @@ export default function MethodPage() {
             child&apos;s age in months, capped at 24 months ahead.
           </li>
           <li>
-            The scoring is plain arithmetic, reviewed by a person. No AI reads or scores your
-            answers, and the same answers always produce the same report.
+            The scoring is plain arithmetic, reviewed by a person, and the same answers always
+            produce the same numbers. Homa writes the words around those numbers, and every
+            sentence is checked against our safety rules (never &ldquo;behind&rdquo;, never a
+            diagnosis, never a number that is not in your answers) before you see it.
           </li>
         </ol>
 

@@ -21,6 +21,7 @@ The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-
 | `BUILD.md` | Engineering entry point, read next |
 | `DESIGN.md` | Spec-compliant design-token summary for design tooling (source: `docs/homa-design/`) |
 | `apps/web/` | The one deployable: Next.js app with the eve agent mounted inside (`withEve`) |
+| `apps/mobile/` | Expo (React Native) companion app: pure client on the same Supabase + eve backend |
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
 | `packages/design/` | Design tokens/components as a workspace package (source: `docs/homa-design/`) |
 | `supabase/` | Database migrations (Supabase GitHub integration watches this) |

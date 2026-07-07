@@ -11,9 +11,11 @@
  */
 
 import {
+  BANNED_WORDS,
   buildFourWeekPlan,
   DEEP_DIVE_CAP,
   domainLine,
+  EM_DASH,
   homaNote,
   MAP_DOMAINS,
   MAP_SOURCES,
@@ -21,8 +23,12 @@ import {
   nextDeepDiveItem,
   planQuestions,
   scoreMap,
+  validateNarrative,
+  validatePlanNarrative,
   type MapAnswer,
   type MapAnswerInput,
+  type PlanNarrative,
+  type ReportNarrative,
 } from "../packages/core/src/index";
 
 const failures: string[] = [];
@@ -33,10 +39,10 @@ function report(label: string, ok: boolean, detail = ""): void {
 }
 
 // Words the report may never contain (journeys/07 never-say list) plus the
-// em dash (brand law). "test" is allowed only inside "never a test" phrasing,
-// so it is checked separately below.
-const BANNED = /\b(behind|delayed?|disorder|diagnos\w*|screening|assessment|percentile)\b/i;
-const EM_DASH = /\u2014/;
+// em dash (brand law), imported from map/copy-laws.ts so the runtime
+// narrative gate enforces the exact same law. "test" is allowed only
+// inside "never a test" phrasing, so it is checked separately below.
+const BANNED = BANNED_WORDS;
 
 function checkCopy(label: string, text: string): void {
   if (BANNED.test(text)) failures.push(`${label}: banned word in "${text.slice(0, 80)}"`);
@@ -65,6 +71,15 @@ for (const domain of MAP_DOMAINS) {
     // detecting ahead at the top of the 2-16 range).
     if (item.typicalMonths < 20 || item.typicalMonths > 210) {
       failures.push(`${item.id}: typicalMonths ${item.typicalMonths} outside sane range`);
+    }
+    // A typical WINDOW, when documented, must be a real window that
+    // contains its own anchor (the band renders around the dot's truth).
+    const range = item.typicalRangeMonths;
+    if (
+      range &&
+      (range[0] >= range[1] || item.typicalMonths < range[0] || item.typicalMonths > range[1])
+    ) {
+      failures.push(`${item.id}: typicalRangeMonths [${range[0]}, ${range[1]}] inconsistent with anchor ${item.typicalMonths}`);
     }
   }
 }
@@ -306,6 +321,110 @@ for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid, tenKid, teen
   }
 }
 report("rendered sentences: no banned words, no em dashes, no negative numbers", failures.length === before);
+
+// ---------- 7. Narrative fixtures pass the runtime gate at the current prompt version ----------
+
+{
+  const { readFileSync } = await import("node:fs");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const { REPORT_PROMPT_VERSION } = await import("../apps/web/agent/report-writer-version");
+  const {
+    SAMPLE_NARRATIVE,
+    SAMPLE_NARRATIVE_GATE_CONTEXT,
+    SAMPLE_NARRATIVE_PROMPT_VERSION,
+  } = await import("../apps/web/app/onboarding/sample/narrative.fixture");
+
+  const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
+  const redTeam = JSON.parse(
+    readFileSync(path.join(scriptsDir, "fixtures/red-team-narrative.json"), "utf8"),
+  ) as {
+    promptVersion: string;
+    narrative: ReportNarrative;
+    gateContext: Parameters<typeof validateNarrative>[1];
+  };
+
+  // Version lock: any prompt or schema change bumps REPORT_PROMPT_VERSION,
+  // which fails here until fixtures are regenerated and founder re-read.
+  report(
+    "narrative fixtures: stamped at the current prompt version",
+    SAMPLE_NARRATIVE_PROMPT_VERSION === REPORT_PROMPT_VERSION &&
+      redTeam.promptVersion === REPORT_PROMPT_VERSION,
+    `sample=${SAMPLE_NARRATIVE_PROMPT_VERSION} redteam=${redTeam.promptVersion} current=${REPORT_PROMPT_VERSION}`,
+  );
+
+  const sampleVerdicts = validateNarrative(SAMPLE_NARRATIVE, SAMPLE_NARRATIVE_GATE_CONTEXT);
+  report(
+    "narrative fixtures: sample (Maya) passes the runtime gate clean",
+    sampleVerdicts.rejectedPieces.length === 0 && !sampleVerdicts.failed,
+    JSON.stringify(sampleVerdicts.rejected),
+  );
+
+  const redTeamVerdicts = validateNarrative(redTeam.narrative, redTeam.gateContext);
+  report(
+    "narrative fixtures: red-team (struggling kid) passes the runtime gate clean",
+    redTeamVerdicts.rejectedPieces.length === 0 && !redTeamVerdicts.failed,
+    JSON.stringify(redTeamVerdicts.rejected),
+  );
+}
+
+// ---------- 8. Narrative gate unit checks (pure, no network) ----------
+
+{
+  const gateContext = {
+    allowedNumbers: ["4", "2", "16", "21"],
+    siblingNames: ["Casey"],
+    childName: "Maya",
+  };
+  const goodPiece = "Maya is doing beautifully here, and the next step is clear.";
+  const base: ReportNarrative = {
+    note: goodPiece,
+    synthesis: goodPiece,
+    subjects: { math: goodPiece },
+    drawers: { math: goodPiece },
+    keepsake: "Maya, you love the world and it shows. Keep going. Homa",
+  };
+  const cases: Array<[string, ReportNarrative, string]> = [
+    ["banned word", { ...base, note: "She is behind here." }, "note"],
+    ["em dash", { ...base, note: "Nice work \u2014 truly." }, "note"],
+    ["invented number", { ...base, synthesis: "Try counting to 100 together." }, "synthesis"],
+    ["negative number", { ...base, synthesis: "She moved -3 months." }, "synthesis"],
+    ["sibling name", { ...base, subjects: { math: "Unlike Casey, Maya counts." } }, "subject.math"],
+    ["diagnosis phrasing", { ...base, drawers: { math: "This may suggest ADHD." } }, "drawer.math"],
+    ["empty piece", { ...base, note: "  " }, "note"],
+    ["keepsake with an invented number", { ...base, keepsake: "You are 5 whole years of wonder." }, "keepsake"],
+  ];
+  let gateOk = true;
+  for (const [label, narrative, expectedKey] of cases) {
+    const verdicts = validateNarrative(narrative, gateContext);
+    if (!verdicts.rejectedPieces.includes(expectedKey)) {
+      gateOk = false;
+      failures.push(`gate misses ${label}`);
+    }
+  }
+  const clean = validateNarrative(base, gateContext);
+  if (clean.rejectedPieces.length > 0 || clean.failed) {
+    gateOk = false;
+    failures.push("gate rejects clean copy");
+  }
+  const allowedNumberPass = validateNarrative(
+    { ...base, note: "At 4 years 2 months, all 16 subjects are mapped." },
+    gateContext,
+  );
+  if (allowedNumberPass.rejectedPieces.length > 0) {
+    gateOk = false;
+    failures.push("gate rejects numbers that ARE in the facts");
+  }
+  const planVerdicts = validatePlanNarrative(
+    { intro: goodPiece, weeks: [goodPiece, goodPiece, goodPiece], closing: "She is behind." },
+    gateContext,
+  );
+  if (!planVerdicts.rejectedPieces.includes("closing") || !planVerdicts.rejectedPieces.includes("week.3")) {
+    gateOk = false;
+    failures.push("plan gate misses a missing week or banned closing");
+  }
+  report("narrative gate: catches banned words, invented numbers, siblings, diagnoses; passes clean copy", gateOk);
+}
 
 // ----------
 

@@ -3,6 +3,418 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-07 (night) · Ribbon ticker bug: words vanishing mid-loop, fixed (founder screenshot: "this squiggle is missing words")
+
+Root cause: the ticker's `<textPath>` (added earlier tonight) rode the
+ribbon's own visible curve, only ~1570 user-units long. Animating
+`startOffset` toward negative pushed early characters below arc-length 0
+(invalid, no such point on the path); animating toward positive ate into
+the path's remaining length faster than the repeating phrase needed,
+running out of valid arc-length before the visible band's right edge.
+Both are silent SVG behavior, no console error, so it only ever showed up
+as characters/words missing from the rendered band, worse at certain
+points in each ~11-13s loop.
+
+Fix in `dividers.tsx`: the colored visible band keeps the original short
+curve unchanged (pixel-identical); a second, invisible path with the same
+curve extended by 3000 user-units of straight line at each end is now the
+`textPath` target, so every offset the loop ever reaches stays inside
+`[0, pathLength]`. Base `startOffset` moved from 0 to 3000 (the extension
+length) so the un-animated/reduced-motion rest state still lands text at
+the exact original visual position. Verified live: extended path length
+now ~7569 per ribbon, all three ribbons' animated ranges fall inside it,
+and screenshots across full loop cycles (0s, 5s, 10s, 12s+) show complete
+text at every sample, all three ribbons. `pnpm --filter web
+typecheck/lint/build` green.
+
+Founder: "We're no longer doing this invite-only thing... we just remove
+this part," pointing at InviteBand (`We're letting families in a few at a
+time`), and asked for a scroll-triggered popup pointing at the
+questionnaire instead. Scope taken literally: this homepage section only,
+not the site-wide "invite-only" / "invite list" copy in the FAQ, terms,
+privacy, hub pending states, or report views (those still say invite-only
+and are UNCHANGED, pending a separate founder call like the 2026-07-06
+"founding families" sweep).
+
+Shipped:
+
+1. `InviteBand.tsx` deleted, `app/page.tsx` no longer renders it. Footer's
+   "Joining Homa" link (`/#pricing`, InviteBand's old anchor id) repointed
+   to `/onboarding` so it doesn't now scroll to nowhere.
+2. New `ScrollCta.tsx`: a small dismissible card (bottom-right on desktop,
+   full-width bottom bar under 640px) that appears once a reader has
+   scrolled past the Features section and hides again whenever CtaBand's
+   closing CTA is on screen (reactive both ways, via a `data-final-cta`
+   attribute the two components share with no prop link), routing to
+   `/onboarding` like every other CTA on the page. Dismissal persists
+   30 days via localStorage (read through `useSyncExternalStore`, the
+   plan-weeks.tsx pattern, hydration-safe and avoids the
+   `react-hooks/set-state-in-effect` cascade lint). Respects
+   `prefers-reduced-motion` (no slide animation) and Escape-to-dismiss.
+3. Trigger is a rAF-throttled scroll-position check, not
+   IntersectionObserver: a threshold-crossing observer never fires for a
+   scroll that jumps clean over the "past the sentinel" frame (fast
+   flick, Page Down, back/forward-cache restore), which was caught live
+   in Playwright verification (instant `scrollTo` never flipped
+   `visible`) before it could ship as a silent dead feature.
+4. `pnpm --filter web typecheck/lint/build` all green; homepage (`/`)
+   still statically prerendered.
+
+## 2026-07-07 (midday) · Phone-to-family link: SMS sessions get family context
+
+Founder rulings (chat): one phone number per family for cohort one;
+capture it as an optional signup field AND on /home; trust the
+signed-in parent's typed number WITHOUT text-back code verification
+(explicit founder choice over the agent's verify-first recommendation).
+
+Shipped (deployed to production):
+
+1. **Migration #22 `family_phones`** (applied to homa-prod): one row per
+   family (unique family_id, droppable later for multi-number), number
+   unique across ALL families (+1E164 check), deny-all RLS + revoked
+   privileges, lead_families gains nullable phone_e164. Isolation check
+   gains both probes (anon read empty, anon insert denied), green.
+2. **Capture**: optional cell field on the onboarding SignupStep (schema
+   `phone`, server normalizes via new @homa/core normalizeUsPhoneE164
+   and silently skips unparseable values so the optional field can never
+   block signup); lead bridge copies the number into family_phones at
+   workspace creation (never overwriting a /home-set number); /home
+   gains a "Text with Homa" card (set/change/clear) that renders only
+   when the deployment's texting line is on.
+3. **Routing**: the Telnyx channel resolves the sender through
+   family_phones and stamps familyId into the session auth attributes;
+   family-context now has a second load path for SMS sessions (server
+   reads pinned to the channel-authenticated familyId, since no Supabase
+   token exists on SMS); sms-mode instruction speaks linked vs unlinked;
+   sms.message_received.linked_family is now real; new registry event
+   sms.family_linked {family_id, source, replaced}.
+4. **Typo safety net** for the skipped verification: whoever owns a
+   freshly linked number gets one "it's Homa, reply STOP if this wasn't
+   you" text (best-effort, Telnyx enforces STOP platform-wide).
+
+Decisions made alone (auditable):
+
+- **Verification skipped is bounded, not ignored**: the founder accepted
+  the wrong-number risk; the agent bounded it with the notification SMS
+  + STOP, the cross-family uniqueness constraint (a number can never
+  route to two families), and fail-closed lookup errors (an inbound text
+  becomes an unlinked session rather than being dropped or mis-routed).
+- **SMS context reads are family-pinned server queries** (same server
+  connection as the lead tables), NOT a service-role client and NOT
+  RLS-bypassing convenience anywhere else: the familyId is stamped by
+  the channel from the parent-written mapping (auth context, law #1's
+  letter on "from auth context only" holds; its RLS-role clause is
+  satisfied at M1-02, and until then this is the same posture bridge.ts
+  already established). Token-backed tools still refuse over SMS.
+- **Tools over SMS stay off** until M1-02 SET LOCAL lands; the sms-mode
+  instruction turns worksheet asks into web-visit offers.
+- The 10DLC campaign attach is now a self-removing cron job (chat-session
+  watchers kept getting reaped); it attaches the number the moment the
+  registry finishes provisioning and texts the founder the go-live
+  confirmation.
+
+Follow-ups: M1-02 SET LOCAL role (unlocks SMS tools properly); an
+in-chat "want to text me?" offer (deferred, needs a tool or UI hook);
+multi-number-per-family (drop the unique(family_id) constraint when a
+second parent's phone matters); phone field on the standalone /signin
+signup form (map flow covers the real funnel today).
+
+**Evening addendum (founder: "voice agent is dumb and sounds like a
+robot, give her the family's account"):** the hosted voice assistant was
+upgraded in place (assistant-0f2cfd3a):
+
+- Model moonshotai/Kimi-K2.6 → anthropic/claude-haiku-4-5 (Telnyx-native,
+  no external key).
+- Voice default → Telnyx Ultra "Callie, Encourager" (natural US English)
+  + Krisp noise suppression. Greeting switched to the model-generated
+  special value so known callers are greeted by name.
+- **Family context on calls**: new deny-all-posture webhook
+  POST /api/voice/context (auth: long random key in the URL query,
+  TELNYX_WEBHOOK_SECRET in .env.local + Vercel prod; the keyed URL lives
+  only in the Telnyx assistant config). At call start Telnyx sends the
+  caller number; the route resolves it through family_phones (same
+  lookup as SMS) and returns {caller_known, parent_name, family_context}
+  as dynamic variables templated into the instructions. Unknown callers
+  and any error fail open to the general-companion experience.
+- Context loading/rendering extracted to lib/family-context.ts, now
+  shared by the agent's family-context instruction (web + SMS paths) and
+  the voice webhook, so all three surfaces render one identical block.
+- scripts/telnyx-provision.mts creation payload updated to match, so a
+  from-scratch re-run reproduces the live assistant.
+- Verified live: webhook 401s without the key, returns empty vars for
+  unknown numbers; instructions/voice/model confirmed on the assistant
+  via GET. Note: trial-tier disclaimer and 10-min cap should be gone now
+  that the account is Verified (founder completed KYC 2026-07-07
+  morning); confirm audibly on the next call.
+
+## 2026-07-07 (morning) · The 100x report build: living record, memory, months, proof (founder: "Do all this. BOIL THE OCEAN.")
+
+Executed the six directions of docs/ideation/2026-07-07-report-100x-value-ideation.html
+in one pass, on the founder instruction to think one level of abstraction
+above and reason hard about how data is generated, saved, stored, and used
+so it stays easy to use and never rots. The architecture that came out of
+that instruction, now written into the code:
+
+- **Four data classes, four freshness rules.** (1) Versioned static
+  content (bank, prompt, templates): stale only by deploy, guarded by
+  version stamps and CI locks. (2) Slowly-changing reference data
+  (state_requirements): joined at RENDER time, never copied into a report
+  row, so a statute change can never strand a stale claim on a permanent
+  URL. (3) Source-of-truth family data (answers with new provenance,
+  birth dates, interests, whatsWorking, curriculums, plan check-offs now
+  server-side): the only data a parent edits, and every new surface
+  writes here and only here. (4) Derived artifacts (scores, narrative,
+  plans): never edited, only re-derived through the one existing pipe
+  (createReport archives words next to numbers, resets, regenerates).
+- **Staleness is derived, never stored.** packages/core/src/map/staleness.ts
+  is a pure function of birth date + generation time + the bank; the
+  report page computes it on every visit. No cron, no stored flag that
+  could itself rot.
+
+Shipped (all typecheck/lint/build/check:map/check:events/check:isolation
+green; narrative pieces ride the existing REPORT_NARRATIVE_ENABLED flag):
+
+1. **The living record.** Migration #22 (lead_answers.source provenance,
+   lead_plans.progress). Tap-to-correct receipts (receipts-list.tsx, one
+   batched save = one rescore + one rewrite via POST /api/map/report/correct),
+   the sharpness meter (per-subject "well observed" vs "one clear look",
+   with the deep-dive probe question inline, one tap), and the
+   self-renewing report (staleness banner offering the ?start= re-check).
+   All writes session-gated like whats-working; shared links stay
+   read-only. New events: map.answers_corrected.
+2. **Homa the correspondent.** The writer now receives lastLetter (the
+   archived note + synthesis out of history) and writes chapter N, plus a
+   new gated `keepsake` piece: a dated letter addressed to the child, no
+   numbers, rendered as a memory-box card. Prompt v2026.07.3; both
+   fixtures regenerated through the live pipeline, gate clean.
+3. **The month, default-on with consent.** The fold-it-into-the-plans
+   promise is now kept: PlanFacts carries whatsWorking (all subjects, for
+   strength-to-struggle transfer), curriculums, and helpWith. Check-offs
+   sync server-side (debounced, localStorage kept as the offline copy;
+   server ∪ local, true wins), render as a positive-only "your month"
+   line on the report, and feed the writer as code-computed practice
+   lines. The consent card offers the clearest growing subject's month in
+   one tap: the tap IS the explicit ask, so the retest email arms without
+   touching the email doctrine. New events: map.plan_consented,
+   map.plan_progress.
+4. **The growth story.** The 12-snapshot archive is finally read: a
+   chapters timeline (oldest first, era note excerpts as period voice,
+   pairwise positive-only movement) plus rising-only sparklines (a curve
+   may never draw a dip; drops stay in the quiet re-check lane, per the
+   anti-guilt law).
+5. **The proof stack.** The state card renders the seeded
+   state_requirements summary at render time (reassure-first copy, the
+   last-verified date, the this-satisfies-nothing boundary, never legal
+   advice), replacing the one-line teaser. Two deterministic audience
+   editions shipped as print-first token routes: /evidence (composite
+   framing, dated growth lines, full receipts with standards codes and
+   citations) and /one-pager (strengths, chart, counts; D6 respected: no
+   helpWith, no whats-working, no private letter on either). Linked from
+   the report's action row.
+6. **Bands and paths.** MapItem.typicalRangeMonths ships the band
+   mechanism with the three corpus-documented ranges (counts-to-100 per
+   CCSS vs trajectories, stranger-clear per Hustad, rides-bike per AAP);
+   receipts render a window band where a range exists, the dot elsewhere,
+   with a new check:map consistency rule (range must contain its anchor).
+   Each drawer draws the ladder as a lit path (confirmed, emerging, one
+   "next up" rung, never a locked state) via core ladderRungs().
+
+Decisions made alone (auditable):
+
+- Corrections are BATCHED (up to 24 changes per save) because every save
+  triggers a full rescore + uncapped rewrite behind the writing beat;
+  per-tap regeneration would hold the page hostage repeatedly.
+- The keepsake rejects alone, never fails the whole generation (it has no
+  template equivalent; the report stands without it).
+- Sparklines render only monotonically rising series with net growth.
+  Honest display of a dip would violate the positive-only movement law,
+  so dips simply do not get a curve.
+- Bands shipped with exactly three items because only three ranges are
+  airtight in 00-synthesis today; the mechanism is general and more
+  ranges port with the corpus open (never invented ranges).
+- The evidence pack and one-pager are deterministic v1 (no model call):
+  for a third-party evidence document, determinism is a feature, and the
+  existing report narrative is addressed to the parent so reusing it
+  would misfire. Model-written audience cover letters can layer on the
+  proven generate-gate-store pattern later.
+- The re-check CTA reuses the existing ?start= resume flow (which serves
+  the current-age frontier questions) instead of building a bespoke diff
+  UI; the answered questions stay answered, so it IS the diff.
+- whats-working placeholder copy fixed in passing ("what's driving",
+  banned-word law; "behind" had shipped in a placeholder).
+
+Deferred, with reasons (not silently):
+
+- Photo receipts / work-sample uploads: minors' media behind unhashed
+  share tokens needs its own access-control design first (D4 consent
+  floor gates photo upload until DPAs exist; the ideation doc flags the
+  same). Needs a founder decision on private-by-default artifacts vs D7.
+- The observation inbox (reply-to-email ingestion): inbound email parsing
+  is provider infrastructure that does not exist yet; the footer's
+  "reply and a real person answers" stays a human promise.
+- The overnight "second read" letter and any annual growth edition email:
+  both collide with "no sequences exist by design" and need an explicit
+  founder overturn, per the ideation doc's own flag.
+
+STOP for the founder (same gate as the narrative layer): fixtures were
+regenerated at prompt v2026.07.3 and include the new keepsake pieces; read
+both aloud (scripts/map-narrative-fixtures.mts already printed them; the
+red-team keepsake for Riley is the wince test) before flipping
+REPORT_NARRATIVE_ENABLED. Everything deterministic in this build (bands,
+paths, state card, editions, corrections, check-off sync, staleness
+banner, growth story) goes live on deploy with no flag.
+
+## 2026-07-07 (small hours) · Voice + text via Telnyx: M5-01 groundwork pulled forward
+
+Founder rulings (chat, 2026-07-07): set up voice and text on Telnyx now;
+SMS/MMS routes into the eve agent behind a flag; voice is a hosted Telnyx
+AI assistant on the same number as a call-Homa experiment; carrier
+registration goes the Sole Proprietor 10DLC path (personal identity + SMS
+OTP, no LLC), superseding M5-01's "Entity/EIN first" assumption and the
+HUMAN-TODO Twilio line. The PRD's cohort-one non-goal (NO SMS) stands:
+everything ships dark behind TELNYX_SMS_ENABLED.
+
+Shipped:
+
+1. **SMS channel** (`apps/web/agent/channels/telnyx.ts`): eve
+   `chatSdkChannel` + the vendor-official `@telnyx/chat-sdk-adapter`
+   (Ed25519 webhook verification built in), mounted at
+   `/eve/v1/chat/telnyx` (proxy matcher already skips `/eve`). One
+   durable eve session per phone-number pair. Inbound MMS images ride
+   along as image parts. Dark unless TELNYX_SMS_ENABLED="true" AND
+   api key + from-number + public key are all present; the public-key
+   requirement means unverifiable webhooks are never processed.
+2. **SMS-mode instruction** (`agent/instructions/sms-mode.ts`): dynamic,
+   Telnyx-channel sessions only; short replies, no markdown, point
+   family-workspace asks to the web app.
+3. **Event** `sms.message_received` (registry + server-side insert via
+   the existing map-events path; no phone numbers or content in props).
+4. **Provisioning** (`pnpm telnyx:provision`, scripts/telnyx-provision.mts
+   + telnyx-shared.mts): idempotent walk (balance gate → number →
+   messaging profile + webhook → sole-prop brand → OTP → campaign →
+   number assignment → voice assistant), stops cleanly at the two human
+   gates (funding, OTP PIN). Executed tonight up to the account-level
+   wall:    messaging profile 40019f3a… created and bound to +13467588011;
+   voice assistant assistant-0f2cfd3a… created (instructions ported from
+   agent/instructions.md voice section + phone-call rules) and the
+   number's calls route to it. 10DLC blocked at trial account level
+   (HTTP 403 code 10038) pending funding, script says so instead of
+   crashing. **Correction (morning, founder repro "busy beep"):** the
+   voice line is wired correctly (number → TeXML app → assistant, all
+   active, verified via API) but Telnyx TRIAL accounts only connect
+   inbound/outbound calls with the account's ONE verified number, and
+   zero numbers were verified, so every caller got busy. Per
+   docs/account-setup/levels-and-capabilities/trial: trial = 1 verified
+   number, 10-min call cap, disclaimer prepended to TTS, outbound SMS
+   only to the verified number, and 10DLC needs the "Verified" level
+   (KYC), which plain "Paid" does not include. HUMAN-TODO updated: the
+   2-minute unblock is verifying the founder's cell in the portal; the
+   real fix is the account-level upgrade.
+5. **Env plumbing**: TELNYX_* in .env.example + .env.local;
+   TELNYX_FROM_NUMBER / TELNYX_MESSAGING_PROFILE_ID / TELNYX_PUBLIC_KEY
+   mirrored to Vercel production. TELNYX_SMS_ENABLED deliberately NOT
+   set in prod (dark until founder flips it post-10DLC). HUMAN-TODO
+   gained the funding/OTP/flip checklist.
+
+Decisions made alone (auditable):
+
+- **SMS senders are unlinked principals** (`authenticator: "telnyx-sms"`,
+  principal = phone number, NO familyId, NO supabaseAccessToken). Law #1
+  says familyId comes from auth context only, and SMS has no Supabase
+  auth context; any phone-to-family mapping shortcut would bypass the
+  RLS story. Family tools already refuse gracefully without context, so
+  texting works as a general companion. Linking a phone to a family is
+  its own future design (needs the M1-02 SET LOCAL pattern or a signed
+  link flow), not tonight's hack.
+- **chat-sdk channel over eve's twilio channel**: Telnyx is not Twilio;
+  the Chat SDK adapter is Telnyx-official and eve ships the bridge.
+  npm `chat` (4.32.0) is installed alongside eve's vendored copy; the
+  vendored orchestrator has no instanceof checks against it, and
+  typecheck passes. chat's `ai@^6` peer warning against our ai@7 is
+  accepted (we never use its ai-message conversion path).
+- **Memory state adapter** for the Chat SDK (dedupe/locks only); eve owns
+  the durable session keyed by thread id, so serverless cold starts
+  cannot lose conversation state.
+- **Messaging profile whitelists US only**; cohort one is US, an
+  international outbound text is a bug by definition.
+- **Voice assistant gets telephony only** (no messaging feature): the eve
+  channel owns SMS, the assistant owns calls; same number, no overlap.
+  Known tradeoff, accepted for the experiment: the voice line is a
+  second brain (Telnyx-hosted, no family data, no tools); its
+  instructions carry the same voice rules and it says so when asked
+  about family specifics.
+- **sms.message_received inserts server-side** through the existing
+  map-events connection: the public events RLS policy stays
+  waitlist-only on purpose.
+
+Follow-ups this creates: phone-to-family linking design; action_costs
+row for SMS once it carries billable traffic (law #3's billable clause);
+outbound/proactive SMS (needs opt-in UX per the campaign's stated flow);
+10-digit long code throughput is sole-prop-tier (fine for cohort one,
+revisit at scale); revisit the voice assistant fork (import into eve or
+retire) after the experiment.
+
+**Addendum (morning, founder "how do we get texts to work"):** founder's
+cell verified (+1 954 990 3497, via API, the trial account's one
+verified number), after which the voice call connected end to end
+(founder confirmed). SMS channel then shipped live: TELNYX_SMS_ENABLED
+set in Vercel prod and production deployed via `vercel deploy --prod`
+from the working tree (the project's established deploy path; the
+selective git commit is pending because packages/core/src/events.ts is
+shared with other uncommitted overnight work whose emitters are
+untracked, and committing the file wholesale would fail check:events).
+Webhook verified live: unsigned POST to /eve/v1/chat/telnyx returns 401.
+Outbound test message (API → founder's verified cell) was accepted by
+Telnyx but **carrier-blocked with error 40010 "Not 10DLC registered"**:
+the trial tier's "outbound to verified number" allowance is
+Telnyx-side only; US carriers require 10DLC registration regardless of
+destination. So texting waits solely on the human chain in HUMAN-TODO:
+account upgrade (Verified/KYC) → TELNYX_SP_* → pnpm telnyx:provision →
+OTP. Zero code or deploy steps remain.
+
+## 2026-07-07 (small hours) · apps/mobile: Expo companion app, first cut
+
+Founder instruction ("START A MOBILE BUILD WITH EXPO. BOIL THE OCEAN")
+overrode the default sequencing (D0 remains the only real deadline; no
+D0 work was displaced, this landed as a parallel lane). Shipped: a new
+`apps/mobile` workspace app (Expo SDK 56, expo-router, TypeScript
+strict) that is a pure client on the existing backend: Supabase
+email/password auth with AsyncStorage sessions, RLS-scoped family +
+children reads/writes (`create_my_family` RPC, children insert), and
+the real eve chat: `useEveAgent` from `eve/react` pointed at
+`EXPO_PUBLIC_API_URL` with a per-request Supabase bearer, exactly the
+web channel's auth contract (`agent/channels/eve.ts` needed zero
+changes). Transcript + session cursor persist per user in AsyncStorage
+(the web chat's localStorage pattern; M1-02 replaces both). Screens:
+sign in, Today, Chat (streaming, worksheet cards, memory chips, busy
+labels), Family. Brand: tokens + Logo hand-copied per the AGENTS.md
+sync rule, icons/splash generated from the house mark into
+`assets/brand/*.svg` + PNGs. Verified: workspace `pnpm typecheck` and
+mobile `eslint .` green, `expo export` (Metro iOS bundle) builds clean.
+
+Decisions made alone (auditable):
+- **eve/react used directly, not a hand-written client.** Verified
+  eve 0.19.0's client layer has no DOM globals and rides plain fetch +
+  ReadableStream; the one gap (React Native's fetch cannot stream) is
+  closed by installing `expo/fetch` as the global fetch at startup
+  (`src/lib/streaming-fetch.ts`, eve exposes no per-client fetch
+  injection). Law 8 note: the web chat also uses `useEveAgent`
+  directly today; when M1-14 wraps the frontend hook behind the
+  harness, both surfaces adopt it together.
+- **SDK 56 over week-old SDK 57**: current default template, settled
+  ecosystem, Expo Go for 57 still in store review; the upgrade path is
+  one `expo install --fix` away.
+- **Email/password only for now**; Google OAuth needs a Supabase
+  redirect-URL registration (HUMAN-TODO) and expo-auth-session wiring.
+- **Onboarding/map flow deliberately not mirrored**: its auth is an
+  httpOnly resume cookie, web-only by design; mobile assumes a
+  signed-in family.
+- **No `build`/`dev` scripts in apps/mobile on purpose**: CI runs its
+  lint + typecheck via turbo, native builds belong to EAS later, and
+  `pnpm dev` should not try to boot a simulator.
+- **Payments stay on the web** (App Store IAP rules); nothing billing
+  related ships in the app.
+
 ## 2026-07-07 (small hours) · M3-05 data layer pulled forward: state_requirements seeded
 
 Founder: "build it so we can pull all the data and save it to build on

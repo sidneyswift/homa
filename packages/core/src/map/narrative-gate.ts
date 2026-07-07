@@ -1,0 +1,160 @@
+import { BANNED_WORDS, EM_DASH } from "./copy-laws";
+import type { PlanNarrative, ReportNarrative } from "./narrative";
+
+/**
+ * The runtime gate every generated sentence passes before a parent can
+ * read it (D8 overturn safety floor). Pure and dependency-free so the
+ * build-time fixture check (scripts/map-check.mts) runs the exact same
+ * law as the live report path. A rejected piece falls back to its
+ * template sentence; too many rejections fail the whole generation
+ * (a half-fallback report reads worse than a clean template one).
+ */
+
+export interface NarrativeGateContext {
+  /** Every digit run that appears anywhere in the facts payload. Any
+   * digit sequence in generated text outside this set is an invented
+   * number and rejects the piece. */
+  allowedNumbers: readonly string[];
+  /** The lead's OTHER kids; their names must never appear (never compare
+   * siblings, and a report is a per-child artifact). */
+  siblingNames: readonly string[];
+  childName: string;
+  /** Subject ids that must each have a card line. */
+  expectedSubjects?: readonly string[];
+  /** Subject ids that must each have a drawer explainer. */
+  expectedDrawers?: readonly string[];
+}
+
+export interface NarrativeVerdicts {
+  /** Piece key to rejection reason; only rejected pieces appear. */
+  rejected: Record<string, string>;
+  rejectedPieces: string[];
+  /** True when the whole generation should be discarded. */
+  failed: boolean;
+}
+
+/** Per-piece character caps (starting values per the implementation
+ * prompt; tune in review). */
+export const NARRATIVE_LENGTH_CAPS = {
+  note: 800,
+  subject: 340,
+  synthesis: 1400,
+  drawer: 500,
+  keepsake: 900,
+  planIntro: 700,
+  planWeek: 300,
+  planClosing: 400,
+} as const;
+
+/** Diagnosis-adjacent phrasing beyond BANNED_WORDS, case-insensitive
+ * substrings (a report must never gesture at a diagnosis). */
+const DIAGNOSIS_SUBSTRINGS = ["on the spectrum", "adhd", "dyslexi", "autis"];
+
+const DIGIT_RUN = /\d+/g;
+const NEGATIVE_NUMBER = /(?:-|\u2212)\s?\d/;
+
+function pieceProblem(
+  text: string | undefined,
+  cap: number,
+  context: NarrativeGateContext,
+): string | null {
+  if (!text || text.trim().length === 0) return "empty";
+  if (text.length > cap) return `over ${cap} chars`;
+  if (BANNED_WORDS.test(text)) return "banned word";
+  if (EM_DASH.test(text)) return "em dash";
+  if (NEGATIVE_NUMBER.test(text)) return "negative number";
+
+  const lower = text.toLowerCase();
+  for (const phrase of DIAGNOSIS_SUBSTRINGS) {
+    if (lower.includes(phrase)) return `diagnosis phrasing "${phrase}"`;
+  }
+  for (const sibling of context.siblingNames) {
+    const name = sibling.trim();
+    if (!name) continue;
+    const pattern = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (pattern.test(text)) return `sibling name "${name}"`;
+  }
+
+  const allowed = new Set(context.allowedNumbers);
+  for (const run of text.match(DIGIT_RUN) ?? []) {
+    if (!allowed.has(run)) return `number ${run} not in facts`;
+  }
+  return null;
+}
+
+export function validateNarrative(
+  narrative: ReportNarrative,
+  context: NarrativeGateContext,
+): NarrativeVerdicts {
+  const rejected: Record<string, string> = {};
+
+  const note = pieceProblem(narrative.note, NARRATIVE_LENGTH_CAPS.note, context);
+  if (note) rejected.note = note;
+
+  const synthesis = pieceProblem(narrative.synthesis, NARRATIVE_LENGTH_CAPS.synthesis, context);
+  if (synthesis) rejected.synthesis = synthesis;
+
+  // The keepsake has no template fallback: a rejection simply renders
+  // nothing there, and never fails the whole generation (the report
+  // stands without its memory-box page; it cannot stand without a note).
+  const keepsake = pieceProblem(narrative.keepsake, NARRATIVE_LENGTH_CAPS.keepsake, context);
+  if (keepsake) rejected.keepsake = keepsake;
+
+  const subjectIds = context.expectedSubjects ?? Object.keys(narrative.subjects);
+  let subjectRejections = 0;
+  for (const domainId of subjectIds) {
+    const problem = pieceProblem(
+      narrative.subjects[domainId],
+      NARRATIVE_LENGTH_CAPS.subject,
+      context,
+    );
+    if (problem) {
+      rejected[`subject.${domainId}`] = problem;
+      subjectRejections += 1;
+    }
+  }
+
+  const drawerIds = context.expectedDrawers ?? Object.keys(narrative.drawers);
+  for (const domainId of drawerIds) {
+    const problem = pieceProblem(
+      narrative.drawers[domainId],
+      NARRATIVE_LENGTH_CAPS.drawer,
+      context,
+    );
+    if (problem) rejected[`drawer.${domainId}`] = problem;
+  }
+
+  // A report that is half fallback reads worse than a clean template
+  // report: the note and synthesis are the voice of the whole page, and
+  // more than 4 broken card lines means the generation went sideways.
+  const failed = Boolean(rejected.note) || Boolean(rejected.synthesis) || subjectRejections > 4;
+
+  return { rejected, rejectedPieces: Object.keys(rejected), failed };
+}
+
+export function validatePlanNarrative(
+  narrative: PlanNarrative,
+  context: NarrativeGateContext,
+): NarrativeVerdicts {
+  const rejected: Record<string, string> = {};
+
+  const intro = pieceProblem(narrative.intro, NARRATIVE_LENGTH_CAPS.planIntro, context);
+  if (intro) rejected.intro = intro;
+
+  const weeks = Array.isArray(narrative.weeks) ? narrative.weeks : [];
+  let weekRejections = 0;
+  for (let index = 0; index < 4; index += 1) {
+    const problem = pieceProblem(weeks[index], NARRATIVE_LENGTH_CAPS.planWeek, context);
+    if (problem) {
+      rejected[`week.${index}`] = problem;
+      weekRejections += 1;
+    }
+  }
+
+  const closing = pieceProblem(narrative.closing, NARRATIVE_LENGTH_CAPS.planClosing, context);
+  if (closing) rejected.closing = closing;
+
+  const failed = Boolean(rejected.intro) || Boolean(rejected.closing) || weekRejections >= 2;
+
+  return { rejected, rejectedPieces: Object.keys(rejected), failed };
+}

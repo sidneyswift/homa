@@ -10,14 +10,18 @@
     "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
     "check:sources": "tsx scripts/benchmarks-freshness.mts",
     "dev": "turbo run dev",
+    "gen:brand": "tsx scripts/brand-assets.mts",
     "lint": "turbo run lint",
     "pull:state-requirements": "tsx scripts/state-requirements-pull.mts",
     "report:norms": "tsx scripts/map-norms-report.mts",
     "seed:state-requirements": "tsx scripts/state-requirements-seed.mts",
+    "telnyx:provision": "tsx scripts/telnyx-provision.mts",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "postgres": "^3.4.9",
+    "satori": "^0.26.0",
+    "sharp": "^0.35.3",
     "tsx": "^4.23.0",
     "turbo": "^2.5.0"
   }

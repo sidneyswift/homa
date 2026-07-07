@@ -77,6 +77,9 @@ await expectEmptyRead("skill_bank");
 // State requirements reference table (migration #21): members read, anon
 // sees nothing, and nobody writes through the Data API (no write policies).
 await expectEmptyRead("state_requirements");
+// Family texting line (migration #22): deny-all like the lead tables; the
+// phone number routes texts INTO a family, so no Data API role may touch it.
+await expectEmptyRead("family_phones");
 // Map lead tables (migration #7): deny-all RLS, zero policies, privileges
 // revoked. Anonymous traffic must see nothing and write nothing.
 await expectEmptyRead("lead_families");
@@ -146,6 +149,11 @@ await expectInsertDenied(
   "anon cannot write state requirements",
 );
 await expectInsertDenied(
+  "family_phones",
+  { family_id: "00000000-0000-0000-0000-000000000000", phone_e164: "+15550000000" },
+  "anon cannot link a phone to a family",
+);
+await expectInsertDenied(
   "waitlist",
   { email: `probe-${Date.now()}@example.com`, status: "invited" },
   "anon cannot self-invite via waitlist status",
@@ -159,6 +167,16 @@ await expectInsertDenied(
   "lead_reports",
   { lead_child_id: "00000000-0000-0000-0000-000000000000", scores: {}, bank_version: "x", token: "probe" },
   "anon cannot forge lead_reports",
+);
+await expectInsertDenied(
+  "lead_children",
+  {
+    lead_family_id: "00000000-0000-0000-0000-000000000000",
+    name: "probe",
+    birth_month: "2020-01-01",
+    child_id: "00000000-0000-0000-0000-000000000000",
+  },
+  "anon cannot forge lead_children child links",
 );
 
 if (failures.length > 0) {

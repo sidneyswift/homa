@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { getMapDomain } from "@homa/core";
 
 import { Logo } from "../../../../../../components/brand/Logo";
 import { emitMapEvent } from "../../../../../../lib/map/events";
+import { narrativeEnabled } from "../../../../../../lib/map/narrative-flag";
+import { runPlanNarrative } from "../../../../../../lib/map/narrative-runner";
 import { getOrBuildPlan } from "../../../../../../lib/map/store";
+import { NarrativeBeat } from "../../narrative-beat";
 import { PlanWeeks } from "./plan-weeks";
 
 /**
@@ -13,9 +18,17 @@ import { PlanWeeks } from "./plan-weeks";
  * child's answers + extras context on first view, retest armed for four
  * weeks out (the read-through's loop: implement, retest, watch the number
  * move). Tokenized like the report itself: printable, shareable, no login.
+ * With the narrative flag on, the model writes the page's prose (intro,
+ * week framing, closing) around the deterministic plan, behind its own
+ * writing beat; the deterministic plan stays stored unchanged as the fact
+ * record either way.
  */
 
 export const dynamic = "force-dynamic";
+
+// The page can kick a background narrative generation (uncapped model
+// call by ruling); give the function room to finish it.
+export const maxDuration = 300;
 
 export const metadata: Metadata = {
   title: "Four-week plan",
@@ -27,15 +40,25 @@ export default async function PlanPage({
   searchParams,
 }: {
   params: Promise<{ token: string; domainId: string }>;
-  searchParams: Promise<{ rebuilt?: string }>;
+  searchParams: Promise<{ rebuilt?: string; built?: string }>;
 }) {
   const { token, domainId } = await params;
-  const { rebuilt } = await searchParams;
+  const { rebuilt, built } = await searchParams;
   const domain = getMapDomain(domainId);
-  // Arriving from a deep dive rebuilds the month from the refined answers.
-  const result = domain
-    ? await getOrBuildPlan(token, domainId, { rebuild: rebuilt === "1" })
-    : null;
+
+  // Arriving from a deep dive rebuilds the month from the refined answers,
+  // ONCE, then redirects to a URL that is safe to reload: leaving
+  // ?rebuilt=1 in place meant every refresh rebuilt the month again
+  // (restarting the retest clock and, with the narrative layer, resetting
+  // the words the writing beat was waiting for, so it never resolved).
+  if (domain && rebuilt === "1") {
+    const rebuiltPlan = await getOrBuildPlan(token, domainId, { rebuild: true });
+    if (rebuiltPlan) {
+      redirect(`/onboarding/r/${token}/plan/${domainId}?built=1`);
+    }
+  }
+
+  const result = domain ? await getOrBuildPlan(token, domainId) : null;
 
   if (!result || !domain) {
     return (
@@ -66,6 +89,62 @@ export default async function PlanPage({
   }
 
   const { plan, childName } = result;
+
+  const flagOn = narrativeEnabled();
+  const planMeta = result.narrativeMeta;
+  const planReady = planMeta?.status === "ready" && result.narrative !== null;
+
+  if (flagOn && !planReady && planMeta?.status !== "failed") {
+    // No attempt yet (fresh or rebuilt plan) or a stale one: kick a
+    // background generation; the runner's claim keeps it single-flight.
+    const childId = result.childId;
+    after(async () => {
+      try {
+        await runPlanNarrative(childId, domainId);
+      } catch (error) {
+        console.error(
+          "plan narrative kick failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    });
+    return (
+      <div className="min-h-screen bg-page">
+        <main className="mx-auto w-full max-w-xl px-6 py-16">
+          <Logo size={26} />
+          <h1 className="mt-8 font-display text-3xl font-bold leading-tight text-strong">
+            Homa is building the four-week plan
+          </h1>
+          <p className="mt-2 text-body">
+            The month&apos;s targets are set. Now the plan gets written for {childName}{" "}
+            specifically.
+          </p>
+          <div className="mt-6">
+            <NarrativeBeat
+              token={token}
+              domainId={domainId}
+              lines={[
+                `Reading what you told me about ${childName}`,
+                `Laying out the four ${plan.subjectName.toLowerCase()} weeks`,
+                `Writing ${childName}'s plan`,
+              ]}
+            />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const planNarrative = flagOn && planReady ? result.narrative : null;
+  const planRejected = new Set(flagOn && planReady ? (planMeta?.rejectedPieces ?? []) : []);
+  const introText =
+    planNarrative && !planRejected.has("intro") ? planNarrative.intro : null;
+  const closingText =
+    planNarrative && !planRejected.has("closing") ? planNarrative.closing : null;
+  const weekLines = planNarrative
+    ? planNarrative.weeks.map((line, index) => (planRejected.has(`week.${index}`) ? null : line))
+    : null;
+
   const retestDate = new Date(result.retestAt).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -91,12 +170,19 @@ export default async function PlanPage({
           </div>
 
           <div className="px-7 py-7 sm:px-10">
-            {rebuilt === "1" ? (
+            {built === "1" ? (
               <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
                 Built from your deep dive: this month aims at exactly what you just pinned down.
               </p>
             ) : null}
-            {plan.startingLine ? (
+            {introText ? (
+              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
+                <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+                  This month, in short
+                </p>
+                <p className="mt-1 whitespace-pre-line text-body">{introText}</p>
+              </div>
+            ) : plan.startingLine ? (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
                   The starting line (already solid)
@@ -124,17 +210,30 @@ export default async function PlanPage({
             </ol>
             {plan.styleNote ? <p className="mt-2 text-sm text-muted">{plan.styleNote}</p> : null}
 
-            <PlanWeeks weeks={plan.weeks} storageKey={`homa-plan-${token}-${domainId}`} />
+            <PlanWeeks
+              weeks={plan.weeks}
+              storageKey={`homa-plan-${token}-${domainId}`}
+              weekLines={weekLines}
+              childId={result.childId}
+              domainId={domainId}
+              initialChecks={result.progress}
+            />
 
             <div className="mt-7 rounded-lg p-5" style={{ background: "var(--gold-100)" }}>
               <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
                 Retest week: around {retestDate}
               </p>
-              <p className="mt-1 text-sm" style={{ color: "var(--gold-ink)" }}>
-                I&apos;ll email you a two-minute re-check so you can see what moved on{" "}
-                {childName}&apos;s report. A slower month is normal too. The numbers are a map,
-                never a grade.
-              </p>
+              {closingText ? (
+                <p className="mt-1 whitespace-pre-line text-sm" style={{ color: "var(--gold-ink)" }}>
+                  {closingText}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm" style={{ color: "var(--gold-ink)" }}>
+                  I&apos;ll email you a two-minute re-check so you can see what moved on{" "}
+                  {childName}&apos;s report. A slower month is normal too. The numbers are a map,
+                  never a grade.
+                </p>
+              )}
             </div>
 
             <div className="mt-7 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>

@@ -28,13 +28,21 @@ const STYLE_LABELS: Record<(typeof HOMESCHOOL_STYLES)[number], string> = {
 };
 
 export function HomeschoolContextCard({ childName }: { childName: string }) {
-  const [style, setStyle] = useState<string | null>(null);
+  const [styles, setStyles] = useState<string[]>([]);
   const [strictness, setStrictness] = useState<string | null>(null);
   const [curriculums, setCurriculums] = useState<string[]>([]);
   const [values, setValues] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "saved" | "no-session">("idle");
 
-  const hasAnything = style !== null || curriculums.length > 0 || values.trim().length > 0;
+  const hasAnything = styles.length > 0 || curriculums.length > 0 || values.trim().length > 0;
+
+  /** Toggles in place, preserving pick order (the first pick stays the
+   * primary style downstream, e.g. the plan's style note). */
+  function toggleStyle(value: string) {
+    setStyles(
+      styles.includes(value) ? styles.filter((item) => item !== value) : [...styles, value],
+    );
+  }
 
   async function save() {
     if (!hasAnything) return;
@@ -45,7 +53,7 @@ export function HomeschoolContextCard({ childName }: { childName: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           family: {
-            style: style ?? undefined,
+            styles: styles.length > 0 ? styles : undefined,
             strictness: strictness ?? undefined,
             curriculums: curriculums.length > 0 ? curriculums : undefined,
             values: values.trim() || undefined,
@@ -81,25 +89,34 @@ export function HomeschoolContextCard({ childName }: { childName: string }) {
       </p>
 
       <div className="mt-4">
-        <p className="font-medium text-strong">A style you follow?</p>
+        {/* Multi-select (founder request 2026-07-06: more than one must be
+            pickable). Selected chips take the soft brand tint, same as the
+            TagInput chips below: several solid clay pills would fight the
+            one real CTA on this card. */}
+        <p className="font-medium text-strong">
+          Styles you follow? <span className="font-normal text-muted">(pick any that fit)</span>
+        </p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {HOMESCHOOL_STYLES.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setStyle(style === value ? null : value)}
-              aria-pressed={style === value}
-              className={`min-h-10 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out ${
-                style === value
-                  ? "border-brand bg-brand text-on-brand"
-                  : "border-border bg-card text-strong hover:border-brand"
-              }`}
-            >
-              {STYLE_LABELS[value]}
-            </button>
-          ))}
+          {HOMESCHOOL_STYLES.map((value) => {
+            const selected = styles.includes(value);
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => toggleStyle(value)}
+                aria-pressed={selected}
+                className={`min-h-10 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out ${
+                  selected
+                    ? "border-brand bg-brand-soft text-[var(--clay-700)]"
+                    : "border-border bg-card text-strong hover:border-brand"
+                }`}
+              >
+                {STYLE_LABELS[value]}
+              </button>
+            );
+          })}
         </div>
-        {style ? (
+        {styles.length > 0 ? (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-sm text-muted">How closely?</span>
             {(
@@ -116,7 +133,7 @@ export function HomeschoolContextCard({ childName }: { childName: string }) {
                 aria-pressed={strictness === value}
                 className={`min-h-10 rounded-pill border px-4 py-2 text-sm ${
                   strictness === value
-                    ? "border-brand bg-brand text-on-brand"
+                    ? "border-brand bg-brand-soft text-[var(--clay-700)]"
                     : "border-border bg-card text-strong hover:border-brand"
                 }`}
               >

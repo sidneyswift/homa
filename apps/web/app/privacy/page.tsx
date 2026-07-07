@@ -14,9 +14,10 @@ import { Logo } from "../../components/brand/Logo";
 export const metadata: Metadata = {
   title: "Privacy",
   description: "What Homa collects, where it lives, who processes it, and how to delete it.",
+  alternates: { canonical: "/privacy" },
 };
 
-const UPDATED = "July 5, 2026";
+const UPDATED = "July 7, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -53,16 +54,23 @@ export default function PrivacyPage() {
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Who processes data for us</h2>
         <p className="mt-3 text-body">
-          Three companies process data for us. This is the complete list:
+          Four companies process data for us. This is the complete list:
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li><b>Supabase</b> (database hosting, US East): stores everything above.</li>
           <li><b>Vercel</b> (web hosting): serves the site and runs our code.</li>
           <li><b>Resend</b> (email): delivers the emails you asked for.</li>
+          <li>
+            <b>Anthropic</b>, via Vercel AI Gateway (writes the words of your report, and powers
+            chatting with Homa once your invite opens).
+          </li>
         </ul>
         <p className="mt-3 text-body">
-          No AI provider receives your questionnaire answers: the report is scored by plain,
-          human-reviewed arithmetic. If that ever changes, this page changes first and says so plainly.
+          Here is exactly how AI touches your report: every number in it is computed by plain
+          arithmetic that a person reviewed, never by AI. Homa, an AI, writes the sentences of
+          the report around those numbers, from your answers. We contractually disallow your
+          data being used to train models, and every sentence passes our safety rules before
+          you see it.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we never do</h2>

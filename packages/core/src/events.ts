@@ -77,6 +77,25 @@ export const EVENT_SCHEMAS = {
     observations: z.number().int().min(0),
     bank_version: z.string(),
   }),
+  // Fired when the score route provisions or syncs the lead's real product
+  // workspace (families/family_members/children rows, founder ruling
+  // 2026-07-06: "once they generate a report they create a family
+  // workspace"). Emitted only when something changed; a no-op rescore
+  // stays silent so the funnel is not flooded with zero-count rows.
+  "map.family_bridged": z.object({
+    lead_id: z.uuid(),
+    family_id: z.uuid(),
+    children_created: z.number().int().min(0),
+    children_updated: z.number().int().min(0),
+  }),
+  // Fired when the bridge deliberately stands down: no auth session on the
+  // scoring request (legacy email-only lead, kept on the invite-time path)
+  // or a session user that is not the lead's linked account (an emailed
+  // report link opened in a browser signed into someone else's family).
+  "map.family_bridge_skipped": z.object({
+    lead_id: z.uuid(),
+    reason: z.enum(["no-auth-session", "auth-user-mismatch"]),
+  }),
   "map.report_viewed": z.object({
     lead_id: z.uuid(),
     child_id: z.uuid(),
@@ -104,6 +123,66 @@ export const EVENT_SCHEMAS = {
   "map.band_ready_emailed": z.object({
     lead_id: z.uuid(),
     child_id: z.uuid(),
+  }),
+  // The living record (2026-07-07): answers edited from the report page
+  // itself. source separates a tapped receipt correction from the inline
+  // sharpening question and the staleness re-check; changes counts the
+  // batch (one event per save, not per tap).
+  "map.answers_corrected": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    source: z.enum(["report_correction", "report_probe", "recheck"]),
+    changes: z.number().int().min(1),
+  }),
+  // The report's one-tap month: the parent explicitly asked Homa to build
+  // the plan and check back, which is what arms the retest email.
+  "map.plan_consented": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+  }),
+  // Plan check-offs synced server-side (one event per save; done_count is
+  // the running total, so the funnel reads practice volume without PII).
+  "map.plan_progress": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    domain: z.string(),
+    done_count: z.number().int().min(0),
+  }),
+  // The LLM narrative layer (D8 overturn, 2026-07-06). One event per
+  // finished generation; kind separates the report from a four-week plan.
+  "map.narrative_generated": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    kind: z.enum(["report", "plan"]),
+    duration_ms: z.number().int().min(0),
+    tokens_in: z.number().int().min(0),
+    tokens_out: z.number().int().min(0),
+    rejected_pieces: z.array(z.string()).default([]),
+  }),
+  // Fired when a generation could not be shown (gate failed the whole
+  // thing, or the call errored) and templates rendered instead.
+  "map.narrative_fallback": z.object({
+    lead_id: z.uuid(),
+    child_id: z.uuid(),
+    kind: z.enum(["report", "plan"]),
+    reason: z.enum(["gate-failed", "generation-error"]),
+  }),
+  // SMS channel (M5-01 groundwork pulled forward as a founder experiment,
+  // build-log 2026-07-07; sole-prop 10DLC, dark behind TELNYX_SMS_ENABLED).
+  // Emitted server-side per inbound text. Props carry no phone number and
+  // no message content: the number is PII and lives only in the session.
+  "sms.message_received": z.object({
+    media_count: z.number().int().min(0),
+    linked_family: z.boolean(),
+  }),
+  // A phone number was linked to a family workspace (family_phones,
+  // migration #22): typed at signup, set on /home, or carried forward by
+  // the lead bridge. No phone number in props, ever.
+  "sms.family_linked": z.object({
+    family_id: z.uuid(),
+    source: z.enum(["signup", "home", "bridge"]),
+    replaced: z.boolean(),
   }),
   // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
   // token and family_id (events policy, migration #13). No message content.

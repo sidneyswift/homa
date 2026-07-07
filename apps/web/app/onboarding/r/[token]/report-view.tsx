@@ -7,19 +7,30 @@ import {
   getMapDomain,
   growingActivityFor,
   homaNote,
+  ladderRungs,
   MAP_SOURCES,
+  nextDeepDiveItem,
+  reportStaleness,
   reportSubtitle,
   tryHeading,
   US_STATES,
   type DomainScore,
   type MapAnswer,
   type MapScores,
+  type ReportNarrative,
 } from "@homa/core";
 
+import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
 import { Logo } from "../../../../components/brand/Logo";
+import { ConsentCard } from "./consent-card";
+import { GrowthStory, type GrowthEra } from "./growth-story";
 import { HomeschoolContextCard } from "./homeschool-context-card";
+import { ReceiptsList, type ReceiptRow } from "./receipts-list";
 import { ReportActions } from "./report-actions";
 import { ReportChart } from "./report-chart";
+import { SharpenInline } from "./sharpen-inline";
+import { StalenessBanner } from "./staleness-banner";
+import { StateCard } from "./state-card";
 import { WhatsWorkingForm } from "./whats-working-form";
 
 /**
@@ -29,7 +40,17 @@ import { WhatsWorkingForm } from "./whats-working-form";
  * was asked, what she answered, and the benchmarks behind it. Movement
  * chips show dated, POSITIVE change only (anti-guilt law: a drop renders
  * as a quiet re-check note, never a down-arrow). No red, no "behind".
+ *
+ * With a narrativeView (D8 overturn), the model-written pieces render in
+ * place of the template sentences, per piece: a gate-rejected piece falls
+ * back to its template line while the rest of the narrative stands. Every
+ * number, badge, chart point, and citation stays computed, either way.
  */
+
+export interface ReportNarrativeView {
+  narrative: ReportNarrative;
+  rejectedPieces: string[];
+}
 
 export interface ReportViewData {
   token: string;
@@ -43,17 +64,11 @@ export interface ReportViewData {
   leadId: string;
   childId: string;
   answers: { itemId: string; answer: MapAnswer }[];
-  history: { scores: MapScores; generated_at: string }[];
+  history: { scores: MapScores; generated_at: string; narrative?: ReportNarrative | null }[];
   otherKids: { id: string; name: string; inRange: boolean; hasReport: boolean }[];
+  /** Built months and their synced check-off counts (empty on sample). */
+  plans: { domainId: string; done: number; total: number; retestAt: string }[];
 }
-
-const ANSWER_LABELS: Record<MapAnswer, string> = {
-  easily: "Easily",
-  getting_there: "Getting there",
-  not_yet: "Not yet",
-  not_sure: "Not sure",
-  skip: "Skipped",
-};
 
 const POSITION_RANK: Record<DomainScore["position"], number> = {
   not_mapped: 0,
@@ -97,15 +112,31 @@ export function ReportView({
   data,
   sample = false,
   askHomeschool = false,
+  narrativeView = null,
+  stateRequirements = null,
 }: {
   data: ReportViewData;
   sample?: boolean;
   /** Shows the relocated "About your homeschool" card (once, until the
    * family context bag has anything in it; the server page decides). */
   askHomeschool?: boolean;
+  /** The model-written pieces, when generated and gate-approved. */
+  narrativeView?: ReportNarrativeView | null;
+  /** The family's state compliance summary (render-time join, never
+   * stored on the report; null renders the old one-line reassurance). */
+  stateRequirements?: StateRequirementsSummary | null;
 }) {
   const report = data;
+  const rejectedPieces = new Set(narrativeView?.rejectedPieces ?? []);
+  /** The generated text for a piece, or null when the template must render. */
+  const generatedPiece = (key: string, text: string | undefined): string | null =>
+    narrativeView && text && !rejectedPieces.has(key) ? text : null;
+  const noteText = generatedPiece("note", narrativeView?.narrative.note);
+  const synthesisText = generatedPiece("synthesis", narrativeView?.narrative.synthesis);
+  const keepsakeText = generatedPiece("keepsake", narrativeView?.narrative.keepsake);
   const months = ageInMonths(report.birthMonth);
+  const editable = !sample;
+  const staleness = reportStaleness(report.birthMonth, report.generatedAt);
   const scores = report.scores.domains;
   const byId = new Map(scores.map((score) => [score.domainId, score]));
   const ordered: DomainScore[] = [
@@ -130,16 +161,60 @@ export function ReportView({
       ? `Re-checked ${new Date(report.generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}. Holding steady is normal; these are long skills.`
       : null;
 
-  const answersByDomain = new Map<string, { statement: string; typicalMonths: number; answer: MapAnswer }[]>();
+  const answersByDomain = new Map<string, ReceiptRow[]>();
+  const answersLookup: Record<string, MapAnswer> = {};
   for (const entry of report.answers) {
     const found = getMapDomain(entry.itemId.split(".")[0]);
     const domainId = found?.id ?? entry.itemId.split(".")[0];
     const item = found?.items.find((candidate) => candidate.id === entry.itemId);
     if (!item) continue;
+    answersLookup[entry.itemId] = entry.answer;
     const list = answersByDomain.get(domainId) ?? [];
-    list.push({ statement: item.statement, typicalMonths: item.typicalMonths, answer: entry.answer });
+    list.push({
+      itemId: item.id,
+      statement: item.statement,
+      typicalMonths: item.typicalMonths,
+      typicalRangeMonths: item.typicalRangeMonths ? [...item.typicalRangeMonths] : null,
+      answer: entry.answer,
+    });
     answersByDomain.set(domainId, list);
   }
+
+  // The living record's month memory and the one-tap month offer.
+  const planByDomain = new Map(report.plans.map((plan) => [plan.domainId, plan]));
+  const practice = report.plans.filter((plan) => plan.done > 0);
+  const consentCandidate = (() => {
+    if (!editable) return null;
+    const growingIds = report.scores.strengthOrder
+      .map((id) => byId.get(id))
+      .filter(
+        (score): score is DomainScore =>
+          Boolean(score) && score!.position === "growing" && !score!.exposureBased,
+      )
+      .filter((score) => !planByDomain.has(score.domainId));
+    const withFrontier = growingIds.find((score) => score.frontierStatement);
+    const pick = withFrontier ?? growingIds[0];
+    if (!pick) return null;
+    const domain = getMapDomain(pick.domainId);
+    return domain ? { domainId: pick.domainId, subjectName: domain.displayName } : null;
+  })();
+
+  // The growth story reads the whole archive, oldest chapter first, the
+  // live report as the closing chapter.
+  const eras: GrowthEra[] = [
+    ...[...report.history]
+      .reverse()
+      .map((entry) => ({
+        generated_at: entry.generated_at,
+        scores: entry.scores,
+        narrative: entry.narrative ?? null,
+      })),
+    {
+      generated_at: report.generatedAt,
+      scores: report.scores,
+      narrative: narrativeView?.narrative ?? null,
+    },
+  ];
 
   const sourceKeys = new Set<string>();
   for (const score of scores) {
@@ -167,6 +242,17 @@ export function ReportView({
             <Link href="/onboarding" className="underline">Get your own child&apos;s report</Link>, free, in
             about five minutes.
           </p>
+        ) : null}
+
+        {/* The self-renewing report: staleness is derived at render (birth
+            date + generation time + the bank), never stored, so the
+            permanent URL always knows how much the child has grown. */}
+        {editable && staleness.stale ? (
+          <StalenessBanner
+            childId={report.childId}
+            childName={report.childName}
+            staleness={staleness}
+          />
         ) : null}
 
         <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
@@ -208,17 +294,36 @@ export function ReportView({
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
                   A note from Homa
                 </p>
-                <p className="mt-1 text-body">
-                  {homaNote(report.scores, report.childName, report.parentFirstName ?? undefined)}
-                </p>
-                {anyMovement ? (
-                  <p className="mt-2 text-body">
-                    And the part worth circling: {movements.size}{" "}
-                    {movements.size === 1 ? "subject" : "subjects"} moved since last time. Your work
-                    is showing up in the numbers.
+                {noteText ? (
+                  <p className="mt-1 whitespace-pre-line text-body">{noteText}</p>
+                ) : (
+                  <>
+                    <p className="mt-1 text-body">
+                      {homaNote(report.scores, report.childName, report.parentFirstName ?? undefined)}
+                    </p>
+                    {anyMovement ? (
+                      <p className="mt-2 text-body">
+                        And the part worth circling: {movements.size}{" "}
+                        {movements.size === 1 ? "subject" : "subjects"} moved since last time. Your work
+                        is showing up in the numbers.
+                      </p>
+                    ) : null}
+                    {recheckedNote ? <p className="mt-2 text-sm text-muted">{recheckedNote}</p> : null}
+                  </>
+                )}
+                {/* The month's memory: her own synced check-offs, counted by
+                    code, positive-only (unchecked boxes say nothing). */}
+                {practice.length > 0 ? (
+                  <p className="mt-2 font-hand text-xl text-sage">
+                    {practice
+                      .map(
+                        (plan) =>
+                          `${plan.done} of ${plan.total} ${(getMapDomain(plan.domainId)?.displayName ?? plan.domainId).toLowerCase()} plan activities done`,
+                      )
+                      .join(" \u00b7 ")}{" "}
+                    {"\u270e"}
                   </p>
                 ) : null}
-                {recheckedNote ? <p className="mt-2 text-sm text-muted">{recheckedNote}</p> : null}
               </div>
             </div>
 
@@ -285,6 +390,15 @@ export function ReportView({
               <ReportChart scores={ordered} prior={prior?.scores.domains ?? null} />
             </div>
 
+            {/* The model-written cross-subject story (D8 overturn): the one
+                place interpretation is wanted. Renders only when generated
+                and gate-approved; there is no template equivalent. */}
+            {synthesisText ? (
+              <div className="mt-4 rounded-lg border border-border-subtle bg-[var(--surface-sunken)] p-5">
+                <p className="whitespace-pre-line text-body">{synthesisText}</p>
+              </div>
+            ) : null}
+
             {/* Subject by subject */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">Subject by subject</h2>
             <p className="mt-1 text-sm text-muted">
@@ -294,6 +408,14 @@ export function ReportView({
               {ordered.map((score) => {
                 const domain = getMapDomain(score.domainId);
                 const line = domainLine(score, report.childName);
+                const subjectText = generatedPiece(
+                  `subject.${score.domainId}`,
+                  narrativeView?.narrative.subjects[score.domainId],
+                );
+                const drawerText = generatedPiece(
+                  `drawer.${score.domainId}`,
+                  narrativeView?.narrative.drawers[score.domainId],
+                );
                 const domainAnswers = answersByDomain.get(score.domainId) ?? [];
                 const movement = movements.get(score.domainId);
                 const badgeStyle =
@@ -308,16 +430,21 @@ export function ReportView({
                   new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
                 );
                 const activity = domain ? growingActivityFor(domain, months) : null;
-                // One shared age scale per drawer, so the "most kids" dots
-                // march down the sorted list while the child's clay marker
-                // holds still: which skills sit before and after their age
-                // becomes visible at a glance (data-viz guideline: stages
-                // and dots on one hairline baseline, never scores).
-                const rowAges = domainAnswers.map((entry) => entry.typicalMonths);
-                const scaleMin = Math.min(...rowAges, months) - 6;
-                const scaleMax = Math.max(...rowAges, months) + 6;
-                const agePercent = (value: number) =>
-                  12 + ((value - scaleMin) / Math.max(1, scaleMax - scaleMin)) * 76;
+                // The sharpness meter: honest instrument quality per
+                // subject, with the single highest-information question
+                // inline when one clear look is all we have.
+                const thinLook =
+                  score.position !== "not_mapped" && !score.highConfidence && score.observations > 0;
+                const probe =
+                  editable && thinLook
+                    ? nextDeepDiveItem(score.domainId, months, answersLookup, 0)
+                    : null;
+                // The subject's ladder, drawn as the lit path her answers
+                // already traced (plus the one rung ahead).
+                const rungs =
+                  score.position !== "not_mapped"
+                    ? ladderRungs(score.domainId, months, answersLookup)
+                    : [];
                 return (
                   <details key={score.domainId} id={`subject-${score.domainId}`} className="group rounded-md border border-border-subtle">
                     <summary className="flex cursor-pointer list-none items-start gap-3 p-4 [&::-webkit-details-marker]:hidden">
@@ -329,7 +456,7 @@ export function ReportView({
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold text-strong">{domain?.displayName}</span>
-                        <span className="mt-0.5 block text-sm text-muted">{line.sentence}</span>
+                        <span className="mt-0.5 block text-sm text-muted">{subjectText ?? line.sentence}</span>
                         <span className="mt-1 block text-xs font-medium text-brand group-open:hidden">
                           see the questions and benchmarks {"\u2193"}
                         </span>
@@ -367,6 +494,57 @@ export function ReportView({
                         block that reads like a sentence, and every zone
                         opens with a one-line plain-language explainer. */}
                     <div className="border-t border-border-subtle px-5 pb-5 pt-4">
+                      {score.position !== "not_mapped" ? (
+                        <p className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                          {score.highConfidence
+                            ? `well observed \u00b7 ${score.observations} answers`
+                            : "one clear look so far"}
+                        </p>
+                      ) : null}
+                      {drawerText ? (
+                        <p className="mb-4 whitespace-pre-line text-sm text-body">{drawerText}</p>
+                      ) : null}
+                      {probe ? (
+                        <SharpenInline
+                          childId={report.childId}
+                          statement={probe.statement}
+                          itemId={probe.id}
+                        />
+                      ) : null}
+                      {rungs.length >= 2 ? (
+                        <div className="mb-4 mt-3">
+                          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                            The path so far
+                          </p>
+                          <ul className="mt-2 flex flex-col gap-1">
+                            {rungs.map((rung) => (
+                              <li key={rung.itemId} className="flex items-start gap-2.5 text-xs">
+                                <span
+                                  aria-hidden="true"
+                                  className="mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[0.6rem] font-bold"
+                                  style={
+                                    rung.state === "confirmed"
+                                      ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
+                                      : rung.state === "emerging"
+                                        ? { background: "var(--accent-sage-soft)", color: "var(--sage-700)" }
+                                        : { background: "var(--info-soft)", color: "var(--sky-600)" }
+                                  }
+                                >
+                                  {rung.state === "confirmed" ? "\u2713" : rung.state === "emerging" ? "\u007e" : "\u2192"}
+                                </span>
+                                <span className={rung.state === "next_up" ? "text-strong" : "text-muted"}>
+                                  {rung.statement}
+                                  <span className="ml-1 font-mono text-[0.6rem] text-subtle">
+                                    {rung.state === "next_up"
+                                      ? `next up \u00b7 typical by ${ageLabel(rung.typicalMonths)}`
+                                      : `typical by ${ageLabel(rung.typicalMonths)}`}
+                                  </span>
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                       {domainAnswers.length > 0 ? (
                         <>
                           <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
@@ -375,62 +553,15 @@ export function ReportView({
                           <p className="mt-1 text-xs text-muted">
                             Each question, your answer, and where the national benchmark sits next
                             to {report.childName}&apos;s age today.
+                            {editable ? " Something changed? Tap change and save; the report rescores around it." : ""}
                           </p>
-                          <ul className="mt-3 flex flex-col gap-2.5">
-                            {domainAnswers
-                              .sort((a, b) => a.typicalMonths - b.typicalMonths)
-                              .map((entry) => (
-                                <li
-                                  key={entry.statement}
-                                  className="rounded-md bg-[var(--surface-sunken)] px-4 pb-3 pt-3"
-                                >
-                                  <p className="text-sm font-medium leading-snug text-strong">
-                                    {entry.statement}?
-                                  </p>
-                                  <p className="mt-1 text-sm text-muted">
-                                    {entry.answer === "skip" ? (
-                                      "You skipped this one"
-                                    ) : (
-                                      <>
-                                        You said:{" "}
-                                        <span className="font-semibold text-strong">
-                                          {ANSWER_LABELS[entry.answer]}
-                                        </span>
-                                      </>
-                                    )}
-                                  </p>
-                                  {/* The age strip: one hairline, the national
-                                      benchmark as a neutral dot ("most kids by
-                                      3y 6m"), the child as the clay marker.
-                                      Both facts sit on the same line, so the
-                                      comparison is read, not computed. Same
-                                      left-to-right age axis as the big chart. */}
-                                  <div className="relative mt-2 h-12" aria-hidden="false">
-                                    <div className="absolute left-0 right-0 top-1/2 h-px bg-[var(--stone-300)]" />
-                                    <span
-                                      className="absolute top-[13px] h-[22px] w-[3px] -translate-x-1/2 rounded-pill bg-brand"
-                                      style={{ left: `${agePercent(months)}%` }}
-                                    />
-                                    <span
-                                      className="absolute top-0 -translate-x-1/2 whitespace-nowrap font-mono text-[0.6rem] font-medium text-brand"
-                                      style={{ left: `${agePercent(months)}%` }}
-                                    >
-                                      {report.childName} {"\u00b7"} {ageLabel(months)}
-                                    </span>
-                                    <span
-                                      className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-[var(--stone-500)]"
-                                      style={{ left: `${agePercent(entry.typicalMonths)}%` }}
-                                    />
-                                    <span
-                                      className="absolute bottom-0 -translate-x-1/2 whitespace-nowrap font-mono text-[0.6rem] text-subtle"
-                                      style={{ left: `${agePercent(entry.typicalMonths)}%` }}
-                                    >
-                                      most kids by {ageLabel(entry.typicalMonths)}
-                                    </span>
-                                  </div>
-                                </li>
-                              ))}
-                          </ul>
+                          <ReceiptsList
+                            childId={report.childId}
+                            childName={report.childName}
+                            ageMonths={months}
+                            rows={domainAnswers}
+                            editable={editable}
+                          />
                         </>
                       ) : (
                         <p className="text-sm text-muted">
@@ -554,6 +685,48 @@ export function ReportView({
               </>
             ) : null}
 
+            {/* The one-tap month: consent IS the explicit ask that lets the
+                28-day retest email arm; nothing is ever armed silently. */}
+            {consentCandidate ? (
+              <ConsentCard
+                childId={report.childId}
+                childName={report.childName}
+                domainId={consentCandidate.domainId}
+                subjectName={consentCandidate.subjectName}
+              />
+            ) : null}
+
+            {/* The growth story: the archive read back as chapters. Renders
+                nothing until a second scoring exists. */}
+            <GrowthStory childName={report.childName} eras={eras} />
+
+            {/* The memory-box letter, the one piece written TO the child. */}
+            {keepsakeText ? (
+              <div className="mt-9 rounded-lg p-6" style={{ background: "var(--gold-100)" }}>
+                <p
+                  className="font-mono text-[0.65rem] uppercase tracking-widest"
+                  style={{ color: "var(--gold-ink)" }}
+                >
+                  For {report.childName}&apos;s memory box {"\u00b7"} {generatedDate}
+                </p>
+                <p
+                  className="mt-2 whitespace-pre-line font-serif text-lg italic leading-relaxed"
+                  style={{ color: "var(--gold-ink-strong)" }}
+                >
+                  {keepsakeText}
+                </p>
+                <p className="mt-2 text-xs print:hidden" style={{ color: "var(--gold-ink)" }}>
+                  Print the report and this letter keeps.
+                </p>
+              </div>
+            ) : null}
+
+            {/* The state card: reference data joined at render, so it can
+                never go stale inside anyone's permanent report. */}
+            {stateRequirements ? (
+              <StateCard summary={stateRequirements} childName={report.childName} />
+            ) : null}
+
             {/* Methodology */}
             <div className="mt-9 rounded-lg bg-[var(--surface-sunken)] p-5 text-sm">
               <h3 className="font-display text-base font-semibold text-strong">
@@ -574,7 +747,7 @@ export function ReportView({
                 advice. Every child grows in their own order, and a first report is an estimate
                 that sharpens as you answer more.
               </p>
-              {stateName ? (
+              {stateName && !stateRequirements ? (
                 <p className="mt-2 text-muted">
                   One more thing, because it matters: homeschooling is legal in all 50 states,
                   including {stateName}. When your invite opens, Homa tracks {stateName}&apos;s

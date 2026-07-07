@@ -33,6 +33,14 @@ export interface MapItemContent {
    * on research or framework guidance without a citable code.
    */
   standards?: readonly string[];
+  /**
+   * The typical WINDOW [earliest, latest] in months, populated only where
+   * the corpus documents a real range (docs/homa-benchmarks/00-synthesis.md
+   * corrections: single-anchor displays understate normal spread). The
+   * report renders a band instead of a single dot when present; scoring
+   * never reads it (anchors stay the scoring truth).
+   */
+  typicalRangeMonths?: readonly [number, number];
 }
 
 export interface MapDomainContent {
@@ -169,7 +177,9 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
       { id: "math.counts-past-20", statement: "Counts past 20 without getting stuck", typicalMonths: 54, sources: ["elof", "ccss-math"], standards: ["ELOF P-MATH 1"] },
       { id: "math.adds-with-objects", statement: "Figures out 2 cookies plus 1 more, using objects or fingers", typicalMonths: 60, sources: ["elof", "clements-sarama"], standards: ["ELOF P-MATH 6"] },
       { id: "math.makes-10", statement: "Finds the number that makes 10 (7 needs 3 more)", typicalMonths: 72, sources: ["ccss-math"], standards: ["CCSS K.OA.A.4"] },
-      { id: "math.counts-to-100", statement: "Counts to 100, by ones or by tens", typicalMonths: 78, sources: ["ccss-math", "clements-sarama"], standards: ["CCSS K.CC.A.1"] },
+      // Range: CCSS places it end of K (72mo); Clements and Sarama's
+      // trajectories put typical mastery nearer 84mo (00-synthesis §3.3).
+      { id: "math.counts-to-100", statement: "Counts to 100, by ones or by tens", typicalMonths: 78, typicalRangeMonths: [72, 84], sources: ["ccss-math", "clements-sarama"], standards: ["CCSS K.CC.A.1"] },
       { id: "math.mental-add-10", statement: "Adds and subtracts small numbers in their head, like 7 plus 2", typicalMonths: 84, sources: ["ccss-math"], standards: ["CCSS 1.OA.C.6"] },
       { id: "math.derived-facts", statement: "Uses facts they know to crack new ones (7+7 helps with 7+8)", typicalMonths: 92, sources: ["clements-sarama", "ccss-math"], standards: ["CCSS 1.OA.C.6"] },
       { id: "math.skip-counting", statement: "Skip-counts by 5s, 10s, and 100s, and reads 3-digit numbers", typicalMonths: 96, sources: ["ccss-math"], standards: ["CCSS 2.NBT.A.2", "CCSS 2.NBT.A.3"] },
@@ -296,7 +306,9 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     items: [
       { id: "language.two-words", statement: "Puts two words together, like 'more milk' or 'go park'", typicalMonths: 26, sources: ["cdc"] },
       { id: "language.short-sentences", statement: "Speaks in short sentences that family and familiar people understand", typicalMonths: 38, sources: ["cdc", "elof"] },
-      { id: "language.stranger-clear", statement: "Someone who just met them understands most of what they say", typicalMonths: 46, sources: ["hustad", "cdc"] },
+      // Range: Hustad 2021 medians, 50% multiword intelligibility to
+      // strangers at 34mo, 75% at 46, 90% at 62 (00-synthesis §3.2).
+      { id: "language.stranger-clear", statement: "Someone who just met them understands most of what they say", typicalMonths: 46, typicalRangeMonths: [34, 62], sources: ["hustad", "cdc"] },
       { id: "language.tells-about-day", statement: "Tells you about something that happened earlier today", typicalMonths: 48, sources: ["cdc", "elof"] },
       { id: "language.why-how", statement: "Asks why and how questions, and stays on topic when you answer", typicalMonths: 54, sources: ["cdc", "elof"] },
       { id: "language.whole-story", statement: "Tells a whole little story with a beginning and an end", typicalMonths: 60, sources: ["cdc"] },
@@ -463,7 +475,9 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
       { id: "gross_motor.catches-ball", statement: "Catches a big ball most of the time", typicalMonths: 58, sources: ["cdc", "shape"] },
       { id: "gross_motor.skips", statement: "Skips with alternating feet", typicalMonths: 68, sources: ["shape"] },
       { id: "gross_motor.dodges", statement: "Runs, stops, and changes direction with control in chase games", typicalMonths: 80, sources: ["shape"] },
-      { id: "gross_motor.rides-bike", statement: "Rides a two-wheeler confidently, starting and stopping on their own", typicalMonths: 84, sources: ["aap-lifeskills", "shape"] },
+      // Range: the AAP's 4-to-7 readiness window (00-synthesis, porting
+      // status: "evidence-based anchor move... AAP 4-to-7 window").
+      { id: "gross_motor.rides-bike", statement: "Rides a two-wheeler confidently, starting and stopping on their own", typicalMonths: 84, typicalRangeMonths: [48, 84], sources: ["aap-lifeskills", "shape"] },
       { id: "gross_motor.swims-basic", statement: "Swims a short stretch and climbs out of the pool on their own", typicalMonths: 88, sources: ["aap-lifeskills"] },
       { id: "gross_motor.jumps-rope", statement: "Jumps rope a few times in a row", typicalMonths: 94, sources: ["shape"], standards: ["SHAPE 1.2.16"] },
       { id: "gross_motor.game-skills", statement: "Throws, catches, and kicks well enough to really play a game (soccer, catch, basketball)", typicalMonths: 126, sources: ["shape"] },

@@ -3,18 +3,22 @@ import type { Metadata } from "next";
 import { planQuestions, scoreMap, type MapAnswer, type MapAnswerInput } from "@homa/core";
 
 import { ReportView, type ReportViewData } from "../r/[token]/report-view";
+import { SAMPLE_NARRATIVE } from "./narrative.fixture";
 
 /**
  * /onboarding/sample: the public sample report. Skeptics get to inspect the exact
  * artifact before giving an email (the sample IS the ad). Rendered through
  * the real ReportView with clearly labeled demonstration data: Maya, 4y2m,
- * a warm mixed profile with one visible month of movement.
+ * a warm mixed profile with one visible month of movement. The narrative is
+ * the committed, founder-reviewed fixture (generated once by
+ * scripts/map-narrative-fixtures.mts); this page NEVER makes a model call.
  */
 
 export const metadata: Metadata = {
   title: "Sample progress report",
   description:
     "A sample of the free progress report: strengths first, national benchmarks behind every subject, and a plan for whatever is growing.",
+  alternates: { canonical: "/onboarding/sample" },
 };
 
 /** Maya's birth month, pinned so the sample always reads 4y 2m. */
@@ -59,6 +63,20 @@ function sampleAnswers(ageMonths: number): MapAnswerInput[] {
   return answers;
 }
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://thankshoma.com" },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Sample progress report",
+      item: "https://thankshoma.com/onboarding/sample",
+    },
+  ],
+};
+
 export default function SampleReportPage() {
   const birthMonth = sampleBirthMonth();
   const ageMonths = 50;
@@ -90,7 +108,20 @@ export default function SampleReportPage() {
     answers: answers.map((entry) => ({ itemId: entry.itemId, answer: entry.answer })),
     history: [{ scores: priorScores, generated_at: monthAgo.toISOString() }],
     otherKids: [],
+    plans: [],
   };
 
-  return <ReportView data={data} sample />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }}
+      />
+      <ReportView
+        data={data}
+        sample
+        narrativeView={{ narrative: SAMPLE_NARRATIVE, rejectedPieces: [] }}
+      />
+    </>
+  );
 }

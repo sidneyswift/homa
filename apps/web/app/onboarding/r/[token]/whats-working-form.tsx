@@ -74,7 +74,7 @@ export function WhatsWorkingForm({
         onChange={(event) => setText(event.target.value)}
         rows={2}
         maxLength={500}
-        placeholder={`Curriculum, habits, tricks: what's behind ${childName}'s ${subjectName.toLowerCase()}?`}
+        placeholder={`Curriculum, habits, tricks: what's driving ${childName}'s ${subjectName.toLowerCase()}?`}
         className="w-full rounded-md border border-border bg-card px-3 py-2 text-xs text-strong focus:border-brand focus:outline-none"
       />
       {state === "no-session" ? (

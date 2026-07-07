@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ideation: what would make the progress report 100x more valuable?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=Hanken+Grotesk:wght@400;600;700&family=EB+Garamond:ital@1&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --clay:#E7602F; --clay-deep:#C44C22; --sage:#3D9A50; --gold:#F0BE00;
+    --gold-soft:#FBF0C9; --gold-ink:#7A5B00; --sage-soft:#E4F1E6; --sage-ink:#2C6E3A;
+    --sky:#4FB4D6; --sky-soft:#E3F2F8; --sky-ink:#2B7B96;
+    --cream:#FBF7F0; --card:#FFFFFF; --ink:#221E1A; --ink-soft:#5B534B; --ink-faint:#8A8078;
+    --line:#EAE2D6; --sunken:#F5EFE5;
+    --display:"Schibsted Grotesk","Avenir Next","Segoe UI",sans-serif;
+    --body:"Hanken Grotesk","Segoe UI",system-ui,sans-serif;
+    --serif:"EB Garamond",Georgia,serif;
+    --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+  .page{max-width:900px;margin-inline:auto;padding:40px 20px 64px}
+  p{max-width:72ch}
+  code{font-family:var(--mono);font-size:.85em;background:var(--sunken);padding:1px 5px;border-radius:6px}
+  a{color:var(--clay)}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-0.015em;line-height:1.15}
+  h1{font-size:2.1rem;font-weight:700;margin:.35em 0 .2em}
+  h1 .accent{color:var(--clay)}
+  h2{font-size:1.35rem;font-weight:700;margin:2.4em 0 .5em}
+  h3{font-size:1.05rem;font-weight:600;margin:0}
+  .eyebrow{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ink-faint)}
+  .subtitle{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--ink-soft);margin:.2em 0 1.2em;max-width:60ch}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:.72rem;color:var(--ink-soft)}
+  .meta b{color:var(--ink);font-weight:700}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 4px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 18px;min-width:120px}
+  .stat .n{font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--clay)}
+  .stat .l{font-size:.74rem;color:var(--ink-soft)}
+  section{margin-top:8px}
+  .baseline{background:var(--sage-soft);border-radius:16px;padding:16px 20px;margin:14px 0}
+  .baseline .eyebrow{color:var(--sage-ink)}
+  .baseline p{margin:.5em 0 0}
+  .axes{list-style:none;padding:0;margin:.4em 0 0;display:flex;flex-direction:column;gap:6px}
+  .axes li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:.9rem}
+  .axes .ax{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--sky-ink);margin-right:8px}
+  .jump{list-style:none;padding:0;margin:.6em 0 1.4em;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+  .jump a{text-decoration:none;color:var(--ink)}
+  .jump a:hover{color:var(--clay)}
+  .jump .rk{font-family:var(--mono);font-weight:700;color:var(--clay);margin-right:6px}
+  article.idea{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 26px;margin:16px 0;box-shadow:0 2px 10px rgba(84,60,40,.05)}
+  .idea-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .rank{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--clay)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chip{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:3px 11px}
+  .chip.axis{background:var(--sky-soft);color:var(--sky-ink)}
+  .chip.conf{background:var(--sage-soft);color:var(--sage-ink)}
+  .chip.cx{background:var(--gold-soft);color:var(--gold-ink)}
+  dl.fields{margin:14px 0 0}
+  dl.fields dt{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-faint);margin-top:12px}
+  dl.fields dd{margin:.25em 0 0;max-width:76ch}
+  .basis-tag{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--sage-ink)}
+  figure{margin:16px 0 2px;background:var(--sunken);border-radius:16px;padding:14px}
+  figcaption{font-size:.74rem;color:var(--ink-soft);margin-top:6px}
+  table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:.88rem}
+  th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  thead th{border-top:0;background:var(--sunken);font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft)}
+  footer.composition-signal{margin-top:48px;padding-top:14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:.68rem;color:var(--ink-faint)}
+  svg text{font-family:var(--body)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">ideation &middot; homa progress report</div>
+  <h1>What would make the report <span class="accent">100x more valuable?</span></h1>
+  <p class="subtitle">Six directions that change what the report is for the parent, re-baselined the morning after the narrative layer and the family workspace bridge shipped.</p>
+  <div class="meta">
+    <span>date <b>2026-07-07</b></span>
+    <span>re-baselined <b>2026-07-07 morning</b></span>
+    <span>topic <b>report-100x-value</b></span>
+    <span>focus <b>the lead-magnet progress report and what it delivers to the parent</b></span>
+    <span>mode <b>repo-grounded</b></span>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n">38</div><div class="l">raw ideas, 5 frames</div></div>
+    <div class="stat"><div class="n">24</div><div class="l">merged candidates</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">survivors</div></div>
+    <div class="stat"><div class="n">5/5</div><div class="l">axes covered</div></div>
+  </div>
+</header>
+
+<section id="grounding">
+  <h2>Grounding Context</h2>
+
+  <div class="baseline">
+    <div class="eyebrow">new baseline &middot; shipped since the first pass (2026-07-07, small hours)</div>
+    <p><b>The LLM narrative layer is built end to end</b> (flag-gated, uncommitted). Migration <code>20260707030725</code> adds <code>narrative</code> + <code>narrative_meta</code> to <code>lead_reports</code> and <code>lead_plans</code>. The facts payload (<code>narrative-facts.ts</code>) hands the writer the parent's <code>whatsWorking</code> notes keyed by subject name, <code>helpWith</code>, merged interests, code-computed movement lines, and per-subject observation counts, confirmed skills, and next steps; <code>allowedNumbersFrom</code> derives the gate's digit allow-list from the serialized payload itself. The gate (<code>narrative-gate.ts</code>) enforces per-piece caps, banned words, sibling names, diagnosis substrings, and invented-number rejection, and fails the whole generation when the note or synthesis rejects or more than 4 subject lines do. The runner claims single-flight with a 10-minute stale self-heal; the score route answers instantly, then writes the narrative in <code>after()</code> and sends the report email only when generation lands, so the emailed link always opens a finished report. Plan narratives (intro, 4 week lines, closing) run through the same gate. Sample and red-team fixtures are committed at prompt v2026.07.2 with a version lock in <code>check:map</code>; the privacy page now names Anthropic as a processor and the method page says plainly that Homa writes the words around code-computed numbers. <code>REPORT_NARRATIVE_ENABLED</code> defaults off until the founder read-aloud.</p>
+    <p><b>The family workspace bridge shipped</b> (uncommitted, live e2e verified). Every score runs <code>ensureFamilyWorkspace</code>: a real family via the <code>create_my_family</code> RPC, children mirrored from lead kids with real birth dates, profiles mirrored forward on rescore, and a one-time <code>what_works</code> memory seeded from the parent's whats-working notes, all as the signed-in caller under RLS. A report holder with an auth session now has a live <code>/home</code> and <code>/chat</code> whose agent already knows her kids the moment the first report exists.</p>
+    <p><b>What the re-baseline changes in this doc.</b> Ideas 1 and 3 got materially cheaper (the pipeline they extend now exists and their remaining gaps re-verified this morning: the writer still never sees archived narratives, and <code>PlanFacts</code> still lacks <code>whatsWorking</code> and <code>curriculums</code>). Idea 4's raw material now accrues automatically (every rescore archives the era's words next to its numbers). Idea 5's editions ride a now-proven generate-gate-store pattern. <code>highConfidence</code> still has zero consumers in <code>apps/web</code> (re-verified), so idea 2's basis stands, though the writer can now at least be honest about thin evidence in prose.</p>
+  </div>
+
+  <p><b>Codebase context.</b> The report: a parent answers a ~5 minute observation questionnaire per child; a deterministic scorer (<code>packages/core/src/map/</code>, 220-item cited bank, 16 subjects) produces positions and months-ahead; the report page renders a note, strengths-first cards, a chart, receipts drawers, growing activities, and 4-week plans at a permanent token URL. The D8 overturn rules that the model writes every parent-facing word from a deterministic facts payload; numbers, positions, and ages stay code forever. Founder rulings on record: "lean into intelligence, while capturing data correctly... building homa into an 'agent' for the user that is personal to them" and "I would rather the report and the deep dives and the 4 week ciricculums be FUCKING INCREADIBLE, then have it take less than 20 seconds."</p>
+  <p><b>What the evidence scouts found</b> (first pass, still true unless noted in the baseline box): a shipped promise the code does not keep ("I'll fold it into the plans" while the plan builder receives only interests and style), a computed confidence signal with zero consumers, a 12-snapshot history archive of which the UI reads exactly one entry, plan check-offs living only in localStorage, a seeded 51-jurisdiction state requirements table surfaced as one teaser line, and a correction channel that is a mailto.</p>
+  <p><b>External context.</b> Research value high: parents act on reports when a specific gap is visible, and vague or inflated reports produce no action; numbers change parent behavior where prose alone does not. Prior art: ASQ-3 parent reports, IXL diagnostics, Seesaw portfolios, NZ Learning Stories (narrative assessments kept as keepsakes), Wrapped and Duolingo recap mechanics. Named white space: one artifact that is simultaneously validated scoring, narrative keepsake, compliance-adjacent evidence, and a hand-to-grandma object; nobody ships that combination.</p>
+  <p><b>Verification.</b> A fresh-context verifier spot-checked every load-bearing citation against the repo (17 sound, 7 weak, 0 refuted) before arbitration; the re-baseline pass re-verified the claims the new code could have invalidated. Two research gestures ("0.5 SD", "B-flation") could not be verified and are treated as seasoning, not basis. Evidence dossiers live at <code>/tmp/compound-engineering/ce-ideate/a7c31f2e/</code>.</p>
+</section>
+
+<section id="axes">
+  <h2>Topic Axes</h2>
+  <ul class="axes">
+    <li><span class="ax">what-it-says</span> what the report says: narrative, interpretation, voice</li>
+    <li><span class="ax">what-it-knows</span> what the report knows: evidence, inputs, data richness</li>
+    <li><span class="ax">what-parent-does</span> what the parent does next: plans, activities, CTAs</li>
+    <li><span class="ax">over-time</span> how the report lives over time: history, movement, rescores, return visits</li>
+    <li><span class="ax">other-audiences</span> who else it serves: sharing, records, compliance, spouse, grandparent, evaluator</li>
+  </ul>
+</section>
+
+<section id="ranked">
+  <h2>Ranked Ideas</h2>
+  <ul class="jump">
+    <li><a href="#i1"><span class="rk">1</span>Homa the correspondent: a report that remembers</a></li>
+    <li><a href="#i2"><span class="rk">2</span>The living record: every touch is an observation</a></li>
+    <li><a href="#i3"><span class="rk">3</span>The default-on month, with one consent tap</a></li>
+    <li><a href="#i4"><span class="rk">4</span>The growth curve and the growth story</a></li>
+    <li><a href="#i5"><span class="rk">5</span>The proof stack: state card, audience editions, photo receipts</a></li>
+    <li><a href="#i6"><span class="rk">6</span>Draw the map: bands and lit paths, not dots and badges</a></li>
+  </ul>
+
+  <article class="idea" id="i1">
+    <div class="idea-head"><span class="rank">1.</span><h3>Homa the correspondent: a report that remembers</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; what-it-says</span><span class="chip conf">confidence 90%</span><span class="chip cx">complexity low-medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Feed the archived narrative (the last note, the last next step Homa pointed at) back into the facts payload, so every rescore writes chapter N of a correspondence instead of a stateless first letter: "Last month I pointed at letter names; you ran with the letter hunt, and here is what moved." Add one new piece: a dated, printable Learning-Story letter addressed to the child herself, built from her strongest observed statements and the parent's own whats-working notes quoted back, with no numbers, made for the memory box. On the new baseline this is a narrow, well-bounded change: extend <code>getReportNarrativeSource</code> to select the archived narrative out of <code>history</code>, add a prior-letter field to <code>ReportFacts</code>, one new section in <code>report-writer.md</code>, one new schema key and gate cap for the keepsake, bump <code>REPORT_PROMPT_VERSION</code>, regenerate fixtures for the read-aloud. The bridge gives the correspondent a second surface: the same whats-working words the report quotes are now seeded as the chat agent's <code>what_works</code> memory, so the letter and the chat can genuinely sound like one person who knows this family.</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> re-verified on the shipped code: <code>getReportNarrativeSource</code> selects <code>r.scores, r.history</code> and <code>ReportFactsInput.history</code> is typed scores + dates only (<code>narrative-store.ts:48</code>, <code>narrative-facts.ts:90</code>), while every rescore archives the shipped words next to the old numbers and resets the live row (store snapshot layer); <code>allowedNumbersFrom(facts)</code> derives the allow-list from the payload (<code>narrative-facts.ts:187-189</code>), so prior-letter digits join it with zero gate changes. The bridge seeds <code>what_works</code> memories from the same notes (<code>bridge.ts:338-377</code>). <span class="basis-tag">external:</span> NZ Learning Stories (Margaret Carr), narrative assessments families keep for decades.</dd>
+      <dt>Rationale</dt>
+      <dd>This is the founder's "agent that is personal to them" ruling made literal, and it is now the cheapest idea on the list relative to its ceiling: the pipeline, gate, versioning, and fixture loop it needs all shipped last night, and the committed Maya fixture already demonstrates the voice bar the memory feature would build on. Memory is what separates a correspondent from a report generator, and a letter worth keeping defeats the one-glance-and-discard failure mode in a way no scoring improvement can.</dd>
+      <dt>Downsides</dt>
+      <dd>Prompt surface grows (memory injection needs its own red-team pass so old advice is referenced, never contradicted). The keepsake register must survive the struggling-kid read-aloud. First reports have no history, so the memory section must degrade to silence, not filler. The severable "overnight second read" leg still collides with the no-sequences email doctrine and needs an explicit founder call if pursued.</dd>
+      <dt>Confidence</dt><dd>90%</dd>
+      <dt>Complexity</dt><dd>Low-Medium</dd>
+    </dl>
+    <figure>
+      <svg viewBox="0 0 640 120" role="img" aria-label="Rescores become chapters that reference the previous letter">
+        <defs><marker id="a1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#8A8078"/></marker></defs>
+        <rect x="10" y="30" width="150" height="56" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="85" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="#221E1A">July report</text>
+        <text x="85" y="72" text-anchor="middle" font-size="11" fill="#5B534B">letter 1</text>
+        <rect x="245" y="30" width="150" height="56" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="320" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="#221E1A">August rescore</text>
+        <text x="320" y="72" text-anchor="middle" font-size="11" fill="#5B534B">letter 2, recalls letter 1</text>
+        <rect x="480" y="30" width="150" height="56" rx="12" fill="#FBF0C9" stroke="#EAE2D6"/>
+        <text x="555" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="#7A5B00">keepsake letter</text>
+        <text x="555" y="72" text-anchor="middle" font-size="11" fill="#7A5B00">addressed to the child</text>
+        <line x1="160" y1="58" x2="240" y2="58" stroke="#8A8078" stroke-width="1.5" marker-end="url(#a1)"/>
+        <line x1="395" y1="58" x2="475" y2="58" stroke="#8A8078" stroke-width="1.5" marker-end="url(#a1)"/>
+        <text x="200" y="48" text-anchor="middle" font-size="10" fill="#5B534B" style="paint-order:stroke fill" stroke="#F5EFE5" stroke-width="3">remembers</text>
+        <text x="435" y="48" text-anchor="middle" font-size="10" fill="#5B534B" style="paint-order:stroke fill" stroke="#F5EFE5" stroke-width="3">kept forever</text>
+      </svg>
+      <figcaption>Each generation reads the letters before it; the keepsake is the piece a family keeps.</figcaption>
+    </figure>
+  </article>
+
+  <article class="idea" id="i2">
+    <div class="idea-head"><span class="rank">2.</span><h3>The living record: every touch is an observation</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; what-it-knows</span><span class="chip conf">confidence 80%</span><span class="chip cx">complexity high</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>One mechanic, four doors. Tap-to-correct: the owning parent changes any receipt answer in place (today the only correction channel is a mailto). The sharpness meter: surface the computed per-subject confidence in honest radiology grammar ("well observed" vs "one clear look so far") and let each thin subject ask its single highest-information question inline, one tap. The observation inbox: reply to the report email with one plain line ("she counted to 31 in the car") and it lands in the child's context; clear bank-item matches offer a one-tap confirm chip. The self-renewing report: on a return visit months later, the permanent URL knows the child has aged into new checkpoints and offers a 30-second pre-filled diff re-check ("In July you said she counted past 20 easily. Still true, or moved?"). Every door feeds the same pipe, and on the new baseline that pipe is real shipped code: deterministic rescore, archived history, regenerated words behind the writing beat, with the status endpoint and single-flight claim pattern ready to reuse for any of these triggers.</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> <code>highConfidence</code> is computed at <code>scoring.ts:127</code> and re-verified this morning to have zero consumers in <code>apps/web</code>; the writer now receives per-subject <code>observations</code> counts (<code>narrative-facts.ts:28</code>) so prose can be honest about thin evidence, but no UI meter or inline question exists; correction channel is a mailto (<code>report-actions.tsx:57-62</code>); only the first view of the permanent URL is ever stamped (<code>store.ts:713-715</code>); the diff re-check mechanic is already designed for invite day (journey BEAT 8) and just never applied to the report itself. <span class="basis-tag">external:</span> IXL's diagnostic keeps parents answering because the meter visibly sharpens.</dd>
+      <dt>Rationale</dt>
+      <dd>A first report rests on as few as 16 taps, and its known weakness is thin evidence presented with a confident face. This flips the report's identity from one-shot transcript to co-maintained ledger: every parent touch makes it sharper, every rescore regenerates the story, and the free artifact becomes the habit the paid product inherits. The narrative layer raises the payoff of every touch: a corrected answer now rewrites the words, not just a badge.</dd>
+      <dt>Downsides</dt>
+      <dd>Largest engineering surface of the six (inbound email parsing is its own project; ship the doors in stages). Every write path from a shareable URL must sit behind the existing session gate or any link holder could mutate a child's record. More asks on the page risks nag; the meter must stay an offer, never a scold. Each touch that rescores also regenerates (cost is ruled a non-constraint, but the writing beat becomes a repeated experience worth designing).</dd>
+      <dt>Confidence</dt><dd>80%</dd>
+      <dt>Complexity</dt><dd>High</dd>
+    </dl>
+    <figure>
+      <svg viewBox="0 0 640 150" role="img" aria-label="Four input doors feed one rescore-and-rewrite loop">
+        <defs><marker id="a2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#8A8078"/></marker></defs>
+        <rect x="10" y="10" width="140" height="26" rx="13" fill="#E3F2F8"/><text x="80" y="27" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2B7B96">correct an answer</text>
+        <rect x="10" y="46" width="140" height="26" rx="13" fill="#E3F2F8"/><text x="80" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2B7B96">one inline question</text>
+        <rect x="10" y="82" width="140" height="26" rx="13" fill="#E3F2F8"/><text x="80" y="99" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2B7B96">reply to the email</text>
+        <rect x="10" y="118" width="140" height="26" rx="13" fill="#E3F2F8"/><text x="80" y="135" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2B7B96">30-second re-check</text>
+        <line x1="150" y1="23" x2="255" y2="70" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a2)"/>
+        <line x1="150" y1="59" x2="255" y2="74" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a2)"/>
+        <line x1="150" y1="95" x2="255" y2="80" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a2)"/>
+        <line x1="150" y1="131" x2="255" y2="85" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a2)"/>
+        <rect x="260" y="52" width="170" height="52" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="345" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#221E1A">new observation</text>
+        <text x="345" y="92" text-anchor="middle" font-size="11" fill="#5B534B">deterministic rescore</text>
+        <line x1="430" y1="78" x2="505" y2="78" stroke="#8A8078" stroke-width="1.5" marker-end="url(#a2)"/>
+        <rect x="510" y="52" width="120" height="52" rx="12" fill="#E4F1E6"/>
+        <text x="570" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#2C6E3A">fresh words,</text>
+        <text x="570" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#2C6E3A">deeper history</text>
+      </svg>
+      <figcaption>Four doors, one pipe: touch, rescore, rewrite, archive. The pipe shipped last night; the doors are the idea.</figcaption>
+    </figure>
+  </article>
+
+  <article class="idea" id="i3">
+    <div class="idea-head"><span class="rank">3.</span><h3>The default-on month, with one consent tap</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; what-parent-does</span><span class="chip conf">confidence 80%</span><span class="chip cx">complexity medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Three fixes that make the report's action loop real. First, keep the shipped promise, now a small precise change: the whats-working form says "I'll fold it into the plans for the growing subjects," and on the new baseline the report note and synthesis DO quote those notes, but the plan still does not: <code>PlanFacts</code> carries only interests, style, starting line, targets, and weeks, and the deterministic builder still receives only interests + style. Extend <code>getPlanNarrativeSource</code> and <code>PlanFacts</code> with <code>whatsWorking</code>, <code>curriculums</code>, and <code>helpWith</code>, and teach the plan section of <code>report-writer.md</code> to credit the family's own proven strategies. Second, give the month a memory: persist plan check-offs to the plan row (today localStorage-only) and render a positive-only "your month" panel beside the movement chips at retest, with a 10-second "which of these did you get to?" chip question. Third, make the loop near-default-on: the report ends with one consent tap, "want me to build the month and check back in 4 weeks?", instead of hiding THE move behind a drawer click.</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> re-verified on the shipped code: <code>PlanFacts</code> has no whats-working or curriculum fields (<code>narrative-facts.ts:57-68</code>), <code>getPlanNarrativeSource</code> selects interests + family style only (<code>narrative-store.ts:168-212</code>), and <code>buildFourWeekPlan</code> is still called with <code>{ interests, style }</code> (<code>store.ts:591-595</code>), while <code>ReportFacts.whatsWorking</code> now exists and flows to the report writer (<code>narrative-facts.ts:48</code>); <code>plan-weeks.tsx:8-11</code>: "the retest email is the loop's real memory"; plan, retest clock, and retest email exist only behind a click (<code>store.ts:504-512</code>, <code>630-645</code>).</dd>
+      <dt>Rationale</dt>
+      <dd>The plan is the report's main action surface, its narrative now exists (intro, week framings, closing through the same gate), and the remaining gap is exactly the facts it is fed. The verifier flagged silent auto-arming of the retest email as a collision with the explicit-ask email doctrine; the one-tap consent keeps the doctrine intact while converting the loop from opt-in-if-you-find-it to offered-to-everyone. A remembered month makes "your work is showing up in the numbers" evidence instead of assertion.</dd>
+      <dt>Downsides</dt>
+      <dd>Server-side check-offs add a write path that must stay session-gated. The consent tap adds one decision to a page that works hard to feel calm. Feeding more family context into plan facts widens the gate's surface slightly (whats-working text is parent-authored free text; the gate already screens generated output, not inputs).</dd>
+      <dt>Confidence</dt><dd>80%</dd>
+      <dt>Complexity</dt><dd>Medium</dd>
+    </dl>
+  </article>
+
+  <article class="idea" id="i4">
+    <div class="idea-head"><span class="rank">4.</span><h3>The growth curve and the growth story</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; over-time</span><span class="chip conf">confidence 75%</span><span class="chip cx">complexity medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>The report archives up to 12 dated snapshots per child, and on the new baseline each snapshot carries the era's generated words next to its numbers (the rescore path resets the live narrative and archives the old one). The UI still reads exactly one entry. Draw the rest: a per-subject dated curve in the pediatric growth-chart grammar (the child against her own past, never against another child), a compiled growth-story view that walks the whole arc with excerpts of what Homa wrote in each era, and once a year, a growth edition that reads like a year in the life. The retest email's promise becomes "a new dot lands on her chart."</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> <code>HISTORY_CAP = 12</code> with narrative-era snapshots archiving their words (<code>store.ts:391-402</code>) while the render path reads only <code>history[0]</code> (<code>report-view.tsx:141</code>); movement lines are already computed for the writer (<code>narrative-facts.ts:95-121</code>); "one year of growth" is an alternative pass condition in NY and WV, "growth framing is not just kind, it is legally load-bearing" (state assessment notes). <span class="basis-tag">external:</span> pediatric growth charts, the one sparse-data instrument parents already trust for decades; Wrapped-style annual recaps as a self-propagating ritual.</dd>
+      <dt>Rationale</dt>
+      <dd>The product's promise is "watch the numbers move," and the artifact currently shows one delta chip. The curve is inherently anti-comparison (voice law), it is the honest answer to single-anchor spread limits, and it makes "this report is the before picture" literal: the paid product is the thing that keeps drawing the curve. Every idea above this one feeds it: corrections, re-checks, and consented months all mint new dots and new chapters.</dd>
+      <dt>Downsides</dt>
+      <dd>Most leads have 0 or 1 snapshots until the rescore loops run, so the surface must degrade gracefully to a single dot. Growth praise must scale by age band (a flat middle-school reading curve is normal and must never read as a problem). The annual edition needs a deliberate call against the email doctrine (one promised anniversary artifact, not a sequence).</dd>
+      <dt>Confidence</dt><dd>75%</dd>
+      <dt>Complexity</dt><dd>Medium</dd>
+    </dl>
+    <figure>
+      <svg viewBox="0 0 640 150" role="img" aria-label="From a single delta chip to the child's own dated curve">
+        <rect x="10" y="20" width="280" height="110" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="150" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#8A8078">TODAY</text>
+        <rect x="95" y="62" width="110" height="26" rx="13" fill="#FBF0C9"/>
+        <text x="150" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5B00">+4 mo since Jun 6</text>
+        <text x="150" y="112" text-anchor="middle" font-size="10.5" fill="#5B534B">one delta, eleven snapshots unread</text>
+        <rect x="350" y="20" width="280" height="110" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="490" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#2C6E3A">THE CURVE</text>
+        <line x1="380" y1="112" x2="610" y2="112" stroke="#EAE2D6" stroke-width="1.5"/>
+        <polyline points="390,100 435,92 480,86 525,72 570,60" fill="none" stroke="#3D9A50" stroke-width="2.5"/>
+        <circle cx="390" cy="100" r="4" fill="#3D9A50"/><circle cx="435" cy="92" r="4" fill="#3D9A50"/>
+        <circle cx="480" cy="86" r="4" fill="#3D9A50"/><circle cx="525" cy="72" r="4" fill="#3D9A50"/>
+        <circle cx="570" cy="60" r="5" fill="#E7602F"/>
+        <text x="570" y="48" text-anchor="middle" font-size="10" font-weight="700" fill="#E7602F" style="paint-order:stroke fill" stroke="#FFFFFF" stroke-width="3">today</text>
+        <text x="490" y="128" text-anchor="middle" font-size="10.5" fill="#5B534B">her own dots, dated, across the year</text>
+      </svg>
+      <figcaption>Same stored data, two different artifacts: a chip you glance at, a curve you keep.</figcaption>
+    </figure>
+  </article>
+
+  <article class="idea" id="i5">
+    <div class="idea-head"><span class="rank">5.</span><h3>The proof stack: state card, audience editions, photo receipts</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; other-audiences</span><span class="chip conf">confidence 70%</span><span class="chip cx">complexity high</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Make the report the family's evidence system. The state card: render what the family's state actually asks, the next real deadline (VA Aug 1, WV Jun 30, NY quarterly), and where scores go, from the 51-jurisdiction table already seeded in prod, always with the explicit boundary that the report never satisfies a state instrument. Audience editions: the token page stays the parent's private letter, and purpose-built renditions of the same deterministic facts serve the named skeptics: a spouse one-pager (hard numbers, per-year math), a grandma packet (self-contained, no login), an evaluator evidence pack (composite growth framing, citations, the 89 verified standards codes the report currently collapses into source labels). On the new baseline each edition is one more schema, prompt section, and gated store on a proven pipeline, not new infrastructure. Photo receipts: attach a photo of the actual work to any answer, rendered inside that receipt strip, never scored, seeding the portfolio families in evaluator states already need.</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> the compliance surface today is one teaser line (<code>report-view.tsx:623-628</code>) while <code>state_requirements</code> is seeded (migration 20260707032148) and the bridge now carries <code>us_state</code> into the real family (<code>bridge.ts:209-212</code>); the generate-gate-store pattern shipped (<code>narrative-generate.ts</code>, <code>narrative-gate.ts</code>, <code>narrative-store.ts</code>) and the privacy page already names the AI writer honestly; D7: tokens deliberately unhashed because "the URL itself is the shareable artifact... sharing is the marketing"; the planning corpus names every audience (spouse one-pager, Grandma Sue "the packet, not the product", the mother-in-law hearing as "the sleeper marketing asset"); no upload code exists anywhere in onboarding (verified by grep). <span class="basis-tag">external:</span> families pay evaluators $30 to $100 per student; Seesaw built a company on capture-to-portfolio.</dd>
+      <dt>Rationale</dt>
+      <dd>Compliance fear is the sharpest named anxiety in the ICP research, and the report is where that fear lives. One report becoming N audience-shaped artifacts is the D7 thesis executed rather than hoped: every edition that leaves the house recruits exactly the audience that currently blocks adoption.</dd>
+      <dt>Downsides</dt>
+      <dd>Hard privacy escalation on photo receipts (minors' media on permanent unauthenticated URLs needs its own access controls, private-by-default). The state card needs the family's homeschool route, which the flow does not collect yet (assessment duty attaches to route, not state). Legal-tone bar on the evaluator pack is unforgiving; scope which two editions ship first.</dd>
+      <dt>Confidence</dt><dd>70%</dd>
+      <dt>Complexity</dt><dd>High</dd>
+    </dl>
+    <figure>
+      <svg viewBox="0 0 640 150" role="img" aria-label="One facts payload fans out to audience-shaped artifacts">
+        <defs><marker id="a5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#8A8078"/></marker></defs>
+        <rect x="20" y="52" width="170" height="52" rx="12" fill="#FFFFFF" stroke="#EAE2D6"/>
+        <text x="105" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#221E1A">one facts payload</text>
+        <text x="105" y="92" text-anchor="middle" font-size="11" fill="#5B534B">deterministic, cited</text>
+        <line x1="190" y1="66" x2="295" y2="26" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="190" y1="74" x2="295" y2="62" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="190" y1="82" x2="295" y2="98" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="190" y1="90" x2="295" y2="134" stroke="#8A8078" stroke-width="1.2" marker-end="url(#a5)"/>
+        <rect x="300" y="13" width="200" height="26" rx="13" fill="#E4F1E6"/><text x="400" y="30" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2C6E3A">parent's private letter</text>
+        <rect x="300" y="49" width="200" height="26" rx="13" fill="#E3F2F8"/><text x="400" y="66" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2B7B96">spouse one-pager</text>
+        <rect x="300" y="85" width="200" height="26" rx="13" fill="#FBF0C9"/><text x="400" y="102" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7A5B00">grandma packet</text>
+        <rect x="300" y="121" width="200" height="26" rx="13" fill="#F5EFE5"/><text x="400" y="138" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5B534B">evaluator evidence pack</text>
+      </svg>
+      <figcaption>The numbers are computed once; the artifact is shaped for whoever has to be convinced.</figcaption>
+    </figure>
+  </article>
+
+  <article class="idea" id="i6">
+    <div class="idea-head"><span class="rank">6.</span><h3>Draw the map: bands and lit paths, not dots and badges</h3></div>
+    <div class="chips"><span class="chip axis">axis &middot; what-it-knows</span><span class="chip conf">confidence 70%</span><span class="chip cx">complexity medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Two honesty upgrades to the report's core display. Bands, not dots: each receipt renders the national benchmark as a typical window ("most kids: between 3y and 4y 6m") instead of a single verdict dot, populated where sources support it with the dot as fallback. The lit path: each subject drawer draws the ladder the scorer already climbs, confirmed anchors lit, the frontier glowing as "next up," one or two nodes above with their typical-by ages, nothing past the +24 month cap and no locked-state language. Unchanged by the new baseline: this is deterministic display work the narrative layer does not touch, though the writer's per-subject next-step facts and the path view would tell one consistent story.</dd>
+      <dt>Basis</dt>
+      <dd><span class="basis-tag">direct:</span> "single-anchor displays understate normal spread" and the CDC-75th-percentile vs median mixing debt are on record in the benchmark synthesis (<code>00-synthesis.md:61, 107</code>); the ladder mechanics exist (<code>bank.ts:8-12</code>: an "easily" unlocks the next item up the ladder) and the plan already computes floor and target (<code>plans.ts:231-232</code>). <span class="basis-tag">external:</span> Duolingo path mechanics; growth-chart percentile bands.</dd>
+      <dt>Rationale</dt>
+      <dd>The single dot is simultaneously the report's main anxiety generator (a "not yet" past the dot reads as a binary miss) and its main precision overstatement. A band makes on-track genuinely reassuring while keeping real gaps specific enough to act on; the lit path makes the deep dive and the 4-week plan legible as moves along a drawn road. The copy already claims the numbers are a map, never a grade; this is the UI finally drawing the map.</dd>
+      <dt>Downsides</dt>
+      <dd>Band metadata is per-item editorial work against the bank (start where sources give ranges). A path view must be designed hard against gamification creep: no locks, no streaks, no levels vocabulary. Closer to a strong render upgrade than a step function on its own; it earns rank 6 by de-risking every other idea's display honesty.</dd>
+      <dt>Confidence</dt><dd>70%</dd>
+      <dt>Complexity</dt><dd>Medium</dd>
+    </dl>
+    <figure>
+      <svg viewBox="0 0 640 120" role="img" aria-label="A single benchmark dot versus a typical window band">
+        <text x="160" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#8A8078">DOT: a line she missed</text>
+        <line x1="40" y1="70" x2="280" y2="70" stroke="#EAE2D6" stroke-width="2"/>
+        <circle cx="200" cy="70" r="5" fill="#8A8078"/>
+        <text x="200" y="92" text-anchor="middle" font-size="10" fill="#5B534B">most kids by 3y 6m</text>
+        <rect x="118" y="56" width="4" height="28" rx="2" fill="#E7602F"/>
+        <text x="120" y="46" text-anchor="middle" font-size="10" font-weight="700" fill="#E7602F">her, 3y 2m</text>
+        <text x="480" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#2C6E3A">BAND: a window she is inside</text>
+        <line x1="360" y1="70" x2="600" y2="70" stroke="#EAE2D6" stroke-width="2"/>
+        <rect x="420" y="60" width="130" height="20" rx="10" fill="#E4F1E6"/>
+        <text x="485" y="96" text-anchor="middle" font-size="10" fill="#2C6E3A">most kids: 3y to 4y 6m</text>
+        <rect x="438" y="56" width="4" height="28" rx="2" fill="#E7602F"/>
+        <text x="440" y="46" text-anchor="middle" font-size="10" font-weight="700" fill="#E7602F">her, 3y 2m</text>
+      </svg>
+      <figcaption>Same fact, different feeling: the band is more honest and less frightening at once.</figcaption>
+    </figure>
+  </article>
+</section>
+
+<section id="rejections">
+  <h2>Rejection Summary</h2>
+  <p>38 raw ideas merged to 24 candidates; a fresh-context verifier spot-checked every load-bearing citation (17 sound, 7 weak, 0 refuted). The 2026-07-07 morning re-baseline confirmed every cut still stands. Cuts and their reasons:</p>
+  <table>
+    <thead><tr><th>#</th><th>Idea</th><th>Reason rejected</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>The win card / learner portrait</td><td>Already ticketed twice (NT-11, AS-07); re-surfacing backlog is not step-function ideation, and its value accrues mostly to acquisition, not the parent. Revisit as a scheduling call for conference week, not a 100x direction.</td></tr>
+      <tr><td>2</td><td>The collective playbook (cross-family whats-working)</td><td>Redistributing families' written prose strains the tenant-isolation law for a network effect that cannot materialize at waitlist n; wrong stage even if right someday. (The bridge's per-family <code>what_works</code> memory seeding is the correct, isolated version of this instinct and shipped.)</td></tr>
+      <tr><td>3</td><td>Homa's own ruler (self-norming bank, public agreement counts)</td><td>The valuable half already exists (<code>pnpm report:norms</code>); per-item agreement counts at lead-magnet sample sizes are statistical noise that invites the exact skeptic backlash the methodology page exists to prevent.</td></tr>
+      <tr><td>4</td><td>The auto-built month (standalone, silent)</td><td>Auto-arming a retest email the parent never asked for silently collides with the explicit-ask email doctrine (<code>email.ts:4-7</code>); survives only inside idea 3's consent-tap shape.</td></tr>
+      <tr><td>5</td><td>The second read (overnight letter, standalone)</td><td>Its evidence (never-read homeschool context) supports feeding context into the existing generation, which idea 1 does; the morning email leg requires an email-doctrine overturn and is severable, so it folds into idea 1 as a flagged later leg.</td></tr>
+      <tr><td>6</td><td>"You might be wondering" (standalone)</td><td>Prompt-level increment already inside the synthesis piece's mandate (the shipped <code>report-writer.md</code> synthesis section confirms interpretation is that piece's job); absorbed into idea 1 rather than standing alone.</td></tr>
+      <tr><td>7</td><td>The skill tree and benchmark bands (as two ideas)</td><td>Merged into idea 6; separately each is a render upgrade, together they are one display-honesty direction.</td></tr>
+      <tr><td>8</td><td>~14 further raw candidates</td><td>Deduplicated into the six survivors above (each survivor lists its constituent raw ideas in the run's checkpoint files).</td></tr>
+    </tbody>
+  </table>
+  <p>All five axes kept at least one survivor; no coverage gaps. Verifier corrections recorded: one build-log quote lives at lines 259-262 (not 138-139 as a dossier cited), and the "0.5 SD" and "B-flation" research gestures could not be verified, so no survivor leans on them.</p>
+</section>
+
+<footer class="composition-signal">Composed 2026-07-07 by ce-ideate (repo-grounded run a7c31f2e) from the founder prompt "what would make our report 100x more valuable to the user?" &middot; re-baselined 2026-07-07 morning after the LLM narrative layer and the family workspace bridge shipped &middot; evidence dossiers and checkpoints: <code>/tmp/compound-engineering/ce-ideate/a7c31f2e/</code></footer>
+
+</div>
+</body>
+</html>

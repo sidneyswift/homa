@@ -27,6 +27,9 @@ export interface MapItem {
   typicalMonths: number;
   /** Citation keys into MAP_SOURCES. */
   sources: readonly string[];
+  /** Documented typical WINDOW [earliest, latest] in months, only where the
+   * corpus gives a real cited range; display-only (see content.ts). */
+  typicalRangeMonths?: readonly [number, number];
 }
 
 export interface MapDomain {
@@ -110,6 +113,69 @@ export function nextDeepDiveItem(
       Math.abs(a.typicalMonths - probe) - Math.abs(b.typicalMonths - probe) ||
       a.typicalMonths - b.typicalMonths,
   )[0];
+}
+
+export interface LadderRung {
+  itemId: string;
+  statement: string;
+  typicalMonths: number;
+  /** confirmed = "easily"; emerging = "getting there"; next_up = the named
+   * next step (a "not yet", or the first unanswered rung above everything
+   * confirmed). Never a locked state: the ladder only ever shows what she
+   * lit and the single rung ahead. */
+  state: "confirmed" | "emerging" | "next_up";
+}
+
+/**
+ * The subject's ladder as the report draws it (the map, finally drawn):
+ * every item the parent answered with real signal, in anchor order, plus
+ * at most one unanswered "next up" rung above the highest confirmed
+ * anchor, within the ahead cap. Pure display data; scoring never reads it.
+ */
+export function ladderRungs(
+  domainId: string,
+  ageMonths: number,
+  answers: AnsweredLookup,
+): LadderRung[] {
+  const domain = getMapDomain(domainId);
+  if (!domain) return [];
+  const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
+
+  const rungs: LadderRung[] = [];
+  let highestAnswered = -Infinity;
+  let hasNamedNext = false;
+  for (const item of sorted) {
+    const answer = answers[item.id];
+    if (answer === "easily") {
+      rungs.push({ itemId: item.id, statement: item.statement, typicalMonths: item.typicalMonths, state: "confirmed" });
+      highestAnswered = Math.max(highestAnswered, item.typicalMonths);
+    } else if (answer === "getting_there") {
+      rungs.push({ itemId: item.id, statement: item.statement, typicalMonths: item.typicalMonths, state: "emerging" });
+      highestAnswered = Math.max(highestAnswered, item.typicalMonths);
+    } else if (answer === "not_yet") {
+      // Only the LOWEST not-yet names the next step; higher ones are
+      // beyond the frontier and drawing them would read as a wall.
+      if (!hasNamedNext) {
+        rungs.push({ itemId: item.id, statement: item.statement, typicalMonths: item.typicalMonths, state: "next_up" });
+        hasNamedNext = true;
+      }
+      highestAnswered = Math.max(highestAnswered, item.typicalMonths);
+    }
+  }
+  if (rungs.length === 0) return [];
+
+  if (!hasNamedNext) {
+    const next = sorted.find(
+      (item) =>
+        answers[item.id] === undefined &&
+        item.typicalMonths > highestAnswered &&
+        item.typicalMonths <= ageMonths + MONTHS_AHEAD_CAP,
+    );
+    if (next) {
+      rungs.push({ itemId: next.id, statement: next.statement, typicalMonths: next.typicalMonths, state: "next_up" });
+    }
+  }
+  return rungs;
 }
 
 export { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent };

@@ -10,6 +10,7 @@ Homa is a multi-tenant AI homeschool assistant (Next.js + the eve agent framewor
 
 - Install: `pnpm install`
 - Dev (all packages): `pnpm dev`, or one package: `pnpm --filter web dev`
+- Mobile app (not part of `pnpm dev` on purpose; it needs a simulator): `pnpm --filter mobile ios` (or `android`, `start`); setup in `apps/mobile/README.md`
 - Build: `pnpm build`
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`
@@ -26,7 +27,7 @@ Homa is a multi-tenant AI homeschool assistant (Next.js + the eve agent framewor
 
 ## Design system
 
-UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). `apps/web` currently hand-copies tokens/fonts/the `Logo` component into `globals.css`, `layout.tsx`, and `components/brand/Logo.tsx` (temporary until `packages/design` lands, ticket M1-17): if `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
+UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). `apps/web` currently hand-copies tokens/fonts/the `Logo` component into `globals.css`, `layout.tsx`, and `components/brand/Logo.tsx`, and `apps/mobile` does the same in `src/theme/tokens.ts` and `src/components/brand/logo.tsx` (temporary until `packages/design` lands, ticket M1-17): if `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
 
 ## Security & boundaries
 

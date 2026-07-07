@@ -14,6 +14,16 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 - [ ] **fal.ai**: create a **new API key** for Homa (separate from the Mac Mini's) → fal.ai/dashboard/keys → label it `homa-cloud` → paste it somewhere safe (1Password), NOT into any repo file *(2 min)*
 - [x] **Resend**: account created, `mail.thankshoma.com` added and fully verified (DKIM, SPF, DMARC, click+open tracking all green), `RESEND_API_KEY` in `apps/web/.env.local` + Vercel production *(done 2026-07-04)*
 
+## Telnyx voice + text (experiment, build-log 2026-07-07)
+
+Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted Homa voice assistant, texts will route to the eve agent). SMS channel code is built but dark. The blocker for BOTH is the Telnyx account tier: trial accounts only connect calls/texts to/from your ONE verified number (busy beep for everyone else, confirmed 2026-07-07), and 10DLC texting registration needs the "Verified" account level (KYC), which even "Paid" does not include.
+
+- [x] **Quick unblock so calling works from YOUR phone**: founder's cell verified via API 2026-07-07; calls from it now connect to Homa. Trial still prepends a "this is an automated call on the Telnyx platform" disclaimer and caps calls at 10 min; both go away on upgrade *(done)*
+- [x] ~~Flip texting on~~ done 2026-07-07: `TELNYX_SMS_ENABLED=true` set in Vercel prod, channel deployed and live (webhook verified: forged posts get 401). Texting now waits ONLY on the steps below; no more code or deploys needed.
+- [ ] **Upgrade the account**: portal.telnyx.com → Account Levels → add payment (~$25), 2FA, service address ("Paid"), then KYC for "Verified" (10DLC needs Verified). Confirmed required even for texting your own verified number: carriers hard-block unregistered senders (test message 2026-07-07 failed with error 40010 "Not 10DLC registered") *(10 min + KYC wait)*
+- [ ] **Fill `TELNYX_SP_*`** in `apps/web/.env.local` (your name, address, email, mobile; it is the "Sole Proprietor" carrier registration, no LLC needed) then run `pnpm telnyx:provision` *(3 min)*
+- [ ] **Verify the PIN** that arrives on your phone: `pnpm telnyx:provision --verify-otp 123456` (re-runs the rest automatically, then text +1 346 758 8011 and Homa answers) *(1 min)*
+
 ## Domain & handles · memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
 **DECIDED 2026-07-04: bought thankshoma.com.** Domain is live on Vercel project
@@ -21,7 +31,10 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 The site + waitlist are LIVE at **https://thankshoma.com** (+ /conference for the
 QR code). Remaining handle work:
 
-- [ ] **Register @thankshoma** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min, do the memo's 2-min phone check for Pinterest/Facebook first)*
+- [ ] **Google Search Console**: add a Domain property for `thankshoma.com` (DNS TXT record, Vercel DNS makes this 2 min) → then Sitemaps → submit `https://thankshoma.com/sitemap.xml`. This is the single biggest crawl/index accelerator only a human can do *(5 min)*
+- [ ] **Bing Webmaster Tools**: import the site from Search Console (one click after GSC exists); covers Bing + Copilot + DuckDuckGo *(2 min)*
+- [ ] **Register @thankshoma** on: Instagram, TikTok, Pinterest, Facebook page, X *(10 min, do the memo's 2-min phone check for Pinterest/Facebook first)*. When done, tell the agent to add the profile URLs to the Organization schema's `sameAs` (entity trust signal)
+- Phone on file for verifications (handle checks, Postiz connects, future Twilio/10DLC): +1 346 758 8011 *(provided 2026-07-07; private by default, keep it off every public surface: no footer, no Organization schema, no ai.txt, unless explicitly ruled otherwise)*
 - [ ] Optional defensive redirects if still available: homaandme.com, homa.school *(memo's list; cheap insurance)*
 
 ## Marketing demand engine · spec: `docs/homa-planning/14-marketing-demand-engine.md`
@@ -43,6 +56,11 @@ QR code). Remaining handle work:
 - [x] Tell the agent "auth Vercel MCP" in chat, it triggers the flow, you complete the browser login *(verified: MCP lists Homa team + projects)*
 - [x] Optional: rescope the Supabase MCP token to the new `Homa` org once it exists (Settings → MCP → supabase) so agents can never touch the Recoupable prod DB *(verified: token now sees ONLY the Homa org)*
 
+## Mobile app (added 2026-07-07, all "whenever it blocks something")
+
+- [ ] **Google sign-in on mobile**: Supabase dashboard → Auth → URL Configuration → add `homa://**` to Redirect URLs, then tell an agent to wire `expo-auth-session` *(2 min; email/password works without this)*
+- [ ] **TestFlight/store, when that day comes**: Apple Developer Program ($99/yr) + Google Play ($25 once), then `npx eas init` login in `apps/mobile` *(agents handle EAS config after)*
+
 ## Family
 
 - [ ] **Ask Alessa**: is the phonics curriculum "Hegg" = **Heggerty**? (last open decision, D10) *(30 sec)*
@@ -55,4 +73,4 @@ QR code). Remaining handle work:
 - GitHub repo creation/push (agent, after org exists)
 - Any code, schema, or deploy (agents)
 - Google Workspace inbox (after domain; ~$7/mo, 10 min, this weekend is fine)
-- Twilio/10DLC (needs the LLC, background task later)
+- ~~Twilio/10DLC (needs the LLC, background task later)~~ superseded: Telnyx sole-prop 10DLC needs no LLC, see the Telnyx section above

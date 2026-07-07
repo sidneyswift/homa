@@ -19,6 +19,8 @@ export {
 
 export { US_STATES, type UsStateCode } from "./us-states";
 
+export { formatUsPhone, normalizeUsPhoneE164 } from "./phone";
+
 export {
   ageInMonths,
   ageLabel,
@@ -35,17 +37,21 @@ export {
   getMapDomain,
   getMapItem,
   growingActivityFor,
+  ladderRungs,
   MAP_ANSWERS,
   MAP_BANK_VERSION,
   MAP_DOMAINS,
   MAP_SOURCES,
   nextDeepDiveItem,
   planQuestions,
+  type LadderRung,
   type MapAnswer,
   type MapDomain,
   type MapItem,
   type MapQuestionPlan,
 } from "./map/bank";
+
+export { reportStaleness, type ReportStaleness } from "./map/staleness";
 
 export {
   buildFourWeekPlan,
@@ -74,6 +80,22 @@ export {
   type DomainLine,
 } from "./map/sentences";
 
+export { BANNED_WORDS, EM_DASH } from "./map/copy-laws";
+
+export {
+  type NarrativeMeta,
+  type PlanNarrative,
+  type ReportNarrative,
+} from "./map/narrative";
+
+export {
+  NARRATIVE_LENGTH_CAPS,
+  validateNarrative,
+  validatePlanNarrative,
+  type NarrativeGateContext,
+  type NarrativeVerdicts,
+} from "./map/narrative-gate";
+
 export {
   HOMESCHOOL_STYLES,
   MAP_INTERESTS_CAP,
@@ -85,6 +107,9 @@ export {
   mapClaimSchema,
   mapExtrasSchema,
   mapFamilyExtrasSchema,
+  mapPlanConsentSchema,
+  mapPlanProgressSchema,
+  mapReportCorrectionSchema,
   mapResumeRequestSchema,
   mapScoreRequestSchema,
   mapSignupSchema,
@@ -94,6 +119,9 @@ export {
   type MapChildInput,
   type MapClaimInput,
   type MapFamilyExtras,
+  type MapPlanConsent,
+  type MapPlanProgress,
+  type MapReportCorrection,
   type MapSignupInput,
   type MapStartInput,
 } from "./map/schemas";

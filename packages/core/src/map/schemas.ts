@@ -50,6 +50,10 @@ export const mapSignupSchema = z.object({
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional(),
   password: z.string().min(8).max(200),
+  /** Optional cell for the texting line (founder call 2026-07-07). Raw
+   * human-typed shape; the server normalizes to +1E164 and silently skips
+   * anything unparseable, an optional field never blocks signup. */
+  phone: z.string().trim().max(30).optional(),
 });
 export type MapSignupInput = z.infer<typeof mapSignupSchema>;
 
@@ -94,8 +98,13 @@ export type MapChildExtras = z.infer<typeof mapChildExtrasSchema>;
 export const mapFamilyExtrasSchema = z.object({
   firstName: z.string().trim().max(100).optional(),
   usState: z.string().length(2).optional(),
-  style: z.enum(HOMESCHOOL_STYLES).optional(),
-  /** How closely the style is followed. */
+  /** Homeschool styles followed, plural since 2026-07-06 (founder:
+   * parents must be able to pick more than one, eclectic homes mix).
+   * First one listed is the primary; context bags written before this
+   * date hold a single `style` string instead, and readers fall back
+   * to it. */
+  styles: z.array(z.enum(HOMESCHOOL_STYLES)).max(HOMESCHOOL_STYLES.length).optional(),
+  /** How closely the styles are followed. */
   strictness: z.enum(["closely", "loosely", "exploring"]).optional(),
   curriculums: z.array(z.string().trim().min(1).max(60)).max(12).optional(),
   /** The crew that can appear in personalized materials later: family
@@ -122,6 +131,44 @@ export type MapAnswerPayload = z.infer<typeof mapAnswerSchema>;
 export const mapScoreRequestSchema = z.object({
   childId: z.uuid(),
 });
+
+/**
+ * The living-record write: one or more answer changes from the report
+ * page (a tapped correction in a receipts drawer, the inline sharpening
+ * question, a staleness re-check), batched so one save means one rescore
+ * and one rewrite. The lead comes from the cookie, never here.
+ */
+export const mapReportCorrectionSchema = z.object({
+  childId: z.uuid(),
+  source: z.enum(["report_correction", "report_probe", "recheck"]).default("report_correction"),
+  changes: z
+    .array(
+      z.object({
+        itemId: z.string().min(1).max(120),
+        answer: z.enum(MAP_ANSWERS),
+      }),
+    )
+    .min(1)
+    .max(24),
+});
+export type MapReportCorrection = z.infer<typeof mapReportCorrectionSchema>;
+
+/** Full-map sync of the four-week plan's check-offs (idempotent: the
+ * client sends the whole checks map, keyed "week.activityIndex"). */
+export const mapPlanProgressSchema = z.object({
+  childId: z.uuid(),
+  domainId: z.string().min(1).max(40),
+  checks: z.record(z.string().regex(/^[1-4]\.\d{1,2}$/), z.boolean()),
+});
+export type MapPlanProgress = z.infer<typeof mapPlanProgressSchema>;
+
+/** The report's one-tap month: consent IS the explicit ask the email
+ * doctrine requires before a retest email may ever be armed. */
+export const mapPlanConsentSchema = z.object({
+  childId: z.uuid(),
+  domainId: z.string().min(1).max(40),
+});
+export type MapPlanConsent = z.infer<typeof mapPlanConsentSchema>;
 
 /** Body of DELETE /api/map/children. The lead comes from the cookie, never here. */
 export const mapChildRemoveSchema = z.object({

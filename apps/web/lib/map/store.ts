@@ -8,6 +8,9 @@ import {
   type FourWeekPlan,
   type MapAnswer,
   type MapScores,
+  type NarrativeMeta,
+  type PlanNarrative,
+  type ReportNarrative,
 } from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
@@ -144,6 +147,9 @@ interface LinkAuthUserInput {
   email: string;
   firstName?: string;
   lastName?: string;
+  /** Normalized +1E164 from the optional signup phone field; the bridge
+   * copies it into family_phones when the workspace is created. */
+  phoneE164?: string;
 }
 
 /**
@@ -181,6 +187,7 @@ export async function linkAuthUser(
         email = ${input.email},
         first_name = coalesce(${input.firstName ?? null}, first_name),
         last_name = coalesce(${input.lastName ?? null}, last_name),
+        phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
         resume_token_hash = ${tokenHash},
         updated_at = now()
       where id = ${targetId}
@@ -195,6 +202,7 @@ export async function linkAuthUser(
       email = ${input.email},
       first_name = coalesce(${input.firstName ?? null}, first_name),
       last_name = coalesce(${input.lastName ?? null}, last_name),
+      phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
       resume_token_hash = ${tokenHash},
       updated_at = now()
     where id = ${input.leadId}
@@ -323,6 +331,76 @@ export async function saveAnswer(
   return { ok: true, domain: item.domain.id };
 }
 
+/**
+ * The living-record write: answer changes arriving from the report page
+ * itself (a tapped correction, the inline sharpening question, a
+ * staleness re-check), batched so one save means one rescore and one
+ * rewrite. Same upsert as saveAnswer plus provenance: corrections stamp
+ * their source so the re-norm loop can tell a second look from a first.
+ */
+export async function correctAnswers(
+  leadId: string,
+  childId: string,
+  changes: Array<{ itemId: string; answer: MapAnswer }>,
+  source: "report_correction" | "report_probe" | "recheck",
+): Promise<boolean> {
+  if (!(await childBelongsToLead(childId, leadId))) return false;
+  const valid = changes.filter((change) => getMapItem(change.itemId));
+  if (valid.length === 0) return false;
+
+  const sql = mapDb();
+  for (const change of valid) {
+    await sql`
+      insert into public.lead_answers (lead_child_id, question_id, answer, source)
+      values (${childId}, ${change.itemId}, ${change.answer}, ${source})
+      on conflict (lead_child_id, question_id)
+      do update set answer = excluded.answer, answered_at = now(), source = excluded.source
+    `;
+  }
+  await touchLead(leadId);
+  return true;
+}
+
+/**
+ * Syncs the four-week plan's check-offs server-side (idempotent full-map
+ * write). Null when no plan exists for this child + subject; the client
+ * keeps its localStorage copy either way, so a shared-link viewer loses
+ * nothing and forges nothing.
+ */
+export async function savePlanProgress(
+  leadId: string,
+  childId: string,
+  domainId: string,
+  checks: Record<string, boolean>,
+): Promise<{ done: number } | null> {
+  if (!(await childBelongsToLead(childId, leadId))) return null;
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.lead_plans
+    set progress = ${sql.json(checks as unknown as DbJson)}
+    where lead_child_id = ${childId} and domain_id = ${domainId}
+    returning id
+  `;
+  if (rows.length === 0) return null;
+  await touchLead(leadId);
+  return { done: Object.values(checks).filter(Boolean).length };
+}
+
+/** The child's report token, re-scoped to the caller's lead (for the
+ * consent tap, which builds a plan through the token path). */
+export async function getReportTokenForChild(
+  leadId: string,
+  childId: string,
+): Promise<string | null> {
+  if (!(await childBelongsToLead(childId, leadId))) return null;
+  const sql = mapDb();
+  const rows = await sql<{ token: string }[]>`
+    select token from public.lead_reports
+    where lead_child_id = ${childId} and revoked_at is null
+  `;
+  return rows[0]?.token ?? null;
+}
+
 /** Full state snapshot for resume: children, answers, report tokens. */
 export async function getLeadState(lead: LeadRow): Promise<LeadState> {
   const sql = mapDb();
@@ -385,11 +463,15 @@ export interface ScoredReport {
   childId: string;
 }
 
-/** One archived scoring, kept so the report can show dated movement. */
+/** One archived scoring, kept so the report can show dated movement.
+ * Snapshots from the narrative era also archive the words that shipped
+ * with those numbers; older entries simply lack the keys. */
 export interface ScoreSnapshot {
   scores: MapScores;
   generated_at: string;
   bank_version: string;
+  narrative?: ReportNarrative | null;
+  narrative_meta?: NarrativeMeta | null;
 }
 
 const HISTORY_CAP = 12;
@@ -419,9 +501,17 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
   );
 
   const existing = await sql<
-    { scores: MapScores; generated_at: string; bank_version: string; history: ScoreSnapshot[] }[]
+    {
+      scores: MapScores;
+      generated_at: string;
+      bank_version: string;
+      history: ScoreSnapshot[];
+      narrative: ReportNarrative | null;
+      narrative_meta: NarrativeMeta | null;
+    }[]
   >`
-    select scores, generated_at::text as generated_at, bank_version, history
+    select scores, generated_at::text as generated_at, bank_version, history,
+           narrative, narrative_meta
     from public.lead_reports where lead_child_id = ${childId}
   `;
   const history: ScoreSnapshot[] =
@@ -431,11 +521,16 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
             scores: existing[0].scores,
             generated_at: existing[0].generated_at,
             bank_version: existing[0].bank_version,
+            narrative: existing[0].narrative,
+            narrative_meta: existing[0].narrative_meta,
           },
           ...existing[0].history,
         ].slice(0, HISTORY_CAP)
       : [];
 
+  // A rescore always rewrites the words next to the new numbers (founder
+  // ruling: regenerate on every rescore): the archived narrative rides in
+  // history and the live row's narrative resets until generation lands.
   const token = newToken();
   const rows = await sql<{ token: string }[]>`
     insert into public.lead_reports (lead_child_id, scores, bank_version, token, history)
@@ -443,7 +538,8 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
             ${sql.json(history as unknown as DbJson)})
     on conflict (lead_child_id) do update
       set scores = excluded.scores, bank_version = excluded.bank_version,
-          generated_at = now(), history = excluded.history
+          generated_at = now(), history = excluded.history,
+          narrative = null, narrative_meta = null
     returning token
   `;
 
@@ -494,7 +590,18 @@ export async function getOrBuildPlan(
   reportToken: string,
   domainId: string,
   options: { rebuild?: boolean } = {},
-): Promise<{ plan: FourWeekPlan; childName: string; leadId: string; childId: string; wasNew: boolean; retestAt: string } | null> {
+): Promise<{
+  plan: FourWeekPlan;
+  childName: string;
+  leadId: string;
+  childId: string;
+  wasNew: boolean;
+  retestAt: string;
+  narrative: PlanNarrative | null;
+  narrativeMeta: NarrativeMeta | null;
+  /** Synced check-offs ("week.activityIndex" to done), server truth. */
+  progress: Record<string, boolean>;
+} | null> {
   const sql = mapDb();
   const rows = await sql<
     {
@@ -518,8 +625,16 @@ export async function getOrBuildPlan(
   const row = rows[0];
   if (!row) return null;
 
-  const existing = await sql<{ plan: FourWeekPlan; retest_at: string }[]>`
-    select plan, retest_at::text as retest_at
+  const existing = await sql<
+    {
+      plan: FourWeekPlan;
+      retest_at: string;
+      narrative: PlanNarrative | null;
+      narrative_meta: NarrativeMeta | null;
+      progress: Record<string, boolean>;
+    }[]
+  >`
+    select plan, retest_at::text as retest_at, narrative, narrative_meta, progress
     from public.lead_plans
     where lead_child_id = ${row.child_id} and domain_id = ${domainId}
   `;
@@ -531,6 +646,9 @@ export async function getOrBuildPlan(
       childId: row.child_id,
       wasNew: false,
       retestAt: existing[0].retest_at,
+      narrative: existing[0].narrative,
+      narrativeMeta: existing[0].narrative_meta,
+      progress: existing[0].progress ?? {},
     };
   }
 
@@ -540,8 +658,14 @@ export async function getOrBuildPlan(
   const childInterests = Array.isArray(row.child_context?.interests)
     ? (row.child_context.interests as string[])
     : [];
+  // Styles went multi-select on 2026-07-06 (`styles` array, first pick is
+  // the primary); bags saved before that hold a single `style` string.
+  const familyStyles = Array.isArray(row.family_context?.styles)
+    ? row.family_context.styles.filter((item): item is string => typeof item === "string")
+    : [];
   const familyStyle =
-    typeof row.family_context?.style === "string" ? row.family_context.style : undefined;
+    familyStyles[0] ??
+    (typeof row.family_context?.style === "string" ? row.family_context.style : undefined);
 
   const plan = buildFourWeekPlan(
     domainId,
@@ -551,8 +675,10 @@ export async function getOrBuildPlan(
   );
   if (!plan) return null;
 
-  // A rebuild restarts the month: fresh plan, fresh retest clock, and the
-  // retest email re-armed (this is the monthly loop working as designed).
+  // A rebuild restarts the month: fresh plan, fresh retest clock, the
+  // retest email re-armed, and the plan narrative reset so the words get
+  // rewritten next to the new month (this is the monthly loop working as
+  // designed).
   const inserted = await sql<{ retest_at: string }[]>`
     insert into public.lead_plans (lead_child_id, domain_id, plan, bank_version, retest_at)
     values (${row.child_id}, ${domainId}, ${sql.json(plan as unknown as DbJson)},
@@ -561,7 +687,9 @@ export async function getOrBuildPlan(
       set plan = excluded.plan,
           bank_version = excluded.bank_version,
           retest_at = excluded.retest_at,
-          retest_emailed_at = null
+          retest_emailed_at = null,
+          narrative = null,
+          narrative_meta = null
     returning retest_at::text as retest_at
   `;
   await touchLead(row.lead_id);
@@ -573,6 +701,11 @@ export async function getOrBuildPlan(
     childId: row.child_id,
     wasNew: existing.length === 0,
     retestAt: inserted[0].retest_at,
+    narrative: null,
+    narrativeMeta: null,
+    // A rebuilt month keeps its checks: the parent's work is source data
+    // and never resets with a derived artifact.
+    progress: existing[0]?.progress ?? {},
   };
 }
 
@@ -619,6 +752,12 @@ export interface ReportView {
   history: ScoreSnapshot[];
   /** The lead's other kids, for the map-the-next-kid handoff. */
   otherKids: { id: string; name: string; inRange: boolean; started: boolean; hasReport: boolean }[];
+  /** The LLM-written layer (null until generated; see narrative-store). */
+  narrative: ReportNarrative | null;
+  narrativeMeta: NarrativeMeta | null;
+  /** The child's built months: check-off counts for the your-month panel
+   * and plan existence for the consent card. */
+  plans: { domainId: string; done: number; total: number; retestAt: string }[];
 }
 
 /** Loads a report by URL token and stamps first view. Null when revoked/unknown. */
@@ -632,6 +771,8 @@ export async function getReportByToken(token: string): Promise<ReportView | null
       generated_at: string;
       viewed_at: string | null;
       history: ScoreSnapshot[];
+      narrative: ReportNarrative | null;
+      narrative_meta: NarrativeMeta | null;
       child_id: string;
       child_name: string;
       birth_month: string;
@@ -642,7 +783,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     }[]
   >`
     select r.token, r.scores, r.bank_version, r.generated_at::text as generated_at,
-           r.viewed_at::text as viewed_at, r.history,
+           r.viewed_at::text as viewed_at, r.history, r.narrative, r.narrative_meta,
            c.id as child_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.interests,
            f.id as lead_id, f.first_name, f.us_state
@@ -674,6 +815,13 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     order by c.created_at
   `;
 
+  const planRows = await sql<
+    { domain_id: string; plan: FourWeekPlan; progress: Record<string, boolean>; retest_at: string }[]
+  >`
+    select domain_id, plan, progress, retest_at::text as retest_at
+    from public.lead_plans where lead_child_id = ${row.child_id}
+  `;
+
   return {
     token: row.token,
     scores: row.scores,
@@ -689,12 +837,20 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     firstView,
     answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
     history: row.history ?? [],
+    narrative: row.narrative,
+    narrativeMeta: row.narrative_meta,
     otherKids: siblingRows.map((kid) => ({
       id: kid.id,
       name: kid.name,
       inRange: isInScoredRange(ageInMonths(kid.birth_month)),
       started: Number(kid.answered) > 0,
       hasReport: kid.has_report,
+    })),
+    plans: planRows.map((plan) => ({
+      domainId: plan.domain_id,
+      done: Object.values(plan.progress ?? {}).filter(Boolean).length,
+      total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
+      retestAt: plan.retest_at,
     })),
   };
 }

@@ -54,6 +54,15 @@ export function ReportActions({
       <button type="button" onClick={() => window.print()} className="text-brand underline-offset-2 hover:underline">
         print it
       </button>
+      {/* Audience renditions: the same numbers, shaped for who has to be
+          convinced (D7: sharing is the marketing; D6: nothing the parent
+          told us privately appears on either). */}
+      <a href={`/onboarding/r/${token}/one-pager`} className="text-brand underline-offset-2 hover:underline">
+        one-page summary
+      </a>
+      <a href={`/onboarding/r/${token}/evidence`} className="text-brand underline-offset-2 hover:underline">
+        evidence pack
+      </a>
       <a
         href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s progress report`)}`}
         className="text-brand underline-offset-2 hover:underline"
