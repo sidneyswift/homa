@@ -15,6 +15,7 @@ import { Logo } from "../../components/brand/Logo";
 export const metadata: Metadata = {
   title: "Terms",
   description: "The plain-language terms for using Homa: what the service is, who it is for, and what we each promise.",
+  alternates: { canonical: "/terms" },
 };
 
 const UPDATED = "July 6, 2026";

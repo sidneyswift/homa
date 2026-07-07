@@ -66,6 +66,7 @@ A: The progress report is free. Homa itself is invite-only while the first famil
 - Homepage: https://thankshoma.com
 - Free progress report: https://thankshoma.com/onboarding
 - Sample report: https://thankshoma.com/onboarding/sample
+- How the report is made (method + sources): https://thankshoma.com/onboarding/method
 - Blog: https://thankshoma.com/blog
 - Privacy policy: https://thankshoma.com/privacy
 - Terms of service: https://thankshoma.com/terms

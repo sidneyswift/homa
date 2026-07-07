@@ -113,6 +113,7 @@ export function Hero() {
               width={760}
               height={440}
               priority
+              sizes="(max-width: 880px) 100vw, 540px"
               style={{ width: "100%", height: 440, objectFit: "cover", display: "block" }}
             />
           </div>

@@ -5,11 +5,16 @@ import { Doodle } from "./Doodle";
 
 /**
  * Sunshine CTA band, ported verbatim from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx.
+ * docs/homa-design/ui_kits/landing/LandingPage.jsx. `data-final-cta` lets
+ * ScrollCta.tsx find this section without a prop link, so it can retire
+ * its own nudge once the page's real CTA is already on screen.
  */
 export function CtaBand() {
   return (
-    <section style={{ background: "var(--band-sunshine)", padding: "112px 40px 120px", position: "relative", overflow: "hidden", textAlign: "center" }}>
+    <section
+      data-final-cta=""
+      style={{ background: "var(--band-sunshine)", padding: "112px 40px 120px", position: "relative", overflow: "hidden", textAlign: "center" }}
+    >
       <Doodle name="star" size={38} color="var(--pop-cobalt)" rotate={-14} style={{ position: "absolute", top: 52, left: "9%" }} />
       <Doodle name="heart" size={30} color="var(--clay-600)" rotate={12} style={{ position: "absolute", bottom: 64, right: "9%" }} />
       <Doodle name="sparkle" size={24} color="#fff" rotate={20} style={{ position: "absolute", top: 66, right: "22%" }} />

@@ -33,12 +33,17 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.description,
-    alternates: { canonical: `/blog/${post.slug}` },
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+      types: { "application/rss+xml": "/blog/rss.xml" },
+    },
     openGraph: {
       type: "article",
+      siteName: "Homa",
       title: post.title,
       description: post.description,
       url: `/blog/${post.slug}`,
+      publishedTime: `${post.date}T00:00:00.000Z`,
       images: image ? [{ url: image }] : undefined,
     },
   };
@@ -59,9 +64,24 @@ export default async function BlogPostPage({
     headline: post.title,
     description: post.description,
     datePublished: post.date,
+    dateModified: post.date,
     image: post.ogImage ?? post.hero,
-    author: { "@type": "Organization", name: "Homa" },
-    publisher: { "@type": "Organization", name: "Homa" },
+    mainEntityOfPage: `https://thankshoma.com/blog/${post.slug}`,
+    // @id ties into the Organization node in the root layout's site-wide
+    // graph; name stays inline for validators that don't resolve across
+    // script blocks.
+    author: { "@type": "Organization", "@id": "https://thankshoma.com/#organization", name: "Homa" },
+    publisher: { "@type": "Organization", "@id": "https://thankshoma.com/#organization", name: "Homa" },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://thankshoma.com" },
+      { "@type": "ListItem", position: 2, name: "Notes", item: "https://thankshoma.com/blog" },
+      { "@type": "ListItem", position: 3, name: post.title, item: `https://thankshoma.com/blog/${post.slug}` },
+    ],
   };
 
   return (
@@ -70,7 +90,11 @@ export default async function BlogPostPage({
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }}
         />
         <article>
           <header>

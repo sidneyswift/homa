@@ -318,6 +318,49 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   .lp-peek { transition: opacity var(--dur-base) var(--ease-out); }
 }
 
+/* Scroll-triggered nudge card (ScrollCta.tsx): bottom-right on desktop,
+   full-width bottom bar on phones so it never blocks a thumb's reach. */
+.scroll-cta {
+  position: fixed;
+  z-index: 40;
+  right: 24px;
+  bottom: 24px;
+  width: 336px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 20px 20px 18px;
+  transform: translateY(24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+.scroll-cta[data-visible="true"] { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.scroll-cta-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.scroll-cta-close:hover { background: var(--stone-100); color: var(--text-body); }
+@media (max-width: 640px) {
+  .scroll-cta { left: 16px; right: 16px; bottom: 16px; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cta { transition: opacity var(--dur-base) ease; transform: none; }
+}
+
 /* ============================================================================
    Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
    step change, opacity + transform only, brand ease-out, under 300ms per the
@@ -353,6 +396,49 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
       transform: none;
     }
   }
+}
+
+/* ============================================================================
+   Narrative writing beat (/onboarding/r/[token], NarrativeBeat). The delight
+   that holds the wait while the report's words are written. Three layers,
+   transform/opacity only, all tokens: (1) each rotating status line rises in;
+   (2) a hand-drawn underline "writes" itself beneath it (pathLength=1 so the
+   dash trick needs no measured geometry); (3) ambient brand doodles drift and
+   twinkle behind it (the house playful device, decoration only). These loop on
+   purpose, it is an ambient wait, not a one-shot step entrance, and every
+   layer goes still under reduced-motion.
+   ========================================================================= */
+@keyframes nb-line-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.nb-line { animation: nb-line-in var(--dur-slow) var(--ease-out) both; }
+
+@keyframes nb-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+.nb-draw { stroke-dasharray: 1; animation: nb-draw 1400ms var(--ease-out) both; }
+
+/* Outer wrapper drifts (translate + rotate); the inner node twinkles
+   (opacity + scale). Kept on separate elements so the two never fight over
+   the same transform. */
+@keyframes nb-float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-9px); }
+  100% { transform: translateY(0); }
+}
+@keyframes nb-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.82); }
+  50%      { opacity: 0.85; transform: scale(1.06); }
+}
+.nb-float { animation: nb-float 4600ms var(--ease-in-out) infinite; }
+.nb-twinkle { animation: nb-twinkle 2800ms var(--ease-in-out) infinite; }
+
+@media (prefers-reduced-motion: reduce), print {
+  .nb-line { animation: none; }
+  .nb-draw { animation: none; stroke-dashoffset: 0; }
+  .nb-float, .nb-twinkle { animation: none; opacity: 0.6; }
 }
 
 /* ============================================================================

@@ -16,13 +16,38 @@ export const metadata: Metadata = {
   title: "Notes",
   description:
     "Notes from Homa: calm, practical writing for homeschool families, one idea at a time.",
+  alternates: {
+    canonical: "/blog",
+    types: { "application/rss+xml": "/blog/rss.xml" },
+  },
 };
 
 export default function BlogIndexPage() {
   const posts = listBlogPosts();
 
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": "https://thankshoma.com/blog#blog",
+    name: "Notes from Homa",
+    url: "https://thankshoma.com/blog",
+    description:
+      "Notes from Homa: calm, practical writing for homeschool families, one idea at a time.",
+    publisher: { "@type": "Organization", "@id": "https://thankshoma.com/#organization", name: "Homa" },
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      datePublished: post.date,
+      url: `https://thankshoma.com/blog/${post.slug}`,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd).replace(/</g, "\\u003c") }}
+      />
       <Nav />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <header>

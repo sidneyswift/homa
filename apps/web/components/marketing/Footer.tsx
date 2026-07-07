@@ -8,7 +8,7 @@ import { Logo } from "../brand/Logo";
 
 const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
   ["Product", [["Your child's progress report", "/onboarding"], ["How the report works", "/onboarding/method"], ["Features", "/#features"]]],
-  ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Joining Homa", "/#pricing"]]],
+  ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Joining Homa", "/onboarding"]]],
   ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
 ];
 

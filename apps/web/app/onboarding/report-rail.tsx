@@ -17,6 +17,16 @@
  * Each check-in lands with a soft ~200ms scale/fade (.rail-check in
  * globals.css, reduced-motion aware): the rail filling in IS the
  * delight, so each one should visibly land.
+ *
+ * Follow-up (2026-07-07, "what info is unneeded"): naming all 16
+ * subjects up front, most of them empty circles she hasn't reached
+ * yet, read like a syllabus and undercut the entry page's "5 minutes"
+ * promise with a literal "16 subjects to go". Done and current subjects
+ * still show by name (that's the payoff, watching it fill in), but
+ * everything still upcoming collapses into one "+ N more" line instead
+ * of itemizing subjects she has no context for yet. The old footer
+ * ("N subjects to go") is redundant with that line now, so it only
+ * shows once for the actual finish, "All subjects placed".
  */
 
 export interface RailSubject {
@@ -28,6 +38,11 @@ export interface RailSubject {
 export function ReportRail({ childName, subjects }: { childName: string; subjects: RailSubject[] }) {
   const done = subjects.filter((subject) => subject.status === "done").length;
   const remaining = subjects.length - done;
+  // Named individually: done (the payoff) and current (where she is).
+  // Order preserved from `subjects`, not regrouped, since a domain's
+  // position in the plan is meaningful.
+  const visibleSubjects = subjects.filter((subject) => subject.status !== "upcoming");
+  const upcomingCount = subjects.length - visibleSubjects.length;
 
   return (
     <aside aria-label={`${childName}'s report, assembling`} className="hidden lg:block">
@@ -44,40 +59,42 @@ export function ReportRail({ childName, subjects }: { childName: string; subject
           </p>
         </div>
         <ul className="px-4 py-3">
-          {subjects.map((subject) => (
+          {visibleSubjects.map((subject) => (
             <li key={subject.id} className="flex items-center gap-2 py-[3px] text-xs">
               {subject.status === "done" ? (
                 <span aria-hidden="true" className="rail-check w-3.5 text-center font-bold text-sage">
                   {"\u2713"}
                 </span>
-              ) : subject.status === "current" ? (
+              ) : (
                 <span aria-hidden="true" className="w-3.5 text-center font-bold text-brand">
                   {"\u25cf"}
-                </span>
-              ) : (
-                <span aria-hidden="true" className="w-3.5 text-center text-border-subtle">
-                  {"\u25cb"}
                 </span>
               )}
               <span
                 className={`transition-colors duration-(--dur-base) ease-out ${
-                  subject.status === "done"
-                    ? "font-medium text-strong"
-                    : subject.status === "current"
-                      ? "font-semibold text-strong"
-                      : "text-subtle"
+                  subject.status === "done" ? "font-medium text-strong" : "font-semibold text-strong"
                 }`}
               >
                 {subject.name}
               </span>
             </li>
           ))}
+          {upcomingCount > 0 ? (
+            <li className="flex items-center gap-2 py-[3px] text-xs text-subtle">
+              <span aria-hidden="true" className="w-3.5 text-center">
+                {"\u25cb"}
+              </span>
+              <span>
+                + {upcomingCount} more subject{upcomingCount === 1 ? "" : "s"}
+              </span>
+            </li>
+          ) : null}
         </ul>
-        <p className="border-t border-border-subtle px-4 py-2.5 text-center text-[0.6875rem] text-subtle">
-          {remaining === 0
-            ? "All subjects placed"
-            : `${remaining} subject${remaining === 1 ? "" : "s"} to go`}
-        </p>
+        {remaining === 0 ? (
+          <p className="border-t border-border-subtle px-4 py-2.5 text-center text-[0.6875rem] text-subtle">
+            All subjects placed
+          </p>
+        ) : null}
       </div>
     </aside>
   );

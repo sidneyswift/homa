@@ -7,9 +7,9 @@ import { Features } from "../components/marketing/Features";
 import { Footer } from "../components/marketing/Footer";
 import { Hero } from "../components/marketing/Hero";
 import { HowHomaWorksCard } from "../components/marketing/HowHomaWorksCard";
-import { InviteBand } from "../components/marketing/InviteBand";
 import { Nav } from "../components/marketing/Nav";
 import { RevealObserver } from "../components/marketing/RevealObserver";
+import { ScrollCta } from "../components/marketing/ScrollCta";
 import { Stories } from "../components/marketing/Stories";
 import { HowThread } from "../components/marketing/thread/HowThread";
 import { FAQ_ITEMS } from "../components/marketing/faq-items";
@@ -18,6 +18,10 @@ import { FAQ_ITEMS } from "../components/marketing/faq-items";
 export const metadata: Metadata = {
   description:
     "Homa is an AI homeschool assistant that tracks developmental progress for children ages 2 to 16 and generates personalized printable materials.",
+  // Self-referencing canonical: crawlers treat fragment URLs (/#how,
+  // /#features) as separate documents with identical content unless the
+  // page names its one preferred URL.
+  alternates: { canonical: "/" },
   other: {
     "last-modified": new Date().toISOString(),
     "answer-capsule":
@@ -40,8 +44,11 @@ const webAppJsonLd = {
     priceCurrency: "USD",
     description: "Free developmental progress report",
   },
-  author: { "@type": "Organization", name: "Homa", url: "https://thankshoma.com" },
-  publisher: { "@type": "Organization", name: "Homa", url: "https://thankshoma.com" },
+  // @id ties into the Organization node in the root layout's site-wide
+  // graph; name stays inline for validators that don't resolve across
+  // script blocks.
+  author: { "@type": "Organization", "@id": "https://thankshoma.com/#organization", name: "Homa" },
+  publisher: { "@type": "Organization", "@id": "https://thankshoma.com/#organization", name: "Homa" },
 };
 
 const faqJsonLd = {
@@ -58,13 +65,15 @@ const faqJsonLd = {
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
  * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
  * the claims pass applied: no fabricated social proof (C2), no pricing
- * (T2), invite-only framing, and every CTA routes to /onboarding, the
- * child's-map flow that replaced the bare waitlist. Section seams are the
- * kit's waves/ribbons (a ribbon IS the seam; never stack a wave at the
- * same boundary). Motion follows the emil-design-eng / review-animations
- * skills: brand ease-out + duration tokens, transform/opacity reveals
- * armed by JS with reduced-motion fallbacks, press scale on every
- * pressable.
+ * (T2), and every CTA routes to /onboarding, the child's-map flow that
+ * replaced the bare waitlist. Section seams are the kit's waves/ribbons (a
+ * ribbon IS the seam; never stack a wave at the same boundary). Motion
+ * follows the emil-design-eng / review-animations skills: brand ease-out +
+ * duration tokens, transform/opacity reveals armed by JS with
+ * reduced-motion fallbacks, press scale on every pressable. Invite-only
+ * framing was retired from this page (founder call 2026-07-07): ScrollCta
+ * replaces the old InviteBand section with a scroll-triggered nudge back
+ * to /onboarding instead.
  */
 export default function LandingPage() {
   return (
@@ -102,6 +111,7 @@ export default function LandingPage() {
       </div>
       <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />
       <Features />
+      <ScrollCta />
       <Wave color="var(--bg-page-warm)" flip />
       <HowThread />
       <Wave color="var(--bg-page-warm)" />
@@ -111,7 +121,6 @@ export default function LandingPage() {
       <Wave color="var(--band-blush)" flip />
       <Stories />
       <Wave color="var(--band-blush)" />
-      <InviteBand />
       <Faq />
       <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
       <CtaBand />

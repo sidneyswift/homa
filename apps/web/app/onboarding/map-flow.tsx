@@ -13,6 +13,7 @@ import { HubStep } from "./hub-step";
 import { KidsStep } from "./kids-step";
 import { NextKidStep } from "./next-kid-step";
 import { ParentStep } from "./parent-step";
+import { PreparingStep } from "./preparing-step";
 import { isChecklistComplete } from "./question-queue";
 import { ScoringStep } from "./scoring-step";
 import { SignupStep } from "./signup-step";
@@ -47,6 +48,13 @@ import { SignupStep } from "./signup-step";
  *      questions or the report. Kids answered in one sitting queue up in
  *      reportQueue and score together, so "answer everyone, then see the
  *      reports" is one path and "report per kid" stays the other.
+ *   6. (2026-07-07) Starting a brand-new kid's questionnaire used to cut
+ *      straight from "Start the questionnaire(s)" to the first question
+ *      with no transition. beginChecklist() now interposes a short
+ *      "preparing" beat (PreparingStep) whenever the target kid hasn't
+ *      answered anything yet, every entry point into the checklist
+ *      routes through it. Resuming an in-progress kid skips it: there's
+ *      nothing new to announce.
  *
  * The one honesty gap this still opens: a family whose only kids are
  * outside the scored age range never reaches scoring at all, and the hub
@@ -134,6 +142,10 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
   /** Set only on the parent-step to kids-step handoff, so the kids screen
    * can open with "Nice to meet you, Sarah." exactly once. */
   const [greetName, setGreetName] = useState<string | null>(null);
+  /** The kid PreparingStep is announcing, and where to land once it's
+   * done; null whenever "preparing" isn't the current phase. */
+  const [preparingChild, setPreparingChild] = useState<{ name: string; ageMonths: number } | null>(null);
+  const [pendingChecklistId, setPendingChecklistId] = useState<string | null>(null);
 
   const refreshState = useCallback(async (): Promise<{
     children: FlowChild[];
@@ -201,8 +213,33 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     }
   }, []);
 
-  function applyPostKidsRoute(route: PostKidsRoute): void {
-    if (route.phase === "checklist" || route.phase === "scoring") {
+  /** The one door into the checklist: a kid with zero answers so far gets
+   * the PreparingStep beat first, a kid already partway through resumes
+   * straight in. Every call site that can land on "checklist" routes
+   * through here instead of setting activeChildId/phase directly. */
+  function beginChecklist(child: FlowChild): void {
+    if (child.answered === 0) {
+      setPreparingChild({ name: child.name, ageMonths: child.ageMonths });
+      setPendingChecklistId(child.id);
+      setPhase("preparing");
+      return;
+    }
+    setActiveChildId(child.id);
+    setPhase("checklist");
+  }
+
+  function applyPostKidsRoute(route: PostKidsRoute, childrenList: FlowChild[]): void {
+    if (route.phase === "checklist") {
+      const child = childrenList.find((candidate) => candidate.id === route.childId);
+      if (child) {
+        beginChecklist(child);
+      } else {
+        setActiveChildId(route.childId);
+        setPhase("checklist");
+      }
+      return;
+    }
+    if (route.phase === "scoring") {
       setActiveChildId(route.childId);
       setPhase(route.phase);
       return;
@@ -295,13 +332,12 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
             !isChecklistComplete(child),
         );
         if (target) {
-          setActiveChildId(target.id);
-          setPhase("checklist");
+          beginChecklist(target);
           return;
         }
       }
 
-      applyPostKidsRoute(decidePostKidsRoute(restored.children, restored.hasAccount));
+      applyPostKidsRoute(decidePostKidsRoute(restored.children, restored.hasAccount), restored.children);
     })();
   }, [refreshState, bootstrapSession]);
 
@@ -339,7 +375,8 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           onDone={() => {
             void (async () => {
               const restored = await refreshState();
-              applyPostKidsRoute(decidePostKidsRoute(restored?.children ?? [], restored?.hasAccount ?? false));
+              const childrenList = restored?.children ?? [];
+              applyPostKidsRoute(decidePostKidsRoute(childrenList, restored?.hasAccount ?? false), childrenList);
             })();
           }}
         />
@@ -355,12 +392,27 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           onDone={() => {
             setGreetName(null);
             void (async () => {
-              // Straight into the first unstarted checklist (read-through
-              // ruling: no interstitial screens between adding kids and
-              // the first question).
+              // Into the first unstarted checklist, by way of the
+              // PreparingStep beat beginChecklist interposes for a kid
+              // who hasn't answered anything yet (2026-07-07 follow-up).
               const restored = await refreshState();
-              applyPostKidsRoute(decidePostKidsRoute(restored?.children ?? [], restored?.hasAccount ?? false));
+              const childrenList = restored?.children ?? [];
+              applyPostKidsRoute(decidePostKidsRoute(childrenList, restored?.hasAccount ?? false), childrenList);
             })();
+          }}
+        />
+      );
+    }
+
+    if (phase === "preparing" && preparingChild) {
+      return (
+        <PreparingStep
+          child={preparingChild}
+          onDone={() => {
+            setPreparingChild(null);
+            if (pendingChecklistId) setActiveChildId(pendingChecklistId);
+            setPendingChecklistId(null);
+            setPhase("checklist");
           }}
         />
       );
@@ -420,10 +472,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           <NextKidStep
             nextKid={pendingKid}
             pendingNames={pendingNames}
-            onAnswerNext={() => {
-              setActiveChildId(pendingKid.id);
-              setPhase("checklist");
-            }}
+            onAnswerNext={() => beginChecklist(pendingKid)}
             onSeeReports={advanceToReports}
           />
         );
@@ -495,8 +544,8 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         email={email}
         welcomeBack={welcomeBack}
         onStartChecklist={(childId) => {
-          setActiveChildId(childId);
-          setPhase("checklist");
+          const child = children.find((candidate) => candidate.id === childId);
+          if (child) beginChecklist(child);
         }}
         onSeeReport={(childId) => {
           setActiveChildId(childId);

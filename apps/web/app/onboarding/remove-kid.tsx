@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 
 /**
  * The quiet remove affordance on a hub card. First tap swaps in an inline
  * confirm that names what goes with the kid (answers, report); the second
  * tap calls DELETE /api/map/children. No modal: the card is the context.
+ *
+ * Follow-up (2026-07-07, "how can we make remove better design"): the
+ * trigger used to be a full "remove {name}" text link sitting right
+ * under the primary button, matching its visual rhythm even though
+ * removal is rare and destructive. Moved to a quiet icon button in the
+ * card's corner instead (the parent card needs `relative` for this to
+ * position against), a lighter-weight, more standard place for a
+ * "remove this card" control to live. The confirm step, once
+ * triggered, still reads inline in the card body: that part is common
+ * enough in the moment it's shown to deserve full sentences.
  */
 export function RemoveKid({
   childId,
@@ -45,9 +56,10 @@ export function RemoveKid({
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="mt-3 block text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline"
+        aria-label={`Remove ${name}`}
+        className="absolute top-3 right-3 rounded-full p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-[var(--sage-50)] hover:text-danger"
       >
-        remove {name}
+        <X size={16} aria-hidden="true" />
       </button>
     );
   }

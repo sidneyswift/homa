@@ -23,6 +23,7 @@ export type FlowPhase =
   | "parent"
   | "kids"
   | "hub"
+  | "preparing"
   | "checklist"
   | "extras"
   | "next-kid"

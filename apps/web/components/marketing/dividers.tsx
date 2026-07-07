@@ -1,10 +1,15 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
  * Section-seam dividers + the Eyebrow section label, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx (source of truth); keep
- * in sync until packages/design exists (M1-17). Purely decorative, static
- * SVG, no motion.
+ * in sync until packages/design exists (M1-17). Wave and Eyebrow are
+ * static SVG, no motion. Ribbon's text scrolls like a ticker along its
+ * curve (SMIL `<animate>` on `startOffset`, the only cross-browser way to
+ * move a textPath, per MDN); JS-armed and skipped entirely under
+ * prefers-reduced-motion, so static SVG is always the safe default.
  */
 
 export function Wave({ color = "var(--band-sky)", flip = false }: { color?: string; flip?: boolean }) {
@@ -26,11 +31,35 @@ export function Wave({ color = "var(--band-sky)", flip = false }: { color?: stri
   );
 }
 
+const RIBBON_TEXT_STYLE = {
+  fontFamily: "var(--font-sans)",
+  fontWeight: 700,
+  fontSize: 18,
+  letterSpacing: "0.2em",
+} as const;
+
+/** Pixels of ticker travel per second; same for every ribbon so a longer phrase just runs longer, not faster. */
+const RIBBON_SCROLL_SPEED = 34;
+
+/**
+ * User-units of straight-line extension added to each end of a ribbon's
+ * curve, for text only (see `textPaths` below). A `<textPath>` can't draw
+ * anything at an arc-length below 0 or past the path's total length, so
+ * animating `startOffset` on the plain ~1570-unit-long curve pushed
+ * characters past one end or the other mid-loop and they vanished
+ * (reported as "missing words"). 3000 comfortably covers the largest
+ * observed per-ribbon loop distance (~450 units) with room to spare for
+ * longer future copy.
+ */
+const PATH_OVERSCAN = 3000;
+
 /**
  * Squiggle ribbon divider: a fat wavy band with a repeating phrase riding
  * the curve. The ribbon IS the seam: `top` and `bottom` section colors meet
  * along its centerline, hidden under the band, so no other transition ever
- * shows behind it.
+ * shows behind it. The phrase scrolls like a ticker; alternating `phase`
+ * (already used to alternate the curve shape) also alternates scroll
+ * direction, so consecutive ribbons on a page visibly move opposite ways.
  */
 export function Ribbon({
   text,
@@ -52,8 +81,34 @@ export function Ribbon({
     "M-60 96 C 240 30, 480 152, 750 88 C 1020 26, 1240 142, 1500 62",
     "M-60 72 C 220 146, 470 28, 760 92 C 1050 154, 1260 40, 1500 104",
   ];
+  // Same two curves, each extended by PATH_OVERSCAN of straight line at
+  // both ends (identical shape in between, so the visible colored band
+  // below, which still uses `paths`, is unchanged pixel-for-pixel). Text
+  // rides this longer version so the ticker always has valid arc-length
+  // to draw on.
+  const textPaths = [
+    `M${-60 - PATH_OVERSCAN} 96 L-60 96 C 240 30, 480 152, 750 88 C 1020 26, 1240 142, 1500 62 L${1500 + PATH_OVERSCAN} 62`,
+    `M${-60 - PATH_OVERSCAN} 72 L-60 72 C 220 146, 470 28, 760 92 C 1050 154, 1260 40, 1500 104 L${1500 + PATH_OVERSCAN} 104`,
+  ];
   const d = paths[phase % 2];
-  const phrase = `${Array(9).fill(text).join("  \u00b7  ")}  \u00b7  `;
+  const textD = textPaths[phase % 2];
+  const reverse = phase % 2 !== 0;
+  // One repeating "text · " unit, glued together 9x. Looping the ticker by
+  // exactly one unit's measured width (see below) makes the reset invisible:
+  // the pixels revealed after the jump are identical to the ones before it.
+  const unit = `${text}  \u00b7  `;
+  const phrase = unit.repeat(9);
+
+  const unitRef = useRef<SVGTextElement>(null);
+  const [loop, setLoop] = useState<{ distance: number; duration: number } | null>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const unitWidth = unitRef.current?.getComputedTextLength();
+    if (!unitWidth) return;
+    setLoop({ distance: unitWidth, duration: unitWidth / RIBBON_SCROLL_SPEED });
+  }, []);
+
   return (
     <div aria-hidden="true" style={{ position: "relative", height: 150, margin: "-1px 0", pointerEvents: "none" }}>
       <svg
@@ -63,12 +118,25 @@ export function Ribbon({
       >
         <path d={`${d} L 1500 -40 L -60 -40 Z`} fill={top} />
         <path d={`${d} L 1500 216 L -60 216 Z`} fill={bottom} />
-        <path id={rid} d={d} fill="none" stroke={color} strokeWidth="54" strokeLinecap="round" />
-        <text
-          dominantBaseline="middle"
-          style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 18, letterSpacing: "0.2em", fill: ink }}
-        >
-          <textPath href={`#${rid}`}>{phrase}</textPath>
+        <path d={d} fill="none" stroke={color} strokeWidth="54" strokeLinecap="round" />
+        {/* Invisible, extends past the colored band above on both ends: the textPath target, per the PATH_OVERSCAN note. */}
+        <path id={rid} d={textD} fill="none" />
+        {/* Off-canvas, invisible: exists only so getComputedTextLength() can measure one unit's rendered width. */}
+        <text ref={unitRef} x={-9999} y={-9999} opacity={0} style={RIBBON_TEXT_STYLE}>
+          {unit}
+        </text>
+        <text dominantBaseline="middle" style={{ ...RIBBON_TEXT_STYLE, fill: ink }}>
+          <textPath href={`#${rid}`} startOffset={PATH_OVERSCAN}>
+            {phrase}
+            {loop ? (
+              <animate
+                attributeName="startOffset"
+                values={reverse ? `${PATH_OVERSCAN}; ${PATH_OVERSCAN + loop.distance}` : `${PATH_OVERSCAN}; ${PATH_OVERSCAN - loop.distance}`}
+                dur={`${loop.duration}s`}
+                repeatCount="indefinite"
+              />
+            ) : null}
+          </textPath>
         </text>
       </svg>
     </div>

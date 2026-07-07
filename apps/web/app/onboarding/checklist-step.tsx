@@ -49,6 +49,11 @@ import { ReportRail, type RailSubject } from "./report-rail";
  * - The in-card "back" (an undo action) was renamed "undo last answer"
  *   so it can't be confused with "back to your family" (navigation)
  *   right below the card.
+ *
+ * Third pass (2026-07-07, "easier to see what kid"): the meta row's
+ * "{name} · {subject}" was one plain gray line, easy to lose track of
+ * with more than one kid in the sitting. The name is now a small brand
+ * chip, visually distinct from the subject label beside it.
  */
 
 const CHIP_LABELS: ReadonlyArray<readonly [MapAnswer, string]> = [
@@ -77,12 +82,16 @@ export function ChecklistStep({
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
   const [flushing, setFlushing] = useState(false);
   const [easilyStreak, setEasilyStreak] = useState(0);
-  const [answeredCount, setAnsweredCount] = useState(Object.keys(child.answers).length);
   /** Item ids answered this sitting, so "back" can undo a mis-tap. */
   const [sittingHistory, setSittingHistory] = useState<string[]>([]);
   /** The domain of the last question answered; a different current domain
    * means a fresh subject intro should show. */
   const [lastDomainId, setLastDomainId] = useState<string | null>(null);
+  /** Whether the last question answered was itself a ladder rung: the
+   * gold "one more, since that was easy" line should only greet the
+   * FIRST rung of a climb, not repeat itself on every rung after
+   * (caught 2026-07-07, "gets redundant"). */
+  const [lastWasLadder, setLastWasLadder] = useState(false);
   /** The chip just tapped, held briefly so the tap visibly lands. */
   const [flashAnswer, setFlashAnswer] = useState<MapAnswer | null>(null);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
@@ -92,6 +101,7 @@ export function ChecklistStep({
   const domainsDone = plans.length - new Set(queue.map((entry) => entry.domainId)).size;
   const domain = current ? getMapDomain(current.domainId) : null;
   const isNewDomain = current ? lastDomainId !== current.domainId : false;
+  const isFirstLadderRung = current ? current.isLadder && !lastWasLadder : false;
 
   const minutesLeft = Math.max(1, Math.ceil((queue.length * SECONDS_PER_SUBJECT) / 60));
   const timeLabel = queue.length <= 1 ? "almost done" : `about ${minutesLeft} min left`;
@@ -129,8 +139,8 @@ export function ChecklistStep({
   function commitAnswer(answer: MapAnswer) {
     if (!current) return;
     setLastDomainId(current.domainId);
+    setLastWasLadder(current.isLadder);
     setEasilyStreak(answer === "easily" ? easilyStreak + 1 : 0);
-    setAnsweredCount((count) => count + 1);
     setSittingHistory((history) => [...history, current.item.id]);
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.item.id]: answer }));
     void postAnswer(current.item.id, answer);
@@ -166,8 +176,8 @@ export function ChecklistStep({
       delete next[lastId];
       return next;
     });
-    setAnsweredCount((count) => Math.max(0, count - 1));
     setEasilyStreak(0);
+    setLastWasLadder(false);
   }
 
   if (flushing || !current || !domain) {
@@ -181,31 +191,49 @@ export function ChecklistStep({
     );
   }
 
-  // The card's one kicker slot: reassurance on the very first question,
-  // the subject intro when a new subject opens, the gold ladder line on
-  // ladder questions. One slot, so nothing above the question ever
-  // appears or disappears between questions.
+  // The card's one kicker slot: the subject intro when a new subject
+  // opens, the gold ladder line on ladder questions. One slot, so
+  // nothing above the question ever appears or disappears between
+  // questions. (2026-07-07, "idk if we need that": the very first
+  // question used to get its own reassurance line here instead of a
+  // subject intro, "Answer from what you've seen Story do. 'Not sure'
+  // is a real answer." Cut on request; question 1 is also the first new
+  // subject, so it falls through to that branch below and gets the same
+  // domain-intro kicker every other subject opens with, e.g. "First up:
+  // numbers." "Not sure" stays legible on its own as one of the four
+  // answer chips either way.)
+  //
+  // 2026-07-07 ("gets redundant"): the gold ladder line used to show on
+  // EVERY rung of a climb, so a streak of "easily" answers in one
+  // subject repeated the identical line two or three times in a row.
+  // isFirstLadderRung narrows it to just the first surprise; later rungs
+  // in the same climb fall through to isNewDomain (false, same subject),
+  // so the kicker slot goes quiet and the question stands on its own.
   const kicker =
-    answeredCount === 0
-      ? {
-          text: `Answer from what you've seen ${child.name} do. \u201cNot sure\u201d is a real answer.`,
-          tone: "muted" as const,
-        }
-      : current.isLadder
-        ? { text: "One more, since that was easy\u2026", tone: "gold" as const }
-        : isNewDomain
-          ? { text: domain.intro, tone: "muted" as const }
-          : null;
+    isFirstLadderRung
+      ? { text: "One more, since that was easy\u2026", tone: "gold" as const }
+      : isNewDomain
+        ? { text: domain.intro, tone: "muted" as const }
+        : null;
 
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10">
       <div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted">
-            {child.name} {"\u00b7"} {domain.displayName}
-          </p>
-          <p className="font-mono text-xs text-subtle">{timeLabel}</p>
+        {/* Two tiers so "who" and "what section" each read on their own
+            (founder feedback 2026-07-07, mobile review: kid + subject
+            blurred into one small gray line). Tier 1: the kid as a
+            brand chip (whose questionnaire) plus the time estimate.
+            Tier 2: the subject as a prominent section title, the thing
+            they're actually answering about right now. */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+            {child.name}
+          </span>
+          <p className="shrink-0 font-mono text-xs text-subtle">{timeLabel}</p>
         </div>
+        <p className="mt-2 truncate font-display text-lg font-bold text-strong">
+          {domain.displayName}
+        </p>
         {/* One continuous hairline, small screens only: the rail carries
             per-subject progress wherever it fits. */}
         <div className="mt-2 h-1 overflow-hidden rounded-pill bg-border-subtle lg:hidden" aria-hidden="true">
@@ -249,7 +277,15 @@ export function ChecklistStep({
               </button>
             ))}
           </div>
-          <div className="mt-3 flex items-center justify-between">
+          {/* Centered when it's the only thing here (2026-07-07, "looks
+              bad"): `justify-between` with nothing on the right left this
+              row pinned to the left edge, which read fine under stacked
+              chips but looked stranded under a wide four-across row,
+              tucked under "Easily" and "Getting there" specifically as
+              if it belonged to those buttons. Splits back to the sides
+              only once "on a roll" actually has something to balance
+              against. */}
+          <div className={`mt-4 flex items-center ${easilyStreak >= 3 ? "justify-between" : "justify-center"}`}>
             <span className="flex items-center gap-4">
               {/* "undo last answer", not "back": "back" next to the
                   "back to your family" navigation link below was two
@@ -278,13 +314,14 @@ export function ChecklistStep({
         </div>
 
         {/* "Back to your family", not "finish later (your answers are
-            saved)": the "saved" reassurance already lives in the quiet
-            header above (OnboardingShell's "Everything saves as you go"),
-            repeating it here read as saying the same thing twice on one
-            screen. This also answers the real question the old label
-            didn't: this is where she'd go to add another kid mid-flow,
-            the hub she lands on has an "add another kid" control and a
-            "Continue the questionnaire" button for exactly this child. */}
+            saved)": this answers the real question the old label didn't,
+            this is where she'd go to add another kid mid-flow. The hub
+            she lands on has an "add another kid" control and a
+            "Continue the questionnaire" button for exactly this child.
+            (2026-07-07: the quiet header's "Everything saves as you go"
+            this comment used to point to is gone, cut on request; the
+            save-in-progress reassurance now lives only on the hub
+            itself, see hub-step.tsx.) */}
         <button
           type="button"
           onClick={onExit}
