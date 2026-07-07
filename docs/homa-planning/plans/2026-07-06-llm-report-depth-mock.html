@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report depth mock · disposable · fake data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=EB+Garamond:ital,wght@1,400&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;
+    --stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+    --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;
+    --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-500:#3D9A50;--sage-600:#2F7C40;--sage-700:#275F34;
+    --gold-100:#FFF3C2;--gold-400:#FFD43B;--gold-ink:#8A6410;--gold-ink-strong:#402E05;
+    --sky-100:#DDF3F9;--sky-500:#4FB4D6;--sky-600:#3A8FA9;--band-sky:#9FE0EE;
+    --display:"Schibsted Grotesk",sans-serif;--body:"Hanken Grotesk",sans-serif;--serif:"EB Garamond",serif;
+    --hand:"Caveat",cursive;--mono:"JetBrains Mono",monospace;--wordmark:"Fredoka",sans-serif;
+    --pill:999px;
+    --shadow-sm:0 1px 2px rgba(78,70,62,.08),0 2px 8px rgba(78,70,62,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--stone-50);color:var(--stone-800);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 96px}
+  .topbar{display:flex;align-items:center;gap:12px;padding:18px 0 0;flex-wrap:wrap}
+  .wordmark{font-family:var(--wordmark);font-weight:600;font-size:1.3rem;color:var(--clay-500)}
+  .meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;color:var(--stone-500);text-transform:uppercase}
+  .fakebanner{margin:16px 0 0;border-radius:12px;background:var(--gold-100);color:var(--gold-ink);padding:12px 16px;font-size:.9rem;font-weight:600}
+  .controls{position:sticky;top:0;z-index:5;background:var(--stone-50);padding:14px 0 10px;border-bottom:1px solid var(--stone-200);margin-top:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .row+.row{margin-top:8px}
+  .rowlabel{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-500);min-width:64px}
+  .tog{border:1.5px solid var(--stone-300);background:#fff;border-radius:var(--pill);padding:7px 16px;font-family:var(--body);font-weight:600;font-size:.86rem;color:var(--stone-800);cursor:pointer}
+  .tog:hover{border-color:var(--clay-300)}
+  .tog.on{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+  .costline{font-family:var(--mono);font-size:.72rem;color:var(--stone-600);margin-top:8px}
+  .costline b{color:var(--stone-800)}
+
+  .report{margin-top:22px;background:#fff;border:1px solid var(--stone-200);border-radius:28px;box-shadow:var(--shadow-sm);overflow:hidden}
+  .band{background:var(--band-sky);padding:26px 28px 24px}
+  .band .kicker{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(34,30,26,.7)}
+  .band h1{font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.05;letter-spacing:-.015em;color:var(--stone-900);margin:12px 0 6px}
+  .band h1 .accent{color:var(--clay-600)}
+  .band .sub{font-family:var(--serif);font-style:italic;font-size:1.05rem;color:rgba(34,30,26,.75);margin:0}
+  .inner{padding:24px 28px 28px}
+
+  .note{display:flex;gap:14px;border:1px solid rgba(61,154,80,.3);background:var(--sage-50);border-radius:14px;padding:16px 18px}
+  .notemark{width:34px;height:34px;border-radius:50%;background:var(--clay-500);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--wordmark);font-weight:600;flex-shrink:0}
+  .note .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-600)}
+  .note p{margin:4px 0 0;font-size:.95rem}
+
+  h2.sec{font-family:var(--display);font-weight:600;font-size:1.2rem;color:var(--stone-900);margin:30px 0 4px}
+  .secsub{font-size:.85rem;color:var(--stone-600);margin:0 0 14px}
+
+  .strengths{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:640px){.strengths{grid-template-columns:1fr}}
+  .gcard{background:var(--gold-100);border-radius:14px;padding:14px}
+  .gcard .t{font-weight:700;color:var(--gold-ink-strong);font-size:.95rem}
+  .gcard .n{font-family:var(--mono);font-size:1.4rem;color:var(--gold-ink);margin-top:2px}
+  .gcard .n span{font-size:.75rem}
+  .gcard .s{font-size:.78rem;color:var(--gold-ink);margin-top:6px;line-height:1.45}
+
+  .subjects{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+  .srow{border:1px solid var(--stone-200);border-radius:12px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start}
+  .badge{flex-shrink:0;white-space:nowrap;border-radius:var(--pill);padding:4px 12px;font-size:.72rem;font-weight:700;margin-top:2px}
+  .b-ahead{background:var(--gold-100);color:var(--gold-ink)}
+  .b-on{background:var(--sage-50);color:var(--sage-700)}
+  .b-grow{background:var(--sky-100);color:var(--sky-600)}
+  .b-exp{background:var(--sage-50);color:var(--sage-700)}
+  .b-nm{background:var(--stone-100);color:var(--stone-600)}
+  .srow .mid{flex:1;min-width:0}
+  .srow .nm{font-weight:700;color:var(--stone-900);font-size:.95rem}
+  .srow .line{font-size:.86rem;color:var(--stone-600);margin-top:2px;line-height:1.5}
+  .srow .num{font-family:var(--mono);font-size:.82rem;color:var(--stone-900);flex-shrink:0;padding-top:2px}
+  .llmchip{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;background:var(--clay-50);color:var(--clay-600);border:1px dashed var(--clay-300);border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+  .srow.llm-on{border-color:var(--clay-300);background:linear-gradient(0deg,rgba(255,240,232,.35),rgba(255,240,232,.35)),#fff}
+
+  .synth{margin-top:26px;border:1.5px dashed var(--clay-300);border-radius:16px;padding:18px 20px;background:linear-gradient(0deg,rgba(255,240,232,.4),rgba(255,240,232,.4)),#fff}
+  .synth .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-600)}
+  .synth p{margin:8px 0 0;font-size:.98rem;line-height:1.65}
+  .synth .readaloud{margin-top:10px;font-family:var(--hand);font-size:1.15rem;color:var(--sage-600)}
+
+  .wiring{margin-top:26px;font-size:.8rem;color:var(--stone-500);border-top:1px solid var(--stone-200);padding-top:14px}
+  .wiring code{font-family:var(--mono);font-size:.72rem;background:var(--stone-100);border-radius:6px;padding:1px 6px}
+
+  h2.qhead{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:44px 0 6px;color:var(--stone-900)}
+  .qsub{color:var(--stone-600);margin:0 0 16px;font-size:.92rem}
+  .q{background:#fff;border:1px solid var(--stone-200);border-radius:16px;padding:18px 20px;margin:12px 0;box-shadow:var(--shadow-sm)}
+  .q .qt{font-weight:700;color:var(--stone-900)}
+  .q .qd{font-size:.86rem;color:var(--stone-600);margin:4px 0 10px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1.5px solid var(--stone-300);background:#fff;border-radius:var(--pill);padding:7px 14px;font-size:.84rem;font-weight:600;color:var(--stone-800);cursor:pointer}
+  .chip:hover{border-color:var(--clay-300)}
+  .chip.on{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+  .chip .rec{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;color:var(--sage-600);margin-left:5px}
+  .chip.on .rec{color:var(--sage-100)}
+
+  .assembler{background:var(--stone-900);border-radius:18px;padding:22px 24px;color:var(--stone-100);margin-top:26px}
+  .assembler h2{font-family:var(--display);color:#fff;margin:0 0 4px;font-size:1.2rem}
+  .assembler p{color:var(--stone-300);margin:0 0 14px;font-size:.9rem}
+  .assembler textarea{width:100%;min-height:70px;border-radius:12px;border:1px solid var(--stone-700);background:var(--stone-800);color:var(--stone-100);padding:11px 13px;font-family:var(--body);font-size:.92rem;resize:vertical}
+  .copybtn{display:inline-flex;align-items:center;background:var(--clay-500);color:#fff;border:none;border-radius:var(--pill);padding:11px 24px;font-family:var(--body);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:12px}
+  .copybtn:hover{background:var(--clay-600)}
+  .copyout{font-family:var(--mono);font-size:.74rem;white-space:pre-wrap;background:var(--stone-800);border-radius:12px;padding:13px;margin-top:12px;color:var(--sage-100);display:none}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--stone-200);font-size:.8rem;color:var(--stone-500);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .caveat{font-family:var(--hand);color:var(--sage-600);font-size:1.15rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="wordmark">homa</span>
+    <span class="meta">disposable mock · llm report depth · july 6, 2026</span>
+  </div>
+  <div class="fakebanner">
+    Everything on this page is fake. Both children are invented, and every clay-dashed block marked
+    "written by a model (mocked)" was written by hand for this mock to show what generated depth would read like.
+    Nothing here touches the real app.
+  </div>
+
+  <div class="controls">
+    <div class="row">
+      <span class="rowlabel">Child</span>
+      <button class="tog on" data-kid="maya" onclick="setKid('maya')">Maya · 4y 2m · mixed-strong</button>
+      <button class="tog" data-kid="jonah" onclick="setKid('jonah')">Jonah · 6y 1m · the hardest honest case</button>
+    </div>
+    <div class="row">
+      <span class="rowlabel">Depth</span>
+      <button class="tog on" data-depth="today" onclick="setDepth('today')">1 · Today's templates</button>
+      <button class="tog" data-depth="cards" onclick="setDepth('cards')">2 · Deeper cards</button>
+      <button class="tog" data-depth="synth" onclick="setDepth('synth')">3 · Whole-picture synthesis</button>
+      <button class="tog" data-depth="both" onclick="setDepth('both')">4 · Both</button>
+    </div>
+    <div class="costline" id="costline"></div>
+  </div>
+
+  <div class="report">
+    <div class="band">
+      <div class="kicker" id="kicker"></div>
+      <h1><span id="kidname"></span>'s <span class="accent">progress report</span></h1>
+      <p class="sub" id="subtitle"></p>
+    </div>
+    <div class="inner">
+      <div class="note">
+        <div class="notemark">h</div>
+        <div>
+          <div class="k">A note from Homa</div>
+          <p id="notetext"></p>
+        </div>
+      </div>
+
+      <h2 class="sec" id="strengthshead"></h2>
+      <p class="secsub" id="strengthssub"></p>
+      <div class="strengths" id="strengths"></div>
+
+      <div id="synthslot"></div>
+
+      <h2 class="sec">Subject by subject</h2>
+      <p class="secsub">The one-line card sentences. Depth 1 is what ships today; watch the on-track openers.</p>
+      <div class="subjects" id="subjects"></div>
+
+      <div class="wiring">
+        Wiring note: nothing here is real. Real wiring would ride <code>POST /api/map/score</code>
+        (one model call via the AI gateway after <code>createReport</code>), store generated text on the
+        <code>lead_reports</code> row versioned by bank + prompt version, share the banned-word gate with
+        <code>scripts/map-check.mts</code> as a runtime validator, and fall back to today's
+        <code>sentences.ts</code> templates on any failure. The sample report would use a hand-reviewed committed fixture.
+      </div>
+    </div>
+  </div>
+
+  <h2 class="qhead">Five calls that change what gets built</h2>
+  <p class="qsub">Tap to answer. Question 1 (overturn "zero model calls") was already ruled in chat: results first. These are the calls that shape the build. Recommended picks are pre-selected and tagged.</p>
+
+  <div class="q" data-q="elements" data-multi="1">
+    <div class="qt">1 · Which elements does the model write?</div>
+    <div class="qd">Everything else stays reviewed template. The note-from-Homa sample, if you want a feel for it, reads like:
+    "Sarah, the picture in one line: language is Maya's engine right now, and it is already pulling reading along." The four-week
+    plan and drawer explainers can be follow-ups; they multiply the review surface without changing the architecture.</div>
+    <div class="chips">
+      <button class="chip on" data-v="per-card sentences">Per-card sentences<span class="rec">REC</span></button>
+      <button class="chip on" data-v="whole-picture synthesis section">Whole-picture synthesis<span class="rec">REC</span></button>
+      <button class="chip" data-v="note from Homa">Note from Homa</button>
+      <button class="chip" data-v="drawer explainers">Drawer explainers</button>
+      <button class="chip" data-v="four-week plan copy">Four-week plan copy</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="latency">
+    <div class="qt">2 · Latency posture</div>
+    <div class="qd">Scoring is instant today (D5=A). One model call writing cards + synthesis is roughly 10 to 18 seconds.
+    The current "Drawing Maya's report..." theater beat is 2 to 3 seconds.</div>
+    <div class="chips">
+      <button class="chip on" data-v="instant paint with templates, generated depth swaps in when ready">Instant paint, depth streams in<span class="rec">REC</span></button>
+      <button class="chip" data-v="hold the report behind a longer writing beat until generation finishes">Hold report behind a writing beat</button>
+      <button class="chip" data-v="generate before the report email only, screen always instant">Screen instant, generation only gates nothing</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="failure">
+    <div class="qt">3 · When the model call fails or the gate rejects the text</div>
+    <div class="qd">The gate rejects banned words, em dashes, sibling comparisons, diagnosis language, invented ages or claims, and length overruns.</div>
+    <div class="chips">
+      <button class="chip on" data-v="degrade silently to templates, log it, retry on next view">Silent template fallback<span class="rec">REC</span></button>
+      <button class="chip" data-v="retry once then degrade">Retry once, then fallback</button>
+      <button class="chip" data-v="hold the report until generation succeeds">Hold the report</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="email">
+    <div class="qt">4 · Does generated text go into the report email?</div>
+    <div class="qd">The email is the durable, forwardable copy. A hallucination on screen is fixable on next view; in an inbox it is forever.</div>
+    <div class="chips">
+      <button class="chip on" data-v="screen only; email stays template and links to the living report">Screen only<span class="rec">REC</span></button>
+      <button class="chip" data-v="email includes the generated synthesis too">Email includes synthesis</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="regen">
+    <div class="qt">5 · Regeneration on rescore (deep dives update the same report)</div>
+    <div class="qd">Regenerating every rescore costs about 3 cents and keeps movement language fresh. Keeping stale prose next to new numbers is the failure case.</div>
+    <div class="chips">
+      <button class="chip on" data-v="regenerate on every rescore">Every rescore<span class="rec">REC</span></button>
+      <button class="chip" data-v="regenerate only when a position or months-ahead changes">Only when a position changes</button>
+    </div>
+  </div>
+
+  <div class="assembler">
+    <h2>Compose your rulings</h2>
+    <p>Tap answers above, add anything free-form, copy the whole thing back into chat.</p>
+    <textarea id="notes" placeholder="Gut reactions: which fake sentences felt like Homa, which felt like slop..."></textarea>
+    <br>
+    <button class="copybtn" onclick="compose()">Copy my answers</button>
+    <div class="copyout" id="copyout"></div>
+  </div>
+
+  <footer>
+    <span>Disposable planning artifact · all data fake · all "generated" text hand-mocked</span>
+    <span class="caveat">react, don't polish ✎</span>
+  </footer>
+</div>
+
+<script>
+// All fake. Sentences in `t` are today's real template outputs; `g` blocks are
+// hand-written mocks of what a gated model call could produce.
+var KIDS = {
+  maya: {
+    name: "Maya", age: "4y 2m", parent: "Sarah",
+    kicker: "made for Maya \u00b7 July 6, 2026 \u00b7 fake sample",
+    subtitle: "a first look at where they stand at 4y 2m, from what you've seen them do",
+    note: "Sarah, here's the honest picture: Maya is ahead for their age in 4 subjects and on track in 8 more. One subject is growing right now, with a place to start below. You gave me 21 real observations. Nothing here is a test result: it's your own noticing, organized.",
+    strengthsHead: "Maya's strengths, first",
+    strengthsSub: "Where Maya is ahead of what's typical for 4y 2m.",
+    strengths: [
+      { t: "Language", n: "+10", s: "You've seen it: tells a whole little story with a beginning and an end." },
+      { t: "Phonics", n: "+8", s: "You've seen it: says the first sound in a spoken word (mmm for milk)." },
+      { t: "Social-emotional", n: "+6", s: "You've seen it: gets that someone else can believe something that isn't true." }
+    ],
+    synth: "Reading the whole picture: Maya's strengths pool around language. She tells whole stories, hears first sounds, and reads other people well, and that cluster is the soil early reading grows in. The reading readiness you asked about is not a project you need to start; it is already underway, and her book-and-dinosaur streak is doing quiet work every day. Math sits comfortably at age: counting is solid, and counting past 20 is the natural next stretch. The one spot asking for a little attention is her hands: beads, scissors, playdough, ten happy minutes at a time. That is a muscle story, not a worry story. One easy win this month: letter sounds in the car. Her ear is ready for them.",
+    readaloud: "",
+    subjects: [
+      { b: "ahead", name: "Language", num: "+10 mo",
+        t: "Maya is ahead of what's typical for their age here. You've seen it: tells a whole little story with a beginning and an end.",
+        g: "A whole story with a beginning and an end, told at 4: that is narrative memory, the engine under reading comprehension later. Language is her strongest thread right now." },
+      { b: "ahead", name: "Phonics", num: "+8 mo",
+        t: "Maya is ahead of what's typical for their age here. You've seen it: says the first sound in a spoken word (mmm for milk).",
+        g: "Hearing that milk starts with mmm is the exact door reading walks in through, and she is standing at it early. Letter sounds are the natural next game." },
+      { b: "ahead", name: "Science", num: "+6 mo",
+        t: "Maya is ahead of what's typical for their age here. You've seen it: knows living things grow and change: seed to plant, caterpillar to butterfly.",
+        g: "Seed to plant, caterpillar to butterfly: she has the first big idea of biology, that living things change. All that outside time is doing quiet work here." },
+      { b: "ahead", name: "Social-emotional", num: "+6 mo",
+        t: "Maya is ahead of what's typical for their age here. You've seen it: gets that someone else can believe something that isn't true.",
+        g: "She understands that someone can believe a thing that is not true. That is the key that unlocks hide-and-seek, surprises, and real empathy, and many kids take another half year to find it." },
+      { b: "on", name: "Social studies", num: "+4 mo",
+        t: "Right where most kids their age are. You've seen it: knows what community helpers do: firefighter, doctor, mail carrier.",
+        g: "Firefighter, doctor, mail carrier: she knows who does what in her world. Place words like near and far, and the name of your town, are the next landmarks." },
+      { b: "on", name: "Executive function", num: "+4 mo",
+        t: "Right where most kids their age are. You've seen it: plays a stop-and-go game (freeze dance, Red Light Green Light) and holds the rule.",
+        g: "Freeze dance is secretly hard work: holding a rule beats an impulse, and she does it. Rolling with a changed plan is the next muscle, and it grows slowly at 4. Normal." },
+      { b: "on", name: "Literacy", num: "+2 mo",
+        t: "Right where most kids their age are. You've seen it: names more than half of the uppercase letters.",
+        g: "More than half her uppercase letters at 4 is right on the path. Retelling is the next chapter: what happened first, how it ended. Books she already loves make it easy." },
+      { b: "on", name: "Art & creative", num: "+2 mo",
+        t: "Right where most kids their age are. You've seen it: tells you what their picture is ('that's our house').",
+        g: "She tells you what her pictures are, which means drawing is already storytelling for her. People and houses on purpose come next, and the dinosaur phase will do the pulling." },
+      { b: "on", name: "Gross motor", num: "+2 mo",
+        t: "Right where most kids their age are. You've seen it: stands on one foot for a few seconds and hops.",
+        g: "Hopping and one-foot balancing at 4 is right on time. Catching a big ball most of the time is the next skill worth a backyard minute." },
+      { b: "on", name: "Math", num: "",
+        t: "Right where most kids their age are. You've seen it: counts 5 objects one at a time and tells you how many there are.",
+        g: "Counting five dinosaurs and knowing the answer is five: that one-to-one idea is the floor the rest of math stands on, and she has it. Counting past 20 is the natural next stretch." },
+      { b: "on", name: "Music", num: "",
+        t: "Right where most kids their age are. You've seen it: claps or taps along to a steady beat.",
+        g: "A steady beat is the skeleton of everything musical that comes later, and she keeps one. A whole song from memory usually arrives next, often out of nowhere in the back seat." },
+      { b: "on", name: "Self-care", num: "",
+        t: "Right where most kids their age are. You've seen it: uses the toilet during the day, with only the occasional miss.",
+        g: "Day-trained with the occasional miss is exactly 4. Independence at this age is a stack of tiny wins; hand-washing start to finish is the next one on the stack." },
+      { b: "grow", name: "Fine motor", num: "",
+        t: "The next step here is clear: strings large beads or threads laces. That's where to start.",
+        g: "Her hands are asking for a little strength work, and it is the fun kind: beads, scissors, playdough. Ten minutes of craft time is the whole assignment." },
+      { b: "exp", name: "Coding & computers", num: "",
+        t: "Code and computers are part of their world, and every build teaches. You've seen it: plays 'robot': gives exact step-by-step instructions and follows yours.",
+        g: "The robot game is real computational thinking: exact steps, in order, then fix the wrong one. At 4 that is the whole subject, and it is going well." },
+      { b: "nm", name: "Second language", num: "",
+        t: "Not part of home life right now, and that's fine. The door is always open.",
+        g: null },
+      { b: "nm", name: "Writing", num: "",
+        t: "Not enough answers yet to place this honestly. A few more would fill it in.",
+        g: null }
+    ]
+  },
+  jonah: {
+    name: "Jonah", age: "6y 1m", parent: "Sarah",
+    kicker: "made for Jonah \u00b7 July 6, 2026 \u00b7 fake sample \u00b7 the red-team case",
+    subtitle: "a first look at where they stand at 6y 1m, from what you've seen them do",
+    note: "Sarah, here's the honest picture: Jonah has solid footing in 3 subjects, and a clear next step in the ones marked blue. That's a starting line, not a verdict. Each blue card below says exactly where to begin. You gave me 19 real observations. Nothing here is a test result: it's your own noticing, organized.",
+    strengthsHead: "Jonah's strengths, first",
+    strengthsSub: "Where Jonah is ahead of what's typical for 6y 1m.",
+    strengths: [
+      { t: "Gross motor", n: "+7", s: "You've seen it: runs, stops, and changes direction with control in chase games." }
+    ],
+    synth: "Reading the whole picture, honestly and hopefully: Jonah is strong in his body and steady with feelings and friends, and those are real foundations, not consolation prizes. Most of the blue on this page is one story, not six: rhyming, letter names, letter sounds, and early counting are the entry skills of the same season of learning, and he has not started that season yet. That is a starting line, not a verdict on him or on you. The useful part: because the blues share a root, one small daily habit moves several subjects at once. If you take one thing from this page, make it rhyming and letter games in the car, five minutes, trucks invited. Plenty of kids firm up sounds at 6 and love chapter books at 8. Re-check in four weeks; at this age those numbers often move quickly.",
+    readaloud: "the drill: read this aloud. if you wince, it does not ship.",
+    subjects: [
+      { b: "ahead", name: "Gross motor", num: "+7 mo",
+        t: "Jonah is ahead of what's typical for their age here. You've seen it: runs, stops, and changes direction with control in chase games.",
+        g: "He moves like a kid older than 6: chase games with real control are whole-body planning. This is a strength worth feeding, not just burning off." },
+      { b: "on", name: "Social-emotional", num: "",
+        t: "Right where most kids their age are. You've seen it: calms down with a strategy when you prompt one: breaths, a break, asking for help.",
+        g: "He can find his way back to calm when you offer a strategy, which is the skill the next ten years are built on. Steady footing here makes everything else easier to teach." },
+      { b: "on", name: "Language", num: "",
+        t: "Right where most kids their age are. You've seen it: uses past and future naturally ('we went', 'we're going to').",
+        g: "His spoken language is right at age: past, future, real back-and-forth. That matters below, because a strong ear is the best possible starting point for the sound work ahead." },
+      { b: "grow", name: "Phonics", num: "",
+        t: "The next step here is clear: joins in on rhymes and rhyming songs they know. That's where to start.",
+        g: "Rhyming is the front door of reading, and it is a game, not a lesson: rhyme what the dump truck dumps. Five minutes in the car is plenty at this stage." },
+      { b: "grow", name: "Literacy", num: "",
+        t: "Next up for Jonah: recognizes the letters in their own name.",
+        g: "Start with the five letters that matter most to him: J-o-n-a-h. Kids learn their own name's letters first because they care about them; that is the honest first rung here." },
+      { b: "grow", name: "Math", num: "",
+        t: "What's next for Jonah: counts out loud to 10 without skipping numbers. One specific, learnable skill.",
+        g: "Counting to 10 without skips is the next rung, and trucks make honest math: count the wheels, count the loads, one number per touch." },
+      { b: "grow", name: "Writing", num: "",
+        t: "The next step here is clear: writes their own first name so you can read it. That's where to start.",
+        g: "His name, written big and traced in three colors, is the whole writing curriculum this month. It rides on the same letters literacy is starting with." },
+      { b: "grow", name: "Fine motor", num: "",
+        t: "Next up for Jonah: cuts along a straight line with child scissors.",
+        g: "Scissor control is hand strength, and hand strength shows up later in everything from writing to zippers. Snipping paper into confetti is five happy minutes." },
+      { b: "grow", name: "Executive function", num: "",
+        t: "What's next for Jonah: sees a sit-down activity through to the end: a puzzle, a craft, a book. One specific, learnable skill.",
+        g: "One short sit-down thing seen through to the end, his pick, is the muscle to build. A truck puzzle counts. Finishing is the skill; the subject is negotiable." },
+      { b: "nm", name: "Second language", num: "",
+        t: "Not part of home life right now, and that's fine. The door is always open.",
+        g: null },
+      { b: "nm", name: "Coding & computers", num: "",
+        t: "Not part of home life right now, and that's fine. The door is always open.",
+        g: null }
+    ]
+  }
+};
+
+var COSTS = {
+  today: "Depth 1 \u00b7 <b>$0 per report \u00b7 instant</b> \u00b7 what ships today",
+  cards: "Depth 2 \u00b7 <b>\u2248 $0.02 per report \u00b7 \u2248 8 to 15 s generation</b> \u00b7 claude-sonnet-5 intro pricing; \u00d71.5 after Aug 31; Haiku \u2248 \u00d70.2",
+  synth: "Depth 3 \u00b7 <b>\u2248 $0.01 per report \u00b7 \u2248 4 to 8 s generation</b> \u00b7 smallest generated surface per word of value",
+  both: "Depth 4 \u00b7 <b>\u2248 $0.03 per report \u00b7 \u2248 10 to 18 s generation (one call)</b> \u00b7 a 200-report conference day \u2248 $6"
+};
+
+var state = { kid: "maya", depth: "today" };
+
+function setKid(k){ state.kid = k; render(); }
+function setDepth(d){ state.depth = d; render(); }
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+function render(){
+  var kid = KIDS[state.kid];
+  var deepCards = state.depth === "cards" || state.depth === "both";
+  var showSynth = state.depth === "synth" || state.depth === "both";
+
+  document.querySelectorAll("[data-kid]").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-kid") === state.kid); });
+  document.querySelectorAll("[data-depth]").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-depth") === state.depth); });
+  document.getElementById("costline").innerHTML = COSTS[state.depth];
+
+  document.getElementById("kicker").textContent = kid.kicker;
+  document.getElementById("kidname").textContent = kid.name;
+  document.getElementById("subtitle").textContent = kid.subtitle;
+  document.getElementById("notetext").textContent = kid.note;
+  document.getElementById("strengthshead").textContent = kid.strengthsHead;
+  document.getElementById("strengthssub").textContent = kid.strengthsSub;
+
+  document.getElementById("strengths").innerHTML = kid.strengths.map(function(s){
+    return '<div class="gcard"><div class="t">' + esc(s.t) + ' \u2605</div><div class="n">' + s.n + '<span> mo ahead</span></div><div class="s">' + esc(s.s) + '</div></div>';
+  }).join("");
+
+  var synthslot = document.getElementById("synthslot");
+  if (showSynth) {
+    synthslot.innerHTML =
+      '<div class="synth"><div class="k">The whole picture, read closely <span class="llmchip">written by a model (mocked)</span></div>' +
+      '<p>' + esc(kid.synth) + '</p>' +
+      (kid.readaloud ? '<div class="readaloud">' + esc(kid.readaloud) + '</div>' : '') +
+      '</div>';
+  } else {
+    synthslot.innerHTML = "";
+  }
+
+  document.getElementById("subjects").innerHTML = kid.subjects.map(function(s){
+    var useLLM = deepCards && s.g;
+    var badgeClass = { ahead: "b-ahead", on: "b-on", grow: "b-grow", exp: "b-exp", nm: "b-nm" }[s.b];
+    var badgeText = { ahead: "Ahead", on: "On track", grow: "Growing right now", exp: "Part of your world", nm: s.name === "Writing" ? "Not mapped yet" : "Whenever you like" }[s.b];
+    if (s.b === "exp") badgeText = "Part of your world";
+    var line = useLLM ? esc(s.g) + ' <span class="llmchip">model (mocked)</span>' : esc(s.t);
+    return '<div class="srow' + (useLLM ? ' llm-on' : '') + '">' +
+      '<span class="badge ' + badgeClass + '">' + badgeText + '</span>' +
+      '<span class="mid"><span class="nm">' + esc(s.name) + '</span><span class="line" style="display:block">' + line + '</span></span>' +
+      (s.num ? '<span class="num">' + s.num + '</span>' : '') +
+      '</div>';
+  }).join("");
+}
+
+document.querySelectorAll(".q").forEach(function(q){
+  var multi = q.getAttribute("data-multi") === "1";
+  q.querySelectorAll(".chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      if (multi) { chip.classList.toggle("on"); }
+      else { q.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("on"); }); chip.classList.add("on"); }
+    });
+  });
+});
+
+function compose(){
+  var lines = ["LLM report depth \u00b7 my rulings:", "1 D8 re-decision: OVERTURNED in chat, results first (2026-07-06)"];
+  var labels = { elements: "2 elements the model writes", latency: "3 latency", failure: "4 failure posture", email: "5 email", regen: "6 regeneration" };
+  document.querySelectorAll(".q").forEach(function(q){
+    var picked = Array.prototype.map.call(q.querySelectorAll(".chip.on"), function(c){ return c.getAttribute("data-v"); });
+    lines.push(labels[q.getAttribute("data-q")] + ": " + (picked.length ? picked.join(" + ") : "no pick yet"));
+  });
+  var notes = document.getElementById("notes").value.trim();
+  if (notes) lines.push("Notes: " + notes);
+  var text = lines.join("\n");
+  var out = document.getElementById("copyout");
+  out.style.display = "block";
+  out.textContent = text;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+}
+
+render();
+</script>
+</body>
+</html>

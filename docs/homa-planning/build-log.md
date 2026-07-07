@@ -3,6 +3,75 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-06 (night) · D8 overturned: the LLM writes the report's words, code keeps the numbers (founder rulings)
+
+Grilling session on the report-depth exploration prompt
+(docs/homa-planning/plans/2026-07-06-llm-report-depth-exploration-prompt.md).
+Full Q&A and options table: plans/2026-07-06-llm-report-depth-options.md.
+Rulings, in the founder's words where they ruled:
+
+1. D8 (lead-magnet index.html, "curated sentence banks, zero model calls")
+   is OVERTURNED for report prose: "fuck privacy. customers care about
+   results." The scorer, ages, badges, chart, movement math, and citations
+   stay deterministic code, unchanged.
+2. Scope: "LLM should write all of it," with facts "deterministic or at
+   least tracked in the database over time." Read as the facts/voice split:
+   code computes every number, the model writes every parent-facing word
+   (top note, card lines, new whole-picture synthesis, drawer explainers,
+   four-week plan prose), and every generation is stored on the report row
+   versioned by bank version + prompt version + model, snapshotting into
+   history on rescore. "Building homa into an 'agent' for the user that is
+   personal to them": report generation shares the chat agent's voice
+   source and model (gateway claude-sonnet-5).
+3. Latency: report waits behind an honest writing beat, UNCAPPED. "I would
+   rather the report and the deep dives and the 4 week ciricculums be
+   FUCKING INCREADIBLE, then have it take less than 20 seconds." Templates
+   render on hard failure only, never on slowness. Report email sends after
+   generation completes so the emailed link opens a finished report.
+4. Defaults accepted without veto: regenerate on every rescore; v1 email
+   stays the two-line pointer; sample report narrative generated once, hand
+   reviewed, committed as fixture (doubles with the struggling-kid fixture
+   as the read-aloud bar for every prompt change); runtime gate ports the
+   map-check laws plus a no-invented-numbers grounding check, rejected
+   pieces fall back per piece.
+5. Consequences owed in the same PR: privacy page subprocessor section and
+   the "No AI provider receives your questionnaire answers" line rewritten
+   (the page promises it "changes first"), method page determinism wording
+   becomes "numbers by plain arithmetic, never AI; Homa writes the words,
+   checked against safety rules." FAQ's "your child never talks to an AI"
+   stays, still true.
+6. Conference timing was asked and not explicitly ruled; standing default
+   logged: build behind a server flag now, flip on when the founder
+   read-aloud passes, before or after July 13 as quality decides.
+
+Implementation prompt handed off:
+plans/2026-07-06-llm-report-narrative-implementation-prompt.md.
+
+## 2026-07-06 (late evening) · Pricing v1 set by founder: Homa $19/mo or $99/yr, Homa Pro $49/mo ("let's not overthink this")
+
+Founder call, superseding the $29/$49 numbers from D2/C1 (structure decided
+2026-07-03; numbers were always provisional under T2). Executed in BOTH
+Stripe environments: new prices on the existing "Homa" product
+(homa_monthly_19, homa_annual_99), new "Homa Pro" product + price
+(homa_pro_monthly_49), three payment links per environment (recorded in
+`apps/web/.env.local` as `..._PAYMENT_LINK_{MONTHLY,ANNUAL,PRO}_URL`), old
+$29 price archived and its link deactivated in both environments.
+
+Judgment calls + flags, made alone and noted for review:
+1. Pro's "bells and whistles" were founder-delegated ("we'll make some
+   stuff up"); chose ONLY claims that are true or hand-deliverable today,
+   per C2/no-fiction law: "Everything in Homa, plus the best intelligence
+   we can run, custom worksheets made for your kids, and priority support
+   from a real person." Editable in the dashboard when the tier sharpens.
+2. FLAG: $99/yr is Homeschool Fox's exact annual price (T3 says never
+   compete on their price axis). Stated to founder in-session; his call.
+3. FLAG: $99/yr is a 57% discount vs $19/mo (norm is 15 to 20%), and
+   annual-at-first-conversion reverses R3's September/month-3 timing
+   recommendation. Both accepted as founder prerogative, logged so the
+   reversal is deliberate, not drift.
+4. Site copy untouched: the FAQ's "pricing gets published before anyone
+   pays a cent" promise still holds until the paywall placement decision.
+
 ## 2026-07-06 (late evening) · "Founding families" framing retired everywhere (founder ruling)
 
 Founder: "remove all references to founding families. everywhere." Scrubbed
