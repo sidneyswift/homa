@@ -1,0 +1,31 @@
+# Homa
+
+> The calm homeschool assistant that shows you it's working.
+
+URL: https://thankshoma.com
+
+## What Homa Does
+
+Homa is an AI homeschool assistant for parents of children ages 2 to 16. It learns each child, generates personalized printable materials, tracks hours for your state, and shows you it's working through progress reports mapped to your state's standards.
+
+## Who It's For
+
+Homeschool parents who want less admin and more teaching. Parents who use their own curriculum, co-ops, or a mix of bought, borrowed, and homemade materials.
+
+## Key Features
+
+- Free developmental progress report (takes five minutes)
+- Personalized printable worksheets and materials
+- State standards mapping with coverage at a glance
+- Hour tracking for state compliance
+- AI assistant that plans around your curriculum
+- Works for ages 2 to 16, with questionnaires tuned to each age
+
+## Try It
+
+Get a free progress report showing exactly where your child stands: https://thankshoma.com/onboarding
+
+## Important
+
+- Homa is for parents only. Your child never sees the questionnaire and never talks to an AI.
+- The progress report is free. Homa itself is invite-only while the first families shape it.

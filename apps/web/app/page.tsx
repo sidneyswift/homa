@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Community } from "../components/marketing/Community";
 import { CtaBand } from "../components/marketing/CtaBand";
 import { Ribbon, Wave } from "../components/marketing/dividers";
@@ -11,6 +12,56 @@ import { Nav } from "../components/marketing/Nav";
 import { RevealObserver } from "../components/marketing/RevealObserver";
 import { Stories } from "../components/marketing/Stories";
 import { HowThread } from "../components/marketing/thread/HowThread";
+
+/* ── Answer capsules & freshness signals ────────────────────────── */
+export const metadata: Metadata = {
+  description:
+    "Homa is an AI homeschool assistant that tracks developmental progress for children ages 2 to 16 and generates personalized printable materials.",
+  other: {
+    "last-modified": new Date().toISOString(),
+    "answer-capsule":
+      "Get a free progress report showing exactly where your child stands \u2014 takes five minutes.",
+  },
+};
+
+/* ── Structured data: WebApplication + FAQPage ────────────────── */
+const faqItems = [
+  ["Does Homa follow my state's standards?", "Yes. Pick your state and every subject maps to it. You see coverage at a glance."],
+  ["Can I use my own curriculum?", "Bring it. Homa plans around any mix of bought, borrowed, and homemade."],
+  ["What ages does it cover?", "The progress report covers ages 2 to 16, with a questionnaire tuned to each age. Personalized materials are richest for the early years and growing from there."],
+  ["Does my child ever use it?", "Never. Homa is for you: your child never sees the questionnaire and never talks to an AI."],
+  ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost. A lighter week is still a school week."],
+  ["What does it cost?", "The progress report is free. Homa itself is invite-only while the first families shape it. Pricing gets published before anyone pays a cent."],
+] as const;
+
+const webAppJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Homa",
+  url: "https://thankshoma.com",
+  description:
+    "The calm homeschool assistant. Homa learns each child, makes printable materials just for them, tracks hours for your state, and shows you it\u2019s working.",
+  applicationCategory: "EducationApplication",
+  operatingSystem: "Any",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    description: "Free developmental progress report",
+  },
+  author: { "@type": "Organization", name: "Homa", url: "https://thankshoma.com" },
+  publisher: { "@type": "Organization", name: "Homa", url: "https://thankshoma.com" },
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map(([q, a]) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
 
 /**
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
@@ -27,6 +78,15 @@ import { HowThread } from "../components/marketing/thread/HowThread";
 export default function LandingPage() {
   return (
     <div style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "hidden" }}>
+      {/* Structured data for agent discoverability */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <RevealObserver />
       {/* The gradient wraps Nav + Hero together (not just Hero): now that
           Nav is transparent, anchoring the glow to Hero's own top edge left
