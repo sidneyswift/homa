@@ -39,11 +39,19 @@ function helpSuggestions(ageMonths: number): readonly string[] {
 export function ExtrasStep({
   child,
   needsSignup,
+  hasNextKid = false,
+  pendingReportCount = 1,
   onDone,
 }: {
   child: FlowChild;
   /** Whether the account step still comes next, before the report. */
   needsSignup: boolean;
+  /** Whether another kid's questions are still open, so the next screen
+   * is the next-kid choice rather than the report. */
+  hasNextKid?: boolean;
+  /** How many kids' reports this sitting has queued up (this kid
+   * included), so the copy says "the reports" when several are coming. */
+  pendingReportCount?: number;
   onDone: () => void;
 }) {
   const [step, setStep] = useState<0 | 1>(0);
@@ -75,8 +83,22 @@ export function ExtrasStep({
     onDone();
   }
 
-  const finishLabel = needsSignup ? "Continue" : `See ${child.name}'s progress report`;
-  const finishSkipLabel = needsSignup ? "skip this" : "skip this, show the report";
+  // "See the report" would lie when the next-kid choice or the account
+  // step comes first; the button only promises the report when the report
+  // is truly next. With several kids' reports queued this sitting, the
+  // landing report is the first kid's, so the label goes plural instead
+  // of naming the wrong kid.
+  const reportIsNext = !needsSignup && !hasNextKid;
+  const finishLabel = !reportIsNext
+    ? "Continue"
+    : pendingReportCount > 1
+      ? "See the reports"
+      : `See ${child.name}'s progress report`;
+  const finishSkipLabel = !reportIsNext
+    ? "skip this"
+    : pendingReportCount > 1
+      ? "skip this, show the reports"
+      : "skip this, show the report";
 
   return (
     <div>
@@ -89,8 +111,16 @@ export function ExtrasStep({
           2026-07-06: "these should be separated, one question at a
           time"), same rhythm as the questionnaire itself. */}
       <p className="font-hand text-2xl text-sage">questionnaire done {"\u2713"}</p>
+      {/* "while I build" is honest only when the report is actually next;
+          with another kid's questions still open, the build may wait on
+          the next-kid choice one screen later. And once several reports
+          are queued, "the reports" beats naming only this kid. */}
       <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-strong">
-        Two quick extras while I build {child.name}&apos;s report
+        {hasNextKid
+          ? `Two quick extras about ${child.name}`
+          : pendingReportCount > 1
+            ? "Two quick extras while I build the reports"
+            : `Two quick extras while I build ${child.name}'s report`}
       </h1>
 
       <div

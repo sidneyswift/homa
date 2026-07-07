@@ -143,6 +143,50 @@ Decisions made alone (auditable):
 - Advisors after the migration: no new findings (deny-all INFO lines and
   the documented create_my_family SECURITY DEFINER warn, unchanged).
 
+## 2026-07-06 (night) · Multi-kid order is the parent's call: the next-kid choice ships
+
+Founder: "it needs to be easier to add your second or third kids
+questions", the parent chooses whether to answer the other kids before
+generating, or generate kid 1's report and do kid 2 after, and the ask
+must be "simple, easy to understand, under 10 words".
+
+Shipped, all in the onboarding flow (no schema or query changes):
+
+1. **The next-kid choice (`next-kid-step.tsx`, new phase).** After one
+   kid's checklist + extras, if another in-range kid still has open
+   questions, one screen asks: **"Leo's questions now, or Maya's report
+   first?"** (7 words; plural form "...or the reports first?" once two or
+   more are queued). Secondary sage button starts/continues the sibling's
+   questionnaire (kids-step task-order precedent, detour above primary);
+   clay primary goes to the report(s). Caption reuses the report handoff
+   line ("Same questionnaire, tuned to Leo's age. About five minutes.")
+   or, for a started sibling, the saved-answers count.
+2. **One scoring beat, several reports.** `reportQueue` in map-flow
+   tracks kids finished this sitting, in order; ScoringStep now takes
+   `kids[]`, scores each sequentially (per-kid status lines, "Building
+   the progress reports…"), and lands on the FIRST kid's report. Any kid
+   finished in an earlier sitting but never scored is swept into the same
+   beat. Signup heading names the landing kid, not the last-answered one.
+3. **Report page: sibling-ready card.** After a multi-kid build, the
+   landing report shows "Leo's report is ready too" linking to
+   /onboarding (the session-scoped family page), deliberately NOT the
+   sibling's token URL: report pages are shareable capability links, and
+   embedding a sibling's token would let anyone holding one kid's link
+   open the other kid's report.
+4. **Honesty fixes the seams exposed:** extras' finish button says
+   "Continue" (and its headline drops "while I build") whenever the
+   choice or the account step comes next, not "See the report"; the hub
+   gained a finished-kid card ("Every question is answered. The report is
+   one tap away." → scoring) replacing a dead "Continue the
+   questionnaire" that mounted an empty checklist; ?start= links for
+   already-finished kids route to scoring instead of that same dead card.
+
+Verified: typecheck, lint, build green; two Playwright e2es (answer-both
+lane with plural ask + both reports in one beat + ready-too card, and
+report-first lane with single-kid beat + handoff card + second sitting
+pointing back at kid 1). Test leads and their bridged families/children/
+auth users deleted by lead id afterward, per the standing lesson.
+
 ## 2026-07-06 (night) · D3 re-decided: family workspace provisions at first report (founder ruling)
 
 Same session as the D8 overturn below. Founder, on learning that a lead's

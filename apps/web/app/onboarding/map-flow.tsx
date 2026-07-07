@@ -11,6 +11,7 @@ import type { FlowChild, FlowPhase } from "./flow-types";
 import { ExtrasStep } from "./extras-step";
 import { HubStep } from "./hub-step";
 import { KidsStep } from "./kids-step";
+import { NextKidStep } from "./next-kid-step";
 import { ParentStep } from "./parent-step";
 import { isChecklistComplete } from "./question-queue";
 import { ScoringStep } from "./scoring-step";
@@ -40,6 +41,12 @@ import { SignupStep } from "./signup-step";
  *      (see OnboardingShell), fully-answered kids resume at the finish
  *      line instead of the hub, focus follows phase changes, and the
  *      checklist gained its live report rail.
+ *   5. Multi-kid order is the parent's call: when one kid's questions
+ *      finish while another in-range kid still has open questions, the
+ *      next-kid choice (NextKidStep) asks which comes first, the sibling's
+ *      questions or the report. Kids answered in one sitting queue up in
+ *      reportQueue and score together, so "answer everyone, then see the
+ *      reports" is one path and "report per kid" stays the other.
  *
  * The one honesty gap this still opens: a family whose only kids are
  * outside the scored age range never reaches scoring at all, and the hub
@@ -51,6 +58,22 @@ import { SignupStep } from "./signup-step";
 function needsPreHubSignup(children: FlowChild[], hasAccount: boolean): boolean {
   if (hasAccount || children.length === 0) return false;
   return !children.some((child) => child.inRange && !child.reportToken);
+}
+
+/** The kid the next-kid choice offers: in range, no report yet, questions
+ * still open, and not already finished this sitting. Kids in reportQueue
+ * are excluded by id rather than by answers because the flow's copy of
+ * the active kid's answers goes stale during a checklist sitting. */
+function nextUnfinishedKid(children: FlowChild[], reportQueue: string[]): FlowChild | null {
+  return (
+    children.find(
+      (child) =>
+        child.inRange &&
+        !child.reportToken &&
+        !reportQueue.includes(child.id) &&
+        !isChecklistComplete(child),
+    ) ?? null
+  );
 }
 
 /** Where a family lands right after their kids list is up to date: the
@@ -104,6 +127,10 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
    * is heading for the report, or none of her kids are scoreable yet and
    * she's heading for the hub. */
   const [signupNext, setSignupNext] = useState<"scoring" | "hub">("hub");
+  /** Ids of kids whose questions finished this sitting, reports pending,
+   * in the order they finished. Scoring builds all of them in one beat and
+   * lands on the first one's report. */
+  const [reportQueue, setReportQueue] = useState<string[]>([]);
   /** Set only on the parent-step to kids-step handoff, so the kids screen
    * can open with "Nice to meet you, Sarah." exactly once. */
   const [greetName, setGreetName] = useState<string | null>(null);
@@ -189,6 +216,17 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     setPhase(route.phase);
   }
 
+  /** The last stretch before the report(s): the account gate if she has
+   * none yet, otherwise straight to scoring. */
+  function advanceToReports(): void {
+    if (hasAccount) {
+      setPhase("scoring");
+      return;
+    }
+    setSignupNext("scoring");
+    setPhase("signup");
+  }
+
   // The shell swaps between full site chrome and quiet focus chrome off
   // the current phase.
   useEffect(() => {
@@ -243,11 +281,18 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       }
 
       // ?start=childId (the report's map-the-next-kid handoff) opens that
-      // kid's checklist directly.
+      // kid's checklist directly. A kid with no questions left falls
+      // through to the router below, which sends finished kids to
+      // scoring; the checklist has no way to complete an already-complete
+      // kid.
       const startChild = params.get("start");
       if (startChild) {
         const target = restored.children.find(
-          (child) => child.id === startChild && child.inRange && !child.reportToken,
+          (child) =>
+            child.id === startChild &&
+            child.inRange &&
+            !child.reportToken &&
+            !isChecklistComplete(child),
         );
         if (target) {
           setActiveChildId(target.id);
@@ -322,10 +367,16 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     }
 
     if (phase === "checklist" && activeChild) {
+      const finishedId = activeChild.id;
       return (
         <ChecklistStep
           child={activeChild}
-          onComplete={() => setPhase("extras")}
+          onComplete={() => {
+            setReportQueue((queue) =>
+              queue.includes(finishedId) ? queue : [...queue, finishedId],
+            );
+            setPhase("extras");
+          }}
           onExit={() => {
             void (async () => {
               await refreshState();
@@ -338,26 +389,57 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     }
 
     if (phase === "extras" && activeChild) {
+      const pendingKid = nextUnfinishedKid(children, reportQueue);
       return (
         <ExtrasStep
           child={activeChild}
           needsSignup={!hasAccount}
+          hasNextKid={pendingKid !== null}
+          pendingReportCount={Math.max(1, reportQueue.length)}
           onDone={() => {
-            if (hasAccount) {
-              setPhase("scoring");
-            } else {
-              setSignupNext("scoring");
-              setPhase("signup");
+            if (pendingKid) {
+              setPhase("next-kid");
+              return;
             }
+            advanceToReports();
           }}
         />
       );
     }
 
+    // With nobody left to offer (unreachable in practice), this falls
+    // through to the hub like every other phase-state mismatch; the hub's
+    // finished-kid card keeps the report one tap away.
+    if (phase === "next-kid") {
+      const pendingKid = nextUnfinishedKid(children, reportQueue);
+      if (pendingKid) {
+        const pendingNames = reportQueue
+          .map((id) => children.find((child) => child.id === id)?.name)
+          .filter((name): name is string => Boolean(name));
+        return (
+          <NextKidStep
+            nextKid={pendingKid}
+            pendingNames={pendingNames}
+            onAnswerNext={() => {
+              setActiveChildId(pendingKid.id);
+              setPhase("checklist");
+            }}
+            onSeeReports={advanceToReports}
+          />
+        );
+      }
+    }
+
     if (phase === "signup") {
+      // Name the kid whose report she lands on: with several kids queued,
+      // that's the first one finished, not the one just answered.
+      const landingChild =
+        (reportQueue.length > 0
+          ? children.find((child) => child.id === reportQueue[0])
+          : null) ?? activeChild;
       return (
         <SignupStep
-          child={activeChild}
+          child={landingChild}
           email={email}
           onDone={() => {
             void (async () => {
@@ -388,9 +470,23 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     }
 
     if (phase === "scoring" && activeChild) {
-      // A deep-dive sitting ends in that subject's rebuilt four-week plan;
-      // the first full checklist ends on the report.
-      return <ScoringStep child={activeChild} planDomain={deepDiveDomain} />;
+      // A deep-dive sitting rescores one kid and ends in that subject's
+      // rebuilt four-week plan. A checklist sitting scores every kid whose
+      // questions are done and unscored (this sitting's queue first, in
+      // the order they finished, then any kid finished on an earlier
+      // visit) and ends on the first one's report.
+      const queued = reportQueue
+        .map((id) => children.find((child) => child.id === id))
+        .filter((child): child is FlowChild => Boolean(child));
+      const alsoFinished = children.filter(
+        (child) =>
+          child.inRange &&
+          !child.reportToken &&
+          !reportQueue.includes(child.id) &&
+          isChecklistComplete(child),
+      );
+      const kids = deepDiveDomain ? [activeChild] : [...queued, ...alsoFinished];
+      return <ScoringStep kids={kids.length > 0 ? kids : [activeChild]} planDomain={deepDiveDomain} />;
     }
 
     return (
@@ -401,6 +497,13 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         onStartChecklist={(childId) => {
           setActiveChildId(childId);
           setPhase("checklist");
+        }}
+        onSeeReport={(childId) => {
+          setActiveChildId(childId);
+          // Head of the queue = the report she lands on. Any other kid
+          // finished earlier still scores in the same beat.
+          setReportQueue((queue) => (queue.includes(childId) ? queue : [childId, ...queue]));
+          advanceToReports();
         }}
         onAddKids={() => setPhase("kids")}
         onChildRemoved={() => {

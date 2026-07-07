@@ -156,6 +156,7 @@ export function ReportView({
     ? US_STATES.find((state) => state.code === report.usState)?.name
     : null;
   const nextKid = report.otherKids.find((kid) => kid.inRange && !kid.hasReport);
+  const readyKids = report.otherKids.filter((kid) => kid.hasReport);
 
   return (
     <div className="min-h-screen bg-page pb-16">
@@ -592,6 +593,32 @@ export function ReportView({
                 step (UX review 2026-07-06), asked after the payoff. */}
             {!sample && askHomeschool ? (
               <HomeschoolContextCard childName={report.childName} />
+            ) : null}
+
+            {/* Sibling reports built in the same sitting. Deliberately no
+                direct report links here: this page is a shareable token
+                URL, and embedding a sibling's token would let anyone
+                holding one kid's link open the other kid's report. The
+                family page is session-scoped, so only the parent's own
+                browser lands on the reports. */}
+            {!sample && readyKids.length > 0 ? (
+              <div className="mt-9 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden">
+                <p className="font-display text-lg font-semibold text-strong">
+                  {readyKids.length === 1
+                    ? `${readyKids[0].name}'s report is ready too.`
+                    : "The other reports are ready too."}
+                </p>
+                <p className="mt-1 text-sm text-body">
+                  {readyKids.length === 1 ? "It's" : "They're"} in your inbox, and one tap from
+                  your family page.
+                </p>
+                <Link
+                  href="/onboarding"
+                  className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+                >
+                  {readyKids.length === 1 ? `Open ${readyKids[0].name}'s report` : "Open the reports"}
+                </Link>
+              </div>
             ) : null}
 
             {/* Next kid handoff */}
