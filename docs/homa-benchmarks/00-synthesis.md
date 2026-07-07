@@ -24,7 +24,7 @@ About 5,100 lines across 10 lane files, every factual claim linked with an acces
 
 Roughly 275 candidate anchor items now sit in the lanes' "Product porting notes" sections, each with a suggested typicalMonths and source. None auto-flow; porting is hand-done per item with a MAP_BANK_VERSION bump and `pnpm check:map` green, wording rewritten to pass the content laws (parent-observable, banned words, citations).
 
-## 2. Crosswalk to the 15 map domains
+## 2. Crosswalk to the 16 map domains
 
 Which lanes feed each shipped domain (primary lane bold):
 
@@ -45,8 +45,9 @@ Which lanes feed each shipped domain (primary lane bold):
 | self_care | 01, **07**, **08**, 09 | Sleep and activity (07), chores and cooking ramp (08), digital privacy habits (09) |
 | executive_function | 01, 02, **08**, 09 | The focus-minutes correction below is this domain's headline |
 | spanish | **09** | Exposure ladder confirmed as the right design; 9 steps drafted, never months-ahead |
+| computer_science | **09** | Shipped 2026-07-06 (16th domain): exposure-based like spanish, CSTA 2017 band anchors as ladder rungs; re-verify vs CSTA 2026 when it publishes |
 
-Candidate NEW domain: computer science (09). CSTA bands give ready-made anchors at 96, 132, 168, 192 months, and no shipped domain covered it. SHIPPED 2026-07-06 by founder call as `computer_science`, exposure-based (see porting status below). Latin remains an audience-specific stretch candidate, not proposed.
+Computer science began as this corpus's candidate NEW domain (09): CSTA bands give ready-made anchors at 96, 132, 168, 192 months, and no shipped domain covered it. SHIPPED 2026-07-06 by founder call as `computer_science`, exposure-based (see porting status below). Latin remains an audience-specific stretch candidate, not proposed.
 
 ## 3. Corrections and tensions vs the shipped bank (v2026.07.1)
 
@@ -110,7 +111,7 @@ Status update, wave 2 (same day): lanes 11 to 16 executed most of this queue. Re
 | 15 refresh sweep | 14 of 14 queue items resolved | AAP media policy replaced Feb 2026; CSTA final text lands July 13 to 15 |
 | 16 state assessments | All 51 jurisdictions, 8 threshold states quoted from statute | About 26 of 51 jurisdictions have some compulsory assessment artifact; Florida has no percentile line; Ohio abolished testing in 2023 |
 
-Tooling shipped the same day (see build log): per-item `standards` codes in the bank (89 of 220 items), `pnpm check:sources` (source liveness + verified-date manifest + revision watchlist; already caught the CDC and ELOF host moves), and `pnpm report:norms` (the Homa-native re-norm loop over our own stored answers, aggregate-only). Runbooks: `runbooks/benchmark-freshness.md`, `runbooks/map-renorm.md`.
+Tooling shipped the same day (see build log): per-item `standards` codes in the bank (89 of 220 items), `pnpm check:sources` (source liveness + verified-date manifest + revision watchlist; already caught the CDC and ELOF host moves), and `pnpm report:norms` (the Homa-native re-norm loop over our own stored answers, aggregate-only). Runbooks: `docs/homa-planning/runbooks/benchmark-freshness.md`, `docs/homa-planning/runbooks/map-renorm.md`.
 
 ## 7. Maintenance
 

@@ -1,5 +1,10 @@
 # 05 — Edge Cases & Failure Journeys (Workstream 5)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 > Trust & safety + UX resilience workstream. Methods: ux-edge-cases (the catalog),
 > adversarial-roleplay (each trust journey was pressure-tested as "the angriest
 > reasonable version of this mom"), edge-case-balance (the prioritization matrix and

@@ -41,9 +41,10 @@ export async function POST(request: Request): Promise<Response> {
   const input = parsed.data;
 
   try {
-    // Name is already known (collected at S1, before the kids); only email
-    // is asked for here, so both the claim and the waitlist mirror carry
-    // the name forward from the lead already resolved off the cookie.
+    // Email is the S1 ask (founder call 2026-07-06, third revision); the
+    // name arrives later at account signup. If this lead somehow already
+    // has a name (legacy order, Google profile), carry it forward into the
+    // claim and the waitlist mirror rather than dropping it.
     const { leadId, returning, resumeToken } = await claimLead({
       leadId: lead.id,
       email: input.email,

@@ -1,19 +1,12 @@
 import { Squiggle } from "./ds/Squiggle";
 import { Eyebrow } from "./dividers";
+import { FAQ_ITEMS } from "./faq-items";
 
 /**
  * FAQ, ported verbatim from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx.
+ * docs/homa-design/ui_kits/landing/LandingPage.jsx. Items live in
+ * faq-items.ts, shared with the FAQPage JSON-LD on the landing page.
  */
-
-const ITEMS: ReadonlyArray<readonly [string, string]> = [
-  ["Does Homa follow my state's standards?", "Yes. Pick your state and every subject maps to it. You see coverage at a glance."],
-  ["Can I use my own curriculum?", "Bring it. Homa plans around any mix of bought, borrowed, and homemade."],
-  ["What ages does it cover?", "The progress report covers ages 2 to 16, with a questionnaire tuned to each age. Personalized materials are richest for the early years and growing from there."],
-  ["Does my child ever use it?", "Never. Homa is for you: your child never sees the questionnaire and never talks to an AI."],
-  ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost. A lighter week is still a school week."],
-  ["What does it cost?", "The progress report is free. Homa itself is invite-only while the first families shape it. Pricing gets published before anyone pays a cent."],
-];
 
 export function Faq() {
   return (
@@ -26,7 +19,7 @@ export function Faq() {
         <Squiggle color="var(--pop-cobalt)" />
       </div>
       <div data-reveal-kids="" className="lp-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "26px 40px" }}>
-        {ITEMS.map(([q, a]) => (
+        {FAQ_ITEMS.map(([q, a]) => (
           <div key={q}>
             <div style={{ fontWeight: 700, color: "var(--text-strong)", marginBottom: 6, fontSize: "1.02rem" }}>{q}</div>
             <div style={{ color: "var(--text-muted)", lineHeight: 1.55, fontSize: "0.95rem" }}>{a}</div>

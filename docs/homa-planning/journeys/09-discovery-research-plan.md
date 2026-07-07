@@ -1,5 +1,13 @@
 # Journey Workstream 9 — Discovery & Research Plan (2026-07-02)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Also superseded: Stripe preorder and fake-door price-test asks below were
+> dropped in the 2026-07-04 conference re-scope (no booth, phone capture only,
+> ladder stops at the waitlist email; see HUMAN-TODO and build-log).
+
 > Mom-Test conference kit, design-partner interview guides, riskiest-assumption register,
 > experiment backlog, evidence log. Methods: mom-test-guide, interview-guide,
 > research-brief, risky-assumptions, experiment-design.

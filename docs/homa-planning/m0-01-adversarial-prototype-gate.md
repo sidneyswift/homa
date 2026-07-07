@@ -1,5 +1,10 @@
 # M0-01 — Adversarial eve prototype: GO/NO-GO gate
 
+> **RESOLVED: GO (2026-07-05, founder decision: staying on eve, not ejecting).**
+> The gate below is historical record; results and mitigations are in the body
+> (~§Results) and in BUILD.md's Phase A section, which is the current summary.
+> Phase B is underway.
+
 > Written before starting, per the council re-scope in `03-backlog.md` ("strict
 > timebox... GO/NO-GO criteria written BEFORE starting"). `13-mr-prd.md` line 3:
 > the PRD is "APPROVED FOR BUILD once M0-01 gate passes" — nothing in Phase B

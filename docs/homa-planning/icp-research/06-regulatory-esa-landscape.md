@@ -1,5 +1,10 @@
 # 06 · Regulatory and ESA landscape (state burden tiers, compliance pain geography, the ESA money wave)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 - **Date:** 2026-07-06
 - **Method:** Web evidence pass (statutes, state DOE and program handbooks, HSLDA state pages, Johns Hopkins Homeschool Hub, NHERI compilations, program administrator documentation, news coverage of 2024-2026 legislation and litigation). Every claim carries an inline link. FACT and INFERENCE are separated; each section carries a confidence level.
 - **Key findings:**

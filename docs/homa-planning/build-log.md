@@ -3,6 +3,119 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-07 (small hours) · Cleanup audit executed: every non-destructive fix applied
+
+Executed docs/homa-planning/plans/2026-07-06-codebase-cleanup-audit.md on
+founder instruction ("fix everything that is non destructive"). Code: em
+dashes out of page metadata + llms-full.txt, Nav "Sign up" casing, terms
+"waitlist" wording, FAQ single-sourced into faq-items.ts (page JSON-LD +
+Faq component), forget_skill documented in agent instructions,
+plansNeedingRetest gains the missing email-null guard, .env.example gains
+RESEND_API_KEY/CRON_SECRET/SUPABASE_DB_PASSWORD/NEXT_PUBLIC_SITE_URL.
+Guardrails: scripts/events-check.mts (MJ-08 registry parity, both
+directions) wired as check:events; skills-targeting-check wired as
+check:skills-targeting; both + lint added to CI; CI node 22 to 24 (matches
+apps/web engines and local). Docs: PRD non-goal/FR-1/pricing supersession
+patches, BUILD.md signup gate + D0 remaining list + CI text, supabase
+README count, HUMAN-TODO Stripe ticks + /onboarding URL, 18 planning docs
+got pricing-v1 supersession notes, lead-magnet HTML specs got D8-overturn
+banners, benchmarks docs moved 15 to 16 domains, Florida percentile claim
+resolved against lane 16, root docs swept of em dashes.
+
+Judgment calls made alone, flagged for review:
+1. Deleted apps/web/public/videos/homa-brand-film.mp4 (16 MB in every
+   deploy, zero references since the founder removed the hero film) and
+   the byte-identical uploads/hf_20260705_*.mp4 duplicate; canonical copy
+   stays at docs/homa-design/assets/videos/homa-brand-film.mp4.
+2. Removed the fictional `pnpm test` (turbo no-op, no workspace defines
+   test); AGENTS.md now lists the four check:* guards as the test suite.
+3. Did NOT touch: applied migration files (comment fixes skipped on
+   purpose, applied migrations stay byte-stable), @homa/core unused barrel
+   exports (API-surface call, needs an owner), privacy/method page wording
+   (owed inside the LLM-report PR per the D8-overturn ruling), MapFlow
+   internal naming (deliberate), marketing signal top-up (content task).
+4. One audit claim inverted on inspection: packages/core/src/map/schemas.ts
+   comments were already correct (email at S1, name at signup) and were
+   left alone; the claim route comment really was stale (said name-at-S1)
+   and was fixed to the email-at-S1 order.
+
+## 2026-07-07 (small hours) · Family workspace bridge SHIPPED (D3 re-decision built)
+
+Implementation of plans/2026-07-06-family-workspace-at-report-implementation-prompt.md,
+uncommitted, awaiting founder review of the e2e screenshots. Every score now
+runs `ensureFamilyWorkspace` (apps/web/lib/map/bridge.ts) after createReport:
+family via the create_my_family RPC, children mirrored from lead kids with
+REAL birth dates, profiles mirror forward on rescore, all writes as the
+signed-in caller under RLS, no service role. Migration 20260707021827 adds
+`lead_children.child_id` (nullable FK, on delete set null). New registry
+events: map.family_bridged, map.family_bridge_skipped. Verified: typecheck,
+forced build, check:map, check:isolation (extended with a lead_children
+insert-forge probe covering child_id) all green; live e2e on homa-prod
+through the real UI (fresh email, 2 kids incl. one pending-band, checklist,
+extras, password signup, report, /home, /chat context reply naming both
+kids, whats-working + rescore, later sibling into the SAME family); test
+rows then deleted scoped by lead id AND family id in both worlds, residue
+check all zeros.
+
+Decisions made alone (auditable):
+- **Session-lead identity check added beyond the prompt**: requireLead also
+  honors the emailed link token, so a report link opened in a browser
+  signed into a DIFFERENT account would have mirrored kids into that other
+  family. The bridge only runs when the session user IS the lead's linked
+  auth user; anything else emits map.family_bridge_skipped
+  {reason: "auth-user-mismatch"} and stands down. Self-healing: state-route
+  linking fixes the lead, the next score bridges.
+- **Race hardening, caught live in e2e run 1**: two parallel score calls
+  (dev StrictMode double-effect; a double-tap or two devices in prod)
+  both saw child_id null and duplicated the product children. The mirror
+  phase now runs in one transaction holding `select ... for update` on the
+  lead row, plus an orphan-adoption pass (a product child matching name +
+  birth date that no lead kid links to is adopted, never twinned), so even
+  an interrupted run cannot duplicate kids on retry. Run 1's rows were
+  cleaned scoped by ids; run 2 (post-fix) was fully green.
+- **map.family_bridged emits only when something changed** (family created,
+  child created, or profile updated). A pure no-op rescore stays silent,
+  per the 2026-07-06 lesson about flooding the funnel during analysis.
+- **The prompt's "the product profile has no other writer for these fields
+  today" is not quite true**: the chat agent's update_child_profile tool
+  writes interests/focus. Founder-ruled last-write-wins mirror stands, but
+  a rescore can clobber an agent-era interest with stale lead data; the
+  extras step also REPLACES the lead's interests list per save (its own
+  semantics), so the mirrored list is the newest sitting's list. Flagged
+  as a known sharp edge for the M2-04 profile engine.
+- **Stretch memory seed built, gated to first-time only**: one what_works
+  row per child, seeded only while the child has NO what_works memories
+  (agent consolidation is never fought, rescores never duplicate), content
+  is the parent's own words behind the scanMemoryContent injection gate,
+  source "onboarding". Notes arriving after a child's memory exists are
+  NOT re-seeded; the narrative build feeds them into report facts anyway.
+- **Isolation checker**: read probes already covered the new column via
+  select=*; added an insert-forge probe (anon inserting a lead_children
+  row with a child_id link) rather than extending reads.
+- Advisors after the migration: no new findings (deny-all INFO lines and
+  the documented create_my_family SECURITY DEFINER warn, unchanged).
+
+## 2026-07-06 (night) · D3 re-decided: family workspace provisions at first report (founder ruling)
+
+Same session as the D8 overturn below. Founder, on learning that a lead's
+auth account exists by report time but the product workspace does not:
+"ok so we should probably fix that so once they generate a report they
+create a family workspace." This completes the erosion of lead-magnet
+decision D3 (option A, "lead records now, account claim at invite") that
+open signup (2026-07-05) and password-before-report (2026-07-06) started:
+accounts AND workspaces now exist during the flow. MJ-09's invite-time
+bridge shrinks to legacy-lead reconciliation.
+
+Shape (full spec:
+plans/2026-07-06-family-workspace-at-report-implementation-prompt.md):
+idempotent bridge at the score route, RLS-only writes as the signed-in
+user (create_my_family RPC + children inserts, NO service-role key),
+lead_children gains a child_id link column, profiles mirror forward on
+rescore, bridge failure never blocks a report. Deliberately NOT included,
+flagged for a separate founder call: exposing /chat or /home to
+report-holding families (report CTA still says invite list; the FAQ's
+invite-only line stands until ruled otherwise).
+
 ## 2026-07-06 (night) · D8 overturned: the LLM writes the report's words, code keeps the numbers (founder rulings)
 
 Grilling session on the report-depth exploration prompt
@@ -46,6 +159,24 @@ Rulings, in the founder's words where they ruled:
 
 Implementation prompt handed off:
 plans/2026-07-06-llm-report-narrative-implementation-prompt.md.
+
+## 2026-07-06 (night) · Pro renamed Homa Plus + Plus annual at $249/yr (founder: "same discount, don't call it pro")
+
+Follow-up to the pricing entry below, both environments:
+
+- "Homa Pro" product renamed "Homa Plus" (converges with the name the
+  planning corpus always used, R4 conversion screen). "Homa+" stays a
+  UI-surface wordmark treatment if design ever wants it; the Stripe
+  product name and receipts say "Homa Plus".
+- Monthly lookup key renamed homa_pro_monthly_49 to homa_plus_monthly_49.
+- New annual price homa_plus_annual_249 + payment links. Judgment call on
+  "same discount": base annual is 56.6% off ($99 vs $228); the exact same
+  ratio on $49/mo is $255.32/yr, rounded to the clean sibling price $249
+  (57.6% off). One API call to change if the founder wants a different
+  number.
+- Env vars renamed/extended: `..._PAYMENT_LINK_PLUS_MONTHLY_URL` +
+  `..._PLUS_ANNUAL_URL` in `.env.local` and `.env.example` (nothing reads
+  them yet).
 
 ## 2026-07-06 (late evening) · Pricing v1 set by founder: Homa $19/mo or $99/yr, Homa Pro $49/mo ("let's not overthink this")
 

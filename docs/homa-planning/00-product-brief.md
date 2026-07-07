@@ -1,5 +1,10 @@
 # Homa Cloud — Product Brief
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 > Status: PLANNING. Nothing in this folder is built. Last updated 2026-07-02.
 
 ## One-liner

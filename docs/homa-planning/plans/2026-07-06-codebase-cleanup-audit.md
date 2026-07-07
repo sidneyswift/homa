@@ -1,5 +1,15 @@
 # Codebase cleanup audit · 2026-07-06
 
+> **STATUS (2026-07-07): EXECUTED.** Every non-destructive fix below was
+> applied the same night (founder instruction "fix everything that is non
+> destructive"; execution record in build-log 2026-07-07 "Cleanup audit
+> executed"). Still open, deliberately: the Tracked section (privacy/method
+> pages ride the LLM-report PR, resume-session stays dormant), the dead
+> schema columns (MJ-09/M2-07 decisions), @homa/core unused barrel exports
+> (API-surface call), applied-migration comment fixes (files stay
+> byte-stable), path-alias/file-split refactors (when next touched), and
+> the marketing signal top-up (content task, reservoir below 5).
+
 A full staleness and consistency pass over the repo, run the night of 2026-07-06
 after the pricing v1 and LLM-report rulings landed. Four parallel audit agents
 covered apps/web, the data layer + scripts, the planning corpus, and

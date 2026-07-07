@@ -1,5 +1,10 @@
 # Homa Roadmap & OKRs — Senior PM capstone (2026-07-03)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 > Synthesizes: decision queue D1–D9 + T1–T3 (journeys/10 §5, all closed), the M-R
 > revenue-first track (03-backlog), the PM library (journeys/01–09), real usage data
 > (10-real-usage-cost-model), and the council verdicts (09). Companion doc: the M-R PRD

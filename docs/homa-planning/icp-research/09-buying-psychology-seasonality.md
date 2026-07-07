@@ -1,5 +1,10 @@
 # Buying psychology and seasonality: homeschool family spending, price anchors, and the purchase calendar
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 - **Date:** 2026-07-06
 - **Method:** web research conducted 2026-07-06. Sources: NHERI and HSLDA published surveys, vendor pricing pages, state ESA program documents and audit press coverage, homeschool forum threads (Well-Trained Mind, Confessions of a Homeschooler community), practitioner blogs, and trade press. Rigor is labeled per source. Forum threads are unscientific anecdote, labeled as such. Every number below traces to a link; nothing is invented.
 - **Rigor legend:** High = primary document or official pricing page. Medium = large survey with method notes, or reputable secondary reporting. Low = single blog claim, vendor self-report, or unverifiable figure. Forum = unscientific anecdote, useful for language and psychology, never for magnitudes.
@@ -189,7 +194,7 @@ All links accessed 2026-07-06.
 
 - Lead with the curriculum and planning anchor, never the planner anchor: name the $650 custom plan, the $60 evaluation, the $1,295 per-child average, then present Homa's price as the bundle that replaces them (sections 1 and 8).
 - Script the spousal conversation on the page: a plain math block of what Homa replaces, cancel-anytime, and a guarantee at the generous end of the niche norm (sections 2, 3, 6).
-- Offer a founding-family rate with a permanent price lock; it is an established, trusted pattern in this exact niche and converts waitlist intent into prepayment (verdict A11).
+- Offer an early-cohort rate with a permanent price lock for the invite list; the pattern is established and trusted in this exact niche and converts waitlist intent into prepayment (verdict A11). (Wording updated 2026-07-06: the "founding families" phrase is retired everywhere by founder ruling; competitor examples above keep their own names.)
 - Collect trigger-moment and threshold data on the waitlist form (which moment brought you here; who else weighs in on purchases), because the two biggest unknowns (spousal threshold, magnitude by trigger) are cheaply answerable there (sections 3 and 5).
 - Plan conversion pushes for October, January, and February, not launch week; that is when the calendar says wallets reopen (section 4).
 

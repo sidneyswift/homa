@@ -6,8 +6,8 @@ import { Button } from "./ds/Button";
 /**
  * Sticky marketing nav, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx. Links anchor to their
- * page sections; "Sign in" points at /signin; "Start free" routes to the
- * waitlist (the live conversion path until invites open).
+ * page sections; "Sign in" points at /signin; "Sign up" routes to
+ * /onboarding (the live conversion path until invites open).
  *
  * Transparent globally (founder call 2026-07-06): no fill, no blur, no
  * border, so it reads as part of whatever's underneath rather than a bar
@@ -73,7 +73,7 @@ export function Nav() {
           Sign in
         </Link>
         <Button variant="primary" href="/onboarding">
-          Sign Up
+          Sign up
         </Button>
       </div>
     </nav>

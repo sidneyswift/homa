@@ -41,7 +41,9 @@ forgiving invitees, and half of M4's launch blockers converted into a funded roa
 **Adopted:** self-serve mechanics + invite codes for the first 20–50 families
 (friend + conference waitlist); **public GA is a switch flipped after 10 stranger
 families survive onboarding + week-4 unassisted.** The public-launch decision stands —
-as the GA milestone.
+as the GA milestone. **[Superseded in part 2026-07-05, build-log: the founder opened
+signup ("no hoops", migration #8); the invite-code check at signup was built, then
+removed. Invites survive as MJ-09 distribution to the waitlist cohort.]**
 
 ### V3 — The timeline was lying
 Realist's arithmetic: the backlog's own ticket sizes sum to **~26 focused weeks**, not

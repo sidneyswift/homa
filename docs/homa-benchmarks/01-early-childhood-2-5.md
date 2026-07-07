@@ -639,7 +639,7 @@ Captured factually because this corpus is internal; none of this language ships 
 
 ## Product porting notes
 
-This lane feeds 12 of the 15 map domains. It does not feed social_studies or spanish, and it gives music only one weak anchor (noted below). typicalMonths values follow the source's age placement; CDC-derived values are 75th percentile "by" ages, so they run slightly conservative relative to average-age norms, which is the safer direction for the map bank. All items below need rewriting into parent-observable language before porting (content laws in `packages/core/src/map/content.ts`).
+This lane feeds 12 of the 16 map domains. It does not feed social_studies, spanish, or computer_science (the 16th domain, shipped 2026-07-06), and it gives music only one weak anchor (noted below). typicalMonths values follow the source's age placement; CDC-derived values are 75th percentile "by" ages, so they run slightly conservative relative to average-age norms, which is the safer direction for the map bank. All items below need rewriting into parent-observable language before porting (content laws in `packages/core/src/map/content.ts`).
 
 ### math
 

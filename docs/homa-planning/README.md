@@ -62,5 +62,6 @@ D10 "ask Alessa" open), capstones written (12-roadmap-okrs, 13-mr-prd).
 order, dependency-sequenced build phases, non-negotiable laws, and conflict-resolution
 rules. No build-time estimates exist anywhere in this plan by design — the ONE real
 date is **July 13, 2026 (Alessa's conference): marketing site + waitlist email capture
-must be deployed** (BUILD.md Deliverable 0). After that: Phase A engine proofs, then
-the PRD's FR order.
+must be deployed** (BUILD.md Deliverable 0, live since 2026-07-04). Phase A engine
+proofs CLEARED 2026-07-05 (staying on eve); Phase B (walking skeleton) is underway.
+Current status lives in BUILD.md's phase list and `build-log.md`.

@@ -1,5 +1,10 @@
 # 08. Philosophy segments and the curriculum market they buy
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 **Date**: 2026-07-06 · **Analyst**: research subagent (segments and curricula domain)
 **Method**: web research against primary sources (NCES/NHES federal surveys, NHERI-published studies, publisher price pages, organization self-reports, journalism, community content). Every claim carries an inline link and access date. FACT and INFERENCE are separated. Community polls are labeled unscientific. No survey numbers are fabricated; where data does not exist, that absence is stated.
 

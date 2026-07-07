@@ -1,5 +1,10 @@
 # Billing & Credits Design — subscription + pay-per-usage (Stripe)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 > Status: PLANNING. Decision (Sidney, 2026-07-02): subscription + usage via credits,
 > designed upfront; every model/feature ties to credit costs with explicit margins.
 > Researched against Stripe docs current as of today.

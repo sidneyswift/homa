@@ -9,7 +9,7 @@ in `00-synthesis.md`.
 
 ## How to read this folder
 
-Start with `00-synthesis.md` (coverage map, crosswalk to the product's 15
+Start with `00-synthesis.md` (coverage map, crosswalk to the product's 16
 map domains, gaps, and recommended next anchors). Drill into the numbered
 lane files for the raw benchmark tables and sources.
 
@@ -48,8 +48,10 @@ lane files for the raw benchmark tables and sources.
 
 ## Relationship to the product
 
-`packages/core/src/map/content.ts` is the shipped question bank: 15
-domains, ages 2 to 16, every item anchored to a `typicalMonths` age. This
+`packages/core/src/map/content.ts` is the shipped question bank: 16
+domains, ages 2 to 16, every item anchored to a `typicalMonths` age
+(exposure-based domains like spanish and computer_science track what the
+family does instead). This
 corpus is the raw material for expanding and re-verifying those anchors,
 and for the richer benchmark positions that progress reports (FR-7
 dashboard, FR-8 weekly notes) will draw on. Porting happens deliberately,
@@ -57,9 +59,10 @@ item by item, with a `MAP_BANK_VERSION` bump and `pnpm check:map` green;
 nothing here auto-flows into the product. The first pass (bank v2026.07.2,
 2026-07-06) is documented in `00-synthesis.md` under "Porting status".
 
-The 15 map domains, for tagging: math, literacy, phonics, writing,
+The 16 map domains, for tagging: math, literacy, phonics, writing,
 language, science, social_studies, art, music, gross_motor, fine_motor,
-social_emotional, self_care, executive_function, spanish.
+social_emotional, self_care, executive_function, spanish,
+computer_science (shipped 2026-07-06).
 
 ## Shared conventions
 

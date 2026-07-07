@@ -1,5 +1,13 @@
 # Marketing demand engine implementation plan
 
+> **STATUS (2026-07-06): EXECUTED, do not re-run.** The engine this plan
+> describes was built 2026-07-05 (build-log): `marketing/` scaffold, the 12
+> pipeline skills in `.agents/skills/marketing-*`, the scorer
+> (`marketing/evals/score_bundle.py`), `/blog` routes, personas, voice,
+> routines, and two staged draft bundles. The checkboxes below were never
+> ticked during execution; treat `marketing/` and the skills as the source
+> of truth, this file as the historical plan.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > or superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.

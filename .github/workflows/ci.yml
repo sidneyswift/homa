@@ -2,8 +2,8 @@ name: CI
 
 # Enforces BUILD.md law #1 ("isolation tests green in CI always") and the
 # M1-07 requirement that the adversarial suite runs in CI from the FIRST
-# schema migration. Extend the isolation-check step (or add a parallel job)
-# as MJ-08's typed event registry grows past `waitlist.joined`.
+# schema migration. Also runs the MJ-08 events-registry parity check, the
+# map content + scorer checks, the skills-targeting checks, and lint.
 
 on:
   push:
@@ -23,7 +23,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Matches apps/web engines ("node": "24.x").
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -32,8 +33,17 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Map content + scorer checks (claims law, citations, golden kids)
         run: pnpm check:map
+
+      - name: Events-registry parity check (MJ-08)
+        run: pnpm check:events
+
+      - name: Skills-bank targeting checks
+        run: pnpm check:skills-targeting
 
       - name: Build
         run: pnpm build

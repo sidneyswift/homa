@@ -1,5 +1,10 @@
 # Homa Production Usage Report — One-Family Cost Model
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 **Data source:** `/Users/sidneyswift/Documents/Projects/Sidney/homa/homa-macmini/.openclaw`  
 **Observation window:** 2026-03-30 → 2026-07-02 (~95 days)  
 **Snapshot note:** Gateway logs stop 2026-06-17; cron run files in `cron/runs/` stop 2026-06-14 (migrated), but ambient-learning state continues through 2026-07-02.

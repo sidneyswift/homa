@@ -80,5 +80,6 @@ camera. Cream, clay, sage tones where natural.
 2. Marketing Studio synthesized the presenter (no Soul ID, no real
    person's likeness).
 3. The free benchmarks checklist this ad points at is the lead-magnet
-   feature (/map) being built in the other workstream. Do not publish this
-   video before that feature is live at thankshoma.com.
+   feature, live at thankshoma.com/onboarding (built as /map, renamed
+   2026-07-06). That publish blocker is cleared; normal staging gates
+   still apply.

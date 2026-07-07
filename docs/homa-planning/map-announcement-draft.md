@@ -2,7 +2,8 @@
 
 > STATUS: DRAFT, NOT SENT. Founder sends this once, manually, after the
 > read-aloud pass. One send ever, no sequence (the D6 ruling). Audience:
-> every `public.waitlist` row that predates the /map launch. Send from
+> every `public.waitlist` row that predates the lead-magnet launch (shipped
+> at /map 2026-07-05, renamed /onboarding 2026-07-06). Send from
 > Resend (hello@mail.thankshoma.com), plain and personal, no tracking-heavy
 > template needed.
 >
@@ -48,7 +49,7 @@ delete your info instead, say the word and it's done.
 
 1. Read the email aloud once (the wince test).
 2. Pull recipient list: `select email from waitlist where created_at < '2026-07-06'`
-   (adjust the date to the /map deploy time) via the Supabase dashboard.
+   (adjust the date to the lead-magnet deploy time) via the Supabase dashboard.
 3. Send via Resend broadcasts (or one-by-one for the first handful to
    watch replies land).
 4. Log the send date in the build log. Never send it twice.

@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: Homa — Warm and Playful
+name: Homa · Warm and Playful
 description: Coral-primary, cream-paper design system for Homa, a calm AI homeschool assistant. Schoolbook charm held together by editorial restraint.
 colors:
   primary: "#E7602F"
@@ -63,12 +63,12 @@ Homa is a calm, capable AI co-pilot for homeschooling moms. Direction: **"Warm a
 
 ## Colors
 
-- **Primary — clay/coral (`#E7602F`):** the one driver for interaction (buttons, links, focus).
-- **Secondary — sage/mint (`#3D9A50`):** growth, progress, "on track" states. Never paired with red for contrast, Homa has no "behind" state (anti-guilt display law).
-- **Tertiary — gold/sunshine (`#F0BE00`):** accent, celebration, checkmark/gold-star progress language. Text on gold tints always uses the dedicated `gold-ink` token, never plain dark or white.
-- **Neutral — warm cream (`#FBF7F0`):** the page background, never pure white or gray, everything is warm-toned including neutrals (a "stone" scale, not a gray scale).
-- **Info — sky/pool aqua (`#4FB4D6`):** a fourth accent for informational moments, distinct from the sage/gold/clay trio.
-- **Error — warm coral-red (`#E2593B`):** used sparingly and never for "behind" or comparison framing, only for real errors (a broken form field, a failed request).
+- **Primary · clay/coral (`#E7602F`):** the one driver for interaction (buttons, links, focus).
+- **Secondary · sage/mint (`#3D9A50`):** growth, progress, "on track" states. Never paired with red for contrast, Homa has no "behind" state (anti-guilt display law).
+- **Tertiary · gold/sunshine (`#F0BE00`):** accent, celebration, checkmark/gold-star progress language. Text on gold tints always uses the dedicated `gold-ink` token, never plain dark or white.
+- **Neutral · warm cream (`#FBF7F0`):** the page background, never pure white or gray, everything is warm-toned including neutrals (a "stone" scale, not a gray scale).
+- **Info · sky/pool aqua (`#4FB4D6`):** a fourth accent for informational moments, distinct from the sage/gold/clay trio.
+- **Error · warm coral-red (`#E2593B`):** used sparingly and never for "behind" or comparison framing, only for real errors (a broken form field, a failed request).
 
 Full scales (50–900 steps per color, dark theme remap, section bands, pop accents) live in `docs/homa-design/tokens/colors.css`.
 

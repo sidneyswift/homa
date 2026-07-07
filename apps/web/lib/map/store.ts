@@ -590,6 +590,7 @@ export async function plansNeedingRetest(): Promise<
     join public.lead_children c on c.id = p.lead_child_id
     join public.lead_families f on f.id = c.lead_family_id
     where p.retest_at < now() and p.retest_emailed_at is null and f.status <> 'deleted'
+      and f.email is not null
     limit 100
   `;
 }

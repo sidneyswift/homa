@@ -4,13 +4,14 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "turbo run build",
+    "check:events": "tsx scripts/events-check.mts",
     "check:isolation": "node scripts/isolation-check.mjs",
     "check:map": "tsx scripts/map-check.mts",
+    "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
     "check:sources": "tsx scripts/benchmarks-freshness.mts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "report:norms": "tsx scripts/map-norms-report.mts",
-    "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {

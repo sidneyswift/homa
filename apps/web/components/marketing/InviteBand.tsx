@@ -6,10 +6,10 @@ import { Eyebrow } from "./dividers";
 /**
  * Invite band. Replaces the kit's three-tier pricing grid, which violated
  * two standing rulings (T2: no pricing on the page; the tiers were also
- * invented). Honest framing: invite-only cohort, the map is the first
- * step, unlimited children is real policy (decision D9). Renamed from
- * FoundingFamilies per founder ruling 2026-07-06: the "founding families"
- * framing is retired everywhere.
+ * invented). Honest framing: invite-only cohort, the onboarding report is
+ * the first step, unlimited children is real policy (decision D9). Renamed
+ * from its original kit name per founder ruling 2026-07-06 (that framing
+ * is retired everywhere).
  */
 
 const POINTS = [

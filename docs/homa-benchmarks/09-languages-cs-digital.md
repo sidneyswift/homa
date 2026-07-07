@@ -382,7 +382,7 @@ Trivium framing (FACT, publisher's articulation): "All beginners, regardless of 
 
 ## Product porting notes
 
-Homa's shipped map bank has 15 domains: math, literacy, phonics, writing, language, science, social_studies, art, music, gross_motor, fine_motor, social_emotional, self_care, executive_function, spanish. This lane feeds spanish (exposure-based: never produces a months-ahead number) and executive_function/self_care lightly via digital habits. CS has no shipped domain: flagged as the strongest candidate new domain this corpus has surfaced, since CSTA gives clean band anchors (96, 132, 168, 192 months) and homeschool CS adoption is widespread. All porting is hand-done later with a MAP_BANK_VERSION bump; nothing auto-flows.
+Homa's shipped map bank has 16 domains: math, literacy, phonics, writing, language, science, social_studies, art, music, gross_motor, fine_motor, social_emotional, self_care, executive_function, spanish, computer_science. This lane feeds spanish (exposure-based: never produces a months-ahead number), computer_science, and executive_function/self_care lightly via digital habits. CS was flagged here as the strongest candidate new domain this corpus surfaced, and it SHIPPED 2026-07-06 (bank v2026.07.2) as `computer_science`, exposure-based, with CSTA 2017 band anchors (96, 132, 168, 192 months) as ladder rungs; re-verify wording against CSTA 2026 when it publishes. All porting is hand-done with a MAP_BANK_VERSION bump; nothing auto-flows.
 
 Candidate items (18), most anchor-worthy first within each domain:
 

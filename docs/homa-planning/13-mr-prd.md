@@ -1,9 +1,9 @@
-# PRD — Homa Cohort One (M-R track)
+# PRD · Homa Cohort One (M-R track)
 
 > **Status:** APPROVED FOR BUILD once M0-01 gate passes. Owner: Sidney (founder/PM).
 > This is the single document an engineering agent builds cohort one from. Detailed
 > specs live in the referenced journey docs; this PRD is the contract that binds them.
-> All founder decisions D1–D9, T1–T3 (journeys/10 §5) are baked in — do not relitigate
+> All founder decisions D1–D9, T1–T3 (journeys/10 §5) are baked in, do not relitigate
 > in implementation.
 
 ## 1. What we are building
@@ -18,7 +18,7 @@ trial-with-card Stripe Payment Link, uncapped power-user experience.
 
 **One deployment serves all families** (eve on Vercel; tenancy per 01-architecture).
 Sidney operates concierge loops behind the product (scoring, weekly notes, state
-reports) — invisible to customers, fail-closed by design.
+reports), invisible to customers, fail-closed by design.
 
 ## 2. Goals / success criteria
 
@@ -26,7 +26,7 @@ The Q3-C1 OKRs (12-roadmap-okrs.md) are this PRD's success criteria verbatim. He
 wow ≤10 min · WLF ≥70% by wk4 · every family gets an efficacy before/after by wk4 ·
 trial cost ≤$45 P50 · zero cross-tenant incidents.
 
-## 3. Non-goals (cohort one) — enforced
+## 3. Non-goals (cohort one) · enforced
 
 NO: SMS/WhatsApp · credit ledger/auto top-up machinery (M1-06/12/13 are NEXT; Payment
 Link only) · visible pricing meter (D2) · discover/local engine · curriculum comparison
@@ -34,12 +34,14 @@ Link only) · visible pricing meter (D2) · discover/local engine · curriculum 
 automated weekly notes (concierge only) · full state-report generator ("ask Homa" →
 Sidney compiles) · 8–12 materials fronting families (parallel build behind rigor bar,
 D3) · child-voice capture & child-facing anything (parent is the speaker; D4 covers
-photos, not voice) · face recognition (banned permanently) · public signup (invite
-codes only).
+photos, not voice) · face recognition (banned permanently) · ~~public signup (invite
+codes only)~~ SUPERSEDED: signup is open since 2026-07-05 (founder ruling, build-log:
+"as easy as possible to sign up, no hoops"; migration #8 dropped the invite trigger).
+MJ-09 remains as invite distribution to the waitlist cohort, not a signup wall.
 
 ## 4. Users
 
-P1–P5 personas (journeys/01). Family #0 = Alessa (parity gate — she moves in as soon
+P1–P5 personas (journeys/01). Family #0 = Alessa (parity gate, she moves in as soon
 as Phase C is buildable; her verdict gates invites #6–20). Families #1–20 = friend +
 conference waitlist, invited in batches. Secondary adults (S1/S2) are
 out of scope except: one login per family, mom may share the device.
@@ -52,32 +54,35 @@ are acceptance criteria wherever they touch a flow. Instrumentation: every FR em
 its events per journeys/06 schema via the typed registry (MJ-08); **no FR merges
 without its events** (ratified law).
 
-### FR-1 Invite gate & signup — spec: journeys/02 §1–2 · MJ-09, M1-01
-Invite code → Supabase Auth (email or Google/Apple) → family record. Waitlist page
-captures non-invited visitors (channel-variant landing bands). Stranger-proof: no
+### FR-1 Invites & signup · spec: journeys/02 §1–2 · MJ-09, M1-01
+(Reframed 2026-07-05, founder ruling in build-log: open signup, no invite-code wall.)
+Supabase Auth signup (email or Google/Apple) → family record, open to anyone. MJ-09
+becomes the invite *distribution* path: the waitlist read path + invite emails that
+bring the conference cohort in deliberately. The lead-magnet flow at /onboarding
+captures visitors (every lead still mirrors into `waitlist`). Stranger-proof: no
 Sidney touch required end-to-end.
 
-### FR-2 Onboarding: the 3-minute wow — spec: journeys/02 §2 (binding copy) · M2-03
-Form intake (mom, state, kids' names+DOBs — forms, not chat) → 4 questions per child →
+### FR-2 Onboarding: the 3-minute wow · spec: journeys/02 §2 (binding copy) · M2-03
+Form intake (mom, state, kids' names+DOBs: forms, not chat) → 4 questions per child →
 **first personalized worksheet delivered in-chat ≤3 min** → PWA add-to-home-screen
 moment → voice-permission ask with graceful denial path. Out-of-range kids (per D3 gap
 window) get the honest MJ-07 screen: hours+journal+benchmarks now, materials tracked
 as "growing with us." Trial starts here: Payment Link checkout w/ card, trial period
-(T1), copy makes "uncapped during your trial — and it stays feeling this way" true.
+(T1), copy makes "uncapped during your trial, and it stays feeling this way" true.
 
-### FR-3 Week-one drip — spec: journeys/02 §3 · MJ-05, M1-08min
+### FR-3 Week-one drip · spec: journeys/02 §3 · MJ-05, M1-08min
 3 questionnaire questions/day/child via email deep-link into chat; skip/catch-up
 rules; completes the profile the wow started. Day-7 lands on validation (first
 benchmark positions visible), never audit.
 
-### FR-4 Chat + voice — spec: journeys/04 F2 · M1-04/05, M1-15, MJ-02
+### FR-4 Chat + voice · spec: journeys/04 F2 · M1-04/05, M1-15, MJ-02
 Streaming chat (eve web channel, `useEveAgent`), mobile-first. Voice notes:
 MediaRecorder → Whisper → routed (journal/observation/hours/question) with
 **named-effect confirmation chips + atomic undo** (MJ-02). Text+file-upload fallback
 ships simultaneously. Session rotation invisible to the user (M1-15). Continuation
 tokens are server-custody secrets (S6).
 
-### FR-5 Materials generation + photo personalization — spec: journeys/04 F1 · M2-05, MJ-01/06/11, D4
+### FR-5 Materials generation + photo personalization · spec: journeys/04 F1 · M2-05, MJ-01/06/11, D4
 Handwriting, flash cards, coloring pages; DS worksheet template; reads `what_works`
 first; generation status streaming with retry/escalation (45–120 s wait is the #1
 funnel risk); print preflight + email-to-self fallback (MJ-01); 👍/👎 with reason chips
@@ -86,36 +91,36 @@ consent screen (separate from signup, plain-language: what's used, where it goes
 no-training, delete anytime); raw photos on TTL; provider DPAs executed before invite
 #1; no face-recognition features. Footer: "made with Homa for [child]" (D7).
 
-### FR-6 Journal + ambient capture + hours — spec: journeys/04 F2/F4 · M2-07, M3-05 subset
+### FR-6 Journal + ambient capture + hours · spec: journeys/04 F2/F4 · M2-07, M3-05 subset
 Evening journal prompt (email deep-link, skip-if-unanswered); replies route to
 journal/compliance-hours/profile/memory with visible confirmations; ambient hour
 accrual from mentions ("2 hours of co-op"); per-state hour targets shown (HomeschoolLeap-
 seeded table, statute links + last-verified dates). Sensitive-context law (MJ-13/D6)
 applies to all captured content.
 
-### FR-7 Dashboard — spec: journeys/02 §3, 04 F3 (display law) · M2-08
+### FR-7 Dashboard · spec: journeys/02 §3, 04 F3 (display law) · M2-08
 Answers exactly three questions: on track? / what next? / where's my proof (hours)?
 Per-child positions in domain framing, growth-only visual language (**no red, no
-"behind" — ever**), recent artifacts, hours vs target. 15-domain detail one tap deeper.
+"behind", ever**), recent artifacts, hours vs target. 15-domain detail one tap deeper.
 
-### FR-8 Weekly loop (concierge) — spec: journeys/03 §2 (3 example notes are binding tone) · M3-01 script, M3-11 manual
+### FR-8 Weekly loop (concierge) · spec: journeys/03 §2 (3 example notes are binding tone) · M3-01 script, M3-11 manual
 Saturday: Sidney triggers scoring script. Sunday: agent-drafted, **Sidney-reviewed**
-weekly note per family via email — containing ONE gentle next step max and, by week 4,
-a hand-written efficacy before/after ("reading is up since the letter-sounds set" —
+weekly note per family via email, containing ONE gentle next step max and, by week 4,
+a hand-written efficacy before/after ("reading is up since the letter-sounds set":
 temporal, never causal). 100% human review = the fail-closed gate.
 
-### FR-9 Learning loop — spec: 06-harness-gap §1/3, 11-hermes-notes · M2-13/14
+### FR-9 Learning loop · spec: 06-harness-gap-analysis §1/3, 11-hermes-implementation-notes · M2-13/14
 Post-turn extraction on a cheap model (Hermes digest pattern): schema-constrained
 writes, reduced toolset, delta guards, `profile_revisions`, UI-visible with undo.
 Injection defense per M2-14 (structural separation + scanning; scope includes photos'
 OCR text).
 
-### FR-10 Trust & safety floor — spec: journeys/05 · MJ-03/10/12/13, M1-16
+### FR-10 Trust & safety floor · spec: journeys/05 · MJ-03/10/12/13, M1-16
 Crisis playbook live before invite #1 (companion-not-therapist per D5; distress-data
 firewall). Claim-dispute path (chat-based, same-day correction propagation). Published
 support SLA. Global safe mode + PITR backups + as-built runbooks.
 
-### FR-11 Founder ops — spec: journeys/06 §5 · MJ-14, T2
+### FR-11 Founder ops · spec: journeys/06 §5 · MJ-14, T2
 Monday dashboard (12 tiles incl. quiet-families call list) + 5 wake-up alerts. Margin
 telemetry from day one: Gateway `ai-reporting-user` = familyId, `ai-reporting-tags` =
 action class on every model call; weekly cost-per-family and cost-per-action review;
@@ -143,12 +148,14 @@ rendering real events. **Gate for invites #6–20:** Alessa two-week parity verd
 ## 8. Open items
 
 - D10: confirm "Hegg" = Heggerty with Alessa (blocks curriculum library naming only).
-- Tier prices/allotments: placeholder $29/mo at Payment Link; real tiers derived at
-  day 60 (T2 memo).
+- Tier prices: v1 set by founder 2026-07-06 (build-log): Homa $19/mo or $99/yr,
+  Homa Pro $49/mo, live in Stripe both environments (supersedes the $29/mo
+  placeholder). Allotments and any revision still derive from real margin data at
+  day 60 (T2 memo). No pricing shown on the site until the paywall decision.
 - A2P 10DLC: entity filed immediately (Phase 0); registration proceeds in background
   for SMS (LATER).
 - **July 13, 2026 conference:** landing page + waitlist capture are a Phase 0
-  deliverable AHEAD of this PRD's product scope — see BUILD.md Deliverable 0.
+  deliverable AHEAD of this PRD's product scope, see BUILD.md Deliverable 0.
 
 ## 9. Risks (top 5, from 04 + council, with owners in the plan)
 

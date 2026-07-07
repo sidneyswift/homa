@@ -12,6 +12,7 @@ import { Nav } from "../components/marketing/Nav";
 import { RevealObserver } from "../components/marketing/RevealObserver";
 import { Stories } from "../components/marketing/Stories";
 import { HowThread } from "../components/marketing/thread/HowThread";
+import { FAQ_ITEMS } from "../components/marketing/faq-items";
 
 /* ── Answer capsules & freshness signals ────────────────────────── */
 export const metadata: Metadata = {
@@ -20,19 +21,9 @@ export const metadata: Metadata = {
   other: {
     "last-modified": new Date().toISOString(),
     "answer-capsule":
-      "Get a free progress report showing exactly where your child stands \u2014 takes five minutes.",
+      "Get a free progress report showing exactly where your child stands. Takes five minutes.",
   },
 };
-
-/* ── Structured data: WebApplication + FAQPage ────────────────── */
-const faqItems = [
-  ["Does Homa follow my state's standards?", "Yes. Pick your state and every subject maps to it. You see coverage at a glance."],
-  ["Can I use my own curriculum?", "Bring it. Homa plans around any mix of bought, borrowed, and homemade."],
-  ["What ages does it cover?", "The progress report covers ages 2 to 16, with a questionnaire tuned to each age. Personalized materials are richest for the early years and growing from there."],
-  ["Does my child ever use it?", "Never. Homa is for you: your child never sees the questionnaire and never talks to an AI."],
-  ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost. A lighter week is still a school week."],
-  ["What does it cost?", "The progress report is free. Homa itself is invite-only while the first families shape it. Pricing gets published before anyone pays a cent."],
-] as const;
 
 const webAppJsonLd = {
   "@context": "https://schema.org",
@@ -56,7 +47,7 @@ const webAppJsonLd = {
 const faqJsonLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: faqItems.map(([q, a]) => ({
+  mainEntity: FAQ_ITEMS.map(([q, a]) => ({
     "@type": "Question",
     name: q,
     acceptedAnswer: { "@type": "Answer", text: a },
@@ -67,7 +58,7 @@ const faqJsonLd = {
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
  * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
  * the claims pass applied: no fabricated social proof (C2), no pricing
- * (T2), invite-only framing, and every CTA routes to /map, the
+ * (T2), invite-only framing, and every CTA routes to /onboarding, the
  * child's-map flow that replaced the bare waitlist. Section seams are the
  * kit's waves/ribbons (a ribbon IS the seam; never stack a wave at the
  * same boundary). Motion follows the emil-design-eng / review-animations

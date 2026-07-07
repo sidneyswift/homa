@@ -20,6 +20,6 @@ export const metadata: Metadata = {
     "Answer a five-minute questionnaire about what your child can do. Homa checks it against national benchmarks and sends you a free progress report.",
 };
 
-export default function MapPage() {
+export default function OnboardingPage() {
   return <OnboardingShell />;
 }

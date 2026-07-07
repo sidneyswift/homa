@@ -12,7 +12,9 @@
 > **M-R revenue-first track**: invite-gated rollout (same self-serve code, invite codes
 > at signup), first paying families via concierge loops, public GA as a scheduled
 > switch after 10 stranger families survive onboarding + their fourth usage week
-> unassisted. M0–M5 tickets remain the full catalog; M-R sequences a subset and defers
+> unassisted. **[Superseded in part 2026-07-05, build-log: signup itself is OPEN, no
+> invite-code wall (migration #8). "Invite-gated" survives as MJ-09 invite
+> distribution: who gets deliberately brought in, not who can sign up.]** M0–M5 tickets remain the full catalog; M-R sequences a subset and defers
 > the rest to post-revenue, where 20 real families' data makes them better-built anyway.
 
 ## M-R — Revenue-first track (plan of record; phases = dependency order)

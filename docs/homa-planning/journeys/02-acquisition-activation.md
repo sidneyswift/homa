@@ -1,5 +1,13 @@
 # Journeys 02 — Acquisition & Activation (discover → land → sign up → wow → week one)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Also superseded: signup is OPEN since 2026-07-05 (founder ruling, build-log,
+> migration #8). Invite codes below describe MJ-09 invite distribution to the
+> waitlist cohort, not a signup wall.
+
 > Workstream 2 of 5. Replaces and deepens J1 in `02-user-journeys.md`. Built on the
 > council's **onboarding inversion** (09 §strong-consensus #1): the 3-minute wow comes
 > first, the 15-minute questionnaire becomes the week-one drip. Personas by code per

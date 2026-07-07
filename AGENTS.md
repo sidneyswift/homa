@@ -9,14 +9,13 @@ Homa is a multi-tenant AI homeschool assistant (Next.js + the eve agent framewor
 ## Commands
 
 - Install: `pnpm install`
-- Dev (all packages): `pnpm dev` — or one package: `pnpm --filter web dev`
+- Dev (all packages): `pnpm dev`, or one package: `pnpm --filter web dev`
 - Build: `pnpm build`
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`
-- Test: `pnpm test`
-- Tenant-isolation guard, run before any schema/query change: `pnpm check:isolation`
+- Guards (no unit-test suite yet, these are the tests): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:skills-targeting`
 - Before ANY eve version bump, no exceptions: `node scripts/eve-upgrade-check.mjs` (procedure: `docs/homa-planning/runbooks/eve-version-bump.md`)
-- CI (`.github/workflows/ci.yml`) runs typecheck + build + `check:isolation` on every push/PR, keep it green.
+- CI (`.github/workflows/ci.yml`) runs typecheck + lint + build + all four guards on every push/PR, keep it green.
 
 ## Code style & voice
 

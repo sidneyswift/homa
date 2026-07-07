@@ -12,7 +12,7 @@ import { blogPostExists, formatBlogDate, listBlogPosts, readBlogPost } from "../
  * /blog/[slug]: one published article, statically generated. Slugs come only
  * from files in content/blog/ (dynamicParams=false: anything else 404s).
  * SEO: metadata + OG from frontmatter, JSON-LD Article, sitemap entry via
- * app/sitemap.ts. Every article ends in the waitlist CTA.
+ * app/sitemap.ts. Every article ends in the /onboarding CTA.
  */
 
 export const dynamicParams = false;

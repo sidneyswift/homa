@@ -17,8 +17,8 @@ The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-
 
 | Path | What |
 |---|---|
-| `AGENTS.md` | What agents read first — commands, style, boundaries (symlinked as `CLAUDE.md`) |
-| `BUILD.md` | Engineering entry point — read next |
+| `AGENTS.md` | What agents read first: commands, style, boundaries (symlinked as `CLAUDE.md`) |
+| `BUILD.md` | Engineering entry point, read next |
 | `DESIGN.md` | Spec-compliant design-token summary for design tooling (source: `docs/homa-design/`) |
 | `apps/web/` | The one deployable: Next.js app with the eve agent mounted inside (`withEve`) |
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
@@ -31,7 +31,7 @@ The product contract is [docs/homa-planning/13-mr-prd.md](docs/homa-planning/13-
 | `HUMAN-TODO.md` | Founder's one-time setup checklist (temporary) |
 
 Local-only (untracked, never pushed): `homa-macmini/` (the original single-family
-production system — contains secrets and family data), `homa-research/` (vendored
+production system, contains secrets and family data), `homa-research/` (vendored
 agent-framework sources), `homa-template/` (the archived open-source template; its
 canonical copy is the `template-archive` branch + tag).
 

@@ -459,7 +459,7 @@ INFERENCE: the sharpest report-usable ladder: sequences own-life events about 72
 
 ## Product porting notes
 
-Homa's shipped map bank has 15 domains: math, literacy, phonics, writing, language, science, social_studies, art, music, gross_motor, fine_motor, social_emotional, self_care, executive_function, spanish. This lane feeds social_studies primarily (the ages 3 to 5 identity items in section 10 also touch social_emotional). Candidate anchor items below are hand-port candidates only, never auto-flow; each needs rewriting to parent-observable phrasing and the content laws in `packages/core/src/map/content.ts` before any `MAP_BANK_VERSION` bump.
+Homa's shipped map bank has 16 domains (computer_science shipped 2026-07-06): math, literacy, phonics, writing, language, science, social_studies, art, music, gross_motor, fine_motor, social_emotional, self_care, executive_function, spanish, computer_science. This lane feeds social_studies primarily (the ages 3 to 5 identity items in section 10 also touch social_emotional). Candidate anchor items below are hand-port candidates only, never auto-flow; each needs rewriting to parent-observable phrasing and the content laws in `packages/core/src/map/content.ts` before any `MAP_BANK_VERSION` bump.
 
 | # | Candidate item (parent-observable draft) | typicalMonths | Source |
 |---|---|---|---|

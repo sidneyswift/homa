@@ -1,5 +1,10 @@
 # 04 — Feature journeys & user stories (workstream 4 of 5)
 
+> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
+> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
+> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
+> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+
 > Status: PLANNING. Written 2026-07-02 against 00-pm-kickoff.md (template + persona cast),
 > 00-product-brief.md (§value stack), 03-backlog.md (M-R plan of record), 06-harness-gap-analysis.md,
 > 09-council-synthesis.md, docs/homa-design/readme.md + web-app UI kit, homa-template skills +

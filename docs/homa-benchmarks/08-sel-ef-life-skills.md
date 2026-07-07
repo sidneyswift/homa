@@ -378,7 +378,7 @@ Note (FACT): AAP moved away from a single number for ages 6+ in later guidance, 
 
 ## Product porting notes
 
-This lane feeds three shipped domains in `packages/core/src/map/content.ts` (bank v2026.07.1): `social_emotional`, `self_care`, `executive_function`. Those domains already carry 13 to 14 items each, several already tagged to `casel`, `harvard-ef`, `dawson-guare`, `aap-lifeskills`. The candidates below are the most anchor-worthy benchmarks this lane verified, framed parent-observable per the content laws. Each is a suggestion for hand-porting (never auto-flow), with `typicalMonths` and the verifying source from this file. Where a candidate refines or corroborates an existing item, that is noted.
+This lane feeds three shipped domains in `packages/core/src/map/content.ts` (written against bank v2026.07.1; the shipped bank is v2026.07.2 as of 2026-07-06, which already applied this lane's focus-minutes correction): `social_emotional`, `self_care`, `executive_function`. Those domains already carry 13 to 14 items each, several already tagged to `casel`, `harvard-ef`, `dawson-guare`, `aap-lifeskills`. The candidates below are the most anchor-worthy benchmarks this lane verified, framed parent-observable per the content laws. Each is a suggestion for hand-porting (never auto-flow), with `typicalMonths` and the verifying source from this file. Where a candidate refines or corroborates an existing item, that is noted.
 
 **Convention reminder:** grade-derived months use the end-of-grade table; developmental-milestone months use research consensus midpoints, not norms. All are approximate.
 

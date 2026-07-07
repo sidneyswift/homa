@@ -1,5 +1,11 @@
 # Exploration prompt: LLM-generated depth in the progress report
 
+> DONE, DO NOT RE-RUN (2026-07-06 night). The exploration this prompt
+> commissioned happened the same evening; D8 was overturned and the rulings
+> live in `2026-07-06-llm-report-depth-options.md` (decision record) and
+> `2026-07-06-llm-report-narrative-implementation-prompt.md` (the build
+> handoff). Kept for the record; the D8=A framing below is historical.
+
 Hand this file to a fresh agent session as its opening instruction. It is a
 mission brief for an EXPLORATION, not an implementation. The agent that
 receives it must not write production code.
