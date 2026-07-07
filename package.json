@@ -11,7 +11,9 @@
     "check:sources": "tsx scripts/benchmarks-freshness.mts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "pull:state-requirements": "tsx scripts/state-requirements-pull.mts",
     "report:norms": "tsx scripts/map-norms-report.mts",
+    "seed:state-requirements": "tsx scripts/state-requirements-seed.mts",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {

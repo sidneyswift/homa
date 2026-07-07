@@ -1,0 +1,217 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "La. R.S. 17:221": "https://www.legis.la.gov/legis/Law.aspx?d=80276",
+    "La. R.S. 17:233": "https://www.legis.la.gov/legis/Law.aspx?d=80325",
+    "La. R.S. 17:236": "https://www.legis.la.gov/legis/Law.aspx?d=80345",
+    "La. R.S. 17:236.1": "https://www.legis.la.gov/legis/Law.aspx?d=80346",
+    "La. R.S. 17:236.2": "https://www.legis.la.gov/legis/Law.aspx?d=80347"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Beginning with the 2022-2023 school year, children who are age 5 by September 30 of the calendar year in which the school year begins through age 18 must attend school (La. R.S. 17:221). Parents may opt to defer kindergarten enrollment. Exception for 17-year-olds with parental consent under certain conditions.",
+    "start_age": 5
+  },
+  "esa_programs": [
+    {
+      "amount": "~$5,100/general student (above 250% FPL), $7,626/income ≤250% FPL, up to $15,253/student with qualifying disability (2025-2026, based on MFP percentages; amounts may be adjusted annually)",
+      "eligibility": "2025-2026: Louisiana residents age 5-21 by September 30, must be entering kindergarten, prior public school enrollee, prior LSP participant, or family income ≤250% FPL. Future years expand eligibility. Students enrolled in an Approved Home Study Program or nonpublic school (not seeking state approval) are NOT eligible while in those programs — must exit home study to participate.",
+      "name": "LA GATOR Scholarships (Louisiana Giving All True Opportunity to Rise)",
+      "status": "active"
+    },
+    {
+      "amount": null,
+      "eligibility": "Family income at or below 250% of federal poverty level; student entering kindergarten or previously attended a C/D/F-rated public school; Louisiana resident. Being replaced by LA GATOR program starting 2025-2026.",
+      "name": "Louisiana Scholarship Program (LSP)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.514Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/LA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: null; Registered Nonpublic School (Non-State-Approved): null; State-Approved Nonpublic School: \"BESE/LDOE\"",
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "bese_home_study",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: true; Registered Nonpublic School (Non-State-Approved): false; State-Approved Nonpublic School: true"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: false; Registered Nonpublic School (Non-State-Approved): undefined; State-Approved Nonpublic School: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Study Program Approved by BESE",
+      "notification": {
+        "deadline": "Within 15 days of beginning home study or withdrawing child from school",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: \"File home study application within 15 days of beginning home study or withdrawing child from school. Same process as initial filing.\"; Registered Nonpublic School (Non-State-Approved): undefined; State-Approved Nonpublic School: undefined",
+        "recipient": "Louisiana Department of Education (LDOE) on behalf of BESE",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: false; Registered Nonpublic School (Non-State-Approved): true; State-Approved Nonpublic School: true",
+        "portfolio_required": false
+      },
+      "statute": "La. R.S. 17:236",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program Approved by BESE: \"general_list\"; Registered Nonpublic School (Non-State-Approved): \"none\"; State-Approved Nonpublic School: \"general_list\"",
+        "required": [
+          "English Language Arts (reading, writing, spelling, grammar)",
+          "mathematics",
+          "science",
+          "social studies (U.S. history, Louisiana history, civics, geography)"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "nonpublic_school_registered",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Registered Nonpublic School (Non-State-Approved)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "BESE/LDOE",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "La. R.S. 17:233",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "nonpublic_school_state_approved",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "State-Approved Nonpublic School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "BESE/LDOE",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "La. R.S. 17:233",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English Language Arts",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "La. R.S. 17:221 (Compulsory School Attendance Ages)",
+      "La. R.S. 17:233 (Nonpublic School Attendance)",
+      "La. R.S. 17:236.1 (Home Study Program Provisions)",
+      "La. R.S. 17:176.2 (Homeschool Extracurricular Access; Act 715 of 2024)",
+      "La. Constitution Art. VIII (BESE Authority)",
+      "BESE Bulletin 741 (Nonpublic School Handbook)",
+      "BESE Home Study Program Guidelines (published by LDOE)"
+    ],
+    "doe_url": "https://doe.louisiana.gov/topic-pages/louisiana-school-choice/home-study",
+    "hslda_url": "https://hslda.org/legal/louisiana",
+    "primary_statute": "La. R.S. 17:236",
+    "statute_url": "https://www.legis.la.gov/legis/Law.aspx?d=80039"
+  },
+  "state_code": "LA",
+  "state_name": "Louisiana",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/LA/wizard"
+}

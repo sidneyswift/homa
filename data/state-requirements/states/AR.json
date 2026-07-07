@@ -1,0 +1,148 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "A.C.A. 6-15-501 et seq.": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/section-6-15-501/",
+    "A.C.A. 6-15-501 through 6-15-507": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/",
+    "A.C.A. 6-15-502": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/section-6-15-502/",
+    "A.C.A. 6-15-503": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/section-6-15-503/",
+    "A.C.A. 6-15-504(f)": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/section-6-15-504/",
+    "A.C.A. 6-18-201": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-18/subchapter-2/section-6-18-201/",
+    "A.C.A. 6-18-2501 et seq.": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-18/subchapter-25/section-6-18-2501/"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Ages 5 through 17 (A.C.A. 6-18-201). A child who has reached age 5 on or before the date established in A.C.A. 6-18-207 (August 1) is subject to compulsory attendance. Parents of children not yet 6 by August 1 may file a kindergarten waiver form with the local district to opt out of kindergarten for that year. A child who has received a high school diploma or equivalent is exempt.",
+    "start_age": 5
+  },
+  "esa_programs": [
+    {
+      "amount": "~$6,864/student ($1,716/quarter; 2025-2026)",
+      "eligibility": "All Arkansas students (universal)",
+      "name": "Arkansas LEARNS Act ESA",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.409Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/AR",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_school_notice",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home School Under Notice (A.C.A. 6-15-501 et seq.)",
+      "notification": {
+        "deadline": "August 15, or at least 5 school days before withdrawing the student if starting mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School Under Notice (A.C.A. 6-15-501 et seq.): [\"name, date of birth, and grade level of each child\",\"location of the home school\",\"core curriculum to be offered\",\"proposed schedule of instruction\",\"qualifications of the parent-teacher\"]; Private/Umbrella School Enrollment: undefined",
+        "recipient": "superintendent of local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "A.C.A. 6-15-501 through 6-15-507",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_umbrella_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private/Umbrella School Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "A.C.A. 6-15-501 et seq.",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "A.C.A. 6-18-201 (Compulsory Attendance)",
+      "A.C.A. 6-18-2501 et seq. (LEARNS Act / ESA)",
+      "A.C.A. 6-15-504(f) (Extracurricular Access)"
+    ],
+    "doe_url": "https://dese.ade.arkansas.gov/Offices/office-of-school-choice-and-parent-empowerment/home-schools/support-for-home-school-parents",
+    "hslda_url": "https://hslda.org/legal/arkansas",
+    "primary_statute": "A.C.A. 6-15-501 through 6-15-507",
+    "statute_url": "https://law.justia.com/codes/arkansas/title-6/subtitle-2/chapter-15/subchapter-5/"
+  },
+  "state_code": "AR",
+  "state_name": "Arkansas",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/AR/wizard"
+}

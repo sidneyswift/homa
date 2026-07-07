@@ -1,0 +1,161 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Mo. Rev. Stat. 167.031": "https://revisor.mo.gov/main/OneSection.aspx?section=167.031",
+    "Mo. Rev. Stat. Section 160.011": "https://revisor.mo.gov/main/OneSection.aspx?section=160.011",
+    "Mo. Rev. Stat. Section 167.012": "https://revisor.mo.gov/main/OneSection.aspx?section=167.012",
+    "Mo. Rev. Stat. Section 167.031": "https://revisor.mo.gov/main/OneSection.aspx?section=167.031",
+    "Mo. Rev. Stat. Section 167.042": "https://revisor.mo.gov/main/OneSection.aspx?section=167.042"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Ages 7 through 16 (compulsory attendance age is 17 — meaning the child must attend until turning 17, or until completing 16 credits toward high school graduation, whichever comes first). Kindergarten is not compulsory. Children ages 5-6 are not required to be enrolled, but if enrolled in public school, must attend regularly.",
+    "start_age": 7
+  },
+  "esa_programs": [
+    {
+      "amount": "~$6,375-$7,145 base; up to 175% for students with disabilities",
+      "eligibility": "Statewide (geographic restriction removed by SB 727, 2024). Students with an IEP, or low-income families (up to 300% of free/reduced lunch threshold) who meet prior public-school attendance, kindergarten entry, or sibling criteria.",
+      "name": "Missouri Empowerment Scholarship Accounts Program",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.538Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MO",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home School Under Section 167.012",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School Under Section 167.012: [\"plan_book_or_daily_log\",\"work_samples\",\"evaluation_record\"]; Private School / Umbrella (Cover) School Enrollment: undefined",
+        "portfolio_required": true
+      },
+      "statute": "Mo. Rev. Stat. Section 167.012; Mo. Rev. Stat. Section 167.031",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "umbrella_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School / Umbrella (Cover) School Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Mo. Rev. Stat. Section 167.031",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "Mo. Rev. Stat. Section 167.012 (Home school definition and requirements; created by SB 727/HB 2287, effective August 28, 2024)",
+      "Mo. Rev. Stat. Section 167.031 (Compulsory attendance; home school referenced)",
+      "Mo. Rev. Stat. Section 167.042 (Written notification to drop child from district rolls; rewritten effective August 28, 2025)",
+      "Mo. Rev. Stat. Section 160.011 (Definitions)",
+      "Mo. Rev. Stat. Section 161.670 (MOCAP)",
+      "Mo. Rev. Stat. Section 167.790 (Homeschool/FPE/virtual school student participation in activities; effective August 28, 2025)"
+    ],
+    "doe_url": "https://dese.mo.gov/mosis-subjects/homeschool",
+    "hslda_url": "https://hslda.org/legal/missouri",
+    "primary_statute": "Mo. Rev. Stat. Section 167.012; Mo. Rev. Stat. Section 167.031",
+    "statute_url": "https://revisor.mo.gov/main/OneSection.aspx?section=167.012"
+  },
+  "state_code": "MO",
+  "state_name": "Missouri",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MO/wizard"
+}

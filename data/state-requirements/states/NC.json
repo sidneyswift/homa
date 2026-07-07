@@ -1,0 +1,156 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "N.C.G.S. 115C-378": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-378.html",
+    "N.C.G.S. 115C-407.5": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-407.5.html",
+    "N.C.G.S. 115C-547": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-547.html",
+    "N.C.G.S. 115C-548": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-548.html",
+    "N.C.G.S. 115C-549": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-549.html",
+    "N.C.G.S. 115C-552": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-552.html",
+    "N.C.G.S. 115C-556": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-556.html",
+    "N.C.G.S. 115C-557": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-557.html",
+    "N.C.G.S. 115C-560": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-560.html",
+    "N.C.G.S. 115C-563": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-563.html",
+    "N.C.G.S. 115C-564": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-564.html",
+    "N.C.G.S. 115C-590": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-590.html",
+    "N.C.G.S. 115C-592": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_115C/GS_115C-592.html"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Compulsory attendance ages 7 through 16. Kindergarten not compulsory.",
+    "start_age": 7
+  },
+  "esa_programs": [
+    {
+      "amount": "~$2,000-$3,000/student (income-based cap)",
+      "eligibility": "NC residents, K-12, income-tiered. Homeschoolers became eligible starting 2024-25 school year.",
+      "name": "Opportunity Scholarship (Homeschool Eligible)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.550Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/NC",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School (DNPE Filing): null; Private Church School / School of Religious Charter: [3,6,9]",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "home_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School (DNPE Filing): [\"GED\"]; Private Church School / School of Religious Charter: []",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Home School (DNPE Filing)",
+      "notification": {
+        "deadline": "At least 5 days before opening the home school (DNPE requires written acknowledgment before starting)",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School (DNPE Filing): \"https://www.doa.nc.gov/about-doa/divisions/division-non-public-education\"; Private Church School / School of Religious Charter: \"https://www.ncdnpe.org/\"",
+        "recipient": "Division of Non-Public Education (DNPE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School (DNPE Filing): \"1 year (test results); attendance and immunization records maintained at home school\"; Private Church School / School of Religious Charter: null",
+        "portfolio_required": false
+      },
+      "statute": "N.C.G.S. 115C-547 through 115C-565",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "private_church_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private Church School / School of Religious Charter",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Division of Non-Public Education (DNPE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "N.C.G.S. 115C-547 et seq.",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "N.C.G.S. 115C-547 et seq. (Nonpublic Education, Part 3 of Article 39)"
+    ],
+    "doe_url": "https://www.doa.nc.gov/about-doa/divisions/division-non-public-education",
+    "hslda_url": "https://hslda.org/legal/north-carolina",
+    "primary_statute": "N.C.G.S. 115C-547 through 115C-565",
+    "statute_url": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/ByArticle/Chapter_115C/Article_39.pdf"
+  },
+  "state_code": "NC",
+  "state_name": "North Carolina",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/NC/wizard"
+}

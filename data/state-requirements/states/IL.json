@@ -1,0 +1,110 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "105 ILCS 5/26-1": "https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=010500050K26-1",
+    "105 ILCS 5/26-2a": "https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=010500050K26-2a",
+    "105 ILCS 5/27-1": "https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=010500050K27-1",
+    "People v. Levisen": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/illinois/supreme-court/1950/31133-5.html"
+    },
+    "Scoma v. Chicago Board of Education": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/federal/district-courts/FSupp/391/452/1494655/"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Child who has attained age 6 by September 1 of the school year is subject to compulsory attendance. Compulsory attendance ends when the child turns 17.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.497Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/IL",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_exemption",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home-Based Private School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "105 ILCS 5/26-1",
+      "subjects": {
+        "count": 6,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "language arts (reading, writing, grammar, spelling)",
+          "mathematics",
+          "science (biological and physical)",
+          "social science (social studies, U.S. history, geography, government/civics)",
+          "fine arts",
+          "physical development and health"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "105 ILCS 5/27-1 (Required Subjects of Instruction)",
+      "105 ILCS 5/26-2a (Truancy Investigation)",
+      "105 ILCS 5/27-21 (U.S. History Instruction -- applies to 'all schools')",
+      "105 ILCS 5/10-20.24 (Part-Time Public School Attendance for Private School Students)",
+      "105 ILCS 5/14-6.01 (Part-Time Attendance for Special Education-Eligible Private School Students)",
+      "105 ILCS 5/27-24.2 and 27-24.4 (Driver's Education for Homeschooled Students)",
+      "105 ILCS 5/10-19 (Public School Calendar -- applies only to public schools)",
+      "35 ILCS 40/5 (Invest in Kids Act -- expired 2023)"
+    ],
+    "doe_url": "https://www.isbe.net/Pages/Homeschool.aspx",
+    "hslda_url": "https://hslda.org/legal/illinois",
+    "primary_statute": "105 ILCS 5/26-1",
+    "statute_url": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=1005&ChapterID=17&Chapter=SCHOOLS&MajorTopic=EDUCATION"
+  },
+  "state_code": "IL",
+  "state_name": "Illinois",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/IL/wizard"
+}

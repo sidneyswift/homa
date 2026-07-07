@@ -1,0 +1,118 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HB 2674": "https://capitol.texas.gov/tlodocs/89R/billtext/html/HB02674F.htm",
+    "HB 3041 (89th Legislature, 2025)": "https://capitol.texas.gov/tlodocs/89R/analysis/html/HB03041E.htm",
+    "Leeper v. Arlington ISD": {
+      "source_label": "Leagle",
+      "source_type": "case_law",
+      "url": "https://www.leagle.com/decision/19941325893sw2d43211263"
+    },
+    "SB 2 (89th Legislature, 2025)": "https://capitol.texas.gov/tlodocs/89R/billtext/pdf/SB00002E.pdf",
+    "SB 401 (89th Legislature, 2025)": "https://capitol.texas.gov/tlodocs/89R/analysis/html/SB00401F.htm",
+    "Tex. Educ. Code 1.010": "https://capitol.texas.gov/tlodocs/89R/billtext/html/HB02674F.htm",
+    "Tex. Educ. Code 130.008": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.130.htm#130.008",
+    "Tex. Educ. Code 25.085": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.25.htm#25.085",
+    "Tex. Educ. Code 25.086": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.25.htm#25.086",
+    "Tex. Educ. Code 25.086(a)(1)": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.25.htm#25.086",
+    "Tex. Educ. Code 25.093": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.25.htm#25.093",
+    "Tex. Educ. Code 28.009": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.28.htm#28.009",
+    "Tex. Educ. Code Ch. 162": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.162.htm",
+    "Tex. Educ. Code Ch. 29, Subch. J": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.29.htm"
+  },
+  "compulsory_education": {
+    "end_age": 19,
+    "notes": "As of September 1 of the school year. Kindergarten not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "$2,000/student (homeschool); $10,474/student (private school)",
+      "eligibility": "All Texas students. Homeschool students receive up to $2,000/year for approved materials and services (homeschool students with disabilities are also capped at $2,000). Private school students receive ~$10,474. Students with disabilities at approved private schools (not homeschools) may receive up to $30,000.",
+      "name": "Texas Education Freedom Accounts (TEFA)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-31T14:18:50.344Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-13",
+  "page_url": "https://homeschoolleap.com/states/TX",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_exemption",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Private School Exemption",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Tex. Educ. Code 25.086(a)(1)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "spelling",
+          "grammar",
+          "mathematics",
+          "good citizenship"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "none",
+  "sources": {
+    "additional_statutes": [
+      "Tex. Educ. Code 25.085 (Compulsory Attendance)",
+      "Tex. Educ. Code 25.093 (Thwarting Compulsory Attendance)",
+      "HB 2398 (2015, decriminalized student truancy)",
+      "Tex. Educ. Code 1.010 (prohibits state regulation of home school programs)",
+      "HB 3041 (89th Legislature, 2025; top 10% university admission fix for homeschoolers)"
+    ],
+    "doe_url": "https://tea.texas.gov/texas-schools/general-information/finding-a-school-for-your-child/home-schooling",
+    "hslda_url": "https://hslda.org/legal/texas",
+    "primary_statute": "Tex. Educ. Code 25.086(a)(1)",
+    "statute_url": "https://statutes.capitol.texas.gov/Docs/ED/htm/ED.25.htm#25.086"
+  },
+  "state_code": "TX",
+  "state_name": "Texas",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/TX/wizard"
+}

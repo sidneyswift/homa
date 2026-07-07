@@ -1,0 +1,1130 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "count": 51,
+  "description": "Homeschool compliance requirements for all 50 US states and Washington, D.C.",
+  "source": "HomeschoolLeap — sourced from state statutes and administrative codes",
+  "states": [
+    {
+      "api_url": "/api/states/AK",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Independent Home Education",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.392Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 4,
+      "regulation_level": "none",
+      "state_code": "AK",
+      "state_name": "Alaska",
+      "url": "/states/AK",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/AL",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Church School / Cover School / Umbrella School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.404Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "low",
+      "state_code": "AL",
+      "state_name": "Alabama",
+      "url": "/states/AL",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/AR",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 5
+      },
+      "default_pathway": "Home School Under Notice (A.C.A. 6-15-501 et seq.)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.409Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "AR",
+      "state_name": "Arkansas",
+      "url": "/states/AR",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/AZ",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Traditional Homeschooling (Affidavit of Intent)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:54:07.684Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "AZ",
+      "state_name": "Arizona",
+      "url": "/states/AZ",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/CA",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home-Based Private School (Private School Affidavit)",
+      "generation_metadata": {
+        "generated_at": "2026-04-01T20:14:46.568Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-13",
+      "notification_required": true,
+      "pathway_count": 4,
+      "regulation_level": "moderate",
+      "state_code": "CA",
+      "state_name": "California",
+      "url": "/states/CA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/CO",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Home-Based Education",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.439Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "CO",
+      "state_name": "Colorado",
+      "url": "/states/CO",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/CT",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Equivalent Instruction Exemption",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.444Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "low",
+      "state_code": "CT",
+      "state_name": "Connecticut",
+      "url": "/states/CT",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/DC",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Home Instruction",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.450Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "moderate",
+      "state_code": "DC",
+      "state_name": "District of Columbia",
+      "url": "/states/DC",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/DE",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 5
+      },
+      "default_pathway": "Single-Family Home School Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.459Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "low",
+      "state_code": "DE",
+      "state_name": "Delaware",
+      "url": "/states/DE",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/FL",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.467Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "FL",
+      "state_name": "Florida",
+      "url": "/states/FL",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/GA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Home Study Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.475Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "GA",
+      "state_name": "Georgia",
+      "url": "/states/GA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/HI",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Home Instruction",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:55:56.313Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "HI",
+      "state_name": "Hawaii",
+      "url": "/states/HI",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/IA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "CPI Option 2: Standardized Testing",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.490Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 4,
+      "regulation_level": "moderate",
+      "state_code": "IA",
+      "state_name": "Iowa",
+      "url": "/states/IA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/ID",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Privately Instructed by Parent or Guardian",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.494Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "none",
+      "state_code": "ID",
+      "state_name": "Idaho",
+      "url": "/states/ID",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/IL",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Home-Based Private School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.497Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "low",
+      "state_code": "IL",
+      "state_name": "Illinois",
+      "url": "/states/IL",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/IN",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 7
+      },
+      "default_pathway": "Non-Accredited Non-Public School (Homeschool)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.502Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "IN",
+      "state_name": "Indiana",
+      "url": "/states/IN",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/KS",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 7
+      },
+      "default_pathway": "Nonaccredited Private School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.506Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "low",
+      "state_code": "KS",
+      "state_name": "Kansas",
+      "url": "/states/KS",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/KY",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Instruction as Private School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.508Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "low",
+      "state_code": "KY",
+      "state_name": "Kentucky",
+      "url": "/states/KY",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/LA",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Home Study Program Approved by BESE",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.514Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "LA",
+      "state_name": "Louisiana",
+      "url": "/states/LA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Prior Approval by Superintendent / School Committee",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.518Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "high",
+      "state_code": "MA",
+      "state_name": "Massachusetts",
+      "url": "/states/MA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MD",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Home Instruction Supervised by the Local School System",
+      "generation_metadata": {
+        "generated_at": "2026-03-31T14:18:25.222Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "MD",
+      "state_name": "Maryland",
+      "url": "/states/MD",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/ME",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Standard Home Instruction",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.527Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "ME",
+      "state_name": "Maine",
+      "url": "/states/ME",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MI",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.531Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "MI",
+      "state_name": "Michigan",
+      "url": "/states/MI",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MN",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 7
+      },
+      "default_pathway": "Non-Qualified Instructor with Testing Alternative",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.534Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "high",
+      "state_code": "MN",
+      "state_name": "Minnesota",
+      "url": "/states/MN",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MO",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 7
+      },
+      "default_pathway": "Home School Under Section 167.012",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.538Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "MO",
+      "state_name": "Missouri",
+      "url": "/states/MO",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MS",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Legitimate Home Instruction Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.542Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "MS",
+      "state_name": "Mississippi",
+      "url": "/states/MS",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/MT",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Home School Under MCA 20-5-109",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.546Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "MT",
+      "state_name": "Montana",
+      "url": "/states/MT",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NC",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Home School (DNPE Filing)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.550Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "NC",
+      "state_name": "North Carolina",
+      "url": "/states/NC",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/ND",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Standard Home Education (HS Diploma/GED)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.554Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "high",
+      "state_code": "ND",
+      "state_name": "North Dakota",
+      "url": "/states/ND",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NE",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Exempt School (Rule 13)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.558Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "NE",
+      "state_name": "Nebraska",
+      "url": "/states/NE",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NH",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education - Notify Resident District Superintendent",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.563Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "low",
+      "state_code": "NH",
+      "state_name": "New Hampshire",
+      "url": "/states/NH",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NJ",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Equivalent Instruction Elsewhere Than at School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.566Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "none",
+      "state_code": "NJ",
+      "state_name": "New Jersey",
+      "url": "/states/NJ",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NM",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Home School",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.569Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "NM",
+      "state_name": "New Mexico",
+      "url": "/states/NM",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NV",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education Notification",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.573Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "NV",
+      "state_name": "Nevada",
+      "url": "/states/NV",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/NY",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Home Instruction Under Commissioner's Regulations",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.576Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "high",
+      "state_code": "NY",
+      "state_name": "New York",
+      "url": "/states/NY",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/OH",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education Notification",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.583Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "low",
+      "state_code": "OH",
+      "state_name": "Ohio",
+      "url": "/states/OH",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/OK",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Other Means of Education",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.586Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "none",
+      "state_code": "OK",
+      "state_name": "Oklahoma",
+      "url": "/states/OK",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/OR",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education under ORS 339.035",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.591Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "OR",
+      "state_name": "Oregon",
+      "url": "/states/OR",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/PA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home Education Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:33:01.829Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "high",
+      "state_code": "PA",
+      "state_name": "Pennsylvania",
+      "url": "/states/PA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/RI",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "School Committee Approval",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.599Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "high",
+      "state_code": "RI",
+      "state_name": "Rhode Island",
+      "url": "/states/RI",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/SC",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 5
+      },
+      "default_pathway": "Option 3 - Accountability Association",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.605Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-25",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "SC",
+      "state_name": "South Carolina",
+      "url": "/states/SC",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/SD",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Alternative Instruction",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.609Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "SD",
+      "state_name": "South Dakota",
+      "url": "/states/SD",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/TN",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Independent Home School (Grades K-8)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.615Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "TN",
+      "state_name": "Tennessee",
+      "url": "/states/TN",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/TX",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 19,
+        "start_age": 6
+      },
+      "default_pathway": "Private School Exemption",
+      "generation_metadata": {
+        "generated_at": "2026-03-31T14:18:50.344Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-13",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "none",
+      "state_code": "TX",
+      "state_name": "Texas",
+      "url": "/states/TX",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/UT",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home School Exemption",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.620Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 1,
+      "regulation_level": "low",
+      "state_code": "UT",
+      "state_name": "Utah",
+      "url": "/states/UT",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/VA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 5
+      },
+      "default_pathway": "Option I -- Parent Holds High School Diploma",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.627Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 5,
+      "regulation_level": "moderate",
+      "state_code": "VA",
+      "state_name": "Virginia",
+      "url": "/states/VA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/VT",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 6
+      },
+      "default_pathway": "Home Study Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.632Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "moderate",
+      "state_code": "VT",
+      "state_name": "Vermont",
+      "url": "/states/VT",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/WA",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 8
+      },
+      "default_pathway": "Standard Home-Based Instruction (45 College Credits)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.639Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 5,
+      "regulation_level": "high",
+      "state_code": "WA",
+      "state_name": "Washington",
+      "url": "/states/WA",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/WI",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 18,
+        "start_age": 6
+      },
+      "default_pathway": "Home-Based Private Educational Program (HBPEP)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.644Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 2,
+      "regulation_level": "low",
+      "state_code": "WI",
+      "state_name": "Wisconsin",
+      "url": "/states/WI",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/WV",
+      "assessment_required": true,
+      "compulsory_education": {
+        "end_age": 17,
+        "start_age": 6
+      },
+      "default_pathway": "Option 2: Less Regulated Pathway (Annual Standardized Testing)",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.647Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": true,
+      "pathway_count": 3,
+      "regulation_level": "moderate",
+      "state_code": "WV",
+      "state_name": "West Virginia",
+      "url": "/states/WV",
+      "verification_status": "verified"
+    },
+    {
+      "api_url": "/api/states/WY",
+      "assessment_required": false,
+      "compulsory_education": {
+        "end_age": 16,
+        "start_age": 7
+      },
+      "default_pathway": "Home-Based Educational Program",
+      "generation_metadata": {
+        "generated_at": "2026-03-30T23:26:51.650Z",
+        "generator_version": "1.0.0",
+        "stale_claim_ids": []
+      },
+      "last_verified": "2026-03-14",
+      "notification_required": false,
+      "pathway_count": 1,
+      "regulation_level": "none",
+      "state_code": "WY",
+      "state_name": "Wyoming",
+      "url": "/states/WY",
+      "verification_status": "verified"
+    }
+  ]
+}

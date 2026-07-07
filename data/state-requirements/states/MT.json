@@ -1,0 +1,164 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Espinoza v. Montana Dept. of Revenue": {
+      "source_label": "Supreme Court",
+      "source_type": "case_law",
+      "url": "https://www.supremecourt.gov/opinions/19pdf/18-1195_g314.pdf"
+    },
+    "MCA 20-1-301": "https://leg.mt.gov/bills/mca/title_0200/chapter_0010/part_0030/section_0010/0200-0010-0030-0010.html",
+    "MCA 20-5-102": "https://leg.mt.gov/bills/mca/title_0200/chapter_0050/part_0010/section_0020/0200-0050-0010-0020.html",
+    "MCA 20-5-109": "https://leg.mt.gov/bills/mca/title_0200/chapter_0050/part_0010/section_0090/0200-0050-0010-0090.html",
+    "MCA 20-5-111": "https://leg.mt.gov/bills/mca/title_0200/chapter_0050/part_0010/section_0110/0200-0050-0010-0110.html",
+    "MCA 20-5-112": "https://leg.mt.gov/bills/mca/title_0200/chapter_0050/part_0010/section_0120/0200-0050-0010-0120.html",
+    "MCA 20-7-111": "https://leg.mt.gov/bills/mca/title_0200/chapter_0070/part_0010/section_0110/0200-0070-0010-0110.html"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Child who is 7 years of age or older prior to the first day of school in any school fiscal year is subject to compulsory attendance (MCA 20-5-102). No mandatory kindergarten. Children under 7 are not required to receive formal instruction.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.546Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MT",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School Under MCA 20-5-109: true; Non-Public (Private) School: false"
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home School Under MCA 20-5-109",
+      "notification": {
+        "deadline": "before the start of the school year, or whenever homeschooling begins if starting mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School Under MCA 20-5-109: true; Non-Public (Private) School: null",
+        "recipient": "county superintendent of schools (NOT the local school district superintendent)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home School Under MCA 20-5-109: true; Non-Public (Private) School: false",
+        "portfolio_required": false
+      },
+      "statute": "MCA 20-5-109",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English language arts / communication arts",
+          "mathematics",
+          "science",
+          "social studies",
+          "arts",
+          "health and physical education",
+          "career education / technology"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "non_public_private_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Non-Public (Private) School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "county superintendent of schools",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "MCA 20-5-109",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English language arts / communication arts",
+          "mathematics",
+          "science",
+          "social studies",
+          "arts",
+          "health and physical education",
+          "career education / technology"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "MCA 20-5-102 (Compulsory Enrollment and Attendance)",
+      "MCA 20-5-111 (Responsibilities and Rights of Parent Who Provides Home School)",
+      "MCA 20-1-301 (School Fiscal Year — instructional time requirements)",
+      "MCA 20-5-112 (Participation in Extracurricular Activities)",
+      "MCA 20-7-111 (Instruction in Public Schools — basic instructional program)",
+      "MCA 20-5-405 (Immunization — no longer applies to home schools per HB778)"
+    ],
+    "doe_url": "https://opi.mt.gov/Families-Students/Family-Student-Support/Homeschool",
+    "hslda_url": "https://hslda.org/legal/montana",
+    "primary_statute": "MCA 20-5-109 (Home Schools)",
+    "statute_url": "https://archive.legmt.gov/bills/mca/title_0200/chapter_0050/part_0010/section_0090/0200-0050-0010-0090.html"
+  },
+  "state_code": "MT",
+  "state_name": "Montana",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MT/wizard"
+}

@@ -1,0 +1,377 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "RCW 28A.150.220": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.150.220",
+    "RCW 28A.150.350": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.150.350",
+    "RCW 28A.195": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.195",
+    "RCW 28A.195.010": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.195.010",
+    "RCW 28A.195.040": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.195.040",
+    "RCW 28A.200": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.200",
+    "RCW 28A.200.010": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.200.010",
+    "RCW 28A.200.020": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.200.020",
+    "RCW 28A.225.010": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.225.010",
+    "RCW 28A.225.015": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.225.015",
+    "RCW 28A.225.216": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.225.216",
+    "RCW 28A.225.217": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.225.217",
+    "RCW 28A.600.310": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.600.310",
+    "WAC 392-134": "https://app.leg.wa.gov/wac/default.aspx?cite=392-134",
+    "WAC 392-134-005": "https://app.leg.wa.gov/wac/default.aspx?cite=392-134-005"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Ages 8-18 compulsory. Ages 6-7 are subject to compulsory attendance ONLY if the child is enrolled in school; if never enrolled, compulsory attendance begins at age 8. Kindergarten is not compulsory.",
+    "start_age": 8
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.639Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/WA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "standard_home_based_instruction",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home-Based Instruction (45 College Credits): true; Home-Based Instruction (Approved Course): true; Home-Based Instruction (Certified Teacher Supervision): true; Home-Based Instruction (Deemed Qualified by Superintendent): true; Private School Extension Program: false",
+        "qualification": "other"
+      },
+      "is_default": true,
+      "name": "Standard Home-Based Instruction (45 College Credits)",
+      "notification": {
+        "deadline": "September 15 of each school year, or within two weeks of the start of any public school quarter if beginning mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home-Based Instruction (45 College Credits): [\"child_name\",\"child_age\",\"certificated_supervision_status\"]; Home-Based Instruction (Approved Course): [\"child_name\",\"child_age\",\"certificated_supervision_status\"]; Home-Based Instruction (Certified Teacher Supervision): [\"child_name\",\"child_age\",\"certificated_supervision_status\"]; Home-Based Instruction (Deemed Qualified by Superintendent): [\"child_name\",\"child_age\",\"certificated_supervision_status\"]; Private School Extension Program: undefined",
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home-Based Instruction (45 College Credits): false; Home-Based Instruction (Approved Course): false; Home-Based Instruction (Certified Teacher Supervision): false; Home-Based Instruction (Deemed Qualified by Superintendent): false; Private School Extension Program: true",
+        "portfolio_required": false
+      },
+      "statute": "RCW 28A.225.010(4)(b); RCW 28A.200.010",
+      "subjects": {
+        "count": 11,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "language",
+          "mathematics",
+          "science",
+          "social studies",
+          "history",
+          "health",
+          "occupational education",
+          "art and music appreciation"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_based_approved_course",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Home-Based Instruction (Approved Course)",
+      "notification": {
+        "deadline": "September 15 of each school year, or within two weeks of the start of any public school quarter if beginning mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "RCW 28A.225.010(4)(b); RCW 28A.200.010",
+      "subjects": {
+        "count": 11,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "language",
+          "mathematics",
+          "science",
+          "social studies",
+          "history",
+          "health",
+          "occupational education",
+          "art and music appreciation"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_based_certified_teacher_supervision",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Home-Based Instruction (Certified Teacher Supervision)",
+      "notification": {
+        "deadline": "September 15 of each school year, or within two weeks of the start of any public school quarter if beginning mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "RCW 28A.225.010(4)(a); RCW 28A.200.010",
+      "subjects": {
+        "count": 11,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "language",
+          "mathematics",
+          "science",
+          "social studies",
+          "history",
+          "health",
+          "occupational education",
+          "art and music appreciation"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_based_superintendent_approval",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Home-Based Instruction (Deemed Qualified by Superintendent)",
+      "notification": {
+        "deadline": "September 15 of each school year, or within two weeks of the start of any public school quarter if beginning mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "RCW 28A.225.010(4)(c); RCW 28A.200.010",
+      "subjects": {
+        "count": 11,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "language",
+          "mathematics",
+          "science",
+          "social studies",
+          "history",
+          "health",
+          "occupational education",
+          "art and music appreciation"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "private_school_extension_program",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 1000,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School Extension Program",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "RCW 28A.195",
+      "subjects": {
+        "count": 11,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "language",
+          "mathematics",
+          "science",
+          "social studies",
+          "history",
+          "health",
+          "occupational education",
+          "art and music appreciation"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "RCW 28A.200.020 (Parental decision-making authority; minimum state regulation)",
+      "RCW 28A.225.010 (Compulsory attendance)",
+      "RCW 28A.225.015 (Enrollment of children age 6-7)",
+      "RCW 28A.195 (Private schools)",
+      "RCW 28A.150.350 (Part-time enrollment; ancillary services)",
+      "RCW 28A.600.310 (Running Start program)",
+      "RCW 28A.225.216 (Military children residency)",
+      "RCW 28A.225.217 (Continued enrollment during deployment)",
+      "WAC 392-134 (Part-time students; ancillary services definitions)"
+    ],
+    "doe_url": "https://ospi.k12.wa.us/student-success/learning-alternatives/home-based-instruction",
+    "hslda_url": "https://hslda.org/legal/washington",
+    "primary_statute": "RCW 28A.200.010",
+    "statute_url": "https://app.leg.wa.gov/rcw/default.aspx?cite=28A.200"
+  },
+  "state_code": "WA",
+  "state_name": "Washington",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/WA/wizard"
+}

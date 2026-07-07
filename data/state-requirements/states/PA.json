@@ -1,0 +1,201 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "24 P.S. Section 13-1327.1": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1949/0/0014.013.000.027.001..HTM",
+    "24 P.S. §13-1327": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1949/0/0014.013.000.027.000..HTM"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Ages 6 through 18 (from when parents elect to have the child enter school, no later than age 6, until age 18). Kindergarten is not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:33:01.829Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/PA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: \"06-30\"; Private Tutoring: undefined; Religious Day School Extension / Satellite Program: undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "portfolio",
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_education_program",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 900,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: true; Private Tutoring: false; Religious Day School Extension / Satellite Program: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: true; Private Tutoring: undefined; Religious Day School Extension / Satellite Program: undefined",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Home Education Program",
+      "notification": {
+        "deadline": "August 1 annually; prior to commencing if starting mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: \"File notarized affidavit with superintendent prior to commencement\"; Private Tutoring: undefined; Religious Day School Extension / Satellite Program: undefined",
+        "recipient": "superintendent of the school district of residence",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: [\"reading_log\",\"work_samples\",\"writing_samples\",\"test_results\"]; Private Tutoring: undefined; Religious Day School Extension / Satellite Program: undefined",
+        "portfolio_required": true
+      },
+      "statute": "24 P.S. Section 13-1327.1 (Act 169 of 1988, as amended)",
+      "subjects": {
+        "count": 10,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: {\"elementary_K_6\":[\"English (spelling, reading, writing)\",\"arithmetic\",\"science\",\"geography\",\"history of the United States and Pennsylvania\",\"civics\",\"safety education (including fire prevention)\",\"health and physiology\",\"physical education\",\"music\",\"art\"],\"secondary_7_12\":[\"English (language, literature, speech, composition)\",\"mathematics (general math, algebra, geometry)\",\"science\",\"geography\",\"social studies (civics, world history, U.S. history, Pennsylvania history)\",\"safety education (including fire prevention)\",\"health and physiology\",\"physical education\",\"music\",\"art\"]}; Private Tutoring: null; Religious Day School Extension / Satellite Program: null",
+        "required": [
+          "English (spelling, reading, writing)",
+          "arithmetic",
+          "science",
+          "geography",
+          "history of the United States and Pennsylvania",
+          "civics",
+          "safety education (including fire prevention)",
+          "health and physiology",
+          "physical education",
+          "music"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_tutoring",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 900,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Private Tutoring",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "24 P.S. Section 13-1327",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "Same subjects as public schools at the applicable grade level"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "religious_day_school_satellite",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Religious Day School Extension / Satellite Program",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "religious day school / local superintendent",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "24 P.S. Section 13-1327(d)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "24 P.S. Section 13-1327 (Private Tutoring)",
+      "24 P.S. Section 13-1327 (Private Tutoring and Religious Exemption)"
+    ],
+    "doe_url": "https://www.pa.gov/agencies/education/programs-and-services/instruction/elementary-and-secondary-education/home-education-and-private-tutoring",
+    "hslda_url": "https://hslda.org/legal/pennsylvania",
+    "primary_statute": "24 P.S. Section 13-1327.1 (Home Education Program)",
+    "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1949&sessInd=0&smthLwInd=0&act=14&chpt=13&sctn=27&subsctn=1"
+  },
+  "state_code": "PA",
+  "state_name": "Pennsylvania",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/PA/wizard"
+}

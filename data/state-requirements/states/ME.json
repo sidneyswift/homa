@@ -1,0 +1,155 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "20-A MRSA 5001-A": "https://legislature.maine.gov/statutes/20-A/title20-Asec5001-A.html",
+    "20-A MRSA Section 5001-A": "https://legislature.maine.gov/statutes/20-A/title20-Asec5001-A.html",
+    "20-A MRSA Section 5021": "https://legislature.maine.gov/statutes/20-A/title20-Asec5021.html",
+    "Carson v. Makin": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://supreme.justia.com/cases/federal/us/596/20-1088/"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Compulsory attendance from age 6 to under 17 (until child's 17th birthday). Kindergarten is not compulsory. Exceptions: 15 with parent and school board permission, or full-time attendance at accredited college with commissioner approval.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.527Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/ME",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: \"superintendent of the SAU\"; Approved Private School or Correspondence Program: null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "portfolio",
+          "other"
+        ]
+      },
+      "id": "standard_home_instruction",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: true; Approved Private School or Correspondence Program: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: false; Approved Private School or Correspondence Program: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Standard Home Instruction",
+      "notification": {
+        "deadline": "within 10 days of the start of home instruction",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: \"File notice of intent within 10 calendar days of beginning home instruction. Same process as initial filing, regardless of time of year.\"; Approved Private School or Correspondence Program: undefined",
+        "recipient": "superintendent of the school administrative unit (SAU) and the commissioner of education (simultaneously)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: true; Approved Private School or Correspondence Program: false",
+        "portfolio_required": false
+      },
+      "statute": "20-A MRSA Section 5001-A",
+      "subjects": {
+        "count": 9,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Instruction: \"general_list\"; Approved Private School or Correspondence Program: \"none\"",
+        "required": [
+          "English and language arts (reading, writing, spelling, grammar)",
+          "mathematics",
+          "science and technology",
+          "social studies (history, geography, economics, civics)",
+          "physical education and health",
+          "library skills",
+          "fine arts (music and visual arts)",
+          "Maine studies (Maine history, geography, and government — in at least one grade from 6 to 12)",
+          "computer proficiency (demonstrated at one grade level from 7 to 12)"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "approved_private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Approved Private School or Correspondence Program",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "20-A MRSA Section 5001-A",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "20-A MRSA Section 5021 (Standards for participation in public schools by students enrolled in equivalent instruction programs)"
+    ],
+    "doe_url": "https://www.maine.gov/doe/schools/schoolops/homeinstruction",
+    "hslda_url": "https://hslda.org/legal/maine",
+    "primary_statute": "20-A MRSA Section 5001-A",
+    "statute_url": "https://legislature.maine.gov/statutes/20-A/title20-Asec5001-A.html"
+  },
+  "state_code": "ME",
+  "state_name": "Maine",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/ME/wizard"
+}

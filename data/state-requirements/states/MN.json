@@ -1,0 +1,167 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Minn. Stat. 120A.22": "https://www.revisor.mn.gov/statutes/cite/120A.22",
+    "Minn. Stat. 120A.22; Minn. Stat. 120A.24": "https://www.revisor.mn.gov/statutes/cite/120A.22",
+    "Minn. Stat. 120A.24": "https://www.revisor.mn.gov/statutes/cite/120A.24",
+    "Minn. Stat. 120A.26": "https://www.revisor.mn.gov/statutes/cite/120A.26",
+    "Minn. Stat. 123B.49": "https://www.revisor.mn.gov/statutes/cite/123B.49",
+    "Minn. Stat. 124D.09": "https://www.revisor.mn.gov/statutes/cite/124D.09"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Compulsory attendance begins at age 7 and ends at 17 (or graduation, whichever comes first). Report must be filed with superintendent by October 1 after the child reaches age 7.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.534Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MN",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "qualified_instructor",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "bachelors"
+      },
+      "is_default": false,
+      "name": "Qualified Instructor Pathway",
+      "notification": {
+        "deadline": "October 1 of the school year, or within 15 days of withdrawal from school or moving into a new district",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the resident school district",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Minn. Stat. 120A.22; Minn. Stat. 120A.24",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading and writing",
+          "literature",
+          "fine arts (including music and visual arts)",
+          "mathematics and science",
+          "history, geography, and economics",
+          "government and citizenship (including U.S. Constitution)",
+          "health and physical education"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Qualified Instructor Pathway: null; Non-Qualified Instructor with Testing Alternative: \"scoring at or below 30th percentile triggers mandatory additional evaluation, not automatic failure\"",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "non_qualified_instructor_testing_alternative",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Qualified Instructor Pathway: true; Non-Qualified Instructor with Testing Alternative: false",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Non-Qualified Instructor with Testing Alternative",
+      "notification": {
+        "deadline": "October 1 of the school year, or within 15 days of withdrawal from school or moving into a new district",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the resident school district",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Minn. Stat. 120A.22, Subd. 11; Minn. Stat. 120A.24",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading and writing",
+          "literature",
+          "fine arts (including music and visual arts)",
+          "mathematics and science",
+          "history, geography, and economics",
+          "government and citizenship (including U.S. Constitution)",
+          "health and physical education"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "Minn. Stat. 120A.22 (Compulsory instruction; subjects; instructor qualifications)",
+      "Minn. Stat. 120A.24 (Reporting; assessment of children not enrolled in public school)",
+      "Minn. Stat. 120A.26 (Enforcement of compulsory instruction)",
+      "Minn. Stat. 123B.49, Subd. 4 (Extracurricular activities; nonpublic students)",
+      "Minn. Stat. 124D.09 (Post-Secondary Enrollment Options)",
+      "Minn. Stat. 290.0674 (Education tax credit)",
+      "Minn. Stat. 290.0132 (K-12 education subtraction/deduction)",
+      "Minn. Stat. 121A.15 (Immunization exemptions)"
+    ],
+    "doe_url": "https://education.mn.gov/MDE/fam/nphs/home/",
+    "hslda_url": "https://hslda.org/legal/minnesota",
+    "primary_statute": "Minn. Stat. 120A.22 (Compulsory Instruction); Minn. Stat. 120A.24 (Reporting and Assessment)",
+    "statute_url": "https://www.revisor.mn.gov/statutes/cite/120A.22"
+  },
+  "state_code": "MN",
+  "state_name": "Minnesota",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MN/wizard"
+}

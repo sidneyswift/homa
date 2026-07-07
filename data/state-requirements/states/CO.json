@@ -1,0 +1,199 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "C.R.S. 22-1-108": "https://colorado.public.law/statutes/crs_22-1-108",
+    "C.R.S. 22-33-104": "https://colorado.public.law/statutes/crs_22-33-104",
+    "C.R.S. 22-33-104.5": "https://colorado.public.law/statutes/crs_22-33-104.5"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Child who has attained age 6 on or before August 1 must attend that school year. Compulsory attendance ends at age 17. A parent is not required to provide notification until the child is 6 or establish the program until the child is 7.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.439Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/CO",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: [\"evaluation by a qualified person chosen by the parent\"]; Enrollment in an Umbrella/Private School: undefined; Licensed-Teacher Home Instruction: undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_based_education",
+      "instructional_time": {
+        "days_per_year": 172,
+        "hours_per_year": 688,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: true; Enrollment in an Umbrella/Private School: false; Licensed-Teacher Home Instruction: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: \"none\"; Enrollment in an Umbrella/Private School: \"none\"; Licensed-Teacher Home Instruction: \"teaching_cert\"",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home-Based Education",
+      "notification": {
+        "deadline": "14 calendar days before beginning home-based education program",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: [\"name of the child\",\"age of the child\",\"address where the child resides\",\"number of hours of attendance (must meet 172-day requirement)\",\"attestation that required subjects will be covered\"]; Enrollment in an Umbrella/Private School: undefined; Licensed-Teacher Home Instruction: undefined",
+        "recipient": "superintendent of the school district in which the child resides",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: true; Enrollment in an Umbrella/Private School: false; Licensed-Teacher Home Instruction: false",
+        "portfolio_required": false
+      },
+      "statute": "C.R.S. 22-33-104.5",
+      "subjects": {
+        "count": 9,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Education: \"general_list\"; Enrollment in an Umbrella/Private School: \"none\"; Licensed-Teacher Home Instruction: \"none\"",
+        "required": [
+          "reading",
+          "writing",
+          "speaking",
+          "mathematics",
+          "history",
+          "civics",
+          "literature",
+          "science",
+          "United States Constitution"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_umbrella_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Enrollment in an Umbrella/Private School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "C.R.S. 22-33-104(2)(a)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "licensed_teacher",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Licensed-Teacher Home Instruction",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "C.R.S. 22-33-104(2)(b)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "C.R.S. 22-33-104 (Compulsory school attendance; includes licensed-teacher exemption at (2)(b))",
+      "C.R.S. 22-33-107 (Enforcement of compulsory attendance)",
+      "C.R.S. 22-1-108 (Teaching of the United States Constitution)"
+    ],
+    "doe_url": "https://ed.cde.state.co.us/choice/homeschool",
+    "hslda_url": "https://hslda.org/legal/colorado",
+    "primary_statute": "C.R.S. 22-33-104.5",
+    "statute_url": "https://leg.colorado.gov/sites/default/files/images/olls/crs2023-title-22.pdf"
+  },
+  "state_code": "CO",
+  "state_name": "Colorado",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/CO/wizard"
+}

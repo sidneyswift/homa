@@ -1,0 +1,304 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "8VAC20-81-150": "https://law.lis.virginia.gov/admincode/title8/agency20/chapter81/section150/",
+    "Va. Code Section 22.1-213": "https://law.lis.virginia.gov/vacode/title22.1/chapter13/section22.1-213/",
+    "Va. Code Section 22.1-253.13:2": "https://law.lis.virginia.gov/vacode/title22.1/chapter13.2/section22.1-253.13:2/",
+    "Va. Code Section 22.1-254": "https://law.lis.virginia.gov/vacode/title22.1/chapter14/section22.1-254/",
+    "Va. Code Section 22.1-254.1": "https://law.lis.virginia.gov/vacode/title22.1/chapter14/section22.1-254.1/",
+    "Va. Code Section 22.1-3": "https://law.lis.virginia.gov/vacode/title22.1/chapter1/section22.1-3/",
+    "Va. Code Section 22.1-360": "https://law.lis.virginia.gov/vacode/title22.1/chapter24/section22.1-360/"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child must have reached 5th birthday on or before September 30 of the school year. Kindergarten is technically compulsory at age 5, but parents may notify the division to opt out. Many families treat the effective compulsory age as 6.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.627Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/VA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option I -- Parent Holds High School Diploma: \"08-01\"; Option II -- Parent is a Qualified Teacher: \"08-01\"; Option III -- Approved Program of Study or Curriculum: \"08-01\"; Option IV -- Evidence of Ability to Provide Adequate Education: \"08-01\"; Religious Exemption: undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "option_i_hs_diploma",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option I -- Parent Holds High School Diploma: true; Option II -- Parent is a Qualified Teacher: true; Option III -- Approved Program of Study or Curriculum: true; Option IV -- Evidence of Ability to Provide Adequate Education: true; Religious Exemption: false",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Option I -- Parent Holds High School Diploma",
+      "notification": {
+        "deadline": "August 15 annually; within 30 days if moving into a new school division mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option I -- Parent Holds High School Diploma: [\"curriculum_description\",\"qualification_evidence\"]; Option II -- Parent is a Qualified Teacher: [\"curriculum_description\",\"qualification_evidence\"]; Option III -- Approved Program of Study or Curriculum: [\"curriculum_description\",\"qualification_evidence\"]; Option IV -- Evidence of Ability to Provide Adequate Education: [\"curriculum_description\",\"qualification_evidence\"]; Religious Exemption: undefined",
+        "recipient": "superintendent of the local school division",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Va. Code Section 22.1-254.1(A)(i)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "option_ii_bachelors_degree",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Option II -- Parent is a Qualified Teacher",
+      "notification": {
+        "deadline": "August 15 annually; within 30 days if moving into a new school division mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school division",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Va. Code Section 22.1-254.1(A)(ii)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "option_iii_correspondence_distance",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Option III -- Approved Program of Study or Curriculum",
+      "notification": {
+        "deadline": "August 15 annually; within 30 days if moving into a new school division mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school division",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Va. Code Section 22.1-254.1(A)(iii)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "option_iv_evidence_of_ability",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Option IV -- Evidence of Ability to Provide Adequate Education",
+      "notification": {
+        "deadline": "August 15 annually; within 30 days if moving into a new school division mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school division",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Va. Code Section 22.1-254.1(A)(iv)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "religious_exemption",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Religious Exemption",
+      "notification": {
+        "deadline": "By August 15 of each year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school board",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Va. Code §22.1-254(B)(1)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "Va. Code Section 22.1-254 (Compulsory Attendance)",
+      "Va. Code Section 22.1-254(B)(1) (Religious Exemption)",
+      "Va. Code Section 22.1-253.13:2 (Standards of Quality, part-time enrollment)"
+    ],
+    "doe_url": "https://www.doe.virginia.gov/parents-students/for-parents/home-instruction",
+    "hslda_url": "https://hslda.org/legal/virginia",
+    "primary_statute": "Va. Code Section 22.1-254.1",
+    "statute_url": "https://law.lis.virginia.gov/vacode/title22.1/chapter14/section22.1-254.1/"
+  },
+  "state_code": "VA",
+  "state_name": "Virginia",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/VA/wizard"
+}

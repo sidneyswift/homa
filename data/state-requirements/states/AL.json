@@ -1,0 +1,212 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Ala. Code 16-28-1": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-1",
+    "Ala. Code 16-28-12": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-12",
+    "Ala. Code 16-28-1; Ala. Code 16-28-7": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-7",
+    "Ala. Code 16-28-1; Ala. Code 16-46-1 et seq.": "https://alison.legislature.state.al.us/code-of-alabama?section=16-46-1",
+    "Ala. Code 16-28-3": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-3",
+    "Ala. Code 16-28-5": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-5",
+    "Ala. Code 16-28-7": "https://alison.legislature.state.al.us/code-of-alabama?section=16-28-7",
+    "Ala. Code 16-46-1": "https://alison.legislature.state.al.us/code-of-alabama?section=16-46-1",
+    "Ala. Code 16-46-1 et seq.": "https://alison.legislature.state.al.us/code-of-alabama?section=16-46-1",
+    "Ala. Code 16-46-3": "https://alison.legislature.state.al.us/code-of-alabama?section=16-46-3"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Ages 6 through 17 (Ala. Code 16-28-3). Children under 6 and those 17 and older are not subject to compulsory attendance.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "$7,000/student (participating school enrollment); $2,000/student (home education, capped at $4,000/family)",
+      "eligibility": "Alabama residents ages 5-19 (up to 21 for IDEA/504), family income at or below 300% federal poverty level (~$93,600 for family of four), lawfully present in U.S. Priority given to students with special needs, then prior-year awardees, then by income level.",
+      "name": "CHOOSE Act Education Savings Account",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.404Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/AL",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "church_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Church School / Cover School / Umbrella School: false; Private Tutor: true; Private School: true"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Church School / Cover School / Umbrella School: false; Private Tutor: true; Private School: false",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Church School / Cover School / Umbrella School",
+      "notification": {
+        "deadline": "Upon initial enrollment in the church school",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Church School / Cover School / Umbrella School: undefined; Private Tutor: [\"child or children to be instructed\",\"subjects to be taught\",\"period of time instruction is proposed to be given\"]; Private School: undefined",
+        "recipient": "umbrella school (which files with local superintendent)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Church School / Cover School / Umbrella School: false; Private Tutor: true; Private School: true",
+        "portfolio_required": false
+      },
+      "statute": "Ala. Code 16-28-1; Ala. Code 16-28-7",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Church School / Cover School / Umbrella School: \"none\"; Private Tutor: \"general_list\"; Private School: \"general_list\"",
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_tutor",
+      "instructional_time": {
+        "days_per_year": 140,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Private Tutor",
+      "notification": {
+        "deadline": "Beginning of tutoring arrangement",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local superintendent",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Ala. Code 16-28-5",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Alabama State Department of Education",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Ala. Code 16-28-1; Ala. Code 16-46-1 et seq.",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "branches prescribed by the state board of education"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "Ala. Code 16-28-3 (Compulsory Attendance Ages)",
+      "Ala. Code 16-28-5 (Private Tutor Exception)",
+      "Ala. Code 16-28-12 (Reporting Requirements)",
+      "Ala. Code 16-46-1 through 16-46-9 (Private Schools)",
+      "Ala. Code 16-46-3 (Private School Teacher Certification Not Required)",
+      "Ala. Code 16-6D-1 et seq. (Alabama Accountability Act)",
+      "Ala. Code 16-30-3, 16-30-4 (Immunization Exemptions)"
+    ],
+    "doe_url": "https://www.alabamaachieves.org/homeschool/",
+    "hslda_url": "https://hslda.org/legal/alabama",
+    "primary_statute": "Ala. Code 16-28-1; Ala. Code 16-28-7",
+    "statute_url": "https://alison.legislature.state.al.us/code-of-alabama"
+  },
+  "state_code": "AL",
+  "state_name": "Alabama",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/AL/wizard"
+}

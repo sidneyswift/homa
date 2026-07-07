@@ -1,0 +1,217 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HSLDA Tennessee": "https://hslda.org/legal/tennessee",
+    "T.C.A. 49-6-3001": "https://codes.findlaw.com/tn/title-49-education/tn-code-sect-49-6-3001/",
+    "T.C.A. 49-6-3004": "https://codes.findlaw.com/tn/title-49-education/tn-code-sect-49-6-3004/",
+    "T.C.A. 49-6-3005": "https://codes.findlaw.com/tn/title-49-education/tn-code-sect-49-6-3005/",
+    "T.C.A. 49-6-3021": "https://codes.findlaw.com/tn/title-49-education/tn-code-sect-49-6-3021/",
+    "T.C.A. 49-6-3050": "https://www.tnhea.org/TCA%2049-6-3050",
+    "TNHEA": "https://www.tnhea.org",
+    "Tennessee DOE Home School": "https://www.tn.gov/education/families/school-options/home-schooling-in-tn.html",
+    "Tennessee EFS Program": "https://www.tn.gov/education/efs.html",
+    "Tennessee ESA Program": "https://www.tn.gov/education/esa.html",
+    "Tennessee IEA Program": "https://www.tn.gov/education/iea.html"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Every parent having control of a child between ages 6 and 17, both inclusive, must cause the child to attend school. Courts have interpreted 'inclusive' to mean through the day before the child's 18th birthday. A child who turns 6 on or before August 15 must attend school that year.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "~$9,346/student for 2025-2026 (varies by district)",
+      "eligibility": "Limited to students zoned to attend Memphis-Shelby County Schools, Metro Nashville Public Schools, or Hamilton County Schools who meet income requirements (family income at or below 200% of the income threshold for federal free lunch) or attend low-performing schools or Achievement School District schools",
+      "name": "Tennessee Education Savings Account (ESA) Pilot Program",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.615Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/TN",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): \"LEA director of schools (superintendent) and state board of education\"; Independent Home School (Grades 9-12): null; Church-Related School (Umbrella School): null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "independent_home_school_k8",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): true; Independent Home School (Grades 9-12): true; Church-Related School (Umbrella School): false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): true; Independent Home School (Grades 9-12): true; Church-Related School (Umbrella School): false",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Independent Home School (Grades K-8)",
+      "notification": {
+        "deadline": "Before the start of each school year, or before commencing instruction if withdrawing mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): [\"child_name\",\"child_age\",\"grade_level\",\"number_of_children\"]; Independent Home School (Grades 9-12): [\"child_name\",\"child_age\",\"grade_level\",\"number_of_children\"]; Church-Related School (Umbrella School): undefined",
+        "recipient": "Director of schools (superintendent) of the local education agency (LEA)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): true; Independent Home School (Grades 9-12): true; Church-Related School (Umbrella School): false",
+        "portfolio_required": false
+      },
+      "statute": "T.C.A. 49-6-3050(b)",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home School (Grades K-8): \"general_list\"; Independent Home School (Grades 9-12): \"general_list\"; Church-Related School (Umbrella School): \"none\"",
+        "required": [
+          "reading / language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "independent_home_school_9_12",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": false,
+      "name": "Independent Home School (Grades 9-12)",
+      "notification": {
+        "deadline": "Before the start of each school year, or before commencing instruction if withdrawing mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Director of schools (superintendent) of the local education agency (LEA)",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "T.C.A. 49-6-3050(b)",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading / language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "church_related_umbrella_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Church-Related School (Umbrella School)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "T.C.A. 49-6-3050(a)(2); T.C.A. 49-6-3050(a)(3); T.C.A. 49-50-801",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "T.C.A. 49-6-3001 (Definitions, including church-related schools Category IV)",
+      "T.C.A. 49-6-3005 (Compulsory Attendance)",
+      "T.C.A. 49-6-3007 (Exceptions to Compulsory Attendance)",
+      "T.C.A. 49-6-3021 (Withdrawal from Public School)",
+      "T.C.A. 49-6-3004 (School Day/Year Requirements)",
+      "T.C.A. 49-6-5001 (Immunization Requirements)",
+      "T.C.A. 49-6-2611 through 49-6-2622 (ESA Pilot Program)"
+    ],
+    "doe_url": "https://www.tn.gov/education/families/school-options/home-schooling-in-tn.html",
+    "hslda_url": "https://hslda.org/legal/tennessee",
+    "primary_statute": "T.C.A. 49-6-3050",
+    "statute_url": "https://www.tnhea.org/TCA%2049-6-3050"
+  },
+  "state_code": "TN",
+  "state_name": "Tennessee",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/TN/wizard"
+}

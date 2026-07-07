@@ -1,0 +1,266 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "EC Section 33190": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=33190.&lawCode=EDC",
+    "EC Section 48200": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48200.&lawCode=EDC",
+    "EC Section 48222": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48222.&lawCode=EDC",
+    "EC Section 48224": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48224.&lawCode=EDC",
+    "EC Section 48412": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48412.&lawCode=EDC",
+    "EC Section 51210": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=51210.&lawCode=EDC",
+    "EC Section 51220": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=51220.&lawCode=EDC",
+    "EC Section 51745": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=51745.&lawCode=EDC",
+    "EC Section 51747": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=51747.&lawCode=EDC",
+    "EC Section 56300": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=56300.&lawCode=EDC",
+    "EC Section 60640": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=60640.&lawCode=EDC",
+    "EC Sections 48222 and 33190": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48222.&lawCode=EDC",
+    "EC Sections 51745-51749.6": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=EDC&division=4.&title=2.&part=28.&chapter=5.&article=5.5.",
+    "Health & Safety Code Section 120325": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=120325.&lawCode=HSC",
+    "Jonathan L. v. Superior Court": {
+      "source_label": "FindLaw",
+      "source_type": "case_law",
+      "url": "https://caselaw.findlaw.com/court/ca-court-of-appeal/1256860.html"
+    },
+    "People v. Turner": {
+      "source_label": "CourtListener",
+      "source_type": "case_law",
+      "url": "https://www.courtlistener.com/opinion/1317628/people-v-turner/"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "EC Section 48200. Compulsory until age 18, completion of 12th grade, or passing the CHSPE (age 16+). Kindergarten and transitional kindergarten (TK) are not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-04-01T20:14:46.568Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-13",
+  "page_url": "https://homeschoolleap.com/states/CA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): null; Private School Satellite Program (PSP / Umbrella School): null; Private Tutor: null; Independent Study Through Public School or Charter School: [3,4,5,6,7,8,11]",
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_based_private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): false; Private School Satellite Program (PSP / Umbrella School): false; Private Tutor: true; Independent Study Through Public School or Charter School: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): false; Private School Satellite Program (PSP / Umbrella School): false; Private Tutor: true; Independent Study Through Public School or Charter School: false",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home-Based Private School (Private School Affidavit)",
+      "notification": {
+        "deadline": "October 1 through October 15 annually",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): false; Private School Satellite Program (PSP / Umbrella School): null; Private Tutor: null; Independent Study Through Public School or Charter School: null",
+        "recipient": "California Department of Education (CDE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): true; Private School Satellite Program (PSP / Umbrella School): false; Private Tutor: true; Independent Study Through Public School or Charter School: false",
+        "portfolio_required": false
+      },
+      "statute": "EC Sections 48222 and 33190",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private School (Private School Affidavit): {\"grades_1_6\":[\"English (speaking, reading, listening, spelling, handwriting, composition, literature)\",\"mathematics\",\"social sciences (anthropology, economics, geography, history, political science, psychology, sociology)\",\"science (biological and physical sciences, scientific investigation, ecology)\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"health (individual, family, and community health)\",\"physical education\"],\"grades_7_12\":[\"English (literature, language, composition)\",\"social sciences (history, geography, civics/government, economics)\",\"world language or languages (beginning not later than grade 7)\",\"physical education\",\"science (biological and physical sciences)\",\"mathematics\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"applied arts (consumer/homemaking education, industrial arts, general business, general agriculture)\",\"career technical education\",\"automobile driver education\"]}; Private School Satellite Program (PSP / Umbrella School): {\"grades_1_6\":[\"English (speaking, reading, listening, spelling, handwriting, composition, literature)\",\"mathematics\",\"social sciences (anthropology, economics, geography, history, political science, psychology, sociology)\",\"science (biological and physical sciences, scientific investigation, ecology)\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"health (individual, family, and community health)\",\"physical education\"],\"grades_7_12\":[\"English (literature, language, composition)\",\"social sciences (history, geography, civics/government, economics)\",\"world language or languages (beginning not later than grade 7)\",\"physical education\",\"science (biological and physical sciences)\",\"mathematics\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"applied arts (consumer/homemaking education, industrial arts, general business, general agriculture)\",\"career technical education\",\"automobile driver education\"]}; Private Tutor: {\"grades_1_6\":[\"English (speaking, reading, listening, spelling, handwriting, composition, literature)\",\"mathematics\",\"social sciences (anthropology, economics, geography, history, political science, psychology, sociology)\",\"science (biological and physical sciences, scientific investigation, ecology)\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"health (individual, family, and community health)\",\"physical education\"],\"grades_7_12\":[\"English (literature, language, composition)\",\"social sciences (history, geography, civics/government, economics)\",\"world language or languages (beginning not later than grade 7)\",\"physical education\",\"science (biological and physical sciences)\",\"mathematics\",\"visual and performing arts (dance, music, theatre, visual arts)\",\"applied arts (consumer/homemaking education, industrial arts, general business, general agriculture)\",\"career technical education\",\"automobile driver education\"]}; Independent Study Through Public School or Charter School: null",
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "public_school_independent_study",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Independent Study Through Public School or Charter School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "EC Sections 51745-51749.6",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "set by school per California state standards"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_satellite_program",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School Satellite Program (PSP / Umbrella School)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "EC Sections 48222 and 33190",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_tutor",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Private Tutor",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "EC Section 48224",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "EC Section 48200 (Compulsory Education)",
+      "EC Section 48224 (Private Tutor Exemption)",
+      "EC Section 33190 (Private School Affidavit)",
+      "EC Section 51210 (Elementary Course of Study)",
+      "EC Section 51220 (Secondary Course of Study)",
+      "EC Sections 51745-51749.6 (Independent Study)",
+      "EC Section 48412 (CHSPE)",
+      "EC Section 56300 et seq. (Child Find / Special Education)",
+      "Health & Safety Code Section 120325 et seq. (Immunization)"
+    ],
+    "doe_url": "https://www.cde.ca.gov/sp/ps/homeschool.asp",
+    "hslda_url": "https://hslda.org/legal/california",
+    "primary_statute": "EC Section 48222 (Private School Exemption)",
+    "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=48222.&lawCode=EDC"
+  },
+  "state_code": "CA",
+  "state_name": "California",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/CA/wizard"
+}

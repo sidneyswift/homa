@@ -1,0 +1,172 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "IC 20-19-2": "https://iga.in.gov/laws/current/ic/titles/20#20-19-2",
+    "IC 20-30-2-3": "https://iga.in.gov/laws/current/ic/titles/20#20-30-2-3",
+    "IC 20-33-2-28": "https://iga.in.gov/laws/current/ic/titles/20#20-33-2-28",
+    "IC 20-33-2-4": "https://iga.in.gov/laws/current/ic/titles/20#20-33-2-4",
+    "IC 20-33-2-4; IC 20-33-2-6": "https://iga.in.gov/laws/2024/ic/titles/20#20-33-2",
+    "IC 20-33-2-6": "https://iga.in.gov/laws/current/ic/titles/20#20-33-2-6",
+    "Mazanec v. North Judson-San Pierre School Corp.": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/federal/district-courts/FSupp/614/1152/2142068/"
+    },
+    "State v. Peterman": {
+      "source_label": "LexisNexis",
+      "source_type": "case_law",
+      "url": "https://www.lexisnexis.com/community/casebrief/p/casebrief-state-v-peterman"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Compulsory attendance until age 18, graduation, or equivalency certificate, whichever comes first. Children under 7 are not subject to compulsory attendance. One of the higher upper-end compulsory ages nationally.",
+    "start_age": 7
+  },
+  "esa_programs": [
+    {
+      "amount": "$20,000 (students with disabilities) / $8,000 (siblings)",
+      "eligibility": "Primarily for students with disabilities eligible for special education services. Sibling eligibility available for siblings of ESA recipients.",
+      "name": "Indiana Education Scholarship Account (ESA)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.502Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/IN",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "non_accredited_non_public_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Non-Accredited Non-Public School (Homeschool): false; Accredited Non-Public School: true"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Non-Accredited Non-Public School (Homeschool): false; Accredited Non-Public School: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Non-Accredited Non-Public School (Homeschool)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Non-Accredited Non-Public School (Homeschool): \"https://www.in.gov/doe/students/homeschool-information/\"; Accredited Non-Public School: null",
+        "recipient": "Indiana Department of Education (IDOE) — voluntary enrollment form (not legally required)",
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Non-Accredited Non-Public School (Homeschool): false; Accredited Non-Public School: true",
+        "portfolio_required": false
+      },
+      "statute": "IC 20-33-2-4; IC 20-33-2-6",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Non-Accredited Non-Public School (Homeschool): \"general_list\"; Accredited Non-Public School: \"detailed_by_grade\"",
+        "required": [
+          "English / language arts (reading, writing, spelling, grammar, composition, literature)",
+          "mathematics",
+          "social studies (U.S. history, government/civics, geography, economics)",
+          "science (biological and physical sciences)"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "accredited_non_public_school",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Accredited Non-Public School",
+      "notification": {
+        "deadline": "Beginning of each school year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Indiana Department of Education (IDOE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "IC 20-19-2",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English / language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "IC 20-33-2-28 (Non-Public School Enrollment Reporting)",
+      "IHSAA By-Law Rule 12-5 (Homeschool Athletic Eligibility; adopted April 2013)",
+      "IC 20-30-2-3 (180-Day School Year)",
+      "IC 20-51-1 et seq. (Choice Scholarship Program)",
+      "IC 20-51.4 (Education Scholarship Account)",
+      "IC 20-19-2 (IDOE Accreditation Standards)",
+      "IC 20-33-2-9 (Exit Interview Provisions)",
+      "Indiana Constitution, Article 8, Section 1"
+    ],
+    "doe_url": "https://www.in.gov/doe/students/homeschool-information/",
+    "hslda_url": "https://hslda.org/legal/indiana",
+    "primary_statute": "IC 20-33-2-4 (Compulsory Attendance); IC 20-33-2-6 (Equivalency Exemption)",
+    "statute_url": "https://iga.in.gov/laws/2024/ic/titles/20#20-33-2"
+  },
+  "state_code": "IN",
+  "state_name": "Indiana",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/IN/wizard"
+}

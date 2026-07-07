@@ -1,0 +1,114 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "In re Sawyer": {
+      "source_label": "CourtListener",
+      "source_type": "case_law",
+      "url": "https://www.courtlistener.com/opinion/1122616/in-re-sawyer/"
+    },
+    "K.S.A. 72-3115": "https://ksrevisor.gov/statutes/chapters/ch72/072_031_0015.html",
+    "K.S.A. 72-3120": "https://ksrevisor.gov/statutes/chapters/ch72/072_031_0020.html",
+    "K.S.A. 72-4345": "https://ksrevisor.gov/statutes/chapters/ch72/072_043_0045.html",
+    "K.S.A. 72-4345 through 72-4347": "https://ksrevisor.gov/statutes/chapters/ch72/072_043_0045.html",
+    "K.S.A. 72-4346": "https://ksrevisor.gov/statutes/chapters/ch72/072_043_0046.html",
+    "K.S.A. 72-4347": "https://ksrevisor.gov/statutes/chapters/ch72/072_043_0047.html",
+    "Kansas AG Opinion 75-409": {
+      "source_label": "KS AG Opinions",
+      "source_type": "case_law",
+      "url": "https://ksag.washburnlaw.edu/opinions/1975/1975-409.pdf"
+    },
+    "Kansas AG Opinion 85-159": {
+      "source_label": "KS AG Opinions",
+      "source_type": "case_law",
+      "url": "https://ksag.washburnlaw.edu/opinions/1985/1985-159.pdf"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Children must attend school from age 7 until age 18 (K.S.A. 72-3120). A child who is 16 or 17 may be exempted under limited circumstances (KSDE-approved alternative education program, parental consent plus counseling, or concurrent postsecondary enrollment) but these generally do not apply to standard homeschoolers.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.506Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/KS",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "other"
+        ]
+      },
+      "id": "nonaccredited_private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": true,
+      "name": "Nonaccredited Private School",
+      "notification": {
+        "deadline": "Before the child begins receiving instruction (one-time registration)",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Kansas State Department of Education (KSDE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "K.S.A. 72-3120 (compulsory attendance); K.S.A. 72-4345 through 72-4347 (nonaccredited private school registration)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "K.S.A. 72-3120 (Compulsory school attendance; competent instructor; substantially equivalent time)",
+      "K.S.A. 72-3115 (School term; instructional hours — 1,116 hours grades 1-11)",
+      "K.S.A. 72-4345 (Nonaccredited private schools; pupil records; definitions)",
+      "K.S.A. 72-4346 (Registration of nonaccredited private schools with state board)",
+      "K.S.A. 72-4347 (Purpose of registration — pupil record transfers)",
+      "K.S.A. 72-7121 (Participation in public school activities by nonpublic school students)",
+      "K.S.A. 72-4351 et seq. (Tax Credit for Low Income Students Scholarship Program)",
+      "K.S.A. 72-5393 (Special education services; private schools)",
+      "Kansas Constitution, Article 6, Section 1"
+    ],
+    "doe_url": "https://www.ksde.gov/agency/division-of-learning-services/special-education-and-title-services/title-services/non-accredited-private-schools",
+    "hslda_url": "https://hslda.org/legal/kansas",
+    "primary_statute": "K.S.A. 72-3120 (compulsory attendance); K.S.A. 72-4345 through 72-4347 (nonaccredited private school registration)",
+    "statute_url": "https://ksrevisor.gov/statutes/chapters/ch72/072_031_0020.html"
+  },
+  "state_code": "KS",
+  "state_name": "Kansas",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/KS/wizard"
+}

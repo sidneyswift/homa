@@ -1,0 +1,99 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "D.C. Code Section 38-202": "https://code.dccouncil.gov/us/dc/council/code/sections/38-202",
+    "D.C. Code Section 38-203": "https://code.dccouncil.gov/us/dc/council/code/sections/38-203",
+    "D.C. Code Section 38-506": "https://code.dccouncil.gov/us/dc/council/code/sections/38-506",
+    "DCMR 5200 Homeschooling": "https://osse.dc.gov/publication/dc-homeschool-regulation"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child who has reached age 5 by September 30 of the school year is subject to compulsory attendance. High school diploma or GED equivalent exempts from compulsory attendance regardless of age.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.450Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/DC",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_instruction",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Home Instruction",
+      "notification": {
+        "deadline": "Before instruction begins; renewed annually before each school year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Office of the State Superintendent of Education (OSSE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": true
+      },
+      "statute": "D.C. Code Section 38-202; 5-E DCMR Chapter 52 (Sections 5200 et seq.)",
+      "subjects": {
+        "count": 8,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "Language Arts",
+          "Mathematics",
+          "Science",
+          "Social Studies",
+          "Art",
+          "Music",
+          "Health",
+          "Physical Education"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "D.C. Code Section 38-201 et seq. (Compulsory School Attendance)",
+      "D.C. Code Section 38-203 (Enforcement of compulsory attendance)",
+      "D.C. Code Section 38-206 / 38-208 (Penalties)",
+      "5-E DCMR Chapter 52, Sections 5200 et seq. (Homeschooling)"
+    ],
+    "doe_url": "https://osse.dc.gov/service/homeschooling-district-columbia",
+    "hslda_url": "https://hslda.org/legal/district-of-columbia",
+    "primary_statute": "D.C. Code Section 38-202",
+    "statute_url": "https://code.dccouncil.gov/us/dc/council/code/sections/38-202"
+  },
+  "state_code": "DC",
+  "state_name": "District of Columbia",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/DC/wizard"
+}

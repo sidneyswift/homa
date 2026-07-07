@@ -1,0 +1,159 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Wis. Stat. 115.001(3g)": "https://docs.legis.wisconsin.gov/statutes/statutes/115/i/001",
+    "Wis. Stat. 118.133": "https://docs.legis.wisconsin.gov/statutes/statutes/118/133",
+    "Wis. Stat. 118.15": "https://docs.legis.wisconsin.gov/statutes/statutes/118/15",
+    "Wis. Stat. 118.165": "https://docs.legis.wisconsin.gov/statutes/statutes/118/165",
+    "Wis. Stat. 118.167": "https://docs.legis.wisconsin.gov/statutes/statutes/118/167",
+    "Wisconsin v. Yoder": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://supreme.justia.com/cases/federal/us/406/205/"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child must be 6 on or before September 1 of the school year. Children 16-17 may be excused with parental consent under certain conditions per Wis. Stat. 118.15(1)(b) and (c).",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.644Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/WI",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "hbpep",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 875,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private Educational Program (HBPEP): \"none\"; Private School: \"other\"",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home-Based Private Educational Program (HBPEP)",
+      "notification": {
+        "deadline": "October 15 of each school year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home-Based Private Educational Program (HBPEP): [\"hours_statement\",\"curriculum_statement\"]; Private School: undefined",
+        "recipient": "Wisconsin Department of Public Instruction (DPI) — NOT the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Wis. Stat. 118.165; Wis. Stat. 115.001(3g)",
+      "subjects": {
+        "count": 6,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "social studies",
+          "science",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 875,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Private School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Wisconsin Department of Public Instruction (DPI)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Wis. Stat. 118.165",
+      "subjects": {
+        "count": 6,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "social studies",
+          "science",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "Wis. Stat. 115.001(3g) (Definition of home-based private educational program)",
+      "Wis. Stat. 118.15 (Compulsory school attendance)",
+      "Wis. Stat. 118.165 (Private schools)",
+      "Wis. Stat. 118.133 (Interscholastic athletics and extracurricular activities for HBPEP students)"
+    ],
+    "doe_url": "https://dpi.wi.gov/sms/home-based",
+    "hslda_url": "https://hslda.org/legal/wisconsin",
+    "primary_statute": "Wis. Stat. 118.165",
+    "statute_url": "https://docs.legis.wisconsin.gov/statutes/statutes/118/165"
+  },
+  "state_code": "WI",
+  "state_name": "Wisconsin",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/WI/wizard"
+}

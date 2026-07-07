@@ -1,0 +1,239 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "4 AAC 33.421-33.426": "https://www.akleg.gov/basis/aac.asp?media=print&secStart=4.33.421&secEnd=4.33.426",
+    "AS 14.30.010": "https://www.akleg.gov/basis/statutes.asp?media=print&secStart=14.30.010&secEnd=14.30.010",
+    "AS 14.30.010(b)(12)": "https://www.akleg.gov/basis/statutes.asp?media=print&secStart=14.30.010&secEnd=14.30.010",
+    "AS 14.45.100": "https://www.akleg.gov/basis/statutes.asp?media=print&secStart=14.45.100&secEnd=14.45.100",
+    "AS 14.45.100-14.45.130": "https://www.akleg.gov/basis/statutes.asp?media=print&secStart=14.45.100&secEnd=14.45.130"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Every child between 7 and 16 must attend school (AS 14.30.010). A child who is 6 and already enrolled in first grade is also subject to compulsory attendance. Parents may opt out of enrollment at age 6 by notifying the school board in writing. No mandatory kindergarten. No September 1 cutoff specified in the statute for the age 7 threshold.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.392Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/AK",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home Education: null; Statewide Correspondence Study Program: \"correspondence program / sponsoring district\"; Private School Exemption: \"authorized representative of the department (composite results); parents (individual results)\"; Religious or Other Private School Enrollment: null",
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "independent_home_education",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home Education: false; Statewide Correspondence Study Program: false; Private School Exemption: true; Religious or Other Private School Enrollment: false"
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Independent Home Education",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home Education: null; Statewide Correspondence Study Program: false; Private School Exemption: false; Religious or Other Private School Enrollment: null",
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Independent Home Education: null; Statewide Correspondence Study Program: null; Private School Exemption: \"permanent\"; Religious or Other Private School Enrollment: null",
+        "portfolio_required": false
+      },
+      "statute": "AS 14.30.010(b)(12)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "correspondence_study_program",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Statewide Correspondence Study Program",
+      "notification": {
+        "deadline": "varies by program",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "correspondence program (operated through a school district)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "AS 14.45.100-14.45.130",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_exemption",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School Exemption",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "AS 14.45.100-14.45.130; AS 14.30.010(b)(1)(C)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "religious_or_private_school_enrollment",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Religious or Other Private School Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "AS 14.45.100-14.45.130",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "none",
+  "sources": {
+    "additional_statutes": [
+      "AS 14.30.010 (Compulsory Attendance)",
+      "AS 14.45.100-14.45.130 (Exempt Schools — includes correspondence study and private schools)",
+      "4 AAC 33.421-33.426 (Correspondence Program Regulations)"
+    ],
+    "doe_url": "https://education.alaska.gov/alaskan_schools/corres",
+    "hslda_url": "https://hslda.org/legal/alaska",
+    "primary_statute": "AS 14.30.010(b)(12)",
+    "statute_url": "https://www.akleg.gov/basis/statutes.asp?media=print&secStart=14.30.010&secEnd=14.30.010"
+  },
+  "state_code": "AK",
+  "state_name": "Alaska",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/AK/wizard"
+}

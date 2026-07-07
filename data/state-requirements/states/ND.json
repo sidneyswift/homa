@@ -1,0 +1,176 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HB 1540": "https://www.ndlegis.gov/assembly/69-2025/regular/bill-overview/bo2286",
+    "NDCC 15.1-20-01": "https://www.ndlegis.gov/cencode/t15-1c20.html",
+    "NDCC 15.1-21-01": "https://www.ndlegis.gov/cencode/t15-1c21.html",
+    "NDCC Chapter 15.1-23": "https://www.ndlegis.gov/cencode/t15-1c23.html",
+    "SB 2400": "https://www.ndlegis.gov/assembly/69-2025/regular/bill-overview/bo2674"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Child who will be 7 before the start of the school year is subject to compulsory attendance for that school year. No mandatory kindergarten.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.554Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/ND",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Education (HS Diploma/GED): []; Monitored Home Education (No Diploma/GED): undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "standard_home_education",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": 700,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Standard Home Education (HS Diploma/GED): true; Monitored Home Education (No Diploma/GED): false",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Standard Home Education (HS Diploma/GED)",
+      "notification": {
+        "deadline": "at least 5 days before the child begins home education, or within 14 days of establishing residence in a school district",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local public school district",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "NDCC 15.1-23-03",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English language arts (reading, composition, creative writing, grammar, spelling)",
+          "mathematics",
+          "social studies (U.S. Constitution, U.S. history, geography, government)",
+          "science",
+          "physical education",
+          "health (physiology, hygiene, disease control, nature and effects of alcohol, tobacco, and narcotics)",
+          "computer science and cybersecurity"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "monitored_home_education",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": 700,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Monitored Home Education (No Diploma/GED)",
+      "notification": {
+        "deadline": "at least 5 days before the child begins home education, or within 14 days of establishing residence in a school district",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local public school district",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "NDCC 15.1-23-06; NDCC 15.1-23-07",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English language arts (reading, composition, creative writing, grammar, spelling)",
+          "mathematics",
+          "social studies (U.S. Constitution, U.S. history, geography, government)",
+          "science",
+          "physical education",
+          "health (physiology, hygiene, disease control, nature and effects of alcohol, tobacco, and narcotics)",
+          "computer science and cybersecurity"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "NDCC 15.1-23-01 (Definitions)",
+      "NDCC 15.1-23-02 (Statement of intent; notification)",
+      "NDCC 15.1-23-03 (Qualifications of parent — HS diploma/GED)",
+      "NDCC 15.1-23-04 (Required instruction — subjects, hours, days)",
+      "NDCC 15.1-23-05 (Academic records)",
+      "NDCC 15.1-23-06 (Required monitoring of progress — non-diploma parents)",
+      "NDCC 15.1-23-07 (Monitoring details, reporting, compensation)",
+      "NDCC 15.1-23-08 (Monitoring teacher qualifications)",
+      "NDCC 15.1-23-09 (Standardized test requirement and exemptions)",
+      "NDCC 15.1-23-10 (Standardized test cost)",
+      "NDCC 15.1-23-11 (Standardized test results — 30th percentile composite trigger)",
+      "NDCC 15.1-23-12 (Remediation plan)",
+      "NDCC 15.1-23-13 (Services plan for children with disabilities)",
+      "NDCC 15.1-23-14 (Services plan — progress reports)",
+      "NDCC 15.1-23-15 (Services plan — qualified persons)",
+      "NDCC 15.1-23-16 (Extracurricular activities)",
+      "NDCC 15.1-23-17 (High school diplomas)",
+      "NDCC 15.1-23-19 (State aid for partial public school attendance)",
+      "NDCC 15.1-20-01 (Compulsory Attendance)",
+      "NDCC 15.1-21-01 (Required curriculum — computer science/cybersecurity)"
+    ],
+    "doe_url": "https://www.nd.gov/dpi/familiescommunity/families/home-education",
+    "hslda_url": "https://hslda.org/legal/north-dakota",
+    "primary_statute": "NDCC Chapter 15.1-23 (Home Education)",
+    "statute_url": "https://www.ndlegis.gov/cencode/t15-1c23.html"
+  },
+  "state_code": "ND",
+  "state_name": "North Dakota",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/ND/wizard"
+}

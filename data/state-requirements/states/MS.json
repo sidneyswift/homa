@@ -1,0 +1,155 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Miss. Code Ann. 37-13-91": "https://law.justia.com/codes/mississippi/title-37/chapter-13/mississippi-compulsory-school-attendance-law/section-37-13-91/",
+    "Miss. Code Ann. 37-13-91(2)(a)": "https://law.justia.com/codes/mississippi/title-37/chapter-13/mississippi-compulsory-school-attendance-law/section-37-13-91/",
+    "Miss. Code Ann. 37-13-91(3)(c)": "https://law.justia.com/codes/mississippi/title-37/chapter-13/mississippi-compulsory-school-attendance-law/section-37-13-91/",
+    "Miss. Code Ann. 37-13-93": "https://law.justia.com/codes/mississippi/title-37/chapter-13/mississippi-compulsory-school-attendance-law/section-37-13-91/",
+    "Miss. Code Ann. 37-15-9": "https://law.justia.com/codes/mississippi/title-37/chapter-15/section-37-15-9/"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Child must have attained age 6 on or before September 1. Compulsory attendance continues until age 17. Kindergarten not compulsory, but voluntary enrollment in public school may trigger compulsory attendance.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "$8,007/student (2025-2026, projected)",
+      "eligibility": "Students with an active IEP within the past 3 years. Serves all special education disability categories. Legislature has considered expanding eligibility.",
+      "name": "Equal Opportunity for Students with Special Needs Act (ESA)",
+      "status": "active"
+    },
+    {
+      "amount": "Varies",
+      "eligibility": "Students in grades 1-12 diagnosed with dyslexia. NOT available to homeschool students.",
+      "name": "Dyslexia Therapy Scholarship",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.542Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MS",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_instruction_program",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Legitimate Home Instruction Program: false; Non-Public School: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Legitimate Home Instruction Program",
+      "notification": {
+        "deadline": "September 15 of each school year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Legitimate Home Instruction Program: [\"child_name\",\"child_address\",\"child_phone\",\"child_dob\",\"parent_name\",\"parent_address\",\"parent_phone\",\"education_description\",\"parent_signature\"]; Non-Public School: undefined",
+        "recipient": "school attendance officer of the resident school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Miss. Code Ann. 37-13-91(3)(c)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "non_public_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Non-Public School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "state",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Miss. Code Ann. 37-13-91(2)(a)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "Miss. Code Ann. 37-13-91 (Compulsory Attendance; Exemptions)",
+      "Miss. Code Ann. 37-13-91(2)(a) (Non-Public School Exemption)",
+      "Miss. Code Ann. 37-181-1 et seq. (Equal Opportunity for Students with Special Needs Act / ESA Program)",
+      "Miss. Code Ann. 37-13-93 (Penalties for Non-Compliance)",
+      "Miss. Code Ann. 37-15-9 (School Attendance Officer Duties)",
+      "Miss. Code Ann. 37-15-11 (Enrollment — Parent Must Accompany Child)"
+    ],
+    "doe_url": "https://mdek12.org/ocsa/home-school/",
+    "hslda_url": "https://hslda.org/legal/mississippi",
+    "primary_statute": "Miss. Code Ann. 37-13-91(3)(c)",
+    "statute_url": "https://advance.lexis.com/container?config=00JAAzNzhjOTYxNC0wZjRkLTQzNzAtYjJlYS1jNjExZWYxZGFhMGYKAFBvZENhdGFsb2cMlW40w5iIH7toHnTBIEP0"
+  },
+  "state_code": "MS",
+  "state_name": "Mississippi",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MS/wizard"
+}

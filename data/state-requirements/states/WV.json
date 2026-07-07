@@ -1,0 +1,233 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "W.Va. Code 18-2-25": "https://code.wvlegislature.gov/18-2-25/",
+    "W.Va. Code 18-31-1": "https://code.wvlegislature.gov/18-31-1/",
+    "W.Va. Code 18-5-45": "https://code.wvlegislature.gov/18-5-45/",
+    "W.Va. Code 18-8-1": "https://code.wvlegislature.gov/18-8-1/",
+    "W.Va. Code 18-8-1a": "https://code.wvlegislature.gov/18-8-1a/"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Children who have reached their 6th birthday by July 1 of the current school year, until their 17th birthday.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "Varies by application window (see notes). Covers tuition, homeschool curriculum, and qualifying expenses.",
+      "eligibility": "WV residents enrolled or eligible for enrollment in a WV public school (K-12); must be under 21 and not have completed secondary education; kindergartners must be at least 5 by July 1",
+      "name": "Hope Scholarship",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.647Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/WV",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "teacher_eval",
+          "standardized_test",
+          "portfolio"
+        ]
+      },
+      "id": "school_board_approval",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": false,
+      "name": "Option 1: School Board Approval Pathway",
+      "notification": {
+        "deadline": "On or before the date home instruction begins",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "county superintendent",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": true
+      },
+      "statute": "W.Va. Code 18-8-1(c)(1)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: undefined; Option 2: Less Regulated Pathway (Annual Standardized Testing): [\"State public school testing program\",\"Portfolio review by certified teacher with written narrative\",\"Alternative assessment mutually agreed upon with county superintendent\"]; Option 3: Learning Pod or Microschool: [\"State public school testing program\",\"Portfolio review by certified teacher with written narrative\",\"Alternative assessment mutually agreed upon with county superintendent\"]",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "portfolio",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "annual_assessment",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: true; Option 2: Less Regulated Pathway (Annual Standardized Testing): false; Option 3: Learning Pod or Microschool: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: true; Option 2: Less Regulated Pathway (Annual Standardized Testing): false; Option 3: Learning Pod or Microschool: true",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Option 2: Less Regulated Pathway (Annual Standardized Testing)",
+      "notification": {
+        "deadline": "before commencing home instruction",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: \"annual\"; Option 2: Less Regulated Pathway (Annual Standardized Testing): \"one_time\"; Option 3: Learning Pod or Microschool: \"one_time\"",
+        "recipient": "county superintendent",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: null; Option 2: Less Regulated Pathway (Annual Standardized Testing): \"3 years\"; Option 3: Learning Pod or Microschool: \"3 years\"",
+        "portfolio_required": false
+      },
+      "statute": "W.Va. Code 18-8-1(c)(2)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1: School Board Approval Pathway: [\"reading\",\"language arts\",\"mathematics\",\"science\",\"social studies\"]; Option 2: Less Regulated Pathway (Annual Standardized Testing): [\"reading\",\"language arts\",\"mathematics\",\"science\",\"social studies\"]; Option 3: Learning Pod or Microschool: [\"reading\",\"language\",\"mathematics\",\"science\",\"social studies\"]",
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "portfolio",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "learning_pod_microschool",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": false,
+      "name": "Option 3: Learning Pod or Microschool",
+      "notification": {
+        "deadline": "upon beginning participation",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "county superintendent or county board",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "W.Va. Code 18-8-1(n)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "language",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "W.Va. Code 18-8-1 (Compulsory School Attendance)",
+      "W.Va. Code 18-8-1a (Commencement and Termination of Compulsory Attendance)",
+      "W.Va. Code 18-8-1(c)(1) (Option 1: School Board Approval Pathway)",
+      "W.Va. Code 18-8-1(c)(2) (Option 2: Less Regulated Pathway)",
+      "W.Va. Code 18-8-1(n) (Option 3: Learning Pods and Microschools)",
+      "W.Va. Code 18-5-45 (Length of Instructional Term - 180 days)",
+      "W.Va. Code 18-2-25 (Interscholastic athletics and extracurricular activities - homeschool, learning pod, and microschool eligibility)",
+      "W.Va. Code 18-8-12 (Diploma authority for homeschools, learning pods, and microschools)",
+      "W.Va. Code 18-31-1 et seq. (Hope Scholarship Act)"
+    ],
+    "doe_url": "https://wvde.us/academics/school-choice/homeschool-state-code",
+    "hslda_url": "https://hslda.org/legal/west-virginia",
+    "primary_statute": "W.Va. Code 18-8-1(c)",
+    "statute_url": "https://code.wvlegislature.gov/18-8-1/"
+  },
+  "state_code": "WV",
+  "state_name": "West Virginia",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/WV/wizard"
+}

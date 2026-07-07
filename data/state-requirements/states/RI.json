@@ -1,0 +1,97 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "R.I.G.L. 16-19-1": "https://law.justia.com/codes/rhode-island/title-16/chapter-16-19/section-16-19-1/",
+    "R.I.G.L. 16-22-4": "https://webserver.rilegislature.gov/statutes/title16/16-22/16-22-4.HTM",
+    "R.I.G.L. Section 16-19-2": "http://webserver.rilegislature.gov/Statutes/TITLE16/16-19/16-19-2.htm",
+    "RIDE Homeschooling": "https://ride.ri.gov/students-families/education-programs/home-schooling"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Compulsory attendance for children who have completed 6 years of life on or before September 1 of the school year, or who are enrolled in kindergarten, through completion of 18 years of life, per R.I.G.L. 16-19-1. Waiver possible for students 16+ with an approved Alternative Learning Plan. Rhode Island raised the upper compulsory age from 16 to 18 circa 2009.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.599Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/RI",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "school_committee_approval",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "School Committee Approval",
+      "notification": {
+        "deadline": "varies by municipality; some require submission before start of school year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school committee or superintendent of the town where the child resides",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "R.I.G.L. Section 16-19-2",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "arithmetic",
+          "geography",
+          "United States and Rhode Island history",
+          "principles of American government",
+          "English"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "R.I.G.L. Section 16-19-1 (Compulsory Attendance)",
+      "R.I.G.L. Section 16-19-1.1",
+      "R.I.G.L. Section 16-22-4 (Instruction in health and physical education)"
+    ],
+    "doe_url": "https://ride.ri.gov/students-families/education-programs/home-schooling",
+    "hslda_url": "https://hslda.org/legal/rhode-island",
+    "primary_statute": "R.I.G.L. Section 16-19-2",
+    "statute_url": "http://webserver.rilegislature.gov/Statutes/TITLE16/16-19/16-19-2.htm"
+  },
+  "state_code": "RI",
+  "state_name": "Rhode Island",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/RI/wizard"
+}

@@ -1,0 +1,110 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HB 209 (2025)": "https://le.utah.gov/~2025/bills/static/HB0209.html",
+    "HB 467 (2026)": "https://le.utah.gov/~2026/bills/static/HB0467.html",
+    "SB 54 (2026)": "https://le.utah.gov/~2026/bills/static/SB0054.html",
+    "Utah Code 53E-7-402": "https://le.utah.gov/xcode/Title53E/Chapter7/53E-7-S402.html",
+    "Utah Code 53F-6-401": "https://le.utah.gov/xcode/Title53F/Chapter6/53F-6-S401.html",
+    "Utah Code 53G-6-201": "https://le.utah.gov/xcode/Title53G/Chapter6/53G-6-S201.html",
+    "Utah Code 53G-6-202": "https://le.utah.gov/xcode/Title53G/Chapter6/53G-6-S202.html",
+    "Utah Code 53G-6-204": "https://le.utah.gov/xcode/Title53G/Chapter6/53G-6-S204.html",
+    "Utah Code 53G-6-702": "https://le.utah.gov/xcode/Title53G/Chapter6/53G-6-S702.html"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Compulsory attendance begins at age 6. Kindergarten is not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "$8,000/year (private school); $6,000/year (home-based, ages 12-18); $4,000/year (home-based, ages 5-11). Age determined as of September 1. Distributed in two equal payments by July 31 and December 31. Mid-year awards prorated by quarter.",
+      "eligibility": "Utah K-12 students under age 19 as of September 1 of the scholarship year. Must verify primary residence in Utah with current-year documentation (utility bill, mortgage statement, lease, or property tax records). Cannot simultaneously receive a Carson Smith Scholarship.",
+      "name": "Utah Fits All Scholarship",
+      "status": "active"
+    },
+    {
+      "amount": "K-12: weighted pupil unit x 2.5 (no income tiers); Preschool full-time: value of weighted pupil unit; Preschool part-time: weighted pupil unit x 0.55. No income-based eligibility tiers.",
+      "eligibility": "Students with qualifying disabilities under IDEA (20 USC 1401(3)), documented by an IEP within the previous 3 years or a multidisciplinary team evaluation. Must be a primary resident of Utah with verification (utility bill, lease, property tax records, or income tax records). Each child must independently qualify; no sibling pass-through. Cannot simultaneously receive Utah Fits All or legacy Carson Smith Scholarship. Preschoolers who are homeschooled are not eligible.",
+      "name": "Carson Smith Opportunity Scholarship",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.620Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/UT",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_school_exemption",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home School Exemption",
+      "notification": {
+        "deadline": "before the child begins home schooling",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school board (board of education of the school district where the child resides)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Utah Code 53G-6-201 et seq.",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "Utah Code 53G-6-202 (Exemptions from compulsory education)",
+      "Utah Code 53G-6-204 (Home school requirements)",
+      "Utah Code 53G-6-702 (Part-time enrollment / dual enrollment)",
+      "Utah Code 53E-7-402 et seq. (Carson Smith Opportunity Scholarship)",
+      "HB 209 (2025) (Homeschool Amendments)",
+      "Utah Code 53F-6-401 et seq. (Utah Fits All Scholarship)"
+    ],
+    "doe_url": "https://schools.utah.gov/curr/homeschool",
+    "hslda_url": "https://hslda.org/legal/utah",
+    "primary_statute": "Utah Code 53G-6-201 et seq.",
+    "statute_url": "https://le.utah.gov/xcode/Title53G/Chapter6/53G-6-S204.html"
+  },
+  "state_code": "UT",
+  "state_name": "Utah",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/UT/wizard"
+}

@@ -1,0 +1,96 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "C.G.S. Section 10-184": "https://www.cga.ct.gov/current/pub/chap_168.htm#sec_10-184",
+    "C.G.S. Section 10-184a": "https://law.justia.com/codes/connecticut/title-10/chapter-168/section-10-184a/",
+    "C.G.S. Section 10-220": "https://www.cga.ct.gov/current/pub/chap_170.htm#sec_10-220"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Children who turn 5 on or before September 1 of the school year must begin instruction that year (changed from January 1 to September 1 effective 2024-2025 per PA 23-159). Parents may delay until age 6 or 7 at their option. Obligation continues until child turns 18 -- notably broader than most states.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.444Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/CT",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "equivalent_instruction",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Equivalent Instruction Exemption",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "C.G.S. Section 10-184",
+      "subjects": {
+        "count": 8,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "English grammar",
+          "geography",
+          "arithmetic",
+          "United States history",
+          "citizenship (including study of town, state, and federal governments)"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "C.G.S. Section 10-220 (Duties of boards of education)",
+      "C.G.S. Section 10-184a (Special education programs or services for children educated in a home or private school)"
+    ],
+    "doe_url": "https://portal.ct.gov/sde",
+    "hslda_url": "https://hslda.org/legal/connecticut",
+    "primary_statute": "C.G.S. Section 10-184",
+    "statute_url": "https://www.cga.ct.gov/current/pub/chap_168.htm#sec_10-184"
+  },
+  "state_code": "CT",
+  "state_name": "Connecticut",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/CT/wizard"
+}

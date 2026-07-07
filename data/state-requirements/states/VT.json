@@ -1,0 +1,152 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "16 V.S.A. Section 166b": "https://legislature.vermont.gov/statutes/section/16/003/00166b",
+    "16 V.S.A. §1121": "https://legislature.vermont.gov/statutes/section/16/025/01121",
+    "16 V.S.A. §166": "https://legislature.vermont.gov/statutes/section/16/003/00166",
+    "16 V.S.A. §906": "https://legislature.vermont.gov/statutes/section/16/023/00906",
+    "16 V.S.A. §944": "https://legislature.vermont.gov/statutes/section/16/023/00944"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Compulsory education ages 6 through 16 per 16 V.S.A. Section 1121. End age of 16 is notably lower than neighboring states.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.632Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/VT",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"annual\"; Enrollment in an Approved Independent (Private) School: null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "portfolio",
+          "other"
+        ]
+      },
+      "id": "home_study_program",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: 175; Enrollment in an Approved Independent (Private) School: null"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"none\"; Enrollment in an Approved Independent (Private) School: \"other\"",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Study Program",
+      "notification": {
+        "deadline": "At least 10 business days prior to commencing home study",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: false; Enrollment in an Approved Independent (Private) School: null",
+        "recipient": "Vermont Secretary of Education / Vermont Agency of Education",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: true; Enrollment in an Approved Independent (Private) School: false",
+        "portfolio_required": false
+      },
+      "statute": "16 V.S.A. Section 166b",
+      "subjects": {
+        "count": 6,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"general_list\"; Enrollment in an Approved Independent (Private) School: \"none\"",
+        "required": [
+          "basic communication skills (reading, writing, numeracy)",
+          "citizenship and government (Vermont and U.S. history and civics)",
+          "physical and health education (including substance abuse education)",
+          "literature (English, American, and other)",
+          "natural sciences",
+          "fine arts"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "approved_independent_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Enrollment in an Approved Independent (Private) School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "16 V.S.A. Section 166",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "16 V.S.A. Section 1121 (Compulsory Attendance)",
+      "16 V.S.A. Section 166 (Approved and Recognized Independent Schools)",
+      "16 V.S.A. Section 906 (Minimum Course of Study)",
+      "16 V.S.A. Section 944 (Dual Enrollment Program)"
+    ],
+    "doe_url": "https://education.vermont.gov/vermont-schools/school-operations/home-study",
+    "hslda_url": "https://hslda.org/legal/vermont",
+    "primary_statute": "16 V.S.A. Section 166b (Home Study Program)",
+    "statute_url": "https://legislature.vermont.gov/statutes/section/16/003/00166b"
+  },
+  "state_code": "VT",
+  "state_name": "Vermont",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/VT/wizard"
+}

@@ -1,0 +1,87 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "N.J.S.A. 18A:38-25": "https://law.justia.com/codes/new-jersey/title-18a/section-18a-38-25/",
+    "State v. Massa": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/new-jersey/appellate-division-published/1967/95-n-j-super-382-0.html"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Children between ages 6 and 16 must receive instruction. Obligation ends when child reaches age 16.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.566Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/NJ",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "equivalent_instruction",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Equivalent Instruction Elsewhere Than at School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "N.J.S.A. 18A:38-25",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "none",
+  "sources": {
+    "additional_statutes": [],
+    "doe_url": "https://www.nj.gov/education/safety/nontraditional/faq_homeschool.shtml",
+    "hslda_url": "https://hslda.org/legal/new-jersey",
+    "primary_statute": "N.J.S.A. 18A:38-25",
+    "statute_url": "https://lis.njleg.state.nj.us/nxt/gateway.dll/statutes/1?f=templates&fn=default.htm&vid=Publish:10.1048/Enu"
+  },
+  "state_code": "NJ",
+  "state_name": "New Jersey",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/NJ/wizard"
+}

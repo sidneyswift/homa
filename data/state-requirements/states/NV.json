@@ -1,0 +1,151 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "NRS 388D": "https://www.leg.state.nv.us/nrs/NRS-388D.html",
+    "NRS 388D.020": "https://www.leg.state.nv.us/nrs/NRS-388D.html",
+    "NRS 392.040": "https://www.leg.state.nv.us/nrs/NRS-392.html#NRS392Sec040",
+    "NRS 392.070": "https://www.leg.state.nv.us/nrs/NRS-392.html#NRS392Sec070",
+    "NRS 392.070; NRS 388D.020": "https://www.leg.state.nv.us/nrs/NRS-392.html#NRS392Sec070",
+    "NRS 394": "https://www.leg.state.nv.us/nrs/NRS-394.html",
+    "SB 252": "https://www.leg.state.nv.us/App/NELIS/REL/83rd2025/Bill/13323/Overview",
+    "Schwartz v. Lopez": {
+      "source_label": "UNLV Law",
+      "source_type": "case_law",
+      "url": "https://scholars.law.unlv.edu/nvscs/1009/"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Compulsory attendance for children ages 6 through 17 (until turning 18 or high school graduation). AB 65 (2023) lowered the start age from 7 to 6. A child who is 5 on or before September 30 may be admitted to kindergarten, but kindergarten is not compulsory. Attendance required until age 18 or high school graduation.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.573Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/NV",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_education_notification",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: false; Exempt Private School: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Education Notification",
+      "notification": {
+        "deadline": "Within 10 days of withdrawing from public school, or within 30 days of establishing residency in Nevada",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: [\"child_name\",\"child_age\",\"child_gender\",\"parent_name\",\"instruction_address\",\"responsibility_declaration\",\"educational_plan\"]; Exempt Private School: undefined",
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "NRS 392.070",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: \"general_list\"; Exempt Private School: \"none\"",
+        "required": [
+          "English (reading, composition, writing)",
+          "mathematics",
+          "science",
+          "social studies (history, geography, economics, government/civics)"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "exempt_private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Exempt Private School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Nevada Department of Education",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "NRS 394",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "NRS 392.040 (Compulsory Attendance)",
+      "NRS 388D (Alternative School Choices — homeschool notification, extracurricular access)",
+      "NRS 394 (Private Schools)"
+    ],
+    "doe_url": "https://doe.nv.gov/offices/craleo/nevada-homeschooling",
+    "hslda_url": "https://hslda.org/legal/nevada",
+    "primary_statute": "NRS 392.070; NRS 388D.020",
+    "statute_url": "https://www.leg.state.nv.us/nrs/NRS-388D.html"
+  },
+  "state_code": "NV",
+  "state_name": "Nevada",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/NV/wizard"
+}

@@ -1,0 +1,105 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HB 46 (2025)": "https://www.wyoleg.gov/Legislation/2025/HB0046",
+    "HSLDA HB 46 Guide": "https://hslda.org/post/what-you-need-to-know-about-hb-46",
+    "HSLDA Wyoming": "https://hslda.org/legal/wyoming",
+    "WS 21-4-101": "https://law.justia.com/codes/wyoming/title-21/chapter-4/article-1/section-21-4-101/",
+    "WS 21-4-102": "https://law.justia.com/codes/wyoming/title-21/chapter-4/article-1/section-21-4-102/",
+    "WS 21-4-301": "https://law.justia.com/codes/wyoming/title-21/chapter-4/article-3/section-21-4-301/",
+    "WS 21-4-506": "https://law.justia.com/codes/wyoming/title-21/chapter-4/article-5/section-21-4-506/",
+    "Wyoming DOE ESA": "https://edu.wyoming.gov/parents/education-savings-accounts/",
+    "Wyoming DOE Homeschooling": "https://edu.wyoming.gov/parents/homeschooling/"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "A child whose 7th birthday falls on or before August 1 must attend school. Compulsory attendance ends upon reaching age 16 or completing 10th grade, whichever comes first. No mandatory kindergarten.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.650Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/WY",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_based_educational_program",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home-Based Educational Program",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "WS 21-4-101(a)(vi)",
+      "subjects": {
+        "count": 7,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "mathematics",
+          "civics",
+          "history",
+          "literature",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "none",
+  "sources": {
+    "additional_statutes": [
+      "WS 21-4-101 (Compulsory Attendance; Definitions)",
+      "WS 21-4-102 (When Attendance Required; Exemptions; Withdrawal)",
+      "WS 21-4-301 (School Year — 175 days)",
+      "WS 21-4-506 (Participation in Activities by Students Not Enrolled in the District)",
+      "HB 46 (2025, Homeschool Freedom Act — eliminated curriculum submission requirement)",
+      "WS 21-2-901 et seq. (Education Savings Account Act / Steamboat Legacy Scholarship)"
+    ],
+    "doe_url": "https://edu.wyoming.gov/parents/homeschooling/",
+    "hslda_url": "https://hslda.org/legal/wyoming",
+    "primary_statute": "WS 21-4-101(a)(vi)",
+    "statute_url": "https://law.justia.com/codes/wyoming/title-21/chapter-4/article-1/section-21-4-101/"
+  },
+  "state_code": "WY",
+  "state_name": "Wyoming",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/WY/wizard"
+}

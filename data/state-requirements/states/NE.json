@@ -1,0 +1,152 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Neb. Rev. Stat. 79-1601": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-1601",
+    "Neb. Rev. Stat. 79-201": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-201",
+    "Neb. Rev. Stat. 79-318": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-318",
+    "Neb. Rev. Stat. Section 79-318": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-318",
+    "Neb. Rev. Stat. Sections 79-1601 through 79-1607": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-1601"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "A child who will reach age 6 before January 1 of the current school year is of mandatory attendance age. A 6-year-old exemption exists: parents may file an affidavit with the local school district stating the child will participate in an exempt school program, delaying formal filing until the child's 7th birthday. Compulsory attendance continues until the child turns 18 or completes secondary education, whichever comes first.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.558Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/NE",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): null; Approved or Accredited Private School (Rule 10): \"Nebraska Department of Education\"",
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "exempt_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 1032,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): false; Approved or Accredited Private School (Rule 10): true"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): false; Approved or Accredited Private School (Rule 10): undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Exempt School (Rule 13)",
+      "notification": {
+        "deadline": "July 15 of each school year; promptly if starting mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): [\"birth_certificate\"]; Approved or Accredited Private School (Rule 10): undefined",
+        "recipient": "Nebraska Department of Education (NDE), Commissioner of Education",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): false; Approved or Accredited Private School (Rule 10): true",
+        "portfolio_required": false
+      },
+      "statute": "Neb. Rev. Stat. Sections 79-1601 through 79-1607; Nebraska Administrative Code, Title 92, Chapter 13 (Rule 13)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Exempt School (Rule 13): \"general_list\"; Approved or Accredited Private School (Rule 10): \"detailed_by_grade\"",
+        "required": [
+          "language arts (reading, writing, spelling, grammar, oral communication)",
+          "mathematics",
+          "science",
+          "social studies (including U.S. and Nebraska history, civics, and government)",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "approved_accredited_private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 1032,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Approved or Accredited Private School (Rule 10)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Nebraska Department of Education (NDE)",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Neb. Rev. Stat. Section 79-318; Nebraska Administrative Code, Title 92, Chapter 10 (Rule 10)",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "must meet state approval or accreditation standards"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "Neb. Rev. Stat. Section 79-201 (Compulsory Attendance)",
+      "Neb. Rev. Stat. Section 79-318 (Private Schools)",
+      "Nebraska Administrative Code, Title 92, Chapter 13 (Rule 13 -- Exempt Schools; pending revision per LB1027)",
+      "Nebraska Administrative Code, Title 92, Chapter 10 (Rule 10 -- Approved/Accredited Schools)",
+      "LB 1141 (2012) -- Exempt school reform legislation",
+      "LB 1027 (2024) -- Reduced exempt school requirements: removed curriculum reporting, student testing, school visits; single-parent signature"
+    ],
+    "doe_url": "https://www.education.ne.gov/fos/exempt-schools/",
+    "hslda_url": "https://hslda.org/legal/nebraska",
+    "primary_statute": "Neb. Rev. Stat. Sections 79-1601 through 79-1607",
+    "statute_url": "https://nebraskalegislature.gov/laws/statutes.php?statute=79-1601"
+  },
+  "state_code": "NE",
+  "state_name": "Nebraska",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/NE/wizard"
+}

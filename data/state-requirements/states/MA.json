@@ -1,0 +1,117 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Brunelle v. Lynn": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/massachusetts/supreme-court/volumes/428/428mass512.html"
+    },
+    "Care and Protection of Charles": {
+      "source_label": "MassCases",
+      "source_type": "case_law",
+      "url": "http://masscases.com/cases/sjc/399/399mass324.html"
+    },
+    "M.G.L. c. 76, s. 1": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter76/Section1",
+    "M.G.L. c.69 Section 1D": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter69/Section1D",
+    "M.G.L. c.71 Section 1": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter71/Section1",
+    "M.G.L. c.76 Section 1": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter76/Section1",
+    "M.G.L. c.76 Section 2": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter76/Section2"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "M.G.L. c.76 Section 1. Compulsory attendance for children in the calendar year they turn 6 through 16. No uniform statewide cutoff date for age 6 enrollment; local districts may set their own kindergarten enrollment age cutoffs.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.518Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "portfolio",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "superintendent_approval",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Prior Approval by Superintendent / School Committee",
+      "notification": {
+        "deadline": "Before beginning homeschool instruction. Returning families typically submit in spring or summer for the upcoming school year. Specific deadlines vary by district.",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local superintendent of schools or school committee",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "M.G.L. c.76 Section 1",
+      "subjects": {
+        "count": 8,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "English language and grammar",
+          "mathematics",
+          "science",
+          "history (including U.S. history and U.S. Constitution)",
+          "geography",
+          "civics / good citizenship"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "M.G.L. c.76 Section 2 (Enforcement of compulsory attendance)",
+      "M.G.L. c.76 Section 4 (Inducement of absences)",
+      "M.G.L. c.71 Section 1 (Public school curriculum requirements)",
+      "M.G.L. c.69 Section 1D (Education standards)",
+      "M.G.L. c.71B (Special education)",
+      "603 CMR 27.04 (Structured learning time, public schools)"
+    ],
+    "doe_url": "https://www.doe.mass.edu/",
+    "hslda_url": "https://hslda.org/legal/massachusetts",
+    "primary_statute": "M.G.L. c.76 Section 1 (Compulsory Attendance)",
+    "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXII/Chapter76/Section1"
+  },
+  "state_code": "MA",
+  "state_name": "Massachusetts",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MA/wizard"
+}

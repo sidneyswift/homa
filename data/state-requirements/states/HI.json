@@ -1,0 +1,142 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "HAR Chapter 8-12": "https://boe.hawaii.gov/policies/AdminRules/Pages/AdminRule12.aspx",
+    "HRS 302A-1132": "https://www.capitol.hawaii.gov/hrscurrent/vol05_ch0261-0319/hrs0302a/hrs_0302a-1132.htm",
+    "HRS 302A-1132(a)(5)": "https://www.capitol.hawaii.gov/hrscurrent/vol05_ch0261-0319/hrs0302a/hrs_0302a-1132.htm",
+    "HRS 302A-1132(a)(5); HAR 8-12": "https://www.capitol.hawaii.gov/hrscurrent/vol05_ch0261-0319/hrs0302a/hrs_0302a-1132.htm"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child must be at least 5 on or before July 31 of the school year. Kindergarten is compulsory. Attendance required through age 18 or high school graduation, whichever comes first. Hawaii has one of the earliest compulsory start ages and latest end ages in the nation.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:55:56.313Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/HI",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Instruction: \"principal of the local public school\"; Private School or Umbrella Program Enrollment: null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "portfolio",
+          "other"
+        ]
+      },
+      "id": "home_instruction",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Instruction: false; Private School or Umbrella Program Enrollment: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Instruction",
+      "notification": {
+        "deadline": "before the child's attendance at school would otherwise be required, or at the time of withdrawal",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Instruction: \"Submit notice of intent to the local public school principal before initiating home schooling. Same process as initial notification.\"; Private School or Umbrella Program Enrollment: undefined",
+        "recipient": "principal of the public school the child would otherwise attend based on residence",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Instruction: [\"commencement_and_ending_dates\",\"weekly_hours_of_instruction\",\"subject_areas_covered\",\"mastery_determination_method\",\"bibliography_of_textbooks_and_materials\"]; Private School or Umbrella Program Enrollment: undefined",
+        "portfolio_required": true
+      },
+      "statute": "HRS 302A-1132(a)(5); HAR 8-12",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_enrollment",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School or Umbrella Program Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "HRS 302A-1132",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "HRS 302A-1132 (Compulsory School Attendance)",
+      "HAR Chapter 8-12 (Compulsory Attendance Rules — implements home instruction requirements)"
+    ],
+    "doe_url": "https://www.hawaiipublicschools.org/ParentsAndStudents/EnrollingInSchool/Pages/Homeschooling.aspx",
+    "hslda_url": "https://hslda.org/legal/hawaii",
+    "primary_statute": "HRS 302A-1132(a)(5) (Home Instruction)",
+    "statute_url": "https://www.capitol.hawaii.gov/hrscurrent/Vol05_Ch0261-0319/HRS0302A/HRS0302A-1132.htm"
+  },
+  "state_code": "HI",
+  "state_name": "Hawaii",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/HI/wizard"
+}

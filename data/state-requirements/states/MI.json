@@ -1,0 +1,173 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Clonlara Inc. v. State Board of Education": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/michigan/supreme-court/1993/91372-5.html"
+    },
+    "MCL 380.10": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-380-10",
+    "MCL 380.1561": "https://legislature.mi.gov/Laws/MCL?objectName=MCL-380-1561",
+    "MCL 380.1561(3)(a)": "https://legislature.mi.gov/Laws/MCL?objectName=MCL-380-1561",
+    "MCL 380.1561(3)(a) and MCL 380.1596": "https://legislature.mi.gov/Laws/MCL?objectName=MCL-380-1561",
+    "MCL 380.1561(3)(f)": "https://legislature.mi.gov/Laws/MCL?objectName=MCL-380-1561",
+    "MCL 380.1596": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-380-1596",
+    "People v. Bennett": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/michigan/supreme-court/1993/91480-5.html"
+    },
+    "People v. DeJonge": {
+      "source_label": "Justia",
+      "source_type": "case_law",
+      "url": "https://law.justia.com/cases/michigan/supreme-court/1993/91479-5.html"
+    }
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child who has reached age 6 by December 1 of the enrollment year is subject to compulsory attendance. Continues until age 18 or high school graduation, whichever comes first. Kindergarten waiver available to delay enrollment.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.531Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/MI",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_education",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education: false; Nonpublic School: true"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education: false; Nonpublic School: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Education",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education: null; Nonpublic School: false",
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education: false; Nonpublic School: true",
+        "portfolio_required": false
+      },
+      "statute": "MCL 380.1561(3)(f)",
+      "subjects": {
+        "count": 9,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education: [\"reading\",\"spelling\",\"mathematics\",\"science\",\"history\",\"civics\",\"literature\",\"writing\",\"English grammar\"]; Nonpublic School: [\"comparable to public school curriculum\"]",
+        "required": [
+          "reading",
+          "spelling",
+          "mathematics",
+          "science",
+          "history",
+          "civics",
+          "literature",
+          "writing",
+          "English grammar"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "nonpublic_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Nonpublic School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local intermediate school district (ISD)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "MCL 380.1561(3)(a) and MCL 380.1596",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "comparable to public school curriculum"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "MCL 380.1561 (Compulsory Attendance)",
+      "MCL 380.1561(3)(a) (Nonpublic School Exemption)",
+      "MCL 380.1596 (Nonpublic School Requirements / Teacher Certification)",
+      "MCL 380.10 (Parental Rights in Education)",
+      "MCL 380.1282a (Part-time Public School Enrollment)",
+      "MCL 388.1766 (Shared Time / Dual Enrollment, State School Aid Act Section 166)",
+      "MCL 388.1701 (Instructional Time Requirements for Public Schools)",
+      "MCL 257.312e (Driver's Education Requirements)",
+      "Michigan Constitution, Article 8, Sections 1 and 2"
+    ],
+    "doe_url": "https://www.michigan.gov/mde",
+    "hslda_url": "https://hslda.org/legal/michigan",
+    "primary_statute": "MCL 380.1561(3)(f)",
+    "statute_url": "https://www.legislature.mi.gov/(S(qe4nfmka5l1xgnmgrtmyhtrz))/mileg.aspx?page=getobject&objectname=mcl-380-1561"
+  },
+  "state_code": "MI",
+  "state_name": "Michigan",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/MI/wizard"
+}

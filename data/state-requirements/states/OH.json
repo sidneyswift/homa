@@ -1,0 +1,223 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "ORC 3301.0732": "https://codes.ohio.gov/ohio-revised-code/section-3301.0732",
+    "ORC 3301.16": "https://codes.ohio.gov/ohio-revised-code/section-3301.16",
+    "ORC 3310.01": "https://codes.ohio.gov/ohio-revised-code/section-3310.01",
+    "ORC 3310.41": "https://codes.ohio.gov/ohio-revised-code/section-3310.41",
+    "ORC 3310.51": "https://codes.ohio.gov/ohio-revised-code/section-3310.51",
+    "ORC 3310.52": "https://codes.ohio.gov/ohio-revised-code/section-3310.52",
+    "ORC 3313.5312": "https://codes.ohio.gov/ohio-revised-code/section-3313.5312",
+    "ORC 3313.60": "https://codes.ohio.gov/ohio-revised-code/section-3313.60",
+    "ORC 3313.6110": "https://codes.ohio.gov/ohio-revised-code/section-3313.6110",
+    "ORC 3321.01": "https://codes.ohio.gov/ohio-revised-code/section-3321.01",
+    "ORC 3321.04": "https://codes.ohio.gov/ohio-revised-code/section-3321.04",
+    "ORC 3321.042": "https://codes.ohio.gov/ohio-revised-code/section-3321.042",
+    "ORC 3365.01": "https://codes.ohio.gov/ohio-revised-code/section-3365.01",
+    "ORC 5747.72": "https://codes.ohio.gov/ohio-revised-code/section-5747.72"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Compulsory attendance begins at age 6. The cutoff date is the district's first day of school (districts may set their own, typically in August or September per ORC 3321.01). Kindergarten is not compulsory, but a child under 6 who enrolls becomes subject to compulsory attendance unless formally withdrawn.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.583Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/OH",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: null; Chartered Nonpublic School: \"Ohio Department of Education and Workforce\"; Non-Chartered Non-Tax-Supported School (\"08 School\"): null",
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "home_education",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: false; Chartered Nonpublic School: true; Non-Chartered Non-Tax-Supported School (\"08 School\"): false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: false; Chartered Nonpublic School: undefined; Non-Chartered Non-Tax-Supported School (\"08 School\"): false",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Education Notification",
+      "notification": {
+        "deadline": "within 5 calendar days of commencing home education; by August 30 each year thereafter",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: \"Notify superintendent within 5 calendar days of commencing. Exemption effective immediately upon receipt.\"; Chartered Nonpublic School: undefined; Non-Chartered Non-Tax-Supported School (\"08 School\"): undefined",
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: false; Chartered Nonpublic School: true; Non-Chartered Non-Tax-Supported School (\"08 School\"): false",
+        "portfolio_required": false
+      },
+      "statute": "ORC 3321.04; ORC 3321.042",
+      "subjects": {
+        "count": 6,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Notification: \"general_list\"; Chartered Nonpublic School: \"detailed_by_grade\"; Non-Chartered Non-Tax-Supported School (\"08 School\"): \"general_list\"",
+        "required": [
+          "English language arts",
+          "mathematics",
+          "science",
+          "history",
+          "government",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "other"
+        ]
+      },
+      "id": "chartered_nonpublic_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Chartered Nonpublic School",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Ohio Department of Education and Workforce",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "ORC 3301.16",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "must meet state standards for nonpublic schools"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "08_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "bachelors"
+      },
+      "is_default": false,
+      "name": "Non-Chartered Non-Tax-Supported School (\"08 School\")",
+      "notification": {
+        "deadline": "Prior to operating",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school district superintendent",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "ORC 3301.0732; OAC 3301-35-08",
+      "subjects": {
+        "count": 10,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "language arts",
+          "geography",
+          "United States and Ohio history",
+          "government",
+          "mathematics",
+          "science",
+          "health",
+          "physical education",
+          "fine arts",
+          "first aid and safety"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "ORC 3321.01 et seq. (Compulsory Education)",
+      "ORC 3321.042 (Home Education Notification)",
+      "ORC 3301.0732 (Non-Chartered Non-Tax-Supported Schools)",
+      "ORC 3301.16 (Chartered Nonpublic Schools)",
+      "ORC 3313.5312 (Extracurricular Access)",
+      "ORC 3310.01 et seq. (EdChoice Scholarship)",
+      "ORC 3310.51 et seq. (Jon Peterson Special Needs Scholarship)"
+    ],
+    "doe_url": "https://education.ohio.gov/topics/ohio-education-options/home-schooling",
+    "hslda_url": "https://hslda.org/legal/ohio",
+    "primary_statute": "ORC 3321.04; ORC 3321.042",
+    "statute_url": "https://codes.ohio.gov/ohio-revised-code/section-3321.04"
+  },
+  "state_code": "OH",
+  "state_name": "Ohio",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/OH/wizard"
+}

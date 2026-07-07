@@ -1,0 +1,143 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "OAR 581-021-0026": "https://secure.sos.state.or.us/oard/viewSingleRule.action?ruleVrsnRsn=313007",
+    "OAR 581-021-0029": "https://oregon.public.law/rules/oar_581-021-0029",
+    "ORS 339.035": "https://www.oregonlegislature.gov/bills_laws/ors/ors339.html",
+    "ORS 339.460": "https://oregon.public.law/statutes/ors_339.460"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Child must be 6 on or before September 1 of the school year. Attendance required until age 18, later than many states. Exemptions for GED or early graduation.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.591Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/OR",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "at_grades",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education under ORS 339.035: \"08-15\"; Private School Enrollment: undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "home_education",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education under ORS 339.035: false; Private School Enrollment: undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Education under ORS 339.035",
+      "notification": {
+        "deadline": "within 10 days of withdrawing from public school or beginning home education",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education under ORS 339.035: \"Notify the education service district in writing within 10 days of beginning home instruction or when a child transfers from a public or private school.\"; Private School Enrollment: undefined",
+        "recipient": "your local Education Service District (ESD)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "ORS 339.035",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Private School Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "ORS 339.030(1)(a)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "ORS 339.010 (Compulsory school attendance)",
+      "ORS 339.030 (Exemptions from compulsory attendance)",
+      "ORS 339.460 (Homeschooled student participation in interscholastic activities)",
+      "OAR 581-021-0026 (Definition of home education and approved tests)",
+      "OAR 581-021-0029 (Home schooling for children with disabilities)",
+      "OAR 581-021-0033 (Interscholastic activity eligibility — 23rd percentile)"
+    ],
+    "doe_url": "https://www.oregon.gov/ode/learning-options/homeschool/pages/default.aspx",
+    "hslda_url": "https://hslda.org/legal/oregon",
+    "primary_statute": "ORS 339.035",
+    "statute_url": "https://www.oregonlegislature.gov/bills_laws/ors/ors339.html"
+  },
+  "state_code": "OR",
+  "state_name": "Oregon",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/OR/wizard"
+}

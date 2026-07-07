@@ -74,6 +74,9 @@ await expectEmptyRead("family_skills");
 // Shared skills bank (migration #15): members read published rows; anon
 // sees nothing and nobody writes through the Data API (no write policies).
 await expectEmptyRead("skill_bank");
+// State requirements reference table (migration #21): members read, anon
+// sees nothing, and nobody writes through the Data API (no write policies).
+await expectEmptyRead("state_requirements");
 // Map lead tables (migration #7): deny-all RLS, zero policies, privileges
 // revoked. Anonymous traffic must see nothing and write nothing.
 await expectEmptyRead("lead_families");
@@ -126,6 +129,21 @@ await expectInsertDenied(
     published: true,
   },
   "anon cannot write the skills bank",
+);
+await expectInsertDenied(
+  "state_requirements",
+  {
+    state_code: "ZZ",
+    state_name: "Intruder",
+    regulation_level: "none",
+    notification_required: false,
+    assessment_required: false,
+    payload: {},
+    source_verification_status: "verified",
+    source_last_verified: "2026-01-01",
+    pulled_at: "2026-01-01T00:00:00Z",
+  },
+  "anon cannot write state requirements",
 );
 await expectInsertDenied(
   "waitlist",

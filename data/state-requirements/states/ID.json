@@ -1,0 +1,88 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Idaho Code 33-201": "https://legislature.idaho.gov/statutesrules/idstat/Title33/T33CH2/SECT33-201/",
+    "Idaho Code 33-202": "https://legislature.idaho.gov/statutesrules/idstat/Title33/T33CH2/SECT33-202/",
+    "Idaho Code 33-203": "https://legislature.idaho.gov/statutesrules/idstat/Title33/T33CH2/SECT33-203/"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Child must be 7 by the first day of school to be subject to compulsory attendance. Compulsory attendance ends at age 16. No mandatory kindergarten. Idaho Code 33-202.",
+    "start_age": 7
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.494Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/ID",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "privately_instructed",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Privately Instructed by Parent or Guardian",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Idaho Code 33-202",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "none",
+  "sources": {
+    "additional_statutes": [
+      "Idaho Code 33-201 (School Age)",
+      "Idaho Code 33-203 (Part-Time Attendance)",
+      "Idaho Constitution, Article IX, Section 1"
+    ],
+    "doe_url": "https://www.sde.idaho.gov/about-us/departments/school-choice/home-school/",
+    "hslda_url": "https://hslda.org/legal/idaho",
+    "primary_statute": "Idaho Code 33-202",
+    "statute_url": "https://legislature.idaho.gov/statutesrules/idstat/Title33/T33CH2/SECT33-202/"
+  },
+  "state_code": "ID",
+  "state_name": "Idaho",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/ID/wizard"
+}

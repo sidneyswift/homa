@@ -1,0 +1,154 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "2021 SB 177": "https://doe.sd.gov/oatq/documents/SB-177.pdf",
+    "SD DOE Homeschooling": "https://doe.sd.gov/oatq/homeschooling.aspx",
+    "SDCL 13-27": "https://sdlegislature.gov/Statutes/13-27",
+    "SDCL 13-28-51": "https://hslda.org/post/public-school-access-for-homeschoolers-in-south-dakota",
+    "SDCL 13-36-7": "https://hslda.org/post/public-school-access-for-homeschoolers-in-south-dakota"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Children who are not younger than 5 or older than 6 by September 1, or any child at least 6 years old, must attend school until age 18 or graduation. All children must attend kindergarten prior to age 7. SDCL 13-27-1 effectively makes kindergarten-age children subject to compulsory attendance, including through alternative instruction.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.609Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/SD",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "alternative_instruction",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Alternative Instruction",
+      "notification": {
+        "deadline": "within 30 days of beginning alternative instruction",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "South Dakota Department of Education or local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "SDCL Chapter 13-27",
+      "subjects": {
+        "count": 2,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "language arts (including reading and writing)",
+          "mathematics"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "alternative_instruction_program",
+      "instructional_time": {
+        "days_per_year": 175,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Alternative Instruction Program",
+      "notification": {
+        "deadline": "within 30 days of beginning alternative instruction",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "South Dakota Department of Education or local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "SDCL 13-27-1.1",
+      "subjects": {
+        "count": 2,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "language arts (including reading and writing)",
+          "mathematics"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "SDCL 13-27-1 (Compulsory attendance — ages 5 through 18)",
+      "SDCL 13-27-3 (Required subjects: language arts and mathematics; max 22 students)",
+      "SDCL 13-27-3.1 (Instructional time requirements)",
+      "SDCL 13-27-7 (Notification of alternative instruction — one-time filing)",
+      "SDCL 13-27-8 (Updated notification upon status change)",
+      "SDCL 13-27-4 (Testing provisions — repealed/amended by 2021 SB 177; alternative instruction students not required to take standardized tests)",
+      "SDCL 13-27-11 (Religious exemption from testing — moot after 2021 SB 177)",
+      "SDCL 13-36-7 (Extracurricular access for alternative instruction students)",
+      "SDCL 13-28-51 (Part-time public school enrollment)",
+      "SDCL 13-28-37.1 (High school dual credit program)",
+      "HB 1009 (2025 — ESA bill, killed in House Education Committee January 2025)",
+      "HB 1020 (2025 — ESA bill, killed in House Education Committee January 2025)"
+    ],
+    "doe_url": "https://doe.sd.gov/oatq/homeschooling.aspx",
+    "hslda_url": "https://hslda.org/legal/south-dakota",
+    "primary_statute": "SDCL Chapter 13-27 (Alternative Instruction, as amended by 2021 SB 177)",
+    "statute_url": "https://sdlegislature.gov/Statutes/13-27"
+  },
+  "state_code": "SD",
+  "state_name": "South Dakota",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/SD/wizard"
+}

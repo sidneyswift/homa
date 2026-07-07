@@ -1,0 +1,110 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "8 NYCRR 100.10": "https://www.nysed.gov/curriculum-instruction/10010-home-instruction",
+    "Education Law 310": "https://www.nysenate.gov/legislation/laws/EDN/310",
+    "Education Law 3602-c": "https://www.nysenate.gov/legislation/laws/EDN/3602-C",
+    "Education Law 4404": "https://www.nysenate.gov/legislation/laws/EDN/4404",
+    "NY Education Law 3204": "https://www.nysenate.gov/legislation/laws/EDN/3204",
+    "NY Education Law 3205": "https://www.nysenate.gov/legislation/laws/EDN/3205",
+    "NY Education Law 3210": "https://www.nysenate.gov/legislation/laws/EDN/3210",
+    "NY Education Law 3212": "https://www.nysenate.gov/legislation/laws/EDN/3212"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Children must receive instruction from the school year in which they turn 6 until the end of the school year in which they turn 16. A child turning 6 on or before December 1 generally must begin that school year. In New York City, compulsory education extends to age 17. Kindergarten is not compulsory under state law.",
+    "start_age": 6
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.576Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/NY",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval"
+        ]
+      },
+      "id": "home_instruction_100_10",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": 900,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Instruction Under Commissioner's Regulations",
+      "notification": {
+        "deadline": "By July 1 annually, or within 14 days of commencing home instruction mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "superintendent of the local school district",
+        "required": true,
+        "type": "detailed_plan"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "8 NYCRR 100.10",
+      "subjects": {
+        "count": 12,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "arithmetic/mathematics",
+          "reading",
+          "spelling",
+          "writing",
+          "English/language arts",
+          "geography",
+          "United States history",
+          "science",
+          "health education",
+          "music",
+          "visual arts",
+          "physical education"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "high",
+  "sources": {
+    "additional_statutes": [
+      "NY Education Law Section 3204 (Instruction requirements)",
+      "NY Education Law Section 3210 (Duty of parents)",
+      "NY Education Law Section 3212 (Compulsory attendance)",
+      "NY Education Law Section 310 (Appeals to Commissioner)"
+    ],
+    "doe_url": "https://www.nysed.gov/nonpublic-schools/home-instruction",
+    "hslda_url": "https://hslda.org/legal/new-york",
+    "primary_statute": "8 NYCRR 100.10",
+    "statute_url": "https://www.nysed.gov/curriculum-instruction/10010-home-instruction"
+  },
+  "state_code": "NY",
+  "state_name": "New York",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/NY/wizard"
+}

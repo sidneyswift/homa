@@ -1,0 +1,156 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "O.C.G.A. 20-2-161.3": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-6/part-4/section-20-2-161-3/",
+    "O.C.G.A. 20-2-295": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-6/part-13/section-20-2-295/",
+    "O.C.G.A. 20-2-319.6": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-6/part-14/section-20-2-319-6/",
+    "O.C.G.A. 20-2-690": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-16/part-1/subpart-2/section-20-2-690/",
+    "O.C.G.A. 20-2-690.1": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-16/part-1/subpart-2/section-20-2-690-1/"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Compulsory attendance begins at age 6 by September 1 of the school year. Ends when child turns 16. Kindergarten is not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "~$6,500/student",
+      "eligibility": "Primarily for students zoned for bottom-25% performing schools. Income limits apply (household income at or below 400% FPL). Must be Georgia resident for at least 1 year. Additional priority categories: students with special needs (IEP/504), foster care, active-duty military children.",
+      "name": "Georgia Promise Scholarship (ESA)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.475Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/GA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "triennial",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: [3,6,9,12]; Private School / Umbrella School Enrollment: null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "home_study_program",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": 810,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: true; Private School / Umbrella School Enrollment: false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"hs_diploma\"; Private School / Umbrella School Enrollment: \"none\"",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Home Study Program",
+      "notification": {
+        "deadline": "Within 30 days of establishing the home study program, and by September 1 of each subsequent year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"Submit declaration of intent within 30 days after establishment of the home study program. No separate mid-year process.\"; Private School / Umbrella School Enrollment: null",
+        "recipient": "Georgia Department of Education",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"3 years\"; Private School / Umbrella School Enrollment: null",
+        "portfolio_required": false
+      },
+      "statute": "O.C.G.A. 20-2-690(c)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Study Program: \"general_list\"; Private School / Umbrella School Enrollment: \"none\"",
+        "required": [
+          "reading",
+          "language arts",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_umbrella",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School / Umbrella School Enrollment",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "O.C.G.A. 20-2-690(b)",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "O.C.G.A. 20-2-690 (Compulsory Attendance)",
+      "O.C.G.A. 20-2-690 through 20-2-701 (Education provisions)",
+      "O.C.G.A. 20-2-319.6 (Dexter Mosley Act — extracurricular access)",
+      "O.C.G.A. 20-2-161.3 (Dual Enrollment)",
+      "O.C.G.A. 20-2B-1 et seq. (Georgia Promise Scholarship / ESA)"
+    ],
+    "doe_url": "https://gadoe.org/parent-family-resources/home-school/",
+    "hslda_url": "https://hslda.org/legal/georgia",
+    "primary_statute": "O.C.G.A. 20-2-690(c)",
+    "statute_url": "https://law.justia.com/codes/georgia/title-20/chapter-2/article-16/part-1/subpart-2/section-20-2-690/"
+  },
+  "state_code": "GA",
+  "state_name": "Georgia",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/GA/wizard"
+}

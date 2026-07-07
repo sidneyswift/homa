@@ -3,6 +3,54 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-07 (small hours) · M3-05 data layer pulled forward: state_requirements seeded
+
+Founder: "build it so we can pull all the data and save it to build on
+top of" (the HomeschoolLeap API identified in 07-deep-research-notes §3).
+Shipped:
+
+1. **Snapshot layer** (`data/state-requirements/`): all 51 jurisdictions
+   pulled verbatim from HomeschoolLeap's free public API (CC BY-SA 4.0,
+   attribution required) via `pnpm pull:state-requirements`. Deterministic
+   sorted-key JSON so re-pulls diff cleanly; script validates count and
+   shape before writing anything.
+2. **Migration #21** (`state_requirements`, applied to homa-prod,
+   version 20260707032148): one row per jurisdiction; typed summary
+   columns (regulation_level, notification/assessment flags, compulsory
+   ages, default pathway, HomeschoolLeap's per-state last-verified date)
+   plus the full upstream document as `payload` jsonb (payload wins if
+   they disagree). RLS: members READ, deliberately NO write policies
+   (skill_bank / M3-04 reasoning: legal claims are fleet-wide blast
+   radius; no Data API role or compromised model turn can alter one).
+3. **Seed** (`pnpm seed:state-requirements`): direct pooler connection
+   (the only write path), upserts snapshots, fails unless the table ends
+   at exactly 51 rows. `pulled_at` always advances; `updated_at` moves
+   only on real content change so it stays an honest "this rule last
+   changed" signal. Verified idempotent (second run: 51 unchanged, zero
+   updated_at movement).
+4. **Guards + docs**: isolation check gains state_requirements probes
+   (anon reads nothing, anon insert 403), green on homa-prod; refresh
+   procedure + J-H correction steps in
+   runbooks/state-requirements-refresh.md; README repo map + supabase
+   README + backlog M3-05 row updated. Security advisors: no new
+   findings after the migration.
+
+Decisions made alone (auditable):
+- **Snapshots in git as the review gate** before any seed (quarantine
+  reasoning ported from M3-04): a re-pull must land as a reviewable diff
+  and git history must preserve every version we ever served, for J-H
+  blast-radius work. Straight API-to-table was rejected.
+- **Read posture starts authenticated-only** (mirrors skill_bank).
+  Public SEO state pages (journeys/02 §1) render server-side, so no anon
+  policy is needed yet; widening to anon is a deliberate later decision
+  when that surface lands.
+- **Kept upstream text verbatim** in snapshots and payload (including
+  upstream punctuation): archival fidelity beats house style inside
+  quoted data; everything Homa-authored around it follows repo style.
+- Table lives at the STATE grain with pathways inside payload; a
+  per-pathway relational split waits until the hours engine (M3-05
+  remainder) proves it needs one.
+
 ## 2026-07-07 (small hours) · Cleanup audit executed: every non-destructive fix applied
 
 Executed docs/homa-planning/plans/2026-07-06-codebase-cleanup-audit.md on

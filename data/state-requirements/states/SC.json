@@ -1,0 +1,217 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "ESTF Program": "https://ed.sc.gov/newsroom/strategic-engagement/education-scholarship-trust-fund-program/",
+    "S.C. Code Section 59-63-100": "https://law.justia.com/codes/south-carolina/title-59/chapter-63/section-59-63-100/",
+    "S.C. Code Section 59-65-40": "https://law.justia.com/codes/south-carolina/title-59/chapter-65/section-59-65-40/",
+    "S.C. Code Section 59-65-45": "https://law.justia.com/codes/south-carolina/title-59/chapter-65/section-59-65-45/",
+    "S.C. Code Section 59-65-47": "https://www.scstatehouse.gov/code/t59c065.php"
+  },
+  "compulsory_education": {
+    "end_age": 17,
+    "notes": "Compulsory attendance begins at age 5 (kindergarten is mandatory). Obligation ceases upon turning 17, not at end of school year.",
+    "start_age": 5
+  },
+  "esa_programs": [
+    {
+      "amount": "$7,500/student (2025-2026)",
+      "eligibility": "Income-restricted: households up to 300% FPL for 2025-26 ($96,450 for family of 4), expanding to 500% FPL for 2026-27 ($160,750 for family of 4). Enrollment capped at 10,000 (2025-26). All 10,000 scholarships for 2025-26 have been awarded.",
+      "name": "Education Scholarship Trust Fund (ESTF)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.605Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-25",
+  "page_url": "https://homeschoolleap.com/states/SC",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "school_board_approval",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": false,
+      "name": "Option 1 - School Board Approval",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school board",
+        "required": true,
+        "type": "approval_required"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": true
+      },
+      "statute": "S.C. Code Section 59-65-40",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "scaihs",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "hs_diploma"
+      },
+      "is_default": false,
+      "name": "Option 2 - SCAIHS",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "South Carolina Association of Independent Home Schools (SCAIHS)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "S.C. Code Section 59-65-45",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1 - School Board Approval: \"local school district\"; Option 2 - SCAIHS: null; Option 3 - Accountability Association: null",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "accountability_association",
+      "instructional_time": {
+        "days_per_year": 180,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1 - School Board Approval: [\"GED\",\"baccalaureate degree\"]; Option 2 - SCAIHS: [\"GED\"]; Option 3 - Accountability Association: [\"GED\"]",
+        "qualification": "hs_diploma"
+      },
+      "is_default": true,
+      "name": "Option 3 - Accountability Association",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1 - School Board Approval: [\"proposed curriculum\",\"instructional plans\",\"instructor qualifications\"]; Option 2 - SCAIHS: undefined; Option 3 - Accountability Association: undefined",
+        "recipient": "homeschool association with at least 50 members",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1 - School Board Approval: [\"planned curriculum\",\"record of instruction (subjects and materials)\",\"attendance records\",\"semiannual progress reports\",\"annual test results\",\"immunization records\"]; Option 2 - SCAIHS: undefined; Option 3 - Accountability Association: [\"record of instruction (plan books)\",\"attendance records\",\"semiannual progress reports\",\"immunization records\"]",
+        "portfolio_required": true
+      },
+      "statute": "S.C. Code Section 59-65-47",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Option 1 - School Board Approval: {\"grades_7_12\":{\"additional_subjects\":[\"composition\",\"literature\"],\"elective_requirement\":\"At least one of: foreign language, visual arts, or performing arts\"}}; Option 2 - SCAIHS: {\"grades_7_12\":{\"additional_subjects\":[\"composition\",\"literature\"]}}; Option 3 - Accountability Association: {\"grades_7_12\":{\"additional_subjects\":[\"composition\",\"literature\"]}}",
+        "required": [
+          "reading",
+          "writing",
+          "mathematics",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "S.C. Code Section 59-65-10 (Compulsory Attendance)"
+    ],
+    "doe_url": "https://ed.sc.gov/districts-schools/state-accountability/home-schooling/",
+    "hslda_url": "https://hslda.org/legal/south-carolina",
+    "primary_statute": "S.C. Code Section 59-65-40; S.C. Code Section 59-65-45; S.C. Code Section 59-65-47",
+    "statute_url": "https://www.scstatehouse.gov/code/t59c065.php"
+  },
+  "state_code": "SC",
+  "state_name": "South Carolina",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/SC/wizard"
+}

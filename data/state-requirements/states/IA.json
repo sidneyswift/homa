@@ -1,0 +1,282 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Iowa Code 139A.8": "https://www.legis.iowa.gov/docs/code/139A.8.pdf",
+    "Iowa Code 256.11": "https://www.legis.iowa.gov/docs/code/256.11.pdf",
+    "Iowa Code 257.11B": "https://www.legis.iowa.gov/docs/code/2026/257.11B.pdf",
+    "Iowa Code 299.1A": "https://www.legis.iowa.gov/docs/code/299.1A.pdf",
+    "Iowa Code 299A.1": "https://www.legis.iowa.gov/docs/code/299A.1.pdf",
+    "Iowa Code 299A.2": "https://www.legis.iowa.gov/docs/code/299A.2.pdf",
+    "Iowa Code 299A.3": "https://www.legis.iowa.gov/docs/code/299A.3.pdf",
+    "Iowa Code 299A.8": "https://www.legis.iowa.gov/docs/code/299A.8.pdf",
+    "Iowa Code Chapter 299A": "https://www.legis.iowa.gov/law/iowaCode/sections?codeChapter=299A"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Child who has reached age 6 by September 15 must receive instruction. Compulsory attendance ends at age 16. Kindergarten is not compulsory.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "$7,988/student (2025-2026; adjusts annually)",
+      "eligibility": "Students enrolled in an accredited nonpublic school only",
+      "name": "Students First Education Savings Account Program",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.490Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/IA",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "teacher_eval"
+        ]
+      },
+      "id": "cpi_option1_licensed_teacher",
+      "instructional_time": {
+        "days_per_year": 148,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "CPI Option 1: Licensed Teacher Supervision",
+      "notification": {
+        "deadline": "By September 1, or within 14 days of removing a child from public school mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Iowa Code Chapter 299A",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English/language arts (reading, writing, spelling, grammar)",
+          "mathematics",
+          "science",
+          "social studies (U.S. and Iowa history, government, citizenship)",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: undefined; CPI Option 2: Standardized Testing: []; Accredited Nonpublic School Enrollment: undefined; Option 4: Independent Private Instruction (IPI): undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test"
+        ]
+      },
+      "id": "cpi_option2_standardized_testing",
+      "instructional_time": {
+        "days_per_year": 148,
+        "hours_per_year": null,
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: true; CPI Option 2: Standardized Testing: true; Accredited Nonpublic School Enrollment: true; Option 4: Independent Private Instruction (IPI): false"
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: true; CPI Option 2: Standardized Testing: false; Accredited Nonpublic School Enrollment: false; Option 4: Independent Private Instruction (IPI): false",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "CPI Option 2: Standardized Testing",
+      "notification": {
+        "deadline": "By September 1, or within 14 days of removing a child from public school mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: false; CPI Option 2: Standardized Testing: false; Accredited Nonpublic School Enrollment: false; Option 4: Independent Private Instruction (IPI): undefined",
+        "recipient": "local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: true; CPI Option 2: Standardized Testing: true; Accredited Nonpublic School Enrollment: true; Option 4: Independent Private Instruction (IPI): false",
+        "portfolio_required": false
+      },
+      "statute": "Iowa Code Chapter 299A",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": true,
+        "pathway_varies_detail": "CPI Option 1: Licensed Teacher Supervision: [\"English/language arts (reading, writing, spelling, grammar)\",\"mathematics\",\"science\",\"social studies (U.S. and Iowa history, government, citizenship)\",\"health\"]; CPI Option 2: Standardized Testing: [\"English/language arts (reading, writing, spelling, grammar)\",\"mathematics\",\"science\",\"social studies (U.S. and Iowa history, government, citizenship)\",\"health\"]; Accredited Nonpublic School Enrollment: [\"English/language arts (reading, writing, spelling, grammar)\",\"mathematics\",\"science\",\"social studies (U.S. and Iowa history, government, citizenship)\",\"health\"]; Option 4: Independent Private Instruction (IPI): [\"mathematics\",\"reading and language arts\",\"science\",\"social studies\"]",
+        "required": [
+          "English/language arts (reading, writing, spelling, grammar)",
+          "mathematics",
+          "science",
+          "social studies (U.S. and Iowa history, government, citizenship)",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "other"
+        ]
+      },
+      "id": "accredited_nonpublic_school",
+      "instructional_time": {
+        "days_per_year": 148,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "other"
+      },
+      "is_default": false,
+      "name": "Accredited Nonpublic School Enrollment",
+      "notification": {
+        "deadline": "By September 1, or within 14 days of removing a child from public school mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local school district",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Iowa Code Chapter 299A",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "English/language arts (reading, writing, spelling, grammar)",
+          "mathematics",
+          "science",
+          "social studies (U.S. and Iowa history, government, citizenship)",
+          "health"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "ipi_option4",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Option 4: Independent Private Instruction (IPI)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Iowa Code 299A.1(2)",
+      "subjects": {
+        "count": 4,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "mathematics",
+          "reading and language arts",
+          "science",
+          "social studies"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "Iowa Code 299A.1(2) (Independent Private Instruction)",
+      "Iowa Code Section 299.1 (Compulsory Education)",
+      "Iowa Code Section 299.1A (Compulsory Attendance Age)",
+      "Iowa Code Section 256.11 (Educational Standards)",
+      "Iowa Code 257.11B (Education Savings Accounts)",
+      "Iowa Code Section 299A.8 (Dual Enrollment)",
+      "Iowa Code Section 139A.8 (Immunization Requirements)",
+      "Iowa Administrative Code 281, Chapter 31"
+    ],
+    "doe_url": "https://educate.iowa.gov/pk-12/educational-choice/homeschooling",
+    "hslda_url": "https://hslda.org/legal/iowa",
+    "primary_statute": "Iowa Code Chapter 299A (Competent Private Instruction)",
+    "statute_url": "https://www.legis.iowa.gov/law/iowaCode/sections?codeChapter=299A"
+  },
+  "state_code": "IA",
+  "state_name": "Iowa",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/IA/wizard"
+}

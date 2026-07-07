@@ -1,0 +1,189 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "14 Del. C. Section 2702": "https://law.justia.com/codes/delaware/title-14/chapter-27/subchapter-i/section-2702/",
+    "14 Del. C. Section 2703": "https://law.justia.com/codes/delaware/title-14/chapter-27/subchapter-i/section-2703/",
+    "14 Del. C. Section 2703A": "https://delcode.delaware.gov/title14/c027/sc01/index.html",
+    "SB 106 (2021)": "https://legis.delaware.gov/json/BillDetail/GenerateHtmlDocument?legislationId=58565&legislationTypeId=1&docTypeId=2&legislationName=SB106"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Children who are 5 years of age on or before August 31 of the current school year through age 16. Children over age 16 may withdraw with parent consent and completion of an exit interview.",
+    "start_age": 5
+  },
+  "esa_programs": [],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.459Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/DE",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "single_family_home_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Single-Family Home School Program",
+      "notification": {
+        "deadline": "Enrollment reported via EdAccess system (enrollment window opens after August 11; statutory filing deadline October 5 per 14 Del. C. §2704)",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Single-Family Home School Program: \"Register via EdAccess Nonpublic School Application (available after August 11). Enrollment due by September 30 (statutory deadline).\"; Multi-Family Home School Program: \"Register via EdAccess Nonpublic School Application (available after August 11). Enrollment due by September 30 (statutory deadline).\"; Single-Family Homeschool Coordinated with Local School District: \"Register via EdAccess Nonpublic School Application (available after August 11). Enrollment due by September 30 (statutory deadline). Must also obtain written determination from local superintendent.\"",
+        "recipient": "Delaware Department of Education (DDOE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Single-Family Home School Program: false; Multi-Family Home School Program: false; Single-Family Homeschool Coordinated with Local School District: true",
+        "portfolio_required": false
+      },
+      "statute": "14 Del. C. Section 2703A",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Single-Family Home School Program: \"none\"; Multi-Family Home School Program: \"none\"; Single-Family Homeschool Coordinated with Local School District: \"general_list\"",
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "multi_family_home_school",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Multi-Family Home School Program",
+      "notification": {
+        "deadline": "Enrollment reported via EdAccess system (enrollment window opens after August 11; statutory filing deadline October 5 per 14 Del. C. §2704)",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Delaware Department of Education (DDOE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "14 Del. C. Section 2703A",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "coordinated_with_district",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Single-Family Homeschool Coordinated with Local School District",
+      "notification": {
+        "deadline": "Enrollment reported via EdAccess system (enrollment window opens after August 11; statutory filing deadline October 5 per 14 Del. C. §2704)",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "Delaware Department of Education (DDOE)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "14 Del. C. Section 2703A",
+      "subjects": {
+        "count": 1,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "subjects prescribed for the public schools of the State"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "14 Del. C. Section 2702 (Compulsory School Attendance)",
+      "14 Del. C. Section 2703 (Exceptions from Compulsory Attendance)",
+      "14 DE Admin. Code 615"
+    ],
+    "doe_url": "https://education.delaware.gov/families/k12/homeschools-and-private-schools/",
+    "hslda_url": "https://hslda.org/legal/delaware",
+    "primary_statute": "14 Del. C. Section 2703A",
+    "statute_url": "https://delcode.delaware.gov/title14/c027/sc01/index.html"
+  },
+  "state_code": "DE",
+  "state_name": "Delaware",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/DE/wizard"
+}

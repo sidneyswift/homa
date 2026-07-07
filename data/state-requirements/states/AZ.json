@@ -1,0 +1,170 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "A.R.S. 15-2402": "https://www.azleg.gov/ars/15/02402.htm",
+    "A.R.S. 15-2403": "https://www.azleg.gov/ars/15/02403.htm",
+    "A.R.S. 15-802": "https://www.azleg.gov/ars/15/00802.htm",
+    "A.R.S. 15-802(B)(2)": "https://www.azleg.gov/ars/15/00802.htm",
+    "A.R.S. 15-802.01": "https://www.azleg.gov/ars/15/00802-01.htm",
+    "A.R.S. Section 15-101": "https://www.azleg.gov/ars/15/00101.htm",
+    "A.R.S. Section 15-802": "https://www.azleg.gov/ars/15/00802.htm",
+    "A.R.S. Section 15-802(B)(2)": "https://www.azleg.gov/ars/15/00802.htm",
+    "A.R.S. Section 15-816.01": "https://www.azleg.gov/ars/15/00816-01.htm",
+    "A.R.S. Sections 15-2401 through 15-2404": "https://www.azleg.gov/ars/15/02401.htm",
+    "A.R.S. Sections 15-2401 through 15-2404; HB 2853 (2022 universal expansion)": "https://www.azleg.gov/ars/15/02401.htm"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Ages 6-16 per A.R.S. Section 15-802(A). Kindergarten is NOT compulsory. Age 6 determined by September 1 cutoff per A.R.S. Section 15-821.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "~$7,000-$7,500/student (general education, 90% of per-pupil base funding); ~$9,000-$28,000+ for students with disabilities",
+      "eligibility": "All Arizona resident children eligible to enroll in a public school (ages 5-18) — universal eligibility since 2022",
+      "name": "Empowerment Scholarship Accounts (ESA)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:54:07.684Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/AZ",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "homeschool_affidavit",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Traditional Homeschooling (Affidavit of Intent)",
+      "notification": {
+        "deadline": "Within 30 days of the start of homeschool instruction",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Traditional Homeschooling (Affidavit of Intent): [\"birth_certificate\"]; Empowerment Scholarship Account (ESA) Homeschooling: undefined",
+        "recipient": "county school superintendent (NOT the local school district superintendent)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Traditional Homeschooling (Affidavit of Intent): false; Empowerment Scholarship Account (ESA) Homeschooling: true",
+        "portfolio_required": false
+      },
+      "statute": "A.R.S. Section 15-802(B)(2)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "grammar",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "esa_homeschool",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Empowerment Scholarship Account (ESA) Homeschooling",
+      "notification": {
+        "deadline": "Affidavit within 30 days of starting instruction; ESA application per ADE timeline",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "county school superintendent (affidavit) AND Arizona Department of Education (ESA application)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "A.R.S. Sections 15-2401 through 15-2404; HB 2853 (2022 universal expansion)",
+      "subjects": {
+        "count": 5,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "grammar",
+          "mathematics",
+          "social studies",
+          "science"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "A.R.S. Section 15-101 (Definitions — defines 'home school')",
+      "A.R.S. Section 15-802 (Compulsory attendance; exemptions)",
+      "A.R.S. Section 15-802.01 (Homeschool students; interscholastic activities eligibility)",
+      "A.R.S. Section 15-745 (Instruction in constitutions, American institutions, Arizona history)",
+      "A.R.S. Sections 15-2401 through 15-2404 (Empowerment Scholarship Accounts)",
+      "A.R.S. Section 15-816.01 (Open enrollment; homeschool students in school activities)",
+      "A.R.S. Section 15-821 (Admission of pupils — age cutoff)",
+      "SB 1553 (2011 original ESA creation)",
+      "HB 2853 (2022 universal ESA expansion)"
+    ],
+    "doe_url": "https://www.azed.gov/esa",
+    "hslda_url": "https://hslda.org/legal/arizona",
+    "primary_statute": "A.R.S. Section 15-802(B)(2)",
+    "statute_url": "https://www.azleg.gov/ars/15/00802.htm"
+  },
+  "state_code": "AZ",
+  "state_name": "Arizona",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/AZ/wizard"
+}

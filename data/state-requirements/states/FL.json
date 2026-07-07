@@ -1,0 +1,219 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "Fla. Stat. 1000.36": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1000/Sections/1000.36.html",
+    "Fla. Stat. 1002.01": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.01.html",
+    "Fla. Stat. 1002.37": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.37.html",
+    "Fla. Stat. 1002.394": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.394.html",
+    "Fla. Stat. 1002.41": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.41.html",
+    "Fla. Stat. 1002.42": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.42.html",
+    "Fla. Stat. 1002.43": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.43.html",
+    "Fla. Stat. 1002.45": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.45.html",
+    "Fla. Stat. 1003.21": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1003/Sections/1003.21.html",
+    "Fla. Stat. 1003.23": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1003/Sections/1003.23.html",
+    "Fla. Stat. 1006.15": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1006/Sections/1006.15.html",
+    "Fla. Stat. 1007.271": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1007/Sections/1007.271.html",
+    "Fla. Stat. 490.003": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0400-0499/0490/Sections/0490.003.html"
+  },
+  "compulsory_education": {
+    "end_age": 16,
+    "notes": "Child must have attained age 6 by February 1 of the school year. Compulsory attendance until age 16 (with conditions). Kindergarten not compulsory unless child has been enrolled in public school.",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": "~$8,000/student (2025-2026)",
+      "eligibility": "All Florida students (universal since HB 1, 2023). No income limitation.",
+      "name": "Personalized Education Program (PEP)",
+      "status": "active"
+    },
+    {
+      "amount": "~$10,000/student; up to $34,000+ for severe disabilities (matrix-funded)",
+      "eligibility": "Students with disabilities or unique abilities. Must have a current IEP, Section 504 plan, or documented diagnosis of an eligible disability.",
+      "name": "Family Empowerment Scholarship - Unique Abilities (FES-UA)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.467Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/FL",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": "annual",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: [\"certified teacher evaluation of portfolio\",\"licensed psychologist or school psychologist evaluation (per s. 490.003(7)-(8))\",\"method agreed upon with superintendent\"]; Private Tutoring: undefined; Private School (Including Umbrella/Cover Schools): undefined",
+        "reporting_required_conditions": null,
+        "required": true,
+        "required_conditions": null,
+        "types": [
+          "standardized_test",
+          "teacher_eval",
+          "other"
+        ]
+      },
+      "id": "home_education_program",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: false; Private Tutoring: undefined; Private School (Including Umbrella/Cover Schools): undefined",
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Education Program",
+      "notification": {
+        "deadline": "Within 30 days of beginning the home education program",
+        "deadline_conditions": null,
+        "frequency": "one_time",
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: []; Private Tutoring: undefined; Private School (Including Umbrella/Cover Schools): undefined",
+        "recipient": "county school district superintendent",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": true,
+        "pathway_varies_detail": "Home Education Program: [\"reading_log\",\"work_samples\",\"writing_samples\"]; Private Tutoring: undefined; Private School (Including Umbrella/Cover Schools): undefined",
+        "portfolio_required": true
+      },
+      "statute": "Fla. Stat. 1002.41",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_tutoring",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "teaching_cert"
+      },
+      "is_default": false,
+      "name": "Private Tutoring",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": false,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Fla. Stat. 1002.43",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    },
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_umbrella",
+      "instructional_time": {
+        "days_per_year": null,
+        "hours_per_year": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": false,
+      "name": "Private School (Including Umbrella/Cover Schools)",
+      "notification": {
+        "deadline": null,
+        "deadline_conditions": null,
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": null,
+        "required": false,
+        "type": null
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "Fla. Stat. 1002.01(2), 1002.42",
+      "subjects": {
+        "count": 0,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "moderate",
+  "sources": {
+    "additional_statutes": [
+      "Fla. Stat. 1002.01 (Definitions)",
+      "Fla. Stat. 1003.21 (Compulsory School Attendance)",
+      "Fla. Stat. 1002.43 (Private Tutoring)",
+      "Fla. Stat. 1002.42 (Private Schools)",
+      "Fla. Stat. 1002.394 (Family Empowerment Scholarship)",
+      "Fla. Stat. 1007.271 (Dual Enrollment)",
+      "Fla. Stat. 1006.15 (Extracurricular Activities; amended by SB 248, effective July 1, 2025)",
+      "Fla. Stat. 1002.37 (Florida Virtual School)",
+      "Fla. Stat. 1002.45 (Virtual Instruction Programs)"
+    ],
+    "doe_url": "https://www.fldoe.org/schools/school-choice/home-edu/",
+    "hslda_url": "https://hslda.org/legal/florida",
+    "primary_statute": "Fla. Stat. 1002.41",
+    "statute_url": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=1000-1099/1002/Sections/1002.41.html"
+  },
+  "state_code": "FL",
+  "state_name": "Florida",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/FL/wizard"
+}

@@ -1,0 +1,105 @@
+{
+  "attribution": "Data by HomeschoolLeap (https://homeschoolleap.com). CC BY-SA 4.0.",
+  "citation_urls": {
+    "KRS 158.070": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56511",
+    "KRS 159.010": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=46050",
+    "KRS 159.030": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=53714",
+    "KRS 159.160": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=3644"
+  },
+  "compulsory_education": {
+    "end_age": 18,
+    "notes": "Children who have reached age 6 by August 1 of the current school year through age 18 or high school graduation. Students aged 16-17 may be exempt with written parental consent and local board approval under certain conditions. Compulsory age raised from 16 to 18 in 2013 (Senate Bill 97).",
+    "start_age": 6
+  },
+  "esa_programs": [
+    {
+      "amount": null,
+      "eligibility": "Homeschooled students eligible based on ACT scores and/or GPA equivalent",
+      "name": "Kentucky Education Excellence Scholarship (KEES)",
+      "status": "active"
+    }
+  ],
+  "generation_metadata": {
+    "generated_at": "2026-03-30T23:26:51.508Z",
+    "generator_version": "1.0.0",
+    "stale_claim_ids": []
+  },
+  "last_verified": "2026-03-14",
+  "page_url": "https://homeschoolleap.com/states/KY",
+  "pathways": [
+    {
+      "assessment": {
+        "frequency": null,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "reporting_required_conditions": null,
+        "required": false,
+        "required_conditions": null,
+        "types": []
+      },
+      "id": "private_school_home_instruction",
+      "instructional_time": {
+        "days_per_year": 170,
+        "hours_per_year": 1062,
+        "pathway_varies": false,
+        "pathway_varies_detail": null
+      },
+      "instructor": {
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "qualification": "none"
+      },
+      "is_default": true,
+      "name": "Home Instruction as Private School",
+      "notification": {
+        "deadline": "Within the first two weeks of the school year, or within two weeks of withdrawing the child from school if beginning mid-year",
+        "deadline_conditions": null,
+        "frequency": "annual",
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "recipient": "local board of education (superintendent of local school district)",
+        "required": true,
+        "type": "simple_notice"
+      },
+      "recordkeeping": {
+        "attendance_tracking": true,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "portfolio_required": false
+      },
+      "statute": "KRS 159.160",
+      "subjects": {
+        "count": 8,
+        "pathway_varies": false,
+        "pathway_varies_detail": null,
+        "required": [
+          "reading",
+          "writing",
+          "spelling",
+          "grammar",
+          "history",
+          "mathematics",
+          "science",
+          "civics"
+        ],
+        "required_conditions": null
+      }
+    }
+  ],
+  "regulation_level": "low",
+  "sources": {
+    "additional_statutes": [
+      "KRS 159.010 (Compulsory Attendance)",
+      "KRS 159.030 (School Term and Age Requirements)",
+      "KRS 158.070 (Instruction Requirements)"
+    ],
+    "doe_url": "https://www.education.ky.gov/federal/fed/Pages/Home-School.aspx",
+    "hslda_url": "https://hslda.org/legal/kentucky",
+    "primary_statute": "KRS 159.160",
+    "statute_url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=3485"
+  },
+  "state_code": "KY",
+  "state_name": "Kentucky",
+  "verification_status": "verified",
+  "wizard_url": "https://homeschoolleap.com/states/KY/wizard"
+}
