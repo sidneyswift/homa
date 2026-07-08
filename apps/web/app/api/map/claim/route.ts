@@ -12,15 +12,17 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 /**
  * POST /api/map/claim
  * S1's create-account submit (founder call 2026-07-08, overturning
- * 2026-07-06's "password is the last question" ruling): name, email, and
- * password, right up front. This is the one moment the anonymous lead
- * becomes a real Supabase Auth account for the password path; Google
- * sign-ups skip this route entirely and link at /api/map/state instead.
- * If the email already belongs to a different, older family, attachAuthUser
- * folds this sitting's kids into that family rather than losing either
- * side. If it already belongs to a real account (any device, any sitting),
- * signUp fails honestly and the client offers sign-in instead of a doomed
- * "try again".
+ * 2026-07-06's "password is the last question" ruling): email and
+ * password, right up front. Her name deliberately is NOT collected here
+ * (founder follow-up, same day): the create-your-family step right after
+ * this asks for it, and asking twice reads as a bug. This is the one
+ * moment the anonymous lead becomes a real Supabase Auth account for the
+ * password path; Google sign-ups skip this route entirely and link at
+ * /api/map/state instead. If the email already belongs to a different,
+ * older family, attachAuthUser folds this sitting's kids into that family
+ * rather than losing either side. If it already belongs to a real account
+ * (any device, any sitting), signUp fails honestly and the client offers
+ * sign-in instead of a doomed "try again".
  */
 export async function POST(request: Request): Promise<Response> {
   if (rateLimited(`claim:${clientIp(request)}`, 10)) {
@@ -55,9 +57,6 @@ export async function POST(request: Request): Promise<Response> {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: input.email,
       password: input.password,
-      options: {
-        data: { given_name: input.firstName, family_name: input.lastName ?? "" },
-      },
     });
     if (signUpError || !signUpData.user) {
       // A returning parent whose email already has an account can never
@@ -87,17 +86,15 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ ok: false, reason: "auth-failed" }, { status: 400 });
     }
 
+    // No name here by design; FamilyStep saves it right after this.
     const { familyId, returning, resumeToken } = await attachAuthUser({
       familyId: family.id,
       authUserId: signUpData.user.id,
       email: input.email,
-      firstName: input.firstName,
-      lastName: input.lastName,
       usState: input.usState,
     });
     await mirrorToWaitlist({
       email: input.email,
-      firstName: input.firstName,
       usState: input.usState,
       source: family.source,
       utm: {},

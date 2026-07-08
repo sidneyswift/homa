@@ -25,18 +25,17 @@ export type MapStartInput = z.infer<typeof mapStartSchema>;
 
 /**
  * S1, the true entry screen (founder call 2026-07-08, overturning
- * 2026-07-06's "password is the last question" ruling): name, email, and
+ * 2026-07-06's "password is the last question" ruling): email and
  * password, right up front, or Google as a one-tap alternative. This is
  * the moment the anonymous lead becomes a real Supabase Auth account (see
  * attachAuthUser); there is no later, lower-friction account step
  * anymore. Google sign-up skips this entirely (the OAuth callback
- * supplies a real, verified email and profile name). One simple name
- * field in the UI, split into first/last on the first space.
+ * supplies a real, verified email and profile name). Her name is NOT
+ * asked here (founder follow-up, same day): the create-your-family step
+ * right after this collects it, and asking twice reads as a bug.
  */
 export const mapClaimSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
-  firstName: z.string().trim().min(1).max(100),
-  lastName: z.string().trim().max(100).optional(),
   password: z.string().min(8).max(200),
   usState: z.string().length(2).optional(),
 });

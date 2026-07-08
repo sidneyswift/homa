@@ -11,14 +11,17 @@ import { ReportPreview } from "./report-preview";
 
 /**
  * S1 (visible): the true entry screen, right after the silent anonymous
- * bootstrap, and now a full sign-up: name, email, and password, or
- * "Sign up with Google" as a one-tap alternative. Founder call 2026-07-08
- * overturns 2026-07-06's "password is the last question" ruling (which
- * deferred name and password to SignupStep, right before the report, to
- * keep the highest-friction ask off the entry screen); that step is
- * retired, this route creates the real Supabase Auth account directly
- * (see /api/map/claim). Google sign-ups still link the moment she returns
+ * bootstrap: email and password, or "Sign up with Google" as a one-tap
+ * alternative. Founder call 2026-07-08 overturns 2026-07-06's "password
+ * is the last question" ruling (which deferred the password to
+ * SignupStep, right before the report); that step is retired, this
+ * screen creates the real Supabase Auth account directly (see
+ * /api/map/claim). Google sign-ups still link the moment she returns
  * from the OAuth redirect (see /api/map/state).
+ *
+ * Her name deliberately is NOT asked here (founder follow-up 2026-07-08,
+ * with screenshot): the create-your-family step right after this
+ * collects it, and asking on both screens read as a bug.
  *
  * Real logo files live at public/images/benchmark-logos/ (founder-sourced
  * 2026-07-06). No CDC mark was supplied, so CDC dropped rather than sit as
@@ -47,7 +50,6 @@ const BENCHMARK_SOURCES: ReadonlyArray<{
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ParentStep({ onDone }: { onDone: () => void }) {
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -78,12 +80,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalizedName = name.trim().replace(/\s+/g, " ");
     const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedName) {
-      setError("Add your name to finish.");
-      return;
-    }
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
@@ -92,8 +89,6 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
       setError("Use at least 8 characters for your password.");
       return;
     }
-    const [firstName, ...rest] = normalizedName.split(" ");
-    const lastName = rest.join(" ") || undefined;
     setError(null);
     setExistingAccount(false);
     setBusy(true);
@@ -102,7 +97,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
       const response = await fetch("/api/map/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email: normalizedEmail, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
       const data = (await response.json()) as { ok: boolean; reason?: string };
       if (!data.ok) {
@@ -123,7 +118,6 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
       // is never simply lost to bad convention-center wifi.
       const outcome = await submitWaitlist({
         email: normalizedEmail,
-        firstName,
         kidCount: undefined,
         kidAgeBands: [],
         source: "organic",
@@ -203,23 +197,9 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             <form onSubmit={handleSubmit} noValidate>
               {/* Visible labels removed per design (2026-07-08); each input
                   keeps an accessible name via a sr-only label for screen
-                  readers, and the placeholder carries the visible hint. */}
-              <label className="sr-only" htmlFor="parent-name">
-                Your name
-              </label>
-              <input
-                id="parent-name"
-                type="text"
-                autoComplete="name"
-                autoFocus
-                required
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Sarah Chen"
-                className="min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
-              />
-
-              <label className="mt-3 block sr-only" htmlFor="parent-email">
+                  readers, and the placeholder carries the visible hint.
+                  No name field here: FamilyStep asks it, once. */}
+              <label className="sr-only" htmlFor="parent-email">
                 Where should I send the report?
               </label>
               <input
@@ -227,11 +207,12 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                autoFocus
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                className="mt-3 min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
+                className="min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
               />
 
               <label className="sr-only" htmlFor="parent-password">
