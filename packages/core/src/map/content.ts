@@ -54,6 +54,23 @@ export interface MapDomainContent {
   items: readonly MapItemContent[];
 }
 
+/** The ages CDC publishes a milestone checklist page for, in months. */
+const CDC_CHECKLIST_MONTHS = [2, 4, 6, 9, 12, 15, 18, 24, 30, 36, 48, 60] as const;
+
+/**
+ * The CDC checklist page nearest the child's age (read-through ask:
+ * link the exact page, "show me where you got this," not the index).
+ * Picks the highest checkpoint the child has reached; clamps to 2mo-5yr.
+ */
+export function cdcChecklistUrl(ageMonths: number): string {
+  let picked: number = CDC_CHECKLIST_MONTHS[0];
+  for (const checkpoint of CDC_CHECKLIST_MONTHS) {
+    if (checkpoint <= ageMonths) picked = checkpoint;
+  }
+  const slug = picked < 12 ? `${picked}mo` : picked % 12 === 0 ? `${picked / 12}yr` : `${picked}mo`;
+  return `https://www.cdc.gov/act-early/milestones/milestones-${slug}.html`;
+}
+
 /** Citation registry: every item's `sources` keys resolve here. */
 export const MAP_SOURCES: Record<string, { label: string; url: string }> = {
   cdc: {

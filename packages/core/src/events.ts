@@ -28,17 +28,6 @@ export const EVENT_SCHEMAS = {
     has_state: z.boolean(),
     returning: z.boolean(),
   }),
-  // Fired at signup: the moment email is captured, right before the report
-  // scores (or, for an all-pending-band family, before the hub). Separate
-  // from map.started because founder call 2026-07-06 split identity capture
-  // from session start: a lead can now answer the whole checklist before
-  // this ever fires.
-  "map.claimed": z.object({
-    family_id: z.uuid(),
-    source: z.enum(WAITLIST_SOURCES),
-    has_state: z.boolean(),
-    returning: z.boolean(),
-  }),
   "map.child_added": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
@@ -61,10 +50,9 @@ export const EVENT_SCHEMAS = {
     keys: z.array(z.string()).default([]),
   }),
   // Fired once, the moment the anonymous family gains a real Supabase
-  // Auth account: either "google" (immediate, at S1) or "password" (the
-  // last question, right before the report). Separate from map.claimed
-  // (which only marks the email as known) so the funnel can see how many
-  // families ever finish becoming an account.
+  // Auth account: either "google" or "password", both now at S1 (founder
+  // call 2026-07-08 folded the password path into the entry screen too,
+  // retiring the old email-only "map.claimed" that used to fire here).
   "map.account_created": z.object({
     family_id: z.uuid(),
     method: z.enum(["google", "password"]),

@@ -6,7 +6,7 @@ import type {
   PlanNarrative,
   ReportNarrative,
 } from "@homa/core";
-import { getMapDomain } from "@homa/core";
+import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
 
@@ -93,7 +93,10 @@ export async function getReportNarrativeSource(
 
   const practice = planRows
     .map((plan) => ({
-      subjectName: getMapDomain(plan.domain_id)?.displayName ?? plan.domain_id,
+      subjectName:
+        plan.domain_id === MONTH_PLAN_DOMAIN
+          ? "the month plan"
+          : (getMapDomain(plan.domain_id)?.displayName ?? plan.domain_id),
       done: Object.values(plan.progress ?? {}).filter(Boolean).length,
       total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
     }))

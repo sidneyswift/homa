@@ -42,12 +42,14 @@ export interface NarrativeVerdicts {
 /** Per-piece character caps (starting values per the implementation
  * prompt; tune in review). */
 export const NARRATIVE_LENGTH_CAPS = {
-  note: 800,
+  // Tightened 2026-07-08 after the first live read-through ("she needs
+  // to be shorter"): the caps now enforce the prompt's brevity budgets.
+  note: 520,
   subject: 340,
-  synthesis: 1400,
-  drawer: 500,
+  synthesis: 700,
+  drawer: 360,
   keepsake: 900,
-  planIntro: 700,
+  planIntro: 450,
   planWeek: 300,
   planClosing: 400,
 } as const;

@@ -27,6 +27,5 @@ export type FlowPhase =
   | "checklist"
   | "extras"
   | "next-kid"
-  | "signup"
   | "deepdive"
   | "scoring";

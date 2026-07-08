@@ -361,6 +361,84 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   .scroll-cta { transition: opacity var(--dur-base) ease; transform: none; }
 }
 
+/* Landing-page signup popup (SignupPopupModal.tsx): reuses the onboarding
+   flow's own entry step inside a wide centered dialog, warm blurred scrim
+   matching the design system's Dialog component. @starting-style drives
+   the entrance (same pattern as .rail-check below), no mount-then-flip
+   effect needed; React unmounts the whole thing instantly on close, same
+   as ScrollCta's own dismissal. */
+.signup-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(51, 42, 33, 0.42);
+  backdrop-filter: blur(2px);
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+.signup-popup-card {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 56px 32px 40px;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.signup-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.signup-popup-close:hover { background: var(--stone-100); color: var(--text-body); }
+
+/* Below ParentStep's own lg breakpoint (1024px) its two-column grid
+   collapses to one column, but a card still sized for the wide desktop
+   grid left that single narrow form hugging the left edge with a dead
+   gap beside it instead of reading as one centered column (founder
+   screenshot 2026-07-08). Narrowing the card to match the form's own
+   content width here lets it fill the card instead of floating in it. */
+@media (max-width: 1023px) {
+  .signup-popup-card { max-width: 34rem; }
+}
+@media (max-width: 640px) {
+  .signup-popup-card { padding: 68px 20px 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signup-popup-overlay, .signup-popup-card { transition: opacity var(--dur-base) ease; transform: none; }
+}
+
 /* ============================================================================
    Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
    step change, opacity + transform only, brand ease-out, under 300ms per the

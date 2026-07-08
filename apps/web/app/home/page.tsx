@@ -39,7 +39,8 @@ export default async function HomePage() {
   const childIds = children.map((child) => child.id);
   const curricula = await getCurriculaForChildren(childIds);
   const pendingCurriculumChildIds = await getPendingCurriculumChildIds(childIds);
-  // The texting card only renders once this deployment has a live line.
+  // Homa's own number, shown on the settings card only once this
+  // deployment has a live texting line configured.
   const homaNumber =
     process.env.TELNYX_SMS_ENABLED === "true"
       ? (process.env.TELNYX_FROM_NUMBER ?? null)
@@ -142,16 +143,23 @@ export default async function HomePage() {
             <AddChildForm familyId={family.id} />
           </div>
 
-          {homaNumber ? (
-            <div className="mt-6">
+          {/* Settings: the phone number card is always available (it's
+              account contact info, not gated behind the texting feature),
+              Homa's own number and the texting-specific copy render only
+              once this deployment has a live line configured. */}
+          <div className="mt-10">
+            <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-subtle">
+              Settings
+            </h2>
+            <div className="mt-4">
               <TextingCard
                 linkedPhoneDisplay={
                   familyPhone ? formatUsPhone(familyPhone.phone_e164) : null
                 }
-                homaNumberDisplay={formatUsPhone(homaNumber)}
+                homaNumberDisplay={homaNumber ? formatUsPhone(homaNumber) : null}
               />
             </div>
-          ) : null}
+          </div>
         </section>
       )}
     </main>

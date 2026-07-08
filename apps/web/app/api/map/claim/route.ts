@@ -1,21 +1,26 @@
 import { cookies } from "next/headers";
 
-import { mapClaimSchema, WAITLIST_SOURCES } from "@homa/core";
+import { mapClaimSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireFamily } from "../../../../lib/map/session";
-import { claimFamily, mirrorToWaitlist } from "../../../../lib/map/store";
+import { attachAuthUser, mirrorToWaitlist } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
+import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
 /**
  * POST /api/map/claim
- * Signup: the one moment email is asked for, framed as creating the
- * account that generates the report. Runs right before scoring, or, for a
- * family whose only kids are outside the scored age range, before the hub
- * (so "I'll email you when it's ready" stays an honest promise). If the
- * email already belongs to a different, older lead, claimLead folds this
- * sitting's kids into that account rather than losing either side.
+ * S1's create-account submit (founder call 2026-07-08, overturning
+ * 2026-07-06's "password is the last question" ruling): name, email, and
+ * password, right up front. This is the one moment the anonymous lead
+ * becomes a real Supabase Auth account for the password path; Google
+ * sign-ups skip this route entirely and link at /api/map/state instead.
+ * If the email already belongs to a different, older family, attachAuthUser
+ * folds this sitting's kids into that family rather than losing either
+ * side. If it already belongs to a real account (any device, any sitting),
+ * signUp fails honestly and the client offers sign-in instead of a doomed
+ * "try again".
  */
 export async function POST(request: Request): Promise<Response> {
   if (rateLimited(`claim:${clientIp(request)}`, 10)) {
@@ -25,6 +30,11 @@ export async function POST(request: Request): Promise<Response> {
   const family = await requireFamily();
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  if (family.has_account) {
+    // Already an account (double submit, or a Google link that raced this
+    // request): nothing to do, but not an error either.
+    return Response.json({ ok: true, returning: false });
   }
 
   let body: unknown;
@@ -41,21 +51,54 @@ export async function POST(request: Request): Promise<Response> {
   const input = parsed.data;
 
   try {
-    // Email is the S1 ask (founder call 2026-07-06, third revision); the
-    // name arrives later at account signup. If this lead somehow already
-    // has a name (legacy order, Google profile), carry it forward into the
-    // claim and the waitlist mirror rather than dropping it.
-    const { familyId, returning, resumeToken } = await claimFamily({
-      familyId: family.id,
+    const supabase = await createSupabaseServerClient();
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: input.email,
-      firstName: family.first_name ?? undefined,
-      lastName: family.last_name ?? undefined,
-      usState: input.usState ?? family.us_state ?? undefined,
+      password: input.password,
+      options: {
+        data: { given_name: input.firstName, family_name: input.lastName ?? "" },
+      },
+    });
+    if (signUpError || !signUpData.user) {
+      // A returning parent whose email already has an account can never
+      // succeed by retrying here; the client needs to know so it can
+      // offer sign-in instead of a generic try-again.
+      const alreadyRegistered =
+        signUpError?.code === "user_already_exists" ||
+        /already (been )?registered/i.test(signUpError?.message ?? "");
+      return Response.json(
+        {
+          ok: false,
+          reason: alreadyRegistered ? "exists" : "auth-failed",
+          message: signUpError?.message,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Open signup accounts are auto-confirmed at creation (migration #8),
+    // but sign in explicitly anyway so the session cookie is set
+    // deterministically even if that project setting ever changes.
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    });
+    if (signInError) {
+      return Response.json({ ok: false, reason: "auth-failed" }, { status: 400 });
+    }
+
+    const { familyId, returning, resumeToken } = await attachAuthUser({
+      familyId: family.id,
+      authUserId: signUpData.user.id,
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      usState: input.usState,
     });
     await mirrorToWaitlist({
       email: input.email,
-      firstName: family.first_name ?? undefined,
-      usState: input.usState ?? family.us_state ?? undefined,
+      firstName: input.firstName,
+      usState: input.usState,
       source: family.source,
       utm: {},
     });
@@ -69,15 +112,7 @@ export async function POST(request: Request): Promise<Response> {
       maxAge: 60 * 60 * 24 * 90,
     });
 
-    const source = WAITLIST_SOURCES.includes(family.source as (typeof WAITLIST_SOURCES)[number])
-      ? (family.source as (typeof WAITLIST_SOURCES)[number])
-      : "other";
-    await emitMapEvent("map.claimed", {
-      family_id: familyId,
-      source,
-      has_state: Boolean(input.usState),
-      returning,
-    });
+    await emitMapEvent("map.account_created", { family_id: familyId, method: "password", returning });
 
     return Response.json({ ok: true, returning });
   } catch (error) {

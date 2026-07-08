@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 
-import { getMapDomain } from "@homa/core";
+import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
 
 import { Logo } from "../../../../../../components/brand/Logo";
 import { emitMapEvent } from "../../../../../../lib/map/events";
@@ -45,22 +45,23 @@ export default async function PlanPage({
   const { token, domainId } = await params;
   const { rebuilt, built } = await searchParams;
   const domain = getMapDomain(domainId);
+  const isMonth = domainId === MONTH_PLAN_DOMAIN;
 
   // Arriving from a deep dive rebuilds the month from the refined answers,
   // ONCE, then redirects to a URL that is safe to reload: leaving
   // ?rebuilt=1 in place meant every refresh rebuilt the month again
   // (restarting the retest clock and, with the narrative layer, resetting
   // the words the writing beat was waiting for, so it never resolved).
-  if (domain && rebuilt === "1") {
+  if ((domain || isMonth) && rebuilt === "1") {
     const rebuiltPlan = await getOrBuildPlan(token, domainId, { rebuild: true });
     if (rebuiltPlan) {
       redirect(`/onboarding/r/${token}/plan/${domainId}?built=1`);
     }
   }
 
-  const result = domain ? await getOrBuildPlan(token, domainId) : null;
+  const result = domain || isMonth ? await getOrBuildPlan(token, domainId) : null;
 
-  if (!result || !domain) {
+  if (!result) {
     return (
       <main className="mx-auto w-full max-w-xl px-6 py-20">
         <Logo size={26} />
@@ -162,10 +163,20 @@ export default async function PlanPage({
               </span>
             </div>
             <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong">
-              {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>{plan.subjectName.toLowerCase()}</span> month
+              {isMonth ? (
+                <>
+                  {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>month</span>
+                </>
+              ) : (
+                <>
+                  {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>{plan.subjectName.toLowerCase()}</span> month
+                </>
+              )}
             </h1>
             <p className="mt-2 font-serif text-lg italic text-strong/75">
-              four weeks, a few minutes a day, then a retest to see what moved
+              {isMonth
+                ? "an add-on to what you already do: the smallest moves that show up in the numbers"
+                : "four weeks, a few minutes a day, then a retest to see what moved"}
             </p>
           </div>
 
@@ -200,14 +211,32 @@ export default async function PlanPage({
               </div>
             )}
 
-            <h2 className="mt-7 font-display text-xl font-semibold text-strong">
-              What this month aims at
-            </h2>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-body">
-              {plan.targets.map((target) => (
-                <li key={target}>{target}</li>
-              ))}
-            </ol>
+            {/* When the written intro exists it already carries the aim
+                (read-through: intro + targets read twice); the formal
+                targets fold away as the fine print. */}
+            {introText ? (
+              <details className="mt-4">
+                <summary className="cursor-pointer font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                  The formal targets behind this month
+                </summary>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-body">
+                  {plan.targets.map((target) => (
+                    <li key={target}>{target}</li>
+                  ))}
+                </ol>
+              </details>
+            ) : (
+              <>
+                <h2 className="mt-7 font-display text-xl font-semibold text-strong">
+                  What this month aims at
+                </h2>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-body">
+                  {plan.targets.map((target) => (
+                    <li key={target}>{target}</li>
+                  ))}
+                </ol>
+              </>
+            )}
             {plan.styleNote ? <p className="mt-2 text-sm text-muted">{plan.styleNote}</p> : null}
 
             <PlanWeeks

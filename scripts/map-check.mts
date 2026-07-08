@@ -13,6 +13,8 @@
 import {
   BANNED_WORDS,
   buildFourWeekPlan,
+  buildMonthPlan,
+  MONTH_PLAN_DOMAIN,
   DEEP_DIVE_CAP,
   domainLine,
   EM_DASH,
@@ -307,6 +309,47 @@ report(
     }
   }
   report(`plan builder: 4 clean weeks for all ${MAP_DOMAINS.length} subjects at 4 ages`, plansOk && failures.every((f) => !f.startsWith("plan ")));
+}
+
+// ---------- 5b. The unified month: one weighted plan for the whole child ----------
+
+{
+  // A growing-heavy 45-month-old: cores behind, music a strength.
+  const monthAnswers = [
+    { itemId: "math.counts-to-5", answer: "getting_there" },
+    { itemId: "math.counts-to-10", answer: "not_yet" },
+    { itemId: "literacy.book-handling", answer: "getting_there" },
+    { itemId: "literacy.own-name-letters", answer: "not_yet" },
+    { itemId: "self_care.spoon-cup", answer: "easily" },
+    { itemId: "self_care.toilet-day", answer: "not_yet" },
+    { itemId: "music.moves-to-music", answer: "easily" },
+    { itemId: "music.sings-along", answer: "easily" },
+    { itemId: "music.steady-beat", answer: "easily" },
+  ] as const;
+  const month = buildMonthPlan(45, [...monthAnswers], { interests: ["trucks"] });
+  let monthOk = Boolean(
+    month &&
+      month.domainId === MONTH_PLAN_DOMAIN &&
+      month.weeks.length === 4 &&
+      month.targets.length >= 2 &&
+      month.targets.length <= 3,
+  );
+  if (month) {
+    for (const week of month.weeks) {
+      // Every focus subject contributes one activity per week, each
+      // prefixed with its subject name so the mix reads honestly.
+      if (week.activities.length < month.targets.length) monthOk = false;
+      for (const activity of week.activities) {
+        checkCopy(`month.w${week.week}`, activity);
+        if (!/^[A-Z][^:]{1,40}: /.test(activity) && !activity.includes("strength")) monthOk = false;
+      }
+    }
+  }
+  report("month plan: weighted, capped at 3 focuses, subject-prefixed weeks", monthOk);
+
+  // A kid with no cores mapped builds no month (nothing to focus).
+  const empty = buildMonthPlan(45, [{ itemId: "music.moves-to-music", answer: "easily" }], {});
+  report("month plan: no focusable cores means no month, never a filler plan", empty === null);
 }
 
 // ---------- 6. Rendered sentences obey the laws ----------

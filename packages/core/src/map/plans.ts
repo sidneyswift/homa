@@ -90,7 +90,7 @@ const PRACTICE_PATTERNS: Record<string, readonly [string, string, string]> = {
   ],
   music: [
     "Five minutes of music play a day aimed at {skill}: clap it, hum it, tap it.",
-    "Find the songs of {interest}, learn one together, notice what the music does.",
+    "Find songs about {interest}, learn one together, and notice what the music does.",
     "One live-music moment this month, busker to concert, then talk about what you heard.",
   ],
   gross_motor: [
@@ -120,7 +120,7 @@ const PRACTICE_PATTERNS: Record<string, readonly [string, string, string]> = {
   ],
   spanish: [
     "Ten minutes of the language a day aimed at {skill}: a song, a show with subtitles, a phrase used for real.",
-    "Learn the words of {interest} first. Motivation is half of vocabulary.",
+    "Learn the words for {interest} first. Motivation is half of vocabulary.",
     "One out-loud win a day: a greeting, an order, a question used with a real person.",
   ],
   computer_science: [
@@ -204,6 +204,103 @@ function skillPhrase(statement: string): string {
   const spaceIndex = phrase.indexOf(" ");
   if (spaceIndex === -1) return phrase;
   return `${gerundize(phrase.slice(0, spaceIndex))}${phrase.slice(spaceIndex)}`;
+}
+
+/** The pseudo-domain id the unified month plan stores under. */
+export const MONTH_PLAN_DOMAIN = "month";
+
+/** Core subjects always keep presence in a month (the read-through
+ * ruling: "a kid can't not do math and literacy for an entire month");
+ * everything else is an elective that sprinkles in as joy. */
+const ELECTIVE_DOMAINS = new Set(["art", "music", "spanish", "computer_science"]);
+
+/**
+ * The unified month (read-through ruling 2026-07-08: ONE four-week plan
+ * for the whole child, not sixteen). Weighted the way Alessa ruled: the
+ * growing CORE subjects carry the emphasis (up to three focus subjects),
+ * one strength sprinkles in for joy, and the whole thing is an ADD-ON to
+ * whatever the family already does, never a schedule takeover. Returns a
+ * FourWeekPlan shaped like any other so storage, narrative, and retest
+ * machinery need no new paths; domainId is MONTH_PLAN_DOMAIN.
+ */
+export function buildMonthPlan(
+  ageMonths: number,
+  answers: MapAnswerInput[],
+  context: PlanContext = {},
+): FourWeekPlan | null {
+  const scores = scoreMap(ageMonths, answers);
+
+  const growingCores = scores.domains.filter(
+    (score) =>
+      score.position === "growing" &&
+      !score.exposureBased &&
+      !ELECTIVE_DOMAINS.has(score.domainId),
+  );
+  // Fill to at least two focuses with the lowest on-track cores, so a
+  // strong kid still gets a month that keeps things moving.
+  const onTrackCores = scores.domains
+    .filter(
+      (score) =>
+        score.position === "on_track" &&
+        !score.exposureBased &&
+        !ELECTIVE_DOMAINS.has(score.domainId),
+    )
+    .sort((a, b) => (a.monthsAhead ?? 0) - (b.monthsAhead ?? 0));
+  const focusScores = [...growingCores, ...onTrackCores].slice(0, 3);
+  if (focusScores.length === 0) return null;
+
+  // One strength sprinkle: the subject with the most months ahead,
+  // electives welcome (the joy slot, never a focus slot).
+  const sprinkleScore = [...scores.domains]
+    .filter((score) => score.position === "ahead" && score.monthsAhead !== null)
+    .sort((a, b) => (b.monthsAhead ?? 0) - (a.monthsAhead ?? 0))[0];
+
+  const subPlans = focusScores
+    .map((score) => buildFourWeekPlan(score.domainId, ageMonths, answers, context))
+    .filter((plan): plan is FourWeekPlan => plan !== null);
+  if (subPlans.length === 0) return null;
+  const sprinklePlan = sprinkleScore
+    ? buildFourWeekPlan(sprinkleScore.domainId, ageMonths, answers, context)
+    : null;
+
+  const targets = subPlans.map((plan) => `${plan.subjectName}: ${plan.targets[0]}`);
+  const startingLine = subPlans.find((plan) => plan.startingLine)?.startingLine ?? null;
+
+  const weeks: PlanWeek[] = [1, 2, 3, 4].map((week) => {
+    const activities: string[] = [];
+    for (const plan of subPlans) {
+      const source = plan.weeks[week - 1];
+      // One activity per focus subject per week, rotating through each
+      // subject's own patterns so the month stays light on purpose
+      // ("the lowest amount of effort that moves a number").
+      const pick = source.activities[(week - 1) % source.activities.length];
+      activities.push(`${plan.subjectName}: ${pick}`);
+    }
+    if (sprinklePlan && (week === 1 || week === 4)) {
+      const source = sprinklePlan.weeks[week - 1];
+      activities.push(
+        `${sprinklePlan.subjectName} (already a strength, keep the joy): ${source.activities[0]}`,
+      );
+    }
+    return {
+      week,
+      // Subject names, not three concatenated target statements: the
+      // formal targets live in the plan's targets list already.
+      focus: subPlans.map((plan) => plan.subjectName.toLowerCase()).join(" + "),
+      activities,
+    };
+  });
+
+  return {
+    domainId: MONTH_PLAN_DOMAIN,
+    subjectName: "the whole month",
+    childAgeLabel: ageLabel(ageMonths),
+    startingLine,
+    targets,
+    weeks,
+    styleNote: context.style ? (STYLE_NOTES[context.style] ?? null) : null,
+    bankVersion: MAP_BANK_VERSION,
+  };
 }
 
 /**

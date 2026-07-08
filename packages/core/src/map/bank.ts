@@ -1,5 +1,5 @@
 import { MONTHS_AHEAD_CAP } from "./bands";
-import { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent } from "./content";
+import { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent } from "./content";
 
 /**
  * The map question bank: types, selection ladder, and lookups over the
@@ -178,7 +178,7 @@ export function ladderRungs(
   return rungs;
 }
 
-export { MAP_DOMAINS, MAP_SOURCES, type MapDomainContent };
+export { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent };
 
 const itemIndex = new Map<string, { domain: MapDomain; item: MapItem }>();
 for (const domain of MAP_DOMAINS) {

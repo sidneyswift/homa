@@ -9,6 +9,7 @@ import { HowHomaWorksCard } from "../components/marketing/HowHomaWorksCard";
 import { Nav } from "../components/marketing/Nav";
 import { RevealObserver } from "../components/marketing/RevealObserver";
 import { ScrollCta } from "../components/marketing/ScrollCta";
+import { SignupPopupProvider } from "../components/marketing/SignupPopupProvider";
 import { Stories } from "../components/marketing/Stories";
 import { HowThread } from "../components/marketing/thread/HowThread";
 import { FAQ_ITEMS } from "../components/marketing/faq-items";
@@ -90,44 +91,46 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <RevealObserver />
-      {/* The gradient wraps Nav + Hero together (not just Hero): now that
-          Nav is transparent, anchoring the glow to Hero's own top edge left
-          a hard seam right under the nav, where the flat page background
-          behind it met the gradient starting abruptly below. Originating
-          the gradient from the true top of the page reads through the
-          transparent nav continuously instead. A second, much smaller echo
-          of the same gold-100 glow (not a second color) sits mid-left,
-          just enough to keep that side from reading flat next to the
-          top-right one. */}
-      <div
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          background:
-            "radial-gradient(18% 22% at 8% 58%, var(--gold-100) 0%, transparent 68%), " +
-            "radial-gradient(100% 130% at 88% 0%, var(--gold-100) 0%, var(--bg-page) 58%)",
-        }}
-      >
-        <Nav />
-        <Hero />
-      </div>
-      <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />
-      <Features />
-      <ScrollCta />
-      <Wave color="var(--bg-page-warm)" flip />
-      <HowThread />
-      <Wave color="var(--bg-page-warm)" />
-      <HowHomaWorksCard />
-      <Wave color="var(--band-blush)" flip />
-      <Stories />
-      <Wave color="var(--band-blush)" />
-      <Faq />
-      <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
-      <CtaBand />
-      <div style={{ background: "var(--band-sunshine)" }}>
-        <Wave color="var(--pop-navy)" flip />
-      </div>
-      <Footer />
+      <SignupPopupProvider>
+        {/* The gradient wraps Nav + Hero together (not just Hero): now that
+            Nav is transparent, anchoring the glow to Hero's own top edge left
+            a hard seam right under the nav, where the flat page background
+            behind it met the gradient starting abruptly below. Originating
+            the gradient from the true top of the page reads through the
+            transparent nav continuously instead. A second, much smaller echo
+            of the same gold-100 glow (not a second color) sits mid-left,
+            just enough to keep that side from reading flat next to the
+            top-right one. */}
+        <div
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            background:
+              "radial-gradient(18% 22% at 8% 58%, var(--gold-100) 0%, transparent 68%), " +
+              "radial-gradient(100% 130% at 88% 0%, var(--gold-100) 0%, var(--bg-page) 58%)",
+          }}
+        >
+          <Nav />
+          <Hero />
+        </div>
+        <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />
+        <Features />
+        <ScrollCta />
+        <Wave color="var(--bg-page-warm)" flip />
+        <HowThread />
+        <Wave color="var(--bg-page-warm)" />
+        <HowHomaWorksCard />
+        <Wave color="var(--band-blush)" flip />
+        <Stories />
+        <Wave color="var(--band-blush)" />
+        <Faq />
+        <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
+        <CtaBand />
+        <div style={{ background: "var(--band-sunshine)" }}>
+          <Wave color="var(--pop-navy)" flip />
+        </div>
+        <Footer />
+      </SignupPopupProvider>
     </div>
   );
 }

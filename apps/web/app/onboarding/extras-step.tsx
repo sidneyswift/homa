@@ -38,14 +38,11 @@ function helpSuggestions(ageMonths: number): readonly string[] {
 
 export function ExtrasStep({
   child,
-  needsSignup,
   hasNextKid = false,
   pendingReportCount = 1,
   onDone,
 }: {
   child: FlowChild;
-  /** Whether the account step still comes next, before the report. */
-  needsSignup: boolean;
   /** Whether another kid's questions are still open, so the next screen
    * is the next-kid choice rather than the report. */
   hasNextKid?: boolean;
@@ -83,12 +80,11 @@ export function ExtrasStep({
     onDone();
   }
 
-  // "See the report" would lie when the next-kid choice or the account
-  // step comes first; the button only promises the report when the report
-  // is truly next. With several kids' reports queued this sitting, the
-  // landing report is the first kid's, so the label goes plural instead
-  // of naming the wrong kid.
-  const reportIsNext = !needsSignup && !hasNextKid;
+  // "See the report" would lie when the next-kid choice comes first; the
+  // button only promises the report when the report is truly next. With
+  // several kids' reports queued this sitting, the landing report is the
+  // first kid's, so the label goes plural instead of naming the wrong kid.
+  const reportIsNext = !hasNextKid;
   const finishLabel = !reportIsNext
     ? "Continue"
     : pendingReportCount > 1

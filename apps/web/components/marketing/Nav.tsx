@@ -1,13 +1,19 @@
+"use client";
+
 import Link from "next/link";
 
 import { Logo } from "../brand/Logo";
 import { Button } from "./ds/Button";
+import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
  * Sticky marketing nav, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx. Links anchor to their
- * page sections; "Sign in" points at /signin; "Sign up" routes to
- * /onboarding (the live conversion path until invites open).
+ * page sections; "Sign in" points at /signin; "Sign up" opens the landing
+ * page's signup popup where a SignupPopupProvider wraps this (the
+ * landing page itself), or falls back to navigating straight to
+ * /onboarding everywhere else Nav renders (onboarding, blog), where
+ * there's no popup to open.
  *
  * Transparent globally (founder call 2026-07-06): no fill, no blur, no
  * border, so it reads as part of whatever's underneath rather than a bar
@@ -24,6 +30,7 @@ const LINKS: ReadonlyArray<readonly [string, string]> = [
 ];
 
 export function Nav() {
+  const openPopup = useSignupPopup();
   return (
     <nav
       className="lp-pad"
@@ -72,9 +79,15 @@ export function Nav() {
         >
           Sign in
         </Link>
-        <Button variant="primary" href="/onboarding">
-          Sign up
-        </Button>
+        {openPopup ? (
+          <Button variant="primary" onClick={openPopup}>
+            Sign up
+          </Button>
+        ) : (
+          <Button variant="primary" href="/onboarding">
+            Sign up
+          </Button>
+        )}
       </div>
     </nav>
   );

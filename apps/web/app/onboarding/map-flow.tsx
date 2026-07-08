@@ -16,15 +16,14 @@ import { ParentStep } from "./parent-step";
 import { PreparingStep } from "./preparing-step";
 import { isChecklistComplete } from "./question-queue";
 import { ScoringStep } from "./scoring-step";
-import { SignupStep } from "./signup-step";
 
 /**
  * Orchestrator for the progress-report flow: an anonymous session opens
- * silently, then email, kids, checklist per kid, the optional extras
- * step, password (the last question, becoming a real account), scoring,
- * report. Every mutation is already persisted server-side by the steps;
- * this component only decides which screen shows and carries the shared
- * children list.
+ * silently, then S1 (name, email, password, or Google) creates the real
+ * account up front, then kids, checklist per kid, the optional extras
+ * step, scoring, report. Every mutation is already persisted server-side
+ * by the steps; this component only decides which screen shows and
+ * carries the shared children list.
  *
  * Founder calls 2026-07-06, in order:
  *   1. "No email needed, sign up as the last question to create an account
@@ -36,8 +35,6 @@ import { SignupStep } from "./signup-step";
  *   3. Email moved back to S1 (this time to stay), with "Sign up with
  *      Google" alongside it; her name moved back to the last question,
  *      bundled with the password Google sign-ups never need to set.
- *      SignupStep is now the "turn into a real account" step, gated on
- *      hasAccount rather than email.
  *   4. Full UX review implemented ("do it all"): quiet chrome mid-flow
  *      (see OnboardingShell), fully-answered kids resume at the finish
  *      line instead of the hub, focus follows phase changes, and the
@@ -56,17 +53,15 @@ import { SignupStep } from "./signup-step";
  *      routes through it. Resuming an in-progress kid skips it: there's
  *      nothing new to announce.
  *
- * The one honesty gap this still opens: a family whose only kids are
- * outside the scored age range never reaches scoring at all, and the hub
- * already promises "I'll email you when it's ready". needsPreHubSignup()
- * closes that gap by routing to the password step before the hub whenever
- * there is no reachable checklist and no account yet.
+ * Founder call 2026-07-08 overturns #3's "password is the last question"
+ * half: ParentStep now asks name, email, and password together, creating
+ * the account immediately (same moment as a Google sign-up). hasAccount
+ * is therefore always true from the moment kids exist, so the former
+ * "signup" phase (SignupStep, gated on !hasAccount) is retired along with
+ * needsPreHubSignup: every route past S1 assumes an account already
+ * exists, and there is no honesty gap to close, S1 already promised
+ * "I'll email you when it's ready" truthfully for every family.
  */
-
-function needsPreHubSignup(children: FlowChild[], hasAccount: boolean): boolean {
-  if (hasAccount || children.length === 0) return false;
-  return !children.some((child) => child.inRange && !child.reportToken);
-}
 
 /** The kid the next-kid choice offers: in range, no report yet, questions
  * still open, and not already finished this sitting. Kids in reportQueue
@@ -85,56 +80,40 @@ function nextUnfinishedKid(children: FlowChild[], reportQueue: string[]): FlowCh
 }
 
 /** Where a family lands right after their kids list is up to date: the
- * next unstarted checklist, the finish line for a fully-answered child
- * (straight to the account gate or scoring, never a dead stop on the hub;
- * this is also the seam a Google sign-in redirect resumes through), the
- * pre-hub account gate, or the hub. Shared by every "state just changed"
- * path so the routing logic lives in exactly one place. */
+ * next unstarted checklist, straight to scoring for a fully-answered
+ * child (never a dead stop on the hub; this is also the seam a Google
+ * sign-in redirect resumes through), or the hub. Shared by every "state
+ * just changed" path so the routing logic lives in exactly one place. */
 type PostKidsRoute =
   | { phase: "kids" }
   | { phase: "checklist"; childId: string }
-  | { phase: "signup"; childId: string | null; next: "scoring" | "hub" }
   | { phase: "scoring"; childId: string }
   | { phase: "hub" };
 
-function decidePostKidsRoute(children: FlowChild[], hasAccount: boolean): PostKidsRoute {
+function decidePostKidsRoute(children: FlowChild[]): PostKidsRoute {
   if (children.length === 0) return { phase: "kids" };
   const next = children.find((child) => child.inRange && !child.reportToken && child.answered === 0);
   if (next) return { phase: "checklist", childId: next.id };
   const finished = children.find(
     (child) => child.inRange && !child.reportToken && isChecklistComplete(child),
   );
-  if (finished) {
-    return hasAccount
-      ? { phase: "scoring", childId: finished.id }
-      : { phase: "signup", childId: finished.id, next: "scoring" };
-  }
-  if (needsPreHubSignup(children, hasAccount)) {
-    return { phase: "signup", childId: children[0]?.id ?? null, next: "hub" };
-  }
+  if (finished) return { phase: "scoring", childId: finished.id };
   return { phase: "hub" };
 }
 
 /** Phases whose first input autofocuses itself; every other phase change
  * moves focus to the step wrapper so keyboard and screen-reader users
  * land on the new content instead of a stale position. */
-const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "kids", "signup"]);
+const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "kids"]);
 
 export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) => void }) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const [children, setChildren] = useState<FlowChild[]>([]);
   const [email, setEmail] = useState<string | null>(null);
-  /** True once the lead has a real Supabase Auth account (Google,
-   * immediately, or password, as the last question before the report). */
-  const [hasAccount, setHasAccount] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [deepDiveDomain, setDeepDiveDomain] = useState<string | null>(null);
-  /** Where signup sends her next: she either just finished a checklist and
-   * is heading for the report, or none of her kids are scoreable yet and
-   * she's heading for the hub. */
-  const [signupNext, setSignupNext] = useState<"scoring" | "hub">("hub");
   /** Ids of kids whose questions finished this sitting, reports pending,
    * in the order they finished. Scoring builds all of them in one beat and
    * lands on the first one's report. */
@@ -151,7 +130,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     children: FlowChild[];
     email: string | null;
     firstName: string | null;
-    hasAccount: boolean;
   } | null> => {
     try {
       const response = await fetch("/api/map/state");
@@ -159,7 +137,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         ok: boolean;
         email?: string | null;
         firstName?: string | null;
-        hasAccount?: boolean;
         familyContextDone?: boolean;
         children?: Array<{
           id: string;
@@ -173,9 +150,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       if (!data.ok) return null;
       const resolvedEmail = data.email ?? null;
       const resolvedFirstName = data.firstName ?? null;
-      const resolvedHasAccount = Boolean(data.hasAccount);
       setEmail(resolvedEmail);
-      setHasAccount(resolvedHasAccount);
       const restored = (data.children ?? []).map((child) => ({
         id: child.id,
         name: child.name,
@@ -190,7 +165,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         children: restored,
         email: resolvedEmail,
         firstName: resolvedFirstName,
-        hasAccount: resolvedHasAccount,
       };
     } catch {
       return null;
@@ -244,24 +218,13 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       setPhase(route.phase);
       return;
     }
-    if (route.phase === "signup") {
-      setActiveChildId(route.childId);
-      setSignupNext(route.next);
-      setPhase("signup");
-      return;
-    }
     setPhase(route.phase);
   }
 
-  /** The last stretch before the report(s): the account gate if she has
-   * none yet, otherwise straight to scoring. */
+  /** The last stretch before the report(s): the account already exists
+   * (S1 created it), so this always goes straight to scoring. */
   function advanceToReports(): void {
-    if (hasAccount) {
-      setPhase("scoring");
-      return;
-    }
-    setSignupNext("scoring");
-    setPhase("signup");
+    setPhase("scoring");
   }
 
   // The shell swaps between full site chrome and quiet focus chrome off
@@ -337,7 +300,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         }
       }
 
-      applyPostKidsRoute(decidePostKidsRoute(restored.children, restored.hasAccount), restored.children);
+      applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
     })();
   }, [refreshState, bootstrapSession]);
 
@@ -376,7 +339,13 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
             void (async () => {
               const restored = await refreshState();
               const childrenList = restored?.children ?? [];
-              applyPostKidsRoute(decidePostKidsRoute(childrenList, restored?.hasAccount ?? false), childrenList);
+              // Same personalized handoff a Google sign-in gets on resume
+              // (see the mount effect above): her account now has a name,
+              // so KidsStep can greet her by it.
+              if (restored?.firstName && childrenList.length === 0) {
+                setGreetName(restored.firstName);
+              }
+              applyPostKidsRoute(decidePostKidsRoute(childrenList), childrenList);
             })();
           }}
         />
@@ -397,7 +366,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
               // who hasn't answered anything yet (2026-07-07 follow-up).
               const restored = await refreshState();
               const childrenList = restored?.children ?? [];
-              applyPostKidsRoute(decidePostKidsRoute(childrenList, restored?.hasAccount ?? false), childrenList);
+              applyPostKidsRoute(decidePostKidsRoute(childrenList), childrenList);
             })();
           }}
         />
@@ -445,7 +414,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       return (
         <ExtrasStep
           child={activeChild}
-          needsSignup={!hasAccount}
           hasNextKid={pendingKid !== null}
           pendingReportCount={Math.max(1, reportQueue.length)}
           onDone={() => {
@@ -477,28 +445,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           />
         );
       }
-    }
-
-    if (phase === "signup") {
-      // Name the kid whose report she lands on: with several kids queued,
-      // that's the first one finished, not the one just answered.
-      const landingChild =
-        (reportQueue.length > 0
-          ? children.find((child) => child.id === reportQueue[0])
-          : null) ?? activeChild;
-      return (
-        <SignupStep
-          child={landingChild}
-          email={email}
-          onDone={() => {
-            void (async () => {
-              await refreshState();
-              setWelcomeBack(true);
-              setPhase(signupNext);
-            })();
-          }}
-        />
-      );
     }
 
     if (phase === "deepdive" && activeChild && deepDiveDomain) {

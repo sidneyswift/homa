@@ -1,7 +1,9 @@
 import {
   ageInMonths,
   buildFourWeekPlan,
+  buildMonthPlan,
   getMapItem,
+  MONTH_PLAN_DOMAIN,
   isInScoredRange,
   MAP_BANK_VERSION,
   scoreMap,
@@ -74,10 +76,10 @@ interface StartAnonymousInput {
 }
 
 /**
- * S1: opens a brand-new anonymous family, no email required. Kids and the
- * checklist auto-save under this cookie-only row from the very first tap;
- * see claimFamily for the signup moment that later attaches an email and
- * attachAuthUser for the account itself.
+ * S1: opens a brand-new anonymous family, no email required, right before
+ * the visible entry screen asks for name, email, and password. Kids and
+ * the checklist auto-save under this cookie-only row from the very first
+ * tap; see attachAuthUser for the moment it becomes a real account.
  */
 export async function startAnonymousFamily(
   input: StartAnonymousInput,
@@ -91,61 +93,6 @@ export async function startAnonymousFamily(
     returning id
   `;
   return { familyId: inserted[0].id, resumeToken };
-}
-
-interface ClaimFamilyInput {
-  /** The caller's own (already anonymous) family, resolved from the cookie. */
-  familyId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  usState?: string;
-}
-
-/**
- * Signup: attaches an email to the caller's anonymous family, rotating its
- * resume token. If that email already belongs to a different, older family
- * (a previous sitting on another device, most likely), this sitting's kids
- * fold into that family instead of splitting them across two rows; nothing
- * typed on either side is lost.
- */
-export async function claimFamily(
-  input: ClaimFamilyInput,
-): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
-  const sql = mapDb();
-  const resumeToken = newToken();
-  const tokenHash = hashToken(resumeToken);
-
-  const existing = await sql<{ id: string }[]>`
-    select id from public.families where email = ${input.email} and id <> ${input.familyId}
-  `;
-
-  if (existing.length > 0) {
-    const targetId = existing[0].id;
-    await foldFamilyInto(input.familyId, targetId);
-    await sql`
-      update public.families set
-        first_name = coalesce(${input.firstName ?? null}, first_name),
-        last_name = coalesce(${input.lastName ?? null}, last_name),
-        us_state = coalesce(${input.usState ?? null}, us_state),
-        resume_token_hash = ${tokenHash},
-        updated_at = now()
-      where id = ${targetId}
-    `;
-    return { familyId: targetId, returning: true, resumeToken };
-  }
-
-  await sql`
-    update public.families set
-      email = ${input.email},
-      first_name = coalesce(${input.firstName ?? null}, first_name),
-      last_name = coalesce(${input.lastName ?? null}, last_name),
-      us_state = coalesce(${input.usState ?? null}, us_state),
-      resume_token_hash = ${tokenHash},
-      updated_at = now()
-    where id = ${input.familyId}
-  `;
-  return { familyId: input.familyId, returning: false, resumeToken };
 }
 
 /** Moves every child of `fromId` into `intoId`, then deletes the empty
@@ -165,6 +112,7 @@ interface AttachAuthUserInput {
   firstName?: string;
   lastName?: string;
   phoneE164?: string;
+  usState?: string;
 }
 
 /**
@@ -201,6 +149,7 @@ export async function attachAuthUser(
       first_name = coalesce(${input.firstName ?? null}, first_name),
       last_name = coalesce(${input.lastName ?? null}, last_name),
       phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
+      us_state = coalesce(${input.usState ?? null}, us_state),
       parent_display_name = coalesce(parent_display_name, ${input.firstName ?? null}),
       status = 'claimed',
       resume_token_hash = ${tokenHash},
@@ -751,12 +700,21 @@ export async function getOrBuildPlan(
     familyStyles[0] ??
     (typeof row.family_context?.style === "string" ? row.family_context.style : undefined);
 
-  const plan = buildFourWeekPlan(
-    domainId,
-    ageInMonths(row.birth_month),
-    answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
-    { interests: [...new Set([...profileInterests, ...bagInterests])], style: familyStyle },
-  );
+  const planContext = {
+    interests: [...new Set([...profileInterests, ...bagInterests])],
+    style: familyStyle,
+  };
+  const planAnswers = answerRows.map((entry) => ({
+    itemId: entry.question_id,
+    answer: entry.answer,
+  }));
+  // The unified month (read-through ruling: one plan for the whole
+  // child) stores under its pseudo-domain and builds with the weighted
+  // month builder; per-subject plans stay as the drill-down.
+  const plan =
+    domainId === MONTH_PLAN_DOMAIN
+      ? buildMonthPlan(ageInMonths(row.birth_month), planAnswers, planContext)
+      : buildFourWeekPlan(domainId, ageInMonths(row.birth_month), planAnswers, planContext);
   if (!plan) return null;
 
   // A rebuild restarts the month: fresh plan, fresh retest clock, the

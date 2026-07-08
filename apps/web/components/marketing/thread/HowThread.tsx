@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
+import { Logo } from "../../brand/Logo";
 import { Button } from "../ds/Button";
 import { Eyebrow } from "../dividers";
 import { CheckVignette, KidsVignette, ProofVignette, WeekVignette } from "./vignettes";
@@ -11,8 +12,12 @@ import { CheckVignette, KidsVignette, ProofVignette, WeekVignette } from "./vign
  * The story thread, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx: Homa's margin-rule gone
  * for a wander. A squiggly clay path down a ruled notebook page that inks in
- * as you scroll, a marker riding the curve, and a waypoint per chapter that
- * checks off as the story passes it. Motion notes (review-animations skill):
+ * as you scroll, the Homa mark riding the curve (a white badge so the
+ * brand-colored house never blends into the brand-colored ink), and a
+ * waypoint per chapter that checks off as the story passes it. The marker
+ * is plain HTML positioned over the SVG rather than a foreignObject, same
+ * coordinate space (no viewBox scaling), simpler and better supported.
+ * Motion notes (review-animations skill):
  * scroll-driven progress (rAF-throttled, passive listener), stroke-dashoffset
  * on SVG paint, waypoint transitions animate background/border/transform at
  * --dur-base --ease-out. Under 880px the gutter/thread hide entirely (kit
@@ -204,8 +209,31 @@ export function HowThread() {
                 strokeDasharray={geom.len}
                 strokeDashoffset={geom.len * (1 - prog)}
               />
-              {marker && <circle cx={marker.x} cy={marker.y} r="10" fill="#fff" stroke="var(--brand)" strokeWidth="3.5" />}
             </svg>
+          )}
+
+          {marker && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: marker.x,
+                top: marker.y,
+                transform: "translate(-50%, -50%)",
+                width: 34,
+                height: 34,
+                borderRadius: "50%",
+                background: "#fff",
+                border: "3.5px solid var(--brand)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "var(--shadow-sm)",
+                pointerEvents: "none",
+              }}
+            >
+              <Logo variant="mark" size={19} />
+            </div>
           )}
 
           {STEPS.map((s, i) => (

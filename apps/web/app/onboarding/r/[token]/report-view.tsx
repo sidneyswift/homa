@@ -9,6 +9,8 @@ import {
   homaNote,
   ladderRungs,
   MAP_SOURCES,
+  MONTH_PLAN_DOMAIN,
+  cdcChecklistUrl,
   nextDeepDiveItem,
   reportStaleness,
   reportSubtitle,
@@ -27,8 +29,10 @@ import { ConsentCard } from "./consent-card";
 import { GrowthStory, type GrowthEra } from "./growth-story";
 import { HomeschoolContextCard } from "./homeschool-context-card";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
+import { SubjectJump } from "./subject-jump";
 import { ReportActions } from "./report-actions";
 import { ReportChart } from "./report-chart";
+import { ReportSnapshot } from "./report-snapshot";
 import { SharpenInline } from "./sharpen-inline";
 import { StalenessBanner } from "./staleness-banner";
 import { StateCard } from "./state-card";
@@ -184,23 +188,27 @@ export function ReportView({
     answersByDomain.set(domainId, list);
   }
 
-  // The living record's month memory and the one-tap month offer.
+  // The living record's month memory and the one-tap UNIFIED month offer
+  // (read-through ruling 2026-07-08: one plan for the whole child, and
+  // the growth focus is the first actionable thing after the note).
   const planByDomain = new Map(report.plans.map((plan) => [plan.domainId, plan]));
   const practice = report.plans.filter((plan) => plan.done > 0);
-  const consentCandidate = (() => {
-    if (!editable) return null;
-    const growingIds = report.scores.strengthOrder
-      .map((id) => byId.get(id))
-      .filter(
-        (score): score is DomainScore =>
-          Boolean(score) && score!.position === "growing" && !score!.exposureBased,
-      )
-      .filter((score) => !planByDomain.has(score.domainId));
-    const withFrontier = growingIds.find((score) => score.frontierStatement);
-    const pick = withFrontier ?? growingIds[0];
-    if (!pick) return null;
-    const domain = getMapDomain(pick.domainId);
-    return domain ? { domainId: pick.domainId, subjectName: domain.displayName } : null;
+  const ELECTIVES = new Set(["art", "music", "spanish", "computer_science"]);
+  const monthFocus = (() => {
+    if (!editable || planByDomain.has(MONTH_PLAN_DOMAIN)) return null;
+    const cores = scores.filter((score) => !score.exposureBased && !ELECTIVES.has(score.domainId));
+    const growingCores = cores.filter((score) => score.position === "growing");
+    const onTrackCores = cores
+      .filter((score) => score.position === "on_track")
+      .sort((a, b) => (a.monthsAhead ?? 0) - (b.monthsAhead ?? 0));
+    const focus = [...growingCores, ...onTrackCores].slice(0, 3);
+    if (focus.length === 0) return null;
+    const names = focus.map(
+      (score) => getMapDomain(score.domainId)?.displayName.toLowerCase() ?? score.domainId,
+    );
+    return names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
   })();
 
   // The growth story reads the whole archive, oldest chapter first, the
@@ -322,7 +330,7 @@ export function ReportView({
                     {practice
                       .map(
                         (plan) =>
-                          `${plan.done} of ${plan.total} ${(getMapDomain(plan.domainId)?.displayName ?? plan.domainId).toLowerCase()} plan activities done`,
+                          `${plan.done} of ${plan.total} ${plan.domainId === MONTH_PLAN_DOMAIN ? "month" : (getMapDomain(plan.domainId)?.displayName ?? plan.domainId).toLowerCase()} plan activities done`,
                       )
                       .join(" \u00b7 ")}{" "}
                     {"\u270e"}
@@ -330,6 +338,41 @@ export function ReportView({
                 ) : null}
               </div>
             </div>
+
+            {/* The one-tap month, right after the celebration: the growth
+                focus was buried at the bottom of a strengths-first list;
+                now it is the first actionable thing on the page. Consent
+                IS the explicit ask that arms the 28-day retest email. */}
+            {monthFocus ? (
+              <ConsentCard
+                childId={report.childId}
+                childName={report.childName}
+                focusLine={monthFocus}
+              />
+            ) : null}
+            {editable && planByDomain.has(MONTH_PLAN_DOMAIN) ? (
+              <p className="mt-4 print:hidden">
+                <Link
+                  href={`/onboarding/r/${report.token}/plan/${MONTH_PLAN_DOMAIN}`}
+                  className="inline-flex min-h-10 items-center rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+                >
+                  Open {report.childName}&apos;s month {"\u2192"}
+                </Link>
+              </p>
+            ) : null}
+
+            {/* The snapshot: the founder-dashboard TLDR (homa-macmini's
+                daily Slack post) in product law, with the by-subject
+                trajectory chart once a second check-in exists. After the
+                note and the month offer: reassure, offer, then numbers. */}
+            <ReportSnapshot
+              childName={report.childName}
+              generatedDate={generatedDate}
+              ageMonths={months}
+              scores={report.scores}
+              plans={report.plans}
+              eras={eras}
+            />
 
             {/* Strengths first */}
             {strengths.length > 0 ? (
@@ -346,37 +389,39 @@ export function ReportView({
                     const line = domainLine(score, report.childName);
                     const movement = movements.get(score.domainId);
                     return (
-                      <div key={score.domainId} className="rounded-lg p-4" style={{ background: "var(--gold-100)" }}>
-                        <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
+                      // The card opens its subject (read-through: tapping a
+                      // strength should show where to take it, never a form).
+                      <SubjectJump
+                        key={score.domainId}
+                        domainId={score.domainId}
+                        className="rounded-lg p-4 text-left transition-shadow hover:shadow-md"
+                        style={{ background: "var(--gold-100)" }}
+                      >
+                        <span className="block font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
                           {domain?.displayName} <span aria-hidden="true">{"\u2605"}</span>
-                        </p>
-                        <p className="mt-1 font-mono text-2xl" style={{ color: "var(--gold-ink)" }}>
+                        </span>
+                        <span className="mt-1 block font-mono text-2xl" style={{ color: "var(--gold-ink)" }}>
                           +{score.monthsAhead}
                           <span className="text-sm"> mo ahead</span>
-                        </p>
+                        </span>
                         {movement ? (
-                          <p className="mt-0.5 font-mono text-xs font-bold" style={{ color: "var(--gold-ink)" }}>
+                          <span className="mt-0.5 block font-mono text-xs font-bold" style={{ color: "var(--gold-ink)" }}>
                             {"\u2191"} {movement.label}
-                          </p>
+                          </span>
                         ) : null}
                         {score.strongestObservedStatement ? (
-                          <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--gold-ink)" }}>
+                          <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--gold-ink)" }}>
                             You&apos;ve seen it: {score.strongestObservedStatement.charAt(0).toLowerCase()}{score.strongestObservedStatement.slice(1)}.
-                          </p>
+                          </span>
                         ) : (
-                          <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--gold-ink)" }}>
+                          <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--gold-ink)" }}>
                             {line.sentence}
-                          </p>
+                          </span>
                         )}
-                        {!sample ? (
-                          <WhatsWorkingForm
-                            childId={report.childId}
-                            domainId={score.domainId}
-                            subjectName={domain?.displayName ?? score.domainId}
-                            childName={report.childName}
-                          />
-                        ) : null}
-                      </div>
+                        <span className="mt-2 block text-xs font-semibold" style={{ color: "var(--gold-ink)" }}>
+                          Where to take it next {"\u2193"}
+                        </span>
+                      </SubjectJump>
                     );
                   })}
                 </div>
@@ -402,6 +447,11 @@ export function ReportView({
                 <p className="whitespace-pre-line text-body">{synthesisText}</p>
               </div>
             ) : null}
+
+            {/* The growth story, elevated (read-through: the line over time
+                is the thing she loves): right under the whole picture.
+                Renders nothing on a first report. */}
+            <GrowthStory childName={report.childName} eras={eras} />
 
             {/* Subject by subject */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">Subject by subject</h2>
@@ -443,12 +493,14 @@ export function ReportView({
                   editable && thinLook
                     ? nextDeepDiveItem(score.domainId, months, answersLookup, 0)
                     : null;
-                // The subject's ladder, drawn as the lit path her answers
-                // already traced (plus the one rung ahead).
-                const rungs =
+                // One forward pointer only (read-through: the full ladder
+                // repeated the receipts): the single unanswered next-up rung.
+                const nextUp =
                   score.position !== "not_mapped"
-                    ? ladderRungs(score.domainId, months, answersLookup)
-                    : [];
+                    ? (ladderRungs(score.domainId, months, answersLookup).find(
+                        (rung) => rung.state === "next_up" && !answersLookup[rung.itemId],
+                      ) ?? null)
+                    : null;
                 return (
                   <details key={score.domainId} id={`subject-${score.domainId}`} className="group rounded-md border border-border-subtle">
                     <summary className="flex cursor-pointer list-none items-start gap-3 p-4 [&::-webkit-details-marker]:hidden">
@@ -515,40 +567,6 @@ export function ReportView({
                           itemId={probe.id}
                         />
                       ) : null}
-                      {rungs.length >= 2 ? (
-                        <div className="mb-4 mt-3">
-                          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
-                            The path so far
-                          </p>
-                          <ul className="mt-2 flex flex-col gap-1">
-                            {rungs.map((rung) => (
-                              <li key={rung.itemId} className="flex items-start gap-2.5 text-xs">
-                                <span
-                                  aria-hidden="true"
-                                  className="mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[0.6rem] font-bold"
-                                  style={
-                                    rung.state === "confirmed"
-                                      ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
-                                      : rung.state === "emerging"
-                                        ? { background: "var(--accent-sage-soft)", color: "var(--sage-700)" }
-                                        : { background: "var(--info-soft)", color: "var(--sky-600)" }
-                                  }
-                                >
-                                  {rung.state === "confirmed" ? "\u2713" : rung.state === "emerging" ? "\u007e" : "\u2192"}
-                                </span>
-                                <span className={rung.state === "next_up" ? "text-strong" : "text-muted"}>
-                                  {rung.statement}
-                                  <span className="ml-1 font-mono text-[0.6rem] text-subtle">
-                                    {rung.state === "next_up"
-                                      ? `next up \u00b7 typical by ${ageLabel(rung.typicalMonths)}`
-                                      : `typical by ${ageLabel(rung.typicalMonths)}`}
-                                  </span>
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : null}
                       {domainAnswers.length > 0 ? (
                         <>
                           <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
@@ -566,12 +584,43 @@ export function ReportView({
                             rows={domainAnswers}
                             editable={editable}
                           />
+                          {/* One evidence view, one pointer (read-through:
+                              "pick one of these"): the receipts above are
+                              the record; this single line is the only
+                              forward-looking addition. */}
+                          {nextUp ? (
+                            <p className="mt-3 text-xs text-strong">
+                              <span
+                                aria-hidden="true"
+                                className="mr-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-[0.6rem] font-bold"
+                                style={{ background: "var(--info-soft)", color: "var(--sky-600)" }}
+                              >
+                                {"\u2192"}
+                              </span>
+                              Next up: {nextUp.statement}
+                              <span className="ml-1 font-mono text-[0.6rem] text-subtle">
+                                typical by {ageLabel(nextUp.typicalMonths)}
+                              </span>
+                            </p>
+                          ) : null}
                         </>
                       ) : (
                         <p className="text-sm text-muted">
                           No answers here yet. A few would fill this subject in.
                         </p>
                       )}
+
+                      {/* The how-did-you-get-here question, re-homed from the
+                          strength card (it belongs where the conversation
+                          is, next to where-to-take-it-next). */}
+                      {editable && score.position === "ahead" && !score.exposureBased ? (
+                        <WhatsWorkingForm
+                          childId={report.childId}
+                          domainId={score.domainId}
+                          subjectName={domain?.displayName ?? score.domainId}
+                          childName={report.childName}
+                        />
+                      ) : null}
 
                       {score.position === "growing" && activity ? (
                         <div className="mt-5 rounded-md p-4" style={{ background: "var(--info-soft)" }}>
@@ -599,10 +648,14 @@ export function ReportView({
                         {domainSources.map((key) => {
                           const source = MAP_SOURCES[key];
                           if (!source) return null;
+                          // The CDC link lands on the checklist page for
+                          // THIS child's age (read-through: "show me the
+                          // exact page"), not the index.
+                          const href = key === "cdc" ? cdcChecklistUrl(months) : source.url;
                           return (
                             <li key={key} className="text-xs">
                               <a
-                                href={source.url}
+                                href={href}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-muted underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
@@ -689,17 +742,6 @@ export function ReportView({
               </>
             ) : null}
 
-            {/* The one-tap month: consent IS the explicit ask that lets the
-                28-day retest email arm; nothing is ever armed silently. */}
-            {consentCandidate ? (
-              <ConsentCard
-                childId={report.childId}
-                childName={report.childName}
-                domainId={consentCandidate.domainId}
-                subjectName={consentCandidate.subjectName}
-              />
-            ) : null}
-
             {/* The "Call Homa" curriculum feature: a real conversation,
                 deeper than the report, ending in an LLM-authored
                 curriculum on /home. */}
@@ -708,10 +750,6 @@ export function ReportView({
               childName={report.childName}
               familyPhone={report.familyPhone}
             />
-
-            {/* The growth story: the archive read back as chapters. Renders
-                nothing until a second scoring exists. */}
-            <GrowthStory childName={report.childName} eras={eras} />
 
             {/* The memory-box letter, the one piece written TO the child. */}
             {keepsakeText ? (

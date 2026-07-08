@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
 import { Doodle } from "../../components/marketing/Doodle";
@@ -11,14 +11,14 @@ import { ReportPreview } from "./report-preview";
 
 /**
  * S1 (visible): the true entry screen, right after the silent anonymous
- * bootstrap. Founder call 2026-07-06 (third revision, same day): email
- * replaces "what's your name?" as the one field asked here, with "Sign up
- * with Google" as a one-tap alternative that creates a real Supabase Auth
- * account immediately (see /api/map/state, which links it the moment she
- * returns from the OAuth redirect). The email-only path defers her name
- * and password to the last question, right before the report (see
- * SignupStep): asking for a password before she's invested a single
- * answer is the highest-friction place to put it.
+ * bootstrap, and now a full sign-up: name, email, and password, or
+ * "Sign up with Google" as a one-tap alternative. Founder call 2026-07-08
+ * overturns 2026-07-06's "password is the last question" ruling (which
+ * deferred name and password to SignupStep, right before the report, to
+ * keep the highest-friction ask off the entry screen); that step is
+ * retired, this route creates the real Supabase Auth account directly
+ * (see /api/map/claim). Google sign-ups still link the moment she returns
+ * from the OAuth redirect (see /api/map/state).
  *
  * Real logo files live at public/images/benchmark-logos/ (founder-sourced
  * 2026-07-06). No CDC mark was supplied, so CDC dropped rather than sit as
@@ -47,11 +47,17 @@ const BENCHMARK_SOURCES: ReadonlyArray<{
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ParentStep({ onDone }: { onDone: () => void }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Reassurance (not an error) when the lead was captured via the offline queue. */
   const [notice, setNotice] = useState<string | null>(null);
+  /** An email that already has a real account never succeeds by retrying
+   * here; offer sign-in instead of a doomed "try again". */
+  const [existingAccount, setExistingAccount] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
 
@@ -72,22 +78,39 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const normalizedName = name.trim().replace(/\s+/g, " ");
     const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedName) {
+      setError("Add your name to finish.");
+      return;
+    }
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
     }
+    if (password.length < 8) {
+      setError("Use at least 8 characters for your password.");
+      return;
+    }
+    const [firstName, ...rest] = normalizedName.split(" ");
+    const lastName = rest.join(" ") || undefined;
     setError(null);
+    setExistingAccount(false);
     setBusy(true);
 
     try {
       const response = await fetch("/api/map/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail }),
+        body: JSON.stringify({ firstName, lastName, email: normalizedEmail, password }),
       });
-      const data = (await response.json()) as { ok: boolean };
+      const data = (await response.json()) as { ok: boolean; reason?: string };
       if (!data.ok) {
+        if (data.reason === "exists") {
+          setExistingAccount(true);
+          setBusy(false);
+          return;
+        }
         setError("That didn't go through. One more try usually does it.");
         setBusy(false);
         return;
@@ -95,9 +118,12 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
       onDone();
     } catch {
       // Dead wifi: capture the lead through the offline waitlist queue so
-      // it is never lost, and say so honestly.
+      // it is never lost, and say so honestly. The account itself can only
+      // be created once connection returns; the queue exists so her spot
+      // is never simply lost to bad convention-center wifi.
       const outcome = await submitWaitlist({
         email: normalizedEmail,
+        firstName,
         kidCount: undefined,
         kidAgeBands: [],
         source: "organic",
@@ -145,7 +171,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
           </h1>
           <p className="mt-4 max-w-[28rem] text-pretty text-body">
             Answer a five-minute questionnaire to get your child&apos;s free progress report. To get
-            started, enter your email.
+            started, create your free account.
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,
@@ -175,9 +201,25 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
-              {/* Visible label removed per design (2026-07-08); the input
-                  keeps an accessible name via aria-label for screen readers. */}
-              <label className="sr-only" htmlFor="parent-email">
+              {/* Visible labels removed per design (2026-07-08); each input
+                  keeps an accessible name via a sr-only label for screen
+                  readers, and the placeholder carries the visible hint. */}
+              <label className="sr-only" htmlFor="parent-name">
+                Your name
+              </label>
+              <input
+                id="parent-name"
+                type="text"
+                autoComplete="name"
+                autoFocus
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Sarah Chen"
+                className="min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
+              />
+
+              <label className="mt-3 block sr-only" htmlFor="parent-email">
                 Where should I send the report?
               </label>
               <input
@@ -185,20 +227,55 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                autoFocus
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                aria-invalid={error !== null}
-                aria-describedby={error ? "parent-form-error" : undefined}
-                className={`min-h-[54px] w-full rounded-md border-[1.5px] bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
-                  error ? "border-danger" : "border-border"
-                }`}
+                className="mt-3 min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
               />
+
+              <label className="sr-only" htmlFor="parent-password">
+                Create a password
+              </label>
+              <div className="relative mt-3">
+                <input
+                  id="parent-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Create a password (at least 8 characters)"
+                  className={`min-h-[54px] w-full rounded-md border-[1.5px] bg-card px-4 py-3.5 pr-12 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
+                    error ? "border-danger" : "border-border"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-[var(--stone-100)] hover:text-body"
+                >
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+                </button>
+              </div>
               {error ? (
                 <p id="parent-form-error" className="mt-2 text-sm text-danger" role="alert">
                   {error}
+                </p>
+              ) : null}
+              {existingAccount ? (
+                <p className="mt-2 rounded-md bg-[var(--accent-sage-soft)] p-3 text-sm text-body" role="status">
+                  Good news: {email} already has a Homa account.{" "}
+                  <a
+                    href="/signin?next=/onboarding"
+                    className="font-semibold text-brand underline underline-offset-2"
+                  >
+                    Sign in
+                  </a>{" "}
+                  and you&apos;ll come right back here.
                 </p>
               ) : null}
               {notice ? (

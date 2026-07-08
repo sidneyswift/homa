@@ -45,6 +45,11 @@ const DOODLES: ReadonlyArray<{
   { name: "sparkle", color: "var(--sky-500)", size: 12, position: { top: "30px", right: "78px" }, floatDelay: "400ms", twinkleDelay: "1500ms" },
 ];
 
+/** After this long, the beat admits the wait is unusual and offers a
+ * manual refresh (read-through: the live plan build appeared to stall
+ * with no way out; the self-heal keeps working underneath either way). */
+const LONG_WAIT_MS = 90 * 1000;
+
 export function NarrativeBeat({
   token,
   domainId,
@@ -58,7 +63,13 @@ export function NarrativeBeat({
 }) {
   const router = useRouter();
   const [lineIndex, setLineIndex] = useState(0);
+  const [longWait, setLongWait] = useState(false);
   const settled = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLongWait(true), LONG_WAIT_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const rotate = setInterval(() => {
@@ -151,6 +162,19 @@ export function NarrativeBeat({
           This takes as long as good writing takes, usually under a minute. The page updates
           itself; leaving and coming back is safe too.
         </p>
+        {longWait ? (
+          <p className="mt-2 text-sm text-muted">
+            This one is taking longer than usual. Nothing is lost:{" "}
+            <button
+              type="button"
+              onClick={() => router.refresh()}
+              className="font-semibold text-brand underline underline-offset-2"
+            >
+              refresh now
+            </button>{" "}
+            or come back in a minute.
+          </p>
+        ) : null}
         <p className="mt-4 font-hand text-xl text-sage">worth the wait {"\u270e"}</p>
       </div>
     </div>

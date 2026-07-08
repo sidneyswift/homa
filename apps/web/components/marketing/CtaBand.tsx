@@ -1,15 +1,21 @@
+"use client";
+
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "./ds/Button";
 import { Doodle } from "./Doodle";
+import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
  * Sunshine CTA band, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx. `data-final-cta` lets
  * ScrollCta.tsx find this section without a prop link, so it can retire
- * its own nudge once the page's real CTA is already on screen.
+ * its own nudge once the page's real CTA is already on screen. Its main
+ * CTA opens the signup popup (founder call 2026-07-08); "How the report
+ * works" is a different page and stays a plain link.
  */
 export function CtaBand() {
+  const openPopup = useSignupPopup();
   return (
     <section
       data-final-cta=""
@@ -39,9 +45,15 @@ export function CtaBand() {
         Set-up takes an afternoon. The calm shows up the same week.
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-        <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-          See where your child stands
-        </Button>
+        {openPopup ? (
+          <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+            See where your child stands
+          </Button>
+        ) : (
+          <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+            See where your child stands
+          </Button>
+        )}
         <Button variant="ghost" size="lg" href="/onboarding/method" style={{ background: "var(--surface-card)" }}>
           How the report works
         </Button>

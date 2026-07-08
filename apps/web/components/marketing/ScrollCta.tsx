@@ -4,6 +4,7 @@ import { ArrowRight, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { Button } from "./ds/Button";
+import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
  * Scroll-triggered nudge card, replacing the invite-only InviteBand section
@@ -64,6 +65,7 @@ function computeVisible(sentinel: Element, finalCta: Element | null): boolean {
 }
 
 export function ScrollCta() {
+  const openPopup = useSignupPopup();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -141,9 +143,15 @@ export function ScrollCta() {
           <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", lineHeight: 1.5, margin: "0 0 16px" }}>
             A few quick questions get you a free report on exactly what your child needs next.
           </p>
-          <Button variant="primary" size="sm" fullWidth href="/onboarding" iconRight={<ArrowRight size={16} color="#fff" aria-hidden="true" />}>
-            See where your child stands
-          </Button>
+          {openPopup ? (
+            <Button variant="primary" size="sm" fullWidth onClick={openPopup} iconRight={<ArrowRight size={16} color="#fff" aria-hidden="true" />}>
+              See where your child stands
+            </Button>
+          ) : (
+            <Button variant="primary" size="sm" fullWidth href="/onboarding" iconRight={<ArrowRight size={16} color="#fff" aria-hidden="true" />}>
+              See where your child stands
+            </Button>
+          )}
         </div>
       )}
     </>

@@ -1,16 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import { ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 
 import { Button } from "./ds/Button";
 import { Doodle } from "./Doodle";
+import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
  * Landing hero, ported from docs/homa-design/ui_kits/landing/LandingPage.jsx
  * and since slimmed by founder calls (2026-07-05 "say exactly what it is",
  * 2026-07-06 "remove watch the film, remove the trust line"): brand-named
- * promise headline, one CTA into /onboarding, three scattered doodles. The
- * brand-film modal left with its button; no state remains, so this is a
- * server component.
+ * promise headline, one CTA, three scattered doodles. The CTA opens the
+ * landing page's signup popup (founder call 2026-07-08) rather than
+ * navigating to /onboarding directly, so this is a client component again.
  *
  * Background per founder screenshot 2026-07-06: warm page cream with a
  * soft gold-100 glow rising from the top-right corner (was flat band-sky).
@@ -40,6 +43,7 @@ import { Doodle } from "./Doodle";
  * for free" (T2: no pricing exists yet, so "free" is accurate, not a claim).
  */
 export function Hero() {
+  const openPopup = useSignupPopup();
   return (
     <section style={{ position: "relative", overflow: "hidden" }}>
       <Doodle name="star" size={34} rotate={-12} style={{ position: "absolute", top: 46, left: "4%" }} />
@@ -102,9 +106,15 @@ export function Hero() {
             your state, so Sunday-night prep becomes a five-minute check-in.
           </p>
           <div style={{ marginTop: 32 }}>
-            <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-              Get started for free
-            </Button>
+            {openPopup ? (
+              <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+                Get started for free
+              </Button>
+            ) : (
+              <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+                Get started for free
+              </Button>
+            )}
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>

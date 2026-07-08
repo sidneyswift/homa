@@ -179,3 +179,71 @@ RT-11..RT-16 are the plan re-architecture (biggest product change here;
 worth its own design pass against the PRD before code). RT-17..RT-20 are
 the habit loop, the founder's own "now what" answer, and the first real
 consumer of the Telnyx groundwork.
+
+## Status (2026-07-08 morning pass, "fix everything")
+
+Shipped in this pass (build-log 2026-07-08 has the details):
+
+- RT-01 SHIPPED: diagnosis first: her writes all landed (context_added
+  01:51, whatsWorking+styles+curriculums 02:09 UTC), so the session
+  survived the migration; the sin was a SILENT failure path. The form
+  now renders every state visibly (saved, failed, no-session with the
+  sign-in hint), and the capture moved into the drawer (RT-10).
+- RT-02 SHIPPED: the self_care plan row + narrative both landed
+  (02:31:25 built, 02:31:37 narrative ready, no fallback events), so
+  the stall was the beat's lack of an exit, not a dead generation. The
+  writing beat now offers "refresh now" after 90 seconds; the
+  narrative-status self-heal stays the backstop.
+- RT-03 SHIPPED: synthesis re-specced to 60-100 words, forbidden from
+  restating the note or any card line; redundancy law added at the top
+  of the craft rules. Prompt v2026.07.11, fixtures regenerated.
+- RT-04 SHIPPED: the ladder list is gone from drawers; receipts are THE
+  evidence view, plus a single unanswered "next up" line; drawer prose
+  re-specced to interpretation only, 1-2 sentences.
+- RT-05 SHIPPED: when the written intro exists the targets list folds
+  into a "formal targets" details element; template fallback unchanged.
+- RT-06 SHIPPED: plan intro re-specced: never recap or re-diagnose,
+  open with the month, framed as an add-on.
+- RT-07 SHIPPED: CDC citations now deep-link to the checklist page for
+  the child's age (cdcChecklistUrl, clamped to the 2mo-5yr set); other
+  sources keep their top-level links.
+- RT-08 SHIPPED: anti-poetry voice rule, "every sentence carries a fact
+  or an action", note cut to 2-3 sentences, caps tightened in the gate
+  (note 520, synthesis 700, drawer 360, planIntro 450).
+- RT-09 SHIPPED: strength cards are now buttons that open and scroll to
+  the subject drawer ("Where to take it next").
+- RT-10 SHIPPED: whats-working moved into the drawer as a real question
+  ("How did X get music this strong? Tell me and I'll borrow it").
+- RT-11 SHIPPED: buildMonthPlan, one unified four-week month: up to 3
+  focus subjects (growing cores first, lowest on-track cores fill), one
+  strength sprinkle weeks 1 and 4, stored under the `month`
+  pseudo-domain so storage, narrative, retest, and progress machinery
+  are unchanged. The report's consent card now builds THE month and
+  sits right after the note; per-subject plans remain as drill-downs.
+- RT-12 SHIPPED: month page + consent copy framed as an add-on ("it
+  adds to what you already do, it never replaces it"); prompt says the
+  same to the writer.
+- RT-13 SHIPPED via the consent card move: the month offer (naming the
+  focus subjects) is the first actionable thing after the note.
+- RT-14a SHIPPED: interest-fill grammar fixed ("Find songs about
+  trucks"); 14b half-shipped: the week framing lines may now name one
+  real, well-known example (song/book) with an anti-invention guard;
+  linked/streamable media links are deferred with RT-15.
+- RT-16 SHIPPED (prompt layer): the note connects practice lines and
+  movement lines temporally when they touch the same subject.
+- RT-18 PARTIAL: the growth story moved up to sit directly under the
+  whole-picture chart. The dotted projection is deferred: promise-vs-
+  offer framing needs a founder call.
+
+Deferred, with reasons:
+
+- RT-15 (local events): needs zip collection + an events data source;
+  PRD non-goal for D0. First post-conference plan upgrade.
+- RT-17 (evening check-in): first real consumer of the Telnyx
+  groundwork; needs cadence/consent design and 10DLC to clear. Design
+  with RT-22.
+- RT-19 (weekly micro-goal): design question on top of the unified
+  month; revisit once the month has real usage.
+- RT-20 (daily style-personalized artifact): new generation surface;
+  scope as the one-pager experiment after the month ships.
+- RT-21/RT-22: parked P3 per the doc, founder call first.

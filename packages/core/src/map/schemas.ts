@@ -24,38 +24,23 @@ export const mapStartSchema = z.object({
 export type MapStartInput = z.infer<typeof mapStartSchema>;
 
 /**
- * The very first question (founder call 2026-07-06, revised same day):
- * email, right at S1, before anything about the kids. Not yet a full
- * account, just the address the report goes to; see mapSignupSchema for
- * the moment it becomes one. Google sign-up skips this entirely (the
- * OAuth callback supplies a real, verified email).
+ * S1, the true entry screen (founder call 2026-07-08, overturning
+ * 2026-07-06's "password is the last question" ruling): name, email, and
+ * password, right up front, or Google as a one-tap alternative. This is
+ * the moment the anonymous lead becomes a real Supabase Auth account (see
+ * attachAuthUser); there is no later, lower-friction account step
+ * anymore. Google sign-up skips this entirely (the OAuth callback
+ * supplies a real, verified email and profile name). One simple name
+ * field in the UI, split into first/last on the first space.
  */
 export const mapClaimSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
-  firstName: z.string().trim().max(100).optional(),
-  usState: z.string().length(2).optional(),
-});
-export type MapClaimInput = z.infer<typeof mapClaimSchema>;
-
-/**
- * The last question, right before the report (founder call 2026-07-06,
- * second revision: "have them create a password as the LAST question
- * before they get results"). Turns the anonymous, email-only lead into a
- * real Supabase Auth account. Google sign-ups never see this: they
- * already have an account the moment they return from the OAuth
- * redirect. One simple name field in the UI, split into first/last on
- * the first space, same as the old name step.
- */
-export const mapSignupSchema = z.object({
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional(),
   password: z.string().min(8).max(200),
-  /** Optional cell for the texting line (founder call 2026-07-07). Raw
-   * human-typed shape; the server normalizes to +1E164 and silently skips
-   * anything unparseable, an optional field never blocks signup. */
-  phone: z.string().trim().max(30).optional(),
+  usState: z.string().length(2).optional(),
 });
-export type MapSignupInput = z.infer<typeof mapSignupSchema>;
+export type MapClaimInput = z.infer<typeof mapClaimSchema>;
 
 export const mapChildSchema = z.object({
   name: z.string().trim().min(1).max(80),

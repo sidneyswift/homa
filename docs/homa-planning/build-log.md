@@ -3,6 +3,45 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 (afternoon) · S1 becomes a full sign-up, overturning "password last"
+
+Instruction "add a create password input... basically a sign up / create
+account page, with google as an option or email/password" ran straight into
+2026-07-06's explicit, twice-revised ruling that password is the LAST
+question, right before the report, specifically to keep the highest-friction
+ask off the entry screen. Flagged the conflict; instructed to override it.
+Two decisions made in the same sitting, both confirmed with the founder
+before touching code:
+
+1. **Password moves to S1.** `ParentStep` now creates the real Supabase
+   Auth account directly (`/api/map/claim`, signUp + signInWithPassword +
+   attachAuthUser), the same moment a Google sign-up would. `mapClaimSchema`
+   gained `firstName`/`lastName`/`password`; the old email-only shape and
+   the `map.claimed` event (superseded by `map.account_created`) are gone.
+2. **Name moves to S1 too, `SignupStep` is retired.** Since the flow's
+   routing only ever showed `SignupStep` while `!hasAccount`, and hasAccount
+   is now always true the moment kids exist (matching how Google sign-ups
+   already worked), that step could never fire again. Rather than leave it
+   dead, folded its one required field (name) into `ParentStep` alongside
+   password, and deleted `SignupStep` + `/api/map/signup` outright.
+   `decidePostKidsRoute`/`needsPreHubSignup` simplified accordingly: no
+   route past S1 needs to ask "does she have an account yet."
+
+**Follow-up (same day):** `SignupStep`'s optional cell number field
+(2026-07-07, "so you can text Homa") had no other home to fold into and was
+dropped rather than force it into S1 uninvited. Rather than lose that
+capture point, moved it to `/home` under a new "Settings" section: the
+existing `TextingCard` (previously gated behind `TELNYX_SMS_ENABLED`, so
+it never rendered at all in deployments without a live texting line) now
+always renders, since saving a number never actually depended on Telnyx,
+only the confirmation text and the "text her directly" framing did. Copy
+adapts: "Text with Homa" once a live line exists, "Your phone number" as
+plain contact settings otherwise.
+
+Verification: typecheck, lint, `check:events` green (registry parity holds:
+`map.account_created` still has three emitters, one more than before).
+`check:map`/`check:isolation` not re-run (no bank or query-path changes).
+
 ## 2026-07-08 (morning) · Tester feedback T1-T4 shipped
 
 Founder instruction "implement t1-t4" against
