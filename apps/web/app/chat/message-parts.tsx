@@ -124,25 +124,27 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
  * (plain assistant text streaming shows itself; a second bubble would
  * double up). A user message awaiting a reply shows "thinking…"; an
  * executing tool shows its named activity.
+ *
+ * Judged by the LAST part only: earlier parts are already on screen. The
+ * previous scan-backwards version went blank in the gap between a finished
+ * tool and the next streamed token, exactly the "is it working? is it not
+ * working?" panic from the 2026-07-07 tester memos (memo 1, MJ-06). While
+ * busy, something must always be visible.
  */
 export function busyLabel(messages: readonly EveMessage[]): string | null {
   const last = messages.at(-1);
-  if (!last) return "thinking…";
-  if (last.role === "user") return "thinking…";
-  if (last.role === "assistant") {
-    for (let i = last.parts.length - 1; i >= 0; i -= 1) {
-      const part = last.parts[i];
-      if (
-        part.type === "dynamic-tool" &&
-        (part.state === "input-streaming" || part.state === "input-available")
-      ) {
-        return TOOL_STATUS_LABELS[part.toolName] ?? "working on it…";
-      }
-      // A streaming text block is already visible; no extra bubble.
-      if (part.type === "text" && part.text.trim().length > 0) return null;
+  if (!last || last.role !== "assistant") return "thinking…";
+  const part = last.parts.at(-1);
+  if (!part) return "thinking…";
+  if (part.type === "dynamic-tool") {
+    if (part.state === "input-streaming" || part.state === "input-available") {
+      return TOOL_STATUS_LABELS[part.toolName] ?? "working on it…";
     }
-    return null;
+    // Tool finished; the model is composing what comes next.
+    return "thinking…";
   }
+  // A streaming text block with content is already visible; no extra bubble.
+  if (part.type === "text") return part.text.trim().length > 0 ? null : "thinking…";
   return "thinking…";
 }
 

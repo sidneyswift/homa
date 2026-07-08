@@ -3,6 +3,40 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 (morning) · Tester feedback T1-T4 shipped
+
+Founder instruction "implement t1-t4" against
+`plans/2026-07-07-tester-feedback-tickets.md` (cut from the 2026-07-07
+tester voice memos):
+
+- **T1, copy:** the Stories band heading is now "It helped run our
+  homeschool first." Wording decided alone (the plan had it
+  founder-gated, the instruction implied delegation): "helped" is the
+  minimal change that moves the control framing back to the mom while
+  keeping the dogfooding story. Owes the founder read-aloud before
+  July 13.
+- **T2, nav:** the wordmark in the `/home` and `/chat` headers is now a
+  link to `/home` (aria-label "Home"); the right-side Home button in
+  chat stays.
+- **T3, worksheet voice:** `create_worksheet`'s `encouragement` is
+  redescribed as written TO the child (description-only change, the
+  payload shape is untouched so older saved transcripts render as
+  before); the tool's note now tells the model to give the parent her
+  own warm line in chat; the printed footer carries the line-treatment
+  Homa mark beside "made with Homa for [name]" (D7 footer attribution),
+  stroke in the footer's ink color so grayscale printers render it
+  clean. `HOUSE_PATH` is exported from `Logo.tsx` so the raw-HTML print
+  window shares the one source of brand art.
+- **T4, thinking state:** `busyLabel` now judges the LAST message part
+  instead of scanning backwards, closing a real blank-screen gap (busy,
+  tool finished, next token not yet streaming, previously returned null,
+  the exact "is it working?" panic in memo 1); the busy bubble now
+  carries the Homa mark bobbing gently (`chat-think-bob`, transform
+  only, brand easing, still under reduced motion).
+
+Verification: typecheck, lint, `check:map`, `check:events` green.
+`check:isolation` not re-run (no schema or query-path changes).
+
 ## 2026-07-08 (past midnight) · "Send an email" tool, web chat/SMS + both voice lines
 
 Founder decision (chat, "what tools can she trigger, can she send an

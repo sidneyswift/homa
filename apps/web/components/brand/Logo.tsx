@@ -8,7 +8,9 @@ import type { CSSProperties } from "react";
  * lockup); keep in sync until packages/design exists (M1-17).
  */
 
-const HOUSE_PATH =
+// Exported for non-React render targets (the printable worksheet footer
+// inlines the mark as a raw SVG string). Same art, one source of truth.
+export const HOUSE_PATH =
   "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
 
 // [letter, baseline offset, rotation] per docs/homa-design's bounced wordmark.

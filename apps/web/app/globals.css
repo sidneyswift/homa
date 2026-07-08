@@ -442,6 +442,22 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 }
 
 /* ============================================================================
+   Chat thinking mark (/chat, ChatClient busy bubble). The little home bobs
+   gently while Homa is thinking so the wait never reads as a blank page
+   (tester ask, evidence memo 1; MJ-06). Transform only, brand easing; loops
+   on purpose (ambient wait, not a step entrance); still under reduced-motion
+   while the label keeps reading what is happening.
+   ========================================================================= */
+@keyframes chat-think-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.chat-think-mark { animation: chat-think-bob 1100ms var(--ease-in-out) infinite; }
+@media (prefers-reduced-motion: reduce), print {
+  .chat-think-mark { animation: none; }
+}
+
+/* ============================================================================
    Blog article prose (/blog/[slug], rendered MDX). Tokens only, no new
    values: display font headings, body text at a comfortable measure, brand
    links. Spec: docs/homa-planning/14-marketing-demand-engine.md §9.

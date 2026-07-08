@@ -48,7 +48,10 @@ export default async function HomePage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
       <header className="flex items-center justify-between">
-        <Logo size={28} />
+        {/* The wordmark is a home link everywhere (tester ask, evidence memo 2). */}
+        <Link href="/home" aria-label="Home" className="inline-flex rounded-md">
+          <Logo size={28} />
+        </Link>
         <form action={signOutAction}>
           <button
             type="submit"

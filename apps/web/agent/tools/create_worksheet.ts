@@ -42,7 +42,9 @@ const worksheetInput = z.object({
   encouragement: z
     .string()
     .max(160)
-    .describe("One warm closing line for the parent to read aloud when it's done"),
+    .describe(
+      "One warm closing line written TO the child, second person ('Every trident you earned today...'), printed on the sheet for the parent to say out loud when it's done",
+    ),
 });
 
 export default defineTool({
@@ -54,7 +56,7 @@ export default defineTool({
     // renders the card from this exact payload.
     return {
       worksheet: input,
-      note: "Worksheet card rendered in chat with a print button. Tell the parent it's ready and what it practices, in one warm sentence.",
+      note: "Worksheet card rendered in chat with a print button. Tell the parent it's ready and what it practices, in one warm sentence written to HER; the sheet's closing line already speaks to the child.",
     };
   },
 });

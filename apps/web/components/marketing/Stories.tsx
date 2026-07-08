@@ -6,7 +6,9 @@ import { Eyebrow } from "./dividers";
  * Our-story band. Replaces the kit's three invented mom quotes, which
  * violated ruling C2 (no fabricated social proof, ever). Until real
  * families say quotable things with their permission, the honest story is
- * the only story: Homa ran one real homeschool first.
+ * the only story: Homa helped run one real homeschool first. ("Helped"
+ * carries the control framing: the mom runs the homeschool, Homa assists;
+ * tester flag 2026-07-07, evidence memo 8.)
  */
 export function Stories() {
   return (
@@ -25,7 +27,7 @@ export function Stories() {
               margin: "8px 0 10px",
             }}
           >
-            It ran our homeschool first.
+            It helped run our homeschool first.
           </h2>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Squiggle segments={4} line={false} color="var(--clay-700)" style={{ width: "auto" }} />

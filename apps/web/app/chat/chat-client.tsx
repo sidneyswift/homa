@@ -151,7 +151,10 @@ export function ChatClient({
   return (
     <div className="flex h-dvh flex-col">
       <header className="flex items-center justify-between border-b border-border-subtle bg-card px-6 py-3">
-        <Logo size={24} />
+        {/* The wordmark is a home link everywhere (tester ask, evidence memo 2). */}
+        <Link href="/home" aria-label="Home" className="inline-flex rounded-md">
+          <Logo size={24} />
+        </Link>
         <div className="flex gap-2">
           {agent.data.messages.length > 0 ? (
             <button
@@ -201,8 +204,14 @@ export function ChatClient({
         )}
         {busy && busyLabel(agent.data.messages) ? (
           <div className="flex justify-start">
-            <div className="rounded-lg rounded-bl-sm bg-card px-4 py-3 text-muted shadow-sm">
-              {busyLabel(agent.data.messages)}
+            {/* The mark bobs while Homa thinks, so the wait is never a blank
+                page (tester ask, evidence memo 1; MJ-06). Goes still under
+                reduced motion; the label still reads what is happening. */}
+            <div className="flex items-center gap-2.5 rounded-lg rounded-bl-sm bg-card px-4 py-3 text-muted shadow-sm">
+              <span className="chat-think-mark inline-flex" aria-hidden="true">
+                <Logo size={20} variant="mark" />
+              </span>
+              <span>{busyLabel(agent.data.messages)}</span>
             </div>
           </div>
         ) : null}

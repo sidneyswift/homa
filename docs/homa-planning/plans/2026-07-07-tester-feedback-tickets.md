@@ -1,5 +1,10 @@
 # Tester feedback tickets · 2026-07-07
 
+> **STATUS (2026-07-08): T1-T4 SHIPPED** (founder instruction "implement
+> t1-t4"; build-log 2026-07-08 morning). T1's wording was decided alone,
+> "It helped run our homeschool first.", and still owes the founder
+> read-aloud before July 13. T5-T9 remain open.
+
 Ticket list cut from the 2026-07-07 tester voice memos, ordered easiest to
 most difficult. Source of truth for every ask:
 `docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md`

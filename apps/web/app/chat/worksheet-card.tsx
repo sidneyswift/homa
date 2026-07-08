@@ -1,10 +1,14 @@
 "use client";
 
+import { HOUSE_PATH } from "../../components/brand/Logo";
+
 /**
  * Renders a create_worksheet tool result as an on-brand card with a print
  * button. Printing opens a minimal print-styled window (v0 of the MJ-01
  * print pipeline: browser print dialog to paper or PDF; the real preflight
- * pipeline replaces this later).
+ * pipeline replaces this later). The printed footer carries the Homa mark
+ * beside "made with Homa for [name]" (D7 footer attribution; tester ask,
+ * evidence memo 13), line treatment so it prints clean in grayscale.
  */
 
 export interface WorksheetPayload {
@@ -52,7 +56,8 @@ function printableHtml(worksheet: WorksheetPayload): string {
   .instruction { font-size: 16px; font-weight: 600; margin: 0; }
   .num { display: inline-flex; width: 24px; height: 24px; border-radius: 999px; background: #fff0e8; color: #e7602f; font-size: 13px; align-items: center; justify-content: center; margin-right: 8px; }
   .content { font-size: 22px; letter-spacing: 0.08em; line-height: 2.1; margin: 10px 0 0 32px; white-space: pre-wrap; }
-  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e7ddce; color: #6b6259; font-size: 13px; display: flex; justify-content: space-between; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e7ddce; color: #6b6259; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .made-with { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -64,7 +69,14 @@ function printableHtml(worksheet: WorksheetPayload): string {
   ${items}
   <footer>
     <span>${escapeHtml(worksheet.encouragement)}</span>
-    <span>made with Homa for ${escapeHtml(worksheet.childName)}</span>
+    <span class="made-with">
+      <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="${HOUSE_PATH}" fill="none" stroke="#6b6259" stroke-width="3.2" stroke-linejoin="round" />
+        <circle cx="17.4" cy="26" r="2.7" fill="#6b6259" />
+        <circle cx="30.6" cy="26" r="2.7" fill="#6b6259" />
+      </svg>
+      made with Homa for ${escapeHtml(worksheet.childName)}
+    </span>
   </footer>
 </body>
 </html>`;
