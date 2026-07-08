@@ -3,6 +3,39 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 · Report gains the snapshot TLDR + by-subject trajectory chart
+
+Founder instruction (with screenshots of the mac mini's daily Slack post and
+dashboard hero chart): "the report / dashboard should have this chart and
+tldr." Ported from `homa-macmini` (`post_dashboard_slack.py`,
+`generate_dashboard.py`) into the web report as two new server components,
+`report-snapshot.tsx` (the TLDR card, after the note from Homa) and
+`report-trajectory.tsx` (months-ahead-by-subject line chart over check-in
+dates, SVG, no client JS), shared by the live report and the public sample.
+
+Two translations the anti-guilt display law forced, decided alone:
+
+1. **"⚠️ Lowest standing" does not port.** The internal post ranks the
+   bottom three domains under a warning glyph; the product law bans deficit
+   framing. The TLDR's second column is "Growing right now" (sky, worded,
+   never numbered), falling back to "Closest to age" with honest at-age
+   labels when nothing is growing. Same information, sanctioned frame.
+2. **The target reference lines do not port.** "Academic target (24mo)" and
+   "Socioemotional target (12mo)" are Story-family philosophy, not product
+   policy; drawing every family against them would be manufactured guilt.
+   The chart keeps plain gridlines (+6 to +24, the display cap) and the
+   at-age baseline. Growing subjects plot on a quiet slot just below the
+   baseline, worded "growing", matching the whole-picture dot chart.
+
+The trajectory chart renders only once a second check-in exists (one date
+is a dot, not a trajectory); first reports get the TLDR alone. "Next
+re-check" row appears only when a plan's four-week clock is armed. Colors
+are design-system tokens only, one per subject. No schema, scoring, or
+event changes (pure display over already-stored history).
+
+Verification: typecheck + lint green; sample report (2 eras) renders the
+card and chart correctly via Playwright screenshot against the dev server.
+
 ## 2026-07-08 (afternoon) · S1 becomes a full sign-up, overturning "password last"
 
 Instruction "add a create password input... basically a sign up / create
