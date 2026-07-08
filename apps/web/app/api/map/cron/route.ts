@@ -10,17 +10,20 @@ import {
   markRetestEmailed,
   plansNeedingRetest,
   mintLinkToken,
+  purgeEmptyAnonymousLeads,
 } from "../../../../lib/map/store";
 
 /**
  * GET /api/map/cron  (Vercel cron, hourly)
- * Three promise-keeping jobs in one pass:
+ * Three promise-keeping jobs plus one hygiene job in one pass:
  *   1. The single 24h reminder for parked flows (one send ever, never a
  *      sequence: reminder_sent_at is checked and stamped).
  *   2. The band-ready promise: children captured outside the scored range
  *      get their checklist email automatically the moment their band ships.
  *   3. The retest loop: four weeks after a plan is built, one email invites
  *      the re-check that makes the numbers visibly move.
+ *   4. Hygiene: anonymous leads with no email and no kids purge after a
+ *      week (see purgeEmptyAnonymousLeads for why this is zero-loss).
  * Gated by CRON_SECRET so only Vercel's scheduler can trigger sends.
  */
 export async function GET(request: Request): Promise<Response> {
@@ -32,6 +35,7 @@ export async function GET(request: Request): Promise<Response> {
   let reminders = 0;
   let bandReady = 0;
   let retests = 0;
+  let purged = 0;
 
   try {
     for (const lead of await leadsNeedingReminder()) {
@@ -77,10 +81,11 @@ export async function GET(request: Request): Promise<Response> {
         retests += 1;
       }
     }
+    purged = await purgeEmptyAnonymousLeads();
   } catch (error) {
     console.error("map/cron failed:", error instanceof Error ? error.message : "unknown");
-    return Response.json({ ok: false, reminders, bandReady, retests }, { status: 500 });
+    return Response.json({ ok: false, reminders, bandReady, retests, purged }, { status: 500 });
   }
 
-  return Response.json({ ok: true, reminders, bandReady, retests });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged });
 }

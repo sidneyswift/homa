@@ -2,6 +2,7 @@ import { mapPlanConsentSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
+import { mirrorReportToProduct } from "../../../../../lib/map/report-mirror";
 import { requireLead } from "../../../../../lib/map/session";
 import { getOrBuildPlan, getReportTokenForChild } from "../../../../../lib/map/store";
 
@@ -58,6 +59,16 @@ export async function POST(request: Request): Promise<Response> {
         child_id: childId,
         domain: domainId,
       });
+    }
+
+    // The consented month reaches the workspace copy immediately.
+    try {
+      await mirrorReportToProduct(lead.id, childId);
+    } catch (error) {
+      console.error(
+        "map/plan/consent mirror failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
     }
 
     return Response.json({ ok: true, url: `/onboarding/r/${token}/plan/${domainId}` });

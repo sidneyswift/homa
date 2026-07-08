@@ -975,6 +975,28 @@ export async function markReminderSent(leadId: string): Promise<void> {
 }
 
 /**
+ * Purges anonymous leads that never became anything: no email, no kids,
+ * untouched for a week. Every visitor who taps "start" and bounces leaves
+ * one of these rows, and nothing else ever deletes them (2026-07-07 audit:
+ * 35 junk rows in two days of testing). Deliberately NARROW: an anonymous
+ * lead WITH kids is never purged, because the family's device cookie can
+ * still resume it. Zero data loss by construction; the funnel's events
+ * rows keep their pseudonymous history either way.
+ */
+export async function purgeEmptyAnonymousLeads(): Promise<number> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    delete from public.lead_families f
+    where f.email is null
+      and f.created_at < now() - interval '7 days'
+      and f.updated_at < now() - interval '7 days'
+      and not exists (select 1 from public.lead_children c where c.lead_family_id = f.id)
+    returning id
+  `;
+  return rows.length;
+}
+
+/**
  * Pending-band children whose age is now inside the scored range.
  * Email-gated: a pending-band-only family is routed through signup before
  * ever reaching the hub, but a defensive filter here means an abandoned

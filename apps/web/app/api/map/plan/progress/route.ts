@@ -2,6 +2,7 @@ import { mapPlanProgressSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
+import { mirrorReportToProduct } from "../../../../../lib/map/report-mirror";
 import { requireLead } from "../../../../../lib/map/session";
 import { savePlanProgress } from "../../../../../lib/map/store";
 
@@ -46,6 +47,18 @@ export async function POST(request: Request): Promise<Response> {
       domain: domainId,
       done_count: result.done,
     });
+
+    // Check-offs are source data; the workspace copy follows immediately
+    // (client-side debounce keeps this to about one mirror per save).
+    try {
+      await mirrorReportToProduct(lead.id, childId);
+    } catch (error) {
+      console.error(
+        "map/plan/progress mirror failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+
     return Response.json({ ok: true });
   } catch (error) {
     console.error(

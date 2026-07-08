@@ -9,6 +9,7 @@ import { Logo } from "../../../../../../components/brand/Logo";
 import { emitMapEvent } from "../../../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../../../lib/map/narrative-flag";
 import { runPlanNarrative } from "../../../../../../lib/map/narrative-runner";
+import { mirrorReportToProduct } from "../../../../../../lib/map/report-mirror";
 import { getOrBuildPlan } from "../../../../../../lib/map/store";
 import { NarrativeBeat } from "../../narrative-beat";
 import { PlanWeeks } from "./plan-weeks";
@@ -54,6 +55,17 @@ export default async function PlanPage({
   if (domain && rebuilt === "1") {
     const rebuiltPlan = await getOrBuildPlan(token, domainId, { rebuild: true });
     if (rebuiltPlan) {
+      // The rebuilt month reaches the workspace copy before the redirect
+      // (best-effort: a shared-link viewer has no session and the mirror
+      // stands down silently; the owner's next touch re-mirrors).
+      try {
+        await mirrorReportToProduct(rebuiltPlan.leadId, rebuiltPlan.childId);
+      } catch (error) {
+        console.error(
+          "plan rebuild mirror failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
       redirect(`/onboarding/r/${token}/plan/${domainId}?built=1`);
     }
   }
@@ -86,6 +98,14 @@ export default async function PlanPage({
       child_id: result.childId,
       domain: domainId,
     });
+    try {
+      await mirrorReportToProduct(result.leadId, result.childId);
+    } catch (error) {
+      console.error(
+        "plan build mirror failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
   }
 
   const { plan, childName } = result;
@@ -98,9 +118,13 @@ export default async function PlanPage({
     // No attempt yet (fresh or rebuilt plan) or a stale one: kick a
     // background generation; the runner's claim keeps it single-flight.
     const childId = result.childId;
+    const leadId = result.leadId;
     after(async () => {
       try {
         await runPlanNarrative(childId, domainId);
+        // The written month reaches the workspace copy too (skips
+        // silently when the background phase has no session cookies).
+        await mirrorReportToProduct(leadId, childId);
       } catch (error) {
         console.error(
           "plan narrative kick failed:",

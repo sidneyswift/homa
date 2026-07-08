@@ -6,6 +6,7 @@ import { emitMapEvent } from "../../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../../lib/map/narrative-runner";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
+import { mirrorReportToProduct } from "../../../../../lib/map/report-mirror";
 import { requireLead } from "../../../../../lib/map/session";
 import { correctAnswers, createReport } from "../../../../../lib/map/store";
 
@@ -71,10 +72,22 @@ export async function POST(request: Request): Promise<Response> {
       bank_version: MAP_BANK_VERSION,
     });
 
+    // Keep the workspace copy in step with the correction (same two-beat
+    // mirror as the score route: numbers now, words after the rewrite).
+    try {
+      await mirrorReportToProduct(lead.id, childId);
+    } catch (error) {
+      console.error(
+        "map/report/correct mirror failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+
     after(async () => {
       if (!narrativeEnabled()) return;
       try {
         await runReportNarrative(childId);
+        await mirrorReportToProduct(lead.id, childId);
       } catch (error) {
         console.error(
           "map/report/correct narrative failed:",
