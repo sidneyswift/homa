@@ -2,17 +2,22 @@ import { ageLabel, getMapDomain, type DomainScore, type MapScores } from "@homa/
 
 import type { GrowthEra } from "./growth-story";
 import { ReportTrajectory } from "./report-trajectory";
+import { SubjectJump } from "./subject-jump";
 
 /**
  * The snapshot: the report's TLDR, ported from the founder dashboard's
  * daily Slack post (homa-macmini post_dashboard_slack.py) into product
  * law. Strengths lead with their numbers; the bottom of the ranking
- * renders in the growth lane ("Growing right now", sky, no numbers) or,
- * when nothing is growing, as "Closest to age" with honest at-age
- * labels, never "lowest standing", never a warning glyph. The next
- * re-check date shows only when a plan's four-week clock is armed, and
- * the trajectory chart appears once a second check-in exists. Pure
- * display over already-computed scores; nothing here writes.
+ * renders in the growth lane ("Growing right now", sky, "next step" as
+ * the offer) or, when nothing is growing, as "Closest to age" with
+ * honest at-age labels, never "lowest standing", never a warning glyph.
+ * Every row jumps to its subject drawer (the TLDR doubles as the
+ * report's table of contents). The next re-check date shows only when a
+ * plan's four-week clock is armed. The trajectory chart renders from the
+ * very first report: every subject bursts up from the at-age start
+ * (founder ruling 2026-07-08), so even one check-in reads as measured
+ * progress. Pure display over already-computed scores; nothing here
+ * writes.
  */
 
 const TLDR_ROWS = 3;
@@ -22,6 +27,38 @@ function orderedRealScores(scores: MapScores): DomainScore[] {
   return scores.strengthOrder
     .map((id) => byId.get(id))
     .filter((score): score is DomainScore => Boolean(score) && !score!.exposureBased);
+}
+
+function subjectName(score: DomainScore): string {
+  return getMapDomain(score.domainId)?.displayName ?? score.domainId;
+}
+
+/** One tappable TLDR row: subject name left, value right, the whole row
+ * jumps to that subject's drawer further down the report. */
+function SnapshotRow({
+  score,
+  value,
+  valueColor,
+}: {
+  score: DomainScore;
+  value: string;
+  valueColor: string;
+}) {
+  return (
+    <li>
+      <SubjectJump
+        domainId={score.domainId}
+        className="group flex w-full items-baseline justify-between gap-3 text-left text-sm"
+      >
+        <span className="font-semibold text-strong underline-offset-2 group-hover:underline">
+          {subjectName(score)}
+        </span>
+        <span className="whitespace-nowrap font-mono text-xs" style={{ color: valueColor }}>
+          {value}
+        </span>
+      </SubjectJump>
+    </li>
+  );
 }
 
 export function ReportSnapshot({
@@ -63,9 +100,6 @@ export function ReportSnapshot({
     .filter((date) => date.getTime() > now)
     .sort((a, b) => a.getTime() - b.getTime())[0];
 
-  const name = (score: DomainScore): string =>
-    getMapDomain(score.domainId)?.displayName ?? score.domainId;
-
   return (
     <div className="mt-4 rounded-lg bg-[var(--surface-sunken)] p-5">
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
@@ -87,15 +121,12 @@ export function ReportSnapshot({
             </p>
             <ul className="mt-1.5 flex flex-col gap-1">
               {strengthRows.map((score) => (
-                <li
+                <SnapshotRow
                   key={score.domainId}
-                  className="flex items-baseline justify-between gap-3 text-sm"
-                >
-                  <span className="font-semibold text-strong">{name(score)}</span>
-                  <span className="font-mono text-xs" style={{ color: "var(--gold-ink)" }}>
-                    +{score.monthsAhead} mo
-                  </span>
-                </li>
+                  score={score}
+                  value={`+${score.monthsAhead} mo`}
+                  valueColor="var(--gold-ink)"
+                />
               ))}
             </ul>
           </div>
@@ -111,15 +142,12 @@ export function ReportSnapshot({
             </p>
             <ul className="mt-1.5 flex flex-col gap-1">
               {growingRows.map((score) => (
-                <li
+                <SnapshotRow
                   key={score.domainId}
-                  className="flex items-baseline justify-between gap-3 text-sm"
-                >
-                  <span className="font-semibold text-strong">{name(score)}</span>
-                  <span className="font-mono text-xs" style={{ color: "var(--sky-600)" }}>
-                    growing
-                  </span>
-                </li>
+                  score={score}
+                  value={"next step \u2193"}
+                  valueColor="var(--sky-600)"
+                />
               ))}
             </ul>
           </div>
@@ -135,17 +163,16 @@ export function ReportSnapshot({
             </p>
             <ul className="mt-1.5 flex flex-col gap-1">
               {closestRows.map((score) => (
-                <li
+                <SnapshotRow
                   key={score.domainId}
-                  className="flex items-baseline justify-between gap-3 text-sm"
-                >
-                  <span className="font-semibold text-strong">{name(score)}</span>
-                  <span className="font-mono text-xs" style={{ color: "var(--sage-700)" }}>
-                    {score.monthsAhead && score.monthsAhead > 0
+                  score={score}
+                  value={
+                    score.monthsAhead && score.monthsAhead > 0
                       ? `+${score.monthsAhead} mo`
-                      : "at age"}
-                  </span>
-                </li>
+                      : "at age"
+                  }
+                  valueColor="var(--sage-700)"
+                />
               ))}
             </ul>
           </div>
@@ -159,19 +186,24 @@ export function ReportSnapshot({
         </p>
       ) : null}
 
-      {eras.length >= 2 ? (
-        <div className="mt-4">
-          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
-            By subject, over time
-          </p>
-          <p className="mt-1 text-xs text-muted">
-            Each line is {childName} against their own past, never another child.
-          </p>
-          <div className="mt-2">
-            <ReportTrajectory childName={childName} eras={eras} />
-          </div>
+      <div className="mt-4">
+        <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+          How ahead is {childName}, by subject (months)
+        </p>
+        <p className="mt-1 text-xs text-muted">
+          Each line is {childName} against their own past, never another child. Every subject
+          starts on the at-age line; your answers are what move it.
+        </p>
+        {/* The plot gets its own white card: figure on ground, same
+            treatment as the whole-picture chart below. */}
+        <div className="mt-2 rounded-md border border-border-subtle bg-card p-3 sm:p-4">
+          <ReportTrajectory
+            childName={childName}
+            eras={eras}
+            nextRecheckAt={nextRecheck ? nextRecheck.toISOString() : null}
+          />
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

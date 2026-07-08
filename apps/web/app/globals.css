@@ -278,7 +278,9 @@ h1, h2, h3, h4, h5, h6 {
    ========================================================================= */
 @media (max-width: 880px) {
   .ht-grid { grid-template-columns: 1fr !important; }
-  .ht-gutter, .ht-line { display: none !important; }
+  /* .ht-marker is app-only: the ported marker is an HTML div over the SVG,
+     not a circle inside .ht-line like the kit, so it needs its own hide. */
+  .ht-gutter, .ht-line, .ht-marker { display: none !important; }
   .ht-step { grid-template-columns: 1fr !important; }
   .ht-step .ht-vig { justify-content: flex-start !important; }
 

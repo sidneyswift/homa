@@ -20,8 +20,8 @@ import { CheckVignette, KidsVignette, ProofVignette, WeekVignette } from "./vign
  * Motion notes (review-animations skill):
  * scroll-driven progress (rAF-throttled, passive listener), stroke-dashoffset
  * on SVG paint, waypoint transitions animate background/border/transform at
- * --dur-base --ease-out. Under 880px the gutter/thread hide entirely (kit
- * CSS), which also serves reduced-motion phone users.
+ * --dur-base --ease-out. Under 880px the gutter/thread/marker hide entirely
+ * (kit CSS), which also serves reduced-motion phone users.
  */
 
 type Geom = { d: string; h: number; len: number };
@@ -214,6 +214,7 @@ export function HowThread() {
 
           {marker && (
             <div
+              className="ht-marker"
               aria-hidden="true"
               style={{
                 position: "absolute",

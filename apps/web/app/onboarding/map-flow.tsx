@@ -9,6 +9,7 @@ import { ChecklistStep } from "./checklist-step";
 import { DeepDiveStep } from "./deep-dive-step";
 import type { FlowChild, FlowPhase } from "./flow-types";
 import { ExtrasStep } from "./extras-step";
+import { FamilyStep } from "./family-step";
 import { HubStep } from "./hub-step";
 import { KidsStep } from "./kids-step";
 import { NextKidStep } from "./next-kid-step";
@@ -61,6 +62,15 @@ import { ScoringStep } from "./scoring-step";
  * needsPreHubSignup: every route past S1 assumes an account already
  * exists, and there is no honesty gap to close, S1 already promised
  * "I'll email you when it's ready" truthfully for every family.
+ *
+ * Founder call 2026-07-08 (second, "one onboarding for every door"): a
+ * create-your-family step (FamilyStep: family name, her name, address,
+ * phone, optional photo) now sits between the account moment and kids,
+ * gated by familySetupDone (families.profile_completed_at) so it shows
+ * exactly once. The kids step became the same add-a-child card the
+ * signed-in flow uses, which collects interests and help-with up front,
+ * so the extras step after the checklist only shows for a kid who left
+ * both empty. After the report, the dashboard (/home) is the landing.
  */
 
 /** The kid the next-kid choice offers: in range, no report yet, questions
@@ -104,7 +114,7 @@ function decidePostKidsRoute(children: FlowChild[]): PostKidsRoute {
 /** Phases whose first input autofocuses itself; every other phase change
  * moves focus to the step wrapper so keyboard and screen-reader users
  * land on the new content instead of a stale position. */
-const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "kids"]);
+const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "family", "kids"]);
 
 export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) => void }) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
@@ -118,9 +128,12 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
    * in the order they finished. Scoring builds all of them in one beat and
    * lands on the first one's report. */
   const [reportQueue, setReportQueue] = useState<string[]>([]);
-  /** Set only on the parent-step to kids-step handoff, so the kids screen
-   * can open with "Nice to meet you, Sarah." exactly once. */
-  const [greetName, setGreetName] = useState<string | null>(null);
+  /** For FamilyStep's greeting and prefills (her name from signup or the
+   * Google profile). */
+  const [parentNames, setParentNames] = useState<{ first: string | null; last: string | null }>({
+    first: null,
+    last: null,
+  });
   /** The kid PreparingStep is announcing, and where to land once it's
    * done; null whenever "preparing" isn't the current phase. */
   const [preparingChild, setPreparingChild] = useState<{ name: string; ageMonths: number } | null>(null);
@@ -130,6 +143,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     children: FlowChild[];
     email: string | null;
     firstName: string | null;
+    familySetupDone: boolean;
   } | null> => {
     try {
       const response = await fetch("/api/map/state");
@@ -137,13 +151,17 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         ok: boolean;
         email?: string | null;
         firstName?: string | null;
+        lastName?: string | null;
         familyContextDone?: boolean;
+        familySetupDone?: boolean;
         children?: Array<{
           id: string;
           name: string;
           ageMonths: number;
           inRange: boolean;
           reportToken: string | null;
+          interests?: string[];
+          helpWith?: string | null;
           answers: Array<{ itemId: string; answer: MapAnswer }>;
         }>;
       };
@@ -151,12 +169,15 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       const resolvedEmail = data.email ?? null;
       const resolvedFirstName = data.firstName ?? null;
       setEmail(resolvedEmail);
+      setParentNames({ first: resolvedFirstName, last: data.lastName ?? null });
       const restored = (data.children ?? []).map((child) => ({
         id: child.id,
         name: child.name,
         ageMonths: child.ageMonths,
         inRange: child.inRange,
         reportToken: child.reportToken,
+        interests: child.interests ?? [],
+        helpWith: child.helpWith ?? null,
         answers: Object.fromEntries(child.answers.map((entry) => [entry.itemId, entry.answer])),
         answered: child.answers.length,
       }));
@@ -165,6 +186,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         children: restored,
         email: resolvedEmail,
         firstName: resolvedFirstName,
+        familySetupDone: Boolean(data.familySetupDone),
       };
     } catch {
       return null;
@@ -244,13 +266,26 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
   // param (report buttons, retest emails) opens straight on the deep dive.
   useEffect(() => {
     void (async () => {
-      const restored = await refreshState();
+      let restored = await refreshState();
       if (restored === null) {
         const ok = await bootstrapSession();
-        setPhase(ok ? "parent" : "bootstrap-error");
-        return;
+        if (!ok) {
+          setPhase("bootstrap-error");
+          return;
+        }
+        // A signed-in user with no family yet (an account from the old
+        // /signin create-account tab, say): the state call links their
+        // auth session to the fresh anonymous family server-side, so one
+        // re-read routes them past the signup screen instead of asking
+        // them to sign up a second time.
+        restored = await refreshState();
+        if (restored === null || !restored.email) {
+          setPhase("parent");
+          return;
+        }
+      } else {
+        setWelcomeBack(true);
       }
-      setWelcomeBack(true);
 
       // The email gate takes priority over everything else: nothing past
       // it (kids, resume links, deep dives) makes sense before we know
@@ -258,13 +293,6 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       if (!restored.email) {
         setPhase("parent");
         return;
-      }
-
-      // A fresh Google sign-in landing here for the first time (no kids
-      // yet) gets one personalized "Nice to meet you", using the name
-      // Google's profile gave us.
-      if (restored.firstName && restored.children.length === 0) {
-        setGreetName(restored.firstName);
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -298,6 +326,14 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           beginChecklist(target);
           return;
         }
+      }
+
+      // The create-your-family gate (deep links above bypass it: those
+      // serve already-engaged families mid-task, and the card catches
+      // them on their next plain visit instead).
+      if (!restored.familySetupDone) {
+        setPhase("family");
+        return;
       }
 
       applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
@@ -337,14 +373,32 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         <ParentStep
           onDone={() => {
             void (async () => {
+              // The create-your-family card is always next for a fresh
+              // signup; a returning account that already finished it
+              // (folded into an older family) routes past.
+              const restored = await refreshState();
+              if (restored === null || !restored.familySetupDone) {
+                setPhase("family");
+                return;
+              }
+              applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
+            })();
+          }}
+        />
+      );
+    }
+
+    if (phase === "family") {
+      return (
+        <FamilyStep
+          firstName={parentNames.first}
+          lastName={parentNames.last}
+          onDone={() => {
+            void (async () => {
+              // Kids are next for a brand-new family; a returning one
+              // resumes wherever its kids actually are.
               const restored = await refreshState();
               const childrenList = restored?.children ?? [];
-              // Same personalized handoff a Google sign-in gets on resume
-              // (see the mount effect above): her account now has a name,
-              // so KidsStep can greet her by it.
-              if (restored?.firstName && childrenList.length === 0) {
-                setGreetName(restored.firstName);
-              }
               applyPostKidsRoute(decidePostKidsRoute(childrenList), childrenList);
             })();
           }}
@@ -357,9 +411,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         <KidsStep
           existingCount={children.length}
           welcomeBack={welcomeBack && children.length === 0}
-          greetName={children.length === 0 ? greetName : null}
           onDone={() => {
-            setGreetName(null);
             void (async () => {
               // Into the first unstarted checklist, by way of the
               // PreparingStep beat beginChecklist interposes for a kid
@@ -393,10 +445,25 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         <ChecklistStep
           child={activeChild}
           onComplete={() => {
-            setReportQueue((queue) =>
-              queue.includes(finishedId) ? queue : [...queue, finishedId],
-            );
-            setPhase("extras");
+            const queueAfter = reportQueue.includes(finishedId)
+              ? reportQueue
+              : [...reportQueue, finishedId];
+            setReportQueue(queueAfter);
+            // The add-a-child card already asked for interests and
+            // help-with (founder call 2026-07-08); the extras step only
+            // shows for a kid who left both empty, never asking twice.
+            const extrasAlreadyAnswered =
+              activeChild.interests.length > 0 || activeChild.helpWith !== null;
+            if (!extrasAlreadyAnswered) {
+              setPhase("extras");
+              return;
+            }
+            const pendingKid = nextUnfinishedKid(children, queueAfter);
+            if (pendingKid) {
+              setPhase("next-kid");
+              return;
+            }
+            advanceToReports();
           }}
           onExit={() => {
             void (async () => {

@@ -51,6 +51,26 @@ export const mapChildSchema = z.object({
 export type MapChildInput = z.infer<typeof mapChildSchema>;
 
 /**
+ * The create-your-family step, right after S1's account moment (founder
+ * call 2026-07-08: one onboarding for every door, signup popup included).
+ * Family name and the parent's name are required; address and phone are
+ * asked on the card but tolerated as optional here so a half-filled save
+ * can never strand her; the avatar is optional everywhere. The server
+ * re-checks that avatarUrl points at OUR storage bucket before storing.
+ */
+export const mapFamilySetupSchema = z.object({
+  familyName: z.string().trim().min(1).max(80),
+  parentName: z.string().trim().min(1).max(100),
+  addressLine: z.string().trim().max(120).optional(),
+  city: z.string().trim().max(80).optional(),
+  usState: z.string().length(2).optional(),
+  zip: z.string().trim().max(12).optional(),
+  phone: z.string().trim().max(24).optional(),
+  avatarUrl: z.string().trim().max(500).optional(),
+});
+export type MapFamilySetupInput = z.infer<typeof mapFamilySetupSchema>;
+
+/**
  * The optional extras collected after the checklist, before the report
  * (founder + Alessa session: context questions come once she's invested,
  * never up front). Everything optional, everything capped.

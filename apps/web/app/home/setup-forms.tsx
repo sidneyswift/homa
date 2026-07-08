@@ -2,9 +2,13 @@
 
 import { useActionState } from "react";
 
-import { US_STATES } from "@homa/core";
+import { addChildAction, type SetupFormState } from "./actions";
 
-import { addChildAction, createFamilyAction, type SetupFormState } from "./actions";
+/**
+ * The add-a-child card. The create-family form that used to live beside
+ * it moved into /onboarding's FamilyStep (founder call 2026-07-08: one
+ * onboarding for every door); /home redirects unfinished setups there.
+ */
 
 const INITIAL_STATE: SetupFormState = { error: null };
 
@@ -15,51 +19,6 @@ const MONTHS = [
 
 const inputClass =
   "mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
-
-export function CreateFamilyForm() {
-  const [state, action, pending] = useActionState(createFamilyAction, INITIAL_STATE);
-
-  return (
-    <form action={action} className="rounded-lg border border-border bg-card p-6 shadow-sm">
-      <h2 className="font-display text-xl font-semibold text-strong">
-        Set up your family
-      </h2>
-      <label className="mt-4 block font-medium text-strong" htmlFor="family-name">
-        Family name
-      </label>
-      <input id="family-name" name="family_name" type="text" placeholder="The Swift family" className={inputClass} />
-
-      <label className="mt-4 block font-medium text-strong" htmlFor="parent-name">
-        What should Homa call you?
-      </label>
-      <input id="parent-name" name="parent_name" type="text" placeholder="Sarah" className={inputClass} />
-
-      <label className="mt-4 block font-medium text-strong" htmlFor="family-state">
-        State (optional)
-      </label>
-      <select id="family-state" name="us_state" defaultValue="" className={inputClass}>
-        <option value="">Choose a state</option>
-        {US_STATES.map((state) => (
-          <option key={state.code} value={state.code}>
-            {state.name}
-          </option>
-        ))}
-      </select>
-
-      {state.error ? (
-        <p className="mt-3 text-sm text-danger" role="alert">{state.error}</p>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
-      >
-        {pending ? "Setting up…" : "Create family"}
-      </button>
-    </form>
-  );
-}
 
 export function AddChildForm({ familyId }: { familyId: string }) {
   const [state, action, pending] = useActionState(addChildAction, INITIAL_STATE);

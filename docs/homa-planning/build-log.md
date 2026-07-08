@@ -3,6 +3,82 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 · One onboarding for every door (signup, signin, setup unified)
+
+Founder instruction: "we make all sign in, sign up, and onboarding use the
+same stuff", with the expected flow spelled out: popup signup (Google or
+email+password) creates the account, then a create-your-family card
+(family name, her name, address, phone, optional profile photo), then the
+SIGNIN flow's add-a-child card (not the onboarding one), then the
+questionnaire, results, and the /home dashboard.
+
+What changed:
+
+- **FamilyStep** (`apps/web/app/onboarding/family-step.tsx`): new step
+  between the account moment and kids. Gated by
+  `families.profile_completed_at` (migration #26), shows exactly once.
+  Saves via new `POST /api/map/family` (cookie/session-scoped, tenancy
+  law intact) with `mapFamilySetupSchema` + the `map.family_setup` event.
+- **KidsStep rebuilt** as the /home "Add a child" card (first name,
+  birth month + year selects, interests, help-with), multi-kid via "Add
+  child" then one primary start button. Reuses `POST /api/map/children`
+  unchanged (it already accepted interests/helpWith).
+- **/home redirects** unfinished setups into /onboarding (no family,
+  family card not done, no kids, or no results while an in-range kid
+  waits); its CreateFamilyForm + createFamilyAction are deleted (the
+  `create_my_family` RPC stays in the DB for the mobile app).
+- **/signin is sign-in only** (create-account tab and signUpAction
+  removed); "New to Homa?" links to /onboarding.
+- **Report page** (non-sample): the closing band's stale invite-list copy
+  and the footer link now point at /home ("Go to your family dashboard").
+- **Migration #26** (`20260708124500_family_profile_setup.sql`, applied
+  to homa-prod): families gains address_line/address_city/address_zip,
+  parent_avatar_url, profile_completed_at; public `avatars` storage
+  bucket with owner-scoped write policies.
+
+Decisions made alone, flagged for review:
+
+1. **Month + year only for kids' birthdays** (day saves as 01, the /home
+   convention). This follows today's explicit "use the signin add-kid
+   card" instruction and screenshot over 2026-07-06's "get the actual
+   birthday" ruling. Age-band math needs month precision only.
+2. **The extras step never asks twice**: with interests/help-with now
+   collected on the kid card, extras shows only for a kid who left both
+   empty there.
+3. **Address granularity**: one street line + city + state + ZIP as real
+   columns (state feeds the existing us_state compliance path). Address
+   and phone are required by the card's own validation but tolerated as
+   optional by the server schema, so a degraded save can never strand
+   anyone.
+4. **Phone soft-link**: the number always saves to families.phone_e164
+   (contact info); the family_phones texting link (unique per number)
+   stands down quietly when another family already claimed it, instead
+   of blocking setup. The /home texting card remains the place to sort
+   that out.
+5. **Avatar bucket is public-read** (standard avatar posture; owner-only
+   writes). The D4 consent floor gates photos of KIDS in materials; this
+   is the parent's own photo, uploaded by them, of themselves. The
+   /api/map/family route only stores URLs that point into our bucket.
+6. **Deep links (?dd=, ?start=) bypass the family-setup gate**: they
+   serve engaged families mid-task; the card catches them on their next
+   plain visit.
+7. **Existing families were NOT backfilled** as setup-complete, so every
+   current family (the founder's own included) sees the family card once
+   on their next /onboarding visit; there is no launched cohort to
+   protect yet.
+8. **Signed-in users with no family self-heal**: /onboarding's bootstrap
+   now re-reads state after opening the anonymous session, so an auth
+   session with no membership row links server-side instead of being
+   asked to sign up again.
+
+Verification: typecheck, lint, check:events, check:isolation, check:map,
+and the web build all green. Full browser walkthrough against the dev
+server (signup, family card, add kid with interests, 47-question
+checklist, report, "Go to your family dashboard" landing on /home with
+no redirect bounce): every step passed, the extras step correctly
+skipped for a kid with interests, and a cookieless /signin shows
+sign-in only with the /onboarding link.
+
 ## 2026-07-08 · Report gains the snapshot TLDR + by-subject trajectory chart
 
 Founder instruction (with screenshots of the mac mini's daily Slack post and
@@ -35,6 +111,59 @@ event changes (pure display over already-stored history).
 
 Verification: typecheck + lint green; sample report (2 eras) renders the
 card and chart correctly via Playwright screenshot against the dev server.
+
+**Follow-up (same morning), founder design review ("yours vs mine"):** the
+first cut read as flat lines with no timeline and no room. Rebuilt to the
+mac mini chart's comprehension model, two conventions founder-ruled
+explicitly:
+
+1. **Every subject starts at the at-age line** one week before the first
+   check-in ("start" tick, no fabricated date printed), so the first week
+   renders as a burst of measured progress; this also un-gates the chart
+   for FIRST reports (one check-in + the origin is a drawable story).
+   Growing subjects start on their own quiet slot instead: starting them
+   at zero would draw a dip that never happened (anti-guilt).
+2. **The axis always extends four weeks past today** (open future,
+   founder: "chart breathing room"). Chose empty space over dashed
+   expected-results projections (the other sanctioned option) since no
+   expectations model exists yet; the armed plan re-check date renders as
+   a named sage marker in that future window when present.
+
+Also: calendar gridlines with evenly spaced date ticks, ringed markers at
+every check-in (latest point solid), per-series hairline lanes (2px,
+upward only, never below the at-age line) so identical whole-month values
+stay countable, two color collisions fixed (executive function to
+stone-700, gross motor to gold-400), and the section retitled to the
+founder's phrasing: "How ahead is {child}, by subject (months)".
+
+**Second follow-up (same morning), senior-design pass on the card:**
+
+1. **The y-axis now fits the child**: max reading plus headroom snapped
+   to 6-month bands (floor +12, cap +24). The old fixed +26 axis parked
+   a +10 kid in the bottom half of an empty frame, quiet deficit
+   framing by composition.
+2. **Emphasis hierarchy**: lines that moved (or sit clearly ahead) render
+   featured (2.5px, full opacity, drawn on top); flat lines recede
+   (1.5px, 45%). Six at-age subjects are one message, not six shouts.
+3. **Direct end-labels replace the legend**: every line is named at its
+   endpoint in the open future space (colored anchor dot, muted mono
+   text, collision dodging, hairline leaders, width-budget truncation).
+   No more matching thirteen hues against a legend.
+4. **Figure-ground**: the plot sits on its own white bg-card inside the
+   sunken snapshot card, same treatment as the whole-picture chart.
+5. **TLDR rows are now jumps** (reusing SubjectJump) to their subject
+   drawers, the TLDR doubling as the report's table of contents; growing
+   rows' redundant "growing" value became the offer "next step ↓".
+
+**Third follow-up, founder RULE (2026-07-08): "downward on the line chart
+is ok. make that a rule."** Codified in BUILD.md law #4 as a scoped
+exception: trajectory line charts may draw honest downward segments
+(copy still never says "behind"; a drop never gets red or warning
+treatment). In code: growing-first subjects now start at zero like every
+other subject, so their week-one segment dips to the growing slot as it
+actually happened, and the hairline lanes center on the true value
+instead of nudging upward-only. Scope note: movement chips, sparklines,
+and prose remain positive-only; the ruling covers line-chart geometry.
 
 ## 2026-07-08 (afternoon) · S1 becomes a full sign-up, overturning "password last"
 

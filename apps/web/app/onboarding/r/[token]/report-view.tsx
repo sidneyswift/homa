@@ -874,24 +874,28 @@ export function ReportView({
                 watch the numbers move.
               </p>
               {sample ? (
+                <>
+                  <Link
+                    href="/onboarding"
+                    className="mt-4 inline-flex items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-bold text-on-brand hover:bg-brand-hover"
+                  >
+                    Get your child&apos;s free report
+                  </Link>
+                  <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
+                    Five minutes of questions, benchmarked against national standards.
+                  </p>
+                </>
+              ) : (
+                // The founder-expected landing after results (2026-07-08):
+                // the family dashboard, where the kids, chat, and settings
+                // live from here on.
                 <Link
-                  href="/onboarding"
+                  href="/home"
                   className="mt-4 inline-flex items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-bold text-on-brand hover:bg-brand-hover"
                 >
-                  Get your child&apos;s free report
+                  Go to your family dashboard
                 </Link>
-              ) : (
-                <p
-                  className="mt-4 inline-flex items-center rounded-pill px-5 py-2.5 text-sm font-bold"
-                  style={{ background: "var(--accent-sage-soft)", color: "var(--sage-700)" }}
-                >
-                  You&apos;re on the invite list {"\u2713"}
-                </p>
               )}
-              <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
-                We invite families a few at a time. Your invite comes by email, with{" "}
-                {report.childName}&apos;s report waiting inside.
-              </p>
             </div>
           </div>
 
@@ -914,9 +918,15 @@ export function ReportView({
         </div>
 
         <p className="mt-4 text-center text-sm text-subtle print:hidden">
-          <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
-            back to your family
-          </Link>
+          {sample ? (
+            <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
+              back to your family
+            </Link>
+          ) : (
+            <Link href="/home" className="text-brand underline-offset-2 hover:underline">
+              go to your family dashboard
+            </Link>
+          )}
         </p>
       </main>
     </div>

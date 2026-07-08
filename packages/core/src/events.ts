@@ -58,6 +58,15 @@ export const EVENT_SCHEMAS = {
     method: z.enum(["google", "password"]),
     returning: z.boolean(),
   }),
+  // The create-your-family step right after the account moment (founder
+  // call 2026-07-08: one onboarding for every door). Booleans only, the
+  // address/phone/avatar themselves are PII and live on the family row.
+  "map.family_setup": z.object({
+    family_id: z.uuid(),
+    has_address: z.boolean(),
+    has_phone: z.boolean(),
+    has_avatar: z.boolean(),
+  }),
   "map.report_generated": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),

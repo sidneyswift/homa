@@ -192,7 +192,9 @@ never modify either).
 3. No feature merges without its events (typed registry) or, if billable, its
    `action_costs` row.
 4. Anti-guilt display law: no red, no "behind", growth framing only; max one nudge
-   per weekly note; never compare siblings.
+   per weekly note; never compare siblings. Founder exception (2026-07-08):
+   trajectory LINE CHARTS may draw honest downward segments; copy still never
+   says "behind", and a drop never gets red or warning treatment.
 5. Child photos: consent screen + TTL + no-training DPAs + zero face recognition (D4).
 6. Distress-data firewall; companion-not-therapist (D5).
 7. Brand voice: no em dashes, sentence case, reassure-before-inform, offers never

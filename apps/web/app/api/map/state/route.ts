@@ -70,8 +70,12 @@ export async function GET(): Promise<Response> {
     return Response.json({
       ok: true,
       firstName: state.family.first_name,
+      lastName: state.family.last_name,
       hasAccount: state.family.has_account,
       familyContextDone,
+      // The create-your-family step's one-shot gate (founder call
+      // 2026-07-08): false routes the flow through that step once.
+      familySetupDone: state.family.profile_completed_at !== null,
       // The caller's own email (cookie-authenticated), for the
       // "send this link to my other device" button.
       email: state.family.email,

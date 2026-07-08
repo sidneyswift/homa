@@ -15,12 +15,18 @@ export interface FlowChild {
   answers: Record<string, MapAnswer>;
   /** Count of saved answers, for the hub's "12 answers saved" line. */
   answered: number;
+  /** From the add-a-child card (or a past extras step); when either is
+   * already filled the extras step never re-asks (founder call
+   * 2026-07-08: the kid card collects these up front now). */
+  interests: string[];
+  helpWith: string | null;
 }
 
 export type FlowPhase =
   | "loading"
   | "bootstrap-error"
   | "parent"
+  | "family"
   | "kids"
   | "hub"
   | "preparing"

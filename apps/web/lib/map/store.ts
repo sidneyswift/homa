@@ -45,6 +45,9 @@ export interface FamilyRow {
   source: string;
   /** True once any auth user holds a membership row for this family. */
   has_account: boolean;
+  /** Stamped when the create-your-family step is submitted; null routes
+   * the flow through that step once (founder call 2026-07-08). */
+  profile_completed_at: string | null;
 }
 
 export interface FamilyChildRow {
@@ -68,6 +71,7 @@ export interface FamilyState {
 }
 
 const FAMILY_COLUMNS = `id, email, first_name, last_name, us_state, status, source,
+  profile_completed_at::text as profile_completed_at,
   exists (select 1 from public.family_members m where m.family_id = families.id) as has_account`;
 
 interface StartAnonymousInput {
@@ -953,6 +957,47 @@ export async function saveChildContext(
   `;
   await touchFamily(familyId);
   return true;
+}
+
+interface FamilySetupInput {
+  familyName: string;
+  firstName: string;
+  lastName?: string;
+  addressLine?: string;
+  city?: string;
+  usState?: string;
+  zip?: string;
+  phoneE164?: string;
+  avatarUrl?: string;
+}
+
+/**
+ * The create-your-family step's one write (founder call 2026-07-08): the
+ * family's display name, the parent's name, the address, the phone, and
+ * the optional avatar land on the family row together, and
+ * profile_completed_at stamps the step done so it never re-asks. The
+ * phone also goes to family_phones separately (the texting routing table
+ * with its own uniqueness law); the caller handles that, this only fills
+ * the family row's own column.
+ */
+export async function saveFamilySetup(familyId: string, input: FamilySetupInput): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.families set
+      name = ${input.familyName},
+      first_name = ${input.firstName},
+      last_name = coalesce(${input.lastName ?? null}, last_name),
+      parent_display_name = ${input.firstName},
+      address_line = ${input.addressLine ?? null},
+      address_city = ${input.city ?? null},
+      address_zip = ${input.zip ?? null},
+      us_state = coalesce(${input.usState ?? null}, us_state),
+      phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
+      parent_avatar_url = ${input.avatarUrl ?? null},
+      profile_completed_at = now(),
+      updated_at = now()
+    where id = ${familyId}
+  `;
 }
 
 /** Merges family-level extras; name and state also fill their real columns. */

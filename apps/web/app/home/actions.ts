@@ -9,9 +9,11 @@ import { getMyFamily } from "../../lib/family";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 /**
- * Family + child setup actions (minimal M2-03(i) form intake). Writes go
- * through RLS: family creation via the create_my_family RPC (migration #6),
- * children via the "members add children" INSERT policy from tenancy v0.
+ * Child setup + texting-line actions (minimal M2-03(i) form intake).
+ * Children write through RLS via the "members add children" INSERT policy
+ * from tenancy v0. Family creation left this file for /onboarding's
+ * FamilyStep (founder call 2026-07-08: one onboarding for every door);
+ * the create_my_family RPC stays in the database for the mobile app.
  * The texting-line actions are the exception by design: family_phones is
  * deny-all, so they write through lib/family-phone on the server-only
  * connection, with familyId derived from the caller's OWN membership
@@ -20,27 +22,6 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 export interface SetupFormState {
   error: string | null;
-}
-
-export async function createFamilyAction(
-  _prev: SetupFormState,
-  formData: FormData,
-): Promise<SetupFormState> {
-  const name = String(formData.get("family_name") ?? "").trim() || "My family";
-  const usState = String(formData.get("us_state") ?? "").trim() || null;
-  const parentName = String(formData.get("parent_name") ?? "").trim() || null;
-
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc("create_my_family", {
-    family_name: name,
-    family_us_state: usState,
-    parent_name: parentName,
-  });
-  if (error) {
-    return { error: error.message };
-  }
-  revalidatePath("/home");
-  return { error: null };
 }
 
 export async function setFamilyPhoneAction(
