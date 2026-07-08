@@ -71,12 +71,20 @@ export async function generateReportNarrative(
 
   // The schema names every expected key explicitly, so a missing subject
   // line is a schema failure at generation time, not a surprise at render.
+  // The keepsake's pronoun constraint rides on the field itself: it is the
+  // one piece where the parent appears in third person, and schema-level
+  // instructions hold better than prose ones (gate misses observed at
+  // v2026.07.8-9 were all parent pronouns in this piece).
   const schema = z.object({
     note: z.string(),
     subjects: requiredStrings(subjectIds),
     synthesis: z.string(),
     drawers: requiredStrings(drawerIds),
-    keepsake: z.string(),
+    keepsake: z
+      .string()
+      .describe(
+        "Letter TO the child ('you' is the child). HARD RULE: zero gendered pronouns anywhere (no she/he/her/him/his/hers, for anyone). Refer to the parent by first name every time, repeating the name instead of ever using a pronoun.",
+      ),
   });
 
   const started = Date.now();

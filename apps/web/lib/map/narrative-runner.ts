@@ -9,6 +9,7 @@ import { emitMapEvent } from "./events";
 import {
   allowedNumbersFrom,
   buildReportFacts,
+  childPronounsFact,
   genderedPronounsAllowedFrom,
   type PlanFacts,
 } from "./narrative-facts";
@@ -122,9 +123,11 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
   const claim = writingMeta();
   if (!(await claimPlanNarrative(childId, domainId, claim))) return;
 
+  const pronounsAllowed = genderedPronounsAllowedFrom(source);
   const facts: PlanFacts = {
     childName: source.childName,
     childAge: source.plan.childAgeLabel,
+    childPronouns: childPronounsFact(pronounsAllowed, source.childName),
     subjectName: source.plan.subjectName,
     interests: source.interests,
     homeschoolStyle: source.homeschoolStyle,
@@ -139,7 +142,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
     allowedNumbers: allowedNumbersFrom(facts),
     siblingNames: source.siblingNames,
     childName: source.childName,
-    genderedPronounsAllowed: genderedPronounsAllowedFrom(facts),
+    genderedPronounsAllowed: pronounsAllowed,
   };
 
   try {

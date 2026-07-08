@@ -42,6 +42,10 @@ export interface ReportFacts {
   childName: string;
   childAge: string;
   childAgeMonths: number;
+  /** The pronoun instruction, computed by code (we never ask a child's
+   * sex): "they/them" unless the parent's own words in these facts
+   * gender the child. The writer obeys this field literally. */
+  childPronouns: string;
   parentFirstName: string | null;
   interests: string[];
   helpWith: string[];
@@ -66,6 +70,8 @@ export interface ReportFacts {
 export interface PlanFacts {
   childName: string;
   childAge: string;
+  /** Same pronoun instruction as the report facts; obey literally. */
+  childPronouns: string;
   subjectName: string;
   interests: string[];
   homeschoolStyle: string | null;
@@ -204,10 +210,16 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
       }
     : null;
 
+  const pronounsAllowed = genderedPronounsAllowedFrom({
+    whatsWorking,
+    helpWith: input.helpWith,
+  });
+
   return {
     childName: input.childName,
     childAge: ageLabel(months),
     childAgeMonths: months,
+    childPronouns: childPronounsFact(pronounsAllowed, input.childName),
     parentFirstName: input.parentFirstName,
     interests: input.interests,
     helpWith: input.helpWith,
@@ -242,4 +254,11 @@ export function genderedPronounsAllowedFrom(parentWords: {
 }): boolean {
   const text = [...Object.values(parentWords.whatsWorking), ...parentWords.helpWith].join(" ");
   return GENDERED_PRONOUNS.test(text);
+}
+
+/** The literal instruction the writer receives inside the facts. */
+export function childPronounsFact(allowed: boolean, childName: string): string {
+  return allowed
+    ? `match the parent's own words in these facts; where her words do not settle it, use they/them for ${childName}`
+    : `they/them only. Never he, she, him, his, or her for ${childName}: the parent has not said, and a name is not an answer`;
 }
