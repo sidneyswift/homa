@@ -9,6 +9,7 @@ import { emitMapEvent } from "./events";
 import {
   allowedNumbersFrom,
   buildReportFacts,
+  genderedPronounsAllowedFrom,
   type PlanFacts,
 } from "./narrative-facts";
 import {
@@ -54,6 +55,7 @@ export async function runReportNarrative(childId: string): Promise<void> {
     allowedNumbers: allowedNumbersFrom(facts),
     siblingNames: source.siblingNames,
     childName: source.childName,
+    genderedPronounsAllowed: genderedPronounsAllowedFrom(facts),
     expectedSubjects: facts.subjects.map((subject) => subject.subjectId),
     expectedDrawers: facts.subjects
       .filter((subject) => subject.position !== "not_mapped")
@@ -137,6 +139,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
     allowedNumbers: allowedNumbersFrom(facts),
     siblingNames: source.siblingNames,
     childName: source.childName,
+    genderedPronounsAllowed: genderedPronounsAllowedFrom(facts),
   };
 
   try {

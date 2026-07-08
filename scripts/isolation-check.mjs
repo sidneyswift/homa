@@ -87,6 +87,12 @@ await expectEmptyRead("lead_children");
 await expectEmptyRead("lead_answers");
 await expectEmptyRead("lead_reports");
 await expectEmptyRead("lead_plans");
+// Product report tables (migration #23): family-scoped by RLS through
+// is_child_family_member. Anon has no policy, so reads return nothing;
+// cross-family access is proven by the same identity model as children.
+await expectEmptyRead("child_reports");
+await expectEmptyRead("child_answers");
+await expectEmptyRead("child_plans");
 
 await expectInsertDenied(
   "families",
@@ -177,6 +183,21 @@ await expectInsertDenied(
     child_id: "00000000-0000-0000-0000-000000000000",
   },
   "anon cannot forge lead_children child links",
+);
+await expectInsertDenied(
+  "child_reports",
+  { child_id: "00000000-0000-0000-0000-000000000000", scores: {}, bank_version: "x" },
+  "anon cannot forge product child reports",
+);
+await expectInsertDenied(
+  "child_answers",
+  { child_id: "00000000-0000-0000-0000-000000000000", question_id: "math.probe", answer: "easily" },
+  "anon cannot forge product child answers",
+);
+await expectInsertDenied(
+  "child_plans",
+  { child_id: "00000000-0000-0000-0000-000000000000", domain_id: "math", plan: {}, bank_version: "x" },
+  "anon cannot forge product child plans",
 );
 
 if (failures.length > 0) {

@@ -393,6 +393,7 @@ report("rendered sentences: no banned words, no em dashes, no negative numbers",
     ["diagnosis phrasing", { ...base, drawers: { math: "This may suggest ADHD." } }, "drawer.math"],
     ["empty piece", { ...base, note: "  " }, "note"],
     ["keepsake with an invented number", { ...base, keepsake: "You are 5 whole years of wonder." }, "keepsake"],
+    ["pronoun guessed from the name", { ...base, note: "She loves to count." }, "note"],
   ];
   let gateOk = true;
   for (const [label, narrative, expectedKey] of cases) {
@@ -414,6 +415,16 @@ report("rendered sentences: no banned words, no em dashes, no negative numbers",
   if (allowedNumberPass.rejectedPieces.length > 0) {
     gateOk = false;
     failures.push("gate rejects numbers that ARE in the facts");
+  }
+  // The parent's own words are the one license for he/she (a boy named
+  // Story must never be "she" just because the model liked the name).
+  const parentPronounPass = validateNarrative(
+    { ...base, note: "You said he lights up during dice games, and it shows." },
+    { ...gateContext, genderedPronounsAllowed: true },
+  );
+  if (parentPronounPass.rejectedPieces.length > 0) {
+    gateOk = false;
+    failures.push("gate rejects pronouns the parent herself used");
   }
   const planVerdicts = validatePlanNarrative(
     { intro: goodPiece, weeks: [goodPiece, goodPiece, goodPiece], closing: "She is behind." },

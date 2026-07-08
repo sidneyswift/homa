@@ -2,6 +2,7 @@ import {
   ageInMonths,
   ageLabel,
   domainLine,
+  GENDERED_PRONOUNS,
   getMapDomain,
   growingActivityFor,
   type MapAnswer,
@@ -226,4 +227,19 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
  * never disagree. */
 export function allowedNumbersFrom(facts: unknown): string[] {
   return [...new Set(JSON.stringify(facts).match(/\d+/g) ?? [])];
+}
+
+/**
+ * True only when the parent's OWN words in the facts gender the child
+ * (a whats-working note, a help-with entry). The product never asks a
+ * child's sex, so this is the writer's only license to say he or she;
+ * everything else is "they", and the gate enforces it (same derive-from-
+ * the-payload pattern as allowedNumbers, so prompt and gate never drift).
+ */
+export function genderedPronounsAllowedFrom(parentWords: {
+  whatsWorking: Record<string, string>;
+  helpWith: string[];
+}): boolean {
+  const text = [...Object.values(parentWords.whatsWorking), ...parentWords.helpWith].join(" ");
+  return GENDERED_PRONOUNS.test(text);
 }

@@ -31,7 +31,7 @@ const { planQuestions, scoreMap, validateNarrative } = await import(
 );
 type MapAnswer = import("../packages/core/src/index").MapAnswer;
 type MapAnswerInput = import("../packages/core/src/index").MapAnswerInput;
-const { buildReportFacts, allowedNumbersFrom } = await import(
+const { buildReportFacts, allowedNumbersFrom, genderedPronounsAllowedFrom } = await import(
   "../apps/web/lib/map/narrative-facts"
 );
 const { generateReportNarrative } = await import("../apps/web/lib/map/narrative-generate");
@@ -83,6 +83,7 @@ async function generateFixture(label: string, input: Parameters<typeof buildRepo
     allowedNumbers: allowedNumbersFrom(facts),
     siblingNames,
     childName: input.childName,
+    genderedPronounsAllowed: genderedPronounsAllowedFrom(facts),
     expectedSubjects: facts.subjects.map((subject) => subject.subjectId),
     expectedDrawers: facts.subjects
       .filter((subject) => subject.position !== "not_mapped")

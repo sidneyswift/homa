@@ -80,7 +80,7 @@ export {
   type DomainLine,
 } from "./map/sentences";
 
-export { BANNED_WORDS, EM_DASH } from "./map/copy-laws";
+export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
 
 export {
   type NarrativeMeta,

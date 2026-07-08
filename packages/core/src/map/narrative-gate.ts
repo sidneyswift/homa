@@ -1,4 +1,4 @@
-import { BANNED_WORDS, EM_DASH } from "./copy-laws";
+import { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./copy-laws";
 import type { PlanNarrative, ReportNarrative } from "./narrative";
 
 /**
@@ -19,6 +19,12 @@ export interface NarrativeGateContext {
    * siblings, and a report is a per-child artifact). */
   siblingNames: readonly string[];
   childName: string;
+  /** True only when the parent's OWN words in the facts payload gender
+   * the child (a whats-working note, a help-with entry). False means the
+   * writer was never told, so any he/she/him/her in generated prose is an
+   * inference from the name and rejects the piece: the child is "they"
+   * until the parent says otherwise. */
+  genderedPronounsAllowed?: boolean;
   /** Subject ids that must each have a card line. */
   expectedSubjects?: readonly string[];
   /** Subject ids that must each have a drawer explainer. */
@@ -63,6 +69,9 @@ function pieceProblem(
   if (BANNED_WORDS.test(text)) return "banned word";
   if (EM_DASH.test(text)) return "em dash";
   if (NEGATIVE_NUMBER.test(text)) return "negative number";
+  if (!context.genderedPronounsAllowed && GENDERED_PRONOUNS.test(text)) {
+    return "gendered pronoun not in the parent's own words";
+  }
 
   const lower = text.toLowerCase();
   for (const phrase of DIAGNOSIS_SUBSTRINGS) {

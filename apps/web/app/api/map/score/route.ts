@@ -8,6 +8,7 @@ import { emitMapEvent } from "../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../lib/map/narrative-runner";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { mirrorReportToProduct } from "../../../../lib/map/report-mirror";
 import { requireLead } from "../../../../lib/map/session";
 import { createReport, markReportEmailed, reportAlreadyEmailed } from "../../../../lib/map/store";
 
@@ -86,6 +87,20 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    // Mirror the freshly scored report into the product tables the
+    // workspace reads (migration #23), keyed by the child_id the bridge
+    // just linked. Foreground so scores and answers are in the workspace
+    // the moment she lands; best-effort, since the lead tables remain the
+    // source of truth and the narrative pass below re-mirrors the words.
+    try {
+      await mirrorReportToProduct(lead.id, report.childId);
+    } catch (error) {
+      console.error(
+        "map/score report mirror failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+
     // Background phase, post-response: write the narrative (flag-gated,
     // uncapped), THEN send the report email so the emailed link opens a
     // finished report. Each step fails alone; the runner stores "failed"
@@ -94,6 +109,10 @@ export async function POST(request: Request): Promise<Response> {
       if (narrativeEnabled()) {
         try {
           await runReportNarrative(report.childId);
+          // Re-mirror so the workspace's product report gains the words
+          // the background pass just wrote (the foreground mirror above
+          // captured a narrative-less snapshot). Idempotent upsert.
+          await mirrorReportToProduct(lead.id, report.childId);
         } catch (error) {
           console.error(
             "map/score narrative failed:",

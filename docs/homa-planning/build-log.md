@@ -3,6 +3,52 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-07 (night) · Family workspace, Phase A: report data moves to product tables (founder rulings, this session)
+
+Two founder decisions this session, both about turning the single long
+tokenized report into a managed family workspace:
+
+1. "Migrate reports/scores into product tables so the workspace owns them
+   natively." Report data had lived only in the lead tables (deny-all,
+   reached by a token). It now also lives in family-scoped product tables
+   the signed-in parent reads under RLS.
+2. "No more invite-only." This extends the 2026-07-07 homepage InviteBand
+   removal to the whole product (report CTA, FAQ, terms, privacy, hub
+   pending states, emails). Only the schema/data groundwork ships in this
+   entry; the invite-only copy sweep is Phase C, still pending.
+
+Shipped in Phase A (migration + write path), applied live to homa-prod:
+
+- **Migration #23 `20260707190000_child_reports.sql`:** `child_reports`,
+  `child_answers`, `child_plans`, mirroring the lead_* shapes minus the
+  funnel/sharing columns (token, viewed_at, emailed_at, revoked_at). RLS
+  on all three, four policies each, scoped through a new
+  `is_child_family_member(cid)` security-definer helper (child to family
+  membership without RLS recursion, same shape as `is_family_member`). A
+  one-time backfill copied every already-linked kid across via
+  `lead_children.child_id` (4 reports, 145 answers, 1 plan on prod).
+- **Advisor hygiene:** the new helper was anon-executable via the default
+  PUBLIC EXECUTE grant; patched to mirror migration #3 (revoke PUBLIC +
+  anon, grant authenticated). Security advisors then clean except the
+  pre-existing accepted set.
+- **`report-mirror.ts` + score-route hook:** every score now mirrors the
+  report into the product tables under the parent's session (no service
+  role), once in the foreground (scores + answers immediately) and once
+  after the background narrative pass (the words reach parity). Reads via
+  the server-only mapDb, writes via the caller's RLS client.
+- **`scripts/isolation-check.mjs`** extended: anon can neither read nor
+  forge the three new tables. `pnpm check:isolation` and `check:events`
+  green; typecheck green. (`check:map` has 3 pre-existing failures from
+  in-flight narrative-fixture work, unrelated to this change.)
+
+Decided alone (auditable): mirror shape mirrors lead_* verbatim so the
+scorer/renderer are reused; member-write RLS policies (a parent can write
+their own child's rows, consistent with children/family_memories) accept
+that a parent could in principle rewrite their own scores, this is not a
+cross-tenant issue and matches the existing pattern. NOT yet done: the
+authed read module + the workspace UI (Phase B, built together against
+the real render needs), and the invite-only copy sweep (Phase C).
+
 ## 2026-07-07 (night) · Ribbon ticker bug: words vanishing mid-loop, fixed (founder screenshot: "this squiggle is missing words")
 
 Root cause: the ticker's `<textPath>` (added earlier tonight) rode the
