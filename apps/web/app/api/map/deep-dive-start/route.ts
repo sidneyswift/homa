@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
+import { requireFamily } from "../../../../lib/map/session";
 
 /**
  * POST /api/map/deep-dive-start
@@ -20,14 +20,14 @@ export async function POST(request: Request): Promise<Response> {
   if (rateLimited(`dds:${clientIp(request)}`, 30)) {
     return Response.json({ ok: true });
   }
-  const lead = await requireLead();
-  if (!lead) return Response.json({ ok: false }, { status: 401 });
+  const family = await requireFamily();
+  if (!family) return Response.json({ ok: false }, { status: 401 });
 
   try {
     const parsed = schema.safeParse(await request.json());
     if (parsed.success) {
       await emitMapEvent("map.deep_dive_started", {
-        lead_id: lead.id,
+        family_id: family.id,
         child_id: parsed.data.childId,
         domain: parsed.data.domain,
         mode: parsed.data.mode,

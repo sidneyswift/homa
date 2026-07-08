@@ -83,8 +83,8 @@ const rows = await sql<BucketRow[]>`
     ) / ${BUCKET_MONTHS}) * ${BUCKET_MONTHS})::int as age_bucket,
     a.answer,
     count(*)::int as n
-  from public.lead_answers a
-  join public.lead_children c on c.id = a.lead_child_id
+  from public.child_answers a
+  join public.lead_children c on c.id = a.child_id
   where a.answer in ('easily', 'getting_there', 'not_yet')
   group by 1, 2, 3
   order by 1, 2
@@ -92,8 +92,8 @@ const rows = await sql<BucketRow[]>`
 
 const totals = await sql<{ children: number; answers: number }[]>`
   select
-    (select count(distinct lead_child_id) from public.lead_answers)::int as children,
-    (select count(*) from public.lead_answers)::int as answers
+    (select count(distinct child_id) from public.child_answers)::int as children,
+    (select count(*) from public.child_answers)::int as answers
 `;
 
 await sql.end();

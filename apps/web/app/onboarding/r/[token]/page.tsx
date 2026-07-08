@@ -93,7 +93,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
   // The relocated "About your homeschool" card shows until the family
   // context bag has anything in it (same one-shot rule the old extras
   // step used).
-  const familyContextDone = await hasFamilyContext(report.leadId);
+  const familyContextDone = await hasFamilyContext(report.familyId);
 
   // Render-time join against the compliance reference table: the report
   // row never stores a legal claim, so none can go stale on it.

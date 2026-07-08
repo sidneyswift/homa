@@ -8,12 +8,12 @@ import { useEffect } from "react";
  * report renders on the server.
  */
 export function ReportActions({
-  leadId,
+  familyId,
   childId,
   childName,
   token,
 }: {
-  leadId: string;
+  familyId: string;
   childId: string;
   childName: string;
   token: string;
@@ -23,9 +23,9 @@ export function ReportActions({
     void fetch("/api/map/report-viewed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId, childId, entry: fresh ? "instant" : "link" }),
+      body: JSON.stringify({ familyId, childId, entry: fresh ? "instant" : "link" }),
     }).catch(() => undefined);
-  }, [leadId, childId]);
+  }, [familyId, childId]);
 
   async function share() {
     const url = `${window.location.origin}/onboarding/r/${token}`;

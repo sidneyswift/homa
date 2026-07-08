@@ -4,8 +4,8 @@ import { mapSignupSchema, normalizeUsPhoneE164 } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
-import { linkAuthUser } from "../../../../lib/map/store";
+import { requireFamily } from "../../../../lib/map/session";
+import { attachAuthUser } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
@@ -18,24 +18,23 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  * account. Google sign-ups never reach this route: /api/map/state links
  * their account the moment they return from the OAuth redirect.
  *
- * Deliberately does not call create_my_family: that provisions the real
- * product's tenant workspace (M1-02), which this pre-tenant lead flow
- * (Deliverable 0) doesn't touch. Linking auth_user_id here is enough to
- * carry the account forward into that workspace later.
+ * One world: the family row has existed since the first tap, so this is
+ * purely an identity upgrade (one membership insert inside
+ * attachAuthUser). Nothing migrates; the workspace was always here.
  */
 export async function POST(request: Request): Promise<Response> {
   if (rateLimited(`signup:${clientIp(request)}`, 10)) {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const family = await requireFamily();
+  if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
-  if (!lead.email) {
+  if (!family.email) {
     return Response.json({ ok: false, reason: "no-email" }, { status: 400 });
   }
-  if (lead.auth_user_id) {
+  if (family.has_account) {
     // Already an account (double submit, or a Google link that raced this
     // request): nothing to do, but not an error either.
     return Response.json({ ok: true });
@@ -57,7 +56,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const supabase = await createSupabaseServerClient();
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: lead.email,
+      email: family.email,
       password: input.password,
       options: {
         data: { given_name: input.firstName, family_name: input.lastName ?? "" },
@@ -84,7 +83,7 @@ export async function POST(request: Request): Promise<Response> {
     // but sign in explicitly anyway so the session cookie is set
     // deterministically even if that project setting ever changes.
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: lead.email,
+      email: family.email,
       password: input.password,
     });
     if (signInError) {
@@ -94,10 +93,10 @@ export async function POST(request: Request): Promise<Response> {
     // Optional field: an unparseable number is skipped, never a failure.
     const phoneE164 = input.phone ? normalizeUsPhoneE164(input.phone) : null;
 
-    const { leadId, returning, resumeToken } = await linkAuthUser({
-      leadId: lead.id,
+    const { familyId, returning, resumeToken } = await attachAuthUser({
+      familyId: family.id,
       authUserId: signUpData.user.id,
-      email: lead.email,
+      email: family.email,
       firstName: input.firstName,
       lastName: input.lastName,
       phoneE164: phoneE164 ?? undefined,
@@ -112,7 +111,7 @@ export async function POST(request: Request): Promise<Response> {
       maxAge: 60 * 60 * 24 * 90,
     });
 
-    await emitMapEvent("map.account_created", { lead_id: leadId, method: "password", returning });
+    await emitMapEvent("map.account_created", { family_id: familyId, method: "password", returning });
 
     return Response.json({ ok: true });
   } catch (error) {

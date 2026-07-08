@@ -61,7 +61,7 @@ export interface ReportViewData {
   birthMonth: string;
   parentFirstName: string | null;
   usState: string | null;
-  leadId: string;
+  familyId: string;
   childId: string;
   answers: { itemId: string; answer: MapAnswer }[];
   history: { scores: MapScores; generated_at: string; narrative?: ReportNarrative | null }[];
@@ -849,7 +849,7 @@ export function ReportView({
             <span>made with Homa for {report.childName}</span>
             {!sample ? (
               <ReportActions
-                leadId={report.leadId}
+                familyId={report.familyId}
                 childId={report.childId}
                 childName={report.childName}
                 token={report.token}

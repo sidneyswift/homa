@@ -24,11 +24,13 @@ import { Doodle } from "./Doodle";
  *
  * Photo per founder screenshot 2026-07-06 (second pass): plain rounded
  * rectangle (radius-xl + shadow-xl), not the earlier organic blob crop,
- * with a floating "proof" stat card at its bottom-left corner echoing
- * Features' "Proof it's working" card (same ChartLine icon, sage tint,
- * same "12 points since April" number) so the hero previews that payoff
- * before the visitor ever scrolls to it. The heart doodle that lived in
- * that corner moved out to make room.
+ * with a floating "proof" card at its bottom-left corner echoing
+ * Features' "Proof it's working" card (sage tint) so the hero previews
+ * that payoff before the visitor ever scrolls to it. The heart doodle
+ * that lived in that corner moved out to make room. Card copy per founder
+ * screenshot 2026-07-07: the earlier "12 pts" stat was invented (the
+ * progress report has no points scale) and read as noise without context,
+ * so the card now speaks the report's own movement language, "moved up".
  *
  * Copy per founder call 2026-07-06 (third pass): headline leads with "Meet
  * Homa" instead of "Homa is", the warmer introduction of the two while
@@ -156,10 +158,10 @@ export function Hero() {
                   lineHeight: 1.1,
                 }}
               >
-                {"\u25b2"} 12 pts
+                Moved up in math
               </p>
               <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                Maya {"\u00b7"} Math, since April
+                Maya {"\u00b7"} since April
               </p>
             </div>
           </div>

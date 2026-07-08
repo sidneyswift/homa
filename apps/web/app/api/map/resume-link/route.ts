@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getLeadByResumeToken } from "../../../../lib/map/store";
+import { getFamilyByResumeToken } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
@@ -16,8 +16,8 @@ export async function GET(request: NextRequest): Promise<Response> {
   const destination = new URL("/onboarding", request.nextUrl.origin);
 
   if (token) {
-    const lead = await getLeadByResumeToken(token);
-    if (lead) {
+    const family = await getFamilyByResumeToken(token);
+    if (family) {
       const cookieStore = await cookies();
       cookieStore.set(MAP_RESUME_COOKIE, token, {
         httpOnly: true,

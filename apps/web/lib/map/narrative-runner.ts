@@ -82,14 +82,14 @@ export async function runReportNarrative(childId: string): Promise<void> {
 
     if (verdicts.failed) {
       await emitMapEvent("map.narrative_fallback", {
-        lead_id: source.leadId,
+        family_id: source.familyId,
         child_id: childId,
         kind: "report",
         reason: "gate-failed",
       });
     } else {
       await emitMapEvent("map.narrative_generated", {
-        lead_id: source.leadId,
+        family_id: source.familyId,
         child_id: childId,
         kind: "report",
         duration_ms: generated.durationMs,
@@ -107,7 +107,7 @@ export async function runReportNarrative(childId: string): Promise<void> {
       failReason: message.slice(0, 400),
     });
     await emitMapEvent("map.narrative_fallback", {
-      lead_id: source.leadId,
+      family_id: source.familyId,
       child_id: childId,
       kind: "report",
       reason: "generation-error",
@@ -164,14 +164,14 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
 
     if (verdicts.failed) {
       await emitMapEvent("map.narrative_fallback", {
-        lead_id: source.leadId,
+        family_id: source.familyId,
         child_id: childId,
         kind: "plan",
         reason: "gate-failed",
       });
     } else {
       await emitMapEvent("map.narrative_generated", {
-        lead_id: source.leadId,
+        family_id: source.familyId,
         child_id: childId,
         kind: "plan",
         duration_ms: generated.durationMs,
@@ -189,7 +189,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
       failReason: message.slice(0, 400),
     });
     await emitMapEvent("map.narrative_fallback", {
-      lead_id: source.leadId,
+      family_id: source.familyId,
       child_id: childId,
       kind: "plan",
       reason: "generation-error",

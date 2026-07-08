@@ -4,8 +4,8 @@ import { mapClaimSchema, WAITLIST_SOURCES } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
-import { claimLead, mirrorToWaitlist } from "../../../../lib/map/store";
+import { requireFamily } from "../../../../lib/map/session";
+import { claimFamily, mirrorToWaitlist } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
@@ -22,8 +22,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const family = await requireFamily();
+  if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -45,18 +45,18 @@ export async function POST(request: Request): Promise<Response> {
     // name arrives later at account signup. If this lead somehow already
     // has a name (legacy order, Google profile), carry it forward into the
     // claim and the waitlist mirror rather than dropping it.
-    const { leadId, returning, resumeToken } = await claimLead({
-      leadId: lead.id,
+    const { familyId, returning, resumeToken } = await claimFamily({
+      familyId: family.id,
       email: input.email,
-      firstName: lead.first_name ?? undefined,
-      lastName: lead.last_name ?? undefined,
-      usState: input.usState ?? lead.us_state ?? undefined,
+      firstName: family.first_name ?? undefined,
+      lastName: family.last_name ?? undefined,
+      usState: input.usState ?? family.us_state ?? undefined,
     });
     await mirrorToWaitlist({
       email: input.email,
-      firstName: lead.first_name ?? undefined,
-      usState: input.usState ?? lead.us_state ?? undefined,
-      source: lead.source,
+      firstName: family.first_name ?? undefined,
+      usState: input.usState ?? family.us_state ?? undefined,
+      source: family.source,
       utm: {},
     });
 
@@ -69,11 +69,11 @@ export async function POST(request: Request): Promise<Response> {
       maxAge: 60 * 60 * 24 * 90,
     });
 
-    const source = WAITLIST_SOURCES.includes(lead.source as (typeof WAITLIST_SOURCES)[number])
-      ? (lead.source as (typeof WAITLIST_SOURCES)[number])
+    const source = WAITLIST_SOURCES.includes(family.source as (typeof WAITLIST_SOURCES)[number])
+      ? (family.source as (typeof WAITLIST_SOURCES)[number])
       : "other";
     await emitMapEvent("map.claimed", {
-      lead_id: leadId,
+      family_id: familyId,
       source,
       has_state: Boolean(input.usState),
       returning,

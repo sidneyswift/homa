@@ -2,14 +2,12 @@ import { after } from "next/server";
 
 import { MAP_BANK_VERSION, mapScoreRequestSchema } from "@homa/core";
 
-import { ensureFamilyWorkspace } from "../../../../lib/map/bridge";
 import { sendReportEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../lib/map/narrative-runner";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { mirrorReportToProduct } from "../../../../lib/map/report-mirror";
-import { requireLead } from "../../../../lib/map/session";
+import { requireFamily } from "../../../../lib/map/session";
 import { createReport, markReportEmailed, reportAlreadyEmailed } from "../../../../lib/map/store";
 
 /**
@@ -22,10 +20,9 @@ import { createReport, markReportEmailed, reportAlreadyEmailed } from "../../../
  * finished report. An email or generation failure never blocks anything:
  * the report page falls back to template sentences.
  *
- * Every score (first or rescore) also runs the family-workspace bridge
- * (founder ruling 2026-07-06): her real families/children rows are
- * provisioned or synced from the lead kids, so the agent's family context
- * lights up the moment the first report exists.
+ * One world: the report row IS the workspace's report row, so there is
+ * no bridge and no mirror here anymore. The family has existed since the
+ * first tap; scoring just fills it in.
  */
 
 // The background phase holds a live model call with no time cap by ruling;
@@ -37,13 +34,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const family = await requireFamily();
+  if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
   // Signup (email) always runs right before this call; a null email here
   // means the client skipped ahead of the flow it was given.
-  if (!lead.email) {
+  if (!family.email) {
     return Response.json({ ok: false, reason: "not-claimed" }, { status: 409 });
   }
 
@@ -63,43 +60,18 @@ export async function POST(request: Request): Promise<Response> {
     // re-send the email; only the first scoring of a child emails her.
     const alreadyEmailed = await reportAlreadyEmailed(parsed.data.childId);
 
-    const report = await createReport(lead.id, parsed.data.childId);
+    const report = await createReport(family.id, parsed.data.childId);
     if (!report) {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
     }
 
     await emitMapEvent("map.report_generated", {
-      lead_id: lead.id,
+      family_id: family.id,
       child_id: report.childId,
       mapped_domains: report.scores.mappedCount,
       observations: report.scores.observationCount,
       bank_version: MAP_BANK_VERSION,
     });
-
-    // Best-effort by design: a bridge failure must never block or delay
-    // the report itself. Idempotent, so the next score simply retries.
-    try {
-      await ensureFamilyWorkspace(lead.id);
-    } catch (error) {
-      console.error(
-        "map/score family bridge failed:",
-        error instanceof Error ? error.message : "unknown",
-      );
-    }
-
-    // Mirror the freshly scored report into the product tables the
-    // workspace reads (migration #23), keyed by the child_id the bridge
-    // just linked. Foreground so scores and answers are in the workspace
-    // the moment she lands; best-effort, since the lead tables remain the
-    // source of truth and the narrative pass below re-mirrors the words.
-    try {
-      await mirrorReportToProduct(lead.id, report.childId);
-    } catch (error) {
-      console.error(
-        "map/score report mirror failed:",
-        error instanceof Error ? error.message : "unknown",
-      );
-    }
 
     // Background phase, post-response: write the narrative (flag-gated,
     // uncapped), THEN send the report email so the emailed link opens a
@@ -109,10 +81,6 @@ export async function POST(request: Request): Promise<Response> {
       if (narrativeEnabled()) {
         try {
           await runReportNarrative(report.childId);
-          // Re-mirror so the workspace's product report gains the words
-          // the background pass just wrote (the foreground mirror above
-          // captured a narrative-less snapshot). Idempotent upsert.
-          await mirrorReportToProduct(lead.id, report.childId);
         } catch (error) {
           console.error(
             "map/score narrative failed:",

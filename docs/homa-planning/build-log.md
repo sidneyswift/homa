@@ -3,6 +3,37 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-07 (late night) · Tester voice memos transcribed and ingested
+
+Fourteen voice memos (~11 minutes, recorded this afternoon by a pilot tester
+walking the product) arrived in `~/Downloads/homa-notes-july-7/`; founder
+instruction was "transcribe and ingest".
+
+- **Transcription:** fal.ai Whisper (`fal-ai/whisper`) with the existing
+  `FAL_API_KEY`; audio re-encoded m4a to mp3 first (fal rejects mp4 data
+  URLs). The audio itself stays out of the repo.
+- **Canonical transcript:**
+  `docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md`,
+  verbatim per memo, with an index mapping each product ask to its surface
+  and ticket (MJ-06 thinking state, M1-02 chat history, M2-05 worksheet art,
+  M2-03 tutorial, M3-11 efficacy loop, create_worksheet closing-line swap
+  plus watermark per D7 attribution).
+- **Marketing extraction:** 7 new signals in `marketing/signals/`
+  (reader-story series, testimonial anatomy, chapters, trial release
+  program, socials cross-post loop, "assists never runs" voice insight, the
+  efficacy loop in her words), all `status: new`, sourced to the transcript
+  with line locators. No duplicates against the existing reservoir.
+- **Copy flag surfaced, not changed:** "It ran our homeschool first."
+  (`apps/web/components/marketing/Stories.tsx` L28) reads to her as Homa in
+  control "instead of Homa is assisting". Founder call on any rewording.
+
+Decided alone (auditable): the evidence folder (journeys/09 §5.1) did not
+exist yet since M0-07 is pending, so only `raw/` plus this one file were
+created, not the full scaffold. Kids' names were redacted to roles in the
+transcript per the family-data law; "Alyssa" kept as transcribed with a note
+that it is most likely Alessa. Formal §5.2 assumption coding deferred to
+M0-07.
+
 ## 2026-07-07 (night) · Family workspace, Phase A: report data moves to product tables (founder rulings, this session)
 
 Two founder decisions this session, both about turning the single long
@@ -192,6 +223,54 @@ upgraded in place (assistant-0f2cfd3a):
   via GET. Note: trial-tier disclaimer and 10-min cap should be gone now
   that the account is Verified (founder completed KYC 2026-07-07
   morning); confirm audibly on the next call.
+
+## 2026-07-07 (night) · ONE WORLD: the lead world, bridge, and mirror retire (founder: "architect the db and onboarding as scalable and simple as possible BEFORE we launch")
+
+Founder ruling, overriding the agent's own wait-until-after-conference
+recommendation with the stronger argument: we have zero real users today
+(one friend family), so pre-launch is the cheapest this migration will
+ever be, and every day after launch adds compatibility constraints.
+Executed the same night.
+
+The shape: a `families` row is the account container from the FIRST tap.
+Migration #24 folds the funnel columns into families (email, names,
+phone, source, utm, status, resume/link token hashes, reminder stamp,
+context, updated_at), the checklist columns into children (context,
+pending_band, band_ready stamp), and the share token + email/view/revoke
+stamps into child_reports. Onboarding writes children / child_answers /
+child_reports / child_plans directly; signup is an identity upgrade (one
+family_members insert inside attachAuthUser, which also folds
+same-email/same-user families together and seeds what_works memories).
+DELETED OUTRIGHT: lib/map/bridge.ts, lib/map/report-mirror.ts, the
+map.family_bridged/skipped events, and every lead_* read and write in
+the app. requireLead became requireFamily with a second door: a signed-in
+Supabase session resolves the family via membership when the cookie is
+absent. All map.* event props renamed lead_id to family_id.
+
+Deliberate postures, unchanged: pre-signup families are RLS-invisible
+(memberless) and reachable only through the server module by cookie-token
+hash, so the deny-all posture survives the unification; report tokens
+stay unhashed shareable artifacts (D7) and now live where the report
+lives; anonymous sign-ins stay DISABLED in Supabase auth (probed 422):
+the cookie IS the pre-signup identity, no auth.users row until signup,
+which keeps bounce abuse away from auth entirely.
+
+Verified: typecheck, lint, build, check:map, check:events,
+check:isolation (probes rewritten: lead_* probes retired, child_* read +
+insert-forge probes in), plus a full scripted e2e against homa-prod
+through the running app: start, add kid, 5 real answers, extras with
+whats-working + curriculums, claim, password signup, score (token
+returned), state (hasAccount true, token matches), report correction,
+consent tap (plan built + retest armed), progress sync, report page
+serving the writing beat, plan page serving its beat. Test family
+deleted scoped by ids, residue zero.
+
+Migration-window note, proving the founder's timing argument: Alessa
+re-onboarded on the OLD prod code while this was being built; her new
+lead rows were backfilled into her family (funnel columns + report
+token) by re-running the #24 backfill before the deploy. The lead_*
+tables drop in a follow-up migration only after the new code is READY in
+prod and a final backfill sweep of the gap window comes back empty.
 
 ## 2026-07-07 (morning) · The 100x report build: living record, memory, months, proof (founder: "Do all this. BOIL THE OCEAN.")
 

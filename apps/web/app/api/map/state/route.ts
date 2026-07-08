@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 
 import { emitMapEvent } from "../../../../lib/map/events";
-import { requireLead } from "../../../../lib/map/session";
-import { getLeadByResumeToken, getLeadState, hasFamilyContext, linkAuthUser } from "../../../../lib/map/store";
+import { requireFamily } from "../../../../lib/map/session";
+import { attachAuthUser, getFamilyByResumeToken, getFamilyState, hasFamilyContext } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
@@ -23,11 +23,11 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  * client never needs a dedicated "did Google work" round trip.
  */
 export async function GET(): Promise<Response> {
-  let lead = await requireLead();
-  if (!lead) return Response.json({ ok: false });
+  let family = await requireFamily();
+  if (!family) return Response.json({ ok: false });
 
   try {
-    if (!lead.auth_user_id) {
+    if (!family.has_account) {
       const supabase = await createSupabaseServerClient();
       const {
         data: { user },
@@ -42,8 +42,8 @@ export async function GET(): Promise<Response> {
             ? meta.family_name.trim()
             : fullName.split(" ").slice(1).join(" ") || undefined;
 
-        const { leadId, returning, resumeToken } = await linkAuthUser({
-          leadId: lead.id,
+        const { familyId, returning, resumeToken } = await attachAuthUser({
+          familyId: family.id,
           authUserId: user.id,
           email: user.email,
           firstName,
@@ -59,22 +59,22 @@ export async function GET(): Promise<Response> {
           maxAge: 60 * 60 * 24 * 90,
         });
 
-        const relinked = await getLeadByResumeToken(resumeToken);
-        if (relinked) lead = relinked;
-        await emitMapEvent("map.account_created", { lead_id: leadId, method: "google", returning });
+        const relinked = await getFamilyByResumeToken(resumeToken);
+        if (relinked) family = relinked;
+        await emitMapEvent("map.account_created", { family_id: familyId, method: "google", returning });
       }
     }
 
-    const state = await getLeadState(lead);
-    const familyContextDone = await hasFamilyContext(lead.id);
+    const state = await getFamilyState(family);
+    const familyContextDone = await hasFamilyContext(family.id);
     return Response.json({
       ok: true,
-      firstName: state.lead.first_name,
-      hasAccount: state.lead.auth_user_id !== null,
+      firstName: state.family.first_name,
+      hasAccount: state.family.has_account,
       familyContextDone,
       // The caller's own email (cookie-authenticated), for the
       // "send this link to my other device" button.
-      email: state.lead.email,
+      email: state.family.email,
       children: state.children.map((child) => ({
         id: child.id,
         name: child.name,

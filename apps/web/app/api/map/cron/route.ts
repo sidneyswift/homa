@@ -4,7 +4,7 @@ import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../..
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
   childrenNowInBand,
-  leadsNeedingReminder,
+  familiesNeedingReminder,
   markBandReady,
   markReminderSent,
   markRetestEmailed,
@@ -38,23 +38,23 @@ export async function GET(request: Request): Promise<Response> {
   let purged = 0;
 
   try {
-    for (const lead of await leadsNeedingReminder()) {
-      const token = await mintLinkToken(lead.id);
-      const sent = await sendReminderEmail(lead.email, lead.first_child, token);
+    for (const family of await familiesNeedingReminder()) {
+      const token = await mintLinkToken(family.id);
+      const sent = await sendReminderEmail(family.email, family.first_child, token);
       if (sent) {
-        await markReminderSent(lead.id);
-        await emitMapEvent("map.reminder_sent", { lead_id: lead.id });
+        await markReminderSent(family.id);
+        await emitMapEvent("map.reminder_sent", { family_id: family.id });
         reminders += 1;
       }
     }
 
     for (const child of await childrenNowInBand()) {
-      const token = await mintLinkToken(child.lead_id);
+      const token = await mintLinkToken(child.family_id);
       const sent = await sendBandReadyEmail(child.email, child.child_name, token);
       if (sent) {
         await markBandReady(child.child_id);
         await emitMapEvent("map.band_ready_emailed", {
-          lead_id: child.lead_id,
+          family_id: child.family_id,
           child_id: child.child_id,
         });
         bandReady += 1;
@@ -62,7 +62,7 @@ export async function GET(request: Request): Promise<Response> {
     }
 
     for (const plan of await plansNeedingRetest()) {
-      const token = await mintLinkToken(plan.lead_id);
+      const token = await mintLinkToken(plan.family_id);
       const subjectName = getMapDomain(plan.domain_id)?.displayName ?? plan.domain_id;
       const sent = await sendRetestEmail(
         plan.email,
@@ -74,7 +74,7 @@ export async function GET(request: Request): Promise<Response> {
       if (sent) {
         await markRetestEmailed(plan.plan_id);
         await emitMapEvent("map.retest_emailed", {
-          lead_id: plan.lead_id,
+          family_id: plan.family_id,
           child_id: plan.child_id,
           domain: plan.domain_id,
         });

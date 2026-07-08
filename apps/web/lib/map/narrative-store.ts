@@ -11,15 +11,14 @@ import { getMapDomain } from "@homa/core";
 import { mapDb, type DbJson } from "./db";
 
 /**
- * Narrative columns on the lead tables (migration: narrative + meta jsonb
- * on lead_reports and lead_plans), server-only via mapDb like everything
- * lead-scoped. Split from store.ts to keep modules small; the tenancy
- * posture is identical (childId always arrives pre-scoped by the caller's
- * cookie-resolved lead or by report token).
+ * Narrative reads and writes against the ONE-WORLD tables (child_reports,
+ * child_plans), server-only via mapDb like everything family-scoped. The
+ * childId always arrives pre-scoped by the caller's cookie-resolved
+ * family or by report token, exactly as before the unification.
  */
 
 export interface ReportNarrativeSource {
-  leadId: string;
+  familyId: string;
   childId: string;
   childName: string;
   birthMonth: string;
@@ -43,11 +42,10 @@ export async function getReportNarrativeSource(
   const sql = mapDb();
   const rows = await sql<
     {
-      lead_id: string;
+      family_id: string;
       child_name: string;
       birth_month: string;
-      interests: string[];
-      help_with: string | null;
+      profile: Record<string, unknown>;
       context: Record<string, unknown>;
       first_name: string | null;
       scores: MapScores;
@@ -58,28 +56,28 @@ export async function getReportNarrativeSource(
       }>;
     }[]
   >`
-    select f.id as lead_id, c.name as child_name,
+    select f.id as family_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
-           c.interests, c.help_with, c.context, f.first_name,
+           c.profile, c.context, f.first_name,
            r.scores, r.history
-    from public.lead_reports r
-    join public.lead_children c on c.id = r.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
-    where r.lead_child_id = ${childId} and f.status <> 'deleted'
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
+    where r.child_id = ${childId} and f.status <> 'deleted'
   `;
   const row = rows[0];
   if (!row) return null;
 
   const answers = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.lead_answers where lead_child_id = ${childId}
+    select question_id, answer from public.child_answers where child_id = ${childId}
   `;
   const siblings = await sql<{ name: string }[]>`
-    select name from public.lead_children
-    where lead_family_id = ${row.lead_id} and id <> ${childId}
+    select c2.name from public.children c2
+    where c2.family_id = ${row.family_id} and c2.id <> ${childId}
   `;
   const planRows = await sql<{ domain_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]>`
-    select domain_id, plan, progress from public.lead_plans
-    where lead_child_id = ${childId}
+    select domain_id, plan, progress from public.child_plans
+    where child_id = ${childId}
   `;
 
   // The writer's memory: the most recent archived letter that actually
@@ -101,10 +99,15 @@ export async function getReportNarrativeSource(
     }))
     .filter((entry) => entry.done > 0);
 
+  const profile = row.profile ?? {};
   const bag = row.context ?? {};
+  const profileInterests = Array.isArray(profile.interests)
+    ? profile.interests.filter((item): item is string => typeof item === "string")
+    : [];
   const bagInterests = Array.isArray(bag.interests)
     ? bag.interests.filter((item): item is string => typeof item === "string")
     : [];
+  const profileFocus = typeof profile.focus === "string" ? [profile.focus] : [];
   const bagHelp = Array.isArray(bag.helpWith)
     ? bag.helpWith.filter((item): item is string => typeof item === "string")
     : [];
@@ -118,12 +121,12 @@ export async function getReportNarrativeSource(
       : {};
 
   return {
-    leadId: row.lead_id,
+    familyId: row.family_id,
     childId,
     childName: row.child_name,
     birthMonth: row.birth_month,
-    interests: [...new Set([...row.interests, ...bagInterests])],
-    helpWith: [...(row.help_with ? [row.help_with] : []), ...bagHelp],
+    interests: [...new Set([...profileInterests, ...bagInterests])],
+    helpWith: [...new Set([...profileFocus, ...bagHelp])],
     whatsWorkingByDomain,
     parentFirstName: row.first_name,
     scores: row.scores,
@@ -148,10 +151,10 @@ export async function claimReportNarrative(
   meta: NarrativeMeta,
 ): Promise<boolean> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    update public.lead_reports
+  const rows = await sql<{ child_id: string }[]>`
+    update public.child_reports
     set narrative_meta = ${sql.json(meta as unknown as DbJson)}
-    where lead_child_id = ${childId}
+    where child_id = ${childId}
       and (
         narrative_meta is null
         or (
@@ -159,7 +162,7 @@ export async function claimReportNarrative(
           and (narrative_meta->>'startedAt')::timestamptz < now() - interval '10 minutes'
         )
       )
-    returning id
+    returning child_id
   `;
   return rows.length > 0;
 }
@@ -171,10 +174,11 @@ export async function storeReportNarrative(
 ): Promise<void> {
   const sql = mapDb();
   await sql`
-    update public.lead_reports
+    update public.child_reports
     set narrative = ${narrative ? sql.json(narrative as unknown as DbJson) : null},
-        narrative_meta = ${sql.json(meta as unknown as DbJson)}
-    where lead_child_id = ${childId}
+        narrative_meta = ${sql.json(meta as unknown as DbJson)},
+        updated_at = now()
+    where child_id = ${childId}
   `;
 }
 
@@ -185,10 +189,10 @@ export async function getReportNarrativeStatusByToken(
 ): Promise<{ childId: string; meta: NarrativeMeta | null } | null> {
   const sql = mapDb();
   const rows = await sql<{ child_id: string; narrative_meta: NarrativeMeta | null }[]>`
-    select r.lead_child_id as child_id, r.narrative_meta
-    from public.lead_reports r
-    join public.lead_children c on c.id = r.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
+    select r.child_id, r.narrative_meta
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
     where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];
@@ -197,7 +201,7 @@ export async function getReportNarrativeStatusByToken(
 }
 
 export interface PlanNarrativeSource {
-  leadId: string;
+  familyId: string;
   childId: string;
   childName: string;
   interests: string[];
@@ -218,33 +222,37 @@ export async function getPlanNarrativeSource(
   const sql = mapDb();
   const rows = await sql<
     {
-      lead_id: string;
+      family_id: string;
       child_name: string;
-      interests: string[];
-      help_with: string | null;
+      profile: Record<string, unknown>;
       child_context: Record<string, unknown>;
       family_context: Record<string, unknown>;
       plan: FourWeekPlan;
     }[]
   >`
-    select f.id as lead_id, c.name as child_name, c.interests, c.help_with,
+    select f.id as family_id, c.name as child_name, c.profile,
            c.context as child_context, f.context as family_context, p.plan
-    from public.lead_plans p
-    join public.lead_children c on c.id = p.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
-    where p.lead_child_id = ${childId} and p.domain_id = ${domainId}
+    from public.child_plans p
+    join public.children c on c.id = p.child_id
+    join public.families f on f.id = c.family_id
+    where p.child_id = ${childId} and p.domain_id = ${domainId}
       and f.status <> 'deleted'
   `;
   const row = rows[0];
   if (!row) return null;
 
   const siblings = await sql<{ name: string }[]>`
-    select name from public.lead_children
-    where lead_family_id = ${row.lead_id} and id <> ${childId}
+    select c2.name from public.children c2
+    where c2.family_id = ${row.family_id} and c2.id <> ${childId}
   `;
+  const profile = row.profile ?? {};
+  const profileInterests = Array.isArray(profile.interests)
+    ? profile.interests.filter((item): item is string => typeof item === "string")
+    : [];
   const bagInterests = Array.isArray(row.child_context?.interests)
     ? row.child_context.interests.filter((item): item is string => typeof item === "string")
     : [];
+  const profileFocus = typeof profile.focus === "string" ? [profile.focus] : [];
   const bagHelp = Array.isArray(row.child_context?.helpWith)
     ? row.child_context.helpWith.filter((item): item is string => typeof item === "string")
     : [];
@@ -272,14 +280,14 @@ export async function getPlanNarrativeSource(
   }
 
   return {
-    leadId: row.lead_id,
+    familyId: row.family_id,
     childId,
     childName: row.child_name,
-    interests: [...new Set([...row.interests, ...bagInterests])],
+    interests: [...new Set([...profileInterests, ...bagInterests])],
     homeschoolStyle,
     whatsWorking,
     curriculums,
-    helpWith: [...(row.help_with ? [row.help_with] : []), ...bagHelp],
+    helpWith: [...new Set([...profileFocus, ...bagHelp])],
     plan: row.plan,
     siblingNames: siblings.map((sibling) => sibling.name),
   };
@@ -292,9 +300,9 @@ export async function claimPlanNarrative(
 ): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
-    update public.lead_plans
+    update public.child_plans
     set narrative_meta = ${sql.json(meta as unknown as DbJson)}
-    where lead_child_id = ${childId} and domain_id = ${domainId}
+    where child_id = ${childId} and domain_id = ${domainId}
       and (
         narrative_meta is null
         or (
@@ -315,10 +323,11 @@ export async function storePlanNarrative(
 ): Promise<void> {
   const sql = mapDb();
   await sql`
-    update public.lead_plans
+    update public.child_plans
     set narrative = ${narrative ? sql.json(narrative as unknown as DbJson) : null},
-        narrative_meta = ${sql.json(meta as unknown as DbJson)}
-    where lead_child_id = ${childId} and domain_id = ${domainId}
+        narrative_meta = ${sql.json(meta as unknown as DbJson)},
+        updated_at = now()
+    where child_id = ${childId} and domain_id = ${domainId}
   `;
 }
 
@@ -331,10 +340,10 @@ export async function getPlanNarrativeStatusByToken(
   const sql = mapDb();
   const rows = await sql<{ child_id: string; narrative_meta: NarrativeMeta | null }[]>`
     select c.id as child_id, p.narrative_meta
-    from public.lead_reports r
-    join public.lead_children c on c.id = r.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
-    left join public.lead_plans p on p.lead_child_id = c.id and p.domain_id = ${domainId}
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
+    left join public.child_plans p on p.child_id = c.id and p.domain_id = ${domainId}
     where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];

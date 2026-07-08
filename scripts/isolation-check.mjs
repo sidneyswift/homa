@@ -80,13 +80,12 @@ await expectEmptyRead("state_requirements");
 // Family texting line (migration #22): deny-all like the lead tables; the
 // phone number routes texts INTO a family, so no Data API role may touch it.
 await expectEmptyRead("family_phones");
-// Map lead tables (migration #7): deny-all RLS, zero policies, privileges
-// revoked. Anonymous traffic must see nothing and write nothing.
-await expectEmptyRead("lead_families");
-await expectEmptyRead("lead_children");
-await expectEmptyRead("lead_answers");
-await expectEmptyRead("lead_reports");
-await expectEmptyRead("lead_plans");
+// One-world onboarding tables (migration #24): the family row is the
+// account container from the first tap, memberless until signup, so
+// anonymous traffic must see nothing in any of them, ever.
+await expectEmptyRead("child_answers");
+await expectEmptyRead("child_reports");
+await expectEmptyRead("child_plans");
 // Product report tables (migration #23): family-scoped by RLS through
 // is_child_family_member. Anon has no policy, so reads return nothing;
 // cross-family access is proven by the same identity model as children.
@@ -165,24 +164,29 @@ await expectInsertDenied(
   "anon cannot self-invite via waitlist status",
 );
 await expectInsertDenied(
-  "lead_families",
-  { email: `probe-${Date.now()}@example.com` },
-  "anon cannot insert lead_families directly",
+  "child_reports",
+  { child_id: "00000000-0000-0000-0000-000000000000", scores: {}, bank_version: "x", token: "probe" },
+  "anon cannot forge child_reports",
 );
 await expectInsertDenied(
-  "lead_reports",
-  { lead_child_id: "00000000-0000-0000-0000-000000000000", scores: {}, bank_version: "x", token: "probe" },
-  "anon cannot forge lead_reports",
-);
-await expectInsertDenied(
-  "lead_children",
+  "child_answers",
   {
-    lead_family_id: "00000000-0000-0000-0000-000000000000",
-    name: "probe",
-    birth_month: "2020-01-01",
     child_id: "00000000-0000-0000-0000-000000000000",
+    question_id: "math.probe",
+    answer: "easily",
   },
-  "anon cannot forge lead_children child links",
+  "anon cannot forge child_answers",
+);
+await expectInsertDenied(
+  "child_plans",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    domain_id: "math",
+    plan: {},
+    bank_version: "x",
+    retest_at: "2026-01-01T00:00:00Z",
+  },
+  "anon cannot forge child_plans",
 );
 await expectInsertDenied(
   "child_reports",

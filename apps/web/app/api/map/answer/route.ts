@@ -2,7 +2,7 @@ import { mapAnswerSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
+import { requireFamily } from "../../../../lib/map/session";
 import { saveAnswer } from "../../../../lib/map/store";
 
 /**
@@ -16,8 +16,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const family = await requireFamily();
+  if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -33,13 +33,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const saved = await saveAnswer(lead.id, parsed.data.childId, parsed.data.itemId, parsed.data.answer);
+    const saved = await saveAnswer(family.id, parsed.data.childId, parsed.data.itemId, parsed.data.answer);
     if (!saved.ok) {
       return Response.json({ ok: false, reason: "unknown-item-or-child" }, { status: 400 });
     }
 
     await emitMapEvent("map.question_answered", {
-      lead_id: lead.id,
+      family_id: family.id,
       child_id: parsed.data.childId,
       domain: saved.domain ?? "unknown",
       answer: parsed.data.answer,

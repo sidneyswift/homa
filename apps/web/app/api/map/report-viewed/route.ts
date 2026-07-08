@@ -10,7 +10,7 @@ import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
  * pseudonymous ids that the report page itself provided.
  */
 const beaconSchema = z.object({
-  leadId: z.uuid(),
+  familyId: z.uuid(),
   childId: z.uuid(),
   entry: z.enum(["instant", "link"]),
 });
@@ -23,7 +23,7 @@ export async function POST(request: Request): Promise<Response> {
     const parsed = beaconSchema.safeParse(await request.json());
     if (parsed.success) {
       await emitMapEvent("map.report_viewed", {
-        lead_id: parsed.data.leadId,
+        family_id: parsed.data.familyId,
         child_id: parsed.data.childId,
         entry: parsed.data.entry,
       });

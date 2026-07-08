@@ -6,9 +6,14 @@ import { Badge } from "../ds/Badge";
 import { Doodle } from "../Doodle";
 
 /**
- * The four product vignettes riding the story thread, ported verbatim from
+ * The four product vignettes riding the story thread, ported from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx: the family setup card,
- * the week plan, the Tuesday check-off, and the benchmark proof card.
+ * the week plan, the Tuesday check-off, and the progress proof card. The
+ * proof card diverged from the kit per founder screenshot 2026-07-07: its
+ * "12 pts" stat was invented (the progress report has no points scale), so
+ * it now mirrors what the report really shows, the growing / on track /
+ * ahead positions and "moved up" movement, in the report's own colors
+ * (blue is growing, green is on track).
  */
 
 function weekChip(label: string, bg: string, fg: string): ReactNode {
@@ -232,27 +237,27 @@ export function ProofVignette() {
             color: "var(--text-subtle)",
           }}
         >
-          Math · benchmark
+          Math · progress report
         </span>
         <Badge tone="sage">On track</Badge>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "2.6rem", fontWeight: 700, color: "var(--sage-600)", lineHeight: 1 }}>
-          ▲ 12 pts
+          ▲ Moved up
         </span>
       </div>
       <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 6 }}>since the fractions practice set</div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: 18, height: 74 }}>
         {(
           [
-            ["Apr", 56, "var(--clay-300)"],
-            ["May", 68, "var(--sage-500)"],
+            ["Apr", "growing", 36, "var(--sky-300)"],
+            ["May", "on track", 56, "var(--sage-500)"],
           ] as const
-        ).map(([m, v, c]) => (
-          <div key={m} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1 }}>
-            <div style={{ width: "100%", maxWidth: 90, height: v * 0.8, background: c, borderRadius: "8px 8px 3px 3px" }} />
+        ).map(([month, position, barHeight, barColor]) => (
+          <div key={month} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1 }}>
+            <div style={{ width: "100%", maxWidth: 90, height: barHeight, background: barColor, borderRadius: "8px 8px 3px 3px" }} />
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--text-subtle)" }}>
-              {m} · {v}
+              {month} · {position}
             </span>
           </div>
         ))}

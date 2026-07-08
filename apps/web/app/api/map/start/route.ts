@@ -4,14 +4,15 @@ import { mapStartSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
-import { startAnonymousLead } from "../../../../lib/map/store";
+import { requireFamily } from "../../../../lib/map/session";
+import { startAnonymousFamily } from "../../../../lib/map/store";
 import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
  * POST /api/map/start
  * S1: opens an anonymous session, silently, before she's typed anything.
- * Kids and the checklist auto-save under this cookie-only lead; email is
+ * The family row exists from this first tap (one world); kids and the
+ * checklist auto-save under this cookie-only family, and email is
  * asked for once, at signup, right before the report is scored (see
  * /api/map/claim). Idempotent: a caller who already holds a valid resume
  * cookie gets a no-op success rather than a second row.
@@ -27,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const existing = await requireLead();
+  const existing = await requireFamily();
   if (existing) {
     return Response.json({ ok: true, returning: true });
   }
@@ -46,7 +47,7 @@ export async function POST(request: Request): Promise<Response> {
   const input = parsed.data;
 
   try {
-    const { leadId, resumeToken } = await startAnonymousLead({
+    const { familyId, resumeToken } = await startAnonymousFamily({
       source: input.source,
       utm: input.utm,
     });
@@ -61,7 +62,7 @@ export async function POST(request: Request): Promise<Response> {
     });
 
     await emitMapEvent("map.started", {
-      lead_id: leadId,
+      family_id: familyId,
       source: input.source,
       has_state: false,
       returning: false,

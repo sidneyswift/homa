@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Community } from "../components/marketing/Community";
 import { CtaBand } from "../components/marketing/CtaBand";
 import { Ribbon, Wave } from "../components/marketing/dividers";
 import { Faq } from "../components/marketing/Faq";
@@ -73,7 +72,10 @@ const faqJsonLd = {
  * reduced-motion fallbacks, press scale on every pressable. Invite-only
  * framing was retired from this page (founder call 2026-07-07): ScrollCta
  * replaces the old InviteBand section with a scroll-triggered nudge back
- * to /onboarding instead.
+ * to /onboarding instead. The Community section ("Find your people") and
+ * its "you don't have to do this alone" ribbon were removed the same day
+ * (founder screenshot 2026-07-07): community is roadmap-only (journeys/07
+ * open question 7), so the page no longer sells it.
  */
 export default function LandingPage() {
   return (
@@ -116,8 +118,6 @@ export default function LandingPage() {
       <HowThread />
       <Wave color="var(--bg-page-warm)" />
       <HowHomaWorksCard />
-      <Ribbon text="YOU DON'T HAVE TO DO THIS ALONE" color="var(--brand)" phase={1} />
-      <Community />
       <Wave color="var(--band-blush)" flip />
       <Stories />
       <Wave color="var(--band-blush)" />

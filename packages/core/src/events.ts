@@ -23,7 +23,7 @@ export const EVENT_SCHEMAS = {
   // Props carry pseudonymous ids, never names or emails.
   // Fired once, when the anonymous session opens (no email yet).
   "map.started": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     source: z.enum(WAITLIST_SOURCES),
     has_state: z.boolean(),
     returning: z.boolean(),
@@ -34,94 +34,78 @@ export const EVENT_SCHEMAS = {
   // from session start: a lead can now answer the whole checklist before
   // this ever fires.
   "map.claimed": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     source: z.enum(WAITLIST_SOURCES),
     has_state: z.boolean(),
     returning: z.boolean(),
   }),
   "map.child_added": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     age_months: z.number().int().min(0),
     in_range: z.boolean(),
   }),
   "map.child_removed": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
   }),
   "map.question_answered": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
     answer: z.enum(["easily", "getting_there", "not_yet", "not_sure", "skip"]),
   }),
   "map.context_added": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid().optional(),
     keys: z.array(z.string()).default([]),
   }),
-  // Fired once, the moment the anonymous lead becomes a real Supabase
+  // Fired once, the moment the anonymous family gains a real Supabase
   // Auth account: either "google" (immediate, at S1) or "password" (the
   // last question, right before the report). Separate from map.claimed
   // (which only marks the email as known) so the funnel can see how many
-  // leads ever finish becoming an account.
+  // families ever finish becoming an account.
   "map.account_created": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     method: z.enum(["google", "password"]),
     returning: z.boolean(),
   }),
   "map.report_generated": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     mapped_domains: z.number().int().min(0),
     observations: z.number().int().min(0),
     bank_version: z.string(),
   }),
-  // Fired when the score route provisions or syncs the lead's real product
-  // workspace (families/family_members/children rows, founder ruling
-  // 2026-07-06: "once they generate a report they create a family
-  // workspace"). Emitted only when something changed; a no-op rescore
-  // stays silent so the funnel is not flooded with zero-count rows.
-  "map.family_bridged": z.object({
-    lead_id: z.uuid(),
-    family_id: z.uuid(),
-    children_created: z.number().int().min(0),
-    children_updated: z.number().int().min(0),
-  }),
-  // Fired when the bridge deliberately stands down: no auth session on the
-  // scoring request (legacy email-only lead, kept on the invite-time path)
-  // or a session user that is not the lead's linked account (an emailed
-  // report link opened in a browser signed into someone else's family).
-  "map.family_bridge_skipped": z.object({
-    lead_id: z.uuid(),
-    reason: z.enum(["no-auth-session", "auth-user-mismatch"]),
-  }),
+  // The one-world unification (2026-07-07) retired the family bridge and
+  // its events: a family exists from the first tap, so there is nothing
+  // to bridge. map.family_bridged / map.family_bridge_skipped ended here.
   "map.report_viewed": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     entry: z.enum(["instant", "link"]),
   }),
   "map.reminder_sent": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
   }),
   "map.deep_dive_started": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
     mode: z.enum(["parent", "together"]),
   }),
   "map.plan_built": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
   }),
   "map.retest_emailed": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
   }),
   "map.band_ready_emailed": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
   }),
   // The living record (2026-07-07): answers edited from the report page
@@ -129,7 +113,7 @@ export const EVENT_SCHEMAS = {
   // sharpening question and the staleness re-check; changes counts the
   // batch (one event per save, not per tap).
   "map.answers_corrected": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     source: z.enum(["report_correction", "report_probe", "recheck"]),
     changes: z.number().int().min(1),
@@ -137,14 +121,14 @@ export const EVENT_SCHEMAS = {
   // The report's one-tap month: the parent explicitly asked Homa to build
   // the plan and check back, which is what arms the retest email.
   "map.plan_consented": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
   }),
   // Plan check-offs synced server-side (one event per save; done_count is
   // the running total, so the funnel reads practice volume without PII).
   "map.plan_progress": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     domain: z.string(),
     done_count: z.number().int().min(0),
@@ -152,7 +136,7 @@ export const EVENT_SCHEMAS = {
   // The LLM narrative layer (D8 overturn, 2026-07-06). One event per
   // finished generation; kind separates the report from a four-week plan.
   "map.narrative_generated": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     kind: z.enum(["report", "plan"]),
     duration_ms: z.number().int().min(0),
@@ -163,7 +147,7 @@ export const EVENT_SCHEMAS = {
   // Fired when a generation could not be shown (gate failed the whole
   // thing, or the call errored) and templates rendered instead.
   "map.narrative_fallback": z.object({
-    lead_id: z.uuid(),
+    family_id: z.uuid(),
     child_id: z.uuid(),
     kind: z.enum(["report", "plan"]),
     reason: z.enum(["gate-failed", "generation-error"]),

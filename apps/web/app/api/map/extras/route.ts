@@ -2,7 +2,7 @@ import { mapExtrasSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireLead } from "../../../../lib/map/session";
+import { requireFamily } from "../../../../lib/map/session";
 import { saveChildContext, saveFamilyContext } from "../../../../lib/map/store";
 
 /**
@@ -17,8 +17,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const caller = await requireFamily();
+  if (!caller) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -45,7 +45,7 @@ export async function POST(request: Request): Promise<Response> {
         ),
       );
       if (Object.keys(patch).length > 0) {
-        const saved = await saveChildContext(lead.id, childId, patch);
+        const saved = await saveChildContext(caller.id, childId, patch);
         if (!saved) return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
         savedKeys.push(...Object.keys(patch));
       }
@@ -59,14 +59,14 @@ export async function POST(request: Request): Promise<Response> {
         ),
       );
       if (Object.keys(patch).length > 0 || firstName || usState) {
-        await saveFamilyContext(lead.id, patch, firstName, usState);
+        await saveFamilyContext(caller.id, patch, firstName, usState);
         savedKeys.push(...Object.keys(patch));
       }
     }
 
     if (savedKeys.length > 0) {
       await emitMapEvent("map.context_added", {
-        lead_id: lead.id,
+        family_id: caller.id,
         child_id: child?.childId,
         keys: savedKeys,
       });

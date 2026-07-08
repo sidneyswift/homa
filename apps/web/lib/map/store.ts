@@ -17,27 +17,35 @@ import { mapDb, type DbJson } from "./db";
 import { hashToken, newToken } from "./tokens";
 
 /**
- * All database access for the map flow. The lead id NEVER comes from the
- * client: routes resolve it from the resume cookie's token hash, and every
- * child-scoped operation re-checks that the child belongs to that lead
- * (the tenancy law, applied to leads).
+ * All database access for the onboarding flow, ONE WORLD (founder ruling
+ * 2026-07-07: architect the database as simple as possible before launch).
+ * A family row is the account container from the very first tap: it starts
+ * memberless (invisible to every client; RLS is members-only), reachable
+ * exclusively through this server module via the resume cookie's token
+ * hash. Signup attaches an auth user with a single family_members insert;
+ * nothing migrates, mirrors, or bridges, because the data was always in
+ * its final home.
+ *
+ * The tenancy law is unchanged: the family id NEVER comes from the client;
+ * routes resolve it from the resume cookie (or Supabase session), and
+ * every child-scoped operation re-checks that the child belongs to that
+ * family.
  */
 
-export interface LeadRow {
+export interface FamilyRow {
   id: string;
-  /** Null until signup: kids and the checklist auto-save anonymously. */
+  /** Null until signup captures it. */
   email: string | null;
   first_name: string | null;
   last_name: string | null;
   us_state: string | null;
   status: string;
   source: string;
-  /** Null until she has a real Supabase Auth account (Google, immediately,
-   * or password, as the last question before the report). */
-  auth_user_id: string | null;
+  /** True once any auth user holds a membership row for this family. */
+  has_account: boolean;
 }
 
-export interface LeadChildRow {
+export interface FamilyChildRow {
   id: string;
   name: string;
   /** "YYYY-MM-DD", the real birthday. */
@@ -51,11 +59,14 @@ export interface LeadChildRow {
   report_token: string | null;
 }
 
-export interface LeadState {
-  lead: LeadRow;
-  children: LeadChildRow[];
+export interface FamilyState {
+  family: FamilyRow;
+  children: FamilyChildRow[];
   answers: Record<string, { itemId: string; answer: MapAnswer }[]>;
 }
+
+const FAMILY_COLUMNS = `id, email, first_name, last_name, us_state, status, source,
+  exists (select 1 from public.family_members m where m.family_id = families.id) as has_account`;
 
 interface StartAnonymousInput {
   source: string;
@@ -63,27 +74,28 @@ interface StartAnonymousInput {
 }
 
 /**
- * S1: opens a brand-new anonymous session, no email required. Kids and the
- * checklist auto-save under this cookie-only lead from the very first tap;
- * see claimLead for the signup moment that later attaches an email.
+ * S1: opens a brand-new anonymous family, no email required. Kids and the
+ * checklist auto-save under this cookie-only row from the very first tap;
+ * see claimFamily for the signup moment that later attaches an email and
+ * attachAuthUser for the account itself.
  */
-export async function startAnonymousLead(
+export async function startAnonymousFamily(
   input: StartAnonymousInput,
-): Promise<{ leadId: string; resumeToken: string }> {
+): Promise<{ familyId: string; resumeToken: string }> {
   const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
   const inserted = await sql<{ id: string }[]>`
-    insert into public.lead_families (email, source, utm, resume_token_hash)
+    insert into public.families (email, source, utm, resume_token_hash)
     values (null, ${input.source}, ${sql.json(input.utm)}, ${tokenHash})
     returning id
   `;
-  return { leadId: inserted[0].id, resumeToken };
+  return { familyId: inserted[0].id, resumeToken };
 }
 
-interface ClaimLeadInput {
-  /** The caller's own (already anonymous) lead, resolved from the cookie. */
-  leadId: string;
+interface ClaimFamilyInput {
+  /** The caller's own (already anonymous) family, resolved from the cookie. */
+  familyId: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -91,31 +103,28 @@ interface ClaimLeadInput {
 }
 
 /**
- * Signup: attaches an email to the caller's anonymous lead, rotating its
- * resume token. If that email already belongs to a different, older lead
+ * Signup: attaches an email to the caller's anonymous family, rotating its
+ * resume token. If that email already belongs to a different, older family
  * (a previous sitting on another device, most likely), this sitting's kids
- * fold into that account instead of splitting the family across two rows;
- * nothing typed on either side is lost.
+ * fold into that family instead of splitting them across two rows; nothing
+ * typed on either side is lost.
  */
-export async function claimLead(
-  input: ClaimLeadInput,
-): Promise<{ leadId: string; returning: boolean; resumeToken: string }> {
+export async function claimFamily(
+  input: ClaimFamilyInput,
+): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
   const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
 
   const existing = await sql<{ id: string }[]>`
-    select id from public.lead_families where email = ${input.email} and id <> ${input.leadId}
+    select id from public.families where email = ${input.email} and id <> ${input.familyId}
   `;
 
   if (existing.length > 0) {
     const targetId = existing[0].id;
+    await foldFamilyInto(input.familyId, targetId);
     await sql`
-      update public.lead_children set lead_family_id = ${targetId}
-      where lead_family_id = ${input.leadId}
-    `;
-    await sql`
-      update public.lead_families set
+      update public.families set
         first_name = coalesce(${input.firstName ?? null}, first_name),
         last_name = coalesce(${input.lastName ?? null}, last_name),
         us_state = coalesce(${input.usState ?? null}, us_state),
@@ -123,138 +132,188 @@ export async function claimLead(
         updated_at = now()
       where id = ${targetId}
     `;
-    await sql`delete from public.lead_families where id = ${input.leadId}`;
-    return { leadId: targetId, returning: true, resumeToken };
+    return { familyId: targetId, returning: true, resumeToken };
   }
 
   await sql`
-    update public.lead_families set
+    update public.families set
       email = ${input.email},
       first_name = coalesce(${input.firstName ?? null}, first_name),
       last_name = coalesce(${input.lastName ?? null}, last_name),
       us_state = coalesce(${input.usState ?? null}, us_state),
       resume_token_hash = ${tokenHash},
       updated_at = now()
-    where id = ${input.leadId}
+    where id = ${input.familyId}
   `;
-  return { leadId: input.leadId, returning: false, resumeToken };
+  return { familyId: input.familyId, returning: false, resumeToken };
 }
 
-interface LinkAuthUserInput {
-  /** The caller's own (already anonymous, or email-only) lead. */
-  leadId: string;
+/** Moves every child of `fromId` into `intoId`, then deletes the empty
+ * husk. Children carry their answers, reports, and plans with them (all
+ * child-keyed), so a fold never touches those tables. */
+async function foldFamilyInto(fromId: string, intoId: string): Promise<void> {
+  const sql = mapDb();
+  await sql`update public.children set family_id = ${intoId} where family_id = ${fromId}`;
+  await sql`delete from public.families where id = ${fromId}`;
+}
+
+interface AttachAuthUserInput {
+  /** The caller's own (already anonymous, or email-only) family. */
+  familyId: string;
   authUserId: string;
   email: string;
   firstName?: string;
   lastName?: string;
-  /** Normalized +1E164 from the optional signup phone field; the bridge
-   * copies it into family_phones when the workspace is created. */
   phoneE164?: string;
 }
 
 /**
- * Attaches a real Supabase Auth account to a lead: either right away
- * (Google, at S1, matched by the profile's email or a prior auth_user_id
- * from another device) or at the last question (password, where the
- * email already matches this exact lead, so no merge ever triggers).
- * Mirrors claimLead's fold-together behavior so a returning family never
- * splits across two rows just because their second sitting started
- * anonymous again.
+ * The account moment: attaches a real Supabase Auth user to a family with
+ * ONE membership insert (this is the entire former "bridge"). Mirrors
+ * claimFamily's fold-together behavior: if the auth user or email already
+ * owns another family, this sitting's kids fold into it. Also stamps
+ * status 'claimed' and seeds the agent's first what_works memories from
+ * any whats-working notes the parent left before signing up.
  */
-export async function linkAuthUser(
-  input: LinkAuthUserInput,
-): Promise<{ leadId: string; returning: boolean; resumeToken: string }> {
+export async function attachAuthUser(
+  input: AttachAuthUserInput,
+): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
   const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
 
   const existing = await sql<{ id: string }[]>`
-    select id from public.lead_families
-    where id <> ${input.leadId}
-      and (auth_user_id = ${input.authUserId} or email = ${input.email})
+    select f.id from public.families f
+    where f.id <> ${input.familyId}
+      and (f.email = ${input.email}
+           or exists (select 1 from public.family_members m
+                      where m.family_id = f.id and m.user_id = ${input.authUserId}))
     limit 1
   `;
-
+  const familyId = existing[0]?.id ?? input.familyId;
   if (existing.length > 0) {
-    const targetId = existing[0].id;
-    await sql`
-      update public.lead_children set lead_family_id = ${targetId}
-      where lead_family_id = ${input.leadId}
-    `;
-    await sql`
-      update public.lead_families set
-        auth_user_id = ${input.authUserId},
-        email = ${input.email},
-        first_name = coalesce(${input.firstName ?? null}, first_name),
-        last_name = coalesce(${input.lastName ?? null}, last_name),
-        phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
-        resume_token_hash = ${tokenHash},
-        updated_at = now()
-      where id = ${targetId}
-    `;
-    await sql`delete from public.lead_families where id = ${input.leadId}`;
-    return { leadId: targetId, returning: true, resumeToken };
+    await foldFamilyInto(input.familyId, familyId);
   }
 
   await sql`
-    update public.lead_families set
-      auth_user_id = ${input.authUserId},
+    update public.families set
       email = ${input.email},
       first_name = coalesce(${input.firstName ?? null}, first_name),
       last_name = coalesce(${input.lastName ?? null}, last_name),
       phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),
+      parent_display_name = coalesce(parent_display_name, ${input.firstName ?? null}),
+      status = 'claimed',
       resume_token_hash = ${tokenHash},
       updated_at = now()
-    where id = ${input.leadId}
+    where id = ${familyId}
   `;
-  return { leadId: input.leadId, returning: false, resumeToken };
+  await sql`
+    insert into public.family_members (family_id, user_id, role)
+    values (${familyId}, ${input.authUserId}, 'parent')
+    on conflict (family_id, user_id) do nothing
+  `;
+  if (input.phoneE164) {
+    await sql`
+      insert into public.family_phones (family_id, phone_e164, added_by, source)
+      values (${familyId}, ${input.phoneE164}, ${input.authUserId}, 'signup')
+      on conflict (family_id) do nothing
+    `;
+  }
+  await seedWhatWorksMemories(familyId);
+
+  return { familyId, returning: existing.length > 0, resumeToken };
 }
 
 /**
- * Resolves a lead from a raw token: either the device cookie's resume token
- * or an emailed link token. Both are honored so an emailed link never
- * invalidates the cookie already living on her original device.
+ * The agent's cold start: one what_works memory per child, from the
+ * parent's own whats-working notes, seeded only while the child has none
+ * (agent consolidation is never fought; re-runs never duplicate).
  */
-export async function getLeadByResumeToken(rawToken: string): Promise<LeadRow | null> {
+async function seedWhatWorksMemories(familyId: string): Promise<void> {
+  const sql = mapDb();
+  const kids = await sql<{ id: string; context: Record<string, unknown> }[]>`
+    select id, context from public.children where family_id = ${familyId}
+  `;
+  for (const kid of kids) {
+    const bag = kid.context?.whatsWorking;
+    if (!bag || typeof bag !== "object") continue;
+    const parts = Object.entries(bag as Record<string, unknown>)
+      .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0)
+      .map(([domainId, text]) => `${domainId}: ${text.trim()}`);
+    if (parts.length === 0) continue;
+    const content = `What the parent says works, in her own words. ${parts.join(" \u00b7 ")}`.slice(0, 500);
+    await sql`
+      insert into public.family_memories (family_id, child_id, kind, content, source)
+      select ${familyId}, ${kid.id}, 'what_works', ${content}, 'onboarding'
+      where not exists (
+        select 1 from public.family_memories
+        where family_id = ${familyId} and child_id = ${kid.id} and kind = 'what_works'
+      )
+    `;
+  }
+}
+
+/**
+ * Resolves a family from a raw token: either the device cookie's resume
+ * token or an emailed link token. Both are honored so an emailed link
+ * never invalidates the cookie already living on her original device.
+ */
+export async function getFamilyByResumeToken(rawToken: string): Promise<FamilyRow | null> {
   const sql = mapDb();
   const hash = hashToken(rawToken);
-  const rows = await sql<LeadRow[]>`
-    select id, email, first_name, last_name, us_state, status, source, auth_user_id
-    from public.lead_families
+  const rows = await sql<FamilyRow[]>`
+    select ${sql.unsafe(FAMILY_COLUMNS)}
+    from public.families
     where (resume_token_hash = ${hash} or link_token_hash = ${hash})
       and status <> 'deleted'
   `;
   return rows[0] ?? null;
 }
 
-export async function getLeadByEmail(email: string): Promise<{ id: string } | null> {
+/** The signed-in fallback: a caller with a Supabase session but no resume
+ * cookie (fresh browser, emailed link opened elsewhere) still reaches
+ * their own family through their membership row. */
+export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow | null> {
+  const sql = mapDb();
+  const rows = await sql<FamilyRow[]>`
+    select ${sql.unsafe(FAMILY_COLUMNS)}
+    from public.families
+    where status <> 'deleted'
+      and exists (select 1 from public.family_members m
+                  where m.family_id = families.id and m.user_id = ${authUserId})
+    limit 1
+  `;
+  return rows[0] ?? null;
+}
+
+export async function getFamilyByEmail(email: string): Promise<{ id: string } | null> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
-    select id from public.lead_families where email = ${email} and status <> 'deleted'
+    select id from public.families where email = ${email} and status <> 'deleted'
   `;
   return rows[0] ?? null;
 }
 
 /**
- * Mints a fresh emailed-link token for a lead. Deliberately separate from
- * the device cookie's resume token: sending an email must never log out
- * the device she's already using.
+ * Mints a fresh emailed-link token for a family. Deliberately separate
+ * from the device cookie's resume token: sending an email must never log
+ * out the device she's already using.
  */
-export async function mintLinkToken(leadId: string): Promise<string> {
+export async function mintLinkToken(familyId: string): Promise<string> {
   const sql = mapDb();
   const linkToken = newToken();
   await sql`
-    update public.lead_families
+    update public.families
     set link_token_hash = ${hashToken(linkToken)}
-    where id = ${leadId}
+    where id = ${familyId}
   `;
   return linkToken;
 }
 
-export async function countChildren(leadId: string): Promise<number> {
+export async function countChildren(familyId: string): Promise<number> {
   const sql = mapDb();
   const rows = await sql<{ count: string }[]>`
-    select count(*)::text as count from public.lead_children where lead_family_id = ${leadId}
+    select count(*)::text as count from public.children where family_id = ${familyId}
   `;
   return Number(rows[0]?.count ?? 0);
 }
@@ -266,20 +325,25 @@ interface AddChildInput {
   helpWith?: string;
 }
 
+/** Interests and help-with live in the child's profile jsonb (the same
+ * fields the chat agent's update_child_profile tool maintains), so the
+ * report flow and the agent share one representation from day one. */
 export async function addChild(
-  leadId: string,
+  familyId: string,
   input: AddChildInput,
 ): Promise<{ childId: string; ageMonths: number; inRange: boolean }> {
   const sql = mapDb();
   const months = ageInMonths(input.birthDate);
   const inRange = isInScoredRange(months);
+  const profile: Record<string, unknown> = { interests: input.interests };
+  if (input.helpWith) profile.focus = input.helpWith;
   const rows = await sql<{ id: string }[]>`
-    insert into public.lead_children (lead_family_id, name, birth_month, interests, help_with, pending_band)
-    values (${leadId}, ${input.name}, ${input.birthDate}, ${input.interests},
-            ${input.helpWith ?? null}, ${!inRange})
+    insert into public.children (family_id, name, birth_month, profile, pending_band)
+    values (${familyId}, ${input.name}, ${input.birthDate},
+            ${sql.json(profile as DbJson)}, ${!inRange})
     returning id
   `;
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return { childId: rows[0].id, ageMonths: months, inRange };
 }
 
@@ -287,47 +351,54 @@ export async function addChild(
  * Hard-deletes a child and, via the schema's on-delete cascades, their
  * answers, report, and plans (the "delete anytime" promise, kept). The
  * where clause carries the tenancy re-scope: a childId belonging to a
- * different lead deletes nothing.
+ * different family deletes nothing.
  */
-export async function removeChild(leadId: string, childId: string): Promise<boolean> {
+export async function removeChild(familyId: string, childId: string): Promise<boolean> {
   const sql = mapDb();
+  await sql`delete from public.child_answers where child_id = ${childId}
+    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
+  await sql`delete from public.child_reports where child_id = ${childId}
+    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
+  await sql`delete from public.child_plans where child_id = ${childId}
+    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
+  await sql`delete from public.family_memories where child_id = ${childId} and family_id = ${familyId}`;
   const rows = await sql<{ id: string }[]>`
-    delete from public.lead_children
-    where id = ${childId} and lead_family_id = ${leadId}
+    delete from public.children
+    where id = ${childId} and family_id = ${familyId}
     returning id
   `;
   if (rows.length === 0) return false;
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return true;
 }
 
-/** True when the child exists and belongs to this lead. */
-async function childBelongsToLead(childId: string, leadId: string): Promise<boolean> {
+/** True when the child exists and belongs to this family. */
+async function childBelongsToFamily(childId: string, familyId: string): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
-    select id from public.lead_children where id = ${childId} and lead_family_id = ${leadId}
+    select id from public.children where id = ${childId} and family_id = ${familyId}
   `;
   return rows.length > 0;
 }
 
 export async function saveAnswer(
-  leadId: string,
+  familyId: string,
   childId: string,
   itemId: string,
   answer: MapAnswer,
 ): Promise<{ ok: boolean; domain?: string }> {
   const item = getMapItem(itemId);
   if (!item) return { ok: false };
-  if (!(await childBelongsToLead(childId, leadId))) return { ok: false };
+  if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
 
   const sql = mapDb();
   await sql`
-    insert into public.lead_answers (lead_child_id, question_id, answer)
-    values (${childId}, ${itemId}, ${answer})
-    on conflict (lead_child_id, question_id)
+    insert into public.child_answers (child_id, question_id, answer, source)
+    values (${childId}, ${itemId}, ${answer}, 'checklist')
+    on conflict (child_id, question_id)
     do update set answer = excluded.answer, answered_at = now()
   `;
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return { ok: true, domain: item.domain.id };
 }
 
@@ -335,29 +406,29 @@ export async function saveAnswer(
  * The living-record write: answer changes arriving from the report page
  * itself (a tapped correction, the inline sharpening question, a
  * staleness re-check), batched so one save means one rescore and one
- * rewrite. Same upsert as saveAnswer plus provenance: corrections stamp
- * their source so the re-norm loop can tell a second look from a first.
+ * rewrite. Corrections stamp their provenance so the re-norm loop can
+ * tell a second look from a first.
  */
 export async function correctAnswers(
-  leadId: string,
+  familyId: string,
   childId: string,
   changes: Array<{ itemId: string; answer: MapAnswer }>,
   source: "report_correction" | "report_probe" | "recheck",
 ): Promise<boolean> {
-  if (!(await childBelongsToLead(childId, leadId))) return false;
+  if (!(await childBelongsToFamily(childId, familyId))) return false;
   const valid = changes.filter((change) => getMapItem(change.itemId));
   if (valid.length === 0) return false;
 
   const sql = mapDb();
   for (const change of valid) {
     await sql`
-      insert into public.lead_answers (lead_child_id, question_id, answer, source)
+      insert into public.child_answers (child_id, question_id, answer, source)
       values (${childId}, ${change.itemId}, ${change.answer}, ${source})
-      on conflict (lead_child_id, question_id)
+      on conflict (child_id, question_id)
       do update set answer = excluded.answer, answered_at = now(), source = excluded.source
     `;
   }
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return true;
 }
 
@@ -368,85 +439,93 @@ export async function correctAnswers(
  * nothing and forges nothing.
  */
 export async function savePlanProgress(
-  leadId: string,
+  familyId: string,
   childId: string,
   domainId: string,
   checks: Record<string, boolean>,
 ): Promise<{ done: number } | null> {
-  if (!(await childBelongsToLead(childId, leadId))) return null;
+  if (!(await childBelongsToFamily(childId, familyId))) return null;
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
-    update public.lead_plans
-    set progress = ${sql.json(checks as unknown as DbJson)}
-    where lead_child_id = ${childId} and domain_id = ${domainId}
+    update public.child_plans
+    set progress = ${sql.json(checks as unknown as DbJson)}, updated_at = now()
+    where child_id = ${childId} and domain_id = ${domainId}
     returning id
   `;
   if (rows.length === 0) return null;
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return { done: Object.values(checks).filter(Boolean).length };
 }
 
-/** The child's report token, re-scoped to the caller's lead (for the
+/** The child's report token, re-scoped to the caller's family (for the
  * consent tap, which builds a plan through the token path). */
 export async function getReportTokenForChild(
-  leadId: string,
+  familyId: string,
   childId: string,
 ): Promise<string | null> {
-  if (!(await childBelongsToLead(childId, leadId))) return null;
+  if (!(await childBelongsToFamily(childId, familyId))) return null;
   const sql = mapDb();
   const rows = await sql<{ token: string }[]>`
-    select token from public.lead_reports
-    where lead_child_id = ${childId} and revoked_at is null
+    select token from public.child_reports
+    where child_id = ${childId} and revoked_at is null and token is not null
   `;
   return rows[0]?.token ?? null;
 }
 
 /** Full state snapshot for resume: children, answers, report tokens. */
-export async function getLeadState(lead: LeadRow): Promise<LeadState> {
+export async function getFamilyState(family: FamilyRow): Promise<FamilyState> {
   const sql = mapDb();
   const children = await sql<
     {
       id: string;
       name: string;
       birth_month: string;
-      interests: string[];
-      help_with: string | null;
+      profile: Record<string, unknown>;
       pending_band: boolean;
       report_token: string | null;
     }[]
   >`
     select c.id, c.name, to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
-           c.interests, c.help_with, c.pending_band, r.token as report_token
-    from public.lead_children c
-    left join public.lead_reports r on r.lead_child_id = c.id and r.revoked_at is null
-    where c.lead_family_id = ${lead.id}
+           c.profile, c.pending_band, r.token as report_token
+    from public.children c
+    left join public.child_reports r on r.child_id = c.id and r.revoked_at is null
+    where c.family_id = ${family.id}
     order by c.created_at
   `;
 
-  const answers: LeadState["answers"] = {};
+  const answers: FamilyState["answers"] = {};
   if (children.length > 0) {
     const childIds = children.map((child) => child.id);
-    const rows = await sql<{ lead_child_id: string; question_id: string; answer: MapAnswer }[]>`
-      select lead_child_id, question_id, answer
-      from public.lead_answers
-      where lead_child_id in ${sql(childIds)}
+    const rows = await sql<{ child_id: string; question_id: string; answer: MapAnswer }[]>`
+      select child_id, question_id, answer
+      from public.child_answers
+      where child_id in ${sql(childIds)}
     `;
     for (const row of rows) {
-      const list = answers[row.lead_child_id] ?? [];
+      const list = answers[row.child_id] ?? [];
       list.push({ itemId: row.question_id, answer: row.answer });
-      answers[row.lead_child_id] = list;
+      answers[row.child_id] = list;
     }
   }
 
   return {
-    lead,
+    family,
     children: children.map((child) => {
       const months = ageInMonths(child.birth_month);
+      const profile = child.profile ?? {};
       return {
-        ...child,
+        id: child.id,
+        name: child.name,
+        birth_month: child.birth_month,
+        interests: Array.isArray(profile.interests)
+          ? profile.interests.filter((item): item is string => typeof item === "string")
+          : [],
+        help_with: typeof profile.focus === "string" ? profile.focus : null,
+        pending_band: child.pending_band,
         age_months: months,
         in_range: isInScoredRange(months),
         answered: (answers[child.id] ?? []).length,
+        report_token: child.report_token,
       };
     }),
     answers,
@@ -479,21 +558,22 @@ const HISTORY_CAP = 12;
 /**
  * Scores a child from their stored answers and upserts the report row.
  * A rescore archives the previous scores into history (newest first,
- * capped), which powers the "+4 mo since June 6" movement chips.
+ * capped), which powers the "+4 mo since June 6" movement chips. The
+ * token survives rescores: the report URL is permanent.
  */
-export async function createReport(leadId: string, childId: string): Promise<ScoredReport | null> {
-  if (!(await childBelongsToLead(childId, leadId))) return null;
+export async function createReport(familyId: string, childId: string): Promise<ScoredReport | null> {
+  if (!(await childBelongsToFamily(childId, familyId))) return null;
   const sql = mapDb();
 
   const childRows = await sql<{ name: string; birth_month: string }[]>`
     select name, to_char(birth_month, 'YYYY-MM-DD') as birth_month
-    from public.lead_children where id = ${childId}
+    from public.children where id = ${childId}
   `;
   if (childRows.length === 0) return null;
   const ageMonths = ageInMonths(childRows[0].birth_month);
 
   const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.lead_answers where lead_child_id = ${childId}
+    select question_id, answer from public.child_answers where child_id = ${childId}
   `;
   const scores = scoreMap(
     ageMonths,
@@ -508,11 +588,12 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
       history: ScoreSnapshot[];
       narrative: ReportNarrative | null;
       narrative_meta: NarrativeMeta | null;
+      token: string | null;
     }[]
   >`
     select scores, generated_at::text as generated_at, bank_version, history,
-           narrative, narrative_meta
-    from public.lead_reports where lead_child_id = ${childId}
+           narrative, narrative_meta, token
+    from public.child_reports where child_id = ${childId}
   `;
   const history: ScoreSnapshot[] =
     existing.length > 0
@@ -531,36 +612,35 @@ export async function createReport(leadId: string, childId: string): Promise<Sco
   // A rescore always rewrites the words next to the new numbers (founder
   // ruling: regenerate on every rescore): the archived narrative rides in
   // history and the live row's narrative resets until generation lands.
-  const token = newToken();
-  const rows = await sql<{ token: string }[]>`
-    insert into public.lead_reports (lead_child_id, scores, bank_version, token, history)
+  const token = existing[0]?.token ?? newToken();
+  await sql`
+    insert into public.child_reports (child_id, scores, bank_version, token, history, generated_at, updated_at)
     values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION}, ${token},
-            ${sql.json(history as unknown as DbJson)})
-    on conflict (lead_child_id) do update
+            ${sql.json(history as unknown as DbJson)}, now(), now())
+    on conflict (child_id) do update
       set scores = excluded.scores, bank_version = excluded.bank_version,
-          generated_at = now(), history = excluded.history,
+          generated_at = now(), updated_at = now(), history = excluded.history,
           narrative = null, narrative_meta = null
-    returning token
   `;
 
-  const leadRows = await sql<{ email: string | null }[]>`
-    select email from public.lead_families where id = ${leadId}
+  const familyRows = await sql<{ email: string | null }[]>`
+    select email from public.families where id = ${familyId}
   `;
-  await touchLead(leadId);
+  await touchFamily(familyId);
 
   return {
-    token: rows[0].token,
+    token,
     scores,
     childName: childRows[0].name,
     ageMonths,
-    email: leadRows[0].email,
+    email: familyRows[0].email,
     childId,
   };
 }
 
 export async function markReportEmailed(childId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.lead_reports set emailed_at = now() where lead_child_id = ${childId}`;
+  await sql`update public.child_reports set emailed_at = now() where child_id = ${childId}`;
 }
 
 /** True when this child's report has already gone out by email (rescores
@@ -569,7 +649,7 @@ export async function reportAlreadyEmailed(childId: string): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ emailed: boolean }[]>`
     select emailed_at is not null as emailed
-    from public.lead_reports where lead_child_id = ${childId}
+    from public.child_reports where child_id = ${childId}
   `;
   return rows[0]?.emailed ?? false;
 }
@@ -593,7 +673,7 @@ export async function getOrBuildPlan(
 ): Promise<{
   plan: FourWeekPlan;
   childName: string;
-  leadId: string;
+  familyId: string;
   childId: string;
   wasNew: boolean;
   retestAt: string;
@@ -608,18 +688,19 @@ export async function getOrBuildPlan(
       child_id: string;
       child_name: string;
       birth_month: string;
+      child_profile: Record<string, unknown>;
       child_context: Record<string, unknown>;
-      lead_id: string;
+      family_id: string;
       family_context: Record<string, unknown>;
     }[]
   >`
     select c.id as child_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
-           c.context as child_context,
-           f.id as lead_id, f.context as family_context
-    from public.lead_reports r
-    join public.lead_children c on c.id = r.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
+           c.profile as child_profile, c.context as child_context,
+           f.id as family_id, f.context as family_context
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
     where r.token = ${reportToken} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];
@@ -635,14 +716,14 @@ export async function getOrBuildPlan(
     }[]
   >`
     select plan, retest_at::text as retest_at, narrative, narrative_meta, progress
-    from public.lead_plans
-    where lead_child_id = ${row.child_id} and domain_id = ${domainId}
+    from public.child_plans
+    where child_id = ${row.child_id} and domain_id = ${domainId}
   `;
   if (existing.length > 0 && !options.rebuild) {
     return {
       plan: existing[0].plan,
       childName: row.child_name,
-      leadId: row.lead_id,
+      familyId: row.family_id,
       childId: row.child_id,
       wasNew: false,
       retestAt: existing[0].retest_at,
@@ -653,9 +734,12 @@ export async function getOrBuildPlan(
   }
 
   const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.lead_answers where lead_child_id = ${row.child_id}
+    select question_id, answer from public.child_answers where child_id = ${row.child_id}
   `;
-  const childInterests = Array.isArray(row.child_context?.interests)
+  const profileInterests = Array.isArray(row.child_profile?.interests)
+    ? (row.child_profile.interests as string[])
+    : [];
+  const bagInterests = Array.isArray(row.child_context?.interests)
     ? (row.child_context.interests as string[])
     : [];
   // Styles went multi-select on 2026-07-06 (`styles` array, first pick is
@@ -671,57 +755,56 @@ export async function getOrBuildPlan(
     domainId,
     ageInMonths(row.birth_month),
     answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
-    { interests: childInterests, style: familyStyle },
+    { interests: [...new Set([...profileInterests, ...bagInterests])], style: familyStyle },
   );
   if (!plan) return null;
 
   // A rebuild restarts the month: fresh plan, fresh retest clock, the
   // retest email re-armed, and the plan narrative reset so the words get
-  // rewritten next to the new month (this is the monthly loop working as
-  // designed).
+  // rewritten next to the new month. Checks are the parent's own work
+  // (source data) and survive the rebuild.
   const inserted = await sql<{ retest_at: string }[]>`
-    insert into public.lead_plans (lead_child_id, domain_id, plan, bank_version, retest_at)
+    insert into public.child_plans (child_id, domain_id, plan, bank_version, retest_at)
     values (${row.child_id}, ${domainId}, ${sql.json(plan as unknown as DbJson)},
             ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
-    on conflict (lead_child_id, domain_id) do update
+    on conflict (child_id, domain_id) do update
       set plan = excluded.plan,
           bank_version = excluded.bank_version,
           retest_at = excluded.retest_at,
           retest_emailed_at = null,
           narrative = null,
-          narrative_meta = null
+          narrative_meta = null,
+          updated_at = now()
     returning retest_at::text as retest_at
   `;
-  await touchLead(row.lead_id);
+  await touchFamily(row.family_id);
 
   return {
     plan,
     childName: row.child_name,
-    leadId: row.lead_id,
+    familyId: row.family_id,
     childId: row.child_id,
     wasNew: existing.length === 0,
     retestAt: inserted[0].retest_at,
     narrative: null,
     narrativeMeta: null,
-    // A rebuilt month keeps its checks: the parent's work is source data
-    // and never resets with a derived artifact.
     progress: existing[0]?.progress ?? {},
   };
 }
 
 /** Plans whose four weeks are up and whose retest email hasn't gone out. */
 export async function plansNeedingRetest(): Promise<
-  { plan_id: string; domain_id: string; child_id: string; child_name: string; lead_id: string; email: string }[]
+  { plan_id: string; domain_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
 > {
   const sql = mapDb();
   return sql<
-    { plan_id: string; domain_id: string; child_id: string; child_name: string; lead_id: string; email: string }[]
+    { plan_id: string; domain_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
   >`
     select p.id as plan_id, p.domain_id, c.id as child_id, c.name as child_name,
-           f.id as lead_id, f.email
-    from public.lead_plans p
-    join public.lead_children c on c.id = p.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
+           f.id as family_id, f.email
+    from public.child_plans p
+    join public.children c on c.id = p.child_id
+    join public.families f on f.id = c.family_id
     where p.retest_at < now() and p.retest_emailed_at is null and f.status <> 'deleted'
       and f.email is not null
     limit 100
@@ -730,7 +813,7 @@ export async function plansNeedingRetest(): Promise<
 
 export async function markRetestEmailed(planId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.lead_plans set retest_emailed_at = now() where id = ${planId}`;
+  await sql`update public.child_plans set retest_emailed_at = now() where id = ${planId}`;
 }
 
 export interface ReportView {
@@ -743,14 +826,14 @@ export interface ReportView {
   interests: string[];
   parentFirstName: string | null;
   usState: string | null;
-  leadId: string;
+  familyId: string;
   childId: string;
   firstView: boolean;
   /** The parent's raw answers, for the expandable "what I asked" sections. */
   answers: { itemId: string; answer: MapAnswer }[];
   /** Prior scorings, newest first, for the movement chips. */
   history: ScoreSnapshot[];
-  /** The lead's other kids, for the map-the-next-kid handoff. */
+  /** The family's other kids, for the map-the-next-kid handoff. */
   otherKids: { id: string; name: string; inRange: boolean; started: boolean; hasReport: boolean }[];
   /** The LLM-written layer (null until generated; see narrative-store). */
   narrative: ReportNarrative | null;
@@ -776,8 +859,8 @@ export async function getReportByToken(token: string): Promise<ReportView | null
       child_id: string;
       child_name: string;
       birth_month: string;
-      interests: string[];
-      lead_id: string;
+      profile: Record<string, unknown>;
+      family_id: string;
       first_name: string | null;
       us_state: string | null;
     }[]
@@ -785,11 +868,11 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     select r.token, r.scores, r.bank_version, r.generated_at::text as generated_at,
            r.viewed_at::text as viewed_at, r.history, r.narrative, r.narrative_meta,
            c.id as child_id, c.name as child_name,
-           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.interests,
-           f.id as lead_id, f.first_name, f.us_state
-    from public.lead_reports r
-    join public.lead_children c on c.id = r.lead_child_id
-    join public.lead_families f on f.id = c.lead_family_id
+           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.profile,
+           f.id as family_id, f.first_name, f.us_state
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
     where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];
@@ -797,21 +880,21 @@ export async function getReportByToken(token: string): Promise<ReportView | null
 
   const firstView = row.viewed_at === null;
   if (firstView) {
-    await sql`update public.lead_reports set viewed_at = now() where token = ${token}`;
+    await sql`update public.child_reports set viewed_at = now() where token = ${token}`;
   }
 
   const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.lead_answers where lead_child_id = ${row.child_id}
+    select question_id, answer from public.child_answers where child_id = ${row.child_id}
   `;
 
   const siblingRows = await sql<
     { id: string; name: string; birth_month: string; answered: string; has_report: boolean }[]
   >`
     select c.id, c.name, to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
-           (select count(*)::text from public.lead_answers a where a.lead_child_id = c.id) as answered,
-           exists (select 1 from public.lead_reports r2 where r2.lead_child_id = c.id) as has_report
-    from public.lead_children c
-    where c.lead_family_id = ${row.lead_id} and c.id <> ${row.child_id}
+           (select count(*)::text from public.child_answers a where a.child_id = c.id) as answered,
+           exists (select 1 from public.child_reports r2 where r2.child_id = c.id) as has_report
+    from public.children c
+    where c.family_id = ${row.family_id} and c.id <> ${row.child_id}
     order by c.created_at
   `;
 
@@ -819,9 +902,10 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     { domain_id: string; plan: FourWeekPlan; progress: Record<string, boolean>; retest_at: string }[]
   >`
     select domain_id, plan, progress, retest_at::text as retest_at
-    from public.lead_plans where lead_child_id = ${row.child_id}
+    from public.child_plans where child_id = ${row.child_id}
   `;
 
+  const profile = row.profile ?? {};
   return {
     token: row.token,
     scores: row.scores,
@@ -829,10 +913,12 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     generatedAt: row.generated_at,
     childName: row.child_name,
     birthMonth: row.birth_month,
-    interests: row.interests,
+    interests: Array.isArray(profile.interests)
+      ? profile.interests.filter((item): item is string => typeof item === "string")
+      : [],
     parentFirstName: row.first_name,
     usState: row.us_state,
-    leadId: row.lead_id,
+    familyId: row.family_id,
     childId: row.child_id,
     firstView,
     answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
@@ -855,73 +941,81 @@ export async function getReportByToken(token: string): Promise<ReportView | null
   };
 }
 
-async function touchLead(leadId: string): Promise<void> {
+async function touchFamily(familyId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.lead_families set updated_at = now() where id = ${leadId}`;
+  await sql`update public.families set updated_at = now() where id = ${familyId}`;
 }
 
 /**
  * Deep-merges an extras patch into a child's context bag (server-validated).
  * whatsWorking merges per-subject so a note about math never clobbers the
- * earlier note about reading.
+ * earlier note about reading. Interests and help-with go to the child's
+ * PROFILE (the agent's representation); everything else stays in context.
  */
 export async function saveChildContext(
-  leadId: string,
+  familyId: string,
   childId: string,
   patch: Record<string, unknown>,
 ): Promise<boolean> {
-  if (!(await childBelongsToLead(childId, leadId))) return false;
+  if (!(await childBelongsToFamily(childId, familyId))) return false;
   const sql = mapDb();
 
-  let merged = patch;
-  if (patch.whatsWorking && typeof patch.whatsWorking === "object") {
+  const { interests, helpWith, ...rest } = patch;
+  let merged = rest;
+  if (rest.whatsWorking && typeof rest.whatsWorking === "object") {
     const rows = await sql<{ context: Record<string, unknown> }[]>`
-      select context from public.lead_children where id = ${childId}
+      select context from public.children where id = ${childId}
     `;
     const existing = (rows[0]?.context?.whatsWorking ?? {}) as Record<string, unknown>;
     merged = {
-      ...patch,
-      whatsWorking: { ...existing, ...(patch.whatsWorking as Record<string, unknown>) },
+      ...rest,
+      whatsWorking: { ...existing, ...(rest.whatsWorking as Record<string, unknown>) },
     };
   }
 
+  const profilePatch: Record<string, unknown> = {};
+  if (Array.isArray(interests) && interests.length > 0) profilePatch.interests = interests;
+  if (Array.isArray(helpWith) && helpWith.length > 0) profilePatch.focus = helpWith.join(", ");
+
   await sql`
-    update public.lead_children
-    set context = context || ${sql.json(merged as unknown as DbJson)}
+    update public.children
+    set context = context || ${sql.json(merged as unknown as DbJson)},
+        profile = profile || ${sql.json(profilePatch as DbJson)},
+        updated_at = now()
     where id = ${childId}
   `;
-  await touchLead(leadId);
+  await touchFamily(familyId);
   return true;
 }
 
 /** Merges family-level extras; name and state also fill their real columns. */
 export async function saveFamilyContext(
-  leadId: string,
+  familyId: string,
   patch: Record<string, unknown>,
   firstName?: string,
   usState?: string,
 ): Promise<void> {
   const sql = mapDb();
   await sql`
-    update public.lead_families
+    update public.families
     set context = context || ${sql.json(patch as unknown as DbJson)},
         first_name = coalesce(${firstName ?? null}, first_name),
         us_state = coalesce(${usState ?? null}, us_state),
         updated_at = now()
-    where id = ${leadId}
+    where id = ${familyId}
   `;
 }
 
 /** Whether family-level extras were already collected (extras step shows once). */
-export async function hasFamilyContext(leadId: string): Promise<boolean> {
+export async function hasFamilyContext(familyId: string): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ has: boolean }[]>`
-    select context <> '{}'::jsonb as has from public.lead_families where id = ${leadId}
+    select context <> '{}'::jsonb as has from public.families where id = ${familyId}
   `;
   return rows[0]?.has ?? false;
 }
 
-/** Mirrors the lead into the waitlist table so the invite list stays one list. */
+/** Mirrors the family into the waitlist table so the invite list stays one list. */
 export async function mirrorToWaitlist(input: {
   email: string;
   firstName?: string;
@@ -938,59 +1032,59 @@ export async function mirrorToWaitlist(input: {
 }
 
 /**
- * Leads eligible for the single 24h reminder. Email-gated: since signup now
- * happens at the end of the checklist (not the start), most stalled leads
- * have no email yet and are simply unreachable until they return on the
- * same device, this only nudges the ones who reached signup, stalled after
- * (e.g. mid-extras), and never scored.
+ * Families eligible for the single 24h reminder. Email-gated: since signup
+ * happens at the end of the checklist (not the start), most stalled
+ * families have no email yet and are simply unreachable until they return
+ * on the same device; this only nudges the ones who reached signup,
+ * stalled after, and never scored.
  */
-export async function leadsNeedingReminder(): Promise<
+export async function familiesNeedingReminder(): Promise<
   { id: string; email: string; first_child: string | null }[]
 > {
   const sql = mapDb();
   return sql<{ id: string; email: string; first_child: string | null }[]>`
     select f.id, f.email,
-      (select c.name from public.lead_children c
-        where c.lead_family_id = f.id
-          and not exists (select 1 from public.lead_reports r where r.lead_child_id = c.id)
+      (select c.name from public.children c
+        where c.family_id = f.id
+          and not exists (select 1 from public.child_reports r where r.child_id = c.id)
         order by c.created_at limit 1) as first_child
-    from public.lead_families f
+    from public.families f
     where f.status = 'open'
       and f.email is not null
       and f.reminder_sent_at is null
       and f.created_at < now() - interval '24 hours'
       and f.updated_at < now() - interval '4 hours'
       and exists (
-        select 1 from public.lead_children c
-        where c.lead_family_id = f.id and not c.pending_band
-          and not exists (select 1 from public.lead_reports r where r.lead_child_id = c.id)
+        select 1 from public.children c
+        where c.family_id = f.id and not c.pending_band
+          and not exists (select 1 from public.child_reports r where r.child_id = c.id)
       )
     limit 50
   `;
 }
 
-export async function markReminderSent(leadId: string): Promise<void> {
+export async function markReminderSent(familyId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.lead_families set reminder_sent_at = now() where id = ${leadId}`;
+  await sql`update public.families set reminder_sent_at = now() where id = ${familyId}`;
 }
 
 /**
- * Purges anonymous leads that never became anything: no email, no kids,
- * untouched for a week. Every visitor who taps "start" and bounces leaves
- * one of these rows, and nothing else ever deletes them (2026-07-07 audit:
- * 35 junk rows in two days of testing). Deliberately NARROW: an anonymous
- * lead WITH kids is never purged, because the family's device cookie can
- * still resume it. Zero data loss by construction; the funnel's events
- * rows keep their pseudonymous history either way.
+ * Purges anonymous families that never became anything: no email, no
+ * member, no kids, untouched for a week. Every visitor who taps "start"
+ * and bounces leaves one of these rows, and nothing else ever deletes
+ * them. Deliberately NARROW: an anonymous family WITH kids is never
+ * purged, because the family's device cookie can still resume it. Zero
+ * data loss by construction.
  */
 export async function purgeEmptyAnonymousLeads(): Promise<number> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
-    delete from public.lead_families f
+    delete from public.families f
     where f.email is null
       and f.created_at < now() - interval '7 days'
       and f.updated_at < now() - interval '7 days'
-      and not exists (select 1 from public.lead_children c where c.lead_family_id = f.id)
+      and not exists (select 1 from public.children c where c.family_id = f.id)
+      and not exists (select 1 from public.family_members m where m.family_id = f.id)
     returning id
   `;
   return rows.length;
@@ -1003,16 +1097,16 @@ export async function purgeEmptyAnonymousLeads(): Promise<number> {
  * signup just retries later instead of failing every cron run.
  */
 export async function childrenNowInBand(): Promise<
-  { child_id: string; child_name: string; lead_id: string; email: string; birth_month: string }[]
+  { child_id: string; child_name: string; family_id: string; email: string; birth_month: string }[]
 > {
   const sql = mapDb();
   const rows = await sql<
-    { child_id: string; child_name: string; lead_id: string; email: string; birth_month: string }[]
+    { child_id: string; child_name: string; family_id: string; email: string; birth_month: string }[]
   >`
-    select c.id as child_id, c.name as child_name, f.id as lead_id, f.email,
+    select c.id as child_id, c.name as child_name, f.id as family_id, f.email,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month
-    from public.lead_children c
-    join public.lead_families f on f.id = c.lead_family_id
+    from public.children c
+    join public.families f on f.id = c.family_id
     where c.pending_band and c.band_ready_emailed_at is null and f.status <> 'deleted'
       and f.email is not null
     limit 200
@@ -1023,8 +1117,8 @@ export async function childrenNowInBand(): Promise<
 export async function markBandReady(childId: string): Promise<void> {
   const sql = mapDb();
   await sql`
-    update public.lead_children
-    set pending_band = false, band_ready_emailed_at = now()
+    update public.children
+    set pending_band = false, band_ready_emailed_at = now(), updated_at = now()
     where id = ${childId}
   `;
 }

@@ -2,8 +2,7 @@ import { mapPlanProgressSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
-import { mirrorReportToProduct } from "../../../../../lib/map/report-mirror";
-import { requireLead } from "../../../../../lib/map/session";
+import { requireFamily } from "../../../../../lib/map/session";
 import { savePlanProgress } from "../../../../../lib/map/store";
 
 /**
@@ -19,8 +18,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const lead = await requireLead();
-  if (!lead) {
+  const family = await requireFamily();
+  if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -37,27 +36,16 @@ export async function POST(request: Request): Promise<Response> {
   const { childId, domainId, checks } = parsed.data;
 
   try {
-    const result = await savePlanProgress(lead.id, childId, domainId, checks);
+    const result = await savePlanProgress(family.id, childId, domainId, checks);
     if (!result) {
       return Response.json({ ok: false, reason: "unknown-plan" }, { status: 400 });
     }
     await emitMapEvent("map.plan_progress", {
-      lead_id: lead.id,
+      family_id: family.id,
       child_id: childId,
       domain: domainId,
       done_count: result.done,
     });
-
-    // Check-offs are source data; the workspace copy follows immediately
-    // (client-side debounce keeps this to about one mirror per save).
-    try {
-      await mirrorReportToProduct(lead.id, childId);
-    } catch (error) {
-      console.error(
-        "map/plan/progress mirror failed:",
-        error instanceof Error ? error.message : "unknown",
-      );
-    }
 
     return Response.json({ ok: true });
   } catch (error) {

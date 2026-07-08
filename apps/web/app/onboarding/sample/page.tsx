@@ -103,7 +103,7 @@ export default function SampleReportPage() {
     birthMonth,
     parentFirstName: "Sarah",
     usState: "TX",
-    leadId: "00000000-0000-0000-0000-000000000000",
+    familyId: "00000000-0000-0000-0000-000000000000",
     childId: "00000000-0000-0000-0000-000000000000",
     answers: answers.map((entry) => ({ itemId: entry.itemId, answer: entry.answer })),
     history: [{ scores: priorScores, generated_at: monthAgo.toISOString() }],

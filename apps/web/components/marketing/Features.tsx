@@ -6,8 +6,12 @@ import { Doodle } from "./Doodle";
 import { Eyebrow } from "./dividers";
 
 /**
- * Six-card feature grid, ported verbatim from
+ * Six-card feature grid, ported from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx (icons, copy, tints).
+ * The "Proof it's working" body diverged from the kit per founder
+ * screenshot 2026-07-07: "up 12 points" named a metric the progress
+ * report doesn't have, so it now uses the report's real "moved up"
+ * movement language instead.
  */
 
 const ITEMS: ReadonlyArray<readonly [LucideIcon, string, string, string, string]> = [
@@ -21,7 +25,7 @@ const ITEMS: ReadonlyArray<readonly [LucideIcon, string, string, string, string]
   [
     ChartLine,
     "Proof it's working",
-    "Watch Homa's practice sets move the numbers. Math up 12 points since April, that kind of proof.",
+    "Watch Homa's practice sets move the needle. Math moved up since April, that kind of proof.",
     "var(--sage-50)",
     "var(--sage-600)",
   ],
