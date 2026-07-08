@@ -168,6 +168,38 @@ export const EVENT_SCHEMAS = {
     source: z.enum(["signup", "home", "bridge"]),
     replaced: z.boolean(),
   }),
+  // "Call Homa" curriculum feature (founder decision 2026-07-07): an
+  // outbound voice call reviews the report, then an LLM-authored
+  // curriculum is generated from what was discussed. No phone number,
+  // no transcript content, ever in props.
+  "voice.call_started": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+  }),
+  "voice.call_failed": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    reason: z.enum(["no-phone", "telnyx-error", "not-found"]),
+  }),
+  "voice.curriculum_generated": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    duration_ms: z.number().int().min(0),
+    tokens_in: z.number().int().min(0),
+    tokens_out: z.number().int().min(0),
+    fallback: z.boolean(),
+  }),
+  // The "send an email" tool (build-log 2026-07-08), both voice
+  // assistants. No subject/body content in props, ever.
+  "voice.email_sent": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+  }),
+  // Same tool, web chat + SMS (agent/tools/send_followup_email.ts).
+  "chat.email_sent": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms"]),
+  }),
   // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
   // token and family_id (events policy, migration #13). No message content.
   "chat.turn_completed": z.object({

@@ -82,6 +82,17 @@ export {
 
 export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
 
+export type {
+  Curriculum,
+  CurriculumSubject,
+  CurriculumWeek,
+} from "./map/curriculum";
+
+export {
+  validateCurriculum,
+  type CurriculumGateVerdict,
+} from "./map/curriculum-gate";
+
 export {
   type NarrativeMeta,
   type PlanNarrative,

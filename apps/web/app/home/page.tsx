@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatUsPhone } from "@homa/core";
 
 import { Logo } from "../../components/brand/Logo";
+import { getCurriculaForChildren, getPendingCurriculumChildIds } from "../../lib/curriculum";
 import { getFamilyPhone } from "../../lib/family-phone";
 import { getMyChildren, getMyFamily } from "../../lib/family";
 import { signOutAction } from "../signin/actions";
@@ -35,6 +36,9 @@ export default async function HomePage() {
   const family = await getMyFamily();
   const children = family ? await getMyChildren(family.id) : [];
   const familyPhone = family ? await getFamilyPhone(family.id) : null;
+  const childIds = children.map((child) => child.id);
+  const curricula = await getCurriculaForChildren(childIds);
+  const pendingCurriculumChildIds = await getPendingCurriculumChildIds(childIds);
   // The texting card only renders once this deployment has a live line.
   const homaNumber =
     process.env.TELNYX_SMS_ENABLED === "true"
@@ -95,6 +99,23 @@ export default async function HomePage() {
                     {child.profile.focus ? (
                       <p className="mt-1 text-sm text-body">
                         Working on: {child.profile.focus}
+                      </p>
+                    ) : null}
+
+                    {/* "Call Homa" curriculum feature (founder decision
+                        2026-07-07): shows once a call has happened. */}
+                    {curricula.has(child.id) ? (
+                      <div className="mt-3 rounded-md border border-sage/30 bg-[var(--accent-sage-soft)] p-3">
+                        <p className="text-sm font-semibold text-strong">
+                          {curricula.get(child.id)?.curriculum.title}
+                        </p>
+                        <p className="mt-1 text-xs text-body">
+                          {curricula.get(child.id)?.curriculum.overview}
+                        </p>
+                      </div>
+                    ) : pendingCurriculumChildIds.has(child.id) ? (
+                      <p className="mt-3 text-xs text-muted">
+                        Homa is building {child.name}&apos;s curriculum from your call.
                       </p>
                     ) : null}
                   </li>

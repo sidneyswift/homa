@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],
     "/onboarding/r/[token]/plan/[domainId]": ["./agent/report-writer.md"],
+    "/api/voice/curriculum/insights": ["./agent/curriculum-writer.md"],
     // The OG card and its vendored fonts render at build time, but trace
     // them anyway so any future dynamic render finds the files.
     "/opengraph-image": ["./assets/fonts/*.woff"],

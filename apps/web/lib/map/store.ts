@@ -841,6 +841,10 @@ export interface ReportView {
   /** The child's built months: check-off counts for the your-month panel
    * and plan existence for the consent card. */
   plans: { domainId: string; done: number; total: number; retestAt: string }[];
+  /** The family's linked texting/calling number, if any (family_phones,
+   * migration #22), so the "Call Homa" card can prefill instead of ask
+   * again. Null when nothing is linked yet. */
+  familyPhone: string | null;
 }
 
 /** Loads a report by URL token and stamps first view. Null when revoked/unknown. */
@@ -905,6 +909,10 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     from public.child_plans where child_id = ${row.child_id}
   `;
 
+  const phoneRows = await sql<{ phone_e164: string }[]>`
+    select phone_e164 from public.family_phones where family_id = ${row.family_id}
+  `;
+
   const profile = row.profile ?? {};
   return {
     token: row.token,
@@ -938,6 +946,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
       total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
       retestAt: plan.retest_at,
     })),
+    familyPhone: phoneRows[0]?.phone_e164 ?? null,
   };
 }
 

@@ -109,6 +109,7 @@ export default function SampleReportPage() {
     history: [{ scores: priorScores, generated_at: monthAgo.toISOString() }],
     otherKids: [],
     plans: [],
+    familyPhone: null,
   };
 
   return (

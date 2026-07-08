@@ -26,6 +26,9 @@ export const MESSAGING_PROFILE_NAME = "Homa SMS (eve channel)";
 export const BRAND_DISPLAY_NAME = "Homa";
 export const VOICE_ASSISTANT_NAME = "Homa voice (experiment)";
 export const WEBHOOK_URL = "https://thankshoma.com/eve/v1/chat/telnyx";
+export const CURRICULUM_ASSISTANT_NAME = "Homa curriculum call";
+export const CURRICULUM_INSIGHT_NAME = "Curriculum call extraction";
+export const CURRICULUM_INSIGHT_GROUP_NAME = "Curriculum calls";
 
 export function requireApiKey(): string {
   const key = process.env.TELNYX_API_KEY;
@@ -150,6 +153,35 @@ export async function findVoiceAssistant(): Promise<AssistantRow | undefined> {
   );
 }
 
+export async function findAssistantByName(name: string): Promise<AssistantRow | undefined> {
+  const payload = await tx("GET", "/ai/assistants");
+  return listOf<AssistantRow>(payload).find((assistant) => assistant.name === name);
+}
+
+export interface InsightTemplateRow {
+  id: string;
+  name: string;
+  instructions: string;
+  webhook?: string;
+}
+
+export async function findInsightTemplate(name: string): Promise<InsightTemplateRow | undefined> {
+  const payload = await tx("GET", "/ai/conversations/insights");
+  return listOf<InsightTemplateRow>(payload).find((insight) => insight.name === name);
+}
+
+export interface InsightGroupRow {
+  id: string;
+  name: string;
+  webhook?: string;
+  insights?: InsightTemplateRow[];
+}
+
+export async function findInsightGroup(name: string): Promise<InsightGroupRow | undefined> {
+  const payload = await tx("GET", "/ai/conversations/insight-groups");
+  return listOf<InsightGroupRow>(payload).find((group) => group.name === name);
+}
+
 /** Founder identity fields for the sole-prop brand, from .env.local only. */
 export interface SoleProprietorIdentity {
   firstName: string;
@@ -173,6 +205,47 @@ function normalizeUsPhone(raw: string | undefined): string | undefined {
   if (digits.length === 10) return `+1${digits}`;
   if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
   return raw;
+}
+
+/**
+ * The "send an email" live tool (build-log 2026-07-08), shared verbatim
+ * by both voice assistants (general inbound + curriculum call).
+ * family_id/child_id are templated straight from each call's own
+ * dynamic variables into the URL (never model-supplied); only subject
+ * and body are parameters the model actually fills in.
+ */
+export function sendEmailToolConfig(webhookSecret: string): unknown {
+  return {
+    type: "webhook",
+    webhook: {
+      name: "send_email",
+      description:
+        "Send a real email to this family's own address on file. Use only " +
+        "when the parent asks for something in writing, or a written " +
+        "summary is clearly the useful next step. Do not overuse.",
+      url:
+        `https://thankshoma.com/api/voice/tools/send-email?key=${webhookSecret}` +
+        `&family_id={{family_id}}&child_id={{child_id}}`,
+      method: "POST",
+      async: false,
+      body_parameters: {
+        type: "object",
+        properties: {
+          subject: {
+            type: "string",
+            description: "A short, warm email subject line.",
+          },
+          body: {
+            type: "string",
+            description:
+              "The email body as plain text, 2 to 4 short sentences, in Homa's voice.",
+          },
+        },
+        required: ["subject", "body"],
+        additionalProperties: false,
+      },
+    },
+  };
 }
 
 export function readSoleProprietorIdentity(): SoleProprietorIdentity {

@@ -3,6 +3,240 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 (past midnight) · "Send an email" tool, web chat/SMS + both voice lines
+
+Founder decision (chat, "what tools can she trigger, can she send an
+email" → "both"): give Homa a real, live email-sending capability on
+every surface: web chat, SMS, the general inbound voice line, and the
+curriculum outbound line.
+
+Shipped (deployed, verified live against real Telnyx assistants):
+
+1. **`lib/map/email.ts` gained two exports**: `sendAgentComposedEmail`
+   (model composes subject + a few body lines; the visual shell, footer,
+   and unsubscribe framing stay code-controlled exactly like every other
+   Homa email, so the model never emits raw HTML) and `getFamilyEmail`
+   (server-only lookup of the family's own registered address).
+2. **Web chat + SMS**: new eve tool `send_followup_email` (family email
+   resolved under the caller's own RLS via `createCallerDbClient`,
+   exactly like every other tool in this codebase; never an
+   address the model supplies).
+3. **Voice, both assistants**: a new webhook tool (`type: "webhook"`,
+   Telnyx's live mid-call tool-calling mechanism, confirmed via their
+   Async Tools docs before building) at
+   `POST /api/voice/tools/send-email`. `family_id`/`child_id` are
+   templated straight into the tool's URL from each call's own dynamic
+   variables (`{{family_id}}`/`{{child_id}}`), never something the model
+   fills in; only `subject`/`body` are model-supplied parameters. The
+   general line's `/api/voice/context` webhook now also resolves and
+   returns `family_id` (and `child_id` when the family has exactly one
+   child, blank/ambiguous otherwise), so the SAME tool config works
+   unmodified on both assistants.
+4. **Guardrails, both surfaces**: recipient is ALWAYS the family's own
+   `families.email`, never model input (BUILD.md law #1: a
+   model-controlled recipient would turn the transactional domain into
+   a spam relay); the same brand-law gate (no em dash, no banned words)
+   runs on subject+body before anything sends, and on a voice-tool
+   rejection the error is phrased as an instruction so the model can
+   rephrase and retry live in the conversation; a per-family rate limit
+   (5/day, the existing in-memory coarse damper already used by the
+   public map routes, same honest "not a hard global guarantee" posture).
+5. **Both Telnyx provisioning scripts now sync `tools` AND
+   `instructions` on every run** (previously only the curriculum script
+   synced instructions; the general script was create-once-only).
+   Verified live via a direct GET on both assistants after running:
+   identical tool config present on each.
+6. New events `voice.email_sent` {family_id, child_id?} and
+   `chat.email_sent` {family_id, channel: "web"|"sms"}, no content ever
+   in props.
+
+Decisions made alone (auditable):
+
+- **A shared tool definition** (`sendEmailToolConfig` in
+  telnyx-shared.mts) used verbatim by both assistants rather than two
+  near-duplicate configs, so a future change to the tool (rate limit,
+  URL, schema) can never drift between the two lines.
+- **Synchronous, not async, webhook tool**: Resend calls resolve in
+  under a second, so there is no "keep talking while it processes" need
+  that would justify the added complexity of Telnyx's async-webhook +
+  Add Messages API pattern (built for slow lookups, not fast sends).
+- **Rejection reasons are written AS instructions to the model**
+  ("Rephrase without an em dash... and call this tool again") rather
+  than terse error codes, specifically so a live voice conversation can
+  self-correct instead of the call just going quiet on a gate failure.
+- Fixed a pre-existing gap while touching `telnyx-provision.mts`: the
+  10DLC campaign step's "still processing" error (10036, the ongoing
+  registry wait from earlier tonight) was crashing the whole script
+  before it ever reached the voice-assistant sync step; now handled the
+  same gracefully-logged way as the account-level block.
+
+Follow-ups: no live send was fired to a real user as a test (verified
+the auth and brand-law rejection paths instead, both correct, and the
+send path itself reuses `send()`, already proven by every other
+transactional email in this app); worth watching whether 5/day per
+family is the right ceiling once real usage exists.
+
+## 2026-07-07 (night) · "Call Homa" curriculum feature: report → voice call → LLM curriculum
+
+Founder decisions (chat): a "Call me" button on the generated report
+triggers an outbound voice call where Homa reviews the report and digs
+deeper; the resulting curriculum is LLM-authored and richer than the
+existing four-week plan (real lesson ideas, materials, weekly themes),
+whatever length Homa judges the family needs (not a fixed 4 weeks); it
+shows up in a lightweight new section on `/home` (the real M2-08
+dashboard stays backlog); the number dialed reuses the family_phones
+system built earlier tonight (prefill if linked, prompt inline if not).
+
+Shipped (deployed to production, all guards green):
+
+1. **Data layer** (migration `child_curriculum_calls` + `child_curricula`,
+   applied to homa-prod): product-side only, no lead-side twin needed,
+   by the time a report is viewable the parent has already signed up
+   (password is the last onboarding question) and the score route has
+   already bridged a family workspace, so every report viewer already
+   has a real family_id/child_id. Same `is_child_family_member` RLS
+   posture as `child_plans`/`child_reports` (migration #23). Members can
+   start a call (their own insert policy) but never forge its completion
+   or a curriculum directly: only the server-only connection (the
+   insights webhook) transitions status or writes a curriculum.
+2. **Curriculum content** (`packages/core/src/map/curriculum.ts` +
+   `curriculum-gate.ts`): a new, freer schema than the four-week plan
+   (title, Homa's own duration call, overview, per-subject weeks with
+   activities/materials, a consolidated materials list, a parent note).
+   The gate reuses the brand-law checks (no em dash, no banned words)
+   but NOT the report gate's numeric-citation enforcement, since a
+   curriculum inherently proposes new activities, it does not restate
+   computed facts.
+3. **Generation** (`agent/curriculum-writer.md` + `lib/map/
+   curriculum-generate.ts`): same `generateObject`/gateway posture as
+   the report narrative writer, fed the report's existing `ReportFacts`
+   plus the call-extracted facts. Two-strike safety net: a gate failure
+   retries once, a second failure falls back to wrapping the EXISTING
+   deterministic `buildFourWeekPlan` output in the curriculum shape, so
+   a family never gets nothing.
+4. **Mechanism** (researched live against Telnyx docs before building):
+   a SECOND, outbound-only assistant ("Homa curriculum call",
+   `assistant-f96c8f74…`, provisioned via new idempotent script
+   `scripts/telnyx-curriculum-provision.mts`), separate from the general
+   inbound voice line, paired with a Telnyx **Structured Insight**
+   ("Curriculum call extraction") whose instructions extract subjects/
+   concerns/interests/goals AND echo back `family_id`/`child_id` as
+   dynamic variables verbatim, wrapped in an **Insight Group** with a
+   webhook pointed at `/api/voice/curriculum/insights?key=...` (same
+   keyed-URL auth posture as `/api/voice/context`). This is the
+   documented, purpose-built Telnyx mechanism for exactly this ("extract
+   structured data from a finished conversation, deliver it by
+   webhook"), found after the first attempt (`post_conversation_settings`
+   tool-calling) turned out to be the wrong tool for this job.
+5. **Two new routes**: `POST /api/voice/curriculum/start` (signed-in
+   only; verifies child ownership under RLS FIRST, links/reuses the
+   family's phone via the existing `family-phone.ts`, builds report
+   facts, places the outbound call with family_id/child_id/report
+   summary as dynamic variables, records the attempt) and
+   `POST /api/voice/curriculum/insights` (the webhook; correlates the
+   insight's echoed ids against a real `initiated` call row before
+   trusting anything, generates, gates, upserts, emits the event).
+6. **UI**: `CallHomaCard` on the report page (beside `ConsentCard`,
+   phone prefilled from `family_phones` when linked); a lightweight
+   curriculum card per child on `/home` (title + overview once ready, a
+   quiet "Homa is building it" state while a call is in flight).
+7. **Events**: `voice.call_started`, `voice.call_failed`,
+   `voice.curriculum_generated` (registry + parity check green).
+8. **Isolation**: `expectEmptyRead`/`expectInsertDenied` probes added
+   for both new tables, verified against homa-prod.
+
+Decisions made alone (auditable):
+
+- **No lead-side mirror tables**: unlike the SMS phone link (which had
+  to support pre-signup leads), a report is provably post-signup, so
+  building this product-side-only is simpler and was verified against
+  the actual signup-then-bridge flow, not assumed.
+- **Correlation via echoed dynamic variables, re-verified against a real
+  call row**: the Structured Insight echoes `family_id`/`child_id` back
+  in its own structured result (documented Telnyx capability: insight
+  instructions can reference dynamic variables). The webhook never
+  trusts those alone, it requires a matching `initiated`
+  `child_curriculum_calls` row for that exact child within a 2-hour
+  window, so forging a write needs both the webhook secret AND control
+  of the Telnyx account, at which point the account is already
+  compromised. Simpler and more robust than fetching conversation
+  metadata by a separately-tracked `call_control_id`.
+- **A second assistant, not variable-branched instructions on the
+  first**: the general inbound line and this outbound review call have
+  materially different jobs (warm companion vs. structured
+  info-gathering) and different post-call behavior (one needs the
+  Insight Group, one does not); a dedicated assistant kept both
+  instruction sets clean instead of one prompt branching on a
+  `call_purpose` variable.
+- **The curriculum gate skips numeric-citation enforcement** (unlike the
+  report gate): a curriculum is inherently generative (new activities,
+  new materials), so there is no fixed "every number must come from
+  facts" contract to check it against; only the universal brand laws
+  (em dash, banned words) apply.
+
+Follow-ups this creates: real dashboard (M2-08) still supersedes the
+/home lightweight section whenever it's built; multiple curricula per
+child over time (currently one row, latest call wins) if a family calls
+back later and wants history kept; the model choice for this second
+assistant inherits tonight's "no Haiku" veto (Qwen3-235B, same as the
+general line) but was not separately re-confirmed by the founder.
+
+**Addendum (later, first real call, founder repro "that didn't go
+through"):** a real call to alessallanes@gmail.com's report surfaced two
+bugs, both fixed and deployed, found by replaying the exact outbound
+request against the live Telnyx API rather than guessing:
+
+1. **Root cause of the failure**: the outbound-call POST never included
+   `AIAssistantId` in the body (only the TeXML app id in the URL path,
+   which Telnyx's docs example shows alongside, not instead of, the
+   body field). Telnyx rejected every attempt before a call row was
+   ever created, hence zero rows in `child_curriculum_calls` and the
+   generic client-side error.
+2. **Latent bug caught while verifying the fix**: the response is a flat
+   `{call_sid, from, to, status}`, not `{data: {call_control_id}}` as
+   assumed; the tracking id would have silently stored as null.
+3. Separately, `.env.local`'s `TELNYX_CURRICULUM_TEXML_APP_ID` had
+   somehow picked up extra trailing digits (corrupted to
+   `299919608238833845220024` instead of `2999196082388338452`);
+   corrected. Vercel production's copy was set from a clean string
+   earlier and was not affected.
+
+Also mid-session: a separate, larger concurrent change (migration #25,
+`20260708021500_drop_lead_world.sql`) retired the entire `lead_*` table
+family (one-world unification: `families`/`children` are now created
+directly from the first tap, no separate staging schema). The
+curriculum feature was unaffected because it was deliberately built
+product-side-only from the start (see the original entry above); this
+turned out to be exactly forward-compatible with that consolidation.
+
+**Addendum (founder call-quality notes, first live call heard):** Homa
+was too talkative, wandered into questions that did not resolve a real
+gap, and never mentioned that the parent can check back in tomorrow.
+Fixed by feeding the call TARGETED information instead of a flat
+subject list:
+
+- New `buildCallFocusSummary()` (`lib/map/curriculum-store.ts`): ranks
+  subjects worst-first, keeps only those actually needing help
+  (`not_mapped`/`growing`), and for each states what is CONFIRMED versus
+  what is an UNCONFIRMED GUESS to check. Deliberately does NOT pad to a
+  fixed count: a child with one real gap gets one focus area, not a
+  manufactured second question. Caught live against Story's real report
+  data: the naive "always top 2" version was pairing the one genuine gap
+  (self-care) with an already on_track subject where the confirmed skill
+  and the "gap to check" were the identical sentence, exactly the
+  wasted-question pattern being fixed.
+- `agent/curriculum-call-instructions.md` rewritten: one sentence per
+  turn, never explore for its own sake, spend the whole call on the new
+  `{{focus_subjects}}` block, one simple concrete offer per resolved
+  gap, explicit closing line inviting a call or text tomorrow for a
+  quick day-review, hang up once the focus list is resolved rather than
+  filling time.
+- The provisioning script now syncs instructions to the live Telnyx
+  assistant on EVERY run (previously create-once-only), so a prompt
+  edit takes effect the moment the script re-runs instead of silently
+  drifting from what is actually deployed; verified live via a direct
+  GET against the assistant after running it.
+
 ## 2026-07-07 (late night) · Tester voice memos transcribed and ingested
 
 Fourteen voice memos (~11 minutes, recorded this afternoon by a pilot tester

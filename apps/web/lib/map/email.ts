@@ -1,5 +1,7 @@
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
+import { mapDb } from "./db";
+
 /**
  * Transactional email for the map flow, sent through Resend's REST API
  * (M1-08 minimal). Every send here is something the parent explicitly asked
@@ -149,6 +151,41 @@ export async function sendRetestEmail(
     cta: { label: `Retest ${childName}'s ${subjectName.toLowerCase()}`, url },
     footerNote: "A slower month is normal too. The numbers are a map, never a grade.",
   });
+}
+
+/**
+ * The "send an email" tool's send path (chat/SMS eve tool + the voice
+ * webhook tool, build-log 2026-07-08). Agent-composed, not a fixed
+ * template: the model supplies subject and body text; the wrapper HTML
+ * shell, footer, and unsubscribe framing stay code-controlled exactly
+ * like every other Homa email, so the model never emits raw HTML.
+ * Callers MUST run brand-law validation (BANNED_WORDS/EM_DASH) on
+ * subject/bodyLines before calling this; it is not repeated here so
+ * both call sites share one gate helper instead of drifting.
+ */
+export async function sendAgentComposedEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+): Promise<boolean> {
+  return send({
+    to,
+    subject,
+    preview: bodyLines[0]?.slice(0, 120) ?? subject,
+    heading: subject,
+    bodyLines,
+    footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
+  });
+}
+
+/** The family's own registered email, for the agent-composed send path
+ * only. Server-only (mapDb): the voice webhook has no caller session. */
+export async function getFamilyEmail(familyId: string): Promise<string | null> {
+  const sql = mapDb();
+  const rows = await sql<{ email: string | null }[]>`
+    select email from public.families where id = ${familyId}
+  `;
+  return rows[0]?.email ?? null;
 }
 
 export async function sendBandReadyEmail(

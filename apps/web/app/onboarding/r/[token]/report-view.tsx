@@ -22,6 +22,7 @@ import {
 
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
 import { Logo } from "../../../../components/brand/Logo";
+import { CallHomaCard } from "./call-homa-card";
 import { ConsentCard } from "./consent-card";
 import { GrowthStory, type GrowthEra } from "./growth-story";
 import { HomeschoolContextCard } from "./homeschool-context-card";
@@ -68,6 +69,9 @@ export interface ReportViewData {
   otherKids: { id: string; name: string; inRange: boolean; hasReport: boolean }[];
   /** Built months and their synced check-off counts (empty on sample). */
   plans: { domainId: string; done: number; total: number; retestAt: string }[];
+  /** The family's linked texting/calling number, if any (null on the
+   * sample page, which carries no real family). */
+  familyPhone: string | null;
 }
 
 const POSITION_RANK: Record<DomainScore["position"], number> = {
@@ -695,6 +699,15 @@ export function ReportView({
                 subjectName={consentCandidate.subjectName}
               />
             ) : null}
+
+            {/* The "Call Homa" curriculum feature: a real conversation,
+                deeper than the report, ending in an LLM-authored
+                curriculum on /home. */}
+            <CallHomaCard
+              childId={report.childId}
+              childName={report.childName}
+              familyPhone={report.familyPhone}
+            />
 
             {/* The growth story: the archive read back as chapters. Renders
                 nothing until a second scoring exists. */}

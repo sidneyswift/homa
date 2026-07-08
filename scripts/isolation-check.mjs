@@ -92,6 +92,12 @@ await expectEmptyRead("child_plans");
 await expectEmptyRead("child_reports");
 await expectEmptyRead("child_answers");
 await expectEmptyRead("child_plans");
+// "Call Homa" curriculum feature (migration #24): same is_child_family_member
+// posture. Only the server-only connection ever writes a curriculum, so a
+// signed-in member can start a call (their own insert policy) but never
+// forge one directly, and anon sees and writes nothing in either table.
+await expectEmptyRead("child_curriculum_calls");
+await expectEmptyRead("child_curricula");
 
 await expectInsertDenied(
   "families",
@@ -187,6 +193,20 @@ await expectInsertDenied(
     retest_at: "2026-01-01T00:00:00Z",
   },
   "anon cannot forge child_plans",
+);
+await expectInsertDenied(
+  "child_curriculum_calls",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    phone_e164: "+15550000000",
+  },
+  "anon cannot forge curriculum calls",
+);
+await expectInsertDenied(
+  "child_curricula",
+  { child_id: "00000000-0000-0000-0000-000000000000", curriculum: {}, model: "x" },
+  "anon cannot forge a curriculum",
 );
 await expectInsertDenied(
   "child_reports",

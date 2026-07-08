@@ -46,6 +46,7 @@ import {
   listOwnedNumbers,
   readSoleProprietorIdentity,
   requireApiKey,
+  sendEmailToolConfig,
   tx,
   type AssistantRow,
   type BrandRow,
@@ -178,6 +179,13 @@ function isAccountLevelBlock(error: unknown): boolean {
     error.status === 403 &&
     error.body.includes("10038")
   );
+}
+
+/** The campaign registry provisioning step (10036) is a known, separate,
+ * still-in-progress wait (build-log 2026-07-07 night); never let it
+ * crash the rest of this script, which has nothing to do with it. */
+function isCampaignStillProcessing(error: unknown): boolean {
+  return error instanceof TelnyxHttpError && error.body.includes("10036");
 }
 
 async function ensureBrand(): Promise<BrandRow | undefined> {
@@ -364,6 +372,11 @@ async function loadVoiceInstructions(): Promise<string> {
     "  the home page at thankshoma dot com if they ask for family things.",
     "- You cannot make worksheets or save memories on a call yet; offer",
     "  them for the next web visit instead.",
+    "- You CAN send a real email to the family's own address on file,",
+    "  using the send_email tool. Only do it when the parent asks for",
+    "  something in writing or it is clearly the useful next step, never",
+    "  as a default. Compose a short, warm subject and 2 to 4 sentences",
+    "  yourself; do not read the email aloud, just confirm you sent it.",
   ].join("\n");
 }
 
@@ -375,9 +388,10 @@ async function ensureVoiceAssistant(
     log("voice", "assistant not created yet");
     return undefined;
   }
+  const instructions = await loadVoiceInstructions();
+  const webhookSecret = process.env.TELNYX_WEBHOOK_SECRET;
+  const tools = webhookSecret ? [sendEmailToolConfig(webhookSecret)] : [];
   if (!assistant) {
-    const instructions = await loadVoiceInstructions();
-    const webhookSecret = process.env.TELNYX_WEBHOOK_SECRET;
     assistant = await tx<{ data?: AssistantRow } & AssistantRow>(
       "POST",
       "/ai/assistants",
@@ -400,6 +414,7 @@ async function ensureVoiceAssistant(
         },
         telephony_settings: { noise_suppression: "krisp" },
         enabled_features: ["telephony"],
+        tools,
         ...(webhookSecret
           ? {
               dynamic_variables_webhook_url: `https://thankshoma.com/api/voice/context?key=${webhookSecret}`,
@@ -408,6 +423,8 @@ async function ensureVoiceAssistant(
                 caller_known: "false",
                 parent_name: "",
                 family_context: "",
+                family_id: "",
+                child_id: "",
               },
             }
           : {}),
@@ -415,7 +432,8 @@ async function ensureVoiceAssistant(
     ).then((payload) => ("data" in payload && payload.data ? payload.data : payload));
     log("voice", `created assistant ${assistant.id}`);
   } else {
-    log("voice", `assistant already exists (${assistant.id})`);
+    await tx("POST", `/ai/assistants/${assistant.id}`, { instructions, tools });
+    log("voice", `assistant already exists (${assistant.id}); instructions + tools synced`);
   }
 
   // Voice attachment: point the number's voice connection at the
@@ -502,13 +520,18 @@ async function main(): Promise<void> {
       }
     }
   } catch (error) {
-    if (!isAccountLevelBlock(error)) throw error;
-    log(
-      "brand",
-      "10DLC endpoints are not enabled at this account level yet. Fix in " +
-        "the portal: add funds (Billing → Add funds) and complete account " +
-        "verification (telnyx.com/upgrade), then re-run this script.",
-    );
+    if (isCampaignStillProcessing(error)) {
+      log("campaign", "registry still provisioning the campaign; not an error, re-run later");
+    } else if (isAccountLevelBlock(error)) {
+      log(
+        "brand",
+        "10DLC endpoints are not enabled at this account level yet. Fix in " +
+          "the portal: add funds (Billing → Add funds) and complete account " +
+          "verification (telnyx.com/upgrade), then re-run this script.",
+      );
+    } else {
+      throw error;
+    }
   }
 
   const assistant = await ensureVoiceAssistant(number);

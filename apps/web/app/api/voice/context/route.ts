@@ -38,6 +38,11 @@ const EMPTY_RESPONSE = {
     caller_known: "false",
     parent_name: "",
     family_context: "",
+    // Blank on purpose: the shared send-email tool's URL templates these
+    // in, and an unlinked caller must resolve to "no account" server-side,
+    // never to an empty string that could be misread as a valid id.
+    family_id: "",
+    child_id: "",
   },
 };
 
@@ -69,6 +74,12 @@ export async function POST(request: Request): Promise<Response> {
         caller_known: "true",
         parent_name: rows.family?.parent_display_name ?? "",
         family_context: renderFamilyContext(rows),
+        family_id: familyId,
+        // Ambiguous with multiple kids on the general line; the email
+        // tool treats a blank child_id as "family-level", which is
+        // correct here (unlike the curriculum line, which always knows
+        // exactly one child).
+        child_id: rows.children.length === 1 ? rows.children[0].id : "",
       },
     });
   } catch (error) {

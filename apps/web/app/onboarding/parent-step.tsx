@@ -175,10 +175,9 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
-              {/* The label carries the why (UX review 2026-07-06: "enter
-                  your email" without a reason reads as a toll booth; this
-                  is the address the report goes to). */}
-              <label className="block text-sm font-medium text-strong" htmlFor="parent-email">
+              {/* Visible label removed per design (2026-07-08); the input
+                  keeps an accessible name via aria-label for screen readers. */}
+              <label className="sr-only" htmlFor="parent-email">
                 Where should I send the report?
               </label>
               <input
@@ -193,7 +192,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 placeholder="you@example.com"
                 aria-invalid={error !== null}
                 aria-describedby={error ? "parent-form-error" : undefined}
-                className={`mt-2 min-h-[54px] w-full rounded-md border-[1.5px] bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
+                className={`min-h-[54px] w-full rounded-md border-[1.5px] bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
                   error ? "border-danger" : "border-border"
                 }`}
               />
