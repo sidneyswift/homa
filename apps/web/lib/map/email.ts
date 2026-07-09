@@ -53,8 +53,9 @@ async function send(args: SendArgs): Promise<boolean> {
     <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${args.footerNote}</p>
   </div>
   <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
-    You asked for this email at thankshoma.com. Reply and a real person answers.
-    We only email you your children's progress reports and your invite.
+    You signed up for Homa at thankshoma.com. Reply and a real person answers.
+    We only email you about your own family's homeschool, never promotions.
+    Every kind of email has an off switch.
   </p>
 </body></html>`;
 
@@ -189,7 +190,10 @@ export async function getFamilyEmail(familyId: string): Promise<string | null> {
 }
 
 /** The evening journal prompt (FR-6 seed; flag-gated in lib/journal.ts).
- * One short invitation, one CTA into chat; never a sequence. */
+ * One short invitation, one CTA into chat; never a sequence. Copy shaped
+ * by the reader gate 2026-07-09: the payoff is stated concretely (what
+ * tonight's sentences change tomorrow), the "plenty" line lives in the
+ * preview only, and the subject no longer reads like a survey. */
 export async function sendJournalPromptEmail(
   to: string,
   parentFirstName: string | null,
@@ -200,12 +204,14 @@ export async function sendJournalPromptEmail(
     childNames.length === 1 ? childNames[0] : "the kids";
   return send({
     to,
-    subject: "How did today go?",
-    preview: "One or two sentences is plenty. Homa remembers what matters.",
-    heading: parentFirstName ? `How did today go, ${parentFirstName}?` : "How did today go?",
+    subject: "One thing from today?",
+    preview: "One or two sentences is plenty.",
+    heading: parentFirstName
+      ? `Tell me one thing from today, ${parentFirstName}`
+      : "Tell me one thing from today",
     bodyLines: [
-      `Tell me one thing from today: a win, a wobble, or something ${kidPhrase} did that surprised you.`,
-      "One or two sentences is plenty. I'll remember what matters, and it shapes what we do next.",
+      `A win, a hard part, or something ${kidPhrase} did that surprised you: any one of them counts.`,
+      "I'll add what matters to your family's record. Tomorrow's practice starts from it. School time you mention goes into your hours log.",
     ],
     cta: { label: "Tell Homa about today", url },
     footerNote:
