@@ -11,6 +11,14 @@ import { mapDb } from "./db";
 
 const FROM = "Homa <hello@mail.thankshoma.com>";
 
+/** Replies must land somewhere real: mail.thankshoma.com is send-only
+ * (no MX, verified 2026-07-09), so without this reply_to every reply
+ * bounces and the footer's "reply and a real person answers" is false.
+ * The apex has Google MX; the founder confirms the hello@ alias exists
+ * (HUMAN-TODO). The reply-into-the-agent upgrade path stays the Resend
+ * inbound webhook (06-harness-gap-analysis #6). */
+const REPLY_TO = "hello@thankshoma.com";
+
 export function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://thankshoma.com";
 }
@@ -65,7 +73,14 @@ async function send(args: SendArgs): Promise<boolean> {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [args.to], subject: args.subject, html, text }),
+      body: JSON.stringify({
+        from: FROM,
+        to: [args.to],
+        reply_to: [REPLY_TO],
+        subject: args.subject,
+        html,
+        text,
+      }),
     });
     if (!response.ok) {
       console.error(`map email: send failed HTTP ${response.status}`);
