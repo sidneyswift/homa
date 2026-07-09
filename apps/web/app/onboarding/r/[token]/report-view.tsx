@@ -399,6 +399,13 @@ export function ReportView({
                           +{score.monthsAhead}
                           <span className="text-sm"> mo ahead</span>
                         </span>
+                        {/* The floor marker: this number is where the
+                            checklist stops, not where the child does. */}
+                        {score.beyondScale ? (
+                          <span className="mt-0.5 block text-xs font-semibold" style={{ color: "var(--gold-ink)" }}>
+                            and past what this number can show
+                          </span>
+                        ) : null}
                         {movement ? (
                           <span className="mt-0.5 block font-mono text-xs font-bold" style={{ color: "var(--gold-ink)" }}>
                             {"\u2191"} {movement.label}
@@ -481,13 +488,30 @@ export function ReportView({
                 const activity = domain ? growingActivityFor(domain, months) : null;
                 // The sharpness meter: honest instrument quality per
                 // subject, with the single highest-information question
-                // inline when one clear look is all we have.
+                // inline whenever one more answer genuinely sharpens the
+                // picture. Three cases, one card (2026-07-08 tails pass):
+                //   thin look: one answer so far, anything helps;
+                //   walk-down: growing with nothing confirmed yet, so the
+                //     probe descends toward the honest starting line (the
+                //     plan needs a first win to build from);
+                //   climb: the number is a floor (beyondScale), so the
+                //     probe keeps climbing until the run actually ends.
+                // Each answered probe refreshes the page and this card
+                // re-renders with the next question, one tap at a time.
                 const thinLook =
                   score.position !== "not_mapped" && !score.highConfidence && score.observations > 0;
+                const walkDown =
+                  score.position === "growing" && score.strongestObservedStatement === null;
+                const probeWanted = thinLook || walkDown || score.beyondScale;
                 const probe =
-                  editable && thinLook
+                  editable && probeWanted
                     ? nextDeepDiveItem(score.domainId, months, answersLookup, 0)
                     : null;
+                const probeKicker = walkDown
+                  ? `Finding ${report.childName}'s starting line \u00b7 one question at a time`
+                  : score.beyondScale
+                    ? `Past every question so far \u00b7 see how far it goes`
+                    : `One clear look so far \u00b7 30 seconds sharpens it`;
                 // One forward pointer only (read-through: the full ladder
                 // repeated the receipts): the single unanswered next-up rung.
                 const nextUp =
@@ -557,9 +581,11 @@ export function ReportView({
                       ) : null}
                       {probe ? (
                         <SharpenInline
+                          key={probe.id}
                           childId={report.childId}
                           statement={probe.statement}
                           itemId={probe.id}
+                          kicker={probeKicker}
                         />
                       ) : null}
                       {domainAnswers.length > 0 ? (
@@ -791,7 +817,8 @@ export function ReportView({
               <p className="mt-2 text-muted">
                 This is built from a parent&apos;s observations. It is not a test and not medical
                 advice. Every child grows in their own order, and a first report is an estimate
-                that sharpens as you answer more.
+                that sharpens as you answer more. If something ever worries you, your
+                pediatrician is the right person to ask.
               </p>
               {stateName && !stateRequirements ? (
                 <p className="mt-2 text-muted">

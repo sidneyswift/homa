@@ -6,20 +6,28 @@ import { useRouter } from "next/navigation";
 import type { MapAnswer } from "@homa/core";
 
 /**
- * The sharpness meter's action half: a subject with one clear look gets
- * its single highest-information question inline (the deep dive's probe
- * logic, one tap instead of a page). Answering rescores and rewrites;
- * "not sure" and "skip" stay honest options. Session-gated like every
- * living-record write.
+ * The sharpness meter's action half: the subject's single
+ * highest-information question, inline (the deep dive's probe logic, one
+ * tap instead of a page). Answering rescores and refreshes the page, and
+ * the server re-renders this card with the NEXT probe when one is still
+ * worth asking, so a growing subject walks down to its honest starting
+ * line and a topped-out strength climbs until the run ends, one consented
+ * tap at a time. "Not sure" and "skip" stay honest options. Session-gated
+ * like every living-record write.
  */
 export function SharpenInline({
   childId,
   statement,
   itemId,
+  kicker,
 }: {
   childId: string;
   statement: string;
   itemId: string;
+  /** The one-line frame above the question, set by the caller to match
+   * why this probe exists (thin look, finding the starting line, or
+   * seeing how far a strength goes). */
+  kicker: string;
 }) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "busy" | "done" | "no-session">("idle");
@@ -54,7 +62,7 @@ export function SharpenInline({
   if (state === "done") {
     return (
       <p className="mt-2 text-xs text-muted print:hidden">
-        Noted. The report is rescoring around it now.
+        Noted. The report is updating now.
       </p>
     );
   }
@@ -71,7 +79,7 @@ export function SharpenInline({
   return (
     <div className="mt-3 rounded-md border border-border-subtle bg-card p-3 print:hidden">
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
-        One clear look so far {"\u00b7"} 30 seconds sharpens it
+        {kicker}
       </p>
       <p className="mt-1 text-sm font-medium text-strong">{statement}?</p>
       <div className="mt-2 flex flex-wrap gap-1.5">

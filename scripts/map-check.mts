@@ -15,10 +15,14 @@ import {
   BANNED_WORDS,
   buildFourWeekPlan,
   buildMonthPlan,
+  CORE_DOMAIN_IDS,
+  CORE_LADDER_RUNGS,
+  MAX_LADDER_RUNGS,
   MONTH_PLAN_DOMAIN,
   DEEP_DIVE_CAP,
   domainLine,
   EM_DASH,
+  getMapItem,
   homaNote,
   MAP_DOMAINS,
   MAP_SOURCES,
@@ -126,14 +130,21 @@ report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cit
 
 // ---------- 2. Selection ladder sanity ----------
 
+// Worst case is base + two rungs per non-core domain and base + six rungs
+// per core subject; typical kids see far fewer because rungs only unlock
+// on "easily".
+const MAX_TOTAL_QUESTIONS = MAP_DOMAINS.reduce(
+  (total, domain) =>
+    total + 1 + (CORE_DOMAIN_IDS.includes(domain.id) ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS),
+  0,
+);
+
 let ladderOk = true;
 for (let age = 24; age < 204; age += 3) {
   const plans = planQuestions(age);
   if (plans.length !== MAP_DOMAINS.length) ladderOk = false;
-  // Worst case is base + two rungs per domain (three in core subjects);
-  // typical kids see far fewer because rungs only unlock on "easily".
   const total = maxQuestionsForAge(age);
-  if (total < plans.length || total > plans.length * 4) {
+  if (total < plans.length || total > MAX_TOTAL_QUESTIONS) {
     ladderOk = false;
     failures.push(`age ${age}m: ${total} max questions out of range`);
   }
@@ -302,6 +313,95 @@ report(
     }
   }
   report("proportional cap: no age, no subject, no answer pattern beats min(24, age/3)", capOk);
+}
+
+// Golden kid 8: the truly gifted 4-year-old (48mo). Core ladders climb
+// past the display window until the run ends, so the report holds the
+// PROOF (a confirmed skill typical of a much older child), the displayed
+// number caps honestly, and beyondScale marks it as a floor.
+{
+  const GIFTED_AGE = 48;
+  const gifted = scoreMap(GIFTED_AGE, answersFor(GIFTED_AGE, () => "easily"));
+  const giftedMath = gifted.domains.find((d) => d.domainId === "math");
+  const mathPlan = planQuestions(GIFTED_AGE).find((plan) => plan.domainId === "math")!;
+  const highestServed = mathPlan.ladders[mathPlan.ladders.length - 1];
+  report(
+    "gifted 4yo: math climbs far past the window (6 rungs served, top rung 2y+ above age)",
+    mathPlan.ladders.length === CORE_LADDER_RUNGS &&
+      highestServed.typicalMonths >= GIFTED_AGE + 24,
+    JSON.stringify(mathPlan.ladders.map((rung) => [rung.id, rung.typicalMonths])),
+  );
+  report(
+    "gifted 4yo: number caps at the age rule AND is marked as a floor (beyondScale)",
+    giftedMath?.position === "ahead" &&
+      giftedMath.monthsAhead === aheadCapForAge(GIFTED_AGE) &&
+      giftedMath.beyondScale === true,
+    JSON.stringify([giftedMath?.monthsAhead, giftedMath?.beyondScale]),
+  );
+  // The evidence line names a skill genuinely past the cap, so the mom of
+  // a truly advanced kid SEES it even though the number stays modest.
+  const strongest = gifted.domains
+    .filter((d) => d.domainId === "math")
+    .map((d) => d.strongestObservedStatement)[0];
+  const strongestItem = MAP_DOMAINS.find((d) => d.id === "math")!.items.find(
+    (item) => item.statement === strongest,
+  );
+  report(
+    "gifted 4yo: the confirmed evidence names a skill past the displayed cap",
+    strongestItem !== undefined &&
+      strongestItem.typicalMonths > GIFTED_AGE + aheadCapForAge(GIFTED_AGE),
+    `strongest=${strongestItem?.id} @${strongestItem?.typicalMonths}mo`,
+  );
+
+  // And the floor flag never fires on an honest, uncapped ahead: a kid
+  // whose run ends inside the window reads as a measurement, not a floor.
+  const modest = scoreMap(
+    GIFTED_AGE,
+    answersFor(GIFTED_AGE, (domainId, rungIndex) =>
+      domainId === "math" ? (rungIndex <= 1 ? "easily" : "not_yet") : "not_sure",
+    ),
+  );
+  const modestMath = modest.domains.find((d) => d.domainId === "math");
+  report(
+    "bracketed kid: an in-window frontier is NOT marked as a floor",
+    modestMath?.position === "ahead" && modestMath.beyondScale === false,
+    JSON.stringify([modestMath?.position, modestMath?.monthsAhead, modestMath?.beyondScale]),
+  );
+}
+
+// The struggling kid never gets a floor flag (no confirmed frontier), and
+// the walk-down machinery has somewhere real to walk: after a base
+// not-yet, the next probe sits BELOW the base, and answering it "easily"
+// gives the plan an honest confirmed starting line.
+{
+  const STRUGGLE_AGE = 72;
+  const struggling = scoreMap(STRUGGLE_AGE, answersFor(STRUGGLE_AGE, () => "not_yet"));
+  report(
+    "struggling kid: growing everywhere, never a beyondScale flag",
+    struggling.domains.every((d) => !d.beyondScale),
+  );
+  const literacyBase = planQuestions(STRUGGLE_AGE).find((plan) => plan.domainId === "literacy")!.base;
+  const walkAnswers: Record<string, MapAnswer> = { [literacyBase.id]: "not_yet" };
+  const firstProbe = nextDeepDiveItem("literacy", STRUGGLE_AGE, walkAnswers, 0);
+  const probeBelowBase =
+    firstProbe !== null && firstProbe.typicalMonths < literacyBase.typicalMonths;
+  let honestLine = false;
+  if (firstProbe) {
+    const rescored = scoreMap(STRUGGLE_AGE, [
+      { itemId: literacyBase.id, answer: "not_yet" },
+      { itemId: firstProbe.id, answer: "easily" },
+    ]);
+    const lit = rescored.domains.find((d) => d.domainId === "literacy");
+    honestLine =
+      lit?.position === "growing" &&
+      lit.strongestObservedStatement === firstProbe.statement &&
+      getMapItem(firstProbe.id) !== undefined;
+  }
+  report(
+    "struggling kid: the walk-down probes below the base and a win becomes the confirmed starting line",
+    probeBelowBase && honestLine,
+    `probe=${firstProbe?.id}`,
+  );
 }
 
 // ---------- 4. Deep dive: probes down for strugglers, up for the strong ----------

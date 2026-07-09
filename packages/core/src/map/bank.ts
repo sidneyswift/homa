@@ -195,17 +195,21 @@ export function getMapDomain(domainId: string): MapDomain | undefined {
   return MAP_DOMAINS.find((domain) => domain.id === domainId);
 }
 
-/** At most this many rungs above the base per domain: two rungs approach
- * the display cap in most domains, so further questions would add fatigue
- * without adding signal. */
+/** At most this many rungs above the base per non-core domain: two rungs
+ * approach the display cap, and electives and motor domains stay light
+ * on purpose. */
 export const MAX_LADDER_RUNGS = 2;
 
-/** Core subjects climb one rung further (up to four questions total):
- * these carry the report's most trust-sensitive claims, and each extra
- * confirmed rung is real corroboration for an "ahead" number
- * (accuracy pass 2026-07-08, after pilot parents flagged inflated
- * results from too few observations). */
-export const CORE_LADDER_RUNGS = 3;
+/** Core subjects climb until the frontier is actually found: up to six
+ * rungs above the base (seven questions in a subject, worst case), and
+ * past the display window, because rungs only ever appear on an "easily"
+ * streak. Founder ruling 2026-07-08 ("I would rather give way more
+ * questions if it gives way more accurate results"): for a strong kid
+ * every extra rung is real corroboration and the honest search for where
+ * the run ends; for everyone else the climb never starts. The DISPLAYED
+ * number still caps at aheadCapForAge; the extra rungs feed the receipts,
+ * the evidence lines, and the plan's starting line. */
+export const CORE_LADDER_RUNGS = 6;
 export const CORE_DOMAIN_IDS: readonly string[] = [
   "math",
   "literacy",
@@ -214,24 +218,20 @@ export const CORE_DOMAIN_IDS: readonly string[] = [
   "language",
 ];
 
-function maxLadderRungsFor(domainId: string): number {
-  return CORE_DOMAIN_IDS.includes(domainId) ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS;
-}
-
 /**
  * The questions one child can ever be asked, in serving order: per domain,
  * the frontier item (greatest typicalMonths at or below the child's age,
- * falling back to the easiest item for young twos) plus up to two ladder
- * rungs above it (three in core subjects), within the +24 month window.
- * Rung N+1 is only SHOWN after "easily" on rung N, so strong domains climb
- * until the child's real frontier is found (this is how "+18 months ahead"
- * becomes measurable), while everyone else answers exactly one question
- * per domain.
+ * falling back to the easiest item for young twos) plus ladder rungs above
+ * it. Non-core domains serve up to two rungs within the +24 month window;
+ * core subjects serve up to six rungs with no window, so a genuinely
+ * advanced kid's real frontier gets found instead of assumed. Rung N+1 is
+ * only SHOWN after "easily" on rung N, so strong domains climb while
+ * everyone else answers exactly one question per domain.
  */
 export interface MapQuestionPlan {
   domainId: string;
   base: MapItem;
-  /** Ascending rungs above the base, within the ahead cap. */
+  /** Ascending rungs above the base. */
   ladders: MapItem[];
 }
 
@@ -241,13 +241,14 @@ export function planQuestions(ageMonths: number): MapQuestionPlan[] {
     const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
     const atOrBelow = sorted.filter((item) => item.typicalMonths <= ageMonths);
     const base = atOrBelow.length > 0 ? atOrBelow[atOrBelow.length - 1] : sorted[0];
+    const core = CORE_DOMAIN_IDS.includes(domain.id);
     const ladders = sorted
       .filter(
         (item) =>
           item.typicalMonths > base.typicalMonths &&
-          item.typicalMonths <= ageMonths + MONTHS_AHEAD_CAP,
+          (core || item.typicalMonths <= ageMonths + MONTHS_AHEAD_CAP),
       )
-      .slice(0, maxLadderRungsFor(domain.id));
+      .slice(0, core ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS);
     plans.push({ domainId: domain.id, base, ladders });
   }
   return plans;

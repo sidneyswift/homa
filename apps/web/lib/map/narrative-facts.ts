@@ -25,6 +25,10 @@ export interface SubjectFacts {
   position: "ahead" | "on_track" | "growing" | "not_mapped";
   badge: string;
   monthsAhead: number | null;
+  /** True when monthsAhead is a floor, not the measurement: the child
+   * confirmed skills past the display cap, or past the last question the
+   * checklist has for this subject. The writer says so plainly. */
+  numberIsFloor: boolean;
   exposureBased: boolean;
   observations: number;
   /** The strongest thing the parent confirmed she has seen. */
@@ -176,6 +180,7 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
       position: score.position,
       badge: line.badge,
       monthsAhead: score.monthsAhead,
+      numberIsFloor: score.beyondScale,
       exposureBased: score.exposureBased,
       observations: score.observations,
       confirmedSkill: score.strongestObservedStatement,

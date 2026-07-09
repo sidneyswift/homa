@@ -134,3 +134,7 @@ new set of cards), run both gates in this order, no exceptions:
 Reader first, editor second: polishing style before checking comprehension
 hides the comprehension problem. The main agent implements feedback it
 agrees with and rewrites copy itself; gate subagents never touch files.
+
+These gates read WORDS. When the rendered interface changed too (layout,
+cards, charts, flows, motion), run `homa-uxui-reviewer` on screenshots of
+the real surface as its own read; neither gate substitutes for the other.

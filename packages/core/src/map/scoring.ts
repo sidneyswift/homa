@@ -47,6 +47,14 @@ export interface DomainScore {
   position: MapPosition;
   /** Whole months ahead of age; null unless position is "ahead" or "on_track". */
   monthsAhead: number | null;
+  /**
+   * True when monthsAhead is a FLOOR, not the measurement: the child's
+   * confirmed frontier ran past the display cap, or they confirmed the
+   * highest item the bank has for this subject. Display and narrative
+   * say so plainly ("the checklist stops here, not the child"), so a
+   * genuinely advanced kid is never mistaken for a merely capped number.
+   */
+  beyondScale: boolean;
   /** True when both the base and a ladder item carried real signal. */
   highConfidence: boolean;
   /** Count of real observations (easily / getting there / not yet). */
@@ -99,6 +107,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         domainId: domain.id,
         position: "not_mapped" as const,
         monthsAhead: null,
+        beyondScale: false,
         highConfidence: false,
         observations: 0,
         strongestObservedStatement: null,
@@ -113,6 +122,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     let sawNotYet = false;
     let frontierStatement: string | null = null;
     let frontierAnchor: number | null = null;
+    let topOfBankConfirmed = false;
+    const bankTop = Math.max(...domain.items.map((item) => item.typicalMonths));
 
     for (const entry of observations) {
       const found = getMapItem(entry.itemId);
@@ -121,6 +132,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       if (entry.answer === "easily") {
         const reached = creditMonths(found.item);
         if (frontier === null || reached > frontier) frontier = reached;
+        if (anchor === bankTop) topOfBankConfirmed = true;
         // Evidence lines name the strongest thing she has SEEN, so the
         // statement follows the raw anchor even when the scored credit
         // (the window's early edge) sits lower.
@@ -157,6 +169,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         domainId: domain.id,
         position,
         monthsAhead: null,
+        beyondScale: false,
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: strongestStatement,
@@ -171,6 +184,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         domainId: domain.id,
         position: "growing" as const,
         monthsAhead: null,
+        beyondScale: false,
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: null,
@@ -195,10 +209,16 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       monthsAhead = null;
     }
 
+    // The number is a floor when the confirmed frontier ran past the
+    // display cap, or the child confirmed the hardest item the bank has.
+    const beyondScale =
+      position === "ahead" && monthsAhead !== null && (delta > monthsAhead || topOfBankConfirmed);
+
     return {
       domainId: domain.id,
       position,
       monthsAhead,
+      beyondScale,
       highConfidence,
       observations: observations.length,
       strongestObservedStatement: strongestStatement,

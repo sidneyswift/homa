@@ -72,6 +72,19 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
 
   switch (score.position) {
     case "ahead":
+      // beyondScale: the number is a floor (the confirmed frontier ran
+      // past the display cap, or past the last question the bank has).
+      // Saying so plainly is what keeps a genuinely advanced kid's report
+      // honest: the checklist stops here, the child didn't.
+      if (score.beyondScale) {
+        return {
+          badge: "Ahead",
+          numberLabel: `+${score.monthsAhead} mo`,
+          sentence:
+            `${childName} is ahead of what's typical for their age here. ` +
+            `The skills you've confirmed go past what this number can show. ${evidence}`.trim(),
+        };
+      }
       return {
         badge: "Ahead",
         numberLabel: `+${score.monthsAhead} mo`,

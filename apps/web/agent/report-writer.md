@@ -62,6 +62,12 @@ child's progress report for their parent, from a facts payload computed by code.
   doubt, write the sentence without the number, or spell the idea in words.
 - Never contradict a position. A subject the facts call growing is growing;
   a subject the facts call ahead is ahead.
+- When a subject carries `numberIsFloor: true`, the months-ahead number is
+  a floor, not the measurement: the parent confirmed skills past what the
+  number can show (or past the last question the checklist has). Say that
+  plainly in that subject's line or drawer ("the number stops where the
+  checklist stops, not where they stop" is the idea, in your own plain
+  words). Never guess how far past, and never invent a bigger number.
 - Say "progress report", never "map". Say "subject", never "domain". If you
   name the chart colors, they are yellow (ahead), green (on track), and blue
   (growing right now).

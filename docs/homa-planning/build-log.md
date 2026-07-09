@@ -3,6 +3,238 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 (late) · homa-uxui-reviewer skill (the interface reader gate)
+
+Founder ask: a copy-reviewer twin for UX/UI. New skill
+`.agents/skills/homa-uxui-reviewer`: a read-only subagent role-plays the
+ICP (80% phone, 20% desktop) going through screenshots or recordings once,
+thinking aloud in real time, then a holistic critique. Every reaction is
+tagged with the three core signals (cognitive load up or down, friction or
+delight, confused or clear). Works at any granularity: button, card,
+chart, section, page, flow, motion. Copy is read only as it changes what
+the user understands or does; copy style stays with homa-copy-reviewer,
+motion-code craft stays with review-animations.
+
+Calls made alone, worth auditing: evidence defaults (phone viewport
+390x844 as the 80% case, desktop 1440x900 as the 20% case; granular
+elements always reviewed as a crop PLUS the full screen they live on;
+one flow per dispatch; motion prefers a recording, and a described-only
+motion is flagged as such with softer conclusions); capture source is the
+dev server with sample/fixture data only, never real family data.
+
+## 2026-07-08 (late night, second pass) · The two tails: gifted kids get found, struggling kids get a starting line
+
+Founder questions (this session): does the accuracy pass hide a truly
+gifted kid? Does it leave a truly struggling kid unknown? And "I would
+rather give way more questions if it gives way more accurate results."
+Honest audit answers: yes and yes, partially. The ladder stopped serving
+questions at the display window (a gifted 4yo doing 7yo work stopped
+getting asked), the capped number rendered like a measurement when it was
+a floor, and a struggling kid produced sixteen growing badges from sixteen
+single answers with no path to the honest starting line except a buried
+link.
+
+What shipped:
+
+- **Core ladders now climb until the run ends**: math, literacy, phonics,
+  writing, language serve up to SIX rungs above the base (seven questions
+  worst case per subject), past the display window, because rungs only
+  appear on an "easily" streak. Typical kids still see about 30 taps for
+  the whole questionnaire (audit); the ~66-tap worst case belongs only to
+  easily-on-everything profiles, exactly the parents who want the depth.
+  Non-core subjects stay light (2 rungs, windowed).
+- **`beyondScale` on DomainScore**: true when the months-ahead number is a
+  FLOOR (confirmed frontier ran past the display cap, or the child
+  confirmed the hardest item the bank has). The reviewed sentence bank
+  says it plainly ("The skills you've confirmed go past what this number
+  can show"), the strengths card marks it ("and past what this number can
+  show"), and the receipts hold the proof (a gifted 4yo's math card now
+  carries "uses derived facts", a 7 to 8yo skill, as confirmed evidence).
+- **The report keeps asking, one consented tap at a time**: the inline
+  probe (SharpenInline) now chains: it re-renders with the next question
+  after each answer, and fires in three cases instead of one: thin look
+  (as before), growing with NOTHING confirmed (walks DOWN toward the
+  honest starting line, so the 4-week plan gets a first win to build
+  from), and beyondScale (keeps climbing until the run actually ends).
+  Kicker copy per case ("Finding {name}'s starting line, one question at
+  a time" / "Past every question so far, see how far it goes").
+- **Pediatrician offer added to the report's methodology box** (the same
+  sentence the method page carries, per edge-case law AQ-14): always
+  present, never conditioned on scores, so no child is ever flagged.
+- **New guards**: gifted 4yo fixture (6 rungs served, top rung 2y+ above
+  age, number capped AND floor-marked, evidence names a skill past the
+  cap), a bracketed kid whose in-window frontier must NOT read as a floor,
+  struggling-kid fixtures (never a floor flag; the walk-down probes below
+  the base and a win becomes the confirmed starting line), and the
+  question-count bound now computed from the ladder constants.
+
+Decisions made alone: CORE_LADDER_RUNGS = 6 (bank depth above a young
+base is about 6 to 10 items; six rungs finds nearly every real frontier
+without an unbounded marathon); beyondScale fires only on "ahead" (an
+on-track plateau at the top of the bank is not a floor claim); the
+walk-down chains only while NOTHING is confirmed in a growing subject
+(one win found, probing rests: anti-guilt); the main questionnaire still
+never drills downward (founder sequencing law kept; the walk-down lives
+on the report, consent-framed, where the deep dive already lived).
+
+Shipped same night once the founder added gateway credits: the
+report-writer prompt rule telling the narrative to name a numberIsFloor
+subject plainly (prompt v2026.07.13 to v2026.07.14), both fixtures
+regenerated through the real pipeline, gate clean. Verified against a
+one-off gifted-4yo generation (not committed): all five core subjects
+carried the floor flag and the model wrote lines like "The checklist runs
+out of questions before Avery does, so there's more happening than this
+number alone can show", gate clean. FOUNDER RE-READ of the regenerated
+fixtures still owed (STOP 1 gate); it covers this change and the two
+prompt bumps before it.
+
+Also restored in this entry's commit: the two build-log entries below
+(the scoring accuracy pass, and the clarity-over-personality copy law)
+were lost when commit 38da009 overwrote this file during concurrent
+sessions; both are reinstated verbatim so the audit trail stays whole.
+
+## 2026-07-08 (late night) · Scoring accuracy pass: window credit, age-scaled cap, deeper core ladders
+
+Trigger (founder, this session): pilot parents got reports with claims like
+"+19 months above typical in speaking" for a toddler and stopped believing
+the number. Reproduced exactly: a 2y3m child whose parent taps "easily" on
+all three served language questions scored +19 (base 26mo, rungs 38 and
+46mo, frontier 46, minus age 27). An audit sweep showed 2-year-olds could
+reach +20 to +24 in most domains from 2 or 3 taps, which is 85 to 100
+percent of the child's whole age.
+
+Three causes, all previously documented in the benchmark corpus but not yet
+applied to scoring:
+
+1. Anchors are "typical BY" ages, the late edge of wide normal windows
+   (00-synthesis correction 6). Crediting the anchor to a young child
+   manufactures phantom months: the median child is understood by
+   strangers at 34mo, not the 46mo anchor (Hustad, lane 11 §8b).
+2. No cap scaling: +24 was reachable at any age, and at age 2 that claim
+   is the child's entire life over again.
+3. Two ladder rungs max, spaced 8 to 16 months apart in the young core
+   bank, so one generous "easily" on one fuzzy statement swung the number
+   by a year.
+
+What shipped (bank v2026.07.2 to v2026.07.3):
+
+- **Scorer, window credit**: an "easily" now earns the EARLY edge of the
+  item's documented `typicalRangeMonths` window when one exists, else the
+  anchor as before (scoring.ts `creditMonths`). Evidence lines still name
+  the strongest raw-anchor item the parent confirmed.
+- **Scorer, age-scaled cap**: displayed months-ahead is now capped at
+  `min(24, round(age/3))` (`aheadCapForAge` in bands.ts). The 27mo case
+  reads +9, never +19. From age 6 up the absolute 24 governs, unchanged.
+- **Bank windows added** from lane 11's verified tables:
+  `language.short-sentences` [34, 46] and `language.clear-sounds` [62, 87]
+  (both Hustad 2021); `stranger-clear`, `counts-to-100`, and `rides-bike`
+  already carried theirs.
+- **Four new core items**, all from the corpus porting notes, filling the
+  biggest documented gaps under ~8y: `math.small-groups` (36mo, Clements
+  and Sarama Small Collection Namer, window [34, 39]),
+  `literacy.pretend-reads` (40mo, ASHA 3-to-4 band, window [36, 48]),
+  `literacy.print-meaning` (48mo, ELOF P-LIT 2 progression, window
+  [36, 48]), `language.true-story` (72mo, Applebee narrative stages, new
+  `applebee` source key).
+- **Deeper core ladders**: math, literacy, phonics, writing, and language
+  (`CORE_DOMAIN_IDS`) got a third rung (superseded the same night by the
+  two-tails pass above, which raised cores to six rungs).
+- **Sample answers pinned**: the public sample (Maya) now renders from a
+  pinned item-id answer list (`sample/sample-answers.ts`) shared with the
+  fixture generator, so bank growth can never silently change the numbers
+  the founder-reviewed narrative talks about. Narrative fixtures
+  regenerated through the real pipeline at prompt v2026.07.13, gate clean;
+  the founder re-read of fixtures (STOP 1) is still owed and covers these.
+- **Method page** (/onboarding/method): the method list now states the
+  window credit, the ladder-corroboration rule ("never from one lucky
+  answer"), the cap with a worked example ("for a 2-year-old, that's 8
+  months at most"), and what the report says when a skill hasn't arrived.
+  Both copy gates ran in order (homa-copy-reviewer, then homa-copy-editor
+  on the rewrite): the reader gate's five changes were all implemented;
+  editor must-fixes implemented except one, deliberately kept: the
+  safety-rules parenthetical still quotes "behind" and "diagnosis" in
+  order to deny them. That disclosure device predates this pass and reads
+  as the page's strongest credibility moment; founder can overrule.
+- **New guards** in check:map: the 27mo trust regression (all-easily
+  language must read exactly +9), and a full sweep asserting no age and
+  no answer pattern can beat `min(24, age/3)` in any subject.
+
+Decisions made alone (auditable): the cap formula (a third of age,
+grounded in the corpus's spread-widens-with-age findings and the old
+ratio-IQ plausibility ceiling, not a published constant); crediting the
+window's early edge rather than its median (conservative direction, per
+lane 11 §9's Denver II precedent); which five domains count as core;
+anchor placements within documented bands for the two new literacy items
+(40 and 48, both inside their sources' 36-to-48 bands); `applebee` added
+as a source key. Deliberately NOT changed: growing/on-track semantics,
+the no-downward-drilling law in the main flow (deep dive already walks
+down post-report), and the movement law (dips stay quiet, so rescored
+reports whose numbers drop under the new math never show a minus).
+
+Consequence to know: existing reports keep their stored numbers until
+their next rescore; a rescore will lower inflated "ahead" values, the
+movement UI hides downward deltas by law, and history archives the old
+scores. Follow-ups queued: windows for the upper bank (8y+, NWEA/Lexile
+inversion path from lane 11).
+
+## 2026-07-08 (night) · Clarity-over-personality copy law + the copy gate skills
+
+Founder ruling (this session): Homa's copy was optimizing personality over
+clarity, producing reports and plans with too much cognitive load. New law:
+clarity and low cognitive load beat personality, and fewer words is NOT the
+goal (cutting words that carry meaning raises load; the fix is fewer ideas
+per sentence, never fewer words per idea).
+
+What changed:
+
+- **Three new skills** in `.agents/skills/`: `homa-copy-writer` (the general
+  copy rulebook: load patterns, per-surface guidelines, and the routing
+  table that says whether a fix belongs in the generator prompt, a template,
+  a component string, or the page itself), `homa-copy-reviewer` (ICP
+  read-along gate: a subagent role-plays a busy non-technical homeschool mom
+  reading the copy once, thinking aloud sentence by sentence, then giving a
+  critique), and `homa-copy-editor` (senior-editor craft gate, structured
+  notes only). Order law: reader first, editor second.
+- **Law added to the rule files** it was missing from: AGENTS.md (CLAUDE.md
+  is a symlink), BUILD.md, `docs/homa-design/readme.md` + `SKILL.md`,
+  `marketing/voice/house-style.md` (voice principle 8).
+- **Report writer prompt** (`agent/report-writer.md`, mirrored into
+  `instructions.md` and `curriculum-writer.md`): "shorter always wins a
+  tie" replaced with "a clear sentence beats a short one"; new rules: one
+  idea per sentence, no comma-splice run-ons, no meta-commentary, metaphor
+  budget of one, subject stays next to its verb (no appositive lists mid
+  sentence), on-track subject lines may be one sentence, keepsake sign-off
+  is just Homa's name, keepsake may not invent an audience. Version bumped
+  2026.07.11 to 2026.07.13; both fixtures regenerated through the real
+  pipeline, gate clean. FOUNDER RE-READ of the new fixtures still owed
+  (STOP 1 gate).
+- **Template + component copy** fixed at the source per the loop's
+  feedback: "the honest picture" and "the part worth circling" meta-frames
+  removed (sentences.ts, report-view, both family-note components,
+  kid-view); consent card run-on split and button shortened; call-Homa card
+  now speaks as "I" (was third-person "she") and says plainly that Homa
+  itself calls; growth story no longer re-quotes the live note or promises
+  "never compared to another child" while the page shows "+N mo vs typical"
+  (trajectory caption now says what the chart actually is); "rescores
+  around it" is now "the report updates"; closing band no longer calls the
+  child a "before" picture and "a plan for every blue subject" is now "a
+  plan for whatever is growing"; a stray prose "behind" in the
+  subject-by-subject intro replaced ("the benchmarks used"); casing fixes
+  (subtitle, expander links, footer, SOURCES label now a styled uppercase
+  treatment).
+- The test run of the loop used the committed Maya sample fixture (the
+  public sample page's exact content), reviewer gate first, fixes applied
+  to the GENERATORS not the artifact, then the editor gate on the
+  regenerated copy.
+
+Flagged for founder, deliberately not changed: "Growing right now" label
+semantics read scarier than the data when the next skill is due within a
+couple of months of the child's age (literacy at 4y 2m vs typical 4y 4m);
+"well observed" renders at 2 answers; the plan artifacts carry three names
+across the page (the month, the 4-week plan, the call-built curriculum);
+"subjects mapped" vocabulary vs the "no map" word rule. All four are
+product-naming or scorer-semantics calls, not copy edits.
+
 ## 2026-07-08 (evening) · Inbound voice line stops monologuing
 
 Founder feedback from a live call: Homa spoke for about a minute before the

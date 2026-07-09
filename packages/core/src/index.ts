@@ -35,9 +35,11 @@ export {
 
 export {
   CORE_DOMAIN_IDS,
+  CORE_LADDER_RUNGS,
   DEEP_DIVE_CAP,
   getMapDomain,
   getMapItem,
+  MAX_LADDER_RUNGS,
   growingActivityFor,
   ladderRungs,
   MAP_ANSWERS,
