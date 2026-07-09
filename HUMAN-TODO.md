@@ -20,7 +20,7 @@ Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted 
 
 - [x] **Quick unblock so calling works from YOUR phone**: founder's cell verified via API 2026-07-07; calls from it now connect to Homa. Trial still prepends a "this is an automated call on the Telnyx platform" disclaimer and caps calls at 10 min; both go away on upgrade *(done)*
 - [x] ~~Flip texting on~~ done 2026-07-07: `TELNYX_SMS_ENABLED=true` set in Vercel prod, channel deployed and live (webhook verified: forged posts get 401). Texting now waits ONLY on the steps below; no more code or deploys needed.
-- [ ] **Upgrade the account**: portal.telnyx.com → Account Levels → add payment (~$25), 2FA, service address ("Paid"), then KYC for "Verified" (10DLC needs Verified). Confirmed required even for texting your own verified number: carriers hard-block unregistered senders (test message 2026-07-07 failed with error 40010 "Not 10DLC registered") *(10 min + KYC wait)*
+- [x] ~~Upgrade the account~~ done (founder-confirmed 2026-07-09, corroborated: $26.48 funded balance, 10DLC brand VERIFIED + campaign ACTIVE, both only possible past trial). Texting any US number is unblocked; the old error-40010 carrier block is history.
 - [ ] **Fill `TELNYX_SP_*`** in `apps/web/.env.local` (your name, address, email, mobile; it is the "Sole Proprietor" carrier registration, no LLC needed) then run `pnpm telnyx:provision` *(3 min)*
 - [ ] **Verify the PIN** that arrives on your phone: `pnpm telnyx:provision --verify-otp 123456` (re-runs the rest automatically, then text +1 346 758 8011 and Homa answers) *(1 min)*
 
