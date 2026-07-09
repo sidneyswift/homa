@@ -37,13 +37,13 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
   {
     n: "01",
     title: "Tell Homa about your kids",
-    body: "Ages, grades, what you want the year to cover, and how your days actually flow. A few minutes of questions, so the very first week already fits your family.",
+    body: "Ages, grades, goals, and how your days actually flow.",
     vignette: <KidsVignette />,
   },
   {
     n: "02",
     title: "Sunday night, the week is waiting",
-    body: "A balanced draft for every child, shaped around your family\u2019s rhythm. Tweak anything with a tap or a message, Homa keeps the balance for you.",
+    body: "A plan for every child, shaped by your input and Homa\u2019s timeline, not a textbook.",
     vignette: <WeekVignette />,
     action: (
       <Button variant="secondary" href="/onboarding" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
@@ -53,14 +53,14 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
   },
   {
     n: "03",
-    title: "Teach, tap, done",
-    body: "Check off lessons as you go, each one lands with a small celebration. When life happens, tell Homa and she reshuffles. A lighter day is still a good day.",
+    title: "Teach, tap, snap, done",
+    body: "Snap a photo of the work, a few words about how it went. That\u2019s the whole habit. Check off lessons as you go. A light day still counts.",
     vignette: <CheckVignette />,
   },
   {
     n: "04",
     title: "Watch the needle move",
-    body: "A gentle questionnaire maps each child against your state\u2019s standards. Then Homa targets practice at what\u2019s growing and shows the work paying off.",
+    body: "A quick questionnaire maps each child against your state\u2019s standards. Steady? Growing? Stuck? Homa pairs the score with the timeline, and builds what\u2019s next.",
     vignette: <ProofVignette />,
   },
 ];
@@ -186,7 +186,7 @@ export function HowThread() {
             to <span style={{ color: "var(--clay-600)" }}>proof</span>.
           </h2>
           <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", lineHeight: 1.6, margin: "18px auto 0", maxWidth: 460 }}>
-            One calm loop, week after week. Follow the thread.
+            Plan Sunday. Teach the week. See the proof. Repeat.
           </p>
         </div>
 

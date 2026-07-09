@@ -6,9 +6,8 @@ import { Eyebrow } from "./dividers";
  * Our-story band. Replaces the kit's three invented mom quotes, which
  * violated ruling C2 (no fabricated social proof, ever). Until real
  * families say quotable things with their permission, the honest story is
- * the only story: Homa helped run one real homeschool first. ("Helped"
- * carries the control framing: the mom runs the homeschool, Homa assists;
- * tester flag 2026-07-07, evidence memo 8.)
+ * the founders' own: built at their kitchen table, for homeschoolers like
+ * them. Copy updated per founder direction 2026-07-09.
  */
 export function Stories() {
   return (
@@ -27,7 +26,7 @@ export function Stories() {
               margin: "8px 0 10px",
             }}
           >
-            It helped run our homeschool first.
+            Built by homeschoolers, for homeschoolers.
           </h2>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Squiggle segments={4} line={false} color="var(--clay-700)" style={{ width: "auto" }} />
@@ -44,13 +43,20 @@ export function Stories() {
           }}
         >
           <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
-            Homa began at one family&rsquo;s kitchen table: weekly plans, materials made for one
-            specific kid, and a picture of where she stands that never once tested her.
+            We built this piece by piece, with our own kitchen table in mind. We wanted
+            curriculum that met each kid where they stood: steady, growing, or stuck. Not a
+            one-size plan hoping it would fit. We wanted a tailored education without losing
+            countless hours to research, hunting down unit studies and curricula to recombine
+            into something that actually fit our own kids and family.
           </p>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "16px 0 0", fontSize: "0.98rem" }}>
-            Homa is that same system, rebuilt for your family. And a promise: no invented
-            testimonials on this page, ever. When real families say quotable things,
-            you&rsquo;ll read them here with permission.
+            Now, thanks to Homa, it&rsquo;s done.
+          </p>
+          <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "8px 0 0", fontSize: "0.98rem" }}>
+            You teach. Homa handles the rest.
+          </p>
+          <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "8px 0 0", fontSize: "0.98rem" }}>
+            Welcome to a new way to homeschool.
           </p>
         </div>
       </div>

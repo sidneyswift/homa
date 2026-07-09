@@ -7,53 +7,50 @@ import { Eyebrow } from "./dividers";
 
 /**
  * Six-card feature grid, ported from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx (icons, copy, tints).
- * The "Proof it's working" body diverged from the kit per founder
- * screenshot 2026-07-07: "up 12 points" named a metric the progress
- * report doesn't have, so it now uses the report's real "moved up"
- * movement language instead.
+ * docs/homa-design/ui_kits/landing/LandingPage.jsx (icons, tints). Copy
+ * updated per founder direction 2026-07-09.
  */
 
 const ITEMS: ReadonlyArray<readonly [LucideIcon, string, string, string, string]> = [
   [
     ClipboardCheck,
     "Know where they stand",
-    "A gentle skills questionnaire mapped to your state's standards.",
+    "Daily photos and a quick recap at night build a living timeline. Homa reads the pattern, steady, growing, or stuck, and adapts the plan to match.",
     "var(--clay-50)",
     "var(--clay-600)",
   ],
   [
     ChartLine,
     "Proof it's working",
-    "Watch Homa's practice sets move the needle. Math moved up since April, that kind of proof.",
+    "Not a feeling. A number. Watch mastery climb as Homa's practice sets close the actual gaps. Change you can see on the timeline.",
     "var(--sage-50)",
     "var(--sage-600)",
   ],
   [
     FilePen,
     "Practice that targets",
-    "Workbook pages and sensory activities tuned to exactly what each child is growing through.",
+    "No generic worksheets. Every page is built around the exact skill your child needs to strengthen right now.",
     "var(--gold-100)",
     "var(--gold-ink)",
   ],
   [
     CalendarHeart,
     "Plans that flex",
-    "Tell Homa how your week looks and she builds a schedule around real life, sick days, field trips, and all.",
+    "Sick days, field trips, the morning nobody can find a single shoe. Tell Homa how your day is going, and she'll build your week around it. No missed beats. No missed lessons.",
     "var(--sky-100)",
     "var(--sky-600)",
   ],
   [
     Compass,
     "Your town, in the plan",
-    "Space week? There's a planetarium day Saturday. Museums, story hours, zoos, and co-ops, matched to your lessons.",
+    "Space Week? There's a new exhibit downtown. Diving into the Civil War? There's a local reenactment on Saturday. Homa builds it into the classroom.",
     "var(--clay-50)",
     "var(--clay-600)",
   ],
   [
     Scale,
     "Compare curriculums",
-    "Side-by-side, in plain language, against how your child actually learns, before you spend a dime.",
+    "Side by side, in plain language. Homa already knows what your kid likes, how they learn, and where they're at. Find the right fit the first time. Every time.",
     "var(--sage-50)",
     "var(--sage-600)",
   ],
