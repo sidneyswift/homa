@@ -3,6 +3,44 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 (evening) · Texting becomes a full capture channel; the journal prompt texts first
+
+Founder arc (this session): the read-aloud pass on the journal email
+("she's speaking poetically") led to "can she just reply?" which exposed
+that replies to every Homa email BOUNCED (the send domain has no MX;
+fixed with reply_to hello@thankshoma.com + a HUMAN-TODO alias check),
+which led to "can Homa text instead?" and a YES on building it. Also
+verified: today's provisioning run cleared 10DLC (brand VERIFIED,
+campaign ACTIVE), so the 40010 carrier block is history.
+
+Shipped:
+
+1. **SMS sessions get the write tools.** resolveAgentAccess in
+   lib/agent-db.ts returns caller (web JWT, RLS wall) or pinned (SMS,
+   familyId from the parent-written phone mapping, the SAME trust basis
+   the voice webhook tools already write on). remember, forget,
+   log_hours, update_child_profile, get_children, and recall now work
+   over text through lib/agent-pinned.ts, which funnels every write
+   through the shared guards (scan, budget, dedupe, in-family child
+   resolution). IMPORTANT posture note recorded in that file: the pinned
+   recall path queries with an explicit family_id predicate because the
+   server connection has no RLS, and it deliberately does NOT use the
+   recall_semantic RPC for the same reason. Worksheets and emails stay
+   web-only; sms-mode.ts now tells the model exactly which is which and
+   that an evening "here's how today went" text IS the journal.
+2. **The journal prompt is channel-aware.** A family with a linked
+   texting line gets a TEXT at 8pm local (the reply side is already the
+   real agent, and Telnyx handles STOP at the platform level); a failed
+   text falls back to the email in the same pass. journalPromptText is
+   the same approved copy, shortened for SMS. Still dark behind
+   JOURNAL_PROMPT_ENABLED.
+3. **The voice log-hours route now shares the pinned hours writer**
+   (recordHoursPinned), so call, SMS, and future channels have one
+   guarded implementation instead of drifting copies.
+
+M1-02 remains the proper fix (a real database principal for SMS
+sessions); resolveAgentAccess is the single seam to swap when it lands.
+
 ## 2026-07-09 (afternoon) · "Do all of this": lab findings become code
 
 Founder direction (this session): ship everything from the morning's

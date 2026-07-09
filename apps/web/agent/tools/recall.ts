@@ -2,7 +2,8 @@ import { emitEvent } from "@homa/core";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { recallPinned } from "../../lib/agent-pinned";
 import { embedText } from "../../lib/learning/embeddings";
 
 /**
@@ -67,16 +68,33 @@ export default defineTool({
     limit: z.number().int().min(1).max(10).default(5),
   }),
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { found: 0, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+
+    if (access.mode === "pinned") {
+      const results = await recallPinned({
+        familyId: access.familyId,
+        query: input.query,
+        scope: input.scope,
+        limit: input.limit,
+      });
+      if (results.length === 0) {
+        return {
+          found: 0,
+          note: "Nothing in this family's history matches. Try different words once; after that, ask the parent instead of guessing.",
+        };
+      }
+      return { found: results.length, results };
+    }
+
+    const { db, familyId } = access;
 
     const hits: RecallHit[] = [];
     const searchText = { type: "websearch" as const, config: "english" };

@@ -40,3 +40,37 @@ export function telnyxListOf<T>(payload: unknown): T[] {
   const container = payload as { data?: T[] };
   return container.data ?? [];
 }
+
+/**
+ * Sends one outbound text from Homa's number. Returns false (never
+ * throws) when the channel is dark or the send fails, so a caller like
+ * the journal loop can fall back to email. Telnyx handles STOP/HELP
+ * opt-outs at the platform level for this number.
+ */
+export async function sendHomaSms(toE164: string, text: string): Promise<boolean> {
+  const apiKey = process.env.TELNYX_API_KEY;
+  const fromNumber = process.env.TELNYX_FROM_NUMBER;
+  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return false;
+
+  try {
+    const response = await fetch("https://api.telnyx.com/v2/messages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: fromNumber, to: toE164, text }),
+    });
+    if (!response.ok) {
+      console.error(`sendHomaSms failed: HTTP ${response.status}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(
+      "sendHomaSms failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return false;
+  }
+}

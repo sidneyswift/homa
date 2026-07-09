@@ -22,7 +22,9 @@ import { embedText } from "./embeddings";
  * session auth, webhook correlation), never from model output.
  */
 
-export type ServerMemorySource = "call" | "review";
+/** 'homa' is the agent's own save (web uses the RLS tool path; SMS uses
+ * this server path on the phone-mapping trust basis). */
+export type ServerMemorySource = "call" | "review" | "homa";
 
 export interface SaveMemoryInput {
   familyId: string;

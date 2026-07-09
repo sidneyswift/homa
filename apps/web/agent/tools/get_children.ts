@@ -1,7 +1,8 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { getChildrenPinned } from "../../lib/agent-pinned";
 
 /**
  * Reads the caller's children and their profiles. Family scope comes from
@@ -13,16 +14,21 @@ export default defineTool({
     "Re-read the children in this family with their ages, interests, and current focus. The same data auto-loads at every turn start, so only call this to double-check mid-conversation, e.g. right after a profile change.",
   inputSchema: z.object({}),
   async execute(_input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { children: [], note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+
+    if (access.mode === "pinned") {
+      return { children: await getChildrenPinned(access.familyId) };
+    }
+
+    const { db, familyId } = access;
 
     const { data, error } = await db
       .from("children")

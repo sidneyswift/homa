@@ -1,13 +1,21 @@
 import { mapDb } from "./map/db";
 import { sendJournalPromptEmail } from "./map/email";
 import { emitMapEvent } from "./map/events";
+import { sendHomaSms } from "./voice/telnyx-api";
 
 /**
  * The evening journal prompt (agentic ladder item 7; FR-6's daily on-ramp
  * for ambient capture). Homa's first proactive loop: at 8pm in each
- * family's own time zone, one short email invites one or two sentences
- * about the day, deep-linking into chat where the reply lands in front of
- * the agent (and the post-turn review turns it into memory).
+ * family's own time zone, one short prompt invites one or two sentences
+ * about the day.
+ *
+ * Channel-aware (founder direction 2026-07-09 evening): a family with a
+ * linked texting line gets a TEXT, because the reply side is already the
+ * real agent (an inbound SMS is a full conversation turn with memory,
+ * hours, and recall on the pinned path), and Telnyx handles STOP at the
+ * platform level. Everyone else gets the email deep-linking into chat.
+ * A failed text falls back to email in the same pass, so the prompt
+ * always has a path.
  *
  * Dark by default: nothing sends unless JOURNAL_PROMPT_ENABLED=true (the
  * founder read-aloud gates the copy, then the flag flips). One send per
@@ -28,6 +36,18 @@ interface JournalCandidate {
   parent_display_name: string | null;
   child_names: string[];
   journal_prompt_last_sent_at: string | null;
+  phone_e164: string | null;
+}
+
+/** The text variant of the same approved prompt: same facts, no
+ * flourish, short enough to stay two SMS segments. */
+function journalPromptText(childNames: string[]): string {
+  const kidPhrase = childNames.length === 1 ? childNames[0] : "the kids";
+  return (
+    "It's Homa. How did today go? Tell me one thing: a win, a hard part, " +
+    `or something ${kidPhrase} did that surprised you. ` +
+    "I'll save what matters and log any school time you mention."
+  );
 }
 
 export function journalPromptEnabled(): boolean {
@@ -73,6 +93,8 @@ export async function runJournalPromptPass(now = new Date()): Promise<JournalPro
               from public.children c where c.family_id = f.id),
              '{}'
            ) as child_names,
+           (select p.phone_e164 from public.family_phones p
+            where p.family_id = f.id) as phone_e164,
            f.created_at
     from public.families f
     where f.email is not null
@@ -97,7 +119,15 @@ export async function runJournalPromptPass(now = new Date()): Promise<JournalPro
     }
 
     const firstName = family.parent_display_name ?? family.first_name;
-    const ok = await sendJournalPromptEmail(family.email, firstName, family.child_names);
+    // Text when a line is linked; the reply IS the agent. Email otherwise
+    // (or when the text fails), deep-linking into chat.
+    let ok = false;
+    if (family.phone_e164) {
+      ok = await sendHomaSms(family.phone_e164, journalPromptText(family.child_names));
+    }
+    if (!ok) {
+      ok = await sendJournalPromptEmail(family.email, firstName, family.child_names);
+    }
     if (!ok) continue;
 
     await sql`

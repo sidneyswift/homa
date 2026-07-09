@@ -1,8 +1,9 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { MEMORY_KINDS } from "../../lib/agent-memory";
+import { forgetMemoryPinned } from "../../lib/agent-pinned";
 
 /**
  * Retires exactly one memory row by content match (M2-02). Substring
@@ -25,16 +26,28 @@ export default defineTool({
       .describe("A distinctive phrase from the memory to delete (case-insensitive)."),
   }),
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { deleted: false, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+
+    if (access.mode === "pinned") {
+      const result = await forgetMemoryPinned(access.familyId, input.match);
+      return result.deleted
+        ? {
+            deleted: true,
+            forgot: result.forgot,
+            note: "Retired from active memory (still in searchable history). If the parent wants it back, save it again with remember.",
+          }
+        : result;
+    }
+
+    const { db, familyId } = access;
 
     const { data, error } = await db
       .from("family_memories")

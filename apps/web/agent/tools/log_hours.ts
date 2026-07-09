@@ -2,7 +2,8 @@ import { emitEvent } from "@homa/core";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { recordHoursPinned } from "../../lib/agent-pinned";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours-model";
 
 /**
@@ -43,16 +44,38 @@ export default defineTool({
     "Log a block of school time to the family's hours record the moment the parent mentions one ('we did 45 minutes of math'). These rows are the family's compliance evidence, so log every real mention exactly once. School time only: movies, errands, and waiting rooms never count. When the duration is vague ('most of the morning'), ask one short 'about how long?' first.",
   inputSchema: logInput,
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { logged: false, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+
+    if (access.mode === "pinned") {
+      const result = await recordHoursPinned({
+        familyId: access.familyId,
+        minutes: input.minutes,
+        subject: input.subject,
+        source: "sms",
+        childId: input.childId ?? null,
+        happenedOn: input.happenedOn ?? null,
+        note: input.note ?? null,
+      });
+      return result.logged
+        ? {
+            ...result,
+            done: true,
+            subject: input.subject,
+            minutes: input.minutes,
+            note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
+          }
+        : result;
+    }
+
+    const { db, familyId } = access;
 
     const happenedOn = input.happenedOn ?? new Date().toISOString().slice(0, 10);
 

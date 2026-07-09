@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
   MEMORY_ENTRY_MAX_CHARS,
@@ -9,6 +9,7 @@ import {
   memoryUsageChars,
   scanMemoryContent,
 } from "../../lib/agent-memory";
+import { saveFamilyMemory } from "../../lib/learning/save-memory";
 import { embedText } from "../../lib/learning/embeddings";
 
 /**
@@ -37,16 +38,52 @@ export default defineTool({
       .describe("Attach to one child (id from the family context block). Omit for family-wide facts."),
   }),
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { saved: false, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+
+    // SMS sessions write through the guarded server path on the
+    // phone-mapping trust basis (lib/agent-db.ts resolveAgentAccess).
+    if (access.mode === "pinned") {
+      const result = await saveFamilyMemory({
+        familyId: access.familyId,
+        content: input.content,
+        kind: input.kind,
+        source: "homa",
+        childId: input.childId ?? null,
+      });
+      if (!result.saved) {
+        const notes: Record<string, string> = {
+          "too-short": "That was too short to save. Say the fact in one full sentence.",
+          "blocked-by-scan":
+            "That reads like an instruction, not a fact about the family. Rephrase it as a plain fact.",
+          duplicate: "Already saved (no duplicate added).",
+          "budget-full":
+            "Memory is full. Consolidate now: forget stale or overlapping entries, then retry this save in the same turn.",
+          "unknown-child":
+            "That child id is not in this family. Use an id from the family context block.",
+        };
+        return {
+          saved: result.reason === "duplicate",
+          ...(result.reason === "duplicate" ? { done: true } : {}),
+          note: notes[result.reason],
+        };
+      }
+      return {
+        saved: true,
+        done: true,
+        content: input.content,
+        note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
+      };
+    }
+
+    const { db, familyId } = access;
 
     const blocked = scanMemoryContent(input.content);
     if (blocked) {

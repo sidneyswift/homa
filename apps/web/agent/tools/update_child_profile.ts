@@ -1,7 +1,8 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { updateChildProfilePinned } from "../../lib/agent-pinned";
 import { scanMemoryContent } from "../../lib/agent-memory";
 
 /**
@@ -38,16 +39,15 @@ export default defineTool({
     "Update a child's profile when their interests or current focus genuinely change (a new obsession, a mastered skill, a new goal). Provide the full interests list when updating interests; it replaces the old list.",
   inputSchema: updateInput,
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { updated: false, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
 
     const interests = input.interests
       ?.map((interest) => interest.trim())
@@ -58,6 +58,23 @@ export default defineTool({
         return { updated: false, note: blocked };
       }
     }
+
+    if (access.mode === "pinned") {
+      const result = await updateChildProfilePinned({
+        familyId: access.familyId,
+        childId: input.childId,
+        ...(interests !== undefined ? { interests } : {}),
+        ...(input.focus !== undefined ? { focus: input.focus } : {}),
+      });
+      return result.updated
+        ? {
+            ...result,
+            note: "Profile updated; the fresh values load automatically next turn. Mention the change to the parent in a short natural aside.",
+          }
+        : result;
+    }
+
+    const { db, familyId } = access;
 
     const { data: child, error: readError } = await db
       .from("children")

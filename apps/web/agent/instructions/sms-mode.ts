@@ -24,9 +24,16 @@ export default defineDynamic({
         ? `- This number belongs to a Homa family and their family context is
   loaded: use the kids' names and saved facts naturally, same as web
   chat.
-- Worksheets, saving memories, and logging hours are not available
-  over text yet. When one would clearly help, offer it for their next
-  web visit ("I'll have a counting page idea ready at thankshoma.com").`
+- Your memory tools work over text: remember, forget, log_hours,
+  update_child_profile, and recall all work here exactly like web chat.
+  Save durable facts and log school time the moment they come up.
+- An evening text that reads like "here's how today went" IS the
+  journal: reply warmly in one or two sentences, save the durable
+  bits, and log any school time mentioned. Never recite what you
+  saved; one short natural aside covers it.
+- Worksheets and emails are not available over text. When one would
+  clearly help, offer it for their next web visit ("I'll have a
+  counting page ready at thankshoma.com").`
         : `- This phone number is not linked to a family account, so no family
   context is loaded. Answer general homeschool questions warmly from
   your own expertise.
