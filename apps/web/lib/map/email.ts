@@ -206,12 +206,10 @@ export async function sendJournalPromptEmail(
     to,
     subject: "One thing from today?",
     preview: "One or two sentences is plenty.",
-    heading: parentFirstName
-      ? `Tell me one thing from today, ${parentFirstName}`
-      : "Tell me one thing from today",
+    heading: parentFirstName ? `How did today go, ${parentFirstName}?` : "How did today go?",
     bodyLines: [
-      `A win, a hard part, or something ${kidPhrase} did that surprised you: any one of them counts.`,
-      "I'll add what matters to your family's record. Tomorrow's practice starts from it. School time you mention goes into your hours log.",
+      `Tell me one thing: a win, a hard part, or something ${kidPhrase} did that surprised you.`,
+      "I'll save it to your family's record and use it to plan tomorrow's practice. If you mention school time, I'll add it to your hours log.",
     ],
     cta: { label: "Tell Homa about today", url },
     footerNote:
