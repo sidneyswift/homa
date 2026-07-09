@@ -1,20 +1,20 @@
 import Link from "next/link";
-import { LogOut, Settings } from "lucide-react";
 
 import { ageLabel } from "@homa/core";
 
 import type { UpNextItem } from "../../lib/dashboard";
 import { Logo } from "../brand/Logo";
-import { signOutAction } from "../../app/signin/actions";
+import { AccountMenu } from "./account-menu";
 import { SidebarNav } from "./sidebar-nav";
 
 /**
  * The app's left rail, ported from the design system's web-app template
  * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
- * card, nav, an "up next" box, the kids list, and the account footer.
- * Rendered once by the (app) layout, so it stays mounted while pages
- * change; nav links only to surfaces that exist (the library row joins
- * when that page lands).
+ * card, nav, an "up next" box, the kids list, and the account footer
+ * (AccountMenu: the name row opens Settings and Sign out). Rendered once
+ * by the (app) layout, so it stays mounted while pages change; nav links
+ * only to surfaces that exist (the library row joins when that page
+ * lands).
  */
 
 export interface SidebarKid {
@@ -135,35 +135,7 @@ export function Sidebar({
         </div>
       ) : null}
 
-      <div className="mt-auto flex items-center gap-2.5 border-t border-border-subtle px-1.5 pt-3">
-        {avatarUrl ? (
-          // Plain <img>: a remote Supabase storage URL; next/image would
-          // need remotePatterns config for a tiny avatar.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="" className="h-[34px] w-[34px] rounded-full border border-border-subtle object-cover" />
-        ) : (
-          <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[var(--sage-500)] font-bold text-white">
-            {parentName.charAt(0)}
-          </span>
-        )}
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[0.85rem] font-semibold text-body">{parentName}</span>
-          <span className="block truncate text-[0.72rem] text-subtle">{familyName}</span>
-        </span>
-        <Link href="/settings" aria-label="Settings" className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body">
-          <Settings size={18} />
-        </Link>
-        <form action={signOutAction}>
-          <button
-            type="submit"
-            aria-label="Sign out"
-            title="Sign out"
-            className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
-          >
-            <LogOut size={18} />
-          </button>
-        </form>
-      </div>
+      <AccountMenu parentName={parentName} familyName={familyName} avatarUrl={avatarUrl} />
     </aside>
   );
 }
