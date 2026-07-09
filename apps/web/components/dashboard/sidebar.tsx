@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { Calendar, House, LogOut, Settings, Sparkles } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 
 import { ageLabel } from "@homa/core";
 
 import type { UpNextItem } from "../../lib/dashboard";
 import { Logo } from "../brand/Logo";
 import { signOutAction } from "../../app/signin/actions";
+import { SidebarNav } from "./sidebar-nav";
 
 /**
  * The app's left rail, ported from the design system's web-app template
  * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
  * card, nav, an "up next" box, the kids list, and the account footer.
- * Shared by /home, /planner, and /kids; nav links only to surfaces that
- * exist (the library row joins when that page lands).
+ * Rendered once by the (app) layout, so it stays mounted while pages
+ * change; nav links only to surfaces that exist (the library row joins
+ * when that page lands).
  */
-
-export type ActiveNav = "home" | "planner" | null;
 
 export interface SidebarKid {
   id: string;
@@ -41,47 +41,18 @@ const DOT_COLOR: Record<UpNextItem["dot"], string> = {
   stone: "var(--stone-300)",
 };
 
-function NavItem({
-  href,
-  label,
-  active = false,
-  icon,
-}: {
-  href: string;
-  label: string;
-  active?: boolean;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={
-        active
-          ? "flex items-center gap-3 rounded-md bg-brand-soft px-3 py-2.5 text-[0.95rem] font-bold text-[var(--clay-700)]"
-          : "flex items-center gap-3 rounded-md px-3 py-2.5 text-[0.95rem] font-medium text-muted transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
-      }
-    >
-      <span className={active ? "text-brand" : "text-subtle"}>{icon}</span>
-      {label}
-    </Link>
-  );
-}
-
 export function Sidebar({
   parentName,
   familyName,
   avatarUrl,
   kids,
   upNext,
-  active = "home",
 }: {
   parentName: string;
   familyName: string;
   avatarUrl: string | null;
   kids: SidebarKid[];
   upNext: UpNextItem[];
-  active?: ActiveNav;
 }) {
   return (
     <aside className="sticky top-3.5 m-3.5 hidden h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)] lg:flex">
@@ -92,16 +63,7 @@ export function Sidebar({
         </Link>
       </div>
 
-      <nav className="flex flex-col gap-0.5">
-        <NavItem href="/home" label="Home" active={active === "home"} icon={<House size={20} />} />
-        <NavItem href="/chat" label="Ask Homa" icon={<Sparkles size={20} />} />
-        <NavItem
-          href="/planner"
-          label="Week planner"
-          active={active === "planner"}
-          icon={<Calendar size={20} />}
-        />
-      </nav>
+      <SidebarNav />
 
       <div className="mt-6 rounded-lg bg-page px-3.5 py-3.5">
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-subtle">
@@ -188,9 +150,9 @@ export function Sidebar({
           <span className="block truncate text-[0.85rem] font-semibold text-body">{parentName}</span>
           <span className="block truncate text-[0.72rem] text-subtle">{familyName}</span>
         </span>
-        <a href="#settings" aria-label="Settings" className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body">
+        <Link href="/settings" aria-label="Settings" className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body">
           <Settings size={18} />
-        </a>
+        </Link>
         <form action={signOutAction}>
           <button
             type="submit"

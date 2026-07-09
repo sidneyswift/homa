@@ -10,14 +10,14 @@ const inputClass =
   "mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
 
 /**
- * The phone number card on /home settings: shows the family's linked cell
+ * The phone number card on /settings: shows the family's linked cell
  * (if any) and lets the parent set, change, or clear it. Account settings,
  * not a texting-feature gate (moved here 2026-07-08 from the onboarding
- * signup step it used to live on): the number saves the same way whether
- * or not this deployment's Homa texting line is live, so a family's
- * contact info is never lost to a feature flag. Homa's own number, and
- * the texting-specific framing, render only once the deployment has a
- * live line configured.
+ * signup step it used to live on, then off the dashboard 2026-07-09): the
+ * number saves the same way whether or not this deployment's Homa texting
+ * line is live, so a family's contact info is never lost to a feature
+ * flag. Homa's own number, and the texting-specific framing, render only
+ * once the deployment has a live line configured.
  */
 export function TextingCard({
   linkedPhoneDisplay,

@@ -6,8 +6,9 @@ import { NextResponse, type NextRequest } from "next/server";
  *   1. Refresh expired Supabase auth tokens on every matched request and
  *      write the fresh cookies to both the request (for Server Components
  *      downstream) and the response (for the browser).
- *   2. Gate the signed-in surfaces: /home, /chat, /planner, and /kids
- *      require a session; /signin bounces already-signed-in users to /home.
+ *   2. Gate the signed-in surfaces: /home, /chat, /planner, /kids, and
+ *      /settings require a session; /signin bounces already-signed-in
+ *      users to /home.
  * getClaims() validates the JWT signature against the project's published
  * keys, so this gate cannot be spoofed by a hand-rolled cookie.
  */
@@ -48,7 +49,8 @@ export async function proxy(request: NextRequest) {
     path.startsWith("/home") ||
     path.startsWith("/chat") ||
     path.startsWith("/planner") ||
-    path.startsWith("/kids");
+    path.startsWith("/kids") ||
+    path.startsWith("/settings");
 
   if (needsAuth && !isSignedIn) {
     const url = request.nextUrl.clone();

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useState, type CSSProperties, type FocusEvent, type ReactNode } from "react";
+
+import { useCanHover, usePrefersReducedMotion } from "./use-interaction-media";
 
 /**
  * Homa Button, primary interactive element. Ported from
@@ -9,8 +11,22 @@ import { useState, type CSSProperties, type ReactNode } from "react";
  * sync until packages/design exists (M1-17). Adds `href` (renders a Next
  * Link with identical styling) so kit CTAs can navigate.
  * Motion per the emil-design-eng skill: exact transition properties, brand
- * ease-out, press scale from --press-scale.
+ * ease-out, press scale from --press-scale. Hover only on hover-capable
+ * devices (never sticks after a tap), press scale only when motion is allowed,
+ * and the focus ring shows on keyboard focus only (:focus-visible), not on a
+ * mouse click.
  */
+
+/** Whether the browser would paint a focus ring for this element right now.
+ * Mirrors the CSS :focus-visible heuristic (keyboard yes, mouse click no);
+ * falls back to showing the ring on browsers without :focus-visible. */
+function showsFocusRing(el: Element): boolean {
+  try {
+    return el.matches(":focus-visible");
+  } catch {
+    return true;
+  }
+}
 
 type ButtonVariant = "primary" | "secondary" | "soft" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
@@ -65,6 +81,8 @@ export function Button({
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
   const [focus, setFocus] = useState(false);
+  const canHover = useCanHover();
+  const reduceMotion = usePrefersReducedMotion();
 
   const base: CSSProperties = {
     display: "inline-flex",
@@ -92,8 +110,8 @@ export function Button({
   const dynamic: CSSProperties = disabled
     ? {}
     : {
-        background: hover ? HOVER_BG[variant] : (base.background as string),
-        transform: active ? "scale(var(--press-scale))" : "none",
+        background: hover && canHover ? HOVER_BG[variant] : (base.background as string),
+        transform: active && !reduceMotion ? "scale(var(--press-scale))" : "none",
         outline: "none",
         boxShadow: focus ? "var(--shadow-focus)" : "none",
       };
@@ -108,7 +126,7 @@ export function Button({
     onMouseUp: () => setActive(false),
     onTouchStart: () => setActive(true),
     onTouchEnd: () => setActive(false),
-    onFocus: () => setFocus(true),
+    onFocus: (event: FocusEvent<HTMLElement>) => setFocus(showsFocusRing(event.currentTarget)),
     onBlur: () => setFocus(false),
   };
 

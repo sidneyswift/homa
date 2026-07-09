@@ -34,6 +34,15 @@ export interface ChildProfile {
   notes?: string;
 }
 
+/**
+ * parentFirstName(family): string
+ * The parent's first name for greetings and the sidebar footer: first
+ * word of the display name, falling back to the family name.
+ */
+export function parentFirstName(family: FamilyRecord): string {
+  return (family.parent_display_name ?? family.name).trim().split(/\s+/)[0] || family.name;
+}
+
 export async function getMyFamily(): Promise<FamilyRecord | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

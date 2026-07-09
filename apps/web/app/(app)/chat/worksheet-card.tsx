@@ -1,6 +1,6 @@
 "use client";
 
-import { HOUSE_PATH } from "../../components/brand/Logo";
+import { HOUSE_PATH } from "../../../components/brand/Logo";
 
 /**
  * Renders a create_worksheet tool result as an on-brand card with a print

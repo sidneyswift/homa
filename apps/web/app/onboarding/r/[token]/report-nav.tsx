@@ -5,8 +5,9 @@ import { Logo } from "../../../../components/brand/Logo";
 /**
  * The report page's nav bar (founder ask 2026-07-08: the report had no
  * way to the dashboard or settings). Slim, sticky, print-hidden. Both
- * links land on /home, which is session-gated, so a shared-link viewer
- * who taps them simply reaches sign-in, never someone else's family.
+ * links land on session-gated pages (/home and /settings), so a
+ * shared-link viewer who taps them simply reaches sign-in, never someone
+ * else's family.
  */
 export function ReportNav() {
   return (
@@ -23,7 +24,7 @@ export function ReportNav() {
             Dashboard
           </Link>
           <Link
-            href="/home#settings"
+            href="/settings"
             className="inline-flex min-h-9 items-center rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors duration-(--dur-fast) ease-out hover:border-brand"
           >
             Settings

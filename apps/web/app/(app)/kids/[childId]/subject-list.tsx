@@ -1,8 +1,8 @@
 import { ageLabel, domainLine, getMapDomain, type DomainScore } from "@homa/core";
 
-import type { DashboardReport } from "../../../lib/dashboard";
-import { movementFor } from "../../../components/dashboard/movement";
-import { gaugeLabel, SubjectGauge, subjectTone } from "../../../components/dashboard/subject-gauge";
+import type { DashboardReport } from "../../../../lib/dashboard";
+import { movementFor } from "../../../../components/dashboard/movement";
+import { gaugeLabel, SubjectGauge, subjectTone } from "../../../../components/dashboard/subject-gauge";
 
 /**
  * Every subject on one kid's page, strengths first (the report's own

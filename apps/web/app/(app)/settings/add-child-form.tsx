@@ -5,12 +5,13 @@ import { useActionState } from "react";
 import { addChildAction, type SetupFormState } from "./actions";
 
 /**
- * The add-a-child card. The create-family form that used to live beside
- * it moved into /onboarding's FamilyStep (founder call 2026-07-08: one
- * onboarding for every door); /home redirects unfinished setups there.
- * The interests and help-with questions left the card the same day
- * (founder follow-up): the questionnaire's extras beat asks them with
- * tappable suggestions instead, so the card is just name + birthday.
+ * The add-a-child card, on /settings since 2026-07-09 (founder ask: it
+ * sat on the dashboard before). The create-family form that used to live
+ * beside it moved into /onboarding's FamilyStep (founder call 2026-07-08:
+ * one onboarding for every door). The interests and help-with questions
+ * left the card the same day (founder follow-up): the questionnaire's
+ * extras beat asks them with tappable suggestions instead, so the card is
+ * just name + birthday.
  */
 
 const INITIAL_STATE: SetupFormState = { error: null };

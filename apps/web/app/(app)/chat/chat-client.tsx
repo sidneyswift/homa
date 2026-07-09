@@ -3,19 +3,23 @@
 import { emitEvent } from "@homa/core";
 import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { Logo } from "../../components/brand/Logo";
-import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import { Logo } from "../../../components/brand/Logo";
+import { createSupabaseBrowserClient } from "../../../lib/supabase/client";
 import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 
 /**
- * The chat surface (trimmed M1-04). useEveAgent drives session state against
- * the same-origin eve routes; auth rides as a bearer token resolved fresh
- * per request from the Supabase browser client. Homa's per-family context
- * (family, children, memories) is injected server-side on every turn by
+ * The chat surface (trimmed M1-04), the main column inside the (app)
+ * frame: the sidebar and phone top bar come from the layout, so this
+ * component fills the rest of the viewport (100dvh minus the top bar's
+ * h-14 on phones, full height beside the sidebar on desktop) and keeps
+ * the composer pinned to the bottom while the transcript scrolls inside.
+ * useEveAgent drives session state against the same-origin eve routes;
+ * auth rides as a bearer token resolved fresh per request from the
+ * Supabase browser client. Homa's per-family context (family, children,
+ * memories) is injected server-side on every turn by
  * agent/instructions/family-context.ts, so even a brand-new session starts
  * already knowing the family.
  *
@@ -53,10 +57,14 @@ export function ChatClient({
   storageKey,
   familyId,
   parentName,
+  initialDraft,
 }: {
   storageKey: string;
   familyId: string | null;
   parentName: string | null;
+  /** Pre-fills the composer (the journal email's deep link); the parent
+   * still edits and sends herself, nothing auto-sends. */
+  initialDraft?: string;
 }) {
   const supabase = createSupabaseBrowserClient();
   const [saved] = useState<SavedChat>(() => loadSavedChat(storageKey));
@@ -107,10 +115,22 @@ export function ChatClient({
         // Storage full or blocked: the durable session still lives server-side.
       }
       void emitTurnCompleted("ok");
+      // The post-turn review trigger (M2-13): fire-and-forget; the server
+      // decides whether enough new conversation accumulated to review.
+      const sessionId = snapshot.session?.sessionId;
+      if (familyId && sessionId) {
+        void fetch("/api/learning/review", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        }).catch(() => {
+          // Best effort: a missed review re-arms on the next turn.
+        });
+      }
     },
   });
 
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
   const busy = agent.status === "submitted" || agent.status === "streaming";
 
@@ -149,31 +169,21 @@ export function ChatClient({
   }
 
   return (
-    <div className="flex h-dvh flex-col">
-      <header className="flex items-center justify-between border-b border-border-subtle bg-card px-6 py-3">
-        {/* The wordmark is a home link everywhere (tester ask, evidence memo 2). */}
-        <Link href="/home" aria-label="Home" className="inline-flex rounded-md">
-          <Logo size={24} />
-        </Link>
-        <div className="flex gap-2">
-          {agent.data.messages.length > 0 ? (
-            <button
-              type="button"
-              onClick={startNewChat}
-              disabled={busy}
-              className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand disabled:opacity-60"
-            >
-              New chat
-            </button>
-          ) : null}
-          <Link
-            href="/home"
-            className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
+    // 3.5rem is the frame's phone top bar (h-14); on desktop the sidebar
+    // sits beside this column, so the full viewport height is ours.
+    <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
+      {agent.data.messages.length > 0 ? (
+        <header className="flex justify-end border-b border-border-subtle bg-card px-4 py-2.5">
+          <button
+            type="button"
+            onClick={startNewChat}
+            disabled={busy}
+            className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand disabled:opacity-60"
           >
-            Home
-          </Link>
-        </div>
-      </header>
+            New chat
+          </button>
+        </header>
+      ) : null}
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
         {agent.data.messages.length === 0 ? (

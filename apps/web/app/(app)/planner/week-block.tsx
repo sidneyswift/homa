@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { PlanWeek } from "@homa/core";
 
-import { planChecksStorageKey, usePlanChecks } from "../../lib/use-plan-checks";
+import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 
 /**
  * One subject's block on the week board: this week's focus and

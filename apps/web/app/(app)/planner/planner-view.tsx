@@ -2,14 +2,14 @@ import Link from "next/link";
 
 import { ageInMonths, getMapDomain, isInScoredRange, MONTH_PLAN_DOMAIN } from "@homa/core";
 
-import type { ChildRecord } from "../../lib/family";
+import type { ChildRecord } from "../../../lib/family";
 import {
   currentWeekIndex,
   type DashboardPlan,
   type DashboardReport,
-} from "../../lib/dashboard";
-import { weekSpanLabel } from "../../lib/time-zone";
-import { avatarTone } from "../../components/dashboard/sidebar";
+} from "../../../lib/dashboard";
+import { weekSpanLabel } from "../../../lib/time-zone";
+import { avatarTone } from "../../../components/dashboard/sidebar";
 import { WeekBlock, type WeekBlockTone } from "./week-block";
 
 /**

@@ -21,7 +21,7 @@ export type SetFamilyPhoneResult =
   | { ok: true; replaced: boolean }
   | { ok: false; reason: "taken" };
 
-/** Reads the family's linked number, for display on /home. */
+/** Reads the family's linked number, for display on /settings. */
 export async function getFamilyPhone(familyId: string): Promise<FamilyPhoneRow | null> {
   const sql = mapDb();
   const rows = await sql<FamilyPhoneRow[]>`
@@ -74,7 +74,7 @@ export async function setFamilyPhone(input: {
   return { ok: true, replaced: existing !== null };
 }
 
-/** Unlinks the family's number (the /home card's remove action). */
+/** Unlinks the family's number (the /settings card's remove action). */
 export async function clearFamilyPhone(familyId: string): Promise<void> {
   const sql = mapDb();
   await sql`delete from public.family_phones where family_id = ${familyId}`;
@@ -96,7 +96,7 @@ export async function findFamilyIdByPhone(phoneE164: string): Promise<string | n
 
 /**
  * Bridge-time copy: carries a lead's signup-typed number into the real
- * family workspace. Never overwrites a number the parent set on /home,
+ * family workspace. Never overwrites a number the parent set on /settings,
  * and silently stands down if another family already claimed it.
  */
 export async function copyLeadPhoneToFamily(

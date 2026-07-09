@@ -4,26 +4,22 @@ import { revalidatePath } from "next/cache";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
-import { clearFamilyPhone, setFamilyPhone } from "../../lib/family-phone";
-import {
-  fillFamilyTimeZoneIfEmpty,
-  isValidTimeZone,
-  setFamilyTimeZone,
-} from "../../lib/family-time-zone";
-import { getMyFamily } from "../../lib/family";
-import { createSupabaseServerClient } from "../../lib/supabase/server";
+import { clearFamilyPhone, setFamilyPhone } from "../../../lib/family-phone";
+import { isValidTimeZone, setFamilyTimeZone } from "../../../lib/family-time-zone";
+import { getMyFamily } from "../../../lib/family";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
- * Child setup + texting-line actions (minimal M2-03(i) form intake).
- * Children write through RLS via the "members add children" INSERT policy
- * from tenancy v0. Family creation left this file for /onboarding's
- * FamilyStep (founder call 2026-07-08: one onboarding for every door);
- * the create_my_family RPC stays in the database for the mobile app.
- * The texting-line actions are the exception by design: family_phones is
- * deny-all, so they write through lib/family-phone on the server-only
+ * /settings server actions, moved here with their cards from /home
+ * (founder ask 2026-07-09: settings left the dashboard). Children write
+ * through RLS via the "members add children" INSERT policy from tenancy
+ * v0. The texting-line actions are the exception by design: family_phones
+ * is deny-all, so they write through lib/family-phone on the server-only
  * connection, with familyId derived from the caller's OWN membership
- * (getMyFamily under RLS), never from the form. The time-zone actions
- * follow the same posture through lib/family-time-zone.
+ * (getMyFamily under RLS), never from the form. The time-zone action
+ * follows the same posture through lib/family-time-zone. Family creation
+ * lives in /onboarding's FamilyStep (founder call 2026-07-08: one
+ * onboarding for every door).
  */
 
 export interface SetupFormState {
@@ -41,7 +37,7 @@ export async function setFamilyPhoneAction(
 
   if (!raw) {
     await clearFamilyPhone(family.id);
-    revalidatePath("/home");
+    revalidatePath("/settings");
     return { error: null };
   }
 
@@ -59,12 +55,14 @@ export async function setFamilyPhoneAction(
     familyId: family.id,
     phoneE164,
     addedBy: user?.id ?? null,
+    // "home" is the family_phones check constraint's historical name for
+    // the in-app settings card (migration #22), kept to avoid a migration.
     source: "home",
   });
   if (!result.ok) {
     return { error: "That number is already linked to another Homa family." };
   }
-  revalidatePath("/home");
+  revalidatePath("/settings");
   return { error: null };
 }
 
@@ -79,21 +77,11 @@ export async function setFamilyTimeZoneAction(
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
   await setFamilyTimeZone(family.id, timeZone);
+  // The zone drives /home's greeting and /planner's week dates too.
+  revalidatePath("/settings");
   revalidatePath("/home");
+  revalidatePath("/planner");
   return { error: null };
-}
-
-/**
- * The device-capture path: called once by TimeZoneSync when the family
- * row has no zone yet. Fills only while unset, so it can never clobber a
- * choice made on the settings card.
- */
-export async function autoFillTimeZoneAction(timeZone: string): Promise<void> {
-  if (typeof timeZone !== "string" || !isValidTimeZone(timeZone)) return;
-  const family = await getMyFamily();
-  if (!family || family.time_zone) return;
-  await fillFamilyTimeZoneIfEmpty(family.id, timeZone);
-  revalidatePath("/home");
 }
 
 export async function addChildAction(
@@ -131,6 +119,10 @@ export async function addChildAction(
   if (error) {
     return { error: error.message };
   }
+  // A new kid shows up on the dashboard's cards, the planner's columns,
+  // and the sidebar's kid list on every page of the group.
+  revalidatePath("/settings");
   revalidatePath("/home");
+  revalidatePath("/planner");
   return { error: null };
 }

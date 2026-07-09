@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { autoFillTimeZoneAction } from "../../app/home/actions";
+import { autoFillTimeZoneAction } from "../../app/(app)/home/actions";
 
 /**
  * Invisible one-shot: when the family row has no time zone yet, capture

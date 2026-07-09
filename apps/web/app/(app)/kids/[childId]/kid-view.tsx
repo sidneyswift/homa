@@ -2,16 +2,16 @@ import Link from "next/link";
 
 import { ageInMonths, ageLabel, homaNote, isInScoredRange } from "@homa/core";
 
-import type { ChildCurriculumRow } from "../../../lib/curriculum";
-import type { ChildRecord } from "../../../lib/family";
-import type { DashboardPlan, DashboardReport, RecentWin } from "../../../lib/dashboard";
-import { avatarTone } from "../../../components/dashboard/sidebar";
-import { kidPill } from "../../../components/dashboard/kid-card";
-import { Logo } from "../../../components/brand/Logo";
-import { MonthCard } from "../../../components/dashboard/month-card";
-import { movedUpCount } from "../../../components/dashboard/movement";
-import { StatTiles } from "../../../components/dashboard/stat-tiles";
-import { WinsCard } from "../../../components/dashboard/wins-card";
+import type { ChildCurriculumRow } from "../../../../lib/curriculum";
+import type { ChildRecord } from "../../../../lib/family";
+import type { DashboardPlan, DashboardReport, RecentWin } from "../../../../lib/dashboard";
+import { avatarTone } from "../../../../components/dashboard/sidebar";
+import { kidPill } from "../../../../components/dashboard/kid-card";
+import { Logo } from "../../../../components/brand/Logo";
+import { MonthCard } from "../../../../components/dashboard/month-card";
+import { movedUpCount } from "../../../../components/dashboard/movement";
+import { StatTiles } from "../../../../components/dashboard/stat-tiles";
+import { WinsCard } from "../../../../components/dashboard/wins-card";
 import { SubjectList } from "./subject-list";
 
 /**

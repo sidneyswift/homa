@@ -1,8 +1,36 @@
 import React from 'react';
 
+/** SSR-safe CSS media-query subscription via useSyncExternalStore (server
+ * snapshot is false, then swaps to the live value after hydration). Lets these
+ * inline-styled controls respect hover capability and the user's motion
+ * preference, the emil-design-eng rules inline styles cannot express. */
+function useMediaQuery(query) {
+  const subscribe = React.useCallback((onChange) => {
+    const mql = window.matchMedia(query);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+  const getSnapshot = React.useCallback(() => window.matchMedia(query).matches, [query]);
+  return React.useSyncExternalStore(subscribe, getSnapshot, () => false);
+}
+
+/** Whether the browser would paint a focus ring right now (keyboard focus
+ * yes, mouse click no); falls back to showing it where :focus-visible is
+ * unsupported. */
+function showsFocusRing(el) {
+  try {
+    return el.matches(':focus-visible');
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Homa Button, primary interactive element.
  * Variants: primary (clay), secondary (sage-outline), ghost, soft, danger.
+ * Hover applies only on hover-capable devices (never sticks after a tap), the
+ * press scale only when motion is allowed, and the focus ring shows on
+ * keyboard focus only (:focus-visible), not on a mouse click.
  */
 export function Button({
   variant = 'primary',
@@ -83,10 +111,12 @@ export function Button({
   const [hover, setHover] = React.useState(false);
   const [active, setActive] = React.useState(false);
   const [focus, setFocus] = React.useState(false);
+  const canHover = useMediaQuery('(hover: hover) and (pointer: fine)');
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   const dynamic = disabled ? {} : {
-    background: hover ? hoverBg[variant] : base.background,
-    transform: active ? 'scale(var(--press-scale))' : 'none',
+    background: hover && canHover ? hoverBg[variant] : base.background,
+    transform: active && !reduceMotion ? 'scale(var(--press-scale))' : 'none',
     outline: 'none',
     boxShadow: focus ? 'var(--shadow-focus)' : 'none',
   };
@@ -100,7 +130,9 @@ export function Button({
       onMouseLeave={() => { setHover(false); setActive(false); }}
       onMouseDown={() => setActive(true)}
       onMouseUp={() => setActive(false)}
-      onFocus={() => setFocus(true)}
+      onTouchStart={() => setActive(true)}
+      onTouchEnd={() => setActive(false)}
+      onFocus={(event) => setFocus(showsFocusRing(event.currentTarget))}
       onBlur={() => setFocus(false)}
       style={{ ...base, ...dynamic }}
       {...rest}
