@@ -13,7 +13,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Fonts:** Schibsted Grotesk (`--font-display`: headlines 700, mid titles 600, big numbers; accent words inside headlines stay Schibsted, clay color, never italic), EB Garamond (`--font-serif`: standalone italic taglines + pull quotes, 400), Fredoka 600 (`--font-wordmark`: the bounced "Homa" lockup only), Hanken Grotesk (sans UI/body), Caveat (Homa’s hand, product margin notes only, one per surface), JetBrains Mono (data). Keep it to two voices per screen plus body.
 - **Icons:** Lucide via CDN, pinned at `lucide@0.525.0`. Never hand-draw UI glyphs. Text on gold tints is always `var(--gold-ink)`.
 - **Components:** in `components/<group>/`. In HTML, load `_ds_bundle.js` and read `const { Button, Card, ... } = window.HomaDesignSystem_5e2305`. Each has a `.prompt.md` with usage.
-- **Voice:** warm, second-person, encouraging, sentence case, minimal emoji. Homa offers, never commands. No em dashes, ever (use a comma, period, colon, or mid-dot instead).
+- **Voice:** warm, second-person, encouraging, sentence case, minimal emoji. Homa offers, never commands. No em dashes, ever (use a comma, period, colon, or mid-dot instead). Clarity and low cognitive load beat personality: one idea per sentence, plain names for things, no metaphor stacks.
 - **Full-screen examples:** `ui_kits/{web-app,mobile-app,landing}/`. Social layouts: `social/`.
 
 Do not edit `_ds_bundle.js`, `_ds_manifest.json`, or `_adherence.oxlintrc.json`, they are generated.

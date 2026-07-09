@@ -19,6 +19,11 @@ voice laws, `docs/homa-design/` guidelines, and the binding claims rules in
 6. Show the reasoning. She distrusts conclusions that arrive without their work.
 7. Calm is the brand. If a line manufactures urgency, fear, or guilt, it is off
    brand even if it converts.
+8. Clarity beats personality (founder ruling 2026-07-08). One idea per
+   sentence, plain names for things, no metaphor stacks, no meta-commentary
+   about the copy itself. Fewer words is not the goal, fewer ideas per
+   sentence is: a 3-word line can confuse as hard as a 20-word one, and
+   cutting words that carry meaning raises the load instead of lowering it.
 
 ## Hard bans (each is also a scorer assertion or an editor check)
 

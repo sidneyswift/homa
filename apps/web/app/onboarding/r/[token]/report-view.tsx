@@ -27,7 +27,6 @@ import { Logo } from "../../../../components/brand/Logo";
 import { CallHomaCard } from "./call-homa-card";
 import { ConsentCard } from "./consent-card";
 import { GrowthStory, type GrowthEra } from "./growth-story";
-import { HomeschoolContextCard } from "./homeschool-context-card";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
 import { SubjectJump } from "./subject-jump";
 import { ReportActions } from "./report-actions";
@@ -119,15 +118,11 @@ function movementFor(
 export function ReportView({
   data,
   sample = false,
-  askHomeschool = false,
   narrativeView = null,
   stateRequirements = null,
 }: {
   data: ReportViewData;
   sample?: boolean;
-  /** Shows the relocated "About your homeschool" card (once, until the
-   * family context bag has anything in it; the server page decides). */
-  askHomeschool?: boolean;
   /** The model-written pieces, when generated and gate-approved. */
   narrativeView?: ReportNarrativeView | null;
   /** The family's state compliance summary (render-time join, never
@@ -288,10 +283,10 @@ export function ReportView({
                 subjects mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalDomains}</b>
               </span>
               <span>
-                your observations <b className="text-strong">{report.scores.observationCount}</b>
+                your answers <b className="text-strong">{report.scores.observationCount}</b>
               </span>
               <span>
-                benchmarks <b className="text-strong">national</b>
+                <b className="text-strong">national</b> benchmarks
               </span>
             </div>
           </div>
@@ -315,9 +310,9 @@ export function ReportView({
                     </p>
                     {anyMovement ? (
                       <p className="mt-2 text-body">
-                        And the part worth circling: {movements.size}{" "}
-                        {movements.size === 1 ? "subject" : "subjects"} moved since last time. Your work
-                        is showing up in the numbers.
+                        Since last time, {movements.size}{" "}
+                        {movements.size === 1 ? "subject" : "subjects"} moved up. Your work is showing
+                        up in the numbers.
                       </p>
                     ) : null}
                     {recheckedNote ? <p className="mt-2 text-sm text-muted">{recheckedNote}</p> : null}
@@ -378,7 +373,7 @@ export function ReportView({
             {strengths.length > 0 ? (
               <>
                 <h2 className="mt-9 font-display text-xl font-semibold text-strong">
-                  {report.childName}&apos;s strengths, first
+                  {report.childName}&apos;s strengths
                 </h2>
                 <p className="mt-1 text-sm text-muted">
                   Where {report.childName} is ahead of what&apos;s typical for {ageLabel(months)}.
@@ -456,7 +451,7 @@ export function ReportView({
             {/* Subject by subject */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">Subject by subject</h2>
             <p className="mt-1 text-sm text-muted">
-              Open any subject to see what I asked, what you answered, and the benchmarks behind it.
+              Open any subject to see what I asked, what you answered, and the benchmarks used.
             </p>
             <div className="mt-4 flex flex-col gap-2.5">
               {ordered.map((score) => {
@@ -514,10 +509,10 @@ export function ReportView({
                         <span className="block font-semibold text-strong">{domain?.displayName}</span>
                         <span className="mt-0.5 block text-sm text-muted">{subjectText ?? line.sentence}</span>
                         <span className="mt-1 block text-xs font-medium text-brand group-open:hidden">
-                          see the questions and benchmarks {"\u2193"}
+                          See the questions and benchmarks {"\u2193"}
                         </span>
                         <span className="mt-1 hidden text-xs font-medium text-brand group-open:block">
-                          hide {"\u2191"}
+                          Hide {"\u2191"}
                         </span>
                       </span>
                       <span className="flex-shrink-0 pt-0.5 text-right">
@@ -575,7 +570,7 @@ export function ReportView({
                           <p className="mt-1 text-xs text-muted">
                             Each question, your answer, and where the national benchmark sits next
                             to {report.childName}&apos;s age today.
-                            {editable ? " Something changed? Tap change and save; the report rescores around it." : ""}
+                            {editable ? " Something changed? Tap change and save, and the report updates." : ""}
                           </p>
                           <ReceiptsList
                             childId={report.childId}
@@ -627,8 +622,8 @@ export function ReportView({
                           <p className="text-sm font-semibold text-strong">{activity.title}</p>
                           <p className="mt-0.5 text-sm text-body">{activity.description}</p>
                           <p className="mt-2 text-xs text-muted">
-                            This is the kind of spot Homa builds a plan around: materials, a pace,
-                            and a re-check so you can watch the number move.
+                            Want more than one idea? Homa can build a 4-week plan around this spot:
+                            materials, a pace, and a re-check.
                           </p>
                         </div>
                       ) : null}
@@ -767,7 +762,7 @@ export function ReportView({
                   {keepsakeText}
                 </p>
                 <p className="mt-2 text-xs print:hidden" style={{ color: "var(--gold-ink)" }}>
-                  Print the report and this letter keeps.
+                  Print the report to keep this letter.
                 </p>
               </div>
             ) : null}
@@ -800,24 +795,21 @@ export function ReportView({
               </p>
               {stateName && !stateRequirements ? (
                 <p className="mt-2 text-muted">
-                  One more thing, because it matters: homeschooling is legal in all 50 states,
-                  including {stateName}. When your invite opens, Homa tracks {stateName}&apos;s
-                  requirements for you.
+                  Homeschooling is legal in all 50 states, including {stateName}. When your
+                  invite to Homa opens, Homa tracks {stateName}&apos;s requirements for you.
                 </p>
               ) : null}
               <p className="mt-3 font-mono text-[0.65rem] leading-relaxed text-subtle">
-                SOURCES {"\u00b7"} {Array.from(sourceKeys).map((key) => MAP_SOURCES[key]?.label).filter(Boolean).join(" \u00b7 ")} {"\u00b7"} bank {report.bankVersion} {"\u00b7"}{" "}
+                <span className="uppercase tracking-widest">Sources</span> {"\u00b7"} {Array.from(sourceKeys).map((key) => MAP_SOURCES[key]?.label).filter(Boolean).join(" \u00b7 ")} {"\u00b7"} checklist version {report.bankVersion} {"\u00b7"}{" "}
                 <Link href="/onboarding/method" className="text-brand underline">
                   how the report works, in full
                 </Link>
               </p>
             </div>
 
-            {/* About your homeschool: relocated from the pre-report extras
-                step (UX review 2026-07-06), asked after the payoff. */}
-            {!sample && askHomeschool ? (
-              <HomeschoolContextCard childName={report.childName} />
-            ) : null}
+            {/* The "About your homeschool" card that lived here moved
+                into the onboarding flow (founder call 2026-07-08: after
+                the family card, before kids), see homeschool-step.tsx. */}
 
             {/* Sibling reports built in the same sitting. Deliberately no
                 direct report links here: this page is a shareable token
@@ -866,12 +858,12 @@ export function ReportView({
             {/* CTA band */}
             <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
               <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
-                This report is the &ldquo;before&rdquo; picture.
+                This report is where {report.childName} starts, not where {report.childName} stays.
               </h3>
               <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
-                Homa moves it: a plan for every blue subject, materials made for exactly
-                what&apos;s growing, and this report re-drawn as {report.childName} grows, so you
-                watch the numbers move.
+                Homa builds a plan for whatever is growing, makes materials for exactly those
+                skills, and re-draws this report as {report.childName} grows, so you watch the
+                numbers move.
               </p>
               {sample ? (
                 <>
@@ -901,7 +893,7 @@ export function ReportView({
 
           {/* Footer */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
-            <span>made with Homa for {report.childName}</span>
+            <span>Made with Homa for {report.childName}</span>
             {!sample ? (
               <ReportActions
                 familyId={report.familyId}
@@ -911,7 +903,7 @@ export function ReportView({
               />
             ) : (
               <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
-                get your own
+                Get your own
               </Link>
             )}
           </div>

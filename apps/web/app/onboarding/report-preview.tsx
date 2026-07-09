@@ -45,8 +45,12 @@ export function ReportPreview() {
           <p className="font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]" style={{ color: "var(--pop-navy)" }}>
             Sample {"\u00b7"} made for Maya
           </p>
+          {/* Second person, not the sample kid's name (founder screenshot
+              2026-07-08): the mock sells what YOUR child gets; Maya stays
+              in the eyebrow and note as the worked example. Sentence case
+              per house style. */}
           <p className="mt-1.5 font-display text-2xl font-bold leading-tight text-strong">
-            Maya&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
+            Your child&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
           </p>
           <p className="mt-1.5 font-mono text-[0.6875rem]" style={{ color: "var(--pop-navy)" }}>
             age 4y 2m {"\u00b7"} 16 subjects {"\u00b7"} national benchmarks

@@ -24,6 +24,7 @@ export { formatUsPhone, normalizeUsPhoneE164 } from "./phone";
 export {
   ageInMonths,
   ageLabel,
+  aheadCapForAge,
   CAPTURE_MAX_MONTHS,
   isInScoredRange,
   isValidBirthDate,
@@ -33,6 +34,7 @@ export {
 } from "./map/bands";
 
 export {
+  CORE_DOMAIN_IDS,
   DEEP_DIVE_CAP,
   getMapDomain,
   getMapItem,
@@ -51,6 +53,8 @@ export {
   type MapItem,
   type MapQuestionPlan,
 } from "./map/bank";
+
+export { PERSONALIZATION_EXCEPTION_IDS, personalizeStatement } from "./map/personalize";
 
 export { reportStaleness, type ReportStaleness } from "./map/staleness";
 

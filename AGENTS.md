@@ -23,6 +23,7 @@ Homa is a multi-tenant AI homeschool assistant (Next.js + the eve agent framewor
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.
 - "Homa" in prose (title case); "HOMA" only in UI-surface wordmark treatments.
 - Sentence case, reassure-before-inform, offers never commands, no red/"behind" framing, never compare siblings.
+- Clarity and low cognitive load beat personality (founder ruling 2026-07-08). One idea per sentence, plain names for things, no metaphor stacks, no meta-commentary. Fewer words is NOT the goal: cutting words that carry meaning makes copy harder, not easier. The full rulebook is `.agents/skills/homa-copy-writer/SKILL.md`; gate important copy with `homa-copy-reviewer` then `homa-copy-editor`.
 - Imports stay at the top of the file, no inline imports.
 
 ## Design system

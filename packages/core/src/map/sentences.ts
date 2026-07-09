@@ -122,8 +122,7 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
 
   const opening = parentName ? `${parentName}, here's` : "Here's";
   const noticing =
-    `You gave me ${scores.observationCount} real observations. ` +
-    `Nothing here is a test result: it's your own noticing, organized.`;
+    `Nothing here is a test: it's ${scores.observationCount} of your own answers, organized.`;
 
   if (scores.mappedCount === 0) {
     return (
@@ -140,8 +139,8 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
         ? `${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and a clear next step in the ones marked blue.`
         : `${childName} has a clear next step in every subject marked blue.`;
     return (
-      `${opening} the honest picture: ${footingLine} ` +
-      `That's a starting line, not a verdict. Each blue card below says exactly where to begin. ` +
+      `${opening} where things stand: ${footingLine} ` +
+      `That's normal, not a verdict. Each blue card below names exactly where to begin. ` +
       noticing
     );
   }
@@ -162,7 +161,7 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
       ? ` ${growing === 1 ? "One subject is" : `${growing} subjects are`} growing right now, each with a place to start below.`
       : "";
 
-  return `${opening} the honest picture: ${standing}.${growingLine} ${noticing}`;
+  return `${opening} where things stand: ${standing}.${growingLine} ${noticing}`;
 }
 
 /** Subject line and preview for the report email. */
@@ -176,7 +175,7 @@ export function reportEmailPreview(): string {
 
 /** The sub-heading under the report title. */
 export function reportSubtitle(ageMonths: number): string {
-  return `a first look at where they stand at ${ageLabel(ageMonths)}, from what you've seen them do`;
+  return `A first look at where they stand at ${ageLabel(ageMonths)}, from what you've seen them do`;
 }
 
 /** Header for the things-to-try section, sized to how much is growing. */

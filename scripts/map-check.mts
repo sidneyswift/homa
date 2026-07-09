@@ -11,6 +11,7 @@
  */
 
 import {
+  aheadCapForAge,
   BANNED_WORDS,
   buildFourWeekPlan,
   buildMonthPlan,
@@ -23,6 +24,8 @@ import {
   MAP_SOURCES,
   maxQuestionsForAge,
   nextDeepDiveItem,
+  PERSONALIZATION_EXCEPTION_IDS,
+  personalizeStatement,
   planQuestions,
   scoreMap,
   validateNarrative,
@@ -87,16 +90,50 @@ for (const domain of MAP_DOMAINS) {
 }
 report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cited and clean`, failures.length === 0);
 
+// ---------- 1b. Personalization: every question takes the kid's name ----------
+// The checklist and deep dive render personalizeStatement(name, item)
+// ("Story counts out loud to 10?"), which prefixes the name and expects a
+// third-person verb phrase. A statement shaped any other way must register
+// a hand-written exception in map/personalize.ts or it fails here.
+{
+  const before1b = failures.length;
+  const bankIds = new Set(MAP_DOMAINS.flatMap((domain) => domain.items.map((item) => item.id)));
+  for (const id of PERSONALIZATION_EXCEPTION_IDS) {
+    if (!bankIds.has(id)) failures.push(`personalize exception "${id}" is not a bank item`);
+  }
+  for (const domain of MAP_DOMAINS) {
+    for (const item of domain.items) {
+      const personalized = personalizeStatement("Story", item);
+      checkCopy(`personalized.${item.id}`, personalized);
+      if (!personalized.includes("Story")) {
+        failures.push(`${item.id}: personalization dropped the child's name`);
+      }
+      // Third-person singular verbs end in s (Counts, Reads, Has, Gets);
+      // anything else ("Someone who just met them...") reads as word salad
+      // with a name prefixed and needs its own hand-written line.
+      if (
+        !PERSONALIZATION_EXCEPTION_IDS.includes(item.id) &&
+        !/^[A-Z][A-Za-z'-]*s\b/.test(item.statement)
+      ) {
+        failures.push(
+          `${item.id}: "${item.statement.slice(0, 50)}" doesn't start with a third-person verb; add an exception in map/personalize.ts`,
+        );
+      }
+    }
+  }
+  report("personalization: every question reads naturally with the kid's name", failures.length === before1b);
+}
+
 // ---------- 2. Selection ladder sanity ----------
 
 let ladderOk = true;
 for (let age = 24; age < 204; age += 3) {
   const plans = planQuestions(age);
   if (plans.length !== MAP_DOMAINS.length) ladderOk = false;
-  // Worst case is base + two rungs in every domain; typical kids see far
-  // fewer because rungs only unlock on "easily".
+  // Worst case is base + two rungs per domain (three in core subjects);
+  // typical kids see far fewer because rungs only unlock on "easily".
   const total = maxQuestionsForAge(age);
-  if (total < plans.length || total > plans.length * 3) {
+  if (total < plans.length || total > plans.length * 4) {
     ladderOk = false;
     failures.push(`age ${age}m: ${total} max questions out of range`);
   }
@@ -146,9 +183,9 @@ const AGE = 50; // 4y 2m
 // Golden kid 1: everything easily → ahead across the board, capped, no growing.
 const aheadKid = scoreMap(AGE, answersFor(AGE, () => "easily"));
 report(
-  "ahead kid: majority ahead, months capped at 24, none growing",
+  "ahead kid: majority ahead, months capped for their age, none growing",
   aheadKid.domains.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
-    aheadKid.domains.every((d) => (d.monthsAhead ?? 0) <= 24) &&
+    aheadKid.domains.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(AGE)) &&
     aheadKid.domains.some((d) => d.position === "ahead"),
   JSON.stringify(aheadKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
 );
@@ -231,6 +268,41 @@ report(
     teenKid.domains.every((d) => (d.monthsAhead ?? 0) <= 24),
   JSON.stringify(teenKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
 );
+
+// Golden kid 7: the trust regression (2026-07-08). A 2y3m-old whose parent
+// taps "easily" on every language question used to read "+19 mo ahead in
+// speaking", and the mom rightly didn't believe it. With window credit and
+// the age-scaled cap, the strongest possible claim at 27mo is +9.
+const TODDLER = 27;
+const toddler = scoreMap(TODDLER, answersFor(TODDLER, () => "easily"));
+const toddlerLanguage = toddler.domains.find((d) => d.domainId === "language");
+report(
+  "27mo trust case: all-easily language reads +9, never +19",
+  toddlerLanguage?.position === "ahead" && toddlerLanguage.monthsAhead === 9,
+  JSON.stringify([toddlerLanguage?.position, toddlerLanguage?.monthsAhead]),
+);
+report(
+  "27mo trust case: no subject claims more than a third of the child's age",
+  toddler.domains.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(TODDLER)),
+  JSON.stringify(toddler.domains.map((d) => [d.domainId, d.monthsAhead])),
+);
+
+// The proportionality law, swept: at EVERY scored age, the most generous
+// possible parent (easily on everything served) can never produce a claim
+// past min(24, about a third of age) in any subject.
+{
+  let capOk = true;
+  for (let age = 24; age < 204; age += 1) {
+    const swept = scoreMap(age, answersFor(age, () => "easily"));
+    for (const d of swept.domains) {
+      if ((d.monthsAhead ?? 0) > aheadCapForAge(age)) {
+        capOk = false;
+        failures.push(`age ${age}m ${d.domainId}: +${d.monthsAhead} exceeds cap ${aheadCapForAge(age)}`);
+      }
+    }
+  }
+  report("proportional cap: no age, no subject, no answer pattern beats min(24, age/3)", capOk);
+}
 
 // ---------- 4. Deep dive: probes down for strugglers, up for the strong ----------
 

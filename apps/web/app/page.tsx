@@ -79,8 +79,13 @@ const faqJsonLd = {
  * open question 7), so the page no longer sells it.
  */
 export default function LandingPage() {
+  // overflowX is clip, not hidden: hidden would make this div a scroll
+  // container, which silently turns the sticky Nav static (an ancestor
+  // with overflow hidden becomes what sticky sticks to, and this div
+  // never scrolls). clip fences the decorative bleed (ribbons, waves)
+  // without creating a scroll container, so the nav pins for real.
   return (
-    <div style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "hidden" }}>
+    <div style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "clip" }}>
       {/* Structured data for agent discoverability */}
       <script
         type="application/ld+json"
@@ -92,25 +97,33 @@ export default function LandingPage() {
       />
       <RevealObserver />
       <SignupPopupProvider>
-        {/* The gradient wraps Nav + Hero together (not just Hero): now that
-            Nav is transparent, anchoring the glow to Hero's own top edge left
-            a hard seam right under the nav, where the flat page background
-            behind it met the gradient starting abruptly below. Originating
-            the gradient from the true top of the page reads through the
-            transparent nav continuously instead. A second, much smaller echo
-            of the same gold-100 glow (not a second color) sits mid-left,
-            just enough to keep that side from reading flat next to the
-            top-right one. */}
+        {/* Nav sits OUTSIDE the gradient wrapper: sticky never escapes its
+            containing block, so a nav nested in a hero-height wrapper got
+            shoved off screen as soon as the hero scrolled past (it pinned
+            for one screen, then vanished). Instead the nav is a direct
+            child of the page root (containing block = the whole page) and
+            the wrapper pulls itself up under the transparent bar by the
+            nav's own height, so the glow still starts at the true top of
+            the page and reads through the nav with no hard seam, exactly
+            as before. The gradient's geometry is untouched: the wrapper
+            occupies the same box on screen, padding standing in for the
+            nav's old slot. A second, much smaller echo of the same
+            gold-100 glow (not a second color) sits mid-left, just enough
+            to keep that side from reading flat next to the top-right one.
+            No overflow here on purpose: Hero clips its own doodles, and
+            overflow hidden on this wrapper was one of the two things that
+            kept the sticky nav from ever pinning on this page. */}
+        <Nav />
         <div
           style={{
             position: "relative",
-            overflow: "hidden",
+            marginTop: "calc(-1 * var(--lp-nav-height))",
+            paddingTop: "var(--lp-nav-height)",
             background:
               "radial-gradient(18% 22% at 8% 58%, var(--gold-100) 0%, transparent 68%), " +
               "radial-gradient(100% 130% at 88% 0%, var(--gold-100) 0%, var(--bg-page) 58%)",
           }}
         >
-          <Nav />
           <Hero />
         </div>
         <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />

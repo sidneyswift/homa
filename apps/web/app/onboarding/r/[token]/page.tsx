@@ -5,7 +5,7 @@ import { Logo } from "../../../../components/brand/Logo";
 import { Doodle } from "../../../../components/marketing/Doodle";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
-import { getReportByToken, hasFamilyContext } from "../../../../lib/map/store";
+import { getReportByToken } from "../../../../lib/map/store";
 import { NarrativeBeat } from "./narrative-beat";
 import { ReportView } from "./report-view";
 
@@ -90,11 +90,6 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
     );
   }
 
-  // The relocated "About your homeschool" card shows until the family
-  // context bag has anything in it (same one-shot rule the old extras
-  // step used).
-  const familyContextDone = await hasFamilyContext(report.familyId);
-
   // Render-time join against the compliance reference table: the report
   // row never stores a legal claim, so none can go stale on it.
   const stateRequirements = report.usState
@@ -109,7 +104,6 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
   return (
     <ReportView
       data={report}
-      askHomeschool={!familyContextDone}
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
     />

@@ -3,6 +3,45 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-08 (evening) · Inbound voice line stops monologuing
+
+Founder feedback from a live call: Homa spoke for about a minute before the
+caller could say anything. Root cause: the inbound assistant's greeting is
+model-generated from its instructions, and the phone-rules block bounded
+per-turn length but said nothing about the opening, so the model front-loaded
+an introduction plus a rundown of the family context.
+
+Fix, in `scripts/telnyx-provision.mts` (`loadVoiceInstructions`), synced live
+via `pnpm telnyx:provision`:
+
+- Phone rules are now explicitly binding over the prepended web-voice
+  sections, keep every turn to one or two short sentences, one thought per
+  turn, and end with letting the caller talk.
+- The opening is bounded: greet in one short sentence, by first name when
+  known ("Hey Sarah, it's Homa!"), then wait. Never introduce at length,
+  never list capabilities, never explain the call.
+- Family context is framed as background knowledge, not a script: draw on it
+  when the conversation goes there, never volunteer a rundown.
+
+The outbound curriculum assistant already had one-sentence-per-turn rules and
+is untouched. Note for future call QA: the Telnyx trial tier still prepends
+its own "automated call" disclaimer before Homa speaks; that part is not the
+model and goes away with the account upgrade (HUMAN-TODO).
+
+Founder follow-up ruling, same evening, after a test call confirmed the short
+greeting: do not just greet and wait. A call is a tennis match; every Homa
+turn ends by passing the ball back. Second sync, same file and same command:
+
+- Greeting now serves a first ball: name plus one directional sentence
+  ("Hey Sarah, it's Homa! How's your week with the kids going?"), and one
+  saved family detail is explicitly fair game for that opening question.
+- Every turn ends with an easy question or an opening the caller can pick up.
+- Wrap-up shape is explicit: when the caller sounds done, close in one turn
+  with a one-sentence recap, the one concrete thing Homa will do from the
+  call (send_email when it belongs in writing, never a promise she cannot
+  keep from a call), then a natural "Ok, talk soon! Bye!" and hang up. Long
+  silence wraps up the same way.
+
 ## 2026-07-08 · One onboarding for every door (signup, signin, setup unified)
 
 Founder instruction: "we make all sign in, sign up, and onboarding use the

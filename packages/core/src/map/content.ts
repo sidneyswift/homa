@@ -1,5 +1,5 @@
 /**
- * The map content bank, v2026.07.2: ages 2 to 16 (scored), 16 domains.
+ * The map content bank, v2026.07.3: ages 2 to 16 (scored), 16 domains.
  *
  * Provenance: ported and extended from homa-template's questionnaire bank
  * (workspace/questionnaire/domains.json) and its citation-backed benchmark
@@ -8,7 +8,11 @@
  * docs/homa-benchmarks/ (2026-07-06 research pass; see its 00-synthesis.md
  * for the corrections v2026.07.2 applied). Every item's typicalMonths is
  * the age in months by which the behavior is typical per the cited
- * frameworks; the scorer reads months-ahead off these anchors.
+ * frameworks; the scorer reads months-ahead off these anchors, crediting
+ * the early edge of typicalRangeMonths where one is documented (v2026.07.3
+ * accuracy pass, after pilot parents flagged inflated claims: anchors are
+ * "typical BY" ages, the late edge of wide normal windows, per lane 11 of
+ * the corpus).
  * Upper anchors map school bands to ages: gr 3 ~9y (108mo), gr 5 ~11y
  * (132mo), gr 8 ~14y (168mo), gr 10 ~16y (192mo), with ladder headroom to
  * ~17y for detecting ahead at the top of the range.
@@ -169,6 +173,10 @@ export const MAP_SOURCES: Record<string, { label: string; url: string }> = {
     label: "CSTA K-12 Computer Science Standards (2017 revision; 2026 update tracked)",
     url: "https://csteachers.org/k12standards/",
   },
+  applebee: {
+    label: "Applebee, The Child's Concept of Story, narrative development stages",
+    url: "https://press.uchicago.edu/ucp/books/book/chicago/C/bo5954934.html",
+  },
 };
 
 export const MAP_DOMAINS: readonly MapDomainContent[] = [
@@ -189,6 +197,9 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     },
     items: [
       { id: "math.counts-to-5", statement: "Counts out loud from 1 to 5, mostly in order", typicalMonths: 30, sources: ["elof", "clements-sarama"], standards: ["ELOF P-MATH 1"] },
+      // Range: Clements and Sarama's Small Collection Namer level runs 34
+      // to 39 months (corpus lane 01 porting notes).
+      { id: "math.small-groups", statement: "Tells you how many things are in a small group of 1 to 3 without counting them", typicalMonths: 36, typicalRangeMonths: [34, 39], sources: ["clements-sarama"] },
       { id: "math.counts-to-10", statement: "Counts out loud to 10 without skipping numbers", typicalMonths: 42, sources: ["elof", "clements-sarama"], standards: ["ELOF P-MATH 1"] },
       { id: "math.how-many-5", statement: "Counts 5 objects one at a time and tells you how many there are", typicalMonths: 48, sources: ["elof", "cdc"] },
       { id: "math.counts-past-20", statement: "Counts past 20 without getting stuck", typicalMonths: 54, sources: ["elof", "ccss-math"], standards: ["ELOF P-MATH 1"] },
@@ -226,7 +237,13 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     },
     items: [
       { id: "literacy.book-handling", statement: "Turns book pages and points at pictures when you name them", typicalMonths: 30, sources: ["cdc", "elof"] },
+      // Range: ASHA places pretend reading in the 3-to-4-year band
+      // (corpus lane 01 porting notes).
+      { id: "literacy.pretend-reads", statement: "Pretends to read a favorite book out loud, turning the pages", typicalMonths: 40, typicalRangeMonths: [36, 48], sources: ["asha", "elof"] },
       { id: "literacy.own-name-letters", statement: "Recognizes the letters in their own name", typicalMonths: 42, sources: ["elof"], standards: ["ELOF P-LIT 3"] },
+      // Range: ELOF P-LIT 2 places knowing print carries meaning in the
+      // 36-to-48-month progression (corpus lane 01 porting notes).
+      { id: "literacy.print-meaning", statement: "Asks what written words say, like a sign or a cereal box", typicalMonths: 48, typicalRangeMonths: [36, 48], sources: ["elof"], standards: ["ELOF P-LIT 2"] },
       { id: "literacy.uppercase-half", statement: "Names more than half of the uppercase letters", typicalMonths: 52, sources: ["elof"], standards: ["ELOF P-LIT 3"] },
       { id: "literacy.retells-story", statement: "Retells a story you just read: what happened first, and how it ended", typicalMonths: 60, sources: ["cdc", "elof"], standards: ["ELOF P-LIT 4"] },
       { id: "literacy.sight-words", statement: "Reads their own name and a few familiar words on sight (like STOP)", typicalMonths: 64, sources: ["elof", "ccss-ela"], standards: ["CCSS RF.K.3.c"] },
@@ -322,15 +339,20 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     },
     items: [
       { id: "language.two-words", statement: "Puts two words together, like 'more milk' or 'go park'", typicalMonths: 26, sources: ["cdc"] },
-      { id: "language.short-sentences", statement: "Speaks in short sentences that family and familiar people understand", typicalMonths: 38, sources: ["cdc", "elof"] },
+      // Range: Hustad 2021, multiword 50% intelligibility: median child at
+      // 34mo, 5th percentile at 46 (corpus lane 11 §8b).
+      { id: "language.short-sentences", statement: "Speaks in short sentences that family and familiar people understand", typicalMonths: 38, typicalRangeMonths: [34, 46], sources: ["hustad", "cdc", "elof"] },
       // Range: Hustad 2021 medians, 50% multiword intelligibility to
       // strangers at 34mo, 75% at 46, 90% at 62 (00-synthesis §3.2).
       { id: "language.stranger-clear", statement: "Someone who just met them understands most of what they say", typicalMonths: 46, typicalRangeMonths: [34, 62], sources: ["hustad", "cdc"] },
       { id: "language.tells-about-day", statement: "Tells you about something that happened earlier today", typicalMonths: 48, sources: ["cdc", "elof"] },
       { id: "language.why-how", statement: "Asks why and how questions, and stays on topic when you answer", typicalMonths: 54, sources: ["cdc", "elof"] },
       { id: "language.whole-story", statement: "Tells a whole little story with a beginning and an end", typicalMonths: 60, sources: ["cdc"] },
-      { id: "language.clear-sounds", statement: "Says nearly all speech sounds clearly (r and th often come last)", typicalMonths: 62, sources: ["crowe-mcleod", "asha"] },
+      // Range: Hustad 2021, multiword 90% intelligibility: median child at
+      // 62mo, 5th percentile at 87 (corpus lane 11 §8b).
+      { id: "language.clear-sounds", statement: "Says nearly all speech sounds clearly (r and th often come last)", typicalMonths: 62, typicalRangeMonths: [62, 87], sources: ["crowe-mcleod", "hustad", "asha"] },
       { id: "language.tenses", statement: "Uses past and future naturally ('we went', 'we're going to')", typicalMonths: 68, sources: ["cdc", "elof"] },
+      { id: "language.true-story", statement: "Tells a true story from their life with a beginning, a problem, and how it turned out", typicalMonths: 72, sources: ["applebee"] },
       { id: "language.explains-steps", statement: "Explains how to do something step by step, like the rules of a game", typicalMonths: 84, sources: ["ccss-ela"], standards: ["CCSS SL.1.4"] },
       { id: "language.real-conversation", statement: "Holds a real back-and-forth conversation with an adult, adding their own ideas", typicalMonths: 96, sources: ["ccss-ela"], standards: ["CCSS SL.2.1"] },
       { id: "language.retells-organized", statement: "Recounts something they learned in an organized way, with the details that matter", typicalMonths: 112, sources: ["asha", "ccss-ela"], standards: ["CCSS SL.3.4"] },

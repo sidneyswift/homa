@@ -188,11 +188,11 @@ export function ReportSnapshot({
 
       <div className="mt-4">
         <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
-          How ahead is {childName}, by subject (months)
+          Months ahead, by subject
         </p>
         <p className="mt-1 text-xs text-muted">
-          Each line is {childName} against their own past, never another child. Every subject
-          starts on the at-age line; your answers are what move it.
+          Each line shows {childName}&apos;s own progress over time. Every subject starts on
+          the at-age line; your answers are what move it.
         </p>
         {/* The plot gets its own white card: figure on ground, same
             treatment as the whole-picture chart below. */}

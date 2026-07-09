@@ -10,6 +10,7 @@ import { DeepDiveStep } from "./deep-dive-step";
 import type { FlowChild, FlowPhase } from "./flow-types";
 import { ExtrasStep } from "./extras-step";
 import { FamilyStep } from "./family-step";
+import { HomeschoolStep } from "./homeschool-step";
 import { HubStep } from "./hub-step";
 import { KidsStep } from "./kids-step";
 import { NextKidStep } from "./next-kid-step";
@@ -144,6 +145,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     email: string | null;
     firstName: string | null;
     familySetupDone: boolean;
+    familyContextDone: boolean;
   } | null> => {
     try {
       const response = await fetch("/api/map/state");
@@ -187,6 +189,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         email: resolvedEmail,
         firstName: resolvedFirstName,
         familySetupDone: Boolean(data.familySetupDone),
+        familyContextDone: Boolean(data.familyContextDone),
       };
     } catch {
       return null;
@@ -395,8 +398,31 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           lastName={parentNames.last}
           onDone={() => {
             void (async () => {
-              // Kids are next for a brand-new family; a returning one
-              // resumes wherever its kids actually are.
+              // The about-your-homeschool questions come next for a
+              // brand-new family (founder call 2026-07-08: during
+              // onboarding, after the family card, before kids). A
+              // returning family that already has kids or already gave
+              // this context resumes wherever its kids actually are;
+              // this step is a one-shot beat in the linear sequence,
+              // never a resume gate, so skipping it never nags.
+              const restored = await refreshState();
+              const childrenList = restored?.children ?? [];
+              if (childrenList.length === 0 && !restored?.familyContextDone) {
+                setPhase("homeschool");
+                return;
+              }
+              applyPostKidsRoute(decidePostKidsRoute(childrenList), childrenList);
+            })();
+          }}
+        />
+      );
+    }
+
+    if (phase === "homeschool") {
+      return (
+        <HomeschoolStep
+          onDone={() => {
+            void (async () => {
               const restored = await refreshState();
               const childrenList = restored?.children ?? [];
               applyPostKidsRoute(decidePostKidsRoute(childrenList), childrenList);
@@ -449,9 +475,9 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
               ? reportQueue
               : [...reportQueue, finishedId];
             setReportQueue(queueAfter);
-            // The add-a-child card already asked for interests and
-            // help-with (founder call 2026-07-08); the extras step only
-            // shows for a kid who left both empty, never asking twice.
+            // The extras step never asks twice: a kid whose interests or
+            // help-with are already on file (an earlier sitting, the chat
+            // agent's profile tool) skips straight past it.
             const extrasAlreadyAnswered =
               activeChild.interests.length > 0 || activeChild.helpWith !== null;
             if (!extrasAlreadyAnswered) {

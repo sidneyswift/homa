@@ -153,9 +153,14 @@ export function ExtrasStep({
           </>
         ) : (
           <>
+            {/* "Where should Homa start", not "what do you want help
+                with" (founder 2026-07-08: that phrasing is too open
+                ended): the chips below ARE the answer space, and the
+                question asks for a starting point, not an inventory of
+                needs. */}
             <TagInput
               className="mt-3"
-              label="What would you love a hand with?"
+              label={`Where should Homa start with ${child.name}?`}
               aside="pick as many as you like"
               suggestions={helpSuggestions(child.ageMonths)}
               tags={helpWith}

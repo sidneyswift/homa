@@ -27,6 +27,7 @@ export type FlowPhase =
   | "bootstrap-error"
   | "parent"
   | "family"
+  | "homeschool"
   | "kids"
   | "hub"
   | "preparing"

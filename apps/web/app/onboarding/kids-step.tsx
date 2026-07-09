@@ -1,22 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check } from "lucide-react";
 
 import { MAP_KID_CAP } from "@homa/core";
 
 /**
  * S2: add your kids, as the SAME add-a-child card the signed-in flow uses
- * (founder call 2026-07-08: one onboarding for every door, and this card
- * design, first name, birth month + year, interests, help-with, is the
- * one to keep). This overturns the 2026-07-06 "get the actual birthday"
- * ruling: month + year is what the card asks, and the day saves as 01,
- * the same convention /home has always used (age-band math needs month
- * precision only).
+ * (founder call 2026-07-08: one onboarding for every door). This
+ * overturns the 2026-07-06 "get the actual birthday" ruling: month +
+ * year is what the card asks, and the day saves as 01, the same
+ * convention /home has always used (age-band math needs month precision
+ * only).
  *
- * Because interests and help-with are collected here now, the extras
- * step after the checklist only shows for a kid who left both empty
- * (MapFlow skips it otherwise), so nothing is ever asked twice.
+ * Founder follow-up (same day, with screenshot): the interests and
+ * help-with questions left this card. They belong to the questionnaire
+ * instead, where the extras beat right after the last checklist question
+ * asks them with tappable suggestions (ExtrasStep), so the card is just
+ * name + birthday and never feels like a survey.
  *
  * Multi-kid: "Add child" saves the form (POST /api/map/children, the
  * same route as before) and clears it for the next sibling; saved kids
@@ -45,22 +46,14 @@ interface KidForm {
   name: string;
   month: string;
   year: string;
-  interests: string;
-  focus: string;
 }
 
 function emptyForm(): KidForm {
-  return { name: "", month: "", year: "", interests: "", focus: "" };
+  return { name: "", month: "", year: "" };
 }
 
 function formIsBlank(form: KidForm): boolean {
-  return (
-    form.name.trim() === "" &&
-    form.month === "" &&
-    form.year === "" &&
-    form.interests.trim() === "" &&
-    form.focus.trim() === ""
-  );
+  return form.name.trim() === "" && form.month === "" && form.year === "";
 }
 
 export function KidsStep({
@@ -78,6 +71,7 @@ export function KidsStep({
   const [form, setForm] = useState<KidForm>(emptyForm());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const totalKids = existingCount + added.length;
   const canAddMore = totalKids < MAP_KID_CAP;
@@ -96,12 +90,6 @@ export function KidsStep({
   }
 
   async function saveForm(): Promise<{ ok: boolean; inRange?: boolean; reason?: string }> {
-    const interests = form.interests
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .slice(0, 8);
-    const focus = form.focus.trim();
     const response = await fetch("/api/map/children", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,8 +97,6 @@ export function KidsStep({
         name: form.name.trim(),
         // Day is always 01 by design: age-band math needs month + year only.
         birthDate: `${form.year}-${form.month.padStart(2, "0")}-01`,
-        interests,
-        ...(focus ? { helpWith: focus } : {}),
       }),
     });
     return (await response.json()) as { ok: boolean; inRange?: boolean; reason?: string };
@@ -138,6 +124,9 @@ export function KidsStep({
       setAdded((current) => [...current, { name: form.name.trim(), inRange: Boolean(data.inRange) }]);
       setForm(emptyForm());
       setBusy(false);
+      // The cleared form plus the cursor back in First name says "ready
+      // for the next kid" without a word of instruction.
+      nameInputRef.current?.focus();
       return true;
     } catch {
       setError("Couldn't reach us just now. Nothing you typed is lost, try again.");
@@ -162,10 +151,17 @@ export function KidsStep({
     onDone();
   }
 
+  // The start button says out loud what it will do with a half-entered
+  // kid (founder confusion 2026-07-08: "idk if Im supposed to press add
+  // child again"): a filled-in form makes it read "Save Gatsby and
+  // start...", so nobody has to guess that starting saves them too.
+  const draftName = form.name.trim();
+  const questionnaireNoun =
+    totalKids + (formIsBlank(form) ? 0 : 1) > 1 ? "the questionnaires" : "the questionnaire";
   const startLabel =
-    totalKids + (formIsBlank(form) ? 0 : 1) > 1
-      ? "Start the questionnaires"
-      : "Start the questionnaire";
+    !formIsBlank(form) && draftName
+      ? `Save ${draftName} and start ${questionnaireNoun}`
+      : `Start ${questionnaireNoun}`;
 
   return (
     <div>
@@ -214,6 +210,7 @@ export function KidsStep({
           </label>
           <input
             id="kid-name"
+            ref={nameInputRef}
             type="text"
             autoFocus
             required
@@ -266,31 +263,6 @@ export function KidsStep({
               </select>
             </div>
           </div>
-
-          <label className="mt-4 block font-medium text-strong" htmlFor="kid-interests">
-            What are they into right now?
-          </label>
-          <input
-            id="kid-interests"
-            type="text"
-            value={form.interests}
-            onChange={(event) => updateForm({ interests: event.target.value })}
-            placeholder="dinosaurs, space, drawing"
-            className={inputClass}
-          />
-          <p className="mt-1 text-sm text-muted">Separate with commas. This themes their materials.</p>
-
-          <label className="mt-4 block font-medium text-strong" htmlFor="kid-focus">
-            What would you love help with first?
-          </label>
-          <input
-            id="kid-focus"
-            type="text"
-            value={form.focus}
-            onChange={(event) => updateForm({ focus: event.target.value })}
-            placeholder="letter sounds, counting to 40, writing her name"
-            className={inputClass}
-          />
 
           {error ? (
             <p className="mt-3 text-sm text-danger" role="alert">

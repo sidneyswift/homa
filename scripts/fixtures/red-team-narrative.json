@@ -1,45 +1,45 @@
 {
-  "promptVersion": "2026.07.11",
+  "promptVersion": "2026.07.13",
   "narrative": {
-    "note": "Jordan, every subject on Riley's report is in that growing-right-now stage, which just means this is where the fun starts, not a verdict on anything. Since reading is what you asked about, the letter hunt for literacy and sound I-spy for phonics are the easiest places to lean in this month. Riley is 4y 2m, right at the starting line for a lot of these skills, so there's no rush here.",
+    "note": "Jordan, every subject on Riley's map is growing right now, and that's a full, busy season, not a gap. The most helpful place to lean in this month is phonics, noticing the beats inside a word, like the three chunks in banana. A simple game of sound I-spy in the car or the bath builds that skill without a worksheet in sight.",
     "subjects": {
-      "math": "Counting five objects one at a time and saying how many is still new for Riley, and the next step is simply counting everything in sight, stairs, crackers, toy trucks, touching each one as you go.",
-      "literacy": "Riley isn't yet recognizing the letters in their own name, and the letter hunt game, spotting one letter everywhere you go, is a playful way to start.",
-      "phonics": "Clapping the beats in a word like ba-na-na is next for Riley, and sound I-spy turns that skill into a game you can play anywhere, the car, the bath, the grocery line.",
-      "writing": "Riley is still developing the finger grip on a crayon, and rainbow name tracing turns that practice into something that feels like art.",
-      "language": "Telling you about something that happened earlier today is a new skill for Riley, and asking them to narrate for someone else, tell it back, makes it feel like storytelling instead of a quiz.",
-      "science": "Sorting things into groups, big versus small, animals versus plants, is next for Riley, and sink or float turns sorting into a guessing game with everyday objects.",
-      "social_studies": "Naming how family members connect is still developing, and drawing a map of home together, with a star for everyone's bed, is a fun way to start.",
-      "art": "Naming the main colors while drawing is next for Riley, and drawing along to a song adds color words into open-ended play.",
-      "music": "Clapping or tapping along to a steady beat is a new skill for Riley, and a simple copy-my-clap game builds that rhythm sense through play.",
-      "gross_motor": "Galloping with one foot leading is still developing, and animal races down the hallway, bear crawl, crab walk, frog jump, build coordination without it feeling like practice.",
-      "fine_motor": "Stringing large beads or threading laces is next for Riley, and snipping paper into confetti with child-safe scissors is a good lower-pressure way to start on that same hand control.",
-      "social_emotional": "Playing WITH other kids, taking turns and sharing with reminders, is still new for Riley, and naming the feeling first, then offering two choices, gives turn-taking some structure to lean on.",
-      "self_care": "Using the toilet during the day is still developing for Riley, and the button board turns another self-care skill, buttoning, into a game rather than a rush.",
-      "executive_function": "Waiting a short turn without falling apart is next for Riley, and freeze dance turns that exact kind of waiting into a game with music.",
-      "computer_science": "Playing robot, giving exact step by step instructions and following yours, is something to try whenever you like, and it's a fun early introduction to sequence and instructions.",
-      "spanish": "Understanding common everyday words in another language is something to explore whenever you like, and picking one phrase to use all week is an easy way to start."
+      "math": "Counting one object at a time and landing on a final number is next for Riley. Touching each stair, cracker, or toy car while counting turns this into a small daily game rather than a drill.",
+      "literacy": "Riley isn't yet asking what a word says, and that curiosity is often the first spark toward reading. A daily letter hunt on cereal boxes and street signs gives Riley a reason to look closely at print.",
+      "phonics": "Hearing the separate beats in a word, like the three chunks in banana, is the next phonics step for Riley. Playing sound I-spy turns that listening into a game you can play anywhere.",
+      "writing": "Riley is still finding a comfortable grip on a crayon. Writing a big rainbow name together lets Riley practice that grip while it feels like art, not effort.",
+      "language": "Telling you about something that already happened is next for Riley's storytelling. Handing Riley the story after something fun, like a trip to the park, gives that skill a real audience.",
+      "science": "Sorting things into groups, like big and small, is the next step for Riley's thinking. A sink or float bowl turns sorting into a guessing game Riley gets to run.",
+      "social_studies": "Naming how family members connect, like how grandma fits in, is next for Riley. Drawing a map of home together and marking everyone's bed gives that idea a picture to point to.",
+      "art": "Naming colors while drawing or painting is next for Riley's creative play. Drawing along to one song lets Riley connect color choices to how the music feels.",
+      "music": "Clapping or tapping a steady beat is next for Riley. A simple copy-my-clap game, swapping who leads, builds that rhythm sense through play.",
+      "gross_motor": "Galloping with one foot leading is the next big move for Riley. Racing down the hallway as different animals builds the coordination that gallop needs.",
+      "fine_motor": "Stringing beads or threading laces is next for Riley's hand control. Snipping paper strips into confetti builds the same scissor and grip strength first.",
+      "social_emotional": "Playing WITH other kids, taking turns and sharing with reminders, is next for Riley. Naming the feeling first during a big moment gives Riley words to reach for before choices.",
+      "self_care": "Using the toilet during the day, with only the occasional miss, is next for Riley. Turning buttoning into a timed game builds the same patience and body control that toileting draws on.",
+      "executive_function": "Waiting a short turn without falling apart, even with support, is next for Riley. Freeze dance turns that waiting into a game, since stopping on cue is its own kind of turn-taking.",
+      "computer_science": "Riley isn't yet giving or following exact step by step instructions in a game of robot, and that's simply about exposure right now. Whenever you like, letting Riley program you across the room turns following directions into giggles.",
+      "spanish": "Understanding a few everyday words in another language, like water or milk, is exposure Riley hasn't had yet. Whenever you like, picking one phrase to use all week is an easy way to start."
     },
-    "synthesis": "Riley's growing subjects tell one story right now: hearing the beats in a word, noticing letters in their name, and telling you what happened today are all part of the same pre-reading foundation building at once. None of it happens in isolation. If you're looking for one place to lean in this month, sound I-spy is an easy one to fold into car rides and bath time, and it feeds both phonics and language at the same time.",
+    "synthesis": "Riley's phonics and literacy skills are two threads of the same reading story: noticing the sounds inside words and noticing that print carries meaning both build toward reading itself. Right now both are just starting, which is exactly on schedule for this age. If you're looking for one place to lean in beyond phonics, pairing a listening game with a print-spotting game during the same week lets Riley's ear and eye grow together instead of separately.",
     "drawers": {
-      "math": "Counting one object at a time before saying how many is the actual counting skill, more than reciting numbers in a row. Counting real things around the house, one touch per number, builds that up naturally.",
-      "literacy": "A child's own name is usually the first set of letters that means something to them, which is why it's the natural starting point for letter recognition. Making it a hunt keeps the letters connected to real things Riley already knows.",
-      "phonics": "Hearing the separate beats inside a word is the skill that later makes sounding out words possible, so it's worth practicing before letters get involved. Playing it as a sound game keeps it light rather than academic.",
-      "writing": "How a crayon is held now shapes how comfortable writing feels later, so the grip is worth more attention than the drawing itself at this stage. Turning name-tracing into art keeps the repetition from feeling like a chore.",
-      "language": "Retelling something that already happened is a bigger leap than naming things right in front of you, since it asks Riley to hold a memory in mind and put it into words. Handing them an audience to tell it to gives that structure a reason to happen.",
-      "science": "Sorting by a category, not just by what looks similar, is an early reasoning skill underneath a lot of later science thinking. Guessing before testing, like in sink or float, adds real curiosity to the sorting.",
-      "social_studies": "Understanding how family members connect to each other is a step past simply naming people, it's the start of mental mapping. Drawing an actual map turns that abstract idea into something to point at.",
-      "art": "Naming colors while creating links the words to Riley's own choices, not to flashcards, which tends to make them stick. Drawing to music gives a reason to name colors that doesn't feel like a test.",
-      "music": "Matching a steady beat is a physical and listening skill at once, and it tends to build through repetition rather than instruction. Echoing a clap pattern back and forth practices that timing in both directions.",
-      "gross_motor": "Galloping asks one side of the body to lead consistently, which is a step up from running or jumping with both feet together. Racing as different animals works several of these movement patterns at once without it feeling like drills.",
-      "fine_motor": "Threading and stringing build the same small hand muscles used later for writing and buttoning, so it's worth practicing outside of craft time too. Snipping with scissors is a good lower-pressure entry point into that same hand control.",
-      "social_emotional": "Playing WITH other kids, not just alongside them, takes turn-taking and sharing that usually still needs an adult's reminders at this age. Naming the feeling first gives Riley something to do with a big feeling besides act on it.",
-      "self_care": "Daytime toilet use tends to firm up with consistency more than any single trick, so occasional misses are a normal part of the process. Practicing an unrelated self-care skill, like buttoning, keeps independence growing on another front.",
-      "executive_function": "Waiting for a turn without support is a big ask at this age, so support during the wait is the expected step, not a workaround. Freeze dance practices that exact pause in a low-stakes, playful way.",
-      "computer_science": "This one is about exposure, not a milestone tied to a certain age, so there's no rush attached to it at all. Giving and following exact steps in a game is the seed of the sequencing that coding builds on later.",
-      "spanish": "This is exposure too, entirely paced by what the family chooses to do, not by an age marker. Repeating one phrase all week gives it a real chance to stick rather than fading into new phrases too quickly."
+      "math": "One-to-one counting is the step that comes right before understanding what a total number actually means. Practicing it hands-on, touching each object as it's counted, builds that connection naturally.",
+      "literacy": "Asking about print is usually the sign a child is starting to connect symbols with meaning. Making letters something to hunt for turns that curiosity into a habit.",
+      "phonics": "Hearing the syllable beats in a word is one of the strongest early signs of reading ease later on. Games that isolate sound, without any letters involved, build that ear first.",
+      "writing": "A fingers-first crayon grip usually develops through repeated, low-pressure practice rather than direct instruction. Making the practice feel like decorating keeps the pencil in hand longer.",
+      "language": "Retelling a recent event asks a child to hold a sequence in mind and put it into words. Giving Riley the floor after something fun is the easiest way to invite that kind of storytelling.",
+      "science": "Sorting by a shared trait is one of the earliest forms of scientific thinking, well before any vocabulary is needed. A guessing game like sink or float makes that categorizing feel playful instead of academic.",
+      "social_studies": "Understanding how family members relate to each other is a big leap in thinking about people beyond oneself. A drawn map with names attached gives that abstract idea something concrete to hold onto.",
+      "art": "Naming colors while creating links language directly to what's being seen and made. Pairing color choices with music adds a second sense to lean on while that vocabulary builds.",
+      "music": "Keeping a steady beat draws on the same timing sense used in language and movement. A call-and-response clapping game builds that internal rhythm without any instruction needed.",
+      "gross_motor": "Galloping asks the body to coordinate two different leg jobs at once, which takes real practice to smooth out. Playful animal movements let that coordination develop without it feeling like a drill.",
+      "fine_motor": "Threading and stringing take a pinch grip and steady hand control that usually develops through lots of small repetitions. Scissor work builds that same hand strength first.",
+      "social_emotional": "Playing alongside other kids and taking turns with reminders is a big step past simply playing near them. Naming a feeling before offering choices gives Riley a script to use in the moment.",
+      "self_care": "Daytime toileting comes together once a child can notice a body signal and act on it in time. Building patience and body control through play, like a buttoning game, supports that same readiness.",
+      "executive_function": "Waiting through a short pause without falling apart is one of the earliest forms of self-control. A stop-and-go game like freeze dance practices that pause in a way that feels fun instead of demanding.",
+      "computer_science": "Giving and following exact instructions is a skill that grows with exposure, not with age alone. A playful robot game is a low-pressure way to start that practice.",
+      "spanish": "Recognizing everyday words in another language comes from hearing them repeated in real moments, not from formal lessons. Picking one phrase to use daily gives Riley that repetition naturally."
     },
-    "keepsake": "Riley, right now you are all about trucks, lining them up, pushing them across the floor, making the engine sounds only you know the words to. Jordan watches you play and notices how focused you get, how a single truck in your hand can hold your attention for a long, quiet stretch. You are curious about the world in your own way and on your own time, and that is exactly how it should be. Whatever you turn your attention to next, Jordan will be right there watching, cheering, and writing it all down. With warmth, Homa."
+    "keepsake": "Riley, right now you love trucks, and you turn every hallway into a road for them. Jordan has watched you line them up just so, engines revving under your voice. Jordan has watched you race them across the floor, making up whole trips as you go. This little letter is here to remember exactly who you are today: curious, busy, and full of your own ideas. With so much of you still growing, Jordan gets to watch you discover something new almost every day. Homa"
   },
   "gateContext": {
     "allowedNumbers": [
@@ -50,9 +50,9 @@
       "1",
       "5",
       "3",
-      "6",
       "8",
-      "10"
+      "10",
+      "6"
     ],
     "siblingNames": [
       "Casey"

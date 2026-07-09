@@ -36,44 +36,15 @@ const { buildReportFacts, allowedNumbersFrom, genderedPronounsAllowedFrom } = aw
 );
 const { generateReportNarrative } = await import("../apps/web/lib/map/narrative-generate");
 const { REPORT_PROMPT_VERSION } = await import("../apps/web/agent/report-writer-version");
-
-/** Maya's answers, mirroring apps/web/app/onboarding/sample/page.tsx
- * exactly so the sample narrative matches the sample numbers. */
-function sampleAnswers(ageMonths: number): MapAnswerInput[] {
-  const byDomain: Record<string, MapAnswer | [MapAnswer, MapAnswer]> = {
-    language: ["easily", "easily"],
-    phonics: ["easily", "easily"],
-    science: ["easily", "easily"],
-    social_emotional: ["easily", "easily"],
-    math: ["easily", "getting_there"],
-    literacy: ["easily", "not_yet"],
-    music: "easily",
-    social_studies: "easily",
-    art: "easily",
-    gross_motor: "easily",
-    executive_function: "easily",
-    spanish: "skip",
-    self_care: "getting_there",
-    fine_motor: "not_yet",
-    writing: "not_sure",
-  };
-  const answers: MapAnswerInput[] = [];
-  for (const plan of planQuestions(ageMonths)) {
-    const spec = byDomain[plan.domainId] ?? "easily";
-    const [base, ladder] = Array.isArray(spec) ? spec : [spec, null];
-    answers.push({ itemId: plan.base.id, answer: base });
-    if (base !== "easily" || !ladder) continue;
-    for (const rung of plan.ladders) {
-      answers.push({ itemId: rung.id, answer: ladder });
-      if (ladder !== "easily") break;
-    }
-  }
-  return answers;
-}
+// Maya's answers: the same pinned list the sample page renders, so the
+// narrative fixture and the sample numbers can never diverge.
+const { SAMPLE_AGE_MONTHS, SAMPLE_ANSWERS, SAMPLE_PRIOR_ANSWERS } = await import(
+  "../apps/web/app/onboarding/sample/sample-answers"
+);
 
 function mayaBirthMonth(): string {
   const now = new Date();
-  const born = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 50, 1));
+  const born = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - SAMPLE_AGE_MONTHS, 1));
   return `${born.getUTCFullYear()}-${String(born.getUTCMonth() + 1).padStart(2, "0")}-01`;
 }
 
@@ -115,15 +86,10 @@ async function generateFixture(label: string, input: Parameters<typeof buildRepo
 }
 
 // ---------- 1. Maya (the sample page) ----------
-const AGE = 50;
-const mayaAnswers = sampleAnswers(AGE);
+const AGE = SAMPLE_AGE_MONTHS;
+const mayaAnswers: MapAnswerInput[] = SAMPLE_ANSWERS;
 const mayaScores = scoreMap(AGE, mayaAnswers);
-const mayaPriorAnswers = mayaAnswers
-  .filter((entry) => !entry.itemId.startsWith("math.") || mayaAnswers.indexOf(entry) < 2)
-  .map((entry) =>
-    entry.itemId.startsWith("self_care.") ? { ...entry, answer: "not_yet" as MapAnswer } : entry,
-  );
-const mayaPriorScores = scoreMap(AGE, mayaPriorAnswers);
+const mayaPriorScores = scoreMap(AGE, SAMPLE_PRIOR_ANSWERS);
 const monthAgo = new Date();
 monthAgo.setDate(monthAgo.getDate() - 28);
 

@@ -56,9 +56,9 @@ export function ConsentCard({
         Want me to build {childName}&apos;s month?
       </p>
       <p className="mt-1 text-sm text-body">
-        One four-week plan for the whole picture, leaning into {focusLine}, with a favorite
-        strength sprinkled in for joy. It adds to what you already do, it never replaces it,
-        and I&apos;ll check back in four weeks so you can watch the numbers move.
+        One four-week plan for the whole picture, with extra attention on {focusLine} and a
+        favorite strength kept in for joy. It adds a few small activities to what you already
+        do; it replaces nothing. In four weeks I&apos;ll check back so you can see what moved.
       </p>
       {state === "no-session" ? (
         <p className="mt-3 rounded-md px-3 py-2 text-xs font-semibold" style={{ background: "var(--info-soft)", color: "var(--sky-600)" }}>
@@ -71,7 +71,7 @@ export function ConsentCard({
           disabled={state === "busy"}
           className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover disabled:opacity-50"
         >
-          {state === "busy" ? "Building the month\u2026" : `Build ${childName}'s month + check back in 4 weeks`}
+          {state === "busy" ? "Building the month\u2026" : `Build ${childName}'s month`}
         </button>
       )}
     </div>

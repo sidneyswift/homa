@@ -1,44 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useSyncExternalStore } from "react";
-
 import type { PlanWeek } from "@homa/core";
 
+import { usePlanChecks } from "../../../../../../lib/use-plan-checks";
+
 /**
- * The four weeks with check-off boxes. Checks live in TWO places on
- * purpose: localStorage (instant, works for any link holder, survives
- * reloads on this device) and, for the owning parent, the plan row
- * itself via a debounced sync, so the month has a memory the report can
- * read at retest ("your work is showing up in the numbers", now with
- * receipts). A shared-link viewer's sync gets a quiet 401 and their
- * checks simply stay local; nothing is ever forged.
- *
- * localStorage is read through useSyncExternalStore (it IS an external
- * store): hydration-safe by construction (the server snapshot is null),
- * and no setState-in-effect cascade.
+ * The four weeks with check-off boxes. The check-off store itself
+ * (localStorage + debounced server sync, shared with the week planner)
+ * lives in lib/use-plan-checks; this renders the full month around it.
  */
-
-const storeListeners = new Set<() => void>();
-
-function subscribeToChecks(callback: () => void): () => void {
-  storeListeners.add(callback);
-  window.addEventListener("storage", callback);
-  return () => {
-    storeListeners.delete(callback);
-    window.removeEventListener("storage", callback);
-  };
-}
-
-function readChecks(storageKey: string): string | null {
-  try {
-    return localStorage.getItem(storageKey);
-  } catch {
-    // Private mode: checks just won't persist.
-    return null;
-  }
-}
-
-const SYNC_DEBOUNCE_MS = 900;
 
 export function PlanWeeks({
   weeks,
@@ -58,48 +28,7 @@ export function PlanWeeks({
   /** The plan row's synced checks: server truth, merged under local. */
   initialChecks?: Record<string, boolean>;
 }) {
-  const rawDone = useSyncExternalStore(
-    subscribeToChecks,
-    () => readChecks(storageKey),
-    () => null,
-  );
-  const done = useMemo<Record<string, boolean>>(() => {
-    let local: Record<string, boolean> = {};
-    if (rawDone) {
-      try {
-        local = JSON.parse(rawDone) as Record<string, boolean>;
-      } catch {
-        local = {};
-      }
-    }
-    // Server ∪ local, true wins: a check made on her phone shows up on
-    // the laptop, and a check made offline still counts here.
-    return { ...initialChecks, ...local };
-  }, [rawDone, initialChecks]);
-
-  const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function scheduleSync(next: Record<string, boolean>) {
-    if (syncTimer.current) clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(() => {
-      void fetch("/api/map/plan/progress", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId, domainId, checks: next }),
-      }).catch(() => undefined);
-    }, SYNC_DEBOUNCE_MS);
-  }
-
-  function toggle(id: string) {
-    const next = { ...done, [id]: !done[id] };
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch {
-      // Persistence is a nicety, not a requirement.
-    }
-    storeListeners.forEach((listener) => listener());
-    scheduleSync(next);
-  }
+  const { done, toggle } = usePlanChecks({ storageKey, childId, domainId, initialChecks });
 
   const total = weeks.reduce((sum, week) => sum + week.activities.length, 0);
   const doneCount = Object.values(done).filter(Boolean).length;

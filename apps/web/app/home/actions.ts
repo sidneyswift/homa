@@ -5,6 +5,11 @@ import { revalidatePath } from "next/cache";
 import { normalizeUsPhoneE164 } from "@homa/core";
 
 import { clearFamilyPhone, setFamilyPhone } from "../../lib/family-phone";
+import {
+  fillFamilyTimeZoneIfEmpty,
+  isValidTimeZone,
+  setFamilyTimeZone,
+} from "../../lib/family-time-zone";
 import { getMyFamily } from "../../lib/family";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
@@ -17,7 +22,8 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
  * The texting-line actions are the exception by design: family_phones is
  * deny-all, so they write through lib/family-phone on the server-only
  * connection, with familyId derived from the caller's OWN membership
- * (getMyFamily under RLS), never from the form.
+ * (getMyFamily under RLS), never from the form. The time-zone actions
+ * follow the same posture through lib/family-time-zone.
  */
 
 export interface SetupFormState {
@@ -62,6 +68,34 @@ export async function setFamilyPhoneAction(
   return { error: null };
 }
 
+export async function setFamilyTimeZoneAction(
+  _prev: SetupFormState,
+  formData: FormData,
+): Promise<SetupFormState> {
+  const timeZone = String(formData.get("time_zone") ?? "").trim();
+  if (!isValidTimeZone(timeZone)) {
+    return { error: "That time zone didn't take. Pick one from the list." };
+  }
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+  await setFamilyTimeZone(family.id, timeZone);
+  revalidatePath("/home");
+  return { error: null };
+}
+
+/**
+ * The device-capture path: called once by TimeZoneSync when the family
+ * row has no zone yet. Fills only while unset, so it can never clobber a
+ * choice made on the settings card.
+ */
+export async function autoFillTimeZoneAction(timeZone: string): Promise<void> {
+  if (typeof timeZone !== "string" || !isValidTimeZone(timeZone)) return;
+  const family = await getMyFamily();
+  if (!family || family.time_zone) return;
+  await fillFamilyTimeZoneIfEmpty(family.id, timeZone);
+  revalidatePath("/home");
+}
+
 export async function addChildAction(
   _prev: SetupFormState,
   formData: FormData,
@@ -70,11 +104,6 @@ export async function addChildAction(
   const name = String(formData.get("child_name") ?? "").trim();
   const birthYear = Number(formData.get("birth_year"));
   const birthMonth = Number(formData.get("birth_month"));
-  const interests = String(formData.get("interests") ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const focus = String(formData.get("focus") ?? "").trim();
 
   if (!name || !familyId) return { error: "A name is required." };
   const currentYear = new Date().getFullYear();
@@ -90,12 +119,14 @@ export async function addChildAction(
   }
 
   const supabase = await createSupabaseServerClient();
+  // Interests and focus fill in later, through the questionnaire's extras
+  // beat (or the chat agent's update_child_profile tool), never this form.
   const { error } = await supabase.from("children").insert({
     family_id: familyId,
     name,
     // Day is always 01 by design: age-band math needs month + year only.
     birth_month: `${birthYear}-${String(birthMonth).padStart(2, "0")}-01`,
-    profile: { interests, focus },
+    profile: {},
   });
   if (error) {
     return { error: error.message };

@@ -191,10 +191,13 @@ export function FamilyStep({
           Street address{" "}
           <span className="font-normal text-muted">(so Homa can follow your state&apos;s rules)</span>
         </label>
+        {/* address-line1, not street-address: the latter is the token for
+            a WHOLE address in one field, and with separate city/state/zip
+            fields it makes browser autofill dump everything here. */}
         <input
           id="family-address"
           type="text"
-          autoComplete="street-address"
+          autoComplete="address-line1"
           required
           value={addressLine}
           onChange={(event) => setAddressLine(event.target.value)}
@@ -223,6 +226,7 @@ export function FamilyStep({
             </label>
             <select
               id="family-state"
+              autoComplete="address-level1"
               required
               value={usState}
               onChange={(event) => setUsState(event.target.value)}

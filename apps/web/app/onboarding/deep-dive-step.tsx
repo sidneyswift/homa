@@ -6,6 +6,7 @@ import {
   DEEP_DIVE_CAP,
   getMapDomain,
   nextDeepDiveItem,
+  personalizeStatement,
   type MapAnswer,
 } from "@homa/core";
 
@@ -190,7 +191,7 @@ export function DeepDiveStep({
           {mode === "together" ? `Try it with ${child.name}:` : `From what you've seen:`}
         </p>
         <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-strong">
-          {current.statement}?
+          {personalizeStatement(child.name, current)}?
         </h2>
 
         <div className="mt-auto grid grid-cols-2 gap-2 pt-5">

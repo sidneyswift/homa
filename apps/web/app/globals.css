@@ -276,6 +276,131 @@ h1, h2, h3, h4, h5, h6 {
    Gentle rise, no bounce, per the emil-design-eng motion rules (opacity +
    transform only, ease-out, 30-80ms stagger).
    ========================================================================= */
+
+/* Marketing nav (Nav.tsx). Transparent at rest (founder call 2026-07-06);
+   once the page scrolls, the kit's original frosted cream surface fades in
+   so sticky content never scrolls through the links (founder bug report
+   2026-07-08). The fill lives on ::before and transitions opacity only:
+   backdrop-filter on the nav itself would also turn the nav into the
+   containing block for the phone menu's fixed tap-catch layer below. */
+:root {
+  /* The bar's rendered height: 18px vertical padding x2 + the 44px
+     "Sign up" Button (md minHeight, ds/Button.tsx), its tallest content.
+     The landing page uses this to tuck the hero gradient up under the
+     transparent bar, and anchor targets use it to land clear of the
+     pinned bar. If the bar's padding or control sizes change, keep this
+     in step (a few px of drift is invisible; smaller-than-real breaks
+     the landing hero's top edge). */
+  --lp-nav-height: 80px;
+}
+
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 18px 40px;
+  min-height: var(--lp-nav-height);
+  box-sizing: border-box;
+}
+
+/* With the bar actually pinning now, in-page anchors need to land their
+   heading below it, not behind it. */
+#how, #features, #stories {
+  scroll-margin-top: calc(var(--lp-nav-height) + 8px);
+}
+.lp-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(251, 247, 240, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.lp-nav[data-scrolled="true"]::before { opacity: 1; }
+
+/* Hamburger toggle and card menu: phones only, hidden past the kit's 880px
+   breakpoint (the media block below shows them). Menu entrance per the
+   emil-design-eng rules: opacity + transform, ease-out, from scale(0.98)
+   never scale(0), origin at the trigger edge; React unmounts it instantly
+   on close, same as ScrollCta and the signup popup. */
+.lp-nav-toggle {
+  display: none;
+  /* Above the menu's tap-catch backdrop, so the X itself stays pressable
+     while the menu is open (everywhere else, the backdrop closing the
+     menu on first tap is the intended scrim behavior). */
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.lp-nav-toggle:active { background: var(--stone-100); transform: scale(0.94); }
+.lp-nav-menu-backdrop { display: none; }
+.lp-nav-menu { display: none; }
+
+@media (max-width: 880px) {
+  .lp-nav-toggle { display: inline-flex; }
+  .lp-nav-menu-backdrop { display: block; position: fixed; inset: 0; }
+  .lp-nav-menu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 12px;
+    right: 12px;
+    padding: 8px;
+    background: var(--surface-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    transform-origin: top center;
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+  }
+  .lp-nav-menu-link {
+    display: block;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+  .lp-nav-menu-link:active { background: var(--stone-100); }
+  .lp-nav-menu-link-strong { font-weight: 600; color: var(--text-body); }
+  .lp-nav-menu-divider { height: 1px; margin: 6px 8px; background: var(--border-subtle); }
+  .lp-nav-menu-cta { padding: 10px 6px 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-nav-menu {
+    transition: opacity var(--dur-base) ease;
+    @starting-style {
+      transform: none;
+    }
+  }
+  .lp-nav-toggle:active { transform: none; }
+}
+
 @media (max-width: 880px) {
   .ht-grid { grid-template-columns: 1fr !important; }
   /* .ht-marker is app-only: the ported marker is an HTML div over the SVG,

@@ -41,6 +41,10 @@ import { useSignupPopup } from "./SignupPopupProvider";
  * subhead adopts the reference's longer version, minus its em dash (house
  * style, AGENTS.md: never one, anywhere), the hero CTA reads "Get started
  * for free" (T2: no pricing exists yet, so "free" is accurate, not a claim).
+ * Subhead middle per founder call 2026-07-08: "makes custom curriculums for
+ * each child" replaces "makes materials for each kid" (spelling normalized
+ * from the instruction's "ciriculums"; "curriculums" matches the Features
+ * card "Compare curriculums", not "curricula").
  */
 export function Hero() {
   const openPopup = useSignupPopup();
@@ -102,8 +106,8 @@ export function Hero() {
             your homeschool <span style={{ color: "var(--clay-600)" }}>assistant</span>.
           </h1>
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "24px 0 0", maxWidth: 470 }}>
-            Homa plans your week, makes materials for each kid, and tracks your hours for
-            your state, so Sunday-night prep becomes a five-minute check-in.
+            Homa plans your week, makes custom curriculums for each child, and tracks hours
+            for your state, so Sunday-night prep becomes a five-minute check-in.
           </p>
           <div style={{ marginTop: 32 }}>
             {openPopup ? (

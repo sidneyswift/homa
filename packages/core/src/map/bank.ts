@@ -13,7 +13,7 @@ import { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent } from
  */
 
 /** Bumped whenever content meaningfully changes; stored on every report. */
-export const MAP_BANK_VERSION = "2026.07.2";
+export const MAP_BANK_VERSION = "2026.07.3";
 
 export const MAP_ANSWERS = ["easily", "getting_there", "not_yet", "not_sure", "skip"] as const;
 export type MapAnswer = (typeof MAP_ANSWERS)[number];
@@ -195,19 +195,38 @@ export function getMapDomain(domainId: string): MapDomain | undefined {
   return MAP_DOMAINS.find((domain) => domain.id === domainId);
 }
 
-/** At most this many rungs above the base per domain: two rungs reach the
- * +24 month display cap in every domain, so further questions would add
- * fatigue without adding signal. */
+/** At most this many rungs above the base per domain: two rungs approach
+ * the display cap in most domains, so further questions would add fatigue
+ * without adding signal. */
 export const MAX_LADDER_RUNGS = 2;
+
+/** Core subjects climb one rung further (up to four questions total):
+ * these carry the report's most trust-sensitive claims, and each extra
+ * confirmed rung is real corroboration for an "ahead" number
+ * (accuracy pass 2026-07-08, after pilot parents flagged inflated
+ * results from too few observations). */
+export const CORE_LADDER_RUNGS = 3;
+export const CORE_DOMAIN_IDS: readonly string[] = [
+  "math",
+  "literacy",
+  "phonics",
+  "writing",
+  "language",
+];
+
+function maxLadderRungsFor(domainId: string): number {
+  return CORE_DOMAIN_IDS.includes(domainId) ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS;
+}
 
 /**
  * The questions one child can ever be asked, in serving order: per domain,
  * the frontier item (greatest typicalMonths at or below the child's age,
  * falling back to the easiest item for young twos) plus up to two ladder
- * rungs above it, within the +24 month cap. Rung N+1 is only SHOWN after
- * "easily" on rung N, so strong domains climb until the child's real
- * frontier is found (this is how "+18 months ahead" becomes measurable),
- * while everyone else answers exactly one question per domain.
+ * rungs above it (three in core subjects), within the +24 month window.
+ * Rung N+1 is only SHOWN after "easily" on rung N, so strong domains climb
+ * until the child's real frontier is found (this is how "+18 months ahead"
+ * becomes measurable), while everyone else answers exactly one question
+ * per domain.
  */
 export interface MapQuestionPlan {
   domainId: string;
@@ -228,7 +247,7 @@ export function planQuestions(ageMonths: number): MapQuestionPlan[] {
           item.typicalMonths > base.typicalMonths &&
           item.typicalMonths <= ageMonths + MONTHS_AHEAD_CAP,
       )
-      .slice(0, MAX_LADDER_RUNGS);
+      .slice(0, maxLadderRungsFor(domain.id));
     plans.push({ domainId: domain.id, base, ladders });
   }
   return plans;

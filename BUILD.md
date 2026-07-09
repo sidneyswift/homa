@@ -45,7 +45,9 @@ Hard constraints (violations = do not ship):
   say "invite list", "first families", or "invite-only" instead.
 - Brand voice law: sentence case, **no em dashes ever**, reassure-before-inform, HOMA
   in UI surfaces / Homa in prose (D8). Never claim "first/only AI homeschool
-  assistant" (ruling C3).
+  assistant" (ruling C3). Clarity and low cognitive load beat personality
+  (founder ruling 2026-07-08); the copy rulebook is
+  `.agents/skills/homa-copy-writer/SKILL.md`.
 - Copy leads with the efficacy story ("know exactly where your child stands, without
   ever testing them, and watch the numbers move"), anchored per positioning doc.
 

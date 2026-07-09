@@ -16,6 +16,19 @@ export const SCORED_MAX_MONTHS = 204;
 /** Hard cap on how far ahead a single domain can read, per the position rubric. */
 export const MONTHS_AHEAD_CAP = 24;
 
+/**
+ * The displayable months-ahead cap for a child of this age: the absolute
+ * cap, or about a third of their age, whichever is smaller. A handful of
+ * parent-answered questions cannot honestly resolve a claim like "+20
+ * months" on a 2-year-old (that is most of the child's whole life), and
+ * testers flagged exactly that kind of number as trust-breaking
+ * (2026-07-08). The ratio cap stops mattering from age 6 up, where the
+ * absolute 24 takes over.
+ */
+export function aheadCapForAge(ageMonths: number): number {
+  return Math.min(MONTHS_AHEAD_CAP, Math.round(ageMonths / 3));
+}
+
 /** Capture floor: under this age we do not even collect a child. */
 export const CAPTURE_MIN_MONTHS = 0;
 /** Capture ceiling for the lead magnet: 16 years. */

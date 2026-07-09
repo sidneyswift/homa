@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import { getMapDomain, planQuestions, type MapAnswer } from "@homa/core";
+import { getMapDomain, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
 import { buildQueue } from "./question-queue";
@@ -255,8 +255,12 @@ export function ChecklistStep({
             {kicker?.text ?? "\u00a0"}
           </p>
           <div className="flex flex-1 items-center py-4">
+            {/* The kid's name rides inside every question (founder call
+                2026-07-08), so "Story counts out loud to 10?" always
+                names who's being asked about, load-bearing with two or
+                more kids in one sitting. */}
             <h2 className="font-display text-xl font-semibold leading-snug text-strong">
-              {current.item.statement}?
+              {personalizeStatement(child.name, current.item)}?
             </h2>
           </div>
 

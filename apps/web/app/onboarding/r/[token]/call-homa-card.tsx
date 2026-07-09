@@ -58,12 +58,12 @@ export function CallHomaCard({
     return (
       <div className="mt-9 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden">
         <p className="font-display text-lg font-semibold text-strong">
-          Homa is calling you now.
+          I&apos;m calling you now.
         </p>
         <p className="mt-1 text-sm text-body">
-          She&apos;ll review {childName}&apos;s report with you and build a curriculum
-          from your conversation. It&apos;ll show up on your home page once it&apos;s
-          ready.
+          We&apos;ll talk through {childName}&apos;s report together, and I&apos;ll build a
+          curriculum from the conversation. It shows up on your home page once
+          it&apos;s ready.
         </p>
       </div>
     );
@@ -72,11 +72,12 @@ export function CallHomaCard({
   return (
     <div className="mt-9 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden">
       <p className="font-display text-lg font-semibold text-strong">
-        Want Homa to call you about {childName}&apos;s report?
+        Want me to call you about {childName}&apos;s report?
       </p>
       <p className="mt-1 text-sm text-body">
-        A real conversation: she&apos;ll walk through what she found, ask a few
-        follow-up questions, and build a curriculum from what you tell her.
+        I&apos;ll call your phone (yes, me, Homa) and walk through what I found.
+        Ask me anything. From that conversation I&apos;ll build {childName}&apos;s
+        curriculum.
       </p>
       {state === "no-session" ? (
         <p className="mt-3 text-xs text-muted">

@@ -43,7 +43,8 @@ Every surface should express one feeling, **calm**, and one relationship, **a co
 - **Person:** Second person ("you," "your kids," "Maya"). Homa says "I" sparingly ("I'll draft that for you").
 - **Tone:** Encouraging, concrete, calm. Celebrates effort; normalizes lighter weeks. Never preachy, never guilt-inducing, never corporate.
 - **Casing:** Sentence case everywhere, headings, buttons, labels. The brand name is **Homa** in copy, never all-caps; the wordmark renders **Homa**, capital H. Overlines/eyebrows may be uppercase with wide tracking.
-- **Length:** Short. A sentence beats a paragraph. Lead with the helpful thing.
+- **Length:** Short, but clarity wins every tie. One idea per sentence; lead with the helpful thing. Fewer words is not the goal: cutting words that carry meaning makes copy harder to read, not easier.
+- **Clarity first:** simplicity and low cognitive load beat personality, every time. Plain names for things, no metaphor stacks, no meta-commentary ("here's the honest picture"), no comma splices standing in for the banned em dash. The full rulebook lives at `.agents/skills/homa-copy-writer/SKILL.md`.
 - **Emoji:** Rare and warm, at most one per message (a ☀️ on a morning greeting). Never as bullets or in dense UI.
 - **Punctuation:** **No em dashes, ever** (hard rule, see `CLAUDE.md`). Use a comma, a period, a colon, or a mid-dot (·).
 - **Numbers & jargon:** Plain language. "About 1h 45m," not "105 minutes." No "modules," no "leveraging."

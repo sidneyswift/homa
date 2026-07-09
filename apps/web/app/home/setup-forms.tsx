@@ -8,6 +8,9 @@ import { addChildAction, type SetupFormState } from "./actions";
  * The add-a-child card. The create-family form that used to live beside
  * it moved into /onboarding's FamilyStep (founder call 2026-07-08: one
  * onboarding for every door); /home redirects unfinished setups there.
+ * The interests and help-with questions left the card the same day
+ * (founder follow-up): the questionnaire's extras beat asks them with
+ * tappable suggestions instead, so the card is just name + birthday.
  */
 
 const INITIAL_STATE: SetupFormState = { error: null };
@@ -59,29 +62,6 @@ export function AddChildForm({ familyId }: { familyId: string }) {
           </select>
         </div>
       </div>
-
-      <label className="mt-4 block font-medium text-strong" htmlFor="child-interests">
-        What are they into right now?
-      </label>
-      <input
-        id="child-interests"
-        name="interests"
-        type="text"
-        placeholder="dinosaurs, space, drawing"
-        className={inputClass}
-      />
-      <p className="mt-1 text-sm text-muted">Separate with commas. This themes their materials.</p>
-
-      <label className="mt-4 block font-medium text-strong" htmlFor="child-focus">
-        What would you love help with first?
-      </label>
-      <input
-        id="child-focus"
-        name="focus"
-        type="text"
-        placeholder="letter sounds, counting to 40, writing her name"
-        className={inputClass}
-      />
 
       {state.error ? (
         <p className="mt-3 text-sm text-danger" role="alert">{state.error}</p>

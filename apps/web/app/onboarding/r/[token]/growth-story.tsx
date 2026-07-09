@@ -147,7 +147,7 @@ export function GrowthStory({
         {childName}&apos;s story so far
       </h2>
       <p className="mt-1 text-sm text-muted">
-        Every re-check adds a chapter. {childName} is only ever compared to their own past.
+        Every re-check adds a chapter.
       </p>
 
       <ol className="mt-4 flex flex-col gap-2.5">
@@ -166,7 +166,7 @@ export function GrowthStory({
                 </span>
                 <span className="font-mono text-[0.65rem] text-subtle">
                   {era.scores.mappedCount} of {era.scores.totalDomains} subjects mapped {"\u00b7"}{" "}
-                  {era.scores.observationCount} observations
+                  {era.scores.observationCount} answers
                 </span>
                 {isLatest ? (
                   <span
@@ -186,7 +186,11 @@ export function GrowthStory({
                   Holding steady, which is a normal chapter too.
                 </p>
               ) : null}
-              {excerpt ? (
+              {/* Past chapters quote their era's note as period voice; the
+                  live chapter's note is already on screen two sections up,
+                  and quoting it again reads as the page repeating itself
+                  (ICP read-along, 2026-07-08). */}
+              {excerpt && !isLatest ? (
                 <p className="mt-2 font-serif text-sm italic leading-relaxed text-body">
                   &ldquo;{excerpt.length > 220 ? `${excerpt.slice(0, 220).trimEnd()}\u2026` : excerpt}&rdquo;
                 </p>
