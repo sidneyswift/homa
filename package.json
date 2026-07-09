@@ -8,6 +8,7 @@
     "check:isolation": "node scripts/isolation-check.mjs",
     "check:map": "tsx scripts/map-check.mts",
     "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
+    "check:taxonomy": "node packages/taxonomy/scripts/validate.mjs",
     "check:sources": "tsx scripts/benchmarks-freshness.mts",
     "dev": "turbo run dev",
     "gen:brand": "tsx scripts/brand-assets.mts",
