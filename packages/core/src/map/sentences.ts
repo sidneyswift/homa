@@ -122,9 +122,11 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
 }
 
 /**
- * The "note from Homa" paragraph at the top of a report. Reads the room:
- * a strong picture celebrates, a growing-heavy picture reassures and points
- * forward, and neither ever shames.
+ * The "note from Homa" at the top of a report: ONE conversational sentence
+ * (founder ruling 2026-07-08, report simplification pass). It reads the
+ * room: a strong picture celebrates, a growing-heavy picture reassures,
+ * and neither ever shames. Everything else the note used to carry
+ * (movement, practice, the month offer) lives elsewhere on the page.
  */
 export function homaNote(scores: MapScores, childName: string, parentName?: string): string {
   const ahead = scores.domains.filter((score) => score.position === "ahead" && !score.exposureBased).length;
@@ -133,48 +135,30 @@ export function homaNote(scores: MapScores, childName: string, parentName?: stri
     (score) => score.position === "growing" && !score.exposureBased,
   ).length;
 
-  const opening = parentName ? `${parentName}, here's` : "Here's";
-  const noticing =
-    `Nothing here is a test: it's ${scores.observationCount} of your own answers, organized.`;
+  const opening = parentName ? `${parentName}, ` : "";
 
   if (scores.mappedCount === 0) {
-    return (
-      `${opening} where we are: ${childName}'s picture is just getting started, and that's fine. ` +
-      `Answer more whenever you like and it fills in. ${noticing}`
-    );
+    return `${opening}${childName}'s picture is just getting started, and it fills in whenever you answer a few more questions.`;
   }
 
-  // Growing-heavy: reassure first, then point at the path. Never a tally of blue.
+  // Growing-heavy: reassure first. Never a tally of blue.
   if (growing >= 4 && growing > ahead) {
     const footing = ahead + onTrack;
-    const footingLine =
-      footing > 0
-        ? `${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and a clear next step in the ones marked blue.`
-        : `${childName} has a clear next step in every subject marked blue.`;
-    return (
-      `${opening} where things stand: ${footingLine} ` +
-      `That's normal, not a verdict. Each blue card below names exactly where to begin. ` +
-      noticing
-    );
+    return footing > 0
+      ? `${opening}${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and every subject growing right now has a clear place to start below.`
+      : `${opening}every subject here is growing right now, and each one has a clear place to start below.`;
   }
 
-  const parts: string[] = [];
-  if (ahead > 0) parts.push(`ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}`);
+  if (ahead > 0 && onTrack > 0) {
+    return `${opening}${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"} and on track in ${onTrack} more.`;
+  }
+  if (ahead > 0) {
+    return `${opening}${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}.`;
+  }
   if (onTrack > 0) {
-    // "12 more" only reads right after an "ahead in N" clause.
-    parts.push(
-      ahead > 0
-        ? `on track in ${onTrack} more`
-        : `on track in ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}`,
-    );
+    return `${opening}${childName} is right where most kids their age are, across ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}.`;
   }
-  const standing = parts.length > 0 ? `${childName} is ${parts.join(" and ")}` : `${childName}'s picture is filling in`;
-  const growingLine =
-    growing > 0
-      ? ` ${growing === 1 ? "One subject is" : `${growing} subjects are`} growing right now, each with a place to start below.`
-      : "";
-
-  return `${opening} where things stand: ${standing}.${growingLine} ${noticing}`;
+  return `${opening}${childName}'s picture is filling in, with a clear place to start in ${growing === 1 ? "one subject" : `${growing} subjects`} below.`;
 }
 
 /** Subject line and preview for the report email. */
@@ -186,9 +170,12 @@ export function reportEmailPreview(): string {
   return "A first look at where they stand, strengths first.";
 }
 
-/** The sub-heading under the report title. */
-export function reportSubtitle(ageMonths: number): string {
-  return `A first look at where they stand at ${ageLabel(ageMonths)}, from what you've seen them do`;
+/** The sub-heading under the report title, addressed to THIS child by
+ * name (founder ruling 2026-07-08: personalize everywhere a name fits;
+ * ICP read: "them" right after the name read oddly, so the clause
+ * carries no pronoun). */
+export function reportSubtitle(ageMonths: number, childName: string): string {
+  return `A first look at where ${childName} stands at ${ageLabel(ageMonths)}, from what you've seen day to day`;
 }
 
 /** Header for the things-to-try section, sized to how much is growing. */

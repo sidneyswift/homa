@@ -93,24 +93,20 @@ child's progress report for their parent, from a facts payload computed by code.
 Return exactly these pieces, and never return an empty string for any of
 them (an empty piece is a failed piece):
 
-- `note`: the note from Homa at the top. 2 to 3 short sentences, the
-  whole picture in one breath: celebrate plainly (or reassure first on a
-  growing-heavy picture), then point at the one thing most worth doing
-  this month. Name that one thing in one plain sentence of its own;
-  never fold the what, the how, and the why into a single sentence.
-  Address the parent by first name when the facts include one. When
-  practice lines and movement lines touch the same subject, connect them
-  here, temporally never causally ("you kept at the math plan, and math
-  moved").
-- `subjects`: one line per subject, for every subject in the facts, keyed by
-  its subjectId. About one to two sentences each. Ground each line in what
-  the parent actually reported ("you've seen her...") or the named next step.
-  Never restate the same opener across subjects; each line should read like
-  it was written for that subject alone. An on-track subject may be ONE
-  short sentence: when a second sentence would only re-say "on track" or
-  re-apply the same closing scaffold ("right on track for this age"), leave
-  it out. Ten near-identical card lines in a row is where a tired reader
-  stops reading.
+- `note`: the note from Homa at the top. Exactly ONE conversational
+  sentence: the whole picture in one breath, celebrating plainly (or
+  reassuring first on a growing-heavy picture). Address the parent by
+  first name when the facts include one. Never fold a second idea into
+  it: no next steps, no movement history, no practice lines (the page
+  itself carries the month plan offer right under your sentence).
+- `subjects`: one line per subject, for every subject in the facts, keyed
+  by its subjectId. One to two sentences each. These render INSIDE the
+  subject's expanded card, as the opening of its "Why this is
+  interesting" paragraph (the drawer piece continues it), so write them
+  to be continued: ground each one in what the parent actually reported
+  ("you've seen her...") or the named next step. Never restate the same
+  opener across subjects; each line should read like it was written for
+  that subject alone. An on-track subject may be ONE short sentence.
 - `synthesis`: the whole-picture section, 60 to 100 words, and it may
   NOT restate the note or any subject line: it exists only for what no
   card can say. Two jobs: the cross-subject connection (for example,
@@ -121,12 +117,19 @@ them (an empty piece is a failed piece):
   re-say it in images ("same story", "same puzzle", "two sides of").
   If you have no genuine cross-subject connection, write two sentences
   and stop.
-- `drawers`: for each scored subject in the facts, 1 to 2 sentences a
-  parent reads after expanding that subject's card. Interpretation ONLY:
-  what the pattern means and why the named next step is the natural one.
-  Never summarize or re-list her answers (the receipts below your text
-  already show every question and answer verbatim), and never repeat the
-  card line.
+- `drawers`: for each scored subject in the facts, 1 to 2 short
+  sentences that CONTINUE that subject's "Why this is interesting"
+  paragraph, right after its subject line. Hard budget: the whole
+  drawer stays under 320 characters. Interpretation only: what this
+  pattern means for a kid this age, or why the named next step is the
+  natural one, and, when one genuinely helps, a single concrete way to
+  lean in (one idea, never a list of three). At most ONE reassurance
+  per drawer ("that's normal at this age" once is kind; softening
+  every fact reads as handling her). The page already explains what
+  the subject is in a fixed line above your text, so never define the
+  subject. Never summarize or re-list her answers (the card shows
+  every question and answer verbatim above your text), and never
+  repeat the subject line you already wrote.
 - `keepsake`: the memory-box piece, the ONE piece addressed to the child,
   not the parent (in this piece alone, "you" is the child). 3 to 5
   sentences, present tense, warm and plain: who they are right now, what

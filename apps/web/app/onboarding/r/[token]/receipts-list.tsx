@@ -3,23 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { ageLabel, type MapAnswer } from "@homa/core";
+import type { MapAnswer } from "@homa/core";
+
+import { reportButtonClass } from "./report-button";
 
 /**
- * The receipts rows for one subject drawer, now a living record: every
- * answer can be changed in place by the owning parent (tap "change",
- * pick the new chip, save once). One save batches every pending change
- * into one rescore and one rewrite; a shared-link viewer without the
- * session cookie gets the same gentle device hint the whats-working box
- * uses. Benchmarks render as a typical WINDOW band where the corpus
- * documents a real range, and the single dot elsewhere.
+ * The receipts rows for one subject drawer: each question asked, then
+ * the answer given, as plain text (founder ask 2026-07-08: the per-row
+ * benchmark strip charts repeated the whole-picture chart; receipts
+ * read as text now). Still a living record: every answer can be changed
+ * in place by the owning parent (tap "change", pick the new chip, save
+ * once). One save batches every pending change into one rescore and one
+ * rewrite; a shared-link viewer without the session cookie gets the
+ * same gentle device hint the rest of the page uses.
  */
 
 export interface ReceiptRow {
   itemId: string;
   statement: string;
+  /** Kept for ordering rows easiest-first; never rendered as a chart. */
   typicalMonths: number;
-  typicalRangeMonths: [number, number] | null;
   answer: MapAnswer;
 }
 
@@ -35,14 +38,10 @@ const CHOICES: MapAnswer[] = ["easily", "getting_there", "not_yet", "not_sure"];
 
 export function ReceiptsList({
   childId,
-  childName,
-  ageMonths,
   rows,
   editable,
 }: {
   childId: string;
-  childName: string;
-  ageMonths: number;
   rows: ReceiptRow[];
   /** False on the sample (demonstration data is not correctable). */
   editable: boolean;
@@ -51,14 +50,6 @@ export function ReceiptsList({
   const [pending, setPending] = useState<Record<string, MapAnswer>>({});
   const [editing, setEditing] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "busy" | "no-session">("idle");
-
-  const rowAges = rows.flatMap((row) =>
-    row.typicalRangeMonths ? [...row.typicalRangeMonths] : [row.typicalMonths],
-  );
-  const scaleMin = Math.min(...rowAges, ageMonths) - 6;
-  const scaleMax = Math.max(...rowAges, ageMonths) + 6;
-  const agePercent = (value: number) =>
-    12 + ((value - scaleMin) / Math.max(1, scaleMax - scaleMin)) * 76;
 
   const pendingCount = Object.keys(pending).length;
 
@@ -94,29 +85,31 @@ export function ReceiptsList({
 
   return (
     <>
-      <ul className="mt-3 flex flex-col gap-2.5">
+      <ul className="mt-2 flex flex-col gap-2">
         {[...rows]
           .sort((a, b) => a.typicalMonths - b.typicalMonths)
           .map((row) => {
             const shown = pending[row.itemId] ?? row.answer;
-            const range = row.typicalRangeMonths;
             return (
-              <li key={row.itemId} className="rounded-md bg-[var(--surface-sunken)] px-4 pb-3 pt-3">
-                <p className="text-sm font-medium leading-snug text-strong">{row.statement}?</p>
-                <p className="mt-1 text-sm text-muted">
-                  {shown === "skip" ? (
-                    "You skipped this one"
-                  ) : (
-                    <>
-                      You said:{" "}
-                      <span className="font-semibold text-strong">{ANSWER_LABELS[shown]}</span>
-                      {pending[row.itemId] ? (
-                        <span className="ml-1 font-mono text-[0.65rem] font-bold" style={{ color: "var(--sky-600)" }}>
-                          {"\u00b7"} updated
-                        </span>
-                      ) : null}
-                    </>
-                  )}
+              <li key={row.itemId} className="rounded-md bg-[var(--surface-sunken)] px-4 py-3">
+                {/* One flowing line: the question, a quiet leader, the
+                    answer. Literally what was asked and what she said. */}
+                <p className="text-sm leading-relaxed text-strong">
+                  <span className="font-medium">{row.statement}?</span>{" "}
+                  <span aria-hidden="true" className="text-subtle">
+                    {"\u2026"}
+                  </span>{" "}
+                  <span className="font-semibold">
+                    {shown === "skip" ? "Skipped" : ANSWER_LABELS[shown]}
+                  </span>
+                  {pending[row.itemId] ? (
+                    <span
+                      className="ml-1.5 font-mono text-[0.65rem] font-bold"
+                      style={{ color: "var(--sky-600)" }}
+                    >
+                      {"\u00b7"} updated
+                    </span>
+                  ) : null}
                   {editable && editing !== row.itemId ? (
                     <button
                       type="button"
@@ -147,7 +140,7 @@ export function ReceiptsList({
                         className={
                           shown === choice
                             ? "rounded-pill bg-brand px-3 py-1 text-xs font-semibold text-on-brand"
-                            : "rounded-pill border border-border bg-card px-3 py-1 text-xs font-semibold text-strong hover:border-brand"
+                            : "rounded-pill border border-border bg-card px-3 py-1 text-xs font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand motion-safe:active:scale-[var(--press-scale)]"
                         }
                       >
                         {ANSWER_LABELS[choice]}
@@ -155,49 +148,6 @@ export function ReceiptsList({
                     ))}
                   </div>
                 ) : null}
-
-                {/* The age strip: the child's clay marker against the
-                    national benchmark, drawn as a window band when the
-                    corpus documents a real range (single anchors
-                    understate normal spread), a neutral dot otherwise. */}
-                <div className="relative mt-2 h-12" aria-hidden="false">
-                  <div className="absolute left-0 right-0 top-1/2 h-px bg-[var(--stone-300)]" />
-                  {range ? (
-                    <span
-                      className="absolute top-[calc(50%-5px)] h-2.5 rounded-pill"
-                      style={{
-                        left: `${agePercent(range[0])}%`,
-                        width: `${Math.max(2, agePercent(range[1]) - agePercent(range[0]))}%`,
-                        background: "var(--accent-sage-soft)",
-                        border: "1px solid var(--sage-300, #A7CFB0)",
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    className="absolute top-[13px] h-[22px] w-[3px] -translate-x-1/2 rounded-pill bg-brand"
-                    style={{ left: `${agePercent(ageMonths)}%` }}
-                  />
-                  <span
-                    className="absolute top-0 -translate-x-1/2 whitespace-nowrap font-mono text-[0.6rem] font-medium text-brand"
-                    style={{ left: `${agePercent(ageMonths)}%` }}
-                  >
-                    {childName} {"\u00b7"} {ageLabel(ageMonths)}
-                  </span>
-                  <span
-                    className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-[var(--stone-500)]"
-                    style={{ left: `${agePercent(row.typicalMonths)}%` }}
-                  />
-                  <span
-                    className="absolute bottom-0 -translate-x-1/2 whitespace-nowrap font-mono text-[0.6rem] text-subtle"
-                    style={{
-                      left: `${agePercent(range ? (range[0] + range[1]) / 2 : row.typicalMonths)}%`,
-                    }}
-                  >
-                    {range
-                      ? `most kids: ${ageLabel(range[0])} to ${ageLabel(range[1])}`
-                      : `most kids by ${ageLabel(row.typicalMonths)}`}
-                  </span>
-                </div>
               </li>
             );
           })}
@@ -214,14 +164,14 @@ export function ReceiptsList({
             type="button"
             onClick={() => void saveChanges()}
             disabled={state === "busy"}
-            className="rounded-pill bg-brand px-4 py-1.5 text-xs font-semibold text-on-brand hover:bg-brand-hover disabled:opacity-50"
+            className={reportButtonClass("primary", "px-4 py-1.5 text-xs font-semibold disabled:opacity-50")}
           >
             {state === "busy"
-              ? "Rescoring\u2026"
+              ? "Updating\u2026"
               : `Save ${pendingCount} ${pendingCount === 1 ? "change" : "changes"}`}
           </button>
           <span className="text-xs text-muted">
-            Saving rescores the report and rewrites it around the new answer.
+            Saving updates the whole report around your new answer.
           </span>
         </div>
       ) : null}

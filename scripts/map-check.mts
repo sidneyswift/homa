@@ -63,6 +63,8 @@ function checkCopy(label: string, text: string): void {
 let itemCount = 0;
 for (const domain of MAP_DOMAINS) {
   checkCopy(`${domain.id}.intro`, domain.intro);
+  checkCopy(`${domain.id}.whatItIs`, domain.whatItIs);
+  if (!domain.whatItIs.trim()) failures.push(`${domain.id}: empty whatItIs`);
   checkCopy(`${domain.id}.activity`, `${domain.growingActivity.title} ${domain.growingActivity.description}`);
   for (const item of domain.items) {
     itemCount += 1;

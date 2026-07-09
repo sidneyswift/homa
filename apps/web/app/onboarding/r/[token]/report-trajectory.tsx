@@ -27,7 +27,8 @@ import type { GrowthEra } from "./growth-story";
 
 const WIDTH = 640;
 const PLOT_HEIGHT = 300;
-const MARGIN = { top: 30, right: 16, bottom: 34, left: 52 } as const;
+/** left fits "growing" at the 12px axis font without clipping. */
+const MARGIN = { top: 30, right: 16, bottom: 34, left: 66 } as const;
 const HEIGHT = MARGIN.top + PLOT_HEIGHT + MARGIN.bottom;
 const PLOT_WIDTH = WIDTH - MARGIN.left - MARGIN.right;
 const Y_MIN = -6;
@@ -45,9 +46,11 @@ const FUTURE_WINDOW_MS = 28 * 24 * 60 * 60 * 1000;
  */
 const LANE_STEP_PX = 2;
 const LANE_COUNT = 5;
-/** End-label metrics: line height and the mono glyph width at 9px. */
-const LABEL_H = 11;
-const LABEL_CHAR_W = 5.6;
+/** End-label metrics: line height and the mono glyph width at 11px
+ * (bumped from 9px, UX read 2026-07-08: the inline mini rendered the
+ * labels as an unreadable squint on a phone). */
+const LABEL_H = 13;
+const LABEL_CHAR_W = 6.9;
 
 /** One distinguishable design-system color per subject (tokens only). */
 const DOMAIN_COLORS: Record<string, string> = {
@@ -249,7 +252,7 @@ export function ReportTrajectory({
             x={x(t)}
             y={MARGIN.top + PLOT_HEIGHT + 18}
             textAnchor="middle"
-            style={{ font: "500 10px var(--font-mono)", fill: "var(--text-subtle)" }}
+            style={{ font: "500 12px var(--font-mono)", fill: "var(--text-subtle)" }}
           >
             {index === 0 ? "start" : dayLabel(t)}
           </text>
@@ -270,7 +273,7 @@ export function ReportTrajectory({
             x={MARGIN.left - 8}
             y={y(months) + 3}
             textAnchor="end"
-            style={{ font: "500 10px var(--font-mono)", fill: "var(--text-subtle)" }}
+            style={{ font: "500 12px var(--font-mono)", fill: "var(--text-subtle)" }}
           >
             {months === 0 ? "at age" : `+${months}${months === yMax ? " mo" : ""}`}
           </text>
@@ -281,7 +284,7 @@ export function ReportTrajectory({
           x={MARGIN.left - 8}
           y={y(GROWING_MONTHS) + 3}
           textAnchor="end"
-          style={{ font: "500 10px var(--font-mono)", fill: "var(--sky-600)" }}
+          style={{ font: "500 12px var(--font-mono)", fill: "var(--sky-600)" }}
         >
           growing
         </text>
@@ -301,7 +304,7 @@ export function ReportTrajectory({
         x={todayX}
         y={MARGIN.top - 8}
         textAnchor="middle"
-        style={{ font: "700 9px var(--font-mono)", fill: "var(--text-subtle)" }}
+        style={{ font: "700 10px var(--font-mono)", fill: "var(--text-subtle)" }}
       >
         today
       </text>
@@ -322,7 +325,7 @@ export function ReportTrajectory({
             x={Math.min(x(recheckT), WIDTH - MARGIN.right - 24)}
             y={MARGIN.top - 8}
             textAnchor="middle"
-            style={{ font: "700 9px var(--font-mono)", fill: "var(--sage-700)" }}
+            style={{ font: "700 10px var(--font-mono)", fill: "var(--sage-700)" }}
           >
             re-check
           </text>
@@ -390,7 +393,7 @@ export function ReportTrajectory({
           <text
             x={labelX + 6}
             y={label.y + 3}
-            style={{ font: "500 9px var(--font-mono)", fill: "var(--text-muted)" }}
+            style={{ font: "500 11px var(--font-mono)", fill: "var(--text-muted)" }}
           >
             {label.text}
           </text>

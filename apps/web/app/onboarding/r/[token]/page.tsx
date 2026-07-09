@@ -7,6 +7,7 @@ import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../lib/map/store";
 import { NarrativeBeat } from "./narrative-beat";
+import { reportButtonClass } from "./report-button";
 import { ReportView } from "./report-view";
 
 /**
@@ -41,7 +42,10 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
         </p>
         <Link
           href="/onboarding"
-          className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
+          className={reportButtonClass(
+            "primary",
+            "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
+          )}
         >
           See where your child stands
         </Link>

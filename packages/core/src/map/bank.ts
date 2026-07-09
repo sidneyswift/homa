@@ -13,7 +13,7 @@ import { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent } from
  */
 
 /** Bumped whenever content meaningfully changes; stored on every report. */
-export const MAP_BANK_VERSION = "2026.07.3";
+export const MAP_BANK_VERSION = "2026.07.5";
 
 export const MAP_ANSWERS = ["easily", "getting_there", "not_yet", "not_sure", "skip"] as const;
 export type MapAnswer = (typeof MAP_ANSWERS)[number];
@@ -37,6 +37,9 @@ export interface MapDomain {
   displayName: string;
   /** One warm line shown when the domain's first question appears. */
   intro: string;
+  /** 1 to 2 plain sentences shown when the subject's report card opens:
+   * what this subject is and what it feeds (see content.ts). */
+  whatItIs: string;
   /**
    * True for domains that track exposure, not age-normed development
    * (second language). They never produce a months-ahead number.

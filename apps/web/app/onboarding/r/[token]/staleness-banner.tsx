@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { ageLabel, type ReportStaleness } from "@homa/core";
 
+import { reportButtonClass } from "./report-button";
+
 /**
  * The self-renewing report: the permanent URL knows the child has grown
  * (staleness is DERIVED at render from birth date + generation time +
@@ -34,7 +36,10 @@ export function StalenessBanner({
       </p>
       <Link
         href={`/onboarding?start=${childId}`}
-        className="inline-flex min-h-9 items-center whitespace-nowrap rounded-pill bg-brand px-4 py-1.5 text-xs font-semibold text-on-brand hover:bg-brand-hover"
+        className={reportButtonClass(
+          "primary",
+          "inline-flex min-h-9 items-center whitespace-nowrap px-4 py-1.5 text-xs font-semibold",
+        )}
       >
         Re-check what&apos;s new {"\u2192"}
       </Link>

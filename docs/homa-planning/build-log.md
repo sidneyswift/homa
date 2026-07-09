@@ -3,6 +3,149 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 · One persistent app frame; /chat moved inside it (founder ask)
+
+Founder ask: after sign-in + onboarding, everything lives inside the app;
+the sidebar and top bar hold still while the page inside changes. Done with
+a Next route group: /home, /chat, /planner, /kids moved into
+`apps/web/app/(app)/` (URLs unchanged) under one `layout.tsx` that renders
+DashboardShell once and stays mounted across navigations. Shared reads
+(family, children, reports, plans, pending curricula) consolidated into
+`lib/app-data.ts` `getAppData()`, memoized per request with React cache()
+so layout + page share one set of queries; sidebar nav highlight is now
+client-side from the pathname (`sidebar-nav.tsx`). Calls made alone:
+
+- **/chat now requires finished setup**: the (app) layout redirects to
+  /onboarding when there is no family, an unfinished family card, or no
+  kids (previously /chat tolerated a family-less session). Consistent with
+  "one onboarding for every door" (founder call 2026-07-08).
+- **Chat lost its own header** (wordmark + Home button): the frame carries
+  both. "New chat" stays as a slim bar atop the transcript. Chat fills the
+  viewport minus the phone top bar (h-14, now fixed-height on purpose);
+  the transcript scrolls inside while the frame and composer hold still.
+- **Shell's main is bare now**; dashboard pages wrap themselves in the new
+  `PageColumn` (same padding + 1040px column as before) so chat can go
+  edge to edge.
+- **Sidebar settings gear** links `/home#settings` (was a bare `#settings`
+  that only worked on /home); the phone bar's Ask Homa pill hides itself
+  on /chat.
+- **In-frame loading state added** (`app/(app)/loading.tsx`, the bobbing
+  mark): page streams in while the frame holds.
+- Typecheck, lint, build, and all four guards green.
+
+Founder ask 2026-07-08 late: the post-questionnaire report was redundant and
+heavy. Plan and tickets in `docs/homa-planning/report-simplify-plan.md` (all
+eleven executed). The shape now: one-sentence note from Homa with the month
+button and a call-me P.S. inside it, snapshot = one chart + one sentence +
+tap-to-enlarge, strengths section gone, whole-picture chart redrawn
+phone-first, subject cards bare until opened (open = what the subject is,
+plain question-answer rows, one "Why this is interesting" paragraph,
+benchmark links, the two buttons), state card and methodology closed by
+default, and a nav bar (Dashboard / Settings) on the live report.
+
+Calls made alone, worth auditing:
+
+- **Features removed from the drawer without an explicit founder line-item**:
+  the founder enumerated the drawer's exact contents, so everything else went:
+  the inline sharpen probe (SharpenInline) and next-up rung, the
+  whats-working form, the per-subject growing-activity callout, and the
+  observations-count kicker. Going deeper stays reachable through "Answer a
+  few deeper questions". NOTE: the whats-working form was the only WRITE
+  path for `context.whatsWorking`; the data keeps rendering into facts and
+  plans where it exists, but nothing collects it now (the curriculum call
+  can). Revisit if that context bag matters for plan quality.
+- **Receipts keep the change-an-answer flow** (living-record law) but lose
+  the per-row benchmark age strip (the founder's "no more charts in
+  drawers"); each row is now literally "question … answer".
+- **The note card also dropped** the movement paragraph, the re-checked
+  line, and the practice check-off line (growth story and the plan page
+  carry those); template `homaNote()` rewritten to ONE sentence (also feeds
+  the kid dashboard card).
+- **Month button consent intact**: the tap that builds the month is still
+  the explicit ask that arms the 28-day re-check email, and the note
+  sentence names the re-check plainly.
+- **Call-me P.S. uses the onboarding number only** (no phone input on the
+  report); a missing number routes to Settings by copy.
+- **Two prompt bumps in one pass**: report-writer.md note spec (one
+  sentence), drawers re-specced as the why-interesting continuation with a
+  one-reassurance budget and an explicit 320-char budget (the gate's 360
+  cap rejected a first regeneration). REPORT_PROMPT_VERSION 2026.07.14 →
+  2026.07.17, fixtures regenerated clean twice; **founder re-read of the
+  new fixtures (STOP 1) still owed**. Bank content gained per-subject
+  `whatItIs` explainers; MAP_BANK_VERSION → 2026.07.5, linted by check:map.
+- **Gates run**: homa-copy-reviewer (ICP read), homa-copy-editor, and
+  homa-uxui-reviewer on phone screenshots. Implemented: lightbox no longer
+  fills the screen with a dead panel (content-sized, centered), trajectory
+  chart type bumped to readable sizes (and left margin widened so
+  "growing" fits), "rescores" and "age norm" jargon replaced, state card's
+  meta-opener and hedging chain trimmed. Declined as founder-fixed
+  structure: reordering sections, cutting the per-drawer button pair.
+- **E2E**: 30-check Playwright pass against the dev server (public sample
+  + a temporary dev-only live-variant preview route, deleted after the
+  run): drawers, lightbox, methodology and sources expanders, state card,
+  nav links, month-button and call-me no-session paths, phone + desktop
+  screenshots. Typecheck, lint, build, and all four guards green.
+
+## 2026-07-09 · Persist every voice call (call_transcripts) + email-gap fix
+
+Founder ruling (this session), from a live investigation of a real user's
+calls (the Gomes family): (1) save all raw call transcripts into our DB
+ALWAYS, both the general companion line and the curriculum line; (2) fix
+the email gap; (3) start turning call content into durable memory. Founder
+answers to the three decisions I surfaced: scope = both lines + backfill
+what is already on Telnyx; retention = store verbatim, keep indefinitely,
+revisit later; memory = auto-extract durable facts into family_memories.
+
+What the investigation proved (all from homa-prod): the general line's
+Telnyx insight group had no webhook, so nothing was ever stored; the
+curriculum line has a webhook but 0 of 3 calls completed, 0 curricula
+generated, 0 transcript_facts written, so the ONLY persistence path in the
+code had a 0% success rate in production. Net: no call content, either
+line, was in our DB; Telnyx was the only copy. The general assistant DOES
+have the send_email tool attached, so the email gap is model behavior: it
+read book lists aloud and never called the tool (Carolyn asked ~6 times
+across 3 calls, 0 emails sent; the one voice.email_sent belonged to a
+curriculum call).
+
+What shipped this session:
+
+- **`call_transcripts` table (migration #25)**: verbatim raw messages per
+  Telnyx conversation, family-scoped by `is_family_member`, server-only
+  writes, `family_id`/`child_id` nullable so unknown callers are stored but
+  Data-API-invisible. Reverses the earlier "general line keeps nothing"
+  privacy-by-default posture, at founder direction; this IS the ruling on
+  journeys Q3 retention (verbatim + indefinite for now). Isolation guard
+  extended to cover it; backfilled 10 conversations (141 messages).
+
+Calls made alone, worth auditing:
+
+- **Capture is a self-contained idempotent sync job**
+  (`scripts/telnyx-transcripts-sync.mts`), keyed on Telnyx
+  `conversation_id`, not the insight webhook. Rationale: the webhook path
+  is proven flaky here (0% curriculum completion), a pull-based job that
+  can run on a cron is the reliable way to honor "ALWAYS". A real-time
+  webhook is a later enhancement, not the guarantee.
+- **Ownership re-derived from the caller's phone** via `family_phones`
+  (trying both call targets), never trusted from Telnyx metadata; a
+  metadata `child_id` is used only after it is re-scoped to that family.
+  When child cannot be resolved (general line is ambiguous with multiple
+  kids; curriculum `child_id` rides dynamic variables that are not in
+  conversation metadata), `child_id` is left null. Curriculum child
+  attribution via the `call_control_id` link is a noted refinement.
+- **Email-gap fix is prompt hardening** in the general-line voice
+  instructions (`loadVoiceInstructions`): never read lists aloud, must call
+  send_email in the same turn, never claim a send without a successful tool
+  result. Goes live only after `pnpm telnyx:provision` re-syncs the
+  assistant. A model swap for stronger tool-calling is left as a follow-up.
+- **Deferred, by sequencing**: LLM memory write-back from transcripts into
+  `family_memories` (founder-approved auto-extract). It writes into curated
+  memory the agent reads every turn and needs the server's AI gateway plus
+  the copy/quality gates, so it gets its own reviewed pass rather than
+  being rushed into this one.
+- Left three read-only investigation scripts behind
+  (`telnyx-calls-today`, `telnyx-call-transcripts`, `telnyx-assistant-info`)
+  alongside the sync job; keep or prune per founder preference.
+
 ## 2026-07-08 (late) · homa-uxui-reviewer skill (the interface reader gate)
 
 Founder ask: a copy-reviewer twin for UX/UI. New skill
@@ -21,6 +164,21 @@ elements always reviewed as a crop PLUS the full screen they live on;
 one flow per dispatch; motion prefers a recording, and a described-only
 motion is flagged as such with softer conclusions); capture source is the
 dev server with sample/fixture data only, never real family data.
+
+## 2026-07-08 (late night) · Founder wording call: the coding question drops the game name
+
+Founder (this session): "there is a robot question that you can remove the
+word robot and it still gets the point across." Applied to
+`computer_science.robot-game` (bank v2026.07.3 to v2026.07.4): the
+statement is now "Gives exact step-by-step instructions during play and
+follows yours", no game name. Naming "robot" narrowed the question: a kid
+who never played a game by that name still gives exact instructions in
+play, and that is the skill (CSTA 1A-AP-08). The item id keeps the old
+slug on purpose, stored answers key off it. The "Robot parent" growing
+ACTIVITY keeps its name: an activity suggests a game to play, a question
+measures a skill, and only the question was narrowing. Both narrative
+fixtures regenerated (same prompt v2026.07.14, facts changed with the
+statement), gate clean; the owed founder re-read covers them.
 
 ## 2026-07-08 (late night, second pass) · The two tails: gifted kids get found, struggling kids get a starting line
 

@@ -119,7 +119,7 @@ export default async function OnePagerPage({
               past typical, green is at it, blue is growing toward it.
             </p>
             <div className="mt-3 rounded-lg border border-border-subtle bg-card p-4">
-              <ReportChart scores={ordered} prior={null} />
+              <ReportChart scores={ordered} prior={null} variant="wide" />
             </div>
 
             <div className="mt-7 rounded-md bg-[var(--surface-sunken)] p-4 text-xs text-muted">

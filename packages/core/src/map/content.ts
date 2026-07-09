@@ -51,6 +51,12 @@ export interface MapDomainContent {
   id: string;
   displayName: string;
   intro: string;
+  /** 1 to 2 plain sentences a parent reads when a subject card opens:
+   * what this subject IS and what it feeds, in layman's terms. Written
+   * age-neutrally so one line serves ages 2 to 16 (report simplification
+   * pass, 2026-07-08). Linted by scripts/map-check.mts like every other
+   * parent-facing bank string. */
+  whatItIs: string;
   exposureBased: boolean;
   growingActivity: { title: string; description: string };
   /** Age-appropriate swap for kids ~8 and up (the report picks by age). */
@@ -184,6 +190,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "math",
     displayName: "Math",
     intro: "First up: numbers.",
+    whatItIs:
+      "Math is number sense: what numbers mean, how amounts compare, and how patterns work. Each skill stacks on the last, from counting to fractions to algebra.",
     exposureBased: false,
     growingActivity: {
       title: "Count the stairs",
@@ -224,6 +232,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "literacy",
     displayName: "Literacy",
     intro: "Next: books and reading.",
+    whatItIs:
+      "Literacy is the road to reading: enjoying books, learning how print works, then reading and understanding on their own. It feeds every other subject, because so much learning arrives through reading.",
     exposureBased: false,
     growingActivity: {
       title: "The letter hunt",
@@ -262,6 +272,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "phonics",
     displayName: "Phonics",
     intro: "Sounds, rhymes, and sounding out words.",
+    whatItIs:
+      "Phonics is hearing the sounds inside words: rhymes, first sounds, then sounding out print. It is what makes reading and spelling new words possible.",
     exposureBased: false,
     growingActivity: {
       title: "Sound I-spy",
@@ -294,6 +306,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "writing",
     displayName: "Writing",
     intro: "Writing, from scribbles to sentences.",
+    whatItIs:
+      "Writing is getting thoughts onto paper: scribbles, then letters, then sentences and stories. It uses hand control and language at the same time, so it often comes together a little after reading.",
     exposureBased: false,
     growingActivity: {
       title: "Rainbow name",
@@ -326,6 +340,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "language",
     displayName: "Language",
     intro: "Talking and telling stories.",
+    whatItIs:
+      "Language is talking and understanding: words, sentences, questions, and telling you what happened. It carries friendships, feelings, and every subject that gets talked through out loud.",
     exposureBased: false,
     growingActivity: {
       title: "Tell it back",
@@ -367,6 +383,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "science",
     displayName: "Science",
     intro: "Science: noticing and finding out.",
+    whatItIs:
+      "Science is noticing and finding out: asking why, guessing what will happen, and checking. It builds the habit of looking closely at the world and wondering how it works.",
     exposureBased: false,
     growingActivity: {
       title: "Sink or float",
@@ -399,6 +417,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "social_studies",
     displayName: "Social studies",
     intro: "Their world: people, places, the past.",
+    whatItIs:
+      "Social studies is their sense of people and place: family, community, maps, and the past. It grows from knowing who is in the family into history, geography, and how the world fits together.",
     exposureBased: false,
     growingActivity: {
       title: "Map of home",
@@ -433,6 +453,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "art",
     displayName: "Art & creative",
     intro: "Art: making things their way.",
+    whatItIs:
+      "Art is making things their own way: drawing, painting, building, pretending. It works small-hand control and imagination at the same time, and it is often where kids first show you what is on their mind.",
     exposureBased: false,
     growingActivity: {
       title: "Draw the song",
@@ -464,6 +486,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "music",
     displayName: "Music",
     intro: "Music: rhythm, songs, listening.",
+    whatItIs:
+      "Music is rhythm, singing, and listening closely. Feeling a steady beat and playing with sounds runs right alongside early reading skills like hearing the parts of words.",
     exposureBased: false,
     growingActivity: {
       title: "Copy my clap",
@@ -494,6 +518,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "gross_motor",
     displayName: "Gross motor",
     intro: "Big movement: running, jumping, balance.",
+    whatItIs:
+      "Gross motor is big-body movement: running, jumping, balancing, throwing. It is how kids build the strength and coordination the rest of their day leans on.",
     exposureBased: false,
     growingActivity: {
       title: "Animal races",
@@ -529,6 +555,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "fine_motor",
     displayName: "Fine motor",
     intro: "Small-hand skills.",
+    whatItIs:
+      "Fine motor is small-hand control: grip, drawing, scissors, buttons. It is the muscle work underneath handwriting, dressing, and making things.",
     exposureBased: false,
     growingActivity: {
       title: "Snipping strips",
@@ -560,6 +588,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "social_emotional",
     displayName: "Social-emotional",
     intro: "Feelings and friends.",
+    whatItIs:
+      "Social-emotional is feelings and friendships: naming emotions, taking turns, playing with others, and settling after upsets. Learning of every kind sits on top of it.",
     exposureBased: false,
     growingActivity: {
       title: "Name it to tame it",
@@ -593,6 +623,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "self_care",
     displayName: "Self-care",
     intro: "Everyday independence.",
+    whatItIs:
+      "Self-care is everyday independence: dressing, eating, washing, and keeping track of their own things. Every skill here hands the child a little more of their own day.",
     exposureBased: false,
     growingActivity: {
       title: "The button board",
@@ -626,6 +658,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "executive_function",
     displayName: "Executive function",
     intro: "Focus, memory, follow-through.",
+    whatItIs:
+      "Executive function is focus, memory, and follow-through: holding a plan in mind, waiting a turn, switching gears, finishing. It is what turns knowing into doing, and it keeps growing all the way through the teen years.",
     exposureBased: false,
     growingActivity: {
       title: "Freeze dance",
@@ -660,6 +694,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     displayName: "Coding & computers",
     intro:
       "Almost done: computers and code. If that's not part of your world yet, one tap on skip is fine.",
+    whatItIs:
+      "Coding and computers follows what your family actually does with technology: giving step-by-step instructions, building small projects, fixing what misbehaves. No ages attached here; it simply follows what is part of your home.",
     exposureBased: true,
     growingActivity: {
       title: "Robot parent",
@@ -672,7 +708,11 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
         "Pick one small real job (a timer, a chore chart, a spreadsheet formula) and build the thing that does it. Real problem, real program.",
     },
     items: [
-      { id: "computer_science.robot-game", statement: "Plays 'robot': gives exact step-by-step instructions and follows yours", typicalMonths: 66, sources: ["csta"], standards: ["CSTA 1A-AP-08"] },
+      // Founder wording call 2026-07-08: no game name in the question.
+      // Naming "robot" narrowed it (kids who never played a game by that
+      // name still give exact instructions in play, which is the skill).
+      // The id keeps the old slug: stored answers key off it.
+      { id: "computer_science.robot-game", statement: "Gives exact step-by-step instructions during play and follows yours", typicalMonths: 66, sources: ["csta"], standards: ["CSTA 1A-AP-08"] },
       { id: "computer_science.block-sequence", statement: "Builds a little program in a block-coding app (ScratchJr, Scratch): steps that run in order", typicalMonths: 84, sources: ["csta"], standards: ["CSTA 1A-AP-10"] },
       { id: "computer_science.finds-bug", statement: "Hunts down which step is wrong when their program misbehaves, and fixes it", typicalMonths: 96, sources: ["csta"], standards: ["CSTA 1A-AP-14"] },
       { id: "computer_science.loops-events", statement: "Uses loops and events on purpose ('when clicked, repeat 10 times')", typicalMonths: 112, sources: ["csta"], standards: ["CSTA 1B-AP-10"] },
@@ -686,6 +726,8 @@ export const MAP_DOMAINS: readonly MapDomainContent[] = [
     id: "spanish",
     displayName: "Second language",
     intro: "Last one: is a second language (Spanish, French, sign, anything) part of your home? If not, one tap on skip and we're done.",
+    whatItIs:
+      "A second language follows what your home does, not milestones: hearing it, playing with it, using words from it. No ages attached here; any amount counts.",
     exposureBased: true,
     growingActivity: {
       title: "One phrase week",

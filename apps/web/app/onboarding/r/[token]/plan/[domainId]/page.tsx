@@ -11,6 +11,7 @@ import { narrativeEnabled } from "../../../../../../lib/map/narrative-flag";
 import { runPlanNarrative } from "../../../../../../lib/map/narrative-runner";
 import { getOrBuildPlan } from "../../../../../../lib/map/store";
 import { NarrativeBeat } from "../../narrative-beat";
+import { reportButtonClass } from "../../report-button";
 import { PlanWeeks } from "./plan-weeks";
 
 /**
@@ -73,7 +74,10 @@ export default async function PlanPage({
         </p>
         <Link
           href="/onboarding"
-          className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
+          className={reportButtonClass(
+            "primary",
+            "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
+          )}
         >
           Get your free progress report
         </Link>
