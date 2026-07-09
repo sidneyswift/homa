@@ -24,6 +24,13 @@ Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted 
 - [ ] **Fill `TELNYX_SP_*`** in `apps/web/.env.local` (your name, address, email, mobile; it is the "Sole Proprietor" carrier registration, no LLC needed) then run `pnpm telnyx:provision` *(3 min)*
 - [ ] **Verify the PIN** that arrives on your phone: `pnpm telnyx:provision --verify-otp 123456` (re-runs the rest automatically, then text +1 346 758 8011 and Homa answers) *(1 min)*
 
+## Agentic learning loops (added 2026-07-09, ladder build)
+
+- [x] ~~Re-provision both voice assistants~~ done by agent 2026-07-09 afternoon (founder "do all of this"): both assistants synced twice, now carrying `send_email` + `remember` + `log_hours` with updated call instructions
+- [x] ~~Vercel prod env check~~ verified 2026-07-09: `TELNYX_API_KEY` and `TELNYX_CURRICULUM_ASSISTANT_ID` both present in Production
+- [ ] **Journal prompt read-aloud**: read the evening email copy in `apps/web/lib/map/email.ts` (`sendJournalPromptEmail`) out loud; if it passes, set `JOURNAL_PROMPT_ENABLED=true` in Vercel prod. It stays completely dark until then. Copy has been through the reader + editor gates (see build-log 2026-07-09 afternoon); only your read-aloud remains *(2 min)*
+- [ ] **Optional cost lever**: set `HOMA_EXTRACTION_MODEL` in Vercel prod to a cheaper gateway model id for the background memory loops, and `HOMA_EMBEDDING_MODEL` if you ever want something other than `openai/text-embedding-3-small` for semantic recall
+
 ## Domain & handles · memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
 **DECIDED 2026-07-04: bought thankshoma.com.** Domain is live on Vercel project

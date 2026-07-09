@@ -24,15 +24,15 @@ export default defineDynamic({
         ? `- This number belongs to a Homa family and their family context is
   loaded: use the kids' names and saved facts naturally, same as web
   chat.
-- Worksheets and saving new memories are not available over text yet.
-  When one would clearly help, offer it for their next web visit
-  ("I'll have a counting page idea ready at thankshoma.com").`
+- Worksheets, saving memories, and logging hours are not available
+  over text yet. When one would clearly help, offer it for their next
+  web visit ("I'll have a counting page idea ready at thankshoma.com").`
         : `- This phone number is not linked to a family account, so no family
   context is loaded. Answer general homeschool questions warmly from
   your own expertise.
 - If the parent asks for something that needs their family workspace
   (worksheets, saved memories, their kids' profiles), say texting can
-  be linked from their /home page at thankshoma.com in one step.`;
+  be linked from their /settings page at thankshoma.com in one step.`;
 
       return defineInstructions({
         markdown: `

@@ -188,6 +188,31 @@ export async function getFamilyEmail(familyId: string): Promise<string | null> {
   return rows[0]?.email ?? null;
 }
 
+/** The evening journal prompt (FR-6 seed; flag-gated in lib/journal.ts).
+ * One short invitation, one CTA into chat; never a sequence. */
+export async function sendJournalPromptEmail(
+  to: string,
+  parentFirstName: string | null,
+  childNames: string[],
+): Promise<boolean> {
+  const url = `${siteUrl()}/chat?draft=journal`;
+  const kidPhrase =
+    childNames.length === 1 ? childNames[0] : "the kids";
+  return send({
+    to,
+    subject: "How did today go?",
+    preview: "One or two sentences is plenty. Homa remembers what matters.",
+    heading: parentFirstName ? `How did today go, ${parentFirstName}?` : "How did today go?",
+    bodyLines: [
+      `Tell me one thing from today: a win, a wobble, or something ${kidPhrase} did that surprised you.`,
+      "One or two sentences is plenty. I'll remember what matters, and it shapes what we do next.",
+    ],
+    cta: { label: "Tell Homa about today", url },
+    footerNote:
+      "These evening check-ins are new. Reply 'stop' to this email and they stop.",
+  });
+}
+
 export async function sendBandReadyEmail(
   to: string,
   childName: string,

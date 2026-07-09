@@ -47,6 +47,7 @@ async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRow
       .from("family_memories")
       .select("id, child_id, kind, content, source, created_at")
       .eq("family_id", familyId)
+      .is("superseded_at", null)
       .in("kind", ["fact", "what_works"])
       .order("created_at", { ascending: true })
       .limit(200),

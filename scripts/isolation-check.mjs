@@ -98,6 +98,18 @@ await expectEmptyRead("child_plans");
 // forge one directly, and anon sees and writes nothing in either table.
 await expectEmptyRead("child_curriculum_calls");
 await expectEmptyRead("child_curricula");
+// Raw call transcripts (migration #25): family-scoped by is_family_member.
+// Only the server-only connection writes (capture webhook + sync job), so
+// anon reads nothing and has no write policy; unknown-caller rows carry a
+// null family_id and are invisible to every Data API role by construction.
+await expectEmptyRead("call_transcripts");
+// The durable chat record (migration #34): members read their own rows;
+// only the persist-conversation hook's server connection ever writes.
+await expectEmptyRead("conversation_messages");
+// Post-turn review bookkeeping (migration #35): deny-all, server-only.
+await expectEmptyRead("learning_reviews");
+// Capture-time hours record (migration #37): family-scoped, members only.
+await expectEmptyRead("hours_log");
 
 await expectInsertDenied(
   "families",
@@ -207,6 +219,40 @@ await expectInsertDenied(
   "child_curricula",
   { child_id: "00000000-0000-0000-0000-000000000000", curriculum: {}, model: "x" },
   "anon cannot forge a curriculum",
+);
+await expectInsertDenied(
+  "call_transcripts",
+  { conversation_id: `probe-${Date.now()}`, messages: [] },
+  "anon cannot forge a call transcript",
+);
+await expectInsertDenied(
+  "conversation_messages",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    session_id: "probe",
+    sequence: 0,
+    role: "user",
+    content: "intruder message",
+  },
+  "anon cannot forge chat history",
+);
+await expectInsertDenied(
+  "learning_reviews",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    session_id: "probe",
+    upto_sequence: 0,
+  },
+  "anon cannot forge review claims",
+);
+await expectInsertDenied(
+  "hours_log",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    subject: "math",
+    minutes: 60,
+  },
+  "anon cannot forge hours",
 );
 await expectInsertDenied(
   "child_reports",

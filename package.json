@@ -16,7 +16,9 @@
     "pull:state-requirements": "tsx scripts/state-requirements-pull.mts",
     "report:norms": "tsx scripts/map-norms-report.mts",
     "seed:state-requirements": "tsx scripts/state-requirements-seed.mts",
+    "telnyx:curriculum:provision": "tsx scripts/telnyx-curriculum-provision.mts",
     "telnyx:provision": "tsx scripts/telnyx-provision.mts",
+    "telnyx:transcripts:sync": "tsx scripts/telnyx-transcripts-sync.mts",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {

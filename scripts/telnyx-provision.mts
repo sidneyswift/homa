@@ -44,7 +44,9 @@ import {
   findVoiceAssistant,
   listOf,
   listOwnedNumbers,
+  logHoursToolConfig,
   readSoleProprietorIdentity,
+  rememberToolConfig,
   requireApiKey,
   sendEmailToolConfig,
   tx,
@@ -386,13 +388,39 @@ async function loadVoiceInstructions(): Promise<string> {
     "- If it is empty, the number is not linked to a Homa family yet: be a",
     "  warm general homeschool companion, and mention linking happens on",
     "  the home page at thankshoma dot com if they ask for family things.",
-    "- You cannot make worksheets or save memories on a call yet; offer",
-    "  them for the next web visit instead.",
-    "- You CAN send a real email to the family's own address on file,",
-    "  using the send_email tool. Only do it when the parent asks for",
-    "  something in writing or it is clearly the useful next step, never",
-    "  as a default. Compose a short, warm subject and 2 to 4 sentences",
-    "  yourself; do not read the email aloud, just confirm you sent it.",
+    "- You cannot make worksheets on a call yet; offer them for the next",
+    "  web visit instead.",
+    "- You CAN save durable facts with the remember tool, and for a linked",
+    "  family you should: the moment the parent shares something worth",
+    "  keeping (family rhythm, a child's new obsession, what worked for",
+    "  teaching them), call remember in that same turn, one compact",
+    "  sentence, with the child's name when it is about one child. Then",
+    "  confirm in one short natural aside (\"noted, Fridays are co-op",
+    "  days\"). Never save task progress, one-off logistics, or anything",
+    "  shared in a moment of distress. If the tool returns an error, say",
+    "  so plainly; never pretend it saved.",
+    "- You CAN log school time with the log_hours tool, and you should:",
+    "  when the parent mentions school time with a duration (\"we did 45",
+    "  minutes of math\"), call log_hours in that same turn. These rows are",
+    "  her official records. School time only, never movies or errands.",
+    "  When she is vague (\"most of the morning\"), ask one short \"about",
+    "  how long?\" and log her answer. Confirm in a few words, never",
+    "  a recital.",
+    "- You CAN send a real email to the family's own address on file with",
+    "  the send_email tool, and that tool is the ONLY way anything reaches",
+    "  them in writing. These rules bind you:",
+    "  - Never read a list, a set of recommendations, or anything longer",
+    "    than a sentence or two out loud. If the useful thing is a list or",
+    "    belongs in writing, say one short sentence offering to email it,",
+    "    then actually call send_email in that SAME turn.",
+    "  - Never say you sent, are sending, or will send an email unless you",
+    "    have actually called send_email and it came back successful. Saying",
+    "    it without calling the tool means the parent gets nothing, which is",
+    "    a broken promise, not a nicety.",
+    "  - Compose a short, warm subject and 2 to 4 sentences yourself, do not",
+    "    read the email body aloud. After the tool succeeds, confirm in one",
+    "    sentence. If it returns an error, tell the parent plainly and never",
+    "    pretend it worked.",
   ].join("\n");
 }
 
@@ -406,7 +434,13 @@ async function ensureVoiceAssistant(
   }
   const instructions = await loadVoiceInstructions();
   const webhookSecret = process.env.TELNYX_WEBHOOK_SECRET;
-  const tools = webhookSecret ? [sendEmailToolConfig(webhookSecret)] : [];
+  const tools = webhookSecret
+    ? [
+        sendEmailToolConfig(webhookSecret),
+        rememberToolConfig(webhookSecret),
+        logHoursToolConfig(webhookSecret),
+      ]
+    : [];
   if (!assistant) {
     assistant = await tx<{ data?: AssistantRow } & AssistantRow>(
       "POST",

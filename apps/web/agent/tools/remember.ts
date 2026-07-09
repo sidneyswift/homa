@@ -9,6 +9,7 @@ import {
   memoryUsageChars,
   scanMemoryContent,
 } from "../../lib/agent-memory";
+import { embedText } from "../../lib/learning/embeddings";
 
 /**
  * Writes one durable memory row for this family (M2-02). The family scope
@@ -71,6 +72,7 @@ export default defineTool({
       .from("family_memories")
       .select("id, child_id, kind, content, source, created_at")
       .eq("family_id", familyId)
+      .is("superseded_at", null)
       .in("kind", [...MEMORY_KINDS]);
     if (readError) {
       return { saved: false, note: `Could not read memory: ${readError.message}` };
@@ -90,12 +92,15 @@ export default defineTool({
       };
     }
 
+    // Best-effort semantic index; null just means FTS-only for this row.
+    const embedding = await embedText(input.content);
     const { error: insertError } = await db.from("family_memories").insert({
       family_id: familyId,
       child_id: input.childId ?? null,
       kind: input.kind,
       content: input.content,
       source: "homa",
+      ...(embedding ? { embedding } : {}),
     });
     if (insertError) {
       return { saved: false, note: `Could not save: ${insertError.message}` };

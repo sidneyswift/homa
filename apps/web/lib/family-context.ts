@@ -68,6 +68,7 @@ export async function loadFamilyContextPinned(
       select id, child_id, kind, content, source, created_at::text as created_at
       from public.family_memories
       where family_id = ${familyId} and kind in ('fact', 'what_works')
+        and superseded_at is null
       order by created_at
       limit 200
     `,

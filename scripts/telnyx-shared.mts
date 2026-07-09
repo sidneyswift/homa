@@ -248,6 +248,109 @@ export function sendEmailToolConfig(webhookSecret: string): unknown {
   };
 }
 
+/**
+ * The "remember" live tool (agentic ladder item 6, founder direction
+ * 2026-07-09), shared by both voice assistants. Same posture as
+ * send_email: family_id/child_id are templated from the call's own
+ * dynamic variables into the URL, so the model only ever supplies the
+ * fact itself. The route funnels every write through the one guarded
+ * server path (apps/web/lib/learning/save-memory.ts).
+ */
+export function rememberToolConfig(webhookSecret: string): unknown {
+  return {
+    type: "webhook",
+    webhook: {
+      name: "remember",
+      description:
+        "Save one durable fact about this family so future conversations " +
+        "remember it. Use the moment something worth keeping comes up: " +
+        "family rhythm, a child's new interest, what works for teaching " +
+        "them. One compact sentence per save. Not for task progress, " +
+        "one-off logistics, or anything sensitive shared in distress.",
+      url:
+        `https://thankshoma.com/api/voice/tools/remember?key=${webhookSecret}` +
+        `&family_id={{family_id}}&child_id={{child_id}}`,
+      method: "POST",
+      async: false,
+      body_parameters: {
+        type: "object",
+        properties: {
+          content: {
+            type: "string",
+            description: "The fact, as one compact self-contained sentence under 300 characters.",
+          },
+          kind: {
+            type: "string",
+            enum: ["fact", "what_works"],
+            description: "'what_works' only for teaching signal; otherwise 'fact'.",
+          },
+          child_name: {
+            type: "string",
+            description:
+              "The child's first name exactly as the family context shows it, only when the fact is about one child.",
+          },
+        },
+        required: ["content"],
+        additionalProperties: false,
+      },
+    },
+  };
+}
+
+/**
+ * The "log_hours" live tool (M3-05 slice, founder direction 2026-07-09):
+ * a phone call is a capture moment for compliance hours. Same posture as
+ * remember: family identity is templated, never model-chosen; the route
+ * validates subject and range and refuses vague input with a
+ * self-correction message the assistant reads back.
+ */
+export function logHoursToolConfig(webhookSecret: string): unknown {
+  return {
+    type: "webhook",
+    webhook: {
+      name: "log_hours",
+      description:
+        "Log a block of school time to the family's official hours record " +
+        "the moment the parent mentions one ('we did 45 minutes of math'). " +
+        "School time only: movies, errands, and waiting rooms never count. " +
+        "When the duration is vague ('most of the morning'), ask one short " +
+        "'about how long?' first, then log the answer.",
+      url:
+        `https://thankshoma.com/api/voice/tools/log-hours?key=${webhookSecret}` +
+        `&family_id={{family_id}}&child_id={{child_id}}`,
+      method: "POST",
+      async: false,
+      body_parameters: {
+        type: "object",
+        properties: {
+          minutes: {
+            type: "integer",
+            description: "Length of the block in minutes, 1 to 600. Never a guess.",
+          },
+          subject: {
+            type: "string",
+            enum: [
+              "reading", "math", "science", "social studies", "art",
+              "music", "PE", "co-op", "life skills", "other",
+            ],
+          },
+          child_name: {
+            type: "string",
+            description:
+              "The child's first name exactly as the family context shows it. Leave off for family-wide time like co-op.",
+          },
+          note: {
+            type: "string",
+            description: "The parent's own words, e.g. 'about an hour of reading before lunch'.",
+          },
+        },
+        required: ["minutes", "subject"],
+        additionalProperties: false,
+      },
+    },
+  };
+}
+
 export function readSoleProprietorIdentity(): SoleProprietorIdentity {
   const fields = {
     firstName: process.env.TELNYX_SP_FIRST_NAME,

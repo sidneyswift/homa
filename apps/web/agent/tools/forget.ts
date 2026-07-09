@@ -5,15 +5,18 @@ import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent
 import { MEMORY_KINDS } from "../../lib/agent-memory";
 
 /**
- * Deletes exactly one memory row by content match (M2-02). Substring
+ * Retires exactly one memory row by content match (M2-02). Substring
  * matching instead of ids keeps the model from hallucinating identifiers
  * (the Hermes pattern); ambiguity returns the candidates instead of
- * guessing. The deleted content comes back in the result so "actually,
- * keep that" can be honored with a fresh remember call.
+ * guessing. Since migration #36 this SUPERSEDES rather than deletes: the
+ * row leaves the pinned context and the /home card but stays in the
+ * archive, so point-in-time recall ("what was she into in February?")
+ * survives corrections. The parent's Remove button on /home remains a
+ * hard delete (privacy decision vs history decision).
  */
 export default defineTool({
   description:
-    "Delete one saved memory that is wrong or stale, matched by a distinctive phrase from its content. If the parent corrects a fact, forget the old entry and remember the corrected one in the same turn.",
+    "Retire one saved memory that is wrong or stale, matched by a distinctive phrase from its content. If the parent corrects a fact, forget the old entry and remember the corrected one in the same turn. The old entry stays in searchable history; it just stops being current.",
   inputSchema: z.object({
     match: z
       .string()
@@ -37,6 +40,7 @@ export default defineTool({
       .from("family_memories")
       .select("id, content")
       .eq("family_id", familyId)
+      .is("superseded_at", null)
       .in("kind", [...MEMORY_KINDS]);
     if (error) {
       return { deleted: false, note: `Could not read memory: ${error.message}` };
@@ -63,19 +67,19 @@ export default defineTool({
     }
 
     const target = matches[0];
-    const { error: deleteError } = await db
+    const { error: updateError } = await db
       .from("family_memories")
-      .delete()
+      .update({ superseded_at: new Date().toISOString() })
       .eq("id", target.id)
       .eq("family_id", familyId);
-    if (deleteError) {
-      return { deleted: false, note: `Could not delete: ${deleteError.message}` };
+    if (updateError) {
+      return { deleted: false, note: `Could not retire it: ${updateError.message}` };
     }
 
     return {
       deleted: true,
       forgot: target.content,
-      note: "Deleted. If the parent wants it back, save it again with remember.",
+      note: "Retired from active memory (still in searchable history). If the parent wants it back, save it again with remember.",
     };
   },
 });

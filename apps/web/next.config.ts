@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
     "/api/map/narrative-status": ["./agent/report-writer.md"],
     "/onboarding/r/[token]/plan/[domainId]": ["./agent/report-writer.md"],
     "/api/voice/curriculum/insights": ["./agent/curriculum-writer.md"],
+    // The learning loops' extraction prompt: the cron route runs the
+    // post-call memory turn, the review route runs the post-turn review.
+    "/api/map/cron": ["./agent/memory-extractor.md"],
+    "/api/learning/review": ["./agent/memory-extractor.md"],
     // The OG card and its vendored fonts render at build time, but trace
     // them anyway so any future dynamic render finds the files.
     "/opengraph-image": ["./assets/fonts/*.woff"],

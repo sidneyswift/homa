@@ -29,6 +29,8 @@ import {
   findAssistantByName,
   findInsightGroup,
   findInsightTemplate,
+  logHoursToolConfig,
+  rememberToolConfig,
   requireApiKey,
   sendEmailToolConfig,
   tx,
@@ -69,7 +71,11 @@ async function loadInstructions(): Promise<string> {
  */
 async function ensureAssistant(webhookSecret: string): Promise<AssistantRow> {
   const instructions = await loadInstructions();
-  const tools = [sendEmailToolConfig(webhookSecret)];
+  const tools = [
+    sendEmailToolConfig(webhookSecret),
+    rememberToolConfig(webhookSecret),
+    logHoursToolConfig(webhookSecret),
+  ];
   const existing = await findAssistantByName(CURRICULUM_ASSISTANT_NAME);
   if (existing) {
     await tx("POST", `/ai/assistants/${existing.id}`, { instructions, tools });

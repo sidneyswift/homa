@@ -3,6 +3,211 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 (afternoon) · "Do all of this": lab findings become code
+
+Founder direction (this session): ship everything from the morning's
+review. Shipped, migrations #36-#38 applied to homa-prod and committed:
+
+1. **hours_log + log_hours (M3-05 slice, migration #37).** Capture-time
+   school hours: a chat tool (caller RLS, double-log guard, week total in
+   the result) and a voice webhook tool on BOTH Telnyx assistants (same
+   templated-URL posture as send_email/remember), an "Hours are records"
+   instructions section (ask "about how long?" when vague; movies never
+   count), a "School time this week" card on /home, and events
+   chat.hours_logged / voice.hours_logged.
+2. **Memory supersession (migration #36).** The agent's forget tool now
+   stamps superseded_at instead of deleting: superseded rows leave the
+   pinned context, /home card, budget, and dedupe, but stay searchable by
+   recall labeled "older note that was later corrected". The parent's
+   Remove button stays a hard delete on purpose (privacy vs history).
+3. **Semantic recall (migration #38).** pgvector columns on
+   family_memories, conversation_messages, call_transcripts; best-effort
+   write-time embeddings everywhere (embedText: null = FTS-only, a write
+   never fails on the embedding model), and a SECURITY INVOKER
+   recall_semantic RPC (caller RLS is the wall, no family parameter to
+   get wrong) that the recall tool uses as a fallback when lexical search
+   comes up short. Model: openai/text-embedding-3-small via the gateway,
+   HOMA_EMBEDDING_MODEL override. Pre-existing rows stay FTS-only (no
+   backfill on purpose); ANN index deferred until archives earn it.
+4. **Review threshold 8 to 4** (HOMA_REVIEW_MIN_MESSAGES override), per
+   the live sim where 12 daily sessions never reached 8 rows.
+5. **Ops run by agent on founder direction:** both Telnyx assistants
+   re-provisioned (twice: remember, then log_hours); Vercel prod env
+   verified (TELNYX_API_KEY, TELNYX_CURRICULUM_ASSISTANT_ID present);
+   migrations #34/#35 made idempotent before commit (the MCP-then-GitHub
+   replay path, same posture as #27). Journal prompt copy went through
+   the homa-copy-reviewer and homa-copy-editor gates; the flag stays dark
+   pending the founder read-aloud (that gate is not delegable).
+
+Calls made alone, worth auditing: hours subjects are a 10-value broad
+list (reading through life skills + other), not the map's 16 domains
+(compliance reporting wants broad buckets; the map measures skills);
+embeddings compute inline in the persist hook (~200-400ms per message,
+after the user already has their streamed reply) rather than a queue;
+recall_semantic caps at 12 rows; voice hours rate-limit 30/family/day.
+
+## 2026-07-09 (afternoon) · Settings left the dashboard for /settings (founder ask)
+
+Founder ask (screenshot of /home): the add-a-child, texting, and time-zone
+cards belong in a settings view, not on the main dashboard. They now live at
+/settings inside the (app) frame: page + cards + their three server actions
+moved to `apps/web/app/(app)/settings/` (setup-forms.tsx renamed
+add-child-form.tsx on the way); /home keeps only the device time-zone capture
+and the memories undo in its actions.ts. Calls the agent decided alone:
+(1) the sidebar gear and the report nav now link /settings instead of
+/home#settings; (2) the phone top bar gained a gear, because the sidebar is
+desktop-only and phones would otherwise have had no path to settings at all
+(before, they scrolled the dashboard); (3) /settings joined proxy.ts's
+signed-in gate so a signed-out visit reaches /signin like every sibling
+surface, not /onboarding; (4) /settings gates only on unfinished setup
+(planner's precedent), not on /home's results-pending redirect, so a parent
+can always fix her phone or time zone; (5) the settings actions revalidate
+every page whose render they change (/settings, /home, /planner), and the
+family_phones source value stays "home" (renaming it is a migration for zero
+behavior). Agent-facing texts that said settings live on /home
+(agent/instructions.md, sms-mode.ts) now say /settings.
+
+Founder-directed research to settle the architecture question empirically
+(chat session; canvas artifact "files-vs-tables-lab"). Four rounds: twin
+50k-memory substrates (markdown tree vs SQLite+FTS), the "files and bash"
+research corpus, a 90-day synthetic mom corpus with hidden ground truth,
+and a LIVE 12-day simulation through the real dev agent against homa-prod
+(real auth, RLS, tools, persist hook; test family cascade-deleted after,
+verified 0 rows left).
+
+Live-sim results: 7/7 continuity probes correct across daily session
+rotation (couch trick, co-op day, obsession staleness, correction
+supersession via an unprompted forget+remember, axolotl-themed worksheet
+after the interest change); the day-4 distress vent saved nothing (law
+held); post-undo the agent did NOT re-assert a parent-deleted memory; the
+hours question got an honest refusal, no invented numbers. Per-step input
+tokens stayed flat (~11.5k) from day 1 to day 12 while memories grew 1 to
+6: the bounded-pinned + searchable-archive design holds its cost curve.
+
+Findings that should become tickets (not built, awaiting founder
+priority): (1) log_hours capture-time tool, the compliance experiment
+recovered only 45% of true hours from prose at query time and the live
+agent could only refuse the records question (M3-05 hours engine, now
+evidence-backed); (2) post-turn review never fired in 12 days, the
+8-message per-session threshold never met by short daily sessions: lower
+it or trigger on session idle; (3) pgvector for recall, FTS AND-semantics
+missed an archived paraphrase the pinned layer no longer carried; (4)
+consider supersession flags instead of delete on memory corrections so
+point-in-time questions survive (round-3 finding: a perfectly curated
+current-state view answered a February question with April's truth).
+
+## 2026-07-09 (morning) · instructions.md restructured as the soul file
+
+Founder ask: does instructions.md do what the Mac mini's AGENTS.md/SOUL.md
+did (character, rules, navigation), and rewrite it per current AGENTS.md
+best practices. Researched the agents.md standard (Linux Foundation / AAIF,
+the 150-line guidance, "only what the agent cannot infer", explicit
+boundaries, imperative rules) and the OpenClaw workspace convention the
+original Homa ran on (SOUL = character, AGENTS = operating rules + memory
+rules + file-access patterns, USER = injected context, MEMORY = learned,
+never restated rules).
+
+Verdict logged in the file's header comment: instructions.md was strong on
+character and voice but had NO world map (where knowledge lives: pinned
+context vs curated memories vs the recall archive), no tool router
+(send_followup_email had zero guidance), and no boundaries section. Rewrote
+it in the SOUL → USER-pointer → TOOLS/world-map → AGENTS-rules order:
+new "Where everything lives", "When to reach for each tool" (a moment →
+tool table + a binding tool-honesty rule: never claim saved/sent without a
+success result this turn), and "Boundaries" sections; Voice (binding) kept
+verbatim (report-writer.md mirror untouched).
+
+Load-bearing detail: scripts/telnyx-provision.mts slices the phone persona
+at the first occurrence of the what-you-know heading. Verified after the
+rewrite that the slice still yields exactly persona + Voice + Have opinions
+(2,281 chars, no web-tool leakage), and the header comment now warns
+against repeating that heading's text above the real one. Guards: eve info
+0 diagnostics, no em dashes, the only "behind" left is the rule quoting it.
+
+## 2026-07-09 · The agentic ladder: one brain, whole record, first loops
+
+Founder direction (this session, after the architecture review): build the
+ten-item agentic ladder in order, with four decisions locked: memory stays
+pinned + searchable archive; built-in eve tools get verified then decided;
+learning-loop writes auto-apply with a visible chip + undo (FR-9 posture);
+voice stays on Telnyx with post-call learning. The ruling doc for all of it
+is NEW `docs/homa-planning/15-agentic-architecture.md` (what lives in
+Postgres vs skills vs tools vs sandbox, the verified built-in-tool surface,
+what Hermes/OpenClaw local can do that eve cloud cannot, the ladder).
+
+Shipped this session (items 1 through 9; migrations #32-#35 applied to
+homa-prod via MCP and committed as files):
+
+1. **Built-ins verified live, then governed.** A dev probe of
+   /eve/v1/info showed 18 tools: our 8 plus all 10 eve framework
+   built-ins; a live session refused "run bash" twice (persona held) but
+   happily ran web_search on a natural compliance question. Ruling
+   applied: `bash`, `write_file`, `web_fetch` disabled via sentinel files
+   (agent/tools/{bash,write_file,web_fetch}.ts); `web_search` kept with a
+   governing instruction section; re-verified: 16 tools, the three gone.
+2. **Transcript capture automated** (lib/voice/transcript-sync.ts +
+   telnyx-api.ts, wired into the hourly /api/map/cron): idempotent upsert
+   by conversation_id, flattened `transcript_text` for FTS, skips
+   unchanged calls, clean skip without TELNYX_API_KEY. The ops script
+   stays for backfill and now writes transcript_text too.
+3. **Post-call memory turn** (lib/learning/call-memory.ts): once a
+   linked call settles, one background model pass reads the verbatim
+   transcript and saves durable facts. Claim-by-update prevents double
+   extraction; outcome lands in call_transcripts.memory_extraction.
+4. **recall tool** (agent/tools/recall.ts, M2-15 v1): Postgres FTS over
+   call_transcripts + conversation_messages + family_memories, under the
+   caller's OWN token (RLS wall) plus explicit family_id filters.
+   Instructions tell Homa to recall before ever saying "I don't remember".
+5. **Durable chat record** (agent/hooks/persist-conversation.ts +
+   conversation_messages, M1-02 slice): every user/assistant message on
+   BOTH channels (web + SMS) persists server-side via an eve hook, keyed
+   (session_id, sequence) so replays never duplicate. localStorage stays
+   the render cache; cross-device transcript RENDERING is still M1-02.
+6. **Voice line hands** (route /api/voice/tools/remember +
+   rememberToolConfig in telnyx-shared): "remember this" now works ON a
+   call, same templated-URL posture as send_email, every write through
+   the ONE guarded path (lib/learning/save-memory.ts: scan, budget,
+   dedupe, in-family child resolution). Both provisioning scripts carry
+   the tool + updated call instructions; RE-PROVISIONING IS A HUMAN STEP
+   (HUMAN-TODO) because it mutates live Telnyx assistants.
+7. **First proactive loop** (lib/journal.ts in the hourly cron): the 8pm
+   journal prompt email in each family's own time zone, once per LOCAL
+   day (families.journal_prompt_last_sent_at), deep-linking to
+   /chat?draft=journal which pre-fills the composer. DARK by default
+   behind JOURNAL_PROMPT_ENABLED until the founder read-aloud.
+8. **Post-turn review loop** (M2-13 v1): chat client fires
+   /api/learning/review after each turn; the route reviews once >= 8
+   unreviewed messages accumulate, claims the window via
+   learning_reviews' unique key, extracts through the same engine
+   (source 'review'), runs in after(). SMS turns persist but do not
+   trigger reviews yet (no client); logged as the known gap.
+9. **Sandbox egress locked** (agent/sandbox.ts): deny-all on every
+   network-capable backend before anything uses the sandbox. The
+   worksheet factory (M0-03/M2-05) extends this file later.
+
+Item 10 (durable per-family workspace) is deliberately NOT built: it
+needs a Vercel Blob store + token that do not exist yet, and the ruling
+doc scopes it to "only if items 3/4/8 prove insufficient".
+
+The undo surface: /home gains a "What Homa remembers" card (memories with
+source labels + one-tap Remove under the parent's own RLS), rendered only
+once something is saved. New events: voice.transcript_synced,
+voice.memory_saved, memory.call_extracted, memory.review_extracted,
+memory.forgotten, journal.prompt_sent, chat.recall_used (all in the typed
+registry; check:events green).
+
+Calls made alone, worth auditing: web_search stays enabled (provider-run,
+no arbitrary-URL exfil path, probe showed real value) while bash/write/
+fetch went dark; extraction defaults to the main model with a
+HOMA_EXTRACTION_MODEL env override instead of hardcoding a cheap model id
+sight-unseen; background loops never evict memories (budget-full skips,
+consolidation stays a foreground move); review cadence is 8 unreviewed
+messages; call extraction caps at 5 memories per call and 3 calls per
+cron pass; the journal email skips families younger than 20 hours. All
+guards green: typecheck, lint, build, check:map, check:events,
+check:isolation (with new probes for conversation_messages and
+learning_reviews), check:skills-targeting, eve info clean (0 diagnostics).
+
 ## 2026-07-09 · One persistent app frame; /chat moved inside it (founder ask)
 
 Founder ask: after sign-in + onboarding, everything lives inside the app;

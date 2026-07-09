@@ -1,0 +1,39 @@
+import { embed } from "ai";
+
+/**
+ * Best-effort embeddings for the archive (migration #38). One rule
+ * everywhere: an embedding is an ENHANCEMENT, never a dependency. Every
+ * caller tolerates null (row stays findable by FTS), no write path ever
+ * fails because the embedding model was unavailable, and the vector is
+ * passed to Postgres as pgvector's string literal form.
+ */
+
+const EMBEDDING_DIMS = 1536;
+const EMBED_MAX_CHARS = 8000;
+
+/** Gateway-routed embedding model; override for model-mix experiments. */
+export function embeddingModelId(): string {
+  return process.env.HOMA_EMBEDDING_MODEL ?? "openai/text-embedding-3-small";
+}
+
+/** Returns the pgvector literal ('[0.1,0.2,...]') or null on any failure. */
+export async function embedText(text: string): Promise<string | null> {
+  const value = text.trim().slice(0, EMBED_MAX_CHARS);
+  if (value.length < 3) return null;
+  try {
+    const result = await embed({
+      model: embeddingModelId(),
+      value,
+      maxRetries: 1,
+    });
+    const vector = result.embedding;
+    if (!Array.isArray(vector) || vector.length !== EMBEDDING_DIMS) return null;
+    return `[${vector.join(",")}]`;
+  } catch (error) {
+    console.error(
+      "embedText failed (row stays FTS-only):",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return null;
+  }
+}

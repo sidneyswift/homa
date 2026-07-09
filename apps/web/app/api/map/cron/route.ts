@@ -1,5 +1,6 @@
 import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
 
+import { runJournalPromptPass, type JournalPromptResult } from "../../../../lib/journal";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
@@ -12,10 +13,14 @@ import {
   mintLinkToken,
   purgeEmptyAnonymousLeads,
 } from "../../../../lib/map/store";
+import {
+  syncCallTranscripts,
+  type TranscriptSyncResult,
+} from "../../../../lib/voice/transcript-sync";
 
 /**
  * GET /api/map/cron  (Vercel cron, hourly)
- * Three promise-keeping jobs plus one hygiene job in one pass:
+ * The promise-keeping jobs plus hygiene in one pass:
  *   1. The single 24h reminder for parked flows (one send ever, never a
  *      sequence: reminder_sent_at is checked and stamped).
  *   2. The band-ready promise: children captured outside the scored range
@@ -24,6 +29,11 @@ import {
  *      the re-check that makes the numbers visibly move.
  *   4. Hygiene: anonymous leads with no email and no kids purge after a
  *      week (see purgeEmptyAnonymousLeads for why this is zero-loss).
+ *   5. Call-transcript capture + the post-call memory turn ("save every
+ *      call ALWAYS", founder ruling 2026-07-09; agentic ladder items 2-3).
+ *      Skips cleanly when TELNYX_API_KEY is absent.
+ *   6. The evening journal prompt in each family's own time zone (item 7;
+ *      dark unless JOURNAL_PROMPT_ENABLED=true).
  * Gated by CRON_SECRET so only Vercel's scheduler can trigger sends.
  */
 export async function GET(request: Request): Promise<Response> {
@@ -36,6 +46,14 @@ export async function GET(request: Request): Promise<Response> {
   let bandReady = 0;
   let retests = 0;
   let purged = 0;
+  let transcripts: TranscriptSyncResult = {
+    scanned: 0,
+    stored: 0,
+    linked: 0,
+    extracted: 0,
+    skipped: true,
+  };
+  let journal: JournalPromptResult = { candidates: 0, sent: 0, skipped: true };
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -87,10 +105,15 @@ export async function GET(request: Request): Promise<Response> {
       }
     }
     purged = await purgeEmptyAnonymousLeads();
+    transcripts = await syncCallTranscripts();
+    journal = await runJournalPromptPass();
   } catch (error) {
     console.error("map/cron failed:", error instanceof Error ? error.message : "unknown");
-    return Response.json({ ok: false, reminders, bandReady, retests, purged }, { status: 500 });
+    return Response.json(
+      { ok: false, reminders, bandReady, retests, purged, transcripts, journal },
+      { status: 500 },
+    );
   }
 
-  return Response.json({ ok: true, reminders, bandReady, retests, purged });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, journal });
 }

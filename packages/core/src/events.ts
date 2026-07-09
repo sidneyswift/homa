@@ -192,10 +192,69 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     child_id: z.uuid().optional(),
   }),
+  // Call-transcript capture (agentic ladder item 2, founder direction
+  // 2026-07-09): one event per NEWLY stored transcript. No phone numbers,
+  // no content; unlinked calls carry no family reference at all.
+  "voice.transcript_synced": z.object({
+    line: z.enum(["general", "curriculum"]),
+    message_count: z.number().int().min(0),
+    linked_family: z.boolean(),
+  }),
+  // The voice remember tool (item 6): a memory saved live on a call.
+  "voice.memory_saved": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+  }),
+  // The post-call memory turn (item 3): counts only, never content.
+  "memory.call_extracted": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+    saved: z.number().int().min(0),
+    skipped: z.number().int().min(0),
+  }),
+  // The post-turn chat review (item 8, M2-13): counts only.
+  "memory.review_extracted": z.object({
+    family_id: z.uuid(),
+    saved: z.number().int().min(0),
+    skipped: z.number().int().min(0),
+    messages_reviewed: z.number().int().min(0),
+  }),
+  // A parent removed a saved memory from /home (the undo surface).
+  "memory.forgotten": z.object({
+    family_id: z.uuid(),
+    source: z.enum(["homa", "parent", "onboarding", "call", "review"]),
+  }),
+  // The evening journal prompt (item 7, FR-6 seed; flag-dark).
+  "journal.prompt_sent": z.object({
+    family_id: z.uuid(),
+  }),
+  // Capture-time hours (M3-05 slice, 2026-07-09). Subject and minutes
+  // are the whole story; the note (parent's words) is PII-adjacent and
+  // stays on the row.
+  "voice.hours_logged": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+    subject: z.string(),
+    minutes: z.number().int().min(1).max(600),
+  }),
   // Same tool, web chat + SMS (agent/tools/send_followup_email.ts).
   "chat.email_sent": z.object({
     family_id: z.uuid(),
     channel: z.enum(["web", "sms"]),
+  }),
+  // Same capture-time hours, from the chat agent's tool. Emitted with
+  // the caller's token (chat.% policy); family_id rides the row column.
+  "chat.hours_logged": z.object({
+    subject: z.string(),
+    minutes: z.number().int().min(1).max(600),
+    channel: z.enum(["web", "sms"]),
+  }),
+  // The recall tool (item 4, M2-15): the agent searched its own history.
+  // Emitted with the caller's token (chat.% policy). Query text never
+  // enters props; scope and result count are the whole story.
+  "chat.recall_used": z.object({
+    scope: z.enum(["calls", "chats", "memories", "all"]),
+    results: z.number().int().min(0),
   }),
   // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
   // token and family_id (events policy, migration #13). No message content.
