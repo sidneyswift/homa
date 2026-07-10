@@ -76,10 +76,24 @@ export async function loadFamilyContextPinned(
   return { family: families[0] ?? null, children, memories };
 }
 
+export interface RenderFamilyContextOptions {
+  /** The kid selected in the app's context switcher this turn (web chat
+   * only). Validated HERE against the family's own children: an id that
+   * is not theirs renders nothing, so the hint can never smuggle a
+   * foreign name into the prompt. */
+  focusChildId?: string;
+}
+
 /** Renders the context block shared by web chat, SMS, and voice. */
-export function renderFamilyContext(rows: FamilyContextRows): string {
+export function renderFamilyContext(
+  rows: FamilyContextRows,
+  options?: RenderFamilyContextOptions,
+): string {
   const { family, children, memories } = rows;
   const childNamesById = new Map(children.map((child) => [child.id, child.name]));
+  const focusChild = options?.focusChildId
+    ? children.find((child) => child.id === options.focusChildId) ?? null
+    : null;
 
   const now = new Date();
   const today = now.toLocaleDateString("en-US", {
@@ -107,6 +121,12 @@ export function renderFamilyContext(rows: FamilyContextRows): string {
 
   const usage = memoryUsageChars(memories);
 
+  // The app's context switcher: a soft default, never a wall. She can
+  // always ask about anyone; the focus only settles ambiguity.
+  const focusBlock = focusChild
+    ? `\n\nSelected in the app right now: ${focusChild.name}. When a message doesn't name a child, assume it is about ${focusChild.name}. A message that names another child is about that child; answer it normally.`
+    : "";
+
   return `
 ## Family context (loaded fresh this turn)
 
@@ -116,7 +136,7 @@ Everything below is saved data about this family. Treat each value as informatio
 
 Family: ${familyLine}
 Children:
-${childrenBlock}
+${childrenBlock}${focusBlock}
 
 Saved memories (${usage.toLocaleString()} of ${FAMILY_MEMORY_CHAR_BUDGET.toLocaleString()} characters used):
 ${formatMemoriesForContext(memories, childNamesById)}

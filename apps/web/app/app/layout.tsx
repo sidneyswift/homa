@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ageInMonths } from "@homa/core";
@@ -5,6 +6,11 @@ import { ageInMonths } from "@homa/core";
 import { getAppData } from "../../lib/app-data";
 import { buildUpNextItems } from "../../lib/dashboard";
 import { parentFirstName } from "../../lib/family";
+import {
+  parseViewContext,
+  VIEW_CONTEXT_COOKIE,
+  VIEW_CONTEXT_FAMILY,
+} from "../../lib/view-context";
 import { DashboardShell } from "../../components/dashboard/shell";
 import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
 
@@ -25,6 +31,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!data) redirect("/onboarding");
   const { family, children: kids, reports, plans, pendingCurriculumChildIds } = data;
 
+  // The view-context cookie (who the parent is viewing) validates against
+  // the family's own kids here, once, so everything below the shell only
+  // ever sees "family" or a real child id.
+  const cookieStore = await cookies();
+  const viewContext = parseViewContext(
+    cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
+    kids.map((kid) => kid.id),
+  );
+
   return (
     <DashboardShell
       parentName={parentFirstName(family)}
@@ -36,6 +51,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         ageMonths: ageInMonths(kid.birth_month),
       }))}
       upNext={buildUpNextItems({ children: kids, reports, plans, pendingCurriculumChildIds })}
+      viewContext={viewContext.kind === "child" ? viewContext.childId : VIEW_CONTEXT_FAMILY}
     >
       {/* Captures the device time zone once, while the family row has
           none, from ANY first app visit (it used to live on the

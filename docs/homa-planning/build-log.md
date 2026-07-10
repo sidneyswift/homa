@@ -3,6 +3,86 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (afternoon) · The context switcher: family or one kid, one selection every surface reads
+
+Founder direction (voice note, midday): the app needs one way to say "who
+am I looking at". On the phone, a kid avatar on the top right of the bar
+that opens a select (whole family or one kid); the progress report tab
+follows it, and chat can focus on one kid without ever refusing to talk
+about the others. Founder approved the design and said "implement and
+test e2e".
+
+Shipped, web app only (the Expo app has no report or planner surfaces
+yet; it gets the same pattern when those land):
+
+1. **One selection, one cookie.** `homa-view-context` (httpOnly, 1 year)
+   holds `family` or a child id. `lib/view-context.ts` is the pure
+   parser; every reader validates the value against the caller's OWN
+   RLS-loaded children, so a stale or forged id degrades to family and
+   never reaches a query (tenancy law). The write is a server action
+   (`app/app/view-context-actions.ts`) that re-checks the id against
+   `getMyChildren` before setting, then revalidates the /app layout.
+2. **One control, two hosts** (`components/dashboard/context-switcher.tsx`).
+   Phone: avatar button top-right in the bar (the old wordmark-centering
+   spacer's spot), menu drops from it, no drawer needed. Desktop: a
+   "Viewing" row at the top of the sidebar. Families with one kid never
+   see it. Menu pattern matches AccountMenu (Escape, outside tap,
+   ease-out entrance); outside tap uses a document listener because the
+   phone bar's backdrop-blur would clip a fixed scrim.
+3. **Surfaces.** Report tab (`/app/report`) resolves to the selected kid
+   first, then first-kid-with-report. On a kid-scoped page (report, kid
+   page), picking a sibling navigates to their same page; picking whole
+   family stays put. Planner narrows to the kid's column and the heading
+   becomes "Story's week"; avatar tones keep the full-family index so
+   colors never shift. Chat shows an "About Story" pill over the
+   composer with a plain pointer to the switcher.
+4. **The agent hears it.** The cookie rides every same-origin eve request;
+   the channel's auth walk stamps `attributes.viewChildId` (a UI hint,
+   never an auth fact), and `renderFamilyContext` validates the id
+   against the family's children before adding one line: assume unnamed
+   questions are about the selected kid, a named kid always wins. SMS,
+   email, and voice are untouched (no cookie, no line).
+
+Copy ran both gates (reader, then editor). The reader gate's biggest
+catch was pre-existing planner empty-state copy ("Every report has a
+one-tap month...") that my kid-name variant made worse; reworded to
+"A month is four weeks of small activities. One tap in the progress
+report builds it, and this page fills in." The editor gate then aligned
+the chat hint to the one-name law ("Change who you're viewing from the
+top right", matching the screen-reader label) and killed "this board".
+
+Verified: typecheck, lint, build, all four guards green. E2E: 23-check
+Playwright pass against a dev server on homa-prod (synthetic 2-kid
+family seeded through the real /api/map routes: start, children, claim,
+family, 16 base answers per kid, score x2). Covers the founder scenario
+exactly (report tab opens the selected kid; the top-right switcher swaps
+the report to the sibling), planner narrowing and restore, the chip
+appearing without a reload, a forged-cookie probe (degrades to family,
+leaks nothing), a foreign-child-id report URL (renders not-found, leaks
+nothing), and one LIVE agent turn: with Story selected, "which kid am I
+focused on?" answered "Story".
+
+Calls made alone, worth auditing:
+
+- Selection is a browser cookie, not a DB column: per-device on purpose
+  (her phone can sit on Amalia while the laptop shows the family), zero
+  schema, and the agent reads it per turn with no new plumbing. If
+  cross-device memory of the selection ever matters, this becomes a
+  `families`/member preference column.
+- Chat focus is a soft default, never a filter: the focus line only
+  settles ambiguity, so "what about Amalia?" mid-focused-chat just works.
+  No per-kid transcript separation yet (tester memo 3 wants it; that is
+  M1-02 conversation-persistence territory).
+- Report tab with a selected kid who has NO report follows the standing
+  law (their report page routes to /onboarding, where the questions
+  live) instead of silently showing a sibling.
+- Housekeeping: the 6 synthetic e2e families (and their auth users) were
+  cascade-deleted from homa-prod after the run, verified zero orphans;
+  report emails to the @example.com addresses bounced by design. The
+  expired `VERCEL_OIDC_TOKEN` in `apps/web/.env.local` (73 hours past
+  expiry, local chat was dead) was replaced with a fresh `vercel env
+  pull` token, and the dev server on :3000 was restarted clean.
+
 ## 2026-07-10 (afternoon) · Founder ruling: build the taxonomy on Marble's open dataset; vendored at docs/homa-benchmarks/marble
 
 Context: a deep comparison of the Mac Mini Homa's benchmarking (15 domains,

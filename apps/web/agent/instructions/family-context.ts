@@ -67,7 +67,12 @@ export default defineDynamic({
   events: {
     "turn.started": async (_event, ctx) => {
       const attributes = ctx.session.auth.current?.attributes as
-        | { channel?: string; familyId?: string; supabaseAccessToken?: string }
+        | {
+            channel?: string;
+            familyId?: string;
+            supabaseAccessToken?: string;
+            viewChildId?: string;
+          }
         | undefined;
 
       try {
@@ -84,7 +89,14 @@ export default defineDynamic({
         } else {
           throw new MissingFamilyContextError();
         }
-        return defineInstructions({ markdown: renderFamilyContext(rows) });
+        // The app's context switcher (web chat only; SMS and email have
+        // no cookie). renderFamilyContext validates the id against the
+        // family's own children, so a stale value renders nothing.
+        return defineInstructions({
+          markdown: renderFamilyContext(rows, {
+            focusChildId: attributes?.viewChildId,
+          }),
+        });
       } catch (error) {
         if (error instanceof MissingFamilyContextError) {
           return defineInstructions({

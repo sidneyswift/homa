@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
 import { getAppData } from "../../lib/app-data";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
+import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
 import { ChatClient } from "./chat-client";
 
 /**
@@ -33,11 +35,25 @@ export default async function ChatPage({
   const app = await getAppData();
   const { draft } = await searchParams;
 
+  // The context switcher's selection: when one kid is selected, the
+  // composer says so and the agent hears it (the eve channel reads the
+  // same cookie off every turn's request).
+  const cookieStore = await cookies();
+  const viewContext = parseViewContext(
+    cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
+    (app?.children ?? []).map((child) => child.id),
+  );
+  const focusChild =
+    viewContext.kind === "child"
+      ? (app?.children ?? []).find((child) => child.id === viewContext.childId) ?? null
+      : null;
+
   return (
     <ChatClient
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
       parentName={app?.family.parent_display_name ?? null}
+      focusChildName={focusChild?.name ?? null}
       // The journal email's deep link (?draft=journal) lands with the
       // composer already started; she edits and sends herself.
       initialDraft={draft === "journal" ? "Here's how today went: " : undefined}

@@ -5,6 +5,7 @@ import { ageLabel } from "@homa/core";
 import type { UpNextItem } from "../../lib/dashboard";
 import { Logo } from "../brand/Logo";
 import { AccountMenu } from "./account-menu";
+import { ContextSwitcher } from "./context-switcher";
 import { SidebarNav } from "./sidebar-nav";
 
 /**
@@ -49,6 +50,9 @@ export interface SidebarProps {
   avatarUrl: string | null;
   kids: SidebarKid[];
   upNext: UpNextItem[];
+  /** Who the parent is viewing: "family" or one of the kids' ids
+   * (validated by the layout against the family's own children). */
+  viewContext: string;
 }
 
 export function Sidebar(props: SidebarProps) {
@@ -77,9 +81,14 @@ export function SidebarContent({
   avatarUrl,
   kids,
   upNext,
+  viewContext,
 }: SidebarProps) {
   return (
     <>
+      {/* Who am I viewing: family or one kid. Multi-kid families only;
+          the switcher renders nothing when there is nothing to switch. */}
+      <ContextSwitcher kids={kids} selected={viewContext} variant="rail" />
+
       <SidebarNav />
 
       <div className="mt-6 rounded-lg bg-page px-3.5 py-3.5">

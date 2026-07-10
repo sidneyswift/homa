@@ -5,17 +5,21 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
+import { ContextSwitcher } from "./context-switcher";
 import { SidebarContent, type SidebarProps } from "./sidebar";
 
 /**
  * The signed-in phone nav (founder call 2026-07-09: one mobile nav on
  * every signed-in page, and it is a hamburger on the top left that opens
- * the sidebar). The bar carries only the hamburger and the wordmark; the
- * old gear / Ask Homa / Sign out cluster retired because the drawer is
- * the whole sidebar, tabs, up next, kids, and the account menu included,
- * so every one of those doors now lives one tap in. Renders in the /app
- * shell, so every signed-in surface gets it for free. The bar's h-14 is
- * load-bearing: chat's phone height is 100dvh minus exactly this bar.
+ * the sidebar). The bar carries the hamburger, the wordmark, and (for
+ * multi-kid families) the context switcher avatar on the right (founder
+ * lean 2026-07-10: switch kids from the top right without the drawer);
+ * the old gear / Ask Homa / Sign out cluster retired because the drawer
+ * is the whole sidebar, tabs, up next, kids, and the account menu
+ * included, so every one of those doors now lives one tap in. Renders in
+ * the /app shell, so every signed-in surface gets it for free. The bar's
+ * h-14 is load-bearing: chat's phone height is 100dvh minus exactly this
+ * bar.
  *
  * Drawer behavior matches the house menus (marketing Nav, AccountMenu):
  * closes on Escape, a backdrop tap, any link tap inside, or the viewport
@@ -80,8 +84,15 @@ export function MobileNav(props: SidebarProps) {
           <Logo size={24} />
         </Link>
 
-        {/* Balances the hamburger so the wordmark sits centered. */}
-        <span className="w-[38px]" aria-hidden="true" />
+        {/* The context switcher (kid avatar, top right, founder lean
+            2026-07-10) for multi-kid families; single-kid families keep
+            the spacer that balances the hamburger so the wordmark sits
+            centered either way. */}
+        {props.kids.length > 1 ? (
+          <ContextSwitcher kids={props.kids} selected={props.viewContext} variant="bar" />
+        ) : (
+          <span className="w-[38px]" aria-hidden="true" />
+        )}
       </header>
 
       {/* The drawer lives OUTSIDE the bar: the bar's backdrop-blur makes

@@ -16,8 +16,11 @@ import { WeekBlock, type WeekBlockTone } from "./week-block";
  * The week board itself (pure render; page.tsx owns auth + data). Each
  * kid's column shows the CURRENT week of their real four-week plans,
  * derived from the retest clock, checkable in place through the same
- * store as the plan pages. Day-by-day scheduling is a later milestone
- * (M2-10); until then this board never pretends activities have days.
+ * store as the plan pages. When the context switcher has one kid
+ * selected (focusChildId), the board narrows to that kid's column and
+ * the heading names them; the whole family is the default. Day-by-day
+ * scheduling is a later milestone (M2-10); until then this board never
+ * pretends activities have days.
  */
 
 /** Block tones cycle the template's subject palette per column position. */
@@ -39,12 +42,15 @@ export function PlannerView({
   plans,
   timeZone,
   now,
+  focusChildId,
 }: {
   kids: ChildRecord[];
   reports: Map<string, DashboardReport>;
   plans: DashboardPlan[];
   timeZone: string;
   now: Date;
+  /** One kid selected in the context switcher, or null for everyone. */
+  focusChildId: string | null;
 }) {
   const nowMs = now.getTime();
   const plansByKid = new Map<string, DashboardPlan[]>();
@@ -54,6 +60,12 @@ export function PlannerView({
     plansByKid.set(plan.childId, list);
   }
 
+  // The switcher narrows the board; avatar tones still come from each
+  // kid's position in the FULL family list so colors never shift.
+  const focusKid = focusChildId ? kids.find((kid) => kid.id === focusChildId) ?? null : null;
+  const visibleKids = focusKid ? [focusKid] : kids;
+  const visiblePlans = focusKid ? plans.filter((plan) => plan.childId === focusKid.id) : plans;
+
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -62,7 +74,7 @@ export function PlannerView({
             This week {"\u00b7"} {weekSpanLabel(now, timeZone)}
           </p>
           <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
-            Your week
+            {focusKid ? `${focusKid.name}'s week` : "Your week"}
           </h1>
         </div>
         <Link
@@ -73,17 +85,22 @@ export function PlannerView({
         </Link>
       </header>
 
-      {plans.length === 0 ? (
+      {visiblePlans.length === 0 ? (
         <div className="mt-6 rounded-lg border border-border-subtle bg-card p-8 text-center shadow-sm">
           <p className="font-display text-xl font-semibold text-strong">
-            No months are running yet.
+            {focusKid
+              ? `There's no month set up for ${focusKid.name} yet.`
+              : "There's no month set up yet."}
           </p>
+          {/* Copy-kit empty-state shape, reworded through both copy gates
+              (2026-07-10): define a month first, then the mechanic; the
+              buttons below are the door. */}
           <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-            Every report has a one-tap month: four weeks of small moves aimed at exactly
-            what&apos;s growing. Start one and this board fills in.
+            A month is four weeks of small activities. One tap in the progress
+            report builds it, and this page fills in.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            {kids.map((child) => {
+            {visibleKids.map((child) => {
               const token = reports.get(child.id)?.token;
               if (token) {
                 return (
@@ -112,8 +129,15 @@ export function PlannerView({
           </div>
         </div>
       ) : (
-        <div className="mt-6 grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div
+          className={
+            focusKid
+              ? "mt-6 grid items-start gap-4 md:max-w-xl"
+              : "mt-6 grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3"
+          }
+        >
           {kids.map((child, index) => {
+            if (focusKid && child.id !== focusKid.id) return null;
             const kidPlans = plansByKid.get(child.id) ?? [];
             if (kidPlans.length === 0) return null;
             const [avatarBg, avatarInk] = avatarTone(index);

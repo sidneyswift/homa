@@ -21,6 +21,7 @@ export function DashboardShell({
   avatarUrl,
   kids,
   upNext,
+  viewContext,
   children,
 }: {
   parentName: string;
@@ -28,6 +29,8 @@ export function DashboardShell({
   avatarUrl: string | null;
   kids: SidebarKid[];
   upNext: UpNextItem[];
+  /** "family" or a kid id: who the context switcher shows as selected. */
+  viewContext: string;
   children: ReactNode;
 }) {
   return (
@@ -38,6 +41,7 @@ export function DashboardShell({
         avatarUrl={avatarUrl}
         kids={kids}
         upNext={upNext}
+        viewContext={viewContext}
       />
 
       <MobileNav
@@ -46,6 +50,7 @@ export function DashboardShell({
         avatarUrl={avatarUrl}
         kids={kids}
         upNext={upNext}
+        viewContext={viewContext}
       />
 
       <main className="min-w-0 flex-1">{children}</main>

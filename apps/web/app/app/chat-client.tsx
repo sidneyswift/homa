@@ -58,11 +58,16 @@ export function ChatClient({
   storageKey,
   familyId,
   parentName,
+  focusChildName,
   initialDraft,
 }: {
   storageKey: string;
   familyId: string | null;
   parentName: string | null;
+  /** The kid selected in the context switcher, or null for the whole
+   * family. Display only: the agent learns the focus server-side from
+   * the same cookie, this just keeps the composer honest about it. */
+  focusChildName?: string | null;
   /** Pre-fills the composer (the journal email's deep link); the parent
    * still edits and sends herself, nothing auto-sends. */
   initialDraft?: string;
@@ -259,6 +264,24 @@ export function ChatClient({
           arrow-up send button. Typing stays enabled while Homa works; only
           sending waits. */}
       <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3.5 sm:px-6">
+        {focusChildName ? (
+          // The context switcher has one kid selected; say so where she
+          // types, so a focused chat never comes as a surprise, and name
+          // the way back (reader-gate fix: the pill alone read as a
+          // mystery button). The switcher lives in the top bar on phones
+          // and in the sidebar on desktop, so the hint names each.
+          <p className="mx-auto mb-2.5 flex w-full max-w-[780px] items-center gap-2">
+            <span className="inline-flex items-center rounded-pill bg-brand-soft px-3 py-1 text-xs font-semibold text-[var(--clay-700)]">
+              About {focusChildName}
+            </span>
+            <span className="text-xs text-subtle lg:hidden">
+              Change who you&apos;re viewing from the top right.
+            </span>
+            <span className="hidden text-xs text-subtle lg:inline">
+              Change who you&apos;re viewing from the sidebar.
+            </span>
+          </p>
+        ) : null}
         <form
           className="mx-auto flex w-full max-w-[780px] items-center gap-2.5 rounded-pill border border-border-subtle bg-card py-2 pl-5 pr-2 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
           onSubmit={(event) => {

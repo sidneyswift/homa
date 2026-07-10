@@ -2,6 +2,8 @@ import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/chann
 import { eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-context";
+
 /**
  * Route auth for the eve channel (minimal M1-01 slice of FR-1).
  *
@@ -55,6 +57,15 @@ function supabaseAuth(): AuthFn<Request> {
     const attributes: Record<string, string> = { supabaseAccessToken: token };
     if (membership?.family_id) attributes.familyId = membership.family_id;
     if (userData.user.email) attributes.email = userData.user.email;
+
+    // The context switcher's selection rides the same-origin request as a
+    // cookie. It is a UI HINT, not an auth fact: family-context validates
+    // it against the family's own children before the model ever hears a
+    // name, so a stale or forged id simply drops (tenancy law).
+    const viewContext = readViewContextCookie(request.headers.get("cookie"));
+    if (viewContext && viewContext !== VIEW_CONTEXT_FAMILY) {
+      attributes.viewChildId = viewContext;
+    }
 
     return {
       authenticator: "app",
