@@ -6,9 +6,14 @@ import { MarkdownText } from "./markdown-text";
 import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
 
 /**
- * Message rendering for the chat transcript: markdown text, worksheet
- * cards, and named-effect memory chips (the MJ-02 confirmation spirit:
- * when Homa saves, updates, or deletes something durable, the effect is
+ * Message rendering for the chat transcript, in the assistant-transcript
+ * style (founder screenshot review 2026-07-09, "Claude structure, Homa
+ * skin"): the parent's messages sit in the kit's brand bubble on the
+ * right (ui_kits/web-app/ChatView.jsx), Homa's replies render FLAT on the
+ * page, no card, and the work Homa did stays visible as quiet past-tense
+ * activity lines ("Checked your family's info") plus the named-effect
+ * memory chips and worksheet cards (the MJ-02 confirmation spirit: when
+ * Homa saves, updates, or deletes something durable, the effect is
  * visible in the transcript, not silent).
  */
 
@@ -48,62 +53,107 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
 
 function MemoryChip({ chip }: { chip: MemoryChipContent }) {
   return (
-    <p className="mt-2 inline-flex max-w-full items-baseline gap-1.5 rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
+    <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
       <span className="font-semibold text-sage">{chip.label}</span>
       {chip.detail ? <span className="truncate text-body">{chip.detail}</span> : null}
     </p>
   );
 }
 
-function partIsRenderable(part: EveMessagePart): boolean {
-  if (part.type === "text") return part.text.trim().length > 0;
-  if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (part.toolName === "create_worksheet") return true;
-    return memoryChipFor(part) !== null;
-  }
-  return false;
-}
+/** Past-tense lines for finished tools with no visible output of their
+ * own (chips and cards carry the rest). The in-flight siblings live in
+ * TOOL_STATUS_LABELS below. */
+const TOOL_DONE_LABELS: Record<string, string> = {
+  get_children: "Checked your family's info",
+  load_skill: "Looked up how we do this",
+};
 
-function MessagePartView({ part, isUser }: { part: EveMessagePart; isUser: boolean }) {
-  if (part.type === "text") {
-    if (isUser) return <p className="whitespace-pre-wrap">{part.text}</p>;
-    return <MarkdownText text={part.text} />;
-  }
-  if (part.type === "dynamic-tool" && part.state === "output-available") {
+/** What one assistant message renders as, in part order: quiet activity
+ * lines (consecutive ones collapse into a single mid-dot line, the way
+ * the reference transcript groups "used X, did Y"), flowing markdown
+ * text, worksheet cards, and memory chips. */
+type AssistantItem =
+  | { kind: "activity"; labels: string[] }
+  | { kind: "text"; text: string }
+  | { kind: "worksheet"; worksheet: WorksheetPayload }
+  | { kind: "chip"; chip: MemoryChipContent };
+
+function assistantItems(parts: readonly EveMessagePart[]): AssistantItem[] {
+  const items: AssistantItem[] = [];
+  for (const part of parts) {
+    if (part.type === "text") {
+      if (part.text.trim().length > 0) items.push({ kind: "text", text: part.text });
+      continue;
+    }
+    if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
     if (part.toolName === "create_worksheet") {
       const output = part.output as { worksheet?: WorksheetPayload } | undefined;
-      if (output?.worksheet) {
-        return (
-          <div className="mt-2">
-            <WorksheetCard worksheet={output.worksheet} />
-          </div>
-        );
-      }
-      return null;
+      if (output?.worksheet) items.push({ kind: "worksheet", worksheet: output.worksheet });
+      continue;
     }
     const chip = memoryChipFor(part);
-    if (chip) return <MemoryChip chip={chip} />;
+    if (chip) {
+      items.push({ kind: "chip", chip });
+      continue;
+    }
+    const label = TOOL_DONE_LABELS[part.toolName];
+    if (!label) continue;
+    const last = items.at(-1);
+    if (last?.kind === "activity") {
+      if (!last.labels.includes(label)) last.labels.push(label);
+    } else {
+      items.push({ kind: "activity", labels: [label] });
+    }
   }
-  return null;
+  return items;
+}
+
+function AssistantItemView({ item }: { item: AssistantItem }) {
+  switch (item.kind) {
+    case "activity":
+      return <p className="text-sm text-subtle">{item.labels.join(" · ")}</p>;
+    case "text":
+      return (
+        <div className="leading-relaxed text-body">
+          <MarkdownText text={item.text} />
+        </div>
+      );
+    case "worksheet":
+      return <WorksheetCard worksheet={item.worksheet} />;
+    case "chip":
+      return <MemoryChip chip={item.chip} />;
+    default: {
+      const exhaustive: never = item;
+      return exhaustive;
+    }
+  }
 }
 
 export function MessageView({ message }: { message: EveMessage }) {
-  const isUser = message.role === "user";
-  if (!message.parts.some(partIsRenderable)) return null;
-
-  return (
-    <div className={isUser ? "flex justify-end" : "flex justify-start"}>
-      <div
-        className={
-          isUser
-            ? "max-w-[85%] rounded-lg rounded-br-sm bg-brand px-4 py-3 text-on-brand"
-            : "max-w-[85%] rounded-lg rounded-bl-sm bg-card px-4 py-3 text-body shadow-sm"
-        }
-      >
-        {message.parts.map((part, index) => (
-          <MessagePartView key={index} part={part} isUser={isUser} />
-        ))}
+  if (message.role === "user") {
+    const text = message.parts
+      .map((part) => (part.type === "text" ? part.text : ""))
+      .join("")
+      .trim();
+    if (text.length === 0) return null;
+    return (
+      <div className="flex justify-end">
+        {/* The kit's user bubble: brand fill, radius-lg with a tucked
+            bottom-right corner, at most 76% of the column. */}
+        <div className="max-w-[76%] rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand shadow-sm">
+          <p className="whitespace-pre-wrap">{text}</p>
+        </div>
       </div>
+    );
+  }
+
+  const items = assistantItems(message.parts);
+  if (items.length === 0) return null;
+  return (
+    <div className="flex flex-col items-start gap-3">
+      {items.map((item, index) => (
+        <AssistantItemView key={index} item={item} />
+      ))}
     </div>
   );
 }
@@ -120,8 +170,8 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
 };
 
 /**
- * What Homa is doing right now, or null when nothing needs a status bubble
- * (plain assistant text streaming shows itself; a second bubble would
+ * What Homa is doing right now, or null when nothing needs a status line
+ * (plain assistant text streaming shows itself; a second line would
  * double up). A user message awaiting a reply shows "thinking…"; an
  * executing tool shows its named activity.
  *
@@ -143,7 +193,7 @@ export function busyLabel(messages: readonly EveMessage[]): string | null {
     // Tool finished; the model is composing what comes next.
     return "thinking…";
   }
-  // A streaming text block with content is already visible; no extra bubble.
+  // A streaming text block with content is already visible; no extra line.
   if (part.type === "text") return part.text.trim().length > 0 ? null : "thinking…";
   return "thinking…";
 }

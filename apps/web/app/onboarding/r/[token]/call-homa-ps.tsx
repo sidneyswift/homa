@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 /**
- * The P.S. at the end of Homa's note (founder ask 2026-07-08: the call
- * offer became a low-stakes sign-off, not its own section). One tap
- * rings the number the family already gave during onboarding; no phone
- * input here. Homa talks the report through on a real call and builds
- * the curriculum from the conversation (it lands on /home when ready).
+ * The call offer, now one plain line inside the letter from Homa
+ * (round 2, founder ask 2026-07-09: "BTW, click if you'd rather I call
+ * you", folded into the letter body instead of its own boxed P.S.). One
+ * tap rings the number the family already gave during onboarding; no
+ * phone input here. Homa talks the report through on a real call and
+ * builds the curriculum from the conversation (it lands on /home when
+ * ready).
  */
 export function CallHomaPs({ childId, childName }: { childId: string; childName: string }) {
   const [state, setState] = useState<"idle" | "busy" | "called" | "error" | "no-session">("idle");
@@ -45,25 +47,25 @@ export function CallHomaPs({ childId, childName }: { childId: string; childName:
 
   if (state === "called") {
     return (
-      <p className="mt-3 text-sm text-body print:hidden">
+      <p className="mt-2 text-body print:hidden">
         Calling you now. Pick up and we&apos;ll talk through {childName}&apos;s report together.
       </p>
     );
   }
 
   return (
-    <div className="mt-3 print:hidden">
-      <p className="text-sm text-body">
-        P.S. Rather talk it through?{" "}
+    <div className="print:hidden">
+      <p className="text-body">
+        BTW,{" "}
         <button
           type="button"
           onClick={() => void call()}
           disabled={state === "busy"}
           className="font-semibold text-brand underline underline-offset-2 transition-opacity duration-(--dur-fast) ease-out hover:opacity-80 disabled:opacity-50"
         >
-          {state === "busy" ? "Calling\u2026" : "Call me"}
+          {state === "busy" ? "calling\u2026" : "click"}
         </button>{" "}
-        and your phone will ring. Yes, really me.
+        if you&apos;d rather I give you a call.
       </p>
       {state === "no-session" ? (
         <p className="mt-1 text-xs text-muted">

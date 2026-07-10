@@ -31,7 +31,7 @@ export interface ReportNarrativeSource {
   answers: Array<{ itemId: string; answer: MapAnswer }>;
   siblingNames: string[];
   /** The archived previous letter (history head), the writer's memory. */
-  priorLetter: { generatedAt: string; note: string; synthesis: string } | null;
+  priorLetter: { generatedAt: string; note: string } | null;
   /** Synced plan check-offs, one row per subject with any progress. */
   practice: Array<{ subjectName: string; done: number; total: number }>;
 }
@@ -87,7 +87,6 @@ export async function getReportNarrativeSource(
     ? {
         generatedAt: archived.generated_at,
         note: archived.narrative.note,
-        synthesis: archived.narrative.synthesis,
       }
     : null;
 

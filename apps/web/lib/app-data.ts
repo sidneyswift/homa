@@ -11,7 +11,7 @@ import { getMyChildren, getMyFamily, type ChildRecord, type FamilyRecord } from 
 
 /**
  * The signed-in app frame's shared reads: family, children, and the rows
- * the sidebar's "up next" rail is derived from. The (app) layout and every
+ * the sidebar's "up next" rail is derived from. The /app layout and every
  * page inside it call getAppData(); React's cache() memoizes it per server
  * request, so the layout and the page rendering in the same pass share one
  * set of queries instead of each re-running them. All reads run under the

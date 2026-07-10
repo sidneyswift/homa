@@ -6,15 +6,20 @@ import { Calendar, House, Sparkles } from "lucide-react";
 
 /**
  * The sidebar's nav list. Client-side on purpose: the app frame renders
- * once in the (app) layout and stays mounted across navigations, so the
+ * once in the /app layout and stays mounted across navigations, so the
  * active highlight can't come from page props anymore; it reads the
  * current pathname instead.
  */
 
-const NAV_ITEMS = [
-  { href: "/home", label: "Home", icon: House },
-  { href: "/chat", label: "Ask Homa", icon: Sparkles },
-  { href: "/planner", label: "Week planner", icon: Calendar },
+/**
+ * The app's tabs, the single source of truth: the desktop sidebar renders
+ * them below, and the marketing Nav's phone menu reuses them for
+ * signed-in visitors (same tabs, same icons, no drift).
+ */
+export const APP_NAV_ITEMS = [
+  { href: "/app", label: "Home", icon: House },
+  { href: "/app/chat", label: "Ask Homa", icon: Sparkles },
+  { href: "/app/planner", label: "Week planner", icon: Calendar },
 ] as const;
 
 export function SidebarNav() {
@@ -22,8 +27,14 @@ export function SidebarNav() {
 
   return (
     <nav className="flex flex-col gap-0.5">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href || pathname.startsWith(`${href}/`);
+      {APP_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        // /app (the dashboard) matches exactly, never by prefix: every
+        // app page lives under /app/, so a prefix match would light the
+        // Home row on all of them.
+        const active =
+          href === "/app"
+            ? pathname === href
+            : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={href}

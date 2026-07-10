@@ -3,7 +3,8 @@ import type { Curriculum } from "@homa/core";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * Reads for the "Call Homa" curriculum feature's /home surface. RLS-scoped
+ * Reads for the "Call Homa" curriculum feature's dashboard surface (/app).
+ * RLS-scoped
  * (child_curricula and child_curriculum_calls both carry member-read
  * policies via is_child_family_member, migration #24), so every row is
  * already this family's own.

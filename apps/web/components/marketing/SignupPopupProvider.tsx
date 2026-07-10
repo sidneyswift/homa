@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { SignupPopupModal } from "./SignupPopupModal";
+import { useSignedIn } from "./use-signed-in";
 
 /**
  * Landing-page signup popup, shared across Nav/Hero/ScrollCta/CtaBand so
@@ -52,9 +53,13 @@ export function SignupPopupProvider({ children }: { children: ReactNode }) {
   const openPopup = useCallback(() => setOpen(true), []);
   const closePopup = useCallback(() => setOpen(false), []);
   const autoOpenedRef = useRef(false);
+  const signedIn = useSignedIn();
 
   useEffect(() => {
-    if (hasAutoShown()) return;
+    // Never auto-pitch signup to a signed-in parent (same rule as the
+    // nav's auth links). The once-ever flag stays unset so a future
+    // signed-out visitor on this browser still gets the one auto-show.
+    if (signedIn || hasAutoShown()) return;
 
     let scheduled = false;
     function check() {
@@ -74,7 +79,7 @@ export function SignupPopupProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [signedIn]);
 
   return (
     <SignupPopupContext.Provider value={openPopup}>

@@ -66,7 +66,7 @@ export function PlannerView({
           </h1>
         </div>
         <Link
-          href="/chat"
+          href="/app/chat"
           className="rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
         >
           Ask Homa to adjust the week
@@ -123,7 +123,7 @@ export function PlannerView({
                 aria-label={`${child.name}'s week`}
                 className="flex flex-col gap-2.5 rounded-lg border border-border-subtle bg-card p-3.5 shadow-sm"
               >
-                <Link href={`/kids/${child.id}`} className="flex items-center gap-2.5 px-0.5 group">
+                <Link href={`/app/kids/${child.id}`} className="flex items-center gap-2.5 px-0.5 group">
                   <span
                     className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-sm font-bold"
                     style={{ background: avatarBg, color: avatarInk }}

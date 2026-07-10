@@ -34,6 +34,18 @@ const nextConfig: NextConfig = {
       { source: "/waitlist", destination: "/onboarding", permanent: true },
       { source: "/map", destination: "/onboarding", permanent: true },
       { source: "/map/:path*", destination: "/onboarding/:path*", permanent: true },
+      // The signed-in app moved under one /app prefix (founder call,
+      // 2026-07-09); every link ever sent (journal emails deep-link
+      // /chat?draft=journal, report emails link /home) keeps working.
+      // 307 on purpose, not 308: these pages are noindex (no SEO equity
+      // to transfer) and the freed top-level names may become marketing
+      // pages later, which a browser-cached permanent redirect would
+      // fight. Query strings carry over automatically.
+      { source: "/home", destination: "/app", permanent: false },
+      { source: "/chat", destination: "/app/chat", permanent: false },
+      { source: "/planner", destination: "/app/planner", permanent: false },
+      { source: "/kids/:path*", destination: "/app/kids/:path*", permanent: false },
+      { source: "/settings", destination: "/app/settings", permanent: false },
     ];
   },
 };

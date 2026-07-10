@@ -67,7 +67,7 @@ export interface ReportFacts {
   /** The previous letter Homa wrote for this child (from the history
    * archive), so each rescore writes chapter N of a correspondence, not a
    * stateless first letter. Null on a first report. */
-  lastLetter: { date: string; note: string; synthesis: string } | null;
+  lastLetter: { date: string; note: string } | null;
   subjects: SubjectFacts[];
 }
 
@@ -116,7 +116,7 @@ export interface ReportFactsInput {
   answers: Array<{ itemId: string; answer: MapAnswer }>;
   history: Array<{ scores: MapScores; generated_at: string }>;
   /** The archived previous narrative (history head), when one exists. */
-  priorLetter?: { generatedAt: string; note: string; synthesis: string } | null;
+  priorLetter?: { generatedAt: string; note: string } | null;
   /** Synced plan check-off counts, one row per subject with any checks. */
   practice?: Array<{ subjectName: string; done: number; total: number }>;
 }
@@ -211,7 +211,6 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
           day: "numeric",
         }),
         note: input.priorLetter.note,
-        synthesis: input.priorLetter.synthesis,
       }
     : null;
 

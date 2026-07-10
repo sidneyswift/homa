@@ -8,7 +8,9 @@ import { createMyFamily } from "../../lib/family";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
-/** First-run family setup, mirroring apps/web/app/home/setup-forms.tsx. */
+/** First-run family setup, mirroring the web onboarding's FamilyStep
+ * (apps/web/app/onboarding; the web's setup forms now live there and in
+ * app/app/settings/add-child-form.tsx). */
 export function CreateFamilyForm({ onCreated }: { onCreated: () => void }) {
   const [name, setName] = useState("");
   const [parentName, setParentName] = useState("");

@@ -17,7 +17,7 @@ export interface CallerAuthAttributes {
 export class MissingFamilyContextError extends Error {
   constructor() {
     super(
-      "No family context on this session. Ask the parent to finish setup at /home first.",
+      "No family context on this session. Ask the parent to finish setup at /app first.",
     );
     this.name = "MissingFamilyContextError";
   }

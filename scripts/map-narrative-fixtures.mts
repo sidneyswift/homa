@@ -67,8 +67,6 @@ async function generateFixture(label: string, input: Parameters<typeof buildRepo
 
   console.log(`\n===== ${label} (v${REPORT_PROMPT_VERSION}, ${generated.durationMs}ms, ${generated.tokensIn} in / ${generated.tokensOut} out) =====`);
   console.log(`\n--- note ---\n${generated.value.note}`);
-  console.log(`\n--- synthesis ---\n${generated.value.synthesis}`);
-  console.log(`\n--- keepsake (to the child) ---\n${generated.value.keepsake}`);
   console.log(`\n--- subject lines ---`);
   for (const [id, line] of Object.entries(generated.value.subjects)) {
     console.log(`  ${id}: ${line}`);

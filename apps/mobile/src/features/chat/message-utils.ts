@@ -1,7 +1,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 /**
- * Transcript display logic ported from apps/web/app/chat/message-parts.tsx
+ * Transcript display logic ported from apps/web/app/app/chat/message-parts.tsx
  * (keep the tool names and labels in sync). Pure functions, no JSX, so
  * both the message views and the analytics counter can share them.
  */

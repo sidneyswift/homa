@@ -39,7 +39,8 @@ export default defineDynamic({
   your own expertise.
 - If the parent asks for something that needs their family workspace
   (worksheets, saved memories, their kids' profiles), say texting can
-  be linked from their /settings page at thankshoma.com in one step.`;
+  be linked from their settings page at thankshoma.com/app/settings
+  in one step.`;
 
       return defineInstructions({
         markdown: `

@@ -5,14 +5,13 @@ import {
   ageLabel,
   domainLine,
   getMapDomain,
-  growingActivityFor,
   homaNote,
   MAP_SOURCES,
   MONTH_PLAN_DOMAIN,
   cdcChecklistUrl,
+  noteGreeting,
+  notePlanSentence,
   reportStaleness,
-  reportSubtitle,
-  tryHeading,
   US_STATES,
   type DomainScore,
   type MapAnswer,
@@ -23,7 +22,7 @@ import {
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
 import { Logo } from "../../../../components/brand/Logo";
 import { CallHomaPs } from "./call-homa-ps";
-import { GrowthStory, type GrowthEra } from "./growth-story";
+import type { GrowthEra } from "./growth-story";
 import { MonthButton } from "./month-button";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
 import { ReportActions } from "./report-actions";
@@ -36,19 +35,21 @@ import { StateCard } from "./state-card";
 
 /**
  * The progress report renderer, shared by the live tokenized page and the
- * public sample. Rebuilt around progressive disclosure (founder pass
- * 2026-07-08: "if you've said it once, you don't need to say it again"):
- * the note is one sentence with the month button and the call-me P.S.
- * inside it, the snapshot is one chart with one sentence, subject cards
- * are bare until opened, and the state and methodology cards start
- * closed. Movement chips show dated, POSITIVE change only (anti-guilt
- * law: a drop renders as nothing, never a down-arrow). No red, no
- * "behind".
+ * public sample. Built around progressive disclosure (founder pass
+ * 2026-07-08: "if you've said it once, you don't need to say it again",
+ * round 2 on 2026-07-09): the note from Homa reads as an actual letter
+ * (greeting, the note sentence, the month plan, a call-me line, a
+ * sign-off), the snapshot is one chart with one sentence and flows
+ * straight into the whole picture and then subject by subject with
+ * nothing between, subject cards are bare until opened, and the state
+ * and methodology cards start closed. Movement chips show dated,
+ * POSITIVE change only (anti-guilt law: a drop renders as nothing, never
+ * a down-arrow). No red, no "behind".
  *
- * With a narrativeView (D8 overturn), the model-written pieces render in
- * place of the template sentences, per piece: a gate-rejected piece falls
- * back to its template line while the rest of the narrative stands. Every
- * number, badge, chart point, and citation stays computed, either way.
+ * With a narrativeView (D8 overturn), the model-written note and subject
+ * lines render in place of the template sentences, per piece: a
+ * gate-rejected piece falls back to its template line. Every number,
+ * badge, chart point, and citation stays computed, either way.
  */
 
 export interface ReportNarrativeView {
@@ -135,8 +136,6 @@ export function ReportView({
   const generatedPiece = (key: string, text: string | undefined): string | null =>
     narrativeView && text && !rejectedPieces.has(key) ? text : null;
   const noteText = generatedPiece("note", narrativeView?.narrative.note);
-  const synthesisText = generatedPiece("synthesis", narrativeView?.narrative.synthesis);
-  const keepsakeText = generatedPiece("keepsake", narrativeView?.narrative.keepsake);
   const months = ageInMonths(report.birthMonth);
   const editable = !sample;
   const staleness = reportStaleness(report.birthMonth, report.generatedAt);
@@ -146,9 +145,6 @@ export function ReportView({
     ...report.scores.strengthOrder.map((id) => byId.get(id)).filter((s): s is DomainScore => Boolean(s)),
     ...scores.filter((score) => score.position === "not_mapped"),
   ];
-  const growing = scores.filter((score) => score.position === "growing" && !score.exposureBased);
-  const trySection = tryHeading(growing.length);
-
   const prior = report.history[0];
   const movements = new Map<string, Movement>();
   for (const score of scores) {
@@ -186,6 +182,10 @@ export function ReportView({
       (score.position === "growing" || score.position === "on_track"),
   );
   const monthOffered = editable && (monthBuilt || monthBuildable);
+  /** Names the month the plan starts (the letter's plan sentence, not
+   * the report's generation date: a re-opened report should still read
+   * as "this month's plan"). */
+  const monthName = new Date().toLocaleDateString("en-US", { month: "long" });
 
   // The growth story reads the whole archive, oldest chapter first, the
   // live report as the closing chapter.
@@ -259,9 +259,9 @@ export function ReportView({
             <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong sm:text-5xl">
               {report.childName}&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
             </h1>
-            <p className="mt-2 font-serif text-lg italic text-strong/75">
-              {reportSubtitle(months, report.childName)}
-            </p>
+            {/* No subtitle (round 2, founder ask 2026-07-09): the heading
+                flowing straight into age, subjects, and benchmarks below
+                is enough. */}
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-strong/70">
               <span>
                 age <b className="text-strong">{ageLabel(months)}</b>
@@ -279,8 +279,10 @@ export function ReportView({
           </div>
 
           <div className="px-7 py-7 sm:px-10">
-            {/* Note from Homa: one sentence, then the month she built from
-                it, then the call-me P.S. All of it in this one card. */}
+            {/* Note from Homa: a personal letter, not a block of text
+                (round 2, founder ask 2026-07-09). Greeting, the note
+                sentence, the month she built from it, the call-me line,
+                and a sign-off, all in this one card. */}
             <div className="flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
               <div className="flex-shrink-0 pt-0.5">
                 <Logo variant="mark" size={34} />
@@ -289,16 +291,15 @@ export function ReportView({
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
                   A note from Homa
                 </p>
-                <p className="mt-1 whitespace-pre-line text-body">
-                  {noteText ?? homaNote(report.scores, report.childName, report.parentFirstName ?? undefined)}
+                <p className="mt-2 font-serif text-lg italic text-strong">
+                  {noteGreeting(report.parentFirstName)}
+                </p>
+                <p className="mt-2 text-body">
+                  {noteText ?? homaNote(report.scores, report.childName)}
                 </p>
                 {monthOffered ? (
                   <>
-                    <p className="mt-2 text-body">
-                      I took everything you told me and turned it into {report.childName}&apos;s
-                      month: a four-week plan with a re-check at the end, so you can see what
-                      moved.
-                    </p>
+                    <p className="mt-2 text-body">{notePlanSentence(report.childName, monthName)}</p>
                     <MonthButton
                       childId={report.childId}
                       childName={report.childName}
@@ -311,8 +312,15 @@ export function ReportView({
                   </>
                 ) : null}
                 {editable ? (
-                  <CallHomaPs childId={report.childId} childName={report.childName} />
+                  <div className="mt-2">
+                    <CallHomaPs childId={report.childId} childName={report.childName} />
+                  </div>
                 ) : null}
+                <p className="mt-3 font-serif italic text-strong">
+                  Thanks,
+                  <br />
+                  Homa
+                </p>
               </div>
             </div>
 
@@ -324,7 +332,8 @@ export function ReportView({
               eras={eras}
             />
 
-            {/* The whole picture */}
+            {/* The whole picture, flowing straight into subject by subject
+                (round 2, founder ask 2026-07-09: nothing between them). */}
             <h2 className="mt-9 font-display text-xl font-semibold text-strong">The whole picture</h2>
             <p className="mt-1 text-sm text-muted">
               One dot per subject. The line marks typical for {ageLabel(months)}. Yellow is ahead,
@@ -334,20 +343,6 @@ export function ReportView({
             <div className="mt-4 rounded-lg border border-border-subtle bg-card p-4">
               <ReportChart scores={ordered} prior={prior?.scores.domains ?? null} />
             </div>
-
-            {/* The model-written cross-subject story (D8 overturn): the one
-                place interpretation is wanted. Renders only when generated
-                and gate-approved; there is no template equivalent. */}
-            {synthesisText ? (
-              <div className="mt-4 rounded-lg border border-border-subtle bg-[var(--surface-sunken)] p-5">
-                <p className="whitespace-pre-line text-body">{synthesisText}</p>
-              </div>
-            ) : null}
-
-            {/* The growth story, elevated (read-through: the line over time
-                is the thing she loves): right under the whole picture.
-                Renders nothing on a first report. */}
-            <GrowthStory childName={report.childName} eras={eras} />
 
             {/* Subject by subject: bare rows until opened (progressive
                 disclosure). Open = what the subject is, the questions and
@@ -535,52 +530,11 @@ export function ReportView({
               })}
             </div>
 
-            {/* Things to try */}
-            {growing.length > 0 ? (
-              <>
-                <h2 className="mt-9 font-display text-xl font-semibold text-strong">{trySection.title}</h2>
-                <p className="mt-1 text-sm text-muted">{trySection.sub}</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {growing.slice(0, 2).map((score) => {
-                    const domain = getMapDomain(score.domainId);
-                    if (!domain) return null;
-                    const activity = growingActivityFor(domain, months);
-                    return (
-                      <div key={score.domainId} className="rounded-lg p-4" style={{ background: "var(--info-soft)" }}>
-                        <p className="font-mono text-[0.65rem] uppercase tracking-widest" style={{ color: "var(--sky-600)" }}>
-                          {domain.displayName}
-                        </p>
-                        <p className="mt-1 font-semibold text-strong">{activity.title}</p>
-                        <p className="mt-1 text-sm text-body">{activity.description}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
-
-            {/* The memory-box letter, the one piece written TO the child. */}
-            {keepsakeText ? (
-              <div className="mt-9 rounded-lg p-6" style={{ background: "var(--gold-100)" }}>
-                <p
-                  className="font-mono text-[0.65rem] uppercase tracking-widest"
-                  style={{ color: "var(--gold-ink)" }}
-                >
-                  For {report.childName}&apos;s memory box {"\u00b7"} {generatedDate}
-                </p>
-                <p
-                  className="mt-2 whitespace-pre-line font-serif text-lg italic leading-relaxed"
-                  style={{ color: "var(--gold-ink-strong)" }}
-                >
-                  {keepsakeText}
-                </p>
-                <p className="mt-2 text-xs print:hidden" style={{ color: "var(--gold-ink)" }}>
-                  Print the report to keep this letter.
-                </p>
-              </div>
-            ) : null}
-
-            {/* The state card: reference data joined at render, closed by
+            {/* After subject by subject, straight into the state card and
+                methodology (round 2, founder ask 2026-07-09: "Things to
+                try" and the memory-box letter removed; every subject
+                card's own next step already carries that job). The
+                state card: reference data joined at render, closed by
                 default, so it can never go stale inside anyone's report. */}
             {stateRequirements ? (
               <StateCard summary={stateRequirements} childName={report.childName} />
@@ -732,7 +686,7 @@ export function ReportView({
                 // the family dashboard, where the kids, chat, and settings
                 // live from here on.
                 <Link
-                  href="/home"
+                  href="/app"
                   className={reportButtonClass(
                     "primary",
                     "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
@@ -768,7 +722,7 @@ export function ReportView({
               back to your family
             </Link>
           ) : (
-            <Link href="/home" className="text-brand underline-offset-2 hover:underline">
+            <Link href="/app" className="text-brand underline-offset-2 hover:underline">
               go to your family dashboard
             </Link>
           )}

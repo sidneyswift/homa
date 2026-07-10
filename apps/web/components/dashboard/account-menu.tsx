@@ -49,7 +49,7 @@ export function AccountMenu({
             className="absolute inset-x-0 bottom-full z-50 mb-1.5 origin-bottom rounded-md border border-border-subtle bg-card p-1.5 shadow-lg transition-[opacity,translate,scale] duration-(--dur-base) ease-out starting:translate-y-1 starting:scale-[0.98] starting:opacity-0 motion-reduce:transition-none"
           >
             <Link
-              href="/settings"
+              href="/app/settings"
               onClick={close}
               className="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
             >

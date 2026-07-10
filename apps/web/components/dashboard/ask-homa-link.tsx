@@ -10,10 +10,10 @@ import { usePathname } from "next/navigation";
  */
 export function AskHomaLink() {
   const pathname = usePathname();
-  if (pathname === "/chat" || pathname.startsWith("/chat/")) return null;
+  if (pathname === "/app/chat" || pathname.startsWith("/app/chat/")) return null;
   return (
     <Link
-      href="/chat"
+      href="/app/chat"
       className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
     >
       Ask Homa

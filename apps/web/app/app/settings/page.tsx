@@ -12,12 +12,12 @@ import { TextingCard } from "./texting-card";
 import { TimeZoneCard } from "./time-zone-card";
 
 /**
- * /settings: the family's account basics (add a child, the texting line,
- * the time zone), moved off the dashboard 2026-07-09 (founder ask: /home
- * is for the week, settings get their own page). Same setup gate as the
- * rest of the (app) group (one onboarding for every door); the frame
- * renders in the (app) layout. Auth is enforced by proxy.ts; data access
- * is enforced by RLS regardless.
+ * /app/settings: the family's account basics (add a child, the texting
+ * line, the time zone), moved off the dashboard 2026-07-09 (founder ask:
+ * the dashboard is for the week, settings get their own page). Same setup
+ * gate as the rest of the /app pages (one onboarding for every door); the
+ * frame renders in the /app layout. Auth is enforced by proxy.ts; data
+ * access is enforced by RLS regardless.
  */
 
 export const metadata: Metadata = {

@@ -46,9 +46,7 @@ export const NARRATIVE_LENGTH_CAPS = {
   // to be shorter"): the caps now enforce the prompt's brevity budgets.
   note: 520,
   subject: 340,
-  synthesis: 700,
   drawer: 360,
-  keepsake: 900,
   planIntro: 450,
   planWeek: 300,
   planClosing: 400,
@@ -102,15 +100,6 @@ export function validateNarrative(
   const note = pieceProblem(narrative.note, NARRATIVE_LENGTH_CAPS.note, context);
   if (note) rejected.note = note;
 
-  const synthesis = pieceProblem(narrative.synthesis, NARRATIVE_LENGTH_CAPS.synthesis, context);
-  if (synthesis) rejected.synthesis = synthesis;
-
-  // The keepsake has no template fallback: a rejection simply renders
-  // nothing there, and never fails the whole generation (the report
-  // stands without its memory-box page; it cannot stand without a note).
-  const keepsake = pieceProblem(narrative.keepsake, NARRATIVE_LENGTH_CAPS.keepsake, context);
-  if (keepsake) rejected.keepsake = keepsake;
-
   const subjectIds = context.expectedSubjects ?? Object.keys(narrative.subjects);
   let subjectRejections = 0;
   for (const domainId of subjectIds) {
@@ -136,9 +125,9 @@ export function validateNarrative(
   }
 
   // A report that is half fallback reads worse than a clean template
-  // report: the note and synthesis are the voice of the whole page, and
-  // more than 4 broken card lines means the generation went sideways.
-  const failed = Boolean(rejected.note) || Boolean(rejected.synthesis) || subjectRejections > 4;
+  // report: the note is the voice of the whole page, and more than 4
+  // broken card lines means the generation went sideways.
+  const failed = Boolean(rejected.note) || subjectRejections > 4;
 
   return { rejected, rejectedPieces: Object.keys(rejected), failed };
 }

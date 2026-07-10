@@ -89,7 +89,7 @@ export default defineDynamic({
         if (error instanceof MissingFamilyContextError) {
           return defineInstructions({
             markdown:
-              "No family context is available on this session: the parent has not finished setup. Warmly point them to /home to set up their family first; do not guess at children or facts.",
+              "No family context is available on this session: the parent has not finished setup. Warmly point them to /app to set up their family first; do not guess at children or facts.",
           });
         }
         return defineInstructions({

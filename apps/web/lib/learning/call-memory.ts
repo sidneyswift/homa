@@ -17,7 +17,7 @@ import {
  * Once-only per call: the claim UPDATE stamps memory_extracted_at first
  * and only proceeds when it won the row, so concurrent cron passes never
  * double-extract. The full outcome (saved, skipped, tokens) lands in
- * memory_extraction for the audit trail and the /home undo surface.
+ * memory_extraction for the audit trail and the /app undo surface.
  */
 
 interface TranscriptRow {

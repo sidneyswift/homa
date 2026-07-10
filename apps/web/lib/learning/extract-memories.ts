@@ -22,7 +22,7 @@ import { saveFamilyMemory } from "./save-memory";
  *   - a hard cap of entries per run (delta guard, M2-13 posture),
  *   - child attribution only by exact name match inside THIS family.
  *
- * Writes are auto-applied with a visible undo surface (/home memories
+ * Writes are auto-applied with a visible undo surface (/app memories
  * card), per founder decision 2026-07-09 (PRD FR-9 posture).
  */
 

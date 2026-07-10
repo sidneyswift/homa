@@ -1,4 +1,4 @@
-import { forgetMemoryAction } from "../../app/(app)/home/actions";
+import { forgetMemoryAction } from "../../app/app/actions";
 
 /**
  * "What Homa remembers": the visible face of the memory system (FR-9's

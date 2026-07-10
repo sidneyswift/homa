@@ -16,10 +16,10 @@ export interface AuthFormState {
   error: string | null;
 }
 
-/** Only same-origin paths; anything else falls back to /home. */
+/** Only same-origin paths; anything else falls back to /app. */
 function safeNext(formData: FormData): string {
   const next = String(formData.get("next") ?? "");
-  return next.startsWith("/") ? next : "/home";
+  return next.startsWith("/") ? next : "/app";
 }
 
 export async function signInAction(

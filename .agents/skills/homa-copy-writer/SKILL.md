@@ -93,7 +93,7 @@ Decide which BEFORE editing:
 | Four-week plan activities and style notes | Generated (templates) | `packages/core/src/map/plans.ts` |
 | Checklist questions and activities | Generated (bank content) | `packages/core/src/map/bank.ts` |
 | Report page persistent strings (headings, buttons, methodology, cards) | One-off | `apps/web/app/onboarding/r/[token]/*.tsx` |
-| Dashboard cards | Mixed: sentences composed in components | `apps/web/app/home/dashboard/*.tsx` |
+| Dashboard cards | Mixed: sentences composed in components | `apps/web/components/dashboard/*.tsx` |
 | Chat, SMS, voice | Generated | `apps/web/agent/instructions.md`, `instructions/sms-mode.ts`, `curriculum-call-instructions.md`, `curriculum-writer.md` |
 | Landing and marketing pages | One-off | Edit the page itself (`apps/web/app/page.tsx`, etc.) |
 | Marketing bundles (articles, captions, emails) | Staged drafts | The draft file, through the marketing-* gates |

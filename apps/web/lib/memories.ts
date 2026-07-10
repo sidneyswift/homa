@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 /**
  * The signed-in parent's saved memories, newest first, read under their
  * OWN RLS context (the members-read policy is the wall; the familyId
- * filter is belt on top). Feeds the /home "What Homa remembers" card,
+ * filter is belt on top). Feeds the /app "What Homa remembers" card,
  * the visible face of every memory the agent and the learning loops save.
  */
 export async function getMyMemories(familyId: string): Promise<MemoryCardRow[]> {

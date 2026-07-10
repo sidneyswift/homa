@@ -19,7 +19,7 @@ import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 
 /**
- * The chat surface, the mobile twin of apps/web/app/chat/chat-client.tsx:
+ * The chat surface, the mobile twin of apps/web/app/app/chat/chat-client.tsx:
  * useEveAgent drives session state against the deployed eve routes
  * (host = EXPO_PUBLIC_API_URL); auth rides as a bearer token resolved
  * fresh per request. Homa's per-family context is injected server-side

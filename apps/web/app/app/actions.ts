@@ -2,16 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
-import { fillFamilyTimeZoneIfEmpty, isValidTimeZone } from "../../../lib/family-time-zone";
-import { getMyFamily } from "../../../lib/family";
-import { emitMapEvent } from "../../../lib/map/events";
-import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import { fillFamilyTimeZoneIfEmpty, isValidTimeZone } from "../../lib/family-time-zone";
+import { getMyFamily } from "../../lib/family";
+import { emitMapEvent } from "../../lib/map/events";
+import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 /**
- * /home's server actions: the device time-zone capture and the memories
- * card's one-tap undo. The settings-card actions (add a child, the
- * texting line, the time-zone picker) moved with their cards to
- * app/(app)/settings/actions.ts (founder ask 2026-07-09: settings left
+ * The dashboard's (/app) server actions: the device time-zone capture
+ * and the memories card's one-tap undo. The settings-card actions (add a
+ * child, the texting line, the time-zone picker) moved with their cards
+ * to app/app/settings/actions.ts (founder ask 2026-07-09: settings left
  * the dashboard). Both actions here scope by the caller's OWN membership
  * (getMyFamily / RLS), never by client input.
  */
@@ -26,11 +26,10 @@ export async function autoFillTimeZoneAction(timeZone: string): Promise<void> {
   const family = await getMyFamily();
   if (!family || family.time_zone) return;
   await fillFamilyTimeZoneIfEmpty(family.id, timeZone);
-  // The zone shows on /home's greeting, /planner's dates, and the
-  // /settings card, so all three refresh.
-  revalidatePath("/home");
-  revalidatePath("/planner");
-  revalidatePath("/settings");
+  // The zone shows on the dashboard greeting, the planner's dates, and
+  // the settings card; one layout-wide revalidate refreshes every /app
+  // page (they share the frame's segment).
+  revalidatePath("/app", "layout");
 }
 
 /**
@@ -53,6 +52,6 @@ export async function forgetMemoryAction(memoryId: string): Promise<void> {
       family_id: deleted.family_id,
       source: deleted.source as "homa" | "parent" | "onboarding" | "call" | "review",
     });
-    revalidatePath("/home");
+    revalidatePath("/app");
   }
 }

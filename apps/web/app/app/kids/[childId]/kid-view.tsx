@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ageInMonths, ageLabel, homaNote, isInScoredRange } from "@homa/core";
+import { ageInMonths, ageLabel, homaNote, isInScoredRange, noteGreeting } from "@homa/core";
 
 import type { ChildCurriculumRow } from "../../../../lib/curriculum";
 import type { ChildRecord } from "../../../../lib/family";
@@ -91,7 +91,7 @@ export function KidView({
             return (
               <Link
                 key={entry.id}
-                href={`/kids/${entry.id}`}
+                href={`/app/kids/${entry.id}`}
                 aria-current={current ? "page" : undefined}
                 className={
                   current
@@ -128,8 +128,9 @@ export function KidView({
             <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
               A note from Homa
             </p>
+            <p className="mt-1 font-serif italic text-strong">{noteGreeting(parentFirstName)}</p>
             <p className="mt-1 text-body">
-              {homaNote(report.scores, child.name, parentFirstName)}
+              {homaNote(report.scores, child.name)}
               {moved > 0
                 ? ` Since last check-in, ${moved} ${moved === 1 ? "subject" : "subjects"} moved up.`
                 : ""}
@@ -203,7 +204,7 @@ export function KidView({
           </Link>
         ) : null}
         <Link
-          href="/chat"
+          href="/app/chat"
           className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
         >
           Ask Homa about {child.name}

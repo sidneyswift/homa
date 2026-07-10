@@ -10,8 +10,8 @@ import { getMyFamily } from "../../../lib/family";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
- * /settings server actions, moved here with their cards from /home
- * (founder ask 2026-07-09: settings left the dashboard). Children write
+ * /app/settings server actions, moved here with their cards from the
+ * dashboard (founder ask 2026-07-09: settings left it). Children write
  * through RLS via the "members add children" INSERT policy from tenancy
  * v0. The texting-line actions are the exception by design: family_phones
  * is deny-all, so they write through lib/family-phone on the server-only
@@ -37,7 +37,7 @@ export async function setFamilyPhoneAction(
 
   if (!raw) {
     await clearFamilyPhone(family.id);
-    revalidatePath("/settings");
+    revalidatePath("/app/settings");
     return { error: null };
   }
 
@@ -62,7 +62,7 @@ export async function setFamilyPhoneAction(
   if (!result.ok) {
     return { error: "That number is already linked to another Homa family." };
   }
-  revalidatePath("/settings");
+  revalidatePath("/app/settings");
   return { error: null };
 }
 
@@ -77,10 +77,9 @@ export async function setFamilyTimeZoneAction(
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
   await setFamilyTimeZone(family.id, timeZone);
-  // The zone drives /home's greeting and /planner's week dates too.
-  revalidatePath("/settings");
-  revalidatePath("/home");
-  revalidatePath("/planner");
+  // The zone drives the dashboard greeting and the planner's week dates
+  // too; one layout-wide revalidate refreshes every /app page.
+  revalidatePath("/app", "layout");
   return { error: null };
 }
 
@@ -120,9 +119,8 @@ export async function addChildAction(
     return { error: error.message };
   }
   // A new kid shows up on the dashboard's cards, the planner's columns,
-  // and the sidebar's kid list on every page of the group.
-  revalidatePath("/settings");
-  revalidatePath("/home");
-  revalidatePath("/planner");
+  // and the sidebar's kid list on every page of the group; one
+  // layout-wide revalidate covers them all.
+  revalidatePath("/app", "layout");
   return { error: null };
 }

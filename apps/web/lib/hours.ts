@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 /**
  * The signed-in family's school-time record for the current week, read
  * under their OWN RLS (the members-read policy is the wall). Feeds the
- * /home hours card; the full per-state compliance report is M3-06's job.
+ * /app hours card; the full per-state compliance report is M3-06's job.
  */
 
 export interface WeekHours {

@@ -12,7 +12,7 @@ export interface FamilyRecord {
   us_state: string | null;
   parent_display_name: string | null;
   /** Stamped by the onboarding create-your-family step; null means setup
-   * is unfinished and /home routes back into /onboarding. */
+   * is unfinished and /app routes back into /onboarding. */
   profile_completed_at: string | null;
   parent_avatar_url: string | null;
   /** IANA time zone (migration #27); null until captured from the

@@ -8,7 +8,7 @@ import { addChild } from "../../lib/family";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
-/** Add-a-child intake, mirroring apps/web/app/home/setup-forms.tsx. */
+/** Add-a-child intake, mirroring apps/web/app/app/settings/add-child-form.tsx. */
 export function AddChildForm({
   familyId,
   onAdded,

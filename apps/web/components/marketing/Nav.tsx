@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Logo } from "../brand/Logo";
+import { APP_NAV_ITEMS } from "../dashboard/sidebar-nav";
 import { Button } from "./ds/Button";
+import { useSignedIn } from "./use-signed-in";
 import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
@@ -32,6 +34,14 @@ import { useSignupPopup } from "./SignupPopupProvider";
  * desktop-only, same founder report), and a full-width "Sign up" as the
  * menu's closing CTA. The menu closes on any link tap, Escape, a tap on
  * the transparent backdrop, or the viewport growing past the breakpoint.
+ *
+ * Auth-aware (founder report 2026-07-09: a signed-in parent was still
+ * offered "Sign up"): useSignedIn resolves the Supabase session after
+ * mount, and while it's true the auth links swap for one "Open Homa"
+ * button on desktop, and the phone menu swaps the marketing links for
+ * the app's tabs (APP_NAV_ITEMS, the same list the desktop sidebar
+ * renders) plus Settings, so the menu reads as the signed-in app's nav,
+ * not a pitch.
  */
 
 const LINKS: ReadonlyArray<readonly [string, string]> = [
@@ -47,6 +57,7 @@ const SCROLLED_AT_PX = 8;
 
 export function Nav() {
   const openPopup = useSignupPopup();
+  const signedIn = useSignedIn();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
@@ -110,32 +121,43 @@ export function Nav() {
         ))}
       </div>
       <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
-        <Link
-          href="/signin"
-          className="lp-nav-links"
-          style={{
-            color: "var(--text-body)",
-            textDecoration: "none",
-            fontWeight: 600,
-            fontSize: "0.95rem",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Sign in
-        </Link>
-        {/* Button has no className prop, so a hide-on-phones wrapper
-            carries .lp-nav-links for it. */}
-        <span className="lp-nav-links" style={{ display: "inline-flex" }}>
-          {openPopup ? (
-            <Button variant="primary" onClick={openPopup}>
-              Sign up
+        {signedIn ? (
+          // Signed in: one door back into the app, no auth pitch.
+          <span className="lp-nav-links" style={{ display: "inline-flex" }}>
+            <Button variant="primary" href="/app">
+              Open Homa
             </Button>
-          ) : (
-            <Button variant="primary" href="/onboarding">
-              Sign up
-            </Button>
-          )}
-        </span>
+          </span>
+        ) : (
+          <>
+            <Link
+              href="/signin"
+              className="lp-nav-links"
+              style={{
+                color: "var(--text-body)",
+                textDecoration: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Sign in
+            </Link>
+            {/* Button has no className prop, so a hide-on-phones wrapper
+                carries .lp-nav-links for it. */}
+            <span className="lp-nav-links" style={{ display: "inline-flex" }}>
+              {openPopup ? (
+                <Button variant="primary" onClick={openPopup}>
+                  Sign up
+                </Button>
+              ) : (
+                <Button variant="primary" href="/onboarding">
+                  Sign up
+                </Button>
+              )}
+            </span>
+          </>
+        )}
         <button
           type="button"
           className="lp-nav-toggle"
@@ -152,33 +174,64 @@ export function Nav() {
           {/* Tap-catch layer: any tap outside the menu closes it. */}
           <div className="lp-nav-menu-backdrop" onClick={closeMenu} aria-hidden="true" />
           <div id="lp-nav-menu" className="lp-nav-menu">
-            {LINKS.map(([label, href]) => (
-              <Link key={label} href={href} className="lp-nav-menu-link" onClick={closeMenu}>
-                {label}
-              </Link>
-            ))}
-            <div className="lp-nav-menu-divider" aria-hidden="true" />
-            <Link href="/signin" className="lp-nav-menu-link lp-nav-menu-link-strong" onClick={closeMenu}>
-              Sign in
-            </Link>
-            <div className="lp-nav-menu-cta">
-              {openPopup ? (
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => {
-                    closeMenu();
-                    openPopup();
-                  }}
+            {signedIn ? (
+              <>
+                {APP_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="lp-nav-menu-link lp-nav-menu-link-app"
+                    onClick={closeMenu}
+                  >
+                    <Icon size={18} aria-hidden="true" />
+                    {label}
+                  </Link>
+                ))}
+                <div className="lp-nav-menu-divider" aria-hidden="true" />
+                <Link
+                  href="/app/settings"
+                  className="lp-nav-menu-link lp-nav-menu-link-app"
+                  onClick={closeMenu}
                 >
-                  Sign up
-                </Button>
-              ) : (
-                <Button variant="primary" fullWidth href="/onboarding" onClick={closeMenu}>
-                  Sign up
-                </Button>
-              )}
-            </div>
+                  <Settings size={18} aria-hidden="true" />
+                  Settings
+                </Link>
+              </>
+            ) : (
+              <>
+                {LINKS.map(([label, href]) => (
+                  <Link key={label} href={href} className="lp-nav-menu-link" onClick={closeMenu}>
+                    {label}
+                  </Link>
+                ))}
+                <div className="lp-nav-menu-divider" aria-hidden="true" />
+                <Link
+                  href="/signin"
+                  className="lp-nav-menu-link lp-nav-menu-link-strong"
+                  onClick={closeMenu}
+                >
+                  Sign in
+                </Link>
+                <div className="lp-nav-menu-cta">
+                  {openPopup ? (
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      onClick={() => {
+                        closeMenu();
+                        openPopup();
+                      }}
+                    >
+                      Sign up
+                    </Button>
+                  ) : (
+                    <Button variant="primary" fullWidth href="/onboarding" onClick={closeMenu}>
+                      Sign up
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </>
       ) : null}

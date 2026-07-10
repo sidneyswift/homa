@@ -11,7 +11,7 @@ import type { ChildRecord } from "./family";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * Server-side reads for the /home dashboard. Everything here runs under
+ * Server-side reads for the /app dashboard. Everything here runs under
  * the caller's RLS context (publishable key + session JWT), so every row
  * is family-scoped by the database itself. No write paths: the dashboard
  * only renders what the questionnaire, plans, and calls already produced.
@@ -22,7 +22,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 export interface DashboardReport {
   childId: string;
   /** The permanent report URL token. Linking it here is the sanctioned
-   * pattern: /home is session-scoped, so only the parent's own browser
+   * pattern: /app is session-scoped, so only the parent's own browser
    * ever sees it (see report-view's sibling-token note). */
   token: string | null;
   scores: MapScores;
@@ -209,7 +209,7 @@ export function buildUpNextItems(input: {
       label: "Talk to Homa about your week",
       sub: null,
       dot: "sage",
-      href: "/chat",
+      href: "/app/chat",
     });
   }
   return items.slice(0, 3);

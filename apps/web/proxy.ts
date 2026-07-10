@@ -6,9 +6,8 @@ import { NextResponse, type NextRequest } from "next/server";
  *   1. Refresh expired Supabase auth tokens on every matched request and
  *      write the fresh cookies to both the request (for Server Components
  *      downstream) and the response (for the browser).
- *   2. Gate the signed-in surfaces: /home, /chat, /planner, /kids, and
- *      /settings require a session; /signin bounces already-signed-in
- *      users to /home.
+ *   2. Gate the signed-in surfaces: everything under /app requires a
+ *      session; /signin bounces already-signed-in users to /app.
  * getClaims() validates the JWT signature against the project's published
  * keys, so this gate cannot be spoofed by a hand-rolled cookie.
  */
@@ -45,12 +44,10 @@ export async function proxy(request: NextRequest) {
   const isSignedIn = data?.claims != null;
 
   const path = request.nextUrl.pathname;
-  const needsAuth =
-    path.startsWith("/home") ||
-    path.startsWith("/chat") ||
-    path.startsWith("/planner") ||
-    path.startsWith("/kids") ||
-    path.startsWith("/settings");
+  // Everything signed-in lives under /app (2026-07-09 rename), so the
+  // gate is structural: new app pages are covered without editing this
+  // list. The exact-or-slash check keeps lookalikes like /apple-icon out.
+  const needsAuth = path === "/app" || path.startsWith("/app/");
 
   if (needsAuth && !isSignedIn) {
     const url = request.nextUrl.clone();
@@ -59,7 +56,7 @@ export async function proxy(request: NextRequest) {
   }
   if (path.startsWith("/signin") && isSignedIn) {
     const url = request.nextUrl.clone();
-    url.pathname = "/home";
+    url.pathname = "/app";
     return NextResponse.redirect(url);
   }
 

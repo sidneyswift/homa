@@ -12,16 +12,8 @@ export interface ReportNarrative {
   note: string;
   /** One line per subject, keyed by domainId (scored + exposure + not_mapped). */
   subjects: Record<string, string>;
-  /** The new whole-picture section: cross-subject story, interests woven in,
-   * one thing worth doing this month. */
-  synthesis: string;
   /** Per-subject drawer explainer, keyed by domainId, scored subjects only. */
   drawers: Record<string, string>;
-  /** The memory-box piece: a short dated letter addressed to the CHILD
-   * (the one piece not written to the parent), no numbers, no advice,
-   * made to be printed and kept. Renders nothing when gate-rejected;
-   * there is no template equivalent. */
-  keepsake: string;
 }
 
 export interface PlanNarrative {

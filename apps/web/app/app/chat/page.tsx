@@ -5,8 +5,8 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { ChatClient } from "./chat-client";
 
 /**
- * /chat: talk to Homa (trimmed M1-04 walking-skeleton slice), rendered
- * inside the (app) frame like every signed-in surface. Auth is enforced
+ * /app/chat: talk to Homa (trimmed M1-04 walking-skeleton slice), rendered
+ * inside the /app frame like every signed-in surface. Auth is enforced
  * twice: proxy.ts gates the page, and the eve channel's supabaseAuth()
  * independently validates every agent request. The chat transcript
  * persists in localStorage keyed by user id (v0 of conversation

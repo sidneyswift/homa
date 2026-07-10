@@ -26,7 +26,7 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
       first_name: string | null;
       scores: MapScores;
       history: unknown[];
-      narrative: { note?: string; synthesis?: string } | null;
+      narrative: { note?: string } | null;
       generated_at: string;
     }[]
   >`
@@ -69,7 +69,6 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
       ? {
           generatedAt: row.generated_at,
           note: row.narrative.note ?? "",
-          synthesis: row.narrative.synthesis ?? "",
         }
       : null,
     practice: planRows.map((plan) => ({

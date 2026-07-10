@@ -6,8 +6,14 @@ import { SignInForm } from "./signin-form";
 /**
  * /signin: minimal email/password entry (M1-01 slice, no invite gate yet).
  * Unlinked from the marketing site on purpose; invited-family testing only.
- * ?next=/some/path returns the user there after auth (the onboarding flow
- * uses this so "sign in instead" comes back to the report, not /home).
+ * ?next=/some/path returns the user there after auth. The onboarding
+ * flow's "already have an account, sign in" link passes next=/app on
+ * purpose, not /onboarding (founder report 2026-07-09: an existing
+ * account with a completed report was landing back on the onboarding
+ * hub instead of its dashboard): /app already redirects unfinished
+ * setups straight back to /onboarding itself, so this is the one place
+ * that decides, for every sign-in path, whether "home" means the
+ * dashboard or a return trip to finish setup.
  */
 
 export const metadata: Metadata = {
@@ -21,7 +27,7 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  const safeNext = next?.startsWith("/") ? next : "/home";
+  const safeNext = next?.startsWith("/") ? next : "/app";
   return (
     <main className="mx-auto w-full max-w-md px-6 py-16">
       <Logo size={28} />

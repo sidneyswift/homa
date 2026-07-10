@@ -82,10 +82,10 @@ export {
 export {
   domainLine,
   homaNote,
+  noteGreeting,
+  notePlanSentence,
   reportEmailPreview,
   reportEmailSubject,
-  reportSubtitle,
-  tryHeading,
   type DomainLine,
 } from "./map/sentences";
 

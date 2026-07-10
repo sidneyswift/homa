@@ -1,4 +1,3 @@
-import { ageLabel } from "./bands";
 import type { DomainScore, MapScores } from "./scoring";
 
 /**
@@ -127,38 +126,55 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
  * room: a strong picture celebrates, a growing-heavy picture reassures,
  * and neither ever shames. Everything else the note used to carry
  * (movement, practice, the month offer) lives elsewhere on the page.
+ *
+ * The parent's name no longer opens this sentence (round 2, founder ask
+ * 2026-07-09): the note now sits under a "Hey {name}," letter greeting
+ * (see `noteGreeting`), so repeating the name here read twice in one
+ * breath.
  */
-export function homaNote(scores: MapScores, childName: string, parentName?: string): string {
+export function homaNote(scores: MapScores, childName: string): string {
   const ahead = scores.domains.filter((score) => score.position === "ahead" && !score.exposureBased).length;
   const onTrack = scores.domains.filter((score) => score.position === "on_track" && !score.exposureBased).length;
   const growing = scores.domains.filter(
     (score) => score.position === "growing" && !score.exposureBased,
   ).length;
 
-  const opening = parentName ? `${parentName}, ` : "";
-
   if (scores.mappedCount === 0) {
-    return `${opening}${childName}'s picture is just getting started, and it fills in whenever you answer a few more questions.`;
+    return `${childName}'s picture is just getting started, and it fills in whenever you answer a few more questions.`;
   }
 
   // Growing-heavy: reassure first. Never a tally of blue.
   if (growing >= 4 && growing > ahead) {
     const footing = ahead + onTrack;
     return footing > 0
-      ? `${opening}${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and every subject growing right now has a clear place to start below.`
-      : `${opening}every subject here is growing right now, and each one has a clear place to start below.`;
+      ? `${childName} has solid footing in ${footing} ${footing === 1 ? "subject" : "subjects"}, and every subject growing right now has a clear place to start below.`
+      : `Every subject here is growing right now, and each one has a clear place to start below.`;
   }
 
   if (ahead > 0 && onTrack > 0) {
-    return `${opening}${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"} and on track in ${onTrack} more.`;
+    return `${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}, on track in ${onTrack} more.`;
   }
   if (ahead > 0) {
-    return `${opening}${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}.`;
+    return `${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}.`;
   }
   if (onTrack > 0) {
-    return `${opening}${childName} is right where most kids their age are, across ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}.`;
+    return `${childName} is right where most kids their age are, across ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}.`;
   }
-  return `${opening}${childName}'s picture is filling in, with a clear place to start in ${growing === 1 ? "one subject" : `${growing} subjects`} below.`;
+  return `${childName}'s picture is filling in, with a clear place to start in ${growing === 1 ? "one subject" : `${growing} subjects`} below.`;
+}
+
+/** The letter greeting above the note (round 2, founder ask 2026-07-09:
+ * the note reads as a personal letter, not a block of text). Falls back
+ * to "there" when the family never gave a first name. */
+export function noteGreeting(parentFirstName: string | null): string {
+  return `Hey ${parentFirstName ?? "there"},`;
+}
+
+/** The month-plan line inside the letter, naming the actual month the
+ * plan starts. The button right under it does the work; this sentence
+ * just says what she's about to open. */
+export function notePlanSentence(childName: string, monthName: string): string {
+  return `I took everything you told me and turned it into ${childName}'s ${monthName} 4-week plan.`;
 }
 
 /** Subject line and preview for the report email. */
@@ -170,24 +186,3 @@ export function reportEmailPreview(): string {
   return "A first look at where they stand, strengths first.";
 }
 
-/** The sub-heading under the report title, addressed to THIS child by
- * name (founder ruling 2026-07-08: personalize everywhere a name fits;
- * ICP read: "them" right after the name read oddly, so the clause
- * carries no pronoun). */
-export function reportSubtitle(ageMonths: number, childName: string): string {
-  return `A first look at where ${childName} stands at ${ageLabel(ageMonths)}, from what you've seen day to day`;
-}
-
-/** Header for the things-to-try section, sized to how much is growing. */
-export function tryHeading(growingCount: number): { title: string; sub: string } {
-  if (growingCount > 2) {
-    return {
-      title: "Where to start",
-      sub: "Not all at once. Pick one for this week. That's enough.",
-    };
-  }
-  return {
-    title: growingCount === 1 ? "One thing worth trying this week" : "A couple of things worth trying this week",
-    sub: "Free, about five minutes, and pointed at what's next. Ideas, never homework.",
-  };
-}

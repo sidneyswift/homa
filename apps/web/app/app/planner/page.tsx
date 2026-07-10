@@ -7,9 +7,9 @@ import { PageColumn } from "../../../components/dashboard/page-column";
 import { PlannerView } from "./planner-view";
 
 /**
- * /planner: the family's week, from the plans that actually exist. Same
- * setup gates as /home (one onboarding for every door); the board itself
- * renders in planner-view.tsx, the frame in the (app) layout. Auth is
+ * /app/planner: the family's week, from the plans that actually exist.
+ * Same setup gates as the dashboard (one onboarding for every door); the
+ * board renders in planner-view.tsx, the frame in the /app layout. Auth is
  * enforced by proxy.ts; data access is enforced by RLS regardless.
  */
 

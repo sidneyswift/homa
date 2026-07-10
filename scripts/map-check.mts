@@ -530,7 +530,7 @@ report(
 
 const before = failures.length;
 for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid, tenKid, teenKid]) {
-  checkCopy("homaNote", homaNote(scores, "Maya", "Sarah"));
+  checkCopy("homaNote", homaNote(scores, "Maya"));
   for (const domain of scores.domains) {
     const line = domainLine(domain, "Maya");
     checkCopy(`line.${domain.domainId}`, `${line.badge} ${line.numberLabel} ${line.sentence}`);
@@ -596,20 +596,17 @@ report("rendered sentences: no banned words, no em dashes, no negative numbers",
   const goodPiece = "Maya is doing beautifully here, and the next step is clear.";
   const base: ReportNarrative = {
     note: goodPiece,
-    synthesis: goodPiece,
     subjects: { math: goodPiece },
     drawers: { math: goodPiece },
-    keepsake: "Maya, you love the world and it shows. Keep going. Homa",
   };
   const cases: Array<[string, ReportNarrative, string]> = [
     ["banned word", { ...base, note: "She is behind here." }, "note"],
     ["em dash", { ...base, note: "Nice work \u2014 truly." }, "note"],
-    ["invented number", { ...base, synthesis: "Try counting to 100 together." }, "synthesis"],
-    ["negative number", { ...base, synthesis: "She moved -3 months." }, "synthesis"],
+    ["invented number", { ...base, subjects: { math: "Try counting to 100 together." } }, "subject.math"],
+    ["negative number", { ...base, subjects: { math: "She moved -3 months." } }, "subject.math"],
     ["sibling name", { ...base, subjects: { math: "Unlike Casey, Maya counts." } }, "subject.math"],
     ["diagnosis phrasing", { ...base, drawers: { math: "This may suggest ADHD." } }, "drawer.math"],
     ["empty piece", { ...base, note: "  " }, "note"],
-    ["keepsake with an invented number", { ...base, keepsake: "You are 5 whole years of wonder." }, "keepsake"],
     ["pronoun guessed from the name", { ...base, note: "She loves to count." }, "note"],
   ];
   let gateOk = true;

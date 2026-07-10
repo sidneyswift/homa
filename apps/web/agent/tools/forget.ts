@@ -10,10 +10,10 @@ import { forgetMemoryPinned } from "../../lib/agent-pinned";
  * matching instead of ids keeps the model from hallucinating identifiers
  * (the Hermes pattern); ambiguity returns the candidates instead of
  * guessing. Since migration #36 this SUPERSEDES rather than deletes: the
- * row leaves the pinned context and the /home card but stays in the
- * archive, so point-in-time recall ("what was she into in February?")
- * survives corrections. The parent's Remove button on /home remains a
- * hard delete (privacy decision vs history decision).
+ * row leaves the pinned context and the dashboard's memories card but
+ * stays in the archive, so point-in-time recall ("what was she into in
+ * February?") survives corrections. The parent's Remove button on the
+ * dashboard remains a hard delete (privacy decision vs history decision).
  */
 export default defineTool({
   description:

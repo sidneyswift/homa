@@ -14,7 +14,7 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
 /**
- * Today: the signed-in landing, mirroring apps/web/app/home/page.tsx's
+ * Today: the signed-in landing, mirroring apps/web/app/app/page.tsx's
  * three states: no family yet, family with no kids, or ready (kids
  * listed, chat one tap away).
  */

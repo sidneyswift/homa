@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
  * OAuth (and email-link) code-exchange callback. Google redirects here with
  * a `?code=...`; we exchange it for a session (the @supabase/ssr browser
  * client stashed the PKCE verifier in a cookie the server can read), the
- * exchange writes the auth cookies, then we send the user on to /home.
+ * exchange writes the auth cookies, then we send the user on to /app.
  *
  * The redirectTo pointing here must be on Supabase's redirect allow list
  * (dashboard → Authentication → URL Configuration).
@@ -14,8 +14,8 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  let next = searchParams.get("next") ?? "/home";
-  if (!next.startsWith("/")) next = "/home";
+  let next = searchParams.get("next") ?? "/app";
+  if (!next.startsWith("/")) next = "/app";
 
   if (code) {
     const supabase = await createSupabaseServerClient();

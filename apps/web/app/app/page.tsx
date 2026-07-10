@@ -3,35 +3,35 @@ import { redirect } from "next/navigation";
 
 import { ageInMonths, isInScoredRange } from "@homa/core";
 
-import { getAppData } from "../../../lib/app-data";
-import { getRecentWins } from "../../../lib/dashboard";
-import { getCurriculaForChildren } from "../../../lib/curriculum";
-import { getMyMemories } from "../../../lib/memories";
-import { getWeekHours } from "../../../lib/hours";
-import { parentFirstName } from "../../../lib/family";
-import { FamilyNote } from "../../../components/dashboard/family-note";
-import { Greeting } from "../../../components/dashboard/greeting";
-import { HoursCard } from "../../../components/dashboard/hours-card";
-import { KidCard } from "../../../components/dashboard/kid-card";
-import { MemoriesCard } from "../../../components/dashboard/memories-card";
-import { MonthCard } from "../../../components/dashboard/month-card";
-import { PageColumn } from "../../../components/dashboard/page-column";
-import { StatTiles } from "../../../components/dashboard/stat-tiles";
-import { TimeZoneSync } from "../../../components/dashboard/time-zone-sync";
-import { WinsCard } from "../../../components/dashboard/wins-card";
+import { getAppData } from "../../lib/app-data";
+import { getRecentWins } from "../../lib/dashboard";
+import { getCurriculaForChildren } from "../../lib/curriculum";
+import { getMyMemories } from "../../lib/memories";
+import { getWeekHours } from "../../lib/hours";
+import { parentFirstName } from "../../lib/family";
+import { FamilyNote } from "../../components/dashboard/family-note";
+import { Greeting } from "../../components/dashboard/greeting";
+import { HoursCard } from "../../components/dashboard/hours-card";
+import { KidCard } from "../../components/dashboard/kid-card";
+import { MemoriesCard } from "../../components/dashboard/memories-card";
+import { MonthCard } from "../../components/dashboard/month-card";
+import { PageColumn } from "../../components/dashboard/page-column";
+import { StatTiles } from "../../components/dashboard/stat-tiles";
+import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
+import { WinsCard } from "../../components/dashboard/wins-card";
 
 /**
- * /home: the signed-in family dashboard, the family's homebase. Frame and
+ * /app: the signed-in family dashboard, the family's homebase. Frame and
  * hierarchy follow the design system's web-app template (docs/homa-design/
  * templates/web-app, the Progress screen); the frame itself renders in the
- * (app) layout, this page is the main column only. Every number on it is
+ * /app layout, this page is the main column only. Every number on it is
  * counted from real rows (reports, plans, answers), never invented, per
  * the display law. Setup itself lives in ONE place, /onboarding (founder
  * call 2026-07-08: one onboarding for every door), so a signed-in visit
  * with unfinished setup, no family, family card not done, no kids, or no
  * results yet while an in-range kid waits, redirects there instead of
  * duplicating those forms here. Account settings (add a child, texting,
- * time zone) live on their own page, /settings (founder ask 2026-07-09).
+ * time zone) live on their own page, /app/settings (founder ask 2026-07-09).
  * Auth is enforced by proxy.ts; data access is enforced by RLS regardless.
  */
 

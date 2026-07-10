@@ -106,7 +106,7 @@ export function KidCard({
       className="flex scroll-mt-20 flex-col rounded-lg border border-border-subtle bg-card p-5 shadow-sm"
     >
       <div className="flex items-center gap-3">
-        <Link href={`/kids/${child.id}`} className="flex min-w-0 flex-1 items-center gap-3 group">
+        <Link href={`/app/kids/${child.id}`} className="flex min-w-0 flex-1 items-center gap-3 group">
           <span
             className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full font-bold"
             style={{ background: avatarBg, color: avatarInk }}

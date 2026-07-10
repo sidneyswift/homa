@@ -103,7 +103,7 @@ export function renderFamilyContext(rows: FamilyContextRows): string {
   const childrenBlock =
     children.length > 0
       ? children.map((child) => describeChild(child, now)).join("\n")
-      : "(no children added yet: gently suggest adding one at /home so you can personalize)";
+      : "(no children added yet: gently suggest adding one at /app/settings so you can personalize)";
 
   const usage = memoryUsageChars(memories);
 

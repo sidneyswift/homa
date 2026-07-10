@@ -3,6 +3,7 @@
 import { emitEvent } from "@homa/core";
 import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
+import { ArrowUp, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../../components/brand/Logo";
@@ -11,7 +12,7 @@ import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts"
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 
 /**
- * The chat surface (trimmed M1-04), the main column inside the (app)
+ * The chat surface (trimmed M1-04), the main column inside the /app
  * frame: the sidebar and phone top bar come from the layout, so this
  * component fills the rest of the viewport (100dvh minus the top bar's
  * h-14 on phones, full height beside the sidebar on desktop) and keeps
@@ -134,6 +135,19 @@ export function ChatClient({
   const bottomRef = useRef<HTMLDivElement>(null);
   const busy = agent.status === "submitted" || agent.status === "streaming";
 
+  // Elapsed seconds beside the busy label (the reference transcript's
+  // "· 19s"): long waits read as work in progress, not a hang. Reset
+  // happens in sendMessage (an event handler), so this effect only ticks.
+  const [busySeconds, setBusySeconds] = useState(0);
+  useEffect(() => {
+    if (!busy) return;
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      setBusySeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [busy]);
+
   useEffect(() => {
     messagesRef.current = agent.data.messages;
   }, [agent.data.messages]);
@@ -164,6 +178,7 @@ export function ChatClient({
     const message = text.trim();
     if (message.length === 0 || busy) return;
     setDraft("");
+    setBusySeconds(0);
     markTurnStarted();
     void agent.send({ message });
   }
@@ -173,7 +188,7 @@ export function ChatClient({
     // sits beside this column, so the full viewport height is ours.
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
       {agent.data.messages.length > 0 ? (
-        <header className="flex justify-end border-b border-border-subtle bg-card px-4 py-2.5">
+        <header className="flex justify-end border-b border-border-subtle bg-page px-4 py-2.5">
           <button
             type="button"
             onClick={startNewChat}
@@ -185,13 +200,15 @@ export function ChatClient({
         </header>
       ) : null}
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
+      {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
+          gap-6 so the flat replies and bubbles keep a clear rhythm. */}
+      <main className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
         {agent.data.messages.length === 0 ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
             </h1>
-            <p className="mt-2 text-body">
+            <p className="mt-2 font-serif text-lg italic text-muted">
               Ask me anything about your homeschool day.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -213,16 +230,19 @@ export function ChatClient({
           ))
         )}
         {busy && busyLabel(agent.data.messages) ? (
-          <div className="flex justify-start">
-            {/* The mark bobs while Homa thinks, so the wait is never a blank
-                page (tester ask, evidence memo 1; MJ-06). Goes still under
-                reduced motion; the label still reads what is happening. */}
-            <div className="flex items-center gap-2.5 rounded-lg rounded-bl-sm bg-card px-4 py-3 text-muted shadow-sm">
-              <span className="chat-think-mark inline-flex" aria-hidden="true">
-                <Logo size={20} variant="mark" />
-              </span>
-              <span>{busyLabel(agent.data.messages)}</span>
-            </div>
+          // The mark bobs while Homa thinks, so the wait is never a blank
+          // page (tester ask, evidence memo 1; MJ-06). Goes still under
+          // reduced motion; the label still reads what is happening. Flat
+          // on the page like the replies, with elapsed seconds so long
+          // tool runs read as progress.
+          <div className="flex items-center gap-2.5 text-muted">
+            <span className="chat-think-mark inline-flex" aria-hidden="true">
+              <Logo size={20} variant="mark" />
+            </span>
+            <span>{busyLabel(agent.data.messages)}</span>
+            {busySeconds > 0 ? (
+              <span className="text-sm text-subtle">· {busySeconds}s</span>
+            ) : null}
           </div>
         ) : null}
         {agent.error ? (
@@ -234,27 +254,32 @@ export function ChatClient({
         <div ref={bottomRef} />
       </main>
 
-      <footer className="border-t border-border-subtle bg-card px-4 py-3">
+      {/* The kit's composer (ChatView.jsx): a white pill card on the page
+          background, sparkles at the left, a borderless input, and a round
+          arrow-up send button. Typing stays enabled while Homa works; only
+          sending waits. */}
+      <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3.5 sm:px-6">
         <form
-          className="mx-auto flex w-full max-w-2xl gap-2"
+          className="mx-auto flex w-full max-w-[780px] items-center gap-2.5 rounded-pill border border-border-subtle bg-card py-2 pl-5 pr-2 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
           onSubmit={(event) => {
             event.preventDefault();
             sendMessage(draft);
           }}
         >
+          <Sparkles size={20} className="shrink-0 text-brand" aria-hidden="true" />
           <input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Tell Homa about your day…"
-            disabled={busy}
-            className="min-h-12 flex-1 rounded-pill border border-border px-5 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+            className="min-h-10 min-w-0 flex-1 bg-transparent text-base text-strong outline-none placeholder:text-subtle"
           />
           <button
             type="submit"
+            aria-label="Send"
             disabled={busy || draft.trim().length === 0}
-            className="min-h-12 rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
           >
-            Send
+            <ArrowUp size={18} aria-hidden="true" />
           </button>
         </form>
       </footer>

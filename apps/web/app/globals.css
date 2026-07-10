@@ -389,6 +389,9 @@ h1, h2, h3, h4, h5, h6 {
   .lp-nav-menu-link-strong { font-weight: 600; color: var(--text-body); }
   .lp-nav-menu-divider { height: 1px; margin: 6px 8px; background: var(--border-subtle); }
   .lp-nav-menu-cta { padding: 10px 6px 6px; }
+  /* Signed-in menu rows: the app's tabs, icon + label like the sidebar. */
+  .lp-nav-menu-link-app { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-body); }
+  .lp-nav-menu-link-app svg { color: var(--text-subtle); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -69,7 +69,12 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
     const supabase = createSupabaseBrowserClient();
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
+      // next=/app, not /onboarding: /app already redirects unfinished
+      // setups straight back here (see app/app/page.tsx), so a
+      // brand-new Google sign-up still resumes the flow, but an existing
+      // account with a completed report lands on its dashboard instead
+      // of the onboarding hub (founder report 2026-07-09).
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/app` },
     });
     if (oauthError) {
       setGoogleBusy(false);
@@ -251,12 +256,12 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 <p className="mt-2 rounded-md bg-[var(--accent-sage-soft)] p-3 text-sm text-body" role="status">
                   Good news: {email} already has a Homa account.{" "}
                   <a
-                    href="/signin?next=/onboarding"
+                    href="/signin?next=/app"
                     className="font-semibold text-brand underline underline-offset-2"
                   >
                     Sign in
                   </a>{" "}
-                  and you&apos;ll come right back here.
+                  and we&apos;ll take you to the right place.
                 </p>
               ) : null}
               {notice ? (

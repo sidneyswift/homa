@@ -12,7 +12,7 @@ import { SidebarNav } from "./sidebar-nav";
  * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
  * card, nav, an "up next" box, the kids list, and the account footer
  * (AccountMenu: the name row opens Settings and Sign out). Rendered once
- * by the (app) layout, so it stays mounted while pages change; nav links
+ * by the /app layout, so it stays mounted while pages change; nav links
  * only to surfaces that exist (the library row joins when that page
  * lands).
  */
@@ -58,7 +58,7 @@ export function Sidebar({
     <aside className="sticky top-3.5 m-3.5 hidden h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)] lg:flex">
       <div className="px-2.5 pb-5 pt-1">
         {/* The wordmark is a home link everywhere (tester ask, memo 2). */}
-        <Link href="/home" aria-label="Home" className="inline-flex rounded-md">
+        <Link href="/app" aria-label="Home" className="inline-flex rounded-md">
           <Logo size={26} />
         </Link>
       </div>
@@ -114,7 +114,7 @@ export function Sidebar({
               return (
                 <li key={kid.id}>
                   <Link
-                    href={`/kids/${kid.id}`}
+                    href={`/app/kids/${kid.id}`}
                     className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
                   >
                     <span

@@ -3,6 +3,45 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 (night) · The signed-in app moved under one /app prefix (founder: "rename now, boil the ocean")
+
+/home is now /app, and everything signed-in nests under it: /app/chat,
+/app/planner, /app/kids/[childId], /app/settings. The (app) route group
+became a real `app/app/` segment (the dashboard is `app/app/page.tsx`,
+its actions beside it); the frame layout is unchanged, just no longer
+hidden behind a group. Calls made alone, worth auditing:
+
+- **The dashboard is /app itself**, not /app/dashboard or /app/home:
+  the shortest path is the landing surface; one name from here on.
+- **proxy.ts gate is structural now**: `path === "/app" ||
+  startsWith("/app/")`, so new signed-in pages can never be forgotten
+  off the auth list. The exact-or-slash form exists because bare
+  startsWith("/app") would have caught /apple-icon (verified 200).
+- **Legacy redirects in next.config.ts**, one per old surface
+  (/home, /chat, /planner, /kids/:path*, /settings), 307 on purpose,
+  not 308: these pages are noindex (no SEO equity to move) and the
+  freed top-level names may become marketing pages later, which
+  browser-cached permanent redirects would fight. Query strings carry
+  over (verified: /chat?draft=journal → /app/chat?draft=journal, the
+  journal email's deep link).
+- **Every speakable URL updated**, not just hrefs: agent instructions
+  (instructions.md, family-context.ts, sms-mode.ts, agent-db.ts error
+  copy) now say /app and /app/settings so Homa never texts or says a
+  dead path; the journal email now links /app/chat directly; report
+  page nav, marketing nav, signin next= defaults, OAuth callback, and
+  the onboarding Google button's redirect all moved.
+- **revalidatePath simplification the prefix enables**: actions that
+  listed home+planner+settings now call revalidatePath("/app",
+  "layout") once, which also catches /app/kids pages the old lists
+  missed.
+- **Left alone**: applied Supabase migrations (their comments are
+  history), old build-log entries, and the mobile app's expo-router
+  push("/chat") (a native route, not a web URL). Mobile's file-path
+  comments were repointed at apps/web/app/app/*.
+- Typecheck, lint, build, all four guards, and a 10-route smoke pass
+  green (old → new redirects, signed-out /app → /signin, /apple-icon
+  untouched).
+
 ## 2026-07-09 (late evening) · The gateway: every door is an adapter, every loop wakes the agent
 
 Founder directive, verbatim intent: "boil the ocean... every channel is

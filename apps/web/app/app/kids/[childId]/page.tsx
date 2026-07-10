@@ -9,9 +9,9 @@ import { PageColumn } from "../../../../components/dashboard/page-column";
 import { KidView } from "./kid-view";
 
 /**
- * /kids/[childId]: one kid's corner of the dashboard, the UI kit's
+ * /app/kids/[childId]: one kid's corner of the dashboard, the UI kit's
  * DashboardView made honest (render lives in kid-view.tsx, the frame in
- * the (app) layout). The child is looked up inside the caller's own
+ * the /app layout). The child is looked up inside the caller's own
  * family (getMyChildren under RLS), so a foreign id is a 404, never a
  * data leak. Same setup gates as /home; auth is enforced by proxy.ts,
  * data access by RLS regardless.

@@ -16,7 +16,7 @@ import { signInAction, type AuthFormState } from "./actions";
 
 const INITIAL_STATE: AuthFormState = { error: null };
 
-export function SignInForm({ next = "/home" }: { next?: string }) {
+export function SignInForm({ next = "/app" }: { next?: string }) {
   const [state, action, pending] = useActionState(signInAction, INITIAL_STATE);
   const [googlePending, setGooglePending] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
