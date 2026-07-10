@@ -38,8 +38,8 @@ The inbound email adapter is BUILT and E2E-verified (a reply to a Homa
 email becomes a real agent turn; "stop" opts the family out of evening
 check-ins). It stays dark until these three land, in order:
 
-- [ ] **Resend inbound**: dashboard → Domains/Inbound → set up receiving on a subdomain (e.g. `in.thankshoma.com`; Resend shows the exact MX record). Vercel DNS holds thankshoma.com, so tell the agent the record and it can add it via `vercel dns` if the dashboard doesn't do it automatically *(5 min)*
-- [ ] **Resend inbound webhook**: point it at `https://thankshoma.com/eve/v1/email/inbound?key=<secret>` where `<secret>` is a fresh random string; then set that same value as `RESEND_INBOUND_SECRET` in Vercel prod (and `.env.local` if you want local testing). The route answers 401 until the env exists *(3 min)*
+- [x] ~~Resend inbound MX~~ done by agent 2026-07-09 9:21pm: `mail` MX → `inbound-smtp.us-east-1.amazonaws.com` priority 10 added via `vercel dns`, resolving publicly. Resend's Domains page should flip to verified on its next check (hit refresh there if it still says Not Started)
+- [ ] **Resend inbound webhook**: paste the URL the agent gave you (endpoint + `?key=...`) into the Resend webhook config. `RESEND_INBOUND_SECRET` is ALREADY set in Vercel prod + `.env.local` and the live route is verified (200 real key / 401 wrong key, 2026-07-09) *(1 min)*
 - [ ] **After both**: tell the agent "flip journal reply-to to the inbound address" so replies flow to Homa instead of your inbox *(30 sec)*
 
 ## Domain & handles · memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`

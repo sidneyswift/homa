@@ -11,13 +11,13 @@ import { mapDb } from "./db";
 
 const FROM = "Homa <hello@mail.thankshoma.com>";
 
-/** Replies must land somewhere real: mail.thankshoma.com is send-only
- * (no MX, verified 2026-07-09), so without this reply_to every reply
- * bounces and the footer's "reply and a real person answers" is false.
- * The apex has Google MX; the founder confirms the hello@ alias exists
- * (HUMAN-TODO). The reply-into-the-agent upgrade path stays the Resend
- * inbound webhook (06-harness-gap-analysis #6). */
-const REPLY_TO = "hello@thankshoma.com";
+/** Replies land in the agent (gateway GW-8, live 2026-07-09 9:2x pm):
+ * mail.thankshoma.com has Resend inbound MX now, and every address at
+ * that domain routes to the email adapter (agent/channels/email.ts).
+ * A reply from a family's registered address becomes a real agent turn;
+ * "stop" opts out of evening check-ins; unknown senders are dropped
+ * (the site's contact paths remain the human channel). */
+const REPLY_TO = "homa@mail.thankshoma.com";
 
 export function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://thankshoma.com";
@@ -213,7 +213,7 @@ export async function sendJournalAgentEmail(
   to: string,
   agentText: string,
 ): Promise<boolean> {
-  const url = `${siteUrl()}/chat?draft=journal`;
+  const url = `${siteUrl()}/app/chat?draft=journal`;
   const bodyLines = agentText
     .split("\n")
     .map((line) => line.trim())
