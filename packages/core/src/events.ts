@@ -187,23 +187,47 @@ export const EVENT_SCHEMAS = {
     ]),
     linked_family: z.boolean(),
   }),
-  // The worksheet studio (FR-5 first real slice, 2026-07-10): one event
-  // per rendered printable, on every channel. Props never carry titles,
-  // html, urls, or prompts; the domain row holds those.
+  // The materials studio (FR-5, v2 shape 2026-07-10): one event per
+  // rendered printable, on every channel. Props never carry titles,
+  // html, urls, or prompts; the materials row holds those. kind/source
+  // read the founder's modularity question directly ("which creation
+  // path do families actually exercise"); reviewed/review_passed track
+  // the self-critique gate (MS-5).
   "materials.created": z.object({
     family_id: z.uuid(),
     child_id: z.uuid().optional(),
     channel: z.enum(["web", "sms", "email", "dispatch"]),
-    has_images: z.boolean(),
+    kind: z.enum([
+      "worksheet",
+      "coloring",
+      "flashcards",
+      "reader",
+      "poster",
+      "infographic",
+      "game",
+      "other",
+    ]),
+    source: z.enum(["html", "image", "hybrid"]),
+    reviewed: z.boolean(),
+    review_passed: z.boolean().optional(),
     sent_by_text: z.boolean(),
     duration_ms: z.number().int().min(0),
   }),
-  // The studio's art department: one event per generated illustration
-  // (each one is a real Vercel AI Gateway spend, so volume is the story).
+  // The studio's art department: one event per generated image (each is
+  // a real Vercel AI Gateway spend, so volume is the story). Reference
+  // driven generation is the reuse loop working, hence the flag.
   "materials.image_generated": z.object({
     family_id: z.uuid(),
     channel: z.enum(["web", "sms", "email", "dispatch"]),
     duration_ms: z.number().int().min(0),
+    has_references: z.boolean(),
+  }),
+  // The keeper moment (MS-3): a parent-approved version became the
+  // family's final and its draft chain was tidied away.
+  "materials.finalized": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    versions_superseded: z.number().int().min(0),
   }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
@@ -279,6 +303,12 @@ export const EVENT_SCHEMAS = {
   // no names, no content (MJ-08).
   "lead.captured": z.object({
     channel: z.enum(["sms", "voice"]),
+  }),
+  // Text-native signup completed a child's report (sms-onboarding-plan
+  // SO-4). Counts only.
+  "signup.sms_completed": z.object({
+    family_id: z.uuid(),
+    questions_answered: z.number().int().min(0),
   }),
   "lead.invited": z.object({
     channel: z.enum(["sms", "voice"]),

@@ -80,15 +80,15 @@
   family_phones row first), sees concierge mode + capture, finishes
   onboarding with that number, watches the row convert.
 
-## Phase B · sign-up fully inside the conversation (RULING NEEDED)
+## Phase B · sign-up fully inside the conversation (RULED + BUILT)
 
-Recommendation: DON'T build text-native account creation for v1. The
-web onboarding IS signup, takes ~5 minutes, needs no card, and produces
-the report: the exact magic moment that converts. Homa-by-text signup
-would skip it and mint empty accounts. The sales lady's one job is
-getting the tap. If conversion data later says the tap is the cliff,
-the build is: collect email over text -> admin-create the auth user ->
-email a magic link -> family + phone link server-side. Ticket it then.
+Founder overruled the recommendation 2026-07-10 ("meet them where they
+are; she should just perform the onboarding there"), and it shipped the
+same day: Homa now runs the ENTIRE onboarding over text (basics, kids,
+the full adaptive checklist in natural language, email, scored report
+link), reusing the web flow's exact store functions. Plan and tickets:
+docs/homa-planning/sms-onboarding-plan.md. No auth user is created over
+text: the web claim path folds in whenever she first signs in.
 
 ## Phase C · payments in conversation (RULING NEEDED + billing milestone)
 

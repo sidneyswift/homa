@@ -26,11 +26,14 @@ export const KID_AGE_BAND_LABELS: Record<KidAgeBand, string> = {
   "11-plus": "11+",
 };
 
-/** Mirrors the check constraint on public.waitlist.source. */
+/** Mirrors the check constraint on public.waitlist.source (and
+ * public.families.source; migration #45 added 'sms' to both for the
+ * text-native signup flow). */
 export const WAITLIST_SOURCES = [
   "conference",
   "referral",
   "organic",
+  "sms",
   "social",
   "other",
 ] as const;

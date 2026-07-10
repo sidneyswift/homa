@@ -127,6 +127,51 @@ acknowledges in its one reply. Calls made alone, worth auditing:
   copy; a failed attachment riding with other content stays a bracketed
   note inside the single agent reply (one-reply law holds).
 
+## 2026-07-10 (midday) · Homa performs signup over text, end to end
+
+Founder overruled the morning's Phase B ruling in plain terms: "the tap
+is not the goal... she should just perform the onboarding there." Plan:
+docs/homa-planning/sms-onboarding-plan.md, all boxes closed same day.
+
+Shipped:
+
+1. **lib/sms-onboarding.ts**: the one server path for text signup,
+   reusing the web flow's exact store functions (startAnonymousFamily,
+   saveFamilySetup, addChild, saveAnswer, createReport), so a family
+   built by text is indistinguishable from one built on the web.
+   signupProgress() answers "what is still needed" at every step; the
+   adaptive queue (planQuestions + the easily-ladder) is shared with
+   the web checklist via the same buildQueue module.
+2. **Six tools** (SMS sessions only, family resolved from the session's
+   own phone, never model input): begin_text_signup (opens or resumes,
+   reports what is missing), signup_set_family, signup_add_child,
+   signup_record_answer (the model translates the parent's natural
+   phrasing to the answer enum; every result carries the NEXT
+   question), signup_set_email (refuses addresses owned by another
+   family; no folding without a real sign-in), signup_finish (scores,
+   returns the permanent report link for Homa's own reply).
+3. **No auth user over text, by design**: scoring needs only
+   families.email; the report link is possession-auth; the phone link
+   makes every later text a full-context linked session; and the web
+   claim path's fold-together attaches her auth user to this same
+   family whenever she first signs in. No service-role key exists or
+   is needed.
+4. **Groundwork**: migration #45 ('sms' joins families.source and
+   waitlist.source; the claim-time waitlist mirror carries it),
+   signup.sms_completed event, sms-mode signup instructions (one
+   question per text, honor skip/not-sure, answer real questions
+   mid-flow, resume any time).
+5. **Verification** (against homa-prod, cascade-cleaned): lib lifecycle
+   18/18 and tool-layer 11/11, including refusal walls (non-SMS
+   sessions, tools before begin, finish before email, taken email) and
+   a full adaptive checklist run (23-27 answers to completion for a
+   4-year-old).
+
+Ruling recorded: the "Subscription Account Tables" half of the ask
+stays gated on the entity + pricing decisions (lead-funnel-plan Phase
+C): when billing exists, Homa's close is a texted Stripe Checkout link
+plus webhook-driven state, never card numbers on-channel.
+
 ## 2026-07-10 (morning) · Strangers become leads; Homa gets concierge mode
 
 Founder ask: unknown texters and callers should (1) leave their number,
