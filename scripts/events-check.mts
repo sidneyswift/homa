@@ -21,7 +21,6 @@ const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
   // (2026-07-10); remove these entries when that work lands.
   ["materials.created", "worksheet materials session 2026-07-10"],
   ["materials.image_generated", "worksheet materials session 2026-07-10"],
-  ["sms.attachment_processed", "worksheet materials session 2026-07-10"],
 ];
 
 const failures: string[] = [];

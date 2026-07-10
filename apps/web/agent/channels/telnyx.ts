@@ -8,6 +8,9 @@ import { normalizeUsPhoneE164 } from "@homa/core";
 
 import { findFamilyIdByPhone } from "../../lib/family-phone";
 import { emitMapEvent } from "../../lib/map/events";
+import { recordLeadContact } from "../../lib/phone-leads";
+import { normalizeSmsAttachments } from "../../lib/voice/sms-attachments";
+import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
 /**
  * SMS channel (M5-01 groundwork, pulled forward as a founder experiment,
@@ -28,6 +31,15 @@ import { emitMapEvent } from "../../lib/map/events";
  * server reads. No supabaseAccessToken exists on SMS, so token-backed
  * tools still refuse; that unlock is the M1-02 SET LOCAL work. Unknown
  * numbers chat as unlinked general sessions.
+ *
+ * Media (founder ruling 2026-07-10: never deny input): every attachment
+ * runs through the normalizer (lib/voice/sms-attachments.ts), which
+ * converts each one into something the model natively consumes: photos
+ * and PDFs pass through as parts, voice notes and video clips arrive as
+ * speech transcripts, text-format files inline, and anything unreadable
+ * becomes a bracketed note the agent can acknowledge. A text whose
+ * attachments ALL failed gets a direct "couldn't read it" reply instead
+ * of an agent turn.
  */
 
 /** Placeholder that keeps the adapter constructible when env is unset. */
@@ -60,6 +72,11 @@ const { bot, channel, send } = chatSdkChannel({
   state: createMemoryState(),
 });
 
+/** Sent directly (no agent turn) when EVERY attachment failed and there
+ *  was no typed text: silence would read as Homa ignoring her. */
+const ATTACHMENTS_FAILED_REPLY =
+  "I couldn't quite make out what you sent. Mind trying again, or typing it?";
+
 // Param types come from the npm "chat" package (the adapter's peer); the
 // vendored copy inside eve is structurally identical, so the handler
 // assigns cleanly to bot.onDirectMessage.
@@ -70,10 +87,7 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
 
   const text = message.text?.trim() ?? "";
   const attachments = message.attachments ?? [];
-  const images = attachments.filter(
-    (attachment) => attachment.type === "image" && attachment.url,
-  );
-  if (text.length === 0 && images.length === 0) return;
+  if (text.length === 0 && attachments.length === 0) return;
 
   // The sender's number is this channel's auth context: a family_phones
   // match (parent-written, unique across families) resolves the family.
@@ -98,18 +112,50 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
     linked_family: familyId !== null,
   });
 
-  // MMS photos ride along as image parts; Telnyx media URLs are short
-  // lived, which is fine because the model reads them within the turn.
+  // A stranger texting IS a lead (lead-funnel-plan LF-2): save the
+  // number before anything else can fail. Fire-and-forget by design.
+  if (!familyId && normalizedSender) {
+    recordLeadContact(normalizedSender, "sms").catch((error: unknown) => {
+      console.error(
+        "phone lead capture (sms) failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    });
+  }
+
+  // Every attachment gets a lane (never deny input): images and PDFs
+  // become parts, speech becomes marked transcript blocks, text files
+  // inline, failures become bracketed notes the agent can acknowledge.
+  const normalized = await normalizeSmsAttachments(attachments);
+  for (const result of normalized.results) {
+    await emitMapEvent("sms.attachment_processed", {
+      kind: result.kind,
+      media_type: result.mediaType,
+      outcome: result.outcome,
+      linked_family: familyId !== null,
+    });
+  }
+
+  // A text whose every attachment failed, with no typed words, never
+  // wakes the agent (it would have nothing to answer); reply directly.
+  if (text.length === 0 && !normalized.hasContent) {
+    await sendHomaSms(normalizedSender ?? senderNumber, ATTACHMENTS_FAILED_REPLY);
+    return;
+  }
+
+  const turnText = [...(text.length > 0 ? [text] : []), ...normalized.blocks].join(
+    "\n\n",
+  );
+
+  // Image parts ride by their (short lived) Telnyx URL, read within the
+  // turn; PDF parts carry downloaded bytes. Text always leads the parts.
   const parts: UserContent = [
-    ...(text.length > 0 ? [{ type: "text" as const, text }] : []),
-    ...images.map((attachment) => ({
-      type: "image" as const,
-      image: new URL(attachment.url as string),
-    })),
+    ...(turnText.length > 0 ? [{ type: "text" as const, text: turnText }] : []),
+    ...normalized.mediaParts,
   ];
 
   await send(
-    { message: images.length > 0 ? parts : text },
+    { message: normalized.mediaParts.length > 0 ? parts : turnText },
     {
       thread,
       title: `SMS conversation ${senderNumber}`,

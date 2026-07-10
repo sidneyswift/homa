@@ -169,13 +169,22 @@ export const EVENT_SCHEMAS = {
   // sms.voice_note_received: never deny input). One event per attachment
   // on an inbound text. media_type is the MIME type the carrier
   // delivered; outcome says which lane handled it: model_native (photos,
-  // PDFs passed to the model directly), transcribed (voice notes and
-  // video clips through STT), inlined (text-format files), or failed
-  // (bracketed acknowledgement note). Never any content, never a number.
+  // PDFs passed to the model directly), converted (BMP images, remade
+  // into PNG before the model sees them), transcribed (voice notes and
+  // video clips through STT), extracted (Word/Excel text pulled out),
+  // inlined (text-format files), or failed (bracketed acknowledgement
+  // note). Never any content, never a number.
   "sms.attachment_processed": z.object({
     kind: z.enum(["image", "audio", "video", "document", "text", "other"]),
     media_type: z.string(),
-    outcome: z.enum(["model_native", "transcribed", "inlined", "failed"]),
+    outcome: z.enum([
+      "model_native",
+      "converted",
+      "transcribed",
+      "extracted",
+      "inlined",
+      "failed",
+    ]),
     linked_family: z.boolean(),
   }),
   // The worksheet studio (FR-5 first real slice, 2026-07-10): one event

@@ -3,6 +3,130 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (late morning) · Word and Excel lanes added; HEIC and Live Photos confirmed as non-issues
+
+Asked to extend the never-deny-input normalizer to every file type a mom might
+actually send (Excel, Word, HEIC, Live Photos, PDF, video), researched each
+claim rather than assuming, and built only what the research showed was real
+and missing. Calls made alone, worth auditing:
+
+- **HEIC and Live Photos needed no code**: Homa's Telnyx number is not
+  iMessage-registered, so every iPhone text to it is a green-bubble SMS/MMS
+  fallback. Verified (multiple independent sources, including Apple Support
+  Communities threads): iOS unconditionally transcodes HEIC to JPEG and
+  flattens a Live Photo to a plain still JPEG before that fallback ever
+  leaves the phone, motion and the HEIC container never survive the trip.
+  Both already ride the existing JPEG image lane; nothing to build, and
+  saying so plainly beat inventing a HEIC decoder for input that never
+  actually arrives in that format.
+- **Word (.docx) and Excel (.xlsx/.xls) lanes added and verified live**:
+  generated real fixtures with LibreOffice (docx, doc) and SheetJS's own
+  writer (xlsx, then converted to legacy xls with LibreOffice), ran them
+  through the actual `normalizeSmsAttachments` function end to end. `mammoth`
+  extracts .docx text verbatim; `xlsx` (SheetJS) extracts both modern .xlsx
+  and legacy binary .xls to CSV. Legacy binary .doc (pre-2007 Word) is
+  explicitly NOT supported: mammoth only parses OOXML, verified live it
+  throws a clean "not a zip file" error on a real .doc rather than hanging,
+  so it lands in the acknowledgement lane exactly as designed.
+- **The one honest unknown, stated plainly rather than hidden**: whether
+  Telnyx's inbound MMS webhook forwards docx/xlsx content types AT ALL is
+  not verified, only the extraction logic is. Telnyx's own documented
+  "Files" allowlist lists only pdf/vcard/calendar; separately, Aerialink's
+  docs state an iPhone cannot attach ANY document format to a green-bubble
+  MMS outside iMessage, and Android support is carrier- and app-dependent.
+  Built the lane anyway since it was cheap (two well-established libraries,
+  no new infrastructure) and correct if it ever fires, rather than waiting
+  on unverifiable-until-real-traffic carrier behavior; `sms.attachment_processed`
+  (kind: document, media_type: docx/xlsx/xls) will show the true trigger
+  rate once texting goes live after 10DLC provisioning finishes.
+- **`sms.attachment_processed` gained a fifth outcome, `extracted`**,
+  distinct from `inlined` (raw text files) and `model_native` (PDF passthrough),
+  so analytics can tell a dumb byte-decode apart from an actual document-
+  format parse without needing to look at `media_type` for every row.
+- **Left one file's typecheck failure alone**: `pnpm typecheck` fails on
+  `app/onboarding/r/[token]/report-view.tsx` (a JSX tag mismatch), a file
+  this session never touched and git shows modified by other concurrent
+  work. Verified this session's own file typechecks clean in isolation and
+  left the unrelated in-flight file for its own session to finish.
+
+## 2026-07-10 (mid-morning) · The BMP gap closed instead of deferred; a stale STAGED_EVENTS cleanup
+
+Asked directly why the two attachment gaps flagged right after the normalizer
+landed (BMP images, non-PDF/text files) needed production telemetry to
+resolve, rather than being findable right now. They didn't: Telnyx's own
+documented MMS allowlist (already researched earlier the same morning) is
+public information, cross-referencing it against the code's lanes settled
+both immediately, no waiting required. Calls made alone, worth auditing:
+
+- **The "other" file bucket is dead code, not a gap**: Telnyx's carrier-level
+  MMS file allowlist is only `application/pdf`, `text/vcard`, `text/calendar`
+  (per their receive-message and send/receive-MMS docs); all three already
+  have working lanes. A generic file (docx, zip, apk) cannot reach this
+  channel over MMS in the first place, so the "other" branch is a safety net
+  for a case the carrier itself won't deliver, not a real product gap.
+- **BMP was real, and got fixed rather than left open**: Telnyx's allowlist
+  does include `image/bmp` (legacy Android/WAP-era support), and Claude's
+  vision API only accepts jpeg/png/gif/webp (verified against Anthropic's
+  docs). `sharp` (already a dependency, used by Next's image optimizer)
+  cannot decode BMP either, verified live with a real ffmpeg-generated BMP.
+  Added `@huh-david/bmp-js` (zero dependencies, actively maintained, ships a
+  purpose-built sharp adapter: `sharpFromBmp(bytes, sharp).png().toBuffer()`)
+  and wired it into `sms-attachments.ts`'s image lane as a `converted`
+  outcome. Verified live end to end: a real BMP converted to PNG, and the
+  resulting image part read correctly ("Red") through the actual gateway
+  model call, not just a unit-level pixel check.
+- **Modern phones essentially never send BMP** (confirmed: it's a legacy
+  Windows/WAP-era format some old Android MMS stacks still list, not
+  something a camera or Photos app produces), so this was a real but rare
+  gap, closed anyway since the fix was cheap (one small, well-scoped,
+  zero-dependency package) rather than deferred on frequency alone.
+- **Found and fixed unrelated damage while running the guard**: `pnpm
+  check:events` failed on three STAGED_EVENTS entries (`materials.created`,
+  `materials.image_generated`, `sms.attachment_processed`) that all already
+  had real emitters, left behind by a separate in-flight worksheet-materials
+  session. Removed all three per the script's own stated convention (remove
+  a staged entry once its emitter lands); this is registry hygiene, not a
+  behavior change, and touches no worksheet-studio code.
+
+## 2026-07-10 (morning) · Every SMS attachment gets a lane: the never-deny-input normalizer
+
+Founder ruling: the channel boundary should recognize anything the model
+cannot use and convert it, whatever arrives; input is never denied.
+Yesterday's voice-note transcription generalized into an attachment
+normalizer (`lib/voice/sms-attachments.ts`) the Telnyx channel runs on
+every inbound attachment: photos pass through as image parts, voice
+notes AND video clips become speech transcripts (same Telnyx STT, which
+extracts a video's audio track server-side), PDFs pass to the model as
+native document parts, contact cards and other text-format files inline
+as text, and anything unreadable becomes a bracketed note the agent
+acknowledges in its one reply. Calls made alone, worth auditing:
+
+- **Video understanding = its audio track, for now**: the founder named
+  Whisper as the video lane and Twelve Labs as a future add; the
+  normalizer's video lane is one function, so a visual-understanding
+  swap stays one file. Verified live: a synthesized mp4 with a speech
+  track transcribed verbatim through `/v2/ai/audio/transcriptions`.
+- **PDFs ride as downloaded base64 bytes, not URLs**: base64 survives
+  every JSON serialization through eve's session storage, and the
+  model leg is proven (a generated PDF pushed through the live gateway
+  as a file part; Claude read its one sentence back). A 4MB guard
+  bounds the download; carriers cap MMS near 1MB anyway.
+- **Unsupported image subtypes fail soft instead of passing through**:
+  Claude accepts jpeg/png/gif/webp; a bmp/tiff image part would error
+  the whole turn at the provider, so those take the acknowledgement
+  lane. Phones effectively never send them (HEIC transcodes to JPEG in
+  the MMS pipeline).
+- **`sms.voice_note_received` (one day old) replaced, not kept**: the
+  general `sms.attachment_processed` event (kind, media_type, outcome,
+  linked_family) covers every lane including the old one; keeping both
+  would double-count voice notes. Same MJ-08 posture: no content, no
+  numbers, media_type + outcome is the whole telemetry story.
+- **The fail-soft direct reply generalized**: any all-failed,
+  no-typed-text inbound gets "I couldn't quite make out what you sent.
+  Mind trying again, or typing it?" instead of the voice-note-specific
+  copy; a failed attachment riding with other content stays a bracketed
+  note inside the single agent reply (one-reply law holds).
+
 ## 2026-07-10 (morning) · Strangers become leads; Homa gets concierge mode
 
 Founder ask: unknown texters and callers should (1) leave their number,

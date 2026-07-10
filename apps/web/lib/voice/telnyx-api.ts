@@ -42,6 +42,37 @@ export function telnyxListOf<T>(payload: unknown): T[] {
 }
 
 /**
+ * downloadTelnyxMedia(mediaUrl): Promise<ArrayBuffer | null>
+ * Downloads one inbound MMS media file (used by the SMS attachment
+ * lanes: transcription, documents, text files). URLs are ephemeral and
+ * may require API-key auth; the bearer header is safe because undici
+ * strips Authorization on any cross-origin redirect. Returns null on
+ * any failure, never throws, so attachment handling stays fail-soft.
+ */
+export async function downloadTelnyxMedia(
+  mediaUrl: string,
+): Promise<ArrayBuffer | null> {
+  const apiKey = process.env.TELNYX_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const response = await fetch(mediaUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!response.ok) {
+      console.error(`telnyx media download failed: HTTP ${response.status}`);
+      return null;
+    }
+    return await response.arrayBuffer();
+  } catch (error) {
+    console.error(
+      "telnyx media download failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return null;
+  }
+}
+
+/**
  * Sends one outbound text from Homa's number. Returns false (never
  * throws) when the channel is dark or the send fails, so a caller like
  * the journal loop can fall back to email. Telnyx handles STOP/HELP
