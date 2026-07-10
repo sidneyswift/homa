@@ -8,8 +8,8 @@ import { parentFirstName } from "../../lib/family";
 import { DashboardShell } from "../../components/dashboard/shell";
 
 /**
- * The signed-in app frame, wrapped around every page under /app (the
- * dashboard, chat, planner, kids, settings) by this segment's layout.
+ * The signed-in app frame, wrapped around every page under /app (chat,
+ * the dashboard, planner, kids, settings) by this segment's layout.
  * The shell (sidebar + phone top bar) renders
  * here ONCE and stays mounted while pages navigate inside it, so the
  * frame never re-mounts or jumps. Unfinished setup redirects to

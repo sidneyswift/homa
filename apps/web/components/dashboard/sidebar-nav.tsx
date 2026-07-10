@@ -17,8 +17,8 @@ import { Calendar, House, Sparkles } from "lucide-react";
  * signed-in visitors (same tabs, same icons, no drift).
  */
 export const APP_NAV_ITEMS = [
-  { href: "/app", label: "Home", icon: House },
-  { href: "/app/chat", label: "Ask Homa", icon: Sparkles },
+  { href: "/app", label: "Ask Homa", icon: Sparkles },
+  { href: "/app/home", label: "Home", icon: House },
   { href: "/app/planner", label: "Week planner", icon: Calendar },
 ] as const;
 
@@ -28,9 +28,9 @@ export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-0.5">
       {APP_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        // /app (the dashboard) matches exactly, never by prefix: every
-        // app page lives under /app/, so a prefix match would light the
-        // Home row on all of them.
+        // /app (chat, the default landing) matches exactly, never by
+        // prefix: every app page lives under /app/, so a prefix match
+        // would light the Ask Homa row on all of them.
         const active =
           href === "/app"
             ? pathname === href

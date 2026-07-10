@@ -209,7 +209,7 @@ export function buildUpNextItems(input: {
       label: "Talk to Homa about your week",
       sub: null,
       dot: "sage",
-      href: "/app/chat",
+      href: "/app",
     });
   }
   return items.slice(0, 3);

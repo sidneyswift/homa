@@ -213,7 +213,7 @@ export async function sendJournalAgentEmail(
   to: string,
   agentText: string,
 ): Promise<boolean> {
-  const url = `${siteUrl()}/app/chat?draft=journal`;
+  const url = `${siteUrl()}/app?draft=journal`;
   const bodyLines = agentText
     .split("\n")
     .map((line) => line.trim())

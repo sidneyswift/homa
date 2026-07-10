@@ -41,11 +41,16 @@ const nextConfig: NextConfig = {
       // to transfer) and the freed top-level names may become marketing
       // pages later, which a browser-cached permanent redirect would
       // fight. Query strings carry over automatically.
-      { source: "/home", destination: "/app", permanent: false },
-      { source: "/chat", destination: "/app/chat", permanent: false },
+      { source: "/home", destination: "/app/home", permanent: false },
+      { source: "/chat", destination: "/app", permanent: false },
       { source: "/planner", destination: "/app/planner", permanent: false },
       { source: "/kids/:path*", destination: "/app/kids/:path*", permanent: false },
       { source: "/settings", destination: "/app/settings", permanent: false },
+      // Chat became the /app root itself the same day (founder ask:
+      // default to chat over the dashboard); /app/chat existed only
+      // briefly but the journal email's already-sent deep link
+      // (/app/chat?draft=journal) still points there.
+      { source: "/app/chat", destination: "/app", permanent: false },
     ];
   },
 };

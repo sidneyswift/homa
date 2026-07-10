@@ -204,7 +204,7 @@ export function KidView({
           </Link>
         ) : null}
         <Link
-          href="/app/chat"
+          href="/app"
           className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
         >
           Ask Homa about {child.name}

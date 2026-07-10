@@ -20,9 +20,9 @@ pnpm --filter web dev   # http://localhost:3000
 - `app/` routes: `/` marketing page, `/onboarding` lead magnet (internal
   code says "map": `/api/map/*`, `lib/map/`, kept on purpose through the
   rename), `/blog`, `/privacy`, `/terms`, `/signin`, and the signed-in
-  app under one `/app` prefix (`/app` dashboard, `/app/chat`,
-  `/app/planner`, `/app/kids/[childId]`, `/app/settings`; old top-level
-  paths redirect).
+  app under one `/app` prefix (`/app` chat, the default landing;
+  `/app/home` dashboard, `/app/planner`, `/app/kids/[childId]`,
+  `/app/settings`; old top-level paths redirect).
 - `agent/` the eve agent: `instructions.md` persona, `tools/`, `channels/`.
 - `lib/map/` lead-magnet data layer (server-only Postgres, deny-all RLS
   tables). `lib/agent-db.ts` caller-scoped DB access for agent tools.

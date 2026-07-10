@@ -71,7 +71,7 @@ import { ScoringStep } from "./scoring-step";
  * exactly once. The kids step became the same add-a-child card the
  * signed-in flow uses, which collects interests and help-with up front,
  * so the extras step after the checklist only shows for a kid who left
- * both empty. After the report, the dashboard (/home) is the landing.
+ * both empty. After the report, the dashboard (/app/home) is the landing.
  */
 
 /** The kid the next-kid choice offers: in range, no report yet, questions

@@ -281,8 +281,10 @@ export function ReportView({
           <div className="px-7 py-7 sm:px-10">
             {/* Note from Homa: a personal letter, not a block of text
                 (round 2, founder ask 2026-07-09). Greeting, the note
-                sentence, the month she built from it, the call-me line,
-                and a sign-off, all in this one card. */}
+                sentence, the month-plan sentence, the call-me line, and
+                the sign-off, all in this one card, with the month button
+                after the sign-off (it's the letter's P.S. action, not a
+                mid-paragraph interruption). */}
             <div className="flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
               <div className="flex-shrink-0 pt-0.5">
                 <Logo variant="mark" size={34} />
@@ -298,18 +300,7 @@ export function ReportView({
                   {noteText ?? homaNote(report.scores, report.childName)}
                 </p>
                 {monthOffered ? (
-                  <>
-                    <p className="mt-2 text-body">{notePlanSentence(report.childName, monthName)}</p>
-                    <MonthButton
-                      childId={report.childId}
-                      childName={report.childName}
-                      planUrl={
-                        monthBuilt
-                          ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_DOMAIN}`
-                          : null
-                      }
-                    />
-                  </>
+                  <p className="mt-2 text-body">{notePlanSentence(report.childName, monthName)}</p>
                 ) : null}
                 {editable ? (
                   <div className="mt-2">
@@ -321,6 +312,17 @@ export function ReportView({
                   <br />
                   Homa
                 </p>
+                {monthOffered ? (
+                  <MonthButton
+                    childId={report.childId}
+                    childName={report.childName}
+                    planUrl={
+                      monthBuilt
+                        ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_DOMAIN}`
+                        : null
+                    }
+                  />
+                ) : null}
               </div>
             </div>
 
@@ -686,7 +688,7 @@ export function ReportView({
                 // the family dashboard, where the kids, chat, and settings
                 // live from here on.
                 <Link
-                  href="/app"
+                  href="/app/home"
                   className={reportButtonClass(
                     "primary",
                     "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
@@ -722,7 +724,7 @@ export function ReportView({
               back to your family
             </Link>
           ) : (
-            <Link href="/app" className="text-brand underline-offset-2 hover:underline">
+            <Link href="/app/home" className="text-brand underline-offset-2 hover:underline">
               go to your family dashboard
             </Link>
           )}

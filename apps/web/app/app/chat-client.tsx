@@ -6,8 +6,8 @@ import { useEveAgent, type EveMessage } from "eve/react";
 import { ArrowUp, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { Logo } from "../../../components/brand/Logo";
-import { createSupabaseBrowserClient } from "../../../lib/supabase/client";
+import { Logo } from "../../components/brand/Logo";
+import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 

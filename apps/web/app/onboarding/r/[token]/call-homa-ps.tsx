@@ -8,8 +8,8 @@ import { useState } from "react";
  * you", folded into the letter body instead of its own boxed P.S.). One
  * tap rings the number the family already gave during onboarding; no
  * phone input here. Homa talks the report through on a real call and
- * builds the curriculum from the conversation (it lands on /home when
- * ready).
+ * builds the curriculum from the conversation (it lands on /app/home
+ * when ready).
  */
 export function CallHomaPs({ childId, childName }: { childId: string; childName: string }) {
   const [state, setState] = useState<"idle" | "busy" | "called" | "error" | "no-session">("idle");

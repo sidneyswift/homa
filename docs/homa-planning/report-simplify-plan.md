@@ -150,3 +150,69 @@ sizes, "rescores" jargon replaced, "age norm" replaced, state card meta-opener
 and hedging trimmed, drawer prompt got a one-reassurance budget and a 320-char
 budget. Founder re-read of the regenerated fixtures (STOP 1) is the one open
 human step.
+
+## Round 2 (founder ask, 2026-07-09 night): the note becomes a letter, one flow
+
+Even after round 1, the note still read as a note plus a bolted-on plan
+paragraph plus a boxed P.S., the snapshot's arc repeated itself twice more
+(the whole picture, then "stories so far"), and "things to try" plus the
+memory-box letter sat between subject cards and the state/methodology pair
+the founder wanted them to flow straight into.
+
+### RS-12 · Drop the header subtitle
+
+- `reportSubtitle()` and its call site removed: the h1 flows straight into
+  the age/subjects/answers/benchmarks meta line. Files: `report-view.tsx`,
+  `sentences.ts`, `packages/core/src/index.ts`.
+
+### RS-13 · Note from Homa becomes a letter
+
+- Structure: "Hey {parent},"greeting, the note sentence (template or
+  model), the month-plan sentence + button when offered, one inline
+  call-me line, "Thanks, Homa" sign-off. New `noteGreeting()` and
+  `notePlanSentence()` template sentences in `sentences.ts`; `homaNote()`
+  drops its `parentName` param now that the greeting owns the name.
+  `call-homa-ps.tsx` reworded from its own boxed P.S. into one inline
+  "BTW, click if you'd rather I give you a call" sentence, same behavior.
+  The model's `note` prompt now explicitly forbids opening with the
+  parent's name (the greeting already says it once); the two committed
+  fixtures were regenerated at prompt v2026.07.18 and both passed the
+  gate clean on the first try. `kid-view.tsx`'s dashboard note picked up
+  the same greeting for consistency (it quotes the same reviewed
+  sentence).
+
+### RS-14 · "Stories so far" removed, snapshot flows straight into the whole picture
+
+- The chapter-by-chapter growth story and its rising-subject sparklines
+  are gone (redundant with the snapshot's trajectory chart and the whole
+  picture chart, per the founder). `GrowthEra` and `movementBetween` stay
+  exported from `growth-story.tsx`: the snapshot chart and the separate
+  `/evidence` archive page both still need them.
+
+### RS-15 · The model's synthesis piece retired too, not just unrendered
+
+- Confirmed with the founder: rather than leave `synthesis` and `keepsake`
+  generating unread content, they're gone from the contract end to end
+  (`ReportNarrative`, the gate, the generation schema, `map-check.mts`'s
+  fixture and unit tests, `report-writer.md`). The whole picture now
+  flows directly into subject by subject with nothing in between.
+  `lastLetter`/`priorLetter` memory carries the prior `note` only now.
+
+### RS-16 · "Things to try" and the memory-box keepsake removed
+
+- Subject by subject now flows straight into the state card, then
+  methodology. `tryHeading()` deleted (dead after its only call site
+  went); `growingActivityFor` stays in the facts payload (the model may
+  still draw on it) but is no longer rendered as its own section.
+
+### RS-17 · Regenerate + verify
+
+- `pnpm tsx scripts/map-narrative-fixtures.mts` (real model call): both
+  fixtures regenerated at prompt v2026.07.18, gate clean, no parent-name
+  repeat in either note. Typecheck, lint, `check:map`, and build all
+  green; sample report and a forced-editable render (month button + call
+  line visible) screenshotted before committing to the layout.
+
+### Status
+
+- [x] RS-12 through RS-17, executed 2026-07-09 night.

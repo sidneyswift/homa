@@ -51,7 +51,7 @@ export function Greeting({
       </div>
       {/* Hidden on phones: the sticky top bar already carries Ask Homa. */}
       <Link
-        href="/app/chat"
+        href="/app"
         className="hidden rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover lg:inline-flex"
       >
         Talk to Homa
