@@ -34,8 +34,10 @@ import { StalenessBanner } from "./staleness-banner";
 import { StateCard } from "./state-card";
 
 /**
- * The progress report renderer, shared by the live tokenized page and the
- * public sample. Built around progressive disclosure (founder pass
+ * The progress report renderer, shared by the live tokenized page, the
+ * public sample, and the in-app home surface (/app/[childId]/report,
+ * founder ask 2026-07-10: the report IS the dashboard). Built around
+ * progressive disclosure (founder pass
  * 2026-07-08: "if you've said it once, you don't need to say it again",
  * round 2 on 2026-07-09): the note from Homa reads as an actual letter
  * (greeting, the note sentence, the month plan, a call-me line, a
@@ -119,11 +121,16 @@ function movementFor(
 export function ReportView({
   data,
   sample = false,
+  context = "standalone",
   narrativeView = null,
   stateRequirements = null,
 }: {
   data: ReportViewData;
   sample?: boolean;
+  /** "standalone" is the tokenized/emailed page with its own chrome;
+   * "app" renders inside the /app frame, which already owns the nav,
+   * the background, and the way back, so none of those repeat here. */
+  context?: "standalone" | "app";
   /** The model-written pieces, when generated and gate-approved. */
   narrativeView?: ReportNarrativeView | null;
   /** The family's state compliance summary (render-time join, never
@@ -131,6 +138,10 @@ export function ReportView({
   stateRequirements?: StateRequirementsSummary | null;
 }) {
   const report = data;
+  const inApp = context === "app";
+  // The /app frame already renders a <main>; nesting another is invalid
+  // HTML, so the in-app column is a plain div.
+  const Column = inApp ? ("div" as const) : ("main" as const);
   const rejectedPieces = new Set(narrativeView?.rejectedPieces ?? []);
   /** The generated text for a piece, or null when the template must render. */
   const generatedPiece = (key: string, text: string | undefined): string | null =>
@@ -222,12 +233,13 @@ export function ReportView({
   const readyKids = report.otherKids.filter((kid) => kid.hasReport);
 
   return (
-    <div className="min-h-screen bg-page pb-16">
+    <div className={inApp ? "pb-16" : "min-h-screen bg-page pb-16"}>
       {/* The way out (founder ask 2026-07-08: the report page had no
-          path to the dashboard or settings). Sample keeps its own CTAs. */}
-      {!sample ? <ReportNav /> : null}
+          path to the app or settings). The sample keeps its own CTAs;
+          in-app, the frame's own nav carries this job. */}
+      {!sample && !inApp ? <ReportNav /> : null}
 
-      <main className="mx-auto w-full max-w-2xl px-4 pt-6">
+      <Column className="mx-auto w-full max-w-2xl px-4 pt-6">
         {sample ? (
           <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
             Sample report. Maya is a demonstration child; every number below is example data.{" "}
@@ -608,12 +620,12 @@ export function ReportView({
               </div>
             </details>
 
-            {/* Sibling reports built in the same sitting. Deliberately no
-                direct report links here: this page is a shareable token
-                URL, and embedding a sibling's token would let anyone
-                holding one kid's link open the other kid's report. The
-                family page is session-scoped, so only the parent's own
-                browser lands on the reports. */}
+            {/* Sibling reports built in the same sitting. On the token
+                URL, deliberately no direct report links: this page is
+                shareable, and embedding a sibling's token would let
+                anyone holding one kid's link open the other kid's
+                report. In-app is session-scoped, so each sibling's own
+                report page links directly. */}
             {!sample && readyKids.length > 0 ? (
               <div className="mt-9 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden">
                 <p className="font-display text-lg font-semibold text-strong">
@@ -621,19 +633,38 @@ export function ReportView({
                     ? `${readyKids[0].name}'s report is ready too.`
                     : "The other reports are ready too."}
                 </p>
-                <p className="mt-1 text-sm text-body">
-                  {readyKids.length === 1 ? "It's" : "They're"} in your inbox, and one tap from
-                  your family page.
-                </p>
-                <Link
-                  href="/onboarding"
-                  className={reportButtonClass(
-                    "primary",
-                    "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold",
-                  )}
-                >
-                  {readyKids.length === 1 ? `Open ${readyKids[0].name}'s report` : "Open the reports"}
-                </Link>
+                {inApp ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {readyKids.map((kid) => (
+                      <Link
+                        key={kid.id}
+                        href={`/app/${kid.id}/report`}
+                        className={reportButtonClass(
+                          "primary",
+                          "inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold",
+                        )}
+                      >
+                        Open {kid.name}&apos;s report
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-1 text-sm text-body">
+                      {readyKids.length === 1 ? "It's" : "They're"} in your inbox, and one tap from
+                      your family page.
+                    </p>
+                    <Link
+                      href="/onboarding"
+                      className={reportButtonClass(
+                        "primary",
+                        "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold",
+                      )}
+                    >
+                      {readyKids.length === 1 ? `Open ${readyKids[0].name}'s report` : "Open the reports"}
+                    </Link>
+                  </>
+                )}
               </div>
             ) : null}
 
@@ -658,46 +689,48 @@ export function ReportView({
               </div>
             ) : null}
 
-            {/* CTA band */}
-            <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
-              <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
-                This report is where {report.childName} starts, not where {report.childName} stays.
-              </h3>
-              <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
-                Homa builds a plan for whatever is growing, makes materials for exactly those
-                skills, and re-draws this report as {report.childName} grows, so you watch the
-                numbers move.
-              </p>
-              {sample ? (
-                <>
+            {/* CTA band: hidden in-app, where the reader is already home
+                and the frame carries every door. */}
+            {inApp ? null : (
+              <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
+                <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
+                  This report is where {report.childName} starts, not where {report.childName} stays.
+                </h3>
+                <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
+                  Homa builds a plan for whatever is growing, makes materials for exactly those
+                  skills, and re-draws this report as {report.childName} grows, so you watch the
+                  numbers move.
+                </p>
+                {sample ? (
+                  <>
+                    <Link
+                      href="/onboarding"
+                      className={reportButtonClass(
+                        "primary",
+                        "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
+                      )}
+                    >
+                      Get your child&apos;s free report
+                    </Link>
+                    <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
+                      Five minutes of questions, benchmarked against national standards.
+                    </p>
+                  </>
+                ) : (
+                  // This report lives in the app now (founder ask
+                  // 2026-07-10): the token page's job ends at the door.
                   <Link
-                    href="/onboarding"
+                    href={`/app/${report.childId}/report`}
                     className={reportButtonClass(
                       "primary",
                       "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
                     )}
                   >
-                    Get your child&apos;s free report
+                    Open this report in Homa
                   </Link>
-                  <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
-                    Five minutes of questions, benchmarked against national standards.
-                  </p>
-                </>
-              ) : (
-                // The founder-expected landing after results (2026-07-08):
-                // the family dashboard, where the kids, chat, and settings
-                // live from here on.
-                <Link
-                  href="/app/dashboard"
-                  className={reportButtonClass(
-                    "primary",
-                    "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
-                  )}
-                >
-                  Go to your family dashboard
-                </Link>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -718,18 +751,23 @@ export function ReportView({
           </div>
         </div>
 
-        <p className="mt-4 text-center text-sm text-subtle print:hidden">
-          {sample ? (
-            <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
-              back to your family
-            </Link>
-          ) : (
-            <Link href="/app/dashboard" className="text-brand underline-offset-2 hover:underline">
-              go to your family dashboard
-            </Link>
-          )}
-        </p>
-      </main>
+        {inApp ? null : (
+          <p className="mt-4 text-center text-sm text-subtle print:hidden">
+            {sample ? (
+              <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
+                back to your family
+              </Link>
+            ) : (
+              <Link
+                href={`/app/${report.childId}/report`}
+                className="text-brand underline-offset-2 hover:underline"
+              >
+                open this report in Homa
+              </Link>
+            )}
+          </p>
+        )}
+      </Column>
     </div>
   );
 }

@@ -21,7 +21,8 @@ pnpm --filter web dev   # http://localhost:3000
   code says "map": `/api/map/*`, `lib/map/`, kept on purpose through the
   rename), `/blog`, `/privacy`, `/terms`, `/signin`, and the signed-in
   app under one `/app` prefix (`/app` chat, the default landing;
-  `/app/dashboard`, `/app/planner`, `/app/kids/[childId]`,
+  `/app/[childId]/report` the in-app progress report with `/app/report`
+  as the nav's resolver, `/app/planner`, `/app/kids/[childId]`,
   `/app/settings`; old top-level paths redirect).
 - `agent/` the eve agent: `instructions.md` persona, `tools/`, `channels/`.
 - `lib/map/` lead-magnet data layer (server-only Postgres, deny-all RLS

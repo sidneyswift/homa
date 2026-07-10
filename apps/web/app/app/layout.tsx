@@ -6,6 +6,7 @@ import { getAppData } from "../../lib/app-data";
 import { buildUpNextItems } from "../../lib/dashboard";
 import { parentFirstName } from "../../lib/family";
 import { DashboardShell } from "../../components/dashboard/shell";
+import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
 
 /**
  * The signed-in app frame, wrapped around every page under /app (chat,
@@ -36,6 +37,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       }))}
       upNext={buildUpNextItems({ children: kids, reports, plans, pendingCurriculumChildIds })}
     >
+      {/* Captures the device time zone once, while the family row has
+          none, from ANY first app visit (it used to live on the
+          dashboard, which retired 2026-07-10; the planner's dates and
+          the evening check-in's timing both read this). */}
+      {family.time_zone ? null : <TimeZoneSync />}
       {children}
     </DashboardShell>
   );

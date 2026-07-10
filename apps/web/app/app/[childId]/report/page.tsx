@@ -1,0 +1,91 @@
+import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
+
+import { getAppData } from "../../../../lib/app-data";
+import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
+import { getStateRequirements } from "../../../../lib/map/state-requirements";
+import { getReportByToken } from "../../../../lib/map/store";
+import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
+import { ReportView } from "../../../onboarding/r/[token]/report-view";
+
+/**
+ * /app/[childId]/report: the progress report as the app's home surface
+ * (founder ask 2026-07-10: the report IS the dashboard; onboarding ends
+ * when the questions do, and the results live in the app). Renders the
+ * same ReportView as the emailed token URL, inside the /app frame, so
+ * the sidebar and phone nav ride along. The child id resolves inside
+ * the caller's own family (RLS), so a foreign id is a 404, never a
+ * leak; the report itself loads by the family's own token. A kid with
+ * no report yet routes to /onboarding, the one place questions live.
+ */
+
+export const metadata: Metadata = {
+  title: "Progress report",
+  robots: { index: false },
+};
+
+export default async function AppReportPage({
+  params,
+}: {
+  params: Promise<{ childId: string }>;
+}) {
+  const { childId } = await params;
+  const data = await getAppData();
+  if (!data) redirect("/onboarding");
+
+  const child = data.children.find((entry) => entry.id === childId);
+  if (!child) notFound();
+
+  const token = data.reports.get(childId)?.token;
+  if (!token) redirect("/onboarding");
+  const report = await getReportByToken(token);
+  if (!report) redirect("/onboarding");
+
+  const flagOn = narrativeEnabled();
+  const meta = report.narrativeMeta;
+  const ready = meta?.status === "ready" && report.narrative !== null;
+
+  // Same honest writing beat as the token page: fresh from scoring, the
+  // model may still be writing this report's words.
+  if (flagOn && !ready && meta?.status !== "failed") {
+    return (
+      <div className="mx-auto w-full max-w-xl px-6 py-16">
+        <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+          Homa is writing {report.childName}&apos;s report
+        </h1>
+        <p className="mt-2 text-body">
+          The numbers are done. Now every sentence gets written for {report.childName}{" "}
+          specifically.
+        </p>
+        <div className="mt-6">
+          <NarrativeBeat
+            token={token}
+            lines={[
+              `Reading your ${report.scores.observationCount} observations`,
+              `Looking across all ${report.scores.totalDomains} subjects`,
+              `Writing ${report.childName}'s report`,
+            ]}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const stateRequirements = report.usState
+    ? await getStateRequirements(report.usState).catch(() => null)
+    : null;
+
+  const narrativeView =
+    flagOn && ready && report.narrative
+      ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
+      : null;
+
+  return (
+    <ReportView
+      data={report}
+      context="app"
+      narrativeView={narrativeView}
+      stateRequirements={stateRequirements}
+    />
+  );
+}

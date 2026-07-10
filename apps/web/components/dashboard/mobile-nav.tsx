@@ -64,7 +64,7 @@ export function MobileNav(props: SidebarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-subtle bg-page/95 px-3 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-subtle bg-page/95 px-3 backdrop-blur lg:hidden print:hidden">
         <button
           type="button"
           aria-expanded={open}

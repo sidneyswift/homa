@@ -96,9 +96,13 @@ export function ScoringStep({
         }
         const elapsed = Date.now() - (startedAt.current ?? Date.now());
         const wait = Math.max(0, minimumWait - elapsed);
+        // A fresh report lands IN the app (founder ask 2026-07-10:
+        // onboarding ends when the questions do; the report is the
+        // app's home surface). The token URL stays the emailed/shared
+        // door; deep-dive sittings still land on the rebuilt plan.
         const destination = planDomain
           ? `/onboarding/r/${landingToken}/plan/${planDomain}?rebuilt=1`
-          : `/onboarding/r/${landingToken}?fresh=1`;
+          : `/app/${frozenKids[0].id}/report?fresh=1`;
         setTimeout(() => {
           if (!cancelled) window.location.assign(destination);
         }, wait);

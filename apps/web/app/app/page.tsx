@@ -7,7 +7,7 @@ import { ChatClient } from "./chat-client";
 /**
  * /app: talk to Homa, the app's default landing (founder ask 2026-07-09:
  * chat over dashboard as the front door; the dashboard moved to
- * /app/dashboard). Rendered inside the /app frame like every signed-in
+ * the in-app report). Rendered inside the /app frame like every signed-in
  * surface. Auth is enforced twice: proxy.ts gates the page, and the eve
  * channel's supabaseAuth() independently validates every agent request.
  * The chat transcript persists in localStorage keyed by user id (v0 of

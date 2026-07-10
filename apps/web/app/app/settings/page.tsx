@@ -5,8 +5,9 @@ import { formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
 import { getFamilyPhone } from "../../../lib/family-phone";
+import { getMyMemories } from "../../../lib/memories";
+import { MemoriesCard } from "../../../components/dashboard/memories-card";
 import { PageColumn } from "../../../components/dashboard/page-column";
-import { TimeZoneSync } from "../../../components/dashboard/time-zone-sync";
 import { AddChildForm } from "./add-child-form";
 import { TextingCard } from "./texting-card";
 import { TimeZoneCard } from "./time-zone-card";
@@ -14,10 +15,12 @@ import { TimeZoneCard } from "./time-zone-card";
 /**
  * /app/settings: the family's account basics (add a child, the texting
  * line, the time zone), moved off the dashboard 2026-07-09 (founder ask:
- * the dashboard is for the week, settings get their own page). Same setup
- * gate as the rest of the /app pages (one onboarding for every door); the
- * frame renders in the /app layout. Auth is enforced by proxy.ts; data
- * access is enforced by RLS regardless.
+ * the dashboard is for the week, settings get their own page), plus the
+ * what-Homa-remembers card (FR-9), which moved here when the card
+ * dashboard retired for the in-app report (founder ask 2026-07-10).
+ * Same setup gate as the rest of the /app pages (one onboarding for
+ * every door); the frame renders in the /app layout. Auth is enforced
+ * by proxy.ts; data access is enforced by RLS regardless.
  */
 
 export const metadata: Metadata = {
@@ -28,9 +31,13 @@ export const metadata: Metadata = {
 export default async function SettingsPage() {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family } = data;
+  const { family, children } = data;
 
-  const familyPhone = await getFamilyPhone(family.id);
+  const [familyPhone, memories] = await Promise.all([
+    getFamilyPhone(family.id),
+    getMyMemories(family.id),
+  ]);
+  const childNames = new Map(children.map((child) => [child.id, child.name]));
 
   // Homa's own number, shown on the texting card only once this
   // deployment has a live texting line configured.
@@ -41,10 +48,6 @@ export default async function SettingsPage() {
 
   return (
     <PageColumn>
-      {/* Captures the device zone once, while the family row has none:
-          this page is reachable straight from the report nav, so it
-          cannot assume /home ran the capture first. */}
-      {family.time_zone ? null : <TimeZoneSync />}
       <header>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
           {family.name}
@@ -61,6 +64,11 @@ export default async function SettingsPage() {
           homaNumberDisplay={homaNumber ? formatUsPhone(homaNumber) : null}
         />
         <TimeZoneCard currentTimeZone={family.time_zone} />
+        {/* Visible only once something is saved: an empty memory list
+            on day one reads as a gap, not a promise. */}
+        {memories.length > 0 ? (
+          <MemoriesCard memories={memories} childNames={childNames} />
+        ) : null}
       </div>
     </PageColumn>
   );

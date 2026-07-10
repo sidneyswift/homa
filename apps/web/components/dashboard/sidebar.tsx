@@ -53,7 +53,7 @@ export interface SidebarProps {
 
 export function Sidebar(props: SidebarProps) {
   return (
-    <aside className="sticky top-3.5 m-3.5 hidden h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)] lg:flex">
+    <aside className="sticky top-3.5 m-3.5 hidden h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)] lg:flex print:hidden">
       <div className="px-2.5 pb-5 pt-1">
         {/* The wordmark is a home link everywhere (tester ask, memo 2). */}
         <Link href="/app" aria-label="Home" className="inline-flex rounded-md">

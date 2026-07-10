@@ -8,12 +8,13 @@ import { emitMapEvent } from "../../lib/map/events";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 /**
- * The dashboard's (/app/dashboard) server actions: the device time-zone
- * capture and the memories card's one-tap undo. The settings-card
- * actions (add a child, the texting line, the time-zone picker) moved
- * with their cards to app/app/settings/actions.ts (founder ask
- * 2026-07-09: settings left the dashboard). Both actions here scope by
- * the caller's OWN membership (getMyFamily / RLS), never by client input.
+ * Frame-level server actions: the device time-zone capture (fired by the
+ * /app layout's TimeZoneSync) and the memories card's one-tap undo (the
+ * card lives on /app/settings since the card dashboard retired, founder
+ * ask 2026-07-10). The settings-card actions (add a child, the texting
+ * line, the time-zone picker) live in app/app/settings/actions.ts. Both
+ * actions here scope by the caller's OWN membership (getMyFamily / RLS),
+ * never by client input.
  */
 
 /**
@@ -26,9 +27,9 @@ export async function autoFillTimeZoneAction(timeZone: string): Promise<void> {
   const family = await getMyFamily();
   if (!family || family.time_zone) return;
   await fillFamilyTimeZoneIfEmpty(family.id, timeZone);
-  // The zone shows on the dashboard greeting, the planner's dates, and
-  // the settings card; one layout-wide revalidate refreshes every /app
-  // page (they share the frame's segment).
+  // The zone shows on the planner's dates and the settings card; one
+  // layout-wide revalidate refreshes every /app page (they share the
+  // frame's segment).
   revalidatePath("/app", "layout");
 }
 
@@ -52,6 +53,6 @@ export async function forgetMemoryAction(memoryId: string): Promise<void> {
       family_id: deleted.family_id,
       source: deleted.source as "homa" | "parent" | "onboarding" | "call" | "review",
     });
-    revalidatePath("/app/dashboard");
+    revalidatePath("/app/settings");
   }
 }

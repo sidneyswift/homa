@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, House, Sparkles } from "lucide-react";
+import { Calendar, FileText, Sparkles } from "lucide-react";
 
 /**
  * The sidebar's nav list. Client-side on purpose: the app frame renders
@@ -18,9 +18,14 @@ import { Calendar, House, Sparkles } from "lucide-react";
  */
 export const APP_NAV_ITEMS = [
   { href: "/app", label: "Ask Homa", icon: Sparkles },
-  { href: "/app/dashboard", label: "Home", icon: House },
+  { href: "/app/report", label: "Progress report", icon: FileText },
   { href: "/app/planner", label: "Week planner", icon: Calendar },
 ] as const;
+
+/** A kid's own report page (/app/[childId]/report), which should light
+ * the Progress report tab even though the tab itself points at the
+ * /app/report resolver. */
+const KID_REPORT_PATH = /^\/app\/[^/]+\/report$/;
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -34,7 +39,9 @@ export function SidebarNav() {
         const active =
           href === "/app"
             ? pathname === href
-            : pathname === href || pathname.startsWith(`${href}/`);
+            : href === "/app/report"
+              ? pathname === href || KID_REPORT_PATH.test(pathname)
+              : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={href}

@@ -3,6 +3,49 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (midday) · The progress report becomes the app's home surface; the card dashboard retires
+
+Founder ask: the report is not "onboarding results", it IS the
+dashboard. Once the questions are done, onboarding is over: land the
+parent inside the app, on the report, with the sidebar around it, and
+keep emailing the report link. Built: `/app/[childId]/report` renders
+the same ReportView as the token URL inside the /app frame; scoring's
+final hop goes there instead of `/onboarding/r/[token]`; the card
+dashboard (`/app/dashboard`) is deleted. Calls made alone, worth
+auditing:
+
+- **Two routes, one per-kid and one stable**: reports are per kid, but
+  the nav tab renders with no kid in hand, so `/app/report` resolves to
+  the first kid with a report and the tab (`Progress report`, FileText
+  icon) lights for any `/app/*/report` path. `/home`, `/app/home`, and
+  `/app/dashboard` all redirect to the resolver.
+- **One renderer, a context prop**: ReportView gained
+  `context="standalone" | "app"` instead of a second component. In-app
+  it drops the token page's own nav, the dark CTA band, and the footer
+  dashboard link (the frame carries those jobs), renders a div column
+  (the frame already owns `<main>`), and links sibling reports directly
+  (`/app/[id]/report`, session-scoped) where the shareable token page
+  deliberately never embeds sibling tokens.
+- **The token URL keeps its job**: it is the emailed/shared door
+  (sendReportEmail was already sending it at scoring; nothing new to
+  build for "email them the report"). Its dashboard CTAs became "Open
+  this report in Homa" (the in-app report) and the ReportNav pill
+  became "Open Homa" (/app).
+- **Dashboard cards**: greeting, family note, and the hours card
+  deleted (with lib/hours.ts, dashboard-only). The memories card MOVED
+  to /app/settings rather than deleted: it is FR-9's visible-undo
+  surface, and deleting it would have orphaned the memory.forgotten
+  event (events-check parity). KidCard deleted; its kidPill standing
+  chip survives as kid-pill.tsx for the per-kid page. TimeZoneSync
+  moved from the dashboard page into the /app layout so the device
+  zone still gets captured on a family's first app visit (the evening
+  check-in's timing reads it).
+- **Verified end to end**: a real onboarding run (account, family card,
+  kid, 96 answers, scoring) landed on `/app/{childId}/report?fresh=1`
+  with the tab active, the phone hamburger bar present, the token page
+  still standalone, and the sample report untouched. Build plus all
+  four guards green; throwaway rows deleted after.
+
 ## 2026-07-10 (late morning) · Word and Excel lanes added; HEIC and Live Photos confirmed as non-issues
 
 Asked to extend the never-deny-input normalizer to every file type a mom might

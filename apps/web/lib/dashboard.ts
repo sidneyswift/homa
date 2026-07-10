@@ -11,10 +11,11 @@ import type { ChildRecord } from "./family";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * Server-side reads for the /app dashboard. Everything here runs under
- * the caller's RLS context (publishable key + session JWT), so every row
- * is family-scoped by the database itself. No write paths: the dashboard
- * only renders what the questionnaire, plans, and calls already produced.
+ * Server-side reads shared by the /app pages (the report tab, kid pages,
+ * planner, the sidebar's up-next rail). Everything here runs under the
+ * caller's RLS context (publishable key + session JWT), so every row is
+ * family-scoped by the database itself. No write paths: these surfaces
+ * only render what the questionnaire, plans, and calls already produced.
  * Display law applies downstream: these rows carry positions and dates,
  * never invented streaks or hours.
  */

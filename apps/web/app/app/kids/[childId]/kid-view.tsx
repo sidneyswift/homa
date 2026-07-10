@@ -6,7 +6,7 @@ import type { ChildCurriculumRow } from "../../../../lib/curriculum";
 import type { ChildRecord } from "../../../../lib/family";
 import type { DashboardPlan, DashboardReport, RecentWin } from "../../../../lib/dashboard";
 import { avatarTone } from "../../../../components/dashboard/sidebar";
-import { kidPill } from "../../../../components/dashboard/kid-card";
+import { kidPill } from "../../../../components/dashboard/kid-pill";
 import { Logo } from "../../../../components/brand/Logo";
 import { MonthCard } from "../../../../components/dashboard/month-card";
 import { movedUpCount } from "../../../../components/dashboard/movement";
@@ -197,7 +197,7 @@ export function KidView({
       <div className="mt-6 flex flex-wrap gap-2">
         {report?.token ? (
           <Link
-            href={`/onboarding/r/${report.token}`}
+            href={`/app/${child.id}/report`}
             className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
           >
             Open the full report

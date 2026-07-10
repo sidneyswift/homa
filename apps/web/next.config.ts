@@ -4,6 +4,10 @@ import { withEve } from "eve/next";
 const nextConfig: NextConfig = {
   // Workspace packages ship raw TypeScript; Next compiles them in-place.
   transpilePackages: ["@homa/core"],
+  // The worksheet studio's renderer (lib/print/render-page.ts): the
+  // Chromium binary and puppeteer must stay real node_modules, never
+  // bundled, so the .br binaries survive to the deployed function.
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
   // AVIF first for the hero LCP image (roughly 20-30% smaller than webp),
   // webp as the fallback.
   images: {
@@ -41,7 +45,7 @@ const nextConfig: NextConfig = {
       // to transfer) and the freed top-level names may become marketing
       // pages later, which a browser-cached permanent redirect would
       // fight. Query strings carry over automatically.
-      { source: "/home", destination: "/app/dashboard", permanent: false },
+      { source: "/home", destination: "/app/report", permanent: false },
       { source: "/chat", destination: "/app", permanent: false },
       { source: "/planner", destination: "/app/planner", permanent: false },
       { source: "/kids/:path*", destination: "/app/kids/:path*", permanent: false },
@@ -51,9 +55,13 @@ const nextConfig: NextConfig = {
       // briefly but the journal email's already-sent deep link
       // (/app/chat?draft=journal) still points there.
       { source: "/app/chat", destination: "/app", permanent: false },
-      // The dashboard was /app/home for a day before the founder named
-      // it /app/dashboard (2026-07-10); same open-tab/history courtesy.
-      { source: "/app/home", destination: "/app/dashboard", permanent: false },
+      // The card dashboard lived at /app/home for a day, then
+      // /app/dashboard for another, then retired for the in-app report
+      // (founder ask 2026-07-10: the report IS the home surface). Both
+      // old names route to the report resolver for open tabs and
+      // history.
+      { source: "/app/home", destination: "/app/report", permanent: false },
+      { source: "/app/dashboard", destination: "/app/report", permanent: false },
     ];
   },
 };
