@@ -16,7 +16,13 @@ import { join } from "node:path";
 import { EVENT_SCHEMAS } from "../packages/core/src/index";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
-const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [];
+const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
+  // Emitters live in the worksheet-materials session's in-flight files
+  // (2026-07-10); remove these entries when that work lands.
+  ["materials.created", "worksheet materials session 2026-07-10"],
+  ["materials.image_generated", "worksheet materials session 2026-07-10"],
+  ["sms.attachment_processed", "worksheet materials session 2026-07-10"],
+];
 
 const failures: string[] = [];
 
