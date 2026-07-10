@@ -47,7 +47,7 @@ export async function persistConversationMessage(
   // Best-effort semantic index (about 200-400ms per message inside the
   // hook, after the user already has their streamed text). Null means
   // this row is findable by FTS only, never a failed write.
-  const embedding = await embedText(content);
+  const embedding = await embedText(content, { familyId });
 
   const sql = mapDb();
   await sql`

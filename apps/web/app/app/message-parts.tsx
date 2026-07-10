@@ -3,7 +3,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { MarkdownText } from "./markdown-text";
-import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
+import { MaterialCard, type MaterialArtifact } from "./material-card";
 
 /**
  * Message rendering for the chat transcript, in the assistant-transcript
@@ -12,7 +12,7 @@ import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
  * right (ui_kits/web-app/ChatView.jsx), Homa's replies render FLAT on the
  * page, no card, and the work Homa did stays visible as quiet past-tense
  * activity lines ("Checked your family's info") plus the named-effect
- * memory chips and worksheet cards (the MJ-02 confirmation spirit: when
+ * memory chips and material cards (the MJ-02 confirmation spirit: when
  * Homa saves, updates, or deletes something durable, the effect is
  * visible in the transcript, not silent).
  */
@@ -48,6 +48,13 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   if (part.toolName === "forget_skill" && output.deleted === true && typeof output.name === "string") {
     return { label: "Skill removed", detail: output.name };
   }
+  if (
+    part.toolName === "mark_material_final" &&
+    output.finalized === true &&
+    typeof output.title === "string"
+  ) {
+    return { label: "Final kept", detail: output.title };
+  }
   return null;
 }
 
@@ -66,16 +73,18 @@ function MemoryChip({ chip }: { chip: MemoryChipContent }) {
 const TOOL_DONE_LABELS: Record<string, string> = {
   get_children: "Checked your family's info",
   load_skill: "Looked up how we do this",
+  generate_image: "Made an image",
+  find_materials: "Looked through your materials",
 };
 
 /** What one assistant message renders as, in part order: quiet activity
  * lines (consecutive ones collapse into a single mid-dot line, the way
  * the reference transcript groups "used X, did Y"), flowing markdown
- * text, worksheet cards, and memory chips. */
+ * text, material cards, and memory chips. */
 type AssistantItem =
   | { kind: "activity"; labels: string[] }
   | { kind: "text"; text: string }
-  | { kind: "worksheet"; worksheet: WorksheetPayload }
+  | { kind: "material"; material: MaterialArtifact }
   | { kind: "chip"; chip: MemoryChipContent };
 
 function assistantItems(parts: readonly EveMessagePart[]): AssistantItem[] {
@@ -86,9 +95,17 @@ function assistantItems(parts: readonly EveMessagePart[]): AssistantItem[] {
       continue;
     }
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
-    if (part.toolName === "create_worksheet") {
-      const output = part.output as { worksheet?: WorksheetPayload } | undefined;
-      if (output?.worksheet) items.push({ kind: "worksheet", worksheet: output.worksheet });
+    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
+      // create_worksheet is the retired v1 name: restored localStorage
+      // transcripts may still carry its parts, shaped {worksheet}.
+      const output = part.output as
+        | { material?: MaterialArtifact; worksheet?: MaterialArtifact }
+        | undefined;
+      const material = output?.material ?? output?.worksheet;
+      // previewUrl guards out refusals and pre-studio legacy payloads.
+      if (material?.previewUrl) {
+        items.push({ kind: "material", material });
+      }
       continue;
     }
     const chip = memoryChipFor(part);
@@ -118,8 +135,8 @@ function AssistantItemView({ item }: { item: AssistantItem }) {
           <MarkdownText text={item.text} />
         </div>
       );
-    case "worksheet":
-      return <WorksheetCard worksheet={item.worksheet} />;
+    case "material":
+      return <MaterialCard material={item.material} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
     default: {
@@ -160,7 +177,10 @@ export function MessageView({ message }: { message: EveMessage }) {
 
 const TOOL_STATUS_LABELS: Record<string, string> = {
   get_children: "checking your family's info…",
-  create_worksheet: "putting the worksheet together…",
+  create_printable: "putting the page together…",
+  generate_image: "making the image…",
+  find_materials: "looking through your materials…",
+  mark_material_final: "keeping the final version…",
   remember: "saving a note…",
   forget: "tidying my notes…",
   update_child_profile: "updating the profile…",

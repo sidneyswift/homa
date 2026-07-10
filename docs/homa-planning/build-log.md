@@ -268,6 +268,88 @@ Note: this session's build ran against the tree while the parallel
 session's SMS voice-note work was mid-flight; final green CI rides with
 that session's commit.
 
+## 2026-07-10 (midday) · Materials studio v2 + the per-family usage ledger, shipped and E2E-verified
+
+Founder direction (2026-07-10 morning, two asks): (1) generalize the
+worksheet pipeline into a creation capability (choose image-model vs
+HTML vs hybrid per request, references, self-critique, metadata,
+draft-vs-final), and (2) track AI consumption per family across every
+modality through the Gateway. Plan:
+plans/2026-07-10-materials-studio-v2.md (all eight tickets, one pass);
+founder said "implement and then test e2e", so the four open decisions
+went as recommended there (renames yes, cheap vision reviewer, draft
+bytes deleted on finalize, eve gateway-tags ask logged below).
+
+What shipped, by ticket:
+
+- **MS-6, the ledger first.** `model_usage` (migration #43, deny-all
+  RLS): one append-only row per model call, raw quantities only (the
+  future action_costs registry prices them; credits stay post-revenue
+  per 08-billing). Chat turns land via a new `step.completed` hook
+  (`agent/hooks/record-usage.ts`, familyId/channel from session auth,
+  all channels); every direct AI SDK call site records itself AND tags
+  the Gateway request with `providerOptions.gateway.{user: familyId,
+  tags: [surface]}` so `/v1/report?group_by=user` shows the same spend
+  provider-side (verified against current Gateway docs): images,
+  artifact review, report/plan narratives (familyId threaded through
+  narrative-runner), curriculum (threaded through the insights route),
+  memory extraction, embeddings (optional attribution param, all six
+  call sites). `pnpm usage:report` reads per-family totals; --reconcile
+  queries the Gateway. Known gaps, logged: eve's own chat calls cannot
+  carry per-family gateway tags yet (static providerOptions only,
+  upstream ask), compaction summary calls are unrecorded
+  (compaction.completed carries no usage), and step.completed carries
+  no model id so chat rows pin HOMA_MODEL.
+- **MS-1/2, the paths.** `lib/illustrations.ts` became
+  `lib/materials/generate-image.ts` (with `lib/print/*` moving to
+  `lib/materials/`): image generation is no longer illustration-shaped,
+  takes up to 4 reference images (fetched server-side, ONLY from this
+  family's own blob prefix, model-supplied foreign URLs refused), and
+  `create_printable` (replacing `create_worksheet`) accepts exactly one
+  of `html` or `pageImageUrl`, so the image model can draw entire pages
+  (wrapImagePage fits them to letter, D7 footer intact).
+- **MS-3/4, the library.** Migration #44 renamed `worksheets` to
+  `materials` (zero rows, verified before renaming) and added kind /
+  subject / curriculum / theme / characters / tags / source / status /
+  revises / approved_at. New tools: `mark_material_final` (approval
+  supersedes the revision chain and deletes DRAFT bytes only; anything
+  once-final keeps bytes) and `find_materials` (finals by default,
+  by-id fetch returns stored html for reuse). RLS update policy added
+  for the finalize flow; isolation checks extended (materials +
+  model_usage).
+- **MS-5, the eyes.** `lib/materials/review-artifact.ts`: a cheap
+  multimodal model (HOMA_REVIEW_MODEL, default openai/gpt-5.4-mini;
+  HOMA_MATERIALS_REVIEW=off kills it) reads the RENDERED pixels against
+  the brief inside create_printable and returns {pass, issues[]} to the
+  agent. On SMS a failing page is deliberately not texted; web still
+  shows the card (iteration is visible). Null review never blocks.
+- **MS-8, the judgment.** worksheet-studio skill retired;
+  materials-studio skill carries the path-selection table, reference
+  discipline, metadata discipline, and the finalize loop.
+  instructions.md and sms-mode.ts rewritten around choose-the-path;
+  web+mobile cards renamed MaterialCard with kind-based headlines
+  (legacy create_worksheet transcript payloads still render).
+- **MS-7, the evidence.** `pnpm materials:calibrate` ran the 7-brief
+  set through the paths against live gpt-image-2
+  (docs/homa-planning/materials/calibration/2026-07-10/): image-direct
+  is far stronger than assumed (correct tracing page, EXACT 3/5/7
+  counts, six correctly spelled flash cards, exact poster wording), the
+  reference-restyle held style while swapping the character, and the
+  one hybrid failure (repeating a full-page image as a unit) was caught
+  by the auto-reviewer. The skill's decision table was rewritten FROM
+  these findings, dated, with the stale "never trust image models with
+  counts" rule retired.
+
+E2E (live, against homa-prod + Gateway + Blob, synthetic family,
+cascade-deleted after): 22/22 checks passed, covering both image tools,
+foreign-reference refusal, hybrid + image-direct creation, review
+pass AND a true-positive fail (wrong-letter page flagged), revision
+lineage, finalize semantics (draft superseded + bytes 404, final bytes
+200, unrelated draft untouched), finals-only retrieval, and usage rows
+for every surface. Typecheck, lint, build, and all four guards green.
+One deprecation fixed along the way: AI SDK image content parts are now
+`{type:"file", mediaType}` (the "image" part type is deprecated in ai@7).
+
 ## 2026-07-10 (morning) · Worksheet illustrations moved off fal.ai onto the Vercel AI Gateway
 
 Founder call: use `openai/gpt-image-2` through the Vercel AI Gateway instead

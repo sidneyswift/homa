@@ -160,7 +160,7 @@ export default defineTool({
     // RPC is SECURITY INVOKER, so the caller's own RLS decides which
     // rows exist for it; no family parameter can be gotten wrong.
     if (hits.length < input.limit) {
-      const queryEmbedding = await embedText(input.query);
+      const queryEmbedding = await embedText(input.query, { familyId });
       if (queryEmbedding) {
         const { data: semantic } = await db.rpc("recall_semantic", {
           query_embedding: queryEmbedding,

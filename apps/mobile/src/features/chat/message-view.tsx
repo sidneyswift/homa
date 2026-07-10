@@ -5,7 +5,7 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
 import { memoryChipFor, partIsRenderable, type MemoryChipContent } from "./message-utils";
-import { WorksheetCard, type WorksheetPayload } from "./worksheet-card";
+import { MaterialCard, type MaterialArtifact } from "./material-card";
 
 /** Transcript bubbles, the mobile twin of apps/web's message-parts.tsx. */
 
@@ -78,12 +78,17 @@ function MessagePartView({
     return <MarkdownText text={part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (part.toolName === "create_worksheet") {
-      const output = part.output as { worksheet?: WorksheetPayload } | undefined;
-      if (output?.worksheet) {
+    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
+      // create_worksheet is the retired v1 name (legacy transcripts).
+      const output = part.output as
+        | { material?: MaterialArtifact; worksheet?: MaterialArtifact }
+        | undefined;
+      const material = output?.material ?? output?.worksheet;
+      // previewUrl guards out refusals and pre-studio legacy payloads.
+      if (material?.previewUrl) {
         return (
           <View style={{ marginTop: space.sm }}>
-            <WorksheetCard worksheet={output.worksheet} />
+            <MaterialCard material={material} />
           </View>
         );
       }

@@ -60,13 +60,28 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Skill removed", detail: output.name };
   }
+  if (
+    part.toolName === "mark_material_final" &&
+    output.finalized === true &&
+    typeof output.title === "string"
+  ) {
+    return { label: "Final kept", detail: output.title };
+  }
   return null;
 }
 
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (part.toolName === "create_worksheet") return true;
+    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
+      const output = (part.output ?? {}) as {
+        material?: { previewUrl?: unknown };
+        worksheet?: { previewUrl?: unknown };
+      };
+      return (
+        typeof (output.material ?? output.worksheet)?.previewUrl === "string"
+      );
+    }
     return memoryChipFor(part) !== null;
   }
   return false;
@@ -74,7 +89,10 @@ export function partIsRenderable(part: EveMessagePart): boolean {
 
 const TOOL_STATUS_LABELS: Record<string, string> = {
   get_children: "checking your family's info\u2026",
-  create_worksheet: "putting the worksheet together\u2026",
+  create_printable: "putting the page together\u2026",
+  generate_image: "making the image\u2026",
+  find_materials: "looking through your materials\u2026",
+  mark_material_final: "keeping the final version\u2026",
   remember: "saving a note\u2026",
   forget: "tidying my notes\u2026",
   update_child_profile: "updating the profile\u2026",

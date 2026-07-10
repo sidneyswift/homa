@@ -130,7 +130,7 @@ export default defineTool({
     }
 
     // Best-effort semantic index; null just means FTS-only for this row.
-    const embedding = await embedText(input.content);
+    const embedding = await embedText(input.content, { familyId });
     const { error: insertError } = await db.from("family_memories").insert({
       family_id: familyId,
       child_id: input.childId ?? null,

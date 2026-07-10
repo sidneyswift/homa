@@ -7,6 +7,7 @@ import { z } from "zod";
 import { buildFourWeekPlan, type Curriculum } from "@homa/core";
 
 import { HOMA_MODEL } from "../../agent/model";
+import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { ReportFacts } from "./narrative-facts";
 
 /**
@@ -88,6 +89,7 @@ const curriculumSchema = z.object({
 export async function generateCurriculum(
   report: ReportFacts,
   call: CallFacts,
+  familyId: string | null = null,
 ): Promise<CurriculumGenerationResult> {
   const started = Date.now();
   const result = await generateObject({
@@ -101,7 +103,22 @@ export async function generateCurriculum(
     schema: curriculumSchema,
     maxOutputTokens: 16000,
     maxRetries: 1,
-    providerOptions: { gateway: { disallowPromptTraining: true } },
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(familyId, "curriculum"),
+      },
+    },
+  });
+
+  await recordModelUsage({
+    familyId,
+    surface: "curriculum",
+    model: HOMA_MODEL,
+    modality: "text",
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    durationMs: Date.now() - started,
   });
 
   return {

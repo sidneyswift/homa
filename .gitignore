@@ -27,3 +27,4 @@ node_modules/
 
 # Template is canonical on the remote (branch+tag template-archive); local copy stays untracked
 homa-template/
+.env*

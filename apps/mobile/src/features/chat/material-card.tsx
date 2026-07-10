@@ -1,0 +1,115 @@
+import { Image, Linking, Pressable, Text } from "react-native";
+
+import { Card } from "../../components/ui/card";
+import { fontFamilies } from "../../theme/fonts";
+import { colors, fontSize, radius, space } from "../../theme/tokens";
+
+/**
+ * A create_printable result: the rendered page's preview image with the
+ * real PDF one tap away (the system viewer handles print/share/AirPrint).
+ * Mirrors apps/web/app/app/material-card.tsx; keep the payload shape and
+ * kind headlines in sync with the tool's output.
+ */
+
+export interface MaterialArtifact {
+  title: string;
+  kind?: string;
+  skill: string | null;
+  childName: string | null;
+  previewUrl: string;
+  pdfUrl: string;
+}
+
+const KIND_HEADLINES: Record<string, string> = {
+  worksheet: "Worksheet ready",
+  coloring: "Coloring page ready",
+  flashcards: "Flash cards ready",
+  reader: "Reader ready",
+  poster: "Poster ready",
+  infographic: "Infographic ready",
+  game: "Game ready",
+};
+
+export function MaterialCard({ material }: { material: MaterialArtifact }) {
+  const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
+  const subtitle = [material.skill, material.childName ? `for ${material.childName}` : null]
+    .filter(Boolean)
+    .join(" \u00B7 ");
+
+  function openPdf() {
+    Linking.openURL(material.pdfUrl).catch(() => {
+      // The chat text already tells her it's ready on the web too.
+    });
+  }
+
+  return (
+    <Card style={{ padding: space.md, gap: space.sm }}>
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodyMedium,
+          fontSize: fontSize.sm,
+          color: colors.brand,
+        }}
+      >
+        {headline}
+      </Text>
+      <Text
+        style={{
+          fontFamily: fontFamilies.displaySemibold,
+          fontSize: fontSize.lg,
+          color: colors.textStrong,
+        }}
+      >
+        {material.title}
+      </Text>
+      {subtitle.length > 0 ? (
+        <Text
+          style={{
+            fontFamily: fontFamilies.body,
+            fontSize: fontSize.sm,
+            color: colors.textMuted,
+          }}
+        >
+          {subtitle}
+        </Text>
+      ) : null}
+      <Pressable onPress={openPdf} accessibilityRole="link">
+        <Image
+          source={{ uri: material.previewUrl }}
+          accessibilityLabel={`Preview of ${material.title}`}
+          style={{
+            width: "100%",
+            aspectRatio: 8.5 / 11,
+            borderRadius: radius.md,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: "#FFFFFF",
+          }}
+          resizeMode="cover"
+        />
+      </Pressable>
+      <Pressable
+        onPress={openPdf}
+        accessibilityRole="button"
+        style={{
+          marginTop: 2,
+          alignSelf: "flex-start",
+          borderRadius: radius.pill,
+          backgroundColor: colors.brand,
+          paddingHorizontal: 18,
+          paddingVertical: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: fontFamilies.bodySemibold,
+            fontSize: fontSize.sm,
+            color: colors.onBrand,
+          }}
+        >
+          Open the printable PDF
+        </Text>
+      </Pressable>
+    </Card>
+  );
+}

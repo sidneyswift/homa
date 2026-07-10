@@ -23,6 +23,7 @@ Drill into the numbered lane files for sources and verbatims.
 | `07-channels-creators-map.md` | Facebook groups, creators, podcasts, conferences, channel plan |
 | `08-segments-curricula.md` | Philosophy segments, sizing, curriculum market, beachhead call |
 | `09-buying-psychology-seasonality.md` | Spend data, price anchors, buying calendar, trigger moments |
+| `10-homeschool-methods-glossary.md` | Every named homeschool method/philosophy, ranked popular-to-obscure, sourced profiles |
 
 ## Rules of this folder
 

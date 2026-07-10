@@ -114,8 +114,11 @@ await expectEmptyRead("hours_log");
 await expectEmptyRead("agent_schedules");
 // Phone-first leads (migration #41): deny-all, server-only.
 await expectEmptyRead("phone_leads");
-// Worksheet studio artifacts (migration #42): family-scoped, members only.
-await expectEmptyRead("worksheets");
+// Materials studio artifacts (migrations #42 + #44): family-scoped,
+// members only.
+await expectEmptyRead("materials");
+// Per-family AI consumption ledger (migration #43): deny-all, server-only.
+await expectEmptyRead("model_usage");
 
 await expectInsertDenied(
   "families",
@@ -278,7 +281,7 @@ await expectInsertDenied(
   "anon cannot forge phone leads",
 );
 await expectInsertDenied(
-  "worksheets",
+  "materials",
   {
     family_id: "00000000-0000-0000-0000-000000000000",
     title: "intruder page",
@@ -286,7 +289,17 @@ await expectInsertDenied(
     preview_url: "https://example.com/x.jpg",
     html: "<p>intruder</p>",
   },
-  "anon cannot forge worksheets",
+  "anon cannot forge materials",
+);
+await expectInsertDenied(
+  "model_usage",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    surface: "chat",
+    model: "intruder/model",
+    modality: "text",
+  },
+  "anon cannot forge usage rows",
 );
 await expectInsertDenied(
   "child_reports",

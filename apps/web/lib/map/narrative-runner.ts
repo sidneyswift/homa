@@ -64,7 +64,7 @@ export async function runReportNarrative(childId: string): Promise<void> {
   };
 
   try {
-    const generated = await generateReportNarrative(facts);
+    const generated = await generateReportNarrative(facts, source.familyId);
     const verdicts = validateNarrative(generated.value, gateContext);
     const meta: NarrativeMeta = {
       ...claim,
@@ -146,7 +146,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
   };
 
   try {
-    const generated = await generatePlanNarrative(facts);
+    const generated = await generatePlanNarrative(facts, source.familyId);
     const verdicts = validatePlanNarrative(generated.value, gateContext);
     const meta: NarrativeMeta = {
       ...claim,

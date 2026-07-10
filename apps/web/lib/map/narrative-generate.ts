@@ -8,6 +8,7 @@ import type { PlanNarrative, ReportNarrative } from "@homa/core";
 
 import { HOMA_MODEL } from "../../agent/model";
 import { REPORT_PROMPT_VERSION } from "../../agent/report-writer-version";
+import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { PlanFacts, ReportFacts } from "./narrative-facts";
 
 /**
@@ -63,6 +64,7 @@ function requiredStrings(ids: string[]): z.ZodObject<Record<string, z.ZodString>
 
 export async function generateReportNarrative(
   facts: ReportFacts,
+  familyId: string | null = null,
 ): Promise<GenerationResult<ReportNarrative>> {
   const subjectIds = facts.subjects.map((subject) => subject.subjectId);
   const drawerIds = facts.subjects
@@ -95,7 +97,22 @@ export async function generateReportNarrative(
     // fattest real report. Cost is per token USED, not per cap.
     maxOutputTokens: 16000,
     maxRetries: 1,
-    providerOptions: { gateway: { disallowPromptTraining: true } },
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(familyId, "report_narrative"),
+      },
+    },
+  });
+
+  await recordModelUsage({
+    familyId,
+    surface: "report_narrative",
+    model: NARRATIVE_MODEL,
+    modality: "text",
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    durationMs: Date.now() - started,
   });
 
   return {
@@ -110,6 +127,7 @@ export async function generateReportNarrative(
 
 export async function generatePlanNarrative(
   facts: PlanFacts,
+  familyId: string | null = null,
 ): Promise<GenerationResult<PlanNarrative>> {
   const schema = z.object({
     intro: z.string(),
@@ -129,7 +147,22 @@ export async function generatePlanNarrative(
     schema,
     maxOutputTokens: 8000,
     maxRetries: 1,
-    providerOptions: { gateway: { disallowPromptTraining: true } },
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(familyId, "plan_narrative"),
+      },
+    },
+  });
+
+  await recordModelUsage({
+    familyId,
+    surface: "plan_narrative",
+    model: NARRATIVE_MODEL,
+    modality: "text",
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    durationMs: Date.now() - started,
   });
 
   return {

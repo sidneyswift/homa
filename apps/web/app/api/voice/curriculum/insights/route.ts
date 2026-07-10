@@ -98,7 +98,7 @@ export async function POST(request: Request): Promise<Response> {
   let tokensOut = 0;
 
   try {
-    const generated = await generateCurriculum(reportFacts, callFacts);
+    const generated = await generateCurriculum(reportFacts, callFacts, familyId);
     durationMs = generated.durationMs;
     tokensIn = generated.tokensIn;
     tokensOut = generated.tokensOut;
@@ -106,7 +106,7 @@ export async function POST(request: Request): Promise<Response> {
     let verdict = validateCurriculum(generated.value);
     if (!verdict.ok) {
       console.error(`curriculum gate rejected: ${verdict.violations.join(", ")}, retrying`);
-      const retry = await generateCurriculum(reportFacts, callFacts);
+      const retry = await generateCurriculum(reportFacts, callFacts, familyId);
       durationMs += retry.durationMs;
       tokensIn += retry.tokensIn;
       tokensOut += retry.tokensOut;

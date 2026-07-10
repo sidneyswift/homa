@@ -317,7 +317,7 @@ export async function recallPinned(input: {
 
   // Semantic fallback with the family predicate inline (see doc comment).
   if (hits.length < input.limit) {
-    const queryEmbedding = await embedText(input.query);
+    const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
     if (queryEmbedding) {
       const rows = await sql<
         { source: string; happened_at: string | null; label: string; content: string }[]

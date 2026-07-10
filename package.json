@@ -13,6 +13,8 @@
     "dev": "turbo run dev",
     "gen:brand": "tsx scripts/brand-assets.mts",
     "lint": "turbo run lint",
+    "materials:calibrate": "tsx scripts/materials-calibration.mts",
+    "usage:report": "tsx scripts/usage-report.mts",
     "pull:state-requirements": "tsx scripts/state-requirements-pull.mts",
     "report:norms": "tsx scripts/map-norms-report.mts",
     "seed:state-requirements": "tsx scripts/state-requirements-seed.mts",

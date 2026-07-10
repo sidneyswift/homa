@@ -81,7 +81,7 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
   }
 
   // Best-effort semantic index; null just means FTS-only for this row.
-  const embedding = await embedText(content);
+  const embedding = await embedText(content, { familyId: input.familyId });
   await sql`
     insert into public.family_memories (family_id, child_id, kind, content, source, embedding)
     values (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source}, ${embedding})

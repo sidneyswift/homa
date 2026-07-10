@@ -7,6 +7,7 @@ import { z } from "zod";
 import { HOMA_MODEL } from "../../agent/model";
 import { MEMORY_ENTRY_MAX_CHARS } from "../agent-memory";
 import { loadFamilyContextPinned, renderFamilyContext } from "../family-context";
+import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import { saveFamilyMemory } from "./save-memory";
 
 /**
@@ -121,7 +122,22 @@ export async function extractMemoriesFromText(input: {
     schema: extractionSchema,
     maxOutputTokens: 1500,
     maxRetries: 1,
-    providerOptions: { gateway: { disallowPromptTraining: true } },
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(input.familyId, "memory_extraction"),
+      },
+    },
+  });
+
+  await recordModelUsage({
+    familyId: input.familyId,
+    surface: "memory_extraction",
+    model,
+    modality: "text",
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    durationMs: Date.now() - started,
   });
 
   const outcome: ExtractionOutcome = {

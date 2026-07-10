@@ -77,8 +77,17 @@ export async function downloadTelnyxMedia(
  * throws) when the channel is dark or the send fails, so a caller like
  * the journal loop can fall back to email. Telnyx handles STOP/HELP
  * opt-outs at the platform level for this number.
+ *
+ * mediaUrls upgrades the send to MMS (the worksheet studio texts the
+ * rendered preview + PDF this way). Media must be publicly fetchable;
+ * Blob's random-suffix URLs qualify. Keep the combined payload small,
+ * carriers get unreliable past about 1MB.
  */
-export async function sendHomaSms(toE164: string, text: string): Promise<boolean> {
+export async function sendHomaSms(
+  toE164: string,
+  text: string,
+  mediaUrls?: string[],
+): Promise<boolean> {
   const apiKey = process.env.TELNYX_API_KEY;
   const fromNumber = process.env.TELNYX_FROM_NUMBER;
   if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return false;
@@ -90,7 +99,12 @@ export async function sendHomaSms(toE164: string, text: string): Promise<boolean
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: fromNumber, to: toE164, text }),
+      body: JSON.stringify({
+        from: fromNumber,
+        to: toE164,
+        text,
+        ...(mediaUrls && mediaUrls.length > 0 ? { media_urls: mediaUrls } : {}),
+      }),
     });
     if (!response.ok) {
       console.error(`sendHomaSms failed: HTTP ${response.status}`);

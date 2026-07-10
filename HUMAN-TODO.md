@@ -7,11 +7,11 @@ Everything not on this list, agents handle. Est. total: ~45–60 minutes.
 
 - [x] **GitHub**: make `sidneyswift/homa` **private** → repo Settings → General → Danger Zone → Change visibility *(verified private via gh CLI 2026-07-03)*
 - [x] **Vercel**: create team → vercel.com/new-team → name: `homa` → choose **Pro** ($20/mo, card required) *(team `Homa` verified via MCP; plan tier not agent-verifiable)*
-- [ ] **Vercel**: same team → AI Gateway tab → buy **$20 AI Gateway credits** *(2 min)*
+- [ ] **Vercel**: same team → AI Gateway tab → buy **$20 AI Gateway credits** *(2 min)*. **Now also funds worksheet illustrations (2026-07-10)**: the studio's `generate_image` tool bills GPT Image 2 through this same gateway, no separate provider or key.
 - [ ] **Vercel**: contact support/your Vercel contact → request **"Agent Runs" observability enablement** for team `homa` (it's gated; ask now, it can lag) *(3 min)*
 - [x] **Supabase**: create org → supabase.com/dashboard → New organization → name: `Homa` *(verified via MCP; `homa-prod` project already live, Postgres 17, us-east-1)*
 - [x] **Stripe**: dashboard → top-left account switcher → **Create new account** → name: `Homa` (do NOT reuse GPTWrapper/Recoup) *(done 2026-07-06: account live, charges_enabled true; pricing v1 products + payment links exist in BOTH environments per build-log)*
-- [ ] **fal.ai**: create a **new API key** for Homa (separate from the Mac Mini's) → fal.ai/dashboard/keys → label it `homa-cloud` → paste it somewhere safe (1Password), NOT into any repo file *(2 min)*
+- [x] ~~**fal.ai**: create a new API key~~ **superseded 2026-07-10**: the worksheet studio's illustrations moved off fal.ai onto GPT Image 2 through the AI Gateway (see the Gateway credits item above), so no fal.ai key is needed. The leftover `FAL_API_KEY` in `apps/web/.env.local` is now unused; safe to remove whenever.
 - [x] **Resend**: account created, `mail.thankshoma.com` added and fully verified (DKIM, SPF, DMARC, click+open tracking all green), `RESEND_API_KEY` in `apps/web/.env.local` + Vercel production *(done 2026-07-04)*
 
 ## Telnyx voice + text (experiment, build-log 2026-07-07)
@@ -23,6 +23,18 @@ Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted 
 - [x] ~~Upgrade the account~~ done (founder-confirmed 2026-07-09, corroborated: $26.48 funded balance, 10DLC brand VERIFIED + campaign ACTIVE, both only possible past trial). Texting any US number is unblocked; the old error-40010 carrier block is history.
 - [ ] **Fill `TELNYX_SP_*`** in `apps/web/.env.local` (your name, address, email, mobile; it is the "Sole Proprietor" carrier registration, no LLC needed) then run `pnpm telnyx:provision` *(3 min)*
 - [ ] **Verify the PIN** that arrives on your phone: `pnpm telnyx:provision --verify-otp 123456` (re-runs the rest automatically, then text +1 346 758 8011 and Homa answers) *(1 min)*
+
+## Worksheet studio (added 2026-07-10, agent-built, fully wired)
+
+- [x] ~~Vercel Blob store~~ done by agent 2026-07-10: `homa-artifacts`
+  (public, iad1) created and linked; `BLOB_READ_WRITE_TOKEN` is in all
+  three Vercel environments and `apps/web/.env.local`
+- [x] ~~Illustration provider~~ done by agent 2026-07-10: switched from
+  fal.ai to GPT Image 2 through the Vercel AI Gateway, so no new key or
+  vendor account is needed; it rides the same Gateway credits as chat.
+- [ ] **Try the loop on your phone** once texting is live: text Homa "make
+  Story a letter O worksheet, Paw Patrol style", wait for the picture +
+  PDF, then reply with a critique and watch the remake *(2 min, fun)*
 
 ## Agentic learning loops (added 2026-07-09, ladder build)
 
@@ -39,8 +51,8 @@ email becomes a real agent turn; "stop" opts the family out of evening
 check-ins). It stays dark until these three land, in order:
 
 - [x] ~~Resend inbound MX~~ done by agent 2026-07-09 9:21pm: `mail` MX → `inbound-smtp.us-east-1.amazonaws.com` priority 10 added via `vercel dns`, resolving publicly. Resend's Domains page should flip to verified on its next check (hit refresh there if it still says Not Started)
-- [ ] **Resend inbound webhook**: paste the URL the agent gave you (endpoint + `?key=...`) into the Resend webhook config. `RESEND_INBOUND_SECRET` is ALREADY set in Vercel prod + `.env.local` and the live route is verified (200 real key / 401 wrong key, 2026-07-09) *(1 min)*
-- [ ] **After both**: tell the agent "flip journal reply-to to the inbound address" so replies flow to Homa instead of your inbox *(30 sec)*
+- [x] ~~Resend inbound webhook~~ founder pasted it 2026-07-09 ~9:23pm (`email.received` event only)
+- [x] ~~Reply-to flip~~ deployed 2026-07-09 late: every Homa email's reply-to is `homa@mail.thankshoma.com`, so replies land in the agent. The whole email loop is LIVE end to end; test anytime by emailing that address from your registered family email
 
 ## Domain & handles · memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
