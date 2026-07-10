@@ -27,7 +27,6 @@ import { MonthButton } from "./month-button";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
 import { ReportActions } from "./report-actions";
 import { reportButtonClass } from "./report-button";
-import { ReportChart } from "./report-chart";
 import { ReportNav } from "./report-nav";
 import { ReportSnapshot } from "./report-snapshot";
 import { StalenessBanner } from "./staleness-banner";
@@ -159,7 +158,6 @@ export function ReportView({
     const movement = movementFor(score, prior);
     if (movement) movements.set(score.domainId, movement);
   }
-  const anyMovement = movements.size > 0;
 
   const answersByDomain = new Map<string, ReceiptRow[]>();
   for (const entry of report.answers) {
@@ -333,25 +331,6 @@ export function ReportView({
       eras={eras}
       className={inApp ? "" : "mt-4"}
     />
-  );
-
-  const wholePictureHeading = (
-    <>
-      <h2 className={`font-display text-xl font-semibold text-strong ${inApp ? "" : "mt-9"}`.trim()}>
-        The whole picture
-      </h2>
-      <p className="mt-1 text-sm text-muted">
-        One dot per subject. The line marks typical for {ageLabel(months)}. Yellow is ahead,
-        green is on track, blue is growing right now.
-        {anyMovement ? " Faded rings show where things stood last time." : ""}
-      </p>
-    </>
-  );
-
-  const wholePictureChart = (
-    <div className="mt-4 rounded-lg border border-border-subtle bg-card p-4">
-      <ReportChart scores={ordered} prior={prior?.scores.domains ?? null} />
-    </div>
   );
 
   const subjectsHeading = (
@@ -739,11 +718,6 @@ export function ReportView({
             {snapshotCard}
 
             <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm lg:col-span-2">
-              {wholePictureHeading}
-              {wholePictureChart}
-            </section>
-
-            <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm lg:col-span-2">
               {subjectsHeading}
               {subjectRows}
             </section>
@@ -794,10 +768,10 @@ export function ReportView({
             {noteCard}
             {snapshotCard}
 
-            {/* The whole picture, flowing straight into subject by subject
-                (round 2, founder ask 2026-07-09: nothing between them). */}
-            {wholePictureHeading}
-            {wholePictureChart}
+            {/* The snapshot flows straight into subject by subject: the
+                whole-picture dot chart retired 2026-07-10 (founder ask;
+                the snapshot's trajectory chart and the subject rows
+                already carry the same picture). */}
             {subjectsHeading}
             {subjectRows}
 

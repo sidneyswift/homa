@@ -3,6 +3,51 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (afternoon) · Founder ruling: build the taxonomy on Marble's open dataset; vendored at docs/homa-benchmarks/marble
+
+Context: a deep comparison of the Mac Mini Homa's benchmarking (15 domains,
+78 scored subdomains, continuous observation loops) against the cloud map
+(16 domains, one number each, one checklist sitting) concluded the cloud is
+missing a strand layer between domain and item. Marble's open skill taxonomy
+(github.com/withmarbleapp/os-taxonomy, v1: 1,590 micro-topics, 3,221
+prerequisite edges, 8 subjects / 54 domains, ages 4-14) independently
+validates that three-level shape and adds a prerequisite DAG.
+
+Founder rulings this session, logged for the audit trail:
+
+- **Adopt Marble as source material, maximally.** Pull the graph, the
+  topics, the evidence/probe shapes, the clusters. "We're at the beginning
+  stages of building out the architecture, so we might as well use the best
+  architecture possible."
+- **Do not gate on licensing now.** Upstream is ODbL 1.0 + CC BY-SA 4.0;
+  obligations bite on public use/redistribution of a derivative database,
+  not private internal use. Founder: "If it ever gets to a place where we
+  need to credit Marble, we will." License files vendored alongside the
+  data; attribution line staged in README-HOMA.md so honoring that promise
+  is one paste away.
+- **Vendored** `data/`, `schema/`, and `validate.mjs` at upstream commit
+  96a7933 into `docs/homa-benchmarks/marble/` (4.0MB, media skipped);
+  validate.mjs passes (checksums + referential integrity). Provenance and
+  usage notes in `docs/homa-benchmarks/marble/README-HOMA.md`.
+- **Naming direction (founder asked, agent recommended):** converge on
+  Marble's vocabulary where the data will flow 1:1 (subject → domain →
+  topic, prerequisites hard/soft with reasons, evidence + assessmentPrompt,
+  clusters, centrality, topic types); keep Homa's own where Homa is ahead
+  (typical-by month anchors, the deterministic months-ahead scorer with
+  honesty caps, chip answers, provenance enum, exposure-based subjects,
+  no-deficit copy laws, RLS). Rename today's code/DB "domain" to "subject"
+  as part of the strand migration, while user count is ~zero.
+
+## 2026-07-10 (afternoon, follow-up) · The whole-picture dot chart retires from the report
+
+Founder ask: delete "The whole picture" card from the report on every
+surface (in-app desktop and phone, and the emailed token page; the
+sample shares the renderer so it goes there too). The snapshot's
+trajectory chart and the subject rows already carry the same
+information. One call made alone: report-chart.tsx stays, the
+one-pager rendition still renders it. Verified on the live sample
+page; the in-app grid loses the one full-width section.
+
 ## 2026-07-10 (afternoon) · The in-app report lays out as a dashboard, not one long letter
 
 Founder ask: on desktop the in-app report should read as a dashboard,
