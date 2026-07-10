@@ -242,6 +242,28 @@ acknowledges in its one reply. Calls made alone, worth auditing:
   copy; a failed attachment riding with other content stays a bracketed
   note inside the single agent reply (one-reply law holds).
 
+## 2026-07-10 (afternoon, later) · The verified phone claim closes U2/U7
+
+Founder: "just do the fix, the verified phone claim." Built on the
+existing SMS rail, no new services: phone_claim_codes (migration #47,
+deny-all; 6-digit codes hashed at rest, 10 minutes, 5 attempts, 3
+sends/day), lib/phone-claim.ts (start/confirm; familyId always from the
+caller's own session), two thin routes, and one PhoneClaim component
+mounted at both former dead ends: the settings texting card and the
+onboarding family step (which now saves the profile and OFFERS the
+claim when the number is taken, instead of the old silent stand-down).
+
+The entitlement rule, stated once: a verified code proves possession of
+the NUMBER, so the number routes to the claimant's family. A true stub
+holding it folds in (shared conservative fold, lib/family-fold.ts,
+extracted from phone-link); a real family holding it keeps all its
+records and loses only the routing. Data merges between two REAL
+families stay a human decision; no code path does that.
+
+16 lab checks green against prod (lifecycle, all holder cases, limits),
+full guard suite + build green. The moved-from family gets no courtesy
+notice yet; noted as a nicety for later.
+
 ## 2026-07-10 (afternoon) · Unknowns pass on text signup: one mom, one account
 
 Founder caught the seam within the hour: "she signs up by text, then

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { normalizeUsPhoneE164, US_STATES } from "@homa/core";
 
+import { PhoneClaim } from "../../components/phone-claim";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 
 /**
@@ -42,6 +43,7 @@ export function FamilyStep({
   const [usState, setUsState] = useState("");
   const [zip, setZip] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneTaken, setPhoneTaken] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -126,13 +128,25 @@ export function FamilyStep({
           ...(avatarUrl ? { avatarUrl } : {}),
         }),
       });
-      const data = (await response.json()) as { ok: boolean; reason?: string };
+      const data = (await response.json()) as {
+        ok: boolean;
+        reason?: string;
+        phoneTaken?: boolean;
+      };
       if (!data.ok) {
         setError(
           data.reason === "bad-phone"
             ? "That doesn't look like a US cell number yet. Ten digits does it."
             : "That didn't save. One more try usually does it.",
         );
+        setBusy(false);
+        return;
+      }
+      if (data.phoneTaken) {
+        // Profile saved; the number belongs to another family. Offer
+        // the verified claim instead of a dead end (U7); she can also
+        // skip it and keep going.
+        setPhoneTaken(phone.trim());
         setBusy(false);
         return;
       }
@@ -316,13 +330,34 @@ export function FamilyStep({
           </p>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
-        >
-          {busy ? "Saving\u2026" : "Continue"}
-        </button>
+        {phoneTaken ? (
+          <>
+            <p className="mt-3 text-sm text-body" role="alert">
+              Everything saved. That number is connected to a different Homa family right
+              now; if it&apos;s yours, verify it and it moves here.
+            </p>
+            <PhoneClaim
+              phone={phoneTaken}
+              phoneDisplay={phoneTaken}
+              onClaimed={() => setPhoneTaken(null)}
+            />
+            <button
+              type="button"
+              onClick={onDone}
+              className="mt-4 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
+            >
+              Continue
+            </button>
+          </>
+        ) : (
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          >
+            {busy ? "Saving\u2026" : "Continue"}
+          </button>
+        )}
       </form>
     </div>
   );

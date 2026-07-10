@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 
+import { PhoneClaim } from "../../../components/phone-claim";
 import { setFamilyPhoneAction, type SetupFormState } from "./actions";
 
 const INITIAL_STATE: SetupFormState = { error: null };
@@ -29,6 +31,7 @@ export function TextingCard({
   homaNumberDisplay: string | null;
 }) {
   const [state, action, pending] = useActionState(setFamilyPhoneAction, INITIAL_STATE);
+  const router = useRouter();
 
   return (
     <form action={action} className="rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -66,6 +69,13 @@ export function TextingCard({
         <p className="mt-3 text-sm text-danger" role="alert">
           {state.error}
         </p>
+      ) : null}
+      {state.phoneTaken ? (
+        <PhoneClaim
+          phone={state.phoneTaken}
+          phoneDisplay={state.phoneTaken}
+          onClaimed={() => router.refresh()}
+        />
       ) : null}
 
       <button

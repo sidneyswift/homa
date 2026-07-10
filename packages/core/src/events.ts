@@ -310,6 +310,16 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     questions_answered: z.number().int().min(0),
   }),
+  // Verified phone claim (sms-onboarding-plan U2/U7): a texted code
+  // proved possession and the number routed to the caller's family.
+  "sms.phone_claim_started": z.object({
+    family_id: z.uuid(),
+  }),
+  "sms.phone_claimed": z.object({
+    family_id: z.uuid(),
+    folded_stub: z.boolean(),
+    moved_number: z.boolean(),
+  }),
   "lead.invited": z.object({
     channel: z.enum(["sms", "voice"]),
   }),

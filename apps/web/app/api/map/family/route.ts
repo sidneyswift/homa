@@ -77,18 +77,22 @@ export async function POST(request: Request): Promise<Response> {
       avatarUrl,
     });
 
+    let phoneTaken = false;
     if (phoneE164) {
       const supabase = await createSupabaseServerClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      // Taken by another family = quiet stand-down (see module doc).
-      await setFamilyPhone({
+      // Taken by another family never blocks the profile save; the
+      // response says so, and the step offers the verified claim
+      // (text a code to the number) instead of a dead end (U7).
+      const linked = await setFamilyPhone({
         familyId: family.id,
         phoneE164,
         addedBy: user?.id ?? null,
         source: "signup",
       });
+      phoneTaken = !linked.ok;
     }
 
     await emitMapEvent("map.family_setup", {
@@ -98,7 +102,7 @@ export async function POST(request: Request): Promise<Response> {
       has_avatar: Boolean(avatarUrl),
     });
 
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, phoneTaken });
   } catch (error) {
     // No address or phone in server logs, ever.
     console.error("map/family failed:", error instanceof Error ? error.message : "unknown");

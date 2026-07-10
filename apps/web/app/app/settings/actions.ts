@@ -24,6 +24,9 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 export interface SetupFormState {
   error: string | null;
+  /** Set when the number belongs to another family: the card offers
+   * the verified claim (text a code) instead of a dead end. */
+  phoneTaken?: string;
 }
 
 export async function setFamilyPhoneAction(
@@ -60,7 +63,11 @@ export async function setFamilyPhoneAction(
     source: "home",
   });
   if (!result.ok) {
-    return { error: "That number is already linked to another Homa family." };
+    return {
+      error:
+        "That number is connected to a different Homa family right now. If it's your number, verify it below and it moves here.",
+      phoneTaken: phoneE164,
+    };
   }
   revalidatePath("/app/settings");
   return { error: null };

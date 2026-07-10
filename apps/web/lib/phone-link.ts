@@ -1,3 +1,4 @@
+import { foldStubFamilyInto } from "./family-fold";
 import { setFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
 import { sendAgentComposedEmail, siteUrl } from "./map/email";
@@ -70,33 +71,13 @@ export async function consumePhoneLinkRequest(rawToken: string): Promise<Consume
 
   // Whoever holds the number now: a true text stub folds in; a real
   // family keeping the number is a conflict this flow must not touch.
-  const owner = await sql<
-    { family_id: string; email: string | null; members: number }[]
-  >`
-    select p.family_id, f.email,
-           (select count(*)::int from public.family_members m where m.family_id = f.id) as members
-    from public.family_phones p join public.families f on f.id = p.family_id
-    where p.phone_e164 = ${request.phone_e164}
+  const owner = await sql<{ family_id: string }[]>`
+    select family_id from public.family_phones where phone_e164 = ${request.phone_e164}
   `;
-  const stub = owner[0];
-  if (stub && stub.family_id !== request.family_id) {
-    if (stub.email !== null || stub.members > 0) {
-      return { ok: false, reason: "phone-owned-elsewhere" };
-    }
-    // Move everything family-scoped, then the children (child-scoped
-    // rows ride along), then retire the stub. The stub's phone row
-    // dies with it, freeing the number for the real family.
-    for (const table of ["conversation_messages", "family_memories", "hours_log"]) {
-      await sql`
-        update ${sql(table)} set family_id = ${request.family_id}
-        where family_id = ${stub.family_id}
-      `;
-    }
-    await sql`
-      update public.children set family_id = ${request.family_id}
-      where family_id = ${stub.family_id}
-    `;
-    await sql`delete from public.families where id = ${stub.family_id}`;
+  const holderId = owner[0]?.family_id;
+  if (holderId && holderId !== request.family_id) {
+    const folded = await foldStubFamilyInto(holderId, request.family_id);
+    if (!folded) return { ok: false, reason: "phone-owned-elsewhere" };
   }
 
   // setFamilyPhone owns the rest: the family_phones write, the

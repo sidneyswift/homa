@@ -132,15 +132,21 @@ marked documented-only:
   before she opens the link.
 - [x] **U10 · Duplicate kids.** Same name + birth month returns the
   existing child; the tool says so instead of minting a twin.
-- [ ] **U2 · Email mismatch (documented, not built).** Text email and
-  Google email differ: no automatic fold is safe without proof. The
-  future design is a verified phone claim (text a code to the number
-  from the web settings card). Needs an OTP decision; ticket when it
-  bites.
-- [ ] **U7 · Web family-step phone collision (documented).** Entering a
-  number the text stub holds shows "already linked" and stalls her.
-  Residual risk is low once U1/U3 exist (the email fold usually fires
-  first at S1); the verified phone claim above is the real fix.
+- [x] **U2 + U7 · The verified phone claim (built 2026-07-10 pm,
+  founder go).** Typing a number proves nothing; possession does. Both
+  "that number is taken" dead ends (the settings texting card and the
+  onboarding family step, which now saves the profile and offers the
+  claim instead of standing down silently) show the same PhoneClaim
+  component: Homa texts the number a 6-digit code (hashed at rest, 10
+  minutes, 5 attempts, 3 sends/day), and a correct code routes the
+  number to the caller's own session family. A true stub holding the
+  number folds in (same conservative rule, now shared in
+  lib/family-fold.ts); a REAL family holding it keeps every record and
+  loses only the number (no data merge without stronger proof, ever).
+  Verified with 16 lab checks against prod: code lifecycle (wrong,
+  capped, expired, replay), all three holder cases, and the send
+  limit. UI is typecheck/build-verified; first click-through is the
+  founder's.
 
 ## What this does NOT include (standing rulings)
 - No card numbers over SMS or voice, ever; the billing-era close is a
