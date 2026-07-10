@@ -114,6 +114,8 @@ await expectEmptyRead("hours_log");
 await expectEmptyRead("agent_schedules");
 // Phone-first leads (migration #41): deny-all, server-only.
 await expectEmptyRead("phone_leads");
+// Phone-link confirmations (migration #46): deny-all, server-only.
+await expectEmptyRead("phone_link_requests");
 // Materials studio artifacts (migrations #42 + #44): family-scoped,
 // members only.
 await expectEmptyRead("materials");

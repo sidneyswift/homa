@@ -97,6 +97,51 @@
 - [x] build-log entry: founder overruled Phase B; what shipped.
 - [x] lead-funnel-plan.md Phase B section updated to point here.
 
+## Unknowns pass (founder-prompted, 2026-07-10 midday)
+
+Founder's instinct: "what happens if an account is created on text and
+then she signs in with Google on the web?" The hunt (finding-unknowns
+blindspot pass over every text-web seam) confirmed it and found
+siblings. All verified fixed against homa-prod (12 checks) unless
+marked documented-only:
+
+- [x] **U1 · Abandonment before email (the founder's case).** Email was
+  asked LAST; a mom who stalls mid-checklist left an email-less family,
+  and a later Google sign-in minted a second one. Email now comes right
+  after her name, before any kids: it is the reconciliation key, and
+  attachAuthUser's fold-together attaches her web login to the
+  text-born family whenever the addresses match.
+- [x] **U3 · The reverse duplicate.** Web-first family, phone never
+  linked, texts as a stranger: when her email comes back "already has
+  an account," Homa emails THAT account a one-time connect-this-phone
+  link (migration #46, lib/phone-link.ts, /api/link-phone). Inbox
+  possession is the proof; clicking folds the text stub (children,
+  conversation record, memories, hours) into her real family and links
+  the number. Single-use, 48h, hashed at rest; true stubs only (no
+  members, no email) ever fold.
+- [x] **U4 · Mixed-case IdP emails.** attachAuthUser wrote user.email
+  raw; a case-preserving IdP would violate the lowercase constraint and
+  fail the entire attach, and the fold's equality check with it. Now
+  normalized at the write.
+- [x] **U5 · No time zone by text.** The journal dispatcher would
+  silently never seed text-born families. Her state now seeds a coarse
+  zone (most-populated zone per state); the settings card refines it.
+- [x] **U6 · Report parity.** finishChildReport now matches the web
+  score route: map.report_generated event, the report email (first
+  scoring only), and a detached narrative kick so the words are ready
+  before she opens the link.
+- [x] **U10 · Duplicate kids.** Same name + birth month returns the
+  existing child; the tool says so instead of minting a twin.
+- [ ] **U2 · Email mismatch (documented, not built).** Text email and
+  Google email differ: no automatic fold is safe without proof. The
+  future design is a verified phone claim (text a code to the number
+  from the web settings card). Needs an OTP decision; ticket when it
+  bites.
+- [ ] **U7 · Web family-step phone collision (documented).** Entering a
+  number the text stub holds shows "already linked" and stalls her.
+  Residual risk is low once U1/U3 exist (the email fold usually fires
+  first at S1); the verified phone claim above is the real fix.
+
 ## What this does NOT include (standing rulings)
 - No card numbers over SMS or voice, ever; the billing-era close is a
   texted Stripe Checkout link plus webhook-driven subscription state

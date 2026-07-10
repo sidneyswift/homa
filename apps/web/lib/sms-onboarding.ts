@@ -1,17 +1,23 @@
-import { ageInMonths, planQuestions, type MapAnswer } from "@homa/core";
+import { ageInMonths, MAP_BANK_VERSION, planQuestions, type MapAnswer } from "@homa/core";
 
 import { buildQueue } from "../app/onboarding/question-queue";
 import { setFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
+import { sendReportEmail } from "./map/email";
 import { emitMapEvent } from "./map/events";
+import { narrativeEnabled } from "./map/narrative-flag";
+import { runReportNarrative } from "./map/narrative-runner";
 import {
   addChild,
   createReport,
+  markReportEmailed,
   mirrorToWaitlist,
+  reportAlreadyEmailed,
   saveFamilySetup,
   startAnonymousFamily,
   type ScoredReport,
 } from "./map/store";
+import { sendPhoneLinkEmail } from "./phone-link";
 
 /**
  * Text-native onboarding (sms-onboarding-plan.md, founder ruling
@@ -134,15 +140,19 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
     });
   }
 
+  // Email comes SECOND on purpose (unknowns pass 2026-07-10, U1): it is
+  // the reconciliation key with the web world. A mom who stalls
+  // mid-checklist must already be findable by email, or her later
+  // Google sign-in mints a second family.
   const needs: string[] = [];
   if (!family?.profile_completed_at) needs.push("family basics (parent name, state)");
+  if (!family?.email) needs.push("her email (so the report has a home and her account is one account)");
   if (children.length === 0) needs.push("at least one child (name and birth month)");
   for (const child of children) {
     if (child.inRange && !child.checklistDone) {
       needs.push(`checklist for ${child.name} (${child.answered} answered so far)`);
     }
   }
-  if (!family?.email) needs.push("an email for the report");
   for (const child of children) {
     if (child.inRange && child.checklistDone && !child.hasReport) {
       needs.push(`finish (score) for ${child.name}`);
@@ -159,31 +169,83 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
   };
 }
 
+/** Coarse state -> IANA zone (most-populated zone per state), so
+ * text-born families get evening prompts at a sane local hour without
+ * ever being asked a time-zone question (unknowns pass U5). A web visit
+ * or the settings card refines it later. */
+const STATE_TIME_ZONES: Record<string, string> = {
+  AL: "America/Chicago", AK: "America/Anchorage", AZ: "America/Phoenix",
+  AR: "America/Chicago", CA: "America/Los_Angeles", CO: "America/Denver",
+  CT: "America/New_York", DE: "America/New_York", DC: "America/New_York",
+  FL: "America/New_York", GA: "America/New_York", HI: "Pacific/Honolulu",
+  ID: "America/Boise", IL: "America/Chicago", IN: "America/Indiana/Indianapolis",
+  IA: "America/Chicago", KS: "America/Chicago", KY: "America/New_York",
+  LA: "America/Chicago", ME: "America/New_York", MD: "America/New_York",
+  MA: "America/New_York", MI: "America/Detroit", MN: "America/Chicago",
+  MS: "America/Chicago", MO: "America/Chicago", MT: "America/Denver",
+  NE: "America/Chicago", NV: "America/Los_Angeles", NH: "America/New_York",
+  NJ: "America/New_York", NM: "America/Denver", NY: "America/New_York",
+  NC: "America/New_York", ND: "America/Chicago", OH: "America/New_York",
+  OK: "America/Chicago", OR: "America/Los_Angeles", PA: "America/New_York",
+  RI: "America/New_York", SC: "America/New_York", SD: "America/Chicago",
+  TN: "America/Chicago", TX: "America/Chicago", UT: "America/Denver",
+  VT: "America/New_York", VA: "America/New_York", WA: "America/Los_Angeles",
+  WV: "America/New_York", WI: "America/Chicago", WY: "America/Denver",
+};
+
 /** Family basics over text: name and state; address never asked on SMS
  * (schema-optional by design). Family display name defaults from the
- * parent's first name. */
+ * parent's first name; the state seeds a coarse time zone when none is
+ * set yet. */
 export async function saveFamilyBasicsFromSms(
   familyId: string,
   input: { parentName: string; familyName?: string | null; usState?: string | null },
 ): Promise<void> {
   const [firstName, ...rest] = input.parentName.trim().split(/\s+/u);
+  const usState = input.usState?.trim().toUpperCase() || undefined;
   await saveFamilySetup(familyId, {
     familyName: input.familyName?.trim() || `${firstName}'s family`,
     firstName,
     lastName: rest.join(" ") || undefined,
-    usState: input.usState?.trim().toUpperCase() || undefined,
+    usState,
   });
+  const zone = usState ? STATE_TIME_ZONES[usState] : undefined;
+  if (zone) {
+    const sql = mapDb();
+    await sql`
+      update public.families set time_zone = ${zone}
+      where id = ${familyId} and time_zone is null
+    `;
+  }
 }
 
 /** Adds a child through the shared store write; returns range info so
- * Homa knows whether a checklist follows. */
+ * Homa knows whether a checklist follows. A repeat of the same name and
+ * birth month returns the existing child instead of a twin row
+ * (unknowns pass U10: text has no visual dedupe). */
 export async function addChildFromSms(
   familyId: string,
   input: { name: string; birthMonth: string },
-): Promise<{ childId: string; ageMonths: number; inRange: boolean }> {
+): Promise<{ childId: string; ageMonths: number; inRange: boolean; existed?: boolean }> {
+  const birthDate = input.birthMonth.length === 7 ? `${input.birthMonth}-01` : input.birthMonth;
+  const sql = mapDb();
+  const existing = await sql<{ id: string; birth_month: string; pending_band: boolean }[]>`
+    select id, to_char(birth_month, 'YYYY-MM-DD') as birth_month, pending_band
+    from public.children
+    where family_id = ${familyId} and lower(name) = ${input.name.trim().toLowerCase()}
+      and birth_month = ${birthDate}
+  `;
+  if (existing[0]) {
+    return {
+      childId: existing[0].id,
+      ageMonths: ageInMonths(existing[0].birth_month),
+      inRange: !existing[0].pending_band,
+      existed: true,
+    };
+  }
   const result = await addChild(familyId, {
     name: input.name,
-    birthDate: input.birthMonth.length === 7 ? `${input.birthMonth}-01` : input.birthMonth,
+    birthDate,
     interests: [],
   });
   await emitMapEvent("map.child_added", {
@@ -219,12 +281,16 @@ export async function nextChecklistItem(
 }
 
 /** Sets the report email, refusing addresses that already belong to a
- * DIFFERENT family (no folding without an authenticated user). Mirrors
- * to the waitlist exactly like the web claim. */
+ * DIFFERENT family (no folding without proof). On a taken email, mails
+ * that account's inbox a one-time "connect this phone" link
+ * (lib/phone-link.ts): inbox possession is the proof, and clicking it
+ * folds this signup into her real family. Mirrors to the waitlist
+ * exactly like the web claim. */
 export async function setFamilyEmailSafe(
   familyId: string,
   email: string,
-): Promise<{ ok: boolean; reason?: "taken" | "invalid" }> {
+  phoneE164?: string,
+): Promise<{ ok: boolean; reason?: "taken" | "invalid"; linkEmailSent?: boolean }> {
   const normalized = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
     return { ok: false, reason: "invalid" };
@@ -235,7 +301,20 @@ export async function setFamilyEmailSafe(
     where email = ${normalized} and id <> ${familyId}
     limit 1
   `;
-  if (taken[0]) return { ok: false, reason: "taken" };
+  if (taken[0]) {
+    let linkEmailSent = false;
+    if (phoneE164) {
+      try {
+        linkEmailSent = await sendPhoneLinkEmail(normalized, taken[0].id, phoneE164);
+      } catch (error) {
+        console.error(
+          "phone-link email failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
+    return { ok: false, reason: "taken", linkEmailSent };
+  }
   const [family] = await sql<{ first_name: string | null; us_state: string | null; utm: unknown }[]>`
     update public.families set email = ${normalized}, updated_at = now()
     where id = ${familyId}
@@ -251,19 +330,58 @@ export async function setFamilyEmailSafe(
   return { ok: true };
 }
 
-/** Scores the child and returns the permanent report. */
+/** Scores the child and returns the permanent report, with full parity
+ * to the web score route (unknowns pass U6): the report_generated
+ * event, the report email (first scoring only), and a non-blocking
+ * narrative kick so the words are ready before she opens the link. */
 export async function finishChildReport(
   familyId: string,
   childId: string,
 ): Promise<ScoredReport | null> {
+  const alreadyEmailed = await reportAlreadyEmailed(childId);
   const report = await createReport(familyId, childId);
-  if (report) {
-    const answers = await childAnswers(childId);
-    await emitMapEvent("signup.sms_completed", {
-      family_id: familyId,
-      questions_answered: Object.keys(answers).length,
-    });
-  }
+  if (!report) return null;
+
+  const answers = await childAnswers(childId);
+  await emitMapEvent("signup.sms_completed", {
+    family_id: familyId,
+    questions_answered: Object.keys(answers).length,
+  });
+  await emitMapEvent("map.report_generated", {
+    family_id: familyId,
+    child_id: report.childId,
+    mapped_domains: report.scores.mappedCount,
+    observations: report.scores.observationCount,
+    bank_version: MAP_BANK_VERSION,
+  });
+
+  // Post-score work runs detached: the SMS turn should not wait 20s of
+  // narrative generation to text the link, and both steps self-heal
+  // (the report page's status poll regenerates a missing narrative).
+  void (async () => {
+    if (narrativeEnabled()) {
+      try {
+        await runReportNarrative(report.childId);
+      } catch (error) {
+        console.error(
+          "sms signup narrative failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
+    try {
+      if (!alreadyEmailed && report.email) {
+        const emailed = await sendReportEmail(report.email, report.childName, report.token);
+        if (emailed) await markReportEmailed(report.childId);
+      }
+    } catch (error) {
+      console.error(
+        "sms signup report email failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+  })();
+
   return report;
 }
 

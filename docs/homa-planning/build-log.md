@@ -197,6 +197,28 @@ acknowledges in its one reply. Calls made alone, worth auditing:
   copy; a failed attachment riding with other content stays a bracketed
   note inside the single agent reply (one-reply law holds).
 
+## 2026-07-10 (afternoon) · Unknowns pass on text signup: one mom, one account
+
+Founder caught the seam within the hour: "she signs up by text, then
+signs in with Google on the web: separate account." Ran the
+finding-unknowns blindspot pass over every text-web seam; seven
+unknowns surfaced (U1-U10 in sms-onboarding-plan.md §Unknowns pass),
+five fixed and verified same session (12 lab checks against prod),
+two documented with their future design (verified phone claim).
+
+The load-bearing changes: email moves to the FRONT of the text flow
+(it is the reconciliation key; fold-together attaches her later web
+login to the text-born family), and the reverse case gets a real
+mechanism: a taken email now triggers a one-time connect-this-phone
+email to that account (migration #46, inbox possession as proof,
+conservative stub-fold that moves children and records before retiring
+the empty shell). Also fixed en passant: attachAuthUser normalizes
+mixed-case IdP emails (latent constraint violation), state seeds a
+coarse time zone so the journal dispatcher can reach text-born
+families, finishChildReport gains web-parity (report_generated event,
+report email, detached narrative kick), and duplicate kids by text
+return the existing child.
+
 ## 2026-07-10 (midday) · Homa performs signup over text, end to end
 
 Founder overruled the morning's Phase B ruling in plain terms: "the tap

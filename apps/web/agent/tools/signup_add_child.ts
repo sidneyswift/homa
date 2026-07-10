@@ -27,6 +27,18 @@ export default defineTool({
     }
 
     const child = await addChildFromSms(session.familyId, input);
+    if (child.existed) {
+      const next = child.inRange
+        ? await nextChecklistItem(session.familyId, child.childId)
+        : null;
+      return {
+        added: false,
+        childId: child.childId,
+        inRange: child.inRange,
+        firstQuestion: next,
+        note: "This child was already added; nothing duplicated. Continue their checklist if one is open.",
+      };
+    }
     if (!child.inRange) {
       return {
         added: true,

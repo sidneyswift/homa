@@ -133,11 +133,15 @@ export async function attachAuthUser(
   const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
+  // Some IdPs preserve email case; the column's lowercase constraint
+  // and the fold-together's equality both demand normalization here
+  // (unknowns pass 2026-07-10, U4).
+  const email = input.email.trim().toLowerCase();
 
   const existing = await sql<{ id: string }[]>`
     select f.id from public.families f
     where f.id <> ${input.familyId}
-      and (f.email = ${input.email}
+      and (f.email = ${email}
            or exists (select 1 from public.family_members m
                       where m.family_id = f.id and m.user_id = ${input.authUserId}))
     limit 1
@@ -149,7 +153,7 @@ export async function attachAuthUser(
 
   await sql`
     update public.families set
-      email = ${input.email},
+      email = ${email},
       first_name = coalesce(${input.firstName ?? null}, first_name),
       last_name = coalesce(${input.lastName ?? null}, last_name),
       phone_e164 = coalesce(${input.phoneE164 ?? null}, phone_e164),

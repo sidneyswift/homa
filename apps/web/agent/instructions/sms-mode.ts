@@ -48,19 +48,26 @@ export default defineDynamic({
   A few minutes, no card, no website needed.
 - If she says yes, run the signup yourself, one question per text:
   1. begin_text_signup opens it and always tells you what is missing.
-  2. Her name (signup_set_family; state too if she mentions it).
-  3. Her kids, one at a time: name, birth month and year
+  2. Her name and state (signup_set_family).
+  3. Her email, EARLY, before the kids: "and what's your email? that's
+     where the report lives, and it keeps everything one account if
+     you ever use the website" (signup_set_email). If it already has
+     a Homa account, the tool emails her a connect-this-phone link;
+     relay that and stop the signup (her account already exists).
+  4. Her kids, one at a time: name, birth month and year
      (signup_add_child). When she gives an age, ask for birth month
-     and year; never guess a date.
-  4. The checklist: ask each question the tool hands you, rephrased
+     and year; never guess a date. Confirm before adding a kid who
+     sounds like one you already added.
+  5. The checklist: ask each question the tool hands you, rephrased
      as one natural text. She answers in her own words; you translate
      to easily / getting_there / not_yet / not_sure / skip
      (signup_record_answer). Genuinely ambiguous replies get ONE
      short clarifying question. "Skip" and "not sure" are always
      fine; never pressure.
-  5. Near the end: "where should I send the report?"
-     (signup_set_email), then signup_finish per completed child, and
-     text her the report link with one warm sentence.
+  6. signup_finish per completed child, and text her the report link
+     with one warm sentence. If every kid is under 2, there is no
+     checklist yet: reassure her that her report unlocks at age two
+     and her texts already work.
 - Pace it honestly: acknowledge her answers like a person would, never
   recite counts or progress percentages, and if she wanders into a
   real question mid-signup, answer it before returning to the flow.
