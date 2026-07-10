@@ -14,7 +14,9 @@ import { SidebarNav } from "./sidebar-nav";
  * (AccountMenu: the name row opens Settings and Sign out). Rendered once
  * by the /app layout, so it stays mounted while pages change; nav links
  * only to surfaces that exist (the library row joins when that page
- * lands).
+ * lands). SidebarContent is the shared inside: the desktop <aside> here
+ * and the phone drawer (mobile-nav.tsx) both render it, so the two never
+ * drift apart.
  */
 
 export interface SidebarKid {
@@ -41,19 +43,15 @@ const DOT_COLOR: Record<UpNextItem["dot"], string> = {
   stone: "var(--stone-300)",
 };
 
-export function Sidebar({
-  parentName,
-  familyName,
-  avatarUrl,
-  kids,
-  upNext,
-}: {
+export interface SidebarProps {
   parentName: string;
   familyName: string;
   avatarUrl: string | null;
   kids: SidebarKid[];
   upNext: UpNextItem[];
-}) {
+}
+
+export function Sidebar(props: SidebarProps) {
   return (
     <aside className="sticky top-3.5 m-3.5 hidden h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)] lg:flex">
       <div className="px-2.5 pb-5 pt-1">
@@ -63,6 +61,25 @@ export function Sidebar({
         </Link>
       </div>
 
+      <SidebarContent {...props} />
+    </aside>
+  );
+}
+
+/**
+ * Everything inside the rail below the logo: nav, up next, kids, account.
+ * A fragment on purpose, both hosts are flex columns and AccountMenu's
+ * mt-auto needs to push against them directly.
+ */
+export function SidebarContent({
+  parentName,
+  familyName,
+  avatarUrl,
+  kids,
+  upNext,
+}: SidebarProps) {
+  return (
+    <>
       <SidebarNav />
 
       <div className="mt-6 rounded-lg bg-page px-3.5 py-3.5">
@@ -136,6 +153,6 @@ export function Sidebar({
       ) : null}
 
       <AccountMenu parentName={parentName} familyName={familyName} avatarUrl={avatarUrl} />
-    </aside>
+    </>
   );
 }

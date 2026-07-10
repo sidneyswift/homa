@@ -3,6 +3,104 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 (late night) · One signed-in mobile nav: a hamburger on the top left that opens the sidebar
+
+Founder instruction: every signed-in page (onboarding excepted) gets the
+same mobile nav, and that nav is a hamburger on the top left that opens
+the sidebar. Built as `MobileNav` in the /app shell, so all five signed-in
+surfaces (chat, home, planner, kids, settings) get it from one render.
+Calls made alone, worth auditing:
+
+- **The phone bar slimmed to hamburger + wordmark.** The old gear /
+  Ask Homa pill / Sign out cluster retired (ask-homa-link.tsx deleted):
+  the drawer IS the sidebar, so settings and sign out ride in its
+  account menu, and Ask Homa is its first tab. The bar's h-14 is
+  unchanged on purpose; chat's phone height subtracts exactly that bar.
+- **The drawer renders the real sidebar, not a copy**: sidebar.tsx now
+  exports `SidebarContent` (nav, up next, kids, account) and both the
+  desktop rail and the drawer wrap it, so the two can't drift.
+- **Drawer manners match the house menus** (marketing Nav, AccountMenu):
+  closes on Escape, a scrim tap, any link tap inside (delegated), or the
+  viewport growing past lg; React unmounts it instantly on close. Slide
+  entrance is transform-only from the left edge, brand ease-out, with
+  the page scroll locked behind it.
+- **Marketing pages left alone**: their signed-in phone menu already
+  lists the same tabs (Nav.tsx, founder report 2026-07-09). Aligning that
+  surface to the left-hamburger drawer would churn the conference landing
+  nav days before D0, so it stays a dropdown card until the founder asks.
+- **Gotcha for future fixed overlays**: the bar's backdrop-blur makes it
+  the containing block for fixed descendants, so the drawer renders as
+  the bar's sibling, never its child, or it clips to the bar's box.
+
+## 2026-07-09 (later still) · Chat becomes the /app default; the dashboard moves to /app/home
+
+Founder instruction: make chat the default page at /app instead of the
+dashboard. The dashboard's page.tsx (and its route-specific onboarding
+gate for "no results yet while an in-range kid waits") moved to a new
+`app/app/home/page.tsx`; the old `app/app/chat/page.tsx` and its colocated
+files (chat-client, message-parts, markdown-text, worksheet-card,
+turn-clock) moved up to become `app/app/page.tsx` directly. Calls made
+alone, worth auditing:
+
+- **Sidebar nav reordered**: "Ask Homa" (now `/app`) moved ahead of "Home"
+  (now `/app/home`) since chat is the true front door; the exact-vs-prefix
+  active-match logic in `sidebar-nav.tsx` already keyed off the href value
+  being `/app`, not the label, so it needed no logic change, just the swap.
+- **Every "Ask Homa" / "Talk to Homa" CTA across the app** (greeting,
+  kid-view, planner-view, the sidebar's up-next fallback, the phone
+  top bar's pill) now points at `/app` instead of `/app/chat`.
+- **Every explicit "go to your family dashboard" link** (report-nav,
+  both report-view CTAs) now points at `/app/home`, not `/app`: those
+  links promise a dashboard by name, and would otherwise land on chat.
+- **Added a redirect `/app/chat` → `/app`** in next.config.ts: `/app/chat`
+  only existed for a few hours today, but the journal email's deep link
+  (`/app/chat?draft=journal`) may already be in an inbox. Updated the
+  `/home` → `/app/home` and `/chat` → `/app` legacy redirects (top-level
+  paths from before the `/app` rename) to match the new arrangement.
+- **`revalidatePath("/app")` in the memories-undo action** became
+  `revalidatePath("/app/home")`: the memories card only renders on the
+  dashboard now, not on every /app page.
+
+## 2026-07-09 (night, round 2) · Progress report simplification round 2: the letter note, one flow from snapshot to subjects
+
+Founder round 2 on the report page (docs/homa-planning/report-simplify-plan.md
+tickets RS-12 through RS-17): the header subtitle is gone, the note from Homa
+now reads as an actual letter (greeting, note, month plan, call-me line,
+sign-off), "Stories so far" and the memory-box keepsake are gone, "Things to
+try" is gone, and the whole picture flows straight into subject by subject
+with nothing between (the model's cross-subject synthesis piece included,
+confirmed with the founder). Calls made alone, worth auditing:
+
+- **Removed `synthesis` and `keepsake` from the model's contract entirely**
+  (`ReportNarrative` type, the gate, the generation schema, `map-check.mts`,
+  `report-writer.md`), not just from rendering: a report that pays to
+  generate two pieces nobody sees violates this repo's own "every piece
+  earns its place" law. `lastLetter`/`priorLetter` memory now carries just
+  the prior `note`, not the prior synthesis; the model's "one warm callback"
+  instruction stands unchanged.
+- **The note prompt now forbids opening with the parent's name**: the page
+  puts a "Hey {name}," greeting above the note text, so the model repeating
+  the name read as the same beat twice. Regenerated both committed
+  fixtures (`pnpm tsx scripts/map-narrative-fixtures.mts`, real model call,
+  gate clean on both) at REPORT_PROMPT_VERSION 2026.07.18.
+- **Greeting falls back to "Hey there,"** when a family has no parent
+  first name on file (should not happen post-onboarding, but the type is
+  nullable and the report must never crash on it).
+- **The call-me P.S. became one inline sentence inside the letter**
+  ("BTW, click if you'd rather I give you a call"), replacing its own
+  boxed card; same tap-to-call behavior and states, just re-worded to fit
+  the letter's voice.
+- **The month-plan sentence names the current calendar month** ("Maya's
+  July 4-week plan"), read at render time rather than stored, so a
+  re-opened report always names the month the plan actually starts.
+- **`GrowthEra` and `movementBetween` stay exported** from
+  `growth-story.tsx` even though the `GrowthStory` component they used to
+  back is gone: the snapshot's trajectory chart and the separate
+  `/evidence` archive page both still depend on them.
+- Typecheck, lint, `check:map` (all fixture + gate checks), and build all
+  green; sample and forced-editable renders screenshotted for the letter
+  layout before committing to it.
+
 ## 2026-07-09 (night) · The signed-in app moved under one /app prefix (founder: "rename now, boil the ocean")
 
 /home is now /app, and everything signed-in nests under it: /app/chat,
