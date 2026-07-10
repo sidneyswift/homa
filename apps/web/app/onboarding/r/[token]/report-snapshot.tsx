@@ -16,6 +16,7 @@ export function ReportSnapshot({
   generatedDate,
   plans,
   eras,
+  className = "mt-4",
 }: {
   childName: string;
   /** Already formatted, e.g. "July 8, 2026" (matches the header band). */
@@ -23,6 +24,10 @@ export function ReportSnapshot({
   plans: { domainId: string; done: number; total: number; retestAt: string }[];
   /** Oldest first, the live report last (report-view's eras). */
   eras: GrowthEra[];
+  /** Outer spacing, owned by the layout: the letter-style page flows
+   * this below the note (mt-4, the default); the in-app dashboard grid
+   * spaces cards itself and passes "". */
+  className?: string;
 }) {
   const now = new Date().getTime();
   const nextRecheck = plans
@@ -31,7 +36,7 @@ export function ReportSnapshot({
     .sort((a, b) => a.getTime() - b.getTime())[0];
 
   return (
-    <div className="mt-4 rounded-lg bg-[var(--surface-sunken)] p-5">
+    <div className={`rounded-lg bg-[var(--surface-sunken)] p-5 ${className}`.trim()}>
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
         {childName}&apos;s snapshot {"\u00b7"} {generatedDate}
       </p>

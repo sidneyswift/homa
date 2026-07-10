@@ -13,9 +13,14 @@ import type { StateRequirementsSummary } from "../../../../lib/map/state-require
 export function StateCard({
   summary,
   childName,
+  className = "mt-9",
 }: {
   summary: StateRequirementsSummary;
   childName: string;
+  /** Outer spacing, owned by the layout: the letter-style page flows
+   * this after the subjects (mt-9, the default); the in-app dashboard
+   * grid spaces cards itself and passes "". */
+  className?: string;
 }) {
   const verified = new Date(summary.sourceLastVerified).toLocaleDateString("en-US", {
     year: "numeric",
@@ -27,7 +32,7 @@ export function StateCard({
       : null;
 
   return (
-    <details className="group mt-9 rounded-lg border border-border-subtle bg-card">
+    <details className={`group rounded-lg border border-border-subtle bg-card ${className}`.trim()}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0">
           <span className="block font-mono text-[0.65rem] uppercase tracking-widest text-subtle">

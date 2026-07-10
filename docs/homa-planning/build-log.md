@@ -3,6 +3,33 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (afternoon) · The in-app report lays out as a dashboard, not one long letter
+
+Founder ask: on desktop the in-app report should read as a dashboard,
+sections as cards across the screen, not one long scroll; the note from
+Homa is its own card, the hero heading its own element. Built inside
+ReportView: the report's pieces (hero band, note letter, snapshot,
+whole picture, subject by subject, state, methodology, sibling and
+next-kid offers, footer actions) are now built once as JSX pieces and
+arranged twice: the token/sample page keeps the exact one-card letter,
+and context="app" lays the same pieces on a PageColumn-width grid (one
+column on phones, two from lg, wide sections spanning both). Calls made
+alone, worth auditing:
+
+- **Pieces, not two renderers**: one set of JSX consts arranged by two
+  return paths, so the letter and the dashboard cannot drift in
+  content. Spacing moved from baked-in mt-9 margins to the layout
+  (ReportSnapshot and StateCard grew a className prop for it).
+- **Grid shape**: hero full width; note and snapshot side by side; the
+  whole picture and subject-by-subject each full-width cards (their
+  charts and rows need the room); state beside methodology; footer
+  actions as a full-width bar. Order on phones matches the letter's
+  reading order exactly.
+- **Verified live**: a fresh onboarding run rendered the grid (note and
+  snapshot geometrically side by side at 1380px), the phone stack, and
+  an unchanged standalone sample. Build and all four guards green;
+  throwaway rows deleted after.
+
 ## 2026-07-10 (midday) · The progress report becomes the app's home surface; the card dashboard retires
 
 Founder ask: the report is not "onboarding results", it IS the
