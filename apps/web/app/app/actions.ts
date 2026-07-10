@@ -8,7 +8,7 @@ import { emitMapEvent } from "../../lib/map/events";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 /**
- * The dashboard's (/app/home) server actions: the device time-zone
+ * The dashboard's (/app/dashboard) server actions: the device time-zone
  * capture and the memories card's one-tap undo. The settings-card
  * actions (add a child, the texting line, the time-zone picker) moved
  * with their cards to app/app/settings/actions.ts (founder ask
@@ -52,6 +52,6 @@ export async function forgetMemoryAction(memoryId: string): Promise<void> {
       family_id: deleted.family_id,
       source: deleted.source as "homa" | "parent" | "onboarding" | "call" | "review",
     });
-    revalidatePath("/app/home");
+    revalidatePath("/app/dashboard");
   }
 }

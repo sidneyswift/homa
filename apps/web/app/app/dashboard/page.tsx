@@ -21,9 +21,10 @@ import { TimeZoneSync } from "../../../components/dashboard/time-zone-sync";
 import { WinsCard } from "../../../components/dashboard/wins-card";
 
 /**
- * /app/home: the family dashboard, moved off the /app root (founder ask
- * 2026-07-09: chat is the app's default landing now, the dashboard is a
- * tab like planner and kids). Frame and hierarchy follow the design
+ * /app/dashboard: the family dashboard, moved off the /app root (founder
+ * ask 2026-07-09: chat is the app's default landing now, the dashboard
+ * is a tab like planner and kids; named /app/dashboard per founder ask
+ * 2026-07-10). Frame and hierarchy follow the design
  * system's web-app template (docs/homa-design/templates/web-app, the
  * Progress screen); the frame itself renders in the /app layout, this
  * page is the main column only. Every number on it is counted from real
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default async function HomePage() {
+export default async function DashboardPage() {
   const data = await getAppData();
   // Unfinished setup lives in /onboarding, the one flow (see module doc).
   if (!data) redirect("/onboarding");

@@ -688,7 +688,7 @@ export function ReportView({
                 // the family dashboard, where the kids, chat, and settings
                 // live from here on.
                 <Link
-                  href="/app/home"
+                  href="/app/dashboard"
                   className={reportButtonClass(
                     "primary",
                     "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
@@ -724,7 +724,7 @@ export function ReportView({
               back to your family
             </Link>
           ) : (
-            <Link href="/app/home" className="text-brand underline-offset-2 hover:underline">
+            <Link href="/app/dashboard" className="text-brand underline-offset-2 hover:underline">
               go to your family dashboard
             </Link>
           )}

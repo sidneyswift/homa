@@ -2,7 +2,7 @@ import { supabase } from "./supabase";
 
 /**
  * Family and child reads/writes for the signed-in app, ported from
- * apps/web/lib/family.ts and app/home/actions.ts (keep the shapes and
+ * apps/web/lib/family.ts and app/app/actions.ts (keep the shapes and
  * rules in sync with those files until a shared package exists). Every
  * query runs under the caller's RLS context, so rows are family-scoped
  * by the database itself, not by trust in this code.

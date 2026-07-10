@@ -95,7 +95,7 @@ the table without changing the tool contract or the promise to the parent.
    for the caller's family or refuses. New event
    `materials.sent_to_printer` goes in the MJ-08 registry
    (`pnpm check:events` stays green).
-5. **Settings surface**: printer setup lives in `/app/home` settings.
+5. **Settings surface**: printer setup lives in `/app/settings`.
    Copy job: help her find her printer's email (Epson panel info sheet),
    plus the approved-senders note (if she enables Epson's Approved Senders
    list she must add `hello@mail.thankshoma.com`).

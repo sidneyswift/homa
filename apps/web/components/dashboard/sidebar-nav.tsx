@@ -18,7 +18,7 @@ import { Calendar, House, Sparkles } from "lucide-react";
  */
 export const APP_NAV_ITEMS = [
   { href: "/app", label: "Ask Homa", icon: Sparkles },
-  { href: "/app/home", label: "Home", icon: House },
+  { href: "/app/dashboard", label: "Home", icon: House },
   { href: "/app/planner", label: "Week planner", icon: Calendar },
 ] as const;
 
