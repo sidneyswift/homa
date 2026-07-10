@@ -74,7 +74,12 @@ export default defineDynamic({
         let rows: FamilyContextRows;
         if (attributes?.supabaseAccessToken) {
           rows = await loadViaCallerToken(attributes);
-        } else if (attributes?.channel === "sms" && attributes.familyId) {
+        } else if (
+          attributes?.familyId &&
+          (attributes.channel === "sms" ||
+            attributes.channel === "email" ||
+            attributes.channel === "dispatch")
+        ) {
           rows = await loadFamilyContextPinned(attributes.familyId);
         } else {
           throw new MissingFamilyContextError();

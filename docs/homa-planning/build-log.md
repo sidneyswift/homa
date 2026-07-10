@@ -3,6 +3,61 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-09 (late evening) · The gateway: every door is an adapter, every loop wakes the agent
+
+Founder directive, verbatim intent: "boil the ocean... every channel is
+an adapter into the agent, and every cron wakes the agent." Plan file
+with checkbox tickets: docs/homa-planning/gateway-plan.md (GW-1..GW-8,
+all built and E2E-verified except the three GW-8 human steps). Doctrine
+ratified into 15-agentic-architecture.md §0.
+
+Shipped:
+
+1. **Email is an adapter now.** agent/channels/email.ts (custom eve
+   channel): a parent's reply to any Homa email becomes a normal agent
+   turn with {channel:'email', familyId} stamped from the family's own
+   registered address; the agent's reply goes back as a threaded email
+   through the shared shell. "stop"/"start" replies flip
+   families.journal_opt_out_at without a turn. Keyed URL
+   (RESEND_INBOUND_SECRET), dark until the founder wires Resend inbound
+   (HUMAN-TODO). email-mode instructions mirror sms-mode.
+2. **The dispatcher.** agent/schedules/dispatch.ts (hourly eve schedule)
+   + lib/schedule-store.ts (agent_schedules rows, atomic lease,
+   self-healing seeding, per-family next-8pm-local advance) +
+   agent/channels/dispatch.ts (proactive delivery: SMS when a line is
+   linked, else the approved email shell). The evening journal prompt is
+   now COMPOSED BY THE AGENT from the family's real context; the
+   template pass left the map cron (receipts and pipelines stay there by
+   ruling; lib/journal.ts deleted, shell copy lives on as
+   sendJournalAgentEmail).
+3. **Groundwork.** Migrations #39 (journal_opt_out_at, channel check
+   widened to email/dispatch, agent_schedules deny-all) and #40 (found
+   live in E2E: message.received and message.completed carry INDEPENDENT
+   sequence counters, so the (session_id, sequence) idempotency key was
+   silently swallowing assistant rows on adapter channels; identity is
+   now (session_id, turn_id, role, sequence). Also hours_log.source
+   gains email/dispatch). resolveAgentAccess accepts pinned channels
+   sms|email|dispatch; family-context and conversation labels follow;
+   hours and events carry the true channel.
+4. **Local dev sandbox ruling.** microsandbox's first VM boot proved
+   unusable on the dev machine (minutes of CPU, turns never progressed),
+   so agent/sandbox.ts pins just-bash locally; deployed runtime still
+   resolves Vercel Sandbox with deny-all egress. eve dev auto-added
+   just-bash to apps/web devDependencies.
+5. **E2E, real dev agent against homa-prod** (synthetic family, cascade
+   cleaned): inbound email -> turn -> memory saved + 45 reading minutes
+   logged with source='email' + both conversation rows persisted;
+   dispatcher seeded -> claimed -> composed a personalized prompt off
+   the saved memory -> delivered (journal.prompt_sent channel=email) ->
+   advanced to next local 8pm -> same-day re-dispatch was a no-op;
+   "stop" opted out turn-free and the row disabled next tick; wrong
+   webhook key got 401. Full guard suite green.
+
+Deviation noted: eve's cross-channel receive() matches channels by
+reference with a route-fingerprint fallback; bundle boundaries broke
+reference identity in dev and a zero-route channel has no fingerprint,
+so the dispatch channel carries a GET health route on purpose.
+
 ## 2026-07-09 (evening) · Texting becomes a full capture channel; the journal prompt texts first
 
 Founder arc (this session): the read-aloud pass on the journal email

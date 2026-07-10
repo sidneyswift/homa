@@ -204,28 +204,27 @@ export async function getFamilyEmail(familyId: string): Promise<string | null> {
   return rows[0]?.email ?? null;
 }
 
-/** The evening journal prompt (FR-6 seed; flag-gated in lib/journal.ts).
- * One short invitation, one CTA into chat; never a sequence. Copy shaped
- * by the reader gate 2026-07-09: the payoff is stated concretely (what
- * tonight's sentences change tomorrow), the "plenty" line lives in the
- * preview only, and the subject no longer reads like a survey. */
-export async function sendJournalPromptEmail(
+/** The evening journal prompt's email shell (FR-6 seed; delivered by the
+ * dispatch channel, gateway-plan GW-4). The founder-approved frame
+ * (subject, preview, CTA, stop line) stays fixed; the body is the
+ * agent's own composed prompt for THIS family. Copy history: reader +
+ * editor gates and the founder read-aloud, 2026-07-09. */
+export async function sendJournalAgentEmail(
   to: string,
-  parentFirstName: string | null,
-  childNames: string[],
+  agentText: string,
 ): Promise<boolean> {
   const url = `${siteUrl()}/chat?draft=journal`;
-  const kidPhrase =
-    childNames.length === 1 ? childNames[0] : "the kids";
+  const bodyLines = agentText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  if (bodyLines.length === 0) return false;
   return send({
     to,
     subject: "One thing from today?",
     preview: "One or two sentences is plenty.",
-    heading: parentFirstName ? `How did today go, ${parentFirstName}?` : "How did today go?",
-    bodyLines: [
-      `Tell me one thing: a win, a hard part, or something ${kidPhrase} did that surprised you.`,
-      "I'll save it to your family's record and use it to plan tomorrow's practice. If you mention school time, I'll add it to your hours log.",
-    ],
+    heading: "How did today go?",
+    bodyLines,
     cta: { label: "Tell Homa about today", url },
     footerNote:
       "These evening check-ins are new. Reply 'stop' to this email and they stop.",

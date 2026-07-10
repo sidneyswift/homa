@@ -129,7 +129,7 @@ export async function recordHoursPinned(input: {
   familyId: string;
   minutes: number;
   subject: string;
-  source: "sms" | "call";
+  source: "sms" | "call" | "email" | "dispatch";
   childId?: string | null;
   childName?: string | null;
   happenedOn?: string | null;
@@ -206,7 +206,7 @@ export async function recordHoursPinned(input: {
     await emitMapEvent("chat.hours_logged", {
       subject: input.subject,
       minutes: Math.round(input.minutes),
-      channel: "sms",
+      channel: input.source,
     });
   }
 

@@ -1,4 +1,5 @@
 import { defaultBackend, defineSandbox } from "eve/sandbox";
+import { justbash } from "eve/sandbox/just-bash";
 
 /**
  * The agent's sandbox, locked down before anything uses it (agentic
@@ -13,11 +14,19 @@ import { defaultBackend, defineSandbox } from "eve/sandbox";
  * just-bash (the dependency-free local fallback) takes no network options
  * and has no real network egress either, so the per-backend keys below
  * cover every backend that can actually reach the internet.
+ *
+ * Local dev pins just-bash outright: defaultBackend would pick
+ * microsandbox on Apple Silicon, and its first VM boot proved unusable
+ * on the dev machine (minutes of CPU, turn never progressed;
+ * 2026-07-09). Deployed runtime (VERCEL set) still resolves to Vercel
+ * Sandbox with deny-all.
  */
 export default defineSandbox({
-  backend: defaultBackend({
-    vercel: { networkPolicy: "deny-all" },
-    docker: { networkPolicy: "deny-all" },
-    microsandbox: { networkPolicy: "deny-all" },
-  }),
+  backend: process.env.VERCEL
+    ? defaultBackend({
+        vercel: { networkPolicy: "deny-all" },
+        docker: { networkPolicy: "deny-all" },
+        microsandbox: { networkPolicy: "deny-all" },
+      })
+    : justbash(),
 });

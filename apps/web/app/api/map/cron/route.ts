@@ -1,6 +1,5 @@
 import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
 
-import { runJournalPromptPass, type JournalPromptResult } from "../../../../lib/journal";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
@@ -32,8 +31,10 @@ import {
  *   5. Call-transcript capture + the post-call memory turn ("save every
  *      call ALWAYS", founder ruling 2026-07-09; agentic ladder items 2-3).
  *      Skips cleanly when TELNYX_API_KEY is absent.
- *   6. The evening journal prompt in each family's own time zone (item 7;
- *      dark unless JOURNAL_PROMPT_ENABLED=true).
+ *
+ * The evening journal prompt moved OUT of this cron: loops that talk to
+ * families wake the agent (gateway-plan GW-4; agent/schedules/dispatch.ts
+ * is its home now). This cron keeps receipts and pipelines only.
  * Gated by CRON_SECRET so only Vercel's scheduler can trigger sends.
  */
 export async function GET(request: Request): Promise<Response> {
@@ -53,7 +54,6 @@ export async function GET(request: Request): Promise<Response> {
     extracted: 0,
     skipped: true,
   };
-  let journal: JournalPromptResult = { candidates: 0, sent: 0, skipped: true };
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -106,14 +106,13 @@ export async function GET(request: Request): Promise<Response> {
     }
     purged = await purgeEmptyAnonymousLeads();
     transcripts = await syncCallTranscripts();
-    journal = await runJournalPromptPass();
   } catch (error) {
     console.error("map/cron failed:", error instanceof Error ? error.message : "unknown");
     return Response.json(
-      { ok: false, reminders, bandReady, retests, purged, transcripts, journal },
+      { ok: false, reminders, bandReady, retests, purged, transcripts },
       { status: 500 },
     );
   }
 
-  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, journal });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts });
 }

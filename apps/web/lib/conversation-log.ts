@@ -21,9 +21,15 @@ export interface PersistMessageInput {
   turnId: string | undefined;
 }
 
-/** The telnyx channel is the only chat-sdk channel mounted, so a
- * chat-sdk kind means SMS; everything else is the web eve channel. */
-function channelLabel(kind: string | undefined): "web" | "sms" {
+/** Sessions stamped by an adapter carry their surface in auth attributes
+ * (sms, email, dispatch); the chat-sdk kind covers SMS's bridge; the
+ * bare eve channel is web. */
+function channelLabel(
+  attributes: unknown,
+  kind: string | undefined,
+): "web" | "sms" | "email" | "dispatch" {
+  const channel = ((attributes ?? {}) as { channel?: string }).channel;
+  if (channel === "sms" || channel === "email" || channel === "dispatch") return channel;
   if (kind && (kind.includes("telnyx") || kind.includes("chat-sdk"))) return "sms";
   return "web";
 }
@@ -51,12 +57,12 @@ export async function persistConversationMessage(
       ${familyId},
       ${input.sessionId},
       ${input.sequence},
-      ${channelLabel(input.channelKind)},
+      ${channelLabel(input.attributes, input.channelKind)},
       ${input.role},
       ${content},
       ${input.turnId ?? null},
       ${embedding}
     )
-    on conflict (session_id, sequence) do nothing
+    on conflict (session_id, (coalesce(turn_id, '')), role, sequence) do nothing
   `;
 }

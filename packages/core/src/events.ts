@@ -224,9 +224,20 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     source: z.enum(["homa", "parent", "onboarding", "call", "review"]),
   }),
-  // The evening journal prompt (item 7, FR-6 seed; flag-dark).
+  // The evening journal prompt (item 7, FR-6 seed; flag-dark). channel
+  // arrived with the dispatcher (gateway-plan GW-4): the agent composes,
+  // the dispatch channel delivers by text or email.
   "journal.prompt_sent": z.object({
     family_id: z.uuid(),
+    channel: z.enum(["sms", "email"]),
+  }),
+  // Inbound email adapter (gateway-plan GW-3). No addresses, no content.
+  "email.message_received": z.object({
+    linked_family: z.boolean(),
+  }),
+  "email.opt_out": z.object({
+    family_id: z.uuid(),
+    resumed: z.boolean(),
   }),
   // Capture-time hours (M3-05 slice, 2026-07-09). Subject and minutes
   // are the whole story; the note (parent's words) is PII-adjacent and
@@ -247,7 +258,7 @@ export const EVENT_SCHEMAS = {
   "chat.hours_logged": z.object({
     subject: z.string(),
     minutes: z.number().int().min(1).max(600),
-    channel: z.enum(["web", "sms"]),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
   }),
   // The recall tool (item 4, M2-15): the agent searched its own history.
   // Emitted with the caller's token (chat.% policy). Query text never

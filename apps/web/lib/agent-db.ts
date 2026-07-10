@@ -53,18 +53,23 @@ export function createCallerDbClient(attributes: unknown): {
  *
  *   caller  · web chat. The caller's own JWT; RLS is the tenancy wall
  *             inside the query itself.
- *   pinned  · SMS. No JWT exists, but the channel stamped familyId from
- *             the parent-written family_phones mapping, the SAME trust
- *             basis the voice webhook tools already write on. Tools then
- *             run server-side reads/writes pre-scoped to that familyId
+ *   pinned  · SMS, inbound email, and dispatcher sessions. No JWT
+ *             exists, but the channel stamped familyId from an
+ *             application-authenticated mapping (the parent-written
+ *             phone row, the family's own registered email address, or
+ *             the dispatcher's schedule row), the SAME trust basis the
+ *             voice webhook tools already write on. Tools then run
+ *             server-side reads/writes pre-scoped to that familyId
  *             through the guarded libs (never raw model input).
  *
- * Interim until M1-02's SET LOCAL role gives SMS sessions a real
+ * Interim until M1-02's SET LOCAL role gives these sessions a real
  * database principal; the seam to swap is exactly this function.
  */
 export type AgentAccess =
   | { mode: "caller"; db: SupabaseClient; familyId: string }
   | { mode: "pinned"; familyId: string };
+
+const PINNED_CHANNELS = new Set(["sms", "email", "dispatch"]);
 
 export function resolveAgentAccess(attributes: unknown): AgentAccess {
   const attrs = (attributes ?? {}) as CallerAuthAttributes & { channel?: string };
@@ -72,7 +77,7 @@ export function resolveAgentAccess(attributes: unknown): AgentAccess {
     const { db, familyId } = createCallerDbClient(attributes);
     return { mode: "caller", db, familyId };
   }
-  if (attrs.channel === "sms" && attrs.familyId) {
+  if (attrs.channel && PINNED_CHANNELS.has(attrs.channel) && attrs.familyId) {
     return { mode: "pinned", familyId: attrs.familyId };
   }
   throw new MissingFamilyContextError();

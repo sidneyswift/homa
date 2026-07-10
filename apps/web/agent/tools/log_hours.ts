@@ -55,11 +55,14 @@ export default defineTool({
     }
 
     if (access.mode === "pinned") {
+      const pinnedChannel = (ctx.session.auth.current?.attributes as { channel?: string })
+        ?.channel;
       const result = await recordHoursPinned({
         familyId: access.familyId,
         minutes: input.minutes,
         subject: input.subject,
-        source: "sms",
+        source:
+          pinnedChannel === "email" || pinnedChannel === "dispatch" ? pinnedChannel : "sms",
         childId: input.childId ?? null,
         happenedOn: input.happenedOn ?? null,
         note: input.note ?? null,

@@ -110,6 +110,8 @@ await expectEmptyRead("conversation_messages");
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
 await expectEmptyRead("hours_log");
+// Dispatcher schedule rows (migration #39): deny-all, server-only.
+await expectEmptyRead("agent_schedules");
 
 await expectInsertDenied(
   "families",
@@ -253,6 +255,15 @@ await expectInsertDenied(
     minutes: 60,
   },
   "anon cannot forge hours",
+);
+await expectInsertDenied(
+  "agent_schedules",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    kind: "journal_prompt",
+    next_run_at: "2026-01-01T00:00:00Z",
+  },
+  "anon cannot forge dispatcher schedules",
 );
 await expectInsertDenied(
   "child_reports",

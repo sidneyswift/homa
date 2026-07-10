@@ -10,6 +10,17 @@
 > model, tenancy), 06-harness-gap-analysis.md (Hermes gaps, ticket map),
 > 11-hermes-implementation-notes.md (the review-loop spec).
 
+## 0. The gateway doctrine (founder-ratified 2026-07-09 evening)
+
+Every conversational surface is an adapter on the ONE agent (eve's
+channel layer is the gateway: web and SMS today, email inbound per
+docs/homa-planning/gateway-plan.md). A surface that cannot be an adapter
+yet (voice, until eve ships a voice channel) must share the record and
+the guarded writes until it can. Loops that talk to families wake the
+agent through the dispatcher; only receipts and pipelines stay
+deterministic sends. The caller/pinned tool duality collapses at ONE
+seam (lib/agent-db.ts resolveAgentAccess) when M1-02 lands.
+
 ## 1. The one-sentence model
 
 The Mac mini's filesystem did three jobs at once: it was the **system of

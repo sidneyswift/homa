@@ -28,9 +28,19 @@ Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted 
 
 - [x] ~~Re-provision both voice assistants~~ done by agent 2026-07-09 afternoon (founder "do all of this"): both assistants synced twice, now carrying `send_email` + `remember` + `log_hours` with updated call instructions
 - [x] ~~Vercel prod env check~~ verified 2026-07-09: `TELNYX_API_KEY` and `TELNYX_CURRICULUM_ASSISTANT_ID` both present in Production
-- [ ] **Journal prompt read-aloud**: read the evening email copy in `apps/web/lib/map/email.ts` (`sendJournalPromptEmail`) out loud; if it passes, set `JOURNAL_PROMPT_ENABLED=true` in Vercel prod. It stays completely dark until then. Copy has been through the reader + editor gates AND your first read-aloud rewrite (plainer, 2026-07-09 evening) *(2 min)*
-- [ ] **Confirm `hello@thankshoma.com` exists in Google Workspace** (Admin console → add the alias if it does not). Every Homa email now sets it as reply-to because the from-domain `mail.thankshoma.com` is send-only: replies used to BOUNCE. Until the reply-into-Homa channel is built, replies (including "stop") land in this inbox for you to handle *(2 min)*
+- [ ] **Journal prompt read-aloud**: the evening prompt is now COMPOSED BY THE AGENT per family and delivered by text (linked line) or the approved email shell (`sendJournalAgentEmail` in `apps/web/lib/map/email.ts`); the fixed frame (subject, preview, CTA, stop line) is what to read aloud. If it passes, set `JOURNAL_PROMPT_ENABLED=true` in Vercel prod. It stays completely dark until then *(2 min)*
+- [ ] **Confirm `hello@thankshoma.com` exists in Google Workspace** (Admin console → add the alias if it does not). Every Homa email now sets it as reply-to because the from-domain `mail.thankshoma.com` is send-only: replies used to BOUNCE. Until the email adapter goes live (next section), replies (including "stop") land in this inbox for you to handle *(2 min)*
 - [ ] **Optional cost lever**: set `HOMA_EXTRACTION_MODEL` in Vercel prod to a cheaper gateway model id for the background memory loops, and `HOMA_EMBEDDING_MODEL` if you ever want something other than `openai/text-embedding-3-small` for semantic recall
+
+## Email-into-Homa (gateway GW-8, added 2026-07-09 late evening)
+
+The inbound email adapter is BUILT and E2E-verified (a reply to a Homa
+email becomes a real agent turn; "stop" opts the family out of evening
+check-ins). It stays dark until these three land, in order:
+
+- [ ] **Resend inbound**: dashboard → Domains/Inbound → set up receiving on a subdomain (e.g. `in.thankshoma.com`; Resend shows the exact MX record). Vercel DNS holds thankshoma.com, so tell the agent the record and it can add it via `vercel dns` if the dashboard doesn't do it automatically *(5 min)*
+- [ ] **Resend inbound webhook**: point it at `https://thankshoma.com/eve/v1/email/inbound?key=<secret>` where `<secret>` is a fresh random string; then set that same value as `RESEND_INBOUND_SECRET` in Vercel prod (and `.env.local` if you want local testing). The route answers 401 until the env exists *(3 min)*
+- [ ] **After both**: tell the agent "flip journal reply-to to the inbound address" so replies flow to Homa instead of your inbox *(30 sec)*
 
 ## Domain & handles · memo is in: `docs/homa-planning/journeys/11-naming-domain-memo.md`
 
