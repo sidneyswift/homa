@@ -351,6 +351,38 @@ export function logHoursToolConfig(webhookSecret: string): unknown {
   };
 }
 
+/**
+ * The unknown-caller way in (lead-funnel-plan LF-5): texts the signup
+ * link to the caller's OWN number. {{telnyx_end_user_target}} is the
+ * caller id Telnyx templates at call time; {{family_id}} templates in so
+ * the route can refuse linked callers (they have nothing to sign up
+ * for). The general assistant only; curriculum-line callers are always
+ * linked families.
+ */
+export function sendSignupLinkToolConfig(webhookSecret: string): unknown {
+  return {
+    type: "webhook",
+    webhook: {
+      name: "send_signup_link",
+      description:
+        "Text the caller Homa's signup link (the free progress report at " +
+        "thankshoma.com/onboarding) to the number they are calling from. " +
+        "Only for callers with no Homa account, only after they say yes " +
+        "to the offer. Never call it twice in one conversation.",
+      url:
+        `https://thankshoma.com/api/voice/tools/send-signup-link?key=${webhookSecret}` +
+        `&family_id={{family_id}}&caller={{telnyx_end_user_target}}`,
+      method: "POST",
+      async: false,
+      body_parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+  };
+}
+
 export function readSoleProprietorIdentity(): SoleProprietorIdentity {
   const fields = {
     firstName: process.env.TELNYX_SP_FIRST_NAME,

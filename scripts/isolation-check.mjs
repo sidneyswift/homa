@@ -112,6 +112,10 @@ await expectEmptyRead("learning_reviews");
 await expectEmptyRead("hours_log");
 // Dispatcher schedule rows (migration #39): deny-all, server-only.
 await expectEmptyRead("agent_schedules");
+// Phone-first leads (migration #41): deny-all, server-only.
+await expectEmptyRead("phone_leads");
+// Worksheet studio artifacts (migration #42): family-scoped, members only.
+await expectEmptyRead("worksheets");
 
 await expectInsertDenied(
   "families",
@@ -264,6 +268,25 @@ await expectInsertDenied(
     next_run_at: "2026-01-01T00:00:00Z",
   },
   "anon cannot forge dispatcher schedules",
+);
+await expectInsertDenied(
+  "phone_leads",
+  {
+    phone_e164: "+15550001111",
+    first_channel: "sms",
+  },
+  "anon cannot forge phone leads",
+);
+await expectInsertDenied(
+  "worksheets",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    title: "intruder page",
+    pdf_url: "https://example.com/x.pdf",
+    preview_url: "https://example.com/x.jpg",
+    html: "<p>intruder</p>",
+  },
+  "anon cannot forge worksheets",
 );
 await expectInsertDenied(
   "child_reports",

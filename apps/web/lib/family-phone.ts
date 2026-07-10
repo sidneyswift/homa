@@ -1,5 +1,6 @@
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
+import { markLeadConverted } from "./phone-leads";
 
 /**
  * The family texting line (migration #22, founder decisions 2026-07-07):
@@ -70,6 +71,7 @@ export async function setFamilyPhone(input: {
     source: input.source,
     replaced: existing !== null,
   });
+  await markLeadConverted(input.phoneE164).catch(() => {});
   await sendLinkNotificationSms(input.phoneE164);
   return { ok: true, replaced: existing !== null };
 }
@@ -118,6 +120,7 @@ export async function copyLeadPhoneToFamily(
         source: "bridge",
         replaced: false,
       });
+      await markLeadConverted(phoneE164).catch(() => {});
       await sendLinkNotificationSms(phoneE164);
     }
   } catch (error) {

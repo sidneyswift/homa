@@ -165,6 +165,37 @@ export const EVENT_SCHEMAS = {
     source: z.enum(["signup", "home", "bridge"]),
     replaced: z.boolean(),
   }),
+  // MMS attachment lanes (build-log 2026-07-10, superseding the one-day
+  // sms.voice_note_received: never deny input). One event per attachment
+  // on an inbound text. media_type is the MIME type the carrier
+  // delivered; outcome says which lane handled it: model_native (photos,
+  // PDFs passed to the model directly), transcribed (voice notes and
+  // video clips through STT), inlined (text-format files), or failed
+  // (bracketed acknowledgement note). Never any content, never a number.
+  "sms.attachment_processed": z.object({
+    kind: z.enum(["image", "audio", "video", "document", "text", "other"]),
+    media_type: z.string(),
+    outcome: z.enum(["model_native", "transcribed", "inlined", "failed"]),
+    linked_family: z.boolean(),
+  }),
+  // The worksheet studio (FR-5 first real slice, 2026-07-10): one event
+  // per rendered printable, on every channel. Props never carry titles,
+  // html, urls, or prompts; the domain row holds those.
+  "materials.created": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    has_images: z.boolean(),
+    sent_by_text: z.boolean(),
+    duration_ms: z.number().int().min(0),
+  }),
+  // The studio's art department: one event per generated illustration
+  // (each one is a real Vercel AI Gateway spend, so volume is the story).
+  "materials.image_generated": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    duration_ms: z.number().int().min(0),
+  }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
   // curriculum is generated from what was discussed. No phone number,
@@ -234,6 +265,17 @@ export const EVENT_SCHEMAS = {
   // Inbound email adapter (gateway-plan GW-3). No addresses, no content.
   "email.message_received": z.object({
     linked_family: z.boolean(),
+  }),
+  // Phone-first leads (lead-funnel-plan LF-6). Channel only: no numbers,
+  // no names, no content (MJ-08).
+  "lead.captured": z.object({
+    channel: z.enum(["sms", "voice"]),
+  }),
+  "lead.invited": z.object({
+    channel: z.enum(["sms", "voice"]),
+  }),
+  "lead.converted": z.object({
+    channel: z.enum(["sms", "voice"]),
   }),
   "email.opt_out": z.object({
     family_id: z.uuid(),

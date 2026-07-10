@@ -3,7 +3,207 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-09 (late night) · One signed-in mobile nav: a hamburger on the top left that opens the sidebar
+## 2026-07-10 (morning) · Strangers become leads; Homa gets concierge mode
+
+Founder ask: unknown texters and callers should (1) leave their number,
+(2) get pushed toward signup, (3) be signable-up by Homa herself,
+"pleasant sales lady mode", including cards and subscriptions. Plan
+file: docs/homa-planning/lead-funnel-plan.md (Phase A built; B and C
+are rulings, below).
+
+Shipped (Phase A, all 14 verification checks green, voice assistant
+re-provisioned live):
+
+1. **phone_leads** (migration #41, deny-all RLS): every unknown text
+   (telnyx.ts) and unknown call (/api/voice/context) upserts a lead row:
+   number, first channel, contact count, status
+   new/engaged/invited/converted. Linking a phone (settings card or the
+   onboarding bridge) flips the lead converted automatically.
+2. **capture_lead tool** (unlinked SMS sessions only): saves the name,
+   email, and situation a stranger volunteers, keyed by the SESSION's
+   own number, refuses linked sessions. Marks 'invited' when the reply
+   carries the signup link.
+3. **Concierge mode**: sms-mode's unlinked branch and the voice
+   assistant's unknown-caller block rewritten: answer the real question
+   first (the help IS the pitch), then ONE offer of the free progress
+   report at thankshoma.com/onboarding ("about five minutes, no card",
+   same-number auto-link explained), drop it if declined, never a
+   second pitch, never payment talk on the channel.
+4. **send_signup_link voice tool**: texts the onboarding link to the
+   caller's own number ({{telnyx_end_user_target}} templated, model
+   never picks the destination), refuses linked callers, 2/day cap per
+   number, failed sends fall back to saying the link aloud and never
+   mark invited. Events: lead.captured / lead.invited / lead.converted
+   (channel only, MJ-08 clean).
+
+Rulings made alone (Phase B/C, logged for founder review):
+
+- **No text-native account creation in v1.** The web onboarding IS
+  signup (five minutes, no card, ends in the report: the converting
+  moment). Homa's job on the channel is getting the tap. Text-native
+  accounts would mint empty workspaces and skip the magic. Revisit only
+  if lead conversion data says the tap is the cliff.
+- **Homa never takes card numbers over SMS or voice, ever.** Card data
+  would land in Telnyx logs, transcripts, conversation_messages, and
+  model context (instant PCI scope), and carriers filter card-number
+  texts on 10DLC campaigns. When billing goes live (LLC-backed Stripe
+  activation), the conversational equivalent is a send_checkout_link
+  tool texting a Stripe Checkout URL (Apple Pay one tap) plus the
+  webhook flipping subscription state. Same warmth, zero compliance
+  surface. Blocked on entity + pricing rulings, ticketed in the plan.
+
+Note: this session's build ran against the tree while the parallel
+session's SMS voice-note work was mid-flight; final green CI rides with
+that session's commit.
+
+## 2026-07-10 (morning) · Worksheet illustrations moved off fal.ai onto the Vercel AI Gateway
+
+Founder call: use `openai/gpt-image-2` through the Vercel AI Gateway instead
+of fal.ai's `nano-banana-pro` for the worksheet studio's `generate_image`
+tool (built a few hours earlier, previous entry below). Net effect: one
+fewer vendor, one fewer credential, and the same gateway that already bills
+every chat turn now bills illustrations too.
+
+- **`lib/fal-images.ts` deleted, `lib/illustrations.ts` added.** Calls the
+  AI SDK's `generateImage` with a bare gateway-routed model string
+  (`HOMA_IMAGE_MODEL`, default `openai/gpt-image-2`), same auth pattern as
+  the report writer's `generateObject` calls (Vercel project auth deployed,
+  `AI_GATEWAY_API_KEY`/OIDC locally, no new env needed since
+  `VERCEL_OIDC_TOKEN` was already in `.env.local`). `@fal-ai/client`
+  removed from `apps/web/package.json`; `FAL_API_KEY` deleted from
+  `.env.local` (dead, was never in Vercel prod anyway).
+- **Image models return bytes, not a hosted URL** (fal's queue API was the
+  one exception): `generateIllustration` now decodes the base64 result and
+  uploads it to Blob itself (`uploadIllustrationBytes` in
+  `lib/print/artifact-store.ts`, same store as worksheet PDFs, under
+  `families/{id}/illustrations/`), handing the model only the resulting
+  `https://` URL. Deliberate: a base64 data URI that size (~1MB PNGs seen
+  in testing) would flood the model's own context every time it re-reads
+  its page HTML for a revision.
+- **`aspectRatio` enum replaced with `shape`**, matching GPT Image 2's five
+  actual output sizes exactly (square/portrait/landscape/tall/wide ->
+  1024x1024 / 1024x1536 / 1536x1024 / 1024x1792 / 1792x1024) instead of a
+  generic ratio string that may not map cleanly onto every provider.
+- **Live-verified twice**: one generation alone (54s, 1.1MB PNG, clean
+  black-and-white coloring-book line art of the requested character),
+  then the full render pipeline with that image embedded (3.8s render,
+  859KB PDF). Both sets of smoke blobs deleted after. Typecheck, lint,
+  and production build all green.
+
+Open end: no `providerOptions` tuning yet (quality/style), so GPT Image 2
+runs at its provider default; revisit if per-image cost needs a lever.
+
+## 2026-07-10 (small hours) · The worksheet studio: agent-designed printables, delivered over SMS
+
+Founder ask (2026-07-09 late night): replicate the Mac mini worksheet loop
+in cloud, better, and over SMS. Alessa asks for a page, Homa designs it,
+sends it back, she critiques ("the O looks boxy"), Homa remakes it. And it
+must be modular: other families want other styles, characters, subjects,
+ages, so a template cannot be the mechanism. Shipped as FR-5's first real
+slice (supersedes the v0 text-exercise `create_worksheet`):
+
+- **The model composes the whole page as HTML/CSS** and the new
+  `create_worksheet` renders it with headless Chromium
+  (`lib/print/render-page.ts`, puppeteer-core + @sparticuz/chromium in
+  the Vercel function; local dev drives the developer's own Chrome) to a
+  letter PDF plus a JPEG preview. Craft lives in a repo skill
+  (`agent/skills/worksheet-studio/SKILL.md`): page contract, tracing/
+  coloring/flash-card CSS recipes, illustration prompt patterns, the
+  critique-and-revise loop. Personalization comes from what the agent
+  already knows (focus, age, interests, what_works, family skills).
+- **`generate_image`**: fal.ai illustrations (default
+  `fal-ai/nano-banana-pro`, env-swappable via `HOMA_IMAGE_MODEL`),
+  server-side key, 30/day per family, `materials.image_generated` event.
+- **Artifacts**: bytes to Vercel Blob (`homa-artifacts` store, created
+  this session, public access + random-suffix URLs, so MMS carriers and
+  browsers can fetch but nobody can enumerate); record to the new
+  `worksheets` table (migration #42, `is_family_member` RLS, the html
+  column kept so future sessions revise instead of re-imagining).
+  Law #2 satisfied: Postgres truth, Blob artifacts, both before turn end.
+- **SMS delivery**: on the SMS channel the tool itself MMSes the preview
+  JPEG + the PDF to the parent's number (from channel auth, never model
+  input), then the agent follows with one short text. `sms-mode.ts` now
+  teaches this; the old "worksheets are not available over text" line is
+  gone. Web chat renders the preview card with the PDF one tap away
+  (replaces the `window.print()` popup).
+
+Decisions made alone, worth auditing:
+
+- **Chromium-in-function over the planned sandbox reportlab pipeline**
+  (M0-03's original shape). HTML/CSS is the one layout language the model
+  is natively fluent in, which is what "no template, any style" requires;
+  reportlab would have meant a schema again. The render seam is frozen
+  (`renderPrintableHtml(html) -> {pdf, previewJpeg}`) so the sandbox
+  pipeline can still replace internals later. Sandbox stays deny-all;
+  bash/write_file sentinels stay in place.
+- **D7 enforced in code**: the shell (`lib/print/page-shell.ts`) wraps
+  every page with the letter @page box and the "made with Homa for
+  [child]" footer, so no composition can forget it. Same file gates
+  scripts/iframes and runs the brand-law scan (EM_DASH + BANNED_WORDS on
+  visible text) before anything renders.
+- **Worksheet MMS counts as delivery, not as the one reply**: the
+  sms-mode "one reply per text" law stands; the tool's MMS is the
+  artifact, the agent's single follow-up text is the reply.
+- **Limits without billing**: 20 sheets + 30 images per family per day
+  (in-memory damper, same posture as the email tool). `action_costs`
+  still does not exist (Phase D); when billing lands these become real
+  metering.
+- **Live smoke-verified end to end** (fal generation 20s, render 4.4s,
+  PDF 413KB + JPEG 161KB, blob HEAD 200s, then deleted): a Skye-themed
+  letter-O tracing sheet with guide lines, start dots, and a line-art
+  dalmatian-in-rescue-ring illustration. Typecheck, lint, build, and all
+  four guards green; migration #42 applied to homa-prod via MCP and the
+  isolation suite re-run against it.
+
+Open ends, deliberately not built tonight: no blob TTL/cleanup, no
+`list_worksheets` recall tool (the html column makes it cheap later), no
+email-channel delivery (email-mode still points to the web), printer
+delivery is the separate send-to-printer plan, and `FAL_API_KEY` in
+Vercel prod needs the founder pass (HUMAN-TODO). The MMS leg itself
+(preview + PDF as `media_urls`) could not be live-tested from this
+machine: texting is dark locally by design and still waits on the 10DLC
+human steps; first live text should include a worksheet ask.
+
+## 2026-07-09 (late night, voice notes) · SMS voice notes transcribe into the agent turn
+
+Founder instruction: Homa should receive voice notes via text. Before this,
+an MMS audio attachment was silently dropped (the channel handler kept
+images only, and a voice note with no caption returned before any reply).
+Now audio attachments transcribe to text in `lib/voice/transcribe.ts` and
+join the turn as a marked block; `sms-mode.ts` teaches the model the
+convention. Calls made alone, worth auditing:
+
+- **Telnyx STT over the AI Gateway's**: the gateway's speech-to-text is
+  beta with gradual access rollout ("models may not appear in the catalog
+  for your team yet"), while Telnyx's `/v2/ai/audio/transcriptions`
+  (Whisper large v3 turbo) is GA and runs on the `TELNYX_API_KEY` the SMS
+  channel already gates on. Wherever SMS works, transcription works: no
+  new env, no new vendor, media never leaves the platform that delivered
+  it. The backend is isolated in one helper so a swap is one file.
+- **The AMR question, settled by live probes**: phones commonly send MMS
+  voice notes as `audio/amr` or `audio/3gpp`, and the STT extension
+  allowlist includes neither. Probed the live API (2026-07-09): the
+  allowlist checks only the filename, and ffmpeg content-probes the
+  actual bytes, exactly as Telnyx's audio-formats doc states ("container
+  format doesn't matter as long as ffmpeg can decode it, the validated
+  extension list is the actual restriction"). AMR-NB bytes uploaded as
+  `.mp3` and a 3gp container as `.mp4` both transcribed verbatim; the
+  same AMR bytes as `.amr` got HTTP 400. So the helper maps AMR-family
+  types onto allowlisted extensions, and every attempt still emits
+  `sms.voice_note_received` (new registry entry) with the delivered
+  `media_type` and outcome, so a Telnyx behavior change surfaces in the
+  funnel the day it happens.
+- **An unreadable voice note with nothing else never wakes the agent**:
+  the handler replies directly via `sendHomaSms` ("I couldn't quite hear
+  that voice note. Mind trying again, or typing it?"), because silence
+  reads as Homa ignoring her and an agent turn would have no content to
+  answer. When a failed note rides alongside typed text or photos, a
+  bracketed note joins the turn instead, so the agent can acknowledge it
+  inside its single reply (the one-reply-per-text law holds).
+- **Transcripts enter the turn as `[Voice note, transcribed]: ...`**, a
+  plain-text convention over any structured part, because SMS turns are
+  already plain text and the sms-mode instruction block (which only
+  loads on this channel) explains it in one bullet.
 
 Founder instruction: every signed-in page (onboarding excepted) gets the
 same mobile nav, and that nav is a hamburger on the top left that opens

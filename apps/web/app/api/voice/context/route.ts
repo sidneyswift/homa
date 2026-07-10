@@ -5,6 +5,7 @@ import {
   loadFamilyContextPinned,
   renderFamilyContext,
 } from "../../../../lib/family-context";
+import { recordLeadContact } from "../../../../lib/phone-leads";
 
 /**
  * POST /api/voice/context: the Telnyx voice assistant's dynamic-variables
@@ -66,7 +67,17 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const familyId = await findFamilyIdByPhone(caller);
-    if (!familyId) return Response.json(EMPTY_RESPONSE);
+    if (!familyId) {
+      // A stranger calling IS a lead (lead-funnel-plan LF-2). Never
+      // blocks the call; the webhook has a 5s budget.
+      recordLeadContact(caller, "voice").catch((error: unknown) => {
+        console.error(
+          "phone lead capture (voice) failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      });
+      return Response.json(EMPTY_RESPONSE);
+    }
 
     const rows = await loadFamilyContextPinned(familyId);
     return Response.json({
