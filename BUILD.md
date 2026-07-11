@@ -202,6 +202,10 @@ never modify either).
 7. Brand voice: no em dashes, sentence case, reassure-before-inform, offers never
    commands.
 8. eve stays behind the harness interface (M1-14), including the frontend hook.
+9. Prod schema and prod code ship together: a breaking migration (rename, drop,
+   tightened constraint) never leads the deploy that reads it. Code first, deploy
+   READY, then migrate, or expand-contract. Additive migrations may lead.
+   (2026-07-10 /app outage; procedure in AGENTS.md § Deploys & migrations.)
 
 ## When you are unsure
 
