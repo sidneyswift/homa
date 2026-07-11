@@ -43,19 +43,11 @@ let cachedSystemPrompt: string | null = null;
 /** agent/curriculum-writer.md; cwd is apps/web under the Next server. */
 function systemPrompt(): string {
   if (cachedSystemPrompt) return cachedSystemPrompt;
-  const candidates = [
+  cachedSystemPrompt = readFileSync(
     path.join(process.cwd(), "agent", "curriculum-writer.md"),
-    path.join(process.cwd(), "apps", "web", "agent", "curriculum-writer.md"),
-  ];
-  for (const candidate of candidates) {
-    try {
-      cachedSystemPrompt = readFileSync(candidate, "utf8");
-      return cachedSystemPrompt;
-    } catch {
-      // Try the next spelling.
-    }
-  }
-  throw new Error("curriculum-writer.md not found; curriculum generation cannot run");
+    "utf8",
+  );
+  return cachedSystemPrompt;
 }
 
 const curriculumSchema = z.object({

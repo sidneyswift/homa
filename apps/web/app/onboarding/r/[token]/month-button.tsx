@@ -62,7 +62,13 @@ export function MonthButton({
           "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold print:hidden",
         )}
       >
-        Open {childName}&apos;s month {"\u2192"}
+        {/* ml-1, not a space: the button is inline-flex, which swallows
+            whitespace-only text nodes between flex items. aria-hidden
+            keeps the glyph out of the accessible name. */}
+        Open {childName}&apos;s month{" "}
+        <span aria-hidden="true" className="ml-1">
+          {"\u2192"}
+        </span>
       </Link>
     );
   }
@@ -88,7 +94,20 @@ export function MonthButton({
         "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold disabled:opacity-50 print:hidden",
       )}
     >
-      {state === "busy" ? `Building ${childName}'s month\u2026` : `Open ${childName}'s month \u2192`}
+      {state === "busy" ? (
+        // "Opening", not "Building": the letter above already says the
+        // month is made, and the reader gate (2026-07-11) caught the
+        // contradiction. The lazy first-tap build stays; it is an
+        // implementation detail she never asked about.
+        `Opening ${childName}'s month\u2026`
+      ) : (
+        <>
+          Open {childName}&apos;s month{" "}
+          <span aria-hidden="true" className="ml-1">
+            {"\u2192"}
+          </span>
+        </>
+      )}
     </button>
   );
 }

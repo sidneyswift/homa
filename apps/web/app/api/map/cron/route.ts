@@ -1,5 +1,9 @@
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
+import {
+  sweepThankYouCards,
+  type ThankYouCardSweepResult,
+} from "../../../../lib/cards/thank-you";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
@@ -31,6 +35,9 @@ import {
  *   5. Call-transcript capture + the post-call memory turn ("save every
  *      call ALWAYS", founder ruling 2026-07-09; agentic ladder items 2-3).
  *      Skips cleanly when TELNYX_API_KEY is absent.
+ *   6. The thank-you card sweep (lib/cards/thank-you.ts): one real
+ *      handwritten card per family, 48h after web onboarding completes.
+ *      DARK unless THANK_YOU_CARDS_ENABLED + Handwrytten env are set.
  *
  * The evening journal prompt moved OUT of this cron: loops that talk to
  * families wake the agent (gateway-plan GW-4; agent/schedules/dispatch.ts
@@ -53,6 +60,13 @@ export async function GET(request: Request): Promise<Response> {
     linked: 0,
     extracted: 0,
     skipped: true,
+  };
+  let cards: ThankYouCardSweepResult = {
+    skipped: true,
+    enqueued: 0,
+    sent: 0,
+    mailed: 0,
+    failed: 0,
   };
 
   try {
@@ -106,13 +120,14 @@ export async function GET(request: Request): Promise<Response> {
     }
     purged = await purgeEmptyAnonymousLeads();
     transcripts = await syncCallTranscripts();
+    cards = await sweepThankYouCards();
   } catch (error) {
     console.error("map/cron failed:", error instanceof Error ? error.message : "unknown");
     return Response.json(
-      { ok: false, reminders, bandReady, retests, purged, transcripts },
+      { ok: false, reminders, bandReady, retests, purged, transcripts, cards },
       { status: 500 },
     );
   }
 
-  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards });
 }

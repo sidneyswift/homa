@@ -39,23 +39,11 @@ let cachedSystemPrompt: string | null = null;
 /** agent/report-writer.md, the versioned system prompt (hand-kept mirror
  * of instructions.md's voice block). Read from disk so the founder edits
  * markdown, not code; next.config's outputFileTracingIncludes ships it.
- * cwd is apps/web under the Next server and the repo root under scripts
- * (the fixtures generator), so both spellings are tried. */
+ * cwd is apps/web under the Next server and fixture script. */
 function systemPrompt(): string {
   if (cachedSystemPrompt) return cachedSystemPrompt;
-  const candidates = [
-    path.join(process.cwd(), "agent", "report-writer.md"),
-    path.join(process.cwd(), "apps", "web", "agent", "report-writer.md"),
-  ];
-  for (const candidate of candidates) {
-    try {
-      cachedSystemPrompt = readFileSync(candidate, "utf8");
-      return cachedSystemPrompt;
-    } catch {
-      // Try the next spelling.
-    }
-  }
-  throw new Error("report-writer.md not found; narrative generation cannot run");
+  cachedSystemPrompt = readFileSync(path.join(process.cwd(), "agent", "report-writer.md"), "utf8");
+  return cachedSystemPrompt;
 }
 
 function requiredStrings(ids: string[]): z.ZodObject<Record<string, z.ZodString>> {

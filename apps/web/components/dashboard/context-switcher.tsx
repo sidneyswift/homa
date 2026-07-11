@@ -93,7 +93,11 @@ function useViewContextPick(selected: string) {
       target === VIEW_CONTEXT_FAMILY ? null : kidSwitchTargetPath(pathname, target);
     startTransition(async () => {
       await setViewContextAction(target);
-      if (destination) router.push(destination);
+      if (destination) {
+        router.push(destination);
+      } else {
+        router.refresh();
+      }
     });
   }
 

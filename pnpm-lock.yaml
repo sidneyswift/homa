@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   eve@0.19.0:
-    hash: c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636
+    hash: cv5q3sd4scoenjudafsnytz6n4
     path: patches/eve@0.19.0.patch
 
 importers:
@@ -54,7 +54,7 @@ importers:
         version: 7.0.14(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       expo:
         specifier: ~56.0.14
         version: 56.0.14(@babel/core@7.29.7)(@expo/dom-webview@56.0.6)(@expo/metro-runtime@56.0.16)(expo-router@56.2.13)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -69,7 +69,7 @@ importers:
         version: 56.0.15(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
       expo-router:
         specifier: ~56.2.13
-        version: 56.2.13(ee25eb8c9be08c81e43615531c294498)
+        version: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
       expo-splash-screen:
         specifier: ~56.0.12
         version: 56.0.12(expo@56.0.14)(typescript@6.0.3)
@@ -163,10 +163,13 @@ importers:
         version: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      handwrytten:
+        specifier: ^1.6.0
+        version: 1.6.0
       lucide-react:
         specifier: ^1.23.0
         version: 1.23.0(react@19.2.4)
@@ -3946,6 +3949,10 @@ packages:
       crossws:
         optional: true
 
+  handwrytten@1.6.0:
+    resolution: {integrity: sha512-9t1FxflEBq5AYRGg5aoF4kAhLl3Wtu6Wlq8bpxbMZvc2C3LT6WJKUNz+FNhtvEpuxqNKAuATnajaRLDF8iVJNw==}
+    engines: {node: '>=18'}
+
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
     engines: {node: '>= 0.4'}
@@ -7235,7 +7242,7 @@ snapshots:
       ws: 8.21.0
       zod: 3.25.76
     optionalDependencies:
-      expo-router: 56.2.13(ee25eb8c9be08c81e43615531c294498)
+      expo-router: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
       react-native: 0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)
     transitivePeerDependencies:
       - '@expo/dom-webview'
@@ -7525,7 +7532,7 @@ snapshots:
       react: 19.2.3
     optionalDependencies:
       '@expo/metro-runtime': 56.0.16(@expo/log-box@56.0.14)(expo@56.0.14)(react-dom@19.2.3(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
-      expo-router: 56.2.13(ee25eb8c9be08c81e43615531c294498)
+      expo-router: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
       react-dom: 19.2.3(react@19.2.3)
     transitivePeerDependencies:
       - supports-color
@@ -9873,7 +9880,7 @@ snapshots:
       '@next/eslint-plugin-next': 16.2.10
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
@@ -9896,7 +9903,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -9911,29 +9918,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
-    dependencies:
-      '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.3
-      eslint: 9.39.4(jiti@2.7.0)
-      get-tsconfig: 4.14.0
-      is-bun-module: 2.0.0
-      stable-hash: 0.0.5
-      tinyglobby: 0.2.17
-      unrs-resolver: 1.12.2
-    optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
-    transitivePeerDependencies:
-      - supports-color
-
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -9968,7 +9960,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -10174,7 +10166,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
+  eve@0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
     dependencies:
       ai: 7.0.14(zod@4.4.3)
       nitro: 3.0.260610-beta(@vercel/blob@2.6.1)(jiti@2.7.0)(lru-cache@11.5.1)
@@ -10322,7 +10314,7 @@ snapshots:
     dependencies:
       react-native: 0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)
 
-  expo-router@56.2.13(ee25eb8c9be08c81e43615531c294498):
+  expo-router@56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu):
     dependencies:
       '@expo/log-box': 56.0.14(@expo/dom-webview@56.0.6)(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
       '@expo/metro-runtime': 56.0.16(@expo/log-box@56.0.14)(expo@56.0.14)(react-dom@19.2.3(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
@@ -10687,6 +10679,8 @@ snapshots:
       srvx: 0.11.20
     optionalDependencies:
       crossws: 0.4.9(srvx@0.11.20)
+
+  handwrytten@1.6.0: {}
 
   has-bigints@1.1.0: {}
 

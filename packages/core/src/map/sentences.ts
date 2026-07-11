@@ -172,9 +172,13 @@ export function noteGreeting(parentFirstName: string | null): string {
 
 /** The month-plan line inside the letter, naming the actual month the
  * plan starts. The button right under it does the work; this sentence
- * just says what she's about to open. */
+ * just says what she's about to open. Word order matters twice here:
+ * "month: a 4-week plan for July" teaches the name the button and the
+ * plan page both use ("{child}'s month"), and it retires the old
+ * "${monthName} 4-week plan" shape, which read as "July 4" for a beat
+ * (and could line-break right after it). */
 export function notePlanSentence(childName: string, monthName: string): string {
-  return `I took everything you told me and turned it into ${childName}'s ${monthName} 4-week plan.`;
+  return `I took everything you told me and turned it into ${childName}'s month: a 4-week plan for ${monthName}.`;
 }
 
 /** Subject line and preview for the report email. */

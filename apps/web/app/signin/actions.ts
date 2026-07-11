@@ -19,7 +19,7 @@ export interface AuthFormState {
 /** Only same-origin paths; anything else falls back to /app. */
 function safeNext(formData: FormData): string {
   const next = String(formData.get("next") ?? "");
-  return next.startsWith("/") ? next : "/app";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/app";
 }
 
 export async function signInAction(

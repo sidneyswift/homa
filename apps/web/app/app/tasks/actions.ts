@@ -31,10 +31,14 @@ async function requireFamilyId(): Promise<string | null> {
 function parseTaskForm(formData: FormData): CustomTaskInput | { error: string } {
   const label = String(formData.get("label") ?? "").trim();
   const prompt = String(formData.get("prompt") ?? "").trim();
-  const weekdays = formData
-    .getAll("weekdays")
-    .map((value) => Number(value))
-    .filter((value) => Number.isInteger(value) && value >= 0 && value <= 6);
+  const weekdays = [
+    ...new Set(
+      formData
+        .getAll("weekdays")
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value) && value >= 0 && value <= 6),
+    ),
+  ].sort((left, right) => left - right);
   const localHour = Number(formData.get("localHour"));
   const deliveryRaw = String(formData.get("deliveryPref") ?? "text");
   const deliveryPref =

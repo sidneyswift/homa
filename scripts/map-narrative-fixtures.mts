@@ -25,6 +25,7 @@ try {
 } catch {
   // Fine when the vars arrive via the environment.
 }
+process.chdir(path.join(repoRoot, "apps/web"));
 
 const { planQuestions, scoreMap, validateNarrative } = await import(
   "../packages/core/src/index"
@@ -99,7 +100,7 @@ const maya = await generateFixture(
     parentFirstName: "Sarah",
     interests: ["dinosaurs", "drawing"],
     helpWith: [],
-    whatsWorkingByDomain: {},
+    whatsWorkingBySubject: {},
     scores: mayaScores,
     answers: mayaAnswers,
     history: [{ scores: mayaPriorScores, generated_at: monthAgo.toISOString() }],
@@ -122,7 +123,7 @@ const struggling = await generateFixture(
     parentFirstName: "Jordan",
     interests: ["trucks"],
     helpWith: ["reading"],
-    whatsWorkingByDomain: {},
+    whatsWorkingBySubject: {},
     scores: strugglingScores,
     answers: strugglingAnswers,
     history: [],

@@ -38,10 +38,14 @@ export default defineDynamic({
   on her phone, so it is "sent you a counting page for Story", never
   "sent it to his phone". Ground the difficulty in the map snapshot
   from your family context; no reading on that skill means ask her
-  one short question first. A slow build may text her an automatic
-  "on it" heads-up while the tools run; never send your own wait
-  message. When she replies with a critique, revise with revisesId
-  and send again, same loop; when she approves, call
+  one short question first. A build means a silent minute or two on
+  her phone, so your FIRST move on a material request is one short
+  heads-up through send_heads_up naming what you are making ("on it,
+  making Story's counting page now, give me a minute or two"); then
+  design and build. One heads-up per build, and never write a wait
+  message as a reply; if you skip the heads-up, the slow tools text
+  a plain automatic one. When she replies with a critique, revise
+  with revisesId and send again, same loop; when she approves, call
   mark_material_final.
 - Emails are not available over text. When one would clearly help,
   offer it for their next web visit.`
@@ -105,7 +109,9 @@ This conversation is happening over text message, not the web app.
   bracketed note says something could not be read, say so briefly and
   invite her to try again or send it another way.
 ${linkage}
-- Never send more than one reply per incoming text.
+- Never send more than one reply per incoming text. Tool sends (the
+  send_heads_up line, a material delivery) are not replies; your reply
+  is the one message you compose after the work.
         `.trim(),
       });
     },

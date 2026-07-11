@@ -195,3 +195,29 @@ this plan land here with the conservative call taken.)
 - 2026-07-11 · Todo for human: per-member avatars and the mobile app's
   member-aware greeting stay family-level (Phase 3 / M1-17 parity
   list); blocks nothing.
+- 2026-07-11 · Plan-confirmed: Phase 2 ran as one atomic transaction
+  with count assertions, after deploy 997bda9 went READY and migration
+  #50 applied. Result: one family (The Swift family, W), two members
+  with display names, two phones with member attribution, one Story
+  (54 answers, 5 plans, birth month 2022-11-01), 86 messages, 8
+  memories, 13 materials, 6 transcripts, 27 events, 188 usage rows.
+  Loser family row and the thankshoma test account (family + auth
+  user) deleted. Pre-merge snapshot of all three families lives in the
+  locked merge_backup_20260711 schema (server-only; drop it once the
+  merged account has lived a week).
+- 2026-07-11 · Phase 3 built the same night: family_invites (migration
+  #51, deny-all token table), lib/family-invites.ts, the /join page,
+  the settings "Parents on this account" card, and the attachAuthUser
+  invite hook (a pending invite beats founding a new family). Both
+  copy gates ran; the reader pass drove real changes (the no-account
+  path is now spelled out everywhere, the marketing footer is
+  suppressed on /join, the invite email got honest custom footers, the
+  settings card discloses that everything is shared, "co-parent"
+  dropped for "another parent") and the editor pass tightened
+  sentence-per-idea and naming drift.
+- 2026-07-11 · Deviation: a parallel founder session worked the same
+  tree during Phase 3 (atomic invite claim in consumeFamilyInvite,
+  escapeHtml in the email sender, safer next-param checks, and the
+  thank-you-cards feature). One collision: the attachAuthUser invite
+  hook was stomped by a concurrent file write and restored; the
+  parallel session's versions were kept everywhere else.

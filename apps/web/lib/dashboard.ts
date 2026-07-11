@@ -1,23 +1,20 @@
 import {
-  ageInMonths,
   getMapItem,
-  isInScoredRange,
   type FourWeekPlan,
   type MapScores,
   type PlanWeek,
 } from "@homa/core";
 
-import type { ChildRecord } from "./family";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
  * Server-side reads shared by the /app pages (the report tab, kid pages,
- * planner, the sidebar's up-next rail). Everything here runs under the
- * caller's RLS context (publishable key + session JWT), so every row is
- * family-scoped by the database itself. No write paths: these surfaces
- * only render what the questionnaire, plans, and calls already produced.
- * Display law applies downstream: these rows carry positions and dates,
- * never invented streaks or hours.
+ * planner). Everything here runs under the caller's RLS context
+ * (publishable key + session JWT), so every row is family-scoped by the
+ * database itself. No write paths: these surfaces only render what the
+ * questionnaire, plans, and calls already produced. Display law applies
+ * downstream: these rows carry positions and dates, never invented
+ * streaks or hours.
  */
 
 export interface DashboardReport {
@@ -78,8 +75,20 @@ export function planStartMs(plan: DashboardPlan): number {
 /** Which of the four weeks the family is living right now (0-based,
  * clamped so a plan past its retest still shows week 4, never crashes). */
 export function currentWeekIndex(plan: DashboardPlan, nowMs: number): number {
+  if (plan.weeks.length === 0) return 0;
   const elapsedWeeks = Math.floor((nowMs - planStartMs(plan)) / (7 * 24 * 60 * 60 * 1000));
   return Math.min(Math.max(elapsedWeeks, 0), plan.weeks.length - 1);
+}
+
+function validPlanWeek(value: unknown): value is PlanWeek {
+  if (!value || typeof value !== "object") return false;
+  const week = value as Partial<PlanWeek>;
+  return (
+    typeof week.week === "number" &&
+    typeof week.focus === "string" &&
+    Array.isArray(week.activities) &&
+    week.activities.every((activity) => typeof activity === "string")
+  );
 }
 
 export async function getPlansForChildren(childIds: string[]): Promise<DashboardPlan[]> {
@@ -90,18 +99,20 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
     .select("child_id, subject_id, plan, progress, retest_at")
     .in("child_id", childIds);
   if (error) throw new Error(`child_plans read failed: ${error.message}`);
-  return (data ?? []).map((row) => {
+  return (data ?? []).flatMap((row) => {
     const plan = row.plan as FourWeekPlan;
+    const weeks = Array.isArray(plan.weeks) ? plan.weeks.filter(validPlanWeek) : [];
+    if (weeks.length === 0) return [];
     const progress = (row.progress ?? {}) as Record<string, boolean>;
-    return {
+    return [{
       childId: row.child_id as string,
       subjectId: row.subject_id as string,
       done: Object.values(progress).filter(Boolean).length,
-      total: plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
+      total: weeks.reduce((sum, week) => sum + week.activities.length, 0),
       retestAt: row.retest_at as string,
-      weeks: plan.weeks,
+      weeks,
       progress,
-    };
+    }];
   });
 }
 
@@ -141,77 +152,4 @@ export async function getRecentWins(childIds: string[], limit = 6): Promise<Rece
     });
   }
   return wins;
-}
-
-export interface UpNextItem {
-  key: string;
-  label: string;
-  sub: string | null;
-  dot: "sage" | "clay" | "stone";
-  href: string | null;
-}
-
-/**
- * The sidebar's "up next" rail, derived from real state only: an in-range
- * kid whose checklist is waiting, a month plan whose four weeks are up,
- * a curriculum still being built from a call. No planner exists yet, so
- * nothing here pretends to be a schedule. Falls back to the chat offer.
- */
-export function buildUpNextItems(input: {
-  children: ChildRecord[];
-  reports: Map<string, DashboardReport>;
-  plans: DashboardPlan[];
-  pendingCurriculumChildIds: Set<string>;
-}): UpNextItem[] {
-  const items: UpNextItem[] = [];
-  const nameById = new Map(input.children.map((child) => [child.id, child.name]));
-  const now = Date.now();
-
-  for (const child of input.children) {
-    const months = ageInMonths(child.birth_month);
-    if (isInScoredRange(months) && !input.reports.has(child.id)) {
-      items.push({
-        key: `checklist-${child.id}`,
-        label: `${child.name}'s checklist`,
-        sub: "about 5 minutes",
-        dot: "sage",
-        href: "/onboarding",
-      });
-    }
-  }
-
-  for (const plan of input.plans) {
-    if (new Date(plan.retestAt).getTime() > now) continue;
-    const token = input.reports.get(plan.childId)?.token;
-    const name = nameById.get(plan.childId);
-    items.push({
-      key: `retest-${plan.childId}-${plan.subjectId}`,
-      label: name ? `Re-check ${name}'s month` : "Re-check the month",
-      sub: "see what moved",
-      dot: "clay",
-      href: token ? `/onboarding/r/${token}/plan/${plan.subjectId}` : null,
-    });
-  }
-
-  for (const childId of input.pendingCurriculumChildIds) {
-    const name = nameById.get(childId);
-    items.push({
-      key: `curriculum-${childId}`,
-      label: name ? `${name}'s curriculum is on its way` : "A curriculum is on its way",
-      sub: "from your call with Homa",
-      dot: "stone",
-      href: null,
-    });
-  }
-
-  if (items.length === 0) {
-    items.push({
-      key: "chat",
-      label: "Talk to Homa about your week",
-      sub: null,
-      dot: "sage",
-      href: "/app",
-    });
-  }
-  return items.slice(0, 3);
 }

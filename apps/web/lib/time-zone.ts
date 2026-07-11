@@ -34,6 +34,31 @@ export function zonedDateParts(
   };
 }
 
+export interface WeekdayCell {
+  /** Short weekday label, "Mon" through "Fri". */
+  label: string;
+  /** Day of the month (1-31) as seen in the family's zone. */
+  dayOfMonth: number;
+  isToday: boolean;
+}
+
+const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
+
+/**
+ * The five Monday-to-Friday cells of the current week in `timeZone`,
+ * for the planner's calendar board. Weekend visits mark no cell as
+ * today: the board shows the week just lived, same as weekSpanLabel.
+ */
+export function weekdayCells(now: Date, timeZone: string): WeekdayCell[] {
+  const { year, month, day, weekday } = zonedDateParts(now, timeZone);
+  const sinceMonday = (weekday + 6) % 7;
+  return WEEKDAY_LABELS.map((label, index) => {
+    // Date.UTC normalizes day-of-month underflow across month edges.
+    const date = new Date(Date.UTC(year, month - 1, day - sinceMonday + index));
+    return { label, dayOfMonth: date.getUTCDate(), isToday: index === sinceMonday };
+  });
+}
+
 /**
  * The Monday-to-Friday span of the current week in `timeZone`, e.g.
  * "Jul 6 to 10" (or "Jun 29 to Jul 3" across a month edge). Weekend

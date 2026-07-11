@@ -31,6 +31,9 @@ interface SendArgs {
   bodyLines: string[];
   cta?: { label: string; url: string };
   footerNote: string;
+  /** The line under the card. Defaults to the signed-up-family framing,
+   * which is FALSE for a brand-new invitee; the invite email overrides. */
+  outerNote?: string;
 }
 
 async function send(args: SendArgs): Promise<boolean> {
@@ -43,27 +46,25 @@ async function send(args: SendArgs): Promise<boolean> {
   const paragraphs = args.bodyLines
     .map(
       (line) =>
-        `<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#332E29;">${line}</p>`,
+        `<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#332E29;">${escapeHtml(line)}</p>`,
     )
     .join("");
   const cta = args.cta
-    ? `<a href="${args.cta.url}" style="display:inline-block;background:#E7602F;color:#ffffff;border-radius:999px;padding:12px 26px;font-weight:700;font-size:16px;text-decoration:none;margin:6px 0 14px;">${args.cta.label}</a>`
+    ? `<a href="${escapeHtml(args.cta.url)}" style="display:inline-block;background:#E7602F;color:#ffffff;border-radius:999px;padding:12px 26px;font-weight:700;font-size:16px;text-decoration:none;margin:6px 0 14px;">${escapeHtml(args.cta.label)}</a>`
     : "";
 
   const html = `<!doctype html>
 <html><body style="margin:0;background:#FBF7F0;padding:24px 12px;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;">
-  <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;">${args.preview}</span>
+  <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;">${escapeHtml(args.preview)}</span>
   <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:22px;padding:32px 30px;border:1px solid #E7DDCE;">
     <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">homa</div>
-    <h1 style="font-size:24px;line-height:1.2;color:#221E1A;margin:0 0 16px;">${args.heading}</h1>
+    <h1 style="font-size:24px;line-height:1.2;color:#221E1A;margin:0 0 16px;">${escapeHtml(args.heading)}</h1>
     ${paragraphs}
     ${cta}
-    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${args.footerNote}</p>
+    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${escapeHtml(args.footerNote)}</p>
   </div>
   <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
-    You signed up for Homa at thankshoma.com. Reply and a real person answers.
-    We only email you about your own family's homeschool, never promotions.
-    Every kind of email has an off switch.
+    ${escapeHtml(args.outerNote ?? "You signed up for Homa at thankshoma.com. Reply and a real person answers. We only email you about your own family's homeschool, never promotions. Every kind of email has an off switch.")}
   </p>
 </body></html>`;
 
@@ -95,6 +96,44 @@ async function send(args: SendArgs): Promise<boolean> {
 
 function stripTags(value: string): string {
   return value.replace(/<[^>]+>/g, "");
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+/**
+ * The co-parent invite (multi-parent plan Phase 3): the ONE email Homa
+ * ever sends to someone who never signed up, so nothing in it may claim
+ * they asked for it. Copy gated 2026-07-11 (reader pass findings: say
+ * what a person with no account does, never advertise mid-invite, and
+ * the shared footers' "you signed up / you asked" framing is false here,
+ * hence the overrides).
+ */
+export async function sendFamilyInviteEmail(
+  to: string,
+  inviterName: string,
+  familyName: string,
+  joinUrl: string,
+): Promise<boolean> {
+  return send({
+    to,
+    subject: `${inviterName} invited you to your family's Homa`,
+    preview: `This invite adds you to ${familyName}'s Homa.`,
+    heading: `${inviterName} invited you`,
+    bodyLines: [
+      `${inviterName} uses Homa, a homeschool companion, for ${familyName}. This invite adds you to the same Homa: the same kids, the same conversations, the same materials.`,
+      "Never used Homa? That's expected. Tap the button, then choose Continue with Google. Your first sign-in creates your account inside your family.",
+      "The link works for 7 days. If you weren't expecting this, you can ignore it and nothing changes.",
+    ],
+    cta: { label: "Join your family on Homa", url: joinUrl },
+    footerNote: `${inviterName} asked Homa to send this one email. It won't email you again unless you join.`,
+    outerNote: `Sent from ${inviterName}'s Homa account at thankshoma.com.`,
+  });
 }
 
 export async function sendReportEmail(to: string, childName: string, reportToken: string): Promise<boolean> {
@@ -254,7 +293,7 @@ export async function sendResearchBriefEmail(
     bodyLines,
     cta: { label: "See Homa's tasks", url },
     footerNote:
-      "Reply to this email and Homa answers. You can turn these morning notes off any time on the Homa's tasks page.",
+      "Reply to this email and Homa answers. Morning briefs have an off switch on Homa's tasks.",
   });
 }
 

@@ -16,7 +16,16 @@ import { signInAction, type AuthFormState } from "./actions";
 
 const INITIAL_STATE: AuthFormState = { error: null };
 
-export function SignInForm({ next = "/app" }: { next?: string }) {
+export function SignInForm({
+  next = "/app",
+  showOnboardingLink = true,
+}: {
+  next?: string;
+  /** The /join page turns this off: pointing a fresh invitee into the
+   * standalone onboarding funnel would route them out of their invite
+   * (reader pass 2026-07-11). */
+  showOnboardingLink?: boolean;
+}) {
   const [state, action, pending] = useActionState(signInAction, INITIAL_STATE);
   const [googlePending, setGooglePending] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
@@ -104,12 +113,14 @@ export function SignInForm({ next = "/app" }: { next?: string }) {
         </form>
       </div>
 
-      <p className="mt-4 text-center text-sm text-body">
-        New to Homa?{" "}
-        <Link href="/onboarding" className="font-semibold text-brand underline underline-offset-2">
-          Get your child&apos;s free progress report
-        </Link>
-      </p>
+      {showOnboardingLink ? (
+        <p className="mt-4 text-center text-sm text-body">
+          New to Homa?{" "}
+          <Link href="/onboarding" className="font-semibold text-brand underline underline-offset-2">
+            Get your child&apos;s free progress report
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }

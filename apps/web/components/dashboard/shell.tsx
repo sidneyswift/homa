@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import type { UpNextItem } from "../../lib/dashboard";
 import { MobileNav } from "./mobile-nav";
 import { Sidebar, type SidebarKid } from "./sidebar";
 
@@ -20,7 +19,6 @@ export function DashboardShell({
   familyName,
   avatarUrl,
   kids,
-  upNext,
   viewContext,
   children,
 }: {
@@ -28,7 +26,6 @@ export function DashboardShell({
   familyName: string;
   avatarUrl: string | null;
   kids: SidebarKid[];
-  upNext: UpNextItem[];
   /** "family" or a kid id: who the context switcher shows as selected. */
   viewContext: string;
   children: ReactNode;
@@ -40,7 +37,6 @@ export function DashboardShell({
         familyName={familyName}
         avatarUrl={avatarUrl}
         kids={kids}
-        upNext={upNext}
         viewContext={viewContext}
       />
 
@@ -49,7 +45,6 @@ export function DashboardShell({
         familyName={familyName}
         avatarUrl={avatarUrl}
         kids={kids}
-        upNext={upNext}
         viewContext={viewContext}
       />
 

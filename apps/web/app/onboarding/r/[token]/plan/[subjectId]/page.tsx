@@ -192,14 +192,20 @@ export default async function PlanPage({
             ) : null}
             {introText ? (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
-                <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+                <p
+                  className="font-mono text-[0.65rem] uppercase tracking-widest"
+                  style={{ color: "var(--sage-700)" }}
+                >
                   This month, in short
                 </p>
                 <p className="mt-1 whitespace-pre-line text-body">{introText}</p>
               </div>
             ) : plan.startingLine ? (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
-                <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+                <p
+                  className="font-mono text-[0.65rem] uppercase tracking-widest"
+                  style={{ color: "var(--sage-700)" }}
+                >
                   The starting line (already solid)
                 </p>
                 <p className="mt-1 text-body">

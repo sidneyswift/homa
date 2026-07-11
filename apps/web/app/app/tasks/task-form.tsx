@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 
 import { createTaskAction, updateTaskAction, type TaskActionState } from "./actions";
 import type { TaskRowView } from "./tasks-view";
@@ -32,11 +33,15 @@ function hourOption(hour: number): string {
 const INITIAL_STATE: TaskActionState = { error: null };
 
 export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => void }) {
+  const router = useRouter();
   const action = task ? updateTaskAction.bind(null, task.id) : createTaskAction;
   const [state, formAction, pending] = useActionState(
     async (prev: TaskActionState, formData: FormData) => {
       const result = await action(prev, formData);
-      if (result.error === null) onDone();
+      if (result.error === null) {
+        onDone();
+        router.refresh();
+      }
       return result;
     },
     INITIAL_STATE,
@@ -56,11 +61,11 @@ export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => v
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
-        Name
+        What should it be called?
         <input
           name="label"
           defaultValue={defaults.label}
-          placeholder="Co-op prep reminder"
+          placeholder="Co-op prep"
           maxLength={60}
           required
           className={inputClass}
@@ -116,13 +121,15 @@ export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => v
         </label>
 
         <fieldset>
-          <legend className="text-sm font-semibold text-strong">How should it reach you?</legend>
+          <legend className="text-sm font-semibold text-strong">
+            How should each result reach you?
+          </legend>
           <div className="mt-1.5 flex flex-col gap-1 text-sm text-body">
             {(
               [
-                { value: "text", label: "Text me (email if texting isn't set up)" },
-                { value: "email", label: "Email me" },
-                { value: "none", label: "Just save it on this page" },
+                { value: "text", label: "Text me. Without texting set up, it emails instead." },
+                { value: "email", label: "Email me." },
+                { value: "none", label: "Just save it to this page." },
               ] as const
             ).map((option) => (
               <label key={option.value} className="inline-flex items-center gap-2">

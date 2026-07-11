@@ -8,23 +8,36 @@ import {
   type DashboardPlan,
   type DashboardReport,
 } from "../../../lib/dashboard";
-import { weekSpanLabel } from "../../../lib/time-zone";
+import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
 import { avatarTone } from "../../../components/dashboard/sidebar";
-import { WeekBlock, type WeekBlockTone } from "./week-block";
+import {
+  DayGrid,
+  type PlannerDay,
+  type PlannerDayItem,
+  type PlannerDayPlan,
+} from "./day-grid";
+import { spreadAcrossWeekdays } from "./spread-week";
 
 /**
- * The week board itself (pure render; page.tsx owns auth + data). Each
- * kid's column shows the CURRENT week of their real four-week plans,
- * derived from the retest clock, checkable in place through the same
- * store as the plan pages. When the context switcher has one kid
- * selected (focusChildId), the board narrows to that kid's column and
- * the heading names them; the whole family is the default. Day-by-day
- * scheduling is a later milestone (M2-10); until then this board never
- * pretends activities have days.
+ * The week board as a Monday-to-Friday calendar (founder ask,
+ * 2026-07-10; pure render, page.tsx owns auth + data). Each kid's
+ * CURRENT week of their real four-week plans is spread across the five
+ * weekdays (spread-week.ts, deterministic), checkable in place through
+ * the same store as the plan pages. The focus strip above the grid
+ * keeps each plan's focus line, week-of-4 position, and full-plan
+ * link. Day placement is presentation only, checks stay keyed by plan;
+ * persisted day-by-day scheduling is a later milestone (M2-10). When
+ * the context switcher has one kid selected (focusChildId), the board
+ * narrows to that kid and the heading names them.
  */
 
-/** Block tones cycle the template's subject palette per column position. */
-const BLOCK_TONES: readonly WeekBlockTone[] = [
+interface BlockTone {
+  bg: string;
+  ink: string;
+}
+
+/** Block tones cycle the template's subject palette per plan position. */
+const BLOCK_TONES: readonly BlockTone[] = [
   { bg: "var(--clay-50)", ink: "var(--clay-700)" },
   { bg: "var(--sage-50)", ink: "var(--sage-700)" },
   { bg: "var(--gold-100)", ink: "var(--gold-ink)" },
@@ -34,6 +47,20 @@ const BLOCK_TONES: readonly WeekBlockTone[] = [
 function subjectLabel(subjectId: string): string {
   if (subjectId === MONTH_PLAN_SUBJECT) return "The month";
   return getMapSubject(subjectId)?.displayName ?? subjectId;
+}
+
+/** One plan's context row in the focus strip above the grid. */
+interface FocusRow {
+  key: string;
+  kidName: string | null;
+  avatarBg: string;
+  avatarInk: string;
+  subjectLabel: string;
+  focus: string;
+  weekNumber: number;
+  tone: BlockTone;
+  planHref: string;
+  retestDue: boolean;
 }
 
 export function PlannerView({
@@ -64,7 +91,73 @@ export function PlannerView({
   // kid's position in the FULL family list so colors never shift.
   const focusKid = focusChildId ? kids.find((kid) => kid.id === focusChildId) ?? null : null;
   const visibleKids = focusKid ? [focusKid] : kids;
-  const visiblePlans = focusKid ? plans.filter((plan) => plan.childId === focusKid.id) : plans;
+
+  const days: PlannerDay[] = weekdayCells(now, timeZone).map((cell) => ({
+    cell,
+    items: [],
+  }));
+  const dayPlans: PlannerDayPlan[] = [];
+  const focusRows: FocusRow[] = [];
+
+  kids.forEach((child, kidIndex) => {
+    if (focusKid && child.id !== focusKid.id) return;
+    const token = reports.get(child.id)?.token;
+    if (!token) return;
+    const kidPlans = plansByKid.get(child.id) ?? [];
+    const [avatarBg, avatarInk] = avatarTone(kidIndex);
+
+    // Gather the kid's whole week first, then spread it over the five
+    // days, so one kid's activities pace the week instead of piling up.
+    const gathered: Omit<PlannerDayItem, "kidName" | "avatarBg" | "avatarInk">[] = [];
+    kidPlans.forEach((plan) => {
+      const weekIdx = currentWeekIndex(plan, nowMs);
+      const week = plan.weeks[weekIdx];
+      // Cycle tones across the whole board (focusRows counts every plan
+      // placed so far), so on the family calendar two kids' first plans
+      // get different colors instead of both landing on clay.
+      const tone = BLOCK_TONES[focusRows.length % BLOCK_TONES.length];
+      const planKey = `${plan.childId}:${plan.subjectId}`;
+      dayPlans.push({
+        key: planKey,
+        childId: plan.childId,
+        subjectId: plan.subjectId,
+        token,
+        initialChecks: plan.progress,
+      });
+      focusRows.push({
+        key: planKey,
+        kidName: focusKid ? null : child.name,
+        avatarBg,
+        avatarInk,
+        subjectLabel: subjectLabel(plan.subjectId),
+        focus: week.focus,
+        weekNumber: weekIdx + 1,
+        tone,
+        planHref: `/onboarding/r/${token}/plan/${plan.subjectId}`,
+        retestDue: new Date(plan.retestAt).getTime() <= nowMs,
+      });
+      week.activities.forEach((text, index) => {
+        gathered.push({
+          planKey,
+          checkId: `${week.week}.${index}`,
+          text,
+          toneBg: tone.bg,
+          toneInk: tone.ink,
+          subjectLabel: subjectLabel(plan.subjectId),
+        });
+      });
+    });
+
+    const slots = spreadAcrossWeekdays(gathered.length);
+    gathered.forEach((entry, index) => {
+      days[slots[index]].items.push({
+        ...entry,
+        kidName: focusKid ? null : child.name,
+        avatarBg,
+        avatarInk,
+      });
+    });
+  });
 
   return (
     <>
@@ -85,7 +178,7 @@ export function PlannerView({
         </Link>
       </header>
 
-      {visiblePlans.length === 0 ? (
+      {focusRows.length === 0 ? (
         <div className="mt-6 rounded-lg border border-border-subtle bg-card p-8 text-center shadow-sm">
           <p className="font-display text-xl font-semibold text-strong">
             {focusKid
@@ -129,63 +222,63 @@ export function PlannerView({
           </div>
         </div>
       ) : (
-        <div
-          className={
-            focusKid
-              ? "mt-6 grid items-start gap-4 md:max-w-xl"
-              : "mt-6 grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3"
-          }
-        >
-          {kids.map((child, index) => {
-            if (focusKid && child.id !== focusKid.id) return null;
-            const kidPlans = plansByKid.get(child.id) ?? [];
-            if (kidPlans.length === 0) return null;
-            const [avatarBg, avatarInk] = avatarTone(index);
-            return (
-              <section
-                key={child.id}
-                aria-label={`${child.name}'s week`}
-                className="flex flex-col gap-2.5 rounded-lg border border-border-subtle bg-card p-3.5 shadow-sm"
+        <>
+          <div className="mt-6 flex flex-col gap-1.5">
+            {focusRows.map((row) => (
+              <div
+                key={row.key}
+                className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md px-3 py-2"
+                style={{ background: row.tone.bg }}
               >
-                <Link href={`/app/kids/${child.id}`} className="flex items-center gap-2.5 px-0.5 group">
+                {row.kidName ? (
                   <span
-                    className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                    style={{ background: avatarBg, color: avatarInk }}
+                    className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold"
+                    style={{ background: row.avatarBg, color: row.avatarInk }}
+                    title={row.kidName}
+                    aria-label={row.kidName}
                   >
-                    {child.name.charAt(0)}
+                    {row.kidName.charAt(0)}
                   </span>
-                  <span className="text-sm font-bold text-strong group-hover:text-brand">
-                    {child.name}
+                ) : null}
+                <span
+                  className="text-[0.62rem] font-bold uppercase tracking-[0.05em]"
+                  style={{ color: row.tone.ink }}
+                >
+                  {row.subjectLabel}
+                </span>
+                <span className="min-w-0 flex-1 basis-52 text-[0.82rem] leading-snug text-body">
+                  {row.focus}
+                </span>
+                <span className="font-mono text-[0.62rem]" style={{ color: row.tone.ink }}>
+                  week {row.weekNumber} of 4
+                </span>
+                {row.retestDue ? (
+                  <span
+                    className="rounded-pill px-2 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.08em]"
+                    style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
+                  >
+                    re-check ready
                   </span>
+                ) : null}
+                <Link
+                  href={row.planHref}
+                  className="text-[0.72rem] font-semibold text-brand hover:underline"
+                >
+                  full plan
                 </Link>
-                {kidPlans.map((plan, planIndex) => {
-                  const token = reports.get(child.id)?.token;
-                  if (!token) return null;
-                  const weekIdx = currentWeekIndex(plan, nowMs);
-                  return (
-                    <WeekBlock
-                      key={`${plan.childId}-${plan.subjectId}`}
-                      subjectLabel={subjectLabel(plan.subjectId)}
-                      week={plan.weeks[weekIdx]}
-                      weekNumber={weekIdx + 1}
-                      childId={plan.childId}
-                      subjectId={plan.subjectId}
-                      token={token}
-                      initialChecks={plan.progress}
-                      tone={BLOCK_TONES[planIndex % BLOCK_TONES.length]}
-                      retestDue={new Date(plan.retestAt).getTime() <= nowMs}
-                    />
-                  );
-                })}
-              </section>
-            );
-          })}
-        </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3">
+            <DayGrid days={days} plans={dayPlans} />
+          </div>
+        </>
       )}
 
       <p className="mt-6 text-xs text-subtle">
-        Check things off as they happen; the report reads this at re-check time. Day-by-day
-        scheduling is coming; for now the week is yours to arrange.
+        Check things off as they happen; the report reads this at re-check time. The days are
+        a starting point: any day counts, and moving activities around is coming.
       </p>
     </>
   );

@@ -27,7 +27,7 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  const safeNext = next?.startsWith("/") ? next : "/app";
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/app";
   return (
     <main className="mx-auto w-full max-w-md px-6 py-16">
       <Logo size={28} />

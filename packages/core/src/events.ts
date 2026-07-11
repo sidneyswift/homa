@@ -388,11 +388,30 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     channel: z.enum(["sms", "email"]),
   }),
+  // Co-parent invites (multi-parent plan Phase 3, NT-4 v0). Sent when
+  // the settings card emails a /join link; accepted when a second adult
+  // becomes a member through the /join page. No email
+  // addresses in props, ever (MJ-08); NT-4's fuller
+  // account.secondary_user_added shape (relationship enum) waits for
+  // roles to mean something.
+  "family.invite_sent": z.object({
+    family_id: z.uuid(),
+  }),
+  "family.invite_accepted": z.object({
+    family_id: z.uuid(),
+  }),
   // A research row entered (or was refused by) the knowledge bank's
   // automated gate (HT-2, D-ht-5). Topic type only, never content.
   "knowledge.row_merged": z.object({
     topic_type: z.enum(["method_philosophy", "method_format", "subject", "study", "other"]),
     gate: z.enum(["passed", "flagged"]),
+  }),
+  // A physical thank-you card order was placed with the mail vendor
+  // (plans/2026-07-11-thank-you-cards.md). One per family, ever; the
+  // name, address, and message are PII and live on the thank_you_cards
+  // row, never here.
+  "card.thank_you_sent": z.object({
+    family_id: z.uuid(),
   }),
 } as const;
 

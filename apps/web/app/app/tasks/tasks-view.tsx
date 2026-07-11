@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, FlaskConical, Moon, Plus } from "lucide-react";
 
 import { deleteTaskAction, setTaskPausedAction } from "./actions";
@@ -38,6 +39,10 @@ export interface TaskRunView {
   startedAt: string;
 }
 
+// Copy passed both gates 2026-07-10 (reader, then editor). Vocabulary
+// law for this surface: the morning artifact is a "brief" (its card
+// title carries the name, nothing else renames it), parent-created
+// things are "tasks", and results are "saved to this page".
 const BUILT_IN_COPY: Record<
   "morning_brief" | "journal_prompt",
   { label: string; description: string }
@@ -45,14 +50,12 @@ const BUILT_IN_COPY: Record<
   morning_brief: {
     label: "Morning research brief",
     description:
-      "A short note on weekday mornings: one thing Homa looked into for your kids, and why it matters.",
+      "Every weekday morning: one thing Homa looked into for your kids, and why it matters.",
   },
   journal_prompt: {
     label: "Evening check-in",
-    // Frequency lives on the schedule chip; the description claiming
-    // "most evenings" beside an "Every day" chip read as a
-    // self-contradiction (reader gate, 2026-07-10).
-    description: "One easy question in the evening, so the day gets remembered.",
+    description:
+      "One easy question in the evening. Answer in a sentence and Homa remembers the day.",
   },
 };
 
@@ -103,6 +106,7 @@ function TaskIcon({ kind }: { kind: TaskRowView["kind"] | "fleet_research" }) {
 }
 
 function PauseToggle({ task }: { task: TaskRowView }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const on = !task.paused;
   return (
@@ -114,7 +118,8 @@ function PauseToggle({ task }: { task: TaskRowView }) {
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await setTaskPausedAction(task.id, on);
+          const result = await setTaskPausedAction(task.id, on);
+          if (result.error === null) router.refresh();
         })
       }
       className={
@@ -135,6 +140,7 @@ function PauseToggle({ task }: { task: TaskRowView }) {
 }
 
 function TaskCard({ task, timeZone }: { task: TaskRowView; timeZone: string }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
   const copy =
@@ -161,7 +167,7 @@ function TaskCard({ task, timeZone }: { task: TaskRowView; timeZone: string }) {
                       ? "by text"
                       : task.deliveryPref === "email"
                         ? "by email"
-                        : "saves to this page"
+                        : "saved to this page"
                   }`
                 : ""}
               {next ? ` \u00b7 next: ${next}` : task.paused ? " \u00b7 off" : ""}
@@ -185,7 +191,8 @@ function TaskCard({ task, timeZone }: { task: TaskRowView; timeZone: string }) {
             onClick={() => {
               if (!window.confirm(`Delete "${copy.label}"? This can't be undone.`)) return;
               startTransition(async () => {
-                await deleteTaskAction(task.id);
+                const result = await deleteTaskAction(task.id);
+                if (result.error === null) router.refresh();
               });
             }}
             className="text-xs font-semibold text-muted hover:underline disabled:opacity-60"
@@ -249,15 +256,15 @@ export function TasksView({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
-            Working for you
+            On her own schedule
           </p>
           <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
             Homa&apos;s tasks
           </h1>
           <p className="mt-1.5 max-w-xl text-sm text-muted">
             Homa works on these by herself: research for your kids, check-ins,
-            and any tasks you give her. What she finds lands below. Your
-            kids&apos; week stays in the Week planner.
+            and any tasks you give her. Everything she finishes shows up
+            below. Your kids&apos; week stays in the Week planner.
           </p>
         </div>
         <button
@@ -265,7 +272,7 @@ export function TasksView({
           onClick={() => setCreating((value) => !value)}
           className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
         >
-          <Plus size={16} /> New task
+          <Plus size={16} /> Add a task
         </button>
       </header>
 
@@ -284,14 +291,18 @@ export function TasksView({
               note={
                 briefFlagOn
                   ? "Starts on its own once your family's first report is ready."
-                  : "Coming soon."
+                  : "Almost ready. It starts on its own, nothing to set up."
               }
             />
           ) : null}
           {!hasJournal ? (
             <DarkKindCard
               kind="journal_prompt"
-              note={journalFlagOn ? "Starts on its own in the evening." : "Coming soon."}
+              note={
+                journalFlagOn
+                  ? "Starts on its own in the evening."
+                  : "Almost ready. It starts on its own, nothing to set up."
+              }
             />
           ) : null}
           {tasks.map((task) => (

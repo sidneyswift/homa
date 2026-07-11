@@ -280,12 +280,23 @@ export function ReportView({
   // this one card, with the month button after the sign-off (it's the
   // letter's P.S. action, not a mid-paragraph interruption).
   const noteCard = (
-    <div className="flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
+    // In the app grid the note spans both columns (it rides above the
+    // full-width snapshot, founder ask 2026-07-11); standalone is
+    // untouched, the letter has no grid.
+    <div
+      className={`flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 ${inApp ? "lg:col-span-2" : ""}`.trim()}
+    >
       <div className="flex-shrink-0 pt-0.5">
         <Logo variant="mark" size={34} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+        {/* sage-700, not the sage-500 default: at this tiny size on the
+            sage-50 card, sage-500 sits near 3.2:1, under the 4.5:1 AA
+            bar (report-preview.tsx picked sage-700 for the same eyebrow). */}
+        <p
+          className="font-mono text-[0.65rem] uppercase tracking-widest"
+          style={{ color: "var(--sage-700)" }}
+        >
           A note from Homa
         </p>
         <p className="mt-2 font-serif text-lg italic text-strong">
@@ -302,7 +313,9 @@ export function ReportView({
             <CallHomaPs childId={report.childId} childName={report.childName} />
           </div>
         ) : null}
-        <p className="mt-3 font-serif italic text-strong">
+        {/* text-lg matches the greeting: the letter's two serif
+            bookends read as one voice at one size. */}
+        <p className="mt-3 font-serif text-lg italic text-strong">
           Thanks,
           <br />
           Homa
@@ -322,14 +335,16 @@ export function ReportView({
     </div>
   );
 
-  // The snapshot: one chart, one sentence, tap to enlarge.
+  // The snapshot: one chart, one sentence, tap to enlarge. Full width
+  // in the app grid (founder ask 2026-07-11: half a column squeezed
+  // the trajectory chart and its thirteen end labels into a squint).
   const snapshotCard = (
     <ReportSnapshot
       childName={report.childName}
       generatedDate={generatedDate}
       plans={report.plans}
       eras={eras}
-      className={inApp ? "" : "mt-4"}
+      className={inApp ? "lg:col-span-2" : "mt-4"}
     />
   );
 
@@ -696,9 +711,10 @@ export function ReportView({
 
   // ---- In-app: the same pieces as a dashboard (founder ask
   // 2026-07-10: cards across the screen on desktop, not one long
-  // letter). Single column on phones, two columns from lg, wide
-  // sections spanning both. Width and padding mirror PageColumn so the
-  // report sits like every other app page.
+  // letter). Single column on phones, two columns from lg; the note,
+  // snapshot, and subjects lead as full-width rows (founder ask
+  // 2026-07-11), the support cards pair up below. Width and padding
+  // mirror PageColumn so the report sits like every other app page.
   if (inApp) {
     return (
       <div className="px-5 py-7 pb-16 lg:px-10 lg:py-8">

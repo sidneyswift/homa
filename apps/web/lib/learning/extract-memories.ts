@@ -67,23 +67,11 @@ const extractionSchema = z.object({
 
 let cachedPrompt: string | null = null;
 
-/** agent/memory-extractor.md; cwd is apps/web under the Next server and
- * the repo root under scripts, so both spellings are tried. */
+/** agent/memory-extractor.md; cwd is apps/web under the Next server. */
 function extractorPrompt(): string {
   if (cachedPrompt) return cachedPrompt;
-  const candidates = [
-    path.join(process.cwd(), "agent", "memory-extractor.md"),
-    path.join(process.cwd(), "apps", "web", "agent", "memory-extractor.md"),
-  ];
-  for (const candidate of candidates) {
-    try {
-      cachedPrompt = readFileSync(candidate, "utf8");
-      return cachedPrompt;
-    } catch {
-      // Try the next spelling.
-    }
-  }
-  throw new Error("memory-extractor.md not found; memory extraction cannot run");
+  cachedPrompt = readFileSync(path.join(process.cwd(), "agent", "memory-extractor.md"), "utf8");
+  return cachedPrompt;
 }
 
 /** Gateway model for background extraction; override with a cheaper id

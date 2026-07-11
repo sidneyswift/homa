@@ -148,6 +148,7 @@ export async function attachAuthUser(
                       where m.family_id = f.id and m.user_id = ${input.authUserId}))
     limit 1
   `;
+
   const familyId = existing[0]?.id ?? input.familyId;
   if (existing.length > 0) {
     await foldFamilyInto(input.familyId, familyId);

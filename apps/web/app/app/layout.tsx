@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { ageInMonths } from "@homa/core";
 
 import { getAppData } from "../../lib/app-data";
-import { buildUpNextItems } from "../../lib/dashboard";
 import { parentFirstName } from "../../lib/family";
 import {
   parseViewContext,
@@ -29,8 +28,7 @@ import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family, children: kids, reports, plans, pendingCurriculumChildIds, memberDisplayName } =
-    data;
+  const { family, children: kids, memberDisplayName } = data;
 
   // The view-context cookie (who the parent is viewing) validates against
   // the family's own kids here, once, so everything below the shell only
@@ -51,7 +49,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         name: kid.name,
         ageMonths: ageInMonths(kid.birth_month),
       }))}
-      upNext={buildUpNextItems({ children: kids, reports, plans, pendingCurriculumChildIds })}
       viewContext={viewContext.kind === "child" ? viewContext.childId : VIEW_CONTEXT_FAMILY}
     >
       {/* Captures the device time zone once, while the family row has

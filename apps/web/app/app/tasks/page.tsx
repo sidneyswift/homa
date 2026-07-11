@@ -38,6 +38,12 @@ export default async function TasksPage() {
       .order("started_at", { ascending: false })
       .limit(30),
   ]);
+  if (scheduleResult.error) {
+    throw new Error(`agent schedules read failed: ${scheduleResult.error.message}`);
+  }
+  if (runsResult.error) {
+    throw new Error(`task runs read failed: ${runsResult.error.message}`);
+  }
 
   const tasks: TaskRowView[] = (scheduleResult.data ?? []).map((row) => ({
     id: row.id as string,

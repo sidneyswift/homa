@@ -3,6 +3,181 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late night) · Thank-you cards: one robot-handwritten card per family, built dark
+
+Founder asked for deep research on mailing a physical thank-you card
+to every mom who signs up, then said "do it". Research verdict
+(canvas + plans/2026-07-11-thank-you-cards.md): Handwrytten, real
+pen, pay-as-you-go ($3.75/card + $0.82 postage), because web
+onboarding's create-your-family step already collects and requires a
+full mailing address, so the main signup path was mailable with zero
+product changes. Built in one pass, entirely dark behind
+THANK_YOU_CARDS_ENABLED + the HANDWRYTTEN_* env set: outbox table
+(migration #53, thank_you_cards, deny-all RLS, unique family_id =
+one card per family ever, applied to prod via MCP, additive may
+lead), a three-pass sweep in the hourly /api/map/cron (enqueue 48h
+after family setup, send with for-update-skip-locked claims + a
+10/run batch + monthly cap default 150 + three-strikes parking,
+confirm to mailed by polling), the official handwrytten npm SDK, and
+card.thank_you_sent in the events registry (family_id only).
+
+Decisions made alone:
+
+- **Basket flow, not orders.send()**: only basket/send forwards
+  test_mode, and the account-global basket is cleared on failure so
+  a stranded item can never double-send on the next sweep.
+- **Attempts stamped before spending**: the claim update increments
+  attempts and flips rows to 'sending' in the same statement, so a
+  mid-order crash can never produce an unbounded paid-API retry
+  loop; stale 'sending' rows are reclaimed after 30 minutes.
+- **Recipient snapshot on the queue row**: a later address edit
+  never redirects a card already being written, and the exact
+  message text is kept for the audit trail.
+- **Test mode is the default posture**: HANDWRYTTEN_TEST_MODE=true
+  validates orders end to end without printing or billing; the
+  founder flips it off only after a read-aloud + one green test
+  order (HUMAN-TODO).
+- **Copy through both gates tonight**: reader gate (ICP read of the
+  physical card, including the envelope moment) then editor gate.
+  Material findings: name who Sidney is, answer the "how do they
+  have my address" flinch on the card itself, say "Homa is one text
+  away" instead of "we" so the card never implies a human answers
+  the texts, gratitude sized to "trying Homa". Final text lives in
+  lib/cards/message.ts; founder read-aloud remains the last word.
+- **No address appends, ever**: if the address is missing (SMS-only
+  signups), the family waits for a phase-2 opt-in ask; data-broker
+  lookups are ruled out in the plan doc.
+
+Verified: check:events, check:isolation (new table covered by read +
+insert probes), typecheck, lint, and the web production build all
+green. Live send untestable until the founder creates the
+Handwrytten account (no key exists), which is exactly what test mode
+is for.
+
+## 2026-07-11 (late night) · SMS heads-up before slow builds is now Homa's own first move (send_heads_up)
+
+Founder ask: on the text client, when Homa is about to do a long run
+(a worksheet build), she should respond first and say it might take a
+minute. The automatic tool-start ack (lib/materials/sms-ack.ts, built
+earlier today) only fires when the first slow TOOL starts, and on the
+html path the model composes the whole page BEFORE that tool call, so
+the longest stretch of dead air was still uncovered, and the ack was
+canned rather than in her voice.
+
+Now: new send_heads_up tool, the agent's instructed FIRST move on a
+material request over SMS, one short model-written line ("on it,
+making Story's counting page now, give me a minute or two") sent
+through the tool lane before designing. Taught in sms-mode.ts, the
+instructions.md tool table + materials section, and the
+materials-studio skill.
+
+Decisions made alone:
+
+- **A tool, not an earlier code hook**: the chat-sdk bridge cannot post
+  agent text before tools finish, and code cannot know intent at
+  inbound time without a classifier; a tool keeps the judgment with
+  the model and the send on the same lane as MMS delivery.
+- **Shared dedupe window**: the tool and the automatic acks in
+  generate_image/create_printable share one per-family key
+  (sms-ack.ts's sendWaitTextOnce, was sendMaterialsAckOnce), so
+  whichever fires first wins and the canned ack remains the safety
+  net when the agent skips the heads-up. Unlinked sessions key on the
+  phone number.
+- **One-reply law clarified, not changed**: sms-mode.ts now states
+  tool sends (heads-up, deliveries) are not replies; the composed
+  message after the work remains the only agent reply.
+- **SMS-gated in code**: on web the tool refuses with a note (progress
+  is already visible in chat); message capped at 160 chars, no
+  content scan (the agent's own replies are not code-scanned either).
+
+## 2026-07-11 (late night) · The in-app report's snapshot goes full width
+
+Founder ask (screenshot of the snapshot card: "make the snapshot both
+rows"): in the /app report grid the trajectory chart shared its row
+with the note card, squeezing thirteen end labels into half a column.
+The snapshot now spans both columns (lg:col-span-2). Decision made
+alone: the note card spans too, because grid auto-placement would
+otherwise leave a permanent empty cell beside it (a span-2 item cannot
+backfill), and no other card can pair with the note reliably (the state
+card is conditional). The standalone letter page is untouched.
+Verified at 1440 through a temporary dev-snapshot-preview harness on
+sample fixtures (dev-note-card pattern), deleted after capture.
+
+## 2026-07-11 (late night) · The week board becomes a Monday-to-Friday calendar
+
+Founder ask (screenshot of /app/planner: "this your week section should
+look like a calendar"). The per-kid stacked cards became one shared
+Mon-Fri grid (day-grid.tsx), matching the design kit's PlannerView
+sketch. Decisions made alone while building:
+
+- Day placement is presentation only. Plans have no day concept, so a
+  deterministic spread (spread-week.ts) lays each kid's current week
+  over the five days: 1 activity lands Monday, 3 land Mon/Wed/Fri, more
+  than five round-robin. Checks stay keyed "week.activityIndex", so the
+  plan pages and the phone stay in sync and nothing new is persisted.
+  Real day-by-day scheduling remains M2-10.
+- Each plan keeps a focus-strip row above the grid (focus line, week n
+  of 4, re-check chip, full-plan link), so no WeekBlock information was
+  lost; week-block.tsx is deleted as superseded. Kid chips distinguish
+  activities on the family board; the context switcher still narrows to
+  one kid.
+- Block tones now cycle across the whole board instead of per kid, so
+  two kids' first plans no longer both land on clay.
+- Footer copy updated to match the new shape: "The days are a starting
+  point: any day counts, and moving activities around is coming."
+
+Verified: web typecheck + scoped lint green; rendered at 1440 and 390
+through a temporary dev-planner-preview harness on sample fixtures
+(dev-note-card pattern), deleted after capture.
+
+## 2026-07-11 (later) · The founder merge ran; co-parent invites shipped (multi-parent Phases 2 + 3)
+
+Phase 2, the merge itself: one atomic transaction with count assertions,
+run after the Phase 1 deploy (997bda9) went READY and migration #50
+dropped the one-phone-per-family constraint. The Swift family now holds
+both founders (display names Sidney and Alessa, both role parent), both
+phones with member attribution, and one Story (Alessa's row canonical,
+answers merged latest-wins to 54, Sidney's literacy plan moved over,
+birth month 2022-11-01). All 86 messages, 8 memories, 13 materials, 6
+transcripts, 27 events, and 188 usage rows verified on the winner;
+Sidney's emptied family row and the alessa@thankshoma.com test account
+(family and auth user) deleted per rulings. Pre-merge snapshot of all
+three families sits in the locked merge_backup_20260711 schema; drop it
+once the merged account has lived a week.
+
+Phase 3, the join path signup never had: family_invites (migration #51,
+deny-all token table, 7-day hashed single-use links, phone_link posture),
+a "Parents on this account" card on /app/settings (list, invite, cancel),
+the /join page (signed-out framing + sign-in doors; signed-in consume),
+and the attachAuthUser hook: a brand-new signup whose email holds a
+pending invite joins THAT family instead of founding a new one, kids
+folding in, which closes the exact hole the founders fell into. Events:
+family.invite_sent / family.invite_accepted (MJ-08 registry).
+
+Decisions made alone while building Phase 3:
+
+- Token possession is the join proof (inbox possession, same trust basis
+  as phone_link_requests); the invite's email is not re-matched against
+  the signer's address, so "invite my husband at his work email, he
+  joins with his Gmail" works.
+- A signed-in caller who already has their OWN family is refused, never
+  auto-merged, and the invite deliberately stays open for retry after
+  sign-out; combining two real families remains the by-hand process the
+  founder merge documented.
+- Both copy gates ran (reader, then editor). Reader findings implemented:
+  the no-account case is spelled out on every surface, the /join page
+  suppresses the sign-in card's onboarding footer (it routed the invitee
+  out of their invite), the invite email got custom footers (the shared
+  ones claim "you signed up / you asked", false for a stranger), the
+  settings card states plainly that a second parent sees everything, and
+  "co-parent" became "another parent". Editor findings implemented:
+  one-idea sentences, "account" no longer flips referent mid-email,
+  no causal "because" in the footer, naming drift settled.
+- A parallel founder session worked the same tree during this build
+  (atomic invite claim, escapeHtml in the email sender, thank-you-cards
+  feature); its versions were kept, one stomped hunk (the attachAuthUser
+  hook) was restored.
+
 ## 2026-07-11 (late night) · Multi-parent v0 pulled forward + founder account merge (rulings D-mp-1..7)
 
 Founder ask: merge sidney@recoupable.com and alessallanes@gmail.com
@@ -293,7 +468,12 @@ in one pass:
    (dispatch/research sessions refused via lib/tasks/guard.ts).
 5. **Events + guards** (HT-7): tasks.run_completed, research.brief_sent,
    knowledge.row_merged registered + emitted; isolation probes for the
-   three tables; typecheck/lint/build + all four guards green.
+   three tables; typecheck/lint/build + all four guards green. Both copy
+   gates ran on the tab + brief email shell (reader, then editor); all
+   five reader changes and all five editor must-fixes implemented (one
+   name per concept: "brief"/"task", sentence-case status lines, the
+   skipped-line euphemism replaced with the plain fact + next step,
+   "scheduled run" jargon removed, delivery options as plain sentences).
 6. **Live E2E green** (scripts/tasks-e2e.mts, dev agent + homa-prod,
    synthetic family cascade-cleaned): seeding, a REAL composed brief
    (Montessori row + the child's phonics frontier + dino interest)

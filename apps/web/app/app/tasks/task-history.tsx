@@ -27,24 +27,24 @@ function runIcon(kind: TaskRunView["kind"]) {
   }
 }
 
+/** Status copy passed both gates 2026-07-10. Sentence case; a brief
+ * often ends with an offer, so the sent lines name the reply path. */
 function statusNote(run: TaskRunView): string | null {
   switch (run.status) {
     case "done":
-      // A brief often ends with an offer; the reply affordance must be
-      // named or the question dead-ends (reader gate, 2026-07-10).
       return run.deliveredChannel === "sms"
-        ? "sent by text \u00b7 replying there works"
+        ? "Sent by text. Reply there and Homa answers."
         : run.deliveredChannel === "email"
-          ? "sent by email \u00b7 replying there works"
+          ? "Sent by email. Reply there and Homa answers."
           : run.deliveredChannel === "none"
-            ? "saved to this page"
+            ? "Saved to this page."
             : null;
     case "skipped":
-      return "skipped this one (the moment had passed)";
+      return "Skipped: its time was already over. It runs again at the next scheduled time.";
     case "failed":
-      return "didn't send; Homa will try again next time";
+      return "Didn't send. Homa tries again at the next scheduled time.";
     case "running":
-      return "working on it now";
+      return "Working on it now.";
     default: {
       const exhaustive: never = run.status;
       throw new Error(`unhandled run status: ${String(exhaustive)}`);
@@ -77,7 +77,7 @@ export function TaskHistory({
         <div className="mt-3 rounded-lg border border-border-subtle bg-card p-6 text-center shadow-sm">
           <p className="font-display text-lg font-semibold text-strong">Nothing here yet.</p>
           <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
-            Homa&apos;s first note lands here after her next scheduled run.
+            The first time a task above runs, what it made shows up here.
           </p>
         </div>
       ) : (

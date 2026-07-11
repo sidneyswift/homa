@@ -217,7 +217,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
    * the PreparingStep beat first, a kid already partway through resumes
    * straight in. Every call site that can land on "checklist" routes
    * through here instead of setting activeChildId/phase directly. */
-  function beginChecklist(child: FlowChild): void {
+  const beginChecklist = useCallback((child: FlowChild): void => {
     if (child.answered === 0) {
       setPreparingChild({ name: child.name, ageMonths: child.ageMonths });
       setPendingChecklistId(child.id);
@@ -226,9 +226,9 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     }
     setActiveChildId(child.id);
     setPhase("checklist");
-  }
+  }, []);
 
-  function applyPostKidsRoute(route: PostKidsRoute, childrenList: FlowChild[]): void {
+  const applyPostKidsRoute = useCallback((route: PostKidsRoute, childrenList: FlowChild[]): void => {
     if (route.phase === "checklist") {
       const child = childrenList.find((candidate) => candidate.id === route.childId);
       if (child) {
@@ -245,7 +245,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       return;
     }
     setPhase(route.phase);
-  }
+  }, [beginChecklist]);
 
   /** The last stretch before the report(s): the account already exists
    * (S1 created it), so this always goes straight to scoring. */
@@ -342,7 +342,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
 
       applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
     })();
-  }, [refreshState, bootstrapSession]);
+  }, [refreshState, bootstrapSession, beginChecklist, applyPostKidsRoute]);
 
   const activeChild = children.find((child) => child.id === activeChildId) ?? null;
 

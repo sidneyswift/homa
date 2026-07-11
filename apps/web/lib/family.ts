@@ -56,6 +56,28 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   return data;
 }
 
+export interface FamilyMemberRecord {
+  user_id: string;
+  role: string;
+  display_name: string | null;
+}
+
+/**
+ * getMyFamilyMembers(familyId): FamilyMemberRecord[]
+ * The family's adults, oldest membership first, under the caller's RLS
+ * (the migration #49 roster policy). Feeds the settings adults card.
+ */
+export async function getMyFamilyMembers(familyId: string): Promise<FamilyMemberRecord[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("family_members")
+    .select("user_id, role, display_name")
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`family members read failed: ${error.message}`);
+  return (data ?? []) as FamilyMemberRecord[];
+}
+
 /**
  * getMyMemberDisplayName(): string | null
  * The signed-in adult's own display name (family_members.display_name,

@@ -15,8 +15,8 @@ import { SidebarContent, type SidebarProps } from "./sidebar";
  * multi-kid families) the context switcher avatar on the right (founder
  * lean 2026-07-10: switch kids from the top right without the drawer);
  * the old gear / Ask Homa / Sign out cluster retired because the drawer
- * is the whole sidebar, tabs, up next, kids, and the account menu
- * included, so every one of those doors now lives one tap in. Renders in
+ * is the whole sidebar, tabs, kids, and the account menu included, so
+ * every one of those doors now lives one tap in. Renders in
  * the /app shell, so every signed-in surface gets it for free. The bar's
  * h-14 is load-bearing: chat's phone height is 100dvh minus exactly this
  * bar.
@@ -109,9 +109,9 @@ export function MobileNav(props: SidebarProps) {
           <div
             id="app-drawer"
             // Delegated close: the drawer is the sidebar, so every link
-            // inside (tabs, up next, account menu's Settings) should land
-            // on its page with the drawer gone; the viewing rows are
-            // buttons, so they opt in via data-drawer-close.
+            // inside (tabs, account menu's Settings) should land on its
+            // page with the drawer gone; the viewing rows are buttons,
+            // so they opt in via data-drawer-close.
             onClick={(event) => {
               const target = event.target as HTMLElement;
               if (target.closest("a") || target.closest("[data-drawer-close]")) close();

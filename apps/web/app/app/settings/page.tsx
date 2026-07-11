@@ -4,11 +4,15 @@ import { redirect } from "next/navigation";
 import { formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
+import { listPendingInvites } from "../../../lib/family-invites";
 import { getFamilyPhones } from "../../../lib/family-phone";
+import { getMyFamilyMembers } from "../../../lib/family";
 import { getMyMemories } from "../../../lib/memories";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { MemoriesCard } from "../../../components/dashboard/memories-card";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { AddChildForm } from "./add-child-form";
+import { AdultsCard } from "./adults-card";
 import { TextingCard } from "./texting-card";
 import { TimeZoneCard } from "./time-zone-card";
 
@@ -33,11 +37,23 @@ export default async function SettingsPage() {
   if (!data) redirect("/onboarding");
   const { family, children } = data;
 
-  const [familyPhones, memories] = await Promise.all([
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [familyPhones, memories, members, pendingInvites] = await Promise.all([
     getFamilyPhones(family.id),
     getMyMemories(family.id),
+    getMyFamilyMembers(family.id),
+    listPendingInvites(family.id),
   ]);
   const childNames = new Map(children.map((child) => [child.id, child.name]));
+
+  const inviteDateFormat = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+  });
 
   // Homa's own number, shown on the texting card only once this
   // deployment has a live texting line configured.
@@ -59,6 +75,17 @@ export default async function SettingsPage() {
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <AddChildForm familyId={family.id} />
+        <AdultsCard
+          adults={members.map((member) => ({
+            name: member.display_name ?? "Parent",
+            isYou: member.user_id === user?.id,
+          }))}
+          pendingInvites={pendingInvites.map((invite) => ({
+            id: invite.id,
+            email: invite.email,
+            sentDisplay: `Sent ${inviteDateFormat.format(new Date(invite.created_at))}`,
+          }))}
+        />
         <TextingCard
           linkedPhones={familyPhones.map((phone) => ({
             e164: phone.phone_e164,

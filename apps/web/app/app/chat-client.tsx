@@ -45,9 +45,7 @@ import { recoverLostTurn } from "./turn-recovery";
  * Slack-channel reading of the one chat), while the model session
  * rotates at the first visit after 4am local (chat-storage.ts). Old
  * days stay scrollable above; the morning lands on a clean "today" with
- * the suggestion chips back. "New chat" is the same move done manually:
- * it archives the visible conversation and starts a fresh session, it
- * no longer erases anything. The durable record is Postgres
+ * the suggestion chips back. The durable record is Postgres
  * (conversation_messages via the persist hook + recall); localStorage
  * is the render cache (M1-02 replaces it as the render source).
  *
@@ -345,7 +343,7 @@ export function ChatClient({
         return;
       }
       if (recovered) {
-        // The "New chat" move done for her: the whole recovered session
+        // The fresh-start move done for her: the whole recovered session
         // folds into the archive (reply included), the store starts
         // clean, and the error clears with it. Nothing is lost.
         const messages = foldEventsToMessages(recovered.events);
@@ -417,32 +415,6 @@ export function ChatClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busy]);
 
-  /** The manual fresh start: archive what is on screen, rotate the
-   *  session, keep every word visible above. Nothing is erased. */
-  function startNewChat() {
-    recoveryRef.current?.abort();
-    const nextArchived = [
-      ...archivedRef.current,
-      ...archiveMessages(
-        agent.data.messages,
-        stampMessageTimes(liveTimes, agent.data.messages),
-      ),
-    ];
-    setArchived(nextArchived);
-    archivedRef.current = nextArchived;
-    setLiveTimes({});
-    setQueued([]);
-    saveChat(storageKey, {
-      archived: nextArchived,
-      events: [],
-      session: undefined,
-      messageTimes: {},
-      lastActivityAt: Date.now(),
-    });
-    agent.reset();
-    durableCursorRef.current = 0;
-  }
-
   const transcript = buildTranscript({
     archived,
     live: agent.data.messages,
@@ -450,8 +422,7 @@ export function ChatClient({
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
   // The chips return whenever a session has no words in it yet: the
-  // first run, a fresh morning over yesterday's scrollback, and right
-  // after "New chat".
+  // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions = agent.data.messages.length === 0 && !busy;
 
   useEffect(() => {
@@ -502,19 +473,6 @@ export function ChatClient({
     // 3.5rem is the frame's phone top bar (h-14); on desktop the sidebar
     // sits beside this column, so the full viewport height is ours.
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
-      {hasAnyMessages ? (
-        <header className="flex justify-end border-b border-border-subtle bg-page px-4 py-2.5">
-          <button
-            type="button"
-            onClick={startNewChat}
-            disabled={busy || agent.data.messages.length === 0}
-            className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand disabled:opacity-60"
-          >
-            New chat
-          </button>
-        </header>
-      ) : null}
-
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">

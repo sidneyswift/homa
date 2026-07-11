@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import { cancelFamilyInvite, sendFamilyInvite } from "../../../lib/family-invites";
 import { addFamilyPhone, removeFamilyPhone } from "../../../lib/family-phone";
 import { isValidTimeZone, setFamilyTimeZone } from "../../../lib/family-time-zone";
-import { getMyFamily } from "../../../lib/family";
+import { getMyFamily, getMyMemberDisplayName, parentFirstName } from "../../../lib/family";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
@@ -81,6 +82,81 @@ export async function removeFamilyPhoneAction(
   // familyId from the caller's own membership: removing can only ever
   // touch the caller's own family's rows (tenancy law).
   await removeFamilyPhone(family.id, phoneE164);
+  revalidatePath("/app/settings");
+  return { error: null };
+}
+
+/** Simple shape check; the invite email itself is the real verification
+ * (possession of the inbox is what joining requires). */
+function looksLikeEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export async function inviteCoParentAction(
+  _prev: SetupFormState,
+  formData: FormData,
+): Promise<SetupFormState> {
+  const raw = String(formData.get("email") ?? "").trim().toLowerCase();
+
+  const family = await getMyFamily();
+  if (!family) {
+    return { error: "The invite didn't send. Finish setting up your family first." };
+  }
+  if (!looksLikeEmail(raw)) {
+    return { error: "That doesn't look like an email address." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const inviterName = (await getMyMemberDisplayName()) ?? parentFirstName(family);
+
+  const result = await sendFamilyInvite({
+    familyId: family.id,
+    email: raw,
+    invitedBy: user?.id ?? null,
+    inviterName,
+    familyName: family.name,
+  });
+  if (!result.ok) {
+    switch (result.reason) {
+      case "already-member":
+        return { error: "They're already part of this family." };
+      case "send-limit":
+        return {
+          error:
+            "This one didn't send: that's three invites to this address today. Ask them to check spam. You can send another tomorrow.",
+        };
+      case "email-failed":
+        return { error: "The invite didn't send. Try again in a minute." };
+      default: {
+        const exhaustive: never = result.reason;
+        return { error: String(exhaustive) };
+      }
+    }
+  }
+  revalidatePath("/app/settings");
+  return { error: null };
+}
+
+export async function cancelInviteAction(
+  _prev: SetupFormState,
+  formData: FormData,
+): Promise<SetupFormState> {
+  const inviteId = String(formData.get("invite_id") ?? "").trim();
+
+  const family = await getMyFamily();
+  if (!family) {
+    return { error: "That didn't cancel. Finish setting up your family first." };
+  }
+  if (!inviteId) {
+    return { error: "That cancel didn't go through. Refresh the page and try again." };
+  }
+
+  // familyId from the caller's own membership scopes the delete; a
+  // forged invite_id can never touch another family's invites.
+  await cancelFamilyInvite(family.id, inviteId);
   revalidatePath("/app/settings");
   return { error: null };
 }

@@ -125,11 +125,16 @@ await expectEmptyRead("phone_leads");
 await expectEmptyRead("phone_link_requests");
 // Verified phone claim codes (migration #47): deny-all, server-only.
 await expectEmptyRead("phone_claim_codes");
+// Co-parent invite tokens (migration #51): deny-all, server-only.
+await expectEmptyRead("family_invites");
 // Materials studio artifacts (migrations #42 + #44): family-scoped,
 // members only.
 await expectEmptyRead("materials");
 // Per-family AI consumption ledger (migration #43): deny-all, server-only.
 await expectEmptyRead("model_usage");
+// Thank-you card outbox (migration #53): deny-all, server-only. It holds
+// mailing-address snapshots, so no Data API role may ever see or touch it.
+await expectEmptyRead("thank_you_cards");
 
 await expectInsertDenied(
   "families",
@@ -323,6 +328,15 @@ await expectInsertDenied(
   "anon cannot forge phone leads",
 );
 await expectInsertDenied(
+  "family_invites",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    email: "intruder@example.com",
+    token_hash: "intruder",
+  },
+  "anon cannot forge family invites",
+);
+await expectInsertDenied(
   "materials",
   {
     family_id: "00000000-0000-0000-0000-000000000000",
@@ -342,6 +356,19 @@ await expectInsertDenied(
     modality: "text",
   },
   "anon cannot forge usage rows",
+);
+await expectInsertDenied(
+  "thank_you_cards",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    recipient_first_name: "Intruder",
+    address_line: "1 Nowhere St",
+    address_city: "Nowhere",
+    us_state: "AZ",
+    address_zip: "00000",
+    message: "This must never be writable over the Data API.",
+  },
+  "anon cannot forge thank-you cards",
 );
 await expectInsertDenied(
   "child_reports",

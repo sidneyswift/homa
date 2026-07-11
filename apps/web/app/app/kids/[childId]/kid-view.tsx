@@ -125,7 +125,10 @@ export function KidView({
             <Logo variant="mark" size={34} />
           </div>
           <div>
-            <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+            <p
+              className="font-mono text-[0.65rem] uppercase tracking-widest"
+              style={{ color: "var(--sage-700)" }}
+            >
               A note from Homa
             </p>
             <p className="mt-1 font-serif italic text-strong">{noteGreeting(parentFirstName)}</p>
@@ -175,7 +178,10 @@ export function KidView({
 
       {curriculum ? (
         <section className="mt-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
-          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-sage">
+          <p
+            className="font-mono text-[0.65rem] uppercase tracking-widest"
+            style={{ color: "var(--sage-700)" }}
+          >
             {child.name}&apos;s curriculum {"\u00b7"} {curriculum.curriculum.durationLabel}
           </p>
           <p className="mt-1.5 font-display text-lg font-semibold text-strong">

@@ -12,7 +12,7 @@ import {
   uploadMaterialArtifacts,
   type MaterialSource,
 } from "../../lib/materials/artifact-store";
-import { sendMaterialsAckOnce } from "../../lib/materials/sms-ack";
+import { sendWaitTextOnce } from "../../lib/materials/sms-ack";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   printableSlug,
@@ -159,11 +159,16 @@ export default defineTool({
         note: "Provide exactly one of html (you composed the page) or pageImageUrl (the image model drew the whole page).",
       };
     }
-    if (hasPageImage && !isFamilyArtifactUrl(input.pageImageUrl as string, familyId)) {
-      return {
-        created: false,
-        note: "pageImageUrl must be a URL generate_image returned for this family. Generate the page image first, then pass its URL.",
-      };
+    let pageImageUrl: string | null = null;
+    if (hasPageImage) {
+      const rawPageImageUrl = input.pageImageUrl as string;
+      if (!isFamilyArtifactUrl(rawPageImageUrl, familyId)) {
+        return {
+          created: false,
+          note: "pageImageUrl must be a URL generate_image returned for this family. Generate the page image first, then pass its URL.",
+        };
+      }
+      pageImageUrl = new URL(rawPageImageUrl).toString();
     }
 
     const metadataText = [
@@ -189,10 +194,11 @@ export default defineTool({
     const channel = usageChannelFromAttributes(attributes);
 
     // Render + review + upload is the slow part of an html-only build;
-    // on SMS one heads-up text covers the wait. Deduped per family, so
-    // a build that already acked from generate_image stays quiet here.
+    // on SMS one wait text covers it. Deduped per family, so a build
+    // where the agent already sent its own heads-up (send_heads_up) or
+    // generate_image already acked stays quiet here.
     if (channel === "sms" && attributes?.phoneNumber) {
-      sendMaterialsAckOnce(familyId, attributes.phoneNumber);
+      sendWaitTextOnce({ familyId, phoneNumber: attributes.phoneNumber });
     }
 
     const startedAt = Date.now();
@@ -203,10 +209,10 @@ export default defineTool({
         ? "hybrid"
         : "html";
     const bodyHtml = hasPageImage
-      ? `<img src="${input.pageImageUrl}" style="max-width:100%;max-height:9.5in;display:block;margin:0 auto;" alt="" />`
+      ? `<img src="${pageImageUrl as string}" style="max-width:100%;max-height:9.5in;display:block;margin:0 auto;" alt="" />`
       : (input.html as string);
     const document = hasPageImage
-      ? wrapImagePage(input.pageImageUrl as string, input.childName ?? "")
+      ? wrapImagePage(pageImageUrl as string, input.childName ?? "")
       : wrapPrintablePage(input.html as string, input.childName ?? "");
 
     let rendered;

@@ -9,7 +9,7 @@ import {
   generateStudioImage,
   IMAGE_SHAPES,
 } from "../../lib/materials/generate-image";
-import { sendMaterialsAckOnce } from "../../lib/materials/sms-ack";
+import { sendWaitTextOnce } from "../../lib/materials/sms-ack";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -84,9 +84,13 @@ export default defineTool({
     const channel = usageChannelFromAttributes(ctx.session.auth.current?.attributes);
 
     // Image generation is the slow leg of an SMS material build; one
-    // heads-up text covers the wait (lib/materials/sms-ack.ts).
+    // wait text covers it, deduped with the agent's own send_heads_up
+    // (lib/materials/sms-ack.ts).
     if (channel === "sms" && attributes?.phoneNumber) {
-      sendMaterialsAckOnce(access.familyId, attributes.phoneNumber);
+      sendWaitTextOnce({
+        familyId: access.familyId,
+        phoneNumber: attributes.phoneNumber,
+      });
     }
 
     const startedAt = Date.now();
