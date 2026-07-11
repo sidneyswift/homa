@@ -414,29 +414,48 @@ export const EVENT_SCHEMAS = {
     model_tier: z.enum(["fast", "mid", "premium"]),
     tool_calls: z.number().int().min(0),
   }),
+  // Canonical conversation continuity attached a short/cross-surface
+  // parent reply to one prior Homa message (or refused to guess between
+  // multiple candidates). No content or recipient address enters events.
+  "conversation.reply_resolved": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms", "email"]),
+    resolution: z.enum(["matched", "ambiguous"]),
+    cross_channel: z.boolean(),
+  }),
   // The task framework (HT-1/HT-7). One event per finished proactive
   // run; fleet runs carry no family_id. Kind + status only, no content.
   "tasks.run_completed": z.object({
     family_id: z.uuid().optional(),
     kind: z.enum(["journal_prompt", "morning_brief", "custom", "fleet_research"]),
-    status: z.enum(["done", "failed", "skipped"]),
+    status: z.enum([
+      "done",
+      "partial",
+      "partial_uncertain",
+      "uncertain",
+      "failed",
+      "skipped",
+    ]),
   }),
   // The weekday morning research brief reached a parent (HT-4, D-ht-2).
   "research.brief_sent": z.object({
     family_id: z.uuid(),
     channel: z.enum(["sms", "email"]),
   }),
-  // Co-parent invites (multi-parent plan Phase 3, NT-4 v0). Sent when
-  // the settings card emails a /join link; accepted when a second adult
-  // becomes a member through the /join page. No email
-  // addresses in props, ever (MJ-08); NT-4's fuller
+  // Family invites (multi-parent plan Phase 3 plus SMS consent flow).
+  // Email acceptance creates a family member through /join; SMS
+  // acceptance links the recipient's verified phone to the family.
+  // No email addresses, phone numbers, or child details in props (MJ-08).
+  // NT-4's fuller
   // account.secondary_user_added shape (relationship enum) waits for
   // roles to mean something.
   "family.invite_sent": z.object({
     family_id: z.uuid(),
+    channel: z.enum(["email", "sms"]),
   }),
   "family.invite_accepted": z.object({
     family_id: z.uuid(),
+    channel: z.enum(["email", "sms"]),
   }),
   // A research row entered (or was refused by) the knowledge bank's
   // automated gate (HT-2, D-ht-5). Topic type only, never content.

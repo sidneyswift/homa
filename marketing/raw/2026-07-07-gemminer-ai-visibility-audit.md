@@ -1,5 +1,9 @@
 # Raw · GemMiner AI visibility audit of thankshoma.com, 2026-07-06
 
+> Historical external-tool snapshot. Search results, AI answers, sampled
+> platforms, site content, and recommended fixes are not current evidence.
+> Run a new bounded audit before reuse.
+
 Transcribed from the founder's screenshots of the GemMiner "AI Visibility
 Audit" report (run 2026-07-06, "4 buyer-question samples and 16 platform
 checks") plus the fixes list the founder pasted alongside them. Screenshots:

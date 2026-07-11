@@ -1,5 +1,7 @@
 # Social-emotional, executive function, and life skills benchmarks, ages 2 to 16
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** SEL, EF, and life skills 08, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web-sourced from primary and near-primary references (CASEL, Illinois State Board of Education SEL PDFs, Harvard Center on the Developing Child, Dawson and Guare, AAP HealthyChildren, AASM, US DOL, the federal Child Welfare Information Gateway, and peer-reviewed developmental literature). Every factual claim carries an inline link and access date; nothing is recalled from memory, and unverifiable numbers are logged in "Dry wells" rather than guessed.

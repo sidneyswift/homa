@@ -117,9 +117,21 @@ export async function findFamilyIdByPhone(phoneE164: string): Promise<string | n
 
 export interface FamilyPhoneIdentity {
   familyId: string;
+  /** Stable adult identity for conversation attribution. Null only for
+   * legacy/unattributed phone rows. */
+  memberUserId: string | null;
   /** The linked adult's display name, when the number carries member
    * attribution and that member set one. Null keeps the caller generic. */
   memberDisplayName: string | null;
+  /** Only a phone attributed to a real signed-in family member may
+   * delegate access to another adult. Phone-only invitees cannot. */
+  canInviteFamilyMembers: boolean;
+  /** The routing row id is this access grant's generation. Removing and
+   * re-adding the phone creates a new id and therefore a new Eve session. */
+  sessionEpoch: string;
+  /** A memberless family created by begin_text_signup must rehydrate its
+   * questionnaire after the access-epoch rotation. */
+  smsSignupCandidate: boolean;
 }
 
 /**
@@ -131,8 +143,23 @@ export async function findFamilyIdentityByPhone(
   phoneE164: string,
 ): Promise<FamilyPhoneIdentity | null> {
   const sql = mapDb();
-  const rows = await sql<{ family_id: string; display_name: string | null }[]>`
-    select p.family_id, m.display_name
+  const rows = await sql<
+    {
+      family_id: string;
+      phone_row_id: string;
+      member_user_id: string | null;
+      display_name: string | null;
+      can_invite_family_members: boolean;
+      sms_signup_candidate: boolean;
+    }[]
+  >`
+    select p.family_id, p.id::text as phone_row_id,
+           p.member_user_id, m.display_name,
+           m.user_id is not null as can_invite_family_members,
+           p.source = 'signup' and not exists (
+             select 1 from public.family_members signup_member
+             where signup_member.family_id = p.family_id
+           ) as sms_signup_candidate
     from public.family_phones p
     left join public.family_members m
       on m.family_id = p.family_id and m.user_id = p.member_user_id
@@ -140,7 +167,31 @@ export async function findFamilyIdentityByPhone(
   `;
   const row = rows[0];
   if (!row) return null;
-  return { familyId: row.family_id, memberDisplayName: row.display_name };
+  return {
+    familyId: row.family_id,
+    memberUserId: row.member_user_id,
+    memberDisplayName: row.display_name,
+    canInviteFamilyMembers: row.can_invite_family_members,
+    sessionEpoch: `family-phone:${row.phone_row_id}`,
+    smsSignupCandidate: row.sms_signup_candidate,
+  };
+}
+
+/**
+ * Last access-boundary generation for a phone, retained after unlinking.
+ * This keeps an unlinked number from resuming model history created before
+ * a prior link or removal.
+ */
+export async function findPhoneAccessEpoch(
+  phoneE164: string,
+): Promise<string | null> {
+  const sql = mapDb();
+  const rows = await sql<{ epoch: string }[]>`
+    select epoch::text as epoch
+    from public.family_phone_access_epochs
+    where phone_e164 = ${phoneE164}
+  `;
+  return rows[0] ? `phone-access:${rows[0].epoch}` : null;
 }
 
 /**

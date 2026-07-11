@@ -1,5 +1,7 @@
 # Math benchmarks, kindergarten to grade 10
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Math 02, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Fetched the CCSS-M standards text grade page by grade page from thecorestandards.org (the live official site, with corestandards.org as temporary mirror), CCSS Appendix A for high school pathways, nationsreportcard.gov and NCES pages for NAEP 2024 and course-taking data, learningtrajectories.org's official trajectory summary PDF for Clements and Sarama levels, Intervention Central and a 2019 peer-reviewed review for CBM fluency norms, World Book's typical course of study pages, and TEA and Florida DOE documents for state variation. Every number below was read from a fetched source on 2026-07-06.

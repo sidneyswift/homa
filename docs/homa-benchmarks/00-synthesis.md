@@ -1,5 +1,7 @@
 # Benchmark corpus synthesis
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **What this is:** the reading guide for the ages 2 to 16 national benchmark corpus: what the lanes captured, how it maps onto the product's 16 map domains, where it corrects the shipped bank, and what a follow-up pass should chase. First written after the original 10 lanes returned; wave 2 (lanes 11 to 16) and the porting status are folded in below. Per-claim sources live in the lane files, not here.
 

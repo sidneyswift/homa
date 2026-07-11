@@ -3,6 +3,149 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late afternoon) · Slow SMS turns now speak before they work
+
+Founder problem: a reasoning-heavy SMS request left the phone silent long
+enough that Homa looked broken. Founder approved an immediate SMS improvement
+and a separate RCS phase after Telnyx supplies a registered beta agent.
+
+The existing `send_heads_up` material-build tool now covers substantial
+reasoning, current research, several dependent tools, and material builds. It
+is the agent's first action on those slow SMS turns. Greetings, quick answers,
+clarifying questions, signup, consent and invitation flows, account linking,
+and one-step record updates stay quiet. The progress line is not the reply;
+Homa still sends one completed reply when the work finishes.
+
+The shared helper moved from `lib/materials/sms-ack.ts` to
+`lib/sms-progress.ts`. It still shares one three-minute, per-instance dedupe
+window across the agent-first tool and automatic material fallbacks. The key
+includes both family and authenticated phone, so one parent's request cannot
+suppress another parent's progress line. The helper now awaits Telnyx and
+reports success only when submission is accepted. A failed progress send
+cannot stop the work or the completed reply. The progress-only Telnyx request
+aborts after five seconds, while ordinary SMS and MMS callers keep their
+existing behavior. The destination still comes only from authenticated channel
+attributes.
+
+The reader gate found the parent-facing lines calm and clear. The editor gate
+then removed inconsistent names, a nested action sentence, and a run-on from
+the generated-copy producer. A code review found older material instructions
+that still promised "a minute or two"; all three producer layers now use the
+same duration-free rule. No exact wait estimate was added because there is no
+evidence for one universal duration.
+
+Verification: the initial focused suite passed 5 tests after first failing on
+the missing service. Timeout and transport coverage brought the focused SMS
+tests to 10; the strengthened continuity guard passed all 65 tests. Edited-file
+lint,
+IDE diagnostics, web typecheck, Next production build, and Eve build all
+passed. The final focused code review found no remaining critical or important
+issue. No live phone test or deployment was performed. RCS code remains
+deferred until the founder completes the Telnyx beta-agent action in
+`HUMAN-TODO.md`.
+
+## 2026-07-11 (afternoon) · Morning research brief has one binding format
+
+Founder approved the Mac Mini-style morning brief as four exact blocks:
+`🔬 Last night I researched`, `What I learned`, `Why it's interesting`, and
+one `Want me to` offer. Each content section is 1 to 2 sentences. The offer
+must name one action Homa can complete now, such as making a quick activity
+or printable. Calendar writes are not available, so Homa may collect timing
+details for a reminder or task but may not promise a calendar change. The
+saved-note URL is deferred until a dedicated research-note route exists.
+
+The generated-copy producer at
+`apps/web/agent/skills/research-brief/SKILL.md` now owns the exact shape,
+plain-language rules, honest overnight versus top-up tense, and CTA
+capability limits. Dispatch repeats the format at the final generation seam.
+A pure validator requires the exact seven-line layout, complete content
+sentences, one supported capability, and the expected overnight or top-up
+tense. It rejects extra questions, links and bare domains, saved-note claims,
+calendar references, markdown, extra emoji, internal vocabulary, em dash
+characters, and messages over 1,600 characters. The paid model eval reads the
+real skill and uses Homa's shared gateway model; CI runs only the deterministic
+contract. The ruling is also indexed in the canonical founder registry.
+
+The reader gate found that teaching abbreviations, abstract sound categories,
+and a vague game offer raised first-read effort. The producer now requires a
+concrete example and a clear deliverable. The editor gate then found unclear
+actors, multi-idea sentences, vague references, and nested CTA clauses. Those
+fixes also landed at the producer layer, never in the generated fixture.
+
+Verification: all 8 deterministic format tests passed; the live model eval
+generated a valid four-block Story phonics brief; all 65 conversation
+continuity tests passed; monorepo typecheck, scoped web lint, event, map, and
+skill-targeting guards, production build, and Eve channel build all passed.
+No commit was created. A final focused code review ended GO after every
+reported format and CTA bypass became a regression fixture.
+
+## 2026-07-11 (morning) · Conversation continuity: one household conversation above every Eve session
+
+Founder rejected the local "inject the latest dispatch message" patch after
+the first live morning brief asked a question and Sidney's SMS reply "Yes"
+resumed a different Eve session: "think one level of abstraction above."
+Production trace: one household, two parent members, two phones, 96 persisted
+messages across 12 Eve sessions (7 web, 2 SMS, 3 dispatch) plus 6 voice
+transcripts. The permanent row shape could not name the adult, recipient,
+episode, reply target, task run, or per-recipient delivery. Root ruling:
+transport threads are adapters, never product conversation identity. Eve owns
+durable execution; an application-owned Conversation Continuity module owns
+causality.
+
+Built test-first:
+
+1. `conversation_episodes`, `conversation_thread_bindings`,
+   `conversation_deliveries`, and `conversation_open_loops`; messages gain
+   episode, actor member, family/internal visibility, task-run origin, reply
+   edge, provider id, and delivery edge. Existing dispatch input prompts were
+   backfilled internal and are hidden from authenticated reads.
+2. The deep module under `lib/conversation-continuity/`: deterministic
+   provider-id-first reply resolution, no "latest message" guessing, one open
+   loop per recipient, explicit ambiguity, expiry, role-labeled hydration,
+   Postgres adapter, per-adult SMS with own-email fallback, partial delivery
+   status, stable hashed transport bindings.
+3. SMS and email authenticate the adult, resolve the canonical episode before
+   starting Eve, and stamp episode/reply/delivery metadata. Web persistence
+   resolves the same module; fresh devices and rotated sessions rehydrate the
+   episode. Voice context receives the latest member continuity block.
+4. Dispatch creates one canonical family message, records one delivery per
+   intended adult, opens independent reply loops only when the generated text
+   actually asks a question, records its Eve session on `homa_task_runs`, and
+   reports partial instead of hiding one adult's failed delivery.
+5. Family folding moves every continuity table and deduplicates transport
+   bindings. Email parsing now preserves Message-ID and In-Reply-To for exact
+   provider causation when available. The task history names partial delivery
+   plainly.
+6. Provider hardening: SMS/email webhook IDs are claimed before Eve so retries
+   cannot repeat tools; parent content is canonical before the turn starts;
+   terminal model output completes the inbound receipt independently from its
+   outbound send. Resend's current metadata-only webhook retrieves content
+   through the Receiving API. Proactive/reaction emails use HMAC-signed
+   per-delivery reply aliases; legacy addresses require DMARC. Telnyx and
+   Resend submission states preserve submitted/rejected/unknown, suppress
+   unsafe fallback/replay, and distinguish partial uncertainty in task history.
+   Existing 296 messages were backfilled into 23 canonical episodes (zero
+   missing); all six historical family task runs recovered their Eve session.
+
+Verification: 55 continuity/channel tests green (new behavior observed red
+first), production-shaped two-parent DB E2E green before the local database
+secret disappeared (7 original checks; the committed CI version now also
+covers receipt replay, sent replay, monotonic visibility, and family fold),
+live Claude model eval green (bare "Yes" produced the promised stop-and-go
+game), monorepo typecheck, source lint, production build, Eve channel build,
+event/map/skills/taxonomy guards green. Two fresh code-review rounds ended
+GO after every critical/high finding was fixed. Supabase advisors found no
+new security warning; all continuity foreign keys are indexed. Anon isolation
+checks are green under the new explicit-deny posture. The authenticated
+cross-family fixture could not rerun after another work stream removed
+`SUPABASE_DB_PASSWORD` from local env; CI now supplies it explicitly and runs
+both isolation and the database continuity E2E.
+
+Schema migrations were applied to homa-prod and are additive/backward
+compatible. Product code is complete on the current reconciliation branch but
+not deployed from this mixed working tree; no commit was created without a
+founder request.
+
 ## 2026-07-11 (pre-dawn) · The wall: built DARK behind HOMA_WALL_ENABLED
 
 Founder instruction after the monetization review: "make the wall. make it
@@ -1072,6 +1215,182 @@ alone:
 - **Reader-gate finding left as-is: bare subject counts in the note.**
   The one-sentence note is a founder ruling (2026-07-08); the named
   subjects sit directly below on the same page.
+
+## 2026-07-11 (5:26pm) · Card note revision 4, minutes after the first batch
+
+Founder rulings right after "send it" completed: no colons on this
+surface, and the address-explanation clause comes out ("they obv know
+they gave thier address"), a conscious override of the reader gate's
+privacy-flinch finding, recorded in the template comment so the
+history stays auditable. "We see it: we homeschool our own kids"
+became "We see it. We homeschool our own kids." (the triple "We"
+opener is deliberate testimony rhythm) and the number line reads
+"text Homa at (346) 758-8011". Body drops to 339 of 500 characters.
+Shipped as one-file commit 5de29dc, deployment READY, site probed;
+inert until the conference cohort enqueues (~July 15). The three
+ordered cards carry revision 3.
+
+## 2026-07-11 (5pm) · SENT: the first three thank-you cards are at the robots, and the first live sweep taught two lessons
+
+Founder said "send it", then paused at the read-aloud and ruled the
+note becomes the co-founders' version signed "Warmly, / Alessa &
+Carolyng / thankshoma.com" (no title; the domain line is a conscious
+override of the reader gate's misparse note). Editor gate passed the
+final text with zero must-fixes and one accepted craft fix ("ours" to
+"our own"). The message change had to reach the deployed sweep, so it
+shipped as a one-file commit built on origin/main via a detached
+worktree (155416b), leaving every other in-flight tree change
+uncommitted. THANK_YOU_CARDS_ENABLED went into prod env; the deploy
+went READY at 4:57pm; the 5:00pm scheduled cron ran the first live
+sweep with the new text.
+
+The first live minute found two real bugs, both fixed and deployed
+within the hour (ce3a5a3, 60c6a44):
+
+- **The optimistic lock never matched.** Send recording guarded on
+  processing_started_at equality, but the timestamp round-tripped
+  through text and the update matched zero rows: Alessa's PAID order
+  (28387032) went unrecorded while her row stayed claimable, one
+  retry from a double-send. The lock is now status='sending' AND
+  attempts=claimed value (an int round-trips exactly). Her row was
+  reconciled by hand to sent + order id, and the missed
+  card.thank_you_sent event inserted.
+- **The payment processor's duplicate window declined batch
+  neighbors.** Three same-amount charges seconds apart: cards 1 and 3
+  failed with "Can't get transaction id with card payment" around
+  card 2's success. SEND_BATCH_LIMIT dropped from 10 to 1 per hourly
+  run (a backlog drains in a day and every charge sits outside the
+  window). The two declined rows were requeued after the fix
+  deployed and sent clean on manual cron fires spaced past the
+  window.
+- Bonus finding, third commit: live basket/send responses carry no
+  order id at all, so rows landed 'sent' with null vendor_order_id
+  (backfilled by hand from orders/list). The wrapper now falls back
+  to the account's newest order when minted within five minutes,
+  safe at one order per run.
+
+Final ledger, verified against both the database and the vendor:
+three rows 'sent', order ids 28387032 (Alessa, 5:00pm), 28387370
+(Carolyng, 5:19pm), 28387377 (CeCe, 5:23pm), all status "paid" on
+the account, roughly $14 total. The concurrency design also got a
+free production test: a manual cron fire overlapped the scheduled
+5pm run and claimed nothing (skip-locked + status filter held). Cards
+reach mailboxes in 4 to 7 days, two of them the co-founders' own.
+
+## 2026-07-11 (late afternoon, second pass) · The front learns to sing: script v4 ships
+
+Founder ruling on v3, minutes after it shipped: "i hate this. it
+looks cheap. dont put homa logo on the front. and make the thak you
+look amazing. the back you can put the full logo and wordmark". v4
+(card id 349914) replaces v3 in production; v3 and its images are
+deleted, account holds only v4's two covers.
+
+Final art: front is the ruled notebook page with a large flowing
+"Thank you" in clay script, two gold sparkle doodles off the final
+swash, no logo anywhere on it. Back is the full lockup (house +
+bounced Fredoka wordmark), centered, nothing else, per the ruling.
+
+Decisions made alone:
+
+- **Dancing Script 700 as a stationery-craft exception.** The system
+  has no lush script: Fredoka is wordmark-only, Caveat is Homa's
+  margin hand (sage, product notes), Schibsted read as "default
+  font" on cardstock (the founder's "cheap"), and EB Garamond italic
+  reads editorial-cold for this audience. A flowing script is what
+  card craft uses for a front hero. Scoped to this physical artifact
+  only, not admitted to the UI type system; an EB Garamond italic
+  alternate was built and preserved beside the sources for a taste
+  check (front-alt-garamond.html).
+- **Clay script + gold sparkles as the two devices.** The hero
+  carries the brand through color instead of a mark; the sparkles
+  come from the sanctioned doodle vocabulary (hand-placed, rotated),
+  sized and positioned off the "u" swash after a composition pass
+  (330px overflowed the trim-safe zone; final 280px with ~125px edge
+  clearance at 300dpi).
+- **No uxui re-gate this round**: the founder is art-directing live
+  and is the reviewer that matters; the prior mailbox read's
+  standing fixes (soft margin rule, no domain) are preserved.
+
+Verified: vendor quality checks clean at 600dpi, production
+HANDWRYTTEN_CARD_ID=349914, .env.local matches, sources updated in
+docs/homa-design/explorations/thank-you-card/, vendor account holds
+exactly one custom card (v4) and its two images.
+
+## 2026-07-11 (late afternoon) · The card quiets down: genuine stationery, not promotion (v3 ships)
+
+Founder ruling on the branded card, same afternoon it shipped: "i
+dont like 'homeschooling made calm'. i also don't think the card
+should be toooooo branded because then it defeats the purpose. it
+should feel like a genuine thankyou card. not a promotional
+matereal". This confirms what the first reader gate found from the
+other direction: the card buys trust by not behaving like marketing.
+
+v3 (card id 349913, "Homa thank you (quiet v3)") replaces v2 in
+production; v2 and its cover images are deleted from the vendor
+account. Reductions, all within the founder's direction, exact
+choices made alone:
+
+- Front headline drops the two-tone brand-poster treatment: single
+  warm ink (text-strong), weight 600 not 700, 150px not 220px. The
+  notebook paper, the softened margin rule, and the small house
+  standing on a baseline stay: paper and a sticker read as
+  stationery, a logo lockup reads as a campaign.
+- Back is now a stationer's colophon only: the small house mark, low
+  center, nothing else. No wordmark, no tagline, no domain. A card
+  maker's quiet stamp is how genuine cards sign their backs.
+- The house mark stays the card's single clay moment on each side
+  (the uxui mailbox read called it the standout delight; the founder
+  objected to promotion, not to the character).
+
+Verified: vendor quality checks clean at 600dpi on both covers,
+production HANDWRYTTEN_CARD_ID=349913 (env listed), .env.local
+matches, design sources updated in
+docs/homa-design/explorations/thank-you-card/ (the exploration HTML
+is now the canonical art; /tmp render scratch is disposable).
+
+## 2026-07-11 (afternoon) · Thank-you cards wear the brand: custom Homa stationery live
+
+Founder asked "can we customize the card with homa branding?". Done
+end to end: card id 349912, "Homa thank you (brand v2)", now the
+production HANDWRYTTEN_CARD_ID (was catalog card 186, Kraft). Built
+from design-system tokens, never image-model output: the front is a
+workbook page (ruled cream paper + the clay margin rule, "Thank you"
+in Schibsted 700 with the clay accent word on "you", the little-home
+mark standing on a baseline rule beneath it), the back is the lockup
+with the bounced Fredoka wordmark and the official tagline in EB
+Garamond italic. Two playful devices per surface, inside the restraint
+law. Sources preserved at docs/homa-design/explorations/thank-you-card/
+(HTML panels render at exact print geometry via headless Chromium);
+apps/web/scripts/handwrytten-brand-card.mts is the repeatable pipeline
+(Vercel Blob hosting, cover registration, vendor quality check, card
+assembly, custom-card detail readback).
+
+Decisions made alone:
+
+- **Rendered, not generated**: image models mangle wordmarks, so the
+  panels are HTML/CSS built on the exact tokens (stone-50, brand clay,
+  paper-rule cobalt at 7%) and the Logo.tsx house path, screenshotted
+  at print size. 1650x1275 (300dpi) tripped the vendor's blur warning;
+  final panels render at 3300x2550 (600dpi) and pass clean.
+- **The uxui reader gate ran on the physical card** (mailbox context,
+  front then back). Its findings shipped: the clay margin rule dropped
+  from 55% to 35% opacity (a strong orange vertical line drifted
+  toward red-pen territory for this reader), and the back's
+  "thankshoma.com" was replaced with the tagline, because the domain
+  misparses on paper and gave no reason to exist; the interior's
+  printed texting number stays the card's one action path.
+- **Interior stays pure handwriting**: no header logo on the writing
+  side; branding lives on the front and back only, so the note itself
+  keeps the pen-and-ink spell.
+- **API quirk recorded**: customCards.create requires backType:
+  "cover" alongside backCoverId, and custom cards are read back via
+  customCards.get, not the public catalog. Draft card 349910 and its
+  four orphaned images were deleted from the account.
+
+Verified: vendor quality check clean on both covers at 600dpi; card
+detail confirms A2 landscape, full bleed, 500-character interior,
+$3.75 price unchanged; production env now points at 349912 (test-mode
+and enablement posture unchanged, the sweep stays dark).
 
 ## 2026-07-11 (1am) · Thank-you cards armed: key live, stationery chosen, both test-mode footguns guarded
 

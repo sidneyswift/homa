@@ -1,219 +1,99 @@
-# BUILD.md · Engineering Agent Start Here
+# BUILD.md · engineering entry point
 
-You are building **Homa Cloud**: a multi-tenant AI homeschool assistant for
-homeschooling mothers. One Vercel deployment (Next.js + the eve agent framework)
-serves all families; Supabase Postgres holds all durable state; Stripe handles money.
-The planning phase is complete, your job is execution, not re-planning.
+Homa is in execution. This file contains the stable build contract for agents. It does not duplicate a volatile feature checklist or claim that repository code is deployed.
 
-**The contract you build against is `docs/homa-planning/13-mr-prd.md`.** Everything else
-below tells you what to read, in what order, and what to build first.
+The fixed near-term deadline is July 13, 2026, when Alessa demonstrates Homa at a homeschool conference. The public site and onboarding entry points must remain usable on a phone. A route returning HTTP 200 does not prove that signup, storage, email, billing, voice, or agent behavior works end to end.
 
----
+## Authority and evidence
 
-## ⏰ THE ONLY REAL DEADLINE
+Use two separate axes of truth:
 
-**July 13, 2026, Alessa demos Homa at a homeschool conference.**
-By then, DEPLOYED AND LIVE, no exceptions:
+1. Product policy: explicit founder rulings, then the PRD, then journey specifications, then judgment.
+2. Observed behavior: current code, tests, configuration, and migrations establish repository behavior. Direct deployment, HTTP, database, and provider observations establish production behavior.
 
-1. **Marketing website** (single landing page is fine)
-2. **Waitlist email capture** that reliably stores signups
+The canonical founder-ruling index is `docs/homa-planning/journeys/10-reconciliation.md` §5, including its later-ruling register. A later founder ruling can supersede the PRD only after it is entered there with its original dated source. Code does not silently overturn policy, and a plan does not prove implementation or deployment.
 
-Everything else is sequenced by dependency, not by calendar. There are no week/day
-estimates anywhere in this plan on purpose, agents build at agent speed; order and
-gates are what matter.
+Current evidence lives in `docs/homa-planning/reconciliation/`:
 
----
+- `documentation-manifest.tsv`: disposition of every documentation file.
+- `claim-ledger.tsv`: material claims, authority, evidence, and resolution.
+- `evidence/repository-baseline.md`: time-bounded repository observations.
+- `evidence/production-baseline.md`: time-bounded deployment and production observations.
 
-## Deliverable 0 · Conference landing page + waitlist (BUILD THIS FIRST)
+The latest recorded production baseline is a snapshot, not a standing guarantee. Refresh it whenever a completion claim depends on current production state.
 
-| What | Where the spec lives |
-|---|---|
-| Copy: hero variants (3), CTAs, taglines, pitch | `docs/homa-planning/journeys/07-positioning-messaging.md` §copy kit |
-| Positioning rules (category, anchor, never-say list) | same doc §1 and §6 |
-| Landing structure + channel-variant bands, waitlist flow | `docs/homa-planning/journeys/02-acquisition-activation.md` §1 + MJ-09 in `docs/homa-planning/journeys/10-reconciliation.md` §2 |
-| Visual system: tokens, components, landing UI kit | `docs/homa-design/`, read `docs/homa-design/SKILL.md` first, then `readme.md`; kit at `docs/homa-design/ui_kits/landing/` |
-| Waitlist storage | Supabase table `waitlist` (email, source/utm, state, kids' age bands optional, created_at) + confirmation state. RLS on. Double-opt-in email can wait; reliable capture cannot. |
-| Conference mode | A QR-friendly URL (e.g. `/conference`) with the conference band variant; capture works flawlessly on a phone on bad convention-center wifi (optimistic UI + retry) |
+## Read before changing product code
 
-Hard constraints (violations = do not ship):
-- **NO fabricated social proof** (no invented family counts/testimonials, ruling C2).
-- **No pricing on the page**, invite-only framing + waitlist only. Sticker
-  prices v1 exist in Stripe as of 2026-07-06 ($19/mo, $99/yr, Pro $49/mo,
-  build-log) but stay OFF the site until the paywall decision; allotments and
-  revisions still derive from real margin data (decision T2). The
-  "founding families" phrase is retired everywhere (founder ruling 2026-07-06):
-  say "invite list", "first families", or "invite-only" instead.
-- Brand voice law: sentence case, **no em dashes ever**, reassure-before-inform, HOMA
-  in UI surfaces / Homa in prose (D8). Never claim "first/only AI homeschool
-  assistant" (ruling C3). Clarity and low cognitive load beat personality
-  (founder ruling 2026-07-08); the copy rulebook is
-  `.agents/skills/homa-copy-writer/SKILL.md`.
-- Copy leads with the efficacy story ("know exactly where your child stands, without
-  ever testing them, and watch the numbers move"), anchored per positioning doc.
+1. `AGENTS.md` for commands, boundaries, copy rules, and deployment discipline.
+2. `docs/homa-planning/13-mr-prd.md` for the product contract and its reconciliation status.
+3. `docs/homa-planning/journeys/10-reconciliation.md` §5 for founder rulings and later supersessions.
+4. The named backlog ticket and its current implementation plan, if one exists.
+5. The code, tests, configuration, and migrations that currently own the behavior.
+6. `docs/homa-design/SKILL.md`, then `docs/homa-design/readme.md`, for UI or copy work.
 
-Definition of done: deployed to production URL, waitlist rows verified in Supabase,
-tested from a phone, Alessa can read every word out loud without wincing (no booth,
-per build-log #11: she says "thankshoma.com" in conversation). The copy pass and
-the homa-design v2 wireframe replacement shipped 2026-07-04 (build-log). Remaining
-before July 13: the founder read-aloud, the phone test, the D6 waitlist announce
-email, and the LLM report narrative behind its server flag (plans/
-2026-07-06-llm-report-narrative-implementation-prompt.md).
+Historical phase narratives and shipped-work notes live in `docs/homa-planning/build-log.md` and dated plans. They are evidence of what was decided or observed at that time, not a substitute for current repository or production verification.
 
-**Superseded surface (founder decision 2026-07-05, "ship all"):** the bare
-waitlist form was replaced by the child's-map lead magnet at `/onboarding`
-(renamed from `/map` on 2026-07-06, founder call; email is the one S1
-field and the name arrives at account signup, founder call 2026-07-06
-third revision, per-child observable
-checklist for ages 2 to 16, deterministic benchmark scoring in
-`packages/core/src/map/`, report page + Resend email, deny-all `lead_*`
-tables behind server routes). Numbers stay deterministic code; the report's
-parent-facing prose moves to LLM generation per the D8-overturn ruling
-(build-log 2026-07-06 night, behind a server flag until the read-aloud
-passes). `/waitlist`, `/conference`, and `/map`
-308-redirect to `/onboarding`; every lead still writes a `public.waitlist` row, so
-MJ-09's invite path is unchanged. Plan + decisions: `docs/homa-planning/
-lead-magnet/` and build-log 2026-07-05. New bands ship into
-`packages/core/src/map/content.ts` behind `pnpm check:map` and the D3 rigor
-bar (each new band: cited items, linter green, founder read-aloud).
+## Repository shape
 
----
+- `apps/web`: the one deployable Next.js application, including marketing, onboarding, authenticated product routes, and the eve agent.
+- `apps/mobile`: an Expo client using the same Supabase and web-agent backend. It is not part of the root `pnpm dev` task.
+- `packages/core`: shared events, map content and scoring, schemas, and other domain code.
+- `packages/taxonomy`: the skill graph and its validation tooling.
+- `packages/design`: an upcoming shared package under ticket M1-17. Web and mobile currently keep synchronized local copies.
+- `supabase/migrations`: local migration history. Local file presence never proves remote application.
+- `docs/homa-planning`: product contract, ticket backlog, dated plans, decisions, runbooks, and historical research.
+- `docs/homa-design`: canonical design source.
+- `docs/homa-benchmarks`: dated benchmark evidence and source material for the map bank.
 
-## Reading order (before writing product code beyond Deliverable 0)
+The route and package-specific maps belong in `apps/web/README.md` and `apps/mobile/README.md`. Do not duplicate them here.
 
-1. `docs/homa-planning/13-mr-prd.md`, THE CONTRACT. FR-1…FR-11, non-goals, launch gates.
-2. `docs/homa-planning/01-architecture.md`, tenancy model, state model, session rotation,
-   verified eve facts. The "laws" in it are binding.
-3. `docs/homa-planning/journeys/10-reconciliation.md` §5, every founder decision
-   (D1–D9, T1–T3). Do not relitigate any of these in code.
-4. Feature specs as you build each FR:
-   - Onboarding/wow/drip → `journeys/02` (copy is binding)
-   - Features + Gherkin acceptance criteria → `journeys/04`
-   - Weekly loop + example notes (tone is binding) → `journeys/03`
-   - Edge behavior catalog (launch-blocking rows = acceptance criteria) → `journeys/05`
-   - Event names/properties for EVERYTHING → `journeys/06` (emit via typed registry;
-     no feature merges without its events)
-5. `docs/homa-design/SKILL.md` → tokens/components for all UI.
-   - **Chat UI stack (decided 2026-07-03):** eve `useEveAgent` drives state →
-     **shadcn** chat components render (init shadcn in `apps/web` during M1-04; verify
-     current component APIs via the shadcn skill) → homa-design tokens re-theme them.
-     Never ship the default shadcn look. eve messages are AI-SDK `UIMessage`-shaped, so
-     they feed shadcn's AI-SDK primitives directly. Do not use shadcn's own data/chat
-     hooks, eve owns session state.
-6. Reference when relevant: `docs/homa-planning/05` (platform limits/pricing),
-   `docs/homa-planning/07` (eve source-code findings), `docs/homa-planning/11` (Hermes
-   implementation patterns for the learning loop/memory/search),
-   `docs/homa-planning/10-real-usage-cost-model.md` (real usage numbers).
+## Current implementation boundaries
 
-The `homa-macmini/` and `homa-template/` folders are READ-ONLY reference (the working
-single-family system and its templatized domain assets, port from `homa-template/`,
-never modify either).
+- Web callers reach Supabase with their own JWT, so RLS is the browser-session tenancy wall.
+- SMS, email, dispatch, and other server-originated channels derive a family from authenticated transport mappings, then call family-pinned server libraries. They do not accept a model-chosen family.
+- Ticket M1-02 owns the remaining non-service-role plus transaction-local `SET LOCAL` hardening for server-originated database work.
+- Generated artifacts are uploaded to durable storage before the turn ends. Sandbox and local files are scratch space only.
+- `packages/design` does not yet supply runtime tokens or components. Ticket M1-17 owns that integration.
+- State-requirement snapshots are reviewed legal-reference data. Product display does not re-verify statutes on every render.
+- The public map uses national developmental and academic benchmarks. State-requirement data describes homeschool law, not state academic standards.
 
-## Build order after Deliverable 0 (dependency-sequenced)
+If a capability is absent from the current repository or lacks production evidence, describe it only with a registered upcoming ticket or remove the claim.
 
-- **Phase A, Engine proof: ✅ CLEARED for Phase B, de-risked
-  (decided 2026-07-05: staying on eve, not ejecting to M0-02).** M0-01 found
-  a reproducible eve failure (test a: a session parked in HITL across a
-  version bump silently fails to resume) mitigated by the harness guard
-  below. A second finding from continuing the spike locally (test b: a step
-  killed mid-flight never resumes in `eve dev`) was **retested against real
-  Vercel preview deployments** and passed cleanly, cross-deployment session
-  continuity works correctly on actual Vercel Workflow, so the local finding
-  looks like a local-dev-world limitation, not a production risk (narrower
-  question of literal mid-step crash recovery on Vercel remains untested,
-  harder to replicate against real infra, but de-risked). Adapted test (e)
-  passed clean: zero cross-session leakage under concurrency, the single
-  most safety-critical property. Tests (c)/(d) are deferred until the
-  dispatcher/rotation code they test exists (M3-10/M1-02, M1-15). **Standing
-  mitigations, required going forward:** (1) `apps/web/lib/harness/
-  resume-session.ts`, dormant until Homa owns an HTTP resume path. Current
-  chat sends through eve's hook and uses `turn-recovery.ts` for dead-stream
-  replay; future schedule dispatch, parked-HITL, or other app-owned HTTP
-  resume paths MUST use this guard because it watches the event stream for
-  real progress instead of trusting `ok: true`; (2)
-  `scripts/eve-upgrade-check.mjs`, run before ANY eve version change, no
-  exceptions; (3) `docs/homa-planning/runbooks/eve-version-bump.md`, the
-  procedure tying both together. Reporting the test (a) bug upstream is a
-  parallel, non-blocking task. Full evidence: `eve-churn-log.md` and
-  `m0-01-adversarial-prototype-gate.md`. Then M0-03 worksheet-in-sandbox,
-  M0-04 voice-on-real-phones,
-  M0-05 Supabase schema v0 + RLS, M0-09 monorepo bootstrap: **pnpm workspaces +
-  Turborepo**: `apps/web` (Next.js, the ONE deployable, with the eve agent
-  mounted inside it via `withEve()` at `apps/web/agent/`), `packages/core`
-  (domain system ported from the template-archive branch), `packages/design`
-  (homa-design tokens/components as a workspace package), `supabase/`
-  (migrations at repo root, the Supabase GitHub integration watches this;
-  connect the integration right after migration #1 lands). Enable Vercel remote
-  caching. The existing Supabase project is **homa-prod** (org: Homa, East US
-  N. Virginia; auto-RLS on, auto-expose off). **CI now exists**
-  (`.github/workflows/ci.yml`: typecheck + lint + build + `check:map` +
-  `check:events` + `check:skills-targeting` + `check:isolation` on every
-  push/PR), keep it green. The MJ-08 events-registry parity check landed
-  2026-07-06 (`scripts/events-check.mts`).
+## Non-negotiable laws
 
-  **Platform ceilings to design around** (full detail: `05-vercel-platform-facts.md`):
-  Sandbox is `iad1`-region only, 200 vCPUs/min creation rate caps fan-out speed,
-  snapshots auto-expire after 30 days; Workflow runs cap at 25,000 events /
-  10,000 steps and retain only 7 days post-completion on Pro ($0.50/GB-mo
-  beyond); Function duration is 300s default, 30 min max (Pro). M0-01's
-  100-family fan-out test and M0-03's latency spike should be designed against
-  these numbers, not discovered by them.
+1. Tenant identity comes from authenticated context or an authenticated transport mapping, never from model or client choice. Every model-supplied ID is re-scoped server-side. Run `pnpm check:isolation` before schema or query changes.
+2. Durable product state belongs in Postgres and durable artifacts belong in Blob storage. Conversation history and sandbox files are not load-bearing state.
+3. Features use the typed event registry. Billable capabilities also use the action-cost registry before they ship.
+4. Product language never uses red or a "behind" label for a child's progress and never compares siblings. Honest downward trajectory segments are allowed when the surrounding treatment stays neutral and growth-oriented.
+5. Child-photo personalization requires the D4 consent, retention, provider, and no-face-recognition floor. Private-by-default sharing for minors' media remains an unresolved founder decision and must not be invented.
+6. Distress content follows the companion-not-therapist and distress-data-firewall rules. Sensitive health and diagnosis memory remains an MJ-13 implementation gap under founder ruling D6.
+7. Homa copy uses sentence case, reassurance before information, offers rather than commands, and no em dash. HOMA appears in the wordmark and on UI surfaces; Homa appears in prose and conversation.
+8. eve version changes require `node scripts/eve-upgrade-check.mjs` and the procedure in `docs/homa-planning/runbooks/eve-version-bump.md`. Agent-module changes also require `pnpm --filter web exec eve build`.
+9. Production schema and production code ship together. Breaking migrations never lead the code that reads them. Use code-first deployment or expand-contract; additive migrations may lead.
+10. Imports remain at the top of the file. Do not add inline imports.
 
-- **Phase B, Walking skeleton, one family end-to-end: ⏳ STARTED
-  (2026-07-05, playable MVP live).** Built and E2E-verified: Supabase Auth
-  email/password (minimal M1-01; `proxy.ts` session refresh + route gating),
-  `create_my_family()` RPC (migration #6), child intake writing
-  `children.profile` (minimal M2-03i), eve channel auth stamping
-  familyId from the caller's own RLS context (`agent/channels/eve.ts`),
-  first two agent tools (`get_children`, `create_worksheet`, caller-scoped
-  DB access via `lib/agent-db.ts`, no service key), and a /chat surface on
-  `useEveAgent` with a printable worksheet card. Signup is OPEN (founder
-  ruling 2026-07-05, "no hoops": migration #8 dropped the invite trigger and
-  the `HOMA_SIGNUP_CODE` env var was removed; MJ-09 is invite distribution
-  to the waitlist cohort, not a signup wall). **Still open
-  in Phase B:** FR-1 proper (MJ-09: waitlist read path + invite codes +
-  invite email, the conference waitlist is still write-only), FR-2's real
-  3-minute wow funnel, FR-4 voice, FR-5 materials pipeline + photo consent
-  floor (current worksheets are text-exercise layouts, not the
-  reportlab/fal pipeline: M0-03 spike still pending), chat history
-  rehydration, **M1-08 minimal** (Resend transactional email: welcome,
-  journal-prompt, weekly-note, receipt templates + the
-  opens/clicks/unsubscribes webhook bridge per `journeys/06 §7`, domain
-  `mail.thankshoma.com` is verified and `RESEND_API_KEY` is in Vercel prod
-  as of 2026-07-04), platform laws (M1-07 isolation suite in CI from the
-  FIRST schema migration, smoke version running in CI now).
-- **Phase C, The living product:** FR-3 (drip), FR-6 (journal+hours), FR-7
-  (dashboard), FR-9 (learning loop), FR-10 (trust floor), FR-11 (founder ops).
-- **Phase D, Money + gates:** FR-8 concierge tooling, Payment Link trial-with-card,
-  the 8 launch gates in PRD §7, then invite #1.
-- **Parallel lane (independent agents):** 8–12 benchmarks/questionnaire track (D3,
-  behind the rigor bar), SEO state-page content, runbooks-as-built.
+## Verification before handoff
 
-## Non-negotiable laws (grep-able summary · full text in PRD/architecture)
+Run the commands listed in `AGENTS.md` that match the change. The full repository handoff gate is:
 
-1. `familyId` comes from auth context only; every tool re-scopes every model-supplied
-   ID; RLS via non-service role + `SET LOCAL`; isolation tests green in CI always.
-2. Nothing load-bearing lives in conversation history or sandbox filesystems , 
-   Postgres is truth, Blob for artifacts, upload before turn end.
-3. No feature merges without its events (typed registry) or, if billable, its
-   `action_costs` row.
-4. Anti-guilt display law: no red, no "behind", growth framing only; max one nudge
-   per weekly note; never compare siblings. Founder exception (2026-07-08):
-   trajectory LINE CHARTS may draw honest downward segments; copy still never
-   says "behind", and a drop never gets red or warning treatment.
-5. Child photos: consent screen + TTL + no-training DPAs + zero face recognition (D4).
-6. Distress-data firewall; companion-not-therapist (D5).
-7. Brand voice: no em dashes, sentence case, reassure-before-inform, offers never
-   commands.
-8. eve stays behind the harness interface (M1-14), including the frontend hook.
-9. Prod schema and prod code ship together: a breaking migration (rename, drop,
-   tightened constraint) never leads the deploy that reads it. Code first, deploy
-   READY, then migrate, or expand-contract. Additive migrations may lead.
-   (2026-07-10 /app outage; procedure in AGENTS.md § Deploys & migrations.)
+```sh
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm --filter web exec eve build
+pnpm check:isolation
+pnpm check:map
+pnpm check:events
+pnpm check:skills-targeting
+pnpm check:taxonomy
+```
 
-## When you are unsure
+During the documentation reconciliation, also run `pnpm check:docs`. The `--allow-open` form is an interim structural check only and is not a completion signal.
 
-Prefer the PRD over journey docs, journey docs over your judgment, and founder
-decisions (journeys/10 §5) over everything. If two documents conflict, check
-`journeys/10-reconciliation.md` §1 rulings first; if still unresolved, stop and ask
-Sidney rather than inventing policy. Log anything you were forced to decide alone in
-`docs/homa-planning/build-log.md` (create it) so decisions stay auditable.
+A green local build is not a green deployment. After a push that touches schema, agent modules, or the deployment pipeline, wait for the intended Vercel deployment to become READY, probe the affected live path, and record sanitized evidence before calling production work complete.
+
+## When sources conflict
+
+Do not invent policy. Record the exact claims, sources, evidence, and smallest missing decision in the reconciliation ledger. Ask the founder when the authority chain cannot resolve the conflict. Append the ruling to `docs/homa-planning/build-log.md`, then register it in `docs/homa-planning/journeys/10-reconciliation.md` §5 so the decision has one canonical index without erasing its dated source.
+
+Never access `homa-macmini/`, `homa-research/`, or `homa-template/`.

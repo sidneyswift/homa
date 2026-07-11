@@ -1,5 +1,7 @@
 # Curriculum crosswalk: math
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Curriculum crosswalk 13 (math), part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Publisher-first web research: scope-and-sequence pages and PDFs, placement test pages, and catalog pages from hmhco.com, singaporemath.com, mathusee.com, mathmammoth.com, rightstartmath.com, teachingtextbooks.com, beastacademy.com, goodandbeautiful.com, abeka.com, christianlight.org, and aop.com, with Cathy Duffy and homeschool comparison sites as labeled secondary sources. Every claim carries an inline link with access date; level-to-bank mappings are marked FACT or INFERENCE.

@@ -1,5 +1,7 @@
 # Social studies benchmarks, kindergarten to grade 10
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Social studies 06, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web searches plus full-document fetches of the primary frameworks: the C3 Framework PDF (socialstudies.org), Core Knowledge CKHG unit lists (coreknowledge.org), CEE 2010 economics and 2021 personal finance standards PDFs (councilforeconed.org, jumpstart.org), NAEP civics and US history results and achievement level pages (nationsreportcard.gov, nces.ed.gov), NCGE Geography for Life pages, ELOF and the 2010 Head Start framework, and state standards (Michigan 2019, New York K-8, Texas TEKS 2022, Virginia SOL 2023) for grade-placement evidence. Every number was read from a fetched source; grade-to-month anchors are the corpus convention.

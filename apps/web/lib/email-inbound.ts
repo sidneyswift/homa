@@ -20,6 +20,17 @@ export interface InboundEmail {
   fromEmail: string | null;
   subject: string;
   text: string;
+  messageId: string | null;
+  inReplyTo: string | null;
+  toEmails: string[];
+  authenticationResults: string | null;
+}
+
+export interface InboundEmailEvent {
+  emailId: string;
+  fromEmail: string | null;
+  subject: string;
+  messageId: string | null;
 }
 
 const SVIX_TOLERANCE_SECONDS = 5 * 60;
@@ -90,7 +101,77 @@ export function parseInboundEmail(body: unknown): InboundEmail {
       .replace(/\s+/g, " ");
   }
 
-  return { fromEmail, subject, text: stripReplyTail(text).trim() };
+  const headers = new Map<string, string>();
+  const rawHeaders = data.headers;
+  if (rawHeaders && !Array.isArray(rawHeaders) && typeof rawHeaders === "object") {
+    for (const [name, value] of Object.entries(rawHeaders)) {
+      if (typeof value === "string") headers.set(name.toLowerCase(), value);
+    }
+  } else if (Array.isArray(rawHeaders)) {
+    for (const header of rawHeaders) {
+      if (!header || typeof header !== "object") continue;
+      const name = (header as { name?: unknown }).name;
+      const value = (header as { value?: unknown }).value;
+      if (typeof name === "string" && typeof value === "string") {
+        headers.set(name.toLowerCase(), value);
+      }
+    }
+  }
+
+  return {
+    fromEmail,
+    subject,
+    text: stripReplyTail(text).trim(),
+    messageId: headers.get("message-id") ?? null,
+    inReplyTo: headers.get("in-reply-to") ?? null,
+    toEmails: Array.isArray(data.to)
+      ? data.to.filter((value): value is string => typeof value === "string")
+      : typeof data.to === "string"
+        ? [data.to]
+        : [],
+    authenticationResults: headers.get("authentication-results") ?? null,
+  };
+}
+
+export function parseInboundEmailEvent(body: unknown): InboundEmailEvent | null {
+  const event = (body ?? {}) as {
+    type?: unknown;
+    data?: Record<string, unknown>;
+  };
+  if (event.type !== "email.received" || !event.data) return null;
+  const emailId = event.data.email_id;
+  if (typeof emailId !== "string" || emailId.length === 0) return null;
+  const from =
+    typeof event.data.from === "string"
+      ? event.data.from.trim().toLowerCase()
+      : null;
+  return {
+    emailId,
+    fromEmail: from || null,
+    subject:
+      typeof event.data.subject === "string" ? event.data.subject : "",
+    messageId:
+      typeof event.data.message_id === "string"
+        ? event.data.message_id
+        : null,
+  };
+}
+
+export async function retrieveInboundEmail(
+  emailId: string,
+  apiKey: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<InboundEmail> {
+  const response = await fetchImpl(
+    `https://api.resend.com/emails/receiving/${encodeURIComponent(emailId)}`,
+    {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Resend receiving GET failed: HTTP ${response.status}`);
+  }
+  return parseInboundEmail(await response.json());
 }
 
 /** Cuts the quoted history a mail client appends under a reply. */
@@ -119,6 +200,8 @@ export function optOutIntent(text: string): "stop" | "start" | null {
 
 export interface FamilyEmailIdentity {
   familyId: string;
+  /** Stable adult identity when the sender is a signed-in member. */
+  memberUserId: string | null;
   /** The member's display name when the address matched a member's
    * sign-in email; null when only the family-level address matched. */
   memberDisplayName: string | null;
@@ -131,20 +214,32 @@ export async function findFamilyIdentityByEmail(
 ): Promise<FamilyEmailIdentity | null> {
   const sql = mapDb();
   const normalized = email.toLowerCase();
-  const rows = await sql<{ family_id: string; display_name: string | null }[]>`
-    select m.family_id, m.display_name
+  const rows = await sql<
+    { family_id: string; member_user_id: string; display_name: string | null }[]
+  >`
+    select m.family_id, m.user_id as member_user_id, m.display_name
     from public.family_members m
     join auth.users u on u.id = m.user_id
     where lower(u.email) = ${normalized}
     limit 1
   `;
   if (rows[0]) {
-    return { familyId: rows[0].family_id, memberDisplayName: rows[0].display_name };
+    return {
+      familyId: rows[0].family_id,
+      memberUserId: rows[0].member_user_id,
+      memberDisplayName: rows[0].display_name,
+    };
   }
   const familyRows = await sql<{ id: string }[]>`
     select id from public.families where lower(email) = ${normalized} limit 1
   `;
-  return familyRows[0] ? { familyId: familyRows[0].id, memberDisplayName: null } : null;
+  return familyRows[0]
+    ? {
+        familyId: familyRows[0].id,
+        memberUserId: null,
+        memberDisplayName: null,
+      }
+    : null;
 }
 
 export async function setJournalOptOut(familyId: string, out: boolean): Promise<void> {

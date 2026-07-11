@@ -1,5 +1,7 @@
 # Early childhood benchmarks, ages 2 to 5
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Early childhood 01, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web search plus direct page and PDF fetches on 2026-07-06, going to primary sources: the CDC 2022 milestone checklists (combined PDF and live pages), the Head Start ELOF 2015 framework PDF, ASHA milestone pages, learningtrajectories.org level documents, state kindergarten readiness assessment documents, and peer-reviewed anchors (Zubler et al. 2022, Hustad et al. 2021, Crowe and McLeod 2020, Wellman et al. 2001, Piasta et al. 2012, NELP 2008, AASM 2016). Secondary clinical references (Merck consumer table, AAP HealthyChildren, pediatric OT and PT pages) fill gaps the primary frameworks do not cover.

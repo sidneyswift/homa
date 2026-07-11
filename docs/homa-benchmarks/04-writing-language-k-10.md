@@ -1,5 +1,7 @@
 # Writing and language benchmarks, kindergarten to grade 10
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Writing and language 04, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Fetched the CCSS ELA Writing and Language standards text grade by grade from the official standards site, then web-searched primary and near-primary sources for each sub-lane (ERIC records, federal WWC reports, state education department documents, publisher program pages, ASHA-journal norms) and transcribed only numbers visible in a fetched source. Grade-to-month anchors use the folder's end-of-grade convention and are always labeled as convention.

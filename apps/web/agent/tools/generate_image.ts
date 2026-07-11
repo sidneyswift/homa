@@ -9,8 +9,8 @@ import {
   generateStudioImage,
   IMAGE_SHAPES,
 } from "../../lib/materials/generate-image";
-import { sendWaitTextOnce } from "../../lib/materials/sms-ack";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
+import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
@@ -83,11 +83,10 @@ export default defineTool({
       | undefined;
     const channel = usageChannelFromAttributes(ctx.session.auth.current?.attributes);
 
-    // Image generation is the slow leg of an SMS material build; one
-    // wait text covers it, deduped with the agent's own send_heads_up
-    // (lib/materials/sms-ack.ts).
+    // Image generation is the slow leg of an SMS material build. This
+    // fallback shares the progress window with send_heads_up.
     if (channel === "sms" && attributes?.phoneNumber) {
-      sendWaitTextOnce({
+      await sendSmsProgressTextOnce({
         familyId: access.familyId,
         phoneNumber: attributes.phoneNumber,
       });

@@ -1,19 +1,25 @@
 # ICP deep research (2026-07-06)
 
-Web-sourced evidence pass on Homa's ideal customer profile, commissioned to
-replace the planning corpus's single-interview assumption base with sourced
-findings. Produced by parallel research agents on 2026-07-06, one file per
-lane, then synthesized into the dossier (`00-icp-dossier.md`).
+This README is the current index and use policy for a dated research corpus.
+The numbered files preserve web-sourced evidence captured on 2026-07-06,
+except the methods glossary captured on 2026-07-10. Market sizes, prices,
+provider state, laws, audience counts, product comparisons, and
+recommendations are historical snapshots. Re-verify volatile claims before
+reuse.
+
+The pass was commissioned to test the planning corpus's small interview base
+against broader sourced evidence. No `00-icp-dossier.md` file survives in this
+repository, so the numbered lane files are the complete local record.
 
 ## How to read this folder
 
-Start with `00-icp-dossier.md` (the synthesis: who the ICP is, what changed
-vs the planning personas, assumption verdicts, and recommended actions).
-Drill into the numbered lane files for sources and verbatims.
+Choose the lane that matches the question, then read its dated method,
+confidence labels, sources, and caveats. A recommendation in a lane is part of
+that research snapshot unless a current product or marketing authority adopts
+it.
 
 | File | Lane |
 |---|---|
-| `00-icp-dossier.md` | Synthesis: ICP definition, persona deltas, verdict table, actions |
 | `01-market-size-demographics.md` | US homeschool market size, growth, demographics, TAM scaffold |
 | `02-community-voice-pains.md` | Pains in moms' own words: planning tax, records, burnout, guilt |
 | `03-benchmarks-behind-kid.md` | The A1 question: standards data for moms whose kid is behind |
@@ -27,14 +33,16 @@ Drill into the numbered lane files for sources and verbatims.
 
 ## Rules of this folder
 
-- Every factual claim carries an inline source link with an access date.
-  FACT and INFERENCE are separated; each section carries a confidence level.
-- Verbatims are exact quotes with URLs, usernames omitted, children's names
-  redacted. They are eligible signal sources for `marketing/` extraction
-  (unlike `[inv]` persona quotes in the journey docs, which stay banned).
-- Nothing here is legal advice. Product surfaces re-verify statutes before
-  display, per repo law.
-- Relationship to the journey docs: `journeys/01-personas-jtbd.md` remains
-  the persona cast of record. This folder is the evidence pass against it;
-  contradictions are listed in the dossier, and persona edits happen in the
-  journey docs only by founder decision.
+- Preserve each numbered file as a dated research record. Do not silently
+  rewrite an old finding to resemble current market or product state.
+- New research must link sources, record access dates, separate facts from
+  inference, and label confidence and sampling limits.
+- Treat verbatims as source material only when their file records a URL,
+  redaction boundary, and exact-quote method. Journey `[inv]` persona text is
+  not observed customer evidence.
+- Nothing here is legal advice. Re-verify statutes and program rules against
+  current primary sources before use.
+- Current product policy lives in the PRD and founder-ruling index. Current
+  marketing operations live in `marketing/AGENTS.md` and
+  `marketing/workflows/demand-engine.md`. This corpus supplies dated evidence
+  to those authorities; it does not override them.

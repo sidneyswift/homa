@@ -1,5 +1,7 @@
 # Neurodivergent and twice-exceptional trajectories
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** ND and 2e 12, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web search plus direct page and PDF fetches on 2026-07-06, prioritizing peer-reviewed primary sources (Ferrer 2010, Shaw 2007, Torgesen 2001, Crowe and McLeod 2020, Pokoski and Durkin 2025) and professional or government bodies (IDA, ASHA, CDC, NIMH, NAGC, Columbus Group). Advocacy sources are used for framing only, never for numbers. Cross-references to corpus lanes 01, 03, 08 and to `docs/homa-planning/icp-research/03-benchmarks-behind-kid.md`.

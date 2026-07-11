@@ -1,7 +1,11 @@
 # 14 · Marketing demand engine
 
-> **Status:** SPEC, approved by founder in the 2026-07-05 design session. Next step
-> is an implementation plan. Owner: Sidney (founder/PM).
+> **Status:** Approved dated DM1 through DM7 specification from the 2026-07-05
+> design session. The implementation now exists in the repository. Current
+> operational status belongs in `marketing/AGENTS.md` and
+> `marketing/workflows/demand-engine.md`; this file remains the decision and
+> acceptance-criteria source. Repository presence does not prove provider auth,
+> publication, delivery, or production behavior. Owner: Sidney (founder/PM).
 > **Provenance:** adapted from the founder's B2B consulting content engine (report:
 > "How the content pipeline works"). Every load-bearing principle is restated here,
 > so this doc stands alone.
@@ -310,10 +314,10 @@ promise. Options for the ruling:
 Until DM7 is ruled: emails are staged, never sent, and `marketing-distributor`
 says exactly that when asked to publish the email format.
 
-Mechanics once unblocked: distributor sends via Resend (`RESEND_API_KEY` already
-in `apps/web/.env.local` and Vercel, never committed). Recipient list comes from
-the Supabase waitlist via the agent's Supabase MCP (scoped to the Homa org);
-the write-only RLS on the public surface stays untouched.
+Mechanics once unblocked: the distributor may send through Resend only after the
+credential, audience scope, and production configuration are re-verified without
+recording secrets in documentation. Recipient selection must use a family-safe,
+auditable waitlist path. The public write-only RLS boundary stays untouched.
 
 ## 11. Distribution: what works day one vs what is blocked
 
@@ -321,11 +325,11 @@ the write-only RLS on the public surface stays untouched.
 trigger, and writes `distribution.md` (canonical URLs, publish times) before moving
 the bundle to `content/published/`.
 
-| Channel | Day-one status | Unblocked by |
+| Channel | Repository or policy status | Still requires |
 |---|---|---|
-| Blog | WORKS (git is the channel) | Nothing |
-| Email | Staged only | DM7 ruling (§10) |
-| TikTok, Instagram, Pinterest, Facebook, YouTube, X | Wired to Postiz CLI, staged only | Human: register @thankshoma handles (HUMAN-TODO), connect each in Postiz, run `postiz auth:login` |
+| Blog | Route and git publishing design exist; no approved article is present in `apps/web/content/blog/` | Approved bundle, CI result, deployment, and live article probe |
+| Email | Staged only by policy | DM7 ruling, recipient-scope review, credential and delivery verification |
+| TikTok, Instagram, Pinterest, Facebook, YouTube, X | Postiz procedure exists; provider auth and account connections are unverified | Verified handles, connected accounts, auth, and a bounded publish test |
 
 Postiz wiring per its skill: `auth:status` check first, `postiz upload` every
 media file, then `posts:create` per channel with platform settings. If auth or an
@@ -384,13 +388,18 @@ edit can remove a rail:
    real names of moms or kids in `raw/` or `signals/`). Engagement data is
    aggregate only.
 4. **Voice laws** (from repo AGENTS.md + `docs/homa-design/`): no em dash, ever;
-   "Homa" in prose, "HOMA" only in wordmark treatments; sentence case;
+   "Homa" in prose, "HOMA" in the wordmark and on UI surfaces; sentence case;
    reassure-before-inform; offers never commands; no "behind" framing; never
    compare siblings.
 5. **Secrets:** no keys in `marketing/` or in any bundle; Resend/Postiz/Higgsfield
    credentials live in env/local config only.
 
-## 16. Acceptance criteria (v1 done means)
+## 16. Historical acceptance criteria
+
+These criteria define the approved v1 target. They are not a current completion
+claim. The operational workflow owns step status, and production-dependent items
+require direct evidence. As of the 2026-07-11 reconciliation, criterion 4 is not
+met because no approved article is present in `apps/web/content/blog/`.
 
 1. `marketing/` exists per §4 with real content in AGENTS.md, all four personas,
    house-style.md, the workflow map, all three routine files, and the scorer.

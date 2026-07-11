@@ -1,18 +1,21 @@
 # Evidence · tester voice memos · 2026-07-07
 
+> Historical raw evidence. The transcripts are preserved verbatim from the
+> 2026-07-07 transcription pass. Editorial metadata and related-work locators
+> may be corrected, but this file does not describe current product status.
+
 Fourteen voice memos recorded 2026-07-07 between 15:32 and 16:39 by a pilot
 tester (a homeschooling mom) walking through the product and thinking out loud
-about marketing. Audio stays out of the repo: `~/Downloads/homa-notes-july-7/`
-(14 `.m4a` files, ~11 minutes total). Transcribed 2026-07-07 with Whisper via
-fal.ai (`fal-ai/whisper`).
+about marketing. The source audio was intentionally not committed. Fourteen
+`.m4a` files totaling about 11 minutes were transcribed 2026-07-07 with Whisper
+via fal.ai (`fal-ai/whisper`).
 
 Handling notes:
 
 - Transcripts are verbatim ASR output, never rewritten. Load-bearing
   mishearings, flagged here instead of edited inline: "the little homo guy" is
-  the Homa mark; "Talk to Home" is the "Talk to Homa" button
-  (`apps/web/app/home/page.tsx`); "teach tap done" is the landing section
-  "Teach, tap, done" (`apps/web/components/marketing/thread/HowThread.tsx`);
+  the Homa mark; "Talk to Home" referred to a now-removed home surface;
+  "teach tap done" referred to a landing section present during the test;
   "on the back and eventually" is "on the back end eventually"; "when they
   download HOMA at night" means downloading the day to Homa; "Alyssa" is most
   likely Alessa (planning-doc spelling); "her son, story is three" in memo 10
@@ -37,14 +40,14 @@ Product asks:
 | 5 | Explain how the points are created; short "how to talk to Homa" tutorial; praise for the landing thread squiggle | Report + onboarding; M2-03; `/onboarding/method` exists but is not discoverable enough |
 | 6 | Kid card lists subjects already discussed; tap kid + subject to open a pre-scoped chat, "shortcuts from point A to point B" | Home; J2 daily loop |
 | 7 | Calendar of done/planned work, Homa inserts the worksheets, photos of the day's work catalogued per day, retroactive edits, portfolio accretes | J2/J4; M2-04 observations; M3-11 efficacy loop |
-| 13 | Parent-facing closing line belongs in chat; the sheet's message should speak to the child; keep "Made with Homa for [name]"; add a Homa watermark for provenance | `apps/web/agent/tools/create_worksheet.ts`; D7 footer attribution |
+| 13 | Parent-facing closing line belongs in chat; the sheet's message should speak to the child; keep "Made with Homa for [name]"; add a Homa watermark for provenance | Current printable path: `apps/web/agent/tools/create_printable.ts`; D7 footer attribution |
 | 14 | The loop in her words: assess once, photograph work through the week, nightly download to Homa, evidence-based adjustment, "solid metrics to go after" | M3-11 efficacy loop |
 
 Copy flag (founder call, nothing changed yet):
 
 | Memo | Flag | Surface |
 |---|---|---|
-| 8 | "It ran our homeschool first" reads as Homa in control, "instead of Homa is assisting" | `apps/web/components/marketing/Stories.tsx` L28 |
+| 8 | "It ran our homeschool first" read as Homa in control rather than assisting | Historical landing-copy flag; current copy must be re-located before reuse |
 
 Marketing ideas (all in `marketing/signals/`; memos 8 and 14 also yielded one signal each):
 

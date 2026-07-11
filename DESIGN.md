@@ -102,9 +102,9 @@ Corners are soft and rounded, never sharp: `sm` 10px, `md` 16px, `lg` 22px (the 
 
 Full component catalog (Badge, Callout, Chip, Skeleton, EmptyState, Doodle, Squiggle, navigation, and more) with props and usage in `docs/homa-design/components/`.
 
-## Do's and Don'ts
+## Copy and usage rules
 
-- **Do** write "Homa" in title case everywhere in prose; reserve all-caps "HOMA" for UI-surface wordmark treatments only.
+- **Do** write "Homa" in prose and conversation; use "HOMA" for the wordmark and on UI surfaces, per global founder ruling D8.
 - **Do** lead with growth, effort, and "on track" framing on any dashboard or report.
 - **Don't** use an em dash, anywhere, ever, use a comma, period, colon, or mid-dot instead.
 - **Don't** show a red "behind" label or compare siblings, this is a hard anti-guilt law, not a style preference.

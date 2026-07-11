@@ -1,6 +1,6 @@
 # Runbook: bumping the pinned eve version
 
-> Early exception to M4-09 (`planning/runbooks/` is a post-Deliverable-0
+> Early exception to M4-09 (`docs/homa-planning/runbooks/` is a post-Deliverable-0
 > ticket): this one exists now because the need is real now, not later. See
 > `docs/homa-planning/eve-churn-log.md` (2026-07-04) for why: a session
 > parked in HITL corrupted on resume across an eve patch bump, and the
@@ -20,12 +20,25 @@ a patch release.
 
 ### 1. Read the changelog first
 
-Check `node_modules/eve/CHANGELOG.md` (or the release notes) for the target
+Check `apps/web/node_modules/eve/CHANGELOG.md` (or the release notes) for the target
 version and everything between it and the current pin. Flag anything
-mentioning "tool", "replay", "workflow", "event log", or "durable" — those
+mentioning "tool", "replay", "workflow", "event log", or "durable"; those
 are the categories that have already broken a parked session once.
 
 ### 2. Run the automated regression check
+
+Start from a clean working tree and record the current `apps/web/package.json`,
+`pnpm-lock.yaml`, installed package, and patch state. The check changes the Eve
+dependency, runs `pnpm install` three times, starts local servers, and calls the
+configured model through AI Gateway. It needs package-network access and the
+model credentials used by `apps/web/agent/model.ts`. If it is interrupted,
+restore the original pin and lockfile, run `pnpm install`, and verify the diff
+before doing anything else.
+
+Eve also has a version-specific pnpm patch. Inspect
+`pnpm-workspace.yaml` and `patches/eve@0.19.0.patch`. The candidate regression
+run is unpatched. Before accepting a new pin, prove that each patch hunk is
+upstream or port it to a patch named for the candidate version.
 
 ```bash
 node scripts/eve-upgrade-check.mjs --to <candidate-version>
@@ -41,36 +54,32 @@ as unsafe until eve fixes it.
 
 ### 3. Check for live parked sessions before deploying
 
-Once real families exist (post Phase B), query for anything currently
-parked in HITL before shipping the version bump:
+The repository does not currently have an executable inventory of Eve sessions
+parked in HITL. Product conversation tables store messages, episodes, bindings,
+and runtime session IDs, but not parked status or continuation tokens. M1-15 owns
+the session-lifecycle inventory and rotation work.
 
-```sql
--- TODO(M1-02): once the conversations/session table exists, this becomes:
--- select session_id, family_id, parked_since from conversations
---   where status = 'waiting_on_human';
-```
-
-If anything is parked: either wait for it to clear naturally, or resolve it
-gracefully (send a "let's pick this back up" message that starts a fresh
-turn) before changing the pin. Never let a real, in-flight HITL pause sit
-across a version-changing deploy — that's the exact condition that broke.
-
-Today (pre-Phase B, no real sessions exist), this step is a no-op; it
-becomes real the moment M1-02's conversations table ships.
+Until that inventory exists, a production Eve bump is blocked unless an
+authorized provider-side query can prove there are no parked sessions. Do not
+infer absence from product tables or the age of the deployment. If anything is
+parked, wait for it to clear or resolve it gracefully before changing the pin.
+Never let an in-flight HITL pause sit across a version-changing deploy; that is
+the exact condition that broke.
 
 ### 4. Deploy, then verify
 
-After deploying the new pin, run a quick smoke check against production
-(start a session, park it deliberately via `ask_question`, confirm it parks
-and can resume normally) before considering the bump done. This is cheap
-insurance beyond the local regression check, since production is the only
-environment that's fully representative.
+After deploying the new pin, use an authorized synthetic account to start a
+production session, park it deliberately through `ask_question`, and confirm
+that the same session resumes. Record the deployment, synthetic principal,
+session identifier, timestamps, and sanitized result, then remove the fixture.
+The current production baseline does not contain this evidence. Without an
+authenticated procedure and cleanup authority, the bump remains unverified.
 
 ### 5. Log the outcome
 
 One line in `eve-churn-log.md` either way: version, date, changelog flags (if
 any), regression check result. The log's whole purpose is giving the eject
-tripwire (`12-roadmap-okrs.md` §tripwires) real data — a bump with nothing to
+tripwire (`12-roadmap-okrs.md` §tripwires) real data. A bump with nothing to
 report is still worth a line ("clean bump, no issues").
 
 ## What this runbook does not solve

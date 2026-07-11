@@ -28,8 +28,14 @@ import { THANK_YOU_CARD_WISHES, thankYouCardMessage } from "./message";
  * backlog (newest signups queue alongside older ones), bounded by the cap.
  */
 
-/** Sends per cron run (hourly), a velocity brake under the monthly cap. */
-const SEND_BATCH_LIMIT = 10;
+/** Sends per cron run (hourly). ONE on purpose, not just a velocity
+ *  brake: each order charges the card on file for the same amount, and
+ *  the payment processor's duplicate-transaction window declines
+ *  same-amount charges placed seconds apart ("Can't get transaction id
+ *  with card payment", first live sweep 2026-07-11: card 1 and 3
+ *  declined around card 2's success). One per hourly run keeps every
+ *  charge well outside the window; a backlog drains itself in a day. */
+const SEND_BATCH_LIMIT = 1;
 const MAX_SEND_ATTEMPTS = 3;
 const DEFAULT_MONTHLY_CAP = 150;
 const STALE_PROCESSING_MINUTES = 30;
@@ -145,7 +151,6 @@ interface QueuedCardRow {
   address_zip: string;
   message: string;
   attempts: number;
-  processing_started_at: string;
 }
 
 async function sendQueuedCards(): Promise<{ sent: number; failed: number }> {
@@ -196,7 +201,7 @@ async function sendQueuedCards(): Promise<{ sent: number; failed: number }> {
       )
       returning c.id, c.family_id, c.recipient_first_name, c.recipient_last_name,
                 c.address_line, c.address_city, c.us_state, c.address_zip,
-                c.message, c.attempts, c.processing_started_at::text as processing_started_at
+                c.message, c.attempts
     )
     select * from claimed
   `;
@@ -215,6 +220,11 @@ async function sendQueuedCards(): Promise<{ sent: number; failed: number }> {
         message: card.message,
         wishes: THANK_YOU_CARD_WISHES,
       });
+      // Optimistic lock on attempts, not on a timestamp: attempts is an
+      // int that increments on every claim, so it round-trips exactly.
+      // The prior processing_started_at text guard never matched in prod
+      // (2026-07-11 5pm incident: a PAID vendor order went unrecorded and
+      // the row stayed claimable, a double-send in the making).
       const recorded = await sql<{ id: string }[]>`
         update public.thank_you_cards
         set status = 'sent',
@@ -222,7 +232,7 @@ async function sendQueuedCards(): Promise<{ sent: number; failed: number }> {
             sent_at = now(),
             processing_started_at = null,
             error = null
-        where id = ${card.id} and processing_started_at = ${card.processing_started_at}::timestamptz
+        where id = ${card.id} and status = 'sending' and attempts = ${card.attempts}
         returning id
       `;
       if (recorded.length > 0) {
@@ -236,7 +246,7 @@ async function sendQueuedCards(): Promise<{ sent: number; failed: number }> {
         set error = ${detail.slice(0, 500)},
             processing_started_at = null,
             status = case when attempts >= ${MAX_SEND_ATTEMPTS} then 'failed' else 'queued' end
-        where id = ${card.id} and processing_started_at = ${card.processing_started_at}::timestamptz
+        where id = ${card.id} and status = 'sending' and attempts = ${card.attempts}
         returning status
       `;
       if (parked[0]?.status === "failed") failed += 1;

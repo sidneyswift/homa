@@ -6,7 +6,8 @@ source:
   type: field-note
   ref: marketing/raw/2026-07-08-tiktok-strategy-field-research.md
   locator: "L161-164"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "Hook: This workbook was technically her grade level. It still

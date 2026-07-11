@@ -5,9 +5,9 @@
  * Stops cleanly at the two human gates (account funding, OTP PIN).
  *
  * What it provisions, in order:
- *   1. Balance check (needs funds: number ~$1/mo, brand $4 one-time,
- *      campaign $15 vetting + $2/mo, then usage: SMS ~$0.007/msg,
- *      voice AI $0.05/min).
+ *   1. Balance check. The dollar figures recorded in the 2026-07-07 build
+ *      notes are historical estimates; verify current Telnyx pricing before
+ *      any paid order or registration.
  *   2. One US local number with SMS + voice (prefers area code 202).
  *   3. Messaging profile pointed at the eve webhook
  *      (https://thankshoma.com/eve/v1/chat/telnyx) + number assignment.
@@ -21,7 +21,9 @@
  * Usage:
  *   pnpm telnyx:provision                  walk all steps, skip done ones
  *   pnpm telnyx:provision --verify-otp N   submit the brand OTP PIN
- *   pnpm telnyx:provision --status         read-only report, change nothing
+ *   pnpm telnyx:provision --status         report resource state; if the named
+ *                                         assistant exists, also sync its
+ *                                         instructions and tools by POST
  *
  * Env: apps/web/.env.local (TELNYX_API_KEY required; TELNYX_SP_* for the
  * brand step). Exit codes: 0 = done or cleanly waiting on a human gate,

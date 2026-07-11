@@ -1,9 +1,10 @@
 # Buying psychology and seasonality: homeschool family spending, price anchors, and the purchase calendar
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical research snapshot, 2026-07-06. Spending figures, prices,
+> seasonality, provider state, and recommendations are dated evidence, not
+> current product or production guidance. Re-verify volatile claims before
+> reuse. Current plan naming is Homa Plus; this file does not verify live
+> Stripe state.
 
 - **Date:** 2026-07-06
 - **Method:** web research conducted 2026-07-06. Sources: NHERI and HSLDA published surveys, vendor pricing pages, state ESA program documents and audit press coverage, homeschool forum threads (Well-Trained Mind, Confessions of a Homeschooler community), practitioner blogs, and trade press. Rigor is labeled per source. Forum threads are unscientific anecdote, labeled as such. Every number below traces to a link; nothing is invented.

@@ -1,3 +1,6 @@
+> Historical draft, not approved or sent. DM7 remains open, the invite framing
+> is stale, and the linked article returns 404. Do not distribute.
+
 subject: A calmer way to keep the hours log
 preview: One messy sentence, captured live. That's the system.
 

@@ -1,10 +1,32 @@
 # PRD · Homa Cohort One (M-R track)
 
-> **Status:** APPROVED FOR BUILD once M0-01 gate passes. Owner: Sidney (founder/PM).
-> This is the single document an engineering agent builds cohort one from. Detailed
-> specs live in the referenced journey docs; this PRD is the contract that binds them.
-> All founder decisions D1–D9, T1–T3 (journeys/10 §5) are baked in, do not relitigate
-> in implementation.
+> **Status:** approved 2026-07-03 cohort-one contract, retained as the historical
+> baseline. Owner: Sidney (founder/PM). Current policy is this baseline as amended by
+> the founder decision registry in `journeys/10-reconciliation.md` §5. Requirements
+> below describe product scope or named upcoming work unless repository and production
+> evidence separately prove implementation and deployment.
+
+## Contract reconciliation notice (2026-07-11)
+
+Later founder rulings changed several original cohort-one boundaries. The original text remains below so the decision history is readable. This table is the controlling interpretation and does not claim that the later policy is shipped.
+
+| Original clause | Current policy | Implementation boundary |
+|---|---|---|
+| §1 and §4 assume invited families and one shared login. | Signup is open, and the approved multi-parent v0 slice supersedes the one-login boundary. | Repository support and production verification are recorded separately; MJ-21 remains the long-term roles ticket. |
+| §3 excludes SMS and automated notes. | Full SMS onboarding and the approved morning-brief, evening-journal, and task loops are in scope under the later SMS and D-ht rulings. | Provider flags, delivery, and production runs require direct evidence. |
+| §3 defers ages 8 to 12 and all child-facing prompts. | Global D3 keeps full-range ambition. The product remains parent-facing, but a parent may choose to sit with a child during optional deep-dive prompts. | Do not claim a child account or child-facing AI chat. |
+| FR-1 mirrors leads into waitlist and family worlds. | The ONE WORLD ruling writes onboarding directly to family data. `/onboarding` is canonical and `/map` redirects. | Retired lead-table language is historical only. |
+| FR-2 promises four questions, a worksheet within three minutes, and checkout during onboarding. | The parent may choose a quick or deeper graph-first assessment. The progress report stays free, and a card prompt belongs at a paid action door. Full birthdays are collected product-wide. | No duration guarantee is current without timed evidence. Paywall activation remains gated by the wall plan. |
+| FR-6 and FR-7 describe hours versus state targets on the dashboard. | State-requirement data is a reviewed legal-reference snapshot. It is not state academic mapping. | Hours can be recorded, but the current repository does not show an hours-versus-target home tile. Keep that behavior ticketed rather than describing it as shipped. |
+| FR-7 specifies a card dashboard. | The later founder ruling makes the progress report the dashboard and intended app home. | The current repository renders chat at `/app` and the report at `/app/report`. M2-08 owns the remaining product-policy delta, and production behavior still requires direct evidence. |
+| FR-8 and §3 limit notes to concierge handling. | D-ht retains the morning brief and evening journal loops and adds Homa's tasks. | Scheduled delivery and model behavior remain production-dependent claims. |
+| FR-9 describes a Hermes-style digest and revision trail. | The learning loop may retain useful family context under the founder memory rules. | Current session review uses bounded verbatim, role-labeled rows rather than a generated digest. `profile_revisions` and D6 sensitive-memory handling remain implementation gaps; MJ-13 owns the sensitive-data work. |
+| FR-5 and D4 describe photo-personalized materials behind the consent and retention floor. | Global D4 remains binding, while private-by-default handling for minors' media is still an open founder decision. | Current material artifacts use public random-suffix Blob URLs. Do not describe the D4 privacy floor or private media storage as shipped without implementation and production evidence. |
+| §6 requires non-service-role access plus transaction-local `SET LOCAL`. | That remains the target tenancy law. | Browser sessions currently use caller JWT plus RLS; server-originated channels use authenticated family mappings and family-pinned libraries. Ticket M1-02 owns the remaining `SET LOCAL` hardening. |
+| §8 names Homa Pro and an entity dependency for SMS. | The upper tier is Homa Plus. The Telnyx sole-proprietor path removed the SMS entity dependency. | Stripe products, prices, and legal account state require fresh provider evidence. |
+| §7 lists launch gates as requirements before the first invite. | The gates remain historical acceptance criteria unless a later founder ruling supersedes one. | The current audit has not verified authenticated onboarding, Stripe, Telnyx delivery, material generation and persistence, successful scheduled runs, or private family data in production. |
+
+Open policy decisions remain D10, DM7 email consent scope, direct printer integration, and private-by-default handling for minors' media. Their canonical statements are in the founder decision registry. Do not invent resolutions in implementation.
 
 ## 1. What we are building
 

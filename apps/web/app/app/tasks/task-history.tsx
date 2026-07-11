@@ -41,6 +41,12 @@ function statusNote(run: TaskRunView): string | null {
             : null;
     case "skipped":
       return "Skipped: its time was already over. It runs again at the next scheduled time.";
+    case "partial":
+      return "Sent to part of the family. One delivery did not go through.";
+    case "partial_uncertain":
+      return "Sent to part of the family. Another phone carrier did not confirm the result.";
+    case "uncertain":
+      return "Homa sent this, but the phone carrier did not confirm the result.";
     case "failed":
       return "Didn't send. Homa tries again at the next scheduled time.";
     case "running":

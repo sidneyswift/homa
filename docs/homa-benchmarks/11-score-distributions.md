@@ -1,5 +1,7 @@
 # Score distributions and tolerance bands
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Distributions 11, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web search plus direct fetches of primary norm sources (Wordbank and Frank et al. 2017, Hasbrouck and Tindal 2017 as already held in lane 03, the NWEA 2025 MAP Growth Norms Technical Manual, hub.lexile.com, the CDC growth chart methodology page, the NIH Toolbox validation monograph and scoring manual, Hustad et al. 2021), capturing percentile curves and spreads rather than point anchors. Every derived number shows its derivation; nothing is from memory.

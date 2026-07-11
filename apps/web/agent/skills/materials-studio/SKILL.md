@@ -198,9 +198,9 @@ metadata means find_materials cannot find it next month, and the
    save_skill (e.g. "paw-patrol-worksheet": what made it work, the
    prompt pattern, the layout).
 
-On text (SMS), open with one short heads-up through send_heads_up
-before you design anything; a build is a silent minute or two on her
-phone otherwise. create_printable already delivered the passing version
-to her phone; follow with one short message naming the child and the
+On text (SMS), open with one short progress text through send_heads_up
+before you design anything. A build otherwise leaves her waiting on a
+silent phone. create_printable already delivered the passing version to
+her phone; follow with one short message naming the child and the
 skill. On web, the card is already visible; one warm sentence, never
 the links.

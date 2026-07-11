@@ -1,4 +1,5 @@
 id: 2026-07-05-how-to-track-homeschool-hours
+lifecycle: historical-draft
 source: marketing/signals/2026-07-05-hours-log-reconstructed-from-memory.md
 lanes: [article, video, email]
 formats:
@@ -17,3 +18,4 @@ gates:
   email: "reviewer(waitlist-subscriber) -> editor, both ran 2026-07-05, rewrites applied"
   micro-copy: "reviewer per persona batch (captions, pin, x) -> one editor pass over the set, ran 2026-07-05, rewrites applied"
 scorecard: marketing/evals/scorecards/2026-07-05-how-to-track-homeschool-hours.json
+notes: "Not approved or published. Mechanical scorecard results do not validate legal, numeric, product, route, automation, provider, consent, or production claims. The article URL returns 404 and DM7 blocks email. Rebuild before use."

@@ -1,3 +1,6 @@
+> Historical draft, not approved or published. Its legal, product, automation,
+> and article-link claims require a new evidence pass. Do not distribute.
+
 title: How to track homeschool hours without living in a spreadsheet
 
 description:

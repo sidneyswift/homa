@@ -11,9 +11,12 @@ are already fixed before style gets polished (the order law lives in
 
 ## How the orchestrator dispatches this gate
 
-Run a fresh subagent (in Cursor: the Task tool, `subagent_type:
-generalPurpose`, `readonly: true`). The dispatch prompt must contain, in this
-order, pasted verbatim:
+Use the current environment's delegation mechanism to run a second
+fresh-context, read-only subagent. Give it only the house style and
+post-reviewer draft named below, with no file-editing task. If the environment
+cannot enforce a read-only mode, state the restriction in the dispatch and
+keep all file edits with the orchestrator. The dispatch prompt must contain,
+in this order, pasted verbatim:
 
 1. The full text of `marketing/voice/house-style.md`.
 2. This instruction block:

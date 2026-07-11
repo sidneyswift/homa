@@ -25,5 +25,6 @@ signal per real finding, commit with message
 
 Hard rules, restated from the laws: aggregates only, no individual parent or
 child data anywhere, publish and send nothing. If no bundle has published
-social posts yet, still produce the report using waitlist deltas alone and say
-plainly that social analytics had nothing to read.
+social posts, Postiz is unauthenticated, or an authorized aggregate signup read
+is unavailable, record that evidence boundary and stop. Do not invent a report
+or claim that waitlist deltas work without a successful bounded read.

@@ -1,5 +1,9 @@
 # Benchmarks and the behind-kid mom: how homeschool parents relate to standards
 
+> Historical research snapshot, 2026-07-06. This file preserves the sampled
+> community evidence and analysis captured on that date. It is not current
+> product, health, or production guidance. Re-verify sources before reuse.
+
 **Date:** 2026-07-06
 **Lane:** ICP research 03, the A1 question (risk score 25/25 in `journeys/09-discovery-research-plan.md`)
 **Method:** Public-community mining, 2026-07-06: Reddit (r/homeschool, r/unschool, r/HomeschoolRecovery, r/Dyslexia) via web search and the PullPush archive API, Well-Trained Mind forums, homeschool blogs and influencer posts, plus NCES/Pew/NHERI segment statistics. Every verbatim is quoted exactly from the linked source, usernames omitted, no children's real names appeared in quoted material. FACT and INFERENCE are separated per section, with a confidence grade.

@@ -1,11 +1,17 @@
 import { defineSchedule } from "eve/schedules";
 
+import {
+  markStalePendingDeliveriesUncertain,
+  setTaskRunRuntimeSession,
+} from "../../lib/conversation-continuity/delivery-ledger";
+import { createProactiveEpisode } from "../../lib/conversation-continuity/ledger";
 import { loadBriefContext, renderBriefContext } from "../../lib/tasks/brief-context";
 import { enabledFamilyTaskKinds } from "../../lib/tasks/kinds";
 import {
   advanceTaskSchedule,
   beginTaskRun,
   claimDueFamilyTasks,
+  finishTaskRun,
   reapStaleTaskRuns,
   releaseTaskSchedule,
   seedFamilyTaskSchedules,
@@ -50,12 +56,13 @@ async function briefMessage(task: DueFamilyTask): Promise<string> {
   const context = await loadBriefContext(task.familyId);
   return [
     "It is this family's weekday morning research brief moment.",
-    "Load the research-brief skill FIRST and follow it exactly; it holds the selection rules, the two-beat shape, and the guardrails.",
+    "Load the research-brief skill FIRST and follow it exactly; it holds the selection rules, required format, and guardrails.",
     "",
     renderBriefContext(context),
     "",
+    "Follow the skill's exact four-block format: research headline, What I learned, Why it's interesting, and one executable Want me to CTA. Preserve the blank lines. Do not add a preamble, sign-off, saved-note line, or URL.",
     `Compose this morning's brief to ${task.parentFirstName ?? "the parent"} about ${task.kidPhrase}.`,
-    "Your reply is delivered to her EXACTLY as written, as a text message or short email: write only the brief itself, no preamble, no quotes, no sign-off.",
+    "Your reply is delivered EXACTLY as written by text or email.",
   ].join("\n");
 }
 
@@ -97,6 +104,7 @@ export default defineSchedule({
         if (enabledFamilyTaskKinds().length === 0) return;
         const now = new Date();
         await seedFamilyTaskSchedules(now);
+        await markStalePendingDeliveriesUncertain(now);
         await reapStaleTaskRuns(now);
         const tasks = await claimDueFamilyTasks({
           now,
@@ -105,6 +113,8 @@ export default defineSchedule({
         });
 
         for (const task of tasks) {
+          let runId: string | null = null;
+          let sessionStarted = false;
           try {
             if (!withinDeliveryWindow(task, now)) {
               // Too late to deliver today (e.g. the 9am brief claimed at
@@ -118,15 +128,19 @@ export default defineSchedule({
               continue;
             }
 
-            const runId = await beginTaskRun(task, now);
+            runId = await beginTaskRun(task, now);
             if (!runId) {
               // The outbox already holds a run for this local day: this
               // claim is an at-least-once redelivery. Advance and move on.
               await advanceTaskSchedule(task, now);
               continue;
             }
+            const episodeId = await createProactiveEpisode({
+              familyId: task.familyId,
+              now,
+            });
 
-            await receive(dispatchChannel, {
+            const session = await receive(dispatchChannel, {
               message: await buildTaskMessage(task),
               target: {
                 familyId: task.familyId,
@@ -136,6 +150,7 @@ export default defineSchedule({
                 kind: task.kind,
                 deliveryPref: task.deliveryPref,
                 label: task.label,
+                episodeId,
               },
               auth: {
                 authenticator: "dispatcher",
@@ -146,9 +161,12 @@ export default defineSchedule({
                   familyId: task.familyId,
                   taskRunId: runId,
                   taskKind: task.kind,
+                  episodeId,
                 },
               },
             });
+            sessionStarted = true;
+            await setTaskRunRuntimeSession(runId, session.id);
 
             // The session is started and durable; its channel finishes
             // the run. Advancing here (not after completion) is what
@@ -159,6 +177,17 @@ export default defineSchedule({
               `dispatch failed for family ${task.familyId} (${task.kind}):`,
               error instanceof Error ? error.message : "unknown",
             );
+            if (runId && !sessionStarted) {
+              await finishTaskRun(runId, {
+                familyId: task.familyId,
+                kind: task.kind,
+                status: "failed",
+                error:
+                  error instanceof Error
+                    ? error.message.slice(0, 500)
+                    : "session startup failed",
+              });
+            }
             await releaseTaskSchedule(task);
           }
         }

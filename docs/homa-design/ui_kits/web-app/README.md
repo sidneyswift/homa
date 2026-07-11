@@ -1,6 +1,11 @@
 # Homa, Web App UI kit
 
-Interactive recreation of the Homa desktop web app.
+> **Historical design prototype:** This July 2026 kit is preserved as visual
+> decision history. It is not the current route, pricing, identity, availability,
+> proof, or capability specification. Use the reconciled PRD, backlog, current
+> application code, and production evidence for those claims.
+
+Historical interactive Homa desktop-app prototype.
 
 **Flow:** Sign in (any credentials) → app shell with left nav → switch between **Ask Homa** (chat), **Progress** (dashboard), **Benchmarks** (skills checklist + impact), **Week planner**, and **Discover** (lesson-matched outings + community). `onboarding.html` is the first-run flow.
 

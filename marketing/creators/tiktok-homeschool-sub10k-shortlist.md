@@ -1,5 +1,9 @@
 # Creators · sub-10k TikTok homeschool shortlist (2026-07-08)
 
+> Historical external-research snapshot. Follower counts, recent posts,
+> eligibility, account status, and contact state require fresh verification.
+> No creator program or outreach is authorized by this file.
+
 Outreach tracker for the ambassador/UGC program. Source: founder research
 dump 2026-07-08 (part 3 of the paste whose parts 1-2 are in
 `marketing/raw/2026-07-08-*.md`). Selection criteria used: under 10k

@@ -1,6 +1,12 @@
 # Homa, Social templates
 
-Ready-to-use, on-brand social layouts at real export sizes. Open any file and Save-as-PDF or screenshot at 1× for a crisp asset. Swap copy freely; keep the lowercase wordmark, the warm-bright palette, chunky display headlines, and the serif italic accent.
+> **Historical design prototypes:** These July 2026 layouts are preserved as
+> visual decision history. They are not approved marketing, social proof, or
+> publication templates. Reuse requires current copy, design, consent, account,
+> and founder review.
+
+The layouts use real export sizes. Their embedded copy and old casing guidance
+are historical and must not be copied into current work.
 
 - `post-tip.html`, 1080×1080 feed post ("Tip of the week").
 - `quote-card.html`, 1080×1080 testimonial on playful navy.

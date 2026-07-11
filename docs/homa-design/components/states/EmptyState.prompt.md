@@ -1,3 +1,7 @@
+> **M1-17 prototype input:** This file documents a standalone design-system
+> specimen. It is not a production primitive until M1-17 ports and verifies it
+> in application code.
+
 Empty state as a warm invitation, never a dead end. Homa always offers the next step.
 
 ```jsx
@@ -11,3 +15,6 @@ Empty state as a warm invitation, never a dead end. Homa always offers the next 
 ```
 
 Copy pattern: state the fact gently, then offer help in Homa's voice.
+> **M1-17 prototype input:** This file documents a standalone design-system
+> specimen. It is not a production primitive until M1-17 ports and verifies it
+> in application code.

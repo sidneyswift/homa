@@ -1,5 +1,10 @@
 # Journey Workstream Reconciliation — Senior PM pass (2026-07-02)
 
+> Mixed lifecycle record. Sections 1 through 4 and section 6 preserve the
+> 2026-07-02 capstone reconciliation. Section 5 is the current canonical
+> founder-policy index, including later dated rulings. The registry establishes
+> policy, not implementation or deployment.
+
 > All nine workstreams delivered (~7,900 lines, docs 01–09). This pass: cross-doc
 > conflicts adjudicated, new tickets renumbered into the global backlog namespace,
 > process laws ratified, and the founder decision queue consolidated. Capstone
@@ -81,7 +86,13 @@ Full descriptions live in the origin docs; this table is the backlog-facing inde
   MJ index appended.
 - M0-07 replaced by the 09 conference-kit spec (Mom-Test protocol + capture sheet).
 
-## 5. Consolidated founder decision queue (blocking, in order)
+## 5. Founder decision registry
+
+This section is the canonical index for founder policy. The original D-series and T-series tables preserve the 2026-07-03 decision session. Later explicit rulings enter the authority chain through the dated-source register below. The register does not claim that a ruling is implemented or deployed.
+
+References must qualify colliding labels as global D3 age range, global D8 casing, lead-magnet D3 workspace timing, or lead-magnet-D8-report-prose.
+
+### Original consolidated decision queue
 
 | # | Decision | Status (2026-07-03 session) | Blocks |
 |---|---|---|---|
@@ -103,6 +114,44 @@ Full descriptions live in the origin docs; this table is the backlog-facing inde
 | T1 | **Trial = card upfront + UNCAPPED power-user experience** (overrides council's no-card trial). Rationale: Alessa only knows Homa beats Homeschool Fox ($99/yr) because she lived the uncapped best-model version; the trial must manufacture that feeling in 14–30 days. Abuse guardrails only (Gateway per-key budgets), invisible to the user. Post-conversion experience NEVER degrades below the trial feel. Trial token cost (~$25–45/family on remixed stack) is treated as CAC. |
 | T2 | **Pricing is derived, not invented**: final tier prices/allotments come from the margin system's first 60 days of real cohort data. The margin/monitoring/model-swap infrastructure (M1-13 + M0-06 + Gateway BYOK/reporting) is elevated to day-one first-class priority, same tier as tenancy isolation. Every new capability (video, 3D, new models) must land in the `action_costs` registry before it ships — no exceptions as abilities expand. **[Note 2026-07-06, build-log: sticker prices v1 were set early by founder call ($19/mo, $99/yr, Pro $49/mo); allotments and any revision still derive from the 60-day data.]** |
 | T3 | **Category separation from Homeschool Fox is strategy, not just copy**: Fox = chat + dashboards + scheduling at $99/yr; Homa = always-on agent. Never compete on their price axis; make the difference FELT (uncapped trial is the mechanism, since most moms won't feel it from a feature list). |
+
+### Later founder rulings
+
+| Registered ruling | Date | Current policy | Original dated source |
+|---|---|---|---|
+| `conference-phone-only` | 2026-07-04 | The conference plan has no booth and no Stripe preorder. Use the phone-based field kit. | `docs/homa-planning/build-log.md` § 2026-07-04 blindspot pass and grilling session |
+| `lead-magnet-map` | 2026-07-05 | The child map and personalized report replace a bare waitlist as the primary acquisition experience. | `docs/homa-planning/build-log.md` § Lead magnet v2 shipped |
+| `open-signup` | 2026-07-05 | Signup is open. MJ-09 distributes invitations but does not gate account creation. | `docs/homa-planning/build-log.md` § Open signup |
+| `public-onboarding-route` | 2026-07-06 | `/onboarding` is the canonical public route. `/map` is a compatibility redirect. | `docs/homa-planning/build-log.md` § /map renamed /onboarding |
+| `founding-families-retired` | 2026-07-06 | Current Homa-facing copy does not use "founding families." Historical records and external evidence may retain it with context. | `docs/homa-planning/build-log.md` § Founding families framing retired everywhere |
+| `lead-magnet-D8-report-prose` | 2026-07-06 | Deterministic code owns report facts and numbers. A model may write parent-facing report prose under gates. This supersedes the lead-magnet D8 sentence-bank ruling, not global D8 casing. | `docs/homa-planning/build-log.md` § D8 overturned |
+| `pricing-2026-07-06` | 2026-07-06 | Base pricing is $19 monthly or $99 yearly. The upper tier is Homa Plus at $49 monthly or $249 yearly. Annual pricing may begin at first conversion. Current Stripe state still requires direct evidence. | `docs/homa-planning/build-log.md` §§ Pricing v1 and Pro renamed Homa Plus |
+| `family-skill-beta-promotion` | 2026-07-06 | During beta, founder-curated family skills may promote without a separate notice under the recorded privacy limits. Revisit consent before general availability. | `docs/homa-planning/build-log.md` § The Homa skills bank |
+| `onboarding-one-world` | 2026-07-07 | Onboarding writes directly to product family data. Lead tables, bridge records, and mirrors are retired. | `docs/homa-planning/build-log.md` § ONE WORLD |
+| `onboarding-full-signup` | 2026-07-08 | Onboarding step 1 performs full signup. Signup, sign-in, and family setup use one onboarding path. | `docs/homa-planning/build-log.md` §§ S1 becomes a full sign-up and One onboarding for every door |
+| `copy-clarity` | 2026-07-08 | Clarity and low cognitive load beat personality. Removing meaning-bearing words is not an improvement merely because the result is shorter. | `docs/homa-planning/build-log.md` § Clarity-over-personality copy law |
+| `trajectory-downward` | 2026-07-08 | Honest downward line-chart segments are allowed when surrounding language stays neutral, specific, and growth-oriented. | `docs/homa-planning/build-log.md` § Report gains the trajectory chart |
+| `voice-retention` | 2026-07-09 | Store voice-call transcripts verbatim and indefinitely. The mismatched journey cross-reference in the original entry does not create a second policy. | `docs/homa-planning/build-log.md` § Persist every voice call |
+| `sms-onboarding` | 2026-07-10 | Full SMS onboarding supersedes the earlier link-only recommendation. | `docs/homa-planning/sms-onboarding-plan.md` |
+| `D-ht-1-through-D-ht-5` | 2026-07-10 | Use fleet research plus per-family application, retain weekday morning briefs and evening journal prompts, provide full task management under "Homa's tasks," and gate automatic merges. | `docs/homa-planning/plans/2026-07-10-homa-tasks-and-nightly-research.md` § Founder decisions |
+| `morning-brief-format` | 2026-07-11 | Weekday research briefs use the approved four-block topic, finding, family application, and one executable offer format. Each content block has 1 to 2 sentences. Saved-note links wait for a dedicated route. | `docs/superpowers/specs/2026-07-11-morning-research-brief-format-design.md` |
+| `subject-domain-topic-taxonomy` | 2026-07-10 | The top level is subject, followed by domain and topic. This supersedes C5's parent-facing top-level domain terminology. | `docs/homa-planning/build-log.md` § The skill graph ships |
+| `report-as-dashboard` | 2026-07-10 | The progress report is the dashboard and authenticated app home. | `docs/homa-planning/build-log.md` § The progress report becomes the app's home surface |
+| `paywall-door-placement` | 2026-07-11 | The progress report remains free. A card prompt appears only when a family opens a paid action door, after the recorded launch prerequisites. | `docs/homa-planning/plans/2026-07-11-the-wall.md` |
+| `onboarding-depth` | 2026-07-11 | A parent may choose the longer graph-first assessment path while a quick path remains available. | `docs/homa-planning/plans/2026-07-11-onboarding-depth-fork.md` |
+| `multi-parent-v0` | 2026-07-11 | The approved multi-parent slice supersedes the PRD's one-login-only cohort boundary. | `docs/homa-planning/plans/2026-07-11-multi-parent-v0-and-founder-account-merge.md` |
+| `full-birthday` | 2026-07-11 | Store month, day, and year product-wide. This supersedes month-and-year minimization and D-mp-4's day-01 normalization. | `docs/homa-planning/build-log.md` § Full-birthday intake ruling |
+
+### Open founder decisions
+
+These are unresolved policy, not implementation latitude:
+
+| Decision | Exact unresolved choice | Source |
+|---|---|---|
+| D10 | Confirm whether "Hegg" means Heggerty before naming the curriculum library. | Original D-series table above |
+| DM7 | Keep waitlist email use invite and launch scoped, or ask for ongoing-content consent before nurture email is sent. | `docs/homa-planning/14-marketing-demand-engine.md` §10 |
+| Direct printer integration | Approve or reject the proposed reversal of the current no-direct-printer scope. | `docs/homa-planning/send-to-printer-plan.md` § Founder decision queue |
+| Private minors' media | Decide whether child photos and other minors' media are private by default despite global D7's general artifact-sharing rule. | `docs/homa-planning/build-log.md` § Voice and text via Telnyx |
 
 ## 6. What remains (senior PM capstone, after decisions D1–D4)
 

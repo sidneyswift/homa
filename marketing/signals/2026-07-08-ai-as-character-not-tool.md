@@ -6,7 +6,8 @@ source:
   type: field-note
   ref: marketing/raw/2026-07-08-ai-ugc-landscape-research.md
   locator: "L165-168"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "Across every winning AI UGC category, the AI isn't a tool, it's

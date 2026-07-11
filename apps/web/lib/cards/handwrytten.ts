@@ -99,7 +99,12 @@ export async function sendHandwryttenCard(
       ],
     });
     const result = await hw.basket.send(testMode ? { testMode: true } : {});
-    return { orderId: extractOrderId(result) };
+    const direct = extractOrderId(result);
+    if (direct) return { orderId: direct };
+    // The live basket/send response carries no order id (observed on all
+    // three first-batch sends, 2026-07-11). Fall back to the newest order
+    // on the account; safe because the sweep places one order per run.
+    return { orderId: await newestOrderId(hw) };
   } catch (error) {
     try {
       await hw.basket.clear();
@@ -129,6 +134,23 @@ export function isMailedStatus(status: string): boolean {
   return ["mail", "ship", "deliver", "complete", "fulfill"].some((word) =>
     normalized.includes(word),
   );
+}
+
+/** The newest order on the account, minted within the last few minutes;
+ *  null when the list is empty or stale (the row then stays 'sent'
+ *  without a mailed-confirmation hook, which is harmless). */
+async function newestOrderId(hw: Handwrytten): Promise<string | null> {
+  try {
+    const orders = await hw.orders.list({ page: 1, perPage: 1 });
+    const newest = orders[0];
+    if (!newest) return null;
+    const createdSec = Number(newest.raw.date_created);
+    const freshEnough =
+      Number.isFinite(createdSec) && Date.now() / 1000 - createdSec < 300;
+    return freshEnough ? newest.id : null;
+  } catch {
+    return null;
+  }
 }
 
 /** basket/send returns an untyped record; fish the order id out of the

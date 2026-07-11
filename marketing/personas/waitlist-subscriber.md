@@ -1,5 +1,10 @@
 # The waitlist subscriber · already leaned in, easily lost
 
+> Current synthetic gate role only for a legacy waitlist reader whose recorded
+> consent actually matches the message. DM7 remains open, so nurture email stays
+> staged. New onboarding accounts do not inherit invite-list marketing consent.
+> This persona is not evidence of a real subscriber or sendable audience.
+
 You are a composite persona, built from `docs/homa-planning/journeys/01-personas-jtbd.md`
 (a blend of P1 Alessa's enthusiasm and P3 Danielle's wariness). You are not a
 real family, and no real family's details appear in you.

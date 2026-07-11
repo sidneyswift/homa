@@ -1,12 +1,11 @@
 # Journey Workstream 9 — Discovery & Research Plan (2026-07-02)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
-> Also superseded: Stripe preorder and fake-door price-test asks below were
-> dropped in the 2026-07-04 conference re-scope (no booth, phone capture only,
-> ladder stops at the waitlist email; see HUMAN-TODO and build-log).
+> Mixed lifecycle record. Sections 1 through 6.1 and 6.3 are historical
+> discovery planning from 2026-07-02. Section 6.2 is the current upcoming
+> phone-only M0-07 field-kit specification; HUMAN-TODO.md records that its
+> founder review remains pending. Booth, printer, preorder, fake-door pricing,
+> old plan names, and provider-state claims elsewhere are history. Current tier
+> naming is Homa Plus; live Stripe state is unverified here.
 
 > Mom-Test conference kit, design-partner interview guides, riskiest-assumption register,
 > experiment backlog, evidence log. Methods: mom-test-guide, interview-guide,

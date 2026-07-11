@@ -83,7 +83,10 @@ export async function sendFamilyInvite(input: {
     return { ok: false, reason: "email-failed" };
   }
 
-  await emitMapEvent("family.invite_sent", { family_id: input.familyId });
+  await emitMapEvent("family.invite_sent", {
+    family_id: input.familyId,
+    channel: "email",
+  });
   return { ok: true };
 }
 
@@ -213,6 +216,9 @@ export async function consumeFamilyInvite(
     if (Date.parse(row.expires_at) < Date.now()) return { kind: "expired" };
     return { kind: "invalid" };
   }
-  await emitMapEvent("family.invite_accepted", { family_id: joined.familyId });
+  await emitMapEvent("family.invite_accepted", {
+    family_id: joined.familyId,
+    channel: "email",
+  });
   return { kind: "joined", familyId: joined.familyId };
 }

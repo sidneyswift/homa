@@ -32,16 +32,30 @@ interface SendArgs {
   bodyLines: string[];
   cta?: { label: string; url: string };
   footerNote: string;
+  replyTo?: string;
   /** The line under the card. Defaults to the signed-up-family framing,
    * which is FALSE for a brand-new invitee; the invite email overrides. */
   outerNote?: string;
 }
 
-async function send(args: SendArgs): Promise<boolean> {
+export type HomaEmailSubmission =
+  | { status: "submitted"; messageId: string }
+  | { status: "rejected" }
+  | { status: "unknown" };
+
+export function classifyResendHttpFailure(
+  status: number,
+): "rejected" | "unknown" {
+  return status === 408 || status === 429 || status >= 500
+    ? "unknown"
+    : "rejected";
+}
+
+async function submit(args: SendArgs): Promise<HomaEmailSubmission> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.error("map email: RESEND_API_KEY not set, skipping send");
-    return false;
+    return { status: "rejected" };
   }
 
   const paragraphs = args.bodyLines
@@ -78,7 +92,7 @@ async function send(args: SendArgs): Promise<boolean> {
       body: JSON.stringify({
         from: FROM,
         to: [args.to],
-        reply_to: [REPLY_TO],
+        reply_to: [args.replyTo ?? REPLY_TO],
         subject: args.subject,
         html,
         text,
@@ -86,13 +100,20 @@ async function send(args: SendArgs): Promise<boolean> {
     });
     if (!response.ok) {
       console.error(`map email: send failed HTTP ${response.status}`);
-      return false;
+      return { status: classifyResendHttpFailure(response.status) };
     }
-    return true;
+    const payload = (await response.json()) as { id?: unknown };
+    return typeof payload.id === "string" && payload.id
+      ? { status: "submitted", messageId: payload.id }
+      : { status: "unknown" };
   } catch (error) {
     console.error("map email: send failed:", error);
-    return false;
+    return { status: "unknown" };
   }
+}
+
+async function send(args: SendArgs): Promise<boolean> {
+  return (await submit(args)).status === "submitted";
 }
 
 function stripTags(value: string): string {
@@ -211,19 +232,39 @@ export async function sendRetestEmail(
  * subject/bodyLines before calling this; it is not repeated here so
  * both call sites share one gate helper instead of drifting.
  */
-export async function sendAgentComposedEmail(
+function agentComposedEmailArgs(
   to: string,
   subject: string,
   bodyLines: string[],
-): Promise<boolean> {
-  return send({
+  replyTo?: string,
+): SendArgs {
+  return {
     to,
     subject,
     preview: bodyLines[0]?.slice(0, 120) ?? subject,
     heading: subject,
     bodyLines,
+    replyTo,
     footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
-  });
+  };
+}
+
+export async function sendAgentComposedEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+  replyTo?: string,
+): Promise<boolean> {
+  return send(agentComposedEmailArgs(to, subject, bodyLines, replyTo));
+}
+
+export async function submitAgentComposedEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+  replyTo?: string,
+): Promise<HomaEmailSubmission> {
+  return submit(agentComposedEmailArgs(to, subject, bodyLines, replyTo));
 }
 
 /** The family's own registered email, for the agent-composed send path
@@ -241,26 +282,46 @@ export async function getFamilyEmail(familyId: string): Promise<string | null> {
  * (subject, preview, CTA, stop line) stays fixed; the body is the
  * agent's own composed prompt for THIS family. Copy history: reader +
  * editor gates and the founder read-aloud, 2026-07-09. */
-export async function sendJournalAgentEmail(
+function journalAgentEmailArgs(
   to: string,
   agentText: string,
-): Promise<boolean> {
+  replyTo?: string,
+): SendArgs | null {
   const url = `${siteUrl()}/app?draft=journal`;
   const bodyLines = agentText
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
-  if (bodyLines.length === 0) return false;
-  return send({
+  if (bodyLines.length === 0) return null;
+  return {
     to,
     subject: "One thing from today?",
     preview: "One or two sentences is plenty.",
     heading: "How did today go?",
     bodyLines,
+    replyTo,
     cta: { label: "Tell Homa about today", url },
     footerNote:
       "These evening check-ins are new. Reply 'stop' to this email and they stop.",
-  });
+  };
+}
+
+export async function sendJournalAgentEmail(
+  to: string,
+  agentText: string,
+  replyTo?: string,
+): Promise<boolean> {
+  const args = journalAgentEmailArgs(to, agentText, replyTo);
+  return args ? send(args) : false;
+}
+
+export async function submitJournalAgentEmail(
+  to: string,
+  agentText: string,
+  replyTo?: string,
+): Promise<HomaEmailSubmission> {
+  const args = journalAgentEmailArgs(to, agentText, replyTo);
+  return args ? submit(args) : { status: "rejected" };
 }
 
 /** The morning research brief's email shell (HT-4, D-ht-2; delivered by
@@ -268,26 +329,46 @@ export async function sendJournalAgentEmail(
  * (subject, preview, CTA to the tasks page, off-switch line) stays
  * code-controlled; the body is the agent's own composed brief for THIS
  * family, same posture as the journal shell. */
-export async function sendResearchBriefEmail(
+function researchBriefEmailArgs(
   to: string,
   agentText: string,
-): Promise<boolean> {
+  replyTo?: string,
+): SendArgs | null {
   const url = `${siteUrl()}/app/tasks`;
   const bodyLines = agentText
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
-  if (bodyLines.length === 0) return false;
-  return send({
+  if (bodyLines.length === 0) return null;
+  return {
     to,
     subject: "What I looked into last night",
     preview: bodyLines[0]?.slice(0, 120) ?? "One small finding for your kids.",
     heading: "From last night's research",
     bodyLines,
+    replyTo,
     cta: { label: "See Homa's tasks", url },
     footerNote:
       "Reply to this email and Homa answers. Morning briefs have an off switch on Homa's tasks.",
-  });
+  };
+}
+
+export async function sendResearchBriefEmail(
+  to: string,
+  agentText: string,
+  replyTo?: string,
+): Promise<boolean> {
+  const args = researchBriefEmailArgs(to, agentText, replyTo);
+  return args ? send(args) : false;
+}
+
+export async function submitResearchBriefEmail(
+  to: string,
+  agentText: string,
+  replyTo?: string,
+): Promise<HomaEmailSubmission> {
+  const args = researchBriefEmailArgs(to, agentText, replyTo);
+  return args ? submit(args) : { status: "rejected" };
 }
 
 export async function sendBandReadyEmail(

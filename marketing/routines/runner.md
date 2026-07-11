@@ -14,55 +14,16 @@ routine's `## Prompt` verbatim.
 | "run tonight's content" | `nightly-content.md` |
 | "run the engagement loop" | `weekly-engagement.md` |
 
-## Mode B · scheduled via launchd (not installed)
+## Mode B · scheduled execution (not installed)
 
-Do not install until the founder explicitly flips DM4. The pattern: a launchd
-job fires the Cursor agent CLI with the routine prompt at the scheduled time.
+Blocked as of 2026-07-11. No Homa marketing launchd job is installed, and the
+previous example depended on a `cursor-agent` command that is absent. The local
+Codex executable's unattended invocation, authentication, permission, logging,
+and failure contract have not been approved or verified.
 
-`~/Library/LaunchAgents/com.homa.marketing.nightly.plist`:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.homa.marketing.nightly</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/zsh</string>
-    <string>-lc</string>
-    <string>cd /Users/sidneyswift/Documents/Projects/Sidney/homa && cursor-agent --print "$(sed -n '/^## Prompt/,$p' marketing/routines/nightly-content.md)"</string>
-  </array>
-  <key>StartCalendarInterval</key>
-  <dict>
-    <key>Hour</key>
-    <integer>4</integer>
-    <key>Minute</key>
-    <integer>0</integer>
-  </dict>
-  <key>StandardOutPath</key>
-  <string>/tmp/homa-marketing-nightly.log</string>
-  <key>StandardErrorPath</key>
-  <string>/tmp/homa-marketing-nightly.err</string>
-</dict>
-</plist>
-```
-
-Enable:
-
-```bash
-launchctl load ~/Library/LaunchAgents/com.homa.marketing.nightly.plist
-```
-
-Disable:
-
-```bash
-launchctl unload ~/Library/LaunchAgents/com.homa.marketing.nightly.plist
-```
-
-Before enabling: set the routine's frontmatter `enabled: true` in the same
-change, so the file state and the scheduler state never disagree. And check the
-`cursor-agent` CLI exists (`which cursor-agent`); if the CLI name or flags have
-changed, fix this file first.
+Do not create or load a scheduler from this file. Before Mode B can be enabled,
+the founder must explicitly flip DM4 and approve a reviewed scheduler change
+that records the exact executable and flags, least-privilege environment,
+working directory, log handling, failure notification, overlap prevention, and
+an end-to-end dry run. Update the routine frontmatter and installed scheduler in
+the same change so their states cannot drift.

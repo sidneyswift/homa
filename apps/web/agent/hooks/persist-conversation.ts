@@ -15,10 +15,11 @@ import { persistConversationMessage } from "../../lib/conversation-log";
  * phone mapping on SMS), never from model output. Sessions with no
  * familyId (unlinked SMS, unauthenticated dev probes) are skipped whole.
  *
- * Failure posture: hooks that throw fail the TURN (eve hooks contract),
- * so everything here is caught and logged; losing one history row must
- * never break a conversation. Idempotency rides the (session_id,
- * sequence) unique key, so replays and reconnects never duplicate.
+ * Failure posture: a parent message is load-bearing canonical input, so its
+ * persistence failure aborts the turn before tools can run. Assistant writes
+ * remain best-effort in this generic hook because channel delivery handlers
+ * persist terminal output before sending it. Idempotency rides the
+ * (session_id, turn_id, role, sequence) key.
  */
 export default defineHook({
   events: {
@@ -38,6 +39,7 @@ export default defineHook({
           "persist-conversation (user) failed:",
           error instanceof Error ? error.message : "unknown",
         );
+        throw error;
       }
     },
     async "message.completed"(event, ctx) {
@@ -51,6 +53,7 @@ export default defineHook({
           role: "assistant",
           content: event.data.message,
           turnId: event.data.turnId,
+          finishReason: event.data.finishReason,
         });
       } catch (error) {
         console.error(

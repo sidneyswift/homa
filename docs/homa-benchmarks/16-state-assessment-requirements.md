@@ -1,5 +1,7 @@
 # State homeschool assessment requirements, all 50 states
 
+> Historical legal-research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current legal, provider, product, or production guidance. Re-verify every jurisdiction against primary sources before use.
+
 **Not legal advice. Product surfaces re-verify statutes before display, per repo law.**
 
 **Date:** 2026-07-06

@@ -1,5 +1,9 @@
 # Raw · planning-doc mining, 2026-07-05
 
+> Historical raw research snapshot. Planning locators, quotes, product claims,
+> and recommendations may have drifted. Re-resolve every source and current
+> policy before extracting a new signal.
+
 Quoted excerpts from the planning corpus worth turning into content. Each block
 cites its doc and line range so extraction stays quotable. No family data: all
 personas quoted here are synthetic composites from the planning docs, and their

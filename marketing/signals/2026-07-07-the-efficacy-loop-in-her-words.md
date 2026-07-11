@@ -6,7 +6,8 @@ source:
   type: field-note
   ref: docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md
   locator: "L195-205"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "instead of reassessing constantly, it is a matter of that mother

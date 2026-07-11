@@ -6,7 +6,8 @@ source:
   type: planning-doc
   ref: docs/homa-planning/journeys/07-positioning-messaging.md
   locator: "L253-272"
-status: used
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: 2026-07-05-ugc-homa-intro
 
 The message house's conversion pillar (B: "Practice aimed at exactly what's

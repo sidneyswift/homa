@@ -21,6 +21,10 @@ import type { DbJson } from "./map/db";
 
 const SIMPLE_FAMILY_TABLES = [
   "conversation_messages",
+  "conversation_episodes",
+  "conversation_deliveries",
+  "conversation_open_loops",
+  "conversation_inbound_receipts",
   "family_memories",
   "hours_log",
   "call_transcripts",
@@ -68,6 +72,22 @@ export async function foldStubFamilyIntoTx(
       where family_id = ${stubId}
     `;
   }
+
+  await tx`
+    update public.conversation_thread_bindings source
+    set family_id = ${intoId}
+    where source.family_id = ${stubId}
+      and not exists (
+        select 1 from public.conversation_thread_bindings target
+        where target.family_id = ${intoId}
+          and target.channel = source.channel
+          and target.thread_key_hash = source.thread_key_hash
+      )
+  `;
+  await tx`
+    delete from public.conversation_thread_bindings
+    where family_id = ${stubId}
+  `;
 
   await tx`
     update public.events set family_id = ${intoId}

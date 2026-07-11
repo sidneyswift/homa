@@ -1,5 +1,7 @@
 # Arts, physical education, and health benchmarks, ages 2 to 16
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Arts, PE, and health 07, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web search plus direct fetches of primary standards documents: nationalartsstandards.org at-a-glance PDFs (all five disciplines), NAfME 2014 music strand PDFs, shapeamerica.org 2024 PE and health standards pages (full indicator listings), the official California PFT FitnessGram HFZ tables, health.gov guidelines, AASM consensus PDF, AAP/HealthyChildren pages, and peer-reviewed motor development and music education literature. Every number was checked against a fetched source; unverifiable items are logged in dry wells rather than estimated.

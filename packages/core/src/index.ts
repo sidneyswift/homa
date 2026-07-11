@@ -79,6 +79,12 @@ export {
 } from "./map/scoring";
 
 export {
+  buildMapQuestionQueue,
+  isMapChecklistComplete,
+  type MapQueueEntry,
+} from "./map/question-queue";
+
+export {
   subjectLine,
   homaNote,
   noteGreeting,

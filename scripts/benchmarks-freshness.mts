@@ -2,7 +2,8 @@
  * Benchmark source freshness check.
  *   1. Every MAP_SOURCES key has a verified-date entry here (and vice
  *      versa), so a new source cannot ship unverified.
- *   2. Every source URL still resolves (HEAD, falling back to GET).
+ *   2. Every source URL receives a liveness probe. Hosts explicitly marked
+ *      botBlocked warn and require manual verification instead of failing.
  *   3. Sources verified more than STALE_DAYS ago get a warning, and the
  *      known-revision watchlist below prints its reminders.
  *
@@ -10,8 +11,8 @@
  * on a schedule: pnpm check:sources
  * Procedure and cadence: docs/homa-planning/runbooks/benchmark-freshness.md
  *
- * Exit codes: 0 = healthy (warnings allowed), 1 = dead link or manifest
- * mismatch.
+ * Exit codes: 0 = no unblocked dead link or manifest mismatch (warnings and
+ * manual BLOCK results allowed), 1 = dead unblocked link or manifest mismatch.
  */
 
 import { MAP_SUBJECTS, MAP_SOURCES } from "../packages/core/src/index";
@@ -151,4 +152,11 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
   process.exit(1);
 }
-console.log("\nAll benchmark sources resolve; manifest complete.");
+const blockedCount = results.filter(
+  (result) => !result.ok && VERIFIED[result.key]?.botBlocked,
+).length;
+console.log(
+  blockedCount > 0
+    ? `\nNo unblocked source is dead and the manifest is complete; ${blockedCount} blocked source(s) still require manual verification.`
+    : "\nAll benchmark sources resolved and the manifest is complete.",
+);

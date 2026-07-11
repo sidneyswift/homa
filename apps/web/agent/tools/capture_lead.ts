@@ -45,10 +45,21 @@ export default defineTool({
   inputSchema: captureInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as
-      | { channel?: string; familyId?: string; phoneNumber?: string }
+      | {
+          channel?: string;
+          familyId?: string;
+          familySmsInviteLookupFailed?: string;
+          familySmsInviteState?: string;
+          phoneNumber?: string;
+        }
       | undefined;
 
-    if (attributes?.channel !== "sms" || attributes.familyId) {
+    if (
+      attributes?.channel !== "sms" ||
+      attributes.familyId ||
+      attributes.familySmsInviteLookupFailed === "true" ||
+      attributes.familySmsInviteState
+    ) {
       return {
         saved: false,
         note: "This tool is only for text conversations with numbers that have no account. This conversation does not qualify; just keep helping.",

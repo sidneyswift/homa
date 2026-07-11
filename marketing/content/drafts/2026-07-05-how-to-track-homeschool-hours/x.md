@@ -1,3 +1,6 @@
+> Historical draft, not approved or published. Its product and article-link
+> claims require a new evidence pass. Do not distribute.
+
 The hours log fails because it asks for the hardest job (remember everything,
 weeks later) at the worst time (9:30pm).
 

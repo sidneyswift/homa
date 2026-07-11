@@ -1,8 +1,15 @@
 # @homa/core
 
-Shared domain package. Today: the typed event registry (MJ-08, law: no feature
-merges without its events), the waitlist submission schema, and the US state
-list. Phase A adds the domain system ported from the template-archive branch
-(see BUILD.md).
+Shared TypeScript domain package consumed by web and mobile.
 
-Raw TypeScript exports; consumers transpile (Next.js via `transpilePackages`).
+Current exports include:
+
+- the typed event registry and wall-door names;
+- waitlist, phone, US-state, and onboarding schemas;
+- age and birthday helpers for the scored range;
+- the map question bank, subjects, scoring, personalization, and staleness rules;
+- deterministic four-week and month-plan builders;
+- report and curriculum types plus their validation gates; and
+- shared copy-law constants.
+
+`src/index.ts` is the canonical public surface. Consumers transpile the raw TypeScript package. Run `pnpm check:map` for bank and scorer changes and `pnpm check:events` for event-registry changes.

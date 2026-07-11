@@ -1,12 +1,12 @@
 # Journeys 02 — Acquisition & Activation (discover → land → sign up → wow → week one)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
-> Also superseded: signup is OPEN since 2026-07-05 (founder ruling, build-log,
-> migration #8). Invite codes below describe MJ-09 invite distribution to the
-> waitlist cohort, not a signup wall.
+> Historical journey and acceptance-source snapshot, originally written
+> 2026-07-02. The reconciled PRD adopts portions of Parts 1 through 3 for FR-1
+> through FR-3, subject to later founder rulings and current tickets. All other
+> routes, prices, plan names, provider state, duration promises, invite gates,
+> and implementation status are dated history. Current tier naming is Homa
+> Plus; live Stripe state is unverified here. Signup is open by policy, while
+> production behavior requires direct evidence.
 
 > Workstream 2 of 5. Replaces and deepens J1 in `02-user-journeys.md`. Built on the
 > council's **onboarding inversion** (09 §strong-consensus #1): the 3-minute wow comes
@@ -42,18 +42,16 @@ URL, never typed by hand on the happy path; no code ⇒ waitlist, not a dead end
 
 ### Journey A1 — Conference QR / waitlist [M-R]
 
-> **Correction (build-log #11–13, 2026-07-04): there is no booth.** Alessa walks
-> the floor and says "thankshoma.com" in conversation; there is no banner, no
-> booth printer, no QR flyer. `/conference` 308-redirects to `/waitlist`, which
-> is the one generic direct-to-form page (source=organic; utm params carry
-> channel attribution if a shared link ever has them). Everything below
+> **Current route correction (verified 2026-07-11): there is no booth.** Alessa
+> uses the phone-based conference field kit. `/conference`, `/waitlist`, and
+> `/map` redirect to `/onboarding` in current code and the public production
+> probe. Everything below
 > describing a booth, a QR banner, a flyer, or a booth printer is the
 > **original design**, kept for its underlying logic (invite banners, saved
-> links, cohort codes) in case a future conference does have a booth — read it
+> links, cohort codes) in case a future conference does have a booth; read it
 > as reference, not as this July 13's build spec. The MJ-09 invite/waitlist
-> service (codes, "email me this link", channel-variant bands) described here
-> is **not built yet** — cohort one's waitlist is capture-only (write-only RLS,
-> no read/invite path). See BUILD.md Phase B.
+> service described here is historical. Current invitation work is tracked
+> separately under MJ-21, and provider delivery remains unverified.
 
 **Frame.**
 - Persona: P2 primary (the conference-mom ask was hours tracking), P4 secondary.
@@ -351,10 +349,9 @@ M4-07 [GA]. ❓ call #3 gates the materials-page age range.
 
 ## Part 2 — The activation masterpiece: signup → first wow [M-R]
 
-This is the make-or-break journey. Design law from the council inversion: **wow before
-work, always**. Target: **account → personalized worksheet on her screen in under 3
-minutes of her time** (M2-03 split ii), and under 10 minutes wall-clock from landing
-tap even with interruptions.
+This is the original make-or-break journey. Its **account → personalized worksheet in
+under 3 minutes** target is a historical design goal, not a current duration guarantee.
+Current onboarding acceptance follows the reconciled PRD and named tickets.
 
 **Frame.**
 - Persona: written for P3 (highest anxiety = the hardest test); variants noted.

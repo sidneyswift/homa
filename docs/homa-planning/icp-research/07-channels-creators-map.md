@@ -1,5 +1,9 @@
 # 07 · Channels and creators map: where US homeschool mothers congregate in 2026
 
+> Historical channel research snapshot, 2026-07-06. Audience counts, prices,
+> event dates, access rules, creator status, and recommendations are dated
+> evidence, not current distribution guidance. Re-verify before use.
+
 - **Date:** 2026-07-06
 - **Method:** Web research (search plus direct page fetches) across group directories, subreddit analytics, influencer indexes (Feedspot, Modash), podcast databases, convention exhibitor pages, and first-party media kits. Every count is labeled with the date observed. No counts are estimated or invented; where a number is not visible, the entry says "count not public". FACT and INFERENCE are separated per section, with a confidence grade.
 - **Key findings:**

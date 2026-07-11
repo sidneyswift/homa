@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homa Binder design directions · disposable prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=EB+Garamond:ital@1&family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.525.0"></script>
+  <style>
+    :root {
+      --stone-50: #fbf7f0;
+      --stone-100: #f3ece1;
+      --stone-200: #e7ddce;
+      --stone-300: #d6c8b4;
+      --stone-400: #b3a492;
+      --stone-500: #8a7d6c;
+      --stone-600: #6b6259;
+      --stone-700: #4e463e;
+      --stone-800: #332e29;
+      --stone-900: #221e1a;
+      --clay-50: #fff0e8;
+      --clay-100: #ffddc9;
+      --clay-200: #ffbe9c;
+      --clay-300: #fb9868;
+      --clay-500: #e7602f;
+      --clay-600: #c44c22;
+      --clay-700: #9c3b1b;
+      --sage-50: #eaf6ec;
+      --sage-100: #d2ecd6;
+      --sage-500: #3d9a50;
+      --sage-600: #2f7c40;
+      --sage-700: #275f34;
+      --gold-100: #fff3c2;
+      --gold-300: #ffe175;
+      --gold-400: #ffd43b;
+      --gold-ink: #8a6410;
+      --gold-ink-strong: #402e05;
+      --sky-100: #ddf3f9;
+      --sky-300: #9fdcec;
+      --sky-500: #4fb4d6;
+      --sky-600: #3a8fa9;
+      --pop-navy: #23304f;
+      --brand: var(--clay-500);
+      --brand-hover: var(--clay-600);
+      --bg-page: var(--stone-50);
+      --bg-card: #fff;
+      --text-strong: var(--stone-900);
+      --text-body: var(--stone-800);
+      --text-muted: var(--stone-600);
+      --text-subtle: var(--stone-500);
+      --border: var(--stone-200);
+      --font-display: "Schibsted Grotesk", sans-serif;
+      --font-sans: "Hanken Grotesk", sans-serif;
+      --font-serif: "EB Garamond", serif;
+      --font-wordmark: "Fredoka", sans-serif;
+      --font-hand: "Caveat", cursive;
+      --font-mono: "JetBrains Mono", monospace;
+      --ease-out: cubic-bezier(.22, .8, .28, 1);
+      --shadow-sm: 0 1px 2px rgba(51, 42, 33, .08), 0 4px 12px rgba(51, 42, 33, .06);
+      --shadow-lg: 0 18px 50px rgba(51, 42, 33, .12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(241, 121, 63, .35);
+      outline-offset: 2px;
+    }
+    .lab { max-width: 1480px; margin: 0 auto; padding: 26px 24px 100px; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .lab-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; }
+    .brand-lockup { display: inline-flex; align-items: center; gap: 10px; }
+    .brand-word {
+      font-family: var(--font-wordmark);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+    .lab-header h1 {
+      max-width: 850px;
+      margin: 24px 0 8px;
+      font-family: var(--font-display);
+      font-size: clamp(2.1rem, 5vw, 4.7rem);
+      line-height: .98;
+      letter-spacing: -.035em;
+      color: var(--text-strong);
+    }
+    .lab-header h1 span { color: var(--clay-600); }
+    .lede { max-width: 760px; margin: 0; color: var(--text-muted); font-size: 1.05rem; }
+    .date-note {
+      flex: 0 0 auto;
+      margin-top: 4px;
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #fff;
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      color: var(--text-subtle);
+    }
+    .fake-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 28px 0 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--gold-300);
+      border-radius: 16px;
+      background: var(--gold-100);
+      color: var(--gold-ink-strong);
+      font-size: .91rem;
+    }
+    .fake-banner svg { flex: 0 0 auto; margin-top: 2px; }
+    .research-strip {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0 28px;
+    }
+    .research-point {
+      min-height: 112px;
+      padding: 18px 20px;
+      border-top: 2px solid var(--stone-300);
+      background: rgba(255, 255, 255, .48);
+    }
+    .research-point:first-child { border-color: var(--clay-500); }
+    .research-point strong {
+      display: block;
+      margin-bottom: 5px;
+      font-family: var(--font-display);
+      color: var(--text-strong);
+    }
+    .research-point p { margin: 0; color: var(--text-muted); font-size: .9rem; }
+    .direction-bar {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 253, 249, .92);
+      box-shadow: var(--shadow-sm);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      overflow-x: auto;
+    }
+    .direction-label {
+      flex: 0 0 auto;
+      padding: 0 8px;
+      font-family: var(--font-mono);
+      font-size: .64rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .direction-button {
+      min-height: 44px;
+      flex: 0 0 auto;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      padding: 8px 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 120ms var(--ease-out);
+    }
+    .direction-button:active { transform: scale(.98); }
+    .direction-button strong { display: block; font-size: .88rem; color: var(--text-strong); }
+    .direction-button small { display: block; color: var(--text-subtle); font-size: .7rem; }
+    .direction-button.is-active { border-color: var(--clay-200); background: var(--clay-50); }
+    .direction-button.is-active strong { color: var(--clay-700); }
+    .direction-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin: 34px 0 14px;
+    }
+    .direction-head h2 {
+      margin: 4px 0 5px;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.45rem);
+      letter-spacing: -.025em;
+      color: var(--text-strong);
+    }
+    .direction-head p { max-width: 760px; margin: 0; color: var(--text-muted); }
+    .recommendation {
+      align-self: center;
+      border-radius: 999px;
+      background: var(--sage-50);
+      padding: 8px 13px;
+      color: var(--sage-700);
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* The shared app frame mirrors Homa's current 248px desktop rail. */
+    .app-frame {
+      position: relative;
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      min-height: 720px;
+      border: 1px solid var(--stone-200);
+      border-radius: 28px;
+      background: var(--stone-50);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .app-sidebar {
+      display: flex;
+      flex-direction: column;
+      margin: 12px 0 12px 12px;
+      padding: 18px 12px 14px;
+      border: 1px solid var(--stone-200);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .app-brand { display: flex; align-items: center; gap: 8px; padding: 0 8px 17px; }
+    .app-brand span { font-family: var(--font-wordmark); font-size: 1rem; font-weight: 600; }
+    .app-nav { display: grid; gap: 3px; }
+    .app-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: .82rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    .app-nav-item.active { background: var(--clay-50); color: var(--clay-700); }
+    .app-nav-item.active svg { color: var(--brand); }
+    .viewing { margin-top: 24px; padding: 0 4px; }
+    .viewing-label {
+      padding: 0 7px 7px;
+      font-family: var(--font-mono);
+      font-size: .58rem;
+      font-weight: 500;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .scope-button {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 41px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      padding: 6px 7px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 140ms var(--ease-out), transform 120ms var(--ease-out);
+    }
+    .scope-button:active { transform: scale(.98); }
+    .scope-button.is-active { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .avatar {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+    .avatar.family { background: var(--stone-100); color: var(--stone-600); }
+    .avatar.maya { background: var(--clay-100); color: var(--clay-700); }
+    .avatar.theo { background: var(--sky-100); color: var(--sky-600); }
+    .scope-check { margin-left: auto; color: var(--brand); }
+    .account-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: auto;
+      padding: 10px 7px 0;
+      border-top: 1px solid var(--stone-200);
+      font-size: .75rem;
+      color: var(--text-muted);
+    }
+    .app-main { min-width: 0; padding: 30px 34px 40px; overflow: hidden; }
+    .mobile-app-top { display: none; }
+    .main-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .main-top h3 {
+      margin: 3px 0 3px;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      line-height: 1.05;
+      letter-spacing: -.025em;
+      color: var(--text-strong);
+    }
+    .main-top p { margin: 0; color: var(--text-muted); font-size: .9rem; }
+    .main-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .icon-button, .soft-button, .primary-button {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    }
+    .icon-button:active, .soft-button:active, .primary-button:active { transform: scale(.97); }
+    .soft-button { border: 1px solid var(--stone-300); background: #fff; color: var(--text-body); }
+    .soft-button:hover { border-color: var(--clay-300); }
+    .primary-button { border: 1px solid var(--brand); background: var(--brand); color: #fff; }
+    .primary-button:hover { background: var(--brand-hover); }
+    .search {
+      display: flex;
+      min-width: 230px;
+      min-height: 42px;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--stone-300);
+      border-radius: 999px;
+      background: #fff;
+      padding: 0 13px;
+      color: var(--text-subtle);
+    }
+    .search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--text-body); font-size: .82rem; }
+    .filter-row { display: flex; gap: 7px; margin: 20px 0 16px; overflow-x: auto; padding-bottom: 2px; }
+    .filter-chip {
+      flex: 0 0 auto;
+      min-height: 36px;
+      border: 1px solid var(--stone-300);
+      border-radius: 999px;
+      background: #fff;
+      padding: 7px 12px;
+      color: var(--text-muted);
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .filter-chip.is-active { border-color: var(--clay-200); background: var(--clay-50); color: var(--clay-700); }
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 22px 0 11px;
+    }
+    .section-title h4 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; color: var(--text-strong); }
+    .section-title span { font-size: .72rem; color: var(--text-subtle); }
+    .empty-inline {
+      display: grid;
+      place-items: center;
+      min-height: 210px;
+      border: 1px dashed var(--stone-300);
+      border-radius: 18px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 28px;
+    }
+
+    /* Shared artifact previews render the same fake dataset in every direction. */
+    .paper-thumb {
+      position: relative;
+      display: grid;
+      aspect-ratio: 8.5 / 10.5;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(78, 70, 62, .12);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--stone-700);
+    }
+    .paper-thumb::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0 18px, rgba(79, 180, 214, .12) 18px 19px);
+      opacity: .75;
+    }
+    .paper-thumb::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 18%;
+      width: 1px;
+      background: rgba(231, 96, 47, .19);
+    }
+    .paper-thumb .thumb-content { position: relative; z-index: 1; display: grid; place-items: center; gap: 7px; padding: 12px; text-align: center; }
+    .paper-thumb .thumb-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--clay-50);
+      color: var(--clay-600);
+    }
+    .paper-thumb .thumb-title { max-width: 120px; font-family: var(--font-display); font-size: .68rem; font-weight: 700; line-height: 1.2; }
+    .tone-sage .thumb-icon { background: var(--sage-50); color: var(--sage-700); }
+    .tone-sky .thumb-icon { background: var(--sky-100); color: var(--sky-600); }
+    .tone-gold .thumb-icon { background: var(--gold-100); color: var(--gold-ink); }
+    .future-badge, .ready-badge, .linked-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 23px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: .57rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .future-badge { background: var(--sky-100); color: var(--sky-600); }
+    .ready-badge { background: var(--sage-50); color: var(--sage-700); }
+    .linked-badge { background: var(--stone-100); color: var(--stone-600); }
+
+    /* Direction 1: a calm, curated binder with a useful cover. */
+    .binder-cover {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      margin-top: 20px;
+      padding: 22px;
+      border: 1px solid var(--clay-200);
+      border-radius: 24px;
+      background-color: #fffdf9;
+      background-image: repeating-linear-gradient(to bottom, transparent 0 27px, rgba(79, 180, 214, .10) 27px 28px);
+      overflow: hidden;
+    }
+    .binder-cover::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 32px;
+      width: 2px;
+      background: rgba(231, 96, 47, .24);
+    }
+    .cover-copy { position: relative; z-index: 1; padding-left: 28px; }
+    .cover-copy h4 {
+      margin: 7px 0 5px;
+      max-width: 440px;
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 2.25rem);
+      line-height: 1.05;
+      color: var(--text-strong);
+    }
+    .cover-copy p { max-width: 480px; margin: 0; color: var(--text-muted); font-size: .84rem; }
+    .hand-note { margin-top: 14px; font-family: var(--font-hand); font-size: 1.15rem; color: var(--sage-600); transform: rotate(-1deg); }
+    .cover-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .mini-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 116px;
+      border: 1px solid var(--stone-200);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .9);
+      padding: 11px;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    }
+    .mini-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .mini-item svg { color: var(--brand); }
+    .mini-item > span, .mini-item > span > span { display: block; }
+    .mini-item strong { display: block; margin-top: 8px; font-size: .76rem; line-height: 1.2; color: var(--text-strong); }
+    .mini-item span { margin-top: 4px; color: var(--text-subtle); font-size: .65rem; }
+    .mini-item .mini-action { display: block; margin-top: 3px; color: var(--clay-700); font-weight: 800; }
+    .binder-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin: 14px 0 0;
+    }
+    .binder-tab {
+      min-height: 42px;
+      border: 1px solid var(--stone-200);
+      border-bottom: 0;
+      border-radius: 12px 12px 4px 4px;
+      background: #fff;
+      padding: 8px 7px;
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .binder-tab.is-active { border-color: var(--clay-200); background: var(--clay-50); color: var(--clay-700); }
+    .binder-page {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      min-height: 280px;
+      border: 1px solid var(--stone-200);
+      border-radius: 5px 18px 18px 18px;
+      background: #fff;
+      padding: 16px;
+    }
+    .binder-item {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+    .binder-item strong { display: block; margin: 8px 1px 1px; color: var(--text-strong); font-size: .77rem; line-height: 1.25; }
+    .binder-item small { color: var(--text-subtle); font-size: .67rem; }
+
+    /* Direction 2: visual shelf, strongest for recognition and rediscovery. */
+    .shelf-feature {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--sage-50);
+    }
+    .shelf-feature .paper-thumb { width: 125px; box-shadow: var(--shadow-sm); transform: rotate(-1.5deg); }
+    .shelf-feature h4 { margin: 5px 0 4px; font-family: var(--font-display); font-size: 1.25rem; color: var(--text-strong); }
+    .shelf-feature p { max-width: 540px; margin: 0 0 12px; color: var(--text-muted); font-size: .82rem; }
+    .shelf-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .shelf-item {
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+    .shelf-item .paper-thumb { transition: transform 170ms var(--ease-out), box-shadow 170ms var(--ease-out); }
+    .shelf-item:hover .paper-thumb { transform: translateY(-3px) rotate(.4deg); box-shadow: var(--shadow-sm); }
+    .shelf-item strong { display: block; margin: 8px 1px 2px; color: var(--text-strong); font-size: .76rem; line-height: 1.22; }
+    .shelf-item small { display: block; color: var(--text-subtle); font-size: .65rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wood-line { height: 7px; margin: 12px 0 20px; border-radius: 99px; background: var(--stone-300); box-shadow: 0 4px 0 rgba(78, 70, 62, .08); }
+
+    /* Direction 3: a familiar file cabinet that optimizes for scale. */
+    .cabinet-layout {
+      display: grid;
+      grid-template-columns: 205px minmax(0, 1fr);
+      min-height: 570px;
+      margin-top: 20px;
+      border: 1px solid var(--stone-200);
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .folder-tree { padding: 14px 10px; border-right: 1px solid var(--stone-200); background: #fffdf9; }
+    .tree-title { padding: 6px 9px 9px; font-family: var(--font-mono); font-size: .6rem; letter-spacing: .13em; text-transform: uppercase; color: var(--text-subtle); }
+    .tree-button {
+      display: flex;
+      width: 100%;
+      min-height: 38px;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      padding: 7px 9px;
+      color: var(--text-muted);
+      font-size: .75rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+    .tree-button span { margin-left: auto; font-family: var(--font-mono); font-size: .6rem; color: var(--text-subtle); }
+    .tree-button.is-active { background: var(--clay-50); color: var(--clay-700); }
+    .file-pane { min-width: 0; padding: 15px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; min-height: 32px; color: var(--text-subtle); font-size: .72rem; }
+    .file-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 7px 0 12px; }
+    .file-toolbar strong { font-family: var(--font-display); color: var(--text-strong); }
+    .file-list { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .file-list th {
+      padding: 8px 9px;
+      border-bottom: 1px solid var(--stone-200);
+      color: var(--text-subtle);
+      font-family: var(--font-mono);
+      font-size: .58rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+    .file-list td { padding: 10px 9px; border-bottom: 1px solid var(--stone-100); font-size: .72rem; color: var(--text-muted); }
+    .file-list tr[data-open-item] { cursor: pointer; transition: background 120ms var(--ease-out); }
+    .file-list tr[data-open-item]:hover { background: var(--stone-50); }
+    .file-name { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .file-name svg { flex: 0 0 auto; color: var(--brand); }
+    .file-name strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-strong); }
+
+    /* Direction 4: distinct notebook covers create stronger child ownership. */
+    .notebook-shelf {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+      padding: 24px 22px 33px;
+      border-radius: 20px;
+      background: var(--stone-100);
+    }
+    .notebook-cover {
+      position: relative;
+      min-height: 290px;
+      border: 0;
+      border-radius: 10px 20px 20px 10px;
+      background: var(--clay-500);
+      padding: 23px 20px;
+      color: #fff;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 8px 10px 0 rgba(78, 70, 62, .13);
+      transition: transform 190ms var(--ease-out), box-shadow 190ms var(--ease-out);
+      overflow: hidden;
+    }
+    .notebook-cover:hover { transform: translateY(-4px) rotate(-.6deg); box-shadow: 10px 14px 0 rgba(78, 70, 62, .13); }
+    .notebook-cover::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 18px;
+      width: 3px;
+      background: rgba(255, 255, 255, .32);
+    }
+    .notebook-cover.maya-book { background: var(--clay-500); }
+    .notebook-cover.theo-book { background: var(--sky-600); }
+    .notebook-cover.family-book { background: var(--sage-600); }
+    .book-label {
+      position: relative;
+      margin: 55px 0 0 15px;
+      border-radius: 10px;
+      background: #fffdf9;
+      padding: 18px;
+      color: var(--text-strong);
+      text-align: center;
+    }
+    .book-label span { font-family: var(--font-mono); font-size: .57rem; letter-spacing: .13em; text-transform: uppercase; color: var(--text-subtle); }
+    .book-label strong { display: block; margin: 5px 0 2px; font-family: var(--font-display); font-size: 1.25rem; }
+    .book-label small { color: var(--text-muted); }
+    .book-count { position: absolute; right: 16px; bottom: 15px; color: rgba(255, 255, 255, .78); font-size: .7rem; }
+    .open-notebook {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 470px;
+      margin-top: 20px;
+      border: 1px solid var(--stone-300);
+      border-radius: 24px;
+      background: #fffdf9;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .notebook-page {
+      position: relative;
+      padding: 27px;
+      background-image: repeating-linear-gradient(to bottom, transparent 0 27px, rgba(79, 180, 214, .12) 27px 28px);
+    }
+    .notebook-page:first-child { border-right: 1px solid var(--stone-300); box-shadow: inset -12px 0 18px rgba(78, 70, 62, .04); }
+    .notebook-page h4 { margin: 6px 0 17px; font-family: var(--font-display); font-size: 1.2rem; color: var(--text-strong); }
+    .notebook-list { display: grid; gap: 8px; }
+    .notebook-row {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(214, 200, 180, .8);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .86);
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .notebook-row svg { color: var(--brand); }
+    .notebook-row strong { display: block; color: var(--text-strong); font-size: .76rem; }
+    .notebook-row small { color: var(--text-subtle); font-size: .65rem; }
+
+    .direction-review {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 14px;
+      align-items: start;
+      margin-top: 15px;
+      padding: 18px;
+      border: 1px solid var(--stone-200);
+      border-radius: 18px;
+      background: #fff;
+    }
+    .review-group strong { display: block; margin-bottom: 7px; color: var(--text-strong); font-size: .8rem; }
+    .steal-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .steal-chip, .winner-button, .answer-chip {
+      min-height: 36px;
+      border: 1px solid var(--stone-300);
+      border-radius: 999px;
+      background: #fff;
+      padding: 7px 11px;
+      color: var(--text-muted);
+      font-size: .72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 140ms var(--ease-out), border-color 140ms var(--ease-out), transform 120ms var(--ease-out);
+    }
+    .steal-chip:active, .winner-button:active, .answer-chip:active { transform: scale(.97); }
+    .steal-chip.is-selected, .answer-chip.is-selected { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .skip-note { margin: 0; color: var(--text-muted); font-size: .78rem; }
+    .skip-note b { color: var(--clay-700); }
+    .winner-button { border-color: var(--brand); background: var(--brand); color: #fff; white-space: nowrap; }
+    .winner-button.is-selected { background: var(--sage-600); border-color: var(--sage-600); }
+
+    /* The item drawer makes each direction testable without any real data. */
+    .drawer-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: stretch end;
+      background: rgba(51, 42, 33, .38);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+    }
+    .detail-drawer {
+      width: min(440px, 92vw);
+      height: 100%;
+      overflow-y: auto;
+      background: var(--stone-50);
+      padding: 24px;
+      box-shadow: -18px 0 50px rgba(51, 42, 33, .18);
+      animation: drawer-in 220ms var(--ease-out);
+    }
+    @keyframes drawer-in { from { transform: translateX(18px); opacity: 0; } }
+    .drawer-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .drawer-close {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid var(--stone-300);
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+    .detail-drawer .paper-thumb { width: 210px; margin: 24px auto; box-shadow: var(--shadow-sm); }
+    .detail-drawer h3 { margin: 0; font-family: var(--font-display); font-size: 1.65rem; color: var(--text-strong); }
+    .detail-drawer > p { color: var(--text-muted); }
+    .metadata { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
+    .metadata div { padding: 11px; border-radius: 12px; background: #fff; }
+    .metadata span { display: block; font-family: var(--font-mono); font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); }
+    .metadata strong { display: block; margin-top: 3px; color: var(--text-strong); font-size: .8rem; }
+    .drawer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .drawer-note { margin-top: 20px; padding: 12px; border-radius: 12px; background: var(--gold-100); color: var(--gold-ink-strong); font-size: .78rem; }
+
+    /* Decisions follow the clickable mock so reactions become a usable brief. */
+    .boundary {
+      margin-top: 62px;
+      padding-top: 10px;
+      border-top: 1px solid var(--stone-200);
+    }
+    .section-heading h2 {
+      margin: 5px 0 5px;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      letter-spacing: -.025em;
+      color: var(--text-strong);
+    }
+    .section-heading p { max-width: 780px; margin: 0; color: var(--text-muted); }
+    .boundary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
+    .boundary-group { padding: 18px; border-radius: 18px; background: #fff; border-top: 3px solid var(--stone-300); }
+    .boundary-group.keep { border-color: var(--sage-500); }
+    .boundary-group.save { border-color: var(--sky-500); }
+    .boundary-group.link { border-color: var(--gold-400); }
+    .boundary-group.hide { border-color: var(--clay-500); }
+    .boundary-group h3 { margin: 0 0 9px; font-family: var(--font-display); font-size: .98rem; color: var(--text-strong); }
+    .boundary-group ul { margin: 0; padding: 0 0 0 17px; color: var(--text-muted); font-size: .8rem; }
+    .boundary-group li + li { margin-top: 5px; }
+    .release-ladder {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 14px;
+      border: 1px solid var(--stone-200);
+      border-radius: 18px;
+      background: var(--stone-200);
+      overflow: hidden;
+    }
+    .release-step { min-height: 140px; padding: 18px; background: #fff; }
+    .release-step strong { display: block; margin: 5px 0; font-family: var(--font-display); color: var(--text-strong); }
+    .release-step p { margin: 0; color: var(--text-muted); font-size: .78rem; }
+    .decisions { margin-top: 62px; }
+    .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    .decision {
+      padding: 18px;
+      border: 1px solid var(--stone-200);
+      border-radius: 18px;
+      background: #fff;
+    }
+    .decision:last-child { grid-column: 1 / -1; }
+    .decision h3 { margin: 0 0 3px; font-family: var(--font-display); font-size: 1rem; color: var(--text-strong); }
+    .decision p { margin: 0 0 11px; color: var(--text-muted); font-size: .78rem; }
+    .answer-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .answer-chip .rec { margin-left: 5px; font-family: var(--font-mono); font-size: .54rem; color: var(--sage-600); }
+    .answer-chip.is-selected .rec { color: var(--sage-700); }
+    .assembler {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+      gap: 18px;
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 22px;
+      background: var(--stone-900);
+      color: var(--stone-100);
+    }
+    .assembler h3 { margin: 0 0 4px; font-family: var(--font-display); color: #fff; }
+    .assembler p { margin: 0 0 12px; color: var(--stone-300); font-size: .82rem; }
+    .assembler textarea {
+      width: 100%;
+      min-height: 190px;
+      resize: vertical;
+      border: 1px solid var(--stone-700);
+      border-radius: 14px;
+      background: var(--stone-800);
+      padding: 13px;
+      color: var(--stone-100);
+      font-size: .82rem;
+      line-height: 1.5;
+    }
+    .notes-area textarea { min-height: 112px; }
+    .copy-button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--brand);
+      padding: 9px 16px;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .wiring-note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border: 1px dashed var(--stone-300);
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: .78rem;
+    }
+    .wiring-note code { border-radius: 5px; background: var(--stone-100); padding: 1px 5px; color: var(--text-body); font-family: var(--font-mono); font-size: .68rem; }
+    footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--stone-200); color: var(--text-subtle); font-size: .76rem; }
+    footer .hand-note { margin: 0; }
+
+    @media (max-width: 1100px) {
+      .binder-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .shelf-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .boundary-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 860px) {
+      .lab { padding-inline: 14px; }
+      .lab-header, .direction-head { grid-template-columns: 1fr; display: grid; }
+      .date-note { justify-self: start; }
+      .research-strip { grid-template-columns: 1fr; }
+      .app-frame { display: block; min-height: 700px; }
+      .app-sidebar { display: none; }
+      .mobile-app-top {
+        display: flex;
+        min-height: 56px;
+        align-items: center;
+        justify-content: space-between;
+        margin: -30px -34px 24px;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--stone-200);
+        background: rgba(255, 255, 255, .86);
+      }
+      .mobile-scope { display: flex; align-items: center; gap: 7px; font-size: .75rem; font-weight: 700; }
+      .direction-review { grid-template-columns: 1fr; }
+      .binder-cover { grid-template-columns: 1fr; }
+      .shelf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .notebook-shelf { grid-template-columns: 1fr 1fr; }
+      .notebook-cover:last-child { grid-column: 1 / -1; min-height: 220px; }
+      .assembler { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 650px) {
+      .app-main { padding: 22px 16px 30px; }
+      .mobile-app-top { margin: -22px -16px 20px; }
+      .main-top { display: block; }
+      .main-actions { justify-content: flex-start; margin-top: 13px; }
+      .search { width: 100%; }
+      .binder-page { grid-template-columns: 1fr 1fr; }
+      .binder-tabs { display: flex; flex-wrap: wrap; overflow: visible; }
+      .binder-tab { flex: 1 1 calc(50% - 5px); border-bottom: 1px solid var(--stone-200); border-radius: 999px; }
+      .shelf-grid { grid-template-columns: 1fr 1fr; }
+      .shelf-feature { grid-template-columns: 95px 1fr; }
+      .shelf-feature .paper-thumb { width: 90px; }
+      .cabinet-layout { grid-template-columns: 1fr; }
+      .folder-tree { display: flex; gap: 5px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--stone-200); }
+      .tree-title { display: none; }
+      .tree-button { flex: 0 0 auto; width: auto; }
+      .tree-button span { margin-left: 4px; }
+      .file-list th:nth-child(3), .file-list td:nth-child(3),
+      .file-list th:nth-child(4), .file-list td:nth-child(4) { display: none; }
+      .notebook-shelf { grid-template-columns: 1fr; }
+      .notebook-cover:last-child { grid-column: auto; }
+      .open-notebook { grid-template-columns: 1fr; }
+      .notebook-page:first-child { border-right: 0; border-bottom: 1px solid var(--stone-300); }
+      .boundary-grid, .release-ladder, .decision-grid { grid-template-columns: 1fr; }
+      .decision:last-child { grid-column: auto; }
+      footer { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="lab">
+    <header class="lab-header">
+      <div>
+        <div class="brand-lockup" aria-label="Homa">
+          <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z" fill="#E7602F"/>
+            <circle cx="17.4" cy="26" r="4.8" fill="#fff"/>
+            <circle cx="30.6" cy="26" r="4.8" fill="#fff"/>
+            <circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A"/>
+            <circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A"/>
+          </svg>
+          <span class="brand-word">HOMA</span>
+          <span class="eyebrow">Binder design lab</span>
+        </div>
+        <h1>Where a family can see what is <span>worth keeping.</span></h1>
+        <p class="lede">Four genuinely different directions for Homa's family files, using the same content so you can judge the structure instead of the palette.</p>
+      </div>
+      <div class="date-note">Disposable prototype · July 11, 2026</div>
+    </header>
+
+    <div class="fake-banner">
+      <i data-lucide="flask-conical" width="18" height="18" aria-hidden="true"></i>
+      <div><strong>Everything below is fake.</strong> Maya, Theo, the Rivera family, and every file are invented for this prototype. No real family data is loaded, no app route was changed, and future content types are labeled.</div>
+    </div>
+
+    <section class="research-strip" aria-label="What the repository tells us">
+      <div class="research-point">
+        <strong>The foundation already exists.</strong>
+        <p>Final Homa materials already have family and optional child ownership, preview images, PDFs, types, subjects, and searchable metadata.</p>
+      </div>
+      <div class="research-point">
+        <strong>One scope can serve every family shape.</strong>
+        <p>Homa already switches between Whole family, Maya, and Theo. Binder can follow that context instead of multiplying navigation.</p>
+      </div>
+      <div class="research-point">
+        <strong>Working files should stay backstage.</strong>
+        <p>Drafts, temporary renders, chat transcripts, and agent scratch space are not family files. The Binder begins at final or explicitly saved.</p>
+      </div>
+    </section>
+
+    <nav class="direction-bar" aria-label="Binder design directions">
+      <span class="direction-label">Compare</span>
+      <button class="direction-button is-active" data-direction="binder" aria-pressed="true">
+        <strong>1 · Living Binder</strong>
+        <small>Curated and calm</small>
+      </button>
+      <button class="direction-button" data-direction="shelf" aria-pressed="false">
+        <strong>2 · Open Shelf</strong>
+        <small>Visual and browsable</small>
+      </button>
+      <button class="direction-button" data-direction="cabinet" aria-pressed="false">
+        <strong>3 · File Cabinet</strong>
+        <small>Familiar and dense</small>
+      </button>
+      <button class="direction-button" data-direction="notebooks" aria-pressed="false">
+        <strong>4 · Kid Notebooks</strong>
+        <small>Personal and physical</small>
+      </button>
+    </nav>
+
+    <section id="direction-intro" aria-live="polite"></section>
+    <section id="demo-root" aria-label="Interactive Binder prototype"></section>
+    <section id="direction-review"></section>
+
+    <section class="boundary">
+      <div class="section-heading">
+        <span class="eyebrow">Recommended content boundary</span>
+        <h2>The Binder is curated, not exhaustive.</h2>
+        <p>A parent should never need to understand Homa's internal file system. The product decides what is safe to hide and gives the parent one clear action when something deserves a permanent place.</p>
+      </div>
+      <div class="boundary-grid">
+        <article class="boundary-group keep">
+          <h3>Always appears</h3>
+          <ul>
+            <li>Final worksheets, readers, games, and printables</li>
+            <li>Current curriculum and plans as live views</li>
+            <li>Parent-approved final versions only</li>
+          </ul>
+        </article>
+        <article class="boundary-group save">
+          <h3>Appears when saved</h3>
+          <ul>
+            <li>Books, links, and outside resources</li>
+            <li>Photos or scans of child work</li>
+            <li>Images Homa made that the parent keeps</li>
+          </ul>
+        </article>
+        <article class="boundary-group link">
+          <h3>Linked, not duplicated</h3>
+          <ul>
+            <li>Progress report</li>
+            <li>Hours and attendance record</li>
+            <li>Week planner and current curriculum</li>
+          </ul>
+        </article>
+        <article class="boundary-group hide">
+          <h3>Never shown</h3>
+          <ul>
+            <li>Agent scratch files and temporary renders</li>
+            <li>Superseded drafts and failed generations</li>
+            <li>Raw chat history, task logs, and system files</li>
+          </ul>
+        </article>
+      </div>
+      <div class="release-ladder" aria-label="Suggested release sequence">
+        <article class="release-step">
+          <span class="eyebrow">First useful release</span>
+          <strong>Final materials</strong>
+          <p>Browse, search, preview, print, and ask Homa to adapt the materials already stored today.</p>
+        </article>
+        <article class="release-step">
+          <span class="eyebrow">Next</span>
+          <strong>Plans and saved resources</strong>
+          <p>Add live curriculum links, books, websites, and a simple “Save to Binder” action.</p>
+        </article>
+        <article class="release-step">
+          <span class="eyebrow">After privacy work</span>
+          <strong>Work samples and records</strong>
+          <p>Add parent-kept photos, portfolio evidence, report exports, and compliance records with explicit retention rules.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="decisions">
+      <div class="section-heading">
+        <span class="eyebrow">Five calls that change what gets built</span>
+        <h2>Tap your choices.</h2>
+        <p>The recommendations are preselected. Change anything that feels wrong, then copy the assembled brief back into chat.</p>
+      </div>
+      <div class="decision-grid">
+        <article class="decision" data-question="Product name" data-multi="false">
+          <h3>1 · What should families call this place?</h3>
+          <p>“Binder” feels familiar and useful. “Library” is clearer for digital browsing but less personal.</p>
+          <div class="answer-row">
+            <button class="answer-chip is-selected" data-answer="Binder">Binder <span class="rec">REC</span></button>
+            <button class="answer-chip" data-answer="Library">Library</button>
+            <button class="answer-chip" data-answer="Family shelf">Family shelf</button>
+            <button class="answer-chip" data-answer="Homebook">Homebook</button>
+          </div>
+        </article>
+        <article class="decision" data-question="Family and child structure" data-multi="false">
+          <h3>2 · One Binder or a Binder per child?</h3>
+          <p>One Binder with Homa's existing family and child context avoids duplicate shared files while still giving each child a focused view.</p>
+          <div class="answer-row">
+            <button class="answer-chip is-selected" data-answer="One Binder that follows Whole family or the selected child">One Binder, switch context <span class="rec">REC</span></button>
+            <button class="answer-chip" data-answer="A family Binder plus a separate Binder for each child">Family plus separate child binders</button>
+            <button class="answer-chip" data-answer="Only separate child binders">Only child binders</button>
+          </div>
+        </article>
+        <article class="decision" data-question="Default landing" data-multi="false">
+          <h3>3 · What should the cover show first?</h3>
+          <p>“This week” answers the daily question. “Recent” is easier to build but less helpful.</p>
+          <div class="answer-row">
+            <button class="answer-chip is-selected" data-answer="This week, with current plans and ready-to-use materials">This week <span class="rec">REC</span></button>
+            <button class="answer-chip" data-answer="Recently added items">Recently added</button>
+            <button class="answer-chip" data-answer="All sections and item counts">Section index</button>
+          </div>
+        </article>
+        <article class="decision" data-question="Navigation placement" data-multi="false">
+          <h3>4 · Where should Binder live?</h3>
+          <p>A sidebar tab makes it a family-wide destination. Hiding it inside each child's page makes shared resources harder to reach.</p>
+          <div class="answer-row">
+            <button class="answer-chip is-selected" data-answer="A first-class Binder tab in the desktop sidebar">Sidebar tab <span class="rec">REC</span></button>
+            <button class="answer-chip" data-answer="Inside each child's page">Inside each child</button>
+            <button class="answer-chip" data-answer="Both a sidebar tab and child-page shortcut">Both</button>
+          </div>
+        </article>
+        <article class="decision" data-question="Saved child media" data-multi="false">
+          <h3>5 · When should a photo or scan become a Binder item?</h3>
+          <p>Homa currently does not keep inbound child media as files. Explicit saving prevents clutter and avoids silently expanding retention.</p>
+          <div class="answer-row">
+            <button class="answer-chip is-selected" data-answer="Only when the parent explicitly chooses Save to Binder">Only after “Save to Binder” <span class="rec">REC</span></button>
+            <button class="answer-chip" data-answer="Homa suggests saving, and the parent confirms">Homa suggests, parent confirms</button>
+            <button class="answer-chip" data-answer="Automatically save every child work photo">Automatically save all</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="assembler">
+        <div>
+          <h3>Your Binder brief</h3>
+          <p>This updates as you choose a direction, steal details, and answer the five calls.</p>
+          <textarea id="reply-output" readonly aria-label="Assembled Binder design brief"></textarea>
+          <button class="copy-button" id="copy-reply">
+            <i data-lucide="copy" width="16" height="16" aria-hidden="true"></i>
+            <span>Copy my choices</span>
+          </button>
+        </div>
+        <div class="notes-area">
+          <h3>Anything your gut noticed?</h3>
+          <p>Examples: “Direction 1 feels too busy” or “I want the notebooks, but with the shelf grid.”</p>
+          <textarea id="founder-notes" placeholder="Add any reaction here. It will be included in the copied brief."></textarea>
+        </div>
+      </div>
+
+      <div class="wiring-note">
+        <strong>Wiring note:</strong> this file is disposable and touches no product code. A validated first release would add a route under <code>apps/web/app/app/binder/</code>, add one row to <code>APP_NAV_ITEMS</code> in <code>apps/web/components/dashboard/sidebar-nav.tsx</code>, reuse the existing view context from <code>apps/web/lib/view-context.ts</code>, and read finalized items through <code>apps/web/lib/materials/library.ts</code>. New saved resources or child work would require an additive content model and the unresolved minors' media privacy decision.
+      </div>
+    </section>
+
+    <footer>
+      <span>Homa Binder design directions · shared dataset · no real data</span>
+      <span class="hand-note">Keep what helps. Hide the machinery.</span>
+    </footer>
+  </div>
+
+  <div id="drawer-root"></div>
+
+  <script>
+    // The same dataset powers all four directions, so only the information
+    // architecture changes. "future" and "linked" keep the prototype honest.
+    const ITEMS = [
+      { id: "ocean-letters", title: "Ocean animals letter practice", section: "Materials", kind: "Worksheet", child: "Maya", subject: "Reading", date: "Today", availability: "ready", tone: "clay", icon: "file-pen-line", detail: "A final, print-ready worksheet Homa made for Maya's letter-sound practice." },
+      { id: "night-reader", title: "A night sky beginner reader", section: "Materials", kind: "Reader", child: "Maya", subject: "Reading", date: "Jul 9", availability: "ready", tone: "sky", icon: "book-open", detail: "A six-page printable reader using Maya's interest in planets." },
+      { id: "shape-hunt", title: "Shapes around the house", section: "Materials", kind: "Game", child: "Theo", subject: "Math", date: "Today", availability: "ready", tone: "gold", icon: "shapes", detail: "A scavenger hunt with simple shape prompts for Theo." },
+      { id: "field-trip-bingo", title: "Museum field trip bingo", section: "Materials", kind: "Game", child: "Family", subject: "Field trip", date: "Jul 7", availability: "ready", tone: "sage", icon: "layout-grid", detail: "A family activity that belongs to everyone, not one child." },
+      { id: "maya-plan", title: "Maya's four-week reading plan", section: "Plans", kind: "Current plan", child: "Maya", subject: "Reading", date: "Week 2", availability: "linked", tone: "clay", icon: "calendar-days", detail: "A live plan Homa should link here rather than duplicate as a file." },
+      { id: "theo-rhythm", title: "Theo's preschool rhythm", section: "Plans", kind: "Curriculum", child: "Theo", subject: "Whole day", date: "Summer", availability: "linked", tone: "sky", icon: "calendar-heart", detail: "Theo's current curriculum view, kept current elsewhere in Homa." },
+      { id: "nature-study", title: "Family nature study", section: "Plans", kind: "Curriculum", child: "Family", subject: "Science", date: "Summer", availability: "linked", tone: "sage", icon: "sprout", detail: "A shared family curriculum plan that appears in every child's context." },
+      { id: "blue-truck", title: "Little Blue Truck", section: "Books & resources", kind: "Book", child: "Theo", subject: "Read aloud", date: "Saved Jul 5", availability: "future", tone: "sky", icon: "library", detail: "A parent-saved book. Saved resources need a new content registry before they are real." },
+      { id: "museum-guide", title: "Natural history museum guide", section: "Books & resources", kind: "Website", child: "Family", subject: "Field trip", date: "Saved Jul 6", availability: "future", tone: "sage", icon: "link", detail: "A family resource saved from the web for a future field trip." },
+      { id: "watercolor-planets", title: "Maya's watercolor planets", section: "Keepsakes", kind: "Work sample", child: "Maya", subject: "Art", date: "Jul 8", availability: "future", tone: "gold", icon: "image", detail: "A future parent-kept work sample. Child media privacy and retention must be resolved first." },
+      { id: "shape-photos", title: "Theo's shape hunt snapshots", section: "Keepsakes", kind: "Work sample", child: "Theo", subject: "Math", date: "Jul 10", availability: "future", tone: "sky", icon: "camera", detail: "A future set of photos saved only after a parent explicitly keeps them." },
+      { id: "maya-report", title: "Maya's July progress report", section: "Records", kind: "Progress report", child: "Maya", subject: "All subjects", date: "Jul 1", availability: "linked", tone: "clay", icon: "chart-no-axes-combined", detail: "A link to Maya's living progress report, not a stale copied file." },
+      { id: "hours-july", title: "July hours and attendance", section: "Records", kind: "Family record", child: "Family", subject: "Compliance", date: "Jul 1–11", availability: "future", tone: "sage", icon: "clipboard-check", detail: "A future export or evidence-locker record with its own retention rules." }
+    ];
+
+    const DIRECTIONS = {
+      binder: {
+        number: "Direction 1",
+        name: "Living Binder",
+        philosophy: "A useful cover first, familiar sections second. Physical cues add warmth without turning the app into a literal three-ring binder.",
+        recommendation: "Recommended foundation",
+        strength: "Best balance of calm, usefulness, and long-term flexibility.",
+        steals: ["One Binder that follows family or child context", "A “This week” cover instead of a file dump", "Human sections instead of technical folders"],
+        skip: "The physical tabs can become cramped if the top-level section count grows past five."
+      },
+      shelf: {
+        number: "Direction 2",
+        name: "Open Shelf",
+        philosophy: "Recognition beats organization. Big previews help a parent rediscover the page, book, or resource she remembers seeing.",
+        recommendation: "",
+        strength: "Best for browsing materials and remembering what something looked like.",
+        steals: ["Large visual previews", "Fast filters by child and type", "Featured “ready for today” item"],
+        skip: "A shelf becomes a thumbnail wall at 100 or 1,000 items unless search and curation are excellent."
+      },
+      cabinet: {
+        number: "Direction 3",
+        name: "File Cabinet",
+        philosophy: "Use the desktop vocabulary parents already know: folders, rows, metadata, search, and predictable density.",
+        recommendation: "",
+        strength: "Best for power users, large archives, and precise retrieval.",
+        steals: ["Compact list view", "Visible metadata", "Folder tree for records and exports"],
+        skip: "It makes homeschooling feel like office administration and exposes more structure than most parents want."
+      },
+      notebooks: {
+        number: "Direction 4",
+        name: "Kid Notebooks",
+        philosophy: "Each child has an object that feels like theirs. Opening a cover is an emotional ritual, not a database query.",
+        recommendation: "",
+        strength: "Best for ownership, warmth, and the physical notebook metaphor.",
+        steals: ["Distinct child covers", "Open-spread detail view", "A family notebook for shared resources"],
+        skip: "Shared materials need a third Binder, and switching covers adds a step before every task."
+      }
+    };
+
+    const SECTIONS = ["All", "Plans", "Materials", "Books & resources", "Keepsakes", "Records"];
+    const state = { direction: "binder", scope: "Family", section: "All", search: "", notebookOpen: false };
+
+    /** Exact Homa mark from the design system, reused rather than redrawn. */
+    function logoMarkup(size = 28) {
+      return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z" fill="#E7602F"/>
+        <circle cx="17.4" cy="26" r="4.8" fill="#fff"/><circle cx="30.6" cy="26" r="4.8" fill="#fff"/>
+        <circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A"/><circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A"/>
+      </svg>`;
+    }
+
+    function avatarMarkup(scope) {
+      const key = scope.toLowerCase();
+      const label = scope === "Family" ? `<i data-lucide="users" width="15" height="15"></i>` : scope.charAt(0);
+      return `<span class="avatar ${key}">${label}</span>`;
+    }
+
+    function sidebarMarkup() {
+      const scopeRows = ["Family", "Maya", "Theo"].map(scope => `
+        <button class="scope-button ${state.scope === scope ? "is-active" : ""}" data-scope="${scope}">
+          ${avatarMarkup(scope)}
+          <span>${scope === "Family" ? "Whole family" : scope}</span>
+          ${state.scope === scope ? `<i class="scope-check" data-lucide="check" width="14" height="14"></i>` : ""}
+        </button>`).join("");
+      const viewingMarkup = state.direction === "notebooks"
+        ? `<div class="viewing"><div class="viewing-label">Child view</div><p style="margin:2px 7px;color:var(--text-subtle);font-size:.72rem">Choose a notebook inside Binder.</p></div>`
+        : `<div class="viewing"><div class="viewing-label">Viewing</div>${scopeRows}</div>`;
+      return `<aside class="app-sidebar">
+        <div class="app-brand">${logoMarkup(26)}<span>HOMA</span></div>
+        <nav class="app-nav" aria-label="Mock app navigation">
+          ${navItem("sparkles", "Ask Homa")}
+          ${navItem("file-text", "Progress report")}
+          ${navItem("calendar", "Week planner")}
+          ${navItem("book-open", "Binder", true)}
+          ${navItem("list-checks", "Homa's tasks")}
+        </nav>
+        ${viewingMarkup}
+        <div class="account-row">${avatarMarkup("Maya")}<span>Alessa · Rivera family</span></div>
+      </aside>`;
+    }
+
+    function navItem(icon, label, active = false) {
+      return `<div class="app-nav-item ${active ? "active" : ""}"><i data-lucide="${icon}" width="17" height="17"></i><span>${label}</span></div>`;
+    }
+
+    function mobileTopMarkup() {
+      return `<div class="mobile-app-top">
+        <div class="app-brand" style="padding:0">${logoMarkup(25)}<span>HOMA</span></div>
+        <div class="mobile-scope">${avatarMarkup(state.scope)}<span>${state.scope === "Family" ? "Whole family" : state.scope}</span></div>
+      </div>`;
+    }
+
+    function filteredItems(section = state.section) {
+      const query = state.search.trim().toLowerCase();
+      return ITEMS.filter(item => {
+        const inScope = state.scope === "Family" || item.child === state.scope || item.child === "Family";
+        const inSection = section === "All" || item.section === section;
+        const inSearch = !query || `${item.title} ${item.kind} ${item.subject}`.toLowerCase().includes(query);
+        return inScope && inSection && inSearch;
+      });
+    }
+
+    function statusBadge(item) {
+      if (item.availability === "ready") return `<span class="ready-badge">Exists today</span>`;
+      if (item.availability === "linked") return `<span class="linked-badge">Live link</span>`;
+      return `<span class="future-badge">Future concept</span>`;
+    }
+
+    function thumbMarkup(item) {
+      return `<div class="paper-thumb tone-${item.tone}">
+        <div class="thumb-content">
+          <span class="thumb-icon"><i data-lucide="${item.icon}" width="21" height="21"></i></span>
+          <span class="thumb-title">${item.title}</span>
+        </div>
+      </div>`;
+    }
+
+    function searchMarkup(placeholder = "Search Binder") {
+      return `<label class="search">
+        <i data-lucide="search" width="16" height="16" aria-hidden="true"></i>
+        <input type="search" value="${state.search}" data-search placeholder="${placeholder}" aria-label="${placeholder}">
+      </label>`;
+    }
+
+    function mainHeaderMarkup(title, subtitle, options = {}) {
+      const addAction = options.add === false
+        ? ""
+        : `<button class="primary-button"><i data-lucide="plus" width="15" height="15"></i> Add</button>`;
+      return `${mobileTopMarkup()}<div class="main-top">
+        <div><span class="eyebrow">${options.eyebrow || "Rivera family"}</span><h3>${title}</h3><p>${subtitle}</p></div>
+        <div class="main-actions">${options.search === false ? "" : searchMarkup()}${addAction}</div>
+      </div>`;
+    }
+
+    function filterRowMarkup() {
+      return `<div class="filter-row">${SECTIONS.map(section => `
+        <button class="filter-chip ${state.section === section ? "is-active" : ""}" data-section="${section}">${section}</button>`).join("")}</div>`;
+    }
+
+    function scopeTitle(familyTitle, childSuffix) {
+      return state.scope === "Family" ? familyTitle : `${state.scope}'s ${childSuffix}`;
+    }
+
+    /** Direction 1 keeps the default useful before it becomes browsable. */
+    function renderBinder() {
+      const coverItems = filteredItems("All").filter(item => ["Today", "Week 2", "Summer"].includes(item.date)).slice(0, 4);
+      const effectiveSection = state.section === "All" ? "Materials" : state.section;
+      const coverIds = new Set(coverItems.map(item => item.id));
+      const pageItems = filteredItems(effectiveSection).filter(item => !coverIds.has(item.id));
+      const page = pageItems.length ? pageItems.map(item => `
+        <button class="binder-item" data-open-item="${item.id}">
+          ${thumbMarkup(item)}
+          <strong>${item.title}</strong>
+          <small>${item.child} · ${item.kind}</small>
+        </button>`).join("") : emptyMarkup();
+      return `<div class="app-frame">${sidebarMarkup()}<main class="app-main">
+        ${mainHeaderMarkup(scopeTitle("Your Binder", "Binder"), state.scope === "Family" ? "Plans, materials, and the things your family chose to keep." : `Everything for ${state.scope}, plus family resources.`, { add: false })}
+        <section class="binder-cover">
+          <div class="cover-copy">
+            <span class="eyebrow">${state.scope === "Family" ? "This week at home" : `This week with ${state.scope}`}</span>
+            <h4>${state.scope === "Family" ? "Everything ready for a calm week." : `${state.scope}'s next pages are ready.`}</h4>
+            <p>Open what you need now. The full Binder stays organized behind these sections.</p>
+            <div class="hand-note">${coverItems.length} useful things, no working drafts</div>
+          </div>
+          <div class="cover-stack">${coverItems.map(item => `
+            <button class="mini-item" data-open-item="${item.id}">
+              <i data-lucide="${item.icon}" width="19" height="19"></i>
+              <span><strong>${item.title}</strong><span>${item.kind} · ${item.child}</span><span class="mini-action">${item.availability === "ready" ? "Open to print" : "Open"}</span></span>
+            </button>`).join("")}</div>
+        </section>
+        <div class="binder-tabs">${SECTIONS.filter(section => section !== "All").map(section => `
+          <button class="binder-tab ${effectiveSection === section ? "is-active" : ""}" data-section="${section}">${section}</button>`).join("")}</div>
+        <div class="section-title"><h4>${effectiveSection === "Materials" ? "More saved materials" : effectiveSection}</h4><span>${pageItems.length} ${pageItems.length === 1 ? "item" : "items"}</span></div>
+        <div class="binder-page">${page}</div>
+      </main></div>`;
+    }
+
+    /** Direction 2 treats previews as memory cues, then adds filters for scale. */
+    function renderShelf() {
+      const items = filteredItems();
+      const feature = items[0] || ITEMS[0];
+      const shelfItems = items.slice(1);
+      return `<div class="app-frame">${sidebarMarkup()}<main class="app-main">
+        ${mainHeaderMarkup(scopeTitle("The family shelf", "shelf"), state.scope === "Family" ? "Browse by what it looks like, who it is for, or what you need." : `A visual shelf for ${state.scope}, with shared family resources.`)}
+        ${filterRowMarkup()}
+        <section class="shelf-feature">
+          ${thumbMarkup(feature)}
+          <div><span class="eyebrow">Ready to use</span><h4>${feature.title}</h4><p>${feature.detail}</p><button class="soft-button" data-open-item="${feature.id}">Open it <i data-lucide="arrow-right" width="14" height="14"></i></button></div>
+        </section>
+        <div class="section-title"><h4>${state.section === "All" ? "On your shelves" : state.section}</h4><span>${items.length} items</span></div>
+        <div class="shelf-grid">${shelfItems.length ? shelfItems.map(item => `
+          <button class="shelf-item" data-open-item="${item.id}">
+            ${thumbMarkup(item)}
+            <strong>${item.title}</strong>
+            <small>${item.child} · ${item.kind}</small>
+          </button>`).join("") : emptyMarkup()}</div>
+        <div class="wood-line"></div>
+      </main></div>`;
+    }
+
+    /** Direction 3 exposes folders and metadata for a Drive-like mental model. */
+    function renderCabinet() {
+      const items = filteredItems();
+      const counts = Object.fromEntries(SECTIONS.map(section => [section, filteredItems(section).length]));
+      const rows = items.map(item => `<tr data-open-item="${item.id}">
+        <td><div class="file-name"><i data-lucide="${item.icon}" width="17" height="17"></i><strong>${item.title}</strong></div></td>
+        <td>${item.child}</td><td>${item.kind}</td><td>${item.date}</td>
+      </tr>`).join("");
+      return `<div class="app-frame">${sidebarMarkup()}<main class="app-main">
+        ${mainHeaderMarkup(scopeTitle("Family files", "files"), "Folders, rows, and details that work like the file tools you already know.")}
+        <div class="cabinet-layout">
+          <aside class="folder-tree"><div class="tree-title">Folders</div>${SECTIONS.map(section => `
+            <button class="tree-button ${state.section === section ? "is-active" : ""}" data-section="${section}">
+              <i data-lucide="${section === "All" ? "archive" : "folder"}" width="15" height="15"></i>${section}<span>${counts[section]}</span>
+            </button>`).join("")}</aside>
+          <section class="file-pane">
+            <div class="breadcrumb"><i data-lucide="home" width="13" height="13"></i><i data-lucide="chevron-right" width="12" height="12"></i><span>${state.scope === "Family" ? "Rivera family" : state.scope}</span><i data-lucide="chevron-right" width="12" height="12"></i><strong>${state.section}</strong></div>
+            <div class="file-toolbar"><strong>${state.section === "All" ? "All files" : state.section}</strong><span class="eyebrow">${items.length} items</span></div>
+            ${items.length ? `<table class="file-list"><thead><tr><th style="width:47%">Name</th><th>For</th><th>Type</th><th>Updated</th></tr></thead><tbody>${rows}</tbody></table>` : emptyMarkup()}
+          </section>
+        </div>
+      </main></div>`;
+    }
+
+    function notebookCover(scope, subtitle, className) {
+      const count = ITEMS.filter(item => item.child === scope || (scope !== "Family" && item.child === "Family")).length;
+      return `<button class="notebook-cover ${className}" data-notebook="${scope}">
+        <div class="book-label"><span>Homa Binder</span><strong>${scope === "Family" ? "Rivera family" : scope}</strong><small>${subtitle}</small></div>
+        <span class="book-count">${count} items</span>
+      </button>`;
+    }
+
+    /** Direction 4 makes the scope itself a physical object. */
+    function renderNotebooks() {
+      if (!state.notebookOpen) {
+        return `<div class="app-frame">${sidebarMarkup()}<main class="app-main">
+          ${mainHeaderMarkup("Choose a notebook", "Each child gets a distinct place. Shared plans and resources live in the family notebook.", { search: false })}
+          <section class="notebook-shelf">
+            ${notebookCover("Maya", "Age 7 · reading and art", "maya-book")}
+            ${notebookCover("Theo", "Age 4 · shapes and stories", "theo-book")}
+            ${notebookCover("Family", "Shared plans and records", "family-book")}
+          </section>
+          <div class="hand-note" style="text-align:center;margin-top:18px">Pick up the notebook you need.</div>
+        </main></div>`;
+      }
+      const items = filteredItems("All");
+      const left = items.filter(item => ["Plans", "Materials"].includes(item.section)).slice(0, 5);
+      const right = items.filter(item => !["Plans", "Materials"].includes(item.section)).slice(0, 5);
+      return `<div class="app-frame">${sidebarMarkup()}<main class="app-main">
+        ${mobileTopMarkup()}<div class="main-top">
+          <div><button class="soft-button" data-close-notebook><i data-lucide="arrow-left" width="14" height="14"></i> All notebooks</button><h3 style="margin-top:14px">${state.scope === "Family" ? "Rivera family" : state.scope}'s notebook</h3><p>${state.scope === "Family" ? "Shared plans, resources, and records." : `A personal view for ${state.scope}, with shared family resources.`}</p></div>
+          <div class="main-actions">${searchMarkup("Search this notebook")}</div>
+        </div>
+        <section class="open-notebook">
+          ${notebookPage("Plans and pages", left)}
+          ${notebookPage("Resources and keepsakes", right)}
+        </section>
+      </main></div>`;
+    }
+
+    function notebookPage(title, items) {
+      return `<div class="notebook-page"><span class="eyebrow">${state.scope}</span><h4>${title}</h4><div class="notebook-list">
+        ${items.length ? items.map(item => `<button class="notebook-row" data-open-item="${item.id}"><i data-lucide="${item.icon}" width="18" height="18"></i><span><strong>${item.title}</strong><small>${item.section} · ${item.date}</small></span></button>`).join("") : `<p class="hand-note">Nothing saved here yet.</p>`}
+      </div></div>`;
+    }
+
+    function emptyMarkup() {
+      return `<div class="empty-inline"><div><i data-lucide="search-x" width="24" height="24"></i><p>No matching Binder items in this fake dataset.</p></div></div>`;
+    }
+
+    function renderDirectionIntro() {
+      const direction = DIRECTIONS[state.direction];
+      document.getElementById("direction-intro").innerHTML = `<div class="direction-head">
+        <div><span class="eyebrow">${direction.number}</span><h2>${direction.name}</h2><p>“${direction.philosophy}”</p></div>
+        ${direction.recommendation ? `<span class="recommendation">${direction.recommendation}</span>` : ""}
+      </div>`;
+    }
+
+    function renderReview() {
+      const direction = DIRECTIONS[state.direction];
+      document.getElementById("direction-review").innerHTML = `<div class="direction-review">
+        <div class="review-group"><strong>Details worth stealing</strong><div class="steal-row">${direction.steals.map(value => `<button class="steal-chip" data-steal="${value}">+ ${value}</button>`).join("")}</div></div>
+        <div class="review-group"><strong>Honest trade-off</strong><p class="skip-note"><b>Skip:</b> ${direction.skip}</p></div>
+        <button class="winner-button ${selectedWinner() === direction.name ? "is-selected" : ""}" data-winner="${direction.name}">${selectedWinner() === direction.name ? "Selected" : "Choose this direction"}</button>
+      </div>`;
+    }
+
+    function renderDemo() {
+      const renderers = { binder: renderBinder, shelf: renderShelf, cabinet: renderCabinet, notebooks: renderNotebooks };
+      renderDirectionIntro();
+      document.getElementById("demo-root").innerHTML = renderers[state.direction]();
+      renderReview();
+      refreshIcons();
+    }
+
+    function refreshIcons() {
+      if (window.lucide) window.lucide.createIcons({ attrs: { "stroke-width": 1.8 } });
+    }
+
+    function openDrawer(itemId) {
+      const item = ITEMS.find(entry => entry.id === itemId);
+      if (!item) return;
+      document.getElementById("drawer-root").innerHTML = `<div class="drawer-scrim" data-close-drawer>
+        <aside class="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" data-drawer-panel>
+          <div class="drawer-top"><span class="eyebrow">${item.section}</span><button class="drawer-close" data-close-drawer aria-label="Close details"><i data-lucide="x" width="18" height="18"></i></button></div>
+          ${thumbMarkup(item)}
+          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">${statusBadge(item)}<span class="eyebrow">${item.child}</span></div>
+          <h3 id="drawer-title">${item.title}</h3><p>${item.detail}</p>
+          <div class="metadata"><div><span>Type</span><strong>${item.kind}</strong></div><div><span>Subject</span><strong>${item.subject}</strong></div><div><span>For</span><strong>${item.child}</strong></div><div><span>Updated</span><strong>${item.date}</strong></div></div>
+          <div class="drawer-actions"><button class="primary-button"><i data-lucide="external-link" width="14" height="14"></i> Open</button><button class="soft-button"><i data-lucide="printer" width="14" height="14"></i> Print</button><button class="soft-button"><i data-lucide="sparkles" width="14" height="14"></i> Ask Homa</button></div>
+          <div class="drawer-note">Prototype only. Buttons show the intended actions but do not open, print, save, or send anything.</div>
+        </aside>
+      </div>`;
+      refreshIcons();
+      document.querySelector(".drawer-close")?.focus();
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer-root").innerHTML = "";
+    }
+
+    // Winner and steal choices live in sets so the reply survives direction changes.
+    let winner = "Living Binder";
+    const steals = new Set(["One Binder that follows family or child context", "A “This week” cover instead of a file dump", "Large visual previews"]);
+    function selectedWinner() { return winner; }
+
+    function selectWinner(value) {
+      winner = value;
+      renderReview();
+      updateReply();
+    }
+
+    function toggleSteal(button) {
+      const value = button.dataset.steal;
+      if (steals.has(value)) steals.delete(value); else steals.add(value);
+      button.classList.toggle("is-selected", steals.has(value));
+      updateReply();
+    }
+
+    function chooseAnswer(button) {
+      const decision = button.closest(".decision");
+      if (!decision) return;
+      decision.querySelectorAll(".answer-chip").forEach(chip => chip.classList.remove("is-selected"));
+      button.classList.add("is-selected");
+      updateReply();
+    }
+
+    function decisionLines() {
+      return [...document.querySelectorAll(".decision")].map(decision => {
+        const answer = decision.querySelector(".answer-chip.is-selected")?.dataset.answer || "No choice yet";
+        return `- ${decision.dataset.question}: ${answer}`;
+      });
+    }
+
+    function updateReply() {
+      const notes = document.getElementById("founder-notes")?.value.trim();
+      const text = [
+        "Binder design choices",
+        "",
+        `Direction: ${winner}`,
+        `Details to steal: ${steals.size ? [...steals].join("; ") : "None selected"}`,
+        "",
+        ...decisionLines(),
+        ...(notes ? ["", `Notes: ${notes}`] : [])
+      ].join("\n");
+      const output = document.getElementById("reply-output");
+      if (output) output.value = text;
+      document.querySelectorAll("[data-steal]").forEach(button => button.classList.toggle("is-selected", steals.has(button.dataset.steal)));
+    }
+
+    async function copyReply() {
+      const output = document.getElementById("reply-output");
+      const buttonLabel = document.querySelector("#copy-reply span");
+      try {
+        await navigator.clipboard.writeText(output.value);
+      } catch {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+      }
+      if (buttonLabel) buttonLabel.textContent = "Copied";
+      setTimeout(() => { if (buttonLabel) buttonLabel.textContent = "Copy my choices"; }, 1500);
+    }
+
+    document.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (!button) {
+        if (event.target.matches("[data-close-drawer]")) closeDrawer();
+        return;
+      }
+      if (button.dataset.direction) {
+        state.direction = button.dataset.direction;
+        state.section = "All";
+        state.search = "";
+        state.notebookOpen = false;
+        document.querySelectorAll("[data-direction]").forEach(entry => {
+          const active = entry.dataset.direction === state.direction;
+          entry.classList.toggle("is-active", active);
+          entry.setAttribute("aria-pressed", String(active));
+        });
+        renderDemo();
+      } else if (button.dataset.scope) {
+        state.scope = button.dataset.scope;
+        renderDemo();
+      } else if (button.dataset.section) {
+        state.section = button.dataset.section;
+        renderDemo();
+      } else if (button.dataset.openItem) {
+        openDrawer(button.dataset.openItem);
+      } else if (button.dataset.notebook) {
+        state.scope = button.dataset.notebook;
+        state.notebookOpen = true;
+        renderDemo();
+      } else if (button.hasAttribute("data-close-notebook")) {
+        state.notebookOpen = false;
+        state.scope = "Family";
+        renderDemo();
+      } else if (button.dataset.winner) {
+        selectWinner(button.dataset.winner);
+      } else if (button.dataset.steal) {
+        toggleSteal(button);
+      } else if (button.dataset.answer) {
+        chooseAnswer(button);
+      } else if (button.hasAttribute("data-close-drawer")) {
+        closeDrawer();
+      }
+    });
+
+    document.addEventListener("input", event => {
+      if (event.target.matches("[data-search]")) {
+        state.search = event.target.value;
+        const cursor = event.target.selectionStart;
+        renderDemo();
+        const nextInput = document.querySelector("[data-search]");
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.setSelectionRange(cursor, cursor);
+        }
+      }
+      if (event.target.id === "founder-notes") updateReply();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.getElementById("drawer-root").innerHTML) closeDrawer();
+    });
+    document.getElementById("copy-reply").addEventListener("click", copyReply);
+
+    renderDemo();
+    updateReply();
+    refreshIcons();
+  </script>
+</body>
+</html>

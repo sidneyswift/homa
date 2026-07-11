@@ -1,9 +1,11 @@
 # 07 · Positioning & messaging (2026-07-02)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical positioning and copy exploration, 2026-07-02. Nothing below is
+> approved shippable copy unless a current copy authority explicitly adopts
+> it. Prices, plan names, privacy claims, provider claims, product status, and
+> open questions are dated history. Current tier naming is Homa Plus; live
+> Stripe state is unverified here. Current copy law lives in AGENTS.md and the
+> Homa copy skill.
 
 > Workstream 7 of the journey library. Methods: pm-os positioning, press-release
 > (working backwards), objection-scan, cta-copy, winning-position. Sources:

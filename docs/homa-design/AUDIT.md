@@ -1,5 +1,10 @@
 # Homa Design System · Audit log
 
+> **Historical design record:** This file preserves July 2026 design decisions,
+> experiments, and then-open items. It is not the current product, ticket, or
+> implementation status source. Use `readme.md`, the reconciled PRD, the backlog,
+> and current application code for present guidance.
+
 ## Senior pass, July 4, 2026 (this repository)
 
 The system was ported from the junior repository (`Homa Design System 2/`, mounted read-only) and every open item in its audit was either fixed or explicitly decided. Generated files (`_ds_bundle.js`, manifest, lint config) were left behind to regenerate here; `uploads/` reference screenshots and the resolved `explorations/` type study were not carried over.

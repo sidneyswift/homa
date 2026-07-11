@@ -6,7 +6,8 @@ source:
   type: field-note
   ref: docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md
   locator: "L172-174"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "a photo of them and their social handles. That way people can go on

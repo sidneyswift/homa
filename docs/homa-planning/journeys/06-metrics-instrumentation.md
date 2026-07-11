@@ -1,5 +1,11 @@
 # Metrics & Instrumentation — North Star, metric tree, event schema, founder dashboard
 
+> Historical instrumentation proposal, last updated 2026-07-02. The typed
+> event-registry law and MJ-14 founder-dashboard target survive. The proposed
+> event names, counts, SQL, tables, columns, metrics, and implementation labels
+> do not describe the current repository. `packages/core/src/events.ts` is the
+> current typed registry, and migrations own the actual database schema.
+
 > Workstream 6 of the journey library (00-pm-kickoff.md). Status: PLANNING.
 > Methods applied: success-metric, tracking-schema, measure-what-matters, impact-model
 > (pm-os). Last updated 2026-07-02.

@@ -12,6 +12,13 @@ the one agent; a surface that cannot be yet (voice) must share the record
 and the guarded writes until it can; loops that talk to families wake the
 agent, and only receipts stay templates.**
 
+> Continuity correction (2026-07-11, live morning-brief incident): adapters
+> share the agent definition, not an Eve session. Channel-local continuation
+> tokens cannot carry a dispatch turn into an SMS/email/web reply. The gateway
+> now crosses one deeper seam first: `lib/conversation-continuity/` owns the
+> canonical episode, adult identity, per-recipient delivery, reply edge, and
+> unresolved open loop; Eve sessions are replaceable execution adapters.
+
 ## Where each surface stands
 
 | Surface | Today | After this plan |

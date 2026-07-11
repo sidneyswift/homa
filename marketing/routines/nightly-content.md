@@ -24,7 +24,6 @@ specifies, commit the staged bundle with message
 Hard stop conditions, restated from the laws: do not publish anything, do not
 send anything, do not post anything, do not touch `apps/web/`, do not call
 `marketing-distributor`. If fewer than 5 signals have `status: new`, run
-`marketing-idea-generator` first. If the scorer fails and the failure cannot be
-fixed by editing the bundle (for example a missing Higgsfield render), commit
-what exists with `WIP` in the commit message and report the blocker instead of
-improvising around it.
+`marketing-idea-generator` first. If the scorer or an asset step fails and the
+failure cannot be repaired within the bundle, stop and report the exact
+blocker. Do not commit an incomplete `WIP` bundle or mark it staged.

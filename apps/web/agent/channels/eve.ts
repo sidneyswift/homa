@@ -1,7 +1,11 @@
 import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/channels/auth";
-import { eveChannel } from "eve/channels/eve";
+import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import {
+  resolveInboundContinuity,
+  resolvedContinuityAttributes,
+} from "../../lib/conversation-continuity/ledger";
 import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-context";
 
 /**
@@ -49,16 +53,24 @@ function supabaseAuth(): AuthFn<Request> {
 
     // The caller's OWN membership row (user_id filter matters since
     // migration #49 let members read the whole family roster).
-    const { data: membership } = await supabase
+    const { data: membership, error: membershipError } = await supabase
       .from("family_members")
       .select("family_id, display_name")
       .eq("user_id", userData.user.id)
       .limit(1)
       .maybeSingle();
+    if (membershipError) {
+      console.error(
+        "eve channel: membership lookup failed:",
+        membershipError.message,
+      );
+      return null;
+    }
 
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = { supabaseAccessToken: token };
     if (membership?.family_id) attributes.familyId = membership.family_id;
+    attributes.memberUserId = userData.user.id;
     if (membership?.display_name) attributes.memberName = membership.display_name;
     if (userData.user.email) attributes.email = userData.user.email;
 
@@ -82,4 +94,59 @@ function supabaseAuth(): AuthFn<Request> {
 
 export default eveChannel({
   auth: [supabaseAuth(), vercelOidc(), localDev()],
+  async onMessage(ctx, message) {
+    const auth = defaultEveAuth(ctx);
+    if (!auth) return { auth };
+
+    const familyId = auth.attributes.familyId;
+    const memberUserId = auth.attributes.memberUserId;
+    const text =
+      typeof message === "string"
+        ? message
+        : message
+            .filter((part) => part.type === "text")
+            .map((part) => part.text)
+            .join("\n");
+    if (typeof familyId !== "string" || text.trim().length === 0) {
+      return { auth };
+    }
+
+    try {
+      const continuity = await resolveInboundContinuity({
+        familyId,
+        memberUserId:
+          typeof memberUserId === "string" ? memberUserId : null,
+        channel: "web",
+        transportThreadKey: `web:${auth.principalId}`,
+        runtimeSessionId: ctx.eve.sessionId ?? null,
+        providerMessageId: null,
+        providerReplyTo: null,
+        destinationKey: auth.principalId,
+        text,
+      });
+      const continuityAttributes = resolvedContinuityAttributes(continuity, {
+        memberUserId:
+          typeof memberUserId === "string" ? memberUserId : null,
+        providerMessageId: null,
+      });
+      return {
+        auth: {
+          ...auth,
+          attributes: {
+            ...auth.attributes,
+            ...continuityAttributes,
+          },
+        },
+        context: continuity.contextMarkdown
+          ? [continuity.contextMarkdown]
+          : [],
+      };
+    } catch (error) {
+      console.error(
+        "eve channel: continuity resolution failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+      return { auth };
+    }
+  },
 });

@@ -28,13 +28,13 @@ voice laws, `docs/homa-design/` guidelines, and the binding claims rules in
 ## Hard bans (each is also a scorer assertion or an editor check)
 
 - The em dash character, anywhere. Use a comma, period, colon, or mid-dot.
-- "HOMA" in prose. It is "Homa" in sentences; the all-caps form exists only in
-  wordmark UI treatments.
+- "HOMA" in prose. It is "Homa" in sentences and conversation; the all-caps
+  form belongs to the wordmark and UI surfaces under global founder ruling D8.
 - "Behind", "falling behind", "catch up", "ahead of grade level" as a promise.
   Say "growing", "on track", "that's just what's next".
 - Comparing siblings, ever, in any direction.
 - "Diagnose", "screening", "assessment" (clinical), "delay", "disorder". Say
-  "map", "checklist", "where they stand", "what's next".
+  "progress report", "checklist", "what looks solid", "what's next".
 - "Tutor", "teacher", "teaches your child", "replaces". The mother is the
   teacher. Say "assistant", "briefs you".
 - "Curriculum" as what Homa is. Say "materials", "practice", "works with your
@@ -50,8 +50,8 @@ voice laws, `docs/homa-design/` guidelines, and the binding claims rules in
 - Member children's photos, names, or voices in any marketing asset.
 - Data promises not yet true ("never used to train AI" waits for the signed
   DPAs; the day they are signed, it ships everywhere).
-- Marketing the moms network before it exists. Weekly note + discover are real;
-  the network is roadmap language only.
+- Marketing the moms network before it exists. Current capability claims need
+  repository evidence and production evidence when they describe the live site.
 
 ## Anti-slop banlist
 
@@ -117,7 +117,7 @@ article bodies and email bodies.
 | Pin | Title max 100 chars, description max 500, image 2:3 with legible overlay text. Description written for search (moms search Pinterest like Google). |
 | Email | Subject under 50 chars and written like a person. Preview line set deliberately. Body under 200 words. Exactly one CTA. |
 
-Every CTA points to thankshoma.com, /waitlist, or the article's canonical URL.
+Every CTA points to thankshoma.com, /onboarding, or the article's canonical URL.
 One CTA per format.
 
 ## The rule about this file

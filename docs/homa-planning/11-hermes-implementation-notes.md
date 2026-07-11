@@ -1,6 +1,9 @@
-# Hermes Agent v0.17.0 — Implementation Notes
+# Hermes Agent v0.17.0 : Implementation Notes
 
-Source tree: `/Users/sidneyswift/Documents/Projects/Sidney/homa/homa-research/homa-sources/hermes-agent` (`pyproject.toml` confirms `0.17.0`).
+> Historical external implementation reference. The source was a restricted local
+> Hermes v0.17.0 snapshot. Its path is intentionally omitted and was not accessed
+> during reconciliation. The behavior below describes that dated external source,
+> not current Homa implementation or production behavior.
 
 There is **no separate “review system prompt”**. The review fork reuses the parent’s cached system prompt and replays conversation history, then appends the review instructions as a **user message** to `run_conversation()`.
 
@@ -22,7 +25,7 @@ There is **no separate “review system prompt”**. The review fork reuses the 
 
 ### When it runs / when it’s skipped
 
-**Memory review** — counted in **user turns**, default interval **10** (`memory.nudge_interval` in config):
+**Memory review** : counted in **user turns**, default interval **10** (`memory.nudge_interval` in config):
 
 ```291:298:agent/turn_context.py
     should_review_memory = False
@@ -43,7 +46,7 @@ Defaults from init:
             agent._memory_nudge_interval = int(mem_config.get("nudge_interval", 10))
 ```
 
-**Skill review** — counted in **tool-loop iterations** since last `skill_manage`, default interval **10** (`skills.creation_nudge_interval`):
+**Skill review** : counted in **tool-loop iterations** since last `skill_manage`, default interval **10** (`skills.creation_nudge_interval`):
 
 ```435:441:agent/turn_finalizer.py
     _should_review_skills = False
@@ -87,14 +90,14 @@ Skipped when: no `final_response`, turn was **interrupted**, neither trigger fir
 
 ```33:41:agent/background_review.py
 # The review fork runs on the MAIN model by default ("auto"), replaying the
-# full conversation — already warm in the prompt cache, so cheap cache reads.
+# full conversation : already warm in the prompt cache, so cheap cache reads.
 # ...
 # Same model -> full replay; different model ->
 # digest. That's the whole policy.
 ```
 
 4. Review fork: `max_iterations=16`, `compression_enabled=False`, `_memory_nudge_interval=0`, `_skill_nudge_interval=0` (no recursive review).
-5. `skip_memory=True` on fork — no external memory provider side effects; only built-in `MEMORY.md`/`USER.md` via shared `_memory_store`.
+5. `skip_memory=True` on fork : no external memory provider side effects; only built-in `MEMORY.md`/`USER.md` via shared `_memory_store`.
 6. Tool whitelist: only `memory` + `skill_manage` tools (runtime deny for everything else).
 
 ### Inputs: full transcript vs digest
@@ -122,7 +125,7 @@ def _digest_history(messages_snapshot: List[Dict], tail: int = 24) -> List[Dict]
     digest = {
         "role": "user",
         "content": (
-            "[Earlier conversation digest — older turns summarised to bound the "
+            "[Earlier conversation digest : older turns summarised to bound the "
             "review's cold-write cost on the routed aux model. Recent turns "
             "follow verbatim below.]\n" + "\n".join(lines)
         ),
@@ -142,13 +145,13 @@ Selection at call site:
                         prompt
                         + "\n\nYou can only call memory and skill "
                         "management tools. Other tools will be denied "
-                        "at runtime — do not attempt them."
+                        "at runtime : do not attempt them."
                     ),
                     conversation_history=_review_history,
                 )
 ```
 
-### Review prompts (exact text — pick one based on triggers)
+### Review prompts (exact text : pick one based on triggers)
 
 Prompt selection:
 
@@ -167,7 +170,7 @@ Prompt selection:
 _MEMORY_REVIEW_PROMPT = (
     "Review the conversation above and consider saving to memory if appropriate.\n\n"
     "Focus on:\n"
-    "1. Has the user revealed things about themselves — their persona, desires, "
+    "1. Has the user revealed things about themselves : their persona, desires, "
     "preferences, or personal details worth remembering?\n"
     "2. Has the user expressed expectations about how you should behave, their work "
     "style, or ways they want you to operate?\n\n"
@@ -176,12 +179,12 @@ _MEMORY_REVIEW_PROMPT = (
 )
 ```
 
-**Skill-only prompt** (long — key structural sections):
+**Skill-only prompt** (long : key structural sections):
 
 ```170:273:agent/background_review.py
 _SKILL_REVIEW_PROMPT = (
     "Review the conversation above and update the skill library. Be "
-    "ACTIVE — most sessions produce at least one skill update, even if "
+    "ACTIVE : most sessions produce at least one skill update, even if "
     "small. A pass that does nothing is a missed learning opportunity, "
     "not a neutral outcome.\n\n"
     "Target shape of the library: CLASS-LEVEL skills, each with a rich "
@@ -238,7 +241,7 @@ Gate logic (`memory.write_approval` / `skills.write_approval`, default **off**):
             stage=True,
             message=(
                 f"Staged for approval ({subsystem}.write_approval is on). "
-                f"Not yet saved — review with {where}."
+                f"Not yet saved : review with {where}."
             ),
         )
 ```
@@ -260,8 +263,8 @@ Memory tool returns when staged:
 | Filter | Mechanism |
 |---|---|
 | Prompt negatives | Skill prompt blocks env failures, “tool X is broken”, one-off tasks |
-| System `MEMORY_GUIDANCE` | Injected when memory enabled — blocks task progress, PR numbers, imperatives |
-| Char budget | 2200 / 1375 — forces consolidation |
+| System `MEMORY_GUIDANCE` | Injected when memory enabled : blocks task progress, PR numbers, imperatives |
+| Char budget | 2200 / 1375 : forces consolidation |
 | Exact dedupe on add | `content in entries` → no-op success |
 | Threat scan on write | `scope="strict"` blocks injection/exfil patterns |
 | Snapshot sanitization at load | Poisoned entries → `[BLOCKED: …]` placeholder in system prompt only |
@@ -311,7 +314,7 @@ Full schema at `MEMORY_SCHEMA` in `tools/memory_tool.py` (lines 1005–1070). Ke
 
 - **`target`**: required enum `memory` | `user`
 - **`action`**: `add` | `replace` | `remove` (single-op)
-- **`operations`**: preferred batch shape — atomic, final-budget check
+- **`operations`**: preferred batch shape : atomic, final-budget check
 - **`old_text`**: substring match for replace/remove (not full entry, not ID)
 
 Description embeds consolidation instructions:
@@ -345,7 +348,7 @@ Single add overflow:
                         f"Adding this entry ({len(content)} chars) would exceed the limit. "
                         f"Consolidate now: use 'replace' to merge overlapping entries into "
                         f"shorter ones or 'remove' stale or less important entries (see "
-                        f"current_entries below), then retry this add — all in this turn."
+                        f"current_entries below), then retry this add : all in this turn."
                     ),
                     "current_entries": entries,
                     "usage": f"{current:,}/{limit:,}",
@@ -379,7 +382,7 @@ Success response is **terminal** (anti-thrash):
             ...
         }
         ...
-        resp["note"] = "Write saved. This update is complete — do not repeat it."
+        resp["note"] = "Write saved. This update is complete : do not repeat it."
 ```
 
 ### Dedupe logic
@@ -490,7 +493,7 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 ```
 
-**FTS5 virtual table** (unicode61 tokenizer) — indexes `content + tool_name + tool_calls`:
+**FTS5 virtual table** (unicode61 tokenizer) : indexes `content + tool_name + tool_calls`:
 
 ```737:759:hermes_state.py
 CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(
@@ -661,9 +664,9 @@ def _resolve_cron_disabled_toolsets(cfg: dict) -> list[str]:
     """Toolsets a cron-spawned agent must never receive.
 
     Three protected toolsets are always disabled in cron context:
-      - ``cronjob`` — would let a cron-spawned agent schedule more cron jobs
-      - ``messaging`` — interactive, needs a live gateway session
-      - ``clarify`` — interactive, blocks waiting for user input
+      - ``cronjob`` : would let a cron-spawned agent schedule more cron jobs
+      - ``messaging`` : interactive, needs a live gateway session
+      - ``clarify`` : interactive, blocks waiting for user input
     ...
     """
     disabled = ["cronjob", "messaging", "clarify"]
@@ -692,4 +695,3 @@ Per-job `enabled_toolsets` **cannot bypass** this denylist (#25752).
 2. **Memory**: `§`-delimited files, char budgets, batch `operations`, substring `old_text`, strict threat regex set + invisible-char scan, optional approval staging.
 3. **Session search**: SQLite FTS5 + triggers, discovery/scroll/browse shapes, lineage dedup, cron demotion, anchored ±5 + bookends ±3.
 4. **Cron**: snapshot unpinned provider/model at create; compare at run and skip + alert on drift; hard-disable `cronjob` tool in cron execution context.
-

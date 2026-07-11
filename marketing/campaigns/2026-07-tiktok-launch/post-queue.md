@@ -1,5 +1,9 @@
 # Post queue · TikTok launch, July-August 2026
 
+> Historical campaign queue. No row is approved to stage or publish. The source
+> signals are archived, and the product, privacy, consent, release, account, and
+> production claims require a new evidence pass.
+
 The first 14 posts from the 2026-07-08 research, hooks adapted to house
 style (mapping table in `playbook.md`). Each post becomes a normal staged
 bundle (video lane) through the demand engine: reader gate, editor gate,

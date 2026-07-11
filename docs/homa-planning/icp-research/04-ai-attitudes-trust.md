@@ -1,5 +1,10 @@
 # ICP research 04: how US homeschool parents relate to AI (usage, objections, trust physics)
 
+> Historical research snapshot, 2026-07-06. This file preserves the sampled
+> market, legal, and community evidence captured on that date. It is not
+> current product, legal, provider, or production guidance. Re-verify volatile
+> claims before reuse.
+
 Date: 2026-07-06
 Analyst: research subagent for Homa positioning ("the parent talks, Homa types")
 Method: web research conducted 2026-07-06. Sources: homeschool blogs and podcasts, the Well-Trained Mind forum, vendor sites and app store listings, national surveys (Pew, PDK, Common Sense Media, Barna, Count on Mothers, MassINC, NCES), and legal analyses of the 2025 COPPA amendments. Reddit could not be crawled directly (network-blocked on this run), so forum verbatims lean on the Well-Trained Mind forum, podcast transcripts, and blog culture; treat any Reddit-specific frequency claim as unmeasured. All quotes are verbatim from the cited pages, usernames omitted, no children's names appeared in quoted material. No numbers or quotes are fabricated. FACT and INFERENCE are labeled per section.
