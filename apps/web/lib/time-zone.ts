@@ -11,6 +11,15 @@ export function effectiveTimeZone(stored: string | null | undefined): string {
   return stored || FALLBACK_TIME_ZONE;
 }
 
+/** Today's calendar date as "YYYY-MM-DD" as seen in `timeZone`. Use this
+ * instead of `new Date().toISOString().slice(0, 10)` (which is the UTC date
+ * and lands on the wrong day for a family after their evening) whenever a
+ * "today" is written on a family's behalf. */
+export function todayInZone(timeZone: string, now: Date = new Date()): string {
+  const { year, month, day } = zonedDateParts(now, timeZone);
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 /** Calendar date parts (year, month 1-12, day, weekday 0=Sun) for `now`
  * as seen in `timeZone`, without any date-library dependency. */
 export function zonedDateParts(

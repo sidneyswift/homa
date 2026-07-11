@@ -4,6 +4,19 @@ import { isHoursSubject } from "./hours-model";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { scanMemoryContent } from "./agent-memory";
+import { effectiveTimeZone, todayInZone } from "./time-zone";
+
+/** The family's IANA zone (or the shared US fallback), loaded on the
+ * server connection. Used so dates written or rendered on a family's
+ * behalf land on their calendar day, not UTC or a hardcoded coast
+ * (2026-07-11 review, CR-11 and CR-12). */
+async function familyTimeZone(familyId: string): Promise<string> {
+  const sql = mapDb();
+  const rows = await sql<{ time_zone: string | null }[]>`
+    select time_zone from public.families where id = ${familyId}
+  `;
+  return effectiveTimeZone(rows[0]?.time_zone);
+}
 
 /**
  * Family-pinned tool operations for sessions with no caller JWT (the SMS
@@ -176,7 +189,7 @@ export async function recordHoursPinned(input: {
     }
   }
 
-  const happenedOn = input.happenedOn ?? new Date().toISOString().slice(0, 10);
+  const happenedOn = input.happenedOn ?? todayInZone(await familyTimeZone(input.familyId));
   const dupe = await sql<{ id: string }[]>`
     select id from public.hours_log
     where family_id = ${input.familyId}
@@ -235,13 +248,13 @@ export interface PinnedRecallHit {
   snippet: string;
 }
 
-function dayLabel(iso: string | null): string {
+function dayLabel(iso: string | null, timeZone: string): string {
   if (!iso) return "unknown date";
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-    timeZone: "America/New_York",
+    timeZone,
   });
 }
 
@@ -261,6 +274,7 @@ export async function recallPinned(input: {
   limit: number;
 }): Promise<PinnedRecallHit[]> {
   const sql = mapDb();
+  const zone = await familyTimeZone(input.familyId);
   const hits: PinnedRecallHit[] = [];
 
   if (input.scope === "calls" || input.scope === "all") {
@@ -275,7 +289,7 @@ export async function recallPinned(input: {
     `;
     for (const row of rows) {
       hits.push({
-        when: dayLabel(row.started_at),
+        when: dayLabel(row.started_at, zone),
         where: row.line === "curriculum" ? "phone call (report review)" : "phone call",
         snippet: row.transcript_text.slice(0, 480),
       });
@@ -293,7 +307,7 @@ export async function recallPinned(input: {
     `;
     for (const row of rows) {
       hits.push({
-        when: dayLabel(row.created_at),
+        when: dayLabel(row.created_at, zone),
         where: `${row.channel === "sms" ? "text message" : "chat"} (${row.role === "user" ? "the parent" : "Homa"})`,
         snippet: row.content.slice(0, 480),
       });
@@ -314,7 +328,7 @@ export async function recallPinned(input: {
     for (const row of rows) {
       const base = row.kind === "what_works" ? "saved memory (what works)" : "saved memory";
       hits.push({
-        when: dayLabel(row.created_at),
+        when: dayLabel(row.created_at, zone),
         where: row.superseded_at ? `${base}, older note that was later corrected` : base,
         snippet: row.content,
       });
@@ -362,7 +376,7 @@ export async function recallPinned(input: {
         const snippet = row.content.slice(0, 480);
         if (seen.has(snippet.slice(0, 80))) continue;
         seen.add(snippet.slice(0, 80));
-        hits.push({ when: dayLabel(row.happened_at), where: row.label, snippet });
+        hits.push({ when: dayLabel(row.happened_at, zone), where: row.label, snippet });
       }
     }
   }
