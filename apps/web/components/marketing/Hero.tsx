@@ -175,7 +175,7 @@ export function Hero() {
                 Moved up in math
               </p>
               <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                Maya {"\u00b7"} since April
+                David {"\u00b7"} since April
               </p>
             </div>
           </div>
