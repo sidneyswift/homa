@@ -3,6 +3,86 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (night) · Incident: live chat turn errored on the phone while the reply finished server-side
+
+Founder report with screenshot (Alessa live-testing on her iPhone,
+thankshoma.com): she dictated her day, watched the observation chips
+land, then got "that last message didn't go through". Investigation
+(Supabase events + conversation log + Vercel runtime logs), the same
+failure hit her twice:
+
+- 02:08:46Z turn starts (8 tool calls incl. a 60s worksheet image);
+  at 02:10:21Z, 94.6s in, her client errored. The turn finished fine
+  server-side at 02:11:28Z; the reply sat unseen in Postgres. Her
+  retry in a fresh session died the same way at 113.5s, with ITS
+  reply completing 5 seconds after she gave up.
+- Root cause: iOS suspends Safari (lock/app switch) and kills the
+  socket; WebKit surfaces that as TypeError "Load failed". eve's
+  stream client classifies disconnects by message regex
+  (abort|cancel|disconnect|premature close|socket|terminated), so
+  "Load failed" bypassed the built-in reconnect-and-replay and became
+  a terminal turn error, and the client then wiped its session cursor
+  (advanceSession resets without a boundary event), which is why her
+  next message started a brand-new session.
+- Ruled out: server-side failure (both turns completed and persisted),
+  a function timeout (the two deaths were 95s and 113s, and the eve
+  service stream outlived 90s), and the dictation feature itself
+  (transcription returned 200, modality "voice" flowed end to end).
+
+Fixes, decisions made alone:
+
+- **patches/eve@0.19.0.patch** (pnpm patchedDependencies, version
+  stays pinned): one line in dist/src/client/ndjson.js broadening
+  isStreamDisconnectError with `load failed|failed to fetch|network`,
+  the WebKit, Chromium, and Firefox/RN mid-stream death phrasings.
+  Stream deaths now resume from streamIndex instead of erroring the
+  turn. Patch over fork per the M0-01 tripwire posture (never eject,
+  vendor the pinned version); flag this patch on the next eve bump
+  (eve-upgrade-check will fail loudly if it stops applying) and drop
+  it if upstream fixes the classifier.
+- **maxReconnectAttempts 8** (default 3) on both chat surfaces: a
+  phone sleeping repeatedly through a 2-minute worksheet turn burns
+  one reconnect per wake; replays are cheap (resume, not recompute).
+- **Wake grace beat**: the visible-tab stall check (20s) aborted the
+  stream the instant a woken tab looked stale, which would have
+  killed the newly working reconnect mid-flight. It now waits 5s for
+  the reconnect to show life before stopping.
+- **Metrics honesty**: onFinish fires for failed turns too, so both
+  chat clients emitted chat.turn_completed "ok" AND "error" for every
+  failure (visible as 1ms-apart pairs across families all week). The
+  "ok" now only fires when the snapshot carries no error.
+- **Known gap, logged not built tonight**: a reply that completes
+  server-side after the client gave up is still not pulled back into
+  the transcript (it lives in conversation_messages and reaches the
+  model through recall). The durable-recovery UX (replay the missed
+  turn into the archive on next visit) is the remaining M1-04 piece.
+
+## 2026-07-10 (late night) · Homa's tasks + nightly research brief: plan and five rulings
+
+Founder arc: the macmini's nightly research Slack post ("it reminds me
+she's working for me even when I'm not using her") becomes a cloud
+feature, a 9am Mon-Fri text (email fallback), plus a webapp tab for
+Homa's tasks, designed one abstraction level above the single cron. The
+founder explicitly challenged the education-knowledge-architecture
+plan's "one research agent per family" line ("don't follow blindly");
+the finding-unknowns pass ran first (macmini research cron read in full,
+founder-authorized exception, code and formats only; two codebase
+mapping passes; unknowns split into code-resolved vs founder calls).
+
+Rulings taken on a question card (recorded as D-ht-1..5 in
+plans/2026-07-10-homa-tasks-and-nightly-research.md): two-tier research
+(fleet corpus + per-family application; per-family web research
+rejected on cost O(families) vs O(topics), privacy of child data in
+search queries, and council S1 blast radius, with the macmini's own
+generic benchmark files as evidence), both proactive loops (9am brief +
+8pm journal), the tab ships full management (M3-08 pulled forward,
+including its no-runaway-loops law), tab name "Homa's tasks", and
+knowledge_bank auto-merge behind an automated gate (M3-04 reconciled
+into the fleet tier, the reconciliation the education plan required).
+Backlog rows M3-04/M3-08 annotated. Also noted in the plan: PRD §3's
+"automated weekly notes (concierge only)" non-goal is superseded for
+the daily brief by this direction. No product code this session.
+
 ## 2026-07-10 (night) · Voice input in the web chat composer (dictation)
 
 Founder instruction: add a microphone to the chat so moms can talk their
@@ -28,9 +108,19 @@ and only her send sends. Calls made alone, worth auditing:
   does. M1-05 proper (voice notes as turns, routing chips + undo, the
   audio-upload fallback) builds on this route + helper later. The text
   box itself is the denial fallback: a blocked mic or an unclear take
-  becomes a quiet hint under the composer ("Homa couldn't open your
-  microphone..." / "That didn't come through clearly. Mind trying
-  again, or typing it?"), typing never leaves.
+  becomes a quiet hint under the composer, typing never leaves.
+- **Copy ran both gates** (reader, then editor). The reader gate's
+  biggest catch: at the check-mark moment she could not tell whether
+  the check SENDS her raw words, so a hint line now sits under the
+  composer while the mic is live ("Tap the check when you're done.
+  Nothing sends until you send it."). Failure lines lead with the path
+  that always works and name concrete fixes ("Homa couldn't use your
+  microphone. Typing works just as well. To talk instead, allow the
+  microphone in your phone or browser settings." / "Homa couldn't make
+  that out. Try somewhere quieter, or speak closer to the microphone.
+  Typing works too."). The editor gate then unified the naming splits
+  (microphone never "mic" in copy; both round buttons speak about
+  "what you said") and broke the semicolon fusions into sentences.
 - **`chat.turn_completed.modality` finally earns its "voice" arm**
   (registry already had it): a turn whose draft took any dictation
   emits modality "voice", so the funnel can see whether moms actually

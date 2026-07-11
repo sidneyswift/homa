@@ -27,13 +27,13 @@ import { Logo } from "../../components/brand/Logo";
 
 export type DictationPhase = "idle" | "recording" | "transcribing";
 
-// Copy passed the reader gate 2026-07-10 (typing named first as the
-// path that always works; the retry line offers both fixes because the
-// server cannot tell too-quiet from too-noisy).
+// Copy passed both gates 2026-07-10 (reader, then editor): typing is
+// named as the path that always works, and the retry line offers both
+// fixes because the server cannot tell too-quiet from too-noisy.
 const MIC_FAILED_MESSAGE =
-  "Homa couldn't use your microphone. Typing works just as well; to talk instead, allow the mic in your phone or browser settings.";
+  "Homa couldn't use your microphone. Typing works just as well. To talk instead, allow the microphone in your phone or browser settings.";
 const TRANSCRIBE_FAILED_MESSAGE =
-  "Homa couldn't make that out. Somewhere quieter, or closer to the phone, usually helps; typing works too.";
+  "Homa couldn't make that out. Try somewhere quieter, or speak closer to the microphone. Typing works too.";
 
 /** Shown under the composer while the mic is live: answers the two
  *  fears the reader gate caught (how does this end, and does the check
@@ -283,7 +283,7 @@ export function DictationRow({
       <span className="flex-1" aria-hidden="true" />
       <button
         type="button"
-        aria-label="Cancel recording"
+        aria-label="Throw away what you said"
         onClick={onCancel}
         disabled={transcribing}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition-colors hover:border-brand disabled:opacity-60"

@@ -64,10 +64,20 @@ import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
  *      (texting model: her thought is never rejected, it just sends
  *      when the line is free);
  *   2. returning to a visible tab with a stream that has been silent
- *      past the stall window quietly aborts the dead stream;
+ *      past the stall window waits one grace beat for the stream's own
+ *      reconnect to land, then aborts if it never does;
  *   3. a watchdog does the same for streams that die without the tab
  *      ever hiding (radio handoffs), sized generously past the longest
  *      normal tool run.
+ *
+ * The reconnect itself (incident 2026-07-11, Alessa's worksheet turns):
+ * iOS kills the socket when Safari suspends, and WebKit surfaces that
+ * as TypeError "Load failed", which eve's stock client treated as a
+ * terminal error instead of a disconnect, skipping its own resume and
+ * erroring the turn while the durable run finished fine server-side.
+ * patches/eve@0.19.0.patch broadens the classifier so those deaths
+ * reconnect and replay from streamIndex; maxReconnectAttempts is sized
+ * for a phone sleeping repeatedly through a long worksheet turn.
  */
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
@@ -83,9 +93,21 @@ const SUGGESTIONS = [
  *  quiet when the tab comes back is dead, not thinking. */
 const VISIBLE_STALL_MS = 20_000;
 
+/** How long a just-woken tab waits for the reconnecting stream to show
+ *  life before giving up and aborting (incident 2026-07-11: iOS kills
+ *  the socket on suspend; the client reconnects and replays from
+ *  streamIndex, but that round trip needs a moment). */
+const WAKE_GRACE_MS = 5_000;
+
 /** Foreground watchdog: past the longest normal tool run (image-heavy
  *  printables stream nothing while the render runs, ~60-90s). */
 const WATCHDOG_STALL_MS = 180_000;
+
+/** Stream reconnects per turn. The default (3) is sized for blips; a
+ *  phone that sleeps repeatedly through a 2-minute worksheet turn burns
+ *  one per wake, and every retry is cheap (replay resumes from the last
+ *  received event, nothing is recomputed). */
+const STREAM_RECONNECT_ATTEMPTS = 8;
 
 export function ChatClient({
   storageKey,
@@ -172,6 +194,7 @@ export function ChatClient({
         return data.session?.access_token ?? "";
       },
     },
+    maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
     onEvent() {
@@ -197,7 +220,10 @@ export function ChatClient({
         // eslint-disable-next-line react-hooks/purity
         lastActivityAt: Date.now(),
       });
-      void emitTurnCompleted("ok");
+      // onFinish fires for failed turns too; those already emit their
+      // own error event (the agent.error effect), so an unconditional
+      // "ok" here double-counted every failure (seen live 2026-07-11).
+      if (!snapshot.error) void emitTurnCompleted("ok");
       // The post-turn review trigger (M2-13): fire-and-forget; the server
       // decides whether enough new conversation accumulated to review.
       const sessionId = snapshot.session?.sessionId;
@@ -281,21 +307,34 @@ export function ChatClient({
   // stream that has clearly stopped flowing so the composer never locks.
   // stop() flips status back to ready; the durable turn continues
   // server-side and its events replay from streamIndex on the next send.
+  // Since the eve stream reconnects on its own (patched disconnect
+  // classifier + maxReconnectAttempts above), a just-woken tab first
+  // gets a grace window: if the reconnect delivers any event, the turn
+  // is alive and nothing aborts.
   useEffect(() => {
     if (!busy) return;
     // The turn just started; that counts as activity (the stall clock
     // must never inherit a stamp from a previous turn).
     lastStreamActivityRef.current = Date.now();
-    const stopIfStale = (stallMs: number) => {
-      if (Date.now() - lastStreamActivityRef.current > stallMs) agent.stop();
-    };
+    let wakeGraceTimer: ReturnType<typeof setTimeout> | null = null;
+    const isStale = (stallMs: number) =>
+      Date.now() - lastStreamActivityRef.current > stallMs;
     const onVisible = () => {
-      if (document.visibilityState === "visible") stopIfStale(VISIBLE_STALL_MS);
+      if (document.visibilityState !== "visible") return;
+      if (!isStale(VISIBLE_STALL_MS) || wakeGraceTimer !== null) return;
+      wakeGraceTimer = setTimeout(() => {
+        wakeGraceTimer = null;
+        // Still nothing after the grace: the stream really is dead.
+        if (isStale(VISIBLE_STALL_MS)) agent.stop();
+      }, WAKE_GRACE_MS);
     };
-    const watchdog = setInterval(() => stopIfStale(WATCHDOG_STALL_MS), 15_000);
+    const watchdog = setInterval(() => {
+      if (isStale(WATCHDOG_STALL_MS)) agent.stop();
+    }, 15_000);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(watchdog);
+      if (wakeGraceTimer !== null) clearTimeout(wakeGraceTimer);
       document.removeEventListener("visibilitychange", onVisible);
     };
     // agent.stop is stable for the store's lifetime; busy is the real dep.

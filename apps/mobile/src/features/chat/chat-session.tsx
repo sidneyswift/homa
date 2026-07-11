@@ -55,6 +55,9 @@ import { BusyBubble, MessageView } from "./message-view";
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
 
+/** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
+const STREAM_RECONNECT_ATTEMPTS = 8;
+
 const SUGGESTIONS = [
   "What should we work on this week?",
   "Make a worksheet for today",
@@ -124,6 +127,10 @@ export function ChatSession({
         return data.session?.access_token ?? "";
       },
     },
+    // A phone that sleeps repeatedly through a long turn burns one
+    // reconnect per wake; replay resumes from the last received event
+    // (incident 2026-07-11, see web twin's header + patches/eve).
+    maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
     onEvent() {
@@ -146,7 +153,10 @@ export function ChatSession({
         messageTimes: stamped,
         lastActivityAt: Date.now(),
       });
-      void emitTurnCompleted("ok");
+      // onFinish fires for failed turns too; those already emit their
+      // own error event (the agent.error effect), so an unconditional
+      // "ok" here double-counted every failure (seen live 2026-07-11).
+      if (!snapshot.error) void emitTurnCompleted("ok");
       // Deliver the queue: messages she sent while Homa was working go
       // out as ONE follow-up turn the moment the line is free (also
       // after Stop, which is often pressed exactly to jump the line).

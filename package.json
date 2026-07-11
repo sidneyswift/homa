@@ -31,5 +31,10 @@
     "sharp": "^0.35.3",
     "tsx": "^4.23.0",
     "turbo": "^2.5.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "eve@0.19.0": "patches/eve@0.19.0.patch"
+    }
   }
 }
