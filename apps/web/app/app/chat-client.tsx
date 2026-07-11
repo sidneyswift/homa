@@ -2,7 +2,7 @@
 
 import { emitEvent } from "@homa/core";
 import { useEveAgent, type EveMessage } from "eve/react";
-import { ArrowUp, Sparkles, Square } from "lucide-react";
+import { ArrowUp, Sparkles, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
@@ -16,6 +16,12 @@ import {
   stampMessageTimes,
   type ArchivedMessage,
 } from "./chat-storage";
+import {
+  DictationRow,
+  MicButton,
+  RECORDING_HINT_MESSAGE,
+  useDictation,
+} from "./dictation";
 import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
 import { SlashComposer } from "./slash-composer";
 import { buildTranscript } from "./transcript-days";
@@ -51,8 +57,12 @@ import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
  * looked complete. Three defenses, all client-side (the turn itself is
  * durable server-side, and the resumable stream replays missed events
  * from the session's streamIndex on the next send):
- *   1. the send button becomes a Stop button while Homa works, so she
- *      can always take the wheel back;
+ *   1. while Homa works the composer never goes dead: an empty composer
+ *      shows Stop; a typed one shows Stop AND Send (founder ruling
+ *      2026-07-10, the Claude/Cursor composer shape), and Send while
+ *      busy QUEUES the message, delivered the moment the turn ends
+ *      (texting model: her thought is never rejected, it just sends
+ *      when the line is free);
  *   2. returning to a visible tab with a stream that has been silent
  *      past the stall window quietly aborts the dead stream;
  *   3. a watchdog does the same for streams that die without the tab
@@ -68,6 +78,14 @@ const SUGGESTIONS = [
   "Make a worksheet for today",
   "We had a rough morning, help me reset",
 ] as const;
+
+/** A backgrounded phone kills the stream within seconds; a stream this
+ *  quiet when the tab comes back is dead, not thinking. */
+const VISIBLE_STALL_MS = 20_000;
+
+/** Foreground watchdog: past the longest normal tool run (image-heavy
+ *  printables stream nothing while the render runs, ~60-90s). */
+const WATCHDOG_STALL_MS = 180_000;
 
 export function ChatClient({
   storageKey,
@@ -105,6 +123,22 @@ export function ChatClient({
   const messagesRef = useRef<readonly EveMessage[]>([]);
   const archivedRef = useRef(archived);
   const reportedErrorRef = useRef<Error | null>(null);
+  /** Last moment the stream showed signs of life (0 = none yet). */
+  const lastStreamActivityRef = useRef(0);
+  /** Messages sent while a turn was running; flushed as one message the
+   *  moment the line is free. */
+  const [queued, setQueued] = useState<string[]>([]);
+  /** The store's send, held by ref so onFinish can deliver the queue
+   *  without capturing `agent` inside its own initializer (the React
+   *  Compiler rejects that self-capture on mobile; twins stay alike). */
+  const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
+    null,
+  );
+  // Whether dictation fed the current draft, and the modality of the
+  // turn in flight (read later by onFinish / the error effect). Refs,
+  // not state: nothing renders from them.
+  const draftFromVoiceRef = useRef(false);
+  const turnModalityRef = useRef<"text" | "voice">("text");
 
   async function emitTurnCompleted(
     status: "ok" | "error",
@@ -123,7 +157,7 @@ export function ChatClient({
       {
         status,
         ...(errorClass ? { error_class: errorClass } : {}),
-        modality: "text",
+        modality: turnModalityRef.current,
         latency_ms: takeTurnLatencyMs(),
         model_tier: MODEL_TIER,
         tool_calls: countLastTurnToolCalls(messagesRef.current),
@@ -140,6 +174,9 @@ export function ChatClient({
     },
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
+    onEvent() {
+      lastStreamActivityRef.current = Date.now();
+    },
     onFinish(snapshot) {
       // Stamp this turn's new message ids with the clock (the only time
       // source the transcript has; eve events carry sequence numbers,
@@ -155,6 +192,9 @@ export function ChatClient({
         events: snapshot.events,
         session: snapshot.session,
         messageTimes: stamped,
+        // onFinish runs after a turn completes, never during render,
+        // so reading the clock is safe; the purity rule cannot tell.
+        // eslint-disable-next-line react-hooks/purity
         lastActivityAt: Date.now(),
       });
       void emitTurnCompleted("ok");
@@ -170,13 +210,42 @@ export function ChatClient({
           // Best effort: a missed review re-arms on the next turn.
         });
       }
+      // Deliver the queue: messages she sent while Homa was working go
+      // out as ONE follow-up turn the moment the line is free (also
+      // after Stop, which is often pressed exactly to jump the line).
+      // A failed turn holds the queue; her next manual send carries it.
+      if (!snapshot.error && queued.length > 0) {
+        const message = queued.join("\n\n");
+        setQueued([]);
+        // Next tick: this callback runs inside the previous send's
+        // teardown, and eve rejects overlapping sends.
+        setTimeout(() => {
+          setBusySeconds(0);
+          markTurnStarted();
+          void sendRef.current?.({ message });
+        }, 0);
+      }
     },
   });
+
+  useEffect(() => {
+    sendRef.current = agent.send;
+  }, [agent.send]);
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
   const firstScrollDoneRef = useRef(false);
   const busy = agent.status === "submitted" || agent.status === "streaming";
+
+  // Voice input (FR-4's dictation leg): the transcript joins whatever
+  // is already typed, and she reviews the words before sending. The
+  // draft setter reads current state so back-to-back takes stack.
+  const dictation = useDictation((transcript) => {
+    draftFromVoiceRef.current = true;
+    setDraft((current) =>
+      current.trim().length === 0 ? transcript : `${current.trimEnd()} ${transcript}`,
+    );
+  });
 
   // Elapsed seconds beside the busy label (the reference transcript's
   // "· 19s"): long waits read as work in progress, not a hang. Reset
@@ -208,6 +277,31 @@ export function ChatClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.error]);
 
+  // Dead-stream recovery (defenses 2 and 3 from the header): abort a
+  // stream that has clearly stopped flowing so the composer never locks.
+  // stop() flips status back to ready; the durable turn continues
+  // server-side and its events replay from streamIndex on the next send.
+  useEffect(() => {
+    if (!busy) return;
+    // The turn just started; that counts as activity (the stall clock
+    // must never inherit a stamp from a previous turn).
+    lastStreamActivityRef.current = Date.now();
+    const stopIfStale = (stallMs: number) => {
+      if (Date.now() - lastStreamActivityRef.current > stallMs) agent.stop();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") stopIfStale(VISIBLE_STALL_MS);
+    };
+    const watchdog = setInterval(() => stopIfStale(WATCHDOG_STALL_MS), 15_000);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(watchdog);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+    // agent.stop is stable for the store's lifetime; busy is the real dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy]);
+
   /** The manual fresh start: archive what is on screen, rotate the
    *  session, keep every word visible above. Nothing is erased. */
   function startNewChat() {
@@ -221,6 +315,7 @@ export function ChatClient({
     setArchived(nextArchived);
     archivedRef.current = nextArchived;
     setLiveTimes({});
+    setQueued([]);
     saveChat(storageKey, {
       archived: nextArchived,
       events: [],
@@ -249,15 +344,30 @@ export function ChatClient({
       behavior: firstScrollDoneRef.current ? "smooth" : "auto",
     });
     firstScrollDoneRef.current = true;
-  }, [agent.data.messages, archived]);
+  }, [agent.data.messages, archived, queued]);
 
   function sendMessage(text: string) {
     const message = text.trim();
-    if (message.length === 0 || busy) return;
+    if (message.length === 0) return;
+    // The registry's modality signal (chat.turn_completed): "voice"
+    // when dictation fed any part of this draft.
+    turnModalityRef.current = draftFromVoiceRef.current ? "voice" : "text";
+    draftFromVoiceRef.current = false;
     setDraft("");
+    // Sending mid-turn queues instead of refusing (texting model,
+    // founder ruling 2026-07-10 night): the bubble waits by the
+    // composer and goes out the moment the line is free.
+    if (busy) {
+      setQueued((current) => [...current, message]);
+      return;
+    }
+    // A queue held back by a failed turn rides along with the next
+    // manual send, in the order she wrote everything.
+    const outgoing = [...queued, message].join("\n\n");
+    setQueued([]);
     setBusySeconds(0);
     markTurnStarted();
-    void agent.send({ message });
+    void agent.send({ message: outgoing });
   }
 
   return (
@@ -342,6 +452,47 @@ export function ChatClient({
             ) : null}
           </div>
         ) : null}
+        {queued.length > 0 ? (
+          // Messages sent mid-turn wait here as dimmed bubbles (the
+          // Cursor queue, in texting clothes) and go out on turn end;
+          // the X pulls one back before it sends. "Send now" interrupts:
+          // stopping the turn is all it takes, the flush in onFinish
+          // delivers the queue the moment the abort settles.
+          <div className="flex flex-col items-end gap-2">
+            {queued.map((text, index) => (
+              <div
+                key={`${index}:${text.slice(0, 24)}`}
+                className="flex max-w-[76%] items-center gap-2"
+              >
+                <button
+                  type="button"
+                  aria-label="Remove from queue"
+                  onClick={() =>
+                    setQueued((current) => current.filter((_, at) => at !== index))
+                  }
+                  className="text-subtle transition-colors hover:text-strong"
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+                <div className="rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand opacity-70">
+                  <p className="whitespace-pre-wrap">{text}</p>
+                </div>
+              </div>
+            ))}
+            <p className="flex items-center gap-3 text-xs text-subtle">
+              Sends when Homa finishes
+              {busy ? (
+                <button
+                  type="button"
+                  onClick={() => agent.stop()}
+                  className="font-semibold text-brand transition-colors hover:underline"
+                >
+                  Send now
+                </button>
+              ) : null}
+            </p>
+          </div>
+        ) : null}
         {agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
             Your conversation is safe; that last message didn&apos;t go through. Try
@@ -353,8 +504,8 @@ export function ChatClient({
 
       {/* The kit's composer (ChatView.jsx): a white pill card on the page
           background, sparkles at the left, a borderless input, and a round
-          arrow-up send button. Typing stays enabled while Homa works; only
-          sending waits. */}
+          arrow-up send button. Typing stays enabled while Homa works, and
+          sending mid-turn queues; nothing ever waits on her. */}
       <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3.5 sm:px-6">
         {focusChildName ? (
           // The context switcher has one kid selected; say so where she
@@ -382,22 +533,81 @@ export function ChatClient({
           }}
         >
           <Sparkles size={20} className="shrink-0 text-brand" aria-hidden="true" />
-          <SlashComposer
-            kids={kids ?? []}
-            skills={slashSkills ?? []}
-            draft={draft}
-            onDraftChange={setDraft}
-            placeholder="Tell Homa about your day…"
-          />
-          <button
-            type="submit"
-            aria-label="Send"
-            disabled={busy || draft.trim().length === 0}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
-          >
-            <ArrowUp size={18} aria-hidden="true" />
-          </button>
+          {dictation.phase !== "idle" ? (
+            // Talking replaces typing for the moment: the listening row
+            // takes the input's place, X drops the take, the check turns
+            // it into editable words. Nothing sends until she sends.
+            <DictationRow
+              phase={dictation.phase}
+              seconds={dictation.seconds}
+              onCancel={dictation.cancel}
+              onAccept={dictation.accept}
+            />
+          ) : (
+            <>
+              <SlashComposer
+                kids={kids ?? []}
+                skills={slashSkills ?? []}
+                draft={draft}
+                onDraftChange={setDraft}
+                placeholder="Tell Homa about your day…"
+              />
+              {dictation.supported ? <MicButton onStart={dictation.start} /> : null}
+              {/* The Claude-composer shape (founder ruling 2026-07-10
+                  night): while Homa works, an empty composer shows Stop;
+                  a typed one shows Stop AND Send, where Send queues the
+                  message for the moment the turn ends. Idle shows Send. */}
+              {busy ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Stop"
+                    onClick={() => agent.stop()}
+                    className={
+                      draft.trim().length > 0
+                        ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong shadow-sm transition-colors hover:border-brand"
+                        : "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                    }
+                  >
+                    <Square size={14} fill="currentColor" aria-hidden="true" />
+                  </button>
+                  {draft.trim().length > 0 ? (
+                    <button
+                      type="submit"
+                      aria-label="Send"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                    >
+                      <ArrowUp size={18} aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <button
+                  type="submit"
+                  aria-label="Send"
+                  disabled={draft.trim().length === 0}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+                >
+                  <ArrowUp size={18} aria-hidden="true" />
+                </button>
+              )}
+            </>
+          )}
         </form>
+        {dictation.phase === "recording" ? (
+          // The contract, visible while she talks (reader gate
+          // 2026-07-10: "does the check send my raw words?"): the check
+          // ends the take, and sending stays hers.
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-subtle" role="status">
+            {RECORDING_HINT_MESSAGE}
+          </p>
+        ) : dictation.error ? (
+          // Fail-soft (M1-05's law): a blocked mic or an unclear take
+          // becomes a quiet hint, and typing is always right there.
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-muted" role="status">
+            {dictation.error}
+          </p>
+        ) : null}
       </footer>
     </div>
   );

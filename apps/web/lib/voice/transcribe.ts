@@ -1,7 +1,8 @@
 /**
- * Speech transcription for inbound SMS media (used by the attachment
- * normalizer, lib/voice/sms-attachments.ts). MMS voice notes AND video
- * clips become text through Telnyx's speech-to-text endpoint
+ * Speech transcription, shared by two callers: inbound SMS media (the
+ * attachment normalizer, lib/voice/sms-attachments.ts) and the web
+ * chat's dictation route (app/api/chat/dictation). Audio becomes text
+ * through Telnyx's speech-to-text endpoint
  * (POST /v2/ai/audio/transcriptions, Whisper-backed, OpenAI compatible):
  * ffmpeg on their side decodes whatever container arrives and, for
  * video, extracts the audio track. Chosen over the AI Gateway's STT,
@@ -72,26 +73,25 @@ function extensionForContentType(contentType: string): string {
 }
 
 /**
- * transcribeSmsMedia(mediaUrl, contentType): Promise<string | null>
- * Downloads one MMS audio or video attachment and returns the speech
- * transcript, or null on any failure. Never throws.
+ * transcribeAudio(audio, contentType): Promise<string | null>
+ * Sends audio (or video) bytes to Telnyx STT and returns the speech
+ * transcript, or null on any failure (missing key, API error, silent
+ * clip). Never throws. The shared core under transcribeSmsMedia and
+ * the chat dictation route.
  */
-export async function transcribeSmsMedia(
-  mediaUrl: string,
+export async function transcribeAudio(
+  audio: ArrayBuffer,
   contentType: string,
 ): Promise<string | null> {
   const apiKey = process.env.TELNYX_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey || audio.byteLength === 0) return null;
 
   try {
-    const media = await downloadTelnyxMedia(mediaUrl);
-    if (!media || media.byteLength === 0) return null;
-
     const form = new FormData();
     form.append("model", TELNYX_STT_MODEL);
     form.append(
       "file",
-      new Blob([media], { type: contentType }),
+      new Blob([audio], { type: contentType }),
       `voice-note.${extensionForContentType(contentType)}`,
     );
 
@@ -102,7 +102,7 @@ export async function transcribeSmsMedia(
     });
     if (!response.ok) {
       console.error(
-        `sms media transcription failed: HTTP ${response.status} (${contentType})`,
+        `audio transcription failed: HTTP ${response.status} (${contentType})`,
       );
       return null;
     }
@@ -112,9 +112,23 @@ export async function transcribeSmsMedia(
     return transcript.length > 0 ? transcript : null;
   } catch (error) {
     console.error(
-      "sms media transcription failed:",
+      "audio transcription failed:",
       error instanceof Error ? error.message : "unknown",
     );
     return null;
   }
+}
+
+/**
+ * transcribeSmsMedia(mediaUrl, contentType): Promise<string | null>
+ * Downloads one MMS audio or video attachment and returns the speech
+ * transcript, or null on any failure. Never throws.
+ */
+export async function transcribeSmsMedia(
+  mediaUrl: string,
+  contentType: string,
+): Promise<string | null> {
+  const media = await downloadTelnyxMedia(mediaUrl);
+  if (!media) return null;
+  return transcribeAudio(media, contentType);
 }

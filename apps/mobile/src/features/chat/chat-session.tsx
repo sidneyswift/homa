@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  AppState,
   Pressable,
   ScrollView,
   Text,
@@ -37,6 +38,18 @@ import { BusyBubble, MessageView } from "./message-view";
  * under day separators while the model session rotates at the first
  * visit after 4am local (lib/chat-storage.ts). "New chat" archives the
  * visible conversation and starts a fresh session; nothing is erased.
+ *
+ * Never stuck (founder bug report 2026-07-10 night, web twin has the
+ * full story): a backgrounded phone kills the turn stream, and a
+ * half-open connection can hang without erroring, leaving the composer
+ * locked. Same defenses as web: while a turn runs an empty composer
+ * shows Stop and a typed one shows Stop AND Send, where Send QUEUES the
+ * message for the moment the turn ends (the Claude-composer shape,
+ * founder ruling 2026-07-10 night); coming back to the foreground
+ * aborts a stream that has gone silent past the stall window; a
+ * watchdog covers streams that die without the app ever hiding. The
+ * turn is durable server-side; missed events replay from streamIndex
+ * on the next send.
  */
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
@@ -47,6 +60,14 @@ const SUGGESTIONS = [
   "Make a worksheet for today",
   "We had a rough morning, help me reset",
 ] as const;
+
+/** A backgrounded app kills the stream within seconds; a stream this
+ *  quiet when the app comes back is dead, not thinking. */
+const VISIBLE_STALL_MS = 20_000;
+
+/** Foreground watchdog: past the longest normal tool run (image-heavy
+ *  printables stream nothing while the render runs, ~60-90s). */
+const WATCHDOG_STALL_MS = 180_000;
 
 export function ChatSession({
   storageKey,
@@ -69,6 +90,16 @@ export function ChatSession({
   }));
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  /** Last moment the stream showed signs of life (0 = none yet). */
+  const lastStreamActivityRef = useRef(0);
+  /** Messages sent while a turn was running; flushed as one message the
+   *  moment the line is free. */
+  const [queued, setQueued] = useState<string[]>([]);
+  /** The store's send, held by ref so onFinish can deliver the queue
+   *  without capturing `agent` inside its own initializer. */
+  const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
+    null,
+  );
   const [draft, setDraft] = useState("");
 
   async function emitTurnCompleted(
@@ -95,6 +126,9 @@ export function ChatSession({
     },
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
+    onEvent() {
+      lastStreamActivityRef.current = Date.now();
+    },
     onFinish(snapshot) {
       // Stamp this turn's new message ids with the clock (the only time
       // source the transcript has; eve events carry sequence numbers,
@@ -113,8 +147,26 @@ export function ChatSession({
         lastActivityAt: Date.now(),
       });
       void emitTurnCompleted("ok");
+      // Deliver the queue: messages she sent while Homa was working go
+      // out as ONE follow-up turn the moment the line is free (also
+      // after Stop, which is often pressed exactly to jump the line).
+      // A failed turn holds the queue; her next manual send carries it.
+      if (!snapshot.error && queued.length > 0) {
+        const message = queued.join("\n\n");
+        setQueued([]);
+        // Next tick: this callback runs inside the previous send's
+        // teardown, and eve rejects overlapping sends.
+        setTimeout(() => {
+          markTurnStarted();
+          void sendRef.current?.({ message });
+        }, 0);
+      }
     },
   });
+
+  useEffect(() => {
+    sendRef.current = agent.send;
+  }, [agent.send]);
 
   const busy = agent.status === "submitted" || agent.status === "streaming";
   const messages = agent.data.messages;
@@ -136,12 +188,47 @@ export function ChatSession({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.error]);
 
+  // Dead-stream recovery: abort a stream that has clearly stopped
+  // flowing so the composer never locks. stop() flips status back to
+  // ready; the durable turn continues server-side and its events replay
+  // from streamIndex on the next send.
+  useEffect(() => {
+    if (!busy) return;
+    // The turn just started; that counts as activity (the stall clock
+    // must never inherit a stamp from a previous turn).
+    lastStreamActivityRef.current = Date.now();
+    const stopIfStale = (stallMs: number) => {
+      if (Date.now() - lastStreamActivityRef.current > stallMs) agent.stop();
+    };
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") stopIfStale(VISIBLE_STALL_MS);
+    });
+    const watchdog = setInterval(() => stopIfStale(WATCHDOG_STALL_MS), 15_000);
+    return () => {
+      subscription.remove();
+      clearInterval(watchdog);
+    };
+    // agent.stop is stable for the store's lifetime; busy is the real dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy]);
+
   function sendMessage(text: string) {
     const message = text.trim();
-    if (message.length === 0 || busy) return;
+    if (message.length === 0) return;
     setDraft("");
+    // Sending mid-turn queues instead of refusing (texting model,
+    // founder ruling 2026-07-10 night): the bubble waits by the
+    // composer and goes out the moment the line is free.
+    if (busy) {
+      setQueued((current) => [...current, message]);
+      return;
+    }
+    // A queue held back by a failed turn rides along with the next
+    // manual send, in the order she wrote everything.
+    const outgoing = [...queued, message].join("\n\n");
+    setQueued([]);
     markTurnStarted();
-    void agent.send({ message });
+    void agent.send({ message: outgoing });
   }
 
   /** The manual fresh start: archive what is on screen, rotate the
@@ -154,6 +241,7 @@ export function ChatSession({
     setArchived(nextArchived);
     archivedRef.current = nextArchived;
     setLiveTimes({});
+    setQueued([]);
     void saveChat(storageKey, {
       archived: nextArchived,
       events: [],
@@ -257,6 +345,93 @@ export function ChatSession({
           </>
         )}
         {statusLabel ? <BusyBubble label={statusLabel} /> : null}
+        {queued.length > 0 ? (
+          // Messages sent mid-turn wait here as dimmed bubbles and go
+          // out on turn end; the remove button pulls one back first.
+          <View style={{ alignItems: "flex-end", gap: space.sm }}>
+            {queued.map((text, index) => (
+              <View
+                key={`${index}:${text.slice(0, 24)}`}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: space.sm,
+                  maxWidth: "76%",
+                }}
+              >
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove from queue"
+                  onPress={() =>
+                    setQueued((current) => current.filter((_, at) => at !== index))
+                  }
+                  hitSlop={8}
+                >
+                  <Text
+                    style={{
+                      fontFamily: fontFamilies.bodySemibold,
+                      fontSize: fontSize.sm,
+                      color: colors.textSubtle,
+                    }}
+                  >
+                    {"\u2715"}
+                  </Text>
+                </Pressable>
+                <View
+                  style={{
+                    borderRadius: radius.lg,
+                    borderBottomRightRadius: radius.sm,
+                    backgroundColor: colors.brand,
+                    opacity: 0.7,
+                    paddingHorizontal: 18,
+                    paddingVertical: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: fontFamilies.body,
+                      fontSize: fontSize.base,
+                      color: colors.onBrand,
+                    }}
+                  >
+                    {text}
+                  </Text>
+                </View>
+              </View>
+            ))}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
+              <Text
+                style={{
+                  fontFamily: fontFamilies.body,
+                  fontSize: fontSize.xs,
+                  color: colors.textSubtle,
+                }}
+              >
+                Sends when Homa finishes
+              </Text>
+              {busy ? (
+                // "Send now" interrupts: stopping the turn is all it
+                // takes, the flush in onFinish delivers the queue the
+                // moment the abort settles.
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => agent.stop()}
+                  hitSlop={8}
+                >
+                  <Text
+                    style={{
+                      fontFamily: fontFamilies.bodySemibold,
+                      fontSize: fontSize.xs,
+                      color: colors.brand,
+                    }}
+                  >
+                    Send now
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
         {agent.error ? (
           <Text
             accessibilityRole="alert"
@@ -289,7 +464,6 @@ export function ChatSession({
           onChangeText={setDraft}
           placeholder={"Tell Homa about your day\u2026"}
           placeholderTextColor={colors.textSubtle}
-          editable={!busy}
           returnKeyType="send"
           onSubmitEditing={() => sendMessage(draft)}
           style={{
@@ -302,33 +476,71 @@ export function ChatSession({
             fontFamily: fontFamilies.body,
             fontSize: fontSize.base,
             color: colors.textStrong,
-            opacity: busy ? 0.6 : 1,
           }}
         />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => sendMessage(draft)}
-          disabled={busy || draft.trim().length === 0}
-          style={({ pressed }) => ({
-            minHeight: 48,
-            borderRadius: radius.pill,
-            backgroundColor: pressed ? colors.brandHover : colors.brand,
-            paddingHorizontal: space.lg,
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: busy || draft.trim().length === 0 ? 0.6 : 1,
-          })}
-        >
-          <Text
-            style={{
-              fontFamily: fontFamilies.bodySemibold,
-              fontSize: fontSize.base,
-              color: colors.onBrand,
-            }}
+        {/* The Claude-composer shape (founder ruling 2026-07-10 night):
+            while Homa works, an empty composer shows Stop; a typed one
+            shows Stop AND Send, where Send queues the message for the
+            moment the turn ends. Idle shows Send. */}
+        {busy ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Stop"
+            onPress={() => agent.stop()}
+            style={({ pressed }) => ({
+              minHeight: 48,
+              borderRadius: radius.pill,
+              borderWidth: draft.trim().length > 0 ? 1 : 0,
+              borderColor: pressed ? colors.brand : colors.border,
+              backgroundColor:
+                draft.trim().length > 0
+                  ? colors.card
+                  : pressed
+                    ? colors.brandHover
+                    : colors.brand,
+              paddingHorizontal: space.lg,
+              alignItems: "center",
+              justifyContent: "center",
+            })}
           >
-            Send
-          </Text>
-        </Pressable>
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodySemibold,
+                fontSize: fontSize.base,
+                color: draft.trim().length > 0 ? colors.textStrong : colors.onBrand,
+              }}
+            >
+              Stop
+            </Text>
+          </Pressable>
+        ) : null}
+        {!busy || draft.trim().length > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Send"
+            onPress={() => sendMessage(draft)}
+            disabled={draft.trim().length === 0}
+            style={({ pressed }) => ({
+              minHeight: 48,
+              borderRadius: radius.pill,
+              backgroundColor: pressed ? colors.brandHover : colors.brand,
+              paddingHorizontal: space.lg,
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: draft.trim().length === 0 ? 0.6 : 1,
+            })}
+          >
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodySemibold,
+                fontSize: fontSize.base,
+                color: colors.onBrand,
+              }}
+            >
+              Send
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
       {messages.length > 0 ? (
         <NewChatRow disabled={busy} onPress={startNewChat} />

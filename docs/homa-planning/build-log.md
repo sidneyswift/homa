@@ -3,6 +3,50 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (night) · Voice input in the web chat composer (dictation)
+
+Founder instruction: add a microphone to the chat so moms can talk their
+prompts. Shipped as dictation into the composer, the first slice of
+FR-4's voice leg (M0-04's exact pipeline: record in the browser, upload,
+Whisper, text lands in the chat): a mic button beside send starts a
+listening row (pulse dot, elapsed time, X to drop the take, check to
+keep it), the transcript lands IN the draft where she reviews and edits,
+and only her send sends. Calls made alone, worth auditing:
+
+- **MediaRecorder + server Whisper over the Web Speech API**: the PRD
+  already picked MediaRecorder -> Whisper, and the Web Speech API would
+  have been the worse call anyway (unreliable on iOS Safari, absent in
+  Firefox, browser-dependent quality). Recording uploads to the new
+  `POST /api/chat/dictation` (signed-in gate, 4MB cap under Vercel's
+  body limit) and transcribes through the same Telnyx STT core the SMS
+  voice-note lane trusts: `lib/voice/transcribe.ts` grew a shared
+  `transcribeAudio(bytes, contentType)`, and `transcribeSmsMedia` now
+  delegates to it. Chrome's webm/opus and iOS Safari's mp4 both already
+  map in its extension table.
+- **Dictation, not voice notes (scope line)**: no audio is stored, no
+  routing, no auto-send; the parent always sees the words before Homa
+  does. M1-05 proper (voice notes as turns, routing chips + undo, the
+  audio-upload fallback) builds on this route + helper later. The text
+  box itself is the denial fallback: a blocked mic or an unclear take
+  becomes a quiet hint under the composer ("Homa couldn't open your
+  microphone..." / "That didn't come through clearly. Mind trying
+  again, or typing it?"), typing never leaves.
+- **`chat.turn_completed.modality` finally earns its "voice" arm**
+  (registry already had it): a turn whose draft took any dictation
+  emits modality "voice", so the funnel can see whether moms actually
+  talk. No registry change, `check:events` untouched.
+- **Recorder discipline**: one state machine in `app/app/dictation.tsx`
+  (hook + row + button, split from chat-client.tsx); hardware released
+  on cancel/unmount so the browser's recording indicator never outlives
+  the take; synchronous double-tap guard so two getUserMedia calls
+  cannot leak a live mic; 3-minute auto-accept cap (dictated prompts
+  run seconds; the cap keeps every codec under the upload limit at the
+  32kbps hint). Listening pulse is opacity/scale only and goes still
+  under reduced motion, per the motion rules.
+- **Mobile app deferred deliberately**: the Expo chat needs expo-audio
+  + mic permission plumbing and can reuse this exact route; web (the
+  PWA surface moms actually get first) ships now.
+
 ## 2026-07-10 (evening) · Fresh mornings, one thread; photo captions into the archive; the microwave conduct rules
 
 Founder direction (chat-threads investigation, two rulings): (1) returning
@@ -84,19 +128,33 @@ Shipped same night, the stuck composer (founder phone-testing report,
   disabled forever, and no busy label shows once the last text part
   looks complete. The web UI had no stop affordance and no stall
   detection; only a page refresh recovered.
-- **Fix, web + mobile twins**: (1) Send becomes a Stop button while a
-  turn runs (`agent.stop()` flips the store back to ready; the turn is
-  durable server-side and missed events replay from the session's
-  streamIndex on the next send); (2) returning to a visible tab/app
-  aborts a stream silent for 20s+ (the backgrounded-phone case,
-  `visibilitychange` on web, AppState on mobile); (3) a foreground
-  watchdog aborts at 180s of silence (radio handoffs), sized past the
-  longest normal tool run since image-heavy printables stream nothing
-  for 60-90s while rendering. Decision made alone: on a stale return
-  the client aborts rather than waiting for a possibly-reconnected
-  quiet stream; worst case the reply arrives on the next send instead
-  of streaming live, and stuck-forever is the failure that burns trust
-  (TE-04 spirit).
+- **Fix, web + mobile twins**: (1) the Claude-composer shape (founder
+  ruling, screenshots): while a turn runs an EMPTY composer shows Stop;
+  a typed one shows Stop AND Send; Send mid-turn QUEUES the message
+  (dimmed bubble by the composer, "Sends when Homa finishes", an X to
+  pull one back, a "Send now" link that interrupts the running turn and
+  delivers the queue immediately), and the queue flushes as one
+  follow-up turn the moment the line is free, including right after
+  Stop. A failed turn holds the queue; her next manual send carries it,
+  in order.
+  `agent.stop()` flips the store back to ready; the turn is durable
+  server-side and missed events replay from the session's streamIndex
+  on the next send. (2) returning to a visible tab/app aborts a stream
+  silent for 20s+ (the backgrounded-phone case, `visibilitychange` on
+  web, AppState on mobile); (3) a foreground watchdog aborts at 180s of
+  silence (radio handoffs), sized past the longest normal tool run
+  since image-heavy printables stream nothing for 60-90s while
+  rendering. Decisions made alone: on a stale return the client aborts
+  rather than waiting for a possibly-reconnected quiet stream (worst
+  case the reply arrives on the next send instead of streaming live,
+  and stuck-forever is the failure that burns trust, TE-04 spirit);
+  queued messages flush as ONE joined turn, not one turn each (she gets
+  one considered reply to her batch, the way texts read); the mobile
+  composer stays typeable while Homa works (it used to disable), since
+  queueing made "wait to type" pointless. React Compiler note: eve hook
+  callbacks must not capture `agent` inside its own initializer (the
+  mobile purity rule rejects the whole closure); the store's send rides
+  a ref instead, both platforms.
 
 Verified: typecheck, lint, build, all four guards green; eval and caption
 smoke run live. Coordinated with the concurrent slash-composer work: the
