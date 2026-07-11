@@ -1,7 +1,7 @@
 import { ageInMonths, MAP_BANK_VERSION, planQuestions, type MapAnswer } from "@homa/core";
 
 import { buildQueue } from "../app/onboarding/question-queue";
-import { setFamilyPhone } from "./family-phone";
+import { addFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
 import { sendReportEmail } from "./map/email";
 import { emitMapEvent } from "./map/events";
@@ -70,7 +70,7 @@ export async function ensureSignupFamily(
   if (linked[0]) return { familyId: linked[0].family_id, created: false };
 
   const { familyId } = await startAnonymousFamily({ source: "sms", utm: {} });
-  const link = await setFamilyPhone({
+  const link = await addFamilyPhone({
     familyId,
     phoneE164,
     addedBy: null,

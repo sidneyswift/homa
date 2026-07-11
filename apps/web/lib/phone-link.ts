@@ -1,5 +1,5 @@
 import { foldStubFamilyInto } from "./family-fold";
-import { setFamilyPhone } from "./family-phone";
+import { addFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
 import { sendAgentComposedEmail, siteUrl } from "./map/email";
 import { hashToken, newToken } from "./map/tokens";
@@ -80,10 +80,10 @@ export async function consumePhoneLinkRequest(rawToken: string): Promise<Consume
     if (!folded) return { ok: false, reason: "phone-owned-elsewhere" };
   }
 
-  // setFamilyPhone owns the rest: the family_phones write, the
+  // addFamilyPhone owns the rest: the family_phones write, the
   // sms.family_linked event, lead conversion, and the confirmation
   // text to the parent.
-  const linked = await setFamilyPhone({
+  const linked = await addFamilyPhone({
     familyId: request.family_id,
     phoneE164: request.phone_e164,
     addedBy: null,

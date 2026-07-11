@@ -6,7 +6,7 @@ import {
   buildReportFactsForChild,
 } from "../../../../../lib/map/curriculum-store";
 import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
-import { getFamilyPhone, setFamilyPhone } from "../../../../../lib/family-phone";
+import { addFamilyPhone, getFamilyPhones } from "../../../../../lib/family-phone";
 
 /**
  * POST /api/voice/curriculum/start: the report page's "Call me" button.
@@ -58,12 +58,13 @@ export async function POST(request: Request): Promise<Response> {
   }
   const familyId = child.family_id as string;
 
+  let providedPhone: string | null = null;
   if (body.phone) {
     const normalized = normalizeUsPhoneE164(body.phone);
     if (!normalized) {
       return Response.json({ ok: false, reason: "bad-phone" }, { status: 400 });
     }
-    const result = await setFamilyPhone({
+    const result = await addFamilyPhone({
       familyId,
       phoneE164: normalized,
       addedBy: user.id,
@@ -72,10 +73,18 @@ export async function POST(request: Request): Promise<Response> {
     if (!result.ok) {
       return Response.json({ ok: false, reason: "phone-taken" }, { status: 409 });
     }
+    providedPhone = normalized;
   }
 
-  const phone = await getFamilyPhone(familyId);
-  if (!phone) {
+  // Call the number she just gave; otherwise her own linked number
+  // (multi-parent v0: each adult carries one), else the family's first.
+  const linked = await getFamilyPhones(familyId);
+  const callTarget =
+    providedPhone ??
+    linked.find((row) => row.member_user_id === user.id)?.phone_e164 ??
+    linked[0]?.phone_e164 ??
+    null;
+  if (!callTarget) {
     return Response.json({ ok: false, reason: "no-phone" }, { status: 400 });
   }
 
@@ -121,7 +130,7 @@ export async function POST(request: Request): Promise<Response> {
         },
         body: JSON.stringify({
           From: fromNumber,
-          To: phone.phone_e164,
+          To: callTarget,
           AIAssistantId: assistantId,
           AIAssistantDynamicVariables: {
             family_id: familyId,
@@ -162,7 +171,7 @@ export async function POST(request: Request): Promise<Response> {
   const { error: insertError } = await supabase.from("child_curriculum_calls").insert({
     child_id: childId,
     family_id: familyId,
-    phone_e164: phone.phone_e164,
+    phone_e164: callTarget,
     call_control_id: callControlId,
     status: "initiated",
   });

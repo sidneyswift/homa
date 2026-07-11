@@ -56,6 +56,31 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   return data;
 }
 
+/**
+ * getMyMemberDisplayName(): string | null
+ * The signed-in adult's own display name (family_members.display_name,
+ * multi-parent v0): "Sidney" on Sidney's login and "Alessa" on Alessa's,
+ * where the family-level parent_display_name can only hold one of them.
+ * Null when unset; callers fall back to parentFirstName(family).
+ * The user_id filter matters: since migration #49 members can read the
+ * whole roster, and this must be the CALLER's row, not the first row.
+ */
+export async function getMyMemberDisplayName(): Promise<string | null> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from("family_members")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`membership read failed: ${error.message}`);
+  return data?.display_name ?? null;
+}
+
 export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

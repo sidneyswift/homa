@@ -3,6 +3,48 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late night) · Multi-parent v0 pulled forward + founder account merge (rulings D-mp-1..7)
+
+Founder ask: merge sidney@recoupable.com and alessallanes@gmail.com
+(one family, one child, Story; signup's no-join-path design gave them
+two complete families), and use the merge to seed multi-parent family
+accounts. Seven founder rulings on a question card, recorded in
+plans/2026-07-11-multi-parent-v0-and-founder-account-merge.md: Phase 1
+multi-parent slice first, then the data merge, then the full
+invite-flow product; Alessa's family row survives renamed "The Swift
+family"; her Story row is canonical with latest-answer-wins on the 8
+conflicting checklist answers; birth month November 2022; account email
+stays alessallanes@gmail.com; the alessa@thankshoma.com test account is
+deleted; both members are role 'parent'.
+
+Scope note: PRD 13's "one login per family" M-R boundary is superseded
+for this slice by founder ruling (the founders themselves are the
+two-parent family). NT-4's invite flow, roles, and per-adult audit stay
+a later phase.
+
+What shipped in the slice (migrations #49/#50): per-member
+display_name, per-number member attribution, roster read policy,
+family_phones one-per-family constraint dropped (number itself stays
+globally unique), settings card lists numbers with add/remove, journal
+and brief texts fan out to every linked number, inbound email matches
+any member's sign-in address, and SMS/voice/web all greet the adult the
+channel authenticated.
+
+Decisions made alone while building:
+
+- attachAuthUser's family_phones insert used "on conflict (family_id)",
+  which would ERROR (not conflict) once migration #50 drops that
+  constraint; switched to a bare "on conflict do nothing", which also
+  absorbs the transitional window before #50 applies.
+- The verified phone claim's real-family branch used to clear ALL of the
+  holder's numbers (clearFamilyPhone deleted by family_id); it now
+  removes only the claimed number, which is the correct multi-number
+  behavior and a quiet bug fix.
+- Both chat clients (web + mobile twins) tripped the react-hooks/purity
+  rule on the turn-recovery lastSendRef stamp inside sendMessage;
+  suppressed with a comment (event handler, never render), matching the
+  file's existing onFinish suppression.
+
 ## 2026-07-11 (small hours) · Lost-turn recovery: a dead stream no longer costs her the reply
 
 Founder instruction ("fix the gap"), closing the known gap from the
@@ -103,6 +145,64 @@ family on the web). Calls made alone, worth auditing:
   in-flight tasks session (untracked lib/tasks/ work); this session's
   files typecheck clean in isolation and ship without touching that.
 
+## 2026-07-10 (late night) · Make her operate smarter: map snapshot in context + calibration laws
+
+Founder arc: the founder texted Homa, watched her guess a counting-to-3
+worksheet for a child whose own checklist said counts-to-10 easily, and
+ruled "implement all" on the six-point failure review, with multi-kid
+behavior considered throughout. Root cause was plumbing, not model:
+child_answers never reached the prompt. Shipped:
+
+1. Per-child map snapshot in the family context block
+   (lib/family-context.ts): every in-range child gets one line per
+   mapped subject (reading, does-easily floor, working edge), scored at
+   render time with the same scoreMap the report uses; both load paths
+   (pinned + caller RLS) now fetch child_answers. A child with no
+   answers renders an ask-first line instead. Calls made alone: the
+   "does easily" statement is recomputed from easily answers only,
+   because the scorer's strongestObservedStatement also counts
+   getting_there items and would mislabel them as easy (verified against
+   Story's real rows); snapshot text carries the sibling law (each
+   child's section stands alone, never compare).
+2. Calibration law in the materials-studio skill + instructions.md:
+   difficulty comes from evidence (conversation, snapshot, memories),
+   never age alone; no evidence means ONE calibrating question before
+   generating; a parent's "she can already do X" is a floor, ask how far
+   past before regenerating; the age table is layout density, not level.
+   Also the honesty rule (a guess is never dressed up as knowledge),
+   placed in Have opinions so the phone persona inherits it.
+3. Memory contradiction guardrail (agent-memory.ts + both save paths):
+   a save that lands semantically close to an active memory still saves
+   but the tool note names the older entry and points at forget.
+   Threshold 0.5 cosine distance, calibrated on the real pair (the
+   stale counts-to-3 row sat at 0.42 from the counts-to-50 row;
+   unrelated same-family pairs measured 0.58+). Scope rule for multiple
+   kids: a child-scoped fact compares against that child plus
+   family-wide rows only, so one sibling's fact can never flag
+   another's. Pinned path computes distance in Postgres; the RLS path
+   fetches scoped embeddings and computes in JS (no vector operators
+   without an RPC, migration deliberately avoided).
+4. Profile non-answer guard (lib/profile-quality.ts): "idk"/"not sure"
+   class values are dropped at every write door (addChild,
+   saveChildContext, update_child_profile) and skipped at render, so
+   "working on idk" can never re-enter a prompt.
+5. SMS wait softener (lib/materials/sms-ack.ts): slow material builds
+   text one automatic "on it" heads-up, sent from the tool lane
+   (generate_image / create_printable) with a 3-minute per-family
+   dedupe. Positioned as a tool send like the MMS delivery itself, so
+   the one-reply-per-inbound-text law on the model is untouched (the
+   chat-sdk bridge drops agent text when a message finishes on
+   tool-calls, so the model cannot ack on its own).
+6. sms-mode voice fix: follow-ups speak to the parent ("sent you a page
+   for Story"), never "sent it to his phone".
+
+Prod data cleaned with the founder watching: Story's "counts to 3
+easily" memory superseded, profile focus "idk" removed. Verified:
+typecheck, lint, eve build, full build, all five guards green; snapshot
+render exercised with a three-kid fixture (mapped kid, unmapped kid,
+under-2 kid) and conflict scoping exercised child vs family-wide vs
+sibling.
+
 ## 2026-07-11 (night) · Incident: live chat turn errored on the phone while the reply finished server-side
 
 Founder report with screenshot (Alessa live-testing on her iPhone,
@@ -156,6 +256,70 @@ Fixes, decisions made alone:
   the transcript (it lives in conversation_messages and reaches the
   model through recall). The durable-recovery UX (replay the missed
   turn into the archive on next visit) is the remaining M1-04 piece.
+
+## 2026-07-10 (later, boil the ocean) · Homa's tasks + nightly research: built and proven E2E
+
+Founder: "Implement the plan. BOIL THE OCEAN. then test e2e." All seven
+tickets from plans/2026-07-10-homa-tasks-and-nightly-research.md landed
+in one pass:
+
+1. **The task framework** (HT-1): migrations #49/#50 (agent_schedules
+   gains kinds morning_brief/custom, per-row local_hour + weekdays +
+   delivery_pref + paused_at, member SELECT policies; homa_task_runs is
+   feed + outbox + health record; knowledge_bank per the education
+   plan's Layer 2 + run_id/content_hash/flagged_reason), the kind
+   registry (lib/tasks/kinds.ts), and the generalized store
+   (lib/tasks/store.ts replaces schedule-store.ts; per-kind seeding,
+   weekday masks, delivery windows, atomic leases, outbox on
+   (schedule_id, family-local date)).
+2. **Fleet research** (HT-2/HT-3): the gate (lib/knowledge/gate.ts:
+   citation-must-resolve, invisible-char + HTML stripping, caps, hash;
+   failures land flagged, never active), demand queue from real family
+   styles/curriculums/subjects with no child data in topic keys, the
+   research channel + save_knowledge tool (research/dispatch sessions
+   only), nightly fleet-research schedule (dark:
+   FLEET_RESEARCH_ENABLED), knowledge-revert.mts (one-action fleet
+   revert restoring superseded predecessors), and the glossary seed
+   (12 method/format rows merged through the gate into homa-prod).
+3. **The morning brief** (HT-4): research-brief SKILL (one angle,
+   two-beat frame, capped top-up, guardrails), brief context bundle
+   (positions + styles + fresh bank rows), 9am-to-noon send window,
+   sendResearchBriefEmail shell, research.brief_sent event. Dark:
+   MORNING_BRIEF_ENABLED.
+4. **Homa's tasks tab** (HT-5/HT-6): /app/tasks + nav entry, built-in
+   cards with pause switches, run-history feed, custom task create/
+   edit/delete (form + server actions), chat parity tools create_task/
+   list_tasks/update_task/delete_task with the M3-08 no-runaway law
+   (dispatch/research sessions refused via lib/tasks/guard.ts).
+5. **Events + guards** (HT-7): tasks.run_completed, research.brief_sent,
+   knowledge.row_merged registered + emitted; isolation probes for the
+   three tables; typecheck/lint/build + all four guards green.
+6. **Live E2E green** (scripts/tasks-e2e.mts, dev agent + homa-prod,
+   synthetic family cascade-cleaned): seeding, a REAL composed brief
+   (Montessori row + the child's phonics frontier + dino interest)
+   delivered by email, no em dash and no banned framing in the brief,
+   outbox no-op on forced redelivery, custom save-only task run, pause
+   switch honored, fleet research merged an active row with resolving
+   citations for the demand queue's top topic.
+
+Two findings and one incident, logged for the record:
+
+- **eve receive() resolves at session START, not completion.** The
+  dispatcher therefore never judges outcomes; the dispatch/research
+  channels finish their own run rows from message.completed, and a
+  reaper in the dispatcher fails anything still running after 2 hours.
+- **Leftover dev rows caused real sends.** The first E2E fire claimed
+  three journal rows seeded into prod by the 2026-07-09 gateway dev
+  session (past-due next_run_at); three real families received warm,
+  correct journal emails at 11:11pm ET. Contained same session: rows
+  corrected to done (they DID deliver), the stray schedule rows purged,
+  a 3-hour delivery window added to the journal kind (late claims now
+  skip, never send), and the E2E now refuses to run over a non-empty
+  agent_schedules table. The class (stale due rows firing after
+  downtime) is closed by the windows.
+- The prod switches stay with the founder: FLEET_RESEARCH_ENABLED, then
+  MORNING_BRIEF_ENABLED after reading a real brief (HUMAN-TODO; the
+  fleet cron registers on the next deploy).
 
 ## 2026-07-10 (late night) · Homa's tasks + nightly research brief: plan and five rulings
 

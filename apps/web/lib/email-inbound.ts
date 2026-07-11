@@ -72,13 +72,47 @@ export function optOutIntent(text: string): "stop" | "start" | null {
   return null;
 }
 
-/** The family that registered this exact address, or null. */
+/**
+ * The family that registered this exact address, or null. Two match
+ * paths since multi-parent v0 (plan 2026-07-11): the family row's own
+ * email (the address SHE gave us at signup) and any member's sign-in
+ * email, so a second parent's replies authenticate without being the
+ * account email. Both are addresses a parent registered; the trust
+ * basis is unchanged.
+ */
 export async function findFamilyIdByEmail(email: string): Promise<string | null> {
+  const identity = await findFamilyIdentityByEmail(email);
+  return identity?.familyId ?? null;
+}
+
+export interface FamilyEmailIdentity {
+  familyId: string;
+  /** The member's display name when the address matched a member's
+   * sign-in email; null when only the family-level address matched. */
+  memberDisplayName: string | null;
+}
+
+/** The identity-aware twin of findFamilyIdByEmail: same auth basis,
+ * plus WHICH adult wrote in, when the address is a member's own. */
+export async function findFamilyIdentityByEmail(
+  email: string,
+): Promise<FamilyEmailIdentity | null> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    select id from public.families where lower(email) = ${email.toLowerCase()} limit 1
+  const normalized = email.toLowerCase();
+  const rows = await sql<{ family_id: string; display_name: string | null }[]>`
+    select m.family_id, m.display_name
+    from public.family_members m
+    join auth.users u on u.id = m.user_id
+    where lower(u.email) = ${normalized}
+    limit 1
   `;
-  return rows[0]?.id ?? null;
+  if (rows[0]) {
+    return { familyId: rows[0].family_id, memberDisplayName: rows[0].display_name };
+  }
+  const familyRows = await sql<{ id: string }[]>`
+    select id from public.families where lower(email) = ${normalized} limit 1
+  `;
+  return familyRows[0] ? { familyId: familyRows[0].id, memberDisplayName: null } : null;
 }
 
 export async function setJournalOptOut(familyId: string, out: boolean): Promise<void> {

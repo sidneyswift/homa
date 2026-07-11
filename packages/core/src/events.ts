@@ -376,6 +376,24 @@ export const EVENT_SCHEMAS = {
     model_tier: z.enum(["fast", "mid", "premium"]),
     tool_calls: z.number().int().min(0),
   }),
+  // The task framework (HT-1/HT-7). One event per finished proactive
+  // run; fleet runs carry no family_id. Kind + status only, no content.
+  "tasks.run_completed": z.object({
+    family_id: z.uuid().optional(),
+    kind: z.enum(["journal_prompt", "morning_brief", "custom", "fleet_research"]),
+    status: z.enum(["done", "failed", "skipped"]),
+  }),
+  // The weekday morning research brief reached a parent (HT-4, D-ht-2).
+  "research.brief_sent": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["sms", "email"]),
+  }),
+  // A research row entered (or was refused by) the knowledge bank's
+  // automated gate (HT-2, D-ht-5). Topic type only, never content.
+  "knowledge.row_merged": z.object({
+    topic_type: z.enum(["method_philosophy", "method_format", "subject", "study", "other"]),
+    gate: z.enum(["passed", "flagged"]),
+  }),
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;

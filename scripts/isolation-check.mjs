@@ -110,8 +110,15 @@ await expectEmptyRead("conversation_messages");
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
 await expectEmptyRead("hours_log");
-// Dispatcher schedule rows (migration #39): deny-all, server-only.
+// Task rows (migrations #39 + #49): members read their OWN family's
+// rows only; anon sees nothing and nobody writes over the Data API.
 await expectEmptyRead("agent_schedules");
+// Task run history (migration #49): same member-select posture; fleet
+// rows (family_id null) are invisible to every Data API role.
+await expectEmptyRead("homa_task_runs");
+// The fleet research corpus (migration #50): deny-all; only the gate
+// (lib/knowledge/gate.ts) writes, only server code reads.
+await expectEmptyRead("knowledge_bank");
 // Phone-first leads (migration #41): deny-all, server-only.
 await expectEmptyRead("phone_leads");
 // Phone-link confirmations (migration #46): deny-all, server-only.
@@ -168,6 +175,37 @@ await expectInsertDenied(
     published: true,
   },
   "anon cannot write the skills bank",
+);
+await expectInsertDenied(
+  "knowledge_bank",
+  {
+    topic_type: "study",
+    topic_key: "intruder-topic",
+    title: "Intruder row",
+    summary: "This must never be writable over the Data API; the gate is the only door.",
+    content: "Fleet-wide injection attempt; the deny-all posture must hold.",
+  },
+  "anon cannot write the knowledge bank",
+);
+await expectInsertDenied(
+  "agent_schedules",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    kind: "custom",
+    next_run_at: new Date().toISOString(),
+    label: "intruder task",
+    prompt: "This must never be writable over the Data API.",
+  },
+  "anon cannot create task schedules",
+);
+await expectInsertDenied(
+  "homa_task_runs",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    kind: "custom",
+    title: "intruder run",
+  },
+  "anon cannot forge task runs",
 );
 await expectInsertDenied(
   "state_requirements",

@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 
 import { foldStubFamilyInto } from "./family-fold";
-import { clearFamilyPhone, setFamilyPhone } from "./family-phone";
+import { addFamilyPhone, removeFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { hashToken } from "./map/tokens";
@@ -110,13 +110,14 @@ export async function confirmPhoneClaim(
   if (holderId && holderId !== familyId) {
     foldedStub = await foldStubFamilyInto(holderId, familyId);
     if (!foldedStub) {
-      // A real family held it: the number moves, their data stays.
-      await clearFamilyPhone(holderId);
+      // A real family held it: this ONE number moves, their data (and
+      // any other numbers they linked) stays.
+      await removeFamilyPhone(holderId, phoneE164);
       movedNumber = true;
     }
   }
 
-  const linked = await setFamilyPhone({
+  const linked = await addFamilyPhone({
     familyId,
     phoneE164,
     addedBy: null,

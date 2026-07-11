@@ -47,15 +47,19 @@ function supabaseAuth(): AuthFn<Request> {
     const { data: userData, error } = await supabase.auth.getUser(token);
     if (error || !userData.user) return null;
 
+    // The caller's OWN membership row (user_id filter matters since
+    // migration #49 let members read the whole family roster).
     const { data: membership } = await supabase
       .from("family_members")
-      .select("family_id")
+      .select("family_id, display_name")
+      .eq("user_id", userData.user.id)
       .limit(1)
       .maybeSingle();
 
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = { supabaseAccessToken: token };
     if (membership?.family_id) attributes.familyId = membership.family_id;
+    if (membership?.display_name) attributes.memberName = membership.display_name;
     if (userData.user.email) attributes.email = userData.user.email;
 
     // The context switcher's selection rides the same-origin request as a

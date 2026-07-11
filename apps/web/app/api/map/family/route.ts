@@ -4,7 +4,7 @@ import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireFamily } from "../../../../lib/map/session";
 import { saveFamilySetup } from "../../../../lib/map/store";
-import { setFamilyPhone } from "../../../../lib/family-phone";
+import { addFamilyPhone } from "../../../../lib/family-phone";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
 /**
@@ -65,28 +65,33 @@ export async function POST(request: Request): Promise<Response> {
   const lastName = rest.join(" ") || undefined;
 
   try {
-    await saveFamilySetup(family.id, {
-      familyName: input.familyName,
-      firstName,
-      lastName,
-      addressLine: input.addressLine,
-      city: input.city,
-      usState: input.usState,
-      zip: input.zip,
-      phoneE164,
-      avatarUrl,
-    });
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    await saveFamilySetup(
+      family.id,
+      {
+        familyName: input.familyName,
+        firstName,
+        lastName,
+        addressLine: input.addressLine,
+        city: input.city,
+        usState: input.usState,
+        zip: input.zip,
+        phoneE164,
+        avatarUrl,
+      },
+      user?.id,
+    );
 
     let phoneTaken = false;
     if (phoneE164) {
-      const supabase = await createSupabaseServerClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       // Taken by another family never blocks the profile save; the
       // response says so, and the step offers the verified claim
       // (text a code to the number) instead of a dead end (U7).
-      const linked = await setFamilyPhone({
+      const linked = await addFamilyPhone({
         familyId: family.id,
         phoneE164,
         addedBy: user?.id ?? null,

@@ -1,7 +1,7 @@
 import { defineChannel, POST } from "eve/channels";
 
 import {
-  findFamilyIdByEmail,
+  findFamilyIdentityByEmail,
   optOutIntent,
   parseInboundEmail,
   setJournalOptOut,
@@ -85,7 +85,8 @@ export default defineChannel({
         return Response.json({ ok: true, note: "nothing to process" });
       }
 
-      const familyId = await findFamilyIdByEmail(email.fromEmail);
+      const identity = await findFamilyIdentityByEmail(email.fromEmail);
+      const familyId = identity?.familyId ?? null;
       await emitMapEvent("email.message_received", {
         linked_family: familyId !== null,
       });
@@ -122,7 +123,15 @@ export default defineChannel({
           authenticator: "resend-email",
           principalId: `email:${email.fromEmail}`,
           principalType: "user",
-          attributes: { channel: "email", familyId },
+          // memberName rides only when the sender's address is a
+          // member's own sign-in email (auth context, never model input).
+          attributes: {
+            channel: "email",
+            familyId,
+            ...(identity?.memberDisplayName
+              ? { memberName: identity.memberDisplayName }
+              : {}),
+          },
         },
         continuationToken: emailContinuationToken(email.fromEmail),
         state: { toEmail: email.fromEmail, subject: email.subject || null, familyId },

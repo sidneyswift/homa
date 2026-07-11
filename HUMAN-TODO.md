@@ -44,6 +44,27 @@ Done by agent: number **+1 (346) 758-8011** wired up (calls route to the hosted 
 - [ ] **One data decision · Alessa's duplicate family**: her phone and real history live on the `alessallanes@gmail.com` family; `alessa@thankshoma.com` is an empty day-old duplicate (1 mirrored kid, no records). If she ever EMAILS Homa from the thankshoma.com address, the adapter will load the empty workspace. Recommendation stands: delete the empty one (say "delete Alessa's duplicate" to an agent), or have her reply from gmail *(30 sec)*
 - [ ] **Optional cost lever**: set `HOMA_EXTRACTION_MODEL` in Vercel prod to a cheaper gateway model id for the background memory loops, and `HOMA_EMBEDDING_MODEL` if you ever want something other than `openai/text-embedding-3-small` for semantic recall
 
+## Homa's tasks + nightly research (added 2026-07-10 late night, agent-built, E2E-verified)
+
+The task framework, fleet research, morning brief, and the Homa's tasks
+tab are BUILT and live-E2E green (build-log 2026-07-10 boil-the-ocean
+entry). The tab is visible now; the two proactive loops wait on your
+switches, in this order:
+
+- [ ] **Deploy** so the new fleet-research cron registers with Vercel
+  (any deploy does it; verify with `vercel crons ls`, expect it beside
+  the hourly dispatcher) *(1 min)*
+- [ ] **Flip fleet research first**: `printf 'true' | vercel env add FLEET_RESEARCH_ENABLED production`
+  then redeploy. Let it run 2 or 3 nights, then skim the rows: ask an
+  agent "show me the knowledge bank" or check the History-less fleet
+  runs via SQL. Knob if wanted: `RESEARCH_TOPICS_PER_NIGHT` (default 3) *(2 min + patience)*
+- [ ] **THE BRIEF SWITCH · read one aloud first**: with the corpus a few
+  nights old, ask an agent to "fire a test morning brief for my family
+  in dev and show me the text" (scripts/tasks-e2e.mts shows the shape).
+  If it passes the read-aloud: `printf 'true' | vercel env add MORNING_BRIEF_ENABLED production`
+  and redeploy. 9am weekday texts begin (email until a phone is linked;
+  your line is linked) *(5 min, the fun one)*
+
 ## Email-into-Homa (gateway GW-8, added 2026-07-09 late evening)
 
 The inbound email adapter is BUILT and E2E-verified (a reply to a Homa

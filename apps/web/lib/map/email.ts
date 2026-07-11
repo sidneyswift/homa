@@ -231,6 +231,33 @@ export async function sendJournalAgentEmail(
   });
 }
 
+/** The morning research brief's email shell (HT-4, D-ht-2; delivered by
+ * the dispatch channel when no texting line is linked). The fixed frame
+ * (subject, preview, CTA to the tasks page, off-switch line) stays
+ * code-controlled; the body is the agent's own composed brief for THIS
+ * family, same posture as the journal shell. */
+export async function sendResearchBriefEmail(
+  to: string,
+  agentText: string,
+): Promise<boolean> {
+  const url = `${siteUrl()}/app/tasks`;
+  const bodyLines = agentText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  if (bodyLines.length === 0) return false;
+  return send({
+    to,
+    subject: "What I looked into last night",
+    preview: bodyLines[0]?.slice(0, 120) ?? "One small finding for your kids.",
+    heading: "From last night's research",
+    bodyLines,
+    cta: { label: "See Homa's tasks", url },
+    footerNote:
+      "Reply to this email and Homa answers. You can turn these morning notes off any time on the Homa's tasks page.",
+  });
+}
+
 export async function sendBandReadyEmail(
   to: string,
   childName: string,

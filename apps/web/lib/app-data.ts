@@ -7,7 +7,13 @@ import {
   type DashboardReport,
 } from "./dashboard";
 import { getPendingCurriculumChildIds } from "./curriculum";
-import { getMyChildren, getMyFamily, type ChildRecord, type FamilyRecord } from "./family";
+import {
+  getMyChildren,
+  getMyFamily,
+  getMyMemberDisplayName,
+  type ChildRecord,
+  type FamilyRecord,
+} from "./family";
 
 /**
  * The signed-in app frame's shared reads: family, children, and the rows
@@ -24,6 +30,9 @@ export interface AppData {
   reports: Map<string, DashboardReport>;
   plans: DashboardPlan[];
   pendingCurriculumChildIds: Set<string>;
+  /** The signed-in adult's own name (multi-parent v0): greetings prefer
+   * it over the family-level parent_display_name. Null when unset. */
+  memberDisplayName: string | null;
 }
 
 /**
@@ -38,11 +47,12 @@ export const getAppData = cache(async (): Promise<AppData | null> => {
   if (children.length === 0) return null;
 
   const childIds = children.map((child) => child.id);
-  const [reports, plans, pendingCurriculumChildIds] = await Promise.all([
+  const [reports, plans, pendingCurriculumChildIds, memberDisplayName] = await Promise.all([
     getReportsForChildren(childIds),
     getPlansForChildren(childIds),
     getPendingCurriculumChildIds(childIds),
+    getMyMemberDisplayName(),
   ]);
 
-  return { family, children, reports, plans, pendingCurriculumChildIds };
+  return { family, children, reports, plans, pendingCurriculumChildIds, memberDisplayName };
 });

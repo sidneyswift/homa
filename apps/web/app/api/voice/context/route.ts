@@ -1,6 +1,6 @@
 import { normalizeUsPhoneE164 } from "@homa/core";
 
-import { findFamilyIdByPhone } from "../../../../lib/family-phone";
+import { findFamilyIdentityByPhone } from "../../../../lib/family-phone";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
@@ -66,8 +66,8 @@ export async function POST(request: Request): Promise<Response> {
   if (!caller) return Response.json(EMPTY_RESPONSE);
 
   try {
-    const familyId = await findFamilyIdByPhone(caller);
-    if (!familyId) {
+    const identity = await findFamilyIdentityByPhone(caller);
+    if (!identity) {
       // A stranger calling IS a lead (lead-funnel-plan LF-2). Never
       // blocks the call; the webhook has a 5s budget.
       recordLeadContact(caller, "voice").catch((error: unknown) => {
@@ -78,13 +78,19 @@ export async function POST(request: Request): Promise<Response> {
       });
       return Response.json(EMPTY_RESPONSE);
     }
+    const familyId = identity.familyId;
 
     const rows = await loadFamilyContextPinned(familyId);
     return Response.json({
       dynamic_variables: {
         caller_known: "true",
-        parent_name: rows.family?.parent_display_name ?? "",
-        family_context: renderFamilyContext(rows),
+        // The calling number's own adult when attributed (multi-parent
+        // v0), else the family-level display name.
+        parent_name:
+          identity.memberDisplayName ?? rows.family?.parent_display_name ?? "",
+        family_context: renderFamilyContext(rows, {
+          speakingWith: identity.memberDisplayName,
+        }),
         family_id: familyId,
         // Ambiguous with multiple kids on the general line; the email
         // tool treats a blank child_id as "family-level", which is

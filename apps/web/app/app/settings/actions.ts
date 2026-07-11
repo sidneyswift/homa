@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
-import { clearFamilyPhone, setFamilyPhone } from "../../../lib/family-phone";
+import { addFamilyPhone, removeFamilyPhone } from "../../../lib/family-phone";
 import { isValidTimeZone, setFamilyTimeZone } from "../../../lib/family-time-zone";
 import { getMyFamily } from "../../../lib/family";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -29,7 +29,7 @@ export interface SetupFormState {
   phoneTaken?: string;
 }
 
-export async function setFamilyPhoneAction(
+export async function addFamilyPhoneAction(
   _prev: SetupFormState,
   formData: FormData,
 ): Promise<SetupFormState> {
@@ -37,12 +37,6 @@ export async function setFamilyPhoneAction(
 
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
-
-  if (!raw) {
-    await clearFamilyPhone(family.id);
-    revalidatePath("/app/settings");
-    return { error: null };
-  }
 
   const phoneE164 = normalizeUsPhoneE164(raw);
   if (!phoneE164) {
@@ -54,7 +48,7 @@ export async function setFamilyPhoneAction(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const result = await setFamilyPhone({
+  const result = await addFamilyPhone({
     familyId: family.id,
     phoneE164,
     addedBy: user?.id ?? null,
@@ -69,6 +63,24 @@ export async function setFamilyPhoneAction(
       phoneTaken: phoneE164,
     };
   }
+  revalidatePath("/app/settings");
+  return { error: null };
+}
+
+export async function removeFamilyPhoneAction(
+  _prev: SetupFormState,
+  formData: FormData,
+): Promise<SetupFormState> {
+  const raw = String(formData.get("phone") ?? "").trim();
+  const phoneE164 = normalizeUsPhoneE164(raw);
+
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+  if (!phoneE164) return { error: "That number didn't parse; nothing was removed." };
+
+  // familyId from the caller's own membership: removing can only ever
+  // touch the caller's own family's rows (tenancy law).
+  await removeFamilyPhone(family.id, phoneE164);
   revalidatePath("/app/settings");
   return { error: null };
 }

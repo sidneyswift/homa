@@ -29,7 +29,8 @@ import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family, children: kids, reports, plans, pendingCurriculumChildIds } = data;
+  const { family, children: kids, reports, plans, pendingCurriculumChildIds, memberDisplayName } =
+    data;
 
   // The view-context cookie (who the parent is viewing) validates against
   // the family's own kids here, once, so everything below the shell only
@@ -42,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <DashboardShell
-      parentName={parentFirstName(family)}
+      parentName={memberDisplayName ?? parentFirstName(family)}
       familyName={family.name}
       avatarUrl={family.parent_avatar_url}
       kids={kids.map((kid) => ({

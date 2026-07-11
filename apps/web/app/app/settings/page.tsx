@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
-import { getFamilyPhone } from "../../../lib/family-phone";
+import { getFamilyPhones } from "../../../lib/family-phone";
 import { getMyMemories } from "../../../lib/memories";
 import { MemoriesCard } from "../../../components/dashboard/memories-card";
 import { PageColumn } from "../../../components/dashboard/page-column";
@@ -33,8 +33,8 @@ export default async function SettingsPage() {
   if (!data) redirect("/onboarding");
   const { family, children } = data;
 
-  const [familyPhone, memories] = await Promise.all([
-    getFamilyPhone(family.id),
+  const [familyPhones, memories] = await Promise.all([
+    getFamilyPhones(family.id),
     getMyMemories(family.id),
   ]);
   const childNames = new Map(children.map((child) => [child.id, child.name]));
@@ -60,7 +60,10 @@ export default async function SettingsPage() {
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <AddChildForm familyId={family.id} />
         <TextingCard
-          linkedPhoneDisplay={familyPhone ? formatUsPhone(familyPhone.phone_e164) : null}
+          linkedPhones={familyPhones.map((phone) => ({
+            e164: phone.phone_e164,
+            display: formatUsPhone(phone.phone_e164),
+          }))}
           homaNumberDisplay={homaNumber ? formatUsPhone(homaNumber) : null}
         />
         <TimeZoneCard currentTimeZone={family.time_zone} />

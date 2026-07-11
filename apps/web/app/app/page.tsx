@@ -57,7 +57,7 @@ export default async function ChatPage({
     <ChatClient
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
-      parentName={app?.family.parent_display_name ?? null}
+      parentName={app?.memberDisplayName ?? app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
       kids={(app?.children ?? []).map((child) => ({ id: child.id, name: child.name }))}
       slashSkills={slashSkills}

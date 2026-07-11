@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, FileText, Sparkles } from "lucide-react";
+import { Calendar, FileText, ListChecks, Sparkles } from "lucide-react";
 
 /**
  * The sidebar's nav list. Client-side on purpose: the app frame renders
@@ -20,6 +20,7 @@ export const APP_NAV_ITEMS = [
   { href: "/app", label: "Ask Homa", icon: Sparkles },
   { href: "/app/report", label: "Progress report", icon: FileText },
   { href: "/app/planner", label: "Week planner", icon: Calendar },
+  { href: "/app/tasks", label: "Homa's tasks", icon: ListChecks },
 ] as const;
 
 /** A kid's own report page (/app/[childId]/report), which should light

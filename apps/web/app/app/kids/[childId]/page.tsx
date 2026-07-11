@@ -30,7 +30,8 @@ export default async function KidPage({
   const { childId } = await params;
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family, children, reports, plans, pendingCurriculumChildIds } = data;
+  const { family, children, reports, plans, pendingCurriculumChildIds, memberDisplayName } =
+    data;
 
   const kidIndex = children.findIndex((entry) => entry.id === childId);
   if (kidIndex === -1) notFound();
@@ -46,7 +47,7 @@ export default async function KidPage({
       <KidView
         kids={children}
         kidIndex={kidIndex}
-        parentFirstName={parentFirstName(family)}
+        parentFirstName={memberDisplayName ?? parentFirstName(family)}
         report={reports.get(child.id) ?? null}
         reports={reports}
         plans={plans.filter((plan) => plan.childId === child.id)}

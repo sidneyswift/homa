@@ -10,7 +10,7 @@ import {
   CONTACT_CARD_FIRST_TEXT,
   sendHomaContactCard,
 } from "../../lib/contact-card";
-import { findFamilyIdByPhone } from "../../lib/family-phone";
+import { findFamilyIdentityByPhone } from "../../lib/family-phone";
 import { emitMapEvent } from "../../lib/map/events";
 import { recordLeadContact } from "../../lib/phone-leads";
 import { normalizeSmsAttachments } from "../../lib/voice/sms-attachments";
@@ -94,13 +94,17 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   if (text.length === 0 && attachments.length === 0) return;
 
   // The sender's number is this channel's auth context: a family_phones
-  // match (parent-written, unique across families) resolves the family.
+  // match (parent-written, unique across families) resolves the family,
+  // and since multi-parent v0 also WHICH adult carries this number.
   const senderNumber = message.author.userId;
   const normalizedSender = normalizeUsPhoneE164(senderNumber);
   let familyId: string | null = null;
+  let memberName: string | null = null;
   if (normalizedSender) {
     try {
-      familyId = await findFamilyIdByPhone(normalizedSender);
+      const identity = await findFamilyIdentityByPhone(normalizedSender);
+      familyId = identity?.familyId ?? null;
+      memberName = identity?.memberDisplayName ?? null;
     } catch (error) {
       // Fail closed to an unlinked session; never drop the text.
       console.error(
@@ -181,13 +185,14 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
         authenticator: "telnyx-sms",
         principalId: `sms:${senderNumber}`,
         principalType: "user",
-        // familyId comes from the phone mapping above (auth context,
-        // never model input). supabaseAccessToken stays absent on SMS,
-        // so token-backed tools refuse until M1-02 lands.
+        // familyId and memberName come from the phone mapping above
+        // (auth context, never model input). supabaseAccessToken stays
+        // absent on SMS, so token-backed tools refuse until M1-02 lands.
         attributes: {
           channel: "sms",
           phoneNumber: senderNumber,
           ...(familyId ? { familyId } : {}),
+          ...(memberName ? { memberName } : {}),
         },
       },
     },
