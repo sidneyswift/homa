@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   eve@0.19.0:
-    hash: cv5q3sd4scoenjudafsnytz6n4
+    hash: c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636
     path: patches/eve@0.19.0.patch
 
 importers:
@@ -54,7 +54,7 @@ importers:
         version: 7.0.14(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       expo:
         specifier: ~56.0.14
         version: 56.0.14(@babel/core@7.29.7)(@expo/dom-webview@56.0.6)(@expo/metro-runtime@56.0.16)(expo-router@56.2.13)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -69,7 +69,7 @@ importers:
         version: 56.0.15(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
       expo-router:
         specifier: ~56.2.13
-        version: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
+        version: 56.2.13(ee25eb8c9be08c81e43615531c294498)
       expo-splash-screen:
         specifier: ~56.0.12
         version: 56.0.12(expo@56.0.14)(typescript@6.0.3)
@@ -151,7 +151,7 @@ importers:
         version: 0.1.0(ai@7.0.14(zod@4.4.3))(chat@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3))(zod@4.4.3)
       '@vercel/analytics':
         specifier: ^2.0.1
-        version: 2.0.1(next@16.2.10(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        version: 2.0.1(next@16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@vercel/blob':
         specifier: ^2.6.1
         version: 2.6.1
@@ -163,7 +163,7 @@ importers:
         version: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -175,7 +175,7 @@ importers:
         version: 1.12.0
       next:
         specifier: 16.2.10
-        version: 16.2.10(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-mdx-remote:
         specifier: ^6.0.0
         version: 6.0.0(@types/react@19.2.17)(react@19.2.4)
@@ -7235,7 +7235,7 @@ snapshots:
       ws: 8.21.0
       zod: 3.25.76
     optionalDependencies:
-      expo-router: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
+      expo-router: 56.2.13(ee25eb8c9be08c81e43615531c294498)
       react-native: 0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)
     transitivePeerDependencies:
       - '@expo/dom-webview'
@@ -7525,7 +7525,7 @@ snapshots:
       react: 19.2.3
     optionalDependencies:
       '@expo/metro-runtime': 56.0.16(@expo/log-box@56.0.14)(expo@56.0.14)(react-dom@19.2.3(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
-      expo-router: 56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu)
+      expo-router: 56.2.13(ee25eb8c9be08c81e43615531c294498)
       react-dom: 19.2.3(react@19.2.3)
     transitivePeerDependencies:
       - supports-color
@@ -8868,9 +8868,9 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vercel/analytics@2.0.1(next@16.2.10(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
+  '@vercel/analytics@2.0.1(next@16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     optionalDependencies:
-      next: 16.2.10(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next: 16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
 
   '@vercel/blob@2.6.1':
@@ -9874,7 +9874,7 @@ snapshots:
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4(jiti@2.7.0))
@@ -9907,7 +9907,7 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -9957,7 +9957,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -10174,7 +10174,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@0.19.0(patch_hash=cv5q3sd4scoenjudafsnytz6n4)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
+  eve@0.19.0(patch_hash=c1ca96eaa7998992f974c551b848db27fee1bcb520780a53abdab2ad2b682636)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
     dependencies:
       ai: 7.0.14(zod@4.4.3)
       nitro: 3.0.260610-beta(@vercel/blob@2.6.1)(jiti@2.7.0)(lru-cache@11.5.1)
@@ -10322,7 +10322,7 @@ snapshots:
     dependencies:
       react-native: 0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)
 
-  expo-router@56.2.13(izr2zqdw3ve3z7uvopbrjpvwnu):
+  expo-router@56.2.13(ee25eb8c9be08c81e43615531c294498):
     dependencies:
       '@expo/log-box': 56.0.14(@expo/dom-webview@56.0.6)(expo@56.0.14)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
       '@expo/metro-runtime': 56.0.16(@expo/log-box@56.0.14)(expo@56.0.14)(react-dom@19.2.3(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
@@ -11987,7 +11987,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  next@16.2.10(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.10
       '@swc/helpers': 0.5.15
@@ -11996,7 +11996,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(react@19.2.4)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.10
       '@next/swc-darwin-x64': 16.2.10
@@ -13281,10 +13281,12 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(react@19.2.4):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.4):
     dependencies:
       client-only: 0.0.1
       react: 19.2.4
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styleq@0.1.3: {}
 

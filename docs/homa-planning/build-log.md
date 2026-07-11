@@ -3,6 +3,22 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (small hours) · Deploys were red: pnpm 9 wrote the eve patch hash, CI and Vercel run pnpm 10
+
+Every deploy and CI run since 4624db6 (the eve ndjson patch) failed at
+`pnpm install --frozen-lockfile` with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
+Cause: the lockfile's patchedDependencies hash was written by local pnpm
+9.15 (short hash format), while CI and Vercel obey the packageManager pin
+(pnpm 10.12.1), which computes sha256 hashes and refuses the mismatch.
+Fix decided alone: regenerate pnpm-lock.yaml with corepack pnpm@10.12.1
+(the pinned version, the one production actually runs), verified on a
+fresh clone that the frozen install now passes. The regeneration also
+reshuffled a few peer resolutions (styled-jsx gained its optional
+@babel/core edge, eslint-plugin-import's resolver key simplified): pnpm
+10's resolution, correct for the environment that installs it. Lesson
+for humans and agents both: run repo installs through corepack so the
+pin wins, or a patch commit from a pnpm-9 shell bricks the pipeline.
+
 ## 2026-07-10 (late night) · Homa's contact card: a vCard as the first text
 
 Founder ask: a new number's first text from Homa should carry her contact
