@@ -1,7 +1,10 @@
+// JSON-free subpath on purpose: eve compiles tool modules outside Next's
+// bundler, where @homa/taxonomy's data loading (createRequire of the
+// corpus JSON) cannot resolve (deploy failure 2026-07-10). The domain
+// registry is plain TS; the topic corpus stays out of tool bundles.
 import { BANK_ITEM_DOMAINS, getMapItem, MAP_SUBJECTS } from "@homa/core";
-import { getTaxonomyDomain, hubTopics, personalizePrompt } from "@homa/taxonomy";
+import { getTaxonomyDomain } from "@homa/taxonomy/domains";
 import { defineTool } from "eve/tools";
-import { after } from "next/server";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
@@ -77,26 +80,16 @@ export default defineTool({
     }
 
     // A rescore resets the report's words (they must match the new
-    // numbers); regenerate them off-turn, same as the report-correction
-    // route. The status endpoint self-heals if this gets cut short.
-    after(async () => {
-      try {
-        await runReportNarrative(input.childId);
-      } catch (error) {
-        console.error("record_observation: narrative regeneration failed", error);
-      }
+    // numbers); kick regeneration without awaiting it. No next/server
+    // after() here: eve compiles tool modules outside Next's bundler and
+    // that import breaks its build (deploy failure 2026-07-10). If this
+    // fire-and-forget gets cut short, the narrative-status endpoint
+    // self-heals on the next report view.
+    void runReportNarrative(input.childId).catch((error) => {
+      console.error("record_observation: narrative regeneration failed", error);
     });
 
     const domain = getTaxonomyDomain(BANK_ITEM_DOMAINS[input.itemId] ?? "");
-
-    // A runnable scenario from the skill graph (highest-centrality topic in
-    // this subject at this age, assessment domains only): the raisin-test
-    // style follow-up for kids old enough to sit in the graph's coverage.
-    const scenario = hubTopics(found.subject.id, result.ageMonths, 5).find(
-      (topic) =>
-        topic.assessmentPrompt &&
-        getTaxonomyDomain(topic.domain)?.kind === "assessment",
-    );
 
     return {
       recorded: true,
@@ -110,9 +103,6 @@ export default defineTool({
         frontier: result.frontierStatement,
       },
       nextNaturalProbe: result.nextProbeStatement,
-      tryAtHomeProbe: scenario?.assessmentPrompt
-        ? personalizePrompt(scenario.assessmentPrompt, result.childName)
-        : null,
       note: "Recorded and rescored. Mention the update to the parent in one natural aside (never clinical); if the moment invites it, the next natural probe is a good follow-up question, asked casually.",
     };
   },
