@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (small hours) · Video gateway: parents' videos become text through Twelve Labs
+
+Founder instruction with an API key: accept video from parents, run it through
+the model, pass text to Homa. Built and live-verified against the real API
+(9-second test clip, both lanes, ~8s per watch):
+
+- `apps/web/lib/video/twelvelabs.ts`: the vendor wrapper, one file, the same
+  isolation posture as `lib/voice/transcribe.ts` (which predicted this exact
+  swap in its header). POST `/v1.3/analyze` sync with Pegasus 1.5, which takes
+  a public direct-file URL or base64 bytes (30MB encoded cap) with no index,
+  task, or polling. Raw fetch, no SDK, eve-build safe. Fail-soft: null on any
+  failure, never throws. `HOMA_VIDEO_PROMPT` asks for who/what/speech/learning
+  content in plain prose and forbids guessing names or ages.
+- Upload shape (decision): video bytes never pass through our API (Vercel's
+  ~4.5MB body cap vs 20-200MB phone videos). `POST /api/video/upload` issues a
+  Blob client-upload token locked to the session family's own
+  `families/{id}/videos/` prefix (video/*, 200MB cap, random suffix);
+  `POST /api/video/describe` (maxDuration 300, 6/min per family rate limit)
+  accepts only URLs passing `isFamilyArtifactUrl` for THIS family, so the
+  gateway never fetches arbitrary URLs and never spends minutes on another
+  tenant's say-so. Both routes take cookie or bearer sessions via the new
+  shared `lib/api-auth.ts` (the learning/review walk, extracted).
+- SMS lane upgraded (first real consumer, live for parents today): the video
+  case in `lib/voice/sms-attachments.ts` now downloads once, has Pegasus watch
+  the clip (90s budget), and falls back to the original audio-track STT on any
+  miss, so a video never gets LESS understanding than before. New
+  `sms.attachment_processed` outcome `described` in the events registry;
+  sms-mode instructions now tell the agent it saw the video.
+- Env: `TWELVELABS_API_KEY` in `.env.local`, `.env.example`, and all three
+  Vercel environments (Sensitive in production + preview). Smoke script:
+  `pnpm --filter web exec tsx scripts/twelvelabs-smoke.mts --file clip.mp4`
+  (or `--url`). Free-plan budget note: 600 total video minutes shared across
+  everything; usage-visible via the vendor dashboard.
+- Input floors from the API reference, enforced by the vendor not us: clips
+  must be 4s to 1h and at least 360x360; misses fall back (SMS) or return
+  `{ description: null }` (route).
+- Drive-by fix while typechecking: `app/api/map/cron/route.ts` called
+  `markBandReady(childId)` but the family-predicates hardening pass (earlier
+  tonight) changed the signature to `(familyId, childId)`; call site updated,
+  pre-existing red typecheck now green.
+
 ## 2026-07-11 (late night) · Isolation guard now tests authenticated tenants
 
 Bug found during the full-repo review follow-up: the isolation smoke check only
@@ -23,6 +64,37 @@ new `public` tables unless someone remembered to add a hand-written assertion.
 Added a migration parser to `scripts/isolation-check.mjs`. Each read or write
 expectation records the table it covers, and the script now fails if any current
 `public` table from `supabase/migrations` is not exercised by the guard.
+
+## 2026-07-11 (late night) · Norms report uses product children
+
+Bug found during the full-repo review follow-up: `scripts/map-norms-report.mts`
+still joined `child_answers` to the dropped `public.lead_children` table, so the
+founder ops report errored.
+
+Updated the aggregate query to join `public.children` on `child_id` and keep the
+age bucket calculation based on `children.birth_month`. Verified with
+`pnpm report:norms` against the configured database.
+
+## 2026-07-11 (late night) · Calibration failures set a failing exit code
+
+Bug found during the full-repo review follow-up: `scripts/materials-calibration.mts`
+logged failed outcomes in the report but always exited 0, so automation could
+mistake a failed calibration for success.
+
+Changed the script to write the report as before, then exit 1 when any outcome
+failed. I did not run the full calibration harness because it can call paid image
+models and create artifacts; verified the exit-code branch statically.
+
+## 2026-07-11 (late night) · Deny-all server tables get explicit revokes
+
+Bug found during the full-repo review follow-up: several deny-all server tables
+had RLS enabled with no policies, but did not have explicit table-level revokes
+for anon and authenticated roles.
+
+Added migration `20260711190000_revoke_deny_all_tables.sql` to revoke all access
+on `phone_leads`, `phone_link_requests`, `phone_claim_codes`, `model_usage`, and
+`knowledge_bank` from anon and authenticated roles. The migration is additive
+security hardening; the existing isolation guard still passes.
 
 ## 2026-07-11 (late night) · Child-scoped helpers require family predicates
 
