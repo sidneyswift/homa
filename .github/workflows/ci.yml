@@ -54,6 +54,16 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
 
+      # Vercel's pipeline runs eve build after next build; it compiles agent
+      # tool modules outside Next's bundler, so imports that Next tolerates
+      # can still sink the deploy (2026-07-10 incident: next/server + a JSON
+      # corpus loader in a tool module). Run it here so CI fails first.
+      - name: Eve channel build (agent tool modules)
+        run: pnpm --filter web exec eve build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation
         env:
