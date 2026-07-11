@@ -11,7 +11,7 @@ import type { FlowChild } from "./flow-types";
  */
 
 export interface QueueEntry {
-  domainId: string;
+  subjectId: string;
   item: MapItem;
   isLadder: boolean;
 }
@@ -24,7 +24,7 @@ export function buildQueue(
   for (const plan of plans) {
     const baseAnswer = answers[plan.base.id];
     if (baseAnswer === undefined) {
-      queue.push({ domainId: plan.domainId, item: plan.base, isLadder: false });
+      queue.push({ subjectId: plan.subjectId, item: plan.base, isLadder: false });
       continue;
     }
     if (baseAnswer !== "easily") continue;
@@ -33,7 +33,7 @@ export function buildQueue(
     for (const rung of plan.ladders) {
       const rungAnswer = answers[rung.id];
       if (rungAnswer === undefined) {
-        queue.push({ domainId: plan.domainId, item: rung, isLadder: true });
+        queue.push({ subjectId: plan.subjectId, item: rung, isLadder: true });
         break;
       }
       if (rungAnswer !== "easily") break;

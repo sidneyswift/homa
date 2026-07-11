@@ -212,7 +212,7 @@ await expectInsertDenied(
   "child_plans",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
-    domain_id: "math",
+    subject_id: "math",
     plan: {},
     bank_version: "x",
     retest_at: "2026-01-01T00:00:00Z",
@@ -317,7 +317,7 @@ await expectInsertDenied(
 );
 await expectInsertDenied(
   "child_plans",
-  { child_id: "00000000-0000-0000-0000-000000000000", domain_id: "math", plan: {}, bank_version: "x" },
+  { child_id: "00000000-0000-0000-0000-000000000000", subject_id: "math", plan: {}, bank_version: "x" },
   "anon cannot forge product child plans",
 );
 

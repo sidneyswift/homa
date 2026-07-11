@@ -1,4 +1,4 @@
-import type { DomainScore, MapScores } from "./scoring";
+import type { SubjectScore, MapScores } from "./scoring";
 
 /**
  * The reviewed sentence bank (decision D8: template strings, zero model
@@ -16,7 +16,7 @@ import type { DomainScore, MapScores } from "./scoring";
  * no deficit words, temporal never causal, no em dashes.
  */
 
-export interface DomainLine {
+export interface SubjectLine {
   /** The chip label: Ahead, On track, Growing right now, Not mapped yet. */
   badge: string;
   /** The right-column number, e.g. "+14 mo". Empty when it would only
@@ -42,7 +42,7 @@ function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
-export function domainLine(score: DomainScore, childName: string): DomainLine {
+export function subjectLine(score: SubjectScore, childName: string): SubjectLine {
   const evidence = score.strongestObservedStatement
     ? `You've seen it: ${lowerFirst(score.strongestObservedStatement)}.`
     : "";
@@ -53,7 +53,7 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
       // Exposure domains track what the family does, never age norms, so
       // each one gets its own warm line instead of a position sentence.
       const opener =
-        score.domainId === "computer_science"
+        score.subjectId === "computer_science"
           ? "Code and computers are part of their world, and every build teaches."
           : "A second language is part of your home, and every bit counts.";
       return {
@@ -108,7 +108,7 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
       return {
         badge: "Growing right now",
         numberLabel: "",
-        sentence: openers[rotate(score.domainId, openers.length)],
+        sentence: openers[rotate(score.subjectId, openers.length)],
       };
     }
     case "not_mapped":
@@ -133,9 +133,9 @@ export function domainLine(score: DomainScore, childName: string): DomainLine {
  * breath.
  */
 export function homaNote(scores: MapScores, childName: string): string {
-  const ahead = scores.domains.filter((score) => score.position === "ahead" && !score.exposureBased).length;
-  const onTrack = scores.domains.filter((score) => score.position === "on_track" && !score.exposureBased).length;
-  const growing = scores.domains.filter(
+  const ahead = scores.subjects.filter((score) => score.position === "ahead" && !score.exposureBased).length;
+  const onTrack = scores.subjects.filter((score) => score.position === "on_track" && !score.exposureBased).length;
+  const growing = scores.subjects.filter(
     (score) => score.position === "growing" && !score.exposureBased,
   ).length;
 

@@ -1,5 +1,5 @@
 import { ageLabel } from "./bands";
-import { getMapDomain, growingActivityFor, MAP_BANK_VERSION } from "./bank";
+import { getMapSubject, growingActivityFor, MAP_BANK_VERSION } from "./bank";
 import { scoreMap, type MapAnswerInput } from "./scoring";
 
 /**
@@ -22,7 +22,7 @@ export interface PlanWeek {
 }
 
 export interface FourWeekPlan {
-  domainId: string;
+  subjectId: string;
   subjectName: string;
   childAgeLabel: string;
   /** The strongest confirmed skill, the honest starting line. */
@@ -207,12 +207,12 @@ function skillPhrase(statement: string): string {
 }
 
 /** The pseudo-domain id the unified month plan stores under. */
-export const MONTH_PLAN_DOMAIN = "month";
+export const MONTH_PLAN_SUBJECT = "month";
 
 /** Core subjects always keep presence in a month (the read-through
  * ruling: "a kid can't not do math and literacy for an entire month");
  * everything else is an elective that sprinkles in as joy. */
-const ELECTIVE_DOMAINS = new Set(["art", "music", "spanish", "computer_science"]);
+const ELECTIVE_SUBJECTS = new Set(["art", "music", "spanish", "computer_science"]);
 
 /**
  * The unified month (read-through ruling 2026-07-08: ONE four-week plan
@@ -221,7 +221,7 @@ const ELECTIVE_DOMAINS = new Set(["art", "music", "spanish", "computer_science"]
  * one strength sprinkles in for joy, and the whole thing is an ADD-ON to
  * whatever the family already does, never a schedule takeover. Returns a
  * FourWeekPlan shaped like any other so storage, narrative, and retest
- * machinery need no new paths; domainId is MONTH_PLAN_DOMAIN.
+ * machinery need no new paths; subjectId is MONTH_PLAN_SUBJECT.
  */
 export function buildMonthPlan(
   ageMonths: number,
@@ -230,20 +230,20 @@ export function buildMonthPlan(
 ): FourWeekPlan | null {
   const scores = scoreMap(ageMonths, answers);
 
-  const growingCores = scores.domains.filter(
+  const growingCores = scores.subjects.filter(
     (score) =>
       score.position === "growing" &&
       !score.exposureBased &&
-      !ELECTIVE_DOMAINS.has(score.domainId),
+      !ELECTIVE_SUBJECTS.has(score.subjectId),
   );
   // Fill to at least two focuses with the lowest on-track cores, so a
   // strong kid still gets a month that keeps things moving.
-  const onTrackCores = scores.domains
+  const onTrackCores = scores.subjects
     .filter(
       (score) =>
         score.position === "on_track" &&
         !score.exposureBased &&
-        !ELECTIVE_DOMAINS.has(score.domainId),
+        !ELECTIVE_SUBJECTS.has(score.subjectId),
     )
     .sort((a, b) => (a.monthsAhead ?? 0) - (b.monthsAhead ?? 0));
   const focusScores = [...growingCores, ...onTrackCores].slice(0, 3);
@@ -251,16 +251,16 @@ export function buildMonthPlan(
 
   // One strength sprinkle: the subject with the most months ahead,
   // electives welcome (the joy slot, never a focus slot).
-  const sprinkleScore = [...scores.domains]
+  const sprinkleScore = [...scores.subjects]
     .filter((score) => score.position === "ahead" && score.monthsAhead !== null)
     .sort((a, b) => (b.monthsAhead ?? 0) - (a.monthsAhead ?? 0))[0];
 
   const subPlans = focusScores
-    .map((score) => buildFourWeekPlan(score.domainId, ageMonths, answers, context))
+    .map((score) => buildFourWeekPlan(score.subjectId, ageMonths, answers, context))
     .filter((plan): plan is FourWeekPlan => plan !== null);
   if (subPlans.length === 0) return null;
   const sprinklePlan = sprinkleScore
-    ? buildFourWeekPlan(sprinkleScore.domainId, ageMonths, answers, context)
+    ? buildFourWeekPlan(sprinkleScore.subjectId, ageMonths, answers, context)
     : null;
 
   const targets = subPlans.map((plan) => `${plan.subjectName}: ${plan.targets[0]}`);
@@ -292,7 +292,7 @@ export function buildMonthPlan(
   });
 
   return {
-    domainId: MONTH_PLAN_DOMAIN,
+    subjectId: MONTH_PLAN_SUBJECT,
     subjectName: "the whole month",
     childAgeLabel: ageLabel(ageMonths),
     startingLine,
@@ -309,16 +309,16 @@ export function buildMonthPlan(
  * the rung above it; strong subjects extend upward from the ladder's top.
  */
 export function buildFourWeekPlan(
-  domainId: string,
+  subjectId: string,
   ageMonths: number,
   answers: MapAnswerInput[],
   context: PlanContext = {},
 ): FourWeekPlan | null {
-  const domain = getMapDomain(domainId);
+  const domain = getMapSubject(subjectId);
   if (!domain) return null;
 
   const scores = scoreMap(ageMonths, answers);
-  const score = scores.domains.find((entry) => entry.domainId === domainId);
+  const score = scores.subjects.find((entry) => entry.subjectId === subjectId);
   const answered = new Map(answers.map((entry) => [entry.itemId, entry.answer]));
   const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
 
@@ -361,7 +361,7 @@ export function buildFourWeekPlan(
   }
 
   const interest = context.interests?.[0] ?? "whatever they love most right now";
-  const patterns = PRACTICE_PATTERNS[domainId] ?? PRACTICE_PATTERNS.math;
+  const patterns = PRACTICE_PATTERNS[subjectId] ?? PRACTICE_PATTERNS.math;
   const activity = growingActivityFor(domain, ageMonths);
 
   const weeks: PlanWeek[] = [1, 2, 3, 4].map((week) => {
@@ -378,7 +378,7 @@ export function buildFourWeekPlan(
   });
 
   return {
-    domainId,
+    subjectId,
     subjectName: domain.displayName,
     childAgeLabel: ageLabel(ageMonths),
     startingLine,

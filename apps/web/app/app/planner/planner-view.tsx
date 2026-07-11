@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ageInMonths, getMapDomain, isInScoredRange, MONTH_PLAN_DOMAIN } from "@homa/core";
+import { ageInMonths, getMapSubject, isInScoredRange, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import type { ChildRecord } from "../../../lib/family";
 import {
@@ -31,9 +31,9 @@ const BLOCK_TONES: readonly WeekBlockTone[] = [
   { bg: "var(--sky-100)", ink: "var(--sky-600)" },
 ];
 
-function subjectLabel(domainId: string): string {
-  if (domainId === MONTH_PLAN_DOMAIN) return "The month";
-  return getMapDomain(domainId)?.displayName ?? domainId;
+function subjectLabel(subjectId: string): string {
+  if (subjectId === MONTH_PLAN_SUBJECT) return "The month";
+  return getMapSubject(subjectId)?.displayName ?? subjectId;
 }
 
 export function PlannerView({
@@ -164,12 +164,12 @@ export function PlannerView({
                   const weekIdx = currentWeekIndex(plan, nowMs);
                   return (
                     <WeekBlock
-                      key={`${plan.childId}-${plan.domainId}`}
-                      subjectLabel={subjectLabel(plan.domainId)}
+                      key={`${plan.childId}-${plan.subjectId}`}
+                      subjectLabel={subjectLabel(plan.subjectId)}
                       week={plan.weeks[weekIdx]}
                       weekNumber={weekIdx + 1}
                       childId={plan.childId}
-                      domainId={plan.domainId}
+                      subjectId={plan.subjectId}
                       token={token}
                       initialChecks={plan.progress}
                       tone={BLOCK_TONES[planIndex % BLOCK_TONES.length]}

@@ -3,6 +3,82 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (evening) · Fresh mornings, one thread; photo captions into the archive; the microwave conduct rules
+
+Founder direction (chat-threads investigation, two rulings): (1) returning
+to the web chat days later drops her mid-old-conversation and is
+disorienting, but the fix is NOT a ChatGPT-style thread list (one family
+chat stays the product shape); (2) the Mac mini "microwave" failure (Homa
+confidently denied a photo-anchored conversation existed) must be
+impossible in the cloud version. "Implement all of this."
+
+Shipped, chat surfaces (web + mobile twins kept aligned):
+
+- **Day separators** in the transcript (`app/app/transcript-days.ts`,
+  mobile `src/lib/transcript-days.ts`): Slack-style quiet date rules
+  ("Today", "Yesterday", "Friday, July 3"); pre-feature messages group
+  under one "Earlier". Times are client-observed (eve events carry
+  sequence numbers, not clock times), stamped at turn finish; live
+  messages without a stamp read as now.
+- **Fresh-morning session rotation** (`app/app/chat-storage.ts`, mobile
+  `src/lib/chat-storage.ts`): first visit after 4am local starts a fresh
+  eve session (the Hermes/OpenClaw daily-reset shape; idle-only per
+  M1-15/TE-04, never mid-conversation). The old session's messages fold
+  into an `archived` render cache, so the transcript stays ONE
+  continuous scrollable history while the model starts clean; the
+  family-context block + memories + recall make the seam invisible.
+  Decision made alone: 4am-boundary rule over an idle-hours timer (one
+  clear rule, matches both reference systems; overnight always rotates,
+  a same-day marathon never does).
+- **"New chat" no longer erases**: it archives the visible conversation
+  and rotates the session; every word stays on screen above the seam.
+  Suggestion chips return whenever the live session has no words yet.
+  Why archived messages instead of one merged event log: eve message ids
+  derive from per-session turn sequences (`turn_1:user` exists in every
+  session), so two sessions replayed through one reducer collide.
+- **Bounded storage**: archive capped at 200 messages, current-session
+  events at 2000 (trimmed at a turn boundary); Postgres
+  `conversation_messages` remains the real record, localStorage stays a
+  render cache until M1-02.
+
+Shipped, the microwave class of failure:
+
+- **Photo captions into the archive** (`lib/voice/caption-image.ts`,
+  wired in `lib/voice/sms-attachments.ts`): linked-family MMS photos get
+  one cheap vision sentence ("[Photo attached: An over-range microwave
+  with a loose door handle.]") joined into the turn text, which is what
+  the persist hook writes, which is what recall searches: photo-only
+  conversations are no longer invisible to memory. Unlinked senders get
+  a bare "[Photo attached]" marker (their sessions never persist, a
+  caption buys nothing); PDFs get "[PDF attached]" (caption lane for
+  PDFs is a noted follow-up). Fail-soft + 20s cap: a slow or failed
+  caption degrades to the marker, never stalls the reply. Verified live
+  through the gateway (10.6s, default `openai/gpt-5.4-mini`, swappable
+  via HOMA_CAPTION_MODEL, off switch HOMA_MEDIA_CAPTIONS=off). Usage
+  lands in model_usage as new surface `media_caption` (no migration
+  needed, surface is free text by design).
+- **Memory-miss conduct** (`agent/instructions.md`): new "When you
+  cannot find something" section (a recall miss never proves the
+  conversation did not happen; say you could not find it, ask for one
+  detail, search again; never explain a miss with a theory about her;
+  partial evidence gets stated, never bridged with a story), a Boundaries
+  clause (never deny a past conversation because a search came up
+  empty), and an out-of-domain line in Have opinions (help with the
+  microwave like a capable friend; never "wrong place"). The recall
+  tool's empty-result note now says a miss proves nothing.
+- **The microwave eval** (`scripts/recall-eval.mts`, `pnpm eval:recall`):
+  seeds a synthetic family with the failure's exact shape (a photo-only
+  message persisted as its caption, the typed follow-up), asserts
+  recall's FTS + semantic arms find it ("microwave", "loose handle",
+  and the parent's own sentence), plus a cross-family isolation probe;
+  cleans up after itself. Run live against homa-prod: 5/5 PASS.
+  Deliberately NOT added to CI (it costs an embedding call and touches
+  the live DB; founder-run, like the calibration harness).
+
+Verified: typecheck, lint, build, all four guards green; eval and caption
+smoke run live. Coordinated with the concurrent slash-composer work: the
+rewritten chat client wires `SlashComposer` in rather than the bare input.
+
 ## 2026-07-10 (evening) · The composer's "/" menu: mention a kid or a skill, token rendered like a link
 
 Founder ask (with Cursor/Cowork screenshots): typing "/" in chat should
@@ -166,6 +242,64 @@ Calls made alone, worth auditing:
   expired `VERCEL_OIDC_TOKEN` in `apps/web/.env.local` (73 hours past
   expiry, local chat was dead) was replaced with a fresh `vercel env
   pull` token, and the dev server on :3000 was restarted clean.
+
+## 2026-07-10 (evening) · The skill graph ships: subject → domain → topic live, the rename executed, the agent writes the map
+
+Founder instruction: "OK IMPLEMENT. BOIL THE OCEAN." Executed the
+skill-graph plan's sequencing steps 2-4 plus the record_observation loop
+pulled forward from step 8 (per the risk pass earlier today: the loops,
+not the corpus, are the critical path). Everything verified green:
+typecheck, lint, build, check:map, check:events, check:taxonomy (new),
+check:isolation, check:skills-targeting.
+
+- **@homa/taxonomy rebuilt as the runtime graph.** Assembly derives Homa
+  topics from the vendored Marble data + a frozen append-only slug map
+  (1,590 topics as `<subject>.<slug>` ids, founder id ruling honored: no
+  marble_id anywhere; lineage as `marble:` refs beside standards refs).
+  3,221 edges, 183 clusters, standards registry, centrality recomputed
+  over the Homa graph. 102-domain registry: 55 Marble-derived + 47
+  authored (gross_motor, fine_motor, self_care, music, art, spanish get
+  full domain scaffolding from the Mac Mini's strand vocabulary; five
+  interest-led science domains + three history eras land as kind
+  "content", materials hooks, never assessment). Life Skills parked as
+  its own subject per the plan. Cluster-only pairs (Earth & Human
+  Activity, Heredity & Evolution) mapped so upstream topic drops land.
+- **The rename window (users ≈ 0, now or never).** domain → subject in
+  packages/core (MapSubject, MAP_SUBJECTS, SubjectScore.subjectId,
+  scores.subjects, totalSubjects, MONTH_PLAN_SUBJECT, subjectLine...),
+  events registry + every emitter (props domain → subject,
+  mapped_domains → mapped_subjects; stored analytics rows untouched,
+  append-only), apps/web (route folder plan/[subjectId], next.config
+  agent pin, ?subject= query key), guards and fixtures. Migration
+  20260711003000_subject_rename applied to prod: child_plans.domain_id →
+  subject_id; scores, history, and plan jsonb rewritten in place (7
+  reports + 7 plans, zero stale keys verified by query). Isolation suite
+  green after.
+- **check:taxonomy** joins the CI guard set: upstream checksums +
+  referential integrity, then the Homa laws (every Marble pair mapped,
+  ids unique and bank-collision-free, DAG acyclic, every bank item
+  assigned to an assessment domain of its own subject, every ref
+  resolves). The 224 bank items each got a hand-curated level-2 domain
+  (packages/core/src/map/item-domains.ts).
+- **record_observation shipped** (the Mac Mini comparison's gap #2): the
+  agent can land "she read a whole Bob Book by herself" as a chip answer
+  with provenance 'conversation', deterministic rescore, off-turn
+  narrative regeneration (same after() pattern as the correction route),
+  and a reply payload with receipts: skill line, fresh position, next
+  ladder rung, and a personalized try-at-home probe from the graph's
+  hub topics. Instructions table row added.
+- **Live side effect, disclosed:** the write path was verified against
+  the real Llanes Story (math.counts-past-20 = easily, source
+  conversation), which moved his math read from on_track +5 to ahead +11.
+  That matches the Mac Mini's verified ground truth (counts to 30,
+  2026-06-19), so it was kept as a correction, not reverted; his report
+  narrative regenerates on next view via the status route.
+- **Deferred, tracked in the plan:** plan-jsonb prerequisite enrichment
+  and report domain receipts (gated surfaces), 2-4 band topic authoring
+  inside the authored domains, freshness decay policy, snapshot cadence.
+  Mobile lint carries a pre-existing error in the founder's uncommitted
+  chat-session WIP (untouched); web chat-client gained the two props its
+  page already passed (kids, slashSkills) so typecheck runs clean.
 
 ## 2026-07-10 (afternoon) · Founder ruling: build the taxonomy on Marble's open dataset; vendored at docs/homa-benchmarks/marble
 

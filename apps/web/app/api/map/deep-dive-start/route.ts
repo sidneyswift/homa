@@ -12,7 +12,7 @@ import { requireFamily } from "../../../../lib/map/session";
  */
 const schema = z.object({
   childId: z.uuid(),
-  domain: z.string().min(1).max(60),
+  subject: z.string().min(1).max(60),
   mode: z.enum(["parent", "together"]),
 });
 
@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
       await emitMapEvent("map.deep_dive_started", {
         family_id: family.id,
         child_id: parsed.data.childId,
-        domain: parsed.data.domain,
+        subject: parsed.data.subject,
         mode: parsed.data.mode,
       });
     }

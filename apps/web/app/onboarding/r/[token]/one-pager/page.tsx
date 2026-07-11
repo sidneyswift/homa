@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ageInMonths, ageLabel, getMapDomain, MAP_SOURCES } from "@homa/core";
+import { ageInMonths, ageLabel, getMapSubject, MAP_SOURCES } from "@homa/core";
 
 import { Logo } from "../../../../../components/brand/Logo";
 import { getReportByToken } from "../../../../../lib/map/store";
@@ -45,7 +45,7 @@ export default async function OnePagerPage({
 
   const months = ageInMonths(report.birthMonth);
   const scores = report.scores;
-  const byId = new Map(scores.domains.map((score) => [score.domainId, score]));
+  const byId = new Map(scores.subjects.map((score) => [score.subjectId, score]));
   const ordered = scores.strengthOrder
     .map((id) => byId.get(id))
     .filter((score): score is NonNullable<typeof score> => Boolean(score));
@@ -57,9 +57,9 @@ export default async function OnePagerPage({
   });
 
   const sourceKeys = new Set<string>();
-  for (const score of scores.domains) {
+  for (const score of scores.subjects) {
     if (score.position === "not_mapped") continue;
-    getMapDomain(score.domainId)?.items.forEach((item) =>
+    getMapSubject(score.subjectId)?.items.forEach((item) =>
       item.sources.forEach((key) => sourceKeys.add(key)),
     );
   }
@@ -80,7 +80,7 @@ export default async function OnePagerPage({
             </h1>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-strong/70">
               <span>
-                subjects mapped <b className="text-strong">{scores.mappedCount} of {scores.totalDomains}</b>
+                subjects mapped <b className="text-strong">{scores.mappedCount} of {scores.totalSubjects}</b>
               </span>
               <span>
                 observations <b className="text-strong">{scores.observationCount}</b>
@@ -95,9 +95,9 @@ export default async function OnePagerPage({
             {strengths.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-3">
                 {strengths.map((score) => {
-                  const domain = getMapDomain(score.domainId);
+                  const domain = getMapSubject(score.subjectId);
                   return (
-                    <div key={score.domainId} className="rounded-lg p-4" style={{ background: "var(--gold-100)" }}>
+                    <div key={score.subjectId} className="rounded-lg p-4" style={{ background: "var(--gold-100)" }}>
                       <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
                         {domain?.displayName}
                       </p>

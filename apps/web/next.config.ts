@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],
-    "/onboarding/r/[token]/plan/[domainId]": ["./agent/report-writer.md"],
+    "/onboarding/r/[token]/plan/[subjectId]": ["./agent/report-writer.md"],
     "/api/voice/curriculum/insights": ["./agent/curriculum-writer.md"],
     // The learning loops' extraction prompt: the cron route runs the
     // post-call memory turn, the review route runs the post-turn review.

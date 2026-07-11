@@ -23,12 +23,12 @@ const SUB_TONE: Record<Tile["subTone"], React.CSSProperties> = {
 
 function buildTiles(reports: DashboardReport[], plans: DashboardPlan[], kidCount: number): Tile[] {
   const mapped = reports.reduce((sum, report) => sum + report.scores.mappedCount, 0);
-  const possible = reports.reduce((sum, report) => sum + report.scores.totalDomains, 0);
+  const possible = reports.reduce((sum, report) => sum + report.scores.totalSubjects, 0);
   const observations = reports.reduce((sum, report) => sum + report.scores.observationCount, 0);
   const aheadCount = reports.reduce(
     (sum, report) =>
       sum +
-      report.scores.domains.filter((score) => score.position === "ahead" && !score.exposureBased)
+      report.scores.subjects.filter((score) => score.position === "ahead" && !score.exposureBased)
         .length,
     0,
   );

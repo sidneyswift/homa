@@ -68,7 +68,7 @@ export async function POST(request: Request): Promise<Response> {
     await emitMapEvent("map.report_generated", {
       family_id: family.id,
       child_id: report.childId,
-      mapped_domains: report.scores.mappedCount,
+      mapped_subjects: report.scores.mappedCount,
       observations: report.scores.observationCount,
       bank_version: MAP_BANK_VERSION,
     });

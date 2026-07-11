@@ -1,4 +1,4 @@
-import { MONTHS_AHEAD_CAP, type DomainScore, type MapPosition } from "@homa/core";
+import { MONTHS_AHEAD_CAP, type SubjectScore, type MapPosition } from "@homa/core";
 
 /**
  * The subject position gauge, shared by the kid cards and the per-kid
@@ -32,19 +32,19 @@ export function subjectTone(position: MapPosition): SubjectTone {
 
 /** Gauge fill: 50% is the at-age notch, +24 mo fills the track, growing
  * rests just left of the notch (mirrors the chart's dot placement). */
-export function gaugePercent(score: DomainScore): number {
+export function gaugePercent(score: SubjectScore): number {
   if (score.position === "growing") return 44;
   const months = Math.min(score.monthsAhead ?? 0, MONTHS_AHEAD_CAP);
   return 50 + (months / MONTHS_AHEAD_CAP) * 50;
 }
 
-export function gaugeLabel(score: DomainScore): string {
+export function gaugeLabel(score: SubjectScore): string {
   if (score.position === "growing") return "growing";
   const months = score.monthsAhead ?? 0;
   return months > 0 ? `+${months} mo` : "at age";
 }
 
-export function SubjectGauge({ score }: { score: DomainScore }) {
+export function SubjectGauge({ score }: { score: SubjectScore }) {
   const tone = subjectTone(score.position);
   return (
     <div className="relative h-[7px] rounded-pill bg-[var(--stone-100)]">

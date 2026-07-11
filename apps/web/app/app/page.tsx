@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { getAppData } from "../../lib/app-data";
+import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
 import { ChatClient } from "./chat-client";
@@ -48,12 +49,18 @@ export default async function ChatPage({
       ? (app?.children ?? []).find((child) => child.id === viewContext.childId) ?? null
       : null;
 
+  // The composer's "/" menu: kids to mention, plus the same advertised
+  // skill set the agent sees (built-ins + saved + targeted bank rows).
+  const slashSkills = await getSlashMenuSkills(app?.children ?? []);
+
   return (
     <ChatClient
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
       parentName={app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
+      kids={(app?.children ?? []).map((child) => ({ id: child.id, name: child.name }))}
+      slashSkills={slashSkills}
       // The journal email's deep link (?draft=journal) lands with the
       // composer already started; she edits and sends herself.
       initialDraft={draft === "journal" ? "Here's how today went: " : undefined}

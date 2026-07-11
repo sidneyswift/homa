@@ -88,7 +88,7 @@ export default defineTool({
       if (results.length === 0) {
         return {
           found: 0,
-          note: "Nothing in this family's history matches. Try different words once; after that, ask the parent instead of guessing.",
+          note: "Nothing in this family's history matches those words. A miss never proves the conversation did not happen: try different words once, then ask the parent for a detail instead of guessing or denying.",
         };
       }
       return { found: results.length, results };
@@ -216,7 +216,7 @@ export default defineTool({
     if (results.length === 0) {
       return {
         found: 0,
-        note: "Nothing in this family's history matches. Try different words once; after that, ask the parent instead of guessing.",
+        note: "Nothing in this family's history matches those words. A miss never proves the conversation did not happen: try different words once, then ask the parent for a detail instead of guessing or denying.",
       };
     }
     return { found: results.length, results };

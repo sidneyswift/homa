@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import type { DashboardPlan, DashboardReport } from "../../lib/dashboard";
 
@@ -12,9 +12,9 @@ import type { DashboardPlan, DashboardReport } from "../../lib/dashboard";
  * say nothing).
  */
 
-function subjectLabel(domainId: string): string {
-  if (domainId === MONTH_PLAN_DOMAIN) return "the month";
-  return (getMapDomain(domainId)?.displayName ?? domainId).toLowerCase();
+function subjectLabel(subjectId: string): string {
+  if (subjectId === MONTH_PLAN_SUBJECT) return "the month";
+  return (getMapSubject(subjectId)?.displayName ?? subjectId).toLowerCase();
 }
 
 function shortDate(value: string): string {
@@ -46,7 +46,7 @@ export function MonthCard({
             <>
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-semibold text-body">
-                  {kidName} {"\u00b7"} {subjectLabel(plan.domainId)}
+                  {kidName} {"\u00b7"} {subjectLabel(plan.subjectId)}
                 </span>
                 <span className="font-mono text-xs text-subtle">
                   {plan.done} of {plan.total}
@@ -66,14 +66,14 @@ export function MonthCard({
           const rowClass = `${index < rows.length - 1 ? "border-b border-[var(--stone-100)] " : ""}block py-3 first:pt-1 last:pb-0`;
           return token ? (
             <Link
-              key={`${plan.childId}-${plan.domainId}`}
-              href={`/onboarding/r/${token}/plan/${plan.domainId}`}
+              key={`${plan.childId}-${plan.subjectId}`}
+              href={`/onboarding/r/${token}/plan/${plan.subjectId}`}
               className={`${rowClass} -mx-2 rounded-md px-2 transition-colors duration-(--dur-fast) ease-out hover:bg-page`}
             >
               {body}
             </Link>
           ) : (
-            <div key={`${plan.childId}-${plan.domainId}`} className={rowClass}>
+            <div key={`${plan.childId}-${plan.subjectId}`} className={rowClass}>
               {body}
             </div>
           );

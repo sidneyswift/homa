@@ -1,4 +1,4 @@
-import { getMapDomain } from "@homa/core";
+import { getMapSubject } from "@homa/core";
 
 import type { GrowthEra } from "./growth-story";
 
@@ -53,7 +53,7 @@ const LABEL_H = 13;
 const LABEL_CHAR_W = 6.9;
 
 /** One distinguishable design-system color per subject (tokens only). */
-const DOMAIN_COLORS: Record<string, string> = {
+const SUBJECT_COLORS: Record<string, string> = {
   math: "var(--pop-cobalt)",
   literacy: "var(--sky-600)",
   phonics: "var(--pop-navy)",
@@ -81,7 +81,7 @@ interface SeriesPoint {
 }
 
 interface TrajectorySeries {
-  domainId: string;
+  subjectId: string;
   name: string;
   color: string;
   points: SeriesPoint[];
@@ -96,10 +96,10 @@ interface TrajectorySeries {
 function buildSeries(eras: GrowthEra[], tStart: number): TrajectorySeries[] {
   const latest = eras[eras.length - 1];
   return latest.scores.strengthOrder
-    .map((domainId) => {
+    .map((subjectId) => {
       const points: SeriesPoint[] = [];
       for (const era of eras) {
-        const score = era.scores.domains.find((entry) => entry.domainId === domainId);
+        const score = era.scores.subjects.find((entry) => entry.subjectId === subjectId);
         if (!score || score.exposureBased || score.position === "not_mapped") continue;
         points.push({
           t: new Date(era.generated_at).getTime(),
@@ -113,9 +113,9 @@ function buildSeries(eras: GrowthEra[], tStart: number): TrajectorySeries[] {
       const moved = points.some((point) => point.months !== points[0].months);
       const lastMonths = points.length > 0 ? points[points.length - 1].months : 0;
       return {
-        domainId,
-        name: getMapDomain(domainId)?.displayName ?? domainId,
-        color: DOMAIN_COLORS[domainId] ?? FALLBACK_COLOR,
+        subjectId,
+        name: getMapSubject(subjectId)?.displayName ?? subjectId,
+        color: SUBJECT_COLORS[subjectId] ?? FALLBACK_COLOR,
         points,
         featured: moved || lastMonths >= 6,
       };
@@ -128,7 +128,7 @@ function dayLabel(t: number): string {
 }
 
 interface EndLabel {
-  domainId: string;
+  subjectId: string;
   color: string;
   text: string;
   /** Where the line actually ends (leader lines start here). */
@@ -220,7 +220,7 @@ export function ReportTrajectory({
       const name =
         entry.name.length > room ? `${entry.name.slice(0, Math.max(1, room - 1))}\u2026` : entry.name;
       return {
-        domainId: entry.domainId,
+        subjectId: entry.subjectId,
         color: entry.color,
         text: `${name}${value}`,
         lineX: x(last.t),
@@ -337,7 +337,7 @@ export function ReportTrajectory({
         .map((entry, seriesIndex) => ({ entry, seriesIndex }))
         .sort((a, b) => Number(a.entry.featured) - Number(b.entry.featured))
         .map(({ entry, seriesIndex }) => (
-          <g key={entry.domainId} opacity={entry.featured ? 0.95 : 0.45}>
+          <g key={entry.subjectId} opacity={entry.featured ? 0.95 : 0.45}>
             <polyline
               points={entry.points
                 .map(
@@ -354,7 +354,7 @@ export function ReportTrajectory({
             {entry.points.map((point, index) =>
               point.origin ? null : (
                 <circle
-                  key={`${entry.domainId}-${point.t}`}
+                  key={`${entry.subjectId}-${point.t}`}
                   cx={x(point.t)}
                   cy={laneY(point.months, seriesIndex)}
                   r={
@@ -378,7 +378,7 @@ export function ReportTrajectory({
       {/* Direct labels in the future space: the legend, where the eye
           already is. Hairline leaders reconnect dodged labels. */}
       {labels.map((label) => (
-        <g key={label.domainId}>
+        <g key={label.subjectId}>
           {Math.abs(label.y - label.lineY) > 5 ? (
             <line
               x1={label.lineX + 5}

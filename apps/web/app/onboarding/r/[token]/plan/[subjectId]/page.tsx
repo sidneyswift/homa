@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 
-import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { Logo } from "../../../../../../components/brand/Logo";
 import { emitMapEvent } from "../../../../../../lib/map/events";
@@ -40,13 +40,13 @@ export default async function PlanPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ token: string; domainId: string }>;
+  params: Promise<{ token: string; subjectId: string }>;
   searchParams: Promise<{ rebuilt?: string; built?: string }>;
 }) {
-  const { token, domainId } = await params;
+  const { token, subjectId } = await params;
   const { rebuilt, built } = await searchParams;
-  const domain = getMapDomain(domainId);
-  const isMonth = domainId === MONTH_PLAN_DOMAIN;
+  const domain = getMapSubject(subjectId);
+  const isMonth = subjectId === MONTH_PLAN_SUBJECT;
 
   // Arriving from a deep dive rebuilds the month from the refined answers,
   // ONCE, then redirects to a URL that is safe to reload: leaving
@@ -54,13 +54,13 @@ export default async function PlanPage({
   // (restarting the retest clock and, with the narrative layer, resetting
   // the words the writing beat was waiting for, so it never resolved).
   if ((domain || isMonth) && rebuilt === "1") {
-    const rebuiltPlan = await getOrBuildPlan(token, domainId, { rebuild: true });
+    const rebuiltPlan = await getOrBuildPlan(token, subjectId, { rebuild: true });
     if (rebuiltPlan) {
-      redirect(`/onboarding/r/${token}/plan/${domainId}?built=1`);
+      redirect(`/onboarding/r/${token}/plan/${subjectId}?built=1`);
     }
   }
 
-  const result = domain || isMonth ? await getOrBuildPlan(token, domainId) : null;
+  const result = domain || isMonth ? await getOrBuildPlan(token, subjectId) : null;
 
   if (!result) {
     return (
@@ -89,7 +89,7 @@ export default async function PlanPage({
     await emitMapEvent("map.plan_built", {
       family_id: result.familyId,
       child_id: result.childId,
-      domain: domainId,
+      subject: subjectId,
     });
   }
 
@@ -105,7 +105,7 @@ export default async function PlanPage({
     const childId = result.childId;
     after(async () => {
       try {
-        await runPlanNarrative(childId, domainId);
+        await runPlanNarrative(childId, subjectId);
       } catch (error) {
         console.error(
           "plan narrative kick failed:",
@@ -127,7 +127,7 @@ export default async function PlanPage({
           <div className="mt-6">
             <NarrativeBeat
               token={token}
-              domainId={domainId}
+              subjectId={subjectId}
               lines={[
                 `Reading what you told me about ${childName}`,
                 `Laying out the four ${plan.subjectName.toLowerCase()} weeks`,
@@ -245,10 +245,10 @@ export default async function PlanPage({
 
             <PlanWeeks
               weeks={plan.weeks}
-              storageKey={`homa-plan-${token}-${domainId}`}
+              storageKey={`homa-plan-${token}-${subjectId}`}
               weekLines={weekLines}
               childId={result.childId}
-              domainId={domainId}
+              subjectId={subjectId}
               initialChecks={result.progress}
             />
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { MAP_BANK_VERSION, MAP_DOMAINS, MAP_SOURCES } from "@homa/core";
+import { MAP_BANK_VERSION, MAP_SUBJECTS, MAP_SOURCES } from "@homa/core";
 
 import { Logo } from "../../../components/brand/Logo";
 
@@ -116,8 +116,8 @@ export default function MethodPage() {
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Coverage today</h2>
         <p className="mt-3 text-body">
-          The questionnaire covers ages 2 to 16 across {MAP_DOMAINS.length} subjects
-          ({MAP_DOMAINS.map((domain) => domain.displayName).join(", ")}). Early ages use
+          The questionnaire covers ages 2 to 16 across {MAP_SUBJECTS.length} subjects
+          ({MAP_SUBJECTS.map((domain) => domain.displayName).join(", ")}). Early ages use
           developmental milestones; school ages use national grade standards. Every question is
           asked as something a parent has seen (work on the table, habits around the house),
           never as a quiz question for the child. Under 2, we save what you share and email you

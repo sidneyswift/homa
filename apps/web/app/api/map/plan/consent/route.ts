@@ -34,7 +34,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
-  const { childId, domainId } = parsed.data;
+  const { childId, subjectId } = parsed.data;
 
   try {
     const token = await getReportTokenForChild(family.id, childId);
@@ -42,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
     }
 
-    const built = await getOrBuildPlan(token, domainId);
+    const built = await getOrBuildPlan(token, subjectId);
     if (!built) {
       return Response.json({ ok: false, reason: "unknown-plan" }, { status: 400 });
     }
@@ -50,17 +50,17 @@ export async function POST(request: Request): Promise<Response> {
     await emitMapEvent("map.plan_consented", {
       family_id: family.id,
       child_id: childId,
-      domain: domainId,
+      subject: subjectId,
     });
     if (built.wasNew) {
       await emitMapEvent("map.plan_built", {
         family_id: family.id,
         child_id: childId,
-        domain: domainId,
+        subject: subjectId,
       });
     }
 
-    return Response.json({ ok: true, url: `/onboarding/r/${token}/plan/${domainId}` });
+    return Response.json({ ok: true, url: `/onboarding/r/${token}/plan/${subjectId}` });
   } catch (error) {
     console.error(
       "map/plan/consent failed:",

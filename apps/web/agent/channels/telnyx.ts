@@ -126,7 +126,9 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   // Every attachment gets a lane (never deny input): images and PDFs
   // become parts, speech becomes marked transcript blocks, text files
   // inline, failures become bracketed notes the agent can acknowledge.
-  const normalized = await normalizeSmsAttachments(attachments);
+  // Linked-family photos also get a caption block so the photo leaves a
+  // searchable trace in the durable record (the microwave lesson).
+  const normalized = await normalizeSmsAttachments(attachments, { familyId });
   for (const result of normalized.results) {
     await emitMapEvent("sms.attachment_processed", {
       kind: result.kind,

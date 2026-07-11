@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { MONTH_PLAN_DOMAIN } from "@homa/core";
+import { MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { reportButtonClass } from "./report-button";
 
@@ -36,7 +36,7 @@ export function MonthButton({
       const response = await fetch("/api/map/plan/consent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId, domainId: MONTH_PLAN_DOMAIN }),
+        body: JSON.stringify({ childId, subjectId: MONTH_PLAN_SUBJECT }),
       });
       if (response.status === 401) {
         setState("no-session");

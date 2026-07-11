@@ -15,16 +15,16 @@ import {
   BANNED_WORDS,
   buildFourWeekPlan,
   buildMonthPlan,
-  CORE_DOMAIN_IDS,
+  CORE_SUBJECT_IDS,
   CORE_LADDER_RUNGS,
   MAX_LADDER_RUNGS,
-  MONTH_PLAN_DOMAIN,
+  MONTH_PLAN_SUBJECT,
   DEEP_DIVE_CAP,
-  domainLine,
+  subjectLine,
   EM_DASH,
   getMapItem,
   homaNote,
-  MAP_DOMAINS,
+  MAP_SUBJECTS,
   MAP_SOURCES,
   maxQuestionsForAge,
   nextDeepDiveItem,
@@ -61,7 +61,7 @@ function checkCopy(label: string, text: string): void {
 // ---------- 1. Content lint ----------
 
 let itemCount = 0;
-for (const domain of MAP_DOMAINS) {
+for (const domain of MAP_SUBJECTS) {
   checkCopy(`${domain.id}.intro`, domain.intro);
   checkCopy(`${domain.id}.whatItIs`, domain.whatItIs);
   if (!domain.whatItIs.trim()) failures.push(`${domain.id}: empty whatItIs`);
@@ -94,7 +94,7 @@ for (const domain of MAP_DOMAINS) {
     }
   }
 }
-report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cited and clean`, failures.length === 0);
+report(`content lint: ${MAP_SUBJECTS.length} domains, ${itemCount} items, all cited and clean`, failures.length === 0);
 
 // ---------- 1b. Personalization: every question takes the kid's name ----------
 // The checklist and deep dive render personalizeStatement(name, item)
@@ -103,11 +103,11 @@ report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cit
 // a hand-written exception in map/personalize.ts or it fails here.
 {
   const before1b = failures.length;
-  const bankIds = new Set(MAP_DOMAINS.flatMap((domain) => domain.items.map((item) => item.id)));
+  const bankIds = new Set(MAP_SUBJECTS.flatMap((domain) => domain.items.map((item) => item.id)));
   for (const id of PERSONALIZATION_EXCEPTION_IDS) {
     if (!bankIds.has(id)) failures.push(`personalize exception "${id}" is not a bank item`);
   }
-  for (const domain of MAP_DOMAINS) {
+  for (const domain of MAP_SUBJECTS) {
     for (const item of domain.items) {
       const personalized = personalizeStatement("Story", item);
       checkCopy(`personalized.${item.id}`, personalized);
@@ -135,16 +135,16 @@ report(`content lint: ${MAP_DOMAINS.length} domains, ${itemCount} items, all cit
 // Worst case is base + two rungs per non-core domain and base + six rungs
 // per core subject; typical kids see far fewer because rungs only unlock
 // on "easily".
-const MAX_TOTAL_QUESTIONS = MAP_DOMAINS.reduce(
+const MAX_TOTAL_QUESTIONS = MAP_SUBJECTS.reduce(
   (total, domain) =>
-    total + 1 + (CORE_DOMAIN_IDS.includes(domain.id) ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS),
+    total + 1 + (CORE_SUBJECT_IDS.includes(domain.id) ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS),
   0,
 );
 
 let ladderOk = true;
 for (let age = 24; age < 204; age += 3) {
   const plans = planQuestions(age);
-  if (plans.length !== MAP_DOMAINS.length) ladderOk = false;
+  if (plans.length !== MAP_SUBJECTS.length) ladderOk = false;
   const total = maxQuestionsForAge(age);
   if (total < plans.length || total > MAX_TOTAL_QUESTIONS) {
     ladderOk = false;
@@ -155,7 +155,7 @@ for (let age = 24; age < 204; age += 3) {
     for (const rung of plan.ladders) {
       if (rung.typicalMonths <= previous) {
         ladderOk = false;
-        failures.push(`age ${age}m ${plan.domainId}: ladder rungs not ascending`);
+        failures.push(`age ${age}m ${plan.subjectId}: ladder rungs not ascending`);
       }
       previous = rung.typicalMonths;
     }
@@ -171,17 +171,17 @@ report("selection ladder: base + ladder sane for every age 2y to 16y", ladderOk)
  */
 function answersFor(
   age: number,
-  pick: (domainId: string, rungIndex: number) => MapAnswer | null,
+  pick: (subjectId: string, rungIndex: number) => MapAnswer | null,
 ): MapAnswerInput[] {
   const out: MapAnswerInput[] = [];
   for (const plan of planQuestions(age)) {
-    const base = pick(plan.domainId, 0);
+    const base = pick(plan.subjectId, 0);
     if (!base) continue;
     out.push({ itemId: plan.base.id, answer: base });
     if (base !== "easily") continue;
     let rungIndex = 1;
     for (const rung of plan.ladders) {
-      const answer = pick(plan.domainId, rungIndex);
+      const answer = pick(plan.subjectId, rungIndex);
       rungIndex += 1;
       if (!answer) break;
       out.push({ itemId: rung.id, answer });
@@ -197,25 +197,25 @@ const AGE = 50; // 4y 2m
 const aheadKid = scoreMap(AGE, answersFor(AGE, () => "easily"));
 report(
   "ahead kid: majority ahead, months capped for their age, none growing",
-  aheadKid.domains.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
-    aheadKid.domains.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(AGE)) &&
-    aheadKid.domains.some((d) => d.position === "ahead"),
-  JSON.stringify(aheadKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
+  aheadKid.subjects.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
+    aheadKid.subjects.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(AGE)) &&
+    aheadKid.subjects.some((d) => d.position === "ahead"),
+  JSON.stringify(aheadKid.subjects.map((d) => [d.subjectId, d.position, d.monthsAhead])),
 );
 
 // Golden kid 2: mixed (Maya): math climbs two rungs, fine motor growing,
 // spanish skipped, everything else easily at the base only.
 const mixedKid = scoreMap(
   AGE,
-  answersFor(AGE, (domainId, rungIndex) => {
-    if (domainId === "math") return rungIndex <= 2 ? "easily" : "not_yet";
-    if (domainId === "fine_motor") return "not_yet";
-    if (domainId === "spanish") return "skip";
-    if (domainId === "writing") return "getting_there";
+  answersFor(AGE, (subjectId, rungIndex) => {
+    if (subjectId === "math") return rungIndex <= 2 ? "easily" : "not_yet";
+    if (subjectId === "fine_motor") return "not_yet";
+    if (subjectId === "spanish") return "skip";
+    if (subjectId === "writing") return "getting_there";
     return rungIndex === 0 ? "easily" : null;
   }),
 );
-const mixedById = new Map(mixedKid.domains.map((d) => [d.domainId, d]));
+const mixedById = new Map(mixedKid.subjects.map((d) => [d.subjectId, d]));
 report(
   "mixed kid: math ahead, fine motor growing, spanish not mapped",
   mixedById.get("math")?.position === "ahead" &&
@@ -234,7 +234,7 @@ report(
 const sparseKid = scoreMap(AGE, answersFor(AGE, () => "not_sure"));
 report(
   "sparse kid: nothing mapped, zero observations held against her",
-  sparseKid.mappedCount === 0 && sparseKid.domains.every((d) => d.position === "not_mapped"),
+  sparseKid.mappedCount === 0 && sparseKid.subjects.every((d) => d.position === "not_mapped"),
 );
 
 // Golden kid 4: struggling (all not yet) → growing everywhere, never a
@@ -242,8 +242,8 @@ report(
 const strugglingKid = scoreMap(AGE, answersFor(AGE, () => "not_yet"));
 report(
   "struggling kid: growing framing only, no negative numbers anywhere",
-  strugglingKid.domains.every((d) => d.position === "growing" || d.position === "not_mapped") &&
-    strugglingKid.domains.every((d) => d.monthsAhead === null),
+  strugglingKid.subjects.every((d) => d.position === "growing" || d.position === "not_mapped") &&
+    strugglingKid.subjects.every((d) => d.monthsAhead === null),
 );
 
 // Determinism: same answers, same map.
@@ -254,19 +254,19 @@ report("determinism: same answers produce the same map", JSON.stringify(again) =
 const TEN = 120;
 const tenKid = scoreMap(
   TEN,
-  answersFor(TEN, (domainId, rungIndex) => {
-    if (domainId === "math") return rungIndex <= 1 ? "easily" : "getting_there";
-    if (domainId === "executive_function") return "not_yet";
-    if (domainId === "self_care") return "getting_there";
+  answersFor(TEN, (subjectId, rungIndex) => {
+    if (subjectId === "math") return rungIndex <= 1 ? "easily" : "getting_there";
+    if (subjectId === "executive_function") return "not_yet";
+    if (subjectId === "self_care") return "getting_there";
     return rungIndex === 0 ? "easily" : null;
   }),
 );
-const tenById = new Map(tenKid.domains.map((d) => [d.domainId, d]));
+const tenById = new Map(tenKid.subjects.map((d) => [d.subjectId, d]));
 report(
   "10yo kid: math ahead, executive function growing, everything scorable",
   tenById.get("math")?.position === "ahead" &&
     tenById.get("executive_function")?.position === "growing" &&
-    tenKid.mappedCount === tenKid.totalDomains,
+    tenKid.mappedCount === tenKid.totalSubjects,
   JSON.stringify([tenById.get("math")?.position, tenById.get("executive_function")?.position, tenKid.mappedCount]),
 );
 
@@ -277,9 +277,9 @@ const FIFTEEN = 180;
 const teenKid = scoreMap(FIFTEEN, answersFor(FIFTEEN, () => "easily"));
 report(
   "15yo kid: strengths cap at +24, plateaued domains read on track, none growing",
-  teenKid.domains.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
-    teenKid.domains.every((d) => (d.monthsAhead ?? 0) <= 24),
-  JSON.stringify(teenKid.domains.map((d) => [d.domainId, d.position, d.monthsAhead])),
+  teenKid.subjects.every((d) => d.exposureBased || d.position === "ahead" || d.position === "on_track") &&
+    teenKid.subjects.every((d) => (d.monthsAhead ?? 0) <= 24),
+  JSON.stringify(teenKid.subjects.map((d) => [d.subjectId, d.position, d.monthsAhead])),
 );
 
 // Golden kid 7: the trust regression (2026-07-08). A 2y3m-old whose parent
@@ -288,7 +288,7 @@ report(
 // the age-scaled cap, the strongest possible claim at 27mo is +9.
 const TODDLER = 27;
 const toddler = scoreMap(TODDLER, answersFor(TODDLER, () => "easily"));
-const toddlerLanguage = toddler.domains.find((d) => d.domainId === "language");
+const toddlerLanguage = toddler.subjects.find((d) => d.subjectId === "language");
 report(
   "27mo trust case: all-easily language reads +9, never +19",
   toddlerLanguage?.position === "ahead" && toddlerLanguage.monthsAhead === 9,
@@ -296,8 +296,8 @@ report(
 );
 report(
   "27mo trust case: no subject claims more than a third of the child's age",
-  toddler.domains.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(TODDLER)),
-  JSON.stringify(toddler.domains.map((d) => [d.domainId, d.monthsAhead])),
+  toddler.subjects.every((d) => (d.monthsAhead ?? 0) <= aheadCapForAge(TODDLER)),
+  JSON.stringify(toddler.subjects.map((d) => [d.subjectId, d.monthsAhead])),
 );
 
 // The proportionality law, swept: at EVERY scored age, the most generous
@@ -307,10 +307,10 @@ report(
   let capOk = true;
   for (let age = 24; age < 204; age += 1) {
     const swept = scoreMap(age, answersFor(age, () => "easily"));
-    for (const d of swept.domains) {
+    for (const d of swept.subjects) {
       if ((d.monthsAhead ?? 0) > aheadCapForAge(age)) {
         capOk = false;
-        failures.push(`age ${age}m ${d.domainId}: +${d.monthsAhead} exceeds cap ${aheadCapForAge(age)}`);
+        failures.push(`age ${age}m ${d.subjectId}: +${d.monthsAhead} exceeds cap ${aheadCapForAge(age)}`);
       }
     }
   }
@@ -324,8 +324,8 @@ report(
 {
   const GIFTED_AGE = 48;
   const gifted = scoreMap(GIFTED_AGE, answersFor(GIFTED_AGE, () => "easily"));
-  const giftedMath = gifted.domains.find((d) => d.domainId === "math");
-  const mathPlan = planQuestions(GIFTED_AGE).find((plan) => plan.domainId === "math")!;
+  const giftedMath = gifted.subjects.find((d) => d.subjectId === "math");
+  const mathPlan = planQuestions(GIFTED_AGE).find((plan) => plan.subjectId === "math")!;
   const highestServed = mathPlan.ladders[mathPlan.ladders.length - 1];
   report(
     "gifted 4yo: math climbs far past the window (6 rungs served, top rung 2y+ above age)",
@@ -342,10 +342,10 @@ report(
   );
   // The evidence line names a skill genuinely past the cap, so the mom of
   // a truly advanced kid SEES it even though the number stays modest.
-  const strongest = gifted.domains
-    .filter((d) => d.domainId === "math")
+  const strongest = gifted.subjects
+    .filter((d) => d.subjectId === "math")
     .map((d) => d.strongestObservedStatement)[0];
-  const strongestItem = MAP_DOMAINS.find((d) => d.id === "math")!.items.find(
+  const strongestItem = MAP_SUBJECTS.find((d) => d.id === "math")!.items.find(
     (item) => item.statement === strongest,
   );
   report(
@@ -359,11 +359,11 @@ report(
   // whose run ends inside the window reads as a measurement, not a floor.
   const modest = scoreMap(
     GIFTED_AGE,
-    answersFor(GIFTED_AGE, (domainId, rungIndex) =>
-      domainId === "math" ? (rungIndex <= 1 ? "easily" : "not_yet") : "not_sure",
+    answersFor(GIFTED_AGE, (subjectId, rungIndex) =>
+      subjectId === "math" ? (rungIndex <= 1 ? "easily" : "not_yet") : "not_sure",
     ),
   );
-  const modestMath = modest.domains.find((d) => d.domainId === "math");
+  const modestMath = modest.subjects.find((d) => d.subjectId === "math");
   report(
     "bracketed kid: an in-window frontier is NOT marked as a floor",
     modestMath?.position === "ahead" && modestMath.beyondScale === false,
@@ -380,9 +380,9 @@ report(
   const struggling = scoreMap(STRUGGLE_AGE, answersFor(STRUGGLE_AGE, () => "not_yet"));
   report(
     "struggling kid: growing everywhere, never a beyondScale flag",
-    struggling.domains.every((d) => !d.beyondScale),
+    struggling.subjects.every((d) => !d.beyondScale),
   );
-  const literacyBase = planQuestions(STRUGGLE_AGE).find((plan) => plan.domainId === "literacy")!.base;
+  const literacyBase = planQuestions(STRUGGLE_AGE).find((plan) => plan.subjectId === "literacy")!.base;
   const walkAnswers: Record<string, MapAnswer> = { [literacyBase.id]: "not_yet" };
   const firstProbe = nextDeepDiveItem("literacy", STRUGGLE_AGE, walkAnswers, 0);
   const probeBelowBase =
@@ -393,7 +393,7 @@ report(
       { itemId: literacyBase.id, answer: "not_yet" },
       { itemId: firstProbe.id, answer: "easily" },
     ]);
-    const lit = rescored.domains.find((d) => d.domainId === "literacy");
+    const lit = rescored.subjects.find((d) => d.subjectId === "literacy");
     honestLine =
       lit?.position === "growing" &&
       lit.strongestObservedStatement === firstProbe.statement &&
@@ -410,7 +410,7 @@ report(
 
 {
   const AGE_10 = 126;
-  const mathBase = planQuestions(AGE_10).find((plan) => plan.domainId === "math")!.base;
+  const mathBase = planQuestions(AGE_10).find((plan) => plan.subjectId === "math")!.base;
   // Struggler: base was "not yet". The next probe must sit BELOW the base
   // anchor (walking down to find the honest starting line).
   const downAnswers: Record<string, MapAnswer> = { [mathBase.id]: "not_yet" };
@@ -447,9 +447,9 @@ report(
 
 {
   let plansOk = true;
-  for (const domain of MAP_DOMAINS) {
+  for (const domain of MAP_SUBJECTS) {
     for (const age of [30, 50, 126, 180]) {
-      const base = planQuestions(age).find((plan) => plan.domainId === domain.id)!.base;
+      const base = planQuestions(age).find((plan) => plan.subjectId === domain.id)!.base;
       const plan = buildFourWeekPlan(domain.id, age, [{ itemId: base.id, answer: "not_yet" }], {
         interests: ["dinosaurs"],
         style: "charlotte_mason",
@@ -482,7 +482,7 @@ report(
       }
     }
   }
-  report(`plan builder: 4 clean weeks for all ${MAP_DOMAINS.length} subjects at 4 ages`, plansOk && failures.every((f) => !f.startsWith("plan ")));
+  report(`plan builder: 4 clean weeks for all ${MAP_SUBJECTS.length} subjects at 4 ages`, plansOk && failures.every((f) => !f.startsWith("plan ")));
 }
 
 // ---------- 5b. The unified month: one weighted plan for the whole child ----------
@@ -503,7 +503,7 @@ report(
   const month = buildMonthPlan(45, [...monthAnswers], { interests: ["trucks"] });
   let monthOk = Boolean(
     month &&
-      month.domainId === MONTH_PLAN_DOMAIN &&
+      month.subjectId === MONTH_PLAN_SUBJECT &&
       month.weeks.length === 4 &&
       month.targets.length >= 2 &&
       month.targets.length <= 3,
@@ -531,10 +531,10 @@ report(
 const before = failures.length;
 for (const scores of [aheadKid, mixedKid, sparseKid, strugglingKid, tenKid, teenKid]) {
   checkCopy("homaNote", homaNote(scores, "Maya"));
-  for (const domain of scores.domains) {
-    const line = domainLine(domain, "Maya");
-    checkCopy(`line.${domain.domainId}`, `${line.badge} ${line.numberLabel} ${line.sentence}`);
-    if (/-\d/.test(line.numberLabel)) failures.push(`line.${domain.domainId}: negative number rendered`);
+  for (const domain of scores.subjects) {
+    const line = subjectLine(domain, "Maya");
+    checkCopy(`line.${domain.subjectId}`, `${line.badge} ${line.numberLabel} ${line.sentence}`);
+    if (/-\d/.test(line.numberLabel)) failures.push(`line.${domain.subjectId}: negative number rendered`);
   }
 }
 report("rendered sentences: no banned words, no em dashes, no negative numbers", failures.length === before);

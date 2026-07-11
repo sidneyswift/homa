@@ -23,7 +23,7 @@ export function WeekBlock({
   week,
   weekNumber,
   childId,
-  domainId,
+  subjectId,
   token,
   initialChecks,
   tone,
@@ -34,7 +34,7 @@ export function WeekBlock({
   /** 1-based, for the "week n of 4" chip. */
   weekNumber: number;
   childId: string;
-  domainId: string;
+  subjectId: string;
   /** The report token, for the storage key + the full-plan link. */
   token: string;
   initialChecks: Record<string, boolean>;
@@ -42,9 +42,9 @@ export function WeekBlock({
   retestDue: boolean;
 }) {
   const { done, toggle } = usePlanChecks({
-    storageKey: planChecksStorageKey(token, domainId),
+    storageKey: planChecksStorageKey(token, subjectId),
     childId,
-    domainId,
+    subjectId,
     initialChecks,
   });
 
@@ -93,7 +93,7 @@ export function WeekBlock({
       </ul>
       <div className="mt-2.5 flex items-center justify-between gap-2">
         <Link
-          href={`/onboarding/r/${token}/plan/${domainId}`}
+          href={`/onboarding/r/${token}/plan/${subjectId}`}
           className="text-[0.72rem] font-semibold text-brand hover:underline"
         >
           full plan

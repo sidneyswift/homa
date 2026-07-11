@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 
 import postgres from "postgres";
 
-import { MAP_BANK_VERSION, MAP_DOMAINS } from "../packages/core/src/index";
+import { MAP_BANK_VERSION, MAP_SUBJECTS } from "../packages/core/src/index";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
@@ -135,7 +135,7 @@ console.log(
 );
 
 let flagged = 0;
-for (const domain of MAP_DOMAINS) {
+for (const domain of MAP_SUBJECTS) {
   console.log(`## ${domain.displayName}\n`);
   console.log("| Item | Anchor (mo) | Observed answers by age bucket | Observed 50% easily |");
   console.log("| --- | --- | --- | --- |");

@@ -6,7 +6,7 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * Typed event registry (MJ-08). Law: no feature merges without its events.
  * Every event name and its props schema is declared here; emitters cannot
  * invent names or shapes. Event props never contain PII (no emails, no names);
- * the PII lives in the domain row the event points at.
+ * the PII lives in the subject row the event points at.
  *
  * Pre-signup web events (waitlist.*) are the only names the public database
  * role may insert; see migration 20260704033725.
@@ -41,7 +41,7 @@ export const EVENT_SCHEMAS = {
   "map.question_answered": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
     answer: z.enum(["easily", "getting_there", "not_yet", "not_sure", "skip"]),
   }),
   "map.context_added": z.object({
@@ -70,7 +70,7 @@ export const EVENT_SCHEMAS = {
   "map.report_generated": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    mapped_domains: z.number().int().min(0),
+    mapped_subjects: z.number().int().min(0),
     observations: z.number().int().min(0),
     bank_version: z.string(),
   }),
@@ -88,18 +88,18 @@ export const EVENT_SCHEMAS = {
   "map.deep_dive_started": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
     mode: z.enum(["parent", "together"]),
   }),
   "map.plan_built": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
   }),
   "map.retest_emailed": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
   }),
   "map.band_ready_emailed": z.object({
     family_id: z.uuid(),
@@ -120,14 +120,14 @@ export const EVENT_SCHEMAS = {
   "map.plan_consented": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
   }),
   // Plan check-offs synced server-side (one event per save; done_count is
   // the running total, so the funnel reads practice volume without PII).
   "map.plan_progress": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    domain: z.string(),
+    subject: z.string(),
     done_count: z.number().int().min(0),
   }),
   // The LLM narrative layer (D8 overturn, 2026-07-06). One event per

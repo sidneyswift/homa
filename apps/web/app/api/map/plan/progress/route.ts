@@ -33,17 +33,17 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
-  const { childId, domainId, checks } = parsed.data;
+  const { childId, subjectId, checks } = parsed.data;
 
   try {
-    const result = await savePlanProgress(family.id, childId, domainId, checks);
+    const result = await savePlanProgress(family.id, childId, subjectId, checks);
     if (!result) {
       return Response.json({ ok: false, reason: "unknown-plan" }, { status: 400 });
     }
     await emitMapEvent("map.plan_progress", {
       family_id: family.id,
       child_id: childId,
-      domain: domainId,
+      subject: subjectId,
       done_count: result.done,
     });
 

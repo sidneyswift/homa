@@ -1,61 +1,62 @@
-// Types
+/**
+ * @homa/taxonomy: the subject → domain → topic skill graph.
+ * Plan: docs/homa-planning/plans/2026-07-10-skill-graph-taxonomy.md.
+ *
+ * Server-side only by intent: the assembled graph is a few MB of data and
+ * must never enter a client bundle (the map bank in @homa/core stays the
+ * client-safe scored spine).
+ */
+
 export type {
-  Topic,
-  TopicType,
-  Dependency,
-  DependencyStrength,
-  Cluster,
+  TopicKind,
+  PrerequisiteStrength,
+  TaxonomyDomain,
+  TaxonomyTopic,
+  TaxonomyPrerequisite,
+  TaxonomyCluster,
+  Curriculum,
   CurriculumStandard,
   CurriculumStandardData,
-  Curriculum,
-  CurriculumStandardsFile,
-  Manifest,
-  ManifestFileEntry,
-  TopicsFile,
-  DependenciesFile,
-  ClustersFile,
 } from "./types.js";
 
-// Topic accessors
 export {
-  getTopicById,
-  getAllTopics,
-  topicsByAge,
-  topicsBySubjectDomain,
-  topicsByInterest,
-  assessmentPromptsForDomain,
+  TAXONOMY_DOMAINS,
+  getTaxonomyDomain,
+  domainsForSubject,
+} from "./domains.js";
+
+export {
+  getTopic,
+  allTopics,
+  topicsForSubject,
+  topicsForDomain,
+  topicsByTeachingAge,
+  assessmentTopics,
+  personalizePrompt,
 } from "./topics.js";
 
-// Domain mapping
 export {
-  homaDomainForTopic,
-  topicsForHomaDomain,
-  MAPPED_HOMA_DOMAINS,
-  UNMAPPED_HOMA_DOMAINS,
-} from "./mapping.js";
-
-// Prerequisite graph
-export {
+  allPrerequisiteEdges,
   prerequisitesOf,
   unlockedBy,
-  allPrerequisites,
-  allUnlocked,
-  pathBetween,
-  topologicalOrder,
+  prerequisiteClosure,
+  unlockClosure,
+  readyTopics,
   bottleneck,
+  teachingOrder,
   hubTopics,
+  type ReadyTopic,
 } from "./graph.js";
 
-// Curriculum standards
-export {
-  getStandard,
-  standardsForTopic,
-  topicsForStandard,
-  standardsCoverage,
-} from "./standards.js";
+export { allClusters, clustersForDomain, clusterSummary } from "./clusters.js";
 
-// Clusters
+export { curricula, getStandard, standardsForTopic } from "./standards.js";
+
 export {
-  clusterSummary,
-  allClustersForDomain,
-} from "./clusters.js";
+  MARBLE_DOMAIN_MAP,
+  marbleDomainKey,
+  topicKindFromMarble,
+  type MarbleDomainTarget,
+} from "./mapping.js";
+
+export { assembleTaxonomy, type AssembledTaxonomy } from "./assemble.js";

@@ -10,9 +10,9 @@
 export interface ReportNarrative {
   /** The note from Homa at the top. */
   note: string;
-  /** One line per subject, keyed by domainId (scored + exposure + not_mapped). */
+  /** One line per subject, keyed by subjectId (scored + exposure + not_mapped). */
   subjects: Record<string, string>;
-  /** Per-subject drawer explainer, keyed by domainId, scored subjects only. */
+  /** Per-subject drawer explainer, keyed by subjectId, scored subjects only. */
   drawers: Record<string, string>;
 }
 

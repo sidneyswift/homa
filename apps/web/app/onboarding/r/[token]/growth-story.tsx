@@ -1,4 +1,4 @@
-import { getMapDomain, type MapScores, type ReportNarrative } from "@homa/core";
+import { getMapSubject, type MapScores, type ReportNarrative } from "@homa/core";
 
 /**
  * The report's archive shape and its movement math (the report's own
@@ -23,11 +23,11 @@ const POSITION_RANK: Record<string, number> = {
 
 export function movementBetween(prev: MapScores, next: MapScores): string[] {
   const lines: string[] = [];
-  for (const current of next.domains) {
+  for (const current of next.subjects) {
     if (current.exposureBased) continue;
-    const previous = prev.domains.find((entry) => entry.domainId === current.domainId);
+    const previous = prev.subjects.find((entry) => entry.subjectId === current.subjectId);
     if (!previous) continue;
-    const name = getMapDomain(current.domainId)?.displayName ?? current.domainId;
+    const name = getMapSubject(current.subjectId)?.displayName ?? current.subjectId;
     if (
       current.monthsAhead !== null &&
       previous.monthsAhead !== null &&

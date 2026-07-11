@@ -12,6 +12,7 @@
   "dependencies": {
     "@chat-adapter/state-memory": "^4.32.0",
     "@homa/core": "workspace:*",
+    "@homa/taxonomy": "workspace:*",
     "@huh-david/bmp-js": "^0.8.5",
     "@sparticuz/chromium": "^149.0.0",
     "@supabase/ssr": "^0.12.0",

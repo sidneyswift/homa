@@ -1,4 +1,4 @@
-import { getMapDomain, type DomainScore } from "@homa/core";
+import { getMapSubject, type SubjectScore } from "@homa/core";
 
 /**
  * The whole-picture chart: one dot per subject on a months-ahead axis,
@@ -26,21 +26,21 @@ const COLORS = {
   sky: "var(--sky-500)",
 } as const;
 
-const POSITION_RANK: Record<DomainScore["position"], number> = {
+const POSITION_RANK: Record<SubjectScore["position"], number> = {
   not_mapped: 0,
   growing: 1,
   on_track: 2,
   ahead: 3,
 };
 
-function dotMonths(score: DomainScore): number {
+function dotMonths(score: SubjectScore): number {
   return score.position === "growing" ? -3 : Math.min(score.monthsAhead ?? 0, 24);
 }
 
 /** The prior dot's months, only when the subject genuinely moved up. */
-function priorMonths(score: DomainScore, prior: DomainScore[] | null): number | null {
+function priorMonths(score: SubjectScore, prior: SubjectScore[] | null): number | null {
   if (!prior) return null;
-  const previous = prior.find((entry) => entry.domainId === score.domainId);
+  const previous = prior.find((entry) => entry.subjectId === score.subjectId);
   if (!previous || previous.position === "not_mapped") return null;
   const monthsImproved =
     score.monthsAhead !== null &&
@@ -51,19 +51,19 @@ function priorMonths(score: DomainScore, prior: DomainScore[] | null): number | 
   return dotMonths(previous);
 }
 
-function rowColor(score: DomainScore): string {
+function rowColor(score: SubjectScore): string {
   if (score.position === "growing") return COLORS.sky;
   return (score.monthsAhead ?? 0) >= 6 ? COLORS.gold : COLORS.sage;
 }
 
-function rowLabel(score: DomainScore): string {
+function rowLabel(score: SubjectScore): string {
   if (score.position === "growing") return "growing";
   const months = score.monthsAhead ?? 0;
   return months > 0 ? `+${months} mo` : "at age";
 }
 
 /** Phone-first layout: subject name above its own track, full-width plot. */
-function StackedChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore[] | null }) {
+function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[] | null }) {
   const WIDTH = 400;
   const PAD_L = 10;
   const PAD_R = 10;
@@ -106,7 +106,7 @@ function StackedChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore
         const top = HEADER + index * ROW_H;
         const labelY = top + 14;
         const cy = top + 33;
-        const domain = getMapDomain(score.domainId);
+        const domain = getMapSubject(score.subjectId);
         const dotX = x(dotMonths(score));
         const color = rowColor(score);
         const label = rowLabel(score);
@@ -116,7 +116,7 @@ function StackedChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore
         // right edge, so "+24 mo" never runs off the canvas.
         const flip = dotX > WIDTH - 64;
         return (
-          <g key={score.domainId}>
+          <g key={score.subjectId}>
             <text
               x={PAD_L}
               y={labelY}
@@ -129,7 +129,7 @@ function StackedChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore
                 strokeLinejoin: "round",
               }}
             >
-              {domain?.displayName ?? score.domainId}
+              {domain?.displayName ?? score.subjectId}
             </text>
             {priorX !== null ? (
               <>
@@ -177,7 +177,7 @@ function StackedChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore
 }
 
 /** The original dense layout: labels in a left column (print one-pager). */
-function WideChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore[] | null }) {
+function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[] | null }) {
   const ROW_H = 34;
   const LABEL_W = 150;
   const VALUE_W = 64;
@@ -217,19 +217,19 @@ function WideChart({ rows, prior }: { rows: DomainScore[]; prior: DomainScore[] 
 
       {rows.map((score, index) => {
         const cy = 34 + index * ROW_H + ROW_H / 2 - 8;
-        const domain = getMapDomain(score.domainId);
+        const domain = getMapSubject(score.subjectId);
         const dotX = x(dotMonths(score));
         const priorM = priorMonths(score, prior);
         const priorX = priorM === null ? null : x(priorM);
         return (
-          <g key={score.domainId}>
+          <g key={score.subjectId}>
             <text
               x={LABEL_W - 10}
               y={cy + 4}
               textAnchor="end"
               style={{ font: "600 12px var(--font-sans)", fill: "var(--text-body)" }}
             >
-              {domain?.displayName ?? score.domainId}
+              {domain?.displayName ?? score.subjectId}
             </text>
             {priorX !== null ? (
               <>
@@ -273,8 +273,8 @@ export function ReportChart({
   prior = null,
   variant = "stacked",
 }: {
-  scores: DomainScore[];
-  prior?: DomainScore[] | null;
+  scores: SubjectScore[];
+  prior?: SubjectScore[] | null;
   /** "stacked" is the phone-first report layout; "wide" the print one. */
   variant?: "stacked" | "wide";
 }) {

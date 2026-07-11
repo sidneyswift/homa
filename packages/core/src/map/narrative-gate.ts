@@ -102,26 +102,26 @@ export function validateNarrative(
 
   const subjectIds = context.expectedSubjects ?? Object.keys(narrative.subjects);
   let subjectRejections = 0;
-  for (const domainId of subjectIds) {
+  for (const subjectId of subjectIds) {
     const problem = pieceProblem(
-      narrative.subjects[domainId],
+      narrative.subjects[subjectId],
       NARRATIVE_LENGTH_CAPS.subject,
       context,
     );
     if (problem) {
-      rejected[`subject.${domainId}`] = problem;
+      rejected[`subject.${subjectId}`] = problem;
       subjectRejections += 1;
     }
   }
 
   const drawerIds = context.expectedDrawers ?? Object.keys(narrative.drawers);
-  for (const domainId of drawerIds) {
+  for (const subjectId of drawerIds) {
     const problem = pieceProblem(
-      narrative.drawers[domainId],
+      narrative.drawers[subjectId],
       NARRATIVE_LENGTH_CAPS.drawer,
       context,
     );
-    if (problem) rejected[`drawer.${domainId}`] = problem;
+    if (problem) rejected[`drawer.${subjectId}`] = problem;
   }
 
   // A report that is half fallback reads worse than a clean template

@@ -41,7 +41,7 @@ export async function POST(request: Request): Promise<Response> {
     await emitMapEvent("map.question_answered", {
       family_id: family.id,
       child_id: parsed.data.childId,
-      domain: saved.domain ?? "unknown",
+      subject: saved.subject ?? "unknown",
       answer: parsed.data.answer,
     });
 

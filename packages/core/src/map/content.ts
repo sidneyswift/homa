@@ -47,7 +47,7 @@ export interface MapItemContent {
   typicalRangeMonths?: readonly [number, number];
 }
 
-export interface MapDomainContent {
+export interface MapSubjectContent {
   id: string;
   displayName: string;
   intro: string;
@@ -185,7 +185,7 @@ export const MAP_SOURCES: Record<string, { label: string; url: string }> = {
   },
 };
 
-export const MAP_DOMAINS: readonly MapDomainContent[] = [
+export const MAP_SUBJECTS: readonly MapSubjectContent[] = [
   {
     id: "math",
     displayName: "Math",

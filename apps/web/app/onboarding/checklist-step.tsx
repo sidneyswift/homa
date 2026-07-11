@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import { getMapDomain, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
+import { getMapSubject, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
 import { buildQueue } from "./question-queue";
@@ -86,7 +86,7 @@ export function ChecklistStep({
   const [sittingHistory, setSittingHistory] = useState<string[]>([]);
   /** The domain of the last question answered; a different current domain
    * means a fresh subject intro should show. */
-  const [lastDomainId, setLastDomainId] = useState<string | null>(null);
+  const [lastSubjectId, setLastDomainId] = useState<string | null>(null);
   /** Whether the last question answered was itself a ladder rung: the
    * gold "one more, since that was easy" line should only greet the
    * FIRST rung of a climb, not repeat itself on every rung after
@@ -98,20 +98,20 @@ export function ChecklistStep({
 
   const queue = buildQueue(plans, answers);
   const current = queue[0];
-  const domainsDone = plans.length - new Set(queue.map((entry) => entry.domainId)).size;
-  const domain = current ? getMapDomain(current.domainId) : null;
-  const isNewDomain = current ? lastDomainId !== current.domainId : false;
+  const subjectsDone = plans.length - new Set(queue.map((entry) => entry.subjectId)).size;
+  const domain = current ? getMapSubject(current.subjectId) : null;
+  const isNewSubject = current ? lastSubjectId !== current.subjectId : false;
   const isFirstLadderRung = current ? current.isLadder && !lastWasLadder : false;
 
   const minutesLeft = Math.max(1, Math.ceil((queue.length * SECONDS_PER_SUBJECT) / 60));
   const timeLabel = queue.length <= 1 ? "almost done" : `about ${minutesLeft} min left`;
 
   const railSubjects: RailSubject[] = plans.map((plan) => {
-    const inQueue = queue.some((entry) => entry.domainId === plan.domainId);
+    const inQueue = queue.some((entry) => entry.subjectId === plan.subjectId);
     return {
-      id: plan.domainId,
-      name: getMapDomain(plan.domainId)?.displayName ?? plan.domainId,
-      status: !inQueue ? "done" : plan.domainId === current?.domainId ? "current" : "upcoming",
+      id: plan.subjectId,
+      name: getMapSubject(plan.subjectId)?.displayName ?? plan.subjectId,
+      status: !inQueue ? "done" : plan.subjectId === current?.subjectId ? "current" : "upcoming",
     };
   });
 
@@ -138,7 +138,7 @@ export function ChecklistStep({
 
   function commitAnswer(answer: MapAnswer) {
     if (!current) return;
-    setLastDomainId(current.domainId);
+    setLastDomainId(current.subjectId);
     setLastWasLadder(current.isLadder);
     setEasilyStreak(answer === "easily" ? easilyStreak + 1 : 0);
     setSittingHistory((history) => [...history, current.item.id]);
@@ -207,12 +207,12 @@ export function ChecklistStep({
   // EVERY rung of a climb, so a streak of "easily" answers in one
   // subject repeated the identical line two or three times in a row.
   // isFirstLadderRung narrows it to just the first surprise; later rungs
-  // in the same climb fall through to isNewDomain (false, same subject),
+  // in the same climb fall through to isNewSubject (false, same subject),
   // so the kicker slot goes quiet and the question stands on its own.
   const kicker =
     isFirstLadderRung
       ? { text: "One more, since that was easy\u2026", tone: "gold" as const }
-      : isNewDomain
+      : isNewSubject
         ? { text: domain.intro, tone: "muted" as const }
         : null;
 
@@ -239,7 +239,7 @@ export function ChecklistStep({
         <div className="mt-2 h-1 overflow-hidden rounded-pill bg-border-subtle lg:hidden" aria-hidden="true">
           <div
             className="h-full rounded-pill bg-brand transition-[width] duration-(--dur-base) ease-out"
-            style={{ width: `${Math.round((domainsDone / plans.length) * 100)}%` }}
+            style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
           />
         </div>
 

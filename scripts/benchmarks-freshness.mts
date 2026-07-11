@@ -14,7 +14,7 @@
  * mismatch.
  */
 
-import { MAP_DOMAINS, MAP_SOURCES } from "../packages/core/src/index";
+import { MAP_SUBJECTS, MAP_SOURCES } from "../packages/core/src/index";
 
 /**
  * When each source key was last verified against its live document, and
@@ -132,7 +132,7 @@ for (const result of results) {
 
 let itemCount = 0;
 let codedCount = 0;
-for (const domain of MAP_DOMAINS) {
+for (const domain of MAP_SUBJECTS) {
   for (const item of domain.items) {
     itemCount += 1;
     if ((item.standards ?? []).length > 0) codedCount += 1;

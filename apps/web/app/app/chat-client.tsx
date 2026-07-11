@@ -1,52 +1,67 @@
 "use client";
 
 import { emitEvent } from "@homa/core";
-import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp, Sparkles, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
+import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import {
+  archiveMessages,
+  prepareChat,
+  pruneMessageTimes,
+  saveChat,
+  stampMessageTimes,
+  type ArchivedMessage,
+} from "./chat-storage";
 import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
+import { SlashComposer } from "./slash-composer";
+import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 
 /**
- * The chat surface (trimmed M1-04), the main column inside the /app
- * frame: the sidebar and phone top bar come from the layout, so this
- * component fills the rest of the viewport (100dvh minus the top bar's
- * h-14 on phones, full height beside the sidebar on desktop) and keeps
- * the composer pinned to the bottom while the transcript scrolls inside.
- * useEveAgent drives session state against the same-origin eve routes;
- * auth rides as a bearer token resolved fresh per request from the
- * Supabase browser client. Homa's per-family context (family, children,
- * memories) is injected server-side on every turn by
- * agent/instructions/family-context.ts, so even a brand-new session starts
- * already knowing the family.
+ * The chat surface, the main column inside the /app frame: the sidebar
+ * and phone top bar come from the layout, so this component fills the
+ * rest of the viewport and keeps the composer pinned to the bottom while
+ * the transcript scrolls inside. useEveAgent drives session state
+ * against the same-origin eve routes; auth rides as a bearer token
+ * resolved fresh per request. Homa's per-family context (family,
+ * children, memories) is injected server-side on every turn by
+ * agent/instructions/family-context.ts, so even a brand-new session
+ * starts already knowing the family.
  *
- * The transcript + session cursor persist to localStorage per user (the
- * eve-documented resumable-sessions pattern); M1-02's Postgres conversations
- * table replaces this. chat.turn_completed events emit per journeys/06 §4.4
- * under the caller's own token (events policy, migration #13).
+ * One thread, fresh mornings (founder direction 2026-07-10 evening):
+ * the transcript is ONE continuous history under day separators (the
+ * Slack-channel reading of the one chat), while the model session
+ * rotates at the first visit after 4am local (chat-storage.ts). Old
+ * days stay scrollable above; the morning lands on a clean "today" with
+ * the suggestion chips back. "New chat" is the same move done manually:
+ * it archives the visible conversation and starts a fresh session, it
+ * no longer erases anything. The durable record is Postgres
+ * (conversation_messages via the persist hook + recall); localStorage
+ * is the render cache (M1-02 replaces it as the render source).
+ *
+ * Never stuck (founder bug report 2026-07-10 night, phone testing:
+ * "it kept not letting me respond"): a phone that locks or backgrounds
+ * mid-turn kills the NDJSON stream, and a half-open connection can hang
+ * without ever erroring, which left status "streaming" and the send
+ * button disabled forever, with no busy label once the last text part
+ * looked complete. Three defenses, all client-side (the turn itself is
+ * durable server-side, and the resumable stream replays missed events
+ * from the session's streamIndex on the next send):
+ *   1. the send button becomes a Stop button while Homa works, so she
+ *      can always take the wheel back;
+ *   2. returning to a visible tab with a stream that has been silent
+ *      past the stall window quietly aborts the dead stream;
+ *   3. a watchdog does the same for streams that die without the tab
+ *      ever hiding (radio handoffs), sized generously past the longest
+ *      normal tool run.
  */
 
-// agent.ts pins anthropic/claude-sonnet-5: the mid tier in journeys/06 terms.
+// agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
-
-interface SavedChat {
-  events?: readonly HandleMessageStreamEvent[];
-  session?: SessionState;
-}
-
-function loadSavedChat(storageKey: string): SavedChat {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    return raw ? (JSON.parse(raw) as SavedChat) : {};
-  } catch {
-    return {};
-  }
-}
 
 const SUGGESTIONS = [
   "What should we work on this week?",
@@ -60,6 +75,8 @@ export function ChatClient({
   parentName,
   focusChildName,
   initialDraft,
+  kids,
+  slashSkills,
 }: {
   storageKey: string;
   familyId: string | null;
@@ -71,10 +88,22 @@ export function ChatClient({
   /** Pre-fills the composer (the journal email's deep link); the parent
    * still edits and sends herself, nothing auto-sends. */
   initialDraft?: string;
+  /** The composer's "/" menu: kids to mention + the advertised skills. */
+  kids?: { id: string; name: string }[];
+  slashSkills?: SlashSkillItem[];
 }) {
   const supabase = createSupabaseBrowserClient();
-  const [saved] = useState<SavedChat>(() => loadSavedChat(storageKey));
+  // Load + rotation decision, once per mount (fresh morning = fresh
+  // session; the old session's messages fold into the archive).
+  const [prepared] = useState(() => prepareChat(storageKey));
+  const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
+  // Message id -> arrival time. State (not a ref) because the transcript
+  // grouping reads it during render.
+  const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
+    ...prepared.messageTimes,
+  }));
   const messagesRef = useRef<readonly EveMessage[]>([]);
+  const archivedRef = useRef(archived);
   const reportedErrorRef = useRef<Error | null>(null);
 
   async function emitTurnCompleted(
@@ -109,17 +138,25 @@ export function ChatClient({
         return data.session?.access_token ?? "";
       },
     },
-    initialEvents: saved.events ?? [],
-    initialSession: saved.session,
+    initialEvents: prepared.initialEvents,
+    initialSession: prepared.initialSession,
     onFinish(snapshot) {
-      try {
-        window.localStorage.setItem(
-          storageKey,
-          JSON.stringify({ events: snapshot.events, session: snapshot.session }),
-        );
-      } catch {
-        // Storage full or blocked: the durable session still lives server-side.
-      }
+      // Stamp this turn's new message ids with the clock (the only time
+      // source the transcript has; eve events carry sequence numbers,
+      // not times), then persist. Callbacks refresh every render (eve's
+      // hook contract), so this closure's liveTimes is current.
+      const stamped = pruneMessageTimes(
+        stampMessageTimes(liveTimes, snapshot.data.messages),
+        snapshot.data.messages,
+      );
+      setLiveTimes(stamped);
+      saveChat(storageKey, {
+        archived: archivedRef.current,
+        events: snapshot.events,
+        session: snapshot.session,
+        messageTimes: stamped,
+        lastActivityAt: Date.now(),
+      });
       void emitTurnCompleted("ok");
       // The post-turn review trigger (M2-13): fire-and-forget; the server
       // decides whether enough new conversation accumulated to review.
@@ -138,6 +175,7 @@ export function ChatClient({
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const firstScrollDoneRef = useRef(false);
   const busy = agent.status === "submitted" || agent.status === "streaming";
 
   // Elapsed seconds beside the busy label (the reference transcript's
@@ -158,6 +196,10 @@ export function ChatClient({
   }, [agent.data.messages]);
 
   useEffect(() => {
+    archivedRef.current = archived;
+  }, [archived]);
+
+  useEffect(() => {
     if (agent.error && agent.error !== reportedErrorRef.current) {
       reportedErrorRef.current = agent.error;
       void emitTurnCompleted("error", "turn_failed");
@@ -166,18 +208,48 @@ export function ChatClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.error]);
 
+  /** The manual fresh start: archive what is on screen, rotate the
+   *  session, keep every word visible above. Nothing is erased. */
   function startNewChat() {
-    try {
-      window.localStorage.removeItem(storageKey);
-    } catch {
-      // Best effort; reset() clears the in-memory state regardless.
-    }
+    const nextArchived = [
+      ...archivedRef.current,
+      ...archiveMessages(
+        agent.data.messages,
+        stampMessageTimes(liveTimes, agent.data.messages),
+      ),
+    ];
+    setArchived(nextArchived);
+    archivedRef.current = nextArchived;
+    setLiveTimes({});
+    saveChat(storageKey, {
+      archived: nextArchived,
+      events: [],
+      session: undefined,
+      messageTimes: {},
+      lastActivityAt: Date.now(),
+    });
     agent.reset();
   }
 
+  const transcript = buildTranscript({
+    archived,
+    live: agent.data.messages,
+    liveTimes,
+  });
+  const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // The chips return whenever a session has no words in it yet: the
+  // first run, a fresh morning over yesterday's scrollback, and right
+  // after "New chat".
+  const showSuggestions = agent.data.messages.length === 0 && !busy;
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [agent.data.messages]);
+    // First paint lands at the bottom instantly (yesterday above the
+    // fold, today in view); later updates glide.
+    bottomRef.current?.scrollIntoView({
+      behavior: firstScrollDoneRef.current ? "smooth" : "auto",
+    });
+    firstScrollDoneRef.current = true;
+  }, [agent.data.messages, archived]);
 
   function sendMessage(text: string) {
     const message = text.trim();
@@ -192,12 +264,12 @@ export function ChatClient({
     // 3.5rem is the frame's phone top bar (h-14); on desktop the sidebar
     // sits beside this column, so the full viewport height is ours.
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
-      {agent.data.messages.length > 0 ? (
+      {hasAnyMessages ? (
         <header className="flex justify-end border-b border-border-subtle bg-page px-4 py-2.5">
           <button
             type="button"
             onClick={startNewChat}
-            disabled={busy}
+            disabled={busy || agent.data.messages.length === 0}
             className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand disabled:opacity-60"
           >
             New chat
@@ -208,7 +280,7 @@ export function ChatClient({
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
-        {agent.data.messages.length === 0 ? (
+        {!hasAnyMessages ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
@@ -230,9 +302,29 @@ export function ChatClient({
             </div>
           </div>
         ) : (
-          agent.data.messages.map((message) => (
-            <MessageView key={message.id} message={message} />
-          ))
+          <>
+            {transcript.map((item) =>
+              item.kind === "separator" ? (
+                <DaySeparator key={item.key} label={item.label} />
+              ) : (
+                <MessageView key={item.key} message={item.message} />
+              ),
+            )}
+            {showSuggestions ? (
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                {SUGGESTIONS.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => sendMessage(suggestion)}
+                    className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </>
         )}
         {busy && busyLabel(agent.data.messages) ? (
           // The mark bobs while Homa thinks, so the wait is never a blank
@@ -290,11 +382,12 @@ export function ChatClient({
           }}
         >
           <Sparkles size={20} className="shrink-0 text-brand" aria-hidden="true" />
-          <input
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+          <SlashComposer
+            kids={kids ?? []}
+            skills={slashSkills ?? []}
+            draft={draft}
+            onDraftChange={setDraft}
             placeholder="Tell Homa about your day…"
-            className="min-h-10 min-w-0 flex-1 bg-transparent text-base text-strong outline-none placeholder:text-subtle"
           />
           <button
             type="submit"
@@ -306,6 +399,20 @@ export function ChatClient({
           </button>
         </form>
       </footer>
+    </div>
+  );
+}
+
+/** The Slack-style date rule: a quiet centered label between days, so
+ *  the past reads as the past without a card or a banner. */
+function DaySeparator({ label }: { label: string }) {
+  return (
+    <div role="separator" aria-label={label} className="flex items-center gap-3">
+      <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
+      <span aria-hidden="true" className="text-xs font-semibold text-subtle">
+        {label}
+      </span>
+      <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
     </div>
   );
 }

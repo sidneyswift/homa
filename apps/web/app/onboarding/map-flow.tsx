@@ -125,7 +125,7 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
   const [welcomeBack, setWelcomeBack] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
-  const [deepDiveDomain, setDeepDiveDomain] = useState<string | null>(null);
+  const [deepDiveSubject, setDeepDiveDomain] = useState<string | null>(null);
   /** Ids of kids whose questions finished this sitting, reports pending,
    * in the order they finished. Scoring builds all of them in one beat and
    * lands on the first one's report. */
@@ -302,11 +302,11 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       const params = new URLSearchParams(window.location.search);
       const deepDive = params.get("dd");
       if (deepDive) {
-        const [childId, domainId] = deepDive.split(".");
+        const [childId, subjectId] = deepDive.split(".");
         const target = restored.children.find((child) => child.id === childId && child.inRange);
-        if (target && domainId) {
+        if (target && subjectId) {
           setActiveChildId(target.id);
-          setDeepDiveDomain(domainId);
+          setDeepDiveDomain(subjectId);
           setPhase("deepdive");
           return;
         }
@@ -541,11 +541,11 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
       }
     }
 
-    if (phase === "deepdive" && activeChild && deepDiveDomain) {
+    if (phase === "deepdive" && activeChild && deepDiveSubject) {
       return (
         <DeepDiveStep
           child={activeChild}
-          domainId={deepDiveDomain}
+          subjectId={deepDiveSubject}
           onComplete={() => setPhase("scoring")}
           onExit={() => {
             void (async () => {
@@ -574,8 +574,8 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           !reportQueue.includes(child.id) &&
           isChecklistComplete(child),
       );
-      const kids = deepDiveDomain ? [activeChild] : [...queued, ...alsoFinished];
-      return <ScoringStep kids={kids.length > 0 ? kids : [activeChild]} planDomain={deepDiveDomain} />;
+      const kids = deepDiveSubject ? [activeChild] : [...queued, ...alsoFinished];
+      return <ScoringStep kids={kids.length > 0 ? kids : [activeChild]} planSubject={deepDiveSubject} />;
     }
 
     return (

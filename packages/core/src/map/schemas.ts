@@ -161,7 +161,7 @@ export type MapReportCorrection = z.infer<typeof mapReportCorrectionSchema>;
  * client sends the whole checks map, keyed "week.activityIndex"). */
 export const mapPlanProgressSchema = z.object({
   childId: z.uuid(),
-  domainId: z.string().min(1).max(40),
+  subjectId: z.string().min(1).max(40),
   checks: z.record(z.string().regex(/^[1-4]\.\d{1,2}$/), z.boolean()),
 });
 export type MapPlanProgress = z.infer<typeof mapPlanProgressSchema>;
@@ -170,7 +170,7 @@ export type MapPlanProgress = z.infer<typeof mapPlanProgressSchema>;
  * doctrine requires before a retest email may ever be armed. */
 export const mapPlanConsentSchema = z.object({
   childId: z.uuid(),
-  domainId: z.string().min(1).max(40),
+  subjectId: z.string().min(1).max(40),
 });
 export type MapPlanConsent = z.infer<typeof mapPlanConsentSchema>;
 

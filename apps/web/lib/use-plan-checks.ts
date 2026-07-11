@@ -42,12 +42,12 @@ const SYNC_DEBOUNCE_MS = 900;
 export function usePlanChecks({
   storageKey,
   childId,
-  domainId,
+  subjectId,
   initialChecks = {},
 }: {
   storageKey: string;
   childId: string;
-  domainId: string;
+  subjectId: string;
   /** The plan row's synced checks: server truth, merged under local. */
   initialChecks?: Record<string, boolean>;
 }): { done: Record<string, boolean>; toggle: (id: string) => void } {
@@ -78,7 +78,7 @@ export function usePlanChecks({
       void fetch("/api/map/plan/progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId, domainId, checks: next }),
+        body: JSON.stringify({ childId, subjectId, checks: next }),
       }).catch(() => undefined);
     }, SYNC_DEBOUNCE_MS);
   }
@@ -99,6 +99,6 @@ export function usePlanChecks({
 
 /** The one canonical localStorage key for a plan's checks, shared by
  * every surface that renders them. */
-export function planChecksStorageKey(token: string, domainId: string): string {
-  return `homa-plan-${token}-${domainId}`;
+export function planChecksStorageKey(token: string, subjectId: string): string {
+  return `homa-plan-${token}-${subjectId}`;
 }

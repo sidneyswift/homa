@@ -1,9 +1,9 @@
 import {
   ageInMonths,
   ageLabel,
-  domainLine,
+  subjectLine,
   GENDERED_PRONOUNS,
-  getMapDomain,
+  getMapSubject,
   growingActivityFor,
   type MapAnswer,
   type MapScores,
@@ -57,7 +57,7 @@ export interface ReportFacts {
   whatsWorking: Record<string, string>;
   observationCount: number;
   mappedCount: number;
-  totalDomains: number;
+  totalSubjects: number;
   /** Movement lines computed by code from report history, ready to quote. */
   movement: string[];
   /** Practice lines computed by code from the plans' synced check-offs
@@ -110,8 +110,8 @@ export interface ReportFactsInput {
   parentFirstName: string | null;
   interests: string[];
   helpWith: string[];
-  /** context.whatsWorking bag, keyed by domainId. */
-  whatsWorkingByDomain: Record<string, string>;
+  /** context.whatsWorking bag, keyed by subjectId. */
+  whatsWorkingBySubject: Record<string, string>;
   scores: MapScores;
   answers: Array<{ itemId: string; answer: MapAnswer }>;
   history: Array<{ scores: MapScores; generated_at: string }>;
@@ -131,11 +131,11 @@ function movementLines(scores: MapScores, history: ReportFactsInput["history"]):
     day: "numeric",
   });
   const lines: string[] = [];
-  for (const current of scores.domains) {
+  for (const current of scores.subjects) {
     if (current.exposureBased) continue;
-    const previous = prior.scores.domains.find((entry) => entry.domainId === current.domainId);
+    const previous = prior.scores.subjects.find((entry) => entry.subjectId === current.subjectId);
     if (!previous) continue;
-    const subjectName = getMapDomain(current.domainId)?.displayName ?? current.domainId;
+    const subjectName = getMapSubject(current.subjectId)?.displayName ?? current.subjectId;
     if (
       current.monthsAhead !== null &&
       previous.monthsAhead !== null &&
@@ -156,7 +156,7 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
 
   const askedByDomain = new Map<string, SubjectFacts["asked"]>();
   for (const entry of input.answers) {
-    const domain = getMapDomain(entry.itemId.split(".")[0]);
+    const domain = getMapSubject(entry.itemId.split(".")[0]);
     if (!domain) continue;
     const item = domain.items.find((candidate) => candidate.id === entry.itemId);
     if (!item) continue;
@@ -169,14 +169,14 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
     askedByDomain.set(domain.id, list);
   }
 
-  const subjects: SubjectFacts[] = input.scores.domains.map((score) => {
-    const domain = getMapDomain(score.domainId);
-    const line = domainLine(score, input.childName);
+  const subjects: SubjectFacts[] = input.scores.subjects.map((score) => {
+    const domain = getMapSubject(score.subjectId);
+    const line = subjectLine(score, input.childName);
     const activity =
       domain && score.position === "growing" ? growingActivityFor(domain, months) : null;
     return {
-      subjectId: score.domainId,
-      subjectName: domain?.displayName ?? score.domainId,
+      subjectId: score.subjectId,
+      subjectName: domain?.displayName ?? score.subjectId,
       position: score.position,
       badge: line.badge,
       monthsAhead: score.monthsAhead,
@@ -185,15 +185,15 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
       observations: score.observations,
       confirmedSkill: score.strongestObservedStatement,
       nextStep: score.frontierStatement,
-      asked: askedByDomain.get(score.domainId) ?? [],
+      asked: askedByDomain.get(score.subjectId) ?? [],
       growingActivity: activity,
     };
   });
 
   const whatsWorking: Record<string, string> = {};
-  for (const [domainId, note] of Object.entries(input.whatsWorkingByDomain)) {
+  for (const [subjectId, note] of Object.entries(input.whatsWorkingBySubject)) {
     if (typeof note !== "string" || note.trim().length === 0) continue;
-    const subjectName = getMapDomain(domainId)?.displayName ?? domainId;
+    const subjectName = getMapSubject(subjectId)?.displayName ?? subjectId;
     whatsWorking[subjectName] = note.trim();
   }
 
@@ -230,7 +230,7 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
     whatsWorking,
     observationCount: input.scores.observationCount,
     mappedCount: input.scores.mappedCount,
-    totalDomains: input.scores.totalDomains,
+    totalSubjects: input.scores.totalSubjects,
     movement: movementLines(input.scores, input.history),
     practice,
     lastLetter,

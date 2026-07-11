@@ -1,5 +1,5 @@
 import { MONTHS_AHEAD_CAP } from "./bands";
-import { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent } from "./content";
+import { MAP_SUBJECTS, MAP_SOURCES, cdcChecklistUrl, type MapSubjectContent } from "./content";
 
 /**
  * The map question bank: types, selection ladder, and lookups over the
@@ -32,7 +32,7 @@ export interface MapItem {
   typicalRangeMonths?: readonly [number, number];
 }
 
-export interface MapDomain {
+export interface MapSubject {
   id: string;
   displayName: string;
   /** One warm line shown when the domain's first question appears. */
@@ -54,7 +54,7 @@ export interface MapDomain {
 
 /** The right growing activity for the child's age (older variant from ~8y). */
 export function growingActivityFor(
-  domain: MapDomain,
+  domain: MapSubject,
   ageMonths: number,
 ): { title: string; description: string } {
   if (ageMonths >= 96 && domain.growingActivityOlder) return domain.growingActivityOlder;
@@ -75,7 +75,7 @@ interface AnsweredLookup {
  * begin?" walks DOWN to find the real starting line; strong kids walk UP
  * past the report's two-rung cap).
  */
-function probeMonths(domain: MapDomain, ageMonths: number, answers: AnsweredLookup): number {
+function probeMonths(domain: MapSubject, ageMonths: number, answers: AnsweredLookup): number {
   let reached: number | null = null;
   let ceiling: number | null = null;
   for (const item of domain.items) {
@@ -101,12 +101,12 @@ function probeMonths(domain: MapDomain, ageMonths: number, answers: AnsweredLook
  * the main checklist's queue.
  */
 export function nextDeepDiveItem(
-  domainId: string,
+  subjectId: string,
   ageMonths: number,
   answers: AnsweredLookup,
   answeredThisSitting: number,
 ): MapItem | null {
-  const domain = getMapDomain(domainId);
+  const domain = getMapSubject(subjectId);
   if (!domain || answeredThisSitting >= DEEP_DIVE_CAP) return null;
   const unanswered = domain.items.filter((item) => answers[item.id] === undefined);
   if (unanswered.length === 0) return null;
@@ -136,11 +136,11 @@ export interface LadderRung {
  * anchor, within the ahead cap. Pure display data; scoring never reads it.
  */
 export function ladderRungs(
-  domainId: string,
+  subjectId: string,
   ageMonths: number,
   answers: AnsweredLookup,
 ): LadderRung[] {
-  const domain = getMapDomain(domainId);
+  const domain = getMapSubject(subjectId);
   if (!domain) return [];
   const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
 
@@ -181,21 +181,21 @@ export function ladderRungs(
   return rungs;
 }
 
-export { MAP_DOMAINS, MAP_SOURCES, cdcChecklistUrl, type MapDomainContent };
+export { MAP_SUBJECTS, MAP_SOURCES, cdcChecklistUrl, type MapSubjectContent };
 
-const itemIndex = new Map<string, { domain: MapDomain; item: MapItem }>();
-for (const domain of MAP_DOMAINS) {
+const itemIndex = new Map<string, { subject: MapSubject; item: MapItem }>();
+for (const domain of MAP_SUBJECTS) {
   for (const item of domain.items) {
-    itemIndex.set(item.id, { domain, item });
+    itemIndex.set(item.id, { subject: domain, item });
   }
 }
 
-export function getMapItem(itemId: string): { domain: MapDomain; item: MapItem } | undefined {
+export function getMapItem(itemId: string): { subject: MapSubject; item: MapItem } | undefined {
   return itemIndex.get(itemId);
 }
 
-export function getMapDomain(domainId: string): MapDomain | undefined {
-  return MAP_DOMAINS.find((domain) => domain.id === domainId);
+export function getMapSubject(subjectId: string): MapSubject | undefined {
+  return MAP_SUBJECTS.find((domain) => domain.id === subjectId);
 }
 
 /** At most this many rungs above the base per non-core domain: two rungs
@@ -213,7 +213,7 @@ export const MAX_LADDER_RUNGS = 2;
  * number still caps at aheadCapForAge; the extra rungs feed the receipts,
  * the evidence lines, and the plan's starting line. */
 export const CORE_LADDER_RUNGS = 6;
-export const CORE_DOMAIN_IDS: readonly string[] = [
+export const CORE_SUBJECT_IDS: readonly string[] = [
   "math",
   "literacy",
   "phonics",
@@ -232,7 +232,7 @@ export const CORE_DOMAIN_IDS: readonly string[] = [
  * everyone else answers exactly one question per domain.
  */
 export interface MapQuestionPlan {
-  domainId: string;
+  subjectId: string;
   base: MapItem;
   /** Ascending rungs above the base. */
   ladders: MapItem[];
@@ -240,11 +240,11 @@ export interface MapQuestionPlan {
 
 export function planQuestions(ageMonths: number): MapQuestionPlan[] {
   const plans: MapQuestionPlan[] = [];
-  for (const domain of MAP_DOMAINS) {
+  for (const domain of MAP_SUBJECTS) {
     const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
     const atOrBelow = sorted.filter((item) => item.typicalMonths <= ageMonths);
     const base = atOrBelow.length > 0 ? atOrBelow[atOrBelow.length - 1] : sorted[0];
-    const core = CORE_DOMAIN_IDS.includes(domain.id);
+    const core = CORE_SUBJECT_IDS.includes(domain.id);
     const ladders = sorted
       .filter(
         (item) =>
@@ -252,7 +252,7 @@ export function planQuestions(ageMonths: number): MapQuestionPlan[] {
           (core || item.typicalMonths <= ageMonths + MONTHS_AHEAD_CAP),
       )
       .slice(0, core ? CORE_LADDER_RUNGS : MAX_LADDER_RUNGS);
-    plans.push({ domainId: domain.id, base, ladders });
+    plans.push({ subjectId: domain.id, base, ladders });
   }
   return plans;
 }

@@ -1,23 +1,23 @@
 import Link from "next/link";
 
-import { ageLabel } from "@homa/core";
-
 import type { UpNextItem } from "../../lib/dashboard";
 import { Logo } from "../brand/Logo";
 import { AccountMenu } from "./account-menu";
-import { ContextSwitcher } from "./context-switcher";
+import { ViewingRows } from "./context-switcher";
 import { SidebarNav } from "./sidebar-nav";
 
 /**
  * The app's left rail, ported from the design system's web-app template
  * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
- * card, nav, an "up next" box, the kids list, and the account footer
- * (AccountMenu: the name row opens Settings and Sign out). Rendered once
- * by the /app layout, so it stays mounted while pages change; nav links
- * only to surfaces that exist (the library row joins when that page
- * lands). SidebarContent is the shared inside: the desktop <aside> here
- * and the phone drawer (mobile-nav.tsx) both render it, so the two never
- * drift apart.
+ * card, nav, an "up next" box, the viewing rows (the kit's "kid
+ * switcher"; founder ruling 2026-07-10 merged the old "My kids" link
+ * list into it, two kid lists in one rail was one too many), and the
+ * account footer (AccountMenu: the name row opens Settings and Sign
+ * out). Rendered once by the /app layout, so it stays mounted while
+ * pages change; nav links only to surfaces that exist (the library row
+ * joins when that page lands). SidebarContent is the shared inside: the
+ * desktop <aside> here and the phone drawer (mobile-nav.tsx) both render
+ * it, so the two never drift apart.
  */
 
 export interface SidebarKid {
@@ -85,10 +85,6 @@ export function SidebarContent({
 }: SidebarProps) {
   return (
     <>
-      {/* Who am I viewing: family or one kid. Multi-kid families only;
-          the switcher renders nothing when there is nothing to switch. */}
-      <ContextSwitcher kids={kids} selected={viewContext} variant="rail" />
-
       <SidebarNav />
 
       <div className="mt-6 rounded-lg bg-page px-3.5 py-3.5">
@@ -129,37 +125,9 @@ export function SidebarContent({
         </ul>
       </div>
 
-      {kids.length > 0 ? (
-        <div className="mt-6 px-1">
-          <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-subtle">
-            My kids
-          </p>
-          <ul className="mt-2 flex flex-col gap-1">
-            {kids.map((kid, index) => {
-              const [bg, ink] = avatarTone(index);
-              return (
-                <li key={kid.id}>
-                  <Link
-                    href={`/app/kids/${kid.id}`}
-                    className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
-                  >
-                    <span
-                      className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                      style={{ background: bg, color: ink }}
-                    >
-                      {kid.name.charAt(0)}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold text-body">{kid.name}</span>
-                      <span className="block text-[0.72rem] text-subtle">{ageLabel(kid.ageMonths)}</span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
+      {/* The one kid list: switcher rows for multi-kid families, a plain
+          kid-page link for single-kid ones (see ViewingRows). */}
+      <ViewingRows kids={kids} selected={viewContext} />
 
       <AccountMenu parentName={parentName} familyName={familyName} avatarUrl={avatarUrl} />
     </>

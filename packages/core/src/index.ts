@@ -34,24 +34,24 @@ export {
 } from "./map/bands";
 
 export {
-  CORE_DOMAIN_IDS,
+  CORE_SUBJECT_IDS,
   CORE_LADDER_RUNGS,
   DEEP_DIVE_CAP,
-  getMapDomain,
+  getMapSubject,
   getMapItem,
   MAX_LADDER_RUNGS,
   growingActivityFor,
   ladderRungs,
   MAP_ANSWERS,
   MAP_BANK_VERSION,
-  MAP_DOMAINS,
+  MAP_SUBJECTS,
   MAP_SOURCES,
   cdcChecklistUrl,
   nextDeepDiveItem,
   planQuestions,
   type LadderRung,
   type MapAnswer,
-  type MapDomain,
+  type MapSubject,
   type MapItem,
   type MapQuestionPlan,
 } from "./map/bank";
@@ -63,7 +63,7 @@ export { reportStaleness, type ReportStaleness } from "./map/staleness";
 export {
   buildFourWeekPlan,
   buildMonthPlan,
-  MONTH_PLAN_DOMAIN,
+  MONTH_PLAN_SUBJECT,
   type FourWeekPlan,
   type PlanContext,
   type PlanWeek,
@@ -73,23 +73,24 @@ export {
   AHEAD_THRESHOLD_MONTHS,
   maxQuestionsForAge,
   scoreMap,
-  type DomainScore,
+  type SubjectScore,
   type MapAnswerInput,
   type MapPosition,
   type MapScores,
 } from "./map/scoring";
 
 export {
-  domainLine,
+  subjectLine,
   homaNote,
   noteGreeting,
   notePlanSentence,
   reportEmailPreview,
   reportEmailSubject,
-  type DomainLine,
+  type SubjectLine,
 } from "./map/sentences";
 
 export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
+export { BANK_ITEM_DOMAINS, domainForBankItem } from "./map/item-domains";
 
 export type {
   Curriculum,

@@ -52,12 +52,12 @@ const LONG_WAIT_MS = 90 * 1000;
 
 export function NarrativeBeat({
   token,
-  domainId,
+  subjectId,
   lines,
 }: {
   token: string;
   /** Set on the plan page's beat; the report beat omits it. */
-  domainId?: string;
+  subjectId?: string;
   /** Honest rotating status lines, first one shown immediately. */
   lines: string[];
 }) {
@@ -80,8 +80,8 @@ export function NarrativeBeat({
 
   useEffect(() => {
     let cancelled = false;
-    const query = domainId
-      ? `token=${encodeURIComponent(token)}&domain=${encodeURIComponent(domainId)}`
+    const query = subjectId
+      ? `token=${encodeURIComponent(token)}&subject=${encodeURIComponent(subjectId)}`
       : `token=${encodeURIComponent(token)}`;
 
     async function poll() {
@@ -105,7 +105,7 @@ export function NarrativeBeat({
       cancelled = true;
       clearInterval(timer);
     };
-  }, [token, domainId, router]);
+  }, [token, subjectId, router]);
 
   return (
     <div

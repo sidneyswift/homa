@@ -1,4 +1,4 @@
-import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
@@ -81,10 +81,10 @@ export async function GET(request: Request): Promise<Response> {
 
     for (const plan of await plansNeedingRetest()) {
       const token = await mintLinkToken(plan.family_id);
-      const isMonth = plan.domain_id === MONTH_PLAN_DOMAIN;
+      const isMonth = plan.subject_id === MONTH_PLAN_SUBJECT;
       const subjectName = isMonth
         ? "month"
-        : (getMapDomain(plan.domain_id)?.displayName ?? plan.domain_id);
+        : (getMapSubject(plan.subject_id)?.displayName ?? plan.subject_id);
       // The month has no single-subject deep dive; its re-check is the
       // whole checklist at the child's current age (?start resume).
       const sent = await sendRetestEmail(
@@ -92,14 +92,14 @@ export async function GET(request: Request): Promise<Response> {
         plan.child_name,
         subjectName,
         token,
-        isMonth ? "" : `${plan.child_id}.${plan.domain_id}`,
+        isMonth ? "" : `${plan.child_id}.${plan.subject_id}`,
       );
       if (sent) {
         await markRetestEmailed(plan.plan_id);
         await emitMapEvent("map.retest_emailed", {
           family_id: plan.family_id,
           child_id: plan.child_id,
-          domain: plan.domain_id,
+          subject: plan.subject_id,
         });
         retests += 1;
       }

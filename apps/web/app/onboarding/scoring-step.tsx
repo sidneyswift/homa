@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { ageLabel, MAP_DOMAINS } from "@homa/core";
+import { ageLabel, MAP_SUBJECTS } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
 
@@ -22,8 +22,8 @@ import type { FlowChild } from "./flow-types";
 
 const LINE_STAGGER_MS = 700;
 
-function buildLines(kids: FlowChild[], planDomain: string | null): string[] {
-  if (planDomain) {
+function buildLines(kids: FlowChild[], planSubject: string | null): string[] {
+  if (planSubject) {
     const kid = kids[0];
     return [
       `Re-checking ${kid.name}'s answers against national benchmarks\u2026`,
@@ -35,7 +35,7 @@ function buildLines(kids: FlowChild[], planDomain: string | null): string[] {
     const kid = kids[0];
     return [
       `Checking ${kid.name}'s answers against national benchmarks\u2026`,
-      `Placing ${MAP_DOMAINS.length} subjects for age ${ageLabel(kid.ageMonths)}\u2026`,
+      `Placing ${MAP_SUBJECTS.length} subjects for age ${ageLabel(kid.ageMonths)}\u2026`,
       `Finding ${kid.name}'s strengths\u2026`,
     ];
   }
@@ -47,11 +47,11 @@ function buildLines(kids: FlowChild[], planDomain: string | null): string[] {
 
 export function ScoringStep({
   kids,
-  planDomain = null,
+  planSubject = null,
 }: {
   /** Every kid to score this beat; the first one's report is the landing. */
   kids: FlowChild[];
-  planDomain?: string | null;
+  planSubject?: string | null;
 }) {
   // Frozen at mount: the parent rebuilds this array every render, and
   // scoring is a one-shot whose effect must not re-fire on a new identity.
@@ -60,7 +60,7 @@ export function ScoringStep({
   const [failed, setFailed] = useState(false);
   const startedAt = useRef<number | null>(null);
 
-  const lines = useMemo(() => buildLines(frozenKids, planDomain), [frozenKids, planDomain]);
+  const lines = useMemo(() => buildLines(frozenKids, planSubject), [frozenKids, planSubject]);
 
   useEffect(() => {
     // Stamped in the effect, not at render (renders must stay pure); the
@@ -100,8 +100,8 @@ export function ScoringStep({
         // onboarding ends when the questions do; the report is the
         // app's home surface). The token URL stays the emailed/shared
         // door; deep-dive sittings still land on the rebuilt plan.
-        const destination = planDomain
-          ? `/onboarding/r/${landingToken}/plan/${planDomain}?rebuilt=1`
+        const destination = planSubject
+          ? `/onboarding/r/${landingToken}/plan/${planSubject}?rebuilt=1`
           : `/app/${frozenKids[0].id}/report?fresh=1`;
         setTimeout(() => {
           if (!cancelled) window.location.assign(destination);
@@ -115,7 +115,7 @@ export function ScoringStep({
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [frozenKids, planDomain, lines]);
+  }, [frozenKids, planSubject, lines]);
 
   if (failed) {
     return (

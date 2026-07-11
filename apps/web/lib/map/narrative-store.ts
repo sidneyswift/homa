@@ -6,7 +6,7 @@ import type {
   PlanNarrative,
   ReportNarrative,
 } from "@homa/core";
-import { getMapDomain, MONTH_PLAN_DOMAIN } from "@homa/core";
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
 
@@ -24,7 +24,7 @@ export interface ReportNarrativeSource {
   birthMonth: string;
   interests: string[];
   helpWith: string[];
-  whatsWorkingByDomain: Record<string, string>;
+  whatsWorkingBySubject: Record<string, string>;
   parentFirstName: string | null;
   scores: MapScores;
   history: Array<{ scores: MapScores; generated_at: string }>;
@@ -75,8 +75,8 @@ export async function getReportNarrativeSource(
     select c2.name from public.children c2
     where c2.family_id = ${row.family_id} and c2.id <> ${childId}
   `;
-  const planRows = await sql<{ domain_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]>`
-    select domain_id, plan, progress from public.child_plans
+  const planRows = await sql<{ subject_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]>`
+    select subject_id, plan, progress from public.child_plans
     where child_id = ${childId}
   `;
 
@@ -93,9 +93,9 @@ export async function getReportNarrativeSource(
   const practice = planRows
     .map((plan) => ({
       subjectName:
-        plan.domain_id === MONTH_PLAN_DOMAIN
+        plan.subject_id === MONTH_PLAN_SUBJECT
           ? "the month plan"
-          : (getMapDomain(plan.domain_id)?.displayName ?? plan.domain_id),
+          : (getMapSubject(plan.subject_id)?.displayName ?? plan.subject_id),
       done: Object.values(plan.progress ?? {}).filter(Boolean).length,
       total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
     }))
@@ -113,7 +113,7 @@ export async function getReportNarrativeSource(
   const bagHelp = Array.isArray(bag.helpWith)
     ? bag.helpWith.filter((item): item is string => typeof item === "string")
     : [];
-  const whatsWorkingByDomain =
+  const whatsWorkingBySubject =
     bag.whatsWorking && typeof bag.whatsWorking === "object"
       ? Object.fromEntries(
           Object.entries(bag.whatsWorking as Record<string, unknown>).filter(
@@ -129,7 +129,7 @@ export async function getReportNarrativeSource(
     birthMonth: row.birth_month,
     interests: [...new Set([...profileInterests, ...bagInterests])],
     helpWith: [...new Set([...profileFocus, ...bagHelp])],
-    whatsWorkingByDomain,
+    whatsWorkingBySubject,
     parentFirstName: row.first_name,
     scores: row.scores,
     history: row.history ?? [],
@@ -219,7 +219,7 @@ export interface PlanNarrativeSource {
 
 export async function getPlanNarrativeSource(
   childId: string,
-  domainId: string,
+  subjectId: string,
 ): Promise<PlanNarrativeSource | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -237,7 +237,7 @@ export async function getPlanNarrativeSource(
     from public.child_plans p
     join public.children c on c.id = p.child_id
     join public.families f on f.id = c.family_id
-    where p.child_id = ${childId} and p.domain_id = ${domainId}
+    where p.child_id = ${childId} and p.subject_id = ${subjectId}
       and f.status <> 'deleted'
   `;
   const row = rows[0];
@@ -275,9 +275,9 @@ export async function getPlanNarrativeSource(
   const whatsWorking: Record<string, string> = {};
   const bagWorking = row.child_context?.whatsWorking;
   if (bagWorking && typeof bagWorking === "object") {
-    for (const [byDomainId, note] of Object.entries(bagWorking as Record<string, unknown>)) {
+    for (const [bySubjectId, note] of Object.entries(bagWorking as Record<string, unknown>)) {
       if (typeof note !== "string" || note.trim().length === 0) continue;
-      whatsWorking[getMapDomain(byDomainId)?.displayName ?? byDomainId] = note.trim();
+      whatsWorking[getMapSubject(bySubjectId)?.displayName ?? bySubjectId] = note.trim();
     }
   }
 
@@ -297,14 +297,14 @@ export async function getPlanNarrativeSource(
 
 export async function claimPlanNarrative(
   childId: string,
-  domainId: string,
+  subjectId: string,
   meta: NarrativeMeta,
 ): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
     update public.child_plans
     set narrative_meta = ${sql.json(meta as unknown as DbJson)}
-    where child_id = ${childId} and domain_id = ${domainId}
+    where child_id = ${childId} and subject_id = ${subjectId}
       and (
         narrative_meta is null
         or (
@@ -319,7 +319,7 @@ export async function claimPlanNarrative(
 
 export async function storePlanNarrative(
   childId: string,
-  domainId: string,
+  subjectId: string,
   narrative: PlanNarrative | null,
   meta: NarrativeMeta,
 ): Promise<void> {
@@ -329,7 +329,7 @@ export async function storePlanNarrative(
     set narrative = ${narrative ? sql.json(narrative as unknown as DbJson) : null},
         narrative_meta = ${sql.json(meta as unknown as DbJson)},
         updated_at = now()
-    where child_id = ${childId} and domain_id = ${domainId}
+    where child_id = ${childId} and subject_id = ${subjectId}
   `;
 }
 
@@ -337,7 +337,7 @@ export async function storePlanNarrative(
  * the child, same trust chain as the plan page itself. */
 export async function getPlanNarrativeStatusByToken(
   token: string,
-  domainId: string,
+  subjectId: string,
 ): Promise<{ childId: string; meta: NarrativeMeta | null } | null> {
   const sql = mapDb();
   const rows = await sql<{ child_id: string; narrative_meta: NarrativeMeta | null }[]>`
@@ -345,7 +345,7 @@ export async function getPlanNarrativeStatusByToken(
     from public.child_reports r
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
-    left join public.child_plans p on p.child_id = c.id and p.domain_id = ${domainId}
+    left join public.child_plans p on p.child_id = c.id and p.subject_id = ${subjectId}
     where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];

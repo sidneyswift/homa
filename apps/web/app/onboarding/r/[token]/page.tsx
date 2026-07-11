@@ -84,7 +84,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               token={token}
               lines={[
                 `Reading your ${report.scores.observationCount} observations`,
-                `Looking across all ${report.scores.totalDomains} subjects`,
+                `Looking across all ${report.scores.totalSubjects} subjects`,
                 `Writing ${report.childName}'s report`,
               ]}
             />

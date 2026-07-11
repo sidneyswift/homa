@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 import {
   DEEP_DIVE_CAP,
-  getMapDomain,
+  getMapSubject,
   nextDeepDiveItem,
   personalizeStatement,
   type MapAnswer,
@@ -29,16 +29,16 @@ const CHIP_LABELS: ReadonlyArray<readonly [MapAnswer, string]> = [
 
 export function DeepDiveStep({
   child,
-  domainId,
+  subjectId,
   onComplete,
   onExit,
 }: {
   child: FlowChild;
-  domainId: string;
+  subjectId: string;
   onComplete: () => void;
   onExit: () => void;
 }) {
-  const domain = getMapDomain(domainId);
+  const domain = getMapSubject(subjectId);
   const [mode, setMode] = useState<"parent" | "together" | null>(null);
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
   const [sittingCount, setSittingCount] = useState(0);
@@ -47,7 +47,7 @@ export function DeepDiveStep({
   const [flushing, setFlushing] = useState(false);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
 
-  const current = domain ? nextDeepDiveItem(domainId, child.ageMonths, answers, sittingCount) : null;
+  const current = domain ? nextDeepDiveItem(subjectId, child.ageMonths, answers, sittingCount) : null;
 
   async function postAnswer(itemId: string, answer: MapAnswer): Promise<void> {
     try {
@@ -67,7 +67,7 @@ export function DeepDiveStep({
     void fetch("/api/map/deep-dive-start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ childId: child.id, domain: domainId, mode: chosen }),
+      body: JSON.stringify({ childId: child.id, subject: subjectId, mode: chosen }),
     }).catch(() => undefined);
   }
 
@@ -91,7 +91,7 @@ export function DeepDiveStep({
     setSittingHistory((history) => [...history, current.id]);
     void postAnswer(current.id, answer);
 
-    if (nextDeepDiveItem(domainId, child.ageMonths, updated, sittingCount + 1) === null) {
+    if (nextDeepDiveItem(subjectId, child.ageMonths, updated, sittingCount + 1) === null) {
       finish();
     }
   }

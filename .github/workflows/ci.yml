@@ -45,6 +45,9 @@ jobs:
       - name: Skills-bank targeting checks
         run: pnpm check:skills-targeting
 
+      - name: Taxonomy checks (skill graph integrity, id law, DAG)
+        run: pnpm check:taxonomy
+
       - name: Build
         run: pnpm build
         env:

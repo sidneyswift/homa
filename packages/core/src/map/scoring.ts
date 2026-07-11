@@ -1,5 +1,5 @@
 import { aheadCapForAge } from "./bands";
-import { MAP_DOMAINS, getMapItem, planQuestions, type MapAnswer, type MapItem } from "./bank";
+import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem } from "./bank";
 
 /**
  * The deterministic map scorer. Pure functions, no I/O, no model calls:
@@ -42,8 +42,8 @@ export interface MapAnswerInput {
   answer: MapAnswer;
 }
 
-export interface DomainScore {
-  domainId: string;
+export interface SubjectScore {
+  subjectId: string;
   position: MapPosition;
   /** Whole months ahead of age; null unless position is "ahead" or "on_track". */
   monthsAhead: number | null;
@@ -70,11 +70,11 @@ export interface DomainScore {
 }
 
 export interface MapScores {
-  domains: DomainScore[];
+  subjects: SubjectScore[];
   /** Domain ids sorted strongest first among scored, growth last. */
   strengthOrder: string[];
   mappedCount: number;
-  totalDomains: number;
+  totalSubjects: number;
   observationCount: number;
 }
 
@@ -89,22 +89,22 @@ function creditMonths(item: MapItem): number {
 }
 
 export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScores {
-  const byDomain = new Map<string, MapAnswerInput[]>();
+  const bySubject = new Map<string, MapAnswerInput[]>();
   for (const entry of answers) {
     const found = getMapItem(entry.itemId);
     if (!found) continue;
-    const list = byDomain.get(found.domain.id) ?? [];
+    const list = bySubject.get(found.subject.id) ?? [];
     list.push(entry);
-    byDomain.set(found.domain.id, list);
+    bySubject.set(found.subject.id, list);
   }
 
-  const domains: DomainScore[] = MAP_DOMAINS.map((domain) => {
-    const domainAnswers = byDomain.get(domain.id) ?? [];
-    const observations = domainAnswers.filter((a) => isRealObservation(a.answer));
+  const subjects: SubjectScore[] = MAP_SUBJECTS.map((subject) => {
+    const subjectAnswers = bySubject.get(subject.id) ?? [];
+    const observations = subjectAnswers.filter((a) => isRealObservation(a.answer));
 
     if (observations.length === 0) {
       return {
-        domainId: domain.id,
+        subjectId: subject.id,
         position: "not_mapped" as const,
         monthsAhead: null,
         beyondScale: false,
@@ -112,7 +112,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         observations: 0,
         strongestObservedStatement: null,
         frontierStatement: null,
-        exposureBased: domain.exposureBased,
+        exposureBased: subject.exposureBased,
       };
     }
 
@@ -123,7 +123,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     let frontierStatement: string | null = null;
     let frontierAnchor: number | null = null;
     let topOfBankConfirmed = false;
-    const bankTop = Math.max(...domain.items.map((item) => item.typicalMonths));
+    const bankTop = Math.max(...subject.items.map((item) => item.typicalMonths));
 
     for (const entry of observations) {
       const found = getMapItem(entry.itemId);
@@ -163,10 +163,10 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
 
     const highConfidence = observations.length >= 2;
 
-    if (domain.exposureBased) {
+    if (subject.exposureBased) {
       const position: MapPosition = frontier !== null ? "on_track" : "growing";
       return {
-        domainId: domain.id,
+        subjectId: subject.id,
         position,
         monthsAhead: null,
         beyondScale: false,
@@ -181,7 +181,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     if (frontier === null) {
       // Only "not yet" signal: the frontier sits at or below her base item.
       return {
-        domainId: domain.id,
+        subjectId: subject.id,
         position: "growing" as const,
         monthsAhead: null,
         beyondScale: false,
@@ -215,7 +215,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       position === "ahead" && monthsAhead !== null && (delta > monthsAhead || topOfBankConfirmed);
 
     return {
-      domainId: domain.id,
+      subjectId: subject.id,
       position,
       monthsAhead,
       beyondScale,
@@ -227,23 +227,23 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     };
   });
 
-  const rank = (score: DomainScore): number => {
+  const rank = (score: SubjectScore): number => {
     if (score.position === "ahead" || score.position === "on_track") {
       return 1000 + (score.monthsAhead ?? 0);
     }
     if (score.position === "growing") return 10;
     return 0;
   };
-  const strengthOrder = [...domains]
+  const strengthOrder = [...subjects]
     .filter((score) => score.position !== "not_mapped")
     .sort((a, b) => rank(b) - rank(a))
-    .map((score) => score.domainId);
+    .map((score) => score.subjectId);
 
   return {
-    domains,
+    subjects,
     strengthOrder,
-    mappedCount: domains.filter((score) => score.position !== "not_mapped").length,
-    totalDomains: domains.length,
+    mappedCount: subjects.filter((score) => score.position !== "not_mapped").length,
+    totalSubjects: subjects.length,
     observationCount: answers.filter((a) => isRealObservation(a.answer)).length,
   };
 }

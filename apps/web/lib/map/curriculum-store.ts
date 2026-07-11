@@ -51,8 +51,8 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
     : [];
   const focus = typeof profile.focus === "string" ? [profile.focus] : [];
 
-  const planRows = await sql<{ domain_id: string; progress: Record<string, boolean> }[]>`
-    select domain_id, progress from public.child_plans where child_id = ${childId}
+  const planRows = await sql<{ subject_id: string; progress: Record<string, boolean> }[]>`
+    select subject_id, progress from public.child_plans where child_id = ${childId}
   `;
 
   return buildReportFacts({
@@ -61,7 +61,7 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
     parentFirstName: row.first_name,
     interests,
     helpWith: focus,
-    whatsWorkingByDomain: {},
+    whatsWorkingBySubject: {},
     scores: row.scores,
     answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
     history: row.history as { scores: MapScores; generated_at: string }[],
@@ -72,7 +72,7 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
         }
       : null,
     practice: planRows.map((plan) => ({
-      subjectName: plan.domain_id,
+      subjectName: plan.subject_id,
       done: Object.values(plan.progress ?? {}).filter(Boolean).length,
       total: 0,
     })),

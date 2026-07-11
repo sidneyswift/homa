@@ -116,12 +116,12 @@ export async function runReportNarrative(childId: string): Promise<void> {
   }
 }
 
-export async function runPlanNarrative(childId: string, domainId: string): Promise<void> {
-  const source = await getPlanNarrativeSource(childId, domainId);
+export async function runPlanNarrative(childId: string, subjectId: string): Promise<void> {
+  const source = await getPlanNarrativeSource(childId, subjectId);
   if (!source) return;
 
   const claim = writingMeta();
-  if (!(await claimPlanNarrative(childId, domainId, claim))) return;
+  if (!(await claimPlanNarrative(childId, subjectId, claim))) return;
 
   const pronounsAllowed = genderedPronounsAllowedFrom(source);
   const facts: PlanFacts = {
@@ -160,7 +160,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
         ? { failReason: `gate: ${JSON.stringify(verdicts.rejected).slice(0, 400)}` }
         : {}),
     };
-    await storePlanNarrative(childId, domainId, verdicts.failed ? null : generated.value, meta);
+    await storePlanNarrative(childId, subjectId, verdicts.failed ? null : generated.value, meta);
 
     if (verdicts.failed) {
       await emitMapEvent("map.narrative_fallback", {
@@ -182,7 +182,7 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
-    await storePlanNarrative(childId, domainId, null, {
+    await storePlanNarrative(childId, subjectId, null, {
       ...claim,
       status: "failed",
       generatedAt: new Date().toISOString(),
@@ -194,6 +194,6 @@ export async function runPlanNarrative(childId: string, domainId: string): Promi
       kind: "plan",
       reason: "generation-error",
     });
-    console.error(`plan narrative failed for child ${childId} ${domainId}:`, message);
+    console.error(`plan narrative failed for child ${childId} ${subjectId}:`, message);
   }
 }

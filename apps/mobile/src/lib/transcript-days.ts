@@ -1,0 +1,97 @@
+import type { EveMessage } from "eve/client";
+
+import type { ArchivedMessage } from "./chat-storage";
+
+/**
+ * Day grouping for the chat transcript, the mobile twin of
+ * apps/web/app/app/transcript-days.ts (keep aligned): messages from past
+ * days render under date separators so old conversation reads as old
+ * instead of resuming mid-thought. Pure logic, no JSX; the chat session
+ * renders the items.
+ */
+
+export type TranscriptItem =
+  | { kind: "separator"; key: string; label: string }
+  | { kind: "message"; key: string; message: EveMessage };
+
+/** One local-day bucket, used to decide where separators go. */
+function dayKeyOf(at: number): string {
+  const date = new Date(at);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+const WEEKDAY_MONTH_DAY: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+};
+
+/**
+ * dayLabelFor(at, now): "Today", "Yesterday", "Friday, July 3", or
+ * "July 3, 2025" once the year differs. Local time on purpose: the
+ * separator answers "when was this, for the person reading it here".
+ */
+export function dayLabelFor(at: number, now: number = Date.now()): string {
+  const day = dayKeyOf(at);
+  if (day === dayKeyOf(now)) return "Today";
+  if (day === dayKeyOf(now - 24 * 60 * 60 * 1000)) return "Yesterday";
+  const date = new Date(at);
+  if (date.getFullYear() === new Date(now).getFullYear()) {
+    return date.toLocaleDateString("en-US", WEEKDAY_MONTH_DAY);
+  }
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+/**
+ * buildTranscript(...): archived history first, then the live session,
+ * with a separator wherever the local day changes. Item keys are
+ * namespaced (archived vs live) because eve message ids restart with
+ * each session (`turn_1:user` exists in every session).
+ *
+ * A live message without a stamped time is treated as arriving now
+ * (it is live; stamps land when the turn finishes). Archived messages
+ * without times are legacy saves and group under one "Earlier" label.
+ */
+export function buildTranscript(input: {
+  archived: readonly ArchivedMessage[];
+  live: readonly EveMessage[];
+  liveTimes: Record<string, number>;
+  now?: number;
+}): TranscriptItem[] {
+  const now = input.now ?? Date.now();
+  const items: TranscriptItem[] = [];
+  let previousDay: string | null = null;
+  let earlierShown = false;
+
+  const push = (key: string, message: EveMessage, at: number | null) => {
+    if (at === null) {
+      if (!earlierShown && items.length === 0) {
+        earlierShown = true;
+        items.push({ kind: "separator", key: `sep:${key}`, label: "Earlier" });
+      }
+    } else {
+      const day = dayKeyOf(at);
+      if (day !== previousDay) {
+        previousDay = day;
+        items.push({
+          kind: "separator",
+          key: `sep:${key}`,
+          label: dayLabelFor(at, now),
+        });
+      }
+    }
+    items.push({ kind: "message", key, message });
+  };
+
+  input.archived.forEach((entry, index) => {
+    push(`a${index}:${entry.message.id}`, entry.message, entry.at);
+  });
+  for (const message of input.live) {
+    push(`m:${message.id}`, message, input.liveTimes[message.id] ?? now);
+  }
+  return items;
+}

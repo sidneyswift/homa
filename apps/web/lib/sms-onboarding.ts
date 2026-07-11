@@ -350,7 +350,7 @@ export async function finishChildReport(
   await emitMapEvent("map.report_generated", {
     family_id: familyId,
     child_id: report.childId,
-    mapped_domains: report.scores.mappedCount,
+    mapped_subjects: report.scores.mappedCount,
     observations: report.scores.observationCount,
     bank_version: MAP_BANK_VERSION,
   });

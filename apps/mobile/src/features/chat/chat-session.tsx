@@ -9,7 +9,15 @@ import {
 import { useEveAgent, type EveMessage } from "eve/react";
 
 import { env } from "../../lib/env";
-import { clearSavedChat, saveChat, type SavedChat } from "../../lib/chat-storage";
+import {
+  archiveMessages,
+  pruneMessageTimes,
+  saveChat,
+  stampMessageTimes,
+  type ArchivedMessage,
+  type PreparedChat,
+} from "../../lib/chat-storage";
+import { buildTranscript } from "../../lib/transcript-days";
 import { emitFamilyEvent } from "../../lib/events";
 import { supabase } from "../../lib/supabase";
 import { markTurnStarted, takeTurnLatencyMs } from "../../lib/turn-clock";
@@ -19,11 +27,16 @@ import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 
 /**
- * The chat surface, the mobile twin of apps/web/app/app/chat/chat-client.tsx:
+ * The chat surface, the mobile twin of apps/web/app/app/chat-client.tsx:
  * useEveAgent drives session state against the deployed eve routes
  * (host = EXPO_PUBLIC_API_URL); auth rides as a bearer token resolved
  * fresh per request. Homa's per-family context is injected server-side
  * on every turn, so a brand-new session already knows the family.
+ *
+ * One thread, fresh mornings: the transcript is one continuous history
+ * under day separators while the model session rotates at the first
+ * visit after 4am local (lib/chat-storage.ts). "New chat" archives the
+ * visible conversation and starts a fresh session; nothing is erased.
  */
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
@@ -37,16 +50,23 @@ const SUGGESTIONS = [
 
 export function ChatSession({
   storageKey,
-  saved,
+  prepared,
   familyId,
   parentName,
 }: {
   storageKey: string;
-  saved: SavedChat;
+  prepared: PreparedChat;
   familyId: string | null;
   parentName: string | null;
 }) {
   const messagesRef = useRef<readonly EveMessage[]>([]);
+  const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
+  const archivedRef = useRef(archived);
+  // Message id -> arrival time. State (not a ref) because the transcript
+  // grouping reads it during render.
+  const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
+    ...prepared.messageTimes,
+  }));
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [draft, setDraft] = useState("");
@@ -73,12 +93,24 @@ export function ChatSession({
         return data.session?.access_token ?? "";
       },
     },
-    initialEvents: saved.events ?? [],
-    initialSession: saved.session,
+    initialEvents: prepared.initialEvents,
+    initialSession: prepared.initialSession,
     onFinish(snapshot) {
+      // Stamp this turn's new message ids with the clock (the only time
+      // source the transcript has; eve events carry sequence numbers,
+      // not times), then persist. Callbacks refresh every render (eve's
+      // hook contract), so this closure's liveTimes is current.
+      const stamped = pruneMessageTimes(
+        stampMessageTimes(liveTimes, snapshot.data.messages),
+        snapshot.data.messages,
+      );
+      setLiveTimes(stamped);
       void saveChat(storageKey, {
+        archived: archivedRef.current,
         events: snapshot.events,
         session: snapshot.session,
+        messageTimes: stamped,
+        lastActivityAt: Date.now(),
       });
       void emitTurnCompleted("ok");
     },
@@ -90,6 +122,10 @@ export function ChatSession({
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    archivedRef.current = archived;
+  }, [archived]);
 
   useEffect(() => {
     if (agent.error && agent.error !== reportedErrorRef.current) {
@@ -108,10 +144,36 @@ export function ChatSession({
     void agent.send({ message });
   }
 
+  /** The manual fresh start: archive what is on screen, rotate the
+   *  session, keep every word visible above. Nothing is erased. */
   function startNewChat() {
-    void clearSavedChat(storageKey);
+    const nextArchived = [
+      ...archivedRef.current,
+      ...archiveMessages(messages, stampMessageTimes(liveTimes, messages)),
+    ];
+    setArchived(nextArchived);
+    archivedRef.current = nextArchived;
+    setLiveTimes({});
+    void saveChat(storageKey, {
+      archived: nextArchived,
+      events: [],
+      session: undefined,
+      messageTimes: {},
+      lastActivityAt: Date.now(),
+    });
     agent.reset();
   }
+
+  const transcript = buildTranscript({
+    archived,
+    live: messages,
+    liveTimes,
+  });
+  const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // The chips return whenever a session has no words in it yet: the
+  // first run, a fresh morning over yesterday's scrollback, and right
+  // after "Start a new chat".
+  const showSuggestions = messages.length === 0 && !busy;
 
   const statusLabel = busy ? busyLabel(messages) : null;
 
@@ -128,7 +190,7 @@ export function ChatSession({
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
         keyboardShouldPersistTaps="handled"
       >
-        {messages.length === 0 ? (
+        {!hasAnyMessages ? (
           <View style={{ flex: 1, justifyContent: "center", gap: space.sm }}>
             <Text
               style={{
@@ -158,36 +220,41 @@ export function ChatSession({
               }}
             >
               {SUGGESTIONS.map((suggestion) => (
-                <Pressable
+                <SuggestionChip
                   key={suggestion}
+                  label={suggestion}
                   onPress={() => sendMessage(suggestion)}
-                  style={({ pressed }) => ({
-                    borderRadius: radius.pill,
-                    borderWidth: 1,
-                    borderColor: pressed ? colors.brand : colors.border,
-                    backgroundColor: colors.card,
-                    paddingHorizontal: space.md,
-                    paddingVertical: 10,
-                    transform: [{ scale: pressed ? pressScale : 1 }],
-                  })}
-                >
-                  <Text
-                    style={{
-                      fontFamily: fontFamilies.body,
-                      fontSize: fontSize.sm,
-                      color: colors.textStrong,
-                    }}
-                  >
-                    {suggestion}
-                  </Text>
-                </Pressable>
+                />
               ))}
             </View>
           </View>
         ) : (
-          messages.map((message) => (
-            <MessageView key={message.id} message={message} />
-          ))
+          <>
+            {transcript.map((item) =>
+              item.kind === "separator" ? (
+                <DaySeparator key={item.key} label={item.label} />
+              ) : (
+                <MessageView key={item.key} message={item.message} />
+              ),
+            )}
+            {showSuggestions ? (
+              <View
+                style={{
+                  marginTop: space.sm,
+                  gap: space.sm,
+                  alignItems: "center",
+                }}
+              >
+                {SUGGESTIONS.map((suggestion) => (
+                  <SuggestionChip
+                    key={suggestion}
+                    label={suggestion}
+                    onPress={() => sendMessage(suggestion)}
+                  />
+                ))}
+              </View>
+            ) : null}
+          </>
         )}
         {statusLabel ? <BusyBubble label={statusLabel} /> : null}
         {agent.error ? (
@@ -266,6 +333,63 @@ export function ChatSession({
       {messages.length > 0 ? (
         <NewChatRow disabled={busy} onPress={startNewChat} />
       ) : null}
+    </View>
+  );
+}
+
+function SuggestionChip({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        borderRadius: radius.pill,
+        borderWidth: 1,
+        borderColor: pressed ? colors.brand : colors.border,
+        backgroundColor: colors.card,
+        paddingHorizontal: space.md,
+        paddingVertical: 10,
+        transform: [{ scale: pressed ? pressScale : 1 }],
+      })}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.body,
+          fontSize: fontSize.sm,
+          color: colors.textStrong,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** The Slack-style date rule: a quiet centered label between days, so
+ *  the past reads as the past without a card or a banner. */
+function DaySeparator({ label }: { label: string }) {
+  return (
+    <View
+      accessibilityRole="none"
+      accessibilityLabel={label}
+      style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
+    >
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodySemibold,
+          fontSize: fontSize.xs,
+          color: colors.textSubtle,
+        }}
+      >
+        {label}
+      </Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
     </View>
   );
 }

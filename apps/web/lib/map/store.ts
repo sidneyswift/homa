@@ -3,9 +3,10 @@ import {
   buildFourWeekPlan,
   buildMonthPlan,
   getMapItem,
-  MONTH_PLAN_DOMAIN,
+  MONTH_PLAN_SUBJECT,
   isInScoredRange,
   MAP_BANK_VERSION,
+  planQuestions,
   scoreMap,
   type FourWeekPlan,
   type MapAnswer,
@@ -196,7 +197,7 @@ async function seedWhatWorksMemories(familyId: string): Promise<void> {
     if (!bag || typeof bag !== "object") continue;
     const parts = Object.entries(bag as Record<string, unknown>)
       .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0)
-      .map(([domainId, text]) => `${domainId}: ${text.trim()}`);
+      .map(([subjectId, text]) => `${subjectId}: ${text.trim()}`);
     if (parts.length === 0) continue;
     const content = `What the parent says works, in her own words. ${parts.join(" \u00b7 ")}`.slice(0, 500);
     await sql`
@@ -343,7 +344,7 @@ export async function saveAnswer(
   childId: string,
   itemId: string,
   answer: MapAnswer,
-): Promise<{ ok: boolean; domain?: string }> {
+): Promise<{ ok: boolean; subject?: string }> {
   const item = getMapItem(itemId);
   if (!item) return { ok: false };
   if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
@@ -356,7 +357,7 @@ export async function saveAnswer(
     do update set answer = excluded.answer, answered_at = now()
   `;
   await touchFamily(familyId);
-  return { ok: true, domain: item.domain.id };
+  return { ok: true, subject: item.subject.id };
 }
 
 /**
@@ -370,7 +371,7 @@ export async function correctAnswers(
   familyId: string,
   childId: string,
   changes: Array<{ itemId: string; answer: MapAnswer }>,
-  source: "report_correction" | "report_probe" | "recheck",
+  source: "report_correction" | "report_probe" | "recheck" | "conversation",
 ): Promise<boolean> {
   if (!(await childBelongsToFamily(childId, familyId))) return false;
   const valid = changes.filter((change) => getMapItem(change.itemId));
@@ -389,6 +390,68 @@ export async function correctAnswers(
   return true;
 }
 
+export interface ObservationResult {
+  childName: string;
+  ageMonths: number;
+  subjectId: string;
+  position: string;
+  monthsAhead: number | null;
+  frontierStatement: string | null;
+  /** The next unanswered bank item on this subject's ladder at this age:
+   * the natural thing to ask about next time it comes up. */
+  nextProbeStatement: string | null;
+}
+
+/**
+ * The agent's write path into the map (skill-graph plan, gap #2 of the
+ * Mac Mini comparison): a conversational report ("she read a whole Bob
+ * Book by herself") lands as a chip answer with provenance 'conversation',
+ * triggers the same deterministic rescore as any checklist sitting, and
+ * hands back the fresh subject reading plus the next natural probe.
+ * Tenancy: familyId comes from session auth; the child is re-scoped here.
+ */
+export async function recordObservation(
+  familyId: string,
+  childId: string,
+  itemId: string,
+  answer: "easily" | "getting_there" | "not_yet",
+): Promise<ObservationResult | null> {
+  const found = getMapItem(itemId);
+  if (!found) return null;
+  const saved = await correctAnswers(familyId, childId, [{ itemId, answer }], "conversation");
+  if (!saved) return null;
+
+  const report = await createReport(familyId, childId);
+  if (!report) return null;
+
+  const subjectScore = report.scores.subjects.find(
+    (score) => score.subjectId === found.subject.id,
+  );
+
+  const sql = mapDb();
+  const answered = await sql<{ question_id: string }[]>`
+    select question_id from public.child_answers where child_id = ${childId}
+  `;
+  const answeredIds = new Set(answered.map((row) => row.question_id));
+  const plan = planQuestions(report.ageMonths).find(
+    (entry) => entry.subjectId === found.subject.id,
+  );
+  const nextProbe =
+    [plan?.base, ...(plan?.ladders ?? [])].find(
+      (item) => item && !answeredIds.has(item.id),
+    ) ?? null;
+
+  return {
+    childName: report.childName,
+    ageMonths: report.ageMonths,
+    subjectId: found.subject.id,
+    position: subjectScore?.position ?? "not_mapped",
+    monthsAhead: subjectScore?.monthsAhead ?? null,
+    frontierStatement: subjectScore?.frontierStatement ?? null,
+    nextProbeStatement: nextProbe?.statement ?? null,
+  };
+}
+
 /**
  * Syncs the four-week plan's check-offs server-side (idempotent full-map
  * write). Null when no plan exists for this child + subject; the client
@@ -398,7 +461,7 @@ export async function correctAnswers(
 export async function savePlanProgress(
   familyId: string,
   childId: string,
-  domainId: string,
+  subjectId: string,
   checks: Record<string, boolean>,
 ): Promise<{ done: number } | null> {
   if (!(await childBelongsToFamily(childId, familyId))) return null;
@@ -406,7 +469,7 @@ export async function savePlanProgress(
   const rows = await sql<{ id: string }[]>`
     update public.child_plans
     set progress = ${sql.json(checks as unknown as DbJson)}, updated_at = now()
-    where child_id = ${childId} and domain_id = ${domainId}
+    where child_id = ${childId} and subject_id = ${subjectId}
     returning id
   `;
   if (rows.length === 0) return null;
@@ -625,7 +688,7 @@ const RETEST_DAYS = 28;
  */
 export async function getOrBuildPlan(
   reportToken: string,
-  domainId: string,
+  subjectId: string,
   options: { rebuild?: boolean } = {},
 ): Promise<{
   plan: FourWeekPlan;
@@ -674,7 +737,7 @@ export async function getOrBuildPlan(
   >`
     select plan, retest_at::text as retest_at, narrative, narrative_meta, progress
     from public.child_plans
-    where child_id = ${row.child_id} and domain_id = ${domainId}
+    where child_id = ${row.child_id} and subject_id = ${subjectId}
   `;
   if (existing.length > 0 && !options.rebuild) {
     return {
@@ -720,9 +783,9 @@ export async function getOrBuildPlan(
   // child) stores under its pseudo-domain and builds with the weighted
   // month builder; per-subject plans stay as the drill-down.
   const plan =
-    domainId === MONTH_PLAN_DOMAIN
+    subjectId === MONTH_PLAN_SUBJECT
       ? buildMonthPlan(ageInMonths(row.birth_month), planAnswers, planContext)
-      : buildFourWeekPlan(domainId, ageInMonths(row.birth_month), planAnswers, planContext);
+      : buildFourWeekPlan(subjectId, ageInMonths(row.birth_month), planAnswers, planContext);
   if (!plan) return null;
 
   // A rebuild restarts the month: fresh plan, fresh retest clock, the
@@ -730,10 +793,10 @@ export async function getOrBuildPlan(
   // rewritten next to the new month. Checks are the parent's own work
   // (source data) and survive the rebuild.
   const inserted = await sql<{ retest_at: string }[]>`
-    insert into public.child_plans (child_id, domain_id, plan, bank_version, retest_at)
-    values (${row.child_id}, ${domainId}, ${sql.json(plan as unknown as DbJson)},
+    insert into public.child_plans (child_id, subject_id, plan, bank_version, retest_at)
+    values (${row.child_id}, ${subjectId}, ${sql.json(plan as unknown as DbJson)},
             ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
-    on conflict (child_id, domain_id) do update
+    on conflict (child_id, subject_id) do update
       set plan = excluded.plan,
           bank_version = excluded.bank_version,
           retest_at = excluded.retest_at,
@@ -760,13 +823,13 @@ export async function getOrBuildPlan(
 
 /** Plans whose four weeks are up and whose retest email hasn't gone out. */
 export async function plansNeedingRetest(): Promise<
-  { plan_id: string; domain_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
+  { plan_id: string; subject_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
 > {
   const sql = mapDb();
   return sql<
-    { plan_id: string; domain_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
+    { plan_id: string; subject_id: string; child_id: string; child_name: string; family_id: string; email: string }[]
   >`
-    select p.id as plan_id, p.domain_id, c.id as child_id, c.name as child_name,
+    select p.id as plan_id, p.subject_id, c.id as child_id, c.name as child_name,
            f.id as family_id, f.email
     from public.child_plans p
     join public.children c on c.id = p.child_id
@@ -806,7 +869,7 @@ export interface ReportView {
   narrativeMeta: NarrativeMeta | null;
   /** The child's built months: check-off counts for the your-month panel
    * and plan existence for the consent card. */
-  plans: { domainId: string; done: number; total: number; retestAt: string }[];
+  plans: { subjectId: string; done: number; total: number; retestAt: string }[];
   /** The family's linked texting/calling number, if any (family_phones,
    * migration #22), so the "Call Homa" card can prefill instead of ask
    * again. Null when nothing is linked yet. */
@@ -869,9 +932,9 @@ export async function getReportByToken(token: string): Promise<ReportView | null
   `;
 
   const planRows = await sql<
-    { domain_id: string; plan: FourWeekPlan; progress: Record<string, boolean>; retest_at: string }[]
+    { subject_id: string; plan: FourWeekPlan; progress: Record<string, boolean>; retest_at: string }[]
   >`
-    select domain_id, plan, progress, retest_at::text as retest_at
+    select subject_id, plan, progress, retest_at::text as retest_at
     from public.child_plans where child_id = ${row.child_id}
   `;
 
@@ -907,7 +970,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
       hasReport: kid.has_report,
     })),
     plans: planRows.map((plan) => ({
-      domainId: plan.domain_id,
+      subjectId: plan.subject_id,
       done: Object.values(plan.progress ?? {}).filter(Boolean).length,
       total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
       retestAt: plan.retest_at,

@@ -10,7 +10,7 @@ in `00-synthesis.md`.
 ## How to read this folder
 
 Start with `00-synthesis.md` (coverage map, crosswalk to the product's 16
-map domains, gaps, and recommended next anchors). Drill into the numbered
+map subjects, gaps, and recommended next anchors). Drill into the numbered
 lane files for the raw benchmark tables and sources.
 
 | File | Lane |
@@ -59,7 +59,7 @@ item by item, with a `MAP_BANK_VERSION` bump and `pnpm check:map` green;
 nothing here auto-flows into the product. The first pass (bank v2026.07.2,
 2026-07-06) is documented in `00-synthesis.md` under "Porting status".
 
-The 16 map domains, for tagging: math, literacy, phonics, writing,
+The 16 map subjects (renamed from "domains" 2026-07-10; "domain" now means the level-2 skill line), for tagging: math, literacy, phonics, writing,
 language, science, social_studies, art, music, gross_motor, fine_motor,
 social_emotional, self_care, executive_function, spanish,
 computer_science (shipped 2026-07-06).

@@ -25,7 +25,7 @@ export function kidPill(report: DashboardReport | null, months: number): KidPill
     }
     return null;
   }
-  const scored = report.scores.domains.filter(
+  const scored = report.scores.subjects.filter(
     (score) => !score.exposureBased && score.position !== "not_mapped",
   );
   if (scored.length === 0) {

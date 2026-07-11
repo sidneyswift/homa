@@ -1,5 +1,5 @@
 import { ageInMonths } from "./bands";
-import { MAP_DOMAINS } from "./bank";
+import { MAP_SUBJECTS } from "./bank";
 
 /**
  * Report staleness, derived at read time and never stored (the anti-rot
@@ -37,7 +37,7 @@ export function reportStaleness(
 
   let newBenchmarks = 0;
   if (monthsGrown > 0) {
-    for (const domain of MAP_DOMAINS) {
+    for (const domain of MAP_SUBJECTS) {
       for (const item of domain.items) {
         if (item.typicalMonths > ageThenMonths && item.typicalMonths <= ageNowMonths) {
           newBenchmarks += 1;

@@ -89,7 +89,7 @@ export function MobileNav(props: SidebarProps) {
             the spacer that balances the hamburger so the wordmark sits
             centered either way. */}
         {props.kids.length > 1 ? (
-          <ContextSwitcher kids={props.kids} selected={props.viewContext} variant="bar" />
+          <ContextSwitcher kids={props.kids} selected={props.viewContext} />
         ) : (
           <span className="w-[38px]" aria-hidden="true" />
         )}
@@ -109,10 +109,12 @@ export function MobileNav(props: SidebarProps) {
           <div
             id="app-drawer"
             // Delegated close: the drawer is the sidebar, so every link
-            // inside (tabs, up next, kids, account menu's Settings)
-            // should land on its page with the drawer gone.
+            // inside (tabs, up next, account menu's Settings) should land
+            // on its page with the drawer gone; the viewing rows are
+            // buttons, so they opt in via data-drawer-close.
             onClick={(event) => {
-              if ((event.target as HTMLElement).closest("a")) close();
+              const target = event.target as HTMLElement;
+              if (target.closest("a") || target.closest("[data-drawer-close]")) close();
             }}
             className="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] translate-x-0 flex-col overflow-y-auto rounded-r-[var(--radius-xl)] border-r border-border-subtle bg-card p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:-translate-x-full motion-reduce:transition-none"
           >

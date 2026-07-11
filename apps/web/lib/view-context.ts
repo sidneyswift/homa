@@ -39,6 +39,24 @@ export function parseViewContext(
   return { kind: "family" };
 }
 
+/** Kid-scoped routes, where switching kids should keep the surface and
+ * swap the kid (report stays a report, kid page stays a kid page). */
+const REPORT_PAGE = /^\/app\/([^/]+)\/report$/;
+const KIDS_PAGE = /^\/app\/kids\/([^/]+)$/;
+
+/**
+ * kidSwitchTargetPath(pathname, childId): string | null
+ * Where picking a kid should navigate from the current page: the
+ * sibling's same page on kid-scoped surfaces, null (stay put) elsewhere.
+ * Shared by the phone bar switcher and the sidebar's viewing rows so the
+ * two can never drift apart.
+ */
+export function kidSwitchTargetPath(pathname: string, childId: string): string | null {
+  if (REPORT_PAGE.test(pathname)) return `/app/${childId}/report`;
+  if (KIDS_PAGE.test(pathname)) return `/app/kids/${childId}`;
+  return null;
+}
+
 /**
  * readViewContextCookie(cookieHeader): string | null
  * Pulls the raw cookie value out of a Cookie header string, for callers

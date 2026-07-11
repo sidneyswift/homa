@@ -3,17 +3,17 @@ import Link from "next/link";
 import {
   ageInMonths,
   ageLabel,
-  domainLine,
-  getMapDomain,
+  subjectLine,
+  getMapSubject,
   homaNote,
   MAP_SOURCES,
-  MONTH_PLAN_DOMAIN,
+  MONTH_PLAN_SUBJECT,
   cdcChecklistUrl,
   noteGreeting,
   notePlanSentence,
   reportStaleness,
   US_STATES,
-  type DomainScore,
+  type SubjectScore,
   type MapAnswer,
   type MapScores,
   type ReportNarrative,
@@ -73,13 +73,13 @@ export interface ReportViewData {
   history: { scores: MapScores; generated_at: string; narrative?: ReportNarrative | null }[];
   otherKids: { id: string; name: string; inRange: boolean; hasReport: boolean }[];
   /** Built months and their synced check-off counts (empty on sample). */
-  plans: { domainId: string; done: number; total: number; retestAt: string }[];
+  plans: { subjectId: string; done: number; total: number; retestAt: string }[];
   /** The family's linked texting/calling number, if any (null on the
    * sample page, which carries no real family). */
   familyPhone: string | null;
 }
 
-const POSITION_RANK: Record<DomainScore["position"], number> = {
+const POSITION_RANK: Record<SubjectScore["position"], number> = {
   not_mapped: 0,
   growing: 1,
   on_track: 2,
@@ -93,11 +93,11 @@ interface Movement {
 }
 
 function movementFor(
-  current: DomainScore,
+  current: SubjectScore,
   prior: { scores: MapScores; generated_at: string } | undefined,
 ): Movement | null {
   if (!prior || current.exposureBased) return null;
-  const previous = prior.scores.domains.find((entry) => entry.domainId === current.domainId);
+  const previous = prior.scores.subjects.find((entry) => entry.subjectId === current.subjectId);
   if (!previous) return null;
   const since = new Date(prior.generated_at).toLocaleDateString("en-US", {
     month: "short",
@@ -146,45 +146,45 @@ export function ReportView({
   const months = ageInMonths(report.birthMonth);
   const editable = !sample;
   const staleness = reportStaleness(report.birthMonth, report.generatedAt);
-  const scores = report.scores.domains;
-  const byId = new Map(scores.map((score) => [score.domainId, score]));
-  const ordered: DomainScore[] = [
-    ...report.scores.strengthOrder.map((id) => byId.get(id)).filter((s): s is DomainScore => Boolean(s)),
+  const scores = report.scores.subjects;
+  const byId = new Map(scores.map((score) => [score.subjectId, score]));
+  const ordered: SubjectScore[] = [
+    ...report.scores.strengthOrder.map((id) => byId.get(id)).filter((s): s is SubjectScore => Boolean(s)),
     ...scores.filter((score) => score.position === "not_mapped"),
   ];
   const prior = report.history[0];
   const movements = new Map<string, Movement>();
   for (const score of scores) {
     const movement = movementFor(score, prior);
-    if (movement) movements.set(score.domainId, movement);
+    if (movement) movements.set(score.subjectId, movement);
   }
 
   const answersByDomain = new Map<string, ReceiptRow[]>();
   for (const entry of report.answers) {
-    const found = getMapDomain(entry.itemId.split(".")[0]);
-    const domainId = found?.id ?? entry.itemId.split(".")[0];
+    const found = getMapSubject(entry.itemId.split(".")[0]);
+    const subjectId = found?.id ?? entry.itemId.split(".")[0];
     const item = found?.items.find((candidate) => candidate.id === entry.itemId);
     if (!item) continue;
-    const list = answersByDomain.get(domainId) ?? [];
+    const list = answersByDomain.get(subjectId) ?? [];
     list.push({
       itemId: item.id,
       statement: item.statement,
       typicalMonths: item.typicalMonths,
       answer: entry.answer,
     });
-    answersByDomain.set(domainId, list);
+    answersByDomain.set(subjectId, list);
   }
 
   // The one-tap unified month, now living INSIDE the note from Homa
   // (founder ask 2026-07-08): one sentence explaining what she built,
   // one button. Before the month exists, the button's tap is the
   // explicit consent that builds it and arms the 28-day retest email.
-  const monthBuilt = report.plans.some((plan) => plan.domainId === MONTH_PLAN_DOMAIN);
+  const monthBuilt = report.plans.some((plan) => plan.subjectId === MONTH_PLAN_SUBJECT);
   const ELECTIVES = new Set(["art", "music", "spanish", "computer_science"]);
   const monthBuildable = scores.some(
     (score) =>
       !score.exposureBased &&
-      !ELECTIVES.has(score.domainId) &&
+      !ELECTIVES.has(score.subjectId) &&
       (score.position === "growing" || score.position === "on_track"),
   );
   const monthOffered = editable && (monthBuilt || monthBuildable);
@@ -213,7 +213,7 @@ export function ReportView({
   const sourceKeys = new Set<string>();
   for (const score of scores) {
     if (score.position === "not_mapped") continue;
-    const domain = getMapDomain(score.domainId);
+    const domain = getMapSubject(score.subjectId);
     domain?.items.forEach((item) => item.sources.forEach((key) => sourceKeys.add(key)));
   }
   const generatedDate = new Date(report.generatedAt).toLocaleDateString("en-US", {
@@ -262,7 +262,7 @@ export function ReportView({
           age <b className="text-strong">{ageLabel(months)}</b>
         </span>
         <span>
-          subjects mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalDomains}</b>
+          subjects mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalSubjects}</b>
         </span>
         <span>
           your answers <b className="text-strong">{report.scores.observationCount}</b>
@@ -313,7 +313,7 @@ export function ReportView({
             childName={report.childName}
             planUrl={
               monthBuilt
-                ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_DOMAIN}`
+                ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_SUBJECT}`
                 : null
             }
           />
@@ -351,15 +351,15 @@ export function ReportView({
   const subjectRows = (
     <div className="mt-4 flex flex-col gap-2.5">
       {ordered.map((score) => {
-        const domain = getMapDomain(score.domainId);
-        const line = domainLine(score, report.childName);
+        const domain = getMapSubject(score.subjectId);
+        const line = subjectLine(score, report.childName);
         const subjectText = generatedPiece(
-          `subject.${score.domainId}`,
-          narrativeView?.narrative.subjects[score.domainId],
+          `subject.${score.subjectId}`,
+          narrativeView?.narrative.subjects[score.subjectId],
         );
         const drawerText = generatedPiece(
-          `drawer.${score.domainId}`,
-          narrativeView?.narrative.drawers[score.domainId],
+          `drawer.${score.subjectId}`,
+          narrativeView?.narrative.drawers[score.subjectId],
         );
         // "Why this is interesting": the model-written subject line
         // continued by its drawer piece; the reviewed template
@@ -367,8 +367,8 @@ export function ReportView({
         const whyInteresting = [subjectText ?? line.sentence, drawerText]
           .filter(Boolean)
           .join(" ");
-        const domainAnswers = answersByDomain.get(score.domainId) ?? [];
-        const movement = movements.get(score.domainId);
+        const subjectAnswers = answersByDomain.get(score.subjectId) ?? [];
+        const movement = movements.get(score.subjectId);
         const badgeStyle =
           score.position === "ahead"
             ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
@@ -381,7 +381,7 @@ export function ReportView({
           new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
         );
         return (
-          <details key={score.domainId} id={`subject-${score.domainId}`} className="group rounded-md border border-border-subtle">
+          <details key={score.subjectId} id={`subject-${score.subjectId}`} className="group rounded-md border border-border-subtle">
             <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span
                 className="flex-shrink-0 whitespace-nowrap rounded-pill px-3 py-1 text-xs font-bold"
@@ -424,14 +424,14 @@ export function ReportView({
               <p className="text-sm text-body">{domain?.whatItIs}</p>
 
               {/* 2. The questions, and what she answered. */}
-              {domainAnswers.length > 0 ? (
+              {subjectAnswers.length > 0 ? (
                 <>
                   <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
                     Questions I asked {"\u00b7"} your answers
                   </p>
                   <ReceiptsList
                     childId={report.childId}
-                    rows={domainAnswers}
+                    rows={subjectAnswers}
                     editable={editable}
                   />
                 </>
@@ -498,7 +498,7 @@ export function ReportView({
                           THE move on a growing subject, so only there
                           does it get the solid clay primary. */}
                       <Link
-                        href={`/onboarding/r/${report.token}/plan/${score.domainId}`}
+                        href={`/onboarding/r/${report.token}/plan/${score.subjectId}`}
                         className={reportButtonClass(
                           score.position === "growing" ? "primary" : "secondary",
                           "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
@@ -509,7 +509,7 @@ export function ReportView({
                       {/* Says the action honestly: this one leaves the
                           report and asks more questions. */}
                       <Link
-                        href={`/onboarding?dd=${report.childId}.${score.domainId}`}
+                        href={`/onboarding?dd=${report.childId}.${score.subjectId}`}
                         className={reportButtonClass(
                           "secondary",
                           "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",

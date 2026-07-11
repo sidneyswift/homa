@@ -5,6 +5,7 @@ import mammoth from "mammoth";
 import sharp from "sharp";
 import * as XLSX from "xlsx";
 
+import { captionSmsImage } from "./caption-image";
 import { downloadTelnyxMedia } from "./telnyx-api";
 import { transcribeSmsMedia } from "./transcribe";
 
@@ -15,7 +16,14 @@ import { transcribeSmsMedia } from "./transcribe";
  *
  *   image     -> image part, passed through by URL (Claude reads jpeg/
  *                png/gif/webp natively); BMP (carrier-legal MMS type
- *                Claude cannot read) converts to PNG first, see below
+ *                Claude cannot read) converts to PNG first, see below.
+ *                Linked-family photos ALSO get a one-line caption block
+ *                (caption-image.ts): the image part is turn-scoped, so
+ *                without a text trace a photo-only exchange is invisible
+ *                to recall forever (the microwave lesson, founder review
+ *                2026-07-10 evening). The caption rides the turn text
+ *                into conversation_messages, where FTS and semantic
+ *                search can find it.
  *   audio     -> speech transcript block (Telnyx STT, transcribe.ts)
  *   video     -> audio-track transcript block (same STT; a Twelve Labs
  *                style visual lane can slot in here later if needed)
@@ -154,6 +162,11 @@ const VOICE_NOTE_MARKER = "[Voice note, transcribed]";
 const VIDEO_MARKER = "[Video attached, audio track transcribed]";
 const WORD_DOCUMENT_MARKER = "[Attached Word document, text extracted]";
 const SPREADSHEET_MARKER = "[Attached spreadsheet, extracted as CSV]";
+/** Bare markers so an attachment's EXISTENCE always reaches the durable
+ *  record, even when captioning is off or fails; the parts themselves
+ *  are turn-scoped and leave no searchable trace. */
+const PHOTO_MARKER = "[Photo attached]";
+const PDF_MARKER = "[PDF attached]";
 
 /** Shared by every extraction lane (text files, Word, Excel) so a large
  *  file degrades to a truncated block instead of flooding the turn. */
@@ -217,7 +230,23 @@ function failedAttachment(
   };
 }
 
-async function convertBmpToPng(url: string): Promise<ProcessedSmsAttachment> {
+/** The photo's searchable trace: a captioned block for linked families
+ *  (null familyId skips the model call; unlinked sessions never persist,
+ *  so a caption would buy nothing), the bare marker otherwise. */
+async function photoBlock(
+  image: Uint8Array | URL,
+  mediaType: string,
+  familyId: string | null,
+): Promise<string> {
+  if (!familyId) return PHOTO_MARKER;
+  const caption = await captionSmsImage({ image, mediaType, familyId });
+  return caption ? `[Photo attached: ${caption}]` : PHOTO_MARKER;
+}
+
+async function convertBmpToPng(
+  url: string,
+  familyId: string | null,
+): Promise<ProcessedSmsAttachment> {
   const bytes = await downloadTelnyxMedia(url);
   if (!bytes || bytes.byteLength === 0 || bytes.byteLength > IMAGE_CONVERT_MAX_BYTES) {
     return failedAttachment("image", "image/bmp");
@@ -227,6 +256,7 @@ async function convertBmpToPng(url: string): Promise<ProcessedSmsAttachment> {
     return {
       result: { kind: "image", mediaType: "image/bmp", outcome: "converted" },
       part: { type: "image", image: png, mediaType: "image/png" },
+      block: await photoBlock(png, "image/png", familyId),
     };
   } catch (error) {
     console.error(
@@ -240,14 +270,18 @@ async function convertBmpToPng(url: string): Promise<ProcessedSmsAttachment> {
 async function processImage(
   url: string,
   mediaType: string,
+  familyId: string | null,
 ): Promise<ProcessedSmsAttachment> {
   if (MODEL_IMAGE_TYPES.has(mediaType)) {
     return {
       result: { kind: "image", mediaType, outcome: "model_native" },
       part: { type: "image", image: new URL(url) },
+      block: await photoBlock(new URL(url), mediaType, familyId),
     };
   }
-  if (CONVERTIBLE_IMAGE_TYPES.has(mediaType)) return await convertBmpToPng(url);
+  if (CONVERTIBLE_IMAGE_TYPES.has(mediaType)) {
+    return await convertBmpToPng(url, familyId);
+  }
   return failedAttachment("image", mediaType);
 }
 
@@ -282,6 +316,10 @@ async function processPdf(
       data: Buffer.from(bytes).toString("base64"),
       mediaType,
     },
+    // File parts are turn-scoped like image parts; the marker keeps the
+    // PDF's existence in the durable record (a caption lane for PDFs is
+    // a noted follow-up).
+    block: PDF_MARKER,
   };
 }
 
@@ -367,6 +405,7 @@ async function processTextFile(
 
 async function processOneSmsAttachment(
   attachment: Attachment,
+  familyId: string | null,
 ): Promise<ProcessedSmsAttachment> {
   const mediaType = bareMediaType(attachment.mimeType);
   const url = attachment.url;
@@ -374,7 +413,7 @@ async function processOneSmsAttachment(
   switch (attachment.type) {
     case "image": {
       if (!url) return failedAttachment("image", mediaType);
-      return await processImage(url, mediaType);
+      return await processImage(url, mediaType, familyId);
     }
     case "audio": {
       if (!url) return failedAttachment("audio", mediaType);
@@ -398,20 +437,24 @@ async function processOneSmsAttachment(
 }
 
 /**
- * normalizeSmsAttachments(attachments): Promise<NormalizedSmsAttachments>
- * Converts every inbound MMS attachment into model-usable content (or a
- * bracketed failure note). Never throws; per-attachment outcomes come
- * back for analytics. Used by agent/channels/telnyx.ts.
+ * normalizeSmsAttachments(attachments, options): converts every inbound
+ * MMS attachment into model-usable content (or a bracketed failure
+ * note). Never throws; per-attachment outcomes come back for analytics.
+ * options.familyId (the channel's auth context, never model input)
+ * turns on photo captioning for linked families. Used by
+ * agent/channels/telnyx.ts.
  */
 export async function normalizeSmsAttachments(
   attachments: Attachment[],
+  options?: { familyId?: string | null },
 ): Promise<NormalizedSmsAttachments> {
   const blocks: string[] = [];
   const mediaParts: Array<ImagePart | FilePart> = [];
   const results: SmsAttachmentResult[] = [];
+  const familyId = options?.familyId ?? null;
 
   for (const attachment of attachments) {
-    const processed = await processOneSmsAttachment(attachment);
+    const processed = await processOneSmsAttachment(attachment, familyId);
     results.push(processed.result);
     if (processed.block) blocks.push(processed.block);
     if (processed.part) mediaParts.push(processed.part);

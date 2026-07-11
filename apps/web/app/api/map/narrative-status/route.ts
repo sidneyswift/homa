@@ -8,7 +8,7 @@ import {
 } from "../../../../lib/map/narrative-store";
 
 /**
- * GET /api/map/narrative-status?token=...[&domain=...]
+ * GET /api/map/narrative-status?token=...[&subject=...]
  * The writing beat's poll target, token-scoped exactly like the report
  * page itself (the token IS the access grant; no lead ids in, none out).
  * Also the self-healing seam: a "writing" attempt whose startedAt is past
@@ -36,14 +36,14 @@ export async function GET(request: Request): Promise<Response> {
 
   const url = new URL(request.url);
   const token = url.searchParams.get("token") ?? "";
-  const domainId = url.searchParams.get("domain");
+  const subjectId = url.searchParams.get("subject");
   if (!token) {
     return Response.json({ ok: false }, { status: 400 });
   }
 
   try {
-    const row = domainId
-      ? await getPlanNarrativeStatusByToken(token, domainId)
+    const row = subjectId
+      ? await getPlanNarrativeStatusByToken(token, subjectId)
       : await getReportNarrativeStatusByToken(token);
     if (!row) {
       return Response.json({ ok: false }, { status: 404 });
@@ -54,8 +54,8 @@ export async function GET(request: Request): Promise<Response> {
       const childId = row.childId;
       after(async () => {
         try {
-          if (domainId) {
-            await runPlanNarrative(childId, domainId);
+          if (subjectId) {
+            await runPlanNarrative(childId, subjectId);
           } else {
             await runReportNarrative(childId);
           }

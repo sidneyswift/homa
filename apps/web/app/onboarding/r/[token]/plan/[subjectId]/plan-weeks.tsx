@@ -15,7 +15,7 @@ export function PlanWeeks({
   storageKey,
   weekLines = null,
   childId,
-  domainId,
+  subjectId,
   initialChecks = {},
 }: {
   weeks: PlanWeek[];
@@ -24,11 +24,11 @@ export function PlanWeeks({
    * null entries fall back to the template focus line alone. */
   weekLines?: Array<string | null> | null;
   childId: string;
-  domainId: string;
+  subjectId: string;
   /** The plan row's synced checks: server truth, merged under local. */
   initialChecks?: Record<string, boolean>;
 }) {
-  const { done, toggle } = usePlanChecks({ storageKey, childId, domainId, initialChecks });
+  const { done, toggle } = usePlanChecks({ storageKey, childId, subjectId, initialChecks });
 
   const total = weeks.reduce((sum, week) => sum + week.activities.length, 0);
   const doneCount = Object.values(done).filter(Boolean).length;

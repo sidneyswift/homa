@@ -4,8 +4,8 @@ import Link from "next/link";
 import {
   ageInMonths,
   ageLabel,
-  domainLine,
-  getMapDomain,
+  subjectLine,
+  getMapSubject,
   MAP_SOURCES,
   type MapAnswer,
 } from "@homa/core";
@@ -68,9 +68,9 @@ export default async function EvidencePackPage({
   });
 
   const positions = {
-    ahead: scores.domains.filter((s) => s.position === "ahead" && !s.exposureBased).length,
-    onTrack: scores.domains.filter((s) => s.position === "on_track" && !s.exposureBased).length,
-    growing: scores.domains.filter((s) => s.position === "growing" && !s.exposureBased).length,
+    ahead: scores.subjects.filter((s) => s.position === "ahead" && !s.exposureBased).length,
+    onTrack: scores.subjects.filter((s) => s.position === "on_track" && !s.exposureBased).length,
+    growing: scores.subjects.filter((s) => s.position === "growing" && !s.exposureBased).length,
   };
 
   // Dated growth lines across the whole archive, oldest pair first.
@@ -89,7 +89,7 @@ export default async function EvidencePackPage({
 
   const answersByDomain = new Map<string, { statement: string; typicalMonths: number; answer: MapAnswer; standards: readonly string[]; sources: readonly string[] }[]>();
   for (const entry of report.answers) {
-    const found = getMapDomain(entry.itemId.split(".")[0]);
+    const found = getMapSubject(entry.itemId.split(".")[0]);
     const item = found?.items.find((candidate) => candidate.id === entry.itemId);
     if (!found || !item) continue;
     const list = answersByDomain.get(found.id) ?? [];
@@ -134,7 +134,7 @@ export default async function EvidencePackPage({
             <h2 className="font-display text-lg font-semibold text-strong">Composite picture</h2>
             <ul className="mt-2 flex flex-col gap-1 text-sm text-body">
               <li>
-                <b>{scores.mappedCount} of {scores.totalDomains}</b> subjects mapped, from{" "}
+                <b>{scores.mappedCount} of {scores.totalSubjects}</b> subjects mapped, from{" "}
                 <b>{scores.observationCount}</b> parent observations.
               </li>
               <li>
@@ -161,14 +161,14 @@ export default async function EvidencePackPage({
               Subject-by-subject record
             </h2>
             <div className="mt-3 flex flex-col gap-4">
-              {scores.strengthOrder.map((domainId) => {
-                const score = scores.domains.find((entry) => entry.domainId === domainId);
-                const domain = getMapDomain(domainId);
+              {scores.strengthOrder.map((subjectId) => {
+                const score = scores.subjects.find((entry) => entry.subjectId === subjectId);
+                const domain = getMapSubject(subjectId);
                 if (!score || !domain) return null;
-                const line = domainLine(score, report.childName);
-                const rows = answersByDomain.get(domainId) ?? [];
+                const line = subjectLine(score, report.childName);
+                const rows = answersByDomain.get(subjectId) ?? [];
                 return (
-                  <div key={domainId} className="rounded-md border border-border-subtle p-4">
+                  <div key={subjectId} className="rounded-md border border-border-subtle p-4">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <h3 className="font-semibold text-strong">{domain.displayName}</h3>
                       <span className="font-mono text-xs text-muted">{line.badge}</span>

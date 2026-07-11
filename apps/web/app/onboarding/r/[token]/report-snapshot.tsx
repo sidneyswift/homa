@@ -21,7 +21,7 @@ export function ReportSnapshot({
   childName: string;
   /** Already formatted, e.g. "July 8, 2026" (matches the header band). */
   generatedDate: string;
-  plans: { domainId: string; done: number; total: number; retestAt: string }[];
+  plans: { subjectId: string; done: number; total: number; retestAt: string }[];
   /** Oldest first, the live report last (report-view's eras). */
   eras: GrowthEra[];
   /** Outer spacing, owned by the layout: the letter-style page flows

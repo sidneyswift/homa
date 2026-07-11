@@ -8,14 +8,15 @@ import { ChatSession } from "../../features/chat/chat-session";
 import { useFamilyData } from "../../features/family/use-family-data";
 import {
   chatStorageKey,
-  loadSavedChat,
-  type SavedChat,
+  prepareChat,
+  type PreparedChat,
 } from "../../lib/chat-storage";
 import { colors, space } from "../../theme/tokens";
 
 /**
- * The Chat tab: loads the persisted transcript before mounting the
- * session (useEveAgent seeds initialEvents at construction), then hands
+ * The Chat tab: loads the persisted transcript and takes the
+ * fresh-morning rotation decision before mounting the session
+ * (useEveAgent seeds initialEvents at construction), then hands
  * everything to ChatSession. Keyed by user id so switching accounts
  * never bleeds transcripts across users.
  */
@@ -23,13 +24,13 @@ export default function ChatScreen() {
   const { session } = useSession();
   const { family } = useFamilyData();
   const userId = session?.user.id ?? null;
-  const [saved, setSaved] = useState<SavedChat | null>(null);
+  const [prepared, setPrepared] = useState<PreparedChat | null>(null);
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    void loadSavedChat(chatStorageKey(userId)).then((chat) => {
-      if (!cancelled) setSaved(chat);
+    void prepareChat(chatStorageKey(userId)).then((chat) => {
+      if (!cancelled) setPrepared(chat);
     });
     return () => {
       cancelled = true;
@@ -58,11 +59,11 @@ export default function ChatScreen() {
           <Logo size={24} />
         </View>
 
-        {userId && saved !== null ? (
+        {userId && prepared !== null ? (
           <ChatSession
             key={userId}
             storageKey={chatStorageKey(userId)}
-            saved={saved}
+            prepared={prepared}
             familyId={family?.id ?? null}
             parentName={family?.parent_display_name ?? null}
           />

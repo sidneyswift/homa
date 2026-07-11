@@ -25,6 +25,7 @@ export const USAGE_SURFACES = [
   "compaction",
   "materials_image",
   "materials_review",
+  "media_caption",
   "report_narrative",
   "plan_narrative",
   "curriculum",

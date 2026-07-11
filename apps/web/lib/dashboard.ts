@@ -58,7 +58,7 @@ export async function getReportsForChildren(
 
 export interface DashboardPlan {
   childId: string;
-  domainId: string;
+  subjectId: string;
   /** Check-offs done vs total activities, counted from the synced map. */
   done: number;
   total: number;
@@ -87,7 +87,7 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("child_plans")
-    .select("child_id, domain_id, plan, progress, retest_at")
+    .select("child_id, subject_id, plan, progress, retest_at")
     .in("child_id", childIds);
   if (error) throw new Error(`child_plans read failed: ${error.message}`);
   return (data ?? []).map((row) => {
@@ -95,7 +95,7 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
     const progress = (row.progress ?? {}) as Record<string, boolean>;
     return {
       childId: row.child_id as string,
-      domainId: row.domain_id as string,
+      subjectId: row.subject_id as string,
       done: Object.values(progress).filter(Boolean).length,
       total: plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
       retestAt: row.retest_at as string,
@@ -185,11 +185,11 @@ export function buildUpNextItems(input: {
     const token = input.reports.get(plan.childId)?.token;
     const name = nameById.get(plan.childId);
     items.push({
-      key: `retest-${plan.childId}-${plan.domainId}`,
+      key: `retest-${plan.childId}-${plan.subjectId}`,
       label: name ? `Re-check ${name}'s month` : "Re-check the month",
       sub: "see what moved",
       dot: "clay",
-      href: token ? `/onboarding/r/${token}/plan/${plan.domainId}` : null,
+      href: token ? `/onboarding/r/${token}/plan/${plan.subjectId}` : null,
     });
   }
 

@@ -1,4 +1,4 @@
-import { ageLabel, domainLine, getMapDomain, type DomainScore } from "@homa/core";
+import { ageLabel, subjectLine, getMapSubject, type SubjectScore } from "@homa/core";
 
 import type { DashboardReport } from "../../../../lib/dashboard";
 import { movementFor } from "../../../../components/dashboard/movement";
@@ -23,11 +23,11 @@ export function SubjectList({
   childName: string;
   ageMonths: number;
 }) {
-  const byId = new Map(report.scores.domains.map((score) => [score.domainId, score]));
+  const byId = new Map(report.scores.subjects.map((score) => [score.subjectId, score]));
   const ordered = report.scores.strengthOrder
-    .map((domainId) => byId.get(domainId))
-    .filter((score): score is DomainScore => Boolean(score));
-  const notMapped = report.scores.domains.filter((score) => score.position === "not_mapped");
+    .map((subjectId) => byId.get(subjectId))
+    .filter((score): score is SubjectScore => Boolean(score));
+  const notMapped = report.scores.subjects.filter((score) => score.position === "not_mapped");
   const prior = report.history[0];
 
   return (
@@ -40,18 +40,18 @@ export function SubjectList({
       </div>
       <div className="mt-3 flex flex-col">
         {ordered.map((score, index) => {
-          const domain = getMapDomain(score.domainId);
-          const line = domainLine(score, childName);
+          const domain = getMapSubject(score.subjectId);
+          const line = subjectLine(score, childName);
           const tone = subjectTone(score.position);
           const movement = movementFor(score, prior);
           return (
             <div
-              key={score.domainId}
+              key={score.subjectId}
               className={`py-3.5 ${index < ordered.length - 1 ? "border-b border-[var(--stone-100)]" : ""}`}
             >
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-semibold text-strong">
-                  {domain?.displayName ?? score.domainId}
+                  {domain?.displayName ?? score.subjectId}
                 </span>
                 <span
                   className="rounded-pill px-2.5 py-0.5 text-[0.68rem] font-bold"

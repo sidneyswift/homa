@@ -1,4 +1,4 @@
-import type { DomainScore, MapScores } from "@homa/core";
+import type { SubjectScore, MapScores } from "@homa/core";
 
 /**
  * Movement between scorings, the dashboard surfaces' shared copy of the
@@ -7,7 +7,7 @@ import type { DomainScore, MapScores } from "@homa/core";
  * a down-arrow). Same semantics as report-view.tsx's movementFor.
  */
 
-const POSITION_RANK: Record<DomainScore["position"], number> = {
+const POSITION_RANK: Record<SubjectScore["position"], number> = {
   not_mapped: 0,
   growing: 1,
   on_track: 2,
@@ -21,11 +21,11 @@ export interface Movement {
 }
 
 export function movementFor(
-  current: DomainScore,
+  current: SubjectScore,
   prior: { scores: MapScores; generated_at: string } | undefined,
 ): Movement | null {
   if (!prior || current.exposureBased) return null;
-  const previous = prior.scores.domains.find((entry) => entry.domainId === current.domainId);
+  const previous = prior.scores.subjects.find((entry) => entry.subjectId === current.subjectId);
   if (!previous) return null;
   const since = new Date(prior.generated_at).toLocaleDateString("en-US", {
     month: "short",
@@ -48,9 +48,9 @@ export function movementFor(
 /** How many subjects genuinely moved up since the prior scoring. */
 export function movedUpCount(scores: MapScores, prior: MapScores | undefined): number {
   if (!prior) return 0;
-  const priorById = new Map(prior.domains.map((score) => [score.domainId, score]));
-  return scores.domains.filter((score) => {
-    const previous = priorById.get(score.domainId);
+  const priorById = new Map(prior.subjects.map((score) => [score.subjectId, score]));
+  return scores.subjects.filter((score) => {
+    const previous = priorById.get(score.subjectId);
     if (!previous || score.exposureBased) return false;
     const monthsImproved =
       score.monthsAhead !== null &&
