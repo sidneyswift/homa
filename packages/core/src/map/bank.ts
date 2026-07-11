@@ -30,6 +30,10 @@ export interface MapItem {
   /** Documented typical WINDOW [earliest, latest] in months, only where the
    * corpus gives a real cited range; display-only (see content.ts). */
   typicalRangeMonths?: readonly [number, number];
+  /** Curriculum-standard keys this item aligns to (e.g. "CCSS K.CC.A.1"),
+   * populated on most bank items in content.ts and surfaced in the evidence
+   * pack. Optional: not every item maps to a formal standard. */
+  standards?: readonly string[];
 }
 
 export interface MapSubject {

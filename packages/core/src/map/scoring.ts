@@ -55,7 +55,9 @@ export interface SubjectScore {
    * genuinely advanced kid is never mistaken for a merely capped number.
    */
   beyondScale: boolean;
-  /** True when both the base and a ladder item carried real signal. */
+  /** True when at least two real observations landed in this subject (base
+   * plus any ladder or deep-dive rung), the threshold at which a reading is
+   * more than a single data point (see observations.length >= 2 below). */
   highConfidence: boolean;
   /** Count of real observations (easily / getting there / not yet). */
   observations: number;

@@ -106,14 +106,22 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
   }
 
   // No-longer-eligible rows go quiet; returners wake up. paused_at is
-  // the parent's own switch and is deliberately never written here.
+  // the parent's own switch and is deliberately never written here. The
+  // report predicate mirrors the seed rule so a brief whose last scored
+  // report was removed goes quiet instead of dispatching an empty brief,
+  // and comes back if a report returns (2026-07-11 review, CR-15).
   await sql`
     update public.agent_schedules s
     set enabled = false
     from public.families f
     where s.family_id = f.id and s.kind = ${kind} and s.enabled
       and (f.email is null or f.time_zone is null
-           or (${optOutFilter} and f.journal_opt_out_at is not null))
+           or (${optOutFilter} and f.journal_opt_out_at is not null)
+           or (${requireReport} and not exists (
+                 select 1 from public.child_reports r
+                 join public.children c on c.id = r.child_id
+                 where c.family_id = f.id
+               )))
   `;
   await sql`
     update public.agent_schedules s
@@ -122,6 +130,11 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     where s.family_id = f.id and s.kind = ${kind} and not s.enabled
       and f.email is not null and f.time_zone is not null
       and (${!optOutFilter} or f.journal_opt_out_at is null)
+      and (${!requireReport} or exists (
+             select 1 from public.child_reports r
+             join public.children c on c.id = r.child_id
+             where c.family_id = f.id
+           ))
   `;
 }
 

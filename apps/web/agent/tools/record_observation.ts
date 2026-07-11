@@ -8,6 +8,7 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { narrativeEnabled } from "../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../lib/map/narrative-runner";
 import { recordObservation } from "../../lib/map/store";
 
@@ -80,14 +81,18 @@ export default defineTool({
     }
 
     // A rescore resets the report's words (they must match the new
-    // numbers); kick regeneration without awaiting it. No next/server
-    // after() here: eve compiles tool modules outside Next's bundler and
-    // that import breaks its build (deploy failure 2026-07-10). If this
-    // fire-and-forget gets cut short, the narrative-status endpoint
-    // self-heals on the next report view.
-    void runReportNarrative(input.childId).catch((error) => {
-      console.error("record_observation: narrative regeneration failed", error);
-    });
+    // numbers); kick regeneration without awaiting it. Gated on the same
+    // REPORT_NARRATIVE_ENABLED flag every other rescore path checks, so with
+    // the flag off we neither pay for generation nor write narrative rows the
+    // UI treats as disabled (2026-07-11 review, CR-08). No next/server after()
+    // here: eve compiles tool modules outside Next's bundler and that import
+    // breaks its build (deploy failure 2026-07-10). If this fire-and-forget
+    // gets cut short, the narrative-status endpoint self-heals on next view.
+    if (narrativeEnabled()) {
+      void runReportNarrative(input.childId).catch((error) => {
+        console.error("record_observation: narrative regeneration failed", error);
+      });
+    }
 
     const domain = getTaxonomyDomain(BANK_ITEM_DOMAINS[input.itemId] ?? "");
 

@@ -1,4 +1,10 @@
-import { buildFourWeekPlan, type Curriculum, type MapAnswer, type MapScores } from "@homa/core";
+import {
+  buildFourWeekPlan,
+  type Curriculum,
+  type FourWeekPlan,
+  type MapAnswer,
+  type MapScores,
+} from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
 import type { ReportFacts, SubjectFacts } from "./narrative-facts";
@@ -51,8 +57,10 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
     : [];
   const focus = typeof profile.focus === "string" ? [profile.focus] : [];
 
-  const planRows = await sql<{ subject_id: string; progress: Record<string, boolean> }[]>`
-    select subject_id, progress from public.child_plans where child_id = ${childId}
+  const planRows = await sql<
+    { subject_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]
+  >`
+    select subject_id, plan, progress from public.child_plans where child_id = ${childId}
   `;
 
   return buildReportFacts({
@@ -71,11 +79,16 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
           note: row.narrative.note ?? "",
         }
       : null,
-    practice: planRows.map((plan) => ({
-      subjectName: plan.subject_id,
-      done: Object.values(plan.progress ?? {}).filter(Boolean).length,
-      total: 0,
-    })),
+    // Real activity totals (not a hardcoded 0), mirroring narrative-store,
+    // and only subjects with actual check-offs, so facts never read "5 of 0"
+    // (2026-07-11 review, CR-14).
+    practice: planRows
+      .map((plan) => ({
+        subjectName: plan.subject_id,
+        done: Object.values(plan.progress ?? {}).filter(Boolean).length,
+        total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
+      }))
+      .filter((entry) => entry.done > 0),
   });
 }
 

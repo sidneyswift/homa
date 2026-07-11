@@ -44,18 +44,26 @@ export function HubStep({
   onChildRemoved: () => void;
 }) {
   const [linkSent, setLinkSent] = useState(false);
+  const [linkError, setLinkError] = useState(false);
 
   async function emailMeThisLink() {
     if (!email) return;
+    setLinkError(false);
+    // Only claim the link was sent when the server actually accepted it; a
+    // network failure must not show "Link sent" (2026-07-11 review, CR-06).
     try {
-      await fetch("/api/map/resume", {
+      const response = await fetch("/api/map/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      setLinkSent(true);
+      if (response.ok) {
+        setLinkSent(true);
+      } else {
+        setLinkError(true);
+      }
     } catch {
-      setLinkSent(true);
+      setLinkError(true);
     }
   }
 
@@ -184,14 +192,22 @@ export function HubStep({
           linkSent ? (
             <p className="text-sm text-muted">Link sent. It works on any device.</p>
           ) : (
-            <button
-              type="button"
-              onClick={() => void emailMeThisLink()}
-              className="inline-flex items-center gap-1.5 self-start text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline"
-            >
-              <Mail size={14} aria-hidden="true" />
-              email me this link (for later, or another device)
-            </button>
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => void emailMeThisLink()}
+                className="inline-flex items-center gap-1.5 self-start text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline"
+              >
+                <Mail size={14} aria-hidden="true" />
+                email me this link (for later, or another device)
+              </button>
+              {linkError ? (
+                <p className="text-sm text-muted" role="alert">
+                  That didn&apos;t send just now. Have another look at your connection and try
+                  again.
+                </p>
+              ) : null}
+            </div>
           )
         ) : null}
       </div>

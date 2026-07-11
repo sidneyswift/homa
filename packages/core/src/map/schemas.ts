@@ -88,7 +88,10 @@ export const HOMESCHOOL_STYLES = [
 
 export const mapChildExtrasSchema = z.object({
   childId: z.uuid(),
-  interests: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
+  // Same cap as initial child creation (MAP_INTERESTS_CAP), so the two write
+  // paths agree and merged profile + bag interests cannot exceed it on one
+  // side (2026-07-11 review, CR-34).
+  interests: z.array(z.string().trim().min(1).max(40)).max(MAP_INTERESTS_CAP).optional(),
   helpWith: z.array(z.string().trim().min(1).max(60)).max(6).optional(),
   /** Per-subject "what we're doing that works" (the ahead follow-up). */
   whatsWorking: z.record(z.string().max(40), z.string().trim().min(1).max(500)).optional(),

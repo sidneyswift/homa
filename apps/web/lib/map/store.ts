@@ -103,11 +103,27 @@ export async function startAnonymousFamily(
 
 /** Moves every child of `fromId` into `intoId`, then deletes the empty
  * husk. Children carry their answers, reports, and plans with them (all
- * child-keyed), so a fold never touches those tables. */
+ * child-keyed), so a fold never touches those tables. The husk's own
+ * `families.context` (homeschool styles, curriculums, notes the parent set
+ * this sitting before signing up) merges into the surviving family first,
+ * filling only keys it lacks so an established family's settings win on
+ * conflict; without this the context died with the husk (2026-07-11
+ * review, CR-13). All three steps run in one transaction so a mid-fold
+ * failure can never leave children split from their husk. */
 async function foldFamilyInto(fromId: string, intoId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.children set family_id = ${intoId} where family_id = ${fromId}`;
-  await sql`delete from public.families where id = ${fromId}`;
+  await sql.begin(async (tx) => {
+    await tx`update public.children set family_id = ${intoId} where family_id = ${fromId}`;
+    await tx`
+      update public.families t
+      set context =
+            coalesce((select f.context from public.families f where f.id = ${fromId}), '{}'::jsonb)
+            || coalesce(t.context, '{}'::jsonb),
+          updated_at = now()
+      where t.id = ${intoId}
+    `;
+    await tx`delete from public.families where id = ${fromId}`;
+  });
 }
 
 interface AttachAuthUserInput {
@@ -1284,6 +1300,12 @@ export async function childrenNowInBand(): Promise<
   { child_id: string; child_name: string; family_id: string; email: string; birth_month: string }[]
 > {
   const sql = mapDb();
+  // Order the oldest pending-band children first and coarsely pre-filter to
+  // those at least ~23 months old in SQL, so a child who has actually crossed
+  // into the scored range can never be dropped by the LIMIT before the exact
+  // (day-precise) isInScoredRange check runs (2026-07-11 review, CR-05). The
+  // one-month SQL slack keeps the day-boundary difference between Postgres
+  // now() and the TS age math from ever excluding an eligible row.
   const rows = await sql<
     { child_id: string; child_name: string; family_id: string; email: string; birth_month: string }[]
   >`
@@ -1293,6 +1315,8 @@ export async function childrenNowInBand(): Promise<
     join public.families f on f.id = c.family_id
     where c.pending_band and c.band_ready_emailed_at is null and f.status <> 'deleted'
       and f.email is not null
+      and c.birth_month <= (now() - make_interval(months => 23))::date
+    order by c.birth_month
     limit 200
   `;
   return rows.filter((row) => isInScoredRange(ageInMonths(row.birth_month)));
