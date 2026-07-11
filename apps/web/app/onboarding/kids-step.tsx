@@ -7,13 +7,14 @@ import { MAP_KID_CAP } from "@homa/core";
 
 /**
  * S2: add your kids, as the SAME add-a-child card the signed-in flow uses
- * (founder call 2026-07-08: one onboarding for every door). This
- * overturns the 2026-07-06 "get the actual birthday" ruling: month +
- * year is what the card asks, and the day saves as 01, the same
- * convention /home has always used (age-band math needs month precision
- * only).
+ * (founder call 2026-07-08: one onboarding for every door). The card asks
+ * for the full birthday, month, day, and year (founder ruling 2026-07-11:
+ * "get the full data so we know how old the kid is", restoring the
+ * 2026-07-06 ruling that the 2026-07-08 month-only card had overturned).
+ * The day select clamps to the real day count for the chosen month, and
+ * the server schema rejects impossible dates like Feb 30.
  *
- * Founder follow-up (same day, with screenshot): the interests and
+ * Founder follow-up (2026-07-08, with screenshot): the interests and
  * help-with questions left this card. They belong to the questionnaire
  * instead, where the extras beat right after the last checklist question
  * asks them with tappable suggestions (ExtrasStep), so the card is just
@@ -45,15 +46,26 @@ interface AddedKid {
 interface KidForm {
   name: string;
   month: string;
+  day: string;
   year: string;
 }
 
 function emptyForm(): KidForm {
-  return { name: "", month: "", year: "" };
+  return { name: "", month: "", day: "", year: "" };
 }
 
 function formIsBlank(form: KidForm): boolean {
-  return form.name.trim() === "" && form.month === "" && form.year === "";
+  return (
+    form.name.trim() === "" && form.month === "" && form.day === "" && form.year === ""
+  );
+}
+
+/** Day count for the picked month (and year, for February), defaulting
+ * generously while either is unpicked; a leap default keeps Feb 29
+ * pickable until the year says otherwise. */
+function daysInMonth(month: string, year: string): number {
+  if (month === "") return 31;
+  return new Date(Number(year || "2000"), Number(month), 0).getDate();
 }
 
 export function KidsStep({
@@ -77,14 +89,22 @@ export function KidsStep({
   const canAddMore = totalKids < MAP_KID_CAP;
 
   function updateForm(patch: Partial<KidForm>) {
-    setForm((current) => ({ ...current, ...patch }));
+    setForm((current) => {
+      const next = { ...current, ...patch };
+      // A month or year change can shrink the day count (Feb, leap years);
+      // an out-of-range picked day resets rather than saving a fake date.
+      if (next.day !== "" && Number(next.day) > daysInMonth(next.month, next.year)) {
+        next.day = "";
+      }
+      return next;
+    });
   }
 
   /** Null when valid, otherwise the friendly pointer to what's missing. */
   function validateForm(): string | null {
     if (!form.name.trim()) return "Add their first name (a nickname is fine) and we're off.";
-    if (form.month === "" || form.year === "") {
-      return `Pick ${form.name.trim()}'s birth month and year.`;
+    if (form.month === "" || form.day === "" || form.year === "") {
+      return `Pick ${form.name.trim()}'s birthday: month, day, and year.`;
     }
     return null;
   }
@@ -95,8 +115,8 @@ export function KidsStep({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: form.name.trim(),
-        // Day is always 01 by design: age-band math needs month + year only.
-        birthDate: `${form.year}-${form.month.padStart(2, "0")}-01`,
+        // The real birthday, day included (founder ruling 2026-07-11).
+        birthDate: `${form.year}-${form.month.padStart(2, "0")}-${form.day.padStart(2, "0")}`,
       }),
     });
     return (await response.json()) as { ok: boolean; inRange?: boolean; reason?: string };
@@ -219,7 +239,7 @@ export function KidsStep({
             className={inputClass}
           />
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-3">
             <div>
               <label className="block font-medium text-strong" htmlFor="kid-birth-month">
                 Birth month
@@ -239,6 +259,29 @@ export function KidsStep({
                     {month}
                   </option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label className="block font-medium text-strong" htmlFor="kid-birth-day">
+                Day
+              </label>
+              <select
+                id="kid-birth-day"
+                required
+                value={form.day}
+                onChange={(event) => updateForm({ day: event.target.value })}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  Day
+                </option>
+                {Array.from({ length: daysInMonth(form.month, form.year) }, (_, i) => i + 1).map(
+                  (day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ),
+                )}
               </select>
             </div>
             <div>

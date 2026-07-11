@@ -30,7 +30,7 @@ export default defineTool({
     await saveFamilyBasicsFromSms(session.familyId, input);
     return {
       saved: true,
-      note: "Saved. Next: her kids, one at a time (name and birth month and year).",
+      note: "Saved. Next: her kids, one at a time (name and full birthday).",
     };
   },
 });

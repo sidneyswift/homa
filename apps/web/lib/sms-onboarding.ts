@@ -147,7 +147,7 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
   const needs: string[] = [];
   if (!family?.profile_completed_at) needs.push("family basics (parent name, state)");
   if (!family?.email) needs.push("her email (so the report has a home and her account is one account)");
-  if (children.length === 0) needs.push("at least one child (name and birth month)");
+  if (children.length === 0) needs.push("at least one child (name and birthday)");
   for (const child of children) {
     if (child.inRange && !child.checklistDone) {
       needs.push(`checklist for ${child.name} (${child.answered} answered so far)`);
@@ -221,19 +221,18 @@ export async function saveFamilyBasicsFromSms(
 
 /** Adds a child through the shared store write; returns range info so
  * Homa knows whether a checklist follows. A repeat of the same name and
- * birth month returns the existing child instead of a twin row
+ * birthday returns the existing child instead of a twin row
  * (unknowns pass U10: text has no visual dedupe). */
 export async function addChildFromSms(
   familyId: string,
-  input: { name: string; birthMonth: string },
+  input: { name: string; birthDate: string },
 ): Promise<{ childId: string; ageMonths: number; inRange: boolean; existed?: boolean }> {
-  const birthDate = input.birthMonth.length === 7 ? `${input.birthMonth}-01` : input.birthMonth;
   const sql = mapDb();
   const existing = await sql<{ id: string; birth_month: string; pending_band: boolean }[]>`
     select id, to_char(birth_month, 'YYYY-MM-DD') as birth_month, pending_band
     from public.children
     where family_id = ${familyId} and lower(name) = ${input.name.trim().toLowerCase()}
-      and birth_month = ${birthDate}
+      and birth_month = ${input.birthDate}
   `;
   if (existing[0]) {
     return {
@@ -245,7 +244,7 @@ export async function addChildFromSms(
   }
   const result = await addChild(familyId, {
     name: input.name,
-    birthDate,
+    birthDate: input.birthDate,
     interests: [],
   });
   await emitMapEvent("map.child_added", {

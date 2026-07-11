@@ -1,18 +1,14 @@
 import { defineDynamic, defineSkill } from "eve/skills";
 
 import {
-  createCallerDbClient,
   MissingFamilyContextError,
+  resolveAgentAccess,
 } from "../../lib/agent-db";
 import {
-  bankSkillMatchesChildren,
-  childTargetingInfo,
-  FAMILY_SKILLS_MAX_COUNT,
-  mergeSkillRows,
-  type BankSkillRow,
-  type FamilySkillRow,
-} from "../../lib/agent-skills";
-import { ageInMonths } from "../../lib/child-age";
+  loadSkillLibraryCaller,
+  loadSkillLibraryPinned,
+  resolveAdvertisedSkillRows,
+} from "../../lib/agent-skills-store";
 
 /**
  * The one skills resolver: merges the family's own saved skills
@@ -32,66 +28,30 @@ import { ageInMonths } from "../../lib/child-age";
  * the turn failing.
  */
 
-interface ChildRow {
-  birth_month: string;
-  profile: { interests?: string[]; focus?: string } | null;
-}
-
 export default defineDynamic({
   events: {
     "turn.started": async (_event, ctx) => {
-      let clientBundle;
       try {
-        clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+        const access = resolveAgentAccess(ctx.session.auth.current?.attributes);
+        const rows =
+          access.mode === "pinned"
+            ? await loadSkillLibraryPinned(access.familyId)
+            : await loadSkillLibraryCaller(access.db, access.familyId);
+        if (!rows) return null;
+
+        const merged = resolveAdvertisedSkillRows(rows);
+        if (merged.length === 0) return null;
+
+        return Object.fromEntries(
+          merged.map((row) => [
+            row.name,
+            defineSkill({ description: row.description, markdown: row.markdown }),
+          ]),
+        );
       } catch (error) {
         if (error instanceof MissingFamilyContextError) return null;
-        throw error;
-      }
-      const { db, familyId } = clientBundle;
-
-      const [familyResult, bankResult, childrenResult] = await Promise.all([
-        db
-          .from("family_skills")
-          .select("name, description, markdown")
-          .eq("family_id", familyId)
-          .order("created_at", { ascending: true })
-          .limit(FAMILY_SKILLS_MAX_COUNT),
-        db
-          .from("skill_bank")
-          .select("name, description, markdown, min_age_months, max_age_months, tags")
-          .eq("published", true)
-          .limit(100),
-        db
-          .from("children")
-          .select("birth_month, profile")
-          .eq("family_id", familyId),
-      ]);
-      if (familyResult.error || bankResult.error || childrenResult.error) {
         return null;
       }
-
-      const now = new Date();
-      const children = ((childrenResult.data ?? []) as ChildRow[]).map((child) =>
-        childTargetingInfo(ageInMonths(child.birth_month, now), child.profile),
-      );
-
-      const familyRows = (familyResult.data ?? []) as Pick<
-        FamilySkillRow,
-        "name" | "description" | "markdown"
-      >[];
-      const bankRows = ((bankResult.data ?? []) as BankSkillRow[]).filter((row) =>
-        bankSkillMatchesChildren(row, children),
-      );
-
-      const merged = mergeSkillRows(familyRows, bankRows);
-      if (merged.length === 0) return null;
-
-      return Object.fromEntries(
-        merged.map((row) => [
-          row.name,
-          defineSkill({ description: row.description, markdown: row.markdown }),
-        ]),
-      );
     },
   },
 });

@@ -1,23 +1,28 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import { isValidBirthDate } from "@homa/core";
+
 import { addChildFromSms, nextChecklistItem } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
 
 /**
  * Adds one child during text signup (sms-onboarding-plan SO-2) and
  * hands back that child's first checklist question so the conversation
- * flows straight into it.
+ * flows straight into it. The birthday is the full date (founder ruling
+ * 2026-07-11: "get the full data so we know how old the kid is").
  */
 export default defineTool({
   description:
-    "Add one child during text signup: name plus birth month and year (day is never collected). Returns the child's first checklist question when they are in the scored range (ages 2 to 16).",
+    "Add one child during text signup: name plus their full birthday (month, day, and year). Returns the child's first checklist question when they are in the scored range (ages 2 to 16).",
   inputSchema: z.object({
     name: z.string().min(1).max(80),
-    birthMonth: z
+    birthDate: z
       .string()
-      .regex(/^\d{4}-\d{2}$/)
-      .describe("YYYY-MM. When she says an age ('she's 4'), ask for birth month and year instead of guessing."),
+      .refine(isValidBirthDate, "expected YYYY-MM-DD, a real calendar date")
+      .describe(
+        "YYYY-MM-DD, the kid's actual birthday. When she gives an age ('she's 4') or only a month, ask for the full birthday instead of guessing.",
+      ),
   }),
   async execute(input, ctx) {
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);

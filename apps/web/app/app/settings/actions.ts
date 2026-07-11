@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { normalizeUsPhoneE164 } from "@homa/core";
+import { isValidBirthDate, normalizeUsPhoneE164 } from "@homa/core";
 
 import { cancelFamilyInvite, sendFamilyInvite } from "../../../lib/family-invites";
 import { addFamilyPhone, removeFamilyPhone } from "../../../lib/family-phone";
@@ -182,32 +182,37 @@ export async function addChildAction(
   _prev: SetupFormState,
   formData: FormData,
 ): Promise<SetupFormState> {
-  const familyId = String(formData.get("family_id") ?? "");
   const name = String(formData.get("child_name") ?? "").trim();
   const birthYear = Number(formData.get("birth_year"));
   const birthMonth = Number(formData.get("birth_month"));
+  const birthDay = Number(formData.get("birth_day"));
 
-  if (!name || !familyId) return { error: "A name is required." };
-  const currentYear = new Date().getFullYear();
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+  if (!name) return { error: "A name is required." };
+  // The full birthday (founder ruling 2026-07-11). isValidBirthDate
+  // checks it is a real calendar date (no Feb 30) in an 18-year window.
+  const birthDate = [
+    String(birthYear),
+    String(birthMonth).padStart(2, "0"),
+    String(birthDay).padStart(2, "0"),
+  ].join("-");
   if (
     !Number.isInteger(birthYear) ||
     !Number.isInteger(birthMonth) ||
-    birthMonth < 1 ||
-    birthMonth > 12 ||
-    birthYear < currentYear - 19 ||
-    birthYear > currentYear
+    !Number.isInteger(birthDay) ||
+    !isValidBirthDate(birthDate)
   ) {
-    return { error: "Pick a valid birth month and year." };
+    return { error: "Pick a valid birthday: month, day, and year." };
   }
 
   const supabase = await createSupabaseServerClient();
   // Interests and focus fill in later, through the questionnaire's extras
   // beat (or the chat agent's update_child_profile tool), never this form.
   const { error } = await supabase.from("children").insert({
-    family_id: familyId,
+    family_id: family.id,
     name,
-    // Day is always 01 by design: age-band math needs month + year only.
-    birth_month: `${birthYear}-${String(birthMonth).padStart(2, "0")}-01`,
+    birth_month: birthDate,
     profile: {},
   });
   if (error) {

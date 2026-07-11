@@ -159,10 +159,18 @@ export type MapReportCorrection = z.infer<typeof mapReportCorrectionSchema>;
 
 /** Full-map sync of the four-week plan's check-offs (idempotent: the
  * client sends the whole checks map, keyed "week.activityIndex"). */
+const PLAN_CHECK_KEY_RE = /^[1-4]\.[0-5]$/;
+
+const mapPlanChecksSchema = z.record(z.string(), z.boolean()).transform((checks) =>
+  Object.fromEntries(
+    Object.entries(checks).filter(([key]) => PLAN_CHECK_KEY_RE.test(key)),
+  ) as Record<string, boolean>,
+);
+
 export const mapPlanProgressSchema = z.object({
   childId: z.uuid(),
   subjectId: z.string().min(1).max(40),
-  checks: z.record(z.string().regex(/^[1-4]\.\d{1,2}$/), z.boolean()),
+  checks: mapPlanChecksSchema,
 });
 export type MapPlanProgress = z.infer<typeof mapPlanProgressSchema>;
 

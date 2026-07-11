@@ -696,8 +696,6 @@ export function ReportView({
       <span>Made with Homa for {report.childName}</span>
       {!sample ? (
         <ReportActions
-          familyId={report.familyId}
-          childId={report.childId}
           childName={report.childName}
           token={report.token}
         />

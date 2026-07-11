@@ -414,6 +414,8 @@ improved):
 > Sub: "Add each of your kids, I'll keep their plans and progress separate."
 > Per kid: Name + Birth month/year (two pickers, no day: an age band doesn't need it
 > and a full DOB is data we don't need to hold)
+> [Overturned 2026-07-11, founder ruling: the full birthday (month, day, year) IS
+> collected, "get the full data so we know how old the kid is." See build-log.]
 > Empty-state (from the kit, kept verbatim): "No pressure, you can always add more
 > later."
 
@@ -995,7 +997,7 @@ day with ≥3 signups; drip answer rate day-over-day drop >30%.
 | Journey element | Ticket(s) | Fit |
 |---|---|---|
 | Auth screen, minimal fields, async verify | M1-01 (Supabase Auth, decided) | Covered. Add acceptance criteria: no email-verification gate pre-wow; identity linking for duplicate signups (Part 2 edge #7) |
-| Boring form intake (name/state/kids) | **M2-03 split (i)** | Covered by the split. This doc is the screen spec: birth month+year (not grade, not full DOB), searchable state select, out-of-range sage card |
+| Boring form intake (name/state/kids) | **M2-03 split (i)** | Covered by the split. This doc is the screen spec: birth month+year (not grade, not full DOB) [overturned 2026-07-11: full birthday is collected, see build-log], searchable state select, out-of-range sage card |
 | 4-questions-per-child + in-chat wow | **M2-03 splits (ii)** | Covered. Spec here: chips-first, one-question screens, "not sure" law, multi-child deferral rule, the why-this-page Callout |
 | Week-one drip (3/day) | **M2-03 split (iii)** | Covered in intent; mechanics need NT-4 (scheduler rows, skip/catch-up, per-persona timing, rotation for multi-child) |
 | Generation inside a chat turn, latency | M0-03 → M2-05 | Covered. M2-05 already adopts the DS worksheet template. Add: status-line streaming + retry/escalation = NT-8 |

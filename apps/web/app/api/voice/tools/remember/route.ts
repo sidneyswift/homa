@@ -1,6 +1,10 @@
 import { saveFamilyMemory } from "../../../../../lib/learning/save-memory";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
+import {
+  readVoiceChildId,
+  readVoiceFamilyId,
+} from "../../../../../lib/voice/tool-context";
 
 /**
  * POST /api/voice/tools/remember: the voice assistants' live memory tool
@@ -33,15 +37,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ success: false, error: "unauthorized" }, { status: 401 });
   }
 
-  const familyId = url.searchParams.get("family_id");
-  const childId = url.searchParams.get("child_id") || null;
-  if (!familyId) {
-    return Response.json({
-      success: false,
-      error:
-        "This caller is not linked to a Homa family yet, so there is nowhere to save this. Offer to set it up at thankshoma.com.",
-    });
-  }
+  const context = readVoiceFamilyId(
+    url,
+    "This caller is not linked to a Homa family yet, so there is nowhere to save this. Offer to set it up at thankshoma.com.",
+  );
+  if (!context.ok) return Response.json({ success: false, error: context.error });
+  const familyId = context.familyId;
+  const childId = readVoiceChildId(url);
 
   let body: ToolCallBody;
   try {

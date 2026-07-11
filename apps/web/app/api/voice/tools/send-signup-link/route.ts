@@ -3,6 +3,7 @@ import { normalizeUsPhoneE164 } from "@homa/core";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { updatePhoneLead } from "../../../../../lib/phone-leads";
 import { sendHomaSms } from "../../../../../lib/voice/telnyx-api";
+import { isUuid } from "../../../../../lib/voice/tool-context";
 
 /**
  * POST /api/voice/tools/send-signup-link: the voice assistant's way in
@@ -32,7 +33,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ success: false, error: "unauthorized" }, { status: 401 });
   }
 
-  if (url.searchParams.get("family_id")) {
+  if (isUuid(url.searchParams.get("family_id"))) {
     return Response.json({
       success: false,
       error:

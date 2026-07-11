@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { getChildrenPinned } from "../../lib/agent-pinned";
+import { ageInMonths } from "../../lib/child-age";
 
 /**
  * Reads the caller's children and their profiles. Family scope comes from
@@ -41,10 +42,7 @@ export default defineTool({
 
     const now = new Date();
     const children = (data ?? []).map((child) => {
-      const birth = new Date(child.birth_month);
-      const months =
-        (now.getFullYear() - birth.getFullYear()) * 12 +
-        (now.getMonth() - birth.getMonth());
+      const months = ageInMonths(child.birth_month, now);
       const profile = (child.profile ?? {}) as {
         interests?: string[];
         focus?: string;

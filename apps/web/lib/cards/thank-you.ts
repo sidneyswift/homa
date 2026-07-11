@@ -4,6 +4,8 @@ import { emitMapEvent } from "../map/events";
 import {
   getHandwryttenOrderStatus,
   handwryttenConfigured,
+  handwryttenLiveMode,
+  isHandwryttenAccountInTestMode,
   isMailedStatus,
   sendHandwryttenCard,
 } from "./handwrytten";
@@ -49,6 +51,22 @@ export async function sweepThankYouCards(): Promise<ThankYouCardSweepResult> {
     failed: 0,
   };
   if (process.env.THANK_YOU_CARDS_ENABLED !== "true" || !handwryttenConfigured()) {
+    return result;
+  }
+  if (!handwryttenLiveMode()) {
+    // Refuse to sweep in test mode rather than burn once-ever rows on
+    // orders that never mail; see handwryttenLiveMode().
+    console.error(
+      "thank-you cards: enabled but HANDWRYTTEN_TEST_MODE is not \"false\"; sweep skipped",
+    );
+    return result;
+  }
+  if (await isHandwryttenAccountInTestMode()) {
+    // Same burn, other switch: the vendor account itself can be in test
+    // mode (their dashboard, Integrations page), invisible to env vars.
+    console.error(
+      "thank-you cards: Handwrytten ACCOUNT is in test mode; flip it to live on their Integrations page; sweep skipped",
+    );
     return result;
   }
   result.skipped = false;

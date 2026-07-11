@@ -1,3 +1,5 @@
+import type postgres from "postgres";
+
 import { mapDb } from "./map/db";
 
 /**
@@ -9,13 +11,27 @@ import { mapDb } from "./map/db";
  * refuses.
  *
  * Folding moves the family-scoped record (conversation history,
- * memories, hours) and the children (child-scoped rows ride along via
- * FKs), then retires the shell. The stub's family_phones row dies with
- * it, freeing the number for the destination family.
+ * memories, hours, call transcripts, materials, task history, saved
+ * skills, and analytics) and the children (child-scoped rows ride along
+ * via FKs), then retires the shell. The stub's family_phones row dies
+ * with it, freeing the number for the destination family.
  */
 
-export async function isTrueStub(familyId: string): Promise<boolean> {
-  const sql = mapDb();
+const SIMPLE_FAMILY_TABLES = [
+  "conversation_messages",
+  "family_memories",
+  "hours_log",
+  "call_transcripts",
+  "learning_reviews",
+  "materials",
+  "model_usage",
+  "homa_task_runs",
+  "child_curriculum_calls",
+] as const;
+
+type SqlClient = postgres.Sql | postgres.TransactionSql;
+
+async function isTrueStubWithSql(sql: SqlClient, familyId: string): Promise<boolean> {
   const rows = await sql<{ email: string | null; members: number }[]>`
     select f.email,
            (select count(*)::int from public.family_members m where m.family_id = f.id) as members
@@ -25,19 +41,66 @@ export async function isTrueStub(familyId: string): Promise<boolean> {
   return Boolean(row) && row.email === null && row.members === 0;
 }
 
-export async function foldStubFamilyInto(stubId: string, intoId: string): Promise<boolean> {
+export async function isTrueStub(familyId: string): Promise<boolean> {
+  return isTrueStubWithSql(mapDb(), familyId);
+}
+
+export async function foldStubFamilyIntoTx(
+  tx: SqlClient,
+  stubId: string,
+  intoId: string,
+): Promise<boolean> {
   if (stubId === intoId) return false;
-  if (!(await isTrueStub(stubId))) return false;
-  const sql = mapDb();
-  for (const table of ["conversation_messages", "family_memories", "hours_log"]) {
-    await sql`
-      update ${sql(table)} set family_id = ${intoId}
+  if (!(await isTrueStubWithSql(tx, stubId))) return false;
+  for (const table of SIMPLE_FAMILY_TABLES) {
+    await tx`
+      update ${tx(table)} set family_id = ${intoId}
       where family_id = ${stubId}
     `;
   }
-  await sql`
+
+  await tx`
+    update public.events set family_id = ${intoId}
+    where family_id = ${stubId}
+  `;
+
+  await tx`
+    update public.family_skills source
+    set family_id = ${intoId}, updated_at = now()
+    where source.family_id = ${stubId}
+      and not exists (
+        select 1 from public.family_skills target
+        where target.family_id = ${intoId} and target.name = source.name
+      )
+  `;
+  await tx`
+    delete from public.family_skills where family_id = ${stubId}
+  `;
+
+  await tx`
+    update public.agent_schedules source
+    set family_id = ${intoId}
+    where source.family_id = ${stubId}
+      and (
+        source.kind not in ('journal_prompt', 'morning_brief')
+        or not exists (
+          select 1 from public.agent_schedules target
+          where target.family_id = ${intoId} and target.kind = source.kind
+        )
+      )
+  `;
+  await tx`
+    delete from public.agent_schedules where family_id = ${stubId}
+  `;
+
+  await tx`
     update public.children set family_id = ${intoId} where family_id = ${stubId}
   `;
-  await sql`delete from public.families where id = ${stubId}`;
+  await tx`delete from public.families where id = ${stubId}`;
   return true;
+}
+
+export async function foldStubFamilyInto(stubId: string, intoId: string): Promise<boolean> {
+  const sql = mapDb();
+  return await sql.begin((tx) => foldStubFamilyIntoTx(tx, stubId, intoId));
 }

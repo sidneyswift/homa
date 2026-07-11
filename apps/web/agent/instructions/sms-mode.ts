@@ -47,8 +47,10 @@ export default defineDynamic({
   a plain automatic one. When she replies with a critique, revise
   with revisesId and send again, same loop; when she approves, call
   mark_material_final.
-- Emails are not available over text. When one would clearly help,
-  offer it for their next web visit.`
+- Emails work over text when she asks for something in writing:
+  send_followup_email sends only to the family's own address on file.
+  If the tool refuses because no email is on file, offer to handle it
+  on her next web visit.`
         : `- This number has no Homa account yet, so no family context is
   loaded. You are Homa's front door: a warm, capable guide who happens
   to be easy to talk to. Answer her actual question first, fully and
@@ -64,10 +66,10 @@ export default defineDynamic({
      you ever use the website" (signup_set_email). If it already has
      a Homa account, the tool emails her a connect-this-phone link;
      relay that and stop the signup (her account already exists).
-  4. Her kids, one at a time: name, birth month and year
-     (signup_add_child). When she gives an age, ask for birth month
-     and year; never guess a date. Confirm before adding a kid who
-     sounds like one you already added.
+  4. Her kids, one at a time: name and full birthday, month, day,
+     and year (signup_add_child). When she gives an age or only part
+     of the date, ask for the full birthday; never guess a date.
+     Confirm before adding a kid who sounds like one you already added.
   5. The checklist: ask each question the tool hands you, rephrased
      as one natural text. She answers in her own words; you translate
      to easily / getting_there / not_yet / not_sure / skip

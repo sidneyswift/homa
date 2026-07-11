@@ -1,7 +1,7 @@
 /**
  * Shared invariants for the family skill library (the runtime "save this as
  * a skill" loop). Rows live in public.family_skills behind RLS; the dynamic
- * resolver (agent/skills/family-skills.ts) advertises them per turn and the
+ * resolver (agent/skills/skill-library.ts) advertises them per turn and the
  * save_skill / forget_skill tools write them. Skills are procedures the
  * model re-reads later, a stronger surface than memory, so writes go
  * through the same injection scan (lib/agent-memory.ts) plus these caps.

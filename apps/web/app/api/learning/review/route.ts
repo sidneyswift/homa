@@ -1,4 +1,5 @@
 import { after } from "next/server";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { runSessionReview } from "../../../../lib/learning/session-review";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
@@ -20,15 +21,46 @@ interface ReviewRequestBody {
   sessionId?: string;
 }
 
-export async function POST(request: Request): Promise<Response> {
+interface ReviewAuth {
+  supabase: SupabaseClient;
+  userId: string;
+}
+
+function bearerToken(request: Request): string | null {
+  const header = request.headers.get("authorization");
+  const match = /^Bearer\s+(.+)$/i.exec(header ?? "");
+  return match?.[1] ?? null;
+}
+
+async function resolveReviewAuth(request: Request): Promise<ReviewAuth | null> {
+  const token = bearerToken(request);
+  if (token) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return null;
+    const supabase = createClient(url, key, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) return null;
+    return { supabase, userId: data.user.id };
+  }
+
   const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
+  const { data } = await supabase.auth.getUser();
+  return data.user ? { supabase, userId: data.user.id } : null;
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const auth = await resolveReviewAuth(request);
+  if (!auth) {
     return Response.json({ queued: false }, { status: 401 });
   }
-  const { data: membership } = await supabase
+  const { data: membership } = await auth.supabase
     .from("family_members")
     .select("family_id")
+    .eq("user_id", auth.userId)
     .limit(1)
     .maybeSingle();
   const familyId = membership?.family_id;

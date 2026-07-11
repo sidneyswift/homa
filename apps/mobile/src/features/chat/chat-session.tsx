@@ -83,6 +83,10 @@ const WATCHDOG_STALL_MS = 180_000;
  *  banner wins; matches the web twin. */
 const RECOVERY_DEADLINE_MS = 240_000;
 
+function apiPath(path: string): string {
+  return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
+}
+
 export function ChatSession({
   storageKey,
   prepared,
@@ -138,6 +142,22 @@ export function ChatSession({
     });
   }
 
+  async function queueLearningReview(sessionId: string): Promise<void> {
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) return;
+    await fetch(apiPath("/api/learning/review"), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ sessionId }),
+    }).catch(() => {
+      // Best effort: a missed review re-arms on the next turn.
+    });
+  }
+
   const agent = useEveAgent({
     host: env.apiUrl,
     auth: {
@@ -177,6 +197,10 @@ export function ChatSession({
       // own error event (the agent.error effect), so an unconditional
       // "ok" here double-counted every failure (seen live 2026-07-11).
       if (!snapshot.error) void emitTurnCompleted("ok");
+      const sessionId = snapshot.session?.sessionId;
+      if (!snapshot.error && familyId && sessionId) {
+        void queueLearningReview(sessionId);
+      }
       // Deliver the queue: messages she sent while Homa was working go
       // out as ONE follow-up turn the moment the line is free (also
       // after Stop, which is often pressed exactly to jump the line).

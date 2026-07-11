@@ -65,35 +65,37 @@ switches, in this order:
   and redeploy. 9am weekday texts begin (email until a phone is linked;
   your line is linked) *(5 min, the fun one)*
 
-## Thank-you cards (added 2026-07-11, agent-built, dark until you do these)
+## Thank-you cards (added 2026-07-11; UPDATED 1am: key live, ONE switch left)
 
 One real handwritten card (robot, actual pen) mails to each family 48h
-after web onboarding. Code, table, copy gates: done
-(plans/2026-07-11-thank-you-cards.md). It cannot spend a cent until you
-create the vendor account and flip the switches, in this order, AFTER
-the conference deploy:
+after web onboarding, once ever per family
+(plans/2026-07-11-thank-you-cards.md). Done tonight by founder + agent:
+account + API key created, return address saved via the API, stationery
+chosen (Kraft Thank You, card 186, font hwDavid "Casual David"; swap
+anytime by changing the env vars), all five env vars set in Vercel
+production (key encrypted). The sweep refuses to run unless
+HANDWRYTTEN_TEST_MODE="false" AND the vendor account is in live mode,
+so a test order can never burn a family's once-ever card. Left, in
+order:
 
-- [ ] **Handwrytten account**: sign up at handwrytten.com (business,
-  pay-as-you-go, no plan needed), add a card on file, then create an
-  API key at app.handwrytten.com/api-keys *(5 min)*
-- [ ] **Pick the stationery**: in their dashboard pick a simple thank-you
-  card and a handwriting style you like, or tell an agent "list
-  Handwrytten cards and fonts" once the key is in .env.local and pick
-  from the ids. Custom Homa-branded stock can come later *(5 min)*
+- [ ] **Billing check**: app.handwrytten.com → your name → payment
+  methods → confirm a credit card is on file. The account shows a
+  billing address but zero saved cards; without one, live orders fail
+  (they park safely as 'failed' after 3 tries, no crash) *(1 min)*
 - [ ] **Read the card aloud once**: the exact text is in
   `apps/web/lib/cards/message.ts` (both copy gates passed; you are the
   last gate). Signature reads "Warmly, Sidney, founder of Homa" *(1 min)*
-- [ ] **Env vars in Vercel prod** (and .env.local if you want dev runs):
-  `HANDWRYTTEN_API_KEY`, `HANDWRYTTEN_CARD_ID`, `HANDWRYTTEN_FONT`,
-  `HANDWRYTTEN_TEST_MODE=true`, `THANK_YOU_CARDS_ENABLED=true`,
-  optional `THANK_YOU_CARDS_MONTHLY_CAP` (default 150). Redeploy.
-  Test mode validates real orders but never prints or bills *(3 min)*
-- [ ] **Watch one test pass**: within the hour the cron will queue and
-  "send" eligible families in test mode; ask an agent "show me the
-  thank_you_cards rows" and sanity-check names + addresses *(2 min)*
-- [ ] **Go live**: flip `HANDWRYTTEN_TEST_MODE` to empty/false in prod,
-  redeploy. Real pens start writing within the hour; first cards land
-  in mailboxes 4 to 7 days later *(1 min)*
+- [ ] Optional dry run: flip the ACCOUNT to test mode (their
+  Integrations page), tell an agent "run the Handwrytten smoke send",
+  expect "order accepted", then flip the account back to live. Fine to
+  skip: the first real batch is 3 known addresses, one of them yours,
+  so you will literally receive the proof in the mail *(3 min)*
+- [ ] **THE SWITCH** (after the July 13 conference deploy):
+  `printf 'true' | vercel env add THANK_YOU_CARDS_ENABLED production`
+  then redeploy. Within the hour the 3 already-eligible families queue
+  and send for real (two DC, one FL; ~$14 total), then new families
+  follow automatically 48h after onboarding, capped at 150/month.
+  Cards land 4 to 7 days later *(2 min)*
 
 ## Email-into-Homa (gateway GW-8, added 2026-07-09 late evening)
 

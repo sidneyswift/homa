@@ -49,9 +49,10 @@
   session phone; result = progress + first thing to ask.
 - [x] `signup_set_family(parentName, familyName?, usState?)`:
   `saveFamilySetup` (address optional by schema; never asked on SMS).
-- [x] `signup_add_child(name, birthMonth)`: `addChild`; result includes
+- [x] `signup_add_child(name, birthDate)`: `addChild`; result includes
   the child's first checklist question (or pending-band note for
-  under-2s).
+  under-2s). [2026-07-11 founder ruling: birthDate is the full
+  YYYY-MM-DD birthday, replacing the original birthMonth.]
 - [x] `signup_record_answer(childId, itemId, answer)`: `saveAnswer`
   with the enum (easily | getting_there | not_yet | not_sure | skip);
   the model maps the parent's natural phrasing to the enum and asks

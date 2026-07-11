@@ -19,6 +19,7 @@ export function AddChildForm({
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
+  const [birthDay, setBirthDay] = useState("");
   const [interests, setInterests] = useState("");
   const [focus, setFocus] = useState("");
   const [pending, setPending] = useState(false);
@@ -32,6 +33,7 @@ export function AddChildForm({
       name,
       birthYear: Number(birthYear),
       birthMonth: Number(birthMonth),
+      birthDay: Number(birthDay),
       interests: interests
         .split(",")
         .map((item) => item.trim())
@@ -46,6 +48,7 @@ export function AddChildForm({
     setName("");
     setBirthYear("");
     setBirthMonth("");
+    setBirthDay("");
     setInterests("");
     setFocus("");
     onAdded();
@@ -86,6 +89,16 @@ export function AddChildForm({
             value={birthMonth}
             onChangeText={setBirthMonth}
             placeholder="4"
+            keyboardType="number-pad"
+            maxLength={2}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <TextField
+            label="Birth day"
+            value={birthDay}
+            onChangeText={setBirthDay}
+            placeholder="12"
             keyboardType="number-pad"
             maxLength={2}
           />

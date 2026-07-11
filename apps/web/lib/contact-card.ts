@@ -14,8 +14,9 @@ import { sendHomaSms } from "./voice/telnyx-api";
  * number is connected to a family on the web (lib/family-phone.ts).
  */
 
-/** Homa's texting line; TELNYX_FROM_NUMBER is authoritative when set. */
-const HOMA_NUMBER_FALLBACK = "+13467588011";
+/** Homa's texting line; TELNYX_FROM_NUMBER is authoritative when set.
+ *  Also printed inside the thank-you card (lib/cards/message.ts). */
+export const HOMA_NUMBER_FALLBACK = "+13467588011";
 
 /** The one line that rides with the card on a new number's first text. */
 export const CONTACT_CARD_FIRST_TEXT =

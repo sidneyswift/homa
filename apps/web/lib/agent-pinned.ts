@@ -203,11 +203,17 @@ export async function recordHoursPinned(input: {
       minutes: Math.round(input.minutes),
     });
   } else {
-    await emitMapEvent("chat.hours_logged", {
-      subject: input.subject,
-      minutes: Math.round(input.minutes),
-      channel: input.source,
-    });
+    await emitMapEvent(
+      "chat.hours_logged",
+      {
+        subject: input.subject,
+        minutes: Math.round(input.minutes),
+        channel: input.source,
+      },
+      {
+        familyId: input.familyId,
+      },
+    );
   }
 
   const weekAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

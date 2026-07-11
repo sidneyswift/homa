@@ -56,6 +56,11 @@ interface FocusRow {
   avatarBg: string;
   avatarInk: string;
   subjectLabel: string;
+  /** Names what the focus line IS before it speaks (reader gate
+   * 2026-07-11: the bare bank statement read as a beheaded sentence).
+   * "The goal:" for subject plans; the month plan's focus is a subject
+   * summary, so it gets "This month:" instead. */
+  focusPrefix: string;
   focus: string;
   weekNumber: number;
   tone: BlockTone;
@@ -130,6 +135,7 @@ export function PlannerView({
         avatarBg,
         avatarInk,
         subjectLabel: subjectLabel(plan.subjectId),
+        focusPrefix: plan.subjectId === MONTH_PLAN_SUBJECT ? "This month:" : "The goal:",
         focus: week.focus,
         weekNumber: weekIdx + 1,
         tone,
@@ -247,7 +253,7 @@ export function PlannerView({
                   {row.subjectLabel}
                 </span>
                 <span className="min-w-0 flex-1 basis-52 text-[0.82rem] leading-snug text-body">
-                  {row.focus}
+                  <span className="font-semibold">{row.focusPrefix}</span> {row.focus}
                 </span>
                 <span className="font-mono text-[0.62rem]" style={{ color: row.tone.ink }}>
                   week {row.weekNumber} of 4
@@ -273,13 +279,18 @@ export function PlannerView({
           <div className="mt-3">
             <DayGrid days={days} plans={dayPlans} />
           </div>
+
+          {/* Right under the boxes it forgives (reader gate 2026-07-11:
+              "any day counts" was doing its work from the least-read
+              spot, and "the report reads this at re-check time" was the
+              one unparseable line on the page). */}
+          <p className="mt-3 text-xs text-muted">
+            Any day counts: do things whenever they fit, and check them off as they happen.
+            At the month&apos;s re-check, the progress report uses these check-offs to show
+            what moved.
+          </p>
         </>
       )}
-
-      <p className="mt-6 text-xs text-subtle">
-        Check things off as they happen; the report reads this at re-check time. The days are
-        a starting point: any day counts, and moving activities around is coming.
-      </p>
     </>
   );
 }

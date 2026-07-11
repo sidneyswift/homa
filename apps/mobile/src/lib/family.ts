@@ -1,3 +1,5 @@
+import { isValidBirthDate } from "@homa/core";
+
 import { supabase } from "./supabase";
 
 /**
@@ -72,6 +74,7 @@ export interface AddChildInput {
   name: string;
   birthYear: number;
   birthMonth: number;
+  birthDay: number;
   interests: string[];
   focus: string;
 }
@@ -80,23 +83,25 @@ export async function addChild(
   input: AddChildInput,
 ): Promise<{ error: string | null }> {
   if (!input.name.trim()) return { error: "A name is required." };
-  const currentYear = new Date().getFullYear();
+  const birthDate = [
+    String(input.birthYear),
+    String(input.birthMonth).padStart(2, "0"),
+    String(input.birthDay).padStart(2, "0"),
+  ].join("-");
   if (
     !Number.isInteger(input.birthYear) ||
     !Number.isInteger(input.birthMonth) ||
-    input.birthMonth < 1 ||
-    input.birthMonth > 12 ||
-    input.birthYear < currentYear - 19 ||
-    input.birthYear > currentYear
+    !Number.isInteger(input.birthDay) ||
+    !isValidBirthDate(birthDate)
   ) {
-    return { error: "Pick a valid birth month and year." };
+    return { error: "Pick a valid birthday: month, day, and year." };
   }
 
   const { error } = await supabase.from("children").insert({
     family_id: input.familyId,
     name: input.name.trim(),
-    // Day is always 01 by design: age-band math needs month + year only.
-    birth_month: `${input.birthYear}-${String(input.birthMonth).padStart(2, "0")}-01`,
+    // Historical column name; the stored value is the child's full birthday.
+    birth_month: birthDate,
     profile: { interests: input.interests, focus: input.focus },
   });
   return { error: error ? error.message : null };

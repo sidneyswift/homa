@@ -80,10 +80,19 @@ One new module chain, all server-only:
 
 Dark until ALL of: `THANK_YOU_CARDS_ENABLED="true"`,
 `HANDWRYTTEN_API_KEY`, `HANDWRYTTEN_CARD_ID`, `HANDWRYTTEN_FONT`.
-`HANDWRYTTEN_TEST_MODE="true"` makes real API calls that validate but
-never print or bill; first flip happens in test mode on purpose.
 `THANK_YOU_CARDS_MONTHLY_CAP` (default 150) is the spend brake:
 at retail that caps exposure near $685/month plus postage.
+
+Test mode (amended 2026-07-11 1am, after the key went live): a test
+order still marks a family's once-ever row as sent while mailing
+nothing, so the sweep REFUSES to run unless `HANDWRYTTEN_TEST_MODE` is
+exactly `"false"` AND the vendor account itself is in live mode
+(Handwrytten has its own account-level test switch on their
+Integrations page, invisible to env vars; the sweep checks the live
+account record via auth/getUser). Test-mode orders are reserved for
+`apps/web/scripts/handwrytten-smoke.mts`, which forces the flag and
+cannot place a real order; per-order test flags are only honored when
+the ACCOUNT is in test mode ("test mode error" otherwise).
 
 ## The card (final copy, gates passed)
 
@@ -114,11 +123,21 @@ contractions because uncontracted phrasing reads as a copied script.
 - A do-not-mail flag surfaced in Settings; today support is manual
   (insert a skipped row for the family, which blocks the queue row).
 
-## Founder switch order (mirrors HUMAN-TODO)
+## Founder switch order (mirrors HUMAN-TODO; steps 1-2 DONE 2026-07-11 1am)
 
-1. After the conference deploy: create the Handwrytten account, API
-   key, pick card + font ids, fund it.
-2. Read the card copy aloud (message.ts is the source of truth).
-3. Set the six env vars in Vercel prod with TEST_MODE=true, flip
-   THANK_YOU_CARDS_ENABLED, watch one cron pass validate orders.
-4. Flip HANDWRYTTEN_TEST_MODE off. Real pens start writing.
+1. DONE: account + API key (founder), return address saved via the
+   address-book API (order placement requires one on file), card 186
+   "Kraft Thank You" + font hwDavid "Casual David" chosen, five env
+   vars set in Vercel production (key encrypted,
+   HANDWRYTTEN_TEST_MODE="false" so the sweep may run when enabled).
+   .env.local carries the same with test mode forced for dev.
+2. DONE: smoke script (`apps/web/scripts/handwrytten-smoke.mts`)
+   verified the key, the 446-card catalog, fonts, and the basket flow
+   against the live API. A full test-mode order additionally needs the
+   account-level test switch (founder dashboard, optional; the first
+   live batch is 3 known addresses, one of them the founder's own).
+3. LEFT (HUMAN-TODO): billing check (confirm a credit card on file),
+   the copy read-aloud, then after the July 13 conference deploy the
+   one switch: `THANK_YOU_CARDS_ENABLED=true` in prod + redeploy.
+   Three eligible families queue immediately; everyone else follows
+   48h after onboarding.

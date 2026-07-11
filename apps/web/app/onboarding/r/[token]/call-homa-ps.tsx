@@ -36,8 +36,8 @@ export function CallHomaPs({ childId, childName }: { childId: string; childName:
         setState("error");
         setError(
           data.reason === "no-phone" || data.reason === "bad-phone"
-            ? "I don't have your number yet. Add it under Settings and I'm one tap away."
-            : "That didn't go through. One more try usually does it.",
+            ? "I don't have your number yet. Add it under Settings, then try again."
+            : "That didn't go through. Try once more.",
         );
         return;
       }
@@ -51,7 +51,7 @@ export function CallHomaPs({ childId, childName }: { childId: string; childName:
   if (state === "called") {
     return (
       <p className="mt-2 text-body print:hidden" role="status">
-        Calling you now. Pick up and we&apos;ll talk through {childName}&apos;s report together.
+        Calling you now. Pick up and we&apos;ll talk through {childName}&apos;s report.
       </p>
     );
   }
@@ -79,9 +79,12 @@ export function CallHomaPs({ childId, childName }: { childId: string; childName:
         </p>
       )}
       {state === "no-session" ? (
+        // Copy-kit shape (name it, settle it, next step), and the SAME
+        // wording as MonthButton's no-session state: one failure, one
+        // vocabulary (editor gate, 2026-07-11).
         <p className="mt-1 text-xs text-muted">
-          Calling works from the device you used for the questionnaire, or open your email link
-          here first.
+          The call didn&apos;t start. I don&apos;t recognize this device yet. Open your email
+          link on this device once, then try again.
         </p>
       ) : null}
       {error ? (

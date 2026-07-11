@@ -3,6 +3,277 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late night) · Phone-link emails require a POST confirm
+
+Bug found during the full-repo review follow-up: `/api/link-phone?t=...`
+consumed its single-use token on GET. Email security scanners and mail-client
+prefetchers can visit links before the parent clicks them, which could fold a
+text signup stub and link the phone without human intent.
+
+Fixed GET to render a side-effect-free confirmation page. The token is consumed
+only by the form's POST. The small HTML renderer now escapes title, body, and
+token values before interpolation.
+
+## 2026-07-11 (late night) · Verified phone claims cannot orphan numbers
+
+Bug found during the full-repo review follow-up: verified phone claim moved a
+number by deleting the old `family_phones` row and then inserting the new one
+outside a transaction. If the insert failed, the number could belong to nobody.
+The same file also texted the verification code before inserting the
+`phone_claim_codes` row, so a failed insert could leave the parent holding a
+code that did not exist in the database.
+
+Fixed the claim path so possession proof, true-stub fold or real-family number
+move, new phone link, and code consumption happen in one transaction. A relink
+failure rolls back and returns `link-failed`. Verification codes are inserted
+before SMS send; if the SMS fails, that unsent code row is deleted.
+
+## 2026-07-11 (late night) · Isolation read checks fail closed
+
+Bug found during the full-repo review follow-up: `scripts/isolation-check.mjs`
+counted any non-2xx anonymous read as a pass. That meant a renamed table, a
+PostgREST error, or a broken RLS setup could turn the tenant-isolation guard
+green while it was not proving the intended condition.
+
+Fixed anonymous reads to require the expected result explicitly. Most
+family-scoped tables must return `200` with an empty JSON array. The two tables
+with intentional explicit revoke posture, `family_phones` and `family_invites`,
+must return 401 or 403. Any other read status now fails the guard.
+
+## 2026-07-11 (late night) · Mobile chat now triggers learning reviews
+
+Bug found during the chat persistence audit: web chat queued the post-turn
+learning review after each successful turn, but mobile chat only persisted the
+conversation and emitted turn analytics. Mobile conversations were searchable by
+recall, but they did not feed the ambient memory-extraction loop unless a later
+web path happened to trigger review.
+
+Fixed the review route to accept either the web cookie session or the mobile
+Supabase bearer token, still deriving `familyId` from the authenticated user's
+own `family_members` row under RLS. Mobile now calls the same review route after
+successful turns.
+
+## 2026-07-11 (late night) · Full birthdays, product-wide (founder ruling)
+
+Founder ruling, on reading the tenancy migration's "a full DOB is data we
+chose not to hold" comment: "what? we should get the full data so we know how
+old the kid is." This restores the 2026-07-06 "get the actual birthday" ruling
+product-wide and retires the month-only convention that the 2026-07-08
+onboarding-card unification had reintroduced (that reversal was flagged for
+review in its own entry; this is the review). Two agent sessions converged on
+the same change tonight; this entry consolidates both.
+
+State before: `children.birth_month` was always a full `date`, and the
+lead-magnet path has saved real days since 2026-07-06 (the Gomes kids all have
+real birthdays), but every product intake appended `-01`, and the two
+month-only age calculators could read a child up to almost one month older
+than they are. Changes:
+
+1. **Intake collects month, day, and year everywhere**: /onboarding KidsStep
+   (Day select, clamped to the picked month's real day count), /app/settings
+   AddChildForm + addChildAction, SMS signup (`signup_add_child` now takes
+   `birthDate` YYYY-MM-DD; sms-mode instructions ask for the birthday and
+   still never guess), and the mobile add-child form. All server paths
+   validate with `isValidBirthDate` (the map's own guard, rejects Feb 30).
+2. **Age math is day-precise everywhere**: `apps/web/lib/child-age.ts` now
+   delegates to `@homa/core`'s `ageInMonths` (day-precise since 2026-07-06)
+   instead of its own month-only math, and `get_children`'s inline duplicate
+   of that math is gone.
+3. **Migration `20260711180000_children_full_birthday`** (comment-only,
+   applied to homa-prod): documents the policy on the column itself,
+   overriding migration #2's "day is always 01" comment, which stays
+   untouched as applied history. No rename: `birth_month` keeps its name,
+   a rename is a breaking migration with no behavior payoff.
+4. **Docs**: journeys/02's "no full DOB" spec lines got dated correction
+   notes; sms-onboarding-plan's tool signature updated. Older static
+   artifacts (lead-magnet HTML mocks) keep the stale wording, noted here
+   rather than edited.
+
+Not done, deliberately: no backfill (day-01 rows cannot know their real day;
+they read exactly as before) and no edit-birthday UI (no child field has an
+edit surface yet). The privacy page already said "their birthday", so its copy
+is already true.
+
+## 2026-07-11 (late night) · Phone stub folds preserve all family-scoped work
+
+Bug found during the phone reconciliation audit: `foldStubFamilyInto` only moved
+`conversation_messages`, `family_memories`, `hours_log`, and children before
+deleting a true phone-created stub family. That matched the earliest text-signup
+shape, but the product now lets pinned SMS, email, dispatch, and voice sessions
+create materials, call transcripts, saved family skills, model usage rows, task
+runs, curriculum-call rows, and events before an email-link or verified-phone
+claim folds the stub into a real family.
+
+Fixed the helper to fold those family-scoped rows in one transaction before
+retiring the stub. Conflict posture stays conservative: the destination family's
+saved skill wins on duplicate skill names, and the destination built-in schedule
+wins on duplicate journal or morning-brief schedules. Custom schedules move.
+
+## 2026-07-11 (late night) · Server events now stamp family_id rows
+
+Bug found during the pinned-channel hours audit: `chat.hours_logged` deliberately
+keeps `family_id` out of props because the signed-in web emitter writes it to the
+`events.family_id` column under RLS. The pinned SMS, email, and dispatch hours
+path used the server emitter instead, and that helper only wrote `name` and
+`props`. Result: the hours row was correct, but the corresponding analytics event
+had no family attribution.
+
+Fixed `emitMapEvent` to write `events.family_id` when validated props contain a
+`family_id`, and to accept an explicit row family id for events like
+`chat.hours_logged` whose schema keeps family id out of props. Wired
+`recordHoursPinned` through that explicit option.
+
+## 2026-07-11 (late night) · Handwrytten live mode now requires an explicit false
+
+Bug found during the thank-you-card pipeline audit: the docs and build-log said
+test mode was the default posture, but `lib/cards/handwrytten.ts` used
+`HANDWRYTTEN_TEST_MODE === "true"`. If the founder enabled
+`THANK_YOU_CARDS_ENABLED` and set the Handwrytten key/card/font env vars but
+forgot the test-mode env, the first cron pass would send live paid orders.
+
+Fixed the wrapper to fail closed: `HANDWRYTTEN_TEST_MODE="false"` is now the
+only live-send value. Unset, `"true"`, and any other value all call Handwrytten
+with testMode enabled. Updated the thank-you-card plan to match that switch
+order.
+
+## 2026-07-11 (late night) · Voice tool URL UUID guard
+
+Bug found during the voice boundary audit: live Telnyx tool routes read
+`family_id` and `child_id` from query strings templated by Telnyx dynamic
+variables. Those values are not model-supplied, but malformed template output
+like `undefined` could still reach UUID-typed SQL predicates or typed event
+validation during a live call. That should be a normal tool result the assistant
+can recover from, not a 500.
+
+Added `lib/voice/tool-context.ts` with one shared UUID predicate. The
+send-email, log-hours, and remember voice tools now reject missing or malformed
+`family_id` before any DB work; malformed `child_id` becomes family-wide so the
+tools can still use the model-supplied child name fallback. The signup-link
+tool now treats only a valid UUID `family_id` as linked, and the curriculum
+insights webhook validates both echoed ids before looking up a pending call.
+
+## 2026-07-11 (late night) · Agent skill library now works on pinned channels
+
+Bug found during the cross-channel agent audit: the dynamic skill resolver,
+`save_skill`, and `forget_skill` still required a Supabase caller JWT. Web
+chat had one, but SMS, inbound email, and dispatch sessions are pinned by
+server-authenticated `familyId` instead. Result: linked text/email families
+could load family context, remember facts, log hours, and make materials, but
+could not load their saved family skills or the published `skill_bank`; explicit
+"save this as a skill" over text also refused with the generic setup message.
+
+Fixed by moving the skill-library read/write paths into `lib/agent-skills.ts`
+with the same access split as memory and materials:
+
+- caller path: Supabase client with the parent's JWT, plus explicit
+  `family_id` predicates.
+- pinned path: direct server SQL through `mapDb()`, with `family_id` predicates
+  on every family table and `published = true` on the shared bank.
+
+No new model-supplied tenant input was added. The pinned trust basis is still
+`resolveAgentAccess`: phone mapping, family email, or dispatcher schedule row.
+The resolver keeps its failure posture, so a skill DB miss removes skills for a
+turn instead of failing the conversation.
+
+## 2026-07-11 (late night) · Note-from-Homa letter: design review fixes, both copy gates run
+
+Founder asked for a senior-designer critique of the letter card at the
+top of the report, then approved the fixes. Changes, at their owning
+layers:
+
+- **The call line lost "BTW, click"** (call-homa-ps.tsx): the tappable
+  text is now the action itself, "have me call you now". A link labeled
+  "click" reads as nothing to a screen reader (WCAG 2.4.4) and nothing
+  on a phone; "now" warns the tap dials immediately (reader-gate catch).
+  The founder ask behind the old line (2026-07-09) was the fold-into-
+  the-letter behavior, which is unchanged; only the wording moved.
+- **notePlanSentence reworded** (core sentences.ts, check:map green):
+  "turned it into {child}'s month: a 4-week plan for {month}". Kills
+  the "July 4" garden path in "{month} 4-week plan" and teaches the
+  same name the button and the plan page's h1 already use.
+- **Month button busy state says "Opening", not "Building"**
+  (month-button.tsx): the letter says the month is made; the reader
+  gate caught the contradiction. The lazy first-tap build + consent
+  semantics are unchanged. The arrow glyph is now aria-hidden.
+- **Eyebrow color unified at sage-700** (report-view, kid-view x2,
+  plan page x2): text-sage (sage-500) on the sage-50 card is about
+  3.2:1, under the 4.5:1 AA bar at 10px; report-preview.tsx already
+  used sage-700 (about 6.5:1). Letter bookends (greeting and sign-off)
+  now share text-lg.
+- **Failure states rebuilt to the copy-kit shape** (editor-gate
+  must-fixes): both no-session states (call and month button) now share
+  one identical wording, "The call didn't start / The month didn't
+  open. I don't recognize this device yet. Open your email link on this
+  device once, then try again.", which retires the "signed-in device"
+  vs "questionnaire device" split and the "first" vs "once" split.
+  "One tap away" and "usually does it" replaced with concrete steps.
+  The dialing state now replaces the whole line ("Calling you now…"),
+  not just the link word, and carries role="status".
+
+Both copy gates ran in order (reader, then editor). Decisions made
+alone:
+
+- **Editor must-fix DECLINED: "ahead for their age"**. The editor
+  called it age-norm ranking. Declined because "ahead" is the fixed
+  position vocabulary (Ahead / On track / Growing badges, founder
+  reviewed, check:map enforced), the banned pole is "behind", and
+  age benchmarking is the product's stated promise. Banning "ahead"
+  would be a founder-level product ruling, not a copy edit; flagged
+  to the founder in the session summary.
+- **Reader-gate finding left as-is: "their" in the note sentence.**
+  Pronoun hard law says parent's own words or "they"; the template
+  layer has no pronoun data (the narrative path already computes
+  childPronouns properly). Plumbing pronouns into templates is a
+  schema change, noted as a possible follow-up, not smuggled in here.
+- **Reader-gate finding left as-is: bare subject counts in the note.**
+  The one-sentence note is a founder ruling (2026-07-08); the named
+  subjects sit directly below on the same page.
+
+## 2026-07-11 (1am) · Thank-you cards armed: key live, stationery chosen, both test-mode footguns guarded
+
+Founder pasted the Handwrytten API key ("do it"). Agent work on top of
+the built-dark pipeline (entry below): key verified against the live
+API (446-card catalog, 38 fonts), stationery chosen (card 186 "Kraft
+Thank You", font hwDavid "Casual David"; swapping is an env change),
+five env vars set in Vercel production with the key encrypted, and a
+smoke script added (apps/web/scripts/handwrytten-smoke.mts) that lists
+the catalog and can place ONLY test-mode orders. The order-placement
+blocker "we need your physical address on file" was cleared through
+the address-book API (sender saved programmatically, no dashboard).
+THANK_YOU_CARDS_ENABLED stays unset: going live remains one explicit
+switch + redeploy, after the conference deploy.
+
+Decisions made alone:
+
+- **The sweep now refuses test mode instead of tolerating it.** A
+  test-mode order is accepted by the vendor but never fulfilled, and
+  the sweep would still mark the family's once-ever row sent: the
+  family silently loses its only card. sweepThankYouCards() now
+  requires HANDWRYTTEN_TEST_MODE to be exactly "false" (the parallel
+  session had already made any other value mean test), and prod got
+  "false" so the one ENABLED switch is truly the last gate.
+- **Account-level test mode is guarded too.** Handwrytten has a
+  second, account-wide test switch on its dashboard Integrations page
+  that env vars cannot see; per-order test flags error when the
+  account is live ("test mode error", observed), and an account left
+  in test mode would silently unfulfill real sweeps. The sweep now
+  reads the live account record (auth/getUser exposes test_mode) and
+  refuses to spend while it is on.
+- **Full test-mode order validation left optional.** It requires the
+  founder to flip that dashboard switch, so it is a HUMAN-TODO option
+  rather than a blocker: the first live batch is 3 known-good
+  addresses (one is the founder's own), failures park after 3
+  attempts, and the smoke probe already validated key, catalog,
+  basket, and the clear-basket-on-failure path (basket confirmed
+  empty after the forced failure).
+- **Billing flagged, not assumed**: the account record shows a billing
+  address but zero saved cards; the billing check is first in
+  HUMAN-TODO because live orders fail (safely) without one.
+
+Verified: web tsc + eslint green on lib/cards and the smoke script;
+`vercel env ls production` shows all five vars; sweep still dark
+(ENABLED unset), zero rows in thank_you_cards.
+
 ## 2026-07-11 (late night) · Thank-you cards: one robot-handwritten card per family, built dark
 
 Founder asked for deep research on mailing a physical thank-you card

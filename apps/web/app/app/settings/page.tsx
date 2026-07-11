@@ -74,7 +74,7 @@ export default async function SettingsPage() {
       </header>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <AddChildForm familyId={family.id} />
+        <AddChildForm />
         <AdultsCard
           adults={members.map((member) => ({
             name: member.display_name ?? "Parent",

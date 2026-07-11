@@ -1,6 +1,10 @@
 import { recordHoursPinned } from "../../../../../lib/agent-pinned";
 import { mapDb } from "../../../../../lib/map/db";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
+import {
+  readVoiceChildId,
+  readVoiceFamilyId,
+} from "../../../../../lib/voice/tool-context";
 
 /**
  * POST /api/voice/tools/log-hours: the voice assistants' capture-time
@@ -30,14 +34,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ success: false, error: "unauthorized" }, { status: 401 });
   }
 
-  const familyId = url.searchParams.get("family_id");
-  const childIdParam = url.searchParams.get("child_id") || null;
-  if (!familyId) {
-    return Response.json({
-      success: false,
-      error: "This caller is not linked to a Homa family yet, so there is no record to add to.",
-    });
-  }
+  const context = readVoiceFamilyId(
+    url,
+    "This caller is not linked to a Homa family yet, so there is no record to add to.",
+  );
+  if (!context.ok) return Response.json({ success: false, error: context.error });
+  const familyId = context.familyId;
+  const childIdParam = readVoiceChildId(url);
 
   let body: ToolCallBody;
   try {

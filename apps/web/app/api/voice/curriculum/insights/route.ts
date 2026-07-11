@@ -13,6 +13,7 @@ import {
   upsertCurriculum,
 } from "../../../../../lib/map/curriculum-store";
 import { emitMapEvent } from "../../../../../lib/map/events";
+import { isUuid } from "../../../../../lib/voice/tool-context";
 
 /**
  * POST /api/voice/curriculum/insights: Telnyx's Insight Group webhook,
@@ -62,7 +63,7 @@ export async function POST(request: Request): Promise<Response> {
   const insight = (body.insights ?? [])[0]?.result;
   const childId = typeof insight?.child_id === "string" ? insight.child_id : null;
   const familyId = typeof insight?.family_id === "string" ? insight.family_id : null;
-  if (!insight || !childId || !familyId) {
+  if (!insight || !isUuid(childId) || !isUuid(familyId)) {
     console.error("curriculum insights webhook: missing child_id/family_id");
     return new Response("ok", { status: 200 });
   }

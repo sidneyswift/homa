@@ -45,21 +45,80 @@ export function DeepDiveStep({
   /** Item ids answered this sitting, so "back" can undo a mis-tap. */
   const [sittingHistory, setSittingHistory] = useState<string[]>([]);
   const [flushing, setFlushing] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [undoing, setUndoing] = useState(false);
   const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
+  const inFlightSaves = useRef<Map<string, Set<Promise<boolean>>>>(new Map());
 
   const current = domain ? nextDeepDiveItem(subjectId, child.ageMonths, answers, sittingCount) : null;
 
-  async function postAnswer(itemId: string, answer: MapAnswer): Promise<void> {
+  async function postAnswer(itemId: string, answer: MapAnswer): Promise<boolean> {
     try {
       const response = await fetch("/api/map/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ childId: child.id, itemId, answer }),
       });
-      if (!response.ok) pendingSaves.current.push({ itemId, answer });
+      if (response.ok) return true;
+      pendingSaves.current.push({ itemId, answer });
+      return false;
     } catch {
       pendingSaves.current.push({ itemId, answer });
+      return false;
     }
+  }
+
+  function trackPostAnswer(itemId: string, answer: MapAnswer): void {
+    const save = postAnswer(itemId, answer);
+    const existing = inFlightSaves.current.get(itemId) ?? new Set<Promise<boolean>>();
+    existing.add(save);
+    inFlightSaves.current.set(itemId, existing);
+    void save.finally(() => {
+      const saves = inFlightSaves.current.get(itemId);
+      saves?.delete(save);
+      if (saves?.size === 0) {
+        inFlightSaves.current.delete(itemId);
+      }
+    });
+  }
+
+  async function waitForItemSaves(itemId: string): Promise<void> {
+    const saves = inFlightSaves.current.get(itemId);
+    if (saves) await Promise.allSettled([...saves]);
+  }
+
+  async function waitForAllSaves(): Promise<void> {
+    while (inFlightSaves.current.size > 0) {
+      const saves = [...inFlightSaves.current.values()].flatMap((entries) => [...entries]);
+      await Promise.allSettled(saves);
+    }
+  }
+
+  async function flushPending(): Promise<boolean> {
+    const retries = [...pendingSaves.current];
+    pendingSaves.current = [];
+    for (const entry of retries) {
+      await postAnswer(entry.itemId, entry.answer);
+    }
+    return pendingSaves.current.length === 0;
+  }
+
+  async function clearAnswer(itemId: string): Promise<boolean> {
+    await waitForItemSaves(itemId);
+    const matchingPending = pendingSaves.current.filter((entry) => entry.itemId === itemId);
+    pendingSaves.current = pendingSaves.current.filter((entry) => entry.itemId !== itemId);
+    try {
+      const response = await fetch("/api/map/answer", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ childId: child.id, itemId }),
+      });
+      if (response.ok) return true;
+    } catch {
+      // Keep local state unchanged below, so the parent can try again.
+    }
+    pendingSaves.current = [...pendingSaves.current, ...matchingPending];
+    return false;
   }
 
   function chooseMode(chosen: "parent" | "together") {
@@ -73,33 +132,44 @@ export function DeepDiveStep({
 
   function finish() {
     setFlushing(true);
+    setSaveError(null);
     void (async () => {
-      const retries = [...pendingSaves.current];
-      pendingSaves.current = [];
-      for (const entry of retries) {
-        await postAnswer(entry.itemId, entry.answer);
+      await waitForAllSaves();
+      const saved = await flushPending();
+      if (saved) {
+        onComplete();
+        return;
       }
-      onComplete();
+      setFlushing(false);
+      setSaveError("Some answers are still saving. You can try again before we update the report.");
     })();
   }
 
   function answerCurrent(answer: MapAnswer) {
     if (!current) return;
+    setSaveError(null);
     const updated = { ...answers, [current.id]: answer };
     setAnswers(updated);
     setSittingCount((count) => count + 1);
     setSittingHistory((history) => [...history, current.id]);
-    void postAnswer(current.id, answer);
+    trackPostAnswer(current.id, answer);
 
     if (nextDeepDiveItem(subjectId, child.ageMonths, updated, sittingCount + 1) === null) {
       finish();
     }
   }
 
-  /** Undo the last tap of this sitting; the re-answer overwrites the save. */
-  function goBack() {
+  /** Undo the last tap of this sitting after the server row is clear too. */
+  async function goBack() {
     const lastId = sittingHistory[sittingHistory.length - 1];
-    if (!lastId) return;
+    if (!lastId || undoing) return;
+    setUndoing(true);
+    const cleared = await clearAnswer(lastId);
+    if (!cleared) {
+      setUndoing(false);
+      setSaveError("That answer is still saved for now. You can try undo again.");
+      return;
+    }
     setSittingHistory((history) => history.slice(0, -1));
     setAnswers((currentAnswers) => {
       const next = { ...currentAnswers };
@@ -107,6 +177,8 @@ export function DeepDiveStep({
       return next;
     });
     setSittingCount((count) => Math.max(0, count - 1));
+    setSaveError(null);
+    setUndoing(false);
   }
 
   if (!domain) {
@@ -163,7 +235,20 @@ export function DeepDiveStep({
         <p className="font-display text-lg font-semibold text-strong">
           Deep dive done.
         </p>
-        <p className="mt-2 text-body">Updating {child.name}&apos;s report{"\u2026"}</p>
+        {saveError && !flushing ? (
+          <>
+            <p className="mt-2 text-body">{saveError}</p>
+            <button
+              type="button"
+              onClick={() => finish()}
+              className="mt-4 rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand hover:bg-brand-soft"
+            >
+              try saving again
+            </button>
+          </>
+        ) : (
+          <p className="mt-2 text-body">Updating {child.name}&apos;s report{"\u2026"}</p>
+        )}
       </div>
     );
   }
@@ -210,10 +295,11 @@ export function DeepDiveStep({
           {sittingHistory.length > 0 ? (
             <button
               type="button"
-              onClick={goBack}
+              onClick={() => void goBack()}
+              disabled={undoing}
               className="text-sm text-subtle underline-offset-2 hover:underline"
             >
-              {"\u2190"} back
+              {undoing ? "undoing..." : `${"\u2190"} back`}
             </button>
           ) : null}
           <button
@@ -224,6 +310,9 @@ export function DeepDiveStep({
             stop here and update the report
           </button>
         </div>
+        {saveError ? (
+          <p className="mt-3 text-sm text-body">{saveError}</p>
+        ) : null}
       </div>
     </div>
   );

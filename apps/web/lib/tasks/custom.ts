@@ -15,10 +15,15 @@ import { nextTaskRunInstant } from "./time";
 
 export const MAX_CUSTOM_TASKS_PER_FAMILY = 10;
 
+const taskWeekdaysSchema = z
+  .array(z.number().int().min(0).max(6))
+  .min(1)
+  .transform((weekdays) => [...new Set(weekdays)].sort((left, right) => left - right));
+
 export const customTaskInputSchema = z.object({
   label: z.string().trim().min(3).max(60),
   prompt: z.string().trim().min(10).max(1000),
-  weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+  weekdays: taskWeekdaysSchema,
   localHour: z.number().int().min(0).max(23),
   deliveryPref: z.enum(["text", "email", "none"]),
 });

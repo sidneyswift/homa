@@ -141,7 +141,7 @@ export const MAP_SOURCES: Record<string, { label: string; url: string }> = {
   },
   "aap-lifeskills": {
     label: "American Academy of Pediatrics (HealthyChildren.org) chores + independence guidance",
-    url: "https://www.healthychildren.org/",
+    url: "https://www.healthychildren.org/English/family-life/family-dynamics/communication-discipline/Pages/Chores-and-Responsibility.aspx",
   },
   asha: {
     label: "ASHA school-age speech and language milestones",
@@ -181,7 +181,7 @@ export const MAP_SOURCES: Record<string, { label: string; url: string }> = {
   },
   applebee: {
     label: "Applebee, The Child's Concept of Story, narrative development stages",
-    url: "https://press.uchicago.edu/ucp/books/book/chicago/C/bo5954934.html",
+    url: "https://archive.org/details/childsconceptofs0000appl_i5o9",
   },
 };
 

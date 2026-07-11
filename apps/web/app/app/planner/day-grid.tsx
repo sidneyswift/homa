@@ -82,10 +82,13 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
           onChange={() => toggle(item.checkId)}
           className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--sage-500)]"
         />
+        {/* Done = sage check + faded text, no strikethrough: these are
+            multi-sentence activities, and a line through a paragraph
+            made the week's anchor unreadable (reader gate 2026-07-11). */}
         <span
           className={
             checked
-              ? "text-[0.78rem] leading-snug text-subtle line-through decoration-[var(--sage-400)]"
+              ? "text-[0.78rem] leading-snug text-subtle"
               : "text-[0.78rem] leading-snug text-body"
           }
         >

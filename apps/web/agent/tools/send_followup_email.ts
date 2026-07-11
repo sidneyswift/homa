@@ -2,9 +2,9 @@ import { BANNED_WORDS, EM_DASH } from "@homa/core";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { createCallerDbClient, MissingFamilyContextError } from "../../lib/agent-db";
+import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
-import { sendAgentComposedEmail } from "../../lib/map/email";
+import { getFamilyEmail, sendAgentComposedEmail } from "../../lib/map/email";
 import { rateLimited } from "../../lib/map/ratelimit";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -31,16 +31,16 @@ export default defineTool({
       .describe("A few short paragraphs, in your own warm voice."),
   }),
   async execute(input, ctx) {
-    let clientBundle;
+    let access;
     try {
-      clientBundle = createCallerDbClient(ctx.session.auth.current?.attributes);
+      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { sent: false, note: error.message };
       }
       throw error;
     }
-    const { db, familyId } = clientBundle;
+    const { familyId } = access;
 
     if (rateLimited(`agent-email:${familyId}`, MAX_PER_FAMILY_PER_DAY, DAY_MS)) {
       return {
@@ -57,16 +57,25 @@ export default defineTool({
       };
     }
 
-    const { data: family, error } = await db
-      .from("families")
-      .select("email")
-      .eq("id", familyId)
-      .maybeSingle();
-    if (error || !family?.email) {
+    let email: string | null = null;
+    if (access.mode === "pinned") {
+      email = await getFamilyEmail(familyId);
+    } else {
+      const { data: family, error } = await access.db
+        .from("families")
+        .select("email")
+        .eq("id", familyId)
+        .maybeSingle();
+      if (error) {
+        return { sent: false, note: "No email is on file for this family yet." };
+      }
+      email = family?.email ?? null;
+    }
+    if (!email) {
       return { sent: false, note: "No email is on file for this family yet." };
     }
 
-    const sent = await sendAgentComposedEmail(family.email, input.subject, input.bodyLines);
+    const sent = await sendAgentComposedEmail(email, input.subject, input.bodyLines);
     if (!sent) {
       return { sent: false, note: "The email failed to send. Tell the parent you'll try again shortly." };
     }

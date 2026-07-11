@@ -1,6 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function safeSameOriginPath(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return null;
+  }
+  if (value === "/signin" || value.startsWith("/signin/") || value.startsWith("/signin?")) {
+    return null;
+  }
+  return value;
+}
+
 /**
  * Session-refresh proxy (Next 16's renamed middleware convention). Two jobs:
  *   1. Refresh expired Supabase auth tokens on every matched request and
@@ -52,12 +62,13 @@ export async function proxy(request: NextRequest) {
   if (needsAuth && !isSignedIn) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
+    url.search = "";
+    url.searchParams.set("next", `${path}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
   }
-  if (path.startsWith("/signin") && isSignedIn) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/app";
-    return NextResponse.redirect(url);
+  if ((path === "/signin" || path.startsWith("/signin/")) && isSignedIn) {
+    const destination = safeSameOriginPath(request.nextUrl.searchParams.get("next")) ?? "/app";
+    return NextResponse.redirect(new URL(destination, request.nextUrl.origin));
   }
 
   return response;

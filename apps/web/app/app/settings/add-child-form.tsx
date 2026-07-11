@@ -11,7 +11,9 @@ import { addChildAction, type SetupFormState } from "./actions";
  * one onboarding for every door). The interests and help-with questions
  * left the card the same day (founder follow-up): the questionnaire's
  * extras beat asks them with tappable suggestions instead, so the card is
- * just name + birthday.
+ * just name + birthday. The birthday is the full date, month, day, and
+ * year (founder ruling 2026-07-11: "get the full data so we know how old
+ * the kid is").
  */
 
 const INITIAL_STATE: SetupFormState = { error: null };
@@ -24,7 +26,7 @@ const MONTHS = [
 const inputClass =
   "mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
 
-export function AddChildForm({ familyId }: { familyId: string }) {
+export function AddChildForm() {
   const [state, action, pending] = useActionState(addChildAction, INITIAL_STATE);
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 19 }, (_, i) => currentYear - i);
@@ -32,14 +34,13 @@ export function AddChildForm({ familyId }: { familyId: string }) {
   return (
     <form action={action} className="rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 className="font-display text-xl font-semibold text-strong">Add a child</h2>
-      <input type="hidden" name="family_id" value={familyId} />
 
       <label className="mt-4 block font-medium text-strong" htmlFor="child-name">
         First name
       </label>
       <input id="child-name" name="child_name" type="text" required className={inputClass} />
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-3">
         <div>
           <label className="block font-medium text-strong" htmlFor="child-birth-month">
             Birth month
@@ -48,6 +49,17 @@ export function AddChildForm({ familyId }: { familyId: string }) {
             <option value="" disabled>Month</option>
             {MONTHS.map((month, index) => (
               <option key={month} value={index + 1}>{month}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium text-strong" htmlFor="child-birth-day">
+            Day
+          </label>
+          <select id="child-birth-day" name="birth_day" required defaultValue="" className={inputClass}>
+            <option value="" disabled>Day</option>
+            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+              <option key={day} value={day}>{day}</option>
             ))}
           </select>
         </div>

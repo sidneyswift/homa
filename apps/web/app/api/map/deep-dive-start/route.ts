@@ -3,6 +3,7 @@ import { z } from "zod";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireFamily } from "../../../../lib/map/session";
+import { childBelongsToFamily } from "../../../../lib/map/store";
 
 /**
  * POST /api/map/deep-dive-start
@@ -26,9 +27,13 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const parsed = schema.safeParse(await request.json());
     if (parsed.success) {
+      const childId = parsed.data.childId;
+      if (!(await childBelongsToFamily(childId, family.id))) {
+        return Response.json({ ok: true });
+      }
       await emitMapEvent("map.deep_dive_started", {
         family_id: family.id,
-        child_id: parsed.data.childId,
+        child_id: childId,
         subject: parsed.data.subject,
         mode: parsed.data.mode,
       });

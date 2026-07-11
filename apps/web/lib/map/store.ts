@@ -342,7 +342,7 @@ export async function removeChild(familyId: string, childId: string): Promise<bo
 }
 
 /** True when the child exists and belongs to this family. */
-async function childBelongsToFamily(childId: string, familyId: string): Promise<boolean> {
+export async function childBelongsToFamily(childId: string, familyId: string): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ id: string }[]>`
     select id from public.children where id = ${childId} and family_id = ${familyId}
@@ -366,6 +366,39 @@ export async function saveAnswer(
     values (${childId}, ${itemId}, ${answer}, 'checklist')
     on conflict (child_id, question_id)
     do update set answer = excluded.answer, answered_at = now()
+  `;
+  await touchFamily(familyId);
+  return { ok: true, subject: item.subject.id };
+}
+
+/**
+ * Removes one stored answer, the server side of the checklist and deep
+ * dive "undo last answer" affordance. Without this the undo cleared only
+ * client state while the row lived on (saveAnswer is upsert-only), so
+ * walking back past a ladder base left orphan rungs the scorer still read
+ * (2026-07-11 review, CR-01). The where clause carries the tenancy
+ * re-scope: an itemId under a child of a different family deletes nothing.
+ */
+export async function deleteAnswer(
+  familyId: string,
+  childId: string,
+  itemId: string,
+): Promise<{ ok: boolean; subject?: string }> {
+  const item = getMapItem(itemId);
+  if (!item) return { ok: false };
+  if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
+
+  const sql = mapDb();
+  await sql`
+    delete from public.child_answers
+    where child_id = ${childId}
+      and question_id = ${itemId}
+      and exists (
+        select 1
+        from public.children c
+        where c.id = ${childId}
+          and c.family_id = ${familyId}
+      )
   `;
   await touchFamily(familyId);
   return { ok: true, subject: item.subject.id };
@@ -469,6 +502,19 @@ export async function recordObservation(
  * keeps its localStorage copy either way, so a shared-link viewer loses
  * nothing and forges nothing.
  */
+export function prunePlanChecks(
+  plan: Pick<FourWeekPlan, "weeks">,
+  checks: Record<string, boolean>,
+): Record<string, boolean> {
+  const allowed = new Set<string>();
+  for (const week of plan.weeks) {
+    week.activities.forEach((_, index) => allowed.add(`${week.week}.${index}`));
+  }
+  return Object.fromEntries(
+    Object.entries(checks).filter(([key]) => allowed.has(key)),
+  ) as Record<string, boolean>;
+}
+
 export async function savePlanProgress(
   familyId: string,
   childId: string,
@@ -477,15 +523,22 @@ export async function savePlanProgress(
 ): Promise<{ done: number } | null> {
   if (!(await childBelongsToFamily(childId, familyId))) return null;
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    update public.child_plans
-    set progress = ${sql.json(checks as unknown as DbJson)}, updated_at = now()
+  const rows = await sql<{ id: string; plan: FourWeekPlan }[]>`
+    select id, plan
+    from public.child_plans
     where child_id = ${childId} and subject_id = ${subjectId}
-    returning id
   `;
-  if (rows.length === 0) return null;
+  const plan = rows[0];
+  if (!plan) return null;
+
+  const pruned = prunePlanChecks(plan.plan, checks);
+  await sql`
+    update public.child_plans
+    set progress = ${sql.json(pruned as unknown as DbJson)}, updated_at = now()
+    where id = ${plan.id}
+  `;
   await touchFamily(familyId);
-  return { done: Object.values(checks).filter(Boolean).length };
+  return { done: Object.values(pruned).filter(Boolean).length };
 }
 
 /** The child's report token, re-scoped to the caller's family (for the
@@ -885,6 +938,21 @@ export interface ReportView {
    * migration #22), so the "Call Homa" card can prefill instead of ask
    * again. Null when nothing is linked yet. */
   familyPhone: string | null;
+}
+
+export async function getReportEventIdsByToken(
+  token: string,
+): Promise<{ familyId: string; childId: string } | null> {
+  const sql = mapDb();
+  const rows = await sql<{ family_id: string; child_id: string }[]>`
+    select f.id as family_id, c.id as child_id
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    join public.families f on f.id = c.family_id
+    where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
+  `;
+  const row = rows[0];
+  return row ? { familyId: row.family_id, childId: row.child_id } : null;
 }
 
 /** Loads a report by URL token and stamps first view. Null when revoked/unknown. */

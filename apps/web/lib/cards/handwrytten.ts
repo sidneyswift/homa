@@ -8,7 +8,7 @@ import { Handwrytten } from "handwrytten";
  *   HANDWRYTTEN_API_KEY    from app.handwrytten.com/api-keys
  *   HANDWRYTTEN_CARD_ID    the chosen stationery template id
  *   HANDWRYTTEN_FONT       the chosen handwriting font id/label
- *   HANDWRYTTEN_TEST_MODE  "true" = orders validate but never print or bill
+ *   HANDWRYTTEN_TEST_MODE  "false" = live orders; anything else stays test mode
  *
  * We drive the two-step basket flow instead of orders.send() because only
  * basket.send() accepts testMode (orders.send() does not forward it), and
@@ -39,6 +39,29 @@ export function handwryttenConfigured(): boolean {
   );
 }
 
+/**
+ * handwryttenLiveMode(): true only when HANDWRYTTEN_TEST_MODE is the
+ * explicit string "false". The cron sweep requires live mode: a test
+ * order would still mark a family's once-ever row as sent, silently
+ * spending the family's only card on an order that never mails. Test
+ * mode is for scripts/handwrytten-smoke.mts, never the sweep.
+ */
+export function handwryttenLiveMode(): boolean {
+  return process.env.HANDWRYTTEN_TEST_MODE === "false";
+}
+
+/**
+ * isHandwryttenAccountInTestMode(): the vendor ALSO has an account-level
+ * test switch (dashboard, Integrations page) that env vars cannot see.
+ * In account test mode orders are accepted but never fulfilled, the same
+ * once-ever-row burn handwryttenLiveMode() guards against, so the sweep
+ * checks the live account record too (auth/getUser exposes test_mode).
+ */
+export async function isHandwryttenAccountInTestMode(): Promise<boolean> {
+  const user = await handwryttenClient().auth.getUser();
+  return (user.raw as { test_mode?: number }).test_mode === 1;
+}
+
 function handwryttenClient(): Handwrytten {
   if (client) return client;
   const apiKey = process.env.HANDWRYTTEN_API_KEY;
@@ -56,7 +79,7 @@ export async function sendHandwryttenCard(
   request: HandwryttenCardRequest,
 ): Promise<{ orderId: string | null }> {
   const hw = handwryttenClient();
-  const testMode = process.env.HANDWRYTTEN_TEST_MODE === "true";
+  const testMode = process.env.HANDWRYTTEN_TEST_MODE !== "false";
   try {
     await hw.basket.addOrder({
       cardId: process.env.HANDWRYTTEN_CARD_ID as string,

@@ -46,9 +46,45 @@ async function rest(pathname, init = {}) {
 
 async function expectEmptyRead(table) {
   const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
-  const body = response.ok ? await response.json() : [];
-  const ok = !response.ok || (Array.isArray(body) && body.length === 0);
-  report(`anon read of ${table} exposes nothing`, ok, `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`);
+  const raw = await response.text();
+  if (!response.ok) {
+    report(
+      `anon read of ${table} exposes nothing`,
+      false,
+      `HTTP ${response.status}, ${raw.slice(0, 100)}`,
+    );
+    return;
+  }
+
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    report(
+      `anon read of ${table} exposes nothing`,
+      false,
+      `HTTP ${response.status}, non-JSON body ${raw.slice(0, 100)}`,
+    );
+    return;
+  }
+
+  const ok = Array.isArray(body) && body.length === 0;
+  report(
+    `anon read of ${table} exposes nothing`,
+    ok,
+    `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`,
+  );
+}
+
+async function expectReadDenied(table) {
+  const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
+  const raw = await response.text();
+  const ok = response.status === 401 || response.status === 403;
+  report(
+    `anon read of ${table} is denied`,
+    ok,
+    `HTTP ${response.status}, ${raw.slice(0, 100)}`,
+  );
 }
 
 async function expectInsertDenied(table, row, label) {
@@ -79,7 +115,7 @@ await expectEmptyRead("skill_bank");
 await expectEmptyRead("state_requirements");
 // Family texting line (migration #22): deny-all like the lead tables; the
 // phone number routes texts INTO a family, so no Data API role may touch it.
-await expectEmptyRead("family_phones");
+await expectReadDenied("family_phones");
 // One-world onboarding tables (migration #24): the family row is the
 // account container from the first tap, memberless until signup, so
 // anonymous traffic must see nothing in any of them, ever.
@@ -126,7 +162,7 @@ await expectEmptyRead("phone_link_requests");
 // Verified phone claim codes (migration #47): deny-all, server-only.
 await expectEmptyRead("phone_claim_codes");
 // Co-parent invite tokens (migration #51): deny-all, server-only.
-await expectEmptyRead("family_invites");
+await expectReadDenied("family_invites");
 // Materials studio artifacts (migrations #42 + #44): family-scoped,
 // members only.
 await expectEmptyRead("materials");

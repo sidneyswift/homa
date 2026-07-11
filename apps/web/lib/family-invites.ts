@@ -211,35 +211,3 @@ export async function consumeFamilyInvite(
   await emitMapEvent("family.invite_accepted", { family_id: joined.familyId });
   return { kind: "joined", familyId: joined.familyId };
 }
-
-/**
- * The onboarding hook (attachAuthUser calls this): a brand-new signup
- * whose email holds a pending invite joins THAT family instead of
- * founding a new one, which closes the two-accounts hole the founders
- * fell into. Returns the newest applicable invite, or null.
- */
-export async function findPendingInviteFamily(email: string): Promise<
-  { inviteId: string; familyId: string; role: string } | null
-> {
-  const sql = mapDb();
-  const rows = await sql<{ id: string; family_id: string; role: string }[]>`
-    select id, family_id, role from public.family_invites
-    where email = ${email.toLowerCase()}
-      and consumed_at is null and expires_at > now()
-    order by created_at desc
-    limit 1
-  `;
-  const row = rows[0];
-  return row ? { inviteId: row.id, familyId: row.family_id, role: row.role } : null;
-}
-
-/** Marks an invite consumed after the onboarding hook joined it. The
- * consumed_at guard keeps a concurrent /join claim from double-marking. */
-export async function markInviteConsumed(inviteId: string, authUserId: string): Promise<void> {
-  const sql = mapDb();
-  await sql`
-    update public.family_invites
-    set consumed_at = now(), consumed_by = ${authUserId}
-    where id = ${inviteId} and consumed_at is null
-  `;
-}

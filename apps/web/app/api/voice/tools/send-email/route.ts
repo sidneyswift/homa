@@ -3,6 +3,10 @@ import { BANNED_WORDS, EM_DASH } from "@homa/core";
 import { getFamilyEmail, sendAgentComposedEmail } from "../../../../../lib/map/email";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
+import {
+  readVoiceChildId,
+  readVoiceFamilyId,
+} from "../../../../../lib/voice/tool-context";
 
 /**
  * POST /api/voice/tools/send-email: a live webhook tool BOTH voice
@@ -36,14 +40,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ success: false, error: "unauthorized" }, { status: 401 });
   }
 
-  const familyId = url.searchParams.get("family_id");
-  const childId = url.searchParams.get("child_id") || null;
-  if (!familyId) {
-    return Response.json({
-      success: false,
-      error: "This caller is not linked to a Homa family yet, so there is no address to send to.",
-    });
-  }
+  const context = readVoiceFamilyId(
+    url,
+    "This caller is not linked to a Homa family yet, so there is no address to send to.",
+  );
+  if (!context.ok) return Response.json({ success: false, error: context.error });
+  const familyId = context.familyId;
+  const childId = readVoiceChildId(url);
 
   let body: ToolCallBody;
   try {

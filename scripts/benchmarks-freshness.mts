@@ -26,10 +26,10 @@ import { MAP_SUBJECTS, MAP_SOURCES } from "../packages/core/src/index";
 const VERIFIED: Record<string, { verified: string; watch?: string; botBlocked?: boolean }> = {
   cdc: { verified: "2026-07-06", watch: "site moved from cdc.gov/ncbddd/actearly to cdc.gov/act-early in the 2025 redesign" },
   elof: { verified: "2026-07-06", botBlocked: true, watch: "moved from eclkc.ohs.acf.hhs.gov to headstart.gov; host rejects automated probes" },
-  "ccss-ela": { verified: "2026-07-06", watch: "official site moved to thecorestandards.org; corestandards.org is a temporary mirror" },
-  "ccss-math": { verified: "2026-07-06", watch: "official site moved to thecorestandards.org; corestandards.org is a temporary mirror" },
+  "ccss-ela": { verified: "2026-07-06", botBlocked: true, watch: "official site moved to thecorestandards.org; automated probes may hit a Cloudflare challenge" },
+  "ccss-math": { verified: "2026-07-06", botBlocked: true, watch: "official site moved to thecorestandards.org; automated probes may hit a Cloudflare challenge" },
   ngss: { verified: "2026-07-06" },
-  c3: { verified: "2026-07-06" },
+  c3: { verified: "2026-07-06", botBlocked: true, watch: "official page may hit a Cloudflare challenge during automated probes" },
   nca: { verified: "2026-07-06", watch: "NCAS standards review process underway per nationalartsstandards.org; check for a new edition" },
   shape: { verified: "2026-07-06", watch: "2024 revision moved PE outcomes to grade spans" },
   casel: { verified: "2026-07-06" },
@@ -38,7 +38,7 @@ const VERIFIED: Record<string, { verified: string; watch?: string; botBlocked?: 
   "clements-sarama": { verified: "2026-07-06" },
   hwt: { verified: "2026-07-06" },
   "dawson-guare": { verified: "2026-07-06" },
-  "aap-lifeskills": { verified: "2026-07-06" },
+  "aap-lifeskills": { verified: "2026-07-11" },
   asha: { verified: "2026-07-06" },
   hustad: { verified: "2026-07-06", botBlocked: true },
   "crowe-mcleod": { verified: "2026-07-06", botBlocked: true },
@@ -48,6 +48,7 @@ const VERIFIED: Record<string, { verified: string; watch?: string; botBlocked?: 
   cee: { verified: "2026-07-06", watch: "CEE published a restructured 3rd edition (2025); bank anchors cite the 2010 grade 4/8/12 benchmarks" },
   "hoff-core": { verified: "2026-07-06" },
   csta: { verified: "2026-07-06", watch: "CSTA 2026 revision launches July 2026 and renames the five concepts; re-verify computer_science items against it" },
+  applebee: { verified: "2026-07-11", watch: "University of Chicago Press book URL 404s; Internet Archive record is the stable bibliographic link" },
 };
 
 const STALE_DAYS = 180;
