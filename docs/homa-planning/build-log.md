@@ -75,6 +75,29 @@ Shipped, the microwave class of failure:
   Deliberately NOT added to CI (it costs an embedding call and touches
   the live DB; founder-run, like the calibration harness).
 
+Shipped same night, the stuck composer (founder phone-testing report,
+"it kept not letting me respond after certain points", screenshots):
+
+- **Root cause**: a phone that locks or backgrounds mid-turn kills the
+  NDJSON stream, and a half-open connection can hang without ever
+  erroring; the eve store then stays `streaming`, the send button stays
+  disabled forever, and no busy label shows once the last text part
+  looks complete. The web UI had no stop affordance and no stall
+  detection; only a page refresh recovered.
+- **Fix, web + mobile twins**: (1) Send becomes a Stop button while a
+  turn runs (`agent.stop()` flips the store back to ready; the turn is
+  durable server-side and missed events replay from the session's
+  streamIndex on the next send); (2) returning to a visible tab/app
+  aborts a stream silent for 20s+ (the backgrounded-phone case,
+  `visibilitychange` on web, AppState on mobile); (3) a foreground
+  watchdog aborts at 180s of silence (radio handoffs), sized past the
+  longest normal tool run since image-heavy printables stream nothing
+  for 60-90s while rendering. Decision made alone: on a stale return
+  the client aborts rather than waiting for a possibly-reconnected
+  quiet stream; worst case the reply arrives on the next send instead
+  of streaming live, and stuck-forever is the failure that burns trust
+  (TE-04 spirit).
+
 Verified: typecheck, lint, build, all four guards green; eval and caption
 smoke run live. Coordinated with the concurrent slash-composer work: the
 rewritten chat client wires `SlashComposer` in rather than the bare input.
@@ -242,6 +265,35 @@ Calls made alone, worth auditing:
   expired `VERCEL_OIDC_TOKEN` in `apps/web/.env.local` (73 hours past
   expiry, local chat was dead) was replaced with a fresh `vercel env
   pull` token, and the dev server on :3000 was restarted clean.
+
+## 2026-07-10 (night) · Incident: /app 500 for ~15 minutes after the skill-graph push; fixed, CI hardened
+
+What the founder saw: thankshoma.com/app returning 500 (Server Components
+render error) at ~9:00pm. Root cause was two stacked failures:
+
+1. **The skill-graph deploy failed on Vercel's eve build step**, which
+   compiles agent tool modules outside Next's bundler. record_observation
+   imported next/server (after) and, through @homa/taxonomy's index, the
+   createRequire JSON corpus loader; neither resolves in that context.
+   next build passed locally and on Vercel, so every local check was
+   green while the deploy itself died.
+2. **The database had already been migrated** (subject rename, applied
+   ~8:40pm) while production kept serving the previous build, whose code
+   still read child_plans.domain_id and scores.domains. Old code against
+   new schema is what 500'd. The sequencing mistake, applying a breaking
+   rename migration hours before the matching code shipped, is the agent's
+   and is logged here so it isn't repeated: for breaking renames, migrate
+   and deploy inside the same window, migration last or expand-contract.
+
+Fixes, verified live (deploy READY 21:08, / 200, /app 307 → signin 200):
+
+- record_observation drops after() for a fire-and-forget narrative kick
+  and imports the domain registry via a new JSON-free
+  @homa/taxonomy/domains subpath; the hub-topic try-at-home probe left
+  the tool payload until the corpus has a tool-safe loading shape
+  (8a72df2).
+- CI now runs `pnpm --filter web exec eve build` after the Next build,
+  so this deploy-only failure mode fails the checks first (1930200).
 
 ## 2026-07-10 (evening) · The skill graph ships: subject → domain → topic live, the rename executed, the agent writes the map
 
