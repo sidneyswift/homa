@@ -70,9 +70,10 @@ interface BucketRow {
 }
 
 /**
- * Age at answer time in whole months, bucketed. birth_month is stored as a
- * date with day 01 (no birth day is ever collected), matching the app's
- * ageInMonths convention.
+ * Age at answer time in whole months, bucketed. children.birth_month holds
+ * the child's birthday; the lead_children table was dropped in the one-world
+ * unification (migration 20260708021500), so this joins the live
+ * public.children (2026-07-11 review, CR-30).
  */
 const rows = await sql<BucketRow[]>`
   select
@@ -84,7 +85,7 @@ const rows = await sql<BucketRow[]>`
     a.answer,
     count(*)::int as n
   from public.child_answers a
-  join public.lead_children c on c.id = a.child_id
+  join public.children c on c.id = a.child_id
   where a.answer in ('easily', 'getting_there', 'not_yet')
   group by 1, 2, 3
   order by 1, 2

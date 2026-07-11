@@ -1,5 +1,6 @@
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import {
   buildCallFocusSummary,
@@ -33,6 +34,12 @@ export async function POST(request: Request): Promise<Response> {
   } = await supabase.auth.getUser();
   if (!user) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+
+  // Each call places a real, billable outbound Telnyx call, so cap how many
+  // an authenticated user can trigger per hour (2026-07-11 review, CR-20).
+  if (rateLimited(`curriculum-call:${user.id}`, 4, 60 * 60 * 1000)) {
+    return Response.json({ ok: false, reason: "rate-limited" }, { status: 429 });
   }
 
   let body: StartBody;

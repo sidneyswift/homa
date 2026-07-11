@@ -279,4 +279,13 @@ lines.push("");
 writeFileSync(path.join(outDir, "report.md"), lines.join("\n"));
 console.log(`\nreport: ${path.join(outDir, "report.md")}`);
 console.log(`blobs created: ${createdBlobUrls.length} (run with --cleanup to delete)`);
+
+// Non-zero exit when any brief failed, so automation (and a human reading
+// only the exit code) cannot mistake a calibration full of failures for a
+// clean run (2026-07-11 review, CR-31).
+const failed = outcomes.filter((outcome) => !outcome.ok).length;
+if (failed > 0) {
+  console.error(`\n${failed} of ${outcomes.length} calibration runs FAILED.`);
+  process.exit(1);
+}
 process.exit(0);

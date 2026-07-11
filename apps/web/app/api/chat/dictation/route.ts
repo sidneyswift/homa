@@ -1,3 +1,4 @@
+import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 import { transcribeAudio } from "../../../../lib/voice/transcribe";
 
@@ -30,6 +31,13 @@ export async function POST(request: Request): Promise<Response> {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
     return Response.json({ transcript: null }, { status: 401 });
+  }
+
+  // Each clip spends Telnyx STT credits, so throttle per signed-in user
+  // (IP as a fallback key) even though the route is auth-gated
+  // (2026-07-11 review, CR-21). ~40 clips/hour is far past normal dictation.
+  if (rateLimited(`dictation:${userData.user.id || clientIp(request)}`, 40, 60 * 60 * 1000)) {
+    return Response.json({ transcript: null, reason: "rate-limited" }, { status: 429 });
   }
 
   let form: FormData;

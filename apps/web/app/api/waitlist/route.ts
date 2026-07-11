@@ -1,5 +1,7 @@
 import { emitEvent, waitlistSubmissionSchema } from "@homa/core";
 
+import { clientIp, rateLimited } from "../../../lib/map/ratelimit";
+
 /**
  * POST /api/waitlist
  * Validates a submission and writes it to public.waitlist over the Supabase
@@ -29,6 +31,14 @@ export async function POST(request: Request): Promise<Response> {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error("waitlist: missing Supabase env vars");
     return Response.json({ ok: false }, { status: 500 });
+  }
+
+  // Public, unauthenticated endpoint: throttle by IP so it cannot be
+  // hammered into Supabase and the events table, matching the map routes'
+  // damper (the honeypot below only stops naive bots) (2026-07-11 review,
+  // CR-19).
+  if (rateLimited(`waitlist:${clientIp(request)}`, 20)) {
+    return Response.json({ ok: false, reason: "rate-limited" }, { status: 429 });
   }
 
   let body: WaitlistRequestBody;

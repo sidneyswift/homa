@@ -15,7 +15,19 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   let next = searchParams.get("next") ?? "/app";
-  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\")) next = "/app";
+  // Same guard as proxy.ts safeSameOriginPath, including rejecting /signin, so
+  // a crafted ?next=/signin cannot bounce a freshly-authed user back to the
+  // sign-in page (2026-07-11 review, CR-26).
+  if (
+    !next.startsWith("/") ||
+    next.startsWith("//") ||
+    next.includes("\\") ||
+    next === "/signin" ||
+    next.startsWith("/signin/") ||
+    next.startsWith("/signin?")
+  ) {
+    next = "/app";
+  }
 
   if (code) {
     const supabase = await createSupabaseServerClient();
