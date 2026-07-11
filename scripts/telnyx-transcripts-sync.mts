@@ -21,6 +21,7 @@
 import postgres from "postgres";
 
 import { embedText } from "../apps/web/lib/learning/embeddings";
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 import { tx, listOf } from "./telnyx-shared.mts";
 
 interface ConversationMeta {
@@ -60,6 +61,10 @@ function db(): ReturnType<typeof postgres> {
     console.error("sync: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_DB_PASSWORD must be set");
     process.exit(2);
   }
+  assertConfirmedProdWrite({
+    scriptName: "telnyx-transcripts-sync",
+    supabaseUrl,
+  });
   const ref = new URL(supabaseUrl).hostname.split(".")[0];
   return postgres({
     host: "aws-0-us-east-1.pooler.supabase.com",

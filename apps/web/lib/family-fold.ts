@@ -41,10 +41,6 @@ async function isTrueStubWithSql(sql: SqlClient, familyId: string): Promise<bool
   return Boolean(row) && row.email === null && row.members === 0;
 }
 
-export async function isTrueStub(familyId: string): Promise<boolean> {
-  return isTrueStubWithSql(mapDb(), familyId);
-}
-
 export async function foldStubFamilyIntoTx(
   tx: SqlClient,
   stubId: string,

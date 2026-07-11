@@ -35,6 +35,7 @@ import {
   type IndexStateEntry,
   type StateDetail,
 } from "./state-requirements-shared.mts";
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const dataDir = path.join(repoRoot, "data", "state-requirements");
@@ -51,6 +52,10 @@ if (!supabaseUrl || !password) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_DB_PASSWORD (apps/web/.env.local)");
   process.exit(2);
 }
+assertConfirmedProdWrite({
+  scriptName: "state-requirements-seed",
+  supabaseUrl,
+});
 const ref = new URL(supabaseUrl).hostname.split(".")[0];
 
 const sql = postgres({

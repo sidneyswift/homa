@@ -270,9 +270,3 @@ export const BANK_ITEM_DOMAINS: Record<string, string> = {
   "spanish.creates-sentences": "l2-speaking-production",
   "spanish.conversation": "l2-conversation-use",
 };
-
-/** The taxonomy domain id for a bank item, or null when unassigned
- * (check:taxonomy keeps this map total, so null means a foreign id). */
-export function domainForBankItem(itemId: string): string | null {
-  return BANK_ITEM_DOMAINS[itemId] ?? null;
-}

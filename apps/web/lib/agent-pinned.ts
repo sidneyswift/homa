@@ -3,7 +3,6 @@ import { embedText } from "./learning/embeddings";
 import { isHoursSubject } from "./hours-model";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
-import { scanMemoryContent } from "./agent-memory";
 import { effectiveTimeZone, todayInZone } from "./time-zone";
 
 /** The family's IANA zone (or the shared US fallback), loaded on the
@@ -383,6 +382,3 @@ export async function recallPinned(input: {
 
   return hits.slice(0, input.limit);
 }
-
-/** Re-export so tool branches share one scan (writes stay guarded). */
-export { scanMemoryContent };

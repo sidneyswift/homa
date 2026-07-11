@@ -33,9 +33,9 @@ import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem }
 export type MapPosition = "ahead" | "on_track" | "growing" | "not_mapped";
 
 /** Ahead begins at half a band above age; below that is "right in the band". */
-export const AHEAD_THRESHOLD_MONTHS = 6;
+const AHEAD_THRESHOLD_MONTHS = 6;
 /** "Getting there" earns the anchor minus half a band. */
-export const EMERGING_DISCOUNT_MONTHS = 6;
+const EMERGING_DISCOUNT_MONTHS = 6;
 
 export interface MapAnswerInput {
   itemId: string;

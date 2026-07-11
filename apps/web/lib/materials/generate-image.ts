@@ -104,30 +104,22 @@ export async function generateStudioImage(input: {
   const model = imageModelId();
   const size = SHAPE_SIZE[input.shape ?? "square"];
   const startedAt = Date.now();
-
-  const generation = generateImage({
-    model,
-    prompt:
-      references.length > 0
-        ? { images: references, text: input.prompt }
-        : input.prompt,
-    size,
-    providerOptions: {
-      gateway: gatewayAttribution(input.familyId, "materials_image"),
-    },
-  });
-  const timeout = new Promise<null>((resolve) =>
-    setTimeout(() => resolve(null), GENERATION_TIMEOUT_MS),
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
 
   try {
-    const result = await Promise.race([generation, timeout]);
-    if (result === null) {
-      return {
-        ok: false,
-        note: "The image is taking too long. Try once more with a simpler prompt, or design the page without it.",
-      };
-    }
+    const result = await generateImage({
+      model,
+      prompt:
+        references.length > 0
+          ? { images: references, text: input.prompt }
+          : input.prompt,
+      size,
+      abortSignal: controller.signal,
+      providerOptions: {
+        gateway: gatewayAttribution(input.familyId, "materials_image"),
+      },
+    });
     const image = result.image;
     if (!image?.base64) {
       return {
@@ -156,6 +148,12 @@ export async function generateStudioImage(input: {
     });
     return { ok: true, url };
   } catch (error) {
+    if (controller.signal.aborted) {
+      return {
+        ok: false,
+        note: "The image is taking too long. Try once more with a simpler prompt, or design the page without it.",
+      };
+    }
     console.error(
       "generateStudioImage failed:",
       error instanceof Error ? error.message : "unknown",
@@ -164,5 +162,7 @@ export async function generateStudioImage(input: {
       ok: false,
       note: "Image generation failed this time. Try a reworded prompt, or design the page without it.",
     };
+  } finally {
+    clearTimeout(timeout);
   }
 }

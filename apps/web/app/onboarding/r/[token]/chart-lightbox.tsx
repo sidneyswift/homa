@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { reportButtonClass } from "./report-button";
 
@@ -14,10 +14,37 @@ import { reportButtonClass } from "./report-button";
  */
 export function ChartLightbox({ title, children }: { title: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const trigger = triggerRef.current;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+      }
+      // Close is the dialog's only interactive control. Keep keyboard focus
+      // inside the modal instead of letting Tab reach the obscured page.
+      if (event.key === "Tab") {
+        event.preventDefault();
+        closeRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      trigger?.focus();
+    };
+  }, [open]);
 
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`${title}. Tap to view larger.`}
@@ -42,6 +69,7 @@ export function ChartLightbox({ title, children }: { title: string; children: Re
               {title}
             </p>
             <button
+              ref={closeRef}
               type="button"
               onClick={() => setOpen(false)}
               className={reportButtonClass("secondary", "inline-flex min-h-10 items-center px-4 py-1.5 text-sm font-semibold")}

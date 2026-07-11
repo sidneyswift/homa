@@ -35,6 +35,13 @@ export {
   personalizePrompt,
 } from "./topics.js";
 
+/**
+ * Staged server-side planning API. Most product surfaces currently consume
+ * only getTaxonomyDomain, but these graph/cluster/standards operations are
+ * the planned seam for the skill-graph teaching-order work in the plan named
+ * above. They stay deliberately public rather than looking like accidental
+ * dead exports (2026-07-11 review, CR-48).
+ */
 export {
   allPrerequisiteEdges,
   prerequisitesOf,

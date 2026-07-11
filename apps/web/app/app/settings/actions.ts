@@ -216,7 +216,8 @@ export async function addChildAction(
     profile: {},
   });
   if (error) {
-    return { error: error.message };
+    console.error("settings add child failed:", error.message);
+    return { error: "That didn't save just now. Have another try." };
   }
   // A new kid shows up on the dashboard's cards, the planner's columns,
   // and the sidebar's kid list on every page of the group; one

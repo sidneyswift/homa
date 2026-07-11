@@ -76,35 +76,33 @@ export async function reviewArtifact(input: {
 
   const model = reviewModelId();
   const startedAt = Date.now();
-  const generation = generateObject({
-    model,
-    schema: reviewSchema,
-    system: REVIEW_SYSTEM,
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "file", mediaType: "image/jpeg", data: input.previewJpeg },
-          { type: "text", text: `The brief:\n${input.brief}` },
-        ],
-      },
-    ],
-    maxOutputTokens: 600,
-    maxRetries: 1,
-    providerOptions: {
-      gateway: {
-        ...gatewayAttribution(input.familyId, "materials_review"),
-        disallowPromptTraining: true,
-      },
-    },
-  });
-  const timeout = new Promise<null>((resolve) =>
-    setTimeout(() => resolve(null), REVIEW_TIMEOUT_MS),
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REVIEW_TIMEOUT_MS);
 
   try {
-    const result = await Promise.race([generation, timeout]);
-    if (result === null) return null;
+    const result = await generateObject({
+      model,
+      schema: reviewSchema,
+      system: REVIEW_SYSTEM,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "file", mediaType: "image/jpeg", data: input.previewJpeg },
+            { type: "text", text: `The brief:\n${input.brief}` },
+          ],
+        },
+      ],
+      maxOutputTokens: 600,
+      maxRetries: 1,
+      abortSignal: controller.signal,
+      providerOptions: {
+        gateway: {
+          ...gatewayAttribution(input.familyId, "materials_review"),
+          disallowPromptTraining: true,
+        },
+      },
+    });
 
     await recordModelUsage({
       familyId: input.familyId,
@@ -119,10 +117,14 @@ export async function reviewArtifact(input: {
 
     return { pass: result.object.pass, issues: result.object.issues };
   } catch (error) {
-    console.error(
-      "reviewArtifact failed (creation proceeds unreviewed):",
-      error instanceof Error ? error.message : "unknown",
-    );
+    if (!controller.signal.aborted) {
+      console.error(
+        "reviewArtifact failed (creation proceeds unreviewed):",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }

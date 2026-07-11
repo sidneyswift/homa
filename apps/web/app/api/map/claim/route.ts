@@ -65,11 +65,14 @@ export async function POST(request: Request): Promise<Response> {
       const alreadyRegistered =
         signUpError?.code === "user_already_exists" ||
         /already (been )?registered/i.test(signUpError?.message ?? "");
+      console.error(
+        "map/claim auth signup failed:",
+        signUpError?.code ?? signUpError?.message ?? "no user returned",
+      );
       return Response.json(
         {
           ok: false,
           reason: alreadyRegistered ? "exists" : "auth-failed",
-          message: signUpError?.message,
         },
         { status: 400 },
       );

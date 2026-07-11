@@ -16,12 +16,19 @@ import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
+
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
   loadEnvFile(path.join(repoRoot, "apps/web/.env.local"));
 } catch {
   // Fine in CI or when env arrives from the shell.
 }
+
+assertConfirmedProdWrite({
+  scriptName: "knowledge-revert",
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+});
 
 // Env must load before the db module reads it (usage-report.mts pattern).
 const { mapDb } = await import("../apps/web/lib/map/db");

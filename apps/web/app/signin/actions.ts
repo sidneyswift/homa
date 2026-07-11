@@ -37,7 +37,8 @@ export async function signInAction(
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    return { error: error.message };
+    console.error("signin failed:", error.code ?? error.message);
+    return { error: "That email and password didn't match. Check both and try again." };
   }
   redirect(safeNext(formData));
 }

@@ -48,6 +48,16 @@ export interface AssembledTaxonomy {
 
 let assembled: AssembledTaxonomy | null = null;
 
+const emDashPattern = /\s*\u2014\s*/g;
+
+function sanitizeReferenceText(value: string): string {
+  return value.replace(emDashPattern, ", ");
+}
+
+function sanitizeOptionalReferenceText(value: string): string | null {
+  return value ? sanitizeReferenceText(value) : null;
+}
+
 function computeCentrality(
   topicIds: string[],
   prerequisites: TaxonomyPrerequisite[],
@@ -110,12 +120,12 @@ export function assembleTaxonomy(): AssembledTaxonomy {
       id: homaId,
       subject: target.subject,
       domain: target.domainId,
-      name: marble.name,
-      description: marble.description,
+      name: sanitizeReferenceText(marble.name),
+      description: sanitizeReferenceText(marble.description),
       kind: topicKindFromMarble(marble.type),
       teachingWindowMonths: [marble.ageRangeStart * 12, marble.ageRangeEnd * 12],
-      evidence: marble.evidence,
-      assessmentPrompt: marble.assessmentPrompt || null,
+      evidence: marble.evidence.map(sanitizeReferenceText),
+      assessmentPrompt: sanitizeOptionalReferenceText(marble.assessmentPrompt),
       refs: [`marble:${marble.id}`, ...marble.standards],
       centrality: 0, // filled in below once edges are known
     });
@@ -132,7 +142,7 @@ export function assembleTaxonomy(): AssembledTaxonomy {
       topicId,
       prerequisiteId,
       strength: assertPrerequisiteStrength(edge.strength),
-      reason: edge.reason || null,
+      reason: sanitizeOptionalReferenceText(edge.reason),
     });
   }
 
@@ -156,7 +166,7 @@ export function assembleTaxonomy(): AssembledTaxonomy {
       subject: target.subject,
       domain: target.domainId,
       ageBandStartMonths: cluster.ageRangeStart * 12,
-      summary: cluster.summary,
+      summary: sanitizeReferenceText(cluster.summary),
     });
   }
 

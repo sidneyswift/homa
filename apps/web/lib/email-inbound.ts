@@ -72,19 +72,6 @@ export function optOutIntent(text: string): "stop" | "start" | null {
   return null;
 }
 
-/**
- * The family that registered this exact address, or null. Two match
- * paths since multi-parent v0 (plan 2026-07-11): the family row's own
- * email (the address SHE gave us at signup) and any member's sign-in
- * email, so a second parent's replies authenticate without being the
- * account email. Both are addresses a parent registered; the trust
- * basis is unchanged.
- */
-export async function findFamilyIdByEmail(email: string): Promise<string | null> {
-  const identity = await findFamilyIdentityByEmail(email);
-  return identity?.familyId ?? null;
-}
-
 export interface FamilyEmailIdentity {
   familyId: string;
   /** The member's display name when the address matched a member's
@@ -92,8 +79,8 @@ export interface FamilyEmailIdentity {
   memberDisplayName: string | null;
 }
 
-/** The identity-aware twin of findFamilyIdByEmail: same auth basis,
- * plus WHICH adult wrote in, when the address is a member's own. */
+/** Finds the family that registered this exact address and, when the
+ * address belongs to a member, identifies which adult wrote in. */
 export async function findFamilyIdentityByEmail(
   email: string,
 ): Promise<FamilyEmailIdentity | null> {

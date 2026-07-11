@@ -117,6 +117,23 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
     order by c.created_at
   `;
 
+  const answersByChild = new Map<string, Record<string, MapAnswer>>();
+  if (childRows.length > 0) {
+    const childIds = childRows.map((child) => child.id);
+    const answerRows = await sql<
+      { child_id: string; question_id: string; answer: MapAnswer }[]
+    >`
+      select child_id, question_id, answer
+      from public.child_answers
+      where child_id in ${sql(childIds)}
+    `;
+    for (const row of answerRows) {
+      const answers = answersByChild.get(row.child_id) ?? {};
+      answers[row.question_id] = row.answer;
+      answersByChild.set(row.child_id, answers);
+    }
+  }
+
   const children: SignupProgress["children"] = [];
   for (const child of childRows) {
     const ageMonths = ageInMonths(child.birth_month);
@@ -124,7 +141,7 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
     let answered = 0;
     let checklistDone = false;
     if (inRange) {
-      const answers = await childAnswers(child.id);
+      const answers = answersByChild.get(child.id) ?? {};
       answered = Object.keys(answers).length;
       checklistDone =
         answered > 0 && buildQueue(planQuestions(ageMonths), answers).length === 0;

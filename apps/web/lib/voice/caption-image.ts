@@ -58,38 +58,36 @@ export async function captionSmsImage(input: {
 
   const model = captionModelId();
   const startedAt = Date.now();
-  const generation = generateText({
-    model,
-    system: CAPTION_SYSTEM,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "file",
-            mediaType: input.mediaType,
-            data: input.image instanceof URL ? input.image : Buffer.from(input.image),
-          },
-          { type: "text", text: "Caption this photo in one sentence." },
-        ],
-      },
-    ],
-    maxOutputTokens: 120,
-    maxRetries: 1,
-    providerOptions: {
-      gateway: {
-        ...gatewayAttribution(input.familyId, "media_caption"),
-        disallowPromptTraining: true,
-      },
-    },
-  });
-  const timeout = new Promise<null>((resolve) =>
-    setTimeout(() => resolve(null), CAPTION_TIMEOUT_MS),
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CAPTION_TIMEOUT_MS);
 
   try {
-    const result = await Promise.race([generation, timeout]);
-    if (result === null) return null;
+    const result = await generateText({
+      model,
+      system: CAPTION_SYSTEM,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "file",
+              mediaType: input.mediaType,
+              data: input.image instanceof URL ? input.image : Buffer.from(input.image),
+            },
+            { type: "text", text: "Caption this photo in one sentence." },
+          ],
+        },
+      ],
+      maxOutputTokens: 120,
+      maxRetries: 1,
+      abortSignal: controller.signal,
+      providerOptions: {
+        gateway: {
+          ...gatewayAttribution(input.familyId, "media_caption"),
+          disallowPromptTraining: true,
+        },
+      },
+    });
 
     await recordModelUsage({
       familyId: input.familyId,
@@ -105,10 +103,14 @@ export async function captionSmsImage(input: {
     const caption = result.text.trim().replace(/\s+/g, " ");
     return caption.length > 0 ? caption.slice(0, CAPTION_MAX_CHARS) : null;
   } catch (error) {
-    console.error(
-      "captionSmsImage failed (photo rides uncaptioned):",
-      error instanceof Error ? error.message : "unknown",
-    );
+    if (!controller.signal.aborted) {
+      console.error(
+        "captionSmsImage failed (photo rides uncaptioned):",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
