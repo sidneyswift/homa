@@ -54,8 +54,14 @@ const PRACTICE_PATTERNS: Record<string, readonly [string, string, string]> = {
     "One real {skill} moment a day, at the store or in the kitchen, and they own it.",
   ],
   literacy: [
-    "Fifteen minutes of reading a day, same couch, same time, their pick. {skill} is the quiet goal.",
-    "Books, articles, or comics about {interest} count double, because they'll finish them.",
+    // "The quiet goal is {skill}", never "{skill} is the quiet goal":
+    // skill statements carry their own comma clauses, and a clause that
+    // does not end the sentence garden-paths ("...a cereal box is the
+    // quiet goal", copy-editor gate 2026-07-11).
+    "Fifteen minutes of reading a day, same couch, same time, their pick. The quiet goal is {skill}.",
+    // Plain fact, not "count double": on a page of literal check-offs a
+    // scoring metaphor reads as a real mechanic (same gate).
+    "Reach for books, articles, or comics about {interest}: they'll finish them.",
     "Library trip: they pick anything about {interest}, you sneak in one that stretches toward {skill}.",
   ],
   phonics: [
@@ -285,8 +291,10 @@ export function buildMonthPlan(
     return {
       week,
       // Subject names, not three concatenated target statements: the
-      // formal targets live in the plan's targets list already.
-      focus: subPlans.map((plan) => plan.subjectName.toLowerCase()).join(" + "),
+      // formal targets live in the plan's targets list already. Comma
+      // separated: plus signs read as a third symbol vocabulary next to
+      // the planner's mid-dots and chips (copy-editor gate 2026-07-11).
+      focus: subPlans.map((plan) => plan.subjectName.toLowerCase()).join(", "),
       activities,
     };
   });
@@ -371,7 +379,11 @@ export function buildFourWeekPlan(
       fill(patterns[0], skill, interest),
       fill(patterns[1], skill, interest),
     ];
-    if (week === 1) base.push(`${activity.title}: ${lowerFirst(activity.description)}`);
+    // Title joins with a period, not a colon: activity descriptions
+    // carry their own colons ("hunt it everywhere: cereal boxes..."),
+    // and two colons stack three structures into one sentence
+    // (copy-editor gate 2026-07-11).
+    if (week === 1) base.push(`${activity.title}. ${activity.description}`);
     if (week === 2 || week === 4) base.push(fill(patterns[2], skill, interest));
     if (week === 3) base.push("A lighter week is normal. Repeat the favorite from weeks 1 and 2.");
     return { week, focus, activities: base };
