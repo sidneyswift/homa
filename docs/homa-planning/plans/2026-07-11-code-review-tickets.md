@@ -1,12 +1,38 @@
 # Full-repo code review tickets · 2026-07-11
 
-> **STATUS: IN PROGRESS.** CR-01 through CR-28 are fixed in
-> the worktree. Remaining tickets are still open unless separately noted. A deep review of the whole tree (apps/web,
+> **STATUS: IN PROGRESS.** A deep review of the whole tree (apps/web,
 > apps/mobile, packages, scripts, supabase) run the night of 2026-07-11. Ten
 > parallel review agents covered every area file by file; every load-bearing
 > finding below was then hand-verified against source before it was written
 > down. Claims that did not survive that check are listed at the very bottom so
 > nobody re-flags them.
+>
+> **EXECUTION on branch `code-review-fixes-2026-07-11` (isolated worktree,
+> chosen because a second agent was editing the main tree concurrently).**
+> Baseline HEAD `711c694` already carried CR-01, CR-02, CR-03, CR-04, CR-09,
+> CR-10, CR-16, CR-17, CR-22, CR-24, CR-29, CR-63 from the concurrent work.
+> Newly fixed on this branch, with typecheck + lint + all five guards +
+> `pnpm build` + `eve build` green: CR-05, CR-06, CR-07, CR-08, CR-11, CR-12,
+> CR-13, CR-14, CR-15, CR-19, CR-20, CR-21, CR-26, CR-30, CR-31, CR-32,
+> CR-33, CR-34, CR-35, CR-36, CR-37, CR-38, CR-39, CR-40, CR-41, CR-42,
+> CR-44, CR-45, CR-50, CR-53, CR-55, CR-58, CR-60, CR-62, CR-65, CR-67.
+> Migration `20260711180000_revoke_deny_all_tables.sql` (CR-32) is written
+> but NOT applied (additive, safe to lead a deploy per the migration law).
+> Deferred with reasons: CR-23 / CR-25 (webhook + inbound-email auth need a
+> coordinated deploy and provisioned signing secrets), CR-27 (defense-in-depth
+> on store files the other agent is actively restructuring), CR-28
+> (cross-tenant isolation phase needs provisioned test users; CI runs against
+> live prod), CR-43 (comment-only edits to already-applied migrations),
+> CR-46 / CR-47 / CR-48 (cosmetic unexports, high merge-churn for near-zero
+> value), CR-49 (kept per the 2026-07-06 ruling), CR-51 / CR-52 (70+ file
+> doc/vendored em-dash sweep), CR-54 / CR-64 / CR-66 / CR-68 (touch
+> actively-edited files or risk a pre-demo regression), CR-56 / CR-57
+> (Tracked Phase-D dep / risky TypeScript major bump), CR-59 / CR-61 (lower
+> priority / uncertain SDK cancellation support), and CR-69 / CR-70 / CR-71 /
+> CR-72 (the big-bang SRP split, shared chat package, DRY helper extractions,
+> and mobile product decisions the tickets themselves say to do "when each
+> area is next touched", which would be unmergeable against the concurrent
+> rewrite of those same files).
 
 Baseline health at review time, all green: `pnpm typecheck`, `pnpm lint`,
 `pnpm build` (FULL TURBO cache hit), and all five guards, `pnpm check:isolation`
