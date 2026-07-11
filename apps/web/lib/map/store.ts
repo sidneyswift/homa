@@ -16,6 +16,7 @@ import {
   type ReportNarrative,
 } from "@homa/core";
 
+import { isProfileNonAnswer } from "../profile-quality";
 import { mapDb, type DbJson } from "./db";
 import { hashToken, newToken } from "./tokens";
 
@@ -166,15 +167,17 @@ export async function attachAuthUser(
     where id = ${familyId}
   `;
   await sql`
-    insert into public.family_members (family_id, user_id, role)
-    values (${familyId}, ${input.authUserId}, 'parent')
+    insert into public.family_members (family_id, user_id, role, display_name)
+    values (${familyId}, ${input.authUserId}, 'parent', ${input.firstName ?? null})
     on conflict (family_id, user_id) do nothing
   `;
   if (input.phoneE164) {
+    // Bare "do nothing": the number may already belong to another family
+    // (phone_e164 unique), and signup never blocks on a phone nicety.
     await sql`
-      insert into public.family_phones (family_id, phone_e164, added_by, source)
-      values (${familyId}, ${input.phoneE164}, ${input.authUserId}, 'signup')
-      on conflict (family_id) do nothing
+      insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
+      values (${familyId}, ${input.phoneE164}, ${input.authUserId}, ${input.authUserId}, 'signup')
+      on conflict do nothing
     `;
   }
   await seedWhatWorksMemories(familyId);
@@ -285,7 +288,10 @@ interface AddChildInput {
 
 /** Interests and help-with live in the child's profile jsonb (the same
  * fields the chat agent's update_child_profile tool maintains), so the
- * report flow and the agent share one representation from day one. */
+ * report flow and the agent share one representation from day one.
+ * Non-answers ("idk", "not sure") are dropped at this door: profile
+ * values re-enter every system prompt, and "working on idk" once did
+ * (2026-07-10). */
 export async function addChild(
   familyId: string,
   input: AddChildInput,
@@ -293,8 +299,12 @@ export async function addChild(
   const sql = mapDb();
   const months = ageInMonths(input.birthDate);
   const inRange = isInScoredRange(months);
-  const profile: Record<string, unknown> = { interests: input.interests };
-  if (input.helpWith) profile.focus = input.helpWith;
+  const profile: Record<string, unknown> = {
+    interests: input.interests.filter((interest) => !isProfileNonAnswer(interest)),
+  };
+  if (input.helpWith && !isProfileNonAnswer(input.helpWith)) {
+    profile.focus = input.helpWith;
+  }
   const rows = await sql<{ id: string }[]>`
     insert into public.children (family_id, name, birth_month, profile, pending_band)
     values (${familyId}, ${input.name}, ${input.birthDate},
@@ -940,6 +950,8 @@ export async function getReportByToken(token: string): Promise<ReportView | null
 
   const phoneRows = await sql<{ phone_e164: string }[]>`
     select phone_e164 from public.family_phones where family_id = ${row.family_id}
+    order by created_at
+    limit 1
   `;
 
   const profile = row.profile ?? {};
@@ -1012,8 +1024,19 @@ export async function saveChildContext(
   }
 
   const profilePatch: Record<string, unknown> = {};
-  if (Array.isArray(interests) && interests.length > 0) profilePatch.interests = interests;
-  if (Array.isArray(helpWith) && helpWith.length > 0) profilePatch.focus = helpWith.join(", ");
+  if (Array.isArray(interests)) {
+    const real = interests.filter(
+      (interest): interest is string =>
+        typeof interest === "string" && !isProfileNonAnswer(interest),
+    );
+    if (real.length > 0) profilePatch.interests = real;
+  }
+  if (Array.isArray(helpWith)) {
+    const real = helpWith.filter(
+      (entry): entry is string => typeof entry === "string" && !isProfileNonAnswer(entry),
+    );
+    if (real.length > 0) profilePatch.focus = real.join(", ");
+  }
 
   await sql`
     update public.children
@@ -1045,9 +1068,15 @@ interface FamilySetupInput {
  * profile_completed_at stamps the step done so it never re-asks. The
  * phone also goes to family_phones separately (the texting routing table
  * with its own uniqueness law); the caller handles that, this only fills
- * the family row's own column.
+ * the family row's own column. The parent named THEMSELF on this form,
+ * so their own membership row gets the same display name (multi-parent
+ * v0: greetings prefer the member's name over the family-level one).
  */
-export async function saveFamilySetup(familyId: string, input: FamilySetupInput): Promise<void> {
+export async function saveFamilySetup(
+  familyId: string,
+  input: FamilySetupInput,
+  authUserId?: string,
+): Promise<void> {
   const sql = mapDb();
   await sql`
     update public.families set
@@ -1065,6 +1094,13 @@ export async function saveFamilySetup(familyId: string, input: FamilySetupInput)
       updated_at = now()
     where id = ${familyId}
   `;
+  if (authUserId) {
+    await sql`
+      update public.family_members
+      set display_name = ${input.firstName}
+      where family_id = ${familyId} and user_id = ${authUserId}
+    `;
+  }
 }
 
 /** Merges family-level extras; name and state also fill their real columns. */

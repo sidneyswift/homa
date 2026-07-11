@@ -8,8 +8,10 @@ import { type MemoryRow } from "../../lib/agent-memory";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
+  type ChildAnswerRow,
   type ChildRow,
   type FamilyContextRows,
+  type MemberRow,
 } from "../../lib/family-context";
 
 /**
@@ -32,34 +34,56 @@ import {
 async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRows> {
   const { db, familyId } = createCallerDbClient(attributes);
 
-  const [familyResult, childrenResult, memoriesResult] = await Promise.all([
-    db
-      .from("families")
-      .select("name, us_state, parent_display_name")
-      .eq("id", familyId)
-      .maybeSingle(),
-    db
-      .from("children")
-      .select("id, name, birth_month, profile")
-      .eq("family_id", familyId)
-      .order("created_at", { ascending: true }),
-    db
-      .from("family_memories")
-      .select("id, child_id, kind, content, source, created_at")
-      .eq("family_id", familyId)
-      .is("superseded_at", null)
-      .in("kind", ["fact", "what_works"])
-      .order("created_at", { ascending: true })
-      .limit(200),
-  ]);
+  const [familyResult, childrenResult, memoriesResult, answersResult, membersResult] =
+    await Promise.all([
+      db
+        .from("families")
+        .select("name, us_state, parent_display_name, time_zone")
+        .eq("id", familyId)
+        .maybeSingle(),
+      db
+        .from("children")
+        .select("id, name, birth_month, profile")
+        .eq("family_id", familyId)
+        .order("created_at", { ascending: true }),
+      db
+        .from("family_memories")
+        .select("id, child_id, kind, content, source, created_at")
+        .eq("family_id", familyId)
+        .is("superseded_at", null)
+        .in("kind", ["fact", "what_works"])
+        .order("created_at", { ascending: true })
+        .limit(200),
+      // The map snapshot's raw material. RLS already walls these rows to
+      // the caller's own children; the inner-join filter is the usual belt.
+      db
+        .from("child_answers")
+        .select("child_id, question_id, answer, children!inner()")
+        .eq("children.family_id", familyId),
+      // The family roster (multi-parent v0): readable under the caller's
+      // token since migration #49 widened the membership SELECT policy.
+      db
+        .from("family_members")
+        .select("display_name")
+        .eq("family_id", familyId)
+        .order("created_at", { ascending: true }),
+    ]);
 
-  if (familyResult.error || childrenResult.error || memoriesResult.error) {
+  if (
+    familyResult.error ||
+    childrenResult.error ||
+    memoriesResult.error ||
+    answersResult.error ||
+    membersResult.error
+  ) {
     throw new Error("family context load failed under caller token");
   }
   return {
     family: familyResult.data,
     children: (childrenResult.data ?? []) as ChildRow[],
     memories: (memoriesResult.data ?? []) as MemoryRow[],
+    answers: (answersResult.data ?? []) as unknown as ChildAnswerRow[],
+    members: (membersResult.data ?? []) as MemberRow[],
   };
 }
 
@@ -72,8 +96,13 @@ export default defineDynamic({
             familyId?: string;
             supabaseAccessToken?: string;
             viewChildId?: string;
+            memberName?: string;
           }
         | undefined;
+
+      // Fleet research sessions have no family on purpose; injecting the
+      // "point the parent to /app" fallback would fight their whole job.
+      if (attributes?.channel === "research") return null;
 
       try {
         let rows: FamilyContextRows;
@@ -92,9 +121,13 @@ export default defineDynamic({
         // The app's context switcher (web chat only; SMS and email have
         // no cookie). renderFamilyContext validates the id against the
         // family's own children, so a stale value renders nothing.
+        // memberName is auth-context-derived by every channel (the
+        // caller's own membership row, or the parent-written phone or
+        // email mapping), never model input.
         return defineInstructions({
           markdown: renderFamilyContext(rows, {
             focusChildId: attributes?.viewChildId,
+            speakingWith: attributes?.memberName ?? null,
           }),
         });
       } catch (error) {

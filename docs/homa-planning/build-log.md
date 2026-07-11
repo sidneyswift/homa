@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (small hours) · Lost-turn recovery: a dead stream no longer costs her the reply
+
+Founder instruction ("fix the gap"), closing the known gap from the
+incident entry below: when the chat stream dies past every reconnect,
+the durable run usually finishes anyway, and the reply used to sit
+unseen in Postgres behind an error banner. Now the client recovers it.
+Both chat surfaces (web + mobile twins, turn-recovery.ts in each).
+
+How it works: on a terminal turn error the client shows "Reconnecting"
+instead of the banner and runs recovery in the background. The eve
+client wipes its session cursor on a mid-turn death, so the session id
+is re-learned from conversation_messages (the persist hook writes the
+user message within seconds; members read only their own rows through
+RLS; the row must match the sent text exactly and postdate the send).
+The durable event stream then replays from index 0 (eve's resumable
+streams), reading until a boundary the live client never received
+settles the session; a still-running turn simply keeps streaming until
+it ends. The full session folds into the transcript archive (the "New
+chat" move done for her), the store resets, and the reply is on screen.
+
+Decisions made alone:
+
+- **Replay the durable stream rather than rebuild from Postgres rows**:
+  conversation_messages stores plain text only, so folding real events
+  through eve's own reducer keeps tool chips, material cards, and
+  message identity exactly as a live turn renders them.
+- **The interrupted turn's boundary is found by durable index**, a
+  client-side cursor (session streamIndex at mount + one per received
+  event): session.waiting closes EVERY turn, so a replay of a
+  multi-turn session must skip boundaries the client already saw.
+- **turn.failed and session.failed at or past that cursor abort the
+  recovery**: a genuinely failed turn keeps the honest error banner
+  (step.failed does not, the runtime retries model calls).
+- **Recovery stands down the moment she acts**: a manual send or "New
+  chat" aborts it (a late reply must never land mid-new-conversation),
+  and a 4-minute deadline keeps a hung server turn from pinning the
+  "Reconnecting" state forever.
+- **No new events in the registry**: the failed turn still emits its
+  error chat.turn_completed (stream reliability stays measurable);
+  recovery is a repair, not a second turn.
+
 ## 2026-07-11 (small hours) · Deploys were red: pnpm 9 wrote the eve patch hash, CI and Vercel run pnpm 10
 
 Every deploy and CI run since 4624db6 (the eve ndjson patch) failed at

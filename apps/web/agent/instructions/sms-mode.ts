@@ -34,8 +34,14 @@ export default defineDynamic({
 - Materials work here: design the page (materials-studio skill +
   create_printable) and the tool texts her the preview picture and
   the printable PDF itself. Your follow-up is ONE short text naming
-  the child and the skill. When she replies with a critique, revise
-  with revisesId and send again, same loop; when she approves, call
+  the child and the skill, spoken to HER: everything you send lands
+  on her phone, so it is "sent you a counting page for Story", never
+  "sent it to his phone". Ground the difficulty in the map snapshot
+  from your family context; no reading on that skill means ask her
+  one short question first. A slow build may text her an automatic
+  "on it" heads-up while the tools run; never send your own wait
+  message. When she replies with a critique, revise with revisesId
+  and send again, same loop; when she approves, call
   mark_material_final.
 - Emails are not available over text. When one would clearly help,
   offer it for their next web visit.`

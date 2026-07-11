@@ -12,6 +12,7 @@ import {
   uploadMaterialArtifacts,
   type MaterialSource,
 } from "../../lib/materials/artifact-store";
+import { sendMaterialsAckOnce } from "../../lib/materials/sms-ack";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   printableSlug,
@@ -182,6 +183,18 @@ export default defineTool({
       return { created: false, note: gateFailure };
     }
 
+    const attributes = ctx.session.auth.current?.attributes as
+      | { channel?: string; phoneNumber?: string }
+      | undefined;
+    const channel = usageChannelFromAttributes(attributes);
+
+    // Render + review + upload is the slow part of an html-only build;
+    // on SMS one heads-up text covers the wait. Deduped per family, so
+    // a build that already acked from generate_image stays quiet here.
+    if (channel === "sms" && attributes?.phoneNumber) {
+      sendMaterialsAckOnce(familyId, attributes.phoneNumber);
+    }
+
     const startedAt = Date.now();
     const kind = input.kind ?? "worksheet";
     const source: MaterialSource = hasPageImage
@@ -212,11 +225,6 @@ export default defineTool({
         note: "Rendering hiccuped (often a slow image URL or heavy CSS). Simplify the page slightly and call this again once.",
       };
     }
-
-    const attributes = ctx.session.auth.current?.attributes as
-      | { channel?: string; phoneNumber?: string }
-      | undefined;
-    const channel = usageChannelFromAttributes(attributes);
 
     // The studio's own eyes: the reviewer sees the actual pixels against
     // the brief; the agent decides what to do with the verdict. A null

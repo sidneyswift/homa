@@ -4,6 +4,7 @@ import { z } from "zod";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { updateChildProfilePinned } from "../../lib/agent-pinned";
 import { scanMemoryContent } from "../../lib/agent-memory";
+import { isProfileNonAnswer } from "../../lib/profile-quality";
 
 /**
  * Schema-bounded profile updates (a first slice of the M2-04 profile
@@ -49,9 +50,17 @@ export default defineTool({
       throw error;
     }
 
+    // Non-answers never land: profile values re-enter every prompt, so
+    // "working on idk" would follow the child around (2026-07-10 lesson).
+    if (input.focus !== undefined && isProfileNonAnswer(input.focus)) {
+      return {
+        updated: false,
+        note: "That focus reads like a non-answer ('idk', 'not sure'). Keep the old value and ask the parent what the child is actually working on, or leave focus off.",
+      };
+    }
     const interests = input.interests
       ?.map((interest) => interest.trim())
-      .filter(Boolean);
+      .filter((interest) => interest.length > 0 && !isProfileNonAnswer(interest));
     for (const text of [...(interests ?? []), input.focus ?? ""]) {
       const blocked = text ? scanMemoryContent(text) : null;
       if (blocked) {

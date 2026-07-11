@@ -9,6 +9,7 @@ import {
   generateStudioImage,
   IMAGE_SHAPES,
 } from "../../lib/materials/generate-image";
+import { sendMaterialsAckOnce } from "../../lib/materials/sms-ack";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -77,7 +78,17 @@ export default defineTool({
       };
     }
 
+    const attributes = ctx.session.auth.current?.attributes as
+      | { phoneNumber?: string }
+      | undefined;
     const channel = usageChannelFromAttributes(ctx.session.auth.current?.attributes);
+
+    // Image generation is the slow leg of an SMS material build; one
+    // heads-up text covers the wait (lib/materials/sms-ack.ts).
+    if (channel === "sms" && attributes?.phoneNumber) {
+      sendMaterialsAckOnce(access.familyId, attributes.phoneNumber);
+    }
+
     const startedAt = Date.now();
     const result = await generateStudioImage({
       familyId: access.familyId,

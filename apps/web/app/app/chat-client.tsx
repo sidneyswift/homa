@@ -10,6 +10,7 @@ import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
   archiveMessages,
+  foldEventsToMessages,
   prepareChat,
   pruneMessageTimes,
   saveChat,
@@ -26,6 +27,7 @@ import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts"
 import { SlashComposer } from "./slash-composer";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
+import { recoverLostTurn } from "./turn-recovery";
 
 /**
  * The chat surface, the main column inside the /app frame: the sidebar
@@ -109,6 +111,11 @@ const WATCHDOG_STALL_MS = 180_000;
  *  received event, nothing is recomputed). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
 
+/** How long lost-turn recovery may keep trying before the plain error
+ *  banner wins: past the longest normal turn with slack, so a reply
+ *  that is still being written server-side gets its chance to land. */
+const RECOVERY_DEADLINE_MS = 240_000;
+
 export function ChatClient({
   storageKey,
   familyId,
@@ -161,6 +168,14 @@ export function ChatClient({
   // not state: nothing renders from them.
   const draftFromVoiceRef = useRef(false);
   const turnModalityRef = useRef<"text" | "voice">("text");
+  // Lost-turn recovery bookkeeping (turn-recovery.ts): the durable
+  // stream cursor (session streamIndex at mount + one per received
+  // event, surviving localStorage event trimming), what the last send
+  // carried, and the in-flight recovery's abort handle.
+  const durableCursorRef = useRef(prepared.initialSession?.streamIndex ?? 0);
+  const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
+  const recoveryRef = useRef<AbortController | null>(null);
+  const [recovering, setRecovering] = useState(false);
 
   async function emitTurnCompleted(
     status: "ok" | "error",
@@ -199,6 +214,7 @@ export function ChatClient({
     initialSession: prepared.initialSession,
     onEvent() {
       lastStreamActivityRef.current = Date.now();
+      durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
       // Stamp this turn's new message ids with the clock (the only time
@@ -247,6 +263,7 @@ export function ChatClient({
         // teardown, and eve rejects overlapping sends.
         setTimeout(() => {
           setBusySeconds(0);
+          lastSendRef.current = { text: message, atMs: Date.now() };
           markTurnStarted();
           void sendRef.current?.({ message });
         }, 0);
@@ -295,13 +312,72 @@ export function ChatClient({
   }, [archived]);
 
   useEffect(() => {
-    if (agent.error && agent.error !== reportedErrorRef.current) {
-      reportedErrorRef.current = agent.error;
-      void emitTurnCompleted("error", "turn_failed");
-    }
-    // emitTurnCompleted is re-created per render; agent.error is the real dep.
+    if (!agent.error || agent.error === reportedErrorRef.current) return;
+    reportedErrorRef.current = agent.error;
+    void emitTurnCompleted("error", "turn_failed");
+
+    // Lost-turn recovery (incident 2026-07-11 follow-up): the durable
+    // run usually outlives a dead stream, so before leaving her with
+    // the error banner, replay the session server-side and fold the
+    // finished conversation, reply included, back into the transcript.
+    const lastSend = lastSendRef.current;
+    if (!lastSend || recoveryRef.current) return;
+    const controller = new AbortController();
+    recoveryRef.current = controller;
+    const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
+    setRecovering(true);
+    void (async () => {
+      const recovered = await recoverLostTurn({
+        supabase,
+        sentText: lastSend.text,
+        sentAtMs: lastSend.atMs,
+        minBoundaryIndex: durableCursorRef.current,
+        bearer: async () => {
+          const { data } = await supabase.auth.getSession();
+          return data.session?.access_token ?? "";
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(deadline);
+      if (recoveryRef.current === controller) recoveryRef.current = null;
+      if (controller.signal.aborted) {
+        setRecovering(false);
+        return;
+      }
+      if (recovered) {
+        // The "New chat" move done for her: the whole recovered session
+        // folds into the archive (reply included), the store starts
+        // clean, and the error clears with it. Nothing is lost.
+        const messages = foldEventsToMessages(recovered.events);
+        const stamped = stampMessageTimes(liveTimes, messages);
+        const nextArchived = [
+          ...archivedRef.current,
+          ...archiveMessages(messages, stamped),
+        ];
+        setArchived(nextArchived);
+        archivedRef.current = nextArchived;
+        setLiveTimes({});
+        saveChat(storageKey, {
+          archived: nextArchived,
+          events: [],
+          session: undefined,
+          messageTimes: {},
+          lastActivityAt: Date.now(),
+        });
+        agent.reset();
+        durableCursorRef.current = 0;
+        lastSendRef.current = null;
+      }
+      setRecovering(false);
+    })();
+    // The closures re-create per render; agent.error is the real dep.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.error]);
+
+  // Give up a running recovery when she leaves the page.
+  useEffect(() => {
+    return () => recoveryRef.current?.abort();
+  }, []);
 
   // Dead-stream recovery (defenses 2 and 3 from the header): abort a
   // stream that has clearly stopped flowing so the composer never locks.
@@ -344,6 +420,7 @@ export function ChatClient({
   /** The manual fresh start: archive what is on screen, rotate the
    *  session, keep every word visible above. Nothing is erased. */
   function startNewChat() {
+    recoveryRef.current?.abort();
     const nextArchived = [
       ...archivedRef.current,
       ...archiveMessages(
@@ -363,6 +440,7 @@ export function ChatClient({
       lastActivityAt: Date.now(),
     });
     agent.reset();
+    durableCursorRef.current = 0;
   }
 
   const transcript = buildTranscript({
@@ -400,11 +478,22 @@ export function ChatClient({
       setQueued((current) => [...current, message]);
       return;
     }
+    // A manual send takes the composer back: a still-running recovery
+    // of the previous turn stands down (its reply would land into a
+    // conversation that has already moved on).
+    recoveryRef.current?.abort();
+    // A fresh session (first turn, or the reset after a failed one)
+    // restarts the durable event cursor.
+    if (!agent.session?.sessionId) durableCursorRef.current = 0;
     // A queue held back by a failed turn rides along with the next
     // manual send, in the order she wrote everything.
     const outgoing = [...queued, message].join("\n\n");
     setQueued([]);
     setBusySeconds(0);
+    // sendMessage is an event handler, never render; reading the clock
+    // is safe here, the purity rule cannot tell (same as onFinish above).
+    // eslint-disable-next-line react-hooks/purity
+    lastSendRef.current = { text: outgoing, atMs: Date.now() };
     markTurnStarted();
     void agent.send({ message: outgoing });
   }
@@ -532,7 +621,16 @@ export function ChatClient({
             </p>
           </div>
         ) : null}
-        {agent.error ? (
+        {recovering ? (
+          // The stream died but the turn is durable server-side; while
+          // the replay runs, the wait reads as work, not as a failure.
+          <div className="flex items-center gap-2.5 text-muted" role="status">
+            <span className="chat-think-mark inline-flex" aria-hidden="true">
+              <Logo size={20} variant="mark" />
+            </span>
+            <span>Reconnecting&hellip;</span>
+          </div>
+        ) : agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
             Your conversation is safe; that last message didn&apos;t go through. Try
             sending it again.
