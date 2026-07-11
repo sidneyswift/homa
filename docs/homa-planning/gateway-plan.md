@@ -110,13 +110,21 @@ agent, and only receipts stay templates.**
   plumbing, not conversations); logged here and in the build-log.
 
 ### GW-8 · Ops handoff (human steps, listed in HUMAN-TODO)
-- [ ] Point inbound mail at Resend: add the MX record for the inbound
-  subdomain and configure the Resend inbound webhook to the channel URL
-  with the secret; set `RESEND_INBOUND_SECRET` in Vercel prod.
-- [ ] After that lands, flip journal reply-to to the inbound address so
-  replies flow to the agent instead of the founder inbox.
+- [x] Inbound mail at Resend: MX added via `vercel dns` (2026-07-09
+  9:21pm), webhook configured by the founder (`email.received` only),
+  `RESEND_INBOUND_SECRET` in Vercel prod + local, live route verified.
+- [x] Journal reply-to flipped to `homa@mail.thankshoma.com` (deployed
+  2026-07-09 late): every Homa email's replies now route to the agent.
+- [x] PROD end-to-end proof (2026-07-10 8pm, "finish it"): a real
+  inbound payload to the production webhook became a real agent turn
+  on the deployed runtime: both conversation rows persisted
+  (channel 'email'), 40 reading minutes logged with source='email', a
+  memory saved, the reply email dispatched, and a follow-up "stop" set
+  journal_opt_out_at without a turn. Synthetic family cascade-cleaned.
+- [x] Dispatcher registered in production: `vercel crons ls` shows the
+  eve schedule mounted hourly alongside /api/map/cron.
 - [ ] `JOURNAL_PROMPT_ENABLED=true` when the founder read-aloud passes
-  (unchanged gate).
+  (unchanged gate; the ONLY remaining switch in this plan).
 
 ## Findings from the E2E (2026-07-09 late evening)
 
@@ -145,5 +153,9 @@ agent, and only receipts stay templates.**
   opted out without a turn and the row disabled on the next tick.
 
 ## Status
-GW-1 through GW-7 are checked and the E2E section held against
-homa-prod-backed dev on 2026-07-09; GW-8 stays open for the founder.
+GW-1 through GW-7 checked (E2E against homa-prod-backed dev,
+2026-07-09) and GW-8's plumbing verified against PRODUCTION on
+2026-07-10. Every conversational door is an adapter on the one agent
+(web, SMS, email; voice federated by documented exception), and the
+dispatcher is mounted as a live hourly cron. One switch remains, the
+founder's by design: `JOURNAL_PROMPT_ENABLED=true` after the read-aloud.

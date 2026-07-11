@@ -3,6 +3,90 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (evening) · The composer's "/" menu: mention a kid or a skill, token rendered like a link
+
+Founder ask (with Cursor/Cowork screenshots): typing "/" in chat should
+open a menu of the kids and the available skills, and a picked item
+should sit in the composer highlighted like a link.
+
+Shipped, web chat:
+
+- **`SlashComposer`** (`app/app/slash-composer.tsx`) replaces the bare
+  composer input. Typing "/" (at start or after a space) opens a menu
+  above the composer: a "Kids" group (avatars from the family palette)
+  and a "Homa's skills" group (name + one-line description). Typing
+  filters both label and raw token; arrows + Enter/Tab pick, Escape
+  dismisses, outside behavior matches the house menus. Picking inserts
+  the token ("/Story ", "/materials-studio ") at the caret.
+- **Inline link-colored tokens** via the mirror technique: the input's
+  own text paints transparent (caret kept) over an aria-hidden mirror
+  that renders known tokens in `--brand`. Color is the only difference
+  on purpose; a weight change would drift the caret metrics.
+- **A kid mention IS a context pick**: picking a kid also writes the
+  view-context cookie (same action as the switcher), so the About chip,
+  the sidebar rows, and the mention always agree. Single-kid families
+  skip the context write (their switcher is hidden, a chip would have no
+  way back off).
+- **Skills source** (`lib/slash-skills.ts`): the same advertised set the
+  agent resolves each turn (family_skills + published, child-targeted
+  skill_bank rows, family precedence), name + description only (the
+  markdown never enters the page payload), plus a hand-listed built-in
+  for the agent's folder skills (materials-studio today). Failure
+  posture matches the resolver: menu degrades, chat never breaks.
+- **The agent learns the convention** in `agent/instructions.md`: "/" +
+  kid name means the message is about that kid; "/" + skill name means
+  load_skill that skill and follow it; the token reads as part of the
+  sentence.
+
+Copy ran both gates. Reader gate (in character) caught: "SKILLS" directly
+under the kids' names misread as the KIDS' skills (a report-card flinch),
+so the header is "Homa's skills"; raw skill names read as leaked code, so
+rows show a sentence-case label ("Materials studio") while the inserted
+token keeps the real name load_skill matches; the About-chip hint pointed
+at a control ("change who you're viewing from...") instead of stating the
+effect, now "Homa will assume you mean Story."; and the placeholder's
+"type / to mention" never finished its thought, now "type / to pick a kid
+or a skill". Editor gate then fixed the "/ mentions" garden path and the
+chip/hint scope mismatch. Declined: renaming materials-studio itself
+(schema-constrained token, founder-sized rename).
+
+Verified: typecheck, lint, build, all four guards green; 8-check
+Playwright e2e against the dev server incl. one LIVE turn ("/Story how
+old is she?" answered "5", proving cookie + mention + instructions land
+together); tonight's synthetic families cleaned from homa-prod (4 rows +
+auth users). Known limits, logged not built: no "/" menu on SMS/email
+(no composer) or the Expo app yet; skill display names are derived, not
+authored (a future skill_bank display_name column would do it properly).
+
+## 2026-07-10 (late afternoon) · Founder ruling: one kid list in the sidebar, the rows ARE the switcher
+
+Founder question on the shipped switcher: why a "Viewing" dropdown AND a
+"My kids" list in the same rail? Agent assessment: mostly redundant, and
+worse than redundant, they could disagree (tap a kid under My kids, land
+on her kid page, the Viewing control still says whole family). The design
+kit always intended one control here (`ui_kits/web-app/README.md` calls
+that slot the "kid switcher"). Founder ruled: **merge them**.
+
+Shipped: the sidebar's kid list is now `ViewingRows`
+(context-switcher.tsx): a "Whole family" row, then the kid rows with age
+labels, active row highlighted (brand-soft + check). Tapping a row sets
+the app-wide selection and stays on the current surface (kid-scoped pages
+swap to the sibling via the shared `kidSwitchTargetPath`); the desktop
+dropdown retired. The phone top-right avatar switcher is unchanged, and
+the drawer (which renders the sidebar) closes on a row pick via
+data-drawer-close delegation. Calls made alone: single-kid families keep
+a plain "My kids" link to the kid page (a switcher with nothing to switch
+is noise); the kid page's own sibling pills and the report's sibling card
+stay for now (in-content affordances, not chrome; founder can rule them
+away later); direct kid-PAGE navigation for multi-kid families now lives
+one tap deeper (switch to the kid, then their page from planner/report
+links), accepted per the ruling. Verified: typecheck, lint, build green;
+e2e re-run 24/24 including new checks (drawer row pick narrows the
+planner and closes the drawer; desktop shows exactly one kid list, no
+dropdown, no "My kids"; live agent turn still answers "Story"); the day's
+synthetic families cleaned from homa-prod again (3 more rows + auth
+users, zero orphans).
+
 ## 2026-07-10 (afternoon) · The context switcher: family or one kid, one selection every surface reads
 
 Founder direction (voice note, midday): the app needs one way to say "who
@@ -117,6 +201,13 @@ Founder rulings this session, logged for the audit trail:
   honesty caps, chip answers, provenance enum, exposure-based subjects,
   no-deficit copy laws, RLS). Rename today's code/DB "domain" to "subject"
   as part of the strand migration, while user count is ~zero.
+- **Ids are Homa's own (founder ruling, same day):** no `marble_id` field
+  anywhere. Every topic, imported or authored, gets a Homa id in the
+  existing bank convention `<subject>.<slug>` (existing 225 item ids stay
+  valid, so child_answers rows never migrate). Upstream lineage lives in a
+  namespaced `refs` array (`marble:mt__h7hvT4tEb`, `ccss-math:K.CC.6`),
+  making Marble one cited corpus among several, not a schema-level parent.
+  Full architecture: `docs/homa-planning/plans/2026-07-10-skill-graph-taxonomy.md`.
 
 ## 2026-07-10 (afternoon, follow-up) · The whole-picture dot chart retires from the report
 
@@ -321,6 +412,34 @@ acknowledges in its one reply. Calls made alone, worth auditing:
   Mind trying again, or typing it?" instead of the voice-note-specific
   copy; a failed attachment riding with other content stays a bracketed
   note inside the single agent reply (one-reply law holds).
+
+## 2026-07-10 (evening) · "Finish it": the gateway proven in production
+
+Founder: "OK FINISH IT." Finishing meant proving the live wiring, not
+writing more of it:
+
+1. **Email loop, production, end to end**: a real inbound payload to
+   the deployed webhook became a real agent turn on the production
+   runtime: both conversation rows (channel 'email'), 40 reading
+   minutes (source='email'), a saved memory, the reply email
+   dispatched, and "stop" flipping journal_opt_out_at without a turn.
+   Synthetic family cascade-cleaned, events swept.
+2. **Dispatcher cron confirmed mounted in prod** (vercel crons ls: the
+   eve schedule runs hourly beside /api/map/cron). The journal loop is
+   one env var from live.
+3. **Ledger cleanup**: HUMAN-TODO's dead items closed (Telnyx sole-prop
+   registration superseded by the account upgrade; the hello@ alias
+   superseded by reply-to-the-agent), gateway-plan GW-8 marked to
+   reflect reality, and the two genuinely-founder items called out
+   plainly: the JOURNAL_PROMPT_ENABLED read-aloud switch, and the
+   Alessa duplicate-family deletion decision.
+
+State of the doctrine after five days: every conversational door (web,
+SMS, email) is an adapter on the ONE agent; voice stays federated by
+documented exception; strangers become leads, get signed up entirely
+in-channel, and reconcile to one family per mom with proof at every
+seam; the only proactive loop still dark waits on one founder
+read-aloud.
 
 ## 2026-07-10 (afternoon, later) · The verified phone claim closes U2/U7
 
