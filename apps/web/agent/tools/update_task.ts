@@ -45,6 +45,16 @@ export default defineTool({
       };
     }
 
+    // Nothing to act on: neither a pause/resume nor any field to edit. Say so
+    // honestly instead of claiming a change was made (2026-07-11 review,
+    // CR-07; tool-honesty rule in instructions.md).
+    if (paused === undefined && Object.keys(patch).length === 0) {
+      return {
+        updated: false,
+        note: "Nothing to change. Pass paused to pause or resume, and/or fields to edit.",
+      };
+    }
+
     if (paused !== undefined) {
       const result = await setTaskPaused(familyId, taskId, paused);
       if (!result.ok) return { updated: false, note: result.note };
