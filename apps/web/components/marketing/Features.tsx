@@ -15,7 +15,7 @@ const ITEMS: ReadonlyArray<readonly [LucideIcon, string, string, string, string]
   [
     ClipboardCheck,
     "Know where they stand",
-    "Daily photos and a quick recap at night build a living timeline. Homa reads the pattern, steady, growing, or stuck, and adapts the plan to match.",
+    "Daily photos and a quick recap at night build a living timeline. Homa reads the pattern, steady, growing, or ready for more practice, and adapts the plan to match.",
     "var(--clay-50)",
     "var(--clay-600)",
   ],

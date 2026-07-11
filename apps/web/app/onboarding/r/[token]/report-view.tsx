@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import {
@@ -20,7 +21,9 @@ import {
 } from "@homa/core";
 
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
+import type { WallCheckout } from "../../../../lib/billing/wall-types";
 import { Logo } from "../../../../components/brand/Logo";
+import { DoorLink } from "../../../../components/billing/door-link";
 import { CallHomaPs } from "./call-homa-ps";
 import type { GrowthEra } from "./growth-story";
 import { MonthButton } from "./month-button";
@@ -86,6 +89,23 @@ const POSITION_RANK: Record<SubjectScore["position"], number> = {
   ahead: 3,
 };
 
+function badgeStyleForPosition(position: SubjectScore["position"]): CSSProperties {
+  switch (position) {
+    case "ahead":
+      return { background: "var(--gold-100)", color: "var(--gold-ink)" };
+    case "on_track":
+      return { background: "var(--accent-sage-soft)", color: "var(--sage-700)" };
+    case "growing":
+      return { background: "var(--info-soft)", color: "var(--sky-600)" };
+    case "not_mapped":
+      return { background: "var(--surface-sunken)", color: "var(--text-muted)" };
+    default: {
+      const exhaustive: never = position;
+      throw new Error(`Unhandled map position: ${exhaustive}`);
+    }
+  }
+}
+
 interface Movement {
   /** "+4 mo since Jun 6" (gold) or "moved up since Jun 6" (sage). */
   label: string;
@@ -123,6 +143,7 @@ export function ReportView({
   context = "standalone",
   narrativeView = null,
   stateRequirements = null,
+  wall = null,
 }: {
   data: ReportViewData;
   sample?: boolean;
@@ -135,6 +156,10 @@ export function ReportView({
   /** The family's state compliance summary (render-time join, never
    * stored on the report; null renders the old one-line reassurance). */
   stateRequirements?: StateRequirementsSummary | null;
+  /** The wall (plans/2026-07-11-the-wall.md): checkout URLs when this
+   * family is walled, null when every door is open (the default, and
+   * always the case while HOMA_WALL_ENABLED is off). */
+  wall?: WallCheckout | null;
 }) {
   const report = data;
   const inApp = context === "app";
@@ -310,7 +335,7 @@ export function ReportView({
         ) : null}
         {editable ? (
           <div className="mt-2">
-            <CallHomaPs childId={report.childId} childName={report.childName} />
+            <CallHomaPs childId={report.childId} childName={report.childName} wall={wall} />
           </div>
         ) : null}
         {/* text-lg matches the greeting: the letter's two serif
@@ -329,6 +354,7 @@ export function ReportView({
                 ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_SUBJECT}`
                 : null
             }
+            wall={wall}
           />
         ) : null}
       </div>
@@ -384,14 +410,7 @@ export function ReportView({
           .join(" ");
         const subjectAnswers = answersByDomain.get(score.subjectId) ?? [];
         const movement = movements.get(score.subjectId);
-        const badgeStyle =
-          score.position === "ahead"
-            ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
-            : score.position === "on_track"
-              ? { background: "var(--accent-sage-soft)", color: "var(--sage-700)" }
-              : score.position === "growing"
-                ? { background: "var(--info-soft)", color: "var(--sky-600)" }
-                : { background: "var(--surface-sunken)", color: "var(--text-muted)" };
+        const badgeStyle = badgeStyleForPosition(score.position);
         const domainSources = Array.from(
           new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
         );
@@ -511,16 +530,21 @@ export function ReportView({
                     <>
                       {/* Emphasis follows position: the 4-week plan is
                           THE move on a growing subject, so only there
-                          does it get the solid clay primary. */}
-                      <Link
+                          does it get the solid clay primary. A DoorLink,
+                          not a Link: the tap is a wall door and beacons
+                          report.action_tapped; the plan page owns the
+                          wall decision server-side. */}
+                      <DoorLink
                         href={`/onboarding/r/${report.token}/plan/${score.subjectId}`}
+                        door="plan"
+                        childId={report.childId}
                         className={reportButtonClass(
                           score.position === "growing" ? "primary" : "secondary",
                           "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
                         )}
                       >
                         Build the 4-week plan
-                      </Link>
+                      </DoorLink>
                       {/* Says the action honestly: this one leaves the
                           report and asks more questions. */}
                       <Link

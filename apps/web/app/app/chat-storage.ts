@@ -5,6 +5,8 @@ import type {
   SessionState,
 } from "eve/client";
 
+import { effectiveTimeZone } from "../../lib/time-zone";
+
 /**
  * Transcript + session cursor persistence for the web chat, and the
  * fresh-morning rotation decision (founder direction 2026-07-10 evening:
@@ -34,12 +36,12 @@ import type {
  * overwrite each other. Folding finished sessions into plain messages
  * sidesteps that for good.
  *
- * Rotation law: a visit after the most recent 4am local starts a fresh
- * eve session (the Hermes/OpenClaw daily-reset shape; idle-only per
- * M1-15/TE-04). Nothing load-bearing lives in conversation history
- * (01-architecture.md): the family context block, saved memories, and
- * the recall archive make the fresh session behave identically, so the
- * seam never reads as forgetting.
+ * Rotation law: a visit after the most recent 4am family-local boundary
+ * starts a fresh eve session (the Hermes/OpenClaw daily-reset shape;
+ * idle-only per M1-15/TE-04). Nothing load-bearing lives in conversation
+ * history (01-architecture.md): the family context block, saved
+ * memories, and the recall archive make the fresh session behave
+ * identically, so the seam never reads as forgetting.
  */
 
 export interface ArchivedMessage {
@@ -109,24 +111,52 @@ export function saveChat(storageKey: string, chat: SavedChat): void {
 }
 
 /**
- * shouldStartFreshSession(lastActivityAt, now): true when the last
- * activity happened before the most recent 4am local, i.e. the first
- * visit of a new chat day. Missing lastActivityAt (legacy saves) counts
- * as stale on purpose: those transcripts predate rotation and a fresh
- * session costs nothing.
+ * shouldStartFreshSession(lastActivityAt, now, timeZone): true when the
+ * last activity happened before the most recent 4am family-local
+ * boundary, i.e. the first visit of a new chat day. Missing
+ * lastActivityAt (legacy saves) counts as stale on purpose: those
+ * transcripts predate rotation and a fresh session costs nothing.
  */
+function localDateKey(timeZone: string, instantMs: number): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(instantMs));
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function localHour(timeZone: string, instantMs: number): number {
+  const value = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    hour12: false,
+  }).format(new Date(instantMs));
+  return Number(value) % 24;
+}
+
+function previousDateKey(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10);
+}
+
+function chatDayKey(timeZone: string, instantMs: number): string {
+  const dateKey = localDateKey(timeZone, instantMs);
+  return localHour(timeZone, instantMs) < FRESH_SESSION_BOUNDARY_HOUR
+    ? previousDateKey(dateKey)
+    : dateKey;
+}
+
 export function shouldStartFreshSession(
   lastActivityAt: number | undefined,
   now: number = Date.now(),
+  timeZone: string | null | undefined = null,
 ): boolean {
   if (!lastActivityAt) return true;
-  const boundary = new Date(now);
-  boundary.setHours(FRESH_SESSION_BOUNDARY_HOUR, 0, 0, 0);
-  if (boundary.getTime() > now) {
-    // Before 4am: the live boundary is yesterday's 4am.
-    boundary.setDate(boundary.getDate() - 1);
-  }
-  return lastActivityAt < boundary.getTime();
+  const zone = effectiveTimeZone(timeZone);
+  return chatDayKey(zone, lastActivityAt) < chatDayKey(zone, now);
 }
 
 /**
@@ -136,12 +166,12 @@ export function shouldStartFreshSession(
  * seeds the store exactly as before. Pure read; the rotated shape
  * persists on the next save (re-folding on reload is idempotent).
  */
-export function prepareChat(storageKey: string): PreparedChat {
+export function prepareChat(storageKey: string, timeZone?: string | null): PreparedChat {
   const saved = loadSavedChat(storageKey);
   const archived = saved.archived ?? [];
   const times = saved.messageTimes ?? {};
 
-  if (!shouldStartFreshSession(saved.lastActivityAt)) {
+  if (!shouldStartFreshSession(saved.lastActivityAt, Date.now(), timeZone)) {
     return {
       archived,
       initialEvents: saved.events ?? [],

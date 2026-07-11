@@ -5,6 +5,7 @@ import {
   optOutIntent,
   parseInboundEmail,
   setJournalOptOut,
+  verifyResendWebhookSignature,
 } from "../../lib/email-inbound";
 import { getFamilyEmail, sendAgentComposedEmail } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
@@ -13,9 +14,9 @@ import { emitMapEvent } from "../../lib/map/events";
  * Email as an adapter on the ONE agent (gateway-plan GW-3): a parent
  * replying to a Homa email is having a conversation, so the reply
  * becomes a normal agent turn and the agent's answer goes back as a
- * threaded email. Inbound arrives from Resend's inbound webhook
- * (configured to this channel's route with ?key=RESEND_INBOUND_SECRET;
- * the channel is DARK while that env is unset).
+ * threaded email. Inbound arrives from Resend's inbound webhook,
+ * configured with ?key=RESEND_INBOUND_SECRET and verified with
+ * RESEND_WEBHOOK_SECRET. The channel is DARK while either env is unset.
  *
  * Tenancy: the sender's address is the auth context, matched against
  * the family's own registered email (the address SHE gave us), exactly
@@ -73,9 +74,20 @@ export default defineChannel({
         return Response.json({ ok: false }, { status: 401 });
       }
 
+      const payload = await req.text();
+      if (
+        !verifyResendWebhookSignature(
+          payload,
+          req.headers,
+          process.env.RESEND_WEBHOOK_SECRET,
+        )
+      ) {
+        return Response.json({ ok: false }, { status: 401 });
+      }
+
       let body: unknown;
       try {
-        body = await req.json();
+        body = JSON.parse(payload);
       } catch {
         return Response.json({ ok: false }, { status: 400 });
       }

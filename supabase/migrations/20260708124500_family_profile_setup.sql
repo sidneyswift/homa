@@ -1,4 +1,4 @@
--- Migration #26: the create-your-family step (founder call 2026-07-08:
+-- Migration #29: the create-your-family step (founder call 2026-07-08:
 -- one onboarding for every door). Right after S1's account moment the
 -- flow now asks for the family name, the parent's name, an address, a
 -- cell number, and an optional profile photo, so the family row grows

@@ -211,9 +211,15 @@ export function useDictation(onTranscript: (transcript: string) => void) {
   // The cap lives in an effect (not the interval callback) so stopping
   // stays a plain state-driven action, never a setState side effect.
   useEffect(() => {
-    if (phase === "recording" && seconds >= MAX_RECORDING_SECONDS) accept();
-    // accept is stable in behavior; phase + seconds are the real deps.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (phase !== "recording" || seconds < MAX_RECORDING_SECONDS) return;
+    const recorder = recorderRef.current;
+    if (!recorder) return;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setPhase("transcribing");
+    recorder.stop();
   }, [phase, seconds]);
 
   return { supported, phase, seconds, error, start, accept, cancel };

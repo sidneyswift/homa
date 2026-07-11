@@ -14,16 +14,28 @@
  *      own subject (item-domains.ts stays total).
  *   5. Data sanity: centrality in [0,1], teaching windows ordered,
  *      every topic carries its marble: lineage ref, standards refs resolve.
+ *   6. Walk-engine laws (plans/2026-07-11-onboarding-depth-fork.md): the
+ *      graph walk is deterministic, never asks what an answer already
+ *      settled, prunes hard dependents of a miss, respects the budget
+ *      and the authored-card gate, and terminates.
  *
  * Usage: pnpm check:taxonomy   (runs upstream validate.mjs first)
  */
 
 import {
+  allPrerequisiteEdges,
   assembleTaxonomy,
   getStandard,
   getTaxonomyDomain,
+  getTopic,
   MARBLE_DOMAIN_MAP,
+  nextWalkCard,
   TAXONOMY_DOMAINS,
+  WALK_BUDGET,
+  walkKnowledge,
+  walkOutcome,
+  walkSummary,
+  type WalkAnswer,
 } from "../packages/taxonomy/src/index.js";
 import { MAP_SUBJECTS } from "../packages/core/src/map/content.js";
 import { BANK_ITEM_DOMAINS } from "../packages/core/src/map/item-domains.js";
@@ -179,6 +191,141 @@ report("every edge references real topics", danglingEdges === 0, `${danglingEdge
   report("teaching windows are ordered and start at 24mo+", badWindows === 0, `${badWindows} bad`);
   report("every imported topic carries its marble: lineage ref", missingLineage === 0, `${missingLineage} missing`);
   report("every standards ref resolves in the registry", unresolvedRefs === 0, `${unresolvedRefs} unresolved`);
+}
+
+// 6. Walk-engine laws
+{
+  // A real hard edge between two assessment topics of one subject: the
+  // fixture every law below runs against, so the checks hold for the
+  // actual corpus, not a toy graph.
+  const hardEdge = allPrerequisiteEdges().find((edge) => {
+    if (edge.strength !== "hard") return false;
+    const dependent = getTopic(edge.topicId);
+    const prerequisite = getTopic(edge.prerequisiteId);
+    return Boolean(
+      dependent &&
+        prerequisite &&
+        dependent.subject === prerequisite.subject &&
+        getTaxonomyDomain(dependent.domain)?.kind === "assessment" &&
+        getTaxonomyDomain(prerequisite.domain)?.kind === "assessment",
+    );
+  });
+  report("a same-subject hard edge exists to test the walk against", hardEdge !== undefined);
+
+  if (hardEdge) {
+    const dependent = getTopic(hardEdge.topicId);
+    const subject = dependent?.subject ?? "math";
+    const seedAge = dependent
+      ? Math.min(dependent.teachingWindowMonths[0] + 6, 168)
+      : 72;
+
+    // Determinism: equal inputs always serve the same card.
+    const first = nextWalkCard(subject, seedAge, {}, 0);
+    const again = nextWalkCard(subject, seedAge, {}, 0);
+    report(
+      "walk serves deterministically",
+      first !== null && again !== null && first.topic.id === again.topic.id,
+      `got ${first?.topic.id} then ${again?.topic.id}`,
+    );
+
+    // The seed card is an assessment topic of the subject, window-fit.
+    report(
+      "walk seed is an in-window assessment topic of the subject",
+      first !== null &&
+        first.topic.subject === subject &&
+        getTaxonomyDomain(first.topic.domain)?.kind === "assessment" &&
+        seedAge >= first.topic.teachingWindowMonths[0] &&
+        seedAge < first.topic.teachingWindowMonths[1],
+      first?.topic.id ?? "no card",
+    );
+
+    // Answered topics are consumed: never served twice.
+    const afterAnswer = first
+      ? nextWalkCard(subject, seedAge, { [first.topic.id]: "easily" }, 1)
+      : null;
+    report(
+      "an answered card is never re-served",
+      first !== null && (afterAnswer === null || afterAnswer.topic.id !== first.topic.id),
+      `re-served ${first?.topic.id}`,
+    );
+
+    // "easily" implies the hard prerequisite closure (never re-asked)...
+    const implied = walkKnowledge({ [hardEdge.topicId]: "easily" });
+    report(
+      "easily confirms the hard prerequisite closure",
+      implied.confirmed.has(hardEdge.prerequisiteId),
+      `${hardEdge.prerequisiteId} not implied by ${hardEdge.topicId}`,
+    );
+
+    // ...but an explicit miss always beats an implied confirmation.
+    const contradicted = walkKnowledge({
+      [hardEdge.topicId]: "easily",
+      [hardEdge.prerequisiteId]: "not_yet",
+    });
+    report(
+      "an explicit not_yet beats an implied confirmation",
+      !contradicted.confirmed.has(hardEdge.prerequisiteId),
+    );
+
+    // "not yet" prunes every transitive hard dependent.
+    const pruned = walkKnowledge({ [hardEdge.prerequisiteId]: "not_yet" });
+    report(
+      "not_yet blocks the topic's hard dependents",
+      pruned.blocked.has(hardEdge.topicId),
+      `${hardEdge.topicId} still askable after missing ${hardEdge.prerequisiteId}`,
+    );
+
+    // The summary agrees: a blocked topic is never "ready", the missed
+    // topic is the named next step in its own domain.
+    const summaries = walkSummary(subject, { [hardEdge.prerequisiteId]: "not_yet" });
+    const flatReady = summaries.flatMap((entry) => entry.readyIds);
+    const missedDomain = summaries.find(
+      (entry) => entry.domainId === getTopic(hardEdge.prerequisiteId)?.domain,
+    );
+    report("summary never lists a blocked topic as ready", !flatReady.includes(hardEdge.topicId));
+    report(
+      "summary names the missed topic as a next step",
+      missedDomain !== undefined && missedDomain.notYetIds.includes(hardEdge.prerequisiteId),
+    );
+
+    // Budget law: the sitting cap is absolute.
+    report(
+      "walk stops at the sitting budget",
+      nextWalkCard(subject, seedAge, {}, WALK_BUDGET) === null,
+    );
+
+    // Authored-card gate: an empty card registry serves nothing, and an
+    // ended sitting with cards left reads budget_reached, not frontier.
+    report(
+      "walk serves only topics with an authored card",
+      nextWalkCard(subject, seedAge, {}, 0, new Set<string>()) === null,
+    );
+    report(
+      "outcome is budget_reached while informative cards remain",
+      walkOutcome(subject, seedAge, {}, WALK_BUDGET) === "budget_reached",
+    );
+    report(
+      "outcome is frontier_found when nothing askable remains",
+      walkOutcome(subject, seedAge, {}, WALK_BUDGET, new Set<string>()) === "frontier_found",
+    );
+
+    // Termination: a full sitting of any chip mix always ends, within
+    // budget, without repeating a card.
+    const chips: WalkAnswer[] = ["easily", "not_yet", "getting_there", "easily", "not_sure", "easily", "skip", "not_yet"];
+    const answers: Record<string, WalkAnswer> = {};
+    const served: string[] = [];
+    for (let turn = 0; turn <= WALK_BUDGET; turn += 1) {
+      const card = nextWalkCard(subject, seedAge, answers, turn);
+      if (!card) break;
+      served.push(card.topic.id);
+      answers[card.topic.id] = chips[turn % chips.length];
+    }
+    report(
+      "a full sitting terminates within budget without repeats",
+      served.length <= WALK_BUDGET && new Set(served).size === served.length,
+      `served ${served.length} cards, ${new Set(served).size} unique`,
+    );
+  }
 }
 
 console.log(

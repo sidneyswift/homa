@@ -113,7 +113,16 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     from public.families f
     where s.family_id = f.id and s.kind = ${kind} and s.enabled
       and (f.email is null or f.time_zone is null
-           or (${optOutFilter} and f.journal_opt_out_at is not null))
+           or (${optOutFilter} and f.journal_opt_out_at is not null)
+           or not exists (select 1 from public.children c where c.family_id = f.id)
+           or (
+             ${requireReport}
+             and not exists (
+               select 1 from public.child_reports r
+               join public.children c on c.id = r.child_id
+               where c.family_id = f.id
+             )
+           ))
   `;
   await sql`
     update public.agent_schedules s
@@ -122,6 +131,15 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     where s.family_id = f.id and s.kind = ${kind} and not s.enabled
       and f.email is not null and f.time_zone is not null
       and (${!optOutFilter} or f.journal_opt_out_at is null)
+      and exists (select 1 from public.children c where c.family_id = f.id)
+      and (
+        ${!requireReport}
+        or exists (
+          select 1 from public.child_reports r
+          join public.children c on c.id = r.child_id
+          where c.family_id = f.id
+        )
+      )
   `;
 }
 

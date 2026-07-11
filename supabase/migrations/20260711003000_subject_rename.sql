@@ -1,4 +1,4 @@
--- Migration: the subject rename (skill-graph taxonomy plan, sequencing #3).
+-- Migration #48: the subject rename (skill-graph taxonomy plan, sequencing #3).
 --
 -- Founder ruling 2026-07-10: the top level of the skill graph is called
 -- SUBJECT everywhere (code, DB, events); the word "domain" is reused for

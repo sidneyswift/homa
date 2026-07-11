@@ -14,6 +14,7 @@ import {
 } from "../../../../../lib/map/curriculum-store";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { isUuid } from "../../../../../lib/voice/tool-context";
+import { hasVoiceWebhookSecret } from "../../../../../lib/voice/webhook-auth";
 
 /**
  * POST /api/voice/curriculum/insights: Telnyx's Insight Group webhook,
@@ -44,9 +45,8 @@ function asStringArray(value: unknown): string[] {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const secret = process.env.TELNYX_WEBHOOK_SECRET;
-  const key = new URL(request.url).searchParams.get("key");
-  if (!secret || key !== secret) {
+  const url = new URL(request.url);
+  if (!hasVoiceWebhookSecret(request, url)) {
     return new Response("unauthorized", { status: 401 });
   }
 
@@ -70,7 +70,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // Correlate against a real call this server placed; an echoed id alone
   // is never enough to trigger a write (see header).
-  const pendingCall = await getPendingCallForChild(childId);
+  const pendingCall = await getPendingCallForChild(familyId, childId);
   if (!pendingCall || pendingCall.familyId !== familyId) {
     console.error(`curriculum insights webhook: no matching call for child ${childId}`);
     return new Response("ok", { status: 200 });
@@ -84,11 +84,11 @@ export async function POST(request: Request): Promise<Response> {
     parentRequests: asStringArray(insight.parent_requests),
     callSummary: typeof insight.call_summary === "string" ? insight.call_summary : "",
   };
-  await markCallCompleted(pendingCall.id, insight);
+  await markCallCompleted(pendingCall.familyId, pendingCall.id, insight);
 
-  const reportFacts = await buildReportFactsForChild(childId);
+  const reportFacts = await buildReportFactsForChild(pendingCall.familyId, childId);
   if (!reportFacts) {
-    await markCallFailed(pendingCall.id, "report facts unavailable");
+    await markCallFailed(pendingCall.familyId, pendingCall.id, "report facts unavailable");
     return new Response("ok", { status: 200 });
   }
 
@@ -126,7 +126,13 @@ export async function POST(request: Request): Promise<Response> {
     fallback = true;
   }
 
-  await upsertCurriculum(childId, pendingCall.id, curriculum, fallback ? "fallback" : "generated");
+  await upsertCurriculum(
+    pendingCall.familyId,
+    childId,
+    pendingCall.id,
+    curriculum,
+    fallback ? "fallback" : "generated",
+  );
   await emitMapEvent("voice.curriculum_generated", {
     family_id: familyId,
     child_id: childId,

@@ -1,19 +1,23 @@
 #!/usr/bin/env node
 /**
  * Isolation smoke check (seed of the M1-07 adversarial suite).
- * Verifies, using only the PUBLIC key, that the database enforces:
+ * Verifies that the database enforces:
  *   1. waitlist and events are write-only (reads return nothing)
  *   2. tenancy tables are invisible and unwritable to anonymous traffic
  *   3. the events namespace and waitlist status cannot be abused on insert
+ *   4. authenticated members cannot read or write another family's rows
  *
  * Usage: node scripts/isolation-check.mjs
- * Env: reads apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL / _PUBLISHABLE_KEY).
+ * Env: reads apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL /
+ * _PUBLISHABLE_KEY / SUPABASE_DB_PASSWORD).
  * Exit code 0 = all checks passed.
  */
 
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import postgres from "postgres";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
@@ -24,12 +28,32 @@ try {
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const dbPassword = process.env.SUPABASE_DB_PASSWORD;
 if (!url || !key) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
   process.exit(2);
 }
 
 const failures = [];
+const coveredTables = new Set();
+const fixtureFamilyIds = [];
+const fixtureUserIds = [];
+
+const projectRef = new URL(url).hostname.split(".")[0];
+const sql = dbPassword
+  ? postgres({
+      host: "aws-0-us-east-1.pooler.supabase.com",
+      port: 6543,
+      database: "postgres",
+      username: `postgres.${projectRef}`,
+      password: dbPassword,
+      ssl: "require",
+      prepare: false,
+      max: 1,
+      idle_timeout: 10,
+      connect_timeout: 15,
+    })
+  : null;
 
 async function rest(pathname, init = {}) {
   const response = await fetch(`${url}/rest/v1/${pathname}`, {
@@ -44,7 +68,136 @@ async function rest(pathname, init = {}) {
   return response;
 }
 
+async function restAs(accessToken, pathname, init = {}) {
+  return rest(pathname, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      ...init.headers,
+    },
+  });
+}
+
+async function authRequest(pathname, body) {
+  const response = await fetch(`${url}/auth/v1/${pathname}`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const raw = await response.text();
+  let parsed = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    throw new Error(`auth ${pathname} returned non-JSON body ${raw.slice(0, 100)}`);
+  }
+  if (!response.ok) {
+    throw new Error(`auth ${pathname} failed with HTTP ${response.status}: ${raw.slice(0, 160)}`);
+  }
+  return parsed;
+}
+
+async function jsonResponse(response, label) {
+  const raw = await response.text();
+  let parsed = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    throw new Error(`${label} returned non-JSON body ${raw.slice(0, 100)}`);
+  }
+  if (!response.ok) {
+    throw new Error(`${label} failed with HTTP ${response.status}: ${raw.slice(0, 160)}`);
+  }
+  return parsed;
+}
+
+async function signUpFixtureUser(label, suffix) {
+  const email = `isolation-${label}-${suffix}@example.com`;
+  const password = `Homa-isolation-${suffix}-${label}-A1!`;
+  const signedUp = await authRequest("signup", { email, password });
+  let accessToken = signedUp.access_token;
+  let userId = signedUp.user?.id;
+  if (!accessToken) {
+    const signedIn = await authRequest("token?grant_type=password", { email, password });
+    accessToken = signedIn.access_token;
+    userId = userId ?? signedIn.user?.id;
+  }
+  if (!accessToken || !userId) {
+    throw new Error(`auth signup for ${label} did not return a usable session`);
+  }
+  fixtureUserIds.push(userId);
+  return { accessToken, userId };
+}
+
+async function createFixtureFamily(user, label) {
+  const body = await jsonResponse(
+    await restAs(user.accessToken, "rpc/create_my_family", {
+      method: "POST",
+      body: JSON.stringify({
+        family_name: `Isolation ${label}`,
+        family_us_state: "AZ",
+        parent_name: `Isolation ${label}`,
+      }),
+      headers: { Prefer: "return=representation" },
+    }),
+    `create fixture family ${label}`,
+  );
+  const familyId = Array.isArray(body) ? body[0]?.family_id : body?.family_id;
+  if (!familyId) throw new Error(`create_my_family for ${label} returned no family_id`);
+  fixtureFamilyIds.push(familyId);
+  return familyId;
+}
+
+async function insertFixtureRow(user, table, row, label) {
+  const body = await jsonResponse(
+    await restAs(user.accessToken, `${table}?select=id`, {
+      method: "POST",
+      body: JSON.stringify(row),
+      headers: { Prefer: "return=representation" },
+    }),
+    label,
+  );
+  const id = Array.isArray(body) ? body[0]?.id : body?.id;
+  if (!id) throw new Error(`${label} returned no id`);
+  return id;
+}
+
+async function expectAuthenticatedRead(accessToken, table, id, expectedCount, label) {
+  coveredTables.add(table);
+  const response = await restAs(accessToken, `${table}?select=id&id=eq.${id}&limit=2`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    report(label, false, `HTTP ${response.status}, ${raw.slice(0, 100)}`);
+    return;
+  }
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    report(label, false, `HTTP ${response.status}, non-JSON body ${raw.slice(0, 100)}`);
+    return;
+  }
+  const ok = Array.isArray(body) && body.length === expectedCount;
+  report(label, ok, `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`);
+}
+
+async function expectAuthenticatedInsertDenied(accessToken, table, row, label) {
+  coveredTables.add(table);
+  const response = await restAs(accessToken, table, {
+    method: "POST",
+    body: JSON.stringify(row),
+  });
+  const ok = response.status === 401 || response.status === 403;
+  report(label, ok, `HTTP ${response.status}`);
+}
+
 async function expectEmptyRead(table) {
+  coveredTables.add(table);
   const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
   const raw = await response.text();
   if (!response.ok) {
@@ -77,6 +230,7 @@ async function expectEmptyRead(table) {
 }
 
 async function expectReadDenied(table) {
+  coveredTables.add(table);
   const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
   const raw = await response.text();
   const ok = response.status === 401 || response.status === 403;
@@ -88,9 +242,201 @@ async function expectReadDenied(table) {
 }
 
 async function expectInsertDenied(table, row, label) {
+  coveredTables.add(table);
   const response = await rest(table, { method: "POST", body: JSON.stringify(row) });
   const ok = response.status === 401 || response.status === 403;
   report(label, ok, `HTTP ${response.status}`);
+}
+
+async function cleanupIsolationFixtures() {
+  if (!sql) return;
+  try {
+    if (fixtureFamilyIds.length > 0) {
+      await sql`delete from public.families where id in ${sql(fixtureFamilyIds)}`;
+    }
+    if (fixtureUserIds.length > 0) {
+      await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
+    }
+  } catch (error) {
+    report(
+      "authenticated fixture cleanup",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
+async function expectAuthenticatedIsolation() {
+  if (!sql) {
+    report(
+      "authenticated cross-family fixture cleanup is configured",
+      false,
+      "missing SUPABASE_DB_PASSWORD",
+    );
+    return;
+  }
+
+  try {
+    const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const familyAUser = await signUpFixtureUser("a", suffix);
+    const familyBUser = await signUpFixtureUser("b", suffix);
+    const familyAId = await createFixtureFamily(familyAUser, "A");
+    const familyBId = await createFixtureFamily(familyBUser, "B");
+
+    const childBId = await insertFixtureRow(
+      familyBUser,
+      "children",
+      { family_id: familyBId, name: "Isolation B child", birth_month: "2020-01-01" },
+      "create Family B child fixture",
+    );
+    const memoryBId = await insertFixtureRow(
+      familyBUser,
+      "family_memories",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        kind: "fact",
+        content: "Isolation check memory for Family B.",
+        source: "parent",
+      },
+      "create Family B memory fixture",
+    );
+    const materialBId = await insertFixtureRow(
+      familyBUser,
+      "materials",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        title: "Isolation fixture",
+        skill: "tenant isolation",
+        pdf_url: "https://example.com/isolation.pdf",
+        preview_url: "https://example.com/isolation.jpg",
+        html: "<p>Isolation fixture.</p>",
+      },
+      "create Family B material fixture",
+    );
+
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "children",
+      childBId,
+      1,
+      "auth member can read own child",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "children",
+      childBId,
+      0,
+      "auth member cannot read another family's child",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "family_memories",
+      memoryBId,
+      1,
+      "auth member can read own family memory",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "family_memories",
+      memoryBId,
+      0,
+      "auth member cannot read another family's memory",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "materials",
+      materialBId,
+      1,
+      "auth member can read own material",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "materials",
+      materialBId,
+      0,
+      "auth member cannot read another family's material",
+    );
+
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
+      "children",
+      { family_id: familyBId, name: "Cross-family child", birth_month: "2020-01-01" },
+      "auth member cannot create a child in another family",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
+      "family_memories",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        kind: "fact",
+        content: "Cross-family memory should be denied.",
+        source: "parent",
+      },
+      "auth member cannot create another family's memory",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
+      "materials",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        title: "Cross-family material",
+        pdf_url: "https://example.com/cross.pdf",
+        preview_url: "https://example.com/cross.jpg",
+        html: "<p>Cross-family material should be denied.</p>",
+      },
+      "auth member cannot create another family's material",
+    );
+
+    report(
+      "authenticated cross-family fixture families were distinct",
+      familyAId !== familyBId,
+      `A ${familyAId}, B ${familyBId}`,
+    );
+  } catch (error) {
+    report(
+      "authenticated cross-family isolation phase",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  } finally {
+    await cleanupIsolationFixtures();
+  }
+}
+
+function migrationPublicTables() {
+  const migrationsDir = path.join(repoRoot, "supabase/migrations");
+  const tables = new Set();
+  for (const file of readdirSync(migrationsDir).filter((entry) => entry.endsWith(".sql")).sort()) {
+    const source = readFileSync(path.join(migrationsDir, file), "utf8");
+    for (const match of source.matchAll(
+      /create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z_]+)/gi,
+    )) {
+      tables.add(match[1]);
+    }
+    for (const match of source.matchAll(
+      /alter\s+table\s+public\.([a-z_]+)\s+rename\s+to\s+([a-z_]+)/gi,
+    )) {
+      tables.delete(match[1]);
+      tables.add(match[2]);
+    }
+    for (const match of source.matchAll(/drop\s+table\s+(?:if\s+exists\s+)?public\.([a-z_]+)/gi)) {
+      tables.delete(match[1]);
+    }
+  }
+  return tables;
+}
+
+function expectEveryPublicTableCovered() {
+  const missing = [...migrationPublicTables()].filter((table) => !coveredTables.has(table)).sort();
+  report(
+    "isolation guard covers every public table from migrations",
+    missing.length === 0,
+    missing.join(", "),
+  );
 }
 
 function report(label, ok, detail) {
@@ -421,6 +767,10 @@ await expectInsertDenied(
   { child_id: "00000000-0000-0000-0000-000000000000", subject_id: "math", plan: {}, bank_version: "x" },
   "anon cannot forge product child plans",
 );
+
+await expectAuthenticatedIsolation();
+expectEveryPublicTableCovered();
+if (sql) await sql.end({ timeout: 5 });
 
 if (failures.length > 0) {
   console.error(`\n${failures.length} isolation check(s) FAILED`);

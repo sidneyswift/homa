@@ -1,4 +1,4 @@
--- Migration #23: product-side report ownership (family workspace, Phase A).
+-- Migration #26: product-side report ownership (family workspace, Phase A).
 --
 -- Founder ruling 2026-07-07: the progress report becomes a native view
 -- inside the signed-in family workspace, so its data moves from the

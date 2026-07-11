@@ -1,4 +1,4 @@
--- Full birthdays, product-wide (founder ruling 2026-07-11: "we should
+-- Migration #55: full birthdays, product-wide (founder ruling 2026-07-11: "we should
 -- get the full data so we know how old the kid is"). This restores the
 -- 2026-07-06 "get the actual birthday" ruling and retires the month-only
 -- convention the 2026-07-08 onboarding-card unification reintroduced.

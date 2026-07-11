@@ -1,27 +1,28 @@
 /**
- * A narrow, defensive seed of M1-14 (the harness escape-hatch contract) —
+ * A narrow, defensive seed of M1-14 (the harness escape-hatch contract),
  * not the full contract (startTurn/parkForHuman/scheduleDispatch/
  * persistEvent). This exists solely to close the specific hole found in
  * the M0-01 spike (docs/homa-planning/eve-churn-log.md, 2026-07-04): eve's
  * resume endpoint can claim success (`ok: true`, even with the *correct*
  * sessionId) while the durable workflow underneath has actually diverged
  * and corrupted, silently dropping the message. A second, rarer variant
- * returns `ok: true` naming a *different* sessionId altogether — a fresh,
+ * returns `ok: true` naming a *different* sessionId altogether: a fresh,
  * memoryless session standing in for the one that broke.
  *
  * Both variants share one property: the synchronous POST response alone
  * cannot be trusted. eve's own docs describe the POST as accepting the
- * follow-up, not confirming the turn ran — real confirmation only exists on
+ * follow-up, not confirming the turn ran. Real confirmation only exists on
  * the session's event stream. So this module does not stop at checking the
  * response body; it watches the stream for real forward progress (a new
  * turn distinct from whatever the caller already knew about) before calling
  * a resume successful.
  *
- * Every caller that resumes an eve session (the chat UI's send, a schedule
- * dispatcher waking a parked session, anything else) MUST go through this
- * function rather than calling eve's HTTP endpoint directly, so a silently
- * dropped resume is a loud failure here instead of a silently corrupted
- * conversation three layers up.
+ * This file is intentionally dormant until Homa owns an HTTP resume path.
+ * Current chat sends through eve's useEveAgent hook and uses turn-recovery.ts
+ * for dead-stream replay. The first schedule dispatcher, parked-HITL path, or
+ * other app-owned HTTP resume MUST go through this function rather than
+ * calling eve's endpoint directly, so a silently dropped resume is a loud
+ * failure here instead of a silently corrupted conversation three layers up.
  *
  * Lives in `lib/`, not `agent/`: this calls eve's HTTP API from the outside,
  * it is not an eve-discovered capability (eve's own discovery warns on
@@ -55,7 +56,7 @@ export interface ResumeSessionResult {
 
 /**
  * Thrown when eve's resume response names a session other than the one we
- * asked for. Treat this as the original conversation being unrecoverable —
+ * asked for. Treat this as the original conversation being unrecoverable:
  * do not continue silently on the returned session as if it were a normal
  * resume. Log it, alert, and surface an honest "let's pick this back up"
  * message to the end user instead.
@@ -89,7 +90,7 @@ export class SessionResumeFailedError extends Error {
 
 /**
  * Thrown when the resume POST claimed success but the session's own event
- * stream shows no real forward progress within the timeout — no new turn,
+ * stream shows no real forward progress within the timeout: no new turn,
  * and no explicit failure event either. This is the variant that motivated
  * this module: `ok: true` on the wire, silence underneath.
  */
@@ -100,7 +101,7 @@ export class SessionResumeUnconfirmedError extends Error {
     super(
       `Resume for session ${sessionId} returned ok:true, but no new turn ` +
         `appeared on its event stream within ${timeoutMs}ms. Treat this as ` +
-        `a failed resume, not a successful one — eve's POST response alone ` +
+        `a failed resume, not a successful one. eve's POST response alone ` +
         `does not confirm the turn ran.`,
     );
     this.name = "SessionResumeUnconfirmedError";
@@ -127,6 +128,7 @@ async function watchForForwardProgress(
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let sawNewTurn = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -141,13 +143,21 @@ async function watchForForwardProgress(
         } catch {
           continue;
         }
-        if (event.type === "turn.failed" || event.type === "session.failed") {
+        if (event.type === "session.failed") {
           return "failed";
         }
+        const turnId = event.data?.turnId;
+        const isNewTurn = typeof turnId === "string" && turnId !== lastKnownTurnId;
+        sawNewTurn = sawNewTurn || isNewTurn;
+        if (event.type === "turn.failed" && isNewTurn) {
+          return "failed";
+        }
+        if (event.type === "turn.completed" && isNewTurn) {
+          return "progressed";
+        }
         if (
-          event.type === "turn.completed" &&
-          event.data?.turnId !== undefined &&
-          event.data.turnId !== lastKnownTurnId
+          sawNewTurn &&
+          (event.type === "session.waiting" || event.type === "session.completed")
         ) {
           return "progressed";
         }
@@ -163,7 +173,7 @@ async function watchForForwardProgress(
 
 /**
  * Resumes an eve session and verifies eve actually resumed *that* session
- * AND made real forward progress on it — not a substitute session, and not
+ * AND made real forward progress on it: not a substitute session, and not
  * a silently dropped message behind a synchronous `ok: true`. Throws one of
  * SessionResumeMismatchError, SessionResumeFailedError, or
  * SessionResumeUnconfirmedError rather than returning a result that looks

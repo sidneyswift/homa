@@ -1,4 +1,4 @@
--- Migration #51: family invites (multi-parent plan Phase 3, NT-4 v0).
+-- Migration #53: family invites (multi-parent plan Phase 3, NT-4 v0).
 -- The join path signup never had: one adult invites another by email,
 -- inbox possession of the tokenized link is the proof (the same trust
 -- basis as phone_link_requests), and accepting inserts a family_members

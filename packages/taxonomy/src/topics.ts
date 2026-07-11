@@ -1,6 +1,6 @@
-import type { TaxonomyTopic } from "./types.js";
-import { assembleTaxonomy } from "./assemble.js";
-import { getTaxonomyDomain } from "./domains.js";
+import type { TaxonomyTopic } from "./types";
+import { assembleTaxonomy } from "./assemble";
+import { getTaxonomyDomain } from "./domains";
 
 /**
  * Topic accessors over the assembled Homa graph. Every id here is a Homa

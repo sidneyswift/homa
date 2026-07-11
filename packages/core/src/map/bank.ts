@@ -27,6 +27,8 @@ export interface MapItem {
   typicalMonths: number;
   /** Citation keys into MAP_SOURCES. */
   sources: readonly string[];
+  /** Formal standard codes behind the anchor, where the content bank has them. */
+  standards?: readonly string[];
   /** Documented typical WINDOW [earliest, latest] in months, only where the
    * corpus gives a real cited range; display-only (see content.ts). */
   typicalRangeMonths?: readonly [number, number];

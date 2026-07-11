@@ -1,6 +1,7 @@
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { markLeadConverted } from "./phone-leads";
+import { sendHomaSms } from "./voice/telnyx-api";
 
 /**
  * The family texting lines (migration #22, one per family; migrations
@@ -143,75 +144,15 @@ export async function findFamilyIdentityByPhone(
 }
 
 /**
- * Bridge-time copy: carries a lead's signup-typed number into the real
- * family workspace. Never overwrites a number the parent set on /app/settings,
- * and silently stands down if another family already claimed it.
- */
-export async function copyLeadPhoneToFamily(
-  familyId: string,
-  phoneE164: string,
-  addedBy: string | null,
-): Promise<void> {
-  const sql = mapDb();
-  try {
-    const rows = await sql<{ family_id: string }[]>`
-      insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
-      values (${familyId}, ${phoneE164}, ${addedBy}, ${addedBy}, 'bridge')
-      on conflict do nothing
-      returning family_id
-    `;
-    if (rows.length > 0) {
-      await emitMapEvent("sms.family_linked", {
-        family_id: familyId,
-        source: "bridge",
-        replaced: false,
-      });
-      await markLeadConverted(phoneE164).catch(() => {});
-      await sendLinkNotificationSms(phoneE164);
-    }
-  } catch (error) {
-    // Best-effort by design: the workspace bridge must never fail over a
-    // phone nicety.
-    console.error(
-      "copyLeadPhoneToFamily failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-  }
-}
-
-/**
  * The typo safety net for skipping code verification (founder call
  * 2026-07-07): whoever actually owns a freshly linked number gets one
  * text saying so, with the STOP escape hatch (Telnyx enforces opt-outs
  * at the platform level). Best-effort: linking never fails over it.
  */
 async function sendLinkNotificationSms(phoneE164: string): Promise<void> {
-  const apiKey = process.env.TELNYX_API_KEY;
-  const fromNumber = process.env.TELNYX_FROM_NUMBER;
-  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return;
-
-  try {
-    const response = await fetch("https://api.telnyx.com/v2/messages", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromNumber,
-        to: phoneE164,
-        text:
-          "Hi, it's Homa. This number is now set up to text with me. " +
-          "Say hi anytime. Not you? Reply STOP and I won't text again.",
-      }),
-    });
-    if (!response.ok) {
-      console.error(`link notification SMS failed: HTTP ${response.status}`);
-    }
-  } catch (error) {
-    console.error(
-      "link notification SMS failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-  }
+  await sendHomaSms(
+    phoneE164,
+    "Hi, it's Homa. This number is now set up to text with me. " +
+      "Say hi anytime. Not you? Reply STOP and I won't text again.",
+  );
 }

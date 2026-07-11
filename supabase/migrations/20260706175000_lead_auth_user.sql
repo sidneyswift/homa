@@ -1,4 +1,4 @@
--- Links a map lead to a real Supabase Auth account, created either
+-- Migration #19: links a map lead to a real Supabase Auth account, created either
 -- immediately (Google sign-up at S1) or as the last question before the
 -- report (email + password, founder call 2026-07-06). Nullable: most
 -- leads mid-flow have no account yet, that's the whole point of the

@@ -29,8 +29,6 @@ export function aheadCapForAge(ageMonths: number): number {
   return Math.min(MONTHS_AHEAD_CAP, Math.round(ageMonths / 3));
 }
 
-/** Capture floor: under this age we do not even collect a child. */
-export const CAPTURE_MIN_MONTHS = 0;
 /** Capture ceiling for the lead magnet: 16 years. */
 export const CAPTURE_MAX_MONTHS = 17 * 12;
 

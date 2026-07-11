@@ -1,6 +1,7 @@
 import { BANNED_WORDS, EM_DASH } from "@homa/core";
 
 import { HOUSE_PATH } from "../../components/brand/Logo";
+import { escapeHtml } from "../html-escape";
 
 /**
  * The printable page shell: the fixed contract around agent-composed
@@ -40,14 +41,6 @@ export function validatePrintableHtml(html: string, extraText: string): string |
 
 /** The footer's house mark, inlined as raw SVG (same art as the Logo). */
 const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="#8A7D6C" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="#8A7D6C"/><circle cx="30.6" cy="26" r="2.7" fill="#8A7D6C"/></svg>`;
-
-function escapeHtml(text: string): string {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
 
 /**
  * wrapPrintablePage(bodyHtml, footerFor): string

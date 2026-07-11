@@ -1,8 +1,17 @@
-import { buildFourWeekPlan, type Curriculum, type MapAnswer, type MapScores } from "@homa/core";
+import {
+  buildFourWeekPlan,
+  getMapSubject,
+  MONTH_PLAN_SUBJECT,
+  type Curriculum,
+  type FourWeekPlan,
+  type MapAnswer,
+  type MapScores,
+} from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
 import type { ReportFacts, SubjectFacts } from "./narrative-facts";
 import { buildReportFacts } from "./narrative-facts";
+import { profileFocusList, profileInterestList } from "./profile-context";
 
 /**
  * Server-only (mapDb) reads/writes for the "Call Homa" curriculum
@@ -16,7 +25,10 @@ import { buildReportFacts } from "./narrative-facts";
 
 /** Builds this child's report facts from the product-side tables, the
  * same shape narrative-generate.ts already writes reports from. */
-export async function buildReportFactsForChild(childId: string): Promise<ReportFacts | null> {
+export async function buildReportFactsForChild(
+  familyId: string,
+  childId: string,
+): Promise<ReportFacts | null> {
   const sql = mapDb();
   const rows = await sql<
     {
@@ -36,7 +48,7 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
     from public.children c
     join public.families f on f.id = c.family_id
     join public.child_reports r on r.child_id = c.id
-    where c.id = ${childId}
+    where c.id = ${childId} and c.family_id = ${familyId}
   `;
   const row = rows[0];
   if (!row) return null;
@@ -46,13 +58,13 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
   `;
 
   const profile = row.profile ?? {};
-  const interests = Array.isArray(profile.interests)
-    ? profile.interests.filter((item): item is string => typeof item === "string")
-    : [];
-  const focus = typeof profile.focus === "string" ? [profile.focus] : [];
+  const interests = profileInterestList(profile.interests);
+  const focus = profileFocusList(profile);
 
-  const planRows = await sql<{ subject_id: string; progress: Record<string, boolean> }[]>`
-    select subject_id, progress from public.child_plans where child_id = ${childId}
+  const planRows = await sql<
+    { subject_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]
+  >`
+    select subject_id, plan, progress from public.child_plans where child_id = ${childId}
   `;
 
   return buildReportFacts({
@@ -72,9 +84,12 @@ export async function buildReportFactsForChild(childId: string): Promise<ReportF
         }
       : null,
     practice: planRows.map((plan) => ({
-      subjectName: plan.subject_id,
+      subjectName:
+        plan.subject_id === MONTH_PLAN_SUBJECT
+          ? "the month plan"
+          : (getMapSubject(plan.subject_id)?.displayName ?? plan.subject_id),
       done: Object.values(plan.progress ?? {}).filter(Boolean).length,
-      total: 0,
+      total: plan.plan.weeks.reduce((sum, week) => sum + week.activities.length, 0),
     })),
   });
 }
@@ -132,11 +147,14 @@ export interface PendingCall {
 /** The most recent 'initiated' call for this child, within a generous
  * window; correlates a Telnyx-echoed child_id back to a real call this
  * server placed, so the webhook never trusts a bare id from the model. */
-export async function getPendingCallForChild(childId: string): Promise<PendingCall | null> {
+export async function getPendingCallForChild(
+  familyId: string,
+  childId: string,
+): Promise<PendingCall | null> {
   const sql = mapDb();
   const rows = await sql<{ id: string; family_id: string }[]>`
     select id, family_id from public.child_curriculum_calls
-    where child_id = ${childId} and status = 'initiated'
+    where child_id = ${childId} and family_id = ${familyId} and status = 'initiated'
       and created_at > now() - interval '2 hours'
     order by created_at desc
     limit 1
@@ -146,6 +164,7 @@ export async function getPendingCallForChild(childId: string): Promise<PendingCa
 }
 
 export async function markCallCompleted(
+  familyId: string,
   callId: string,
   transcriptFacts: unknown,
 ): Promise<void> {
@@ -154,20 +173,25 @@ export async function markCallCompleted(
     update public.child_curriculum_calls
     set status = 'completed', transcript_facts = ${sql.json(transcriptFacts as DbJson)},
         completed_at = now()
-    where id = ${callId}
+    where id = ${callId} and family_id = ${familyId}
   `;
 }
 
-export async function markCallFailed(callId: string, error: string): Promise<void> {
+export async function markCallFailed(
+  familyId: string,
+  callId: string,
+  error: string,
+): Promise<void> {
   const sql = mapDb();
   await sql`
     update public.child_curriculum_calls
     set status = 'failed', error = ${error}, completed_at = now()
-    where id = ${callId}
+    where id = ${callId} and family_id = ${familyId}
   `;
 }
 
 export async function upsertCurriculum(
+  familyId: string,
   childId: string,
   callId: string,
   curriculum: Curriculum,
@@ -176,7 +200,16 @@ export async function upsertCurriculum(
   const sql = mapDb();
   await sql`
     insert into public.child_curricula (child_id, call_id, curriculum, model)
-    values (${childId}, ${callId}, ${sql.json(curriculum as unknown as DbJson)}, ${model})
+    select ${childId}, ${callId}, ${sql.json(curriculum as unknown as DbJson)}, ${model}
+    where exists (
+      select 1
+      from public.child_curriculum_calls call
+      join public.children c on c.id = call.child_id
+      where call.id = ${callId}
+        and call.child_id = ${childId}
+        and call.family_id = ${familyId}
+        and c.family_id = ${familyId}
+    )
     on conflict (child_id) do update
       set call_id = excluded.call_id,
           curriculum = excluded.curriculum,

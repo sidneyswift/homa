@@ -1,3 +1,5 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 import { mapDb } from "./map/db";
 
 /**
@@ -18,6 +20,49 @@ export interface InboundEmail {
   fromEmail: string | null;
   subject: string;
   text: string;
+}
+
+const SVIX_TOLERANCE_SECONDS = 5 * 60;
+
+function svixHeader(headers: Headers, name: "id" | "timestamp" | "signature"): string | null {
+  return headers.get(`svix-${name}`) ?? headers.get(`webhook-${name}`);
+}
+
+export function verifyResendWebhookSignature(
+  payload: string,
+  headers: Headers,
+  webhookSecret: string | null | undefined,
+): boolean {
+  if (!webhookSecret) return false;
+  const id = svixHeader(headers, "id");
+  const timestamp = svixHeader(headers, "timestamp");
+  const signatures = svixHeader(headers, "signature");
+  if (!id || !timestamp || !signatures) return false;
+
+  const timestampSeconds = Number(timestamp);
+  if (!Number.isFinite(timestampSeconds)) return false;
+  const ageSeconds = Math.abs(Date.now() / 1000 - timestampSeconds);
+  if (ageSeconds > SVIX_TOLERANCE_SECONDS) return false;
+
+  const secretPart = webhookSecret.startsWith("whsec_")
+    ? webhookSecret.slice("whsec_".length)
+    : webhookSecret;
+  const secretBytes = Buffer.from(secretPart, "base64");
+  if (secretBytes.length === 0) return false;
+
+  const expected = createHmac("sha256", secretBytes)
+    .update(`${id}.${timestamp}.${payload}`)
+    .digest();
+
+  for (const candidate of signatures.split(/\s+/)) {
+    const [version, value] = candidate.split(",", 2);
+    if (version !== "v1" || !value) continue;
+    const actual = Buffer.from(value, "base64");
+    if (actual.length === expected.length && timingSafeEqual(actual, expected)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Tolerant extraction from Resend inbound webhook payloads. */
@@ -72,19 +117,6 @@ export function optOutIntent(text: string): "stop" | "start" | null {
   return null;
 }
 
-/**
- * The family that registered this exact address, or null. Two match
- * paths since multi-parent v0 (plan 2026-07-11): the family row's own
- * email (the address SHE gave us at signup) and any member's sign-in
- * email, so a second parent's replies authenticate without being the
- * account email. Both are addresses a parent registered; the trust
- * basis is unchanged.
- */
-export async function findFamilyIdByEmail(email: string): Promise<string | null> {
-  const identity = await findFamilyIdentityByEmail(email);
-  return identity?.familyId ?? null;
-}
-
 export interface FamilyEmailIdentity {
   familyId: string;
   /** The member's display name when the address matched a member's
@@ -92,8 +124,8 @@ export interface FamilyEmailIdentity {
   memberDisplayName: string | null;
 }
 
-/** The identity-aware twin of findFamilyIdByEmail: same auth basis,
- * plus WHICH adult wrote in, when the address is a member's own. */
+/** Resolves a registered parent email to its family, plus WHICH adult
+ * wrote in when the address is a member's own. */
 export async function findFamilyIdentityByEmail(
   email: string,
 ): Promise<FamilyEmailIdentity | null> {

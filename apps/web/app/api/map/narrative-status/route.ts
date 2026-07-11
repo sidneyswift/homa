@@ -55,9 +55,9 @@ export async function GET(request: Request): Promise<Response> {
       after(async () => {
         try {
           if (subjectId) {
-            await runPlanNarrative(childId, subjectId);
+            await runPlanNarrative(childId, subjectId, row.familyId);
           } else {
-            await runReportNarrative(childId);
+            await runReportNarrative(childId, row.familyId);
           }
         } catch (error) {
           console.error(

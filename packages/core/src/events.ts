@@ -11,6 +11,13 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * Pre-signup web events (waitlist.*) are the only names the public database
  * role may insert; see migration 20260704033725.
  */
+
+/** The wall's four doors: the report actions the paywall stands in front
+ *  of (plans/2026-07-11-the-wall.md). Shared by the wall.* and
+ *  report.action_tapped schemas and the beacon route's request schema. */
+export const WALL_DOORS = ["plan", "month", "call", "chat"] as const;
+export type WallDoor = (typeof WALL_DOORS)[number];
+
 export const EVENT_SCHEMAS = {
   "waitlist.joined": z.object({
     source: z.enum(WAITLIST_SOURCES),
@@ -91,6 +98,34 @@ export const EVENT_SCHEMAS = {
     subject: z.string(),
     mode: z.enum(["parent", "together"]),
   }),
+  // The onboarding depth fork (plans/2026-07-11-onboarding-depth-fork.md,
+  // founder rulings 2026-07-11): after a subject's core questions the mom
+  // chooses depth. Take-rate per subject reads straight off choice.
+  "map.depth_fork_decided": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    subject: z.string(),
+    choice: z.enum(["deeper", "move_on"]),
+  }),
+  // One event per graph-walk card answered (the walk's heartbeat).
+  // domain is the level-2 skill line, so drop-off localizes to a strand.
+  "map.walk_answered": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    subject: z.string(),
+    domain: z.string(),
+    answer: z.enum(["easily", "getting_there", "not_yet", "not_sure", "skip"]),
+  }),
+  // A walk sitting ended. stopped_early is the mid-walk drop-off signal
+  // the founder asked to watch from day one; silent abandonment shows as
+  // a deeper fork with no walk_ended row.
+  "map.walk_ended": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    subject: z.string(),
+    questions_answered: z.number().int().min(0),
+    outcome: z.enum(["frontier_found", "budget_reached", "stopped_early"]),
+  }),
   "map.plan_built": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
@@ -170,16 +205,19 @@ export const EVENT_SCHEMAS = {
   // on an inbound text. media_type is the MIME type the carrier
   // delivered; outcome says which lane handled it: model_native (photos,
   // PDFs passed to the model directly), converted (BMP images, remade
-  // into PNG before the model sees them), transcribed (voice notes and
-  // video clips through STT), extracted (Word/Excel text pulled out),
-  // inlined (text-format files), or failed (bracketed acknowledgement
-  // note). Never any content, never a number.
+  // into PNG before the model sees them), described (video clips watched
+  // end to end by the Twelve Labs gateway, 2026-07-11), transcribed
+  // (voice notes through STT; video clips when the visual lane is dark
+  // or missed), extracted (Word/Excel text pulled out), inlined
+  // (text-format files), or failed (bracketed acknowledgement note).
+  // Never any content, never a number.
   "sms.attachment_processed": z.object({
     kind: z.enum(["image", "audio", "video", "document", "text", "other"]),
     media_type: z.string(),
     outcome: z.enum([
       "model_native",
       "converted",
+      "described",
       "transcribed",
       "extracted",
       "inlined",
@@ -411,6 +449,40 @@ export const EVENT_SCHEMAS = {
   // name, address, and message are PII and live on the thank_you_cards
   // row, never here.
   "card.thank_you_sent": z.object({
+    family_id: z.uuid(),
+  }),
+  // The wall (paywall groundwork, built DARK behind HOMA_WALL_ENABLED;
+  // plans/2026-07-11-the-wall.md). A "door" is one of the four report
+  // actions the wall will stand in front of. Door taps fire with the
+  // flag OFF too, on purpose: the paywall decision wants baseline
+  // tap-through data from the free era, and `walled` says which era a
+  // tap belongs to.
+  "report.action_tapped": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid().optional(),
+    door: z.enum(WALL_DOORS),
+    walled: z.boolean(),
+  }),
+  // The wall rendered: the modal opened on a door, or the plan page
+  // served its full-page offer instead of building a plan.
+  "wall.viewed": z.object({
+    family_id: z.uuid(),
+    door: z.enum(WALL_DOORS),
+  }),
+  "wall.dismissed": z.object({
+    family_id: z.uuid(),
+    door: z.enum(WALL_DOORS),
+  }),
+  // She left for Stripe checkout (a Payment Link tab, plan chosen).
+  "wall.checkout_started": z.object({
+    family_id: z.uuid(),
+    door: z.enum(WALL_DOORS),
+    plan: z.enum(["monthly", "annual"]),
+  }),
+  // /api/billing/confirm verified the checkout session and stamped
+  // trial_started_at. Fires only on the first confirm; a re-visit of
+  // the confirmation URL is a no-op.
+  "billing.trial_started": z.object({
     family_id: z.uuid(),
   }),
 } as const;

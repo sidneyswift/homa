@@ -51,19 +51,23 @@ tab are BUILT and live-E2E green (build-log 2026-07-10 boil-the-ocean
 entry). The tab is visible now; the two proactive loops wait on your
 switches, in this order:
 
-- [ ] **Deploy** so the new fleet-research cron registers with Vercel
-  (any deploy does it; verify with `vercel crons ls`, expect it beside
-  the hourly dispatcher) *(1 min)*
-- [ ] **Flip fleet research first**: `printf 'true' | vercel env add FLEET_RESEARCH_ENABLED production`
-  then redeploy. Let it run 2 or 3 nights, then skim the rows: ask an
-  agent "show me the knowledge bank" or check the History-less fleet
-  runs via SQL. Knob if wanted: `RESEARCH_TOPICS_PER_NIGHT` (default 3) *(2 min + patience)*
-- [ ] **THE BRIEF SWITCH · read one aloud first**: with the corpus a few
-  nights old, ask an agent to "fire a test morning brief for my family
-  in dev and show me the text" (scripts/tasks-e2e.mts shows the shape).
-  If it passes the read-aloud: `printf 'true' | vercel env add MORNING_BRIEF_ENABLED production`
-  and redeploy. 9am weekday texts begin (email until a phone is linked;
-  your line is linked) *(5 min, the fun one)*
+- [x] ~~Deploy~~ done 2026-07-11 2:32am (founder "do both"): commit
+  6116cb4 deployed, `vercel crons ls` shows the fleet cron (47 6 * * *)
+  beside the hourly dispatcher
+- [x] ~~Flip fleet research~~ done 2026-07-11 2:28am: flag live, and the
+  first production run at 2:47am merged 3 cited rows (executive
+  function, art, fine motor) picked by real family demand. Knob if
+  wanted: `RESEARCH_TOPICS_PER_NIGHT` (default 3)
+- [x] ~~The brief switch~~ done 2026-07-11 2:28am (founder flipped both
+  without the dev read-aloud; the E2E briefs in the build session were
+  the read). Founder follow-up "have the brief go out tomorrow": rows
+  seeded at Saturday 9am ET as a one-time exception, then the Mon-Fri
+  rhythm takes over on its own. First texts: Sat Jul 11, 9am. After the
+  multi-parent fold (same night, other work stream) the household is
+  ONE family with both parents and both phones, so the brief texts
+  Sidney AND Alessa; Gomes gets it too. The old "Llanes skipped"
+  eligibility note is obsolete: her account and the report now live in
+  the same family
 
 ## Thank-you cards (added 2026-07-11; UPDATED 1am: key live, ONE switch left)
 
@@ -96,6 +100,42 @@ order:
   and send for real (two DC, one FL; ~$14 total), then new families
   follow automatically 48h after onboarding, capped at 150/month.
   Cards land 4 to 7 days later *(2 min)*
+
+## The wall (added 2026-07-11 pre-dawn; BUILT and DARK, do NOTHING before the July 13 conference)
+
+The paywall is built and ships dark behind `HOMA_WALL_ENABLED`
+(plans/2026-07-11-the-wall.md). Door-tap analytics are already live so
+you collect baseline data this weekend with zero visible change. When
+Phase D says go, in this order:
+
+- [ ] **Stripe Payment Links (monthly $19 + annual $99)**: edit both
+  links in the dashboard → add a **30-day free trial**, and set the
+  after-completion redirect to
+  `https://thankshoma.com/api/billing/confirm?session_id={CHECKOUT_SESSION_ID}`
+  *(5 min)*
+- [ ] **Stripe trial reminder emails**: Settings → Subscriptions and
+  emails → turn on the "upcoming trial expiration" email. The wall copy
+  promises "you get an email first"; this is that email *(2 min)*
+- [ ] **Vercel env**: confirm `NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL`,
+  `..._ANNUAL_URL`, and `STRIPE_LIVE_SECRET_KEY` are set in Production
+  (keys went in 2026-07-06; the two link URLs may be missing) *(3 min)*
+- [ ] **Apply migration 20260711200000** (additive, safe to lead): tell
+  an agent "apply the family billing migration" or run it via MCP *(1 min)*
+- [ ] **Pricing on the site, same deploy as the flip**: the FAQ promises
+  "pricing gets published before anyone pays a cent." Tell an agent to
+  build the pricing section/page before or with the flip, never after
+  *(agent work, your read-aloud)*
+- [ ] **Read the wall aloud once**: all wall words live in
+  `apps/web/components/billing/wall-copy.ts` (both copy gates run; you
+  are the last gate). One review flag stands: $99/yr is Homeschool
+  Fox's exact annual sticker (T3 collision), decide if it becomes
+  $119 to $149 before it goes public *(3 min)*
+- [ ] **THE SWITCH** (Phase D, after PRD §7 gates):
+  `printf 'true' | vercel env add HOMA_WALL_ENABLED production` then
+  redeploy. Test end to end with a fresh family + Stripe TEST link
+  first (set the TEST link envs on a preview) incl. cancel *(15 min)*
+- [ ] **Comping a family** (you, Alessa, testers): set
+  `billing_exempt = true` on their families row (tell an agent) *(30 sec)*
 
 ## Email-into-Homa (gateway GW-8, added 2026-07-09 late evening)
 

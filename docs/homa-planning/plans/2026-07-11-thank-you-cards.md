@@ -94,24 +94,40 @@ account record via auth/getUser). Test-mode orders are reserved for
 cannot place a real order; per-order test flags are only honored when
 the ACCOUNT is in test mode ("test mode error" otherwise).
 
-## The card (final copy, gates passed)
+## The card (final copy, revision 2 "heartfelt", gates passed)
+
+Founder direction 2026-07-11 1:40am: "make it heartfelt". Rewritten
+and re-gated the same night (reader, then editor).
 
 > Hi {firstName},
 >
-> Thank you for trying Homa. Teaching your kids at home is generous
-> work.
+> Thank you for trying Homa, and for sharing this address when you
+> signed up.
 >
-> You shared this address when you set up your family, so I wanted to
-> send a real card. Homa is one text away whenever you want a hand.
+> You took on your family's whole education. Most people won't see
+> how much love that takes. I built Homa so you never have to do it
+> alone.
+>
+> Whenever you want a hand, text Homa: (346) 758-8011.
 >
 > Warmly,
 > Sidney, founder of Homa
 
-Gate findings that shaped it: gratitude sized to "trying" (bigger
-claims read as guilt in week one), the address sentence answers the
-"how do they know where we live" flinch before it forms, "Homa is one
-text away" names the product so the card never overpromises a person,
-contractions because uncontracted phrasing reads as a copied script.
+Gate findings that shaped revision 2: the address explanation moved
+INTO sentence one (the "how do they know where we live" worry fires at
+the logo and hums under every tender line until answered); the warmth
+states facts true of every homeschool parent plus the founder's why,
+because fake-personal lines ("you show up every day") read as
+horoscope-generic and per-family detail is barred (child data never
+goes to the mail vendor); "your family's whole education" is
+family-size-neutral because a wrong "kids" plural in real ink is where
+the hand stops feeling like a hand; "when you signed up" replaced "set
+up your family" (app language inside handwriting breaks the spell);
+the texting number is printed because the card lives on a fridge and
+must be actionable from the kitchen; the self-praising gesture
+sentence ("deserves more than an email, something you can hold") was
+cut, the paper makes that point itself; gratitude stays sized to
+"trying"; one metaphor ("want a hand"); contractions throughout.
 
 ## What is NOT in scope (phase 2 candidates)
 

@@ -84,7 +84,7 @@ const rows = await sql<BucketRow[]>`
     a.answer,
     count(*)::int as n
   from public.child_answers a
-  join public.lead_children c on c.id = a.child_id
+  join public.children c on c.id = a.child_id
   where a.answer in ('easily', 'getting_there', 'not_yet')
   group by 1, 2, 3
   order by 1, 2

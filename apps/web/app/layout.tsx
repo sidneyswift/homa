@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Caveat, EB_Garamond, Fredoka, Hanken_Grotesk, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { WaitlistQueueFlusher } from "./waitlist-queue-flusher";
 
 // Homa Design System v3 fonts (docs/homa-design/tokens/fonts.css), loaded via
 // next/font for self-hosting + zero layout shift instead of the DS's raw
@@ -126,6 +127,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c") }}
         />
+        <WaitlistQueueFlusher />
         {children}
         {/* Pageview beacon for the landing -> signup conversion denominator
             (docs/homa-planning/journeys/06-metrics-instrumentation.md). Product

@@ -26,7 +26,14 @@ import {
  * model-mix experiments.
  */
 
-const REVIEW_MIN_MESSAGES = Number(process.env.HOMA_REVIEW_MIN_MESSAGES ?? 4);
+function parseReviewMinMessages(value: string | undefined): number {
+  if (value === undefined || value.trim().length === 0) return 4;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return 4;
+  return Math.floor(parsed);
+}
+
+const REVIEW_MIN_MESSAGES = parseReviewMinMessages(process.env.HOMA_REVIEW_MIN_MESSAGES);
 const REVIEW_WINDOW_MAX_MESSAGES = 60;
 
 interface MessageRow {

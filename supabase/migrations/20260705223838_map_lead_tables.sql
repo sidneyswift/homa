@@ -1,4 +1,4 @@
--- Migration #7: the child's map lead tables (lead magnet v2, decision D3=A).
+-- Migration #9: the child's map lead tables (lead magnet v2, decision D3=A).
 -- Posture: STRICTER than the waitlist. RLS is enabled with ZERO policies and
 -- all privileges are revoked from the public Data API roles, so anon and
 -- authenticated can neither read nor write these tables at all. Every access

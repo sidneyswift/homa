@@ -44,7 +44,7 @@ export function Stories() {
         >
           <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
             We built this piece by piece, with our own kitchen table in mind. We wanted
-            curriculum that met each kid where they stood: steady, growing, or stuck. Not a
+            curriculum that met each kid where they stood: steady, growing, or ready for more practice. Not a
             one-size plan hoping it would fit. We wanted a tailored education without losing
             countless hours to research, hunting down unit studies and curricula to recombine
             into something that actually fit our own kids and family.

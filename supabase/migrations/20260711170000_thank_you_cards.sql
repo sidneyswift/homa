@@ -1,4 +1,4 @@
--- Thank-you cards (plans/2026-07-11-thank-you-cards.md, founder "do it"
+-- Migration #54: thank-you cards (plans/2026-07-11-thank-you-cards.md, founder "do it"
 -- 2026-07-11). One physical handwritten card per family, ever, written
 -- by a robot with a real pen (Handwrytten) after web onboarding
 -- completes and 48 quiet hours pass.

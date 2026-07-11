@@ -1,4 +1,4 @@
--- Migration #16: email moves from required-at-start to required-at-signup
+-- Migration #17: email moves from required-at-start to required-at-signup
 -- (founder call: "no email needed, sign up as the last question to create
 -- an account and generate the report"). The lead now exists anonymously
 -- from the very first tap (kids + checklist auto-save under a cookie-only

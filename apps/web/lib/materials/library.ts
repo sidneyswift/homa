@@ -109,12 +109,16 @@ export async function getMaterialCaller(
   familyId: string,
   materialId: string,
 ): Promise<MaterialSummary | null> {
-  const { data } = await db
+  const { data, error } = await db
     .from("materials")
     .select(`${SUMMARY_COLUMNS}, html`)
     .eq("family_id", familyId)
     .eq("id", materialId)
     .maybeSingle();
+  if (error) {
+    console.error("materials single read failed:", error.message);
+    throw new Error("Could not read saved materials.");
+  }
   return data ? toSummary(data as unknown as MaterialDbRow) : null;
 }
 
@@ -167,7 +171,10 @@ export async function findMaterialsCaller(
   // exact (case preserved by the tool's guidance to reuse stored names).
   if (filters.character) query = query.contains("characters", [filters.character]);
   const { data, error } = await query;
-  if (error) return [];
+  if (error) {
+    console.error("materials search failed:", error.message);
+    throw new Error("Could not search saved materials.");
+  }
   return ((data ?? []) as unknown as MaterialDbRow[]).map(toSummary);
 }
 

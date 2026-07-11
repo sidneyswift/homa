@@ -1,4 +1,4 @@
--- Migration #15: the Homa skills bank, the shared tier above family_skills.
+-- Migration #16: the Homa skills bank, the shared tier above family_skills.
 -- Curated, fleet-wide procedures with targeting: a skill can be general
 -- (advertised to everyone), age-banded, capability-tagged, or both. The
 -- resolver (agent/skills/skill-library.ts) advertises a bank skill only to

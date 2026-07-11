@@ -33,15 +33,21 @@ function dateChip(value: string): string {
 export function MemoriesCard({
   memories,
   childNames,
+  loadError = false,
 }: {
   memories: MemoryCardRow[];
   childNames: Map<string, string>;
+  loadError?: boolean;
 }) {
   const rows = memories.slice(0, 6);
   return (
     <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
       <p className="text-[0.8rem] font-semibold text-muted">What Homa remembers</p>
-      {rows.length > 0 ? (
+      {loadError ? (
+        <p className="mt-2 text-sm text-muted">
+          Homa couldn&apos;t load saved memories right now. You can refresh this page in a minute.
+        </p>
+      ) : rows.length > 0 ? (
         <ul className="mt-1 flex flex-col">
           {rows.map((memory, index) => {
             const childName = memory.child_id ? childNames.get(memory.child_id) : null;

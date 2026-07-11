@@ -7,9 +7,8 @@ import { ageInMonths, ageLabel } from "@homa/core";
 import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { AddChildForm } from "../../features/family/add-child-form";
-import { CreateFamilyForm } from "../../features/family/create-family-form";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
@@ -20,7 +19,8 @@ import { colors, fontSize, space } from "../../theme/tokens";
  */
 export default function TodayScreen() {
   const router = useRouter();
-  const { family, children, loading, error, reload } = useFamilyData();
+  const { family, children, memberDisplayName, loading, error, reload } = useFamilyData();
+  const readyFamily = family?.profile_completed_at && children.length > 0 ? family : null;
 
   // Re-read on focus so changes made in the Family tab (or on the web)
   // show up without an app restart.
@@ -51,7 +51,7 @@ export default function TodayScreen() {
               "Your family's info is safe; it just didn't load this time. Switching tabs and back will retry."
             }
           </Text>
-        ) : !family ? (
+        ) : !readyFamily ? (
           <View style={{ gap: space.md }}>
             <Text
               style={{
@@ -61,7 +61,7 @@ export default function TodayScreen() {
                 color: colors.textStrong,
               }}
             >
-              {"Welcome. Let's set up your family."}
+              {"Welcome. Let's finish your setup."}
             </Text>
             <Text
               style={{
@@ -70,9 +70,14 @@ export default function TodayScreen() {
                 color: colors.textBody,
               }}
             >
-              One quick step, then you can tell Homa about your kids.
+              Start with the web onboarding so Homa has your family basics and your kids
+              before you use the app.
             </Text>
-            <CreateFamilyForm onCreated={() => void reload()} />
+            <Button
+              label="Open onboarding"
+              size="lg"
+              onPress={() => void openWebOnboarding()}
+            />
           </View>
         ) : (
           <View style={{ gap: space.md }}>
@@ -84,79 +89,63 @@ export default function TodayScreen() {
                 color: colors.textStrong,
               }}
             >
-              {family.parent_display_name
-                ? `Hi ${family.parent_display_name}.`
-                : family.name}
+              {memberDisplayName ?? readyFamily.parent_display_name
+                ? `Hi ${memberDisplayName ?? readyFamily.parent_display_name}.`
+                : readyFamily.name}
             </Text>
 
-            {children.length > 0 ? (
-              <View style={{ gap: space.md }}>
-                {children.map((child) => (
-                  <Card key={child.id} style={{ gap: 4 }}>
+            <View style={{ gap: space.md }}>
+              {children.map((child) => (
+                <Card key={child.id} style={{ gap: 4 }}>
+                  <Text
+                    style={{
+                      fontFamily: fontFamilies.displaySemibold,
+                      fontSize: fontSize.lg,
+                      color: colors.textStrong,
+                    }}
+                  >
+                    {child.name}
                     <Text
                       style={{
-                        fontFamily: fontFamilies.displaySemibold,
-                        fontSize: fontSize.lg,
-                        color: colors.textStrong,
+                        fontFamily: fontFamilies.body,
+                        fontSize: fontSize.sm,
+                        color: colors.textMuted,
                       }}
                     >
-                      {child.name}
-                      <Text
-                        style={{
-                          fontFamily: fontFamilies.body,
-                          fontSize: fontSize.sm,
-                          color: colors.textMuted,
-                        }}
-                      >
-                        {"  "}
-                        {ageLabel(ageInMonths(child.birth_month))}
-                      </Text>
+                      {"  "}
+                      {ageLabel(ageInMonths(child.birth_month))}
                     </Text>
-                    {child.profile.interests?.length ? (
-                      <Text
-                        style={{
-                          fontFamily: fontFamilies.body,
-                          fontSize: fontSize.sm,
-                          color: colors.textBody,
-                        }}
-                      >
-                        Into: {child.profile.interests.join(", ")}
-                      </Text>
-                    ) : null}
-                    {child.profile.focus ? (
-                      <Text
-                        style={{
-                          fontFamily: fontFamilies.body,
-                          fontSize: fontSize.sm,
-                          color: colors.textBody,
-                        }}
-                      >
-                        Working on: {child.profile.focus}
-                      </Text>
-                    ) : null}
-                  </Card>
-                ))}
-                <Button
-                  label="Talk to Homa"
-                  size="lg"
-                  onPress={() => router.push("/chat")}
-                />
-              </View>
-            ) : (
-              <View style={{ gap: space.md }}>
-                <Text
-                  style={{
-                    fontFamily: fontFamilies.body,
-                    fontSize: fontSize.base,
-                    color: colors.textBody,
-                  }}
-                >
-                  Tell Homa about a child to get your first personalized
-                  worksheet.
-                </Text>
-                <AddChildForm familyId={family.id} onAdded={() => void reload()} />
-              </View>
-            )}
+                  </Text>
+                  {child.profile.interests?.length ? (
+                    <Text
+                      style={{
+                        fontFamily: fontFamilies.body,
+                        fontSize: fontSize.sm,
+                        color: colors.textBody,
+                      }}
+                    >
+                      Into: {child.profile.interests.join(", ")}
+                    </Text>
+                  ) : null}
+                  {child.profile.focus ? (
+                    <Text
+                      style={{
+                        fontFamily: fontFamilies.body,
+                        fontSize: fontSize.sm,
+                        color: colors.textBody,
+                      }}
+                    >
+                      Working on: {child.profile.focus}
+                    </Text>
+                  ) : null}
+                </Card>
+              ))}
+              <Button
+                label="Talk to Homa"
+                size="lg"
+                onPress={() => router.push("/chat")}
+              />
+            </View>
           </View>
         )}
       </ScrollView>

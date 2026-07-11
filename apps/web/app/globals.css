@@ -569,6 +569,51 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   .signup-popup-overlay, .signup-popup-card { transition: opacity var(--dur-base) ease; transform: none; }
 }
 
+/* The wall's dialog (components/billing/wall-modal.tsx, DARK behind
+   HOMA_WALL_ENABLED; plans/2026-07-11-the-wall.md): the signup popup's
+   scrim-and-card recipe at offer-card width, same @starting-style
+   entrance, same reduced-motion fallback. */
+.wall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(51, 42, 33, 0.42);
+  backdrop-filter: blur(2px);
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+.wall-card {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 28px 28px 24px;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall-overlay, .wall-card { transition: opacity var(--dur-base) ease; transform: none; }
+}
+
 /* ============================================================================
    Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
    step change, opacity + transform only, brand ease-out, under 300ms per the

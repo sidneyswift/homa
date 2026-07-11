@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 
-import type { Curriculum, CurriculumStandard, CurriculumStandardsFile } from "./types.js";
-import { getTopic } from "./topics.js";
+import type { Curriculum, CurriculumStandard, CurriculumStandardsFile } from "./types";
+import { getTopic } from "./topics";
 
 /**
  * The standards registry: 7 curricula keyed `<slug>:<code>` (uk-nc-2013,

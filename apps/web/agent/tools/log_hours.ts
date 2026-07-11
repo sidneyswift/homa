@@ -5,6 +5,7 @@ import { z } from "zod";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { recordHoursPinned } from "../../lib/agent-pinned";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours-model";
+import { effectiveTimeZone, zonedDateString } from "../../lib/time-zone";
 
 /**
  * Capture-time school hours (M3-05 slice; lab evidence in build-log
@@ -80,7 +81,15 @@ export default defineTool({
 
     const { db, familyId } = access;
 
-    const happenedOn = input.happenedOn ?? new Date().toISOString().slice(0, 10);
+    let happenedOn = input.happenedOn ?? null;
+    if (!happenedOn) {
+      const { data: family } = await db
+        .from("families")
+        .select("time_zone")
+        .eq("id", familyId)
+        .maybeSingle();
+      happenedOn = zonedDateString(new Date(), effectiveTimeZone(family?.time_zone));
+    }
 
     // Double-log guard: the same block mentioned twice in one chat must
     // not become two compliance rows.

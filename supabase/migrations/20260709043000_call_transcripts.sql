@@ -1,4 +1,4 @@
--- Migration: call_transcripts (founder decision 2026-07-09, build-log):
+-- Migration #31: call_transcripts (founder decision 2026-07-09, build-log):
 -- persist EVERY Telnyx voice call's raw transcript into our own database,
 -- both the general companion line and the curriculum line. This reverses
 -- the earlier "general line keeps nothing" privacy-by-default posture, at

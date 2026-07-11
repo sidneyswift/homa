@@ -117,6 +117,10 @@ export function subjectLine(score: SubjectScore, childName: string): SubjectLine
         numberLabel: "",
         sentence: "Not enough answers yet to place this honestly. A few more would fill it in.",
       };
+    default: {
+      const exhaustive: never = score.position;
+      throw new Error(`Unhandled map position: ${exhaustive}`);
+    }
   }
 }
 
@@ -189,4 +193,3 @@ export function reportEmailSubject(childName: string): string {
 export function reportEmailPreview(): string {
   return "A first look at where they stand, strengths first.";
 }
-

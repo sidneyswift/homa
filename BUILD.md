@@ -125,8 +125,11 @@ never modify either).
   most safety-critical property. Tests (c)/(d) are deferred until the
   dispatcher/rotation code they test exists (M3-10/M1-02, M1-15). **Standing
   mitigations, required going forward:** (1) `apps/web/lib/harness/
-  resume-session.ts`, every resume MUST go through this; it watches the
-  event stream for real progress instead of trusting `ok: true`; (2)
+  resume-session.ts`, dormant until Homa owns an HTTP resume path. Current
+  chat sends through eve's hook and uses `turn-recovery.ts` for dead-stream
+  replay; future schedule dispatch, parked-HITL, or other app-owned HTTP
+  resume paths MUST use this guard because it watches the event stream for
+  real progress instead of trusting `ok: true`; (2)
   `scripts/eve-upgrade-check.mjs`, run before ANY eve version change, no
   exceptions; (3) `docs/homa-planning/runbooks/eve-version-bump.md`, the
   procedure tying both together. Reporting the test (a) bug upstream is a

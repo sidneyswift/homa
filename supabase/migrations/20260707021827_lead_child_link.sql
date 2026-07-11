@@ -1,4 +1,4 @@
--- Links a mirrored product child (public.children) back to the lead kid it
+-- Migration #20: links a mirrored product child (public.children) back to the lead kid it
 -- came from, so the family-workspace bridge (founder ruling 2026-07-06:
 -- "once they generate a report they create a family workspace") is
 -- idempotent: a rescore updates the same product child instead of creating

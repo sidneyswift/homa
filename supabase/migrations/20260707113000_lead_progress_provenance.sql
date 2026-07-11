@@ -1,4 +1,4 @@
--- Migration #22: living-record columns (2026-07-07).
+-- Migration #23: living-record columns (2026-07-07).
 --
 -- lead_plans.progress: the four-week plan's check-offs move server-side
 -- (shape: the client's own check ids, "week.activityIndex", to booleans).

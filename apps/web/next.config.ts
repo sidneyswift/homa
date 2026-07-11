@@ -3,8 +3,11 @@ import { withEve } from "eve/next";
 
 const nextConfig: NextConfig = {
   // Workspace packages ship raw TypeScript; Next compiles them in-place.
-  transpilePackages: ["@homa/core"],
-  // The worksheet studio's renderer (lib/print/render-page.ts): the
+  // @homa/taxonomy joined when the graph walk's routes became the first
+  // full-package import under Next (only the /domains subpath was used
+  // before, and only inside eve-compiled tool bundles).
+  transpilePackages: ["@homa/core", "@homa/taxonomy"],
+  // The materials studio's renderer (lib/materials/render-page.ts): the
   // Chromium binary and puppeteer must stay real node_modules, never
   // bundled, so the .br binaries survive to the deployed function.
   serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],

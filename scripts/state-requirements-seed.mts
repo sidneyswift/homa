@@ -17,7 +17,7 @@
  * connection (Supabase transaction pooler, server-only DB password) is
  * the only write path, same credential path as scripts/map-norms-report.mts.
  *
- * Usage: pnpm seed:state-requirements
+ * Usage: pnpm seed:state-requirements -- --confirm-prod
  * Env: apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_DB_PASSWORD).
  * Exit codes: 0 = seeded and verified, 1 = validation or count failure, 2 = missing env.
  */
@@ -35,6 +35,7 @@ import {
   type IndexStateEntry,
   type StateDetail,
 } from "./state-requirements-shared.mts";
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const dataDir = path.join(repoRoot, "data", "state-requirements");
@@ -52,6 +53,11 @@ if (!supabaseUrl || !password) {
   process.exit(2);
 }
 const ref = new URL(supabaseUrl).hostname.split(".")[0];
+
+assertConfirmedProdWrite({
+  scriptName: "state-requirements-seed",
+  supabaseUrl,
+});
 
 const sql = postgres({
   host: "aws-0-us-east-1.pooler.supabase.com",

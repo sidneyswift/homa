@@ -42,7 +42,7 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [familyPhones, memories, members, pendingInvites] = await Promise.all([
+  const [familyPhones, memoriesResult, members, pendingInvites] = await Promise.all([
     getFamilyPhones(family.id),
     getMyMemories(family.id),
     getMyFamilyMembers(family.id),
@@ -96,8 +96,12 @@ export default async function SettingsPage() {
         <TimeZoneCard currentTimeZone={family.time_zone} />
         {/* Visible only once something is saved: an empty memory list
             on day one reads as a gap, not a promise. */}
-        {memories.length > 0 ? (
-          <MemoriesCard memories={memories} childNames={childNames} />
+        {memoriesResult.loadError || memoriesResult.memories.length > 0 ? (
+          <MemoriesCard
+            memories={memoriesResult.memories}
+            childNames={childNames}
+            loadError={memoriesResult.loadError}
+          />
         ) : null}
       </div>
     </PageColumn>

@@ -1,9 +1,14 @@
 import { mapPlanConsentSchema } from "@homa/core";
 
+import { familyWallCheckout } from "../../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
 import { requireFamily } from "../../../../../lib/map/session";
-import { getOrBuildPlan, getReportTokenForChild } from "../../../../../lib/map/store";
+import {
+  getOrBuildPlan,
+  getReportTokenForChild,
+  planExists,
+} from "../../../../../lib/map/store";
 
 /**
  * POST /api/map/plan/consent
@@ -40,6 +45,14 @@ export async function POST(request: Request): Promise<Response> {
     const token = await getReportTokenForChild(family.id, childId);
     if (!token) {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
+    }
+
+    // The wall (plans/2026-07-11-the-wall.md): building a NEW month is a
+    // door; a month that already exists stays reachable. MonthButton
+    // shows the offer on this 403.
+    const checkout = await familyWallCheckout(family.id);
+    if (checkout && !(await planExists(childId, subjectId))) {
+      return Response.json({ ok: false, reason: "walled" }, { status: 403 });
     }
 
     const built = await getOrBuildPlan(token, subjectId);

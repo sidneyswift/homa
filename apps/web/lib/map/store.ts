@@ -7,6 +7,8 @@ import {
   isInScoredRange,
   MAP_BANK_VERSION,
   planQuestions,
+  SCORED_MAX_MONTHS,
+  SCORED_MIN_MONTHS,
   scoreMap,
   type FourWeekPlan,
   type MapAnswer,
@@ -16,8 +18,17 @@ import {
   type ReportNarrative,
 } from "@homa/core";
 
-import { isProfileNonAnswer } from "../profile-quality";
+import { mergeFamilyContextBags } from "../family-context-merge";
 import { mapDb, type DbJson } from "./db";
+import {
+  cleanProfileFocus,
+  cleanProfileInterests,
+  firstFamilyStyle,
+  profileFocusList,
+  profileHelpList,
+  profileInterestList,
+  uniqueStrings,
+} from "./profile-context";
 import { hashToken, newToken } from "./tokens";
 
 /**
@@ -106,6 +117,18 @@ export async function startAnonymousFamily(
  * child-keyed), so a fold never touches those tables. */
 async function foldFamilyInto(fromId: string, intoId: string): Promise<void> {
   const sql = mapDb();
+  const contextRows = await sql<{ id: string; context: Record<string, unknown> | null }[]>`
+    select id, context from public.families where id in (${fromId}, ${intoId})
+  `;
+  const fromContext = contextRows.find((row) => row.id === fromId)?.context;
+  const intoContext = contextRows.find((row) => row.id === intoId)?.context;
+  const mergedContext = mergeFamilyContextBags(intoContext, fromContext);
+  await sql`
+    update public.families
+    set context = ${sql.json(mergedContext as unknown as DbJson)},
+        updated_at = now()
+    where id = ${intoId}
+  `;
   await sql`update public.children set family_id = ${intoId} where family_id = ${fromId}`;
   await sql`delete from public.families where id = ${fromId}`;
 }
@@ -301,10 +324,11 @@ export async function addChild(
   const months = ageInMonths(input.birthDate);
   const inRange = isInScoredRange(months);
   const profile: Record<string, unknown> = {
-    interests: input.interests.filter((interest) => !isProfileNonAnswer(interest)),
+    interests: cleanProfileInterests(input.interests),
   };
-  if (input.helpWith && !isProfileNonAnswer(input.helpWith)) {
-    profile.focus = input.helpWith;
+  const focus = cleanProfileFocus(input.helpWith);
+  if (focus) {
+    profile.focus = focus;
   }
   const rows = await sql<{ id: string }[]>`
     insert into public.children (family_id, name, birth_month, profile, pending_band)
@@ -556,6 +580,20 @@ export async function getReportTokenForChild(
   return rows[0]?.token ?? null;
 }
 
+/** True when this child already has a stored plan for the subject. The
+ * wall's existing-content exemption reads this: viewing or refreshing a
+ * plan that exists stays open, only building a NEW one is gated
+ * (plans/2026-07-11-the-wall.md). */
+export async function planExists(childId: string, subjectId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ one: number }[]>`
+    select 1 as one from public.child_plans
+    where child_id = ${childId} and subject_id = ${subjectId}
+    limit 1
+  `;
+  return rows.length > 0;
+}
+
 /** Full state snapshot for resume: children, answers, report tokens. */
 export async function getFamilyState(family: FamilyRow): Promise<FamilyState> {
   const sql = mapDb();
@@ -601,10 +639,8 @@ export async function getFamilyState(family: FamilyRow): Promise<FamilyState> {
         id: child.id,
         name: child.name,
         birth_month: child.birth_month,
-        interests: Array.isArray(profile.interests)
-          ? profile.interests.filter((item): item is string => typeof item === "string")
-          : [],
-        help_with: typeof profile.focus === "string" ? profile.focus : null,
+        interests: profileInterestList(profile.interests),
+        help_with: profileFocusList(profile)[0] ?? null,
         pending_band: child.pending_band,
         age_months: months,
         in_range: isInScoredRange(months),
@@ -722,18 +758,28 @@ export async function createReport(familyId: string, childId: string): Promise<S
   };
 }
 
-export async function markReportEmailed(childId: string): Promise<void> {
+export async function markReportEmailed(familyId: string, childId: string): Promise<void> {
   const sql = mapDb();
-  await sql`update public.child_reports set emailed_at = now() where child_id = ${childId}`;
+  await sql`
+    update public.child_reports
+    set emailed_at = now()
+    where child_id = ${childId}
+      and exists (
+        select 1 from public.children c
+        where c.id = ${childId} and c.family_id = ${familyId}
+      )
+  `;
 }
 
 /** True when this child's report has already gone out by email (rescores
  * after a deep dive must not re-send it). */
-export async function reportAlreadyEmailed(childId: string): Promise<boolean> {
+export async function reportAlreadyEmailed(familyId: string, childId: string): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ emailed: boolean }[]>`
     select emailed_at is not null as emailed
-    from public.child_reports where child_id = ${childId}
+    from public.child_reports r
+    join public.children c on c.id = r.child_id
+    where r.child_id = ${childId} and c.family_id = ${familyId}
   `;
   return rows[0]?.emailed ?? false;
 }
@@ -820,23 +866,12 @@ export async function getOrBuildPlan(
   const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
     select question_id, answer from public.child_answers where child_id = ${row.child_id}
   `;
-  const profileInterests = Array.isArray(row.child_profile?.interests)
-    ? (row.child_profile.interests as string[])
-    : [];
-  const bagInterests = Array.isArray(row.child_context?.interests)
-    ? (row.child_context.interests as string[])
-    : [];
-  // Styles went multi-select on 2026-07-06 (`styles` array, first pick is
-  // the primary); bags saved before that hold a single `style` string.
-  const familyStyles = Array.isArray(row.family_context?.styles)
-    ? row.family_context.styles.filter((item): item is string => typeof item === "string")
-    : [];
-  const familyStyle =
-    familyStyles[0] ??
-    (typeof row.family_context?.style === "string" ? row.family_context.style : undefined);
+  const profileInterests = profileInterestList(row.child_profile?.interests);
+  const bagInterests = profileInterestList(row.child_context?.interests);
+  const familyStyle = firstFamilyStyle(row.family_context);
 
   const planContext = {
-    interests: [...new Set([...profileInterests, ...bagInterests])],
+    interests: uniqueStrings(profileInterests, bagInterests),
     style: familyStyle,
   };
   const planAnswers = answerRows.map((entry) => ({
@@ -1031,9 +1066,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     generatedAt: row.generated_at,
     childName: row.child_name,
     birthMonth: row.birth_month,
-    interests: Array.isArray(profile.interests)
-      ? profile.interests.filter((item): item is string => typeof item === "string")
-      : [],
+    interests: profileInterestList(profile.interests),
     parentFirstName: row.first_name,
     usState: row.us_state,
     familyId: row.family_id,
@@ -1094,16 +1127,11 @@ export async function saveChildContext(
 
   const profilePatch: Record<string, unknown> = {};
   if (Array.isArray(interests)) {
-    const real = interests.filter(
-      (interest): interest is string =>
-        typeof interest === "string" && !isProfileNonAnswer(interest),
-    );
+    const real = cleanProfileInterests(interests);
     if (real.length > 0) profilePatch.interests = real;
   }
   if (Array.isArray(helpWith)) {
-    const real = helpWith.filter(
-      (entry): entry is string => typeof entry === "string" && !isProfileNonAnswer(entry),
-    );
+    const real = profileHelpList(helpWith);
     if (real.length > 0) profilePatch.focus = real.join(", ");
   }
 
@@ -1287,22 +1315,33 @@ export async function childrenNowInBand(): Promise<
   const rows = await sql<
     { child_id: string; child_name: string; family_id: string; email: string; birth_month: string }[]
   >`
+    with bounds as (
+      select
+        ((now() at time zone 'utc')::date - (${SCORED_MIN_MONTHS} * interval '1 month'))::date
+          as youngest_scored_birth_date,
+        ((now() at time zone 'utc')::date - (${SCORED_MAX_MONTHS} * interval '1 month'))::date
+          as oldest_scored_birth_date
+    )
     select c.id as child_id, c.name as child_name, f.id as family_id, f.email,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month
     from public.children c
     join public.families f on f.id = c.family_id
+    cross join bounds b
     where c.pending_band and c.band_ready_emailed_at is null and f.status <> 'deleted'
       and f.email is not null
+      and c.birth_month <= b.youngest_scored_birth_date
+      and c.birth_month > b.oldest_scored_birth_date
+    order by c.created_at asc, c.id asc
     limit 200
   `;
-  return rows.filter((row) => isInScoredRange(ageInMonths(row.birth_month)));
+  return rows;
 }
 
-export async function markBandReady(childId: string): Promise<void> {
+export async function markBandReady(familyId: string, childId: string): Promise<void> {
   const sql = mapDb();
   await sql`
     update public.children
     set pending_band = false, band_ready_emailed_at = now(), updated_at = now()
-    where id = ${childId}
+    where id = ${childId} and family_id = ${familyId}
   `;
 }

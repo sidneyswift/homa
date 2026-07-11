@@ -7,6 +7,7 @@ import {
   readVoiceChildId,
   readVoiceFamilyId,
 } from "../../../../../lib/voice/tool-context";
+import { hasVoiceWebhookSecret } from "../../../../../lib/voice/webhook-auth";
 
 /**
  * POST /api/voice/tools/send-email: a live webhook tool BOTH voice
@@ -35,8 +36,7 @@ interface ToolCallBody {
 
 export async function POST(request: Request): Promise<Response> {
   const url = new URL(request.url);
-  const secret = process.env.TELNYX_WEBHOOK_SECRET;
-  if (!secret || url.searchParams.get("key") !== secret) {
+  if (!hasVoiceWebhookSecret(request, url)) {
     return Response.json({ success: false, error: "unauthorized" }, { status: 401 });
   }
 

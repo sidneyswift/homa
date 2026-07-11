@@ -68,7 +68,7 @@ export interface DashboardPlan {
 
 /** The plan's first day: the retest clock is armed 28 days out when the
  * plan is built, so the start is always retestAt minus four weeks. */
-export function planStartMs(plan: DashboardPlan): number {
+function planStartMs(plan: DashboardPlan): number {
   return new Date(plan.retestAt).getTime() - 28 * 24 * 60 * 60 * 1000;
 }
 

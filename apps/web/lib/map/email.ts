@@ -1,5 +1,6 @@
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
+import { escapeHtml } from "../html-escape";
 import { mapDb } from "./db";
 
 /**
@@ -96,14 +97,6 @@ async function send(args: SendArgs): Promise<boolean> {
 
 function stripTags(value: string): string {
   return value.replace(/<[^>]+>/g, "");
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 /**

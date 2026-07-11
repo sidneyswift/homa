@@ -1,4 +1,4 @@
--- The "Call Homa" curriculum feature (founder decision 2026-07-07,
+-- Migration #27: the "Call Homa" curriculum feature (founder decision 2026-07-07,
 -- build-log): a button on the report triggers an outbound voice call
 -- where Homa reviews the report and digs deeper, then an LLM-authored
 -- curriculum (not the deterministic four-week plan; richer, whatever

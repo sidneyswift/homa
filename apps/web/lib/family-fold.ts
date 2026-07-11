@@ -1,6 +1,8 @@
 import type postgres from "postgres";
 
+import { mergeFamilyContextBags } from "./family-context-merge";
 import { mapDb } from "./map/db";
+import type { DbJson } from "./map/db";
 
 /**
  * The conservative stub-fold shared by every phone reconciliation path
@@ -41,10 +43,6 @@ async function isTrueStubWithSql(sql: SqlClient, familyId: string): Promise<bool
   return Boolean(row) && row.email === null && row.members === 0;
 }
 
-export async function isTrueStub(familyId: string): Promise<boolean> {
-  return isTrueStubWithSql(mapDb(), familyId);
-}
-
 export async function foldStubFamilyIntoTx(
   tx: SqlClient,
   stubId: string,
@@ -52,6 +50,18 @@ export async function foldStubFamilyIntoTx(
 ): Promise<boolean> {
   if (stubId === intoId) return false;
   if (!(await isTrueStubWithSql(tx, stubId))) return false;
+  const contextRows = await tx<{ id: string; context: Record<string, unknown> | null }[]>`
+    select id, context from public.families where id in (${stubId}, ${intoId})
+  `;
+  const stubContext = contextRows.find((row) => row.id === stubId)?.context;
+  const intoContext = contextRows.find((row) => row.id === intoId)?.context;
+  const mergedContext = mergeFamilyContextBags(intoContext, stubContext);
+  await tx`
+    update public.families
+    set context = ${tx.json(mergedContext as unknown as DbJson)},
+        updated_at = now()
+    where id = ${intoId}
+  `;
   for (const table of SIMPLE_FAMILY_TABLES) {
     await tx`
       update ${tx(table)} set family_id = ${intoId}

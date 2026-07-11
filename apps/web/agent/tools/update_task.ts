@@ -2,7 +2,7 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { setTaskPaused, updateCustomTask } from "../../lib/tasks/custom";
+import { setTaskPaused, updateCustomTask, type CustomTaskInput } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
 export default defineTool({
@@ -33,11 +33,22 @@ export default defineTool({
     }
 
     const { taskId, paused, ...patch } = input;
+    const cleanPatch = Object.fromEntries(
+      Object.entries(patch).filter(([, value]) => value !== undefined),
+    ) as Partial<CustomTaskInput>;
+    const hasPatch = Object.keys(cleanPatch).length > 0;
+
+    if (paused === undefined && !hasPatch) {
+      return {
+        updated: false,
+        note: "No task changes were supplied. Ask what the parent wants changed.",
+      };
+    }
 
     if (paused !== undefined) {
       const result = await setTaskPaused(familyId, taskId, paused);
       if (!result.ok) return { updated: false, note: result.note };
-      if (Object.keys(patch).length === 0) {
+      if (!hasPatch) {
         return {
           updated: true,
           note: `Task ${paused ? "paused" : "resumed"}. Tell the parent in one short aside.`,
@@ -45,8 +56,8 @@ export default defineTool({
       }
     }
 
-    if (Object.keys(patch).length > 0) {
-      const result = await updateCustomTask(familyId, taskId, patch);
+    if (hasPatch) {
+      const result = await updateCustomTask(familyId, taskId, cleanPatch);
       if (!result.ok) return { updated: false, note: result.note };
     }
     return { updated: true, note: "Task updated. Tell the parent in one short aside." };

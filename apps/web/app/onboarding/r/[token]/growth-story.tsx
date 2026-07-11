@@ -1,4 +1,4 @@
-import { getMapSubject, type MapScores, type ReportNarrative } from "@homa/core";
+import { getMapSubject, type MapScores, type ReportNarrative, type SubjectScore } from "@homa/core";
 
 /**
  * The report's archive shape and its movement math (the report's own
@@ -14,7 +14,7 @@ export interface GrowthEra {
   narrative?: ReportNarrative | null;
 }
 
-const POSITION_RANK: Record<string, number> = {
+const POSITION_RANK: Record<SubjectScore["position"], number> = {
   not_mapped: 0,
   growing: 1,
   on_track: 2,
@@ -34,10 +34,9 @@ export function movementBetween(prev: MapScores, next: MapScores): string[] {
       current.monthsAhead > previous.monthsAhead
     ) {
       lines.push(`${name} +${current.monthsAhead - previous.monthsAhead} mo`);
-    } else if ((POSITION_RANK[current.position] ?? 0) > (POSITION_RANK[previous.position] ?? 0)) {
+    } else if (POSITION_RANK[current.position] > POSITION_RANK[previous.position]) {
       lines.push(`${name} moved up`);
     }
   }
   return lines;
 }
-

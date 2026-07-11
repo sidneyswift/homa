@@ -1,9 +1,11 @@
+import { MAP_INTERESTS_CAP } from "@homa/core";
+
 import { ageInMonths } from "./child-age";
 import { embedText } from "./learning/embeddings";
 import { isHoursSubject } from "./hours-model";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
-import { scanMemoryContent } from "./agent-memory";
+import { effectiveTimeZone, zonedDateString } from "./time-zone";
 
 /**
  * Family-pinned tool operations for sessions with no caller JWT (the SMS
@@ -69,7 +71,9 @@ export async function updateChildProfilePinned(input: {
   }
   const nextProfile = {
     ...(child.profile ?? {}),
-    ...(input.interests !== undefined ? { interests: input.interests } : {}),
+    ...(input.interests !== undefined
+      ? { interests: input.interests.slice(0, MAP_INTERESTS_CAP) }
+      : {}),
     ...(input.focus !== undefined ? { focus: input.focus } : {}),
   };
   await sql`
@@ -176,7 +180,13 @@ export async function recordHoursPinned(input: {
     }
   }
 
-  const happenedOn = input.happenedOn ?? new Date().toISOString().slice(0, 10);
+  let happenedOn = input.happenedOn ?? null;
+  if (!happenedOn) {
+    const rows = await sql<{ time_zone: string | null }[]>`
+      select time_zone from public.families where id = ${input.familyId}
+    `;
+    happenedOn = zonedDateString(new Date(), effectiveTimeZone(rows[0]?.time_zone));
+  }
   const dupe = await sql<{ id: string }[]>`
     select id from public.hours_log
     where family_id = ${input.familyId}
@@ -235,13 +245,13 @@ export interface PinnedRecallHit {
   snippet: string;
 }
 
-function dayLabel(iso: string | null): string {
+function dayLabel(iso: string | null, timeZone: string): string {
   if (!iso) return "unknown date";
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-    timeZone: "America/New_York",
+    timeZone,
   });
 }
 
@@ -261,6 +271,10 @@ export async function recallPinned(input: {
   limit: number;
 }): Promise<PinnedRecallHit[]> {
   const sql = mapDb();
+  const familyRows = await sql<{ time_zone: string | null }[]>`
+    select time_zone from public.families where id = ${input.familyId}
+  `;
+  const timeZone = effectiveTimeZone(familyRows[0]?.time_zone);
   const hits: PinnedRecallHit[] = [];
 
   if (input.scope === "calls" || input.scope === "all") {
@@ -275,7 +289,7 @@ export async function recallPinned(input: {
     `;
     for (const row of rows) {
       hits.push({
-        when: dayLabel(row.started_at),
+        when: dayLabel(row.started_at, timeZone),
         where: row.line === "curriculum" ? "phone call (report review)" : "phone call",
         snippet: row.transcript_text.slice(0, 480),
       });
@@ -293,7 +307,7 @@ export async function recallPinned(input: {
     `;
     for (const row of rows) {
       hits.push({
-        when: dayLabel(row.created_at),
+        when: dayLabel(row.created_at, timeZone),
         where: `${row.channel === "sms" ? "text message" : "chat"} (${row.role === "user" ? "the parent" : "Homa"})`,
         snippet: row.content.slice(0, 480),
       });
@@ -314,7 +328,7 @@ export async function recallPinned(input: {
     for (const row of rows) {
       const base = row.kind === "what_works" ? "saved memory (what works)" : "saved memory";
       hits.push({
-        when: dayLabel(row.created_at),
+        when: dayLabel(row.created_at, timeZone),
         where: row.superseded_at ? `${base}, older note that was later corrected` : base,
         snippet: row.content,
       });
@@ -362,13 +376,10 @@ export async function recallPinned(input: {
         const snippet = row.content.slice(0, 480);
         if (seen.has(snippet.slice(0, 80))) continue;
         seen.add(snippet.slice(0, 80));
-        hits.push({ when: dayLabel(row.happened_at), where: row.label, snippet });
+        hits.push({ when: dayLabel(row.happened_at, timeZone), where: row.label, snippet });
       }
     }
   }
 
   return hits.slice(0, input.limit);
 }
-
-/** Re-export so tool branches share one scan (writes stay guarded). */
-export { scanMemoryContent };

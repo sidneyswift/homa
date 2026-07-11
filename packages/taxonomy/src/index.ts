@@ -5,6 +5,12 @@
  * Server-side only by intent: the assembled graph is a few MB of data and
  * must never enter a client bundle (the map bank in @homa/core stays the
  * client-safe scored spine).
+ *
+ * The root export is intentionally broader than today's product imports.
+ * `@homa/taxonomy/domains` is the narrow runtime path used by app code;
+ * this root API is the staged server-side graph surface for taxonomy
+ * checks, research tasks, curriculum crosswalks, and future readiness
+ * planning. Do not import this root module from client components.
  */
 
 export type {
@@ -17,13 +23,13 @@ export type {
   Curriculum,
   CurriculumStandard,
   CurriculumStandardData,
-} from "./types.js";
+} from "./types";
 
 export {
   TAXONOMY_DOMAINS,
   getTaxonomyDomain,
   domainsForSubject,
-} from "./domains.js";
+} from "./domains";
 
 export {
   getTopic,
@@ -33,7 +39,7 @@ export {
   topicsByTeachingAge,
   assessmentTopics,
   personalizePrompt,
-} from "./topics.js";
+} from "./topics";
 
 export {
   allPrerequisiteEdges,
@@ -46,17 +52,35 @@ export {
   teachingOrder,
   hubTopics,
   type ReadyTopic,
-} from "./graph.js";
+} from "./graph";
 
-export { allClusters, clustersForDomain, clusterSummary } from "./clusters.js";
+export { allClusters, clustersForDomain, clusterSummary } from "./clusters";
 
-export { curricula, getStandard, standardsForTopic } from "./standards.js";
+export {
+  WALK_BUDGET,
+  hardPrerequisiteClosure,
+  hardUnlockClosure,
+  nextWalkCard,
+  walkKnowledge,
+  walkOutcome,
+  walkSummary,
+  type WalkAnswer,
+  type WalkAnswers,
+  type WalkCard,
+  type WalkDomainSummary,
+  type WalkKnowledge,
+  type WalkOutcome,
+} from "./walk";
+
+export { WALK_CARDS, askableTopicIds, walkCardStatement } from "./cards";
+
+export { curricula, getStandard, standardsForTopic } from "./standards";
 
 export {
   MARBLE_DOMAIN_MAP,
   marbleDomainKey,
   topicKindFromMarble,
   type MarbleDomainTarget,
-} from "./mapping.js";
+} from "./mapping";
 
-export { assembleTaxonomy, type AssembledTaxonomy } from "./assemble.js";
+export { assembleTaxonomy, type AssembledTaxonomy } from "./assemble";

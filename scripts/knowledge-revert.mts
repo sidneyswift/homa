@@ -7,7 +7,7 @@
  * loses its last good entry.
  *
  * Usage:
- *   pnpm tsx scripts/knowledge-revert.mts --run <homa_task_runs uuid> [--reason "why"]
+ *   pnpm tsx scripts/knowledge-revert.mts --run <homa_task_runs uuid> [--reason "why"] --confirm-prod
  *
  * Env: apps/web/.env.local (SUPABASE_DB_PASSWORD).
  */
@@ -15,6 +15,8 @@
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
@@ -34,9 +36,14 @@ function argValue(flag: string): string | null {
 const runId = argValue("--run");
 const reason = argValue("--reason") ?? "reverted by scripts/knowledge-revert.mts";
 if (!runId || !/^[0-9a-f-]{36}$/i.test(runId)) {
-  console.error("Usage: pnpm tsx scripts/knowledge-revert.mts --run <uuid> [--reason \"why\"]");
+  console.error("Usage: pnpm tsx scripts/knowledge-revert.mts --run <uuid> [--reason \"why\"] --confirm-prod");
   process.exit(2);
 }
+
+assertConfirmedProdWrite({
+  scriptName: "knowledge-revert",
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+});
 
 const sql = mapDb();
 

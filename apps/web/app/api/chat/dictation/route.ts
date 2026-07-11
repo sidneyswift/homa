@@ -1,3 +1,4 @@
+import { rateLimited } from "../../../../lib/map/ratelimit";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 import { transcribeAudio } from "../../../../lib/voice/transcribe";
 
@@ -24,12 +25,17 @@ import { transcribeAudio } from "../../../../lib/voice/transcribe";
  *  with a clear response instead of a platform error. At Opus voice
  *  bitrates this is roughly 15 minutes, far past a dictated prompt. */
 const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
+const HOUR_MS = 60 * 60 * 1000;
+const MAX_DICTATIONS_PER_USER_PER_HOUR = 30;
 
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
     return Response.json({ transcript: null }, { status: 401 });
+  }
+  if (rateLimited(`chat-dictation:${userData.user.id}`, MAX_DICTATIONS_PER_USER_PER_HOUR, HOUR_MS)) {
+    return Response.json({ transcript: null }, { status: 429 });
   }
 
   let form: FormData;

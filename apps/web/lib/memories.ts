@@ -1,13 +1,18 @@
 import type { MemoryCardRow } from "../components/dashboard/memories-card";
 import { createSupabaseServerClient } from "./supabase/server";
 
+export interface MemoriesResult {
+  memories: MemoryCardRow[];
+  loadError: boolean;
+}
+
 /**
  * The signed-in parent's saved memories, newest first, read under their
  * OWN RLS context (the members-read policy is the wall; the familyId
  * filter is belt on top). Feeds the /app "What Homa remembers" card,
  * the visible face of every memory the agent and the learning loops save.
  */
-export async function getMyMemories(familyId: string): Promise<MemoryCardRow[]> {
+export async function getMyMemories(familyId: string): Promise<MemoriesResult> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("family_memories")
@@ -19,7 +24,7 @@ export async function getMyMemories(familyId: string): Promise<MemoryCardRow[]> 
     .limit(30);
   if (error) {
     console.error(`family_memories read failed: ${error.message}`);
-    return [];
+    return { memories: [], loadError: true };
   }
-  return (data ?? []) as MemoryCardRow[];
+  return { memories: (data ?? []) as MemoryCardRow[], loadError: false };
 }

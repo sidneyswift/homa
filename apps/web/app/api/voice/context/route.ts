@@ -6,6 +6,7 @@ import {
   renderFamilyContext,
 } from "../../../../lib/family-context";
 import { recordLeadContact } from "../../../../lib/phone-leads";
+import { hasVoiceWebhookSecret } from "../../../../lib/voice/webhook-auth";
 
 /**
  * POST /api/voice/context: the Telnyx voice assistant's dynamic-variables
@@ -48,9 +49,8 @@ const EMPTY_RESPONSE = {
 };
 
 export async function POST(request: Request): Promise<Response> {
-  const secret = process.env.TELNYX_WEBHOOK_SECRET;
-  const key = new URL(request.url).searchParams.get("key");
-  if (!secret || key !== secret) {
+  const url = new URL(request.url);
+  if (!hasVoiceWebhookSecret(request, url)) {
     return Response.json(EMPTY_RESPONSE, { status: 401 });
   }
 

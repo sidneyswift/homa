@@ -1,5 +1,7 @@
 import { emitEvent, waitlistSubmissionSchema } from "@homa/core";
 
+import { clientIp, rateLimited } from "../../../lib/map/ratelimit";
+
 /**
  * POST /api/waitlist
  * Validates a submission and writes it to public.waitlist over the Supabase
@@ -26,6 +28,10 @@ interface WaitlistRequestBody {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  if (rateLimited(`waitlist:${clientIp(request)}`, 10)) {
+    return Response.json({ ok: false }, { status: 429 });
+  }
+
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error("waitlist: missing Supabase env vars");
     return Response.json({ ok: false }, { status: 500 });

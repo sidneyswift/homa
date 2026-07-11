@@ -1,15 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-function safeSameOriginPath(value: string | null): string | null {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
-    return null;
-  }
-  if (value === "/signin" || value.startsWith("/signin/") || value.startsWith("/signin?")) {
-    return null;
-  }
-  return value;
-}
+import { safeSameOriginPath } from "./lib/safe-redirect";
 
 /**
  * Session-refresh proxy (Next 16's renamed middleware convention). Two jobs:

@@ -1,5 +1,5 @@
-import type { TaxonomyDomain } from "./types.js";
-import { MARBLE_DOMAIN_MAP } from "./mapping.js";
+import type { TaxonomyDomain } from "./types";
+import { MARBLE_DOMAIN_MAP } from "./mapping";
 
 /**
  * The level-2 domain registry: every skill line in the product, both

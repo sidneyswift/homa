@@ -1,8 +1,7 @@
-import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { setMapResumeCookie } from "../../../../lib/map/resume-cookie";
 import { getFamilyByResumeToken } from "../../../../lib/map/store";
-import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
  * GET /api/map/resume-link?t=TOKEN
@@ -18,14 +17,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   if (token) {
     const family = await getFamilyByResumeToken(token);
     if (family) {
-      const cookieStore = await cookies();
-      cookieStore.set(MAP_RESUME_COOKIE, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 90,
-      });
+      await setMapResumeCookie(token);
       destination.searchParams.set("resumed", "1");
       // Retest emails carry a deep-dive target ("childId.subjectId"); pass it
       // through so the flow opens straight on the subject's re-check.

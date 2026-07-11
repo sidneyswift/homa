@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { safeSameOriginPath } from "../../../lib/safe-redirect";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
@@ -14,8 +15,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  let next = searchParams.get("next") ?? "/app";
-  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\")) next = "/app";
+  const next = safeSameOriginPath(searchParams.get("next")) ?? "/app";
 
   if (code) {
     const supabase = await createSupabaseServerClient();

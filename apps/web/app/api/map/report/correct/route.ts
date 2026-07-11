@@ -74,7 +74,7 @@ export async function POST(request: Request): Promise<Response> {
     after(async () => {
       if (!narrativeEnabled()) return;
       try {
-        await runReportNarrative(childId);
+        await runReportNarrative(childId, family.id);
       } catch (error) {
         console.error(
           "map/report/correct narrative failed:",

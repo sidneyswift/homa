@@ -1,12 +1,7 @@
 import {
-  bankSkillMatchesChildren,
-  childTargetingInfo,
-  FAMILY_SKILLS_MAX_COUNT,
-  mergeSkillRows,
-  type BankSkillRow,
-} from "./agent-skills";
-import { ageInMonths } from "./child-age";
-import type { ChildRecord } from "./family";
+  loadSkillLibraryCaller,
+  resolveAdvertisedSkillRows,
+} from "./agent-skills-store";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -33,34 +28,15 @@ const BUILT_IN_SKILLS: SlashSkillItem[] = [
   },
 ];
 
-export async function getSlashMenuSkills(
-  children: ChildRecord[],
-): Promise<SlashSkillItem[]> {
+export async function getSlashMenuSkills(familyId: string | null): Promise<SlashSkillItem[]> {
+  if (!familyId) return BUILT_IN_SKILLS;
+
   const supabase = await createSupabaseServerClient();
   try {
-    const [familyResult, bankResult] = await Promise.all([
-      supabase
-        .from("family_skills")
-        .select("name, description, markdown")
-        .order("created_at", { ascending: true })
-        .limit(FAMILY_SKILLS_MAX_COUNT),
-      supabase
-        .from("skill_bank")
-        .select("name, description, markdown, min_age_months, max_age_months, tags")
-        .eq("published", true)
-        .limit(100),
-    ]);
-    if (familyResult.error || bankResult.error) return [];
+    const rows = await loadSkillLibraryCaller(supabase, familyId);
+    if (!rows) return BUILT_IN_SKILLS;
 
-    const now = new Date();
-    const targeting = children.map((child) =>
-      childTargetingInfo(ageInMonths(child.birth_month, now), child.profile),
-    );
-    const bankRows = ((bankResult.data ?? []) as BankSkillRow[]).filter((row) =>
-      bankSkillMatchesChildren(row, targeting),
-    );
-
-    const merged = mergeSkillRows(familyResult.data ?? [], bankRows).map((row) => ({
+    const merged = resolveAdvertisedSkillRows(rows).map((row) => ({
       name: row.name,
       description: row.description,
     }));

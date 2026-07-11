@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-
 import { emitMapEvent } from "../../../../lib/map/events";
+import { setMapResumeCookie } from "../../../../lib/map/resume-cookie";
 import { requireFamily } from "../../../../lib/map/session";
 import { attachAuthUser, getFamilyByResumeToken, getFamilyState, hasFamilyContext } from "../../../../lib/map/store";
-import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
 /**
@@ -50,14 +48,7 @@ export async function GET(): Promise<Response> {
           lastName,
         });
 
-        const cookieStore = await cookies();
-        cookieStore.set(MAP_RESUME_COOKIE, resumeToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 60 * 60 * 24 * 90,
-        });
+        await setMapResumeCookie(resumeToken);
 
         const relinked = await getFamilyByResumeToken(resumeToken);
         if (relinked) family = relinked;

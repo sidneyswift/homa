@@ -88,7 +88,7 @@ export const HOMESCHOOL_STYLES = [
 
 export const mapChildExtrasSchema = z.object({
   childId: z.uuid(),
-  interests: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
+  interests: z.array(z.string().trim().min(1).max(40)).max(MAP_INTERESTS_CAP).optional(),
   helpWith: z.array(z.string().trim().min(1).max(60)).max(6).optional(),
   /** Per-subject "what we're doing that works" (the ahead follow-up). */
   whatsWorking: z.record(z.string().max(40), z.string().trim().min(1).max(500)).optional(),

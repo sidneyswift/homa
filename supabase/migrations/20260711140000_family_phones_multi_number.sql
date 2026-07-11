@@ -1,4 +1,4 @@
--- Migration #50: multi-parent v0, breaking half. Drops the
+-- Migration #52: multi-parent v0, breaking half. Drops the
 -- one-number-per-family constraint so each adult's cell can route to
 -- the same family (migration #22 predicted this: "multi-number later
 -- is just dropping that constraint"). The number itself stays unique
