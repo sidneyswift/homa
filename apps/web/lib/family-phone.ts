@@ -1,3 +1,4 @@
+import { sendHomaContactCard } from "./contact-card";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { markLeadConverted } from "./phone-leads";
@@ -146,31 +147,22 @@ function isUniqueViolation(error: unknown): boolean {
  * The typo safety net for skipping code verification (founder call
  * 2026-07-07): whoever actually owns a freshly linked number gets one
  * text saying so, with the STOP escape hatch (Telnyx enforces opt-outs
- * at the platform level). Best-effort: linking never fails over it.
+ * at the platform level). The text now carries Homa's contact card
+ * (founder ask 2026-07-10) so the owner can save who is texting.
+ * Best-effort: linking never fails over it.
  */
 async function sendLinkNotificationSms(phoneE164: string): Promise<void> {
-  const apiKey = process.env.TELNYX_API_KEY;
-  const fromNumber = process.env.TELNYX_FROM_NUMBER;
-  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return;
-
+  // Same dark-channel posture as before: a deployment without a live
+  // texting line skips silently, no send, no event.
+  if (process.env.TELNYX_SMS_ENABLED !== "true") return;
   try {
-    const response = await fetch("https://api.telnyx.com/v2/messages", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromNumber,
-        to: phoneE164,
-        text:
-          "Hi, it's Homa. This number is now set up to text with me. " +
-          "Say hi anytime. Not you? Reply STOP and I won't text again.",
-      }),
-    });
-    if (!response.ok) {
-      console.error(`link notification SMS failed: HTTP ${response.status}`);
-    }
+    const sent = await sendHomaContactCard(
+      phoneE164,
+      "Hi, it's Homa. This number is now set up to text with me. " +
+        "Here's my contact card so you can save me. Say hi anytime. " +
+        "Not you? Reply STOP and I won't text again.",
+    );
+    await emitMapEvent("sms.contact_card_sent", { trigger: "linked", sent });
   } catch (error) {
     console.error(
       "link notification SMS failed:",

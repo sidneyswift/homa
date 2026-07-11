@@ -6,6 +6,10 @@ import type { Message, Thread } from "chat";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import {
+  CONTACT_CARD_FIRST_TEXT,
+  sendHomaContactCard,
+} from "../../lib/contact-card";
 import { findFamilyIdByPhone } from "../../lib/family-phone";
 import { emitMapEvent } from "../../lib/map/events";
 import { recordLeadContact } from "../../lib/phone-leads";
@@ -114,13 +118,25 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
 
   // A stranger texting IS a lead (lead-funnel-plan LF-2): save the
   // number before anything else can fail. Fire-and-forget by design.
+  // A number's FIRST-ever text also gets Homa's contact card (vCard
+  // MMS) alongside the agent's reply, so she can save who's texting.
   if (!familyId && normalizedSender) {
-    recordLeadContact(normalizedSender, "sms").catch((error: unknown) => {
-      console.error(
-        "phone lead capture (sms) failed:",
-        error instanceof Error ? error.message : "unknown",
-      );
-    });
+    const to = normalizedSender;
+    recordLeadContact(to, "sms")
+      .then(async ({ firstContact }) => {
+        if (!firstContact) return;
+        const sent = await sendHomaContactCard(to, CONTACT_CARD_FIRST_TEXT);
+        await emitMapEvent("sms.contact_card_sent", {
+          trigger: "first_text",
+          sent,
+        });
+      })
+      .catch((error: unknown) => {
+        console.error(
+          "phone lead capture (sms) failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      });
   }
 
   // Every attachment gets a lane (never deny input): images and PDFs

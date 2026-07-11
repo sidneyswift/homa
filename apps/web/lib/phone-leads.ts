@@ -15,11 +15,13 @@ import { emitMapEvent } from "./map/events";
 export type LeadChannel = "sms" | "voice";
 
 /** Records a contact from an unknown number: first contact inserts the
- * row, repeats bump the count and graduate 'new' to 'engaged'. */
+ * row, repeats bump the count and graduate 'new' to 'engaged'. Returns
+ * whether this was the number's first-ever contact, so the SMS channel
+ * can greet a brand-new number with Homa's contact card. */
 export async function recordLeadContact(
   phoneE164: string,
   channel: LeadChannel,
-): Promise<void> {
+): Promise<{ firstContact: boolean }> {
   const sql = mapDb();
   const rows = await sql<{ inserted: boolean }[]>`
     insert into public.phone_leads (phone_e164, first_channel)
@@ -30,9 +32,11 @@ export async function recordLeadContact(
       status = case when phone_leads.status = 'new' then 'engaged' else phone_leads.status end
     returning (xmax = 0) as inserted
   `;
-  if (rows[0]?.inserted) {
+  const firstContact = rows[0]?.inserted === true;
+  if (firstContact) {
     await emitMapEvent("lead.captured", { channel });
   }
+  return { firstContact };
 }
 
 /** Enriches the lead conversationally (the capture_lead tool): details

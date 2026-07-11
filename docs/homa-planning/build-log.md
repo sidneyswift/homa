@@ -3,6 +3,49 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-10 (late night) · Homa's contact card: a vCard as the first text
+
+Founder ask: a new number's first text from Homa should carry her contact
+card (name, photo, email, site, socials) so a parent saves who's texting
+in one tap. Built as a vCard 3.0 served at /homa.vcf and attached as MMS
+media; founder picked BOTH trigger moments (a brand-new number's first
+inbound text, and the link-notification text when a number connects to a
+family on the web). Calls made alone, worth auditing:
+
+- **A route handler over a public/ file**: Telnyx's MMS file allowlist
+  names text/vcard; static .vcf serving can fall back to the older
+  text/x-vcard, so app/homa.vcf/route.ts sets the content type
+  explicitly. The card doubles as a plain download link on the site.
+- **The photo is embedded base64, not a URL**: iOS does not reliably
+  fetch remote PHOTO URIs inside vCards. public/brand/homa-mark-512.png
+  rides inside the card (~21KB total, far under the ~1MB MMS ceiling) as
+  a committed generated constant (lib/contact-card-photo.ts, regen
+  command in its header) so the route does no filesystem or network I/O.
+- **Folding done by hand, verified by script**: vCard 3.0 wants CRLF and
+  75-octet folding; get it wrong and phones silently drop the photo. All
+  values are ASCII so chars = octets; a tsx check (structure, CRLF, line
+  lengths, embedded bytes equal the brand PNG byte-for-byte) passed.
+- **The socials are Apple-extension rows**: X-SOCIALPROFILE renders
+  TikTok/Instagram on iPhones; Android contact apps ignore those two
+  lines and keep name, photo, number, email, site. Accepted degradation.
+- **recordLeadContact now returns { firstContact }**: it already
+  computed insert-vs-update (xmax = 0); returning it lets the Telnyx
+  channel greet only first-ever numbers. The channel's fire-and-forget
+  posture holds: the card send chains behind the lead write and can
+  never break the agent turn. Known ordering honesty: the card is a
+  separate MMS racing the agent's SMS reply, carriers don't guarantee
+  which bubble lands first.
+- **The link-notification text became the card carrier**: the
+  family-phone typo-safety-net text (lib/family-phone.ts) now sends
+  through sendHomaContactCard with the same copy plus a card line,
+  keeping its STOP escape hatch and dark-channel skip.
+- **One new event, sms.contact_card_sent** (trigger: first_text |
+  linked, sent boolean), MJ-08 posture, registered and guard-green.
+- **Left two pre-existing typecheck errors alone**: agent/schedules/
+  dispatch.ts references readTaskRun/finishTaskRun from a concurrent
+  in-flight tasks session (untracked lib/tasks/ work); this session's
+  files typecheck clean in isolation and ship without touching that.
+
 ## 2026-07-11 (night) · Incident: live chat turn errored on the phone while the reply finished server-side
 
 Founder report with screenshot (Alessa live-testing on her iPhone,

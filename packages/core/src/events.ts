@@ -310,6 +310,14 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     questions_answered: z.number().int().min(0),
   }),
+  // Homa's contact card (vCard MMS, founder ask 2026-07-10) went out.
+  // first_text = a brand-new number's first inbound message; linked =
+  // the notification when a number connects to a family. sent=false
+  // rows surface carrier or media fetch trouble. No numbers (MJ-08).
+  "sms.contact_card_sent": z.object({
+    trigger: z.enum(["first_text", "linked"]),
+    sent: z.boolean(),
+  }),
   // Verified phone claim (sms-onboarding-plan U2/U7): a texted code
   // proved possession and the number routed to the caller's family.
   "sms.phone_claim_started": z.object({
