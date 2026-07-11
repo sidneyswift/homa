@@ -1,5 +1,9 @@
 # Raw · Homa TikTok strategy field research, 2026-07-08
 
+> Historical strategy-research snapshot. Product premises, platform behavior,
+> examples, counts, and recommendations are not approved current marketing
+> guidance. Reconcile them with current product truth and privacy policy first.
+
 Founder-pasted research dump, 2026-07-08, part 2 of 3. Part 1 (the general
 AI UGC landscape) is `2026-07-08-ai-ugc-landscape-research.md`; part 3
 (creator shortlist) is tracked in `marketing/creators/`. This part is the

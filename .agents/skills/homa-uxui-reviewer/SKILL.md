@@ -56,9 +56,12 @@ first; never ask it to imagine the UI from code.
 
 ## How to dispatch this gate
 
-Run a fresh subagent (in Cursor: the Task tool, `subagent_type:
-generalPurpose`, `readonly: true`, screenshots and recordings passed via
-`file_attachments`). The dispatch prompt must contain, in this order:
+Use the current environment's delegation mechanism to run a fresh-context,
+read-only subagent. Provide screenshots or recordings through the
+environment's supported attachment mechanism. Give it no prior design
+conversation and no file-editing task. If the environment cannot enforce a
+read-only mode, state the restriction in the dispatch and keep all file edits
+with the main agent. The dispatch prompt must contain, in this order:
 
 1. The persona block above, verbatim.
 2. A short scope paragraph: what is under review and at what granularity

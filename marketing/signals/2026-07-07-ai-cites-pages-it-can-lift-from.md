@@ -6,7 +6,8 @@ source:
   type: keyword-research
   ref: marketing/raw/2026-07-07-gemminer-ai-visibility-audit.md
   locator: "L71-72"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "AI assembles answers from passages it can lift: direct answers, a

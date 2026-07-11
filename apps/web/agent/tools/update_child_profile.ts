@@ -1,6 +1,8 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import { MAP_INTERESTS_CAP } from "@homa/core";
+
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { updateChildProfilePinned } from "../../lib/agent-pinned";
 import { scanMemoryContent } from "../../lib/agent-memory";
@@ -21,7 +23,7 @@ const updateInput = z
       .describe("The child to update (id from the family context block)."),
     interests: z
       .array(z.string().min(1).max(40))
-      .max(12)
+      .max(MAP_INTERESTS_CAP)
       .optional()
       .describe("Full replacement list of current interests (their obsessions, the worksheet hooks)."),
     focus: z
@@ -60,7 +62,8 @@ export default defineTool({
     }
     const interests = input.interests
       ?.map((interest) => interest.trim())
-      .filter((interest) => interest.length > 0 && !isProfileNonAnswer(interest));
+      .filter((interest) => interest.length > 0 && !isProfileNonAnswer(interest))
+      .slice(0, MAP_INTERESTS_CAP);
     for (const text of [...(interests ?? []), input.focus ?? ""]) {
       const blocked = text ? scanMemoryContent(text) : null;
       if (blocked) {

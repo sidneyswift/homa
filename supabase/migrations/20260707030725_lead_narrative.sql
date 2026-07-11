@@ -1,4 +1,4 @@
--- The LLM-written narrative layer (D8 overturn, founder rulings
+-- Migration #21: the LLM-written narrative layer (D8 overturn, founder rulings
 -- 2026-07-06): the model's words live NEXT TO the deterministic facts,
 -- versioned, never in place of them. narrative holds the generated pieces
 -- (null until generated); narrative_meta tracks the attempt

@@ -8,6 +8,7 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { narrativeEnabled } from "../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../lib/map/narrative-runner";
 import { recordObservation } from "../../lib/map/store";
 
@@ -85,9 +86,11 @@ export default defineTool({
     // that import breaks its build (deploy failure 2026-07-10). If this
     // fire-and-forget gets cut short, the narrative-status endpoint
     // self-heals on the next report view.
-    void runReportNarrative(input.childId).catch((error) => {
-      console.error("record_observation: narrative regeneration failed", error);
-    });
+    if (narrativeEnabled()) {
+      void runReportNarrative(input.childId, access.familyId).catch((error) => {
+        console.error("record_observation: narrative regeneration failed", error);
+      });
+    }
 
     const domain = getTaxonomyDomain(BANK_ITEM_DOMAINS[input.itemId] ?? "");
 

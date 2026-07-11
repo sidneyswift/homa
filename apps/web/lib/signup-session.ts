@@ -24,9 +24,17 @@ export async function resolveSignupSession(
   const attrs = (attributes ?? {}) as {
     channel?: string;
     familyId?: string;
+    familySmsInviteLookupFailed?: string;
+    familySmsInviteState?: string;
     phoneNumber?: string;
   };
-  if (attrs.channel !== "sms") return null;
+  if (
+    attrs.channel !== "sms" ||
+    attrs.familySmsInviteLookupFailed === "true" ||
+    attrs.familySmsInviteState
+  ) {
+    return null;
+  }
   const phoneE164 = normalizeUsPhoneE164(attrs.phoneNumber ?? "");
   if (!phoneE164) return null;
   const familyId = attrs.familyId ?? (await findFamilyIdByPhone(phoneE164));

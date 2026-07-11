@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ageLabel } from "@homa/core";
 
@@ -31,22 +31,30 @@ export function PreparingStep({
   child: { name: string; ageMonths: number };
   onDone: () => void;
 }) {
-  const [lineCount, setLineCount] = useState(1);
+  const lineKey = `${child.name}:${child.ageMonths}`;
+  const [lineState, setLineState] = useState({ key: lineKey, count: 1 });
+  const lineCount = lineState.key === lineKey ? lineState.count : 1;
+  const onDoneRef = useRef(onDone);
   const lines = useMemo(() => buildLines(child.name, child.ageMonths), [child.name, child.ageMonths]);
+
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
     const timers = lines
       .slice(1)
-      .map((_, index) => setTimeout(() => setLineCount(index + 2), (index + 1) * LINE_STAGGER_MS));
-    const finish = setTimeout(onDone, MINIMUM_WAIT_MS);
+      .map((_, index) =>
+        setTimeout(() => {
+          setLineState({ key: lineKey, count: index + 2 });
+        }, (index + 1) * LINE_STAGGER_MS),
+      );
+    const finish = setTimeout(() => onDoneRef.current(), MINIMUM_WAIT_MS);
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(finish);
     };
-    // Runs once per kid: onDone is a fresh closure each render, but this
-    // beat should never restart mid-flight because of a parent re-render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines]);
+  }, [lineKey, lines]);
 
   return (
     <div aria-busy="true" className="mx-auto max-w-[28rem] text-center">

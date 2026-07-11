@@ -15,6 +15,7 @@ export interface FamilyRecord {
   name: string;
   us_state: string | null;
   parent_display_name: string | null;
+  profile_completed_at: string | null;
 }
 
 export interface ChildProfile {
@@ -34,11 +35,27 @@ export interface ChildRecord {
 export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
-    .select("id, name, us_state, parent_display_name")
+    .select("id, name, us_state, parent_display_name, profile_completed_at")
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(`families read failed: ${error.message}`);
   return data;
+}
+
+/** The signed-in adult's own display name, not the family-level fallback. */
+export async function getMyMemberDisplayName(): Promise<string | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from("family_members")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`membership read failed: ${error.message}`);
+  return data?.display_name ?? null;
 }
 
 export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
@@ -49,24 +66,6 @@ export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
     .order("created_at", { ascending: true });
   if (error) throw new Error(`children read failed: ${error.message}`);
   return (data ?? []) as ChildRecord[];
-}
-
-export interface CreateFamilyInput {
-  name: string;
-  usState: string | null;
-  parentName: string | null;
-}
-
-/** Family creation goes through the create_my_family RPC (migration #6). */
-export async function createMyFamily(
-  input: CreateFamilyInput,
-): Promise<{ error: string | null }> {
-  const { error } = await supabase.rpc("create_my_family", {
-    family_name: input.name.trim() || "My family",
-    family_us_state: input.usState,
-    parent_name: input.parentName,
-  });
-  return { error: error ? error.message : null };
 }
 
 export interface AddChildInput {

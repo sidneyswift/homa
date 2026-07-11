@@ -1,11 +1,12 @@
-# Homa Production Usage Report — One-Family Cost Model
+# Homa Production Usage Report : One-Family Cost Model
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical one-family input snapshot. The source was a restricted local system
+> observed from 2026-03-30 through 2026-07-02. Its path and private identifiers are
+> intentionally omitted. The figures cannot be reproduced within this audit's
+> allowed repository boundary and do not describe current Homa Cloud production,
+> pricing, provider state, or telemetry.
 
-**Data source:** `/Users/sidneyswift/Documents/Projects/Sidney/homa/homa-macmini/.openclaw`  
+**Data source:** restricted local one-family operations snapshot  
 **Observation window:** 2026-03-30 → 2026-07-02 (~95 days)  
 **Snapshot note:** Gateway logs stop 2026-06-17; cron run files in `cron/runs/` stop 2026-06-14 (migrated), but ambient-learning state continues through 2026-07-02.
 
@@ -74,7 +75,7 @@ Usage is logged per assistant message as `usage: { input, output, cacheRead, cac
 | `gpt-5.5` | 19 | 985K | $1.51 |
 | `delivery-mirror` | 258 | 0 | $0 |
 
-**June 2026 steady-state month** (best reference — all crons + heartbeat running):
+**June 2026 steady-state month** (best reference : all crons + heartbeat running):
 
 | Category | LLM calls | Tokens |
 |----------|-----------|--------|
@@ -108,8 +109,8 @@ Usage is logged per assistant message as `usage: { input, output, cacheRead, cac
 | `learning-loop-state.json` | **1,776** runs | through 2026-07-02 | Ambient learning only; ~**30/day** |
 | `email-triage-log.jsonl` | **374** lines | 2026-05-03 → 2026-07-02 | ~**6/day** (not full hourly yet) |
 | `journal-prompts.jsonl` | **54** lines | 2026-05-06 → 2026-07-02 | Daily prompt; channel error since ~Jun 18 |
-| `learning-journal.jsonl` | **194** lines | 2026-05-05 → 2026-07-01 | **Not 115K+** — precise count is 194 |
-| `janitor.jsonl` | **1,080** runs | — | Daily janitor script executions |
+| `learning-journal.jsonl` | **194** lines | 2026-05-05 → 2026-07-01 | **Not 115K+** : precise count is 194 |
+| `janitor.jsonl` | **1,080** runs | : | Daily janitor script executions |
 
 **June automation triggers (user-role messages):**
 - Heartbeat polls: **782** (~26/day)
@@ -174,7 +175,7 @@ Per-turn context a cloud version would carry:
 | `HEARTBEAT.md` | 2.2 KB |
 | **Total** | **407.7 KB (~104K tokens @ 4 chars/token)** |
 
-**Observed cold-start cache write per turn: ~52–61K tokens** — matches stable context + skills snapshot + tool schemas. Warm turns reuse ~52–69K cache read with small incremental writes.
+**Observed cold-start cache write per turn: ~52–61K tokens** : matches stable context + skills snapshot + tool schemas. Warm turns reuse ~52–69K cache read with small incremental writes.
 
 Skills snapshot in `sessions.json` lists 40+ bundled OpenClaw skills (adds significant hidden context beyond the files above).
 
@@ -228,11 +229,11 @@ Voice is **real but light**: Less sends occasional Slack voice notes → Whisper
 | **(b′) Cron LLM invocations** | 3,194 | **2,789** | **1,008** | **High** |
 | **(b″) Total automation LLM** | 3,971 | **3,480** | **1,253** | **High** |
 | **(c) Total tokens** | 678M | **450M** | **214M** | **High** for Jun |
-| — cache read | 501M | ~280M est. | 158M | Medium |
-| — cache write | 173M | ~95M est. | 55M | Medium |
-| — billable in+out | 3.7M | ~2.5M est. | 1.16M | High |
+| : cache read | 501M | ~280M est. | 158M | Medium |
+| : cache write | 173M | ~95M est. | 55M | Medium |
+| : billable in+out | 3.7M | ~2.5M est. | 1.16M | High |
 | **(d) PDF artifacts generated** | 173 | **70** | **55** | Medium |
-| **(e) Stable context payload** | — | **408 KB / ~104K tok** | per cold turn | **High** |
+| **(e) Stable context payload** | : | **408 KB / ~104K tok** | per cold turn | **High** |
 
 ---
 
@@ -241,9 +242,9 @@ Voice is **real but light**: Less sends occasional Slack voice notes → Whisper
 ### As-is on Opus (current production mix)
 
 - **Primary model today:** `claude-opus-4-8` (63% of calls)
-- **Observed logged API cost:** $228.44 / 95 days → **~$72/mo** — but only 34% of calls had cost fields; Opus 4-8 calls log **$0**
+- **Observed logged API cost:** $228.44 / 95 days → **~$72/mo** : but only 34% of calls had cost fields; Opus 4-8 calls log **$0**
 - **Actual current spend is likely $100–200+/mo** on Opus 4-8 at June's 450M tokens/month (heavy cache helps, but 6,200 calls × ~73K avg tokens adds up)
-- List-price upper bound (no cache discount): **~$1,350/mo** — not realistic; prompt caching reduces effective cost ~5–10×
+- List-price upper bound (no cache discount): **~$1,350/mo** : not realistic; prompt caching reduces effective cost ~5–10×
 
 ### Model remix scenarios
 
@@ -255,10 +256,10 @@ Voice is **real but light**: Less sends occasional Slack voice notes → Whisper
 | **D. Cap + cache** | Hard monthly turn cap (~100 human, 2000 auto), 5-min cache TTL | Variable | **Yes** with limits |
 
 **Key cost drivers to optimize:**
-1. **Ambient Learning** — 32 runs/day × ~69K tokens even on null runs = ~**66M tokens/mo** alone
-2. **Heartbeat** — 26/day × ~120K avg = ~**83M tokens/mo** in June
-3. **Cold cache writes** — 52K tokens per new isolated cron session; session reuse would help
-4. **Tool-loop interactive** — 29 LLM calls per human message; subagent caps would reduce spend
+1. **Ambient Learning** : 32 runs/day × ~69K tokens even on null runs = ~**66M tokens/mo** alone
+2. **Heartbeat** : 26/day × ~120K avg = ~**83M tokens/mo** in June
+3. **Cold cache writes** : 52K tokens per new isolated cron session; session reuse would help
+4. **Tool-loop interactive** : 29 LLM calls per human message; subagent caps would reduce spend
 
 ---
 
@@ -285,4 +286,3 @@ One active homeschool family running full Homa automation consumes roughly:
 - **~408 KB stable context** per cold LLM call
 
 At **$29/mo**, you'd need Scenario C (cheap models for automation) plus strict caps. At **$49/mo**, Scenario B/C with prompt caching is plausible for this usage profile. The family's actual interactive load is modest; **automation overhead (heartbeat + ambient learning) is the dominant cost**, not parent chat volume.
-

@@ -1,11 +1,9 @@
 /**
- * Map content + scorer check (lead magnet v2). Two jobs, one exit code:
- *   1. Content lint: every bank item is cited, and no parent-facing string
- *      anywhere in the bank or sentence outputs contains a banned word
- *      (claims law) or an em dash (brand law).
- *   2. Scorer fixtures: golden kids (ahead, mixed, sparse, struggling)
- *      produce the expected positions, deterministically, with no negative
- *      number and no deficit word ever rendered.
+ * Map, plan, fixture, version-lock, and narrative checks under one exit code.
+ * The content lint covers the parent-facing fields and sentence outputs named
+ * in this script; it is not a proof that every string in every imported object
+ * was inspected. Scorer fixtures verify deterministic positions and the
+ * asserted copy and number laws for their covered cases.
  *
  * Usage: pnpm check:map   (tsx scripts/map-check.mts)
  */

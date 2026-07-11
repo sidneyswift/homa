@@ -1,5 +1,10 @@
 # Campaign · TikTok launch, July-August 2026
 
+> Historical campaign proposal, not approved for staging or publication. The
+> product-truth, child-privacy, testimonial, release, consent, route, account,
+> and production gates in this plan are unresolved or stale. Rebuild a campaign
+> from current evidence and newly approved signals before use.
+
 The time-boxed push that opens Homa's TikTok: own the moment before
 curriculum during the July/August buying season. Grounded in the 2026-07-08
 founder research (`marketing/raw/2026-07-08-tiktok-strategy-field-research.md`,
@@ -15,12 +20,11 @@ every adaptation). All pipeline laws apply unchanged: drafts stage in
 
 ## Status and dependencies
 
-- TikTok distribution is blocked-on-human: register @thankshoma, connect
-  Postiz (HUMAN-TODO, workflow step 11). Scripting and staging can start
-  now.
-- The live product surface today is thankshoma.com, the waitlist, and the
-  free level checklist at thankshoma.com/onboarding. Posts that show any
-  other product flow wait for that flow to exist (see claims guardrails).
+- TikTok distribution was planned but remains blocked on verified handles and
+  Postiz authentication. This historical plan is not an authorization to stage.
+- The product surface described in the original campaign is superseded. Current
+  public copy calls `/onboarding` a free progress report, not a real-level or
+  level-check product. Verify the live route and every filmed behavior again.
 
 ## The wedge
 
@@ -97,6 +101,10 @@ The point is sequence, not magic.
 
 ### 4 · The comment funnel (engagement + reply loop)
 
+> Do not reuse this pillar. Publicly soliciting a child's grade and hardest
+> subject needs an approved collection, moderation, retention, and consent
+> design that this campaign does not contain.
+
 Signal: `2026-07-08-comment-the-grade-and-subject-funnel`.
 
 - "Comment your kid's grade + hardest subject and I'll tell you what I'd
@@ -132,9 +140,10 @@ Signals: `2026-07-08-literacy-crisis-enter-gently`,
 
 ## Claims guardrails (binding, per journeys/07 §6 and house style)
 
-- Product-true today: the free level checklist at thankshoma.com/onboarding
-  (questions for the parent, never a test for the child; national
-  benchmarks; free), the waitlist. Film these freely and truthfully.
+- No product claim in this historical plan is approved today. The current
+  working-tree surface is a free progress report based on parent answers and
+  national benchmarks. A fresh live probe and copy gate are required before
+  filming or publication.
 - Not live yet, so not filmable as product proof: worksheet/photo upload
   that finds a missing skill, generated right-level materials, the weekly
   plan. Until each ships, those posts run in educator voice ("what I'd
@@ -144,8 +153,9 @@ Signals: `2026-07-08-literacy-crisis-enter-gently`,
 - Never: outcome promises, aggregate efficacy claims, "behind"/"catch up"
   framing, sibling comparisons, clinical words (say "level check", never
   "assessment" or "diagnostic"), a member child on camera, invented
-  testimonials. UGC presenters introduce the product in their own words;
-  they never fake usage history or results.
+  testimonials. Real child work also requires an approved release, privacy
+  treatment, and retention boundary. UGC presenters introduce the product in
+  their own words; they never fake usage history or results.
 
 ## Recurring voice lines (campaign-specific, on top of house style)
 

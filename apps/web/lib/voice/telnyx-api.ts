@@ -83,14 +83,35 @@ export async function downloadTelnyxMedia(
  * Blob's random-suffix URLs qualify. Keep the combined payload small,
  * carriers get unreliable past about 1MB.
  */
-export async function sendHomaSms(
+export type HomaSmsSubmission =
+  | { status: "submitted"; messageId: string }
+  | { status: "rejected" }
+  | { status: "unknown" };
+
+export function classifyTelnyxHttpFailure(
+  status: number,
+): "rejected" | "unknown" {
+  return status === 408 || status === 429 || status >= 500
+    ? "unknown"
+    : "rejected";
+}
+
+/**
+ * Detailed submission result for side effects that must distinguish a
+ * provider rejection from a transport failure after Telnyx may have
+ * accepted the message.
+ */
+export async function submitHomaSms(
   toE164: string,
   text: string,
   mediaUrls?: string[],
-): Promise<boolean> {
+  signal?: AbortSignal,
+): Promise<HomaSmsSubmission> {
   const apiKey = process.env.TELNYX_API_KEY;
   const fromNumber = process.env.TELNYX_FROM_NUMBER;
-  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return false;
+  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) {
+    return { status: "rejected" };
+  }
 
   try {
     const response = await fetch("https://api.telnyx.com/v2/messages", {
@@ -105,17 +126,34 @@ export async function sendHomaSms(
         text,
         ...(mediaUrls && mediaUrls.length > 0 ? { media_urls: mediaUrls } : {}),
       }),
+      signal,
     });
     if (!response.ok) {
       console.error(`sendHomaSms failed: HTTP ${response.status}`);
-      return false;
+      return { status: classifyTelnyxHttpFailure(response.status) };
     }
-    return true;
+    const payload = (await response.json()) as { data?: { id?: unknown } };
+    const messageId = payload.data?.id;
+    if (typeof messageId !== "string" || !messageId) {
+      console.error("sendHomaSms returned no message id");
+      return { status: "unknown" };
+    }
+    return { status: "submitted", messageId };
   } catch (error) {
     console.error(
       "sendHomaSms failed:",
       error instanceof Error ? error.message : "unknown",
     );
-    return false;
+    return { status: "unknown" };
   }
+}
+
+export async function sendHomaSms(
+  toE164: string,
+  text: string,
+  mediaUrls?: string[],
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const result = await submitHomaSms(toE164, text, mediaUrls, signal);
+  return result.status === "submitted";
 }

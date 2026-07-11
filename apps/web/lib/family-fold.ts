@@ -1,6 +1,8 @@
 import type postgres from "postgres";
 
+import { mergeFamilyContextBags } from "./family-context-merge";
 import { mapDb } from "./map/db";
+import type { DbJson } from "./map/db";
 
 /**
  * The conservative stub-fold shared by every phone reconciliation path
@@ -19,6 +21,10 @@ import { mapDb } from "./map/db";
 
 const SIMPLE_FAMILY_TABLES = [
   "conversation_messages",
+  "conversation_episodes",
+  "conversation_deliveries",
+  "conversation_open_loops",
+  "conversation_inbound_receipts",
   "family_memories",
   "hours_log",
   "call_transcripts",
@@ -41,10 +47,6 @@ async function isTrueStubWithSql(sql: SqlClient, familyId: string): Promise<bool
   return Boolean(row) && row.email === null && row.members === 0;
 }
 
-export async function isTrueStub(familyId: string): Promise<boolean> {
-  return isTrueStubWithSql(mapDb(), familyId);
-}
-
 export async function foldStubFamilyIntoTx(
   tx: SqlClient,
   stubId: string,
@@ -52,12 +54,40 @@ export async function foldStubFamilyIntoTx(
 ): Promise<boolean> {
   if (stubId === intoId) return false;
   if (!(await isTrueStubWithSql(tx, stubId))) return false;
+  const contextRows = await tx<{ id: string; context: Record<string, unknown> | null }[]>`
+    select id, context from public.families where id in (${stubId}, ${intoId})
+  `;
+  const stubContext = contextRows.find((row) => row.id === stubId)?.context;
+  const intoContext = contextRows.find((row) => row.id === intoId)?.context;
+  const mergedContext = mergeFamilyContextBags(intoContext, stubContext);
+  await tx`
+    update public.families
+    set context = ${tx.json(mergedContext as unknown as DbJson)},
+        updated_at = now()
+    where id = ${intoId}
+  `;
   for (const table of SIMPLE_FAMILY_TABLES) {
     await tx`
       update ${tx(table)} set family_id = ${intoId}
       where family_id = ${stubId}
     `;
   }
+
+  await tx`
+    update public.conversation_thread_bindings source
+    set family_id = ${intoId}
+    where source.family_id = ${stubId}
+      and not exists (
+        select 1 from public.conversation_thread_bindings target
+        where target.family_id = ${intoId}
+          and target.channel = source.channel
+          and target.thread_key_hash = source.thread_key_hash
+      )
+  `;
+  await tx`
+    delete from public.conversation_thread_bindings
+    where family_id = ${stubId}
+  `;
 
   await tx`
     update public.events set family_id = ${intoId}

@@ -84,7 +84,7 @@ export async function GET(request: Request): Promise<Response> {
       const token = await mintLinkToken(child.family_id);
       const sent = await sendBandReadyEmail(child.email, child.child_name, token);
       if (sent) {
-        await markBandReady(child.child_id);
+        await markBandReady(child.family_id, child.child_id);
         await emitMapEvent("map.band_ready_emailed", {
           family_id: child.family_id,
           child_id: child.child_id,

@@ -1,5 +1,8 @@
 # Raw · AI UGC landscape research (TikTok), 2026-07-08
 
+> Historical external-research snapshot. Accounts, formats, views, engagement,
+> platform behavior, and recommendations require fresh verification before use.
+
 Founder-pasted research dump, 2026-07-08, part 1 of 3. Part 2 (the Homa
 TikTok strategy that builds on this) is `2026-07-08-tiktok-strategy-field-research.md`;
 part 3 (creator shortlist) is tracked in `marketing/creators/`. This part

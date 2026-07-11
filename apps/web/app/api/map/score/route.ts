@@ -58,7 +58,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     // Rescores (after a deep dive) update the same report row and must not
     // re-send the email; only the first scoring of a child emails her.
-    const alreadyEmailed = await reportAlreadyEmailed(parsed.data.childId);
+    const alreadyEmailed = await reportAlreadyEmailed(family.id, parsed.data.childId);
 
     const report = await createReport(family.id, parsed.data.childId);
     if (!report) {
@@ -80,7 +80,7 @@ export async function POST(request: Request): Promise<Response> {
     after(async () => {
       if (narrativeEnabled()) {
         try {
-          await runReportNarrative(report.childId);
+          await runReportNarrative(report.childId, family.id);
         } catch (error) {
           console.error(
             "map/score narrative failed:",
@@ -91,7 +91,7 @@ export async function POST(request: Request): Promise<Response> {
       try {
         if (!alreadyEmailed && report.email) {
           const emailed = await sendReportEmail(report.email, report.childName, report.token);
-          if (emailed) await markReportEmailed(report.childId);
+          if (emailed) await markReportEmailed(family.id, report.childId);
         }
       } catch (error) {
         console.error(

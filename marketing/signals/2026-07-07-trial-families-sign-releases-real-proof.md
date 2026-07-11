@@ -6,7 +6,8 @@ source:
   type: field-note
   ref: docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md
   locator: "L162-166"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Verbatim: "when we give out the free trials, we want to ask them to send us

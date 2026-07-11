@@ -25,6 +25,12 @@ export interface StateRequirementsSummary {
   sourceLastVerified: string;
 }
 
+const emDashPattern = /\s*\u2014\s*/g;
+
+function sanitizeReferenceText(value: string): string {
+  return value.replace(emDashPattern, " - ");
+}
+
 export async function getStateRequirements(
   stateCode: string,
 ): Promise<StateRequirementsSummary | null> {
@@ -54,13 +60,13 @@ export async function getStateRequirements(
   if (!row) return null;
   return {
     stateCode: row.state_code,
-    stateName: row.state_name,
+    stateName: sanitizeReferenceText(row.state_name),
     regulationLevel: row.regulation_level,
     compulsoryStartAge: row.compulsory_start_age,
     compulsoryEndAge: row.compulsory_end_age,
     notificationRequired: row.notification_required,
     assessmentRequired: row.assessment_required,
-    defaultPathway: row.default_pathway,
+    defaultPathway: row.default_pathway ? sanitizeReferenceText(row.default_pathway) : null,
     sourcePageUrl: row.source_page_url,
     sourceLastVerified: row.source_last_verified,
   };

@@ -1,5 +1,7 @@
 # Refresh sweep, July 2026
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Refresh sweep 15, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder). Executes the follow-up queue from 00-synthesis.md; each section supersedes the matching dry-well entries in lanes 01 to 10 where it resolves them.
 **Method:** Direct fetches of the primary documents named in the queue (NCES/NAGB, WHO, AAP/AAPD, OSPI, ISBE, ECLKC, CPSC, World Book, Read Naturally, CSTA, Ohio DEW), with the ELOF framework PDF downloaded and text-extracted and the firewalled Ohio page recovered via a browser-agent fetch. Every claim carries an inline link with access date; FACT and INFERENCE are separated; nothing is estimated.

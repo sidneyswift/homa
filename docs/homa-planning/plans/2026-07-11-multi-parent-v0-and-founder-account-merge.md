@@ -115,7 +115,9 @@ are Phase 3).
 - No invite flow, no roles UI, no permission scopes (Phase 3 / NT-4).
 - No per-member avatar (families.parent_avatar_url stays single; known
   gap, listed for Phase 3).
-- Mobile app keeps family-level greeting (parity ticket M1-17 posture).
+- Mobile now reads member display names. M1-17 is the design-system integration
+  ticket, not a general mobile parity ticket. Per-member avatars remain outside
+  this slice.
 - create_my_family guard stays: one family per user remains the law.
 
 ## Phase 2 · the merge (one transaction, after Phase 1 is READY)
@@ -192,9 +194,9 @@ this plan land here with the conservative call taken.)
   migrations already applied to prod). The Phase 1 changes interleave
   with it in shared files (dispatch, telnyx, chat clients), so both
   ship in one push rather than pretending they are separable.
-- 2026-07-11 · Todo for human: per-member avatars and the mobile app's
-  member-aware greeting stay family-level (Phase 3 / M1-17 parity
-  list); blocks nothing.
+- 2026-07-11 · Reconciled note: mobile now reads member display names.
+  Per-member avatars remain outside this slice. M1-17 does not own general
+  mobile parity.
 - 2026-07-11 · Plan-confirmed: Phase 2 ran as one atomic transaction
   with count assertions, after deploy 997bda9 went READY and migration
   #50 applied. Result: one family (The Swift family, W), two members

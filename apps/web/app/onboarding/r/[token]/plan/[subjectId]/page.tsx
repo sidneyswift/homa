@@ -6,10 +6,22 @@ import { after } from "next/server";
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { Logo } from "../../../../../../components/brand/Logo";
+import { WallOffer } from "../../../../../../components/billing/wall-offer";
+import {
+  WALL_SIGNIN_BODY,
+  WALL_SIGNIN_BUTTON,
+  WALL_SIGNIN_HEADLINE,
+} from "../../../../../../components/billing/wall-copy";
+import { familyWallCheckout, wallEnabled } from "../../../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../../../lib/map/narrative-flag";
 import { runPlanNarrative } from "../../../../../../lib/map/narrative-runner";
-import { getOrBuildPlan } from "../../../../../../lib/map/store";
+import { requireFamily } from "../../../../../../lib/map/session";
+import {
+  getOrBuildPlan,
+  getReportEventIdsByToken,
+  planExists,
+} from "../../../../../../lib/map/store";
 import { NarrativeBeat } from "../../narrative-beat";
 import { reportButtonClass } from "../../report-button";
 import { PlanWeeks } from "./plan-weeks";
@@ -23,6 +35,12 @@ import { PlanWeeks } from "./plan-weeks";
  * week framing, closing) around the deterministic plan, behind its own
  * writing beat; the deterministic plan stays stored unchanged as the fact
  * record either way.
+ *
+ * The wall (plans/2026-07-11-the-wall.md, DARK behind
+ * HOMA_WALL_ENABLED): building a NEW plan is a door, so a walled family
+ * gets the offer page here instead of a fresh build. A plan that
+ * already exists renders normally forever: the wall gates action, never
+ * what a family already has.
  */
 
 export const dynamic = "force-dynamic";
@@ -47,6 +65,62 @@ export default async function PlanPage({
   const { rebuilt, built } = await searchParams;
   const domain = getMapSubject(subjectId);
   const isMonth = subjectId === MONTH_PLAN_SUBJECT;
+
+  // The wall stands only in front of plans that do not exist yet. Flag
+  // off short-circuits before any of these queries run. On this
+  // shareable URL the checkout renders ONLY when the viewer's own
+  // session matches the report's family: a shared-link viewer's payment
+  // could never be attributed (the confirm route unlocks the payer's
+  // signed-in family), so anyone else gets sign-in instead of a
+  // checkout that would charge a card and unlock nothing.
+  if ((domain || isMonth) && wallEnabled()) {
+    const ids = await getReportEventIdsByToken(token);
+    if (ids) {
+      const checkout = await familyWallCheckout(ids.familyId);
+      if (checkout && !(await planExists(ids.childId, subjectId))) {
+        const viewer = await requireFamily();
+        const isOwner = viewer?.id === ids.familyId;
+        // The funnel counts offers actually shown, not sign-in prompts.
+        if (isOwner) {
+          await emitMapEvent("wall.viewed", { family_id: ids.familyId, door: "plan" });
+        }
+        return (
+          <main className="mx-auto w-full max-w-xl px-6 py-20">
+            <Logo size={26} />
+            {isOwner ? (
+              <div className="mt-8 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
+                <WallOffer door="plan" checkout={checkout} />
+              </div>
+            ) : (
+              <div className="mt-8">
+                <h1 className="font-display text-2xl font-bold text-strong">
+                  {WALL_SIGNIN_HEADLINE}
+                </h1>
+                <p className="mt-3 text-body">{WALL_SIGNIN_BODY}</p>
+                <Link
+                  href={`/signin?next=${encodeURIComponent(`/onboarding/r/${token}/plan/${subjectId}`)}`}
+                  className={reportButtonClass(
+                    "primary",
+                    "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
+                  )}
+                >
+                  {WALL_SIGNIN_BUTTON}
+                </Link>
+              </div>
+            )}
+            <p className="mt-4 text-sm">
+              <Link
+                href={`/onboarding/r/${token}`}
+                className="text-brand underline-offset-2 hover:underline"
+              >
+                back to the report
+              </Link>
+            </p>
+          </main>
+        );
+      }
+    }
+  }
 
   // Arriving from a deep dive rebuilds the month from the refined answers,
   // ONCE, then redirects to a URL that is safe to reload: leaving
@@ -105,7 +179,7 @@ export default async function PlanPage({
     const childId = result.childId;
     after(async () => {
       try {
-        await runPlanNarrative(childId, subjectId);
+        await runPlanNarrative(childId, subjectId, result.familyId);
       } catch (error) {
         console.error(
           "plan narrative kick failed:",
@@ -281,8 +355,14 @@ export default async function PlanPage({
               </p>
               <p className="mt-2 max-w-lg text-sm" style={{ color: "var(--stone-300)" }}>
                 Materials made for {childName}, woven around your family, numbers tracked for you.
-                You&apos;re on the invite list. Your invite comes by email.
+                Open Homa to keep planning from the dashboard.
               </p>
+              <Link
+                href="/app"
+                className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:bg-page"
+              >
+                Open Homa
+              </Link>
             </div>
           </div>
 

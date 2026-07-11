@@ -1,6 +1,7 @@
 # Full-repo code review tickets · 2026-07-11
 
-> **STATUS: OPEN, none executed.** A deep review of the whole tree (apps/web,
+> **STATUS: IN PROGRESS.** CR-01 through CR-50, CR-52 through CR-55, CR-58 through CR-68, and CR-72 are fixed in
+> the worktree. CR-51 is partially cleaned. Remaining tickets are still open unless separately noted. A deep review of the whole tree (apps/web,
 > apps/mobile, packages, scripts, supabase) run the night of 2026-07-11. Ten
 > parallel review agents covered every area file by file; every load-bearing
 > finding below was then hand-verified against source before it was written
@@ -37,6 +38,9 @@ are real but narrow.
 
 ### CR-01 · Checklist "undo last answer" never clears the server save
 
+- **Status 2026-07-11 late night:** Fixed in the worktree. Undo now calls
+  `DELETE /api/map/answer`, waits for in-flight saves, and completion only
+  continues after pending saves clear.
 - **Where:** `apps/web/app/onboarding/checklist-step.tsx:170-181` (`goBack`) + `apps/web/lib/map/store.ts:353-372` (`saveAnswer` is upsert-only, no delete).
 - **What:** Every chip tap calls `postAnswer()`, which upserts into `child_answers` immediately. `goBack()` only deletes the answer from local React state. Scoring (`/api/map/score` → `createReport`) reads all rows from the DB, not the client. Undo a mis-tap, finish, and the mis-tapped answer is still scored. The report is the lead magnet's entire artifact, so a wrong number here is a wrong first impression. Deep-dive undo has the identical shape (`deep-dive-step.tsx` per the onboarding review).
 - **Fix:** On undo, POST a delete/clear for that `itemId` (needs a new server route + a `deleteAnswer` in `store.ts`), and block `onComplete` until the server matches local state. Verified: high.
@@ -67,17 +71,17 @@ are real but narrow.
 
 | # | Where | What | Verified |
 | --- | --- | --- | --- |
-| CR-05 | `apps/web/lib/map/store.ts:1250-1265` (`childrenNowInBand`) | `LIMIT 200` runs before the in-range age filter happens in JS, with no `ORDER BY`. Children outside the arbitrary first batch never get their band-ready email. Push the scored-range predicate into SQL and order before capping. | high |
-| CR-06 | `apps/web/app/onboarding/hub-step.tsx:48-60` (`emailMeThisLink`) | `setLinkSent(true)` runs in both the `try` and the `catch`, so a network failure still shows "Link sent. It works on any device." Only set on `response.ok`. | high |
-| CR-07 | `apps/web/agent/tools/update_task.ts:35-52` | A call with only `{ taskId }` (no `paused`, empty patch) skips both branches and still returns `{ updated: true }`, violating the tool-honesty rule in `instructions.md`. Return `{ updated: false }` when there is nothing to change. | high |
-| CR-08 | `apps/web/agent/tools/record_observation.ts:88` vs `apps/web/app/api/map/score/route.ts:81` | Every other rescore path gates `runReportNarrative` behind `narrativeEnabled()`; the observation tool calls it unconditionally, so with the flag off the product still pays for generation and writes narrative rows the UI treats as disabled. | high |
-| CR-09 | `apps/web/app/onboarding/checklist-step.tsx:131-154` | After `flushPending()`, `onComplete()` is called unconditionally even if retries re-failed (they re-push into `pendingSaves`). On bad conference wifi the parent sees "Questionnaire done" and scores against a partial answer set. Verify the queue is empty before completing; show retry UI otherwise. | high |
-| CR-10 | `apps/web/app/onboarding/checklist-step.tsx:160-167` | `answerCurrent` schedules `commitAnswer` on an uncleared 140ms `setTimeout`. Tapping "back to your family" (`onExit`) inside that window still fires the commit on the unmounted step and can advance the parent past the hub. Store the timer id in a ref and clear it on exit/unmount. | high |
-| CR-11 | `apps/web/lib/agent-pinned.ts:179` (`recordHoursPinned`) + `apps/web/agent/tools/log_hours.ts:83` (caller path) | Default `happenedOn` is `new Date().toISOString().slice(0,10)`, i.e. the UTC date. A parent logging after ~7-8pm US time gets tomorrow's date. Resolve "today" in the family's IANA zone (`effectiveTimeZone` + `zonedDateParts` already exist in `lib/time-zone.ts`). | high |
-| CR-12 | `apps/web/lib/agent-pinned.ts:232-239` (`dayLabel`) + `apps/web/agent/tools/recall.ts:45-52` (`dayOf`) | Recall hit dates are hardcoded to `America/New_York` for every family, while `family-context.ts` renders "today" in the family's real zone. A Pacific family gets Eastern-dated snippets. Thread the family zone through. | high |
-| CR-13 | `apps/web/lib/map/store.ts:104-111,152-155` (`foldFamilyInto`) | On signup fold, only `children` move and the husk `families` row is deleted; `families.context` (homeschool styles, curriculums written pre-signup via `saveFamilyContext`) is dropped with no merge. Deep-merge context into the surviving family before delete, same shape as `saveChildContext`'s `whatsWorking` merge. | high |
-| CR-14 | `apps/web/lib/map/curriculum-store.ts:74-78` → `apps/web/lib/map/narrative-facts.ts:200-205` | `buildReportFactsForChild` hardcodes `total: 0` for every plan row while computing real `done` counts, so report facts can read "checked off 5 of 0 activities". Sum activity counts like `narrative-store.ts:99-100`, or omit `practice` when `total === 0`. | high |
-| CR-15 | `apps/web/lib/tasks/store.ts:55-125` (`seedKind`) | `morning_brief` seeding requires a scored report, but the enable/disable hygiene UPDATEs only check email/timezone/journal opt-out. A family whose last report is removed keeps an enabled brief and gets empty dispatches. Add the `exists(child_reports…)` predicate to both branches. | medium |
+| CR-05 | `apps/web/lib/map/store.ts:1250-1265` (`childrenNowInBand`) | Fixed in the worktree. The scored-range predicate now runs in SQL before `LIMIT 200`, and the capped set is ordered by creation time and id. | high |
+| CR-06 | `apps/web/app/onboarding/hub-step.tsx:48-60` (`emailMeThisLink`) | Fixed in the worktree. The hub now reports success only when `/api/map/resume` returns an HTTP OK, and failed sends keep a retry state. | high |
+| CR-07 | `apps/web/agent/tools/update_task.ts:35-52` | Fixed in the worktree. The tool now strips undefined optional fields and returns `{ updated: false }` when no real change is supplied. | high |
+| CR-08 | `apps/web/agent/tools/record_observation.ts:88` vs `apps/web/app/api/map/score/route.ts:81` | Fixed in the worktree. Observation rescoring now gates `runReportNarrative` behind `narrativeEnabled()`, matching the other rescore paths. | high |
+| CR-09 | `apps/web/app/onboarding/checklist-step.tsx:131-154` | Fixed in the worktree. Checklist completion now waits for all in-flight saves and retried pending saves, and shows a retry state if any write still fails. | high |
+| CR-10 | `apps/web/app/onboarding/checklist-step.tsx:160-167` | Fixed in the worktree. The delayed answer timer is stored in a ref and cleared on exit and unmount. | high |
+| CR-11 | `apps/web/lib/agent-pinned.ts:179` (`recordHoursPinned`) + `apps/web/agent/tools/log_hours.ts:83` (caller path) | Fixed in the worktree. Default `happenedOn` now uses `zonedDateString(new Date(), effectiveTimeZone(family.time_zone))` in both pinned and signed-in paths. | high |
+| CR-12 | `apps/web/lib/agent-pinned.ts:232-239` (`dayLabel`) + `apps/web/agent/tools/recall.ts:45-52` (`dayOf`) | Fixed in the worktree. Pinned and signed-in recall now format hit dates in the family's configured time zone, with the standard fallback. | high |
+| CR-13 | `apps/web/lib/map/store.ts:104-111,152-155` (`foldFamilyInto`) | Fixed in the worktree. Signup and phone-stub folds now merge source `families.context` into the surviving family before deleting the source row. | high |
+| CR-14 | `apps/web/lib/map/curriculum-store.ts:74-78` → `apps/web/lib/map/narrative-facts.ts:200-205` | Fixed in the worktree. Curriculum report facts now select the stored plan and compute activity totals from `plan.weeks`, matching the main narrative path. | high |
+| CR-15 | `apps/web/lib/tasks/store.ts:55-125` (`seedKind`) | Fixed in the worktree. Built-in task hygiene now disables rows that no longer have kids or, for morning briefs, no longer have a scored report, and only re-enables rows that meet the same predicates. | medium |
 
 ### Timezone/date correctness (shared root cause: UTC `new Date()` on `YYYY-MM` strings)
 
@@ -85,41 +89,41 @@ CR-11/CR-12 above plus:
 
 | # | Where | What | Verified |
 | --- | --- | --- | --- |
-| CR-16 | `apps/web/lib/child-age.ts:7-13` vs `packages/core/src/map/bands.ts:61-66` | Two `ageInMonths`: the `lib` copy uses local `getMonth()`/`getFullYear()` with no day precision; the core copy uses UTC and credits a month only after the birth day. Agent/skill paths import the `lib` copy, UI/map import core, so the same child can read a different age in two places. Delete `lib/child-age.ts`, use `@homa/core` everywhere (keep `formatChildAge` in one shared home). | high |
-| CR-17 | `apps/web/agent/tools/get_children.ts:42-47` | `new Date(child.birth_month)` on a `YYYY-MM` string parses as UTC and can shift the month, producing off-by-one `ageMonths`/`ageYears` vs `family-context.ts`. Parse `[year, month]` explicitly. | medium |
-| CR-18 | `apps/web/app/app/chat-storage.ts:118-129` (`shouldStartFreshSession`) | The 4am fresh-session boundary is computed with `setHours` in the browser's local zone, not the family zone. A traveling parent or a device in another zone rotates at the wrong wall-clock time. Pass `family.time_zone` in, or explicitly accept device-local rotation. | medium |
+| CR-16 | `apps/web/lib/child-age.ts:7-13` vs `packages/core/src/map/bands.ts:61-66` | Fixed in the worktree by the full-birthday pass. `lib/child-age.ts` now delegates to `@homa/core` age math while keeping `formatChildAge` local. | high |
+| CR-17 | `apps/web/agent/tools/get_children.ts:42-47` | Fixed in the worktree by the full-birthday pass. `get_children` now uses shared day-precise `ageInMonths` instead of `new Date(child.birth_month)`. | medium |
+| CR-18 | `apps/web/app/app/chat-storage.ts:118-129` (`shouldStartFreshSession`) | Fixed in the worktree. Chat rotation now receives `family.time_zone` and compares family-local chat-day keys around the 4am boundary instead of using browser-local Date setters. | medium |
 
 ### Security (defense-in-depth and public-surface gaps)
 
 | # | Where | What | Verified |
 | --- | --- | --- | --- |
-| CR-19 | `apps/web/app/api/waitlist/route.ts:28-98` | The public waitlist POST has only a honeypot, no `rateLimited()`/`clientIp()` like every map route, so it can be spammed into Supabase and the events table. Add IP rate limiting via `lib/map/ratelimit`. | high |
-| CR-20 | `apps/web/app/api/voice/curriculum/start/route.ts:29-183` | The signed-in "Call me" handler places a real outbound Telnyx call with no per-family rate limit, so any authenticated parent can run up call charges. Add a per-family daily cap (mirror `voice/tools/send-email`). | high |
-| CR-21 | `apps/web/app/api/chat/dictation/route.ts:28-56` | Auth-gated but unthrottled; each call spends Telnyx STT credits. Rate-limit per user or IP. | high |
-| CR-22 | `apps/web/lib/family-invites.ts:136-213` (`consumeFamilyInvite`) | Token hash, expiry, and single-use are checked, but `auth.users.email` is never compared to `family_invites.email`. Any signed-in account with no family of its own can consume a forwarded/leaked invite link. Compare `lower(email)` and refuse on mismatch. | high |
-| CR-23 | six Telnyx webhook/tool routes (`voice/context`, `voice/tools/*`, `voice/curriculum/insights`) | All authenticate via `?key=` in the URL. Query strings land in access/CDN logs and Referer. Prefer an `Authorization: Bearer` header and treat the URL secret as defense-in-depth only; rotate if URLs may have been logged. | medium |
-| CR-24 | `apps/web/lib/phone-claim.ts:52-62` (`startPhoneClaim`) | The verification SMS is sent before the code row is inserted; if the insert fails the parent holds a code with no DB row. Insert first (or same transaction), send after. | high |
-| CR-25 | `apps/web/lib/email-inbound.ts:9-15` + `apps/web/agent/channels/email.ts:70-74` | Inbound email trusts `fromEmail` from the body after a URL-secret match, with no Resend signature verification; secret leak allows impersonating any registered family's email to its agent scope. Add signature verification. | medium |
-| CR-26 | `apps/web/app/auth/callback/route.ts:17-18` | Blocks `//` and `\` but, unlike `proxy.ts`'s `safeSameOriginPath`, allows `next=/signin`, bouncing a freshly-authed user back to sign-in. Reuse `safeSameOriginPath`. | medium |
-| CR-27 | narrative + curriculum stores by `childId` only: `apps/web/lib/map/narrative-store.ts:39-67,151-169`, `apps/web/lib/map/curriculum-store.ts:19-40`, plus write-by-`child_id`-alone in `store.ts` (`markReportEmailed`, `markBandReady`, `saveChildContext`, etc.) | These enforce no family boundary in the query itself; every current caller pre-scopes, but a future caller with a bare UUID crosses tenants. Add a `familyId` parameter and predicate to each entry point (defense-in-depth behind RLS/token gating). | medium |
+| CR-19 | `apps/web/app/api/waitlist/route.ts:28-98` | Fixed in the worktree. The public waitlist POST now applies the shared IP rate limiter and returns 429 before any Supabase write when the window is exceeded. | high |
+| CR-20 | `apps/web/app/api/voice/curriculum/start/route.ts:29-183` | Fixed in the worktree. The signed-in "Call me" handler now applies a per-family daily cap before phone linking or Telnyx work. | high |
+| CR-21 | `apps/web/app/api/chat/dictation/route.ts:28-56` | Fixed in the worktree. Dictation now applies a per-user hourly cap before multipart parsing or STT work. | high |
+| CR-22 | `apps/web/lib/family-invites.ts:136-213` (`consumeFamilyInvite`) | Fixed in the worktree. Invite consumption now requires the authenticated user's email to match the invited email before token consumption or membership insert. | high |
+| CR-23 | six Telnyx webhook/tool routes (`voice/context`, `voice/tools/*`, `voice/curriculum/insights`) | Fixed in the worktree. Voice webhook/tool routes now accept `Authorization: Bearer <TELNYX_WEBHOOK_SECRET>` through a shared helper, with the existing URL key kept as a compatibility fallback. | medium |
+| CR-24 | `apps/web/lib/phone-claim.ts:52-62` (`startPhoneClaim`) | Fixed in the worktree. Phone claim codes are inserted before SMS send, and a failed send deletes the pending code so the parent never receives an unredeemable code. | high |
+| CR-25 | `apps/web/lib/email-inbound.ts:9-15` + `apps/web/agent/channels/email.ts:70-74` | Fixed in the worktree. Inbound email now verifies the raw Resend/Svix webhook signature with `RESEND_WEBHOOK_SECRET` before parsing or trusting sender fields. | medium |
+| CR-26 | `apps/web/app/auth/callback/route.ts:17-18` | Fixed in the worktree. Auth callback and proxy now share `safeSameOriginPath`, which rejects `/signin` destinations as well as external-looking paths. | medium |
+| CR-27 | narrative + curriculum stores by `childId` only: `apps/web/lib/map/narrative-store.ts:39-67,151-169`, `apps/web/lib/map/curriculum-store.ts:19-40`, plus write-by-`child_id`-alone in `store.ts` (`markReportEmailed`, `markBandReady`, `saveChildContext`, etc.) | Fixed in the worktree. Narrative, curriculum, report-email, and band-ready helpers now require or derive a family id and include matching family predicates before reads or writes. | medium |
 
 ### Guards and CI (the test suite's own blind spots)
 
 | # | Where | What | Verified |
 | --- | --- | --- | --- |
-| CR-28 | `scripts/isolation-check.mjs` (whole file) | Uses only the anon key; it never signs in as Family A and tries to read Family B's `children`/`family_memories`/`materials`. A policy bug granting `authenticated` too broad a `USING` clause passes CI. Add a two-JWT cross-tenant phase. This is the load-bearing case for law #1. | high |
-| CR-29 | `scripts/isolation-check.mjs:65-137` | The hardcoded table list omits `family_members`, `phone_link_requests`, and `phone_claim_codes` (all live, the latter two deny-all token tables). New tables only get covered by hand. Add them, and consider generating the deny-all list from migrations so tables cannot ship uncovered. | high |
-| CR-30 | `scripts/map-norms-report.mts:77-91` | Joins `child_answers` to `public.lead_children`, dropped in migration `20260708021500_drop_lead_world.sql`; `pnpm report:norms` now errors. Join `public.children` on `child_id` and age from `children.birth_month`. Dev script only (not product runtime). | high |
-| CR-31 | `scripts/materials-calibration.mts:236-282` | Failed outcomes are logged but the script always `process.exit(0)`, so automation reading the exit code treats a failed calibration as success. Exit 1 when any outcome failed. | high |
-| CR-32 | deny-all tables missing explicit `revoke`: `phone_leads`, `phone_link_requests`, `phone_claim_codes`, `model_usage`, `knowledge_bank` (contrast `family_invites`/`family_phones` which have both) | RLS-with-zero-policies denies today, but a future broad GRANT or policy slip exposes these before a table with an explicit REVOKE would. Add `revoke all on table … from anon, authenticated`. | medium |
+| CR-28 | `scripts/isolation-check.mjs` (whole file) | Fixed in the worktree. The guard now creates two temporary authenticated families, proves own reads, blocks cross-family reads and writes for `children`, `family_memories`, and `materials`, and cleans up fixtures through the DB connection. CI now supplies `SUPABASE_DB_PASSWORD` to this step. | high |
+| CR-29 | `scripts/isolation-check.mjs:65-137` | Fixed in the worktree. The named tables are covered, and the guard now parses migrations and fails if any current `public` table is missing from the isolation assertions. | high |
+| CR-30 | `scripts/map-norms-report.mts:77-91` | Fixed in the worktree. The norms report now joins `public.children` on `child_id` and `pnpm report:norms` runs successfully against the configured database. | high |
+| CR-31 | `scripts/materials-calibration.mts:236-282` | Fixed in the worktree. The script still writes its report, then exits 1 when any outcome failed and exits 0 only when all outcomes succeeded. | high |
+| CR-32 | deny-all tables missing explicit `revoke`: `phone_leads`, `phone_link_requests`, `phone_claim_codes`, `model_usage`, `knowledge_bank` (contrast `family_invites`/`family_phones` which have both) | Fixed in the worktree. Added migration `20260711190000_revoke_deny_all_tables.sql` with explicit `revoke all` statements for the five deny-all server tables. | medium |
 
 ### Correctness in the domain core (guarded content, but type/consistency faults)
 
 | # | Where | What | Verified |
 | --- | --- | --- | --- |
-| CR-33 | `packages/core/src/map/bank.ts:21-33` (`MapItem`) vs `content.ts:27-48` (`MapItemContent`) | ~80 items populate `standards`, and `MapItemContent` declares it, but `MapItem` (what `getMapItem` returns) drops the field, forcing a cast in `evidence/page.tsx:101`. Add `standards?` to `MapItem` or unify the two parallel item types. | high |
-| CR-34 | `packages/core/src/map/schemas.ts:47-48` (cap 8) vs `:91-92` (cap 12) | Child-create caps interests at 8; the extras endpoint allows 12; the merge sites apply no combined cap, so up to 20 can accumulate. Align on one cap or enforce a combined max at merge. | high |
-| CR-35 | `packages/core/src/map/scoring.ts:58-59` vs `:164` | The `highConfidence` doc says "both base and a ladder item carried real signal" but the code is `observations.length >= 2` (any two answers). Reword the doc or implement the base+ladder check it promises. | high |
+| CR-33 | `packages/core/src/map/bank.ts:21-33` (`MapItem`) vs `content.ts:27-48` (`MapItemContent`) | Fixed in the worktree. `MapItem` now includes optional `standards`, and the evidence page reads `item.standards` without a cast. | high |
+| CR-34 | `packages/core/src/map/schemas.ts:47-48` (cap 8) vs `:91-92` (cap 12) | Fixed in the worktree. Child creation, extras, onboarding UI, agent profile updates, and pinned updates now share `MAP_INTERESTS_CAP`, and server profile writes slice to that cap. | high |
+| CR-35 | `packages/core/src/map/scoring.ts:58-59` vs `:164` | Fixed in the worktree. The `highConfidence` comment now matches the existing rule, at least two real observations in the subject, with no scoring behavior change. | high |
 
 ---
 
@@ -129,59 +133,59 @@ CR-11/CR-12 above plus:
 
 | # | Where | What |
 | --- | --- | --- |
-| CR-36 | `apps/web/app/app/settings/time-zone-card.tsx:33-35` | "Sets the clock behind your greeting…" uses banned "behind" framing (law #4). Reword. |
-| CR-37 | `apps/web/components/marketing/faq-items.ts:13`, `apps/web/app/terms/page.tsx:42-43` | "invite-only" / "for invited families" copy contradicts the open onboarding funnel (invite-only retired 2026-07-07, documented in `page.tsx:73-75`). |
-| CR-38 | `apps/web/components/marketing/Features.tsx:18`, `Stories.tsx:47`, `thread/HowThread.tsx:63` | Marketing copy uses "stuck" deficit framing while product surfaces avoid it. Run through `homa-copy-reviewer`. |
-| CR-39 | `apps/web/app/onboarding/r/[token]/plan/[subjectId]/page.tsx:278-285` | Footer tells already-onboarded families "You're on the invite list." Point them at the app instead. |
-| CR-40 | `apps/web/app/onboarding/page.tsx:6-11`, `extras-step.tsx:15-17` | File-header comments describe the pre-2026-07-08 flow order and a relocated homeschool block. Update. |
-| CR-41 | `apps/web/next.config.ts:7-9` | Comment points at `lib/print/render-page.ts`; the file is `lib/materials/render-page.ts`. |
-| CR-42 | `packages/core/src/map/content.ts:2` (`v2026.07.3`) vs `bank.ts:16` (`MAP_BANK_VERSION="2026.07.5"`) | Content header version disagrees with the stored report version constant. Reconcile. |
-| CR-43 | supabase migration header comments | Two files each claim "Migration #49", two claim "#50" (`homa_tasks_framework`, `multi_parent_v0`, `knowledge_bank`, `family_phones_multi_number`). Renumber comments to match filename order (comments only). |
+| CR-36 | `apps/web/app/app/settings/time-zone-card.tsx:33-35` | Fixed in the worktree. Reworded the settings copy to "Sets the clock for your greeting..." and removed the banned word. |
+| CR-37 | `apps/web/components/marketing/faq-items.ts:13`, `apps/web/app/terms/page.tsx:42-43` | Fixed in the worktree. Removed stale invite-only wording from the FAQ, terms, and synced public `llms` summaries. |
+| CR-38 | `apps/web/components/marketing/Features.tsx:18`, `Stories.tsx:47`, `thread/HowThread.tsx:63` | Fixed in the worktree. Replaced the visible marketing "stuck" framing with "ready for more practice" across the feature grid, story section, and how-it-works thread. |
+| CR-39 | `apps/web/app/onboarding/r/[token]/plan/[subjectId]/page.tsx:278-285` | Fixed in the worktree. The plan footer now points families to `/app`, and the remaining pending-age hub copy no longer uses invite-list framing. |
+| CR-40 | `apps/web/app/onboarding/page.tsx:6-11`, `extras-step.tsx:15-17` | Fixed in the worktree. Updated the onboarding page and extras-step comments to match the current account-first flow and dedicated HomeschoolStep. |
+| CR-41 | `apps/web/next.config.ts:7-9` | Fixed in the worktree. Updated the renderer comment to `lib/materials/render-page.ts`. |
+| CR-42 | `packages/core/src/map/content.ts:2` (`v2026.07.3`) vs `bank.ts:16` (`MAP_BANK_VERSION="2026.07.5"`) | Fixed in the worktree. Updated the content bank header to v2026.07.5 to match `MAP_BANK_VERSION`. |
+| CR-43 | supabase migration header comments | Fixed in the worktree. Renumbered migration header comments in filename order so no `Migration #` value is duplicated. Comments only. |
 
 ### Dead exports / dead code (verified zero external importers)
 
 | # | Where | What |
 | --- | --- | --- |
-| CR-44 | `apps/web/lib/waitlist-client.ts:112` (`flushWaitlistQueue`) | Exported, zero importers. The offline queue it drains is therefore never flushed, so a queued signup on flaky wifi sits forever. Either wire it into a root client bootstrap (on mount + `online` event) or delete the queue path. **This one is a latent bug, not just dead code, promote if the offline-queue promise still stands.** |
-| CR-45 | `apps/web/lib/family-phone.ts:150-176` (`copyLeadPhoneToFamily`) | Leftover from the retired family-bridge flow. Delete. |
-| CR-46 | `apps/web/lib/email-inbound.ts:83-86` (`findFamilyIdByEmail`), `hours-model.ts:28-34` (`formatMinutes`), `dashboard.ts:71-73` (`planStartMs`), `family-fold.ts:17-26` (`isTrueStub`), `agent-pinned.ts:368` (re-export `scanMemoryContent`) | Exported but only used in-file or not at all. Unexport or remove. |
-| CR-47 | `packages/core/src/index.ts` (`ladderRungs`, `domainForBankItem`, `CAPTURE_MAX_MONTHS`, `AHEAD_THRESHOLD_MONTHS`); `bands.ts` (`CAPTURE_MIN_MONTHS` defined, never referenced) | Dead barrel exports in `@homa/core`. Trim or wire in. |
-| CR-48 | most of `packages/taxonomy/src/index.ts:28-62` (`readyTopics`, `bottleneck`, `hubTopics`, `clusterSummary`, `standardsForTopic`, …) | Only `getTaxonomyDomain` is imported by product code; the graph API is staged but unconsumed. Document as staged or trim exports. |
-| CR-49 | `apps/web/lib/harness/resume-session.ts` (whole file) | Zero importers; chat uses `turn-recovery.ts` stream replay instead. BUILD.md still calls it a load-bearing standing mitigation ("every resume MUST go through this"). Re-decide: wire it into the resume paths, or retire it and update BUILD.md. See Tracked note. |
+| CR-44 | `apps/web/lib/waitlist-client.ts:112` (`flushWaitlistQueue`) | Fixed in the worktree. Added a root `WaitlistQueueFlusher` client component that flushes queued waitlist submissions on mount and on the browser `online` event. |
+| CR-45 | `apps/web/lib/family-phone.ts:150-176` (`copyLeadPhoneToFamily`) | Fixed in the worktree. Removed the dead helper from `family-phone.ts`; the active phone-link bridge path still uses `addFamilyPhone`. |
+| CR-46 | `apps/web/lib/email-inbound.ts:83-86` (`findFamilyIdByEmail`), `hours-model.ts:28-34` (`formatMinutes`), `dashboard.ts:71-73` (`planStartMs`), `family-fold.ts:17-26` (`isTrueStub`), `agent-pinned.ts:368` (re-export `scanMemoryContent`) | Fixed in the worktree. Removed unused wrappers/functions, made `planStartMs` private, and removed the `scanMemoryContent` re-export. |
+| CR-47 | `packages/core/src/index.ts` (`ladderRungs`, `domainForBankItem`, `CAPTURE_MAX_MONTHS`, `AHEAD_THRESHOLD_MONTHS`); `bands.ts` (`CAPTURE_MIN_MONTHS` defined, never referenced) | Fixed in the worktree. Trimmed the dead root barrel exports and removed unused `CAPTURE_MIN_MONTHS`; internal module exports used within core remain. |
+| CR-48 | most of `packages/taxonomy/src/index.ts:28-62` (`readyTopics`, `bottleneck`, `hubTopics`, `clusterSummary`, `standardsForTopic`, …) | Fixed in the worktree. Documented the broad root export as a staged server-side graph API and kept the narrow `@homa/taxonomy/domains` runtime import path for product code. |
+| CR-49 | `apps/web/lib/harness/resume-session.ts` (whole file) | Fixed in the worktree. Kept the harness as the staged M1-14 HTTP resume guard, clarified in code and BUILD.md that current hook-driven chat uses `turn-recovery.ts`, and tightened stream confirmation to accept a new turn that reaches `turn.completed`, `session.waiting`, or `session.completed`. |
 
 ### Convention/law violations (mechanical)
 
 | # | Where | What |
 | --- | --- | --- |
-| CR-50 | `apps/web/lib/harness/resume-session.ts` lines 2,9,14,58,92,103,166 | Seven em dashes in comments/strings (law #7: none, ever). Replace with comma/period/colon/mid-dot. |
-| CR-51 | tracked docs (70+ files: `build-log.md`, `journeys/*`, several `.agents/skills/*`) | Em dashes throughout docs; the law covers docs too. Batch cleanup, prioritize user-facing copy and build-log; consider a lint rule. |
-| CR-52 | `data/state-requirements/**` and `packages/taxonomy/data/topics.json` | Vendored snapshots contain em dashes. Not linted (not parent-facing), but sanitize on ingest/display so they never render verbatim. |
-| CR-53 | `packages/core/src/map/sentences.ts:72-120` (`switch(score.position)`), `apps/web/app/onboarding/r/[token]/report-view.tsx:387-394` (ternary), `growth-story.tsx:17-22` (`Record<string, number>` + `?? 0`) | Switches/branches over the `position` union with no `never` default, violating the workspace exhaustive-switch rule. Add `default: const _: never = …`. |
-| CR-54 | `apps/web/app/app/chat-client.tsx` (4 sites), `dictation.tsx`, three mobile `chat-session.tsx` sites | `eslint-disable react-hooks/exhaustive-deps`/`purity` hide dependency drift (`storageKey`, `agent.stop`, `liveTimes`). Refactor recovery into a hook with refs; chat-client is the worst offender. |
+| CR-50 | `apps/web/lib/harness/resume-session.ts` lines 2,9,14,58,92,103,166 | Fixed in the worktree. Replaced the no-em-dash violations in comments and error text. |
+| CR-51 | tracked docs (70+ files: `build-log.md`, `journeys/*`, several `.agents/skills/*`) | Partially cleaned. `apps/` and `packages/` are now free of literal em dashes outside vendored taxonomy data, with CR-52 sanitizing vendored display paths. Historical docs and local skill reference files still need a deliberate batch cleanup and lint rule. |
+| CR-52 | `data/state-requirements/**` and `packages/taxonomy/data/topics.json` | Fixed in the worktree. Added read-boundary sanitization for state requirement card text and assembled taxonomy names, descriptions, evidence, prompts, edge reasons, and cluster summaries, leaving vendored snapshots unchanged. |
+| CR-53 | `packages/core/src/map/sentences.ts:72-120` (`switch(score.position)`), `apps/web/app/onboarding/r/[token]/report-view.tsx:387-394` (ternary), `growth-story.tsx:17-22` (`Record<string, number>` + `?? 0`) | Fixed in the worktree. Added `never` exhaustiveness checks for report sentence and badge position handling, and keyed the growth movement rank map to `SubjectScore["position"]` so future union changes fail typecheck. |
+| CR-54 | `apps/web/app/app/chat-client.tsx` (4 sites), `dictation.tsx`, three mobile `chat-session.tsx` sites | Fixed in the worktree. Removed the listed hook suppressions by using explicit Eve method dependencies, stable completion callbacks, and state/ref-driven recorder recovery. Also removed the remaining app/package React hook suppressions in onboarding and mobile family loading. |
 
 ### Config / dependency hygiene
 
 | # | Where | What |
 | --- | --- | --- |
-| CR-55 | root `package.json` `pnpm.patchedDependencies` | Every turbo task prints `[WARN] The "pnpm" field in package.json is no longer read by pnpm … "pnpm.patchedDependencies" ignored`. The `eve@0.19.0` streaming-disconnect patch is applied today (verified in `node_modules`), but the config is in the spot newer pnpm ignores, and local pnpm 9.15.0 ≠ `packageManager: pnpm@10.12.1`. Move the config to the location current pnpm reads so a clean install can't silently drop the patch. |
+| CR-55 | root `package.json` `pnpm.patchedDependencies` | Fixed in the worktree. Moved `patchedDependencies` to `pnpm-workspace.yaml`, where pnpm 10 workspace settings are read, and removed the ignored `package.json.pnpm` block. `pnpm-lock.yaml` stayed unchanged after `pnpm install --lockfile-only --ignore-scripts`, preserving the eve patch hash. |
 | CR-56 | `apps/web/package.json:38` (`stripe`) | Declared, zero imports (Phase D billing). Known-deliberate (Tracked below) but re-flagged: remove until first import, or move to a billing package. |
 | CR-57 | version skew: `react` web `19.2.4` vs mobile `19.2.3`; `typescript` web `^5` vs mobile `~6.0.3`; `@types/node` web `^20` vs taxonomy `^22` | Same monorepo, different compiler/runtime pins (mobile on TS 6, web on TS 5). Align in one bump. |
-| CR-58 | 7 ops scripts (`telnyx-call-transcripts`, `telnyx-calls-today`, `tasks-e2e`, `knowledge-seed`, `knowledge-revert`, `map-narrative-fixtures`, `telnyx-assistant-info`) | Runnable only via `pnpm exec tsx`, no root `package.json` alias. Add aliases or document in BUILD.md. |
-| CR-59 | prod-mutating scripts (`knowledge-revert`, `knowledge-seed`, `state-requirements-seed`, `telnyx-transcripts-sync`) | Upsert/delete against prod via `SUPABASE_DB_PASSWORD` with no `--dry-run`/`--confirm-prod` gate. Add a confirmation flag when the URL matches the prod host. |
+| CR-58 | 7 ops scripts (`telnyx-call-transcripts`, `telnyx-calls-today`, `tasks-e2e`, `knowledge-seed`, `knowledge-revert`, `map-narrative-fixtures`, `telnyx-assistant-info`) | Fixed in the worktree. Added root aliases for all seven scripts; prod-mutating aliases still require callers to pass `-- --confirm-prod`. |
+| CR-59 | prod-mutating scripts (`knowledge-revert`, `knowledge-seed`, `state-requirements-seed`, `telnyx-transcripts-sync`) | Fixed in the worktree. Added a shared hosted-Supabase write guard and wired all four scripts to require `--confirm-prod` before DB writes or transcript sync. Local Supabase URLs remain unblocked. |
 
 ### Smaller smells
 
 | # | Where | What |
 | --- | --- | --- |
-| CR-60 | `apps/web/lib/map/ratelimit.ts:17-18` | At 10k keys the limiter calls `windows.clear()`, wiping every counter and briefly removing abuse protection for all routes on that instance. Evict oldest (LRU) instead. |
-| CR-61 | `apps/web/lib/materials/review-artifact.ts:101-107`, `generate-image.ts:119-124`, `voice/caption-image.ts:86-92` | `Promise.race` timeouts return failure but the underlying `generateObject`/`generateImage`/`generateText` keeps running and can still bill via `recordModelUsage`. Use `AbortController` or ignore late results. |
-| CR-62 | `apps/web/lib/materials/library.ts:169-171`, `apps/web/lib/memories.ts:20-23` | Return `[]` on any PostgREST error, so a permissions/schema failure looks like "nothing here". Log and propagate a failure state. |
-| CR-63 | `apps/web/app/api/link-phone/route.ts:11-22` (`page()`) | Interpolates `${title}`/`${body}` into HTML unescaped. All current callers are static, but any future dynamic copy is an XSS vector. Escape. |
-| CR-64 | `apps/web/app/api/map/claim/route.ts:68-74`, `signin/actions.ts:39-40`, `settings/actions.ts:214-216` | Raw Supabase error messages returned to the client/UI. Map to reviewed copy; log the raw message server-side only. |
-| CR-65 | `apps/web/lib/learning/session-review.ts:29` | `REVIEW_MIN_MESSAGES` parsed with bare `Number(...)`; a non-numeric env becomes `NaN` and `len < NaN` is always false, so the gate is disabled. Validate with `Number.isFinite` and default to 4. |
-| CR-66 | `apps/web/lib/sms-onboarding.ts:121-131` | `signupProgress` awaits `childAnswers(childId)` per child in a loop (N+1). One `where child_id in (...)` query grouped in memory. |
-| CR-67 | `apps/web/public/next.svg`, `vercel.svg`, `globe.svg`, `file.svg`, `window.svg` | Stock Create-Next-App SVGs, no references in app/components. Delete after a full-repo grep confirms. |
-| CR-68 | `apps/web/app/onboarding/r/[token]/chart-lightbox.tsx:32-66` | `role="dialog"`/`aria-modal` with no focus trap, initial focus, or Escape handler. Add them. |
+| CR-60 | `apps/web/lib/map/ratelimit.ts:17-18` | Fixed in the worktree. Replaced `windows.clear()` with bounded insertion-order LRU eviction and refreshes active keys on each hit, so high-cardinality abuse no longer wipes unrelated counters. |
+| CR-61 | `apps/web/lib/materials/review-artifact.ts:101-107`, `generate-image.ts:119-124`, `voice/caption-image.ts:86-92` | Fixed in the worktree. Replaced `Promise.race` timeout wrappers with `AbortController` signals passed into `generateObject`, `generateImage`, and `generateText`, so timed-out calls are cancelled and never record late usage. |
+| CR-62 | `apps/web/lib/materials/library.ts:169-171`, `apps/web/lib/memories.ts:20-23` | Fixed in the worktree. Material caller reads now log raw PostgREST errors and throw a generic tool failure; memories reads return an explicit load-error state so settings can show a quiet error instead of hiding the card as empty. |
+| CR-63 | `apps/web/app/api/link-phone/route.ts:11-22` (`page()`) | Already fixed in the current worktree. `page()` escapes title, body, and hidden token values before HTML interpolation. |
+| CR-64 | `apps/web/app/api/map/claim/route.ts:68-74`, `signin/actions.ts:39-40`, `settings/actions.ts:214-216` | Fixed in the worktree. These paths now return stable parent-facing copy and log raw Supabase/Auth messages server-side only. |
+| CR-65 | `apps/web/lib/learning/session-review.ts:29` | Fixed in the worktree. `HOMA_REVIEW_MIN_MESSAGES` now accepts only finite positive numbers, floors decimals, and falls back to 4 for blank, malformed, or less-than-one values. |
+| CR-66 | `apps/web/lib/sms-onboarding.ts:121-131` | Fixed in the worktree. `signupProgress` now batches in-range child answers with one family-scoped joined query and groups them in memory; single-child SMS answer reads also require `familyId`. |
+| CR-67 | `apps/web/public/next.svg`, `vercel.svg`, `globe.svg`, `file.svg`, `window.svg` | Fixed in the worktree. Full-repo grep found no references outside this tracker row, and the unused stock SVGs were deleted. |
+| CR-68 | `apps/web/app/onboarding/r/[token]/chart-lightbox.tsx:32-66` | Fixed in the worktree. The chart lightbox now focuses the close button on open, traps Tab within the dialog, closes on Escape, and restores focus to the trigger on close. |
 
 ---
 
@@ -209,18 +213,28 @@ Verified copy-paste with concrete both-sites:
 
 - **Agent tool scoping preamble** (16 tools) and **signup-session preamble** (6 tools): the same `resolveAgentAccess`/`resolveSignupSession` try/catch block. Extract `withAgentAccess(attributes, fn)` / `withSignupSession(...)`.
 - **Map-route auth+validate preamble** (~10 routes): rate limit + `requireFamily` + JSON parse + zod. Extract `parseMapRequest(request, schema)`.
-- **Telnyx webhook key check** (6 routes) → `assertTelnyxWebhook(request)`.
-- **Resume-cookie set** (4 routes) → `setMapResumeCookie(token)`.
-- **Child interest/style/help-with parsing** (`store.ts`, `narrative-store.ts` ×2, `curriculum-store.ts`) → `lib/map/profile-context.ts`.
-- **`escapeHtml`** (`map/email.ts`, `materials/page-shell.ts`) → one `lib/html-escape.ts`.
-- **Telnyx SMS send** (`family-phone.ts` reimplements `voice/telnyx-api.ts`'s `sendHomaSms`); **E.164 normalization** across Telnyx scripts; **skill-library resolver** duplicated by `lib/slash-skills.ts`; **`argValue`/`parseArgs`/`loadEnvFile` bootstrap** across ~10 scripts (→ `scripts/cli-args.mts` + `scripts/load-web-env.mts`).
+- **Telnyx webhook key check** (6 routes) → fixed in the worktree with one
+  `lib/voice/webhook-auth.ts` helper.
+- **Resume-cookie set** (4 routes) → fixed in the worktree with one
+  `lib/map/resume-cookie.ts` helper.
+- **Child interest/style/help-with parsing** (`store.ts`, `narrative-store.ts` ×2, `curriculum-store.ts`) → fixed in the worktree with one `lib/map/profile-context.ts` helper.
+- **`escapeHtml`** (`map/email.ts`, `materials/page-shell.ts`, `api/link-phone/route.ts`) → fixed in the worktree with one `lib/html-escape.ts`.
+- **Telnyx SMS send** (`family-phone.ts` reimplements `voice/telnyx-api.ts`'s `sendHomaSms`) → fixed in the worktree by moving the link notification onto `sendHomaSms`. **Skill-library resolver** duplicated by `lib/slash-skills.ts` → fixed in the worktree by reusing `agent-skills-store.ts`. Remaining: **E.164 normalization** across Telnyx scripts; **`argValue`/`parseArgs`/`loadEnvFile` bootstrap** across ~10 scripts (→ `scripts/cli-args.mts` + `scripts/load-web-env.mts`).
 - **Report/plan facts assembly** duplicated and drifting between `narrative-store.ts` (full) and `curriculum-store.ts` (thin, missing context) → one `loadReportFactsInput(familyId, childId)`. Note: this thinness is also the root of CR-14.
 
 Verified: high on all listed sites.
 
 ### CR-72 · Mobile is behind web on shipped decisions
 
+Status 2026-07-11 late night: Fixed in the worktree for every named gap below.
+Mobile no longer exposes standalone account creation or family creation, reads
+`profile_completed_at`, gates Today and Chat until family setup plus at least
+one child exists, prefers the signed-in member display name, and still queues
+`/api/learning/review` after successful turns.
+
 Beyond the duplication, mobile lags web on decisions already made: it still offers standalone signup (web retired it 2026-07-08; mobile users skip onboarding + `profile_completed_at`), doesn't call `/api/learning/review` after turns, ignores per-member display names (multi-parent v0), and doesn't gate the Today flow on `profile_completed_at`. Its `AGENTS.md:13` also overstates tenant safety ("familyId never comes from client input") while `family.ts:95` and `events.ts:12` do pass client `family_id` (RLS re-checks it, so safe, but the doc should say so). Decide per item: implement, or document as an intentional mobile gap.
+
+2026-07-11 cleanup: `apps/mobile/AGENTS.md` now states the actual boundary, agent identity never takes `familyId` from client input, while app writes may pass a selected `family_id` under caller-token RLS. The mobile chat stack now does call `/api/learning/review` after successful turns. Standalone signup/profile-completion, per-member display names, and Today/Chat gating are fixed.
 
 ---
 

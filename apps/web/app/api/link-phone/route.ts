@@ -1,4 +1,5 @@
 import { consumePhoneLinkRequest } from "../../../lib/phone-link";
+import { escapeHtml } from "../../../lib/html-escape";
 
 /**
  * GET /api/link-phone?t=TOKEN: the click target of the "connect texting
@@ -10,23 +11,6 @@ import { consumePhoneLinkRequest } from "../../../lib/phone-link";
  * of redirecting into the app, because the click often happens on a
  * device with no session.
  */
-
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (char) => {
-    switch (char) {
-      case "&":
-        return "&amp;";
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case '"':
-        return "&quot;";
-      default:
-        return "&#39;";
-    }
-  });
-}
 
 function page(title: string, body: string, token?: string): Response {
   const safeTitle = escapeHtml(title);

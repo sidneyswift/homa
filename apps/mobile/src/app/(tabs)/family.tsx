@@ -10,13 +10,15 @@ import { useSession } from "../../features/auth/session-provider";
 import { AddChildForm } from "../../features/family/add-child-form";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { supabase } from "../../lib/supabase";
+import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
 /** Family: who Homa knows, plus account actions. */
 export default function FamilyScreen() {
   const { session } = useSession();
-  const { family, children, loading, reload } = useFamilyData();
+  const { family, children, memberDisplayName, loading, reload } = useFamilyData();
+  const setupReady = Boolean(family?.profile_completed_at && children.length > 0);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,7 +53,7 @@ export default function FamilyScreen() {
               >
                 {family.name}
               </Text>
-              {family.parent_display_name ? (
+              {memberDisplayName ?? family.parent_display_name ? (
                 <Text
                   style={{
                     fontFamily: fontFamilies.body,
@@ -59,7 +61,7 @@ export default function FamilyScreen() {
                     color: colors.textBody,
                   }}
                 >
-                  Parent: {family.parent_display_name}
+                  Parent: {memberDisplayName ?? family.parent_display_name}
                 </Text>
               ) : null}
               {family.us_state ? (
@@ -75,42 +77,63 @@ export default function FamilyScreen() {
               ) : null}
             </Card>
 
-            {children.map((child) => (
-              <Card key={child.id} style={{ gap: 4 }}>
+            {!setupReady ? (
+              <Card style={{ gap: space.md }}>
                 <Text
                   style={{
-                    fontFamily: fontFamilies.displaySemibold,
-                    fontSize: fontSize.lg,
-                    color: colors.textStrong,
+                    fontFamily: fontFamilies.body,
+                    fontSize: fontSize.base,
+                    color: colors.textBody,
                   }}
                 >
-                  {child.name}
-                  <Text
-                    style={{
-                      fontFamily: fontFamilies.body,
-                      fontSize: fontSize.sm,
-                      color: colors.textMuted,
-                    }}
-                  >
-                    {"  "}
-                    {ageLabel(ageInMonths(child.birth_month))}
-                  </Text>
+                  Finish onboarding on the web so Homa can keep the app in sync
+                  with your family setup.
                 </Text>
-                {child.profile.interests?.length ? (
-                  <Text
-                    style={{
-                      fontFamily: fontFamilies.body,
-                      fontSize: fontSize.sm,
-                      color: colors.textBody,
-                    }}
-                  >
-                    Into: {child.profile.interests.join(", ")}
-                  </Text>
-                ) : null}
+                <Button
+                  label="Open onboarding"
+                  onPress={() => void openWebOnboarding()}
+                />
               </Card>
-            ))}
+            ) : (
+              <>
+                {children.map((child) => (
+                  <Card key={child.id} style={{ gap: 4 }}>
+                    <Text
+                      style={{
+                        fontFamily: fontFamilies.displaySemibold,
+                        fontSize: fontSize.lg,
+                        color: colors.textStrong,
+                      }}
+                    >
+                      {child.name}
+                      <Text
+                        style={{
+                          fontFamily: fontFamilies.body,
+                          fontSize: fontSize.sm,
+                          color: colors.textMuted,
+                        }}
+                      >
+                        {"  "}
+                        {ageLabel(ageInMonths(child.birth_month))}
+                      </Text>
+                    </Text>
+                    {child.profile.interests?.length ? (
+                      <Text
+                        style={{
+                          fontFamily: fontFamilies.body,
+                          fontSize: fontSize.sm,
+                          color: colors.textBody,
+                        }}
+                      >
+                        Into: {child.profile.interests.join(", ")}
+                      </Text>
+                    ) : null}
+                  </Card>
+                ))}
 
-            <AddChildForm familyId={family.id} onAdded={() => void reload()} />
+                <AddChildForm familyId={family.id} onAdded={() => void reload()} />
+              </>
+            )}
           </View>
         ) : (
           <Text
@@ -120,8 +143,7 @@ export default function FamilyScreen() {
               color: colors.textBody,
             }}
           >
-            Set up your family on the Today tab first; everything here
-            fills in from there.
+            Start with the web onboarding; everything here fills in from there.
           </Text>
         )}
 

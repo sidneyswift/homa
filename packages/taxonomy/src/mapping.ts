@@ -1,4 +1,4 @@
-import type { PrerequisiteStrength, TopicKind } from "./types.js";
+import type { PrerequisiteStrength, TopicKind } from "./types";
 
 /**
  * The Marble import mapping, straight from the plan's table

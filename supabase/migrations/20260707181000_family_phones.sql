@@ -1,4 +1,4 @@
--- The family texting line (founder decisions 2026-07-07, build-log):
+-- Migration #25: the family texting line (founder decisions 2026-07-07, build-log):
 -- one phone number per family, captured optionally at signup or on /home,
 -- trusted as typed (verification deliberately skipped for cohort one,
 -- founder call), and used by the Telnyx SMS channel to resolve an inbound

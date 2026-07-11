@@ -11,8 +11,11 @@ character instead of agreeing with the author.
 
 ## How the orchestrator dispatches this gate
 
-Run a fresh subagent (in Cursor: the Task tool, `subagent_type:
-generalPurpose`, `readonly: true`). The dispatch prompt must contain, in this
+Use the current environment's delegation mechanism to run a fresh-context,
+read-only subagent. Give it only the persona and draft named below, no prior
+drafting conversation and no file-editing task. If the environment cannot
+enforce a read-only mode, state the restriction in the dispatch and keep all
+file edits with the orchestrator. The dispatch prompt must contain, in this
 order, pasted verbatim, not summarized:
 
 1. The full text of the right persona file from `marketing/personas/`

@@ -3,9 +3,12 @@
 import { emitEvent } from "@homa/core";
 import { useEveAgent, type EveMessage } from "eve/react";
 import { ArrowUp, Sparkles, Square, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
+import { sendWallBeacon } from "../../components/billing/wall-beacon";
+import { WallModal } from "../../components/billing/wall-modal";
+import type { WallCheckout } from "../../lib/billing/wall-types";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
@@ -114,18 +117,29 @@ const STREAM_RECONNECT_ATTEMPTS = 8;
  *  that is still being written server-side gets its chance to land. */
 const RECOVERY_DEADLINE_MS = 240_000;
 
+function currentTimeMs(): number {
+  return Date.now();
+}
+
 export function ChatClient({
   storageKey,
   familyId,
+  timeZone,
   parentName,
   focusChildName,
   initialDraft,
   kids,
   slashSkills,
+  wall = null,
 }: {
   storageKey: string;
   familyId: string | null;
+  timeZone: string | null;
   parentName: string | null;
+  /** The wall (plans/2026-07-11-the-wall.md): checkout URLs when this
+   * family is walled, null when the composer is open (the default, and
+   * always the case while HOMA_WALL_ENABLED is off). */
+  wall?: WallCheckout | null;
   /** The kid selected in the context switcher, or null for the whole
    * family. Display only: the agent learns the focus server-side from
    * the same cookie, this just keeps the composer honest about it. */
@@ -137,10 +151,10 @@ export function ChatClient({
   kids?: { id: string; name: string }[];
   slashSkills?: SlashSkillItem[];
 }) {
-  const supabase = createSupabaseBrowserClient();
+  const [supabase] = useState(() => createSupabaseBrowserClient());
   // Load + rotation decision, once per mount (fresh morning = fresh
   // session; the old session's messages fold into the archive).
-  const [prepared] = useState(() => prepareChat(storageKey));
+  const [prepared] = useState(() => prepareChat(storageKey, timeZone));
   const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
   // Message id -> arrival time. State (not a ref) because the transcript
   // grouping reads it during render.
@@ -175,30 +189,33 @@ export function ChatClient({
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
 
-  async function emitTurnCompleted(
-    status: "ok" | "error",
-    errorClass?: "turn_failed" | "send_failed" | "unknown",
-  ) {
-    if (!familyId) return;
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    if (!url || !key) return;
-    const { data } = await supabase.auth.getSession();
-    const accessToken = data.session?.access_token;
-    if (!accessToken) return;
-    await emitEvent(
-      { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
-      "chat.turn_completed",
-      {
-        status,
-        ...(errorClass ? { error_class: errorClass } : {}),
-        modality: turnModalityRef.current,
-        latency_ms: takeTurnLatencyMs(),
-        model_tier: MODEL_TIER,
-        tool_calls: countLastTurnToolCalls(messagesRef.current),
-      },
-    );
-  }
+  const emitTurnCompleted = useCallback(
+    async (
+      status: "ok" | "error",
+      errorClass?: "turn_failed" | "send_failed" | "unknown",
+    ) => {
+      if (!familyId) return;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (!url || !key) return;
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+      if (!accessToken) return;
+      await emitEvent(
+        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
+        "chat.turn_completed",
+        {
+          status,
+          ...(errorClass ? { error_class: errorClass } : {}),
+          modality: turnModalityRef.current,
+          latency_ms: takeTurnLatencyMs(),
+          model_tier: MODEL_TIER,
+          tool_calls: countLastTurnToolCalls(messagesRef.current),
+        },
+      );
+    },
+    [familyId, supabase],
+  );
 
   const agent = useEveAgent({
     auth: {
@@ -211,7 +228,7 @@ export function ChatClient({
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
     onEvent() {
-      lastStreamActivityRef.current = Date.now();
+      lastStreamActivityRef.current = currentTimeMs();
       durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
@@ -229,10 +246,7 @@ export function ChatClient({
         events: snapshot.events,
         session: snapshot.session,
         messageTimes: stamped,
-        // onFinish runs after a turn completes, never during render,
-        // so reading the clock is safe; the purity rule cannot tell.
-        // eslint-disable-next-line react-hooks/purity
-        lastActivityAt: Date.now(),
+        lastActivityAt: currentTimeMs(),
       });
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
@@ -261,22 +275,31 @@ export function ChatClient({
         // teardown, and eve rejects overlapping sends.
         setTimeout(() => {
           setBusySeconds(0);
-          lastSendRef.current = { text: message, atMs: Date.now() };
+          lastSendRef.current = { text: message, atMs: currentTimeMs() };
           markTurnStarted();
           void sendRef.current?.({ message });
         }, 0);
       }
     },
   });
+  const agentError = agent.error;
+  const agentReset = agent.reset;
+  const agentSend = agent.send;
+  const agentStop = agent.stop;
 
   useEffect(() => {
-    sendRef.current = agent.send;
-  }, [agent.send]);
+    sendRef.current = agentSend;
+  }, [agentSend]);
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
   const firstScrollDoneRef = useRef(false);
   const busy = agent.status === "submitted" || agent.status === "streaming";
+  // The wall (plans/2026-07-11-the-wall.md): the chat door. One
+  // door-tap beacon per visit (the ref), and a walled family's send
+  // opens the offer instead of the turn, draft intact.
+  const [wallOpen, setWallOpen] = useState(false);
+  const chatDoorTappedRef = useRef(false);
 
   // Voice input (FR-4's dictation leg): the transcript joins whatever
   // is already typed, and she reviews the words before sending. The
@@ -294,9 +317,9 @@ export function ChatClient({
   const [busySeconds, setBusySeconds] = useState(0);
   useEffect(() => {
     if (!busy) return;
-    const startedAt = Date.now();
+    const startedAt = currentTimeMs();
     const timer = setInterval(() => {
-      setBusySeconds(Math.floor((Date.now() - startedAt) / 1000));
+      setBusySeconds(Math.floor((currentTimeMs() - startedAt) / 1000));
     }, 1000);
     return () => clearInterval(timer);
   }, [busy]);
@@ -310,8 +333,8 @@ export function ChatClient({
   }, [archived]);
 
   useEffect(() => {
-    if (!agent.error || agent.error === reportedErrorRef.current) return;
-    reportedErrorRef.current = agent.error;
+    if (!agentError || agentError === reportedErrorRef.current) return;
+    reportedErrorRef.current = agentError;
     void emitTurnCompleted("error", "turn_failed");
 
     // Lost-turn recovery (incident 2026-07-11 follow-up): the durable
@@ -360,17 +383,15 @@ export function ChatClient({
           events: [],
           session: undefined,
           messageTimes: {},
-          lastActivityAt: Date.now(),
+          lastActivityAt: currentTimeMs(),
         });
-        agent.reset();
+        agentReset();
         durableCursorRef.current = 0;
         lastSendRef.current = null;
       }
       setRecovering(false);
     })();
-    // The closures re-create per render; agent.error is the real dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agent.error]);
+  }, [agentError, agentReset, emitTurnCompleted, liveTimes, storageKey, supabase]);
 
   // Give up a running recovery when she leaves the page.
   useEffect(() => {
@@ -389,21 +410,21 @@ export function ChatClient({
     if (!busy) return;
     // The turn just started; that counts as activity (the stall clock
     // must never inherit a stamp from a previous turn).
-    lastStreamActivityRef.current = Date.now();
+    lastStreamActivityRef.current = currentTimeMs();
     let wakeGraceTimer: ReturnType<typeof setTimeout> | null = null;
     const isStale = (stallMs: number) =>
-      Date.now() - lastStreamActivityRef.current > stallMs;
+      currentTimeMs() - lastStreamActivityRef.current > stallMs;
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       if (!isStale(VISIBLE_STALL_MS) || wakeGraceTimer !== null) return;
       wakeGraceTimer = setTimeout(() => {
         wakeGraceTimer = null;
         // Still nothing after the grace: the stream really is dead.
-        if (isStale(VISIBLE_STALL_MS)) agent.stop();
+        if (isStale(VISIBLE_STALL_MS)) agentStop();
       }, WAKE_GRACE_MS);
     };
     const watchdog = setInterval(() => {
-      if (isStale(WATCHDOG_STALL_MS)) agent.stop();
+      if (isStale(WATCHDOG_STALL_MS)) agentStop();
     }, 15_000);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
@@ -411,9 +432,7 @@ export function ChatClient({
       if (wakeGraceTimer !== null) clearTimeout(wakeGraceTimer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-    // agent.stop is stable for the store's lifetime; busy is the real dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busy]);
+  }, [agentStop, busy]);
 
   const transcript = buildTranscript({
     archived,
@@ -437,6 +456,18 @@ export function ChatClient({
   function sendMessage(text: string) {
     const message = text.trim();
     if (message.length === 0) return;
+    // The chat door's tap beacon, once per visit, wall on or off (the
+    // paywall decision wants baseline tap-through data).
+    if (!chatDoorTappedRef.current) {
+      chatDoorTappedRef.current = true;
+      sendWallBeacon({ kind: "door_tap", door: "chat" });
+    }
+    // Walled: the offer opens and her words stay in the composer. The
+    // eve turn never starts, so nothing is half-sent behind the wall.
+    if (wall) {
+      setWallOpen(true);
+      return;
+    }
     // The registry's modality signal (chat.turn_completed): "voice"
     // when dictation fed any part of this draft.
     turnModalityRef.current = draftFromVoiceRef.current ? "voice" : "text";
@@ -461,10 +492,7 @@ export function ChatClient({
     const outgoing = [...queued, message].join("\n\n");
     setQueued([]);
     setBusySeconds(0);
-    // sendMessage is an event handler, never render; reading the clock
-    // is safe here, the purity rule cannot tell (same as onFinish above).
-    // eslint-disable-next-line react-hooks/purity
-    lastSendRef.current = { text: outgoing, atMs: Date.now() };
+    lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     markTurnStarted();
     void agent.send({ message: outgoing });
   }
@@ -704,6 +732,14 @@ export function ChatClient({
           </p>
         ) : null}
       </footer>
+      {wall ? (
+        <WallModal
+          door="chat"
+          checkout={wall}
+          open={wallOpen}
+          onClose={() => setWallOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

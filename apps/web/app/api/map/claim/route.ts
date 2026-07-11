@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-
 import { mapClaimSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { setMapResumeCookie } from "../../../../lib/map/resume-cookie";
 import { requireFamily } from "../../../../lib/map/session";
 import { attachAuthUser, mirrorToWaitlist } from "../../../../lib/map/store";
-import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
 /**
@@ -65,11 +63,17 @@ export async function POST(request: Request): Promise<Response> {
       const alreadyRegistered =
         signUpError?.code === "user_already_exists" ||
         /already (been )?registered/i.test(signUpError?.message ?? "");
+      console.error(
+        "map/claim signup failed:",
+        signUpError?.message ?? "missing user from signup response",
+      );
       return Response.json(
         {
           ok: false,
           reason: alreadyRegistered ? "exists" : "auth-failed",
-          message: signUpError?.message,
+          message: alreadyRegistered
+            ? "That email already has a Homa account."
+            : "We couldn't create that account yet. You can try again in a minute.",
         },
         { status: 400 },
       );
@@ -100,14 +104,7 @@ export async function POST(request: Request): Promise<Response> {
       utm: {},
     });
 
-    const cookieStore = await cookies();
-    cookieStore.set(MAP_RESUME_COOKIE, resumeToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 90,
-    });
+    await setMapResumeCookie(resumeToken);
 
     await emitMapEvent("map.account_created", { family_id: familyId, method: "password", returning });
 

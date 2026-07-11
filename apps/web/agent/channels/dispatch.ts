@@ -1,15 +1,28 @@
 import { defineChannel, GET } from "eve/channels";
 
 import {
-  sendAgentComposedEmail,
-  sendJournalAgentEmail,
-  sendResearchBriefEmail,
+  listFamilyDeliveryRecipients,
+} from "../../lib/conversation-continuity/delivery-ledger";
+import { buildSignedReplyAddress } from "../../lib/conversation-continuity/email-reply-auth";
+import {
+  markCanonicalMessageDelivered,
+  persistCanonicalMessage,
+} from "../../lib/conversation-continuity/ledger";
+import {
+  deliverTaskMessage,
+  postgresTaskDeliveryLedger,
+} from "../../lib/conversation-continuity/task-delivery";
+import {
+  submitAgentComposedEmail,
+  submitJournalAgentEmail,
+  submitResearchBriefEmail,
+  type HomaEmailSubmission,
 } from "../../lib/map/email";
 import { mapDb } from "../../lib/map/db";
 import { emitMapEvent } from "../../lib/map/events";
 import { finishTaskRun, markTaskRunDelivered } from "../../lib/tasks/store";
 import { type FamilyTaskKind } from "../../lib/tasks/kinds";
-import { sendHomaSms } from "../../lib/voice/telnyx-api";
+import { submitHomaSms } from "../../lib/voice/telnyx-api";
 
 /**
  * The proactive channel (gateway-plan GW-4, generalized by HT-1): where
@@ -40,64 +53,35 @@ interface DispatchState {
   phoneNumbers: string[];
   email: string | null;
   runId: string | null;
+  episodeId: string | null;
   kind: FamilyTaskKind;
   deliveryPref: "text" | "email" | "none";
   label: string | null;
   delivered: boolean;
 }
 
-type DeliveredChannel = "sms" | "email" | "none";
-
-/** Texts every linked number; true when at least one send landed, so a
- * second parent's dead number never fails the whole family's task. */
-async function sendSmsToAll(phoneNumbers: string[], text: string): Promise<boolean> {
-  let anyDelivered = false;
-  for (const phone of phoneNumbers) {
-    if (await sendHomaSms(phone, text)) anyDelivered = true;
-  }
-  return anyDelivered;
-}
-
-/** Kind-specific delivery: which doors to try, in which order. Returns
- * null when every attempted door failed (the dispatcher then fails the
- * run); "none" is a successful save-only outcome, never a failure. */
-async function deliver(
-  state: DispatchState,
+async function sendTaskEmail(
+  kind: FamilyTaskKind,
+  label: string | null,
+  email: string,
   text: string,
-): Promise<DeliveredChannel | null> {
-  const { kind, phoneNumbers, email, deliveryPref, label } = state;
-
+  replyTo?: string,
+): Promise<HomaEmailSubmission> {
   switch (kind) {
-    case "journal_prompt": {
-      if (await sendSmsToAll(phoneNumbers, text)) return "sms";
-      if (email && (await sendJournalAgentEmail(email, text))) return "email";
-      return null;
-    }
-    case "morning_brief": {
-      if (await sendSmsToAll(phoneNumbers, text)) return "sms";
-      if (email && (await sendResearchBriefEmail(email, text))) return "email";
-      return null;
-    }
-    case "custom": {
-      // The parent picked the door herself. Her own vocabulary is never
-      // brand-gated (she may well say "assessment"); the shared email
-      // shell and SMS pipe are the same guarded senders as everywhere.
-      if (deliveryPref === "none") return "none";
-      if (deliveryPref === "text") {
-        if (await sendSmsToAll(phoneNumbers, text)) return "sms";
-        if (email && (await sendAgentComposedEmail(email, label ?? "From Homa", [text]))) {
-          return "email";
-        }
-        return null;
-      }
-      if (email && (await sendAgentComposedEmail(email, label ?? "From Homa", [text]))) {
-        return "email";
-      }
-      return null;
-    }
+    case "journal_prompt":
+      return await submitJournalAgentEmail(email, text, replyTo);
+    case "morning_brief":
+      return await submitResearchBriefEmail(email, text, replyTo);
+    case "custom":
+      return await submitAgentComposedEmail(
+        email,
+        label ?? "From Homa",
+        [text],
+        replyTo,
+      );
     default: {
       const exhaustive: never = kind;
-      throw new Error(`unhandled dispatch kind: ${String(exhaustive)}`);
+      throw new Error(`unhandled task email kind: ${String(exhaustive)}`);
     }
   }
 }
@@ -108,6 +92,7 @@ export default defineChannel({
     phoneNumbers: [],
     email: null,
     runId: null,
+    episodeId: null,
     kind: "journal_prompt",
     deliveryPref: "text",
     label: null,
@@ -130,6 +115,7 @@ export default defineChannel({
       phoneNumbers?: string[];
       email?: string | null;
       runId?: string;
+      episodeId?: string;
       kind?: FamilyTaskKind;
       deliveryPref?: "text" | "email" | "none";
       label?: string | null;
@@ -143,6 +129,7 @@ export default defineChannel({
         phoneNumbers: target.phoneNumbers ?? [],
         email: target.email ?? null,
         runId: target.runId ?? null,
+        episodeId: target.episodeId ?? null,
         kind,
         deliveryPref: target.deliveryPref ?? "text",
         label: target.label ?? null,
@@ -153,53 +140,115 @@ export default defineChannel({
   },
 
   events: {
-    async "message.completed"(eventData, channel) {
-      const data = eventData as { message?: string | null; finishReason?: string };
+    async "message.completed"(eventData, channel, ctx) {
+      const data = eventData as {
+        message?: string | null;
+        finishReason?: string;
+        sequence: number;
+        turnId?: string;
+      };
       if (data.finishReason !== "stop" || !data.message?.trim()) return;
       if (channel.state.delivered) return;
       const text = data.message.trim();
-      const { familyId, runId, kind } = channel.state;
+      const { familyId, runId, kind, episodeId, deliveryPref, label } =
+        channel.state;
       if (!familyId) return;
 
       try {
-        const channelUsed = await deliver(channel.state, text);
-        if (channelUsed === null) {
-          console.error(
-            `dispatch delivery failed for family ${familyId} (${kind}; no channel worked)`,
-          );
-          if (runId) {
-            await finishTaskRun(runId, {
-              familyId,
-              kind,
-              status: "failed",
-              error: "delivery failed on every channel",
-            });
-          }
-          return;
+        const message = await persistCanonicalMessage({
+          attributes: ctx.session.auth.current?.attributes,
+          sessionId: ctx.session.id,
+          channel: "dispatch",
+          sequence: data.sequence,
+          role: "assistant",
+          content: text,
+          turnId: data.turnId,
+        });
+        if (!message || !episodeId) {
+          throw new Error("dispatch message could not enter the continuity ledger");
         }
-        channel.state.delivered = true;
+        const recipients = await listFamilyDeliveryRecipients(familyId);
+        const delivery = await deliverTaskMessage(
+          {
+            familyId,
+            episodeId,
+            messageId: message.id,
+            taskRunId: runId,
+            kind,
+            text,
+            recipients,
+            deliveryMode: deliveryPref,
+          },
+          {
+            ledger: postgresTaskDeliveryLedger,
+            transports: {
+              sendSms: submitHomaSms,
+              sendEmail: async (email, body, attempt) => {
+                const secret = process.env.RESEND_INBOUND_SECRET;
+                const replyTo = secret
+                  ? buildSignedReplyAddress(attempt.id, secret)
+                  : undefined;
+                return await sendTaskEmail(
+                  kind,
+                  label,
+                  email,
+                  body,
+                  replyTo,
+                );
+              },
+            },
+          },
+        );
+        channel.state.delivered = delivery.deliveredCount > 0;
+        if (delivery.deliveredCount > 0) {
+          await markCanonicalMessageDelivered({
+            familyId,
+            messageId: message.id,
+          });
+        }
 
         if (runId) {
-          await markTaskRunDelivered(runId, { summary: text, channel: channelUsed });
-          await finishTaskRun(runId, { familyId, kind, status: "done" });
+          if (delivery.status !== "failed") {
+            await markTaskRunDelivered(runId, {
+              summary: text,
+              channel: delivery.deliveredChannel,
+            });
+          }
+          await finishTaskRun(runId, {
+            familyId,
+            kind,
+            status: delivery.status,
+            sessionId: ctx.session.id,
+            ...(delivery.status === "failed"
+              ? { error: "delivery failed for every intended recipient" }
+              : {}),
+          });
         }
 
-        if (kind === "journal_prompt") {
+        if (kind === "journal_prompt" && delivery.deliveredCount > 0) {
           const sql = mapDb();
           await sql`
             update public.families set journal_prompt_last_sent_at = now()
             where id = ${familyId}
           `;
-          if (channelUsed !== "none") {
+          if (
+            delivery.deliveredChannel === "sms" ||
+            delivery.deliveredChannel === "email"
+          ) {
             await emitMapEvent("journal.prompt_sent", {
               family_id: familyId,
-              channel: channelUsed,
+              channel: delivery.deliveredChannel,
             });
           }
-        } else if (kind === "morning_brief" && channelUsed !== "none") {
+        } else if (
+          kind === "morning_brief" &&
+          delivery.deliveredCount > 0 &&
+          (delivery.deliveredChannel === "sms" ||
+            delivery.deliveredChannel === "email")
+        ) {
           await emitMapEvent("research.brief_sent", {
             family_id: familyId,
-            channel: channelUsed,
+            channel: delivery.deliveredChannel,
           });
         }
       } catch (error) {

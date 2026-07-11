@@ -31,7 +31,7 @@ export function TimeZoneCard({ currentTimeZone }: { currentTimeZone: string | nu
     <form action={action} className="rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 className="font-display text-xl font-semibold text-strong">Your time zone</h2>
       <p className="mt-1 text-sm text-body">
-        Sets the clock behind your greeting and the week planner&apos;s dates.
+        Sets the clock for your greeting and the week planner&apos;s dates.
         {currentTimeZone ? "" : " Homa picks it up from your device on this visit."}
       </p>
 

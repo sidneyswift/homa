@@ -9,6 +9,14 @@ import type {
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
+import {
+  firstFamilyStyle,
+  profileFocusList,
+  profileHelpList,
+  profileInterestList,
+  stringList,
+  uniqueStrings,
+} from "./profile-context";
 
 /**
  * Narrative reads and writes against the ONE-WORLD tables (child_reports,
@@ -38,6 +46,7 @@ export interface ReportNarrativeSource {
 
 export async function getReportNarrativeSource(
   childId: string,
+  familyId?: string,
 ): Promise<ReportNarrativeSource | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -64,6 +73,7 @@ export async function getReportNarrativeSource(
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
     where r.child_id = ${childId} and f.status <> 'deleted'
+      and (${familyId ?? null} is null or f.id = ${familyId ?? null})
   `;
   const row = rows[0];
   if (!row) return null;
@@ -103,16 +113,10 @@ export async function getReportNarrativeSource(
 
   const profile = row.profile ?? {};
   const bag = row.context ?? {};
-  const profileInterests = Array.isArray(profile.interests)
-    ? profile.interests.filter((item): item is string => typeof item === "string")
-    : [];
-  const bagInterests = Array.isArray(bag.interests)
-    ? bag.interests.filter((item): item is string => typeof item === "string")
-    : [];
-  const profileFocus = typeof profile.focus === "string" ? [profile.focus] : [];
-  const bagHelp = Array.isArray(bag.helpWith)
-    ? bag.helpWith.filter((item): item is string => typeof item === "string")
-    : [];
+  const profileInterests = profileInterestList(profile.interests);
+  const bagInterests = profileInterestList(bag.interests);
+  const profileFocus = profileFocusList(profile);
+  const bagHelp = profileHelpList(bag.helpWith);
   const whatsWorkingBySubject =
     bag.whatsWorking && typeof bag.whatsWorking === "object"
       ? Object.fromEntries(
@@ -127,8 +131,8 @@ export async function getReportNarrativeSource(
     childId,
     childName: row.child_name,
     birthMonth: row.birth_month,
-    interests: [...new Set([...profileInterests, ...bagInterests])],
-    helpWith: [...new Set([...profileFocus, ...bagHelp])],
+    interests: uniqueStrings(profileInterests, bagInterests),
+    helpWith: uniqueStrings(profileFocus, bagHelp),
     whatsWorkingBySubject,
     parentFirstName: row.first_name,
     scores: row.scores,
@@ -149,6 +153,7 @@ export async function getReportNarrativeSource(
  * the next rescore resets the row.
  */
 export async function claimReportNarrative(
+  familyId: string,
   childId: string,
   meta: NarrativeMeta,
 ): Promise<boolean> {
@@ -157,6 +162,10 @@ export async function claimReportNarrative(
     update public.child_reports
     set narrative_meta = ${sql.json(meta as unknown as DbJson)}
     where child_id = ${childId}
+      and exists (
+        select 1 from public.children c
+        where c.id = ${childId} and c.family_id = ${familyId}
+      )
       and (
         narrative_meta is null
         or (
@@ -170,6 +179,7 @@ export async function claimReportNarrative(
 }
 
 export async function storeReportNarrative(
+  familyId: string,
   childId: string,
   narrative: ReportNarrative | null,
   meta: NarrativeMeta,
@@ -181,6 +191,10 @@ export async function storeReportNarrative(
         narrative_meta = ${sql.json(meta as unknown as DbJson)},
         updated_at = now()
     where child_id = ${childId}
+      and exists (
+        select 1 from public.children c
+        where c.id = ${childId} and c.family_id = ${familyId}
+      )
   `;
 }
 
@@ -188,10 +202,12 @@ export async function storeReportNarrative(
  * exactly like the page itself. */
 export async function getReportNarrativeStatusByToken(
   token: string,
-): Promise<{ childId: string; meta: NarrativeMeta | null } | null> {
+): Promise<{ childId: string; familyId: string; meta: NarrativeMeta | null } | null> {
   const sql = mapDb();
-  const rows = await sql<{ child_id: string; narrative_meta: NarrativeMeta | null }[]>`
-    select r.child_id, r.narrative_meta
+  const rows = await sql<
+    { child_id: string; family_id: string; narrative_meta: NarrativeMeta | null }[]
+  >`
+    select r.child_id, f.id as family_id, r.narrative_meta
     from public.child_reports r
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
@@ -199,7 +215,7 @@ export async function getReportNarrativeStatusByToken(
   `;
   const row = rows[0];
   if (!row) return null;
-  return { childId: row.child_id, meta: row.narrative_meta };
+  return { childId: row.child_id, familyId: row.family_id, meta: row.narrative_meta };
 }
 
 export interface PlanNarrativeSource {
@@ -220,6 +236,7 @@ export interface PlanNarrativeSource {
 export async function getPlanNarrativeSource(
   childId: string,
   subjectId: string,
+  familyId?: string,
 ): Promise<PlanNarrativeSource | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -239,6 +256,7 @@ export async function getPlanNarrativeSource(
     join public.families f on f.id = c.family_id
     where p.child_id = ${childId} and p.subject_id = ${subjectId}
       and f.status <> 'deleted'
+      and (${familyId ?? null} is null or f.id = ${familyId ?? null})
   `;
   const row = rows[0];
   if (!row) return null;
@@ -248,28 +266,14 @@ export async function getPlanNarrativeSource(
     where c2.family_id = ${row.family_id} and c2.id <> ${childId}
   `;
   const profile = row.profile ?? {};
-  const profileInterests = Array.isArray(profile.interests)
-    ? profile.interests.filter((item): item is string => typeof item === "string")
-    : [];
-  const bagInterests = Array.isArray(row.child_context?.interests)
-    ? row.child_context.interests.filter((item): item is string => typeof item === "string")
-    : [];
-  const profileFocus = typeof profile.focus === "string" ? [profile.focus] : [];
-  const bagHelp = Array.isArray(row.child_context?.helpWith)
-    ? row.child_context.helpWith.filter((item): item is string => typeof item === "string")
-    : [];
-
-  // Styles went multi-select on 2026-07-06 (`styles`, first is primary);
-  // older bags hold a single `style` string. Same fallback as store.ts.
-  const familyStyles = Array.isArray(row.family_context?.styles)
-    ? row.family_context.styles.filter((item): item is string => typeof item === "string")
-    : [];
-  const homeschoolStyle =
-    familyStyles[0] ??
-    (typeof row.family_context?.style === "string" ? row.family_context.style : null);
+  const profileInterests = profileInterestList(profile.interests);
+  const bagInterests = profileInterestList(row.child_context?.interests);
+  const profileFocus = profileFocusList(profile);
+  const bagHelp = profileHelpList(row.child_context?.helpWith);
+  const homeschoolStyle = firstFamilyStyle(row.family_context) ?? null;
 
   const curriculums = Array.isArray(row.family_context?.curriculums)
-    ? row.family_context.curriculums.filter((item): item is string => typeof item === "string")
+    ? stringList(row.family_context.curriculums)
     : [];
 
   const whatsWorking: Record<string, string> = {};
@@ -285,17 +289,18 @@ export async function getPlanNarrativeSource(
     familyId: row.family_id,
     childId,
     childName: row.child_name,
-    interests: [...new Set([...profileInterests, ...bagInterests])],
+    interests: uniqueStrings(profileInterests, bagInterests),
     homeschoolStyle,
     whatsWorking,
     curriculums,
-    helpWith: [...new Set([...profileFocus, ...bagHelp])],
+    helpWith: uniqueStrings(profileFocus, bagHelp),
     plan: row.plan,
     siblingNames: siblings.map((sibling) => sibling.name),
   };
 }
 
 export async function claimPlanNarrative(
+  familyId: string,
   childId: string,
   subjectId: string,
   meta: NarrativeMeta,
@@ -305,6 +310,10 @@ export async function claimPlanNarrative(
     update public.child_plans
     set narrative_meta = ${sql.json(meta as unknown as DbJson)}
     where child_id = ${childId} and subject_id = ${subjectId}
+      and exists (
+        select 1 from public.children c
+        where c.id = ${childId} and c.family_id = ${familyId}
+      )
       and (
         narrative_meta is null
         or (
@@ -318,6 +327,7 @@ export async function claimPlanNarrative(
 }
 
 export async function storePlanNarrative(
+  familyId: string,
   childId: string,
   subjectId: string,
   narrative: PlanNarrative | null,
@@ -330,6 +340,10 @@ export async function storePlanNarrative(
         narrative_meta = ${sql.json(meta as unknown as DbJson)},
         updated_at = now()
     where child_id = ${childId} and subject_id = ${subjectId}
+      and exists (
+        select 1 from public.children c
+        where c.id = ${childId} and c.family_id = ${familyId}
+      )
   `;
 }
 
@@ -338,10 +352,12 @@ export async function storePlanNarrative(
 export async function getPlanNarrativeStatusByToken(
   token: string,
   subjectId: string,
-): Promise<{ childId: string; meta: NarrativeMeta | null } | null> {
+): Promise<{ childId: string; familyId: string; meta: NarrativeMeta | null } | null> {
   const sql = mapDb();
-  const rows = await sql<{ child_id: string; narrative_meta: NarrativeMeta | null }[]>`
-    select c.id as child_id, p.narrative_meta
+  const rows = await sql<
+    { child_id: string; family_id: string; narrative_meta: NarrativeMeta | null }[]
+  >`
+    select c.id as child_id, f.id as family_id, p.narrative_meta
     from public.child_reports r
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
@@ -350,5 +366,5 @@ export async function getPlanNarrativeStatusByToken(
   `;
   const row = rows[0];
   if (!row) return null;
-  return { childId: row.child_id, meta: row.narrative_meta };
+  return { childId: row.child_id, familyId: row.family_id, meta: row.narrative_meta };
 }

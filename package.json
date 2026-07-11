@@ -4,22 +4,35 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "turbo run build",
+    "check:docs": "node scripts/docs-reconciliation-check.mjs",
     "check:events": "tsx scripts/events-check.mts",
     "check:isolation": "node scripts/isolation-check.mjs",
     "check:map": "tsx scripts/map-check.mts",
+    "check:research-brief": "tsx --test apps/web/lib/tasks/research-brief-format.test.ts",
     "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
+    "check:continuity": "tsx --test \"apps/web/lib/conversation-continuity/*.test.ts\" \"apps/web/lib/email-inbound-continuity.test.ts\" \"apps/web/lib/map/email-submission.test.ts\" \"apps/web/lib/sms-progress.test.ts\" \"apps/web/lib/sms-session-epoch.test.ts\" \"apps/web/lib/voice/telnyx-api.test.ts\"",
     "check:taxonomy": "node packages/taxonomy/scripts/validate.mjs && tsx scripts/taxonomy-check.mts",
     "taxonomy:slugs": "tsx packages/taxonomy/scripts/generate-slug-map.mts",
     "check:sources": "tsx scripts/benchmarks-freshness.mts",
     "dev": "turbo run dev",
     "eval:recall": "tsx scripts/recall-eval.mts",
+    "eval:continuity": "tsx scripts/conversation-continuity-model-eval.mts",
+    "eval:research-brief": "tsx scripts/research-brief-format-eval.mts",
     "gen:brand": "tsx scripts/brand-assets.mts",
+    "knowledge:revert": "tsx scripts/knowledge-revert.mts",
+    "knowledge:seed": "tsx scripts/knowledge-seed.mts",
     "lint": "turbo run lint",
+    "map:narrative-fixtures": "tsx scripts/map-narrative-fixtures.mts",
     "materials:calibrate": "tsx scripts/materials-calibration.mts",
     "usage:report": "tsx scripts/usage-report.mts",
     "pull:state-requirements": "tsx scripts/state-requirements-pull.mts",
     "report:norms": "tsx scripts/map-norms-report.mts",
     "seed:state-requirements": "tsx scripts/state-requirements-seed.mts",
+    "tasks:e2e": "tsx scripts/tasks-e2e.mts",
+    "continuity:e2e": "tsx scripts/conversation-continuity-e2e.mts",
+    "telnyx:assistant-info": "tsx scripts/telnyx-assistant-info.mts",
+    "telnyx:call-transcripts": "tsx scripts/telnyx-call-transcripts.mts",
+    "telnyx:calls-today": "tsx scripts/telnyx-calls-today.mts",
     "telnyx:curriculum:provision": "tsx scripts/telnyx-curriculum-provision.mts",
     "telnyx:provision": "tsx scripts/telnyx-provision.mts",
     "telnyx:transcripts:sync": "tsx scripts/telnyx-transcripts-sync.mts",
@@ -31,10 +44,5 @@
     "sharp": "^0.35.3",
     "tsx": "^4.23.0",
     "turbo": "^2.5.0"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "eve@0.19.0": "patches/eve@0.19.0.patch"
-    }
   }
 }

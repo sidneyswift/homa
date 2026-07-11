@@ -26,9 +26,12 @@ react in character instead of agreeing with the author.
 
 ## How to dispatch this gate
 
-Run a fresh subagent (in Cursor: the Task tool, `subagent_type:
-generalPurpose`, `readonly: true`). The dispatch prompt must contain, in
-this order, pasted verbatim, never summarized:
+Use the current environment's delegation mechanism to run a fresh-context,
+read-only subagent. Give it only the material named below, no prior drafting
+conversation and no file-editing task. If the environment cannot enforce a
+read-only mode, state the restriction in the dispatch and keep all file edits
+with the main agent. The dispatch prompt must contain, in this order, pasted
+verbatim, never summarized:
 
 1. The persona block above.
 2. This instruction block:

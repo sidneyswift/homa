@@ -1,5 +1,11 @@
 # 01 — Personas, Empathy Map, JTBD Jobs & Forces
 
+> Historical proto-persona research, last updated 2026-07-02. P1 through P5
+> remain shorthand where the reconciled PRD cites them, but invented
+> demographics, quotes, assumptions, and open questions are not validated
+> customer facts. Current policy and child-use boundaries come from the PRD
+> and founder-ruling index.
+
 > Workstream 1 of 5 (see `00-pm-kickoff.md`). Senior UX research + product strategy.
 > Status: PLANNING. Last updated 2026-07-02.
 >
@@ -1284,6 +1290,12 @@ dynamic applies to one "it got our state law wrong" post).
 
 ### S4 — The child (NEVER a user)
 
+> Current-policy correction. The parent remains the account holder and primary
+> operator. Global D4 permits consented child-likeness input under its retention,
+> provider, and no-face-recognition floor. The later onboarding-depth ruling also
+> permits an optional parent-guided together mode. The older absolutes below are
+> preserved as the original proto-persona constraint, not current policy.
+
 The hard rule (kickoff + council open call 4, assuming option (a)): the child never
 uses Homa. The parent is the speaker, the uploader, the account. The assessment is
 a test for the mother, never the child `[UR-A]`.
@@ -1315,6 +1327,10 @@ a test for the mother, never the child `[UR-A]`.
 ---
 
 ## 6. ❓ Open questions for the founder (consolidated)
+
+> Historical question set. Later decisions are indexed in
+> `journeys/10-reconciliation.md` section 5. Do not reopen a resolved item from
+> this list or treat an unanswered historical question as a current blocker.
 
 Ordered by how much downstream work each answer unblocks.
 

@@ -1,6 +1,6 @@
-import type { TaxonomyPrerequisite, TaxonomyTopic } from "./types.js";
-import { assembleTaxonomy } from "./assemble.js";
-import { getTopic } from "./topics.js";
+import type { TaxonomyPrerequisite, TaxonomyTopic } from "./types";
+import { assembleTaxonomy } from "./assemble";
+import { getTopic } from "./topics";
 
 /**
  * The prerequisite graph over Homa topic ids. Score on the ladder, plan on

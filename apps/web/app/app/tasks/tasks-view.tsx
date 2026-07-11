@@ -32,7 +32,14 @@ export interface TaskRowView {
 export interface TaskRunView {
   id: string;
   kind: "journal_prompt" | "morning_brief" | "custom" | "fleet_research";
-  status: "running" | "done" | "failed" | "skipped";
+  status:
+    | "running"
+    | "done"
+    | "partial"
+    | "partial_uncertain"
+    | "uncertain"
+    | "failed"
+    | "skipped";
   title: string;
   summary: string | null;
   deliveredChannel: "sms" | "email" | "none" | null;

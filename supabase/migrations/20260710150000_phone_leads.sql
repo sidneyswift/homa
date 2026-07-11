@@ -1,4 +1,4 @@
--- Migration #41: phone-first leads (lead-funnel-plan.md LF-1, founder
+-- Migration #42: phone-first leads (lead-funnel-plan.md LF-1, founder
 -- ask 2026-07-10 morning). A stranger who texts or calls the Homa
 -- number leaves a lead row the moment she makes contact; the concierge
 -- flow enriches it (name, email, invited) and the phone bridge flips it

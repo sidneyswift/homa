@@ -11,10 +11,12 @@ export {
 
 export {
   EVENT_SCHEMAS,
+  WALL_DOORS,
   emitEvent,
   type EventName,
   type EventProps,
   type EventSink,
+  type WallDoor,
 } from "./events";
 
 export { US_STATES, type UsStateCode } from "./us-states";
@@ -25,7 +27,6 @@ export {
   ageInMonths,
   ageLabel,
   aheadCapForAge,
-  CAPTURE_MAX_MONTHS,
   isInScoredRange,
   isValidBirthDate,
   MONTHS_AHEAD_CAP,
@@ -41,7 +42,6 @@ export {
   getMapItem,
   MAX_LADDER_RUNGS,
   growingActivityFor,
-  ladderRungs,
   MAP_ANSWERS,
   MAP_BANK_VERSION,
   MAP_SUBJECTS,
@@ -70,7 +70,6 @@ export {
 } from "./map/plans";
 
 export {
-  AHEAD_THRESHOLD_MONTHS,
   maxQuestionsForAge,
   scoreMap,
   type SubjectScore,
@@ -78,6 +77,12 @@ export {
   type MapPosition,
   type MapScores,
 } from "./map/scoring";
+
+export {
+  buildMapQuestionQueue,
+  isMapChecklistComplete,
+  type MapQueueEntry,
+} from "./map/question-queue";
 
 export {
   subjectLine,
@@ -90,7 +95,7 @@ export {
 } from "./map/sentences";
 
 export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
-export { BANK_ITEM_DOMAINS, domainForBankItem } from "./map/item-domains";
+export { BANK_ITEM_DOMAINS } from "./map/item-domains";
 
 export type {
   Curriculum,

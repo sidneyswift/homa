@@ -6,7 +6,8 @@ source:
   type: keyword-research
   ref: marketing/raw/2026-07-07-gemminer-ai-visibility-audit.md
   locator: "L13-16"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 "thankshoma.com shows up in 0 of 16 AI checks" (ChatGPT, Perplexity, Claude,

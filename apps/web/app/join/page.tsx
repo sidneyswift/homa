@@ -129,6 +129,7 @@ export default async function JoinPage({
   const result: ConsumeInviteResult = await consumeFamilyInvite(
     token,
     user.id,
+    user.email,
     deriveFirstName(user),
   );
 
@@ -143,6 +144,14 @@ export default async function JoinPage({
           heading="This login already has a family"
           body="You're signed in with an account that already has its own Homa family. Your invite link still works. Sign out, then open it again with the account you want to use. If you meant to combine two existing families, tell the parent who invited you. Combining is a careful step Homa's team does by hand."
           cta={{ href: "/app", label: "Go to your Homa" }}
+        />
+      );
+    case "email-mismatch":
+      return (
+        <Outcome
+          heading="Use the invited email"
+          body="This invite was sent to a different email address. Sign out, then open the invite with the account that received it, or ask for a fresh invite."
+          cta={{ href: "/", label: "Back to Homa" }}
         />
       );
     case "expired":

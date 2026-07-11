@@ -1,5 +1,7 @@
 # Reading benchmarks, kindergarten to grade 10
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Reading 03, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web research against primary sources: the official CCSS standards site and full ELA standards PDF, the Hasbrouck and Tindal 2017 technical report (Behavioral Research and Teaching, University of Oregon) cross-checked against Read Naturally's reproduction, the official DIBELS 8 benchmark goals PDF (University of Oregon), MetaMetrics and CCSS Appendix A supplemental documents for Lexile, the official Fountas and Pinnell expectations chart, nationsreportcard.gov plus a state reproduction for NAEP 2024, and peer-reviewed or author-published papers for Ehri, Chall, vocabulary, silent rates, and reading onset. Every number was read from a fetched document; nothing is from memory.

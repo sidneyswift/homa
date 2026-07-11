@@ -1,7 +1,11 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { ensureSignupFamily, signupProgress } from "../../lib/sms-onboarding";
+import {
+  ensureSignupFamily,
+  nextChecklistItem,
+  signupProgress,
+} from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
 
 /**
@@ -21,6 +25,22 @@ export default defineTool({
 
     const { familyId, created } = await ensureSignupFamily(session.phoneE164);
     const progress = await signupProgress(familyId);
+    const nextQuestions = (
+      await Promise.all(
+        progress.children.map(async (child) => {
+          if (!child.inRange || child.checklistDone) return null;
+          const next = await nextChecklistItem(familyId, child.childId);
+          return next
+            ? {
+                childId: child.childId,
+                childName: child.name,
+                itemId: next.itemId,
+                statement: next.statement,
+              }
+            : null;
+        }),
+      )
+    ).filter((question) => question !== null);
     return {
       started: true,
       resumed: !created,
@@ -34,6 +54,7 @@ export default defineTool({
         checklistDone: child.checklistDone,
         hasReport: child.hasReport,
       })),
+      nextQuestions,
       note:
         progress.needs.length > 0
           ? `Collect the first missing thing conversationally: ${progress.needs[0]}. One question per text.`

@@ -55,7 +55,7 @@ export interface SubjectScore {
    * genuinely advanced kid is never mistaken for a merely capped number.
    */
   beyondScale: boolean;
-  /** True when both the base and a ladder item carried real signal. */
+  /** True when at least two checklist items in this subject carried real signal. */
   highConfidence: boolean;
   /** Count of real observations (easily / getting there / not yet). */
   observations: number;

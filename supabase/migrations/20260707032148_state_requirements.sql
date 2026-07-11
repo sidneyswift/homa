@@ -1,4 +1,4 @@
--- Migration #21: state_requirements, the per-jurisdiction homeschool
+-- Migration #22: state_requirements, the per-jurisdiction homeschool
 -- compliance reference table (M3-05 data layer; 50 states + DC).
 --
 -- Seeded ONLY from the repo's reviewed snapshots of HomeschoolLeap's

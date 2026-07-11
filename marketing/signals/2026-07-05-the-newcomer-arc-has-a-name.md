@@ -6,7 +6,8 @@ source:
   type: planning-doc
   ref: marketing/raw/2026-07-05-planning-doc-mining.md
   locator: "L38-46"
-status: new
+status: archived
+archive_reason: "Dated signal snapshot; documentation reconciliation 2026-07-11 requires fresh product truth, consent, source, and channel review before reuse."
 used_by: null
 
 Week one she recreates school at the kitchen table; by 10:30 he is melting

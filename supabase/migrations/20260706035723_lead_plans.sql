@@ -1,4 +1,4 @@
--- Migration #9: four-week plans + the retest loop (founder: build it now).
+-- Migration #11: four-week plans + the retest loop (founder: build it now).
 -- A plan is a deterministic four-week program for one subject of one child,
 -- built from the bank around the child's frontier, flavored by their
 -- interests and the family's homeschool style. retest_at arms the cron's

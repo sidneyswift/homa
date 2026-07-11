@@ -34,6 +34,15 @@ export function zonedDateParts(
   };
 }
 
+function paddedDatePart(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+export function zonedDateString(now: Date, timeZone: string): string {
+  const { year, month, day } = zonedDateParts(now, timeZone);
+  return `${year}-${paddedDatePart(month)}-${paddedDatePart(day)}`;
+}
+
 export interface WeekdayCell {
   /** Short weekday label, "Mon" through "Fri". */
   label: string;

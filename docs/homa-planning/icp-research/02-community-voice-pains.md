@@ -1,5 +1,9 @@
 # Community voice: homeschool mothers' pains in their own words
 
+> Historical research snapshot, 2026-07-06. This file preserves the sampled
+> community evidence and analysis captured on that date. It is not current
+> market, product, or production guidance. Re-verify sources before reuse.
+
 - **Date:** 2026-07-06 (all links accessed 2026-07-06)
 - **Method:** Web search plus direct retrieval of public threads. Reddit content (r/homeschool, r/HomeschoolRecovery) was pulled through the PullPush archive of Reddit, which returns exact post and comment text with permalinks; Mumsnet and blog pages were fetched directly. Quotes are verbatim, usernames omitted, no real names of mothers or children (a child's name would be replaced with [child]; none of the selected quotes contained one). Where a quoted source contained an em dash or typographic ligature, it is rendered as a comma, period, or plain hyphen per repo style law; no words were added, removed, or changed. Typos in quotes are original.
 - **Coverage caveats:** Facebook groups are not publicly indexable and did not surface; Well-Trained Mind forum content is represented indirectly through a Susan Wise Bauer quote circulating on blogs. Frequency judgments come from sampled searches, not exhaustive counts, and are marked INFERENCE.

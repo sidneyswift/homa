@@ -1,3 +1,7 @@
+> **M1-17 prototype input:** This file documents a standalone design-system
+> specimen. It is not a production primitive until M1-17 ports and verifies it
+> in application code.
+
 Small hand-drawn decorative shapes, scattered like margin stickers around headlines, cards, and bands; decoration only, never UI or icons.
 
 ```jsx
@@ -7,3 +11,6 @@ Small hand-drawn decorative shapes, scattered like margin stickers around headli
 ```
 
 Names: `star`, `heart`, `sun`, `sparkle`, `squiggle`, `flower`, `cloud`, `moon`, `zigzag`, `loop`. Props: `size` (px, default 24), `color` (any token, default `--pop-cobalt`), `rotate` (deg). Rotate a few degrees so they feel hand-placed; one or two per surface, max.
+> **M1-17 prototype input:** This file documents a standalone design-system
+> specimen. It is not a production primitive until M1-17 ports and verifies it
+> in application code.

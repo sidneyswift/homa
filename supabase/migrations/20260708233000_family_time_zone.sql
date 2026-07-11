@@ -1,4 +1,4 @@
--- Migration #27: the family's time zone, one nullable text column
+-- Migration #30: the family's time zone, one nullable text column
 -- (IANA name, e.g. "America/New_York"). The dashboard greeting and the
 -- week planner's dates rendered in America/Chicago as the honest middle
 -- of a US-only audience; this makes them exact. Null means "not captured

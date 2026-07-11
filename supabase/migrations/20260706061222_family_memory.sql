@@ -1,4 +1,4 @@
--- Migration #13: the memory floor (M2-02 slice) + parent display name (M2-01).
+-- Migration #14: the memory floor (M2-02 slice) + parent display name (M2-01).
 -- Homa's durable memory lives in Postgres rows, never in conversation history
 -- or sandbox files (01-architecture.md state model): a fresh session with the
 -- same rows behaves identically, which is what makes session rotation safe.

@@ -1,5 +1,9 @@
 # The 9:30pm hours log
 
+> Historical draft, not approved or published. The produced asset length,
+> numeric comparison, product automation, legal, and article-link claims require
+> a new evidence pass. Do not distribute.
+
 hook: "9:30pm. The hours log. Again." (on-screen inside the first 2 seconds)
 length-target: 30s
 

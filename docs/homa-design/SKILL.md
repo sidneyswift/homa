@@ -4,7 +4,8 @@ description: Use this skill to generate well-branded interfaces and assets for H
 user-invocable: true
 ---
 
-Read the README.md file within this skill, and explore the other available files.
+Read `readme.md` in this directory, then explore only the files needed for the
+task.
 If creating visual artifacts (slides, mocks, throwaway prototypes, etc), copy assets out and create static HTML files for the user to view. If working on production code, you can copy assets and read the rules here to become an expert in designing with this brand.
 If the user invokes this skill without any other guidance, ask them what they want to build or design, ask some questions, and act as an expert designer who outputs HTML artifacts _or_ production code, depending on the need.
 
@@ -12,7 +13,11 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Entry CSS:** `styles.css` (imports all tokens). Link it, then use CSS custom properties, `--brand` (coral `#E7602F`), `--sage-500` (mint), `--gold-400` (sunshine), `--sky-500` (aqua), pops (`--pop-cobalt`, `--pop-blush`, `--pop-navy`), bands (`--band-sky/mint/blush/sunshine`), playful shapes (`--blob-1/2/3`, `--bg-paper`), `--bg-page` (warm cream), `--text-strong/body/muted/subtle`, radii (`--radius-lg` cards, `--radius-pill` buttons), `--shadow-sm/lg`, `--ease-out`. Dark theme: `data-theme="dark"` on any subtree (experimental).
 - **Fonts:** Schibsted Grotesk (`--font-display`: headlines 700, mid titles 600, big numbers; accent words inside headlines stay Schibsted, clay color, never italic), EB Garamond (`--font-serif`: standalone italic taglines + pull quotes, 400), Fredoka 600 (`--font-wordmark`: the bounced "Homa" lockup only), Hanken Grotesk (sans UI/body), Caveat (Homa’s hand, product margin notes only, one per surface), JetBrains Mono (data). Keep it to two voices per screen plus body.
 - **Icons:** Lucide via CDN, pinned at `lucide@0.525.0`. Never hand-draw UI glyphs. Text on gold tints is always `var(--gold-ink)`.
-- **Components:** in `components/<group>/`. In HTML, load `_ds_bundle.js` and read `const { Button, Card, ... } = window.HomaDesignSystem_5e2305`. Each has a `.prompt.md` with usage.
+- **Components:** standalone design-system specimens in `components/<group>/`.
+  They are M1-17 prototype inputs, not production primitives. In prototype
+  HTML, load `_ds_bundle.js` and read
+  `const { Button, Card, ... } = window.HomaDesignSystem_5e2305`. Each has a
+  `.prompt.md` with usage.
 - **Voice:** warm, second-person, encouraging, sentence case, minimal emoji. Homa offers, never commands. No em dashes, ever (use a comma, period, colon, or mid-dot instead). Clarity and low cognitive load beat personality: one idea per sentence, plain names for things, no metaphor stacks.
 - **Full-screen examples:** `ui_kits/{web-app,mobile-app,landing}/`. Social layouts: `social/`.
 

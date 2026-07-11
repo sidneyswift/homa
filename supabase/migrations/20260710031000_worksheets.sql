@@ -1,4 +1,4 @@
--- Migration #42: worksheets, the durable record behind the worksheet
+-- Migration #41: worksheets, the durable record behind the worksheet
 -- studio (FR-5 first real slice; agentic worksheet loop, founder ask
 -- 2026-07-09 late night: "Alessa asks over SMS, Homa designs it, sends
 -- it back, she critiques, Homa remakes it").

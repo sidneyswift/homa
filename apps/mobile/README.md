@@ -30,10 +30,12 @@ simulator; your Mac's LAN IP from a real phone).
 | Events | `src/lib/events.ts` | `@homa/core` typed registry, caller's own token |
 | Brand assets | `assets/brand/*.svg` | PNGs in `assets/images/` are generated: `rsvg-convert -w 1024 -h 1024 brand/<name>.svg -o images/<name>.png` |
 
-## Not here yet, on purpose
+The home greeting uses the current member display name when available. M1-17
+owns design-system integration, not general mobile parity.
 
-- Google OAuth (needs the deep-link redirect registered in Supabase, see HUMAN-TODO)
-- Push notifications (needs an EAS project + credentials)
-- Worksheet printing (stays on the web; the card says so)
-- The onboarding/map flow (its API auth is an httpOnly resume cookie, web-only for now)
-- EAS build/submit config (arrives with the store-release decision)
+## Current native boundaries
+
+- Authentication is email and password. No Google OAuth flow is present in this package.
+- No push-notification or EAS build and submit configuration is present.
+- Printable artifacts render in chat and open their PDF URL in the system viewer, which can offer platform print or share actions. There is no native in-app print control.
+- New and unfinished families open the web `/onboarding` flow. Native onboarding is not present.

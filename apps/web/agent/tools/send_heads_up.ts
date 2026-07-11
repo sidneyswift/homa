@@ -1,18 +1,16 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { sendWaitTextOnce } from "../../lib/materials/sms-ack";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
+import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 
 /**
- * The agent's opening move on slow work over SMS: one short text in her
- * own voice ("on it, making Story's counting page now") sent BEFORE she
- * designs and builds, so the parent never stares at a silent phone. The
- * chat-sdk bridge cannot post agent text until every tool finishes, so
- * this rides the tool-send lane (lib/materials/sms-ack.ts), sharing the
- * dedupe window with the automatic tool-start ack: whichever fires
- * first wins, one wait text per build. The number comes from channel
- * auth, never the model (anti-relay law).
+ * The agent's opening move on genuinely slow work over SMS: one short
+ * progress text sent before substantial reasoning, research, dependent
+ * tools, or a material build. The chat-sdk bridge cannot post agent text
+ * until every tool finishes, so this rides the tool-send lane and shares
+ * one dedupe window with automatic material fallbacks. The destination
+ * comes from channel auth, never the model (anti-relay law).
  */
 
 const headsUpInput = z.object({
@@ -22,13 +20,13 @@ const headsUpInput = z.object({
     .min(1)
     .max(160)
     .describe(
-      "The one short line to text her, in your voice, naming what you are making and that it takes a minute or two. Plain text: no markdown, no links.",
+      "One short line telling her what you are working through. Do not include markdown, links, or an exact time estimate.",
     ),
 });
 
 export default defineTool({
   description:
-    "Text the parent one short heads-up BEFORE you start slow work in a text (SMS) conversation: a material build or image generation means a silent minute or two on her phone otherwise. Call it FIRST, before loading skills or designing, e.g. 'On it, making Story's counting page now. Should land here in a minute or two.' One heads-up per build (the tool refuses extras), and your normal reply after the work is still the only real reply. Pointless on web chat, where she already watches your progress live.",
+    "Text the parent one short progress message BEFORE slow work in an SMS conversation. Call it first when substantial reasoning, current research, several dependent tools, or a material build would otherwise leave her waiting in silence. Keep the line specific to her request. Do not use it for greetings, quick answers, clarifying questions, signup, consent, invitations, account linking, or one-step record updates. One progress text is allowed per slow turn. The completed reply remains the only reply to the parent's text. It is unnecessary on web chat, where she sees progress live.",
   inputSchema: headsUpInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as
@@ -43,7 +41,7 @@ export default defineTool({
       };
     }
 
-    const sent = sendWaitTextOnce({
+    const sent = await sendSmsProgressTextOnce({
       familyId: attributes.familyId ?? null,
       phoneNumber: attributes.phoneNumber,
       text: input.message,
@@ -51,11 +49,11 @@ export default defineTool({
     return sent
       ? {
           sent: true,
-          note: "Heads-up texted. Now do the work; when it finishes, reply normally, and never send a second wait message.",
+          note: "Progress text sent. Do the work, then send the completed reply. Never send a second progress message.",
         }
       : {
           sent: false,
-          note: "A wait text already went out for this build moments ago. Never send another; just do the work.",
+          note: "No progress text was confirmed. It may already have been sent for this slow turn. Continue the work. Do not claim the text was delivered. Do not try another progress message.",
         };
   },
 });

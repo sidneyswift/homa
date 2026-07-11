@@ -83,7 +83,10 @@ export async function sendFamilyInvite(input: {
     return { ok: false, reason: "email-failed" };
   }
 
-  await emitMapEvent("family.invite_sent", { family_id: input.familyId });
+  await emitMapEvent("family.invite_sent", {
+    family_id: input.familyId,
+    channel: "email",
+  });
   return { ok: true };
 }
 
@@ -123,6 +126,7 @@ export type ConsumeInviteResult =
   | { kind: "joined"; familyId: string }
   | { kind: "already-member"; familyId: string }
   | { kind: "has-family" }
+  | { kind: "email-mismatch" }
   | { kind: "invalid" }
   | { kind: "expired" };
 
@@ -136,6 +140,7 @@ export type ConsumeInviteResult =
 export async function consumeFamilyInvite(
   rawToken: string,
   authUserId: string,
+  authEmail: string | null | undefined,
   displayName: string | null,
 ): Promise<ConsumeInviteResult> {
   const sql = mapDb();
@@ -143,19 +148,22 @@ export async function consumeFamilyInvite(
     {
       id: string;
       family_id: string;
+      email: string;
       role: string;
       expires_at: string;
       consumed_at: string | null;
       consumed_by: string | null;
     }[]
   >`
-    select id, family_id, role, expires_at::text as expires_at,
+    select id, family_id, email, role, expires_at::text as expires_at,
            consumed_at::text as consumed_at, consumed_by::text as consumed_by
     from public.family_invites
     where token_hash = ${hashToken(rawToken)}
   `;
   const invite = rows[0];
   if (!invite) return { kind: "invalid" };
+  const callerEmail = authEmail?.trim().toLowerCase();
+  if (!callerEmail || callerEmail !== invite.email) return { kind: "email-mismatch" };
   if (invite.consumed_at) {
     return invite.consumed_by === authUserId
       ? { kind: "already-member", familyId: invite.family_id }
@@ -208,6 +216,9 @@ export async function consumeFamilyInvite(
     if (Date.parse(row.expires_at) < Date.now()) return { kind: "expired" };
     return { kind: "invalid" };
   }
-  await emitMapEvent("family.invite_accepted", { family_id: joined.familyId });
+  await emitMapEvent("family.invite_accepted", {
+    family_id: joined.familyId,
+    channel: "email",
+  });
   return { kind: "joined", familyId: joined.familyId };
 }

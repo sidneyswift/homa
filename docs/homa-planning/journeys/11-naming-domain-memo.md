@@ -1,5 +1,10 @@
 # 11 — Naming & Domain Memo (Due Diligence)
 
+> Historical due-diligence snapshot, July 3, 2026. Domain, social-handle,
+> trademark, registration, and availability claims require a fresh official
+> check before reuse. The current verified production domain is
+> `thankshoma.com`; social-handle registration remains a founder action.
+
 **Date:** July 3, 2026 · **Method:** RDAP over HTTP (Verisign + rdap.org), whois, HTTP probes of social profile URLs, web search. **Not legal advice** — trademark items flagged for the M4-04 lawyer pass. Nothing purchased.
 
 **Headline: both founder favorites are gone.** gethoma.com was registered May 19, 2026 and heyhoma.com January 23, 2026 (parked at Namecheap). Recommendation below: **homahelps.com**.

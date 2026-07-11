@@ -1,5 +1,7 @@
 # Curriculum crosswalk: reading and language arts
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Curriculum crosswalk 14 (ELA), part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Publisher sites first (allaboutlearningpress.com, logicofenglish.com, epslearning.com, hookedonphonics.com, goodandbeautiful.com, abeka.com, welltrainedmind.com, iew.com, lwtears.com, bobbooks.com), fetching scope-and-sequence, placement, and product pages directly; Cathy Duffy and homeschool review sites used only as labeled secondary sources. Level contents are transcribed from fetched pages, never from memory; grade-to-month anchors use the folder's end-of-grade convention and are always marked as convention.

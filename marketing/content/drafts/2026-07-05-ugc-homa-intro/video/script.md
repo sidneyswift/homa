@@ -1,5 +1,10 @@
 # UGC · Homa intro, take 3 (conversational, benchmark map feature)
 
+> Historical draft, not approved or published. Its source signal, checklist,
+> benchmark-map, product-state, and route premises require a new evidence pass.
+> Per-channel captions are missing and Postiz is unauthenticated. Do not
+> distribute.
+
 hook: "Does anyone actually know where their homeschool kid is at?" (spoken inside 2 seconds)
 length-target: 15s (~46 spoken words)
 mode: ugc, presenter synthesized from brief (warm mom, mid 30s, kitchen)

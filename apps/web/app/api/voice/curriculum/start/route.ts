@@ -1,6 +1,8 @@
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import { familyWallCheckout } from "../../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../../lib/map/events";
+import { rateLimited } from "../../../../../lib/map/ratelimit";
 import {
   buildCallFocusSummary,
   buildReportFactsForChild,
@@ -25,6 +27,9 @@ interface StartBody {
    * the same step, so the report page never needs a separate save flow. */
   phone?: string;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_CALLS_PER_FAMILY_PER_DAY = 3;
 
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createSupabaseServerClient();
@@ -58,6 +63,17 @@ export async function POST(request: Request): Promise<Response> {
   }
   const familyId = child.family_id as string;
 
+  // The wall (plans/2026-07-11-the-wall.md): a curriculum call is a
+  // door, always an action, so there is no existing-content exemption
+  // here. CallHomaPs shows the offer on this 403.
+  if ((await familyWallCheckout(familyId)) !== null) {
+    return Response.json({ ok: false, reason: "walled" }, { status: 403 });
+  }
+
+  if (rateLimited(`curriculum-call:${familyId}`, MAX_CALLS_PER_FAMILY_PER_DAY, DAY_MS)) {
+    return Response.json({ ok: false, reason: "rate-limited" }, { status: 429 });
+  }
+
   let providedPhone: string | null = null;
   if (body.phone) {
     const normalized = normalizeUsPhoneE164(body.phone);
@@ -88,7 +104,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "no-phone" }, { status: 400 });
   }
 
-  const facts = await buildReportFactsForChild(childId);
+  const facts = await buildReportFactsForChild(familyId, childId);
   if (!facts) {
     return Response.json({ ok: false, reason: "no-report" }, { status: 400 });
   }

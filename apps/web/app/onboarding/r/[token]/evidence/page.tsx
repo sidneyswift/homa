@@ -93,12 +93,11 @@ export default async function EvidencePackPage({
     const item = found?.items.find((candidate) => candidate.id === entry.itemId);
     if (!found || !item) continue;
     const list = answersByDomain.get(found.id) ?? [];
-    const content = found.items.find((candidate) => candidate.id === entry.itemId);
     list.push({
       statement: item.statement,
       typicalMonths: item.typicalMonths,
       answer: entry.answer,
-      standards: (content as { standards?: readonly string[] } | undefined)?.standards ?? [],
+      standards: item.standards ?? [],
       sources: item.sources,
     });
     answersByDomain.set(found.id, list);

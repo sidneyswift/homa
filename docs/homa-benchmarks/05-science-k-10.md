@@ -1,5 +1,7 @@
 # Science benchmarks, kindergarten to grade 10
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Science 05, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Primary sources fetched and parsed directly: the NGSS combined performance-expectation PDF ("AllTopic"), NGSS Appendix F (practices) and Appendix K (model course maps), NAEP science report pages at nationsreportcard.gov (2024 grade 8, 2019 grade 4), NCES Digest table 225.45 and Condition of Education course-taking indicator, ACF Head Start ELOF, World Book Typical Course of Study (via a homeschool mirror plus the World Book pages), and Texas TEA rule pages. Every number below traces to one of these fetched sources; unverifiable items are parked in "Dry wells and method notes".

@@ -1,10 +1,12 @@
 # Homa Design System
 
-**Homa** is an AI assistant for homeschooling moms, a calm, capable co-pilot. She plans the week and tracks progress, but the heart of the product is deeper: she **benchmarks each child against state/national standards through a gentle parent checklist** (a test for the mother, never the child), **generates practice targeted at exactly what's growing** (workbook pages, sensory activities), and then **proves the loop closed**, showing that the work moved the numbers. She also **connects lessons to the real world**: comparing curriculums, finding co-ops and story hours, suggesting the planetarium during space week or the zoo during the animal unit, and introducing nearby Homa families. Homa ships as a **web app** (chat + dashboards + benchmarks + discover), a **mobile app**, and a **marketing landing page** (thankshoma.com), with a growing set of **social templates**.
+**Homa** is an AI assistant for homeschooling families, designed as a calm, capable companion. The current map uses national developmental and academic benchmarks with a parent-led checklist. State data is a separate legal-requirements reference, not state academic mapping. The product can create practice materials and record progress evidence, but it must describe changes as temporal observations rather than proof that Homa caused them. The web app, Expo client, landing-page system, and social templates all use this visual language. Repository presence does not by itself prove that a surface or provider-backed capability is live.
 
 This repository is the single source of truth for Homa's brand: design tokens, fonts, reusable UI components, full-screen UI kits, foundation specimens, templates, and social layouts.
 
-> **Origin & sources:** The system was designed from scratch (no prior logo, brand assets, codebase, or Figma were provided), then ported here from the working repository `Homa Design System 2/` (mounted local folder) and given a senior cleanup pass: see `AUDIT.md` for exactly what changed. If you have existing brand assets, share them and we'll reconcile.
+> **History:** `AUDIT.md` preserves the dated design exploration and porting
+> record. Current design work uses only the sources in this repository and does
+> not depend on an external working folder.
 
 ---
 
@@ -31,8 +33,8 @@ Every surface should express one feeling, **calm**, and one relationship, **a co
 1. **Homa is a presence, not a product.** A warm daily greeting, gentle nudges, and *permission* ("a lighter day is still a good day"). In the UI: the recurring **"A note from Homa"** pattern (`Callout`, mobile Home).
 2. **An ownable device, "Homa's hand."** The **notebook margin-rule** (a clay vertical line, the workbook margin) and **Homa's handwriting** (Caveat, always **sage**, one margin note per surface, max). Plus the **checkmark / gold-star** language for progress. See `guidelines/brand-device.card.html`.
 3. **Reassurance-first data.** **No red "BEHIND" labels, ever.** Lead with growth, effort, streaks, "on track"; celebrate small wins. The dashboard should *calm* her, not audit her.
-4. **Proof, gently.** The benchmark checklist is a test for the mother, never the child. Homa targets practice, then shows the needle move: "Math is up 12 points since the fractions set." See `ui_kits/web-app/BenchmarksView.jsx`.
-5. **Connected to her world.** The planetarium during space week, story hour Thursday, four Homa families within five miles. See `ui_kits/web-app/DiscoverView.jsx`.
+4. **Progress evidence, gently.** The parent completes the main benchmark checklist. Optional deep-dive prompts may be tried together with a child. Homa may show a dated change, such as "Math is up 12 points since April," but never claim that one activity caused it.
+5. **Connected to her world.** Local activities and curriculum comparison remain product direction unless a named ticket and current evidence establish the specific surface. UI-kit examples are visual prototypes, not capability claims.
 
 ---
 
@@ -42,7 +44,7 @@ Every surface should express one feeling, **calm**, and one relationship, **a co
 
 - **Person:** Second person ("you," "your kids," "Maya"). Homa says "I" sparingly ("I'll draft that for you").
 - **Tone:** Encouraging, concrete, calm. Celebrates effort; normalizes lighter weeks. Never preachy, never guilt-inducing, never corporate.
-- **Casing:** Sentence case everywhere, headings, buttons, labels. The brand name is **Homa** in copy, never all-caps; the wordmark renders **Homa**, capital H. Overlines/eyebrows may be uppercase with wide tracking.
+- **Casing:** Sentence case for headings, buttons, and labels. Write **Homa** in prose and conversation. Use **HOMA** in the wordmark and on UI surfaces, per global founder ruling D8. Overlines and eyebrows may also use an uppercase treatment with wide tracking.
 - **Length:** Short, but clarity wins every tie. One idea per sentence; lead with the helpful thing. Fewer words is not the goal: cutting words that carry meaning makes copy harder to read, not easier.
 - **Clarity first:** simplicity and low cognitive load beat personality, every time. Plain names for things, no metaphor stacks, no meta-commentary ("here's the honest picture"), no comma splices standing in for the banned em dash. The full rulebook lives at `.agents/skills/homa-copy-writer/SKILL.md`.
 - **Emoji:** Rare and warm, at most one per message (a ☀️ on a morning greeting). Never as bullets or in dense UI.
@@ -91,7 +93,7 @@ Homa's reusable phrases (encouragement, empty/loading, errors, nudges) live in `
 
 **Motion.** Gentle and quick, **no bounce** in UI (the splash character's squash-and-bounce landing is the one sanctioned exception). `--ease-out` = `cubic-bezier(0.22, 0.8, 0.28, 1)`. Hovers ~120ms (`--dur-fast`), entrances 200–320ms. Hover: darken buttons, lift cards (`translateY(-2px)`, deepen shadow). Press: `scale(0.98)`. **The check-off** (signature micro-interaction): circle fills sage with a 350ms pop, a gold star floats up (800ms), the title quiets to strike-through. Undoable, never a modal, never confetti. See `guidelines/motion-check-off.card.html`.
 
-**Data-viz.** Warm and calm (`guidelines/data-viz.card.html`). Bars in clay-300 (clay-500 emphasis, sage goal-met), rounded tops, hairline baseline; one sage trend line with endpoint dot and display KPI. Growth framing always ("▲ 6 this month"); never red down-arrows on a child's chart. Numbers use `--font-mono` / tabular figures.
+**Data-viz.** Warm and calm (`guidelines/data-viz.card.html`). Bars in clay-300 (clay-500 emphasis, sage goal-met), rounded tops, hairline baseline; one sage trend line with endpoint dot and display KPI. Growth framing always. Honest downward line segments are allowed, but never use red, a warning treatment, or "behind" language for a child's chart. Numbers use `--font-mono` / tabular figures.
 
 **Borders.** Hairline, warm: `--border-subtle` (stone-200) on cards, `--border-default` (stone-300) on inputs, 1.5px on interactive fields.
 
@@ -112,7 +114,12 @@ Homa's reusable phrases (encouragement, empty/loading, errors, nudges) live in `
 
 ## Components
 
-Reusable primitives in `components/<group>/`, each with `.jsx` + `.d.ts` + `.prompt.md` and a directory `@dsCard` HTML. Namespace: `window.HomaDesignSystem_5e2305` (confirm with `check_design_system`).
+The files in `components/<group>/` are standalone design-system prototypes and
+M1-17 implementation inputs. They are not production primitives until M1-17
+ports and verifies them in application code. Each prototype has `.jsx` + `.d.ts`
++ `.prompt.md` files and a directory `@dsCard` HTML. The generated manifest
+records namespace `window.HomaDesignSystem_5e2305`; never hand-edit that
+manifest.
 
 - **actions/**: `Button`, `IconButton`
 - **brand/**: `Logo` ("the little home" character mark, a rounded clay house with bright eyes, + the bounced Fredoka "Homa" wordmark)
@@ -131,7 +138,9 @@ Reusable primitives in `components/<group>/`, each with `.jsx` + `.d.ts` + `.pro
 
 ## UI kits
 
-Full-screen, interactive recreations in `ui_kits/<product>/` (each has its own README):
+Full-screen, interactive design prototypes in `ui_kits/<product>/` preserve
+dated visual directions. They are not current route, pricing, identity,
+availability, proof, or capability specifications:
 
 - **web-app/**: login → shell with **Ask Homa** chat, **Progress** dashboard, **Benchmarks** (checklist + impact proof), **Week planner**, **Discover**, **Curriculum**; plus first-run **onboarding** (`onboarding.html`).
 - **mobile-app/**: phone-framed app, Home (check-off celebration), Ask, Plan, Discover, Kids, bottom tabs; `splash.html` is the animated launch moment.
@@ -146,7 +155,7 @@ Full-screen, interactive recreations in `ui_kits/<product>/` (each has its own R
 - `components/`: reusable primitives (list above).
 - `ui_kits/`: `web-app/`, `mobile-app/`, `landing/`.
 - `templates/`: starting points for consuming projects, **Landing Page**, **Web App Shell**, **Printable Worksheet** (US Letter: a student page plus a parent key page with coaching notes and a "how did it go" check-in; `showAnswers` and `parentKey` tweaks), each a `.dc.html` built on the system.
-- `assets/`: brand renders (`brand/homa-character-2048.png` transparent character mark, `brand/homa-app-tile-2048.png` app icon), photography (`photos/hero-family.png`), and film (`videos/homa-brand-film.mp4`, 15s, plays from the landing hero's "Watch the film"). Source of truth for the mark stays `components/brand/Logo.jsx`.
+- `assets/`: brand renders (`brand/homa-character-2048.png` transparent character mark, `brand/homa-app-tile-2048.png` app icon), photography (`photos/hero-family.png`), and a 15-second prototype film (`videos/homa-brand-film.mp4`). The historical landing prototype links the film; production does not. Source of truth for the mark stays `components/brand/Logo.jsx`.
 - `guidelines/`: foundation specimen cards (Brand, Colors, Type, Spacing) for the Design System tab.
 - `social/`: social templates (post, quote, story, carousel, notification, promise).
 - `AUDIT.md`: the senior-pass changelog and the open items.

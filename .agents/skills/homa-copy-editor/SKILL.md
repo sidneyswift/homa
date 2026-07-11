@@ -11,9 +11,12 @@ settled before style gets polished.
 
 ## How to dispatch this gate
 
-Run a fresh subagent (in Cursor: the Task tool, `subagent_type:
-generalPurpose`, `readonly: true`). The dispatch prompt must contain, in
-this order, pasted verbatim, never summarized:
+Use the current environment's delegation mechanism to run a second
+fresh-context, read-only subagent. Give it only the rulebook, surface context,
+settled reader calls, and copy named below, with no file-editing task. If the
+environment cannot enforce a read-only mode, state the restriction in the
+dispatch and keep all file edits with the main agent. The dispatch prompt must
+contain, in this order, pasted verbatim, never summarized:
 
 1. The full text of `.agents/skills/homa-copy-writer/SKILL.md` (the
    rulebook). For marketing surfaces, also the full text of

@@ -1,6 +1,11 @@
 # Homa, Landing Page UI kit
 
-Full marketing site recreation for Homa.
+> **Historical design prototype:** This July 2026 kit is preserved as visual
+> decision history. It is not the current route, pricing, identity, availability,
+> proof, or capability specification. Use the reconciled PRD, backlog, current
+> application code, and production evidence for those claims.
+
+Historical full marketing-site prototype for Homa.
 
 > Production divergence note (2026-07-06): the shipped landing page
 > (`apps/web/app/page.tsx`) deliberately departs from this kit in two

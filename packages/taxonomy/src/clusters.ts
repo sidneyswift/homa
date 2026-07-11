@@ -1,5 +1,5 @@
-import type { TaxonomyCluster } from "./types.js";
-import { assembleTaxonomy } from "./assemble.js";
+import type { TaxonomyCluster } from "./types";
+import { assembleTaxonomy } from "./assemble";
 
 /**
  * Parent-facing cluster summaries per (subject, domain, age band): the

@@ -1,12 +1,15 @@
 # Thank-you cards · one robot-handwritten card per family
 
-> Status: BUILT 2026-07-11 (founder "do it" after the deep-research
-> pass, same session). Code, migration, copy, and guards are all in;
-> the feature is DARK behind THANK_YOU_CARDS_ENABLED and stays dark
-> until the founder finishes the Handwrytten account steps in
-> HUMAN-TODO. Nothing here should deploy before the July 13 conference
-> deploy is out; the migration already sits in prod (additive, empty
-> table) via MCP, per the deploy law.
+> Status: LIVE 2026-07-11 5pm (founder "send it" after the read-aloud
+> ruling). The first three cards are ordered and paid, order ids in
+> the build-log entry of the same date, which also records the two
+> bugs the first live sweep surfaced and their same-hour fixes (an
+> optimistic-lock recording bug and the payment processor's
+> duplicate-charge window; SEND_BATCH_LIMIT is now 1 per hourly run).
+> The conference cohort starts flowing automatically ~July 15 (48h
+> after July 13 signups), capped at 150/month. The note is the
+> co-founders' version signed "Warmly, / Alessa & Carolyng /
+> thankshoma.com"; the stationery is custom card 349914.
 
 ## What this is
 
@@ -94,30 +97,68 @@ account record via auth/getUser). Test-mode orders are reserved for
 cannot place a real order; per-order test flags are only honored when
 the ACCOUNT is in test mode ("test mode error" otherwise).
 
-## The card (final copy, gates passed)
+## The card (current copy, revision 4)
+
+The note went through four founder-directed revisions on 2026-07-11,
+each gated or ruled (the full trail lives in message.ts's comment and
+the build log): rev 1 gated baseline, rev 2 "make it heartfelt", rev 3
+the co-founders' "We" version signed "Warmly, / Alessa & Carolyng /
+thankshoma.com" (this is what the first three cards carry), rev 4
+minutes after that batch went to the robots: no colons on the surface,
+and the address-explanation clause removed ("they obviously know they
+gave their address", a conscious override of the reader gate's
+privacy-flinch finding). Current text, mailing from the conference
+cohort onward:
 
 > Hi {firstName},
 >
-> Thank you for trying Homa. Teaching your kids at home is generous
-> work.
+> Thank you for trying Homa.
 >
-> You shared this address when you set up your family, so I wanted to
-> send a real card. Homa is one text away whenever you want a hand.
+> You took on your family's whole education. Most people won't see
+> how much love that takes. We see it. We homeschool our own kids.
+> We built Homa so you never have to do it alone.
+>
+> Whenever you want a hand, text Homa at (346) 758-8011. We hope she
+> helps your family as much as she's helped our own.
 >
 > Warmly,
-> Sidney, founder of Homa
+> Alessa & Carolyng
+> thankshoma.com
 
-Gate findings that shaped it: gratitude sized to "trying" (bigger
-claims read as guilt in week one), the address sentence answers the
-"how do they know where we live" flinch before it forms, "Homa is one
-text away" names the product so the card never overpromises a person,
-contractions because uncontracted phrasing reads as a copied script.
+Standing gate findings baked into the text: testimony over
+fake-familiarity ("We see it. We homeschool our own kids." makes
+"most people won't see" read as two named women speaking from
+experience); "your family's whole education" stays family-size
+neutral (a wrong "kids" plural in real ink is where the hand stops
+feeling like a hand); the texting number is printed because the card
+lives on a fridge; Homa is named then "she", one pronoun; gratitude
+sized to "trying"; "want a hand" is the one metaphor; contractions
+throughout; sentence case everywhere.
 
 ## What is NOT in scope (phase 2 candidates)
 
 - The agent asking SMS-signup families for an address (opt-in).
 - An address card in Settings (no post-onboarding edit UI exists).
-- Custom Homa stationery via the customCards API, design-system art.
+- DONE 2026-07-11 afternoon: custom Homa stationery. Card id 349914,
+  "Homa thank you (script v4)", the third design pass in one
+  afternoon, each under a founder ruling:
+  v2 (bold two-tone headline, lockup + tagline back) fell to "a
+  genuine thank-you card, not promotional material; the tagline is
+  out". v3 (quiet single-ink sans, tiny colophon back) fell to "looks
+  cheap; no logo on the front; make the Thank you look amazing; full
+  logo and wordmark on the back". v4 final art: the front is ruled
+  cream notebook paper with the soft clay margin rule, a large
+  flowing "Thank you" in clay script (Dancing Script, a
+  stationery-craft exception recorded in the build log; the system
+  has no lush script and Fredoka/Caveat are role-locked) with two
+  gold sparkle doodles riding the final swash, and NO logo anywhere
+  on the front. The back is the full lockup, house + bounced Fredoka
+  wordmark, centered, nothing else. An EB Garamond italic alternate
+  front is preserved beside the sources
+  (docs/homa-design/explorations/thank-you-card/, pipeline
+  apps/web/scripts/handwrytten-brand-card.mts). The uxui mailbox
+  read's fixes carried through all passes (margin rule at 35%
+  opacity, no misparsing domain on paper).
 - Founder handwriting digitization.
 - Milestone cards (first report, 100th day) as a tasks-framework kind.
 - A do-not-mail flag surfaced in Settings; today support is manual
@@ -126,11 +167,12 @@ contractions because uncontracted phrasing reads as a copied script.
 ## Founder switch order (mirrors HUMAN-TODO; steps 1-2 DONE 2026-07-11 1am)
 
 1. DONE: account + API key (founder), return address saved via the
-   address-book API (order placement requires one on file), card 186
-   "Kraft Thank You" + font hwDavid "Casual David" chosen, five env
-   vars set in Vercel production (key encrypted,
-   HANDWRYTTEN_TEST_MODE="false" so the sweep may run when enabled).
-   .env.local carries the same with test mode forced for dev.
+   address-book API (order placement requires one on file), font
+   hwDavid "Casual David" chosen, five env vars set in Vercel
+   production (key encrypted, HANDWRYTTEN_TEST_MODE="false" so the
+   sweep may run when enabled). .env.local carries the same with test
+   mode forced for dev. Stationery upgraded same day from catalog card
+   186 to the custom Homa card, final id 349914 (see phase-2 list).
 2. DONE: smoke script (`apps/web/scripts/handwrytten-smoke.mts`)
    verified the key, the 446-card catalog, fonts, and the basket flow
    against the live API. A full test-mode order additionally needs the

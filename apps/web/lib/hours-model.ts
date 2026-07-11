@@ -23,12 +23,3 @@ export type HoursSubject = (typeof HOURS_SUBJECTS)[number];
 export function isHoursSubject(value: string): value is HoursSubject {
   return (HOURS_SUBJECTS as readonly string[]).includes(value);
 }
-
-/** "1h 45m" style label, per the plain-numbers voice law. */
-export function formatMinutes(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
-}

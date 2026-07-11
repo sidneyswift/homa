@@ -17,11 +17,19 @@
  * the answer, or the server log shows a replay divergence or corrupted
  * event log.
  *
+ * This check mutates apps/web/package.json, pnpm-lock.yaml, and installed
+ * dependencies while it runs, starts local servers, and calls the configured
+ * model through AI Gateway. Start from a clean tree. If interrupted, restore
+ * the original pin and lockfile, then run pnpm install. The candidate install
+ * does not port the version-specific patch in pnpm-workspace.yaml.
+ *
  * Usage:
  *   node scripts/eve-upgrade-check.mjs --to 0.20.0            (from = current pin)
  *   node scripts/eve-upgrade-check.mjs --from 0.19.0 --to 0.20.0
  *
- * Exit code 0 = safe to bump the pin. Exit code 1 = do not, read the report.
+ * Exit code 0 = this local regression passed. Exit code 1 = regression failure.
+ * Exit code 2 = invalid or missing arguments. Patch review, parked-session
+ * inventory, and an authenticated production smoke remain separate gates.
  */
 
 import { execFileSync, spawn } from "node:child_process";

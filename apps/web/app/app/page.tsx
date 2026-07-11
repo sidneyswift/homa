@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { getAppData } from "../../lib/app-data";
+import { familyWallCheckout } from "../../lib/billing/wall";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
@@ -51,12 +52,19 @@ export default async function ChatPage({
 
   // The composer's "/" menu: kids to mention, plus the same advertised
   // skill set the agent sees (built-ins + saved + targeted bank rows).
-  const slashSkills = await getSlashMenuSkills(app?.children ?? []);
+  const slashSkills = await getSlashMenuSkills(app?.family.id ?? null);
+
+  // The wall (plans/2026-07-11-the-wall.md): the first chat message is a
+  // door. Null while the flag is off (the instant no-query path), and
+  // for exempt or trialing families.
+  const wall = app ? await familyWallCheckout(app.family.id) : null;
 
   return (
     <ChatClient
+      wall={wall}
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
+      timeZone={app?.family.time_zone ?? null}
       parentName={app?.memberDisplayName ?? app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
       kids={(app?.children ?? []).map((child) => ({ id: child.id, name: child.name }))}

@@ -1,5 +1,11 @@
 # Journey Workstream — PM Kickoff (2026-07-02)
 
+> Historical coordination snapshot, 2026-07-02. The shared workstream
+> structure and proto-persona vocabulary are preserved as planning history.
+> Current age scope, child-use boundaries, product policy, implementation, and
+> production state come from the reconciled PRD, founder-ruling index, and
+> direct evidence.
+
 > Senior-PM coordination doc. Five specialist workstreams produce the journey library in
 > this folder. This doc pins the shared persona cast, the journey template, and the
 > quality bar so the documents compose instead of drifting.

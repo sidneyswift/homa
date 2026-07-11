@@ -3,7 +3,9 @@ import Link from "next/link";
 
 import { Logo } from "../../../../components/brand/Logo";
 import { Doodle } from "../../../../components/marketing/Doodle";
+import { familyWallCheckout, wallEnabled } from "../../../../lib/billing/wall";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
+import { requireFamily } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../lib/map/store";
 import { NarrativeBeat } from "./narrative-beat";
@@ -105,11 +107,24 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
       : null;
 
+  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
+  // (the instant no-query path), and for exempt or trialing families.
+  // Owner-only on this shareable URL: a signed-in visitor from another
+  // family must never see this family's checkout (her payment would
+  // carry the wrong client_reference_id and unlock nothing). Her door
+  // taps already no-op through the existing session checks.
+  const viewer = wallEnabled() ? await requireFamily() : null;
+  const wall =
+    viewer && viewer.id === report.familyId
+      ? await familyWallCheckout(report.familyId)
+      : null;
+
   return (
     <ReportView
       data={report}
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
+      wall={wall}
     />
   );
 }

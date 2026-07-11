@@ -1,10 +1,11 @@
 # 03 — Retention & Monetization Journeys
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
-> Also superseded: kid caps below predate D9 (unlimited kids per family).
+> Historical journey and acceptance-source snapshot, last updated 2026-07-02.
+> The reconciled PRD retains R2's three weekly-note examples as a dated tone
+> source for FR-8, subject to current copy and efficacy laws. Billing branches,
+> prices, plan names, provider state, annual timing, child caps, and open
+> questions are historical. Current tier naming is Homa Plus; live Stripe state
+> is unverified here. D9 permits unlimited children on every plan.
 
 > Status: PLANNING. Workstream 3 of 5 (see `00-pm-kickoff.md`). Covers the daily/weekly
 > habit loops, the month curve and homeschool seasonality, trial→paid, low-balance/top-up,
@@ -204,6 +205,11 @@ Length law: readable in 90 seconds on a phone. If it scrolls more than 2.5 scree
 cut bullets, never the proof block.
 
 ### Three example weekly notes (brand voice, spec-quality)
+
+> Current efficacy-law correction. These examples remain dated tone references,
+> not approved factual templates. Any statement connecting work with movement
+> must stay temporal and correlational. It may not claim that an activity caused
+> a child's measured change.
 
 **Note A — the good week** (P1, child "Maya")
 

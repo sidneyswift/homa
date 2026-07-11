@@ -1,31 +1,30 @@
 # Homa
 
-> The calm homeschool assistant that shows you it's working.
+> You can start with what you already know about your child. Homa helps with planning, printable materials, records, and useful next steps.
 
 URL: https://thankshoma.com
+Canonical expanded summary: https://thankshoma.com/llms-full.txt
 
-## What Homa Does
+## What Homa does
 
-Homa is an AI homeschool assistant for parents of children ages 2 to 16. It learns each child, generates personalized printable materials, tracks hours for your state, and shows you it's working through progress reports mapped to your state's standards.
+Homa helps a parent see what a child does comfortably and what they are learning now. It can create printable materials, record school hours, and save useful family context.
 
-## Who It's For
+The progress report covers ages 2 to 16. A parent answers questions about things they have seen their child do. The report compares those answers with cited national sources. It shows what looks solid, what is growing, and one useful next step.
 
-Homeschool parents who want less admin and more teaching. Parents who use their own curriculum, co-ops, or a mix of bought, borrowed, and homemade materials.
+A separate state section summarizes reviewed homeschool-law sources and shows when they were last checked. It is not legal advice and cannot confirm that a family has met a legal requirement.
 
-## Key Features
+## Current boundaries
 
-- Free developmental progress report (takes five minutes)
-- Personalized printable worksheets and materials
-- State standards mapping with coverage at a glance
-- Hour tracking for state compliance
-- AI assistant that plans around your curriculum
-- Works for ages 2 to 16, with questionnaires tuned to each age
+- Homa is parent-facing. There is no child account or child-facing AI chat.
+- A parent may choose to try optional follow-up questions together with a child.
+- Homa can record school hours. It cannot confirm that a family has met a legal requirement.
+- A parent can save the name of a curriculum. Current plans do not follow every curriculum's full scope and sequence.
+- The planner does not move unfinished activities to new days automatically.
+- The progress report remains free under current product policy. The live site is the source for current access and membership details.
 
-## Try It
+## Progress report
 
-Get a free progress report showing exactly where your child stands: https://thankshoma.com/onboarding
+Start or return to onboarding: https://thankshoma.com/onboarding
 
-## Important
-
-- Homa is for parents only. Your child never sees the questionnaire and never talks to an AI.
-- The progress report is free. Homa itself is invite-only while the first families shape it.
+Completion time varies by child and by whether the parent chooses optional follow-up questions. Sample report: https://thankshoma.com/onboarding/sample
+Method and sources: https://thankshoma.com/onboarding/method

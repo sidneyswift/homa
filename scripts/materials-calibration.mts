@@ -279,4 +279,8 @@ lines.push("");
 writeFileSync(path.join(outDir, "report.md"), lines.join("\n"));
 console.log(`\nreport: ${path.join(outDir, "report.md")}`);
 console.log(`blobs created: ${createdBlobUrls.length} (run with --cleanup to delete)`);
-process.exit(0);
+const failedOutcomes = outcomes.filter((outcome) => !outcome.ok);
+if (failedOutcomes.length > 0) {
+  console.error(`calibration failed: ${failedOutcomes.length} outcome(s) failed`);
+}
+process.exit(failedOutcomes.length > 0 ? 1 : 0);

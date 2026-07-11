@@ -1,9 +1,10 @@
 # 01 · US homeschool market size, growth, and demographics
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical research snapshot, 2026-07-06. Market sizes, prices, provider
+> state, legislation, and recommendations are dated evidence, not current
+> product or production guidance. Re-verify volatile claims before reuse.
+> Current plan naming is Homa Plus; this file does not verify live Stripe
+> state. Prices below remain part of the dated record.
 
 - **Date:** 2026-07-06
 - **Author:** ICP research agent (market size and demographics lane)

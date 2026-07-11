@@ -1,5 +1,7 @@
 # World languages, computer science, and digital literacy benchmarks, ages 2 to 16
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Languages, CS, and digital 09, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web research against primary standards bodies (actfl.org, csteachers.org, iste.org, commonsense.org, UNESCO, ai4k12.org, state departments of education) and peer-reviewed second-language-acquisition sources; every number was verified against a fetched page and carries an inline link with access date. Grade-to-month anchors use the folder's end-of-grade convention and are marked as convention, not fact.

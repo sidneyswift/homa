@@ -5,6 +5,7 @@ import { z } from "zod";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { recallPinned } from "../../lib/agent-pinned";
 import { embedText } from "../../lib/learning/embeddings";
+import { effectiveTimeZone } from "../../lib/time-zone";
 
 /**
  * The agent's grep over its own past (agentic ladder item 4, M2-15):
@@ -42,13 +43,13 @@ function snippetAround(text: string, query: string): string {
   return `${start > 0 ? "..." : ""}${text.slice(start, end).trim()}${end < text.length ? "..." : ""}`;
 }
 
-function dayOf(iso: string | null): string {
+function dayOf(iso: string | null, timeZone: string): string {
   if (!iso) return "unknown date";
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-    timeZone: "America/New_York",
+    timeZone,
   });
 }
 
@@ -95,6 +96,12 @@ export default defineTool({
     }
 
     const { db, familyId } = access;
+    const { data: family } = await db
+      .from("families")
+      .select("time_zone")
+      .eq("id", familyId)
+      .maybeSingle();
+    const timeZone = effectiveTimeZone(family?.time_zone);
 
     const hits: RecallHit[] = [];
     const searchText = { type: "websearch" as const, config: "english" };
@@ -109,7 +116,7 @@ export default defineTool({
         .limit(input.limit);
       for (const row of data ?? []) {
         hits.push({
-          when: dayOf(row.started_at),
+          when: dayOf(row.started_at, timeZone),
           where: row.line === "curriculum" ? "phone call (report review)" : "phone call",
           snippet: snippetAround(row.transcript_text ?? "", input.query),
         });
@@ -127,7 +134,7 @@ export default defineTool({
       for (const row of data ?? []) {
         const speaker = row.role === "user" ? "the parent" : "Homa";
         hits.push({
-          when: dayOf(row.created_at),
+          when: dayOf(row.created_at, timeZone),
           where: `${row.channel === "sms" ? "text message" : "chat"} (${speaker})`,
           snippet: snippetAround(row.content ?? "", input.query),
         });
@@ -145,7 +152,7 @@ export default defineTool({
       for (const row of data ?? []) {
         const base = row.kind === "what_works" ? "saved memory (what works)" : "saved memory";
         hits.push({
-          when: dayOf(row.created_at),
+          when: dayOf(row.created_at, timeZone),
           // Superseded rows stay searchable for point-in-time questions,
           // labeled so the model never presents an old fact as current.
           where: row.superseded_at ? `${base}, older note that was later corrected` : base,
@@ -187,7 +194,7 @@ export default defineTool({
               : (row.content ?? "").slice(0, MAX_SNIPPET);
           if (seen.has(snippet.slice(0, 80))) continue;
           seen.add(snippet.slice(0, 80));
-          hits.push({ when: dayOf(row.happened_at), where: row.label, snippet });
+          hits.push({ when: dayOf(row.happened_at, timeZone), where: row.label, snippet });
         }
       }
     }

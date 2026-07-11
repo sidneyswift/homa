@@ -113,7 +113,16 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     from public.families f
     where s.family_id = f.id and s.kind = ${kind} and s.enabled
       and (f.email is null or f.time_zone is null
-           or (${optOutFilter} and f.journal_opt_out_at is not null))
+           or (${optOutFilter} and f.journal_opt_out_at is not null)
+           or not exists (select 1 from public.children c where c.family_id = f.id)
+           or (
+             ${requireReport}
+             and not exists (
+               select 1 from public.child_reports r
+               join public.children c on c.id = r.child_id
+               where c.family_id = f.id
+             )
+           ))
   `;
   await sql`
     update public.agent_schedules s
@@ -122,6 +131,15 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     where s.family_id = f.id and s.kind = ${kind} and not s.enabled
       and f.email is not null and f.time_zone is not null
       and (${!optOutFilter} or f.journal_opt_out_at is null)
+      and exists (select 1 from public.children c where c.family_id = f.id)
+      and (
+        ${!requireReport}
+        or exists (
+          select 1 from public.child_reports r
+          join public.children c on c.id = r.child_id
+          where c.family_id = f.id
+        )
+      )
   `;
 }
 
@@ -260,7 +278,10 @@ export async function beginTaskRun(
 /** The dispatch channel's write: the composed text and where it went. */
 export async function markTaskRunDelivered(
   runId: string,
-  outcome: { summary: string; channel: "sms" | "email" | "none" },
+  outcome: {
+    summary: string;
+    channel: "sms" | "email" | "none" | null;
+  },
 ): Promise<void> {
   const sql = mapDb();
   await sql`
@@ -290,7 +311,13 @@ export async function finishTaskRun(
   outcome: {
     familyId: string | null;
     kind: TaskRunKind;
-    status: "done" | "failed" | "skipped";
+    status:
+      | "done"
+      | "partial"
+      | "partial_uncertain"
+      | "uncertain"
+      | "failed"
+      | "skipped";
     error?: string;
     sessionId?: string;
   },
@@ -320,17 +347,55 @@ export async function finishTaskRun(
 export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
   const sql = mapDb();
   const cutoff = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
-  const stale = await sql<{ id: string; family_id: string | null; kind: TaskRunKind }[]>`
-    select id, family_id, kind from public.homa_task_runs
+  const stale = await sql<
+    {
+      id: string;
+      family_id: string | null;
+      kind: TaskRunKind;
+      delivered_channel: "sms" | "email" | "none" | null;
+      summary: string | null;
+    }[]
+  >`
+    select id, family_id, kind, delivered_channel, summary
+    from public.homa_task_runs
     where status = 'running' and started_at < ${cutoff}
     limit 25
   `;
   for (const run of stale) {
+    const deliveries = await sql<
+      { sent: number; uncertain: number; unresolved: number }[]
+    >`
+      select
+        count(*) filter (where status = 'sent')::int as sent,
+        count(*) filter (where status = 'uncertain')::int as uncertain,
+        count(*) filter (where status in ('failed', 'pending'))::int
+          as unresolved
+      from public.conversation_deliveries
+      where task_run_id = ${run.id}
+    `;
+    const sent = deliveries[0]?.sent ?? 0;
+    const uncertain = deliveries[0]?.uncertain ?? 0;
+    const unresolved = deliveries[0]?.unresolved ?? 0;
+    const saveOnlyCompleted =
+      run.delivered_channel === "none" && Boolean(run.summary);
     await finishTaskRun(run.id, {
       familyId: run.family_id,
       kind: run.kind,
-      status: "failed",
-      error: "run never completed (reaped after 2 hours)",
+      status:
+        saveOnlyCompleted
+          ? "done"
+          : sent > 0
+            ? unresolved > 0 || uncertain > 0
+              ? uncertain > 0 && unresolved === 0
+                ? "partial_uncertain"
+                : "partial"
+              : "done"
+            : uncertain > 0
+              ? "uncertain"
+              : "failed",
+      ...(sent > 0 || uncertain > 0 || saveOnlyCompleted
+        ? {}
+        : { error: "run never completed (reaped after 2 hours)" }),
     });
   }
 }

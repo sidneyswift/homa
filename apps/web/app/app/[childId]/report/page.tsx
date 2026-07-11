@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { getAppData } from "../../../../lib/app-data";
+import { familyWallCheckout } from "../../../../lib/billing/wall";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../lib/map/store";
@@ -80,12 +81,17 @@ export default async function AppReportPage({
       ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
       : null;
 
+  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
+  // (the instant no-query path), and for exempt or trialing families.
+  const wall = await familyWallCheckout(data.family.id);
+
   return (
     <ReportView
       data={report}
       context="app"
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
+      wall={wall}
     />
   );
 }

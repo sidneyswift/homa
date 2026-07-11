@@ -8,11 +8,12 @@
  * (procedure: docs/homa-planning/runbooks/map-renorm.md).
  *
  * Privacy and tenancy posture:
- *   - Aggregate counts only. No names, emails, or ids in the output.
+ *   - Aggregate counts only. No names, emails, family ids, or child ids in the
+ *     output. Bank item ids, overall totals, and exact low-cell counts do print.
  *   - Read-only queries; runs locally with the server-only DB password
  *     (same credential path as apps/web/lib/map/db.ts), never deployed.
  *   - Buckets under MIN_BUCKET_N render as "low n" instead of percentages,
- *     so no small-cell inference is possible.
+ *     but include the exact count. Treat output as founder-private.
  *
  * Usage: pnpm report:norms   (tsx scripts/map-norms-report.mts)
  * Env: apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_DB_PASSWORD).
@@ -70,9 +71,10 @@ interface BucketRow {
 }
 
 /**
- * Age at answer time in whole months, bucketed. birth_month is stored as a
- * date with day 01 (no birth day is ever collected), matching the app's
- * ageInMonths convention.
+ * Approximate age bucket from calendar year/month difference. The legacy
+ * children.birth_month column holds the full birthday, but this query ignores
+ * the day and can place boundary observations one month early. The runbook
+ * suspends anchor changes until day-precise math and cohort eligibility land.
  */
 const rows = await sql<BucketRow[]>`
   select
@@ -84,7 +86,7 @@ const rows = await sql<BucketRow[]>`
     a.answer,
     count(*)::int as n
   from public.child_answers a
-  join public.lead_children c on c.id = a.child_id
+  join public.children c on c.id = a.child_id
   where a.answer in ('easily', 'getting_there', 'not_yet')
   group by 1, 2, 3
   order by 1, 2

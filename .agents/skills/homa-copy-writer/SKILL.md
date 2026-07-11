@@ -46,9 +46,9 @@ length cap; cut a whole idea instead, or split the sentence.
 ## Hard laws (never bend, from AGENTS.md and copy-laws.ts)
 
 - No em dash, ever. Comma, period, colon, or mid-dot.
-- "Homa" in prose; "HOMA" only in wordmark UI treatments. Sentence case
-  everywhere; all-caps appears only inside styled uppercase treatments
-  (mono eyebrows and labels, per the design system), never in prose.
+- "Homa" in prose and conversation; "HOMA" in the wordmark and on UI
+  surfaces, per global founder ruling D8. Sentence case still governs the
+  surrounding words.
 - Never "behind" (in ANY sense), no deficit words, no diagnosis or testing
   vocabulary, no percentiles. Growth framing only.
 - Never compare siblings. Never a verdict on a child.
@@ -111,9 +111,10 @@ and regenerate.
   regenerate fixtures (`pnpm tsx scripts/map-narrative-fixtures.mts`, needs
   gateway credentials), then the founder re-reads the new fixtures (STOP 1
   gate). `pnpm check:map` enforces the version lock.
-- The Voice (binding) section is hand-mirrored across `instructions.md`,
-  `report-writer.md`, and `curriculum-writer.md`. Change one, change all
-  three.
+- The voice sections share the common laws in this rulebook but are not exact
+  mirrors. A change to a shared law requires a deliberate pass across
+  `instructions.md`, `report-writer.md`, and `curriculum-writer.md`; a
+  surface-specific rule stays with its producer.
 - Template changes in `packages/core/src/map/*`: run `pnpm check:map`.
 - Marketing voice mechanics (banlist, limits) live ONLY in
   `marketing/voice/house-style.md`; add new bans there, never restate them.

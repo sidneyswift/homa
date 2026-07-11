@@ -6,9 +6,9 @@
  * real-time webhook misses (founder decision 2026-07-09, build-log).
  *
  * Usage:
- *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts             # sync recent (default 500)
- *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts --limit 50
- *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts <id> <id>   # specific conversations
+ *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts --confirm-prod             # sync recent (default 500)
+ *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts --limit 50 --confirm-prod
+ *   pnpm exec tsx scripts/telnyx-transcripts-sync.mts <id> <id> --confirm-prod   # specific conversations
  *
  * Ownership is re-derived server-side: family from the caller's phone via
  * family_phones, child only if a metadata child_id actually belongs to
@@ -21,6 +21,7 @@
 import postgres from "postgres";
 
 import { embedText } from "../apps/web/lib/learning/embeddings";
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 import { tx, listOf } from "./telnyx-shared.mts";
 
 interface ConversationMeta {
@@ -60,6 +61,10 @@ function db(): ReturnType<typeof postgres> {
     console.error("sync: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_DB_PASSWORD must be set");
     process.exit(2);
   }
+  assertConfirmedProdWrite({
+    scriptName: "telnyx-transcripts-sync",
+    supabaseUrl,
+  });
   const ref = new URL(supabaseUrl).hostname.split(".")[0];
   return postgres({
     host: "aws-0-us-east-1.pooler.supabase.com",
@@ -224,6 +229,8 @@ function parseArgs(argv: string[]): { ids: string[]; limit: number } {
     if (arg === "--limit") {
       limit = Number(argv[index + 1]) || limit;
       index += 1;
+    } else if (arg === "--confirm-prod") {
+      continue;
     } else {
       ids.push(arg);
     }

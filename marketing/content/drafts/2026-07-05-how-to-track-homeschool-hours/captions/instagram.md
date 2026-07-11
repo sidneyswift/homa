@@ -1,3 +1,6 @@
+> Historical draft, not approved or published. Its numeric, legal, product, and
+> article-link claims require a new evidence pass. Do not distribute.
+
 If you're rebuilding three weeks of homeschool hours from memory tonight,
 this one's for you.
 

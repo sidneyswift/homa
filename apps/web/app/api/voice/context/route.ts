@@ -1,11 +1,13 @@
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import { loadRecentContinuityForMember } from "../../../../lib/conversation-continuity/ledger";
 import { findFamilyIdentityByPhone } from "../../../../lib/family-phone";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
 } from "../../../../lib/family-context";
 import { recordLeadContact } from "../../../../lib/phone-leads";
+import { hasVoiceWebhookSecret } from "../../../../lib/voice/webhook-auth";
 
 /**
  * POST /api/voice/context: the Telnyx voice assistant's dynamic-variables
@@ -48,9 +50,8 @@ const EMPTY_RESPONSE = {
 };
 
 export async function POST(request: Request): Promise<Response> {
-  const secret = process.env.TELNYX_WEBHOOK_SECRET;
-  const key = new URL(request.url).searchParams.get("key");
-  if (!secret || key !== secret) {
+  const url = new URL(request.url);
+  if (!hasVoiceWebhookSecret(request, url)) {
     return Response.json(EMPTY_RESPONSE, { status: 401 });
   }
 
@@ -81,6 +82,20 @@ export async function POST(request: Request): Promise<Response> {
     const familyId = identity.familyId;
 
     const rows = await loadFamilyContextPinned(familyId);
+    let continuityContext = "";
+    try {
+      continuityContext = await loadRecentContinuityForMember({
+        familyId,
+        memberUserId: identity.memberUserId,
+      });
+    } catch (error) {
+      // Continuity is an enrichment. A ledger outage must never turn a
+      // known caller into the stranger experience or hide family context.
+      console.error(
+        "voice context: continuity load failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return Response.json({
       dynamic_variables: {
         caller_known: "true",
@@ -88,9 +103,14 @@ export async function POST(request: Request): Promise<Response> {
         // v0), else the family-level display name.
         parent_name:
           identity.memberDisplayName ?? rows.family?.parent_display_name ?? "",
-        family_context: renderFamilyContext(rows, {
-          speakingWith: identity.memberDisplayName,
-        }),
+        family_context: [
+          renderFamilyContext(rows, {
+            speakingWith: identity.memberDisplayName,
+          }),
+          continuityContext,
+        ]
+          .filter((block) => block.length > 0)
+          .join("\n\n"),
         family_id: familyId,
         // Ambiguous with multiple kids on the general line; the email
         // tool treats a blank child_id as "family-level", which is

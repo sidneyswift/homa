@@ -116,6 +116,10 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
     from public.children c where c.family_id = ${familyId}
     order by c.created_at
   `;
+  const answersByChildId = await childAnswersByChildId(
+    familyId,
+    childRows.filter((child) => !child.pending_band).map((child) => child.id),
+  );
 
   const children: SignupProgress["children"] = [];
   for (const child of childRows) {
@@ -124,7 +128,7 @@ export async function signupProgress(familyId: string): Promise<SignupProgress> 
     let answered = 0;
     let checklistDone = false;
     if (inRange) {
-      const answers = await childAnswers(child.id);
+      const answers = answersByChildId.get(child.id) ?? {};
       answered = Object.keys(answers).length;
       checklistDone =
         answered > 0 && buildQueue(planQuestions(ageMonths), answers).length === 0;
@@ -268,7 +272,7 @@ export async function nextChecklistItem(
   `;
   if (!child) return null;
   const ageMonths = ageInMonths(child.birth_month);
-  const answers = await childAnswers(childId);
+  const answers = await childAnswers(familyId, childId);
   const queue = buildQueue(planQuestions(ageMonths), answers);
   if (queue.length === 0) return null;
   return {
@@ -337,11 +341,11 @@ export async function finishChildReport(
   familyId: string,
   childId: string,
 ): Promise<ScoredReport | null> {
-  const alreadyEmailed = await reportAlreadyEmailed(childId);
+  const alreadyEmailed = await reportAlreadyEmailed(familyId, childId);
   const report = await createReport(familyId, childId);
   if (!report) return null;
 
-  const answers = await childAnswers(childId);
+  const answers = await childAnswers(familyId, childId);
   await emitMapEvent("signup.sms_completed", {
     family_id: familyId,
     questions_answered: Object.keys(answers).length,
@@ -360,7 +364,7 @@ export async function finishChildReport(
   void (async () => {
     if (narrativeEnabled()) {
       try {
-        await runReportNarrative(report.childId);
+        await runReportNarrative(report.childId, familyId);
       } catch (error) {
         console.error(
           "sms signup narrative failed:",
@@ -371,7 +375,7 @@ export async function finishChildReport(
     try {
       if (!alreadyEmailed && report.email) {
         const emailed = await sendReportEmail(report.email, report.childName, report.token);
-        if (emailed) await markReportEmailed(report.childId);
+        if (emailed) await markReportEmailed(familyId, report.childId);
       }
     } catch (error) {
       console.error(
@@ -384,10 +388,32 @@ export async function finishChildReport(
   return report;
 }
 
-async function childAnswers(childId: string): Promise<Record<string, MapAnswer>> {
+async function childAnswers(
+  familyId: string,
+  childId: string,
+): Promise<Record<string, MapAnswer>> {
+  return (await childAnswersByChildId(familyId, [childId])).get(childId) ?? {};
+}
+
+async function childAnswersByChildId(
+  familyId: string,
+  childIds: string[],
+): Promise<Map<string, Record<string, MapAnswer>>> {
+  const answersByChildId = new Map<string, Record<string, MapAnswer>>();
+  for (const childId of childIds) answersByChildId.set(childId, {});
+  if (childIds.length === 0) return answersByChildId;
+
   const sql = mapDb();
-  const rows = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.child_answers where child_id = ${childId}
+  const rows = await sql<{ child_id: string; question_id: string; answer: MapAnswer }[]>`
+    select a.child_id, a.question_id, a.answer
+    from public.child_answers a
+    join public.children c on c.id = a.child_id
+    where c.family_id = ${familyId}
+      and a.child_id in ${sql(childIds)}
   `;
-  return Object.fromEntries(rows.map((row) => [row.question_id, row.answer]));
+  for (const row of rows) {
+    const answers = answersByChildId.get(row.child_id);
+    if (answers) answers[row.question_id] = row.answer;
+  }
+  return answersByChildId;
 }

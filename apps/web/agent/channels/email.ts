@@ -1,21 +1,52 @@
 import { defineChannel, POST } from "eve/channels";
 
 import {
+  beginDeliveryAttempt,
+  findDeliveryEmailIdentity,
+  finishDeliveryAttempt,
+  openReplyLoop,
+} from "../../lib/conversation-continuity/delivery-ledger";
+import {
+  buildSignedReplyAddress,
+  emailAuthenticationPasses,
+  parseSignedReplyDeliveryId,
+} from "../../lib/conversation-continuity/email-reply-auth";
+import {
+  claimInboundReceipt,
+  completeInboundReceipt,
+  failInboundReceipt,
+  setInboundReceiptSession,
+} from "../../lib/conversation-continuity/inbound-receipts";
+import {
+  markCanonicalMessageDelivered,
+  persistCanonicalMessage,
+  resolveInboundContinuity,
+  resolvedContinuityAttributes,
+} from "../../lib/conversation-continuity/ledger";
+import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
+import {
   findFamilyIdentityByEmail,
   optOutIntent,
   parseInboundEmail,
+  parseInboundEmailEvent,
+  retrieveInboundEmail,
   setJournalOptOut,
+  verifyResendWebhookSignature,
 } from "../../lib/email-inbound";
-import { getFamilyEmail, sendAgentComposedEmail } from "../../lib/map/email";
+import {
+  getFamilyEmail,
+  sendAgentComposedEmail,
+  submitAgentComposedEmail,
+} from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
 
 /**
  * Email as an adapter on the ONE agent (gateway-plan GW-3): a parent
  * replying to a Homa email is having a conversation, so the reply
  * becomes a normal agent turn and the agent's answer goes back as a
- * threaded email. Inbound arrives from Resend's inbound webhook
- * (configured to this channel's route with ?key=RESEND_INBOUND_SECRET;
- * the channel is DARK while that env is unset).
+ * threaded email. Inbound arrives from Resend's inbound webhook,
+ * configured with ?key=RESEND_INBOUND_SECRET and verified with
+ * RESEND_WEBHOOK_SECRET. The channel is DARK while either env is unset.
  *
  * Tenancy: the sender's address is the auth context, matched against
  * the family's own registered email (the address SHE gave us), exactly
@@ -73,19 +104,86 @@ export default defineChannel({
         return Response.json({ ok: false }, { status: 401 });
       }
 
+      const payload = await req.text();
+      if (
+        !verifyResendWebhookSignature(
+          payload,
+          req.headers,
+          process.env.RESEND_WEBHOOK_SECRET,
+        )
+      ) {
+        return Response.json({ ok: false }, { status: 401 });
+      }
+
       let body: unknown;
       try {
-        body = await req.json();
+        body = JSON.parse(payload);
       } catch {
         return Response.json({ ok: false }, { status: 400 });
       }
 
-      const email = parseInboundEmail(body);
+      const receivedEvent = parseInboundEmailEvent(body);
+      let email;
+      if (receivedEvent) {
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) {
+          // A retry can recover after configuration is restored; silently
+          // acknowledging here would permanently lose the parent email.
+          return Response.json(
+            { ok: false, note: "email retrieval unavailable" },
+            { status: 503 },
+          );
+        }
+        try {
+          email = await retrieveInboundEmail(receivedEvent.emailId, apiKey);
+        } catch (error) {
+          console.error(
+            "email channel: received-email retrieval failed:",
+            error instanceof Error ? error.message : "unknown",
+          );
+          return Response.json(
+            { ok: false, note: "email retrieval failed" },
+            { status: 503 },
+          );
+        }
+        if (!email.messageId && receivedEvent.messageId) {
+          email.messageId = receivedEvent.messageId;
+        }
+      } else {
+        // Legacy fixture compatibility. Production Resend webhooks use the
+        // metadata-only event above.
+        email = parseInboundEmail(body);
+      }
       if (!email.fromEmail || email.text.length === 0) {
         return Response.json({ ok: true, note: "nothing to process" });
       }
 
-      const identity = await findFamilyIdentityByEmail(email.fromEmail);
+      const signedDeliveryId = parseSignedReplyDeliveryId(
+        email.toEmails,
+        secret,
+      );
+      const signedIdentity = signedDeliveryId
+        ? await findDeliveryEmailIdentity(
+            signedDeliveryId,
+            email.fromEmail,
+          )
+        : null;
+      const identity =
+        signedIdentity ??
+        (await findFamilyIdentityByEmail(email.fromEmail));
+      if (
+        !signedIdentity &&
+        identity &&
+        !emailAuthenticationPasses(email.authenticationResults)
+      ) {
+        // A verified Resend webhook authenticates Resend, not the SMTP
+        // sender. Legacy fixed reply addresses require aligned DMARC;
+        // new proactive messages use a signed per-delivery alias.
+        return Response.json(
+          { ok: false, note: "sender authentication failed" },
+          { status: 403 },
+        );
+      }
       const familyId = identity?.familyId ?? null;
       await emitMapEvent("email.message_received", {
         linked_family: familyId !== null,
@@ -94,6 +192,25 @@ export default defineChannel({
         // Unknown sender: never a turn. The reply-to inbox remains the
         // human path for strangers.
         return Response.json({ ok: true, note: "sender not linked" });
+      }
+      const providerMessageId =
+        email.messageId ??
+        receivedEvent?.emailId ??
+        req.headers.get("svix-id") ??
+        req.headers.get("webhook-id");
+      if (!providerMessageId) {
+        return Response.json(
+          { ok: false, note: "email id missing" },
+          { status: 400 },
+        );
+      }
+      const inboundReceipt = await claimInboundReceipt({
+        familyId,
+        channel: "email",
+        providerMessageId,
+      });
+      if (!inboundReceipt.claimed) {
+        return Response.json({ ok: true, note: "duplicate ignored" });
       }
 
       const intent = optOutIntent(email.text);
@@ -115,30 +232,110 @@ export default defineChannel({
             ],
           );
         }
+        await completeInboundReceipt(inboundReceipt.id);
         return Response.json({ ok: true, note: "opt-out handled" });
       }
 
-      const session = await send(email.text, {
-        auth: {
-          authenticator: "resend-email",
-          principalId: `email:${email.fromEmail}`,
-          principalType: "user",
-          // memberName rides only when the sender's address is a
-          // member's own sign-in email (auth context, never model input).
+      const continuationToken = emailContinuationToken(email.fromEmail);
+      let continuityAttributes: Record<string, string> = {};
+      try {
+        const continuity = await resolveInboundContinuity({
+          familyId,
+          memberUserId: identity?.memberUserId ?? null,
+          channel: "email",
+          transportThreadKey: continuationToken,
+          runtimeSessionId: null,
+          providerMessageId,
+          providerReplyTo: email.inReplyTo,
+          explicitDeliveryId: signedDeliveryId,
+          destinationKey: email.fromEmail,
+          text: email.text,
+        });
+        continuityAttributes = resolvedContinuityAttributes(continuity, {
+          memberUserId: identity?.memberUserId ?? null,
+          providerMessageId,
+        });
+      } catch (error) {
+        console.error(
+          "email channel: continuity resolution failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+        await failInboundReceipt(inboundReceipt.id, error);
+        throw error;
+      }
+      try {
+        const persistedInbound = await persistCanonicalMessage({
           attributes: {
-            channel: "email",
             familyId,
-            ...(identity?.memberDisplayName
-              ? { memberName: identity.memberDisplayName }
-              : {}),
+            ...continuityAttributes,
           },
-        },
-        continuationToken: emailContinuationToken(email.fromEmail),
-        state: { toEmail: email.fromEmail, subject: email.subject || null, familyId },
-        title: `Email conversation ${email.fromEmail}`,
-      });
+          sessionId: `inbound:${inboundReceipt.id}`,
+          channel: "email",
+          sequence: 0,
+          role: "user",
+          content: email.text,
+          turnId: inboundReceipt.id,
+          providerMessageId,
+        });
+        if (
+          continuityAttributes.repliedDeliveryId &&
+          !persistedInbound?.replyClaimed
+        ) {
+          await completeInboundReceipt(inboundReceipt.id);
+          return Response.json({
+            ok: true,
+            note: "reply already handled",
+          });
+        }
+      } catch (error) {
+        await failInboundReceipt(inboundReceipt.id, error);
+        throw error;
+      }
 
-      return Response.json({ ok: true, sessionId: session.id });
+      let startedSession;
+      try {
+        startedSession = await send(email.text, {
+          auth: {
+            authenticator: "resend-email",
+            principalId: `email:${email.fromEmail}`,
+            principalType: "user",
+            // memberName rides only when the sender's address is a
+            // member's own sign-in email (auth context, never model input).
+            attributes: {
+              channel: "email",
+              familyId,
+              email: email.fromEmail,
+              inboundReceiptId: inboundReceipt.id,
+              ...continuityAttributes,
+              ...(identity?.memberDisplayName
+                ? { memberName: identity.memberDisplayName }
+                : {}),
+            },
+          },
+          continuationToken,
+          state: {
+            toEmail: email.fromEmail,
+            subject: email.subject || null,
+            familyId,
+          },
+          title: `Email conversation ${email.fromEmail}`,
+        });
+      } catch (error) {
+        await failInboundReceipt(inboundReceipt.id, error);
+        throw error;
+      }
+      try {
+        await setInboundReceiptSession(
+          inboundReceipt.id,
+          startedSession.id,
+        );
+      } catch (error) {
+        console.error(
+          "email channel: receipt session link failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+      return Response.json({ ok: true, sessionId: startedSession.id });
     }),
   ],
 
@@ -146,23 +343,103 @@ export default defineChannel({
     "session.failed"(eventData) {
       console.error("email channel session failed:", JSON.stringify(eventData).slice(0, 400));
     },
-    async "message.completed"(eventData, channel) {
+    async "message.completed"(eventData, channel, ctx) {
       // Interim narration before tool calls also lands here; only the
       // terminal reply goes back to the parent's inbox.
-      const data = eventData as { message?: string | null; finishReason?: string };
+      const data = eventData as {
+        message?: string | null;
+        finishReason?: string;
+        sequence: number;
+        turnId?: string;
+      };
       if (data.finishReason !== "stop" || !data.message?.trim()) return;
       const to = channel.state.toEmail;
-      if (!to) return;
+      const familyId = channel.state.familyId;
+      const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
+        memberUserId?: string;
+        inboundReceiptId?: string;
+      };
+      if (attributes.inboundReceiptId) {
+        await completeInboundReceipt(attributes.inboundReceiptId);
+      }
+      if (!to || !familyId) return;
+      const persisted = await persistCanonicalMessage({
+        attributes: ctx.session.auth.current?.attributes,
+        sessionId: ctx.session.id,
+        channel: "email",
+        sequence: data.sequence,
+        role: "assistant",
+        content: data.message,
+        turnId: data.turnId,
+      });
+      if (!persisted) return;
+      const attempt = await beginDeliveryAttempt({
+        familyId,
+        episodeId: persisted.episodeId,
+        messageId: persisted.id,
+        taskRunId: null,
+        memberUserId: attributes.memberUserId ?? null,
+        channel: "email",
+        destination: to,
+        providerThreadKey: `email:${to.toLowerCase()}`,
+      });
+      if (!attempt.shouldSend) {
+        if (attempt.existingStatus === "sent") {
+          await markCanonicalMessageDelivered({
+            familyId,
+            messageId: persisted.id,
+          });
+        }
+        return;
+      }
+      const contract = replyContractForReactiveMessage(data.message);
+      if (contract) await openReplyLoop({ attempt, contract });
       try {
-        await sendAgentComposedEmail(
+        const replySecret = process.env.RESEND_INBOUND_SECRET;
+        const submission = await submitAgentComposedEmail(
           to,
           replySubject(channel.state.subject),
           data.message
             .split("\n")
             .map((line) => line.trim())
             .filter((line) => line.length > 0),
+          replySecret
+            ? buildSignedReplyAddress(attempt.id, replySecret)
+            : undefined,
         );
+        await finishDeliveryAttempt(attempt, {
+          delivered: submission.status === "submitted",
+          ...(submission.status === "submitted"
+            ? { providerMessageId: submission.messageId }
+            : {
+                error:
+                  submission.status === "unknown"
+                    ? "Resend submission uncertain"
+                    : "Resend send rejected",
+                uncertain: submission.status === "unknown",
+              }),
+        });
+        if (submission.status !== "submitted") {
+          if (attributes.inboundReceiptId) {
+            await completeInboundReceipt(attributes.inboundReceiptId);
+          }
+          return;
+        }
+        await markCanonicalMessageDelivered({
+          familyId,
+          messageId: persisted.id,
+        });
+        if (attributes.inboundReceiptId) {
+          await completeInboundReceipt(attributes.inboundReceiptId);
+        }
       } catch (error) {
+        await finishDeliveryAttempt(attempt, {
+          delivered: false,
+          error: error instanceof Error ? error.message : "unknown",
+        });
+        if (attributes.inboundReceiptId) {
+          await completeInboundReceipt(attributes.inboundReceiptId);
+        }
         console.error(
           "email channel delivery failed:",
           error instanceof Error ? error.message : "unknown",

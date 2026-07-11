@@ -1,3 +1,6 @@
+> Historical draft, not approved or published. Its product, automation, legal,
+> and article-link claims require a new evidence pass. Do not distribute.
+
 title: The homeschool hours log that writes itself (no more 9:30pm rebuilds)
 
 description:

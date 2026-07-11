@@ -4,11 +4,10 @@ import { OnboardingShell } from "./onboarding-shell";
 
 /**
  * /onboarding: the progress-report flow (lead magnet v2, replaces the plain
- * waitlist). Email first, then kids, then a five-minute observable
- * checklist per child, then optional extras, then the account (name +
- * password, the last question), then the report. Every answer auto-saves
- * server-side; the httpOnly resume cookie restores the flow on return
- * visits.
+ * waitlist). Account first, then family setup, homeschool context, kids,
+ * a five-minute observable checklist per child, optional child extras,
+ * scoring, and the report. Every answer auto-saves server-side; the
+ * httpOnly resume cookie restores the flow on return visits.
  *
  * Chrome (nav/footer) decisions live in OnboardingShell: full site chrome
  * on the page-like moments, quiet chrome during the focused steps.

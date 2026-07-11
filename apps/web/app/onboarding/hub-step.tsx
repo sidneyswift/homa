@@ -43,19 +43,20 @@ export function HubStep({
   onAddKids: () => void;
   onChildRemoved: () => void;
 }) {
-  const [linkSent, setLinkSent] = useState(false);
+  const [linkStatus, setLinkStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
 
   async function emailMeThisLink() {
-    if (!email) return;
+    if (!email || linkStatus === "sending") return;
+    setLinkStatus("sending");
     try {
-      await fetch("/api/map/resume", {
+      const response = await fetch("/api/map/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      setLinkSent(true);
+      setLinkStatus(response.ok ? "sent" : "failed");
     } catch {
-      setLinkSent(true);
+      setLinkStatus("failed");
     }
   }
 
@@ -165,7 +166,7 @@ export function HubStep({
 
       {anyPending && childrenList.every((child) => !child.inRange) ? (
         <p className="mt-4 text-body">
-          You&apos;re on the invite list. Your invite comes by email.
+          You&apos;re all set. We&apos;ll email you when the questionnaire is ready for their age.
         </p>
       ) : null}
 
@@ -181,17 +182,23 @@ export function HubStep({
           </button>
         ) : null}
         {email ? (
-          linkSent ? (
+          linkStatus === "sent" ? (
             <p className="text-sm text-muted">Link sent. It works on any device.</p>
           ) : (
-            <button
-              type="button"
-              onClick={() => void emailMeThisLink()}
-              className="inline-flex items-center gap-1.5 self-start text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline"
-            >
-              <Mail size={14} aria-hidden="true" />
-              email me this link (for later, or another device)
-            </button>
+            <>
+              {linkStatus === "failed" ? (
+                <p className="text-sm text-body">That link did not send. You can try again.</p>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void emailMeThisLink()}
+                disabled={linkStatus === "sending"}
+                className="inline-flex items-center gap-1.5 self-start text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline disabled:cursor-wait disabled:opacity-70"
+              >
+                <Mail size={14} aria-hidden="true" />
+                {linkStatus === "sending" ? "sending..." : "email me this link (for later, or another device)"}
+              </button>
+            </>
           )
         ) : null}
       </div>

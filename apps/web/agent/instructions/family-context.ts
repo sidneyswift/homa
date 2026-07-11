@@ -5,6 +5,7 @@ import {
   MissingFamilyContextError,
 } from "../../lib/agent-db";
 import { type MemoryRow } from "../../lib/agent-memory";
+import { loadContinuityContext } from "../../lib/conversation-continuity/ledger";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
@@ -97,12 +98,22 @@ export default defineDynamic({
             supabaseAccessToken?: string;
             viewChildId?: string;
             memberName?: string;
+            episodeId?: string;
+            continuityContext?: string;
+            familySmsInviteState?:
+              | "pending"
+              | "awaiting-parent"
+              | "expired";
           }
         | undefined;
 
       // Fleet research sessions have no family on purpose; injecting the
       // "point the parent to /app" fallback would fight their whole job.
       if (attributes?.channel === "research") return null;
+      // An invited adult has a deliberately unlinked, consent-only turn.
+      // sms-mode owns that explanation; the generic setup fallback would
+      // incorrectly route them into onboarding before they answer.
+      if (attributes?.familySmsInviteState) return null;
 
       try {
         let rows: FamilyContextRows;
@@ -124,11 +135,31 @@ export default defineDynamic({
         // memberName is auth-context-derived by every channel (the
         // caller's own membership row, or the parent-written phone or
         // email mapping), never model input.
+        const familyContext = renderFamilyContext(rows, {
+          focusChildId: attributes?.viewChildId,
+          speakingWith: attributes?.memberName ?? null,
+        });
+        let continuityContext = attributes?.continuityContext ?? "";
+        if (attributes?.familyId && continuityContext.length === 0) {
+          try {
+            continuityContext = await loadContinuityContext({
+              familyId: attributes.familyId,
+              episodeId: attributes.episodeId ?? null,
+              runtimeSessionId: ctx.session.id,
+            });
+          } catch (error) {
+            // Family context is the reliable floor. A continuity read
+            // failure never makes the whole turn forget the family.
+            console.error(
+              "family context: continuity load failed:",
+              error instanceof Error ? error.message : "unknown",
+            );
+          }
+        }
         return defineInstructions({
-          markdown: renderFamilyContext(rows, {
-            focusChildId: attributes?.viewChildId,
-            speakingWith: attributes?.memberName ?? null,
-          }),
+          markdown: [familyContext, continuityContext]
+            .filter((block) => block.length > 0)
+            .join("\n\n"),
         });
       } catch (error) {
         if (error instanceof MissingFamilyContextError) {
@@ -137,6 +168,10 @@ export default defineDynamic({
               "No family context is available on this session: the parent has not finished setup. Warmly point them to /app to set up their family first; do not guess at children or facts.",
           });
         }
+        console.error(
+          "family context load failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
         return defineInstructions({
           markdown:
             "The family context could not be loaded this turn. Rely on the conversation itself, offer to try again, and avoid stating remembered facts you cannot see.",

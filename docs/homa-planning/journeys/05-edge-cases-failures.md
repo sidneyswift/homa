@@ -1,9 +1,10 @@
 # 05 — Edge Cases & Failure Journeys (Workstream 5)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical journey and acceptance-source snapshot, written 2026-07-02. The
+> reconciled PRD retains only scenarios adopted by current rulings or tickets
+> as FR-10 acceptance inputs. Other prices, plan names, providers, age limits,
+> session behavior, built-status labels, and unresolved questions are history.
+> Current tier naming is Homa Plus; live Stripe state is unverified here.
 
 > Trust & safety + UX resilience workstream. Methods: ux-edge-cases (the catalog),
 > adversarial-roleplay (each trust journey was pressure-tested as "the angriest
@@ -49,6 +50,13 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 | AQ-14 | **Homa gives medical-adjacent developmental advice** ("that sounds like a speech delay, try these exercises"). | Hard boundary: Homa describes observations vs benchmarks and suggests *talking to the pediatrician* for anything clinical; never diagnoses, never treats. See IC-06 and journey J-J's cousin policy question ❓Q2. [M-R] |
 
 ### 1b. Input chaos (IC)
+
+> Current-policy correction for adopted scenarios. Global D5 resolves the
+> crisis posture as companion-not-therapist. Global D6 requires useful
+> parent-provided health and diagnosis context behind a sensitive flag and
+> stricter controls; MJ-13 owns the missing implementation. Current map coverage
+> is ages 2 through 16. Provider, offline, session, and degradation behavior in
+> this historical catalog is not proof of implementation or production.
 
 | ID | Scenario | Expected behavior |
 |---|---|---|
@@ -529,6 +537,10 @@ progress-philosophy page · M4-12 parent-facing breach templates.
 ---
 
 ## 6. ❓ Policy questions for Sidney (consolidated)
+
+> Historical question set. D5 and D6 are resolved in the current founder
+> registry. Do not treat Q2 or Q3 below as open policy. Implementation gaps and
+> genuinely open decisions must be read from the registry and current tickets.
 
 Real decisions, needed in writing, roughly in order of urgency:
 

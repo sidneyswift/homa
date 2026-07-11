@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
   Pressable,
@@ -83,6 +83,10 @@ const WATCHDOG_STALL_MS = 180_000;
  *  banner wins; matches the web twin. */
 const RECOVERY_DEADLINE_MS = 240_000;
 
+function currentTimeMs(): number {
+  return Date.now();
+}
+
 function apiPath(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
 }
@@ -128,19 +132,22 @@ export function ChatSession({
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
 
-  async function emitTurnCompleted(
-    status: "ok" | "error",
-    errorClass?: "turn_failed" | "send_failed" | "unknown",
-  ) {
-    await emitFamilyEvent(familyId, "chat.turn_completed", {
-      status,
-      ...(errorClass ? { error_class: errorClass } : {}),
-      modality: "text",
-      latency_ms: takeTurnLatencyMs(),
-      model_tier: MODEL_TIER,
-      tool_calls: countLastTurnToolCalls(messagesRef.current),
-    });
-  }
+  const emitTurnCompleted = useCallback(
+    async (
+      status: "ok" | "error",
+      errorClass?: "turn_failed" | "send_failed" | "unknown",
+    ) => {
+      await emitFamilyEvent(familyId, "chat.turn_completed", {
+        status,
+        ...(errorClass ? { error_class: errorClass } : {}),
+        modality: "text",
+        latency_ms: takeTurnLatencyMs(),
+        model_tier: MODEL_TIER,
+        tool_calls: countLastTurnToolCalls(messagesRef.current),
+      });
+    },
+    [familyId],
+  );
 
   async function queueLearningReview(sessionId: string): Promise<void> {
     const { data } = await supabase.auth.getSession();
@@ -173,7 +180,7 @@ export function ChatSession({
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
     onEvent() {
-      lastStreamActivityRef.current = Date.now();
+      lastStreamActivityRef.current = currentTimeMs();
       durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
@@ -191,7 +198,7 @@ export function ChatSession({
         events: snapshot.events,
         session: snapshot.session,
         messageTimes: stamped,
-        lastActivityAt: Date.now(),
+        lastActivityAt: currentTimeMs(),
       });
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
@@ -211,17 +218,21 @@ export function ChatSession({
         // Next tick: this callback runs inside the previous send's
         // teardown, and eve rejects overlapping sends.
         setTimeout(() => {
-          lastSendRef.current = { text: message, atMs: Date.now() };
+          lastSendRef.current = { text: message, atMs: currentTimeMs() };
           markTurnStarted();
           void sendRef.current?.({ message });
         }, 0);
       }
     },
   });
+  const agentError = agent.error;
+  const agentReset = agent.reset;
+  const agentSend = agent.send;
+  const agentStop = agent.stop;
 
   useEffect(() => {
-    sendRef.current = agent.send;
-  }, [agent.send]);
+    sendRef.current = agentSend;
+  }, [agentSend]);
 
   const busy = agent.status === "submitted" || agent.status === "streaming";
   const messages = agent.data.messages;
@@ -235,8 +246,8 @@ export function ChatSession({
   }, [archived]);
 
   useEffect(() => {
-    if (!agent.error || agent.error === reportedErrorRef.current) return;
-    reportedErrorRef.current = agent.error;
+    if (!agentError || agentError === reportedErrorRef.current) return;
+    reportedErrorRef.current = agentError;
     void emitTurnCompleted("error", "turn_failed");
 
     // Lost-turn recovery: the durable run usually outlives a dead
@@ -286,17 +297,15 @@ export function ChatSession({
           events: [],
           session: undefined,
           messageTimes: {},
-          lastActivityAt: Date.now(),
+          lastActivityAt: currentTimeMs(),
         });
-        agent.reset();
+        agentReset();
         durableCursorRef.current = 0;
         lastSendRef.current = null;
       }
       setRecovering(false);
     })();
-    // The closures re-create per render; agent.error is the real dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agent.error]);
+  }, [agentError, agentReset, emitTurnCompleted, liveTimes, storageKey]);
 
   // Give up a running recovery when the chat unmounts.
   useEffect(() => {
@@ -314,30 +323,28 @@ export function ChatSession({
     if (!busy) return;
     // The turn just started; that counts as activity (the stall clock
     // must never inherit a stamp from a previous turn).
-    lastStreamActivityRef.current = Date.now();
+    lastStreamActivityRef.current = currentTimeMs();
     let wakeGraceTimer: ReturnType<typeof setTimeout> | null = null;
     const isStale = (stallMs: number) =>
-      Date.now() - lastStreamActivityRef.current > stallMs;
+      currentTimeMs() - lastStreamActivityRef.current > stallMs;
     const subscription = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
       if (!isStale(VISIBLE_STALL_MS) || wakeGraceTimer !== null) return;
       wakeGraceTimer = setTimeout(() => {
         wakeGraceTimer = null;
         // Still nothing after the grace: the stream really is dead.
-        if (isStale(VISIBLE_STALL_MS)) agent.stop();
+        if (isStale(VISIBLE_STALL_MS)) agentStop();
       }, WAKE_GRACE_MS);
     });
     const watchdog = setInterval(() => {
-      if (isStale(WATCHDOG_STALL_MS)) agent.stop();
+      if (isStale(WATCHDOG_STALL_MS)) agentStop();
     }, 15_000);
     return () => {
       subscription.remove();
       clearInterval(watchdog);
       if (wakeGraceTimer !== null) clearTimeout(wakeGraceTimer);
     };
-    // agent.stop is stable for the store's lifetime; busy is the real dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busy]);
+  }, [agentStop, busy]);
 
   function sendMessage(text: string) {
     const message = text.trim();
@@ -361,10 +368,7 @@ export function ChatSession({
     // manual send, in the order she wrote everything.
     const outgoing = [...queued, message].join("\n\n");
     setQueued([]);
-    // sendMessage is an event handler, never render; reading the clock
-    // is safe here, the purity rule cannot tell (same as the web twin).
-    // eslint-disable-next-line react-hooks/purity
-    lastSendRef.current = { text: outgoing, atMs: Date.now() };
+    lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     markTurnStarted();
     void agent.send({ message: outgoing });
   }
@@ -386,7 +390,7 @@ export function ChatSession({
       events: [],
       session: undefined,
       messageTimes: {},
-      lastActivityAt: Date.now(),
+      lastActivityAt: currentTimeMs(),
     });
     agent.reset();
     durableCursorRef.current = 0;

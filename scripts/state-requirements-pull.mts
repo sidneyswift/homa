@@ -2,7 +2,8 @@
  * State requirements pull (M3-05 data layer, stage 1 of 2).
  *
  * Fetches HomeschoolLeap's free public compliance API (CC BY-SA 4.0,
- * attribution required) and snapshots the raw JSON into
+ * attribution recorded in the dated manifest) and snapshots recursively
+ * key-sorted, normalized JSON into
  * data/state-requirements/: one file per jurisdiction (51: 50 states plus
  * DC) plus the index listing and a manifest recording the pull. Nothing
  * here touches the database.
@@ -21,6 +22,8 @@
  * check:sources). Procedure and cadence:
  * docs/homa-planning/runbooks/state-requirements-refresh.md
  *
+ * Validation checks count and selected fields, not the exact jurisdiction set
+ * or every consumed legal field. The script does not delete stale files.
  * Exit codes: 0 = snapshots written, 1 = fetch or validation failure.
  */
 
@@ -136,4 +139,6 @@ console.log(
   `Verification statuses: ${[...statuses.entries()].map(([status, n]) => `${status}=${n}`).join(", ")}; ` +
     `oldest last_verified ${oldestVerified}.`,
 );
-console.log("Next: review `git diff data/state-requirements`, then run pnpm seed:state-requirements");
+console.log(
+  "Next: review `git diff data/state-requirements`, then run pnpm seed:state-requirements -- --confirm-prod",
+);

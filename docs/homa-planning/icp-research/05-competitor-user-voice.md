@@ -1,5 +1,9 @@
 # Competitor user voice: landscape refresh and review mining
 
+> Historical research snapshot, 2026-07-06. Competitor features, prices,
+> leadership, ratings, and recommendations are dated evidence, not current
+> market or product guidance. Re-verify every volatile claim before reuse.
+
 - **Date:** 2026-07-06
 - **Method:** live web verification of each competitor's own pricing and docs pages, app store listings, Trustpilot, BBB, Common Sense Media, third-party review roundups, homeschool blogs, and vendor comparison pages. Every claim carries an inline link. Verbatims are quoted exactly as published, usernames omitted. FACT and INFERENCE are separated, with confidence per section.
 - **Scope note:** Facebook group content is behind login and was not directly accessible; Reddit quotes come via secondary roundups that cite them. Flagged where relevant.

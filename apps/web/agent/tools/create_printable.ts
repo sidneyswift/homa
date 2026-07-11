@@ -12,7 +12,6 @@ import {
   uploadMaterialArtifacts,
   type MaterialSource,
 } from "../../lib/materials/artifact-store";
-import { sendWaitTextOnce } from "../../lib/materials/sms-ack";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   printableSlug,
@@ -25,6 +24,7 @@ import {
   renderPrintableHtml,
 } from "../../lib/materials/render-page";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
+import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -193,12 +193,14 @@ export default defineTool({
       | undefined;
     const channel = usageChannelFromAttributes(attributes);
 
-    // Render + review + upload is the slow part of an html-only build;
-    // on SMS one wait text covers it. Deduped per family, so a build
-    // where the agent already sent its own heads-up (send_heads_up) or
-    // generate_image already acked stays quiet here.
+    // Render + review + upload is the slow part of an HTML-only build.
+    // This fallback shares the progress window with send_heads_up and
+    // generate_image.
     if (channel === "sms" && attributes?.phoneNumber) {
-      sendWaitTextOnce({ familyId, phoneNumber: attributes.phoneNumber });
+      await sendSmsProgressTextOnce({
+        familyId,
+        phoneNumber: attributes.phoneNumber,
+      });
     }
 
     const startedAt = Date.now();

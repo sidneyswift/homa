@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-
 import { mapStartSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { setMapResumeCookie } from "../../../../lib/map/resume-cookie";
 import { requireFamily } from "../../../../lib/map/session";
 import { startAnonymousFamily } from "../../../../lib/map/store";
-import { MAP_RESUME_COOKIE } from "../../../../lib/map/tokens";
 
 /**
  * POST /api/map/start
@@ -52,14 +50,7 @@ export async function POST(request: Request): Promise<Response> {
       utm: input.utm,
     });
 
-    const cookieStore = await cookies();
-    cookieStore.set(MAP_RESUME_COOKIE, resumeToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 90,
-    });
+    await setMapResumeCookie(resumeToken);
 
     await emitMapEvent("map.started", {
       family_id: familyId,

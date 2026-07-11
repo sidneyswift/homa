@@ -2,24 +2,28 @@
  * State requirements seed (M3-05 data layer, stage 2 of 2).
  *
  * Upserts the reviewed snapshots in data/state-requirements/ into the
- * state_requirements table (migration #21). Run ONLY after
+ * state_requirements table (migration 20260707032148_state_requirements.sql).
+ * Run ONLY after
  * pnpm pull:state-requirements and a human read of
  * `git diff data/state-requirements`: this script is the moment upstream
  * legal data becomes product-readable, and the diff review is the
  * quarantine gate (AQ-10 / M3-04 reasoning).
  *
- * Upsert semantics: pulled_at always advances to the manifest's pull
- * time; updated_at moves ONLY when row content actually changed, so it
- * stays an honest "this rule last changed" signal for the product and
- * for blast-radius work (journey J-H).
+ * Upsert semantics: pulled_at always advances to the manifest's pull time.
+ * The inserted/changed/unchanged summary compares payload JSON only.
+ * updated_at watches payload plus notification_required and
+ * assessment_required, not every upserted column.
  *
  * The table has no Data API write policies on purpose; this direct
  * connection (Supabase transaction pooler, server-only DB password) is
  * the only write path, same credential path as scripts/map-norms-report.mts.
  *
- * Usage: pnpm seed:state-requirements
+ * Usage: pnpm seed:state-requirements -- --confirm-prod
  * Env: apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_DB_PASSWORD).
- * Exit codes: 0 = seeded and verified, 1 = validation or count failure, 2 = missing env.
+ * The 51 upserts are sequential, not wrapped in one transaction. A mid-run
+ * failure can leave a partial refresh before the final count check.
+ * Exit codes: 0 = seeded and final count verified, 1 = validation or count
+ * failure, 2 = missing env.
  */
 
 import { readdir, readFile } from "node:fs/promises";
@@ -35,6 +39,7 @@ import {
   type IndexStateEntry,
   type StateDetail,
 } from "./state-requirements-shared.mts";
+import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const dataDir = path.join(repoRoot, "data", "state-requirements");
@@ -52,6 +57,11 @@ if (!supabaseUrl || !password) {
   process.exit(2);
 }
 const ref = new URL(supabaseUrl).hostname.split(".")[0];
+
+assertConfirmedProdWrite({
+  scriptName: "state-requirements-seed",
+  supabaseUrl,
+});
 
 const sql = postgres({
   host: "aws-0-us-east-1.pooler.supabase.com",

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { MAP_INTERESTS_CAP } from "@homa/core";
+
 import type { FlowChild } from "./flow-types";
 import { TagInput } from "./tag-input";
 
@@ -13,8 +15,7 @@ import { TagInput } from "./tag-input";
  * UX review 2026-07-06 (approved in full): dieted from nine asks to the
  * two that feed the report itself, interests (they end up in the
  * materials) and help-with (it shapes the report's note). The "About
- * your homeschool" block (style, curriculums, values) moved to the
- * report page, after the payoff, where reciprocity is on our side; the
+ * your homeschool" block now lives in HomeschoolStep before kids; the
  * remaining asks (activities, crew, notes) belong to the product proper,
  * not the lead flow. Everything here is still skippable in one tap.
  */
@@ -134,7 +135,7 @@ export function ExtrasStep({
               suggestions={interestSuggestions(child.ageMonths)}
               tags={interests}
               setTags={setInterests}
-              max={12}
+              max={MAP_INTERESTS_CAP}
             />
             <button
               type="button"

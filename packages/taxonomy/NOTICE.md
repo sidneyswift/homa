@@ -21,4 +21,4 @@ The `curriculum-standards.json` file contains standards extracted from third-par
 - **C3 Framework for Social Studies (c3-social-studies):** © NCSS. Codes only.
 - **IB PYP (ib-pyp-pspe):** © International Baccalaureate Organization. Codes only.
 
-See the upstream PROVENANCE.md for full details.
+The vendored provenance and license home is `docs/homa-benchmarks/marble/README-HOMA.md`. Full upstream details are preserved in `docs/homa-benchmarks/marble/PROVENANCE.md`, `LICENSE`, and `LICENSE-CONTENT`.

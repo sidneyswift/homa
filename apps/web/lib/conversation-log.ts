@@ -1,3 +1,8 @@
+import {
+  resolveInboundContinuity,
+  resolvedContinuityAttributes,
+} from "./conversation-continuity/ledger";
+import { persistCanonicalMessage } from "./conversation-continuity/ledger";
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
 
@@ -19,6 +24,7 @@ export interface PersistMessageInput {
   role: "user" | "assistant";
   content: string;
   turnId: string | undefined;
+  finishReason?: string;
 }
 
 /** Sessions stamped by an adapter carry their surface in auth attributes
@@ -37,32 +43,74 @@ function channelLabel(
 export async function persistConversationMessage(
   input: PersistMessageInput,
 ): Promise<void> {
-  const attrs = (input.attributes ?? {}) as { familyId?: string };
+  const attrs = (input.attributes ?? {}) as {
+    familyId?: string;
+    memberUserId?: string;
+    episodeId?: string;
+    providerMessageId?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
   const familyId = attrs.familyId;
   if (!familyId) return;
 
   const content = input.content.trim().slice(0, CONTENT_MAX_CHARS);
   if (content.length === 0) return;
+  const channel = channelLabel(input.attributes, input.channelKind);
+  let continuityAttributes: Record<string, string> = {};
+  if (input.role === "user" && !attrs.episodeId) {
+    try {
+      const continuity = await resolveInboundContinuity({
+        familyId,
+        memberUserId: attrs.memberUserId ?? null,
+        channel: channel === "dispatch" ? "web" : channel,
+        transportThreadKey:
+          attrs.phoneNumber ??
+          attrs.email ??
+          `${channel}:${input.sessionId}`,
+        runtimeSessionId: input.sessionId,
+        providerMessageId: attrs.providerMessageId ?? null,
+        providerReplyTo: null,
+        destinationKey: attrs.phoneNumber ?? attrs.email ?? null,
+        text: content,
+      });
+      continuityAttributes = resolvedContinuityAttributes(continuity, {
+        memberUserId: attrs.memberUserId ?? null,
+        providerMessageId: attrs.providerMessageId ?? null,
+      });
+    } catch (error) {
+      console.error(
+        "conversation continuity resolution failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+  }
 
   // Best-effort semantic index (about 200-400ms per message inside the
   // hook, after the user already has their streamed text). Null means
   // this row is findable by FTS only, never a failed write.
   const embedding = await embedText(content, { familyId });
 
-  const sql = mapDb();
-  await sql`
-    insert into public.conversation_messages
-      (family_id, session_id, sequence, channel, role, content, turn_id, embedding)
-    values (
-      ${familyId},
-      ${input.sessionId},
-      ${input.sequence},
-      ${channelLabel(input.attributes, input.channelKind)},
-      ${input.role},
-      ${content},
-      ${input.turnId ?? null},
-      ${embedding}
-    )
-    on conflict (session_id, (coalesce(turn_id, '')), role, sequence) do nothing
-  `;
+  const persisted = await persistCanonicalMessage({
+    attributes: { ...attrs, ...continuityAttributes },
+    sessionId: input.sessionId,
+    channel,
+    sequence: input.sequence,
+    role: input.role,
+    content,
+    turnId: input.turnId,
+    providerMessageId: attrs.providerMessageId ?? null,
+    terminal:
+      input.role === "assistant"
+        ? input.finishReason === "stop"
+        : undefined,
+  });
+  if (persisted && embedding) {
+    const sql = mapDb();
+    await sql`
+      update public.conversation_messages
+      set embedding = ${embedding}
+      where id = ${persisted.id} and embedding is null
+    `;
+  }
 }

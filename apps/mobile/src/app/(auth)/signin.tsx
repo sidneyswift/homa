@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   Text,
   View,
@@ -16,19 +15,17 @@ import { Card } from "../../components/ui/card";
 import { TextField } from "../../components/ui/text-field";
 import { useSession } from "../../features/auth/session-provider";
 import { supabase } from "../../lib/supabase";
+import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontSize, space } from "../../theme/tokens";
 
 /**
- * Email + password sign in and sign up, matching the web /signin flow
- * (signups are auto-confirmed by a DB trigger, so signUp is followed by
- * an immediate password sign-in, same as apps/web/app/signin/actions.ts).
- * Google OAuth needs a deep-link redirect registered in Supabase first;
- * it arrives with that setup (HUMAN-TODO).
+ * Email + password sign-in, matching the web /signin flow. Account
+ * creation stays behind the web onboarding entry, so every door gathers
+ * the same setup context before a family reaches the app.
  */
 export default function SignInScreen() {
   const { session } = useSession();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -44,23 +41,15 @@ export default function SignInScreen() {
     }
     setPending(true);
     setError(null);
-    if (mode === "signup") {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: trimmedEmail,
-        password,
-      });
-      if (signUpError) {
-        setPending(false);
-        setError(signUpError.message);
-        return;
-      }
-    }
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: trimmedEmail,
       password,
     });
     setPending(false);
-    if (signInError) setError(signInError.message);
+    if (signInError) {
+      console.error("mobile signin failed:", signInError.message);
+      setError("That email and password didn't match. You can try again when you're ready.");
+    }
     // Success: SessionProvider picks up the session and this screen redirects.
   }
 
@@ -94,19 +83,6 @@ export default function SignInScreen() {
           </View>
 
           <Card style={{ gap: space.md }}>
-            <View style={{ flexDirection: "row", gap: space.sm }}>
-              <ModeTab
-                label="Sign in"
-                active={mode === "signin"}
-                onPress={() => setMode("signin")}
-              />
-              <ModeTab
-                label="Create account"
-                active={mode === "signup"}
-                onPress={() => setMode("signup")}
-              />
-            </View>
-
             <TextField
               label="Email"
               value={email}
@@ -121,8 +97,7 @@ export default function SignInScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              placeholder={mode === "signup" ? "8 characters or more" : undefined}
+              autoComplete="current-password"
             />
 
             {error ? (
@@ -139,67 +114,32 @@ export default function SignInScreen() {
             ) : null}
 
             <Button
-              label={
-                pending
-                  ? "One moment\u2026"
-                  : mode === "signin"
-                    ? "Sign in"
-                    : "Create account"
-              }
+              label={pending ? "One moment\u2026" : "Sign in"}
               onPress={() => void submit()}
               disabled={pending}
               size="lg"
             />
           </Card>
 
-          <Text
-            style={{
-              textAlign: "center",
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.sm,
-              color: colors.textMuted,
-            }}
-          >
-            Google sign-in works on the web today and is coming to the app.
-          </Text>
+          <View style={{ gap: space.sm }}>
+            <Text
+              style={{
+                textAlign: "center",
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.sm,
+                color: colors.textMuted,
+              }}
+            >
+              New to Homa? Start with the web onboarding, then sign in here.
+            </Text>
+            <Button
+              label="Open onboarding"
+              variant="ghost"
+              onPress={() => void openWebOnboarding()}
+            />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
-}
-
-function ModeTab({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      onPress={onPress}
-      style={{
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        borderColor: active ? colors.brand : colors.border,
-        backgroundColor: active ? colors.brand : colors.card,
-        paddingHorizontal: space.md,
-        paddingVertical: 8,
-      }}
-    >
-      <Text
-        style={{
-          fontFamily: fontFamilies.bodyMedium,
-          fontSize: fontSize.sm,
-          color: active ? colors.onBrand : colors.textStrong,
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }

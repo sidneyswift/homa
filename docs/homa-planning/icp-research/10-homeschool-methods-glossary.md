@@ -1,15 +1,20 @@
 # 10. Homeschool methods and philosophies: a ranked, sourced glossary
 
+> Historical research snapshot, 2026-07-10. Method descriptions, popularity
+> estimates, prices, and source status are dated evidence, not a self-updating
+> reference. Add a new dated research pass or explicitly date-stamp refreshed
+> claims before reuse.
+
 **Date**: 2026-07-10 · **Analyst**: research pass (methods and philosophies domain)
 **Method**: web research against primary sources (NHERI's published survey, publisher
 and organization self-reports, sector-analysis nonprofits, journalism, community
 content). Every claim carries an inline link and access date. FACT and INFERENCE are
 separated, CAUTION flags unverifiable or self-interested numbers, and confidence is
 rated per section. This file exists so Homa's product and agent can ground a
-conversation in what a named method actually is and how big it actually is, instead of
-relying only on the model's internal training data, which goes stale the day training
-stopped. It is meant to be a living document: append new methods, refresh numbers, and
-date-stamp changes (see §5).
+conversation in what a named method actually is and how big it appeared in this
+snapshot, instead of relying only on the model's internal training data. It was
+designed for dated updates; any later change must name its refresh date and evidence
+(see §5).
 
 **Purpose, read this first.** `08-segments-curricula.md` already covers the six
 segments that matter most for product strategy (classical, Charlotte Mason,

@@ -3,6 +3,541 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late afternoon) · Slow SMS turns now speak before they work
+
+Founder problem: a reasoning-heavy SMS request left the phone silent long
+enough that Homa looked broken. Founder approved an immediate SMS improvement
+and a separate RCS phase after Telnyx supplies a registered beta agent.
+
+The existing `send_heads_up` material-build tool now covers substantial
+reasoning, current research, several dependent tools, and material builds. It
+is the agent's first action on those slow SMS turns. Greetings, quick answers,
+clarifying questions, signup, consent and invitation flows, account linking,
+and one-step record updates stay quiet. The progress line is not the reply;
+Homa still sends one completed reply when the work finishes.
+
+The shared helper moved from `lib/materials/sms-ack.ts` to
+`lib/sms-progress.ts`. It still shares one three-minute, per-instance dedupe
+window across the agent-first tool and automatic material fallbacks. The key
+includes both family and authenticated phone, so one parent's request cannot
+suppress another parent's progress line. The helper now awaits Telnyx and
+reports success only when submission is accepted. A failed progress send
+cannot stop the work or the completed reply. The progress-only Telnyx request
+aborts after five seconds, while ordinary SMS and MMS callers keep their
+existing behavior. The destination still comes only from authenticated channel
+attributes.
+
+The reader gate found the parent-facing lines calm and clear. The editor gate
+then removed inconsistent names, a nested action sentence, and a run-on from
+the generated-copy producer. A code review found older material instructions
+that still promised "a minute or two"; all three producer layers now use the
+same duration-free rule. No exact wait estimate was added because there is no
+evidence for one universal duration.
+
+Verification: the initial focused suite passed 5 tests after first failing on
+the missing service. Timeout and transport coverage brought the focused SMS
+tests to 10; the strengthened continuity guard passed all 65 tests. Edited-file
+lint,
+IDE diagnostics, web typecheck, Next production build, and Eve build all
+passed. The final focused code review found no remaining critical or important
+issue. No live phone test or deployment was performed. RCS code remains
+deferred until the founder completes the Telnyx beta-agent action in
+`HUMAN-TODO.md`.
+
+## 2026-07-11 (afternoon) · Morning research brief has one binding format
+
+Founder approved the Mac Mini-style morning brief as four exact blocks:
+`🔬 Last night I researched`, `What I learned`, `Why it's interesting`, and
+one `Want me to` offer. Each content section is 1 to 2 sentences. The offer
+must name one action Homa can complete now, such as making a quick activity
+or printable. Calendar writes are not available, so Homa may collect timing
+details for a reminder or task but may not promise a calendar change. The
+saved-note URL is deferred until a dedicated research-note route exists.
+
+The generated-copy producer at
+`apps/web/agent/skills/research-brief/SKILL.md` now owns the exact shape,
+plain-language rules, honest overnight versus top-up tense, and CTA
+capability limits. Dispatch repeats the format at the final generation seam.
+A pure validator requires the exact seven-line layout, complete content
+sentences, one supported capability, and the expected overnight or top-up
+tense. It rejects extra questions, links and bare domains, saved-note claims,
+calendar references, markdown, extra emoji, internal vocabulary, em dash
+characters, and messages over 1,600 characters. The paid model eval reads the
+real skill and uses Homa's shared gateway model; CI runs only the deterministic
+contract. The ruling is also indexed in the canonical founder registry.
+
+The reader gate found that teaching abbreviations, abstract sound categories,
+and a vague game offer raised first-read effort. The producer now requires a
+concrete example and a clear deliverable. The editor gate then found unclear
+actors, multi-idea sentences, vague references, and nested CTA clauses. Those
+fixes also landed at the producer layer, never in the generated fixture.
+
+Verification: all 8 deterministic format tests passed; the live model eval
+generated a valid four-block Story phonics brief; all 65 conversation
+continuity tests passed; monorepo typecheck, scoped web lint, event, map, and
+skill-targeting guards, production build, and Eve channel build all passed.
+No commit was created. A final focused code review ended GO after every
+reported format and CTA bypass became a regression fixture.
+
+## 2026-07-11 (morning) · Conversation continuity: one household conversation above every Eve session
+
+Founder rejected the local "inject the latest dispatch message" patch after
+the first live morning brief asked a question and Sidney's SMS reply "Yes"
+resumed a different Eve session: "think one level of abstraction above."
+Production trace: one household, two parent members, two phones, 96 persisted
+messages across 12 Eve sessions (7 web, 2 SMS, 3 dispatch) plus 6 voice
+transcripts. The permanent row shape could not name the adult, recipient,
+episode, reply target, task run, or per-recipient delivery. Root ruling:
+transport threads are adapters, never product conversation identity. Eve owns
+durable execution; an application-owned Conversation Continuity module owns
+causality.
+
+Built test-first:
+
+1. `conversation_episodes`, `conversation_thread_bindings`,
+   `conversation_deliveries`, and `conversation_open_loops`; messages gain
+   episode, actor member, family/internal visibility, task-run origin, reply
+   edge, provider id, and delivery edge. Existing dispatch input prompts were
+   backfilled internal and are hidden from authenticated reads.
+2. The deep module under `lib/conversation-continuity/`: deterministic
+   provider-id-first reply resolution, no "latest message" guessing, one open
+   loop per recipient, explicit ambiguity, expiry, role-labeled hydration,
+   Postgres adapter, per-adult SMS with own-email fallback, partial delivery
+   status, stable hashed transport bindings.
+3. SMS and email authenticate the adult, resolve the canonical episode before
+   starting Eve, and stamp episode/reply/delivery metadata. Web persistence
+   resolves the same module; fresh devices and rotated sessions rehydrate the
+   episode. Voice context receives the latest member continuity block.
+4. Dispatch creates one canonical family message, records one delivery per
+   intended adult, opens independent reply loops only when the generated text
+   actually asks a question, records its Eve session on `homa_task_runs`, and
+   reports partial instead of hiding one adult's failed delivery.
+5. Family folding moves every continuity table and deduplicates transport
+   bindings. Email parsing now preserves Message-ID and In-Reply-To for exact
+   provider causation when available. The task history names partial delivery
+   plainly.
+6. Provider hardening: SMS/email webhook IDs are claimed before Eve so retries
+   cannot repeat tools; parent content is canonical before the turn starts;
+   terminal model output completes the inbound receipt independently from its
+   outbound send. Resend's current metadata-only webhook retrieves content
+   through the Receiving API. Proactive/reaction emails use HMAC-signed
+   per-delivery reply aliases; legacy addresses require DMARC. Telnyx and
+   Resend submission states preserve submitted/rejected/unknown, suppress
+   unsafe fallback/replay, and distinguish partial uncertainty in task history.
+   Existing 296 messages were backfilled into 23 canonical episodes (zero
+   missing); all six historical family task runs recovered their Eve session.
+
+Verification: 55 continuity/channel tests green (new behavior observed red
+first), production-shaped two-parent DB E2E green before the local database
+secret disappeared (7 original checks; the committed CI version now also
+covers receipt replay, sent replay, monotonic visibility, and family fold),
+live Claude model eval green (bare "Yes" produced the promised stop-and-go
+game), monorepo typecheck, source lint, production build, Eve channel build,
+event/map/skills/taxonomy guards green. Two fresh code-review rounds ended
+GO after every critical/high finding was fixed. Supabase advisors found no
+new security warning; all continuity foreign keys are indexed. Anon isolation
+checks are green under the new explicit-deny posture. The authenticated
+cross-family fixture could not rerun after another work stream removed
+`SUPABASE_DB_PASSWORD` from local env; CI now supplies it explicitly and runs
+both isolation and the database continuity E2E.
+
+Schema migrations were applied to homa-prod and are additive/backward
+compatible. Product code is complete on the current reconciliation branch but
+not deployed from this mixed working tree; no commit was created without a
+founder request.
+
+## 2026-07-11 (pre-dawn) · The wall: built DARK behind HOMA_WALL_ENABLED
+
+Founder instruction after the monetization review: "make the wall. make it
+removable. Not at the conference." Built the paywall between the free report
+and the acting product, dark by default: flag off means zero behavior change
+and zero added queries, so the July 13 conference deploy is untouched and the
+07-04 no-Stripe-at-conference ruling stands. Full decision record:
+plans/2026-07-11-the-wall.md.
+
+Placement (from the review, supersedes PRD FR-2's card-at-onboarding wording
+that predates open signup): the report stays free forever; the card comes out
+at the first tap on one of four doors (build a plan, open the month,
+curriculum call, first chat message). The wall gates NEW action only; plans
+and months that already exist keep rendering. Unlock is Payment Link checkout
+verified by /api/billing/confirm (client_reference_id must match the
+signed-in family), which stamps families.trial_started_at once.
+families.billing_exempt is the founder comp switch. Agent calls made alone,
+all conservative and logged in the plan doc: chat gate is client-side in v0
+(channel enforcement is Phase D hardening), no webhooks yet (trial_started_at
+is one-way; founder ops cover cohort scale), SMS stays unwalled per the
+standing pricing-over-text ban, wall access reads fail OPEN so a billing
+hiccup can never take a family's product down.
+
+Instrumentation is live NOW with the flag off: report.action_tapped fires on
+every door tap (walled=false era) so the paywall decision gets baseline
+tap-through data starting this weekend; wall.viewed / wall.dismissed /
+wall.checkout_started / billing.trial_started complete the funnel later.
+Verified: web + core typecheck, web lint, check:events (registry parity),
+check:isolation (no new tables; three additive families columns, migration
+20260711200000 NOT yet applied to prod, it ships with this code per the
+additive-may-lead law).
+
+File additions: apps/web/lib/billing/{wall.ts,wall-types.ts},
+apps/web/components/billing/{wall-copy.ts,wall-offer.tsx,wall-modal.tsx,
+door-link.tsx,wall-beacon.ts}, apps/web/app/api/billing/{beacon,confirm}/
+route.ts, supabase/migrations/20260711200000_family_billing.sql,
+plans/2026-07-11-the-wall.md; wall threading in report-view, month-button,
+call-homa-ps, plan page, plan consent + curriculum start routes, chat page +
+chat-client; WALL_DOORS + five events in packages/core/src/events.ts.
+
+## 2026-07-11 (late night) · Child profile parsing has one map helper
+
+Bug found during the full-repo review follow-up: child interests, focus,
+help-with text, and homeschool style were parsed separately in map state,
+plan generation, report narratives, and curriculum-call facts. One plan path
+also cast JSON arrays directly to `string[]`, so non-string values could leak
+into planner context.
+
+Added `apps/web/lib/map/profile-context.ts` for string-list extraction,
+deduping, profile interest cleanup, help/focus cleanup, and the family style
+fallback. Moved the repeated map, narrative, and curriculum parsing onto it.
+The shared read path also applies the existing non-answer guard so old
+`"idk"`-style focus rows do not re-enter prompts. Verified with web TypeScript,
+web lint, and a grep for the old unsafe casts and local filter patterns.
+
+## 2026-07-11 (late night) · App SMS sends go through one Telnyx helper
+
+Bug found during the full-repo review follow-up: the family phone linker
+reimplemented the raw Telnyx `/v2/messages` POST for its confirmation text,
+while the rest of app code used `sendHomaSms`. That split could drift on SMS
+enablement, from-number handling, MMS support, or failure behavior.
+
+Moved the link notification onto `apps/web/lib/voice/telnyx-api.ts`'s
+`sendHomaSms` helper. Verified with a grep showing the app-side raw Telnyx
+messages endpoint now only appears in that helper, plus web TypeScript and web
+lint.
+
+## 2026-07-11 (late night) · Map resume cookie writes have one helper
+
+Bug found during the full-repo review follow-up: four map routes repeated the
+same httpOnly resume cookie options. That made token lifetime and cookie
+security settings easy to drift between anonymous start, password claim, Google
+linking, and emailed resume links.
+
+Added `apps/web/lib/map/resume-cookie.ts` with `setMapResumeCookie`, then moved
+all four routes onto it. Verified with a grep showing the raw cookie setter now
+lives in one map helper, plus web TypeScript and web lint.
+
+## 2026-07-11 (late night) · HTML escaping has one helper
+
+Bug found during the full-repo review follow-up: `escapeHtml` existed in three
+places after the link-phone confirmation page was hardened. That kind of helper
+drift is exactly how one HTML surface keeps escaping less than another.
+
+Added `apps/web/lib/html-escape.ts` and moved map email, printable page shells,
+and the link-phone confirmation page onto it. The shared helper escapes text
+nodes and quoted attribute values, including apostrophes. Verified with web
+TypeScript, web lint, and a grep showing only the shared helper defines
+`escapeHtml`.
+
+## 2026-07-11 (late night) · Mobile no longer bypasses web onboarding
+
+Bug found during the full-repo review follow-up: mobile still had its own
+email/password account creation and family creation path after web retired that
+flow. A mobile-created account could skip the web onboarding step that stamps
+`profile_completed_at`, then reach Today or Chat in a half-setup state.
+
+Removed the mobile create-account mode and the dead mobile family-creation RPC
+wrapper. The mobile sign-in screen now only signs in existing accounts and opens
+web onboarding for new families. Mobile family reads now include
+`profile_completed_at` and the signed-in adult's own `family_members.display_name`.
+Today and Chat require the same readiness shape as web app data: family basics
+complete and at least one child. Family and Chat greetings now prefer the
+member-specific display name before the family-level fallback. Verified with the
+mobile TypeScript check, mobile lint, and a grep proving mobile no longer
+contains `signUp`, `createMyFamily`, or `create_my_family` paths.
+
+## 2026-07-11 (late night) · App source is clear of literal em dash characters
+
+Bug found during the full-repo review follow-up: one app-level instruction file
+still carried a literal em dash, even after the earlier code cleanup. The broader
+CR-51 docs sweep remains open because it touches historical planning records and
+local skill reference material.
+
+Replaced the remaining non-vendored app/package hit in `apps/web/AGENTS.md`.
+Verified `apps/` and `packages/` have no literal em dash outside vendored
+taxonomy data. Vendored data remains handled by the CR-52 read-boundary
+sanitizer.
+
+## 2026-07-11 (late night) · Mobile tenant-boundary docs corrected
+
+Bug found during the full-repo review follow-up: `apps/mobile/AGENTS.md`
+overstated the mobile tenant boundary by saying `familyId` never comes from
+client input. The code is safer than that phrasing: some app writes send a
+selected `family_id`, and Supabase RLS re-checks it under the caller's token.
+
+Updated the mobile instructions to reserve the stronger rule for agent
+identity, and to describe app writes as caller-token RLS-scoped. This is a
+partial CR-72 cleanup only; the broader mobile signup/profile-completion gaps
+remain tracked.
+
+## 2026-07-11 (late night) · Hook suppressions removed from app code
+
+Bug found during the full-repo review follow-up: chat recovery, stream
+watchdog, dictation auto-stop, and onboarding transition code suppressed React
+hook lint rules. That hid dependency drift in the recovery paths that keep the
+composer from getting stuck.
+
+Refactored the web and mobile chat recovery effects to use explicit Eve method
+dependencies, stable completion callbacks, and a time helper instead of purity
+suppression. The dictation auto-stop now stops the recorder directly from the
+state-driven cap effect. The preparing step now keys staged-line state by child,
+so switching children starts at the first line without an effect reset. The
+mobile family loader no longer needs its set-state-in-effect suppression. Also
+fixed the lint fallout in the chart lightbox focus restore, memories-card copy,
+and a stale import. Verified with web lint, web TypeScript, mobile TypeScript,
+and a repo grep for React hook suppression comments under `apps/` and
+`packages/`.
+
+## 2026-07-11 (small hours) · Graph walk machinery built dark (depth-fork plan steps 1-2)
+
+Built the instrumented core of plans/2026-07-11-onboarding-depth-fork.md on the
+founder's "continue": the three registry events (map.depth_fork_decided,
+map.walk_answered, map.walk_ended), the pure walk engine in
+packages/taxonomy/src/walk.ts (fold answers into confirmed/emerging/blocked
+knowledge with hard-closure implication, explicit-beats-implied contradiction
+handling, climb-on-easily prune-on-miss card selection, sitting budget 8
+mirroring DEEP_DIVE_CAP, per-domain frontier summaries), the authored-card
+layer (cards.ts, empty until curation batch 1, so the walk serves nothing and
+ships dark), the /api/map/walk + /api/map/walk-fork routes, and
+lib/map/walk-store.ts (topics validated against the taxonomy server-side,
+child_answers rows under source 'onboarding_walk', tenancy re-scoped per the
+law). Thirteen walk-engine laws joined pnpm check:taxonomy, asserted against
+the real corpus.
+
+Decisions made alone: apps/web became the first full-package @homa/taxonomy
+importer under Next, which surfaced that Turbopack resolves the package's
+.js-suffixed relative TS imports literally (nine module-not-found errors).
+Added @homa/taxonomy to transpilePackages and dropped the .js suffixes from
+the package's internal imports, matching @homa/core's extensionless
+convention; eve build, tsx guards, typecheck, lint, and the full Next build
+all verified green after the change. Walk answers fold in every stored
+taxonomy-topic answer for the child regardless of writer (record_observation
+included), while bank-item answers stay out of the graph fold: the ladder and
+the graph stay separate models per the skill-graph plan.
+
+## 2026-07-11 (small hours) · Onboarding depth: mom-decides fork, instrumented (founder rulings)
+
+Chat session on the Marble-derived skill graph and onboarding length ended in
+four founder rulings, captured with the full design in
+plans/2026-07-11-onboarding-depth-fork.md: (1) err toward a longer, smarter
+first assessment and shorten from evidence, never preemptive fear; (2) depth
+is the mom's choice, offered per subject after its core questions ("dive
+deeper into [subject A], or move on to [subject B]"), biased toward her
+helpWith subjects; (3) fork take-rate and mid-walk drop-off per subject are
+instrumented from day one through the events registry, so "shorten it" is a
+data decision in two weeks instead of a complaint-driven one; (4) graph-walk
+answers land unanchored (they feed the frontier, plans, and the agent
+immediately) and graduate into the scored set per topic when an anchor is
+authored with a citation, so the scorer's honesty rules stay untouched. No
+product code shipped in this session; the plan is the artifact.
+
+## 2026-07-11 (late night) · Vendored reference text is sanitized at read time
+
+Bug found during the full-repo review follow-up: upstream state-requirement
+snapshots and Marble taxonomy data contain em dash characters. Editing those
+vendored snapshots would create noisy upstream drift, but showing them verbatim
+would violate the repo's copy law.
+
+Added a read-boundary sanitizer for state requirement card text and the
+taxonomy assembly layer. The vendored files stay exact; product-facing state
+pathway text and assembled taxonomy names, descriptions, evidence, prompts,
+edge reasons, and cluster summaries normalize the character before display or
+API use. Verified with `check:taxonomy`, the web TypeScript check, and a grep
+that the changed source files contain no literal em dash.
+
+## 2026-07-11 (late night) · Ops scripts have root aliases
+
+Bug found during the full-repo review follow-up: seven ops scripts were runnable
+only through `pnpm exec tsx`, while nearby scripts had root aliases.
+
+Added aliases for knowledge seed/revert, map narrative fixtures, tasks E2E,
+Telnyx assistant info, Telnyx call transcripts, and Telnyx calls today. The
+prod-mutating aliases do not bake in confirmation; callers still pass
+`-- --confirm-prod`, so CR-59's guard remains active. Verified with `pnpm run`.
+
+## 2026-07-11 (late night) · SMS signup progress batches answers
+
+Bug found during the full-repo review follow-up: `signupProgress` loaded child
+answers one child at a time. Families with several children paid an avoidable
+query per child on every SMS progress check.
+
+Added a batched answer loader that joins through `children` and scopes by
+`family_id`, then groups answers by child in memory. The single-child SMS answer
+helper now also requires `familyId`, so every answer read in this path carries a
+family predicate. Verified with the web TypeScript check.
+
+## 2026-07-11 (late night) · Model timeouts now abort the request
+
+Bug found during the full-repo review follow-up: materials review, materials
+image generation, and SMS image captioning used `Promise.race` for timeouts.
+The user-facing path returned a failure, but the underlying AI SDK call could
+keep running and bill late.
+
+Replaced those races with `AbortController` timers passed to the AI SDK via
+`abortSignal`. Timed-out calls now cancel the request, skip usage recording, and
+keep the same fail-soft user posture. Verified with the web TypeScript check and
+a grep that the flagged `Promise.race` wrappers are gone.
+
+## 2026-07-11 (late night) · Read failures no longer look empty
+
+Bug found during the full-repo review follow-up: saved-materials and memories
+reads returned `[]` on PostgREST errors. A policy or schema failure looked the
+same as "nothing saved yet."
+
+Material caller reads now log the raw PostgREST message and throw a generic tool
+failure instead of telling the agent nothing matched. The settings memories read
+now returns `{ memories, loadError }`; the card renders a quiet load-error state
+when the query fails and stays hidden only for a true empty list. Verified with
+the web TypeScript check.
+
+## 2026-07-11 (late night) · Auth and settings errors use reviewed copy
+
+Bug found during the full-repo review follow-up: three user-facing paths returned
+raw Supabase or Auth error messages: onboarding account claim, sign-in, and the
+settings child-add action.
+
+Those paths now return stable Homa copy to the client and log the raw message on
+the server. The claim route still preserves the `exists` reason so the client can
+offer sign-in for returning accounts. Verified with the web TypeScript check.
+
+## 2026-07-11 (late night) · Chart lightbox traps focus
+
+Bug found during the full-repo review follow-up: the report chart lightbox used
+`role="dialog"` and `aria-modal` but did not move focus into the dialog, trap
+Tab, handle Escape, or restore focus after close.
+
+Added trigger, dialog, and close-button refs. Opening the lightbox focuses the
+close button; Tab cycles inside the dialog; Escape closes it; closing restores
+focus to the trigger. Verified with the web TypeScript check.
+
+## 2026-07-11 (late night) · Removed unused starter SVGs
+
+Bug found during the full-repo review follow-up: the web public folder still
+carried five stock Create Next App SVGs with no references in app code.
+
+Confirmed with a full-repo grep, then deleted `file.svg`, `globe.svg`,
+`next.svg`, `vercel.svg`, and `window.svg` from `apps/web/public`.
+
+## 2026-07-11 (late night) · Review threshold env fails closed
+
+Bug found during the full-repo review follow-up: `HOMA_REVIEW_MIN_MESSAGES` was
+parsed with bare `Number(...)`. A malformed value became `NaN`, and
+`messages.length < NaN` is always false, so the post-turn review gate could run
+on every turn.
+
+Added a small parser that accepts only finite positive numbers, floors decimals,
+and falls back to the default of 4 for blank, malformed, or less-than-one values.
+Verified with the web TypeScript check.
+
+## 2026-07-11 (late night) · Rate limiter evicts one key at a time
+
+Bug found during the full-repo review follow-up: the shared in-memory rate
+limiter called `windows.clear()` when it crossed 10,000 keys. One
+high-cardinality abuse pattern could briefly erase unrelated counters for the
+same serverless instance.
+
+Replaced the full clear with bounded insertion-order LRU eviction. Active keys
+are refreshed on each hit, and only the oldest keys are removed when the map is
+over capacity. Verified with the web TypeScript check and a focused smoke that
+keeps a recently used limited key alive across overflow.
+
+## 2026-07-11 (late night) · Prod-mutating scripts require confirmation
+
+Bug found during the full-repo review follow-up: four ops scripts wrote through
+server DB credentials with no explicit production confirmation flag:
+`knowledge-seed`, `knowledge-revert`, `state-requirements-seed`, and
+`telnyx-transcripts-sync`.
+
+Added `scripts/prod-write-guard.mts`, which allows local Supabase URLs but exits
+2 for hosted Supabase URLs unless `--confirm-prod` is present. Wired the guard
+into all four scripts before their write paths and updated usage comments. Smoke
+checked all four without the flag; each stopped before writing.
+
+## 2026-07-11 (late night) · eve patch config moved to workspace settings
+
+Bug found during the full-repo review follow-up: the load-bearing eve
+stream-disconnect patch was declared under `package.json.pnpm`, a legacy
+location current pnpm warns can be ignored. The lockfile still had the patch
+hash, but a clean install should not depend on stale config shape.
+
+Moved `patchedDependencies` into `pnpm-workspace.yaml` and removed the ignored
+`package.json.pnpm` block. `pnpm install --lockfile-only --ignore-scripts` ran
+under `corepack pnpm` 10.12.1 and left `pnpm-lock.yaml` unchanged, preserving
+the `eve@0.19.0` patch hash.
+
+## 2026-07-11 (late night) · Report position handling is exhaustive
+
+Bug found during the full-repo review follow-up: report sentence and badge code
+handled the current `SubjectScore["position"]` union but had no compile-time
+exhaustiveness guard. A future position could fall into a default style or
+missing return path.
+
+Added `never` checks to the shared report sentence switch and the web report
+badge style mapping. The growth movement rank map now uses
+`Record<SubjectScore["position"], number>` instead of `Record<string, number>`,
+so new positions break typecheck until the movement rule is explicit. Verified
+with `pnpm check:map` and the web TypeScript check.
+
+## 2026-07-11 (late night) · Resume guard stays staged until HTTP resume lands
+
+Bug found during the full-repo review follow-up: `apps/web/lib/harness/
+resume-session.ts` had zero importers while BUILD.md described it as a standing
+mitigation every resume must use. The missing context was the 2026-07-06 audit:
+no app-owned HTTP resume path exists yet. Current chat sends through eve's
+`useEveAgent` hook and repairs dead streams through `turn-recovery.ts`.
+
+Kept the harness, updated its header and BUILD.md to make the staged status
+explicit, and fixed its confirmation predicate. It now treats a resumed session
+as confirmed when a new turn reaches `turn.completed`, `session.waiting`, or
+`session.completed`, while still failing on a mismatched session, `session.failed`,
+or `turn.failed` for that new turn. Also removed the no-em-dash violations from
+the harness comments and error text.
+
+## 2026-07-11 (small hours, follow-up) · Short clips get the extra second instead of losing their picture
+
+Founder, on the video gateway's 4-second floor: "for clips below 4 sec, just
+add the extra second." Implemented as a conform-and-retry inside the vendor
+module, invisible to callers:
+
+- Error-driven, not probe-driven: every clip goes straight to /analyze; only
+  a rejection whose code names an input floor triggers the fix. Codes
+  captured live with real under-floor clips (never guessed):
+  `video_duration_too_short` and `video_resolution_too_low`, both HTTP 400
+  with a JSON `code` field. Normal clips pay zero overhead.
+- `lib/video/pad.ts`: ffprobe the bytes, then one ffmpeg pass. Under 4s gets
+  a freeze-frame tail (tpad clone + apad silence) out to 5s, comfortably past
+  the floor so container rounding can never re-trip it; under 360x360
+  upscales to the floor (aspect preserved) in the same pass, closing the
+  second rejection for free. Content is never invented: the clip shows what
+  it showed, a beat longer. Temp files under mkdtemp, always removed.
+- Both public functions retry once through the pad: the bytes lane (SMS)
+  reuses bytes in hand; the URL lane (describe route) downloads the family's
+  own already-vetted blob once, then retries via base64.
+- E2E green locally, real API: a 1.6s "first steps" clip with speech now
+  describes fully (visuals + quoted parent line) instead of falling back to
+  audio-only; a 2.4s 200x200 silent clip passes both floors in one pass. The
+  blank-clip test also exposed Pegasus inventing a scene for a featureless
+  video; HOMA_VIDEO_PROMPT now instructs "describe only what is visible or
+  audible, say so instead of guessing", re-verified: the blank clip now
+  honestly reports "entirely blank".
+- The honest prod gap, decided alone but NOT shipped alone: padding runs
+  ffmpeg/ffprobe as subprocesses (FFMPEG_PATH / FFPROBE_PATH overrides, PATH
+  fallback). Dev machines have ffmpeg; Vercel's runtime does not, so in prod
+  today the retry declines and short clips keep the STT fallback, exactly
+  yesterday's behavior, fail-soft. Shipping ffmpeg to prod means adding
+  ffmpeg-static (~75MB linux binary) and verifying nitro/eve-build asset
+  tracing on a real deploy, which tonight's tree (many uncommitted changes
+  from parallel sessions) cannot safely do. Logged as the open follow-up:
+  add ffmpeg-static behind the same FFMPEG_PATH seam and watch one preview
+  deploy; no code here changes when that lands.
+
 ## 2026-07-11 (small hours) · Video gateway: parents' videos become text through Twelve Labs
 
 Founder instruction with an API key: accept video from parents, run it through
@@ -95,6 +630,154 @@ Added migration `20260711190000_revoke_deny_all_tables.sql` to revoke all access
 on `phone_leads`, `phone_link_requests`, `phone_claim_codes`, `model_usage`, and
 `knowledge_bank` from anon and authenticated roles. The migration is additive
 security hardening; the existing isolation guard still passes.
+
+## 2026-07-11 (late night) · Map items expose standards metadata
+
+Bug found during the full-repo review follow-up: the content bank included
+standards codes, but the exported `MapItem` type omitted them, forcing the
+evidence page to cast around the type system.
+
+Added optional `standards` to `MapItem` and removed the evidence page cast.
+Verified with `pnpm check:map` and the web TypeScript check.
+
+## 2026-07-11 (late night) · Child interests share one cap
+
+Bug found during the full-repo review follow-up: child creation capped interests
+at 8, while extras and agent profile updates allowed 12, and profile merge paths
+did not enforce the combined cap.
+
+Aligned child creation, extras, onboarding UI, signed-in agent updates, and
+pinned profile updates on `MAP_INTERESTS_CAP`. Server profile writes now slice
+interest lists to the same cap before storing. Verified with `pnpm check:map`
+and the web TypeScript check.
+
+## 2026-07-11 (late night) · High-confidence comment matches scorer behavior
+
+Bug found during the full-repo review follow-up: `SubjectScore.highConfidence`
+was documented as base plus ladder signal, but the scorer has long used at
+least two real observations in the subject.
+
+Updated the comment to match the existing runtime rule rather than changing
+report behavior. Verified with `pnpm check:map`.
+
+## 2026-07-11 (late night) · Time-zone copy removes banned wording
+
+Bug found during the full-repo review follow-up: the settings time-zone card
+used "behind" in parent-facing copy, which Homa copy law bans.
+
+Changed the line to "Sets the clock for your greeting and the week planner's
+dates." Checked the file for the banned word after the edit.
+
+## 2026-07-11 (late night) · Public copy drops retired invite-only framing
+
+Bug found during the full-repo review follow-up: the landing FAQ and terms still
+said Homa was invite-only, which contradicted the open onboarding funnel.
+
+Updated the FAQ and terms copy to say the product is free while the first
+families shape it, without implying an invite gate. Synced the public `llms`
+summary files that repeated the old FAQ answer.
+
+## 2026-07-11 (late night) · Marketing copy uses growth framing
+
+Bug found during the full-repo review follow-up: three marketing strings used
+"stuck" as a child-status label, while product surfaces use growth framing.
+
+Replaced the visible marketing instances with "ready for more practice" in the
+feature grid, story section, and how-it-works thread. A remaining "stuck" match
+is an internal state-machine comment, not parent-facing copy.
+
+## 2026-07-11 (late night) · Plan footer points to the app
+
+Bug found during the full-repo review follow-up: the four-week plan footer told
+families they were on the invite list, even though onboarding is open and signed
+in families should continue in the app.
+
+Changed the footer to link to `/app` and removed the remaining invite-list line
+from the pending-age hub state. The pending-age copy now says Homa will email
+when the questionnaire is ready for that age.
+
+## 2026-07-11 (late night) · Onboarding comments match the current flow
+
+Bug found during the full-repo review follow-up: file-header comments still
+described an older onboarding order where account setup came last and the
+homeschool block lived on the report page.
+
+Updated the comments in `app/onboarding/page.tsx` and `extras-step.tsx` to match
+the current account-first flow, family setup, HomeschoolStep, kids, checklist,
+child extras, scoring, and report.
+
+## 2026-07-11 (late night) · Next config renderer comment uses the current path
+
+Bug found during the full-repo review follow-up: `apps/web/next.config.ts`
+still pointed at the old `lib/print/render-page.ts` renderer path.
+
+Updated the comment to name `lib/materials/render-page.ts`, matching the current
+materials studio renderer.
+
+## 2026-07-11 (late night) · Content bank header matches bank version
+
+Bug found during the full-repo review follow-up: `content.ts` still labeled the
+map bank as v2026.07.3 while `MAP_BANK_VERSION` is 2026.07.5.
+
+Updated the file header to v2026.07.5. Historical references to earlier
+correction passes remain unchanged.
+
+## 2026-07-11 (late night) · Migration header comments are unique
+
+Bug found during the full-repo review follow-up: several migration header
+comments reused old migration numbers, including duplicate #49 and #50 labels.
+
+Renumbered migration header comments in filename order through the current tail.
+This was comments only; no SQL behavior changed.
+
+## 2026-07-11 (late night) · Waitlist queue flushes from the root
+
+Bug found during the full-repo review follow-up: waitlist submissions could be
+queued in localStorage on bad network, but the exported queue flusher had no
+importers, so parked submissions might never retry.
+
+Added a root `WaitlistQueueFlusher` client component. It calls
+`flushWaitlistQueue` on mount and again when the browser fires `online`. Verified
+with the web TypeScript check.
+
+## 2026-07-11 (late night) · Removed retired phone bridge helper
+
+Bug found during the full-repo review follow-up: `copyLeadPhoneToFamily` was
+left over from the retired family bridge flow and had no importers.
+
+Removed the dead helper from `family-phone.ts`. The active phone-link path still
+uses `addFamilyPhone` with the existing `bridge` source. Verified with the web
+TypeScript check.
+
+## 2026-07-11 (late night) · Removed dead exported helpers
+
+Bug found during the full-repo review follow-up: several helpers were exported
+without external importers, and a few were not used at all.
+
+Removed the unused `findFamilyIdByEmail`, `formatMinutes`, and `isTrueStub`
+wrappers, made `planStartMs` private to `dashboard.ts`, and removed the
+`scanMemoryContent` re-export from `agent-pinned.ts`. Verified with the web
+TypeScript check.
+
+## 2026-07-11 (late night) · Trimmed dead core barrel exports
+
+Bug found during the full-repo review follow-up: the `@homa/core` package root
+exported several map internals nobody imported, and `CAPTURE_MIN_MONTHS` was
+defined but unused.
+
+Removed the dead root barrel exports for `ladderRungs`, `domainForBankItem`,
+`CAPTURE_MAX_MONTHS`, and `AHEAD_THRESHOLD_MONTHS`, and removed
+`CAPTURE_MIN_MONTHS`. Internal module exports used inside core remain. Verified
+with `pnpm check:map` and the web TypeScript check.
+
+## 2026-07-11 (late night) · Taxonomy root exports are documented as staged
+
+Bug found during the full-repo review follow-up: `@homa/taxonomy` exported a
+broad graph API, while product code only imports the narrow domains path.
+
+Kept the root API because taxonomy checks and future server-side graph work need
+it, and documented that it is staged, server-only, and not for client component
+imports. Verified with `pnpm check:taxonomy`.
 
 ## 2026-07-11 (late night) · Child-scoped helpers require family predicates
 
@@ -532,6 +1215,182 @@ alone:
 - **Reader-gate finding left as-is: bare subject counts in the note.**
   The one-sentence note is a founder ruling (2026-07-08); the named
   subjects sit directly below on the same page.
+
+## 2026-07-11 (5:26pm) · Card note revision 4, minutes after the first batch
+
+Founder rulings right after "send it" completed: no colons on this
+surface, and the address-explanation clause comes out ("they obv know
+they gave thier address"), a conscious override of the reader gate's
+privacy-flinch finding, recorded in the template comment so the
+history stays auditable. "We see it: we homeschool our own kids"
+became "We see it. We homeschool our own kids." (the triple "We"
+opener is deliberate testimony rhythm) and the number line reads
+"text Homa at (346) 758-8011". Body drops to 339 of 500 characters.
+Shipped as one-file commit 5de29dc, deployment READY, site probed;
+inert until the conference cohort enqueues (~July 15). The three
+ordered cards carry revision 3.
+
+## 2026-07-11 (5pm) · SENT: the first three thank-you cards are at the robots, and the first live sweep taught two lessons
+
+Founder said "send it", then paused at the read-aloud and ruled the
+note becomes the co-founders' version signed "Warmly, / Alessa &
+Carolyng / thankshoma.com" (no title; the domain line is a conscious
+override of the reader gate's misparse note). Editor gate passed the
+final text with zero must-fixes and one accepted craft fix ("ours" to
+"our own"). The message change had to reach the deployed sweep, so it
+shipped as a one-file commit built on origin/main via a detached
+worktree (155416b), leaving every other in-flight tree change
+uncommitted. THANK_YOU_CARDS_ENABLED went into prod env; the deploy
+went READY at 4:57pm; the 5:00pm scheduled cron ran the first live
+sweep with the new text.
+
+The first live minute found two real bugs, both fixed and deployed
+within the hour (ce3a5a3, 60c6a44):
+
+- **The optimistic lock never matched.** Send recording guarded on
+  processing_started_at equality, but the timestamp round-tripped
+  through text and the update matched zero rows: Alessa's PAID order
+  (28387032) went unrecorded while her row stayed claimable, one
+  retry from a double-send. The lock is now status='sending' AND
+  attempts=claimed value (an int round-trips exactly). Her row was
+  reconciled by hand to sent + order id, and the missed
+  card.thank_you_sent event inserted.
+- **The payment processor's duplicate window declined batch
+  neighbors.** Three same-amount charges seconds apart: cards 1 and 3
+  failed with "Can't get transaction id with card payment" around
+  card 2's success. SEND_BATCH_LIMIT dropped from 10 to 1 per hourly
+  run (a backlog drains in a day and every charge sits outside the
+  window). The two declined rows were requeued after the fix
+  deployed and sent clean on manual cron fires spaced past the
+  window.
+- Bonus finding, third commit: live basket/send responses carry no
+  order id at all, so rows landed 'sent' with null vendor_order_id
+  (backfilled by hand from orders/list). The wrapper now falls back
+  to the account's newest order when minted within five minutes,
+  safe at one order per run.
+
+Final ledger, verified against both the database and the vendor:
+three rows 'sent', order ids 28387032 (Alessa, 5:00pm), 28387370
+(Carolyng, 5:19pm), 28387377 (CeCe, 5:23pm), all status "paid" on
+the account, roughly $14 total. The concurrency design also got a
+free production test: a manual cron fire overlapped the scheduled
+5pm run and claimed nothing (skip-locked + status filter held). Cards
+reach mailboxes in 4 to 7 days, two of them the co-founders' own.
+
+## 2026-07-11 (late afternoon, second pass) · The front learns to sing: script v4 ships
+
+Founder ruling on v3, minutes after it shipped: "i hate this. it
+looks cheap. dont put homa logo on the front. and make the thak you
+look amazing. the back you can put the full logo and wordmark". v4
+(card id 349914) replaces v3 in production; v3 and its images are
+deleted, account holds only v4's two covers.
+
+Final art: front is the ruled notebook page with a large flowing
+"Thank you" in clay script, two gold sparkle doodles off the final
+swash, no logo anywhere on it. Back is the full lockup (house +
+bounced Fredoka wordmark), centered, nothing else, per the ruling.
+
+Decisions made alone:
+
+- **Dancing Script 700 as a stationery-craft exception.** The system
+  has no lush script: Fredoka is wordmark-only, Caveat is Homa's
+  margin hand (sage, product notes), Schibsted read as "default
+  font" on cardstock (the founder's "cheap"), and EB Garamond italic
+  reads editorial-cold for this audience. A flowing script is what
+  card craft uses for a front hero. Scoped to this physical artifact
+  only, not admitted to the UI type system; an EB Garamond italic
+  alternate was built and preserved beside the sources for a taste
+  check (front-alt-garamond.html).
+- **Clay script + gold sparkles as the two devices.** The hero
+  carries the brand through color instead of a mark; the sparkles
+  come from the sanctioned doodle vocabulary (hand-placed, rotated),
+  sized and positioned off the "u" swash after a composition pass
+  (330px overflowed the trim-safe zone; final 280px with ~125px edge
+  clearance at 300dpi).
+- **No uxui re-gate this round**: the founder is art-directing live
+  and is the reviewer that matters; the prior mailbox read's
+  standing fixes (soft margin rule, no domain) are preserved.
+
+Verified: vendor quality checks clean at 600dpi, production
+HANDWRYTTEN_CARD_ID=349914, .env.local matches, sources updated in
+docs/homa-design/explorations/thank-you-card/, vendor account holds
+exactly one custom card (v4) and its two images.
+
+## 2026-07-11 (late afternoon) · The card quiets down: genuine stationery, not promotion (v3 ships)
+
+Founder ruling on the branded card, same afternoon it shipped: "i
+dont like 'homeschooling made calm'. i also don't think the card
+should be toooooo branded because then it defeats the purpose. it
+should feel like a genuine thankyou card. not a promotional
+matereal". This confirms what the first reader gate found from the
+other direction: the card buys trust by not behaving like marketing.
+
+v3 (card id 349913, "Homa thank you (quiet v3)") replaces v2 in
+production; v2 and its cover images are deleted from the vendor
+account. Reductions, all within the founder's direction, exact
+choices made alone:
+
+- Front headline drops the two-tone brand-poster treatment: single
+  warm ink (text-strong), weight 600 not 700, 150px not 220px. The
+  notebook paper, the softened margin rule, and the small house
+  standing on a baseline stay: paper and a sticker read as
+  stationery, a logo lockup reads as a campaign.
+- Back is now a stationer's colophon only: the small house mark, low
+  center, nothing else. No wordmark, no tagline, no domain. A card
+  maker's quiet stamp is how genuine cards sign their backs.
+- The house mark stays the card's single clay moment on each side
+  (the uxui mailbox read called it the standout delight; the founder
+  objected to promotion, not to the character).
+
+Verified: vendor quality checks clean at 600dpi on both covers,
+production HANDWRYTTEN_CARD_ID=349913 (env listed), .env.local
+matches, design sources updated in
+docs/homa-design/explorations/thank-you-card/ (the exploration HTML
+is now the canonical art; /tmp render scratch is disposable).
+
+## 2026-07-11 (afternoon) · Thank-you cards wear the brand: custom Homa stationery live
+
+Founder asked "can we customize the card with homa branding?". Done
+end to end: card id 349912, "Homa thank you (brand v2)", now the
+production HANDWRYTTEN_CARD_ID (was catalog card 186, Kraft). Built
+from design-system tokens, never image-model output: the front is a
+workbook page (ruled cream paper + the clay margin rule, "Thank you"
+in Schibsted 700 with the clay accent word on "you", the little-home
+mark standing on a baseline rule beneath it), the back is the lockup
+with the bounced Fredoka wordmark and the official tagline in EB
+Garamond italic. Two playful devices per surface, inside the restraint
+law. Sources preserved at docs/homa-design/explorations/thank-you-card/
+(HTML panels render at exact print geometry via headless Chromium);
+apps/web/scripts/handwrytten-brand-card.mts is the repeatable pipeline
+(Vercel Blob hosting, cover registration, vendor quality check, card
+assembly, custom-card detail readback).
+
+Decisions made alone:
+
+- **Rendered, not generated**: image models mangle wordmarks, so the
+  panels are HTML/CSS built on the exact tokens (stone-50, brand clay,
+  paper-rule cobalt at 7%) and the Logo.tsx house path, screenshotted
+  at print size. 1650x1275 (300dpi) tripped the vendor's blur warning;
+  final panels render at 3300x2550 (600dpi) and pass clean.
+- **The uxui reader gate ran on the physical card** (mailbox context,
+  front then back). Its findings shipped: the clay margin rule dropped
+  from 55% to 35% opacity (a strong orange vertical line drifted
+  toward red-pen territory for this reader), and the back's
+  "thankshoma.com" was replaced with the tagline, because the domain
+  misparses on paper and gave no reason to exist; the interior's
+  printed texting number stays the card's one action path.
+- **Interior stays pure handwriting**: no header logo on the writing
+  side; branding lives on the front and back only, so the note itself
+  keeps the pen-and-ink spell.
+- **API quirk recorded**: customCards.create requires backType:
+  "cover" alongside backCoverId, and custom cards are read back via
+  customCards.get, not the public catalog. Draft card 349910 and its
+  four orphaned images were deleted from the account.
+
+Verified: vendor quality check clean on both covers at 600dpi; card
+detail confirms A2 landscape, full bleed, 500-character interior,
+$3.75 price unchanged; production env now points at 349912 (test-mode
+and enablement posture unchanged, the sweep stays dark).
 
 ## 2026-07-11 (1am) · Thank-you cards armed: key live, stationery chosen, both test-mode footguns guarded
 
@@ -1040,6 +1899,29 @@ Fixes, decisions made alone:
   the transcript (it lives in conversation_messages and reaches the
   model through recall). The durable-recovery UX (replay the missed
   turn into the archive on next visit) is the remaining M1-04 piece.
+
+## 2026-07-11 (2:30am) · Both switches flipped; first fleet run green; brief goes out Saturday
+
+Founder: "do both", then "actually. have the brief go out tomorrow."
+Actions: copy-gate fixes committed (6116cb4) and deployed (READY
+2:32am), FLEET_RESEARCH_ENABLED + MORNING_BRIEF_ENABLED added to
+production before the build, fleet cron verified registered
+(47 6 * * * beside the hourly dispatcher). The first production fleet
+run fired on schedule at 2:47am and merged 3 active cited rows
+(executive_function ×7 citations, art ×6, fine_motor ×6), demand-picked
+from real family reports. Per the founder's tomorrow ruling, the
+morning_brief rows were seeded directly at Saturday 9am local (a
+one-time exception to the Mon-Fri mask; the advance puts them back on
+weekdays after the send). Eligible: Swift + Gomes (texts; lines
+linked). Llanes was initially skipped by the report-required rule, then
+the multi-parent fold (other work stream, same night) merged the
+household into ONE family carrying Story's report, both parents as
+members, and both phones; the surviving brief row rebound to it, so
+Saturday's send reaches Sidney and Alessa. Founder Q&A logged: the
+"score" is Story's progress report (the scored questionnaire from Jul
+8); it sat on Sidney's account because he ran that onboarding under his
+login while Alessa's text signup had spawned a parallel family.
+JOURNAL_PROMPT_ENABLED remains dark, unchanged.
 
 ## 2026-07-10 (later, boil the ocean) · Homa's tasks + nightly research: built and proven E2E
 

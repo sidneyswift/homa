@@ -1,4 +1,5 @@
 id: 2026-07-05-ugc-homa-intro
+lifecycle: historical-draft
 source: marketing/signals/2026-07-05-ugc-intro-pillars-spoken-plainly.md
 lanes: [video]
 formats:
@@ -7,4 +8,4 @@ formats:
 gates:
   script: "take 2: reviewer(shortform-viewer) -> editor, 2026-07-05. Take 3 (founder redirect: conversational, benchmarks feature, no props, real logo): reviewer -> editor ran again 2026-07-05; must-fixes applied (32 words for 13s, 5-word hook, 'exactly' cut as precision overclaim, for-you idea on screen)"
 scorecard: marketing/evals/scorecards/2026-07-05-ugc-homa-intro.json
-notes: "Video-only bundle (founder-requested Marketing Studio UGC asset). Per-channel caption files are not derived yet; derive them before any social publish. Publishing blocked on Postiz setup (HUMAN-TODO) AND on the /onboarding lead-magnet feature going live (the ad's free-checklist claim)."
+notes: "Not approved or published. The source signal and video premise diverge; the old checklist and benchmark-map language is superseded by the progress-report surface; per-channel captions are missing; Postiz is unauthenticated. Rebuild before use."

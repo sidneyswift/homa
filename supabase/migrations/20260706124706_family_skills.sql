@@ -1,4 +1,4 @@
--- Migration #14: family skills, the runtime "save this as a skill" library.
+-- Migration #15: family skills, the runtime "save this as a skill" library.
 -- The Mac Mini's homa-system-skillify wrote skill files to disk; the cloud
 -- equivalent is rows that a defineDynamic resolver (agent/skills/
 -- family-skills.ts) advertises to that family's sessions as loadable skills

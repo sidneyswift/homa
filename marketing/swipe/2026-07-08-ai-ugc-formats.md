@@ -1,5 +1,10 @@
 # Swipe · AI UGC formats worth studying (TikTok), July 2026
 
+> Historical craft-research snapshot. Examples, metrics, platform behavior,
+> before-and-after framing, diagnostic language, child artifacts, and outreach
+> ideas require current product-truth, privacy, release, and house-style review
+> before reuse.
+
 Distilled from `marketing/raw/2026-07-08-ai-ugc-landscape-research.md` and
 `marketing/raw/2026-07-08-tiktok-strategy-field-research.md` (founder
 research dump, 2026-07-08). One entry per format: the anatomy, the best

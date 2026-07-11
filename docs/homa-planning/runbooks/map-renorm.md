@@ -1,16 +1,22 @@
 # Runbook: Homa-native norms (the re-norm loop)
 
-Every map sitting stores anchored observations (`lead_answers` +
-`lead_children.birth_month`). At cohort scale, that becomes the only
-parent-observed homeschool norm base in existence: our moat. This runbook
-turns that data into anchor corrections safely.
+Map sittings store anchored observations in `child_answers` joined to
+`children.birth_month`, whose legacy column name now holds a full birth date.
+This runbook describes how Homa may use its own parent-observed cohort as one
+input to anchor review. It does not establish a national norm or a unique moat.
 
 ## The loop
 
 1. Run `pnpm report:norms` (founder machine only; needs
-   `SUPABASE_DB_PASSWORD` in `apps/web/.env.local`). Output is aggregate
+   `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_DB_PASSWORD` in
+   `apps/web/.env.local`). Output is aggregate
    markdown: per item, answer shares by 6-month age bucket next to the
    item's published `typicalMonths` anchor.
+   The current query does not distinguish production families from test or
+   incomplete cohorts. It calculates calendar year/month differences and
+   ignores the birthday day, so observations near a month boundary are
+   approximate. Suspend anchor changes from this report until cohort eligibility
+   and day-precise age math are implemented.
 2. Items where the observed 50%-easily age diverges from the anchor by
    more than 6 months get a FLAG. A flag is a question, not a verdict.
 3. Before touching any anchor, check the gates below. If the gates pass
@@ -38,14 +44,14 @@ turns that data into anchor corrections safely.
 
 ## Privacy posture (non-negotiable)
 
-The report is aggregate-only: no names, emails, or ids ever appear in the
-output; buckets under n=30 render as "low n". The script is read-only,
-runs locally with the server-only credential, and is never deployed or
-scheduled on infrastructure. Anything beyond aggregate counts is out of
-scope for this loop and needs its own founder decision.
+The report is aggregate-only and contains no names, emails, family IDs, or child
+IDs. It does print bank item IDs, exact overall child and answer totals, and the
+exact count inside each `low n` cell. Treat the output as founder-private and do
+not store or share it as a privacy-safe aggregate. The script is read-only, runs
+locally with the server-only credential, and is not deployed or scheduled.
 
 ## Cadence
 
-Quarterly, or whenever total stored answers double, whichever comes
-first. Expect "insufficient data" verdicts for a long time at current
-volume; the loop exists so the data compounds from day one.
+Quarterly, or after an explicitly recorded answer-count checkpoint doubles.
+The repository does not persist a last-run count, so the doubling trigger is
+not otherwise computable. Expect "insufficient data" verdicts for a long time.

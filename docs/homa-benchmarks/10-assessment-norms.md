@@ -1,5 +1,7 @@
 # Assessment norms and the homeschool testing landscape
 
+> Historical research snapshot, 2026-07-06. This file preserves the evidence and analysis captured on that date. It is not current product, legal, provider, standards, or production guidance. Re-verify volatile facts and source freshness before porting any claim into Homa.
+
 **Date:** 2026-07-06
 **Lane:** Assessment norms 10, part of the ages 2 to 16 national benchmark corpus (see README.md in this folder)
 **Method:** Web research with primary-source verification: NCES and nationsreportcard.gov for NAEP, NWEA's published 2020 and 2025 norms documents, MetaMetrics (lexile.com, hub.lexile.com, metametricsinc.com), Renaissance support pages, homeschool provider sites (Seton Testing, Academic Excellence, Homeschool Boss, achievement-test.com), state statutes and education-department pages, worldbook.com, and publisher placement pages. Every number was transcribed from a fetched page and carries an inline link with access date; nothing is from memory.

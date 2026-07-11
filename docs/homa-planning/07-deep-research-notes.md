@@ -1,16 +1,13 @@
 # Deep Research Notes (2026-07-02, round 2)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
-
-> Source-code level findings on eve, legal obligations, compliance data sourcing, and
-> generation economics. Companion to 05-vercel-platform-facts.md.
+> Historical research snapshot dated 2026-07-02. Preserve the source findings,
+> but do not treat legal conclusions, provider economics, child-role assumptions,
+> state-data status, or generation architecture here as current. Durable laws live
+> in `BUILD.md`; state-data operations live in the state snapshot README and runbook.
 
 ## 1. eve source-code findings (read from the published package, dist/src, v0.19.0)
 
-### Compaction is MORE lossy than the docs imply — rotation design vindicated
+### Compaction is MORE lossy than the docs imply : rotation design vindicated
 
 Read `harness/compaction.js` directly. How it actually works:
 
@@ -28,15 +25,15 @@ Read `harness/compaction.js` directly. How it actually works:
 - Token counting is provider-reported when available, else `JSON.length/4` estimate.
 
 Consequences (all already reflected in architecture, now with proof):
-1. Facts must be captured to Postgres **at the turn they occur** — compaction will not
+1. Facts must be captured to Postgres **at the turn they occur** : compaction will not
    preserve them.
-2. Behavior rules must ride in instructions (never compactable) — confirmed: dynamic
+2. Behavior rules must ride in instructions (never compactable) : confirmed: dynamic
    instructions are assembled per model call, outside history.
 3. **`compaction.model` is configurable separately from the chat model** (verified in
-   `resolve-agent.js`) — run compaction on a cheap model, it's summarizing 280-char
+   `resolve-agent.js`) : run compaction on a cheap model, it's summarizing 280-char
    stubs anyway.
 
-### Sandbox `/workspace` does NOT survive redeploys — sandbox is scratch, never storage
+### Sandbox `/workspace` does NOT survive redeploys : sandbox is scratch, never storage
 
 Read `runtime/sandbox/keys.js`. The per-session sandbox name is:
 
@@ -54,20 +51,20 @@ Postgres + Blob, period.** The sandbox holds only (a) template-seeded scripts/fo
 (b) job-scoped scratch. Any generated artifact must be uploaded to Blob before the turn
 ends. With our deploy cadence (daily-ish), treating sandbox persistence as family storage
 would silently wipe "the family computer" every deploy. This kills the last remnant of
-the "persistent Sandbox as the Mac-Mini-in-the-cloud" idea — good riddance, we planned
+the "persistent Sandbox as the Mac-Mini-in-the-cloud" idea : good riddance, we planned
 around Postgres/Blob anyway.
 
 Also verified: eve's default Vercel sandbox timeout is 30 minutes
 (`DEFAULT_SANDBOX_TIMEOUT_MS = 1800*1e3`), tag limit 5, and template prewarm retries once
 on cache-miss before failing the build.
 
-## 2. Legal: COPPA 2025 amendments (compliance deadline ALREADY PASSED — April 22, 2026)
+## 2. Legal: COPPA 2025 amendments (compliance deadline ALREADY PASSED : April 22, 2026)
 
 The FTC's first COPPA overhaul since 2013 was finalized April 2025; full compliance was
-required by **April 22, 2026** — i.e., before our launch. What matters for Homa:
+required by **April 22, 2026** : i.e., before our launch. What matters for Homa:
 
 - **Scope nuance in our favor:** COPPA governs collection *from* children under 13.
-  Homa v1 is parent-directed — the mom is the user; the child never touches the product
+  Homa v1 is parent-directed : the mom is the user; the child never touches the product
   (worksheets are printed). We collect data *about* children *from* a parent, which is
   generally outside COPPA's direct trigger. BUT: design decisions must keep it that way
   (no child-facing chat mode without a full COPPA workup), and state privacy laws (CCPA
@@ -77,11 +74,11 @@ required by **April 22, 2026** — i.e., before our launch. What matters for Hom
   parental consent. Our commitments must be contractual, not vibes: zero-retention /
   no-training arrangements with model providers (AI Gateway's ZDR enforcement add-on is
   relevant), stated in the privacy policy.
-- **No indefinite retention + written retention policy required** — maps directly to our
+- **No indefinite retention + written retention policy required** : maps directly to our
   export/delete self-serve plan (M4-05); add a written retention schedule to M4-04.
-- **Direct notices must identify third parties/categories** receiving data — our privacy
+- **Direct notices must identify third parties/categories** receiving data : our privacy
   policy must name model providers, Vercel, Supabase, fal.ai, Stripe, Resend.
-- Ed-tech-specific rules were deferred (FTC waiting on FERPA changes) — we're
+- Ed-tech-specific rules were deferred (FTC waiting on FERPA changes) : we're
   direct-to-parent, not school-contracted, so FERPA is out of scope for v1.
 
 **M4-04 (lawyer pass) now has a concrete brief**: confirm parent-directed posture keeps
@@ -116,7 +113,7 @@ Worksheet cost stack (verified components): sandbox compute ≈ $0.01–0.03 + o
 $0.08 + LLM turn ≈ small → **≈ $0.10–0.15 per illustrated worksheet, image-dominated**.
 30/month ≈ $3–4.50/family. Fine at $29–49/mo, and the image model is the cost lever
 (512px for drafts, cheaper models for coloring pages). Mac Mini's "Nano Banana 2 only,
-never Flux" rule was a quality call for *story-character* art — keep it for picture
+never Flux" rule was a quality call for *story-character* art : keep it for picture
 books, relax it for generic clip-art.
 
 ## 5. Follow-ups spawned by this round
@@ -127,5 +124,5 @@ books, relax it for generic clip-art.
 - [ ] Architecture: sandbox-as-scratch law + artifact-upload-before-turn-end rule
       (written into 01).
 - [ ] Cost model (M0-06): use $0.08/image, and real token numbers from the Mac Mini
-      usage analysis (see 08-real-usage-cost-model.md when the analysis lands).
+      usage analysis (see the dated `10-real-usage-cost-model.md`).
 - [ ] Set `compaction.model` to a cheap model in the agent config from day one.

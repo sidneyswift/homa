@@ -5,9 +5,14 @@ import mammoth from "mammoth";
 import sharp from "sharp";
 import * as XLSX from "xlsx";
 
+import {
+  describeVideoBytes,
+  twelveLabsConfigured,
+  VIDEO_BYTES_MAX,
+} from "../video/twelvelabs";
 import { captionSmsImage } from "./caption-image";
 import { downloadTelnyxMedia } from "./telnyx-api";
-import { transcribeSmsMedia } from "./transcribe";
+import { transcribeAudio, transcribeSmsMedia } from "./transcribe";
 
 /**
  * The SMS attachment normalizer (founder ruling 2026-07-10: never deny
@@ -25,8 +30,15 @@ import { transcribeSmsMedia } from "./transcribe";
  *                into conversation_messages, where FTS and semantic
  *                search can find it.
  *   audio     -> speech transcript block (Telnyx STT, transcribe.ts)
- *   video     -> audio-track transcript block (same STT; a Twelve Labs
- *                style visual lane can slot in here later if needed)
+ *   video     -> watched-video description block (Twelve Labs Pegasus,
+ *                lib/video/twelvelabs.ts: what happens on screen plus
+ *                what is said); clips under the vendor floors (4s,
+ *                360x360) get one freeze-frame pad/upscale retry where
+ *                ffmpeg exists (lib/video/pad.ts; dev now, prod
+ *                pending the ffmpeg-static decision in the build-log),
+ *                and when the key is unset or the watch still fails,
+ *                the audio-track transcript lane (same STT as audio)
+ *                catches it
  *   document  -> PDF passes through as a file part (Claude reads PDFs);
  *                Word (.docx) and Excel (.xlsx/.xls) extract to plain
  *                text/CSV first (mammoth, SheetJS), since Claude has no
@@ -89,8 +101,12 @@ export type SmsAttachmentOutcome =
   | "model_native"
   /** Converted into a model-native format first (BMP images -> PNG). */
   | "converted"
-  /** Speech became text through STT (voice notes, video clips). */
+  /** Speech became text through STT (voice notes; video clips when the
+   *  visual lane is dark or the watch failed). */
   | "transcribed"
+  /** A video was watched end to end (Twelve Labs): the block carries
+   *  what happened on screen plus what was said. */
+  | "described"
   /** Parsed text pulled out of a document format (Word, Excel). */
   | "extracted"
   /** A text-format file joined the turn as an inline block. */
@@ -160,6 +176,13 @@ const EXTRACTED_TEXT_MAX_CHARS = 4000;
 
 const VOICE_NOTE_MARKER = "[Voice note, transcribed]";
 const VIDEO_MARKER = "[Video attached, audio track transcribed]";
+const VIDEO_DESCRIBED_MARKER = "[Video attached, watched]";
+
+/** The SMS reply path holds the parent's thread while the model
+ *  watches; MMS clips run a few seconds to a minute, so this stays far
+ *  under the webhook's patience while leaving the STT fallback time to
+ *  run after a miss. */
+const VIDEO_DESCRIBE_TIMEOUT_MS = 90_000;
 const WORD_DOCUMENT_MARKER = "[Attached Word document, text extracted]";
 const SPREADSHEET_MARKER = "[Attached spreadsheet, extracted as CSV]";
 /** Bare markers so an attachment's EXISTENCE always reaches the durable
@@ -299,6 +322,40 @@ async function processSpeech(
   };
 }
 
+/** The video lane: Pegasus watches the whole clip (visuals + speech)
+ *  when the gateway is configured; any miss falls back to the original
+ *  audio-track transcript, so a video never gets LESS understanding
+ *  than it did before the visual lane existed. Bytes download once and
+ *  feed both attempts. */
+async function processVideo(
+  url: string,
+  mediaType: string,
+): Promise<ProcessedSmsAttachment> {
+  if (!twelveLabsConfigured()) return await processSpeech("video", url, mediaType);
+
+  const bytes = await downloadTelnyxMedia(url);
+  if (!bytes || bytes.byteLength === 0 || bytes.byteLength > VIDEO_BYTES_MAX) {
+    return failedAttachment("video", mediaType);
+  }
+
+  const description = await describeVideoBytes(bytes, {
+    timeoutMs: VIDEO_DESCRIBE_TIMEOUT_MS,
+  });
+  if (description) {
+    return {
+      result: { kind: "video", mediaType, outcome: "described" },
+      block: `${VIDEO_DESCRIBED_MARKER}: ${description}`,
+    };
+  }
+
+  const transcript = await transcribeAudio(bytes, mediaType);
+  if (!transcript) return failedAttachment("video", mediaType);
+  return {
+    result: { kind: "video", mediaType, outcome: "transcribed" },
+    block: `${VIDEO_MARKER}: ${transcript}`,
+  };
+}
+
 async function processPdf(
   url: string,
   mediaType: string,
@@ -421,7 +478,7 @@ async function processOneSmsAttachment(
     }
     case "video": {
       if (!url) return failedAttachment("video", mediaType);
-      return await processSpeech("video", url, mediaType);
+      return await processVideo(url, mediaType);
     }
     case "file": {
       const kind = kindForFile(mediaType);

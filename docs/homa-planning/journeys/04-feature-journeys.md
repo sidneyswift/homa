@@ -1,14 +1,17 @@
 # 04 — Feature journeys & user stories (workstream 4 of 5)
 
-> Supersession note (2026-07-06, build-log): $29 and $29 to $49 plan prices
-> below are the retired placeholder. Pricing v1 is Homa $19/mo or $99/yr and
-> Homa Pro $49/mo, live in Stripe both environments. Competitor prices quoted
-> in this doc are facts and stand. Allotments still derive at day 60 (T2).
+> Historical journey and acceptance-source snapshot, written 2026-07-02. The
+> reconciled PRD adopts specific F1 through F4 stories for FR-4 through FR-7,
+> subject to later age, consent, taxonomy, trajectory, and voice rulings. Other
+> stories, tickets, routes, prices, plan names, providers, and implementation
+> status are historical. Current tier naming is Homa Plus; live Stripe state is
+> unverified here.
 
-> Status: PLANNING. Written 2026-07-02 against 00-pm-kickoff.md (template + persona cast),
-> 00-product-brief.md (§value stack), 03-backlog.md (M-R plan of record), 06-harness-gap-analysis.md,
-> 09-council-synthesis.md, docs/homa-design/readme.md + web-app UI kit, homa-template skills +
-> questionnaire. Methods: use-case-map, jtbd-jobs, gherkin-stories (pm-os).
+> Status: historical planning. Written 2026-07-02 against 00-pm-kickoff.md
+> (template + persona cast), 00-product-brief.md (§value stack), 03-backlog.md,
+> 06-harness-gap-analysis.md, 09-council-synthesis.md, and the Homa design
+> system. A restricted local questionnaire reference used during drafting is
+> intentionally omitted. Methods: use-case-map, jtbd-jobs, gherkin-stories.
 >
 > How to read: each feature gets (a) a use case, (b) job stories, (c) a journey per the
 > kickoff template, (d) INVEST user stories with Gherkin acceptance criteria. Stories are
@@ -479,6 +482,11 @@ literacy") not school subjects, and the standard selector maps state standards w
 they exist for preK–2 with national benchmarks fallback. Grade-subject framing becomes
 real at M5-06 age expansion.
 
+> Current implementation correction. The map now covers ages 2 through 16 with
+> 16 subjects, and the skill graph uses subject, domain, and topic. State legal
+> requirements do not provide state academic-standard mapping. The paragraph
+> above is the original design flag, not current product structure.
+
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotion | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
 | 1. Invite | Weekly note line / dashboard "ready for review" badge (never red, warning-tone per DS) | Taps through | Frames it as HER checklist: "Check what you've seen him do. Blanks are fine, they're just what's next" (BenchmarksView copy) | 10s | Mild duty, some dread | Feels like a test OF HER homeschooling; skipped forever if guilt-toned | The Caveat margin note ("blanks are fine ✎") disarms it |
@@ -501,6 +509,10 @@ speed-checking to clear the badge, data quality is rotting.
 
 ## Journey B: position display, reassurance-first
 
+> Current trajectory correction. Red and deficit-labeled progress states remain
+> prohibited. A neutral, evidence-backed downward trajectory segment is allowed
+> when its surrounding treatment remains growth-oriented.
+
 **Frame**: P1 (validation-seeking) opens Benchmarks cold; also P3 post-checklist.
 Positions render per BenchmarksView: per-domain cards with badges from the sanctioned
 set: **"Ahead" (gold) · "On track" (sage) · "Ready for review" (warning/neutral)**.
@@ -510,7 +522,7 @@ ever** (M1-17 enforces in code; DS readme §reassurance-first-data).
 
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotion | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
-| 1. Overview | Standing cards per domain | Scans badges | Strengths listed first, always; each card has a one-line human note ("comprehension is a real strength"), mono numerals for data | 20s | Bracing → exhale | Any accidental deficit connotation (red, down-arrows on child charts is banned by DS data-viz law) | The page's job in one glance: "he's okay, you're okay" |
+| 1. Overview | Standing cards per domain | Scans badges | Strengths listed first, always; each card has a one-line human note ("comprehension is a real strength"), mono numerals for data | 20s | Bracing → exhale | Any accidental deficit connotation; red and deficit-labeled downward indicators are banned | The page's job in one glance: "he's okay, you're okay" |
 | 2. Depth | Card tap → domain detail: trajectory line, evidence list, benchmark citations | Reads evidence behind a number | Every position backed by her own observations + citation-backed milestones (M0-10 benchmarks library); "last measured" honesty via confidence decay | 1–2 min | Credibility forming | Uncited or stale claims read as AI hand-waving; P4 will churn over a wrong claim | Citations = ammunition for the mother-in-law conversation |
 | 3. Compare (quietly) | Standard selector (state / national) | Switches lens | Recomputes vs selected standard; language stays growth-framed in both | 15s | Quiet competitive pressure, satisfied honestly (00 §value stack: this pressure is REAL, serve it without shame) | Turning this into a leaderboard vibe | "Ahead in 3 domains" is allowed to feel GOOD (gold, not smug) |
 | 4. Act | "Growing right now" | Adds practice to the week | Generates targeted materials (Journey C start) | 30s | Agency | — | — |
@@ -568,8 +580,8 @@ must be ~0 and is a trust-debt alarm, tracked as `efficacy.low_confidence_attrib
    attribution: "Counting jumped on its own, kids do that. Lovely." Attribution join
    requires done-work signals; this is the honesty backbone of the selling point.
 3. **Regression / position drops after re-measurement** → growth framing + measurement
-   humility ("earlier picture may have been optimistic; here's what to watch"), never a
-   down-arrow on a child chart (DS law); staged via M2-13 delta guards if the drop is
+   humility ("earlier picture may have been optimistic; here's what to watch"). A
+   neutral downward segment may be shown; red or deficit framing may not. Large drops are staged via M2-13 delta guards if
    large (>N subdomains moving = staged for review, not auto-applied).
 4. **She disputes a position** ("he's way past that") → one-tap "this looks wrong" →
    instant mini-checklist to re-evidence; her observation outranks stale inference;
@@ -619,7 +631,7 @@ never manufactures dread.
   - When the benchmarks surface renders
   - Then strengths render first, badges come only from {Ahead, On track, Ready for review}, the below-band domain renders as a growth area with attached practice, and no "behind"-class label or red state exists in the DOM.
 - Scenario (negative): forbidden-copy regression guard
-  - Given any code path that would render a deficit label ("behind", "below grade", red down-arrow) on a child surface
+  - Given any code path that would render a deficit label ("behind", "below grade", or a red deficit indicator) on a child surface
   - When CI runs the M1-17 reassurance-law test suite
   - Then the build fails.
 - Notes · Dependencies: M1-17 ⛔ (this story IS its acceptance criteria on this surface), M2-08. Non-functional: the law applies to email/note renders too.
@@ -1234,7 +1246,7 @@ answer Callout).
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotion | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
 | 1. Ask | Chat: "Heggerty or Logic of English for phonics?" | One question, weeks of anxiety behind it | Confirms the child + goal; pulls profile position (phonics subdomains) + what_works modality facts | 20s | Hopeful skepticism | Generic blog-post answer = instantly worse than her tabs | "For Theo specifically, let me lay it out" |
-| 2. Compare | CurriculumView cards: approach, daily time, cost/yr, fit badge (Great fit / Good stretch / Different style, per kit) | Reads both cards | Facts from practice library (curriculum-reviews.md pattern) + web research (quarantined, M2-14); the *take* line is personalized: "Theo learns by doing; LOE's tiles match how he already plays with sounds" | 2–3 min | Clarity arriving | Wrong facts (price, scope) torch trust; every fact needs a source + as-of date | Fit reasoning cites HER OWN observations back to her ("you told me he resists worksheets, Heggerty is oral-first, that matters here") |
+| 2. Compare | CurriculumView cards: approach, daily time, cost/yr, fit badge (Great fit / Good stretch / Different style, per kit) | Reads both cards | Facts from the dated practice-library proposal plus quarantined web research (M2-14); the *take* line is personalized: "Theo learns by doing; LOE's tiles match how he already plays with sounds" | 2–3 min | Clarity arriving | Wrong facts (price, scope) torch trust; every fact needs a source + as-of date | Fit reasoning cites HER OWN observations back to her ("you told me he resists worksheets, Heggerty is oral-first, that matters here") |
 | 3. Recommend | Fit-matched lead card + honest trade-offs | Weighs | One recommendation, hedged honestly, never absolute; the Callout law: "there's no one right answer, there's the right fit for this kid, this year" | 1 min | Permission to decide | Overconfidence (she'll blame Homa if it flops); underconfidence (no help at all) | Names the failure mode: "if he hits a wall with LOE it'll be the writing load, here's the workaround" |
 | 4. Try | "Try a sample week" → generated sample plan slotted into next week (F5) | Runs a low-stakes trial | Builds a representative week from the curriculum's approach + her schedule; feedback captured (F2) tagged to the trial | 1 wk | Empowered, de-risked | A bad sample week misrepresenting the curriculum is unfair to it AND her | The trial converts a $150 gamble into a free experiment |
 | 5. Decide + fold in | Post-trial check-in | Picks | Folds the pick into the planner spine (CurriculumView Callout: "I'll fold whichever you pick straight into the planner"); purchase happens on the vendor's site (no marketplace v1, M5-05 icebox) | 5 min | Decision fatigue GONE | — | Six weeks later the efficacy loop (F3) reports how the pick is landing: full circle |
@@ -1348,7 +1360,7 @@ Disambiguation moments: several per day. Shared activities: daily (read-alouds, 
 trips, co-op).
 
 **Why Homa**: per-child profiles ARE the product (the moat); orchestration is what
-makes them livable at n>1: cheap disambiguation etiquette (M2-11, from SOUL.md), one
+makes them livable at n>1: cheap disambiguation etiquette (M2-11), one
 capture fanning out to multiple profiles, per-child context everywhere, and honesty at
 the range boundary instead of pretending or excluding.
 
@@ -1420,7 +1432,7 @@ concierge review, and eventually as a GENTLE self-serve nudge at most.
    printer, values) live in a separate family store; tests assert no cross-child
    retrieval (M1-07 suite includes intra-family scoping, not just cross-family).
 
-**Ticket map**: M2-11 (disambiguation etiquette, from SOUL.md), M2-02 (per-child +
+**Ticket map**: M2-11 (disambiguation etiquette), M2-02 (per-child +
 family-level memory separation), M2-07 (routing), M2-03 (add-a-child), M1-01/M1-02
 (family principal, schema), M3-05 (per-child hours in one family ledger), M5-06
 (age-range expansion: the real fix for Caleb). **Gaps**: NT-05 (out-of-range honesty:
@@ -1516,6 +1528,10 @@ Also recommended (not new tickets, acceptance-criteria amendments):
 - **M2-05**: `materials.out_of_range_declined` behavior (F8-S3) as acceptance criteria.
 
 # ❓ Open questions for the founder
+
+> Historical question set. Q3 below concerns uploaded child audio, not voice-call
+> transcript retention. Current rulings are indexed in
+> `journeys/10-reconciliation.md` section 5.
 
 1. **Credit visibility in generation UX** (Sidney call #2, 09): the F1 journey assumes
    per-artifact consideration ≈ 0. If visible credit pricing ships, stage-1 UX needs a

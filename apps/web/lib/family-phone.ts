@@ -1,6 +1,7 @@
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { markLeadConverted } from "./phone-leads";
+import { sendHomaSms } from "./voice/telnyx-api";
 
 /**
  * The family texting lines (migration #22, one per family; migrations
@@ -116,9 +117,21 @@ export async function findFamilyIdByPhone(phoneE164: string): Promise<string | n
 
 export interface FamilyPhoneIdentity {
   familyId: string;
+  /** Stable adult identity for conversation attribution. Null only for
+   * legacy/unattributed phone rows. */
+  memberUserId: string | null;
   /** The linked adult's display name, when the number carries member
    * attribution and that member set one. Null keeps the caller generic. */
   memberDisplayName: string | null;
+  /** Only a phone attributed to a real signed-in family member may
+   * delegate access to another adult. Phone-only invitees cannot. */
+  canInviteFamilyMembers: boolean;
+  /** The routing row id is this access grant's generation. Removing and
+   * re-adding the phone creates a new id and therefore a new Eve session. */
+  sessionEpoch: string;
+  /** A memberless family created by begin_text_signup must rehydrate its
+   * questionnaire after the access-epoch rotation. */
+  smsSignupCandidate: boolean;
 }
 
 /**
@@ -130,8 +143,23 @@ export async function findFamilyIdentityByPhone(
   phoneE164: string,
 ): Promise<FamilyPhoneIdentity | null> {
   const sql = mapDb();
-  const rows = await sql<{ family_id: string; display_name: string | null }[]>`
-    select p.family_id, m.display_name
+  const rows = await sql<
+    {
+      family_id: string;
+      phone_row_id: string;
+      member_user_id: string | null;
+      display_name: string | null;
+      can_invite_family_members: boolean;
+      sms_signup_candidate: boolean;
+    }[]
+  >`
+    select p.family_id, p.id::text as phone_row_id,
+           p.member_user_id, m.display_name,
+           m.user_id is not null as can_invite_family_members,
+           p.source = 'signup' and not exists (
+             select 1 from public.family_members signup_member
+             where signup_member.family_id = p.family_id
+           ) as sms_signup_candidate
     from public.family_phones p
     left join public.family_members m
       on m.family_id = p.family_id and m.user_id = p.member_user_id
@@ -139,44 +167,31 @@ export async function findFamilyIdentityByPhone(
   `;
   const row = rows[0];
   if (!row) return null;
-  return { familyId: row.family_id, memberDisplayName: row.display_name };
+  return {
+    familyId: row.family_id,
+    memberUserId: row.member_user_id,
+    memberDisplayName: row.display_name,
+    canInviteFamilyMembers: row.can_invite_family_members,
+    sessionEpoch: `family-phone:${row.phone_row_id}`,
+    smsSignupCandidate: row.sms_signup_candidate,
+  };
 }
 
 /**
- * Bridge-time copy: carries a lead's signup-typed number into the real
- * family workspace. Never overwrites a number the parent set on /app/settings,
- * and silently stands down if another family already claimed it.
+ * Last access-boundary generation for a phone, retained after unlinking.
+ * This keeps an unlinked number from resuming model history created before
+ * a prior link or removal.
  */
-export async function copyLeadPhoneToFamily(
-  familyId: string,
+export async function findPhoneAccessEpoch(
   phoneE164: string,
-  addedBy: string | null,
-): Promise<void> {
+): Promise<string | null> {
   const sql = mapDb();
-  try {
-    const rows = await sql<{ family_id: string }[]>`
-      insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
-      values (${familyId}, ${phoneE164}, ${addedBy}, ${addedBy}, 'bridge')
-      on conflict do nothing
-      returning family_id
-    `;
-    if (rows.length > 0) {
-      await emitMapEvent("sms.family_linked", {
-        family_id: familyId,
-        source: "bridge",
-        replaced: false,
-      });
-      await markLeadConverted(phoneE164).catch(() => {});
-      await sendLinkNotificationSms(phoneE164);
-    }
-  } catch (error) {
-    // Best-effort by design: the workspace bridge must never fail over a
-    // phone nicety.
-    console.error(
-      "copyLeadPhoneToFamily failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-  }
+  const rows = await sql<{ epoch: string }[]>`
+    select epoch::text as epoch
+    from public.family_phone_access_epochs
+    where phone_e164 = ${phoneE164}
+  `;
+  return rows[0] ? `phone-access:${rows[0].epoch}` : null;
 }
 
 /**
@@ -186,32 +201,9 @@ export async function copyLeadPhoneToFamily(
  * at the platform level). Best-effort: linking never fails over it.
  */
 async function sendLinkNotificationSms(phoneE164: string): Promise<void> {
-  const apiKey = process.env.TELNYX_API_KEY;
-  const fromNumber = process.env.TELNYX_FROM_NUMBER;
-  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) return;
-
-  try {
-    const response = await fetch("https://api.telnyx.com/v2/messages", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromNumber,
-        to: phoneE164,
-        text:
-          "Hi, it's Homa. This number is now set up to text with me. " +
-          "Say hi anytime. Not you? Reply STOP and I won't text again.",
-      }),
-    });
-    if (!response.ok) {
-      console.error(`link notification SMS failed: HTTP ${response.status}`);
-    }
-  } catch (error) {
-    console.error(
-      "link notification SMS failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-  }
+  await sendHomaSms(
+    phoneE164,
+    "Hi, it's Homa. This number is now set up to text with me. " +
+      "Say hi anytime. Not you? Reply STOP and I won't text again.",
+  );
 }
