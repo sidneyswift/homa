@@ -167,7 +167,13 @@ export async function findMaterialsCaller(
   // exact (case preserved by the tool's guidance to reuse stored names).
   if (filters.character) query = query.contains("characters", [filters.character]);
   const { data, error } = await query;
-  if (error) return [];
+  if (error) {
+    // Surface the failure in logs instead of returning [] silently, which
+    // reads to the tool and parent as "no materials" (2026-07-11 review,
+    // CR-62). Still returns [] so a read error never fails the turn.
+    console.error(`findMaterialsCaller read failed: ${error.message}`);
+    return [];
+  }
   return ((data ?? []) as unknown as MaterialDbRow[]).map(toSummary);
 }
 

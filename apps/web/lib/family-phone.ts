@@ -143,43 +143,6 @@ export async function findFamilyIdentityByPhone(
 }
 
 /**
- * Bridge-time copy: carries a lead's signup-typed number into the real
- * family workspace. Never overwrites a number the parent set on /app/settings,
- * and silently stands down if another family already claimed it.
- */
-export async function copyLeadPhoneToFamily(
-  familyId: string,
-  phoneE164: string,
-  addedBy: string | null,
-): Promise<void> {
-  const sql = mapDb();
-  try {
-    const rows = await sql<{ family_id: string }[]>`
-      insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
-      values (${familyId}, ${phoneE164}, ${addedBy}, ${addedBy}, 'bridge')
-      on conflict do nothing
-      returning family_id
-    `;
-    if (rows.length > 0) {
-      await emitMapEvent("sms.family_linked", {
-        family_id: familyId,
-        source: "bridge",
-        replaced: false,
-      });
-      await markLeadConverted(phoneE164).catch(() => {});
-      await sendLinkNotificationSms(phoneE164);
-    }
-  } catch (error) {
-    // Best-effort by design: the workspace bridge must never fail over a
-    // phone nicety.
-    console.error(
-      "copyLeadPhoneToFamily failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-  }
-}
-
-/**
  * The typo safety net for skipping code verification (founder call
  * 2026-07-07): whoever actually owns a freshly linked number gets one
  * text saying so, with the STOP escape hatch (Telnyx enforces opt-outs

@@ -26,7 +26,15 @@ import {
  * model-mix experiments.
  */
 
-const REVIEW_MIN_MESSAGES = Number(process.env.HOMA_REVIEW_MIN_MESSAGES ?? 4);
+// Guarded parse: a non-numeric env would make Number(...) NaN, and
+// `length < NaN` is always false, silently disabling the message-count gate
+// so reviews fire on every tiny batch (2026-07-11 review, CR-65).
+function reviewMinMessages(): number {
+  const parsed = Number(process.env.HOMA_REVIEW_MIN_MESSAGES);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 4;
+}
+
+const REVIEW_MIN_MESSAGES = reviewMinMessages();
 const REVIEW_WINDOW_MAX_MESSAGES = 60;
 
 interface MessageRow {

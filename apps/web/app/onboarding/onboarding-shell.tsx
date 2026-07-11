@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { Logo } from "../../components/brand/Logo";
 import { Footer } from "../../components/marketing/Footer";
 import { Nav } from "../../components/marketing/Nav";
+import { flushWaitlistQueue } from "../../lib/waitlist-client";
 import type { FlowPhase } from "./flow-types";
 import { MapFlow } from "./map-flow";
 
@@ -54,6 +55,17 @@ export function OnboardingShell() {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const fullChrome = FULL_CHROME_PHASES.has(phase);
   const topAnchored = TOP_ANCHORED_PHASES.has(phase);
+
+  // Drain any waitlist submission parked by submitWaitlist on a failed send
+  // (parent-step's offline path): on mount and when connectivity returns.
+  // Without this the localStorage queue was never flushed, so a signup that
+  // failed on bad wifi sat forever (2026-07-11 review, CR-44).
+  useEffect(() => {
+    void flushWaitlistQueue();
+    const onOnline = () => void flushWaitlistQueue();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]">
