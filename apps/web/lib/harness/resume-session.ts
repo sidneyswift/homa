@@ -1,17 +1,17 @@
 /**
- * A narrow, defensive seed of M1-14 (the harness escape-hatch contract) —
+ * A narrow, defensive seed of M1-14 (the harness escape-hatch contract),
  * not the full contract (startTurn/parkForHuman/scheduleDispatch/
  * persistEvent). This exists solely to close the specific hole found in
  * the M0-01 spike (docs/homa-planning/eve-churn-log.md, 2026-07-04): eve's
  * resume endpoint can claim success (`ok: true`, even with the *correct*
  * sessionId) while the durable workflow underneath has actually diverged
  * and corrupted, silently dropping the message. A second, rarer variant
- * returns `ok: true` naming a *different* sessionId altogether — a fresh,
+ * returns `ok: true` naming a *different* sessionId altogether, a fresh,
  * memoryless session standing in for the one that broke.
  *
  * Both variants share one property: the synchronous POST response alone
  * cannot be trusted. eve's own docs describe the POST as accepting the
- * follow-up, not confirming the turn ran — real confirmation only exists on
+ * follow-up, not confirming the turn ran; real confirmation only exists on
  * the session's event stream. So this module does not stop at checking the
  * response body; it watches the stream for real forward progress (a new
  * turn distinct from whatever the caller already knew about) before calling
@@ -55,7 +55,7 @@ export interface ResumeSessionResult {
 
 /**
  * Thrown when eve's resume response names a session other than the one we
- * asked for. Treat this as the original conversation being unrecoverable —
+ * asked for. Treat this as the original conversation being unrecoverable:
  * do not continue silently on the returned session as if it were a normal
  * resume. Log it, alert, and surface an honest "let's pick this back up"
  * message to the end user instead.
@@ -89,7 +89,7 @@ export class SessionResumeFailedError extends Error {
 
 /**
  * Thrown when the resume POST claimed success but the session's own event
- * stream shows no real forward progress within the timeout — no new turn,
+ * stream shows no real forward progress within the timeout: no new turn,
  * and no explicit failure event either. This is the variant that motivated
  * this module: `ok: true` on the wire, silence underneath.
  */
@@ -100,7 +100,7 @@ export class SessionResumeUnconfirmedError extends Error {
     super(
       `Resume for session ${sessionId} returned ok:true, but no new turn ` +
         `appeared on its event stream within ${timeoutMs}ms. Treat this as ` +
-        `a failed resume, not a successful one — eve's POST response alone ` +
+        `a failed resume, not a successful one; eve's POST response alone ` +
         `does not confirm the turn ran.`,
     );
     this.name = "SessionResumeUnconfirmedError";
@@ -163,7 +163,7 @@ async function watchForForwardProgress(
 
 /**
  * Resumes an eve session and verifies eve actually resumed *that* session
- * AND made real forward progress on it — not a substitute session, and not
+ * AND made real forward progress on it, not a substitute session, and not
  * a silently dropped message behind a synchronous `ok: true`. Throws one of
  * SessionResumeMismatchError, SessionResumeFailedError, or
  * SessionResumeUnconfirmedError rather than returning a result that looks

@@ -117,6 +117,13 @@ export function subjectLine(score: SubjectScore, childName: string): SubjectLine
         numberLabel: "",
         sentence: "Not enough answers yet to place this honestly. A few more would fill it in.",
       };
+    default: {
+      // A new SubjectScore["position"] must fail the build here rather than
+      // fall through to an undefined return (2026-07-11 review, CR-53;
+      // workspace exhaustive-switch rule).
+      const exhaustive: never = score.position;
+      return exhaustive;
+    }
   }
 }
 

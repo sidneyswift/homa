@@ -281,7 +281,7 @@ export default async function PlanPage({
               </p>
               <p className="mt-2 max-w-lg text-sm" style={{ color: "var(--stone-300)" }}>
                 Materials made for {childName}, woven around your family, numbers tracked for you.
-                You&apos;re on the invite list. Your invite comes by email.
+                That&apos;s Homa once the whole plan is running.
               </p>
             </div>
           </div>

@@ -60,7 +60,7 @@ const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: R
   {
     n: "04",
     title: "Watch the needle move",
-    body: "A quick questionnaire maps each child against your state\u2019s standards. Steady? Growing? Stuck? Homa pairs the score with the timeline, and builds what\u2019s next.",
+    body: "A quick questionnaire maps each child against your state\u2019s standards. Steady? Growing? Finding their feet? Homa pairs the score with the timeline, and builds what\u2019s next.",
     vignette: <ProofVignette />,
   },
 ];

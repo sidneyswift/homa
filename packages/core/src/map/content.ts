@@ -1,5 +1,6 @@
 /**
- * The map content bank, v2026.07.3: ages 2 to 16 (scored), 16 domains.
+ * The map content bank, v2026.07.5 (see MAP_BANK_VERSION in bank.ts, the
+ * value reports persist): ages 2 to 16 (scored), 16 domains.
  *
  * Provenance: ported and extended from homa-template's questionnaire bank
  * (workspace/questionnaire/domains.json) and its citation-backed benchmark

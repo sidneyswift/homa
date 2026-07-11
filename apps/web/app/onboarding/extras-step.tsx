@@ -13,8 +13,8 @@ import { TagInput } from "./tag-input";
  * UX review 2026-07-06 (approved in full): dieted from nine asks to the
  * two that feed the report itself, interests (they end up in the
  * materials) and help-with (it shapes the report's note). The "About
- * your homeschool" block (style, curriculums, values) moved to the
- * report page, after the payoff, where reciprocity is on our side; the
+ * your homeschool" block (style, curriculums, values) now has its own
+ * homeschool step earlier in onboarding (homeschool-step.tsx); the
  * remaining asks (activities, crew, notes) belong to the product proper,
  * not the lead flow. Everything here is still skippable in one tap.
  */

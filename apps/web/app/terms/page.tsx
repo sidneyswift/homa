@@ -40,7 +40,7 @@ export default function TermsPage() {
         <p className="mt-3 text-body">
           Homa is early, and we would rather tell you that plainly than pretend otherwise. Today
           the service includes your child&apos;s progress report and practice plans, the invite
-          list, the blog, and, for invited families, the Homa assistant. All of it is free
+          list, the blog, and the Homa assistant for our first families. All of it is free
           today. If paid plans arrive, we will show the price clearly and ask before charging you,
           never the other way around.
         </p>
