@@ -3,6 +3,238 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-11 (late night) · Isolation guard now tests authenticated tenants
+
+Bug found during the full-repo review follow-up: the isolation smoke check only
+tested the anonymous public role. A policy bug that let one signed-in family
+read another family's rows could still pass CI.
+
+Extended `scripts/isolation-check.mjs` with a two-user fixture phase. It creates
+two temporary authenticated families, proves own reads, proves cross-family
+reads and writes fail for children, family memories, and materials, then deletes
+the fixture families and auth users through the database connection. CI now
+passes `SUPABASE_DB_PASSWORD` to the isolation step so cleanup is reliable.
+
+## 2026-07-11 (late night) · Isolation guard fails on uncovered tables
+
+Bug found during the full-repo review follow-up: the isolation script could miss
+new `public` tables unless someone remembered to add a hand-written assertion.
+
+Added a migration parser to `scripts/isolation-check.mjs`. Each read or write
+expectation records the table it covers, and the script now fails if any current
+`public` table from `supabase/migrations` is not exercised by the guard.
+
+## 2026-07-11 (late night) · Child-scoped helpers require family predicates
+
+Bug found during the full-repo review follow-up: several narrative,
+curriculum, report-email, and band-ready helpers trusted pre-scoped callers but
+did not enforce the family boundary in their own queries.
+
+Updated those helpers to require or derive the expected family id and to include
+matching family predicates before reads and writes. Token-scoped narrative
+status now carries through the family id proven by the report token, and the
+curriculum webhook correlates child and family before completion or curriculum
+upsert.
+
+## 2026-07-11 (late night) · Auth callback uses the shared safe redirect
+
+Bug found during the full-repo review follow-up: the auth callback rejected
+external redirects but still allowed `next=/signin`, which could bounce a
+freshly authenticated user back to sign-in.
+
+Moved `safeSameOriginPath` into `lib/safe-redirect.ts` and reused it from both
+`proxy.ts` and `/auth/callback`. The shared helper rejects external paths,
+backslashes, and sign-in destinations.
+
+## 2026-07-11 (late night) · Inbound email verifies Resend signatures
+
+Bug found during the full-repo review follow-up: inbound email authenticated
+only with the route's URL secret, then trusted `from` from the JSON body. A URL
+secret leak could impersonate any registered sender address.
+
+Fixed the email channel to read the raw request body, verify the Resend/Svix
+signature headers against `RESEND_WEBHOOK_SECRET`, and only then parse JSON.
+The existing `RESEND_INBOUND_SECRET` URL key remains as an additional gate.
+`apps/web/.env.example` now documents both inbound secrets.
+
+## 2026-07-11 (late night) · Voice webhooks accept bearer auth
+
+Bug found during the full-repo review follow-up: six Telnyx voice webhook and
+tool routes authenticated only with `?key=...` in the URL. Query strings can end
+up in access logs and referrers.
+
+Added a shared `hasVoiceWebhookSecret` helper. Voice context, curriculum
+insights, remember, log-hours, send-email, and send-signup-link now accept
+`Authorization: Bearer <TELNYX_WEBHOOK_SECRET>` and keep the URL key as a
+compatibility fallback while Telnyx tool URLs are migrated.
+
+## 2026-07-11 (late night) · Family invites require the invited email
+
+Bug found during the full-repo review follow-up: invite tokens were checked for
+hash, expiry, and single use, but the signed-in account email was not compared
+to `family_invites.email`. A forwarded or leaked invite link could add a
+different account that had no family yet.
+
+Fixed invite consumption to require the authenticated user's email to match the
+invited email before token consumption or membership insert. The join page now
+passes `user.email` and shows a specific mismatch outcome.
+
+## 2026-07-11 (late night) · Chat dictation is rate-limited
+
+Bug found during the full-repo review follow-up: `/api/chat/dictation` required
+auth but did not throttle uploads, even though each request can spend Telnyx STT
+credits.
+
+Fixed the route to apply a per-user hourly cap after auth and before multipart
+body parsing or transcription work. Excess requests return 429 with a null
+transcript, matching the route's fail-soft response shape.
+
+## 2026-07-11 (late night) · Curriculum calls have a daily family cap
+
+Bug found during the full-repo review follow-up: the signed-in curriculum
+"Call me" endpoint placed real outbound Telnyx calls without a per-family rate
+limit. A signed-in parent could repeatedly trigger paid calls.
+
+Fixed `/api/voice/curriculum/start` to apply a per-family 24-hour cap before
+phone linking, report-fact building, or any Telnyx request. Excess requests
+return 429 with `rate-limited`.
+
+## 2026-07-11 (late night) · Waitlist joins are rate-limited
+
+Bug found during the full-repo review follow-up: the public waitlist endpoint
+had a honeypot but no IP rate limit. A bot could still generate repeated
+Supabase insert attempts and event writes.
+
+Fixed `/api/waitlist` to use the same per-instance `rateLimited` and `clientIp`
+helper as the public map routes. Excess requests return 429 before validation
+or any Supabase write.
+
+## 2026-07-11 (late night) · Chat day rollover uses family time zone
+
+Bug found during the full-repo review follow-up: web chat's fresh-session
+rollover used browser-local `Date` setters for the 4am boundary. A traveling
+parent or a device set to a different zone could rotate the model session on
+the wrong family day.
+
+Fixed the app page to pass `family.time_zone` into `ChatClient`, and
+`prepareChat` now compares family-local chat-day keys. Before 4am belongs to
+the previous chat day; at or after 4am belongs to the current one.
+
+## 2026-07-11 (late night) · Built-in task hygiene rechecks eligibility
+
+Bug found during the full-repo review follow-up: seeding a `morning_brief`
+required a scored report, but the later enable and disable hygiene updates did
+not re-check that report predicate. A family whose reports disappeared could
+keep an enabled empty brief.
+
+Fixed the hygiene updates to use the same eligibility shape as seeding: email,
+time zone, at least one child, journal opt-out for journal prompts, and a scored
+child report for morning briefs.
+
+## 2026-07-11 (late night) · Curriculum report facts count plan activities
+
+Bug found during the full-repo review follow-up: the curriculum-call report
+facts path counted completed plan activities but hardcoded each plan's total to
+zero. That could produce facts like "checked off 5 of 0 activities" for the
+narrative writer.
+
+Fixed `buildReportFactsForChild` to select the stored plan and compute totals
+from `plan.weeks`, matching the main narrative-store path. Subject labels now
+also use the map subject display name or "the month plan" for the month row.
+
+## 2026-07-11 (late night) · Family folds preserve context bags
+
+Bug found during the full-repo review follow-up: signup folding moved children
+into the surviving family and deleted the source family, but it dropped
+`families.context`. Homeschool styles, curriculums, and values collected before
+signup could disappear during the fold.
+
+Added a shared family-context merge helper. Signup folds now merge the source
+context into the surviving family before deletion, recursively merging nested
+objects and unioning arrays. The same helper is also used by phone-stub folds so
+family-level context does not disappear there either.
+
+## 2026-07-11 (late night) · Recall dates use the family time zone
+
+Bug found during the full-repo review follow-up: recall snippets formatted
+call, chat, and memory dates in `America/New_York` for every family. Pacific
+and mountain families could see a different date than the one Homa uses in the
+family context block.
+
+Fixed both recall paths. Pinned recall resolves the family time zone on the
+server connection, and signed-in recall reads it through the caller's RLS
+client. Date labels now format with that zone and fall back through the
+existing `effectiveTimeZone` helper.
+
+## 2026-07-11 (late night) · Hours logging defaults to family-local today
+
+Bug found during the full-repo review follow-up: `log_hours` defaulted
+`happenedOn` with `new Date().toISOString().slice(0, 10)`. A parent logging
+after evening in many US zones could get tomorrow's UTC date.
+
+Added a shared `zonedDateString` helper and used the family's configured time
+zone, with the existing fallback, for both pinned channel writes and signed-in
+chat writes. Explicit dates supplied by the model still pass through unchanged.
+
+## 2026-07-11 (late night) · Observation rescoring respects narrative flag
+
+Bug found during the full-repo review follow-up: the `record_observation` agent
+tool always kicked off report narrative regeneration after a rescore, even when
+`REPORT_NARRATIVE_ENABLED` was off. Other rescore paths already honored that
+flag, so this path could spend generation work and write narrative rows the UI
+treated as disabled.
+
+Fixed the tool to gate `runReportNarrative` behind `narrativeEnabled()`, matching
+score, correction, SMS, and narrative-status paths.
+
+## 2026-07-11 (late night) · Task updates refuse empty changes
+
+Bug found during the full-repo review follow-up: the `update_task` agent tool
+returned `{ updated: true }` when the model supplied only a `taskId` and no
+actual task change. That violated the tool-honesty rule and could make the
+agent tell a parent a task changed when nothing happened.
+
+Fixed the tool to strip undefined optional fields, detect no-op inputs, and
+return `{ updated: false }` with a short clarification note. Real pause or
+custom-task edits still use the same store-level validation.
+
+## 2026-07-11 (late night) · Resume-link email failures stay retryable
+
+Bug found during the full-repo review follow-up: the onboarding hub's "email me
+this link" action set its success state in both the success and failure paths.
+A failed fetch could still show "Link sent. It works on any device."
+
+Fixed the hub to track idle, sending, sent, and failed states. The success copy
+now appears only after `/api/map/resume` returns an HTTP OK, and failures keep a
+retry affordance visible.
+
+## 2026-07-11 (late night) · Band-ready emails filter age before capping
+
+Bug found during the full-repo review follow-up: `childrenNowInBand()` selected
+up to 200 pending-band children without ordering, then filtered the scored age
+range in JavaScript. Eligible children outside that arbitrary first batch could
+miss the email telling their family the checklist was ready.
+
+Fixed the query to apply the scored age window in SQL before `limit 200`, using
+the same day-precise UTC date boundary as `ageInMonths`. The capped set is now
+ordered by child creation time and id so repeated cron runs advance
+deterministically.
+
+## 2026-07-11 (late night) · Onboarding undo clears saved map answers
+
+Bug found during the full-repo review follow-up: checklist and deep-dive undo
+removed answers from local React state only. The original chip tap had already
+upserted `child_answers`, and scoring reads the database, so a mis-tap could
+still shape the generated report after the parent undid it.
+
+Fixed `/api/map/answer` with a scoped DELETE path and a `deleteAnswer` store
+helper. Checklist and deep-dive undo now wait for any in-flight save for that
+item, clear the server row, and only then remove the answer locally. Completion
+now waits for all in-flight and retried saves before building the report, with
+a retry state if conference wifi drops the final write. The checklist's delayed
+tap timer is also cleared on exit and unmount so it cannot commit after the
+parent leaves the step.
+
 ## 2026-07-11 (late night) · Phone-link emails require a POST confirm
 
 Bug found during the full-repo review follow-up: `/api/link-phone?t=...`
@@ -360,6 +592,40 @@ Decisions made alone:
 - **SMS-gated in code**: on web the tool refuses with a note (progress
   is already visible in chat); message capped at 160 chars, no
   content scan (the agent's own replies are not code-scanned either).
+
+## 2026-07-11 (small hours) · Planner copy fixes from the two gates
+
+Founder ran the reader gate on the planner calendar (UI + copy scope),
+then said "Fix". Implemented the reader findings that were safe without
+a founder ruling, then ran homa-copy-editor per the order law and
+implemented its verdicts. Reader-gate fixes: the footer now leads with
+"any day counts", names "the progress report" and "the month's
+re-check" plainly (the old "the report reads this at re-check time" was
+the page's one unparseable, watched-feeling line), sits right under the
+grid, renders only with the grid, and the "moving activities around is
+coming" self-talk is cut; the focus strip line gets a "The goal:" /
+"This month:" prefix (the bare bank statement read as a beheaded
+sentence); checked cards keep the sage check + fade but lose the
+strikethrough (a line through a two-sentence activity was unreadable).
+
+Editor-gate fixes: "full plan" link renamed "full month" (one name per
+concept; the empty state defines "month"); literacy template reordered
+to "The quiet goal is {skill}" (skill statements carry comma clauses,
+so trailing "is the quiet goal" garden-pathed); "count double" replaced
+with the concrete fact (scoring metaphor on a page of literal
+check-offs); footer de-metaphored so "quiet goal" is the surface's one
+image; week-1 activity title joins with a period not a colon
+(descriptions carry their own colons); month focus joins subjects with
+commas not plus signs; empty-state body gains a checklist definition
+sentence, rendered only when a checklist button shows; "Open day"
+becomes "Free day" (verb-first button convention made it parse as an
+instruction). Template changes affect newly built plans; stored months
+keep their words until re-check, per the fix-the-producer law.
+
+Declined for now (parked with the founder): next-week navigation (a
+feature) and splitting tips out of checkable activities (a plan-shape
+change in core). check:map green, typechecks green, re-verified at 1440
+through the dev-planner-preview harness, deleted after capture.
 
 ## 2026-07-11 (late night) · The in-app report's snapshot goes full width
 

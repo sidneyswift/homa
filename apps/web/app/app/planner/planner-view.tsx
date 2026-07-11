@@ -193,10 +193,20 @@ export function PlannerView({
           </p>
           {/* Copy-kit empty-state shape, reworded through both copy gates
               (2026-07-10): define a month first, then the mechanic; the
-              buttons below are the door. */}
+              buttons below are the door. The checklist sentence joins
+              only when a checklist button will render below, so the
+              word never arrives unexplained (copy-editor gate
+              2026-07-11). */}
           <p className="mx-auto mt-2 max-w-md text-sm text-muted">
             A month is four weeks of small activities. One tap in the progress
             report builds it, and this page fills in.
+            {visibleKids.some(
+              (child) =>
+                !reports.get(child.id)?.token &&
+                isInScoredRange(ageInMonths(child.birth_month)),
+            )
+              ? " The checklist is five minutes of questions that build the first progress report."
+              : ""}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {visibleKids.map((child) => {
@@ -266,11 +276,14 @@ export function PlannerView({
                     re-check ready
                   </span>
                 ) : null}
+                {/* "month", never "plan": one name per concept, and this
+                    page's empty state defines the month (copy-editor
+                    gate 2026-07-11). */}
                 <Link
                   href={row.planHref}
                   className="text-[0.72rem] font-semibold text-brand hover:underline"
                 >
-                  full plan
+                  full month
                 </Link>
               </div>
             ))}
@@ -283,11 +296,12 @@ export function PlannerView({
           {/* Right under the boxes it forgives (reader gate 2026-07-11:
               "any day counts" was doing its work from the least-read
               spot, and "the report reads this at re-check time" was the
-              one unparseable line on the page). */}
+              one unparseable line on the page). Kept metaphor-free so
+              the templates' "quiet goal" stays the surface's one image
+              (copy-editor gate, same night). */}
           <p className="mt-3 text-xs text-muted">
-            Any day counts: do things whenever they fit, and check them off as they happen.
-            At the month&apos;s re-check, the progress report uses these check-offs to show
-            what moved.
+            Any day counts: do the activities whenever they fit, and check them off as they
+            happen. At the month&apos;s re-check, these check-offs go into the progress report.
           </p>
         </>
       )}

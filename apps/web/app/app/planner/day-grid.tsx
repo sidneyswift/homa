@@ -143,9 +143,14 @@ export function DayGrid({ days, plans }: { days: PlannerDay[]; plans: PlannerDay
               );
             })
           ) : (
-            <p className="px-0.5 pb-1 text-[0.72rem] text-subtle md:min-h-10">
-              Open day
-            </p>
+            <>
+              {/* "Free", not "Open": on a page of verb-first buttons,
+                  "Open day" parses as an instruction to open something
+                  (copy-editor gate 2026-07-11). */}
+              <p className="px-0.5 pb-1 text-[0.72rem] text-subtle md:min-h-10">
+                Free day
+              </p>
+            </>
           )}
         </section>
       ))}
