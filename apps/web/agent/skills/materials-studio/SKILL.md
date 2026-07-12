@@ -150,6 +150,43 @@ from calibration runs, re-check after any model swap):
 **Flash cards / cut-outs**: a 2x2 or 2x3 CSS grid, each cell
 `border: 2px dashed #b3a492; padding: 24px; text-align: center;`.
 
+**Letter boxes**: some handwriting curricula (Handwriting Without
+Tears, for one) teach letters inside a box, not on a three-line guide.
+When the family's curriculum metadata or the parent's ask points that
+way, draw rows of practice boxes (`border: 3px solid #221e1a;
+width/height: 90px;`) with one model letter in the first box of each
+row, and keep box proportions exact; this is precisely where the html
+path beats the image model.
+
+## Manipulatives: think past the page (early math especially)
+
+Real curricula pair lessons with things the child can hold: counters,
+ten-frames, number lines, pattern blocks. A page that works WITH a
+manipulative fits how the family already teaches, so for counting,
+addition, patterns, or place value, consider offering one:
+
+- Print the manipulative itself when it helps: a ten-frame mat, a strip
+  of cut-out counters, a 0-20 number line. The html path owns these;
+  exact grid geometry is its strength.
+- Or write the page's instruction line to use what the house already
+  has: beans, coins, cereal, toy cars. Never send her shopping.
+- Mention it once, as an offer, when it genuinely fits ("want a
+  ten-frame mat to go with this?"); never lecture about manipulatives.
+
+**Ten-frame** (a 2x5 grid of empty cells the child fills with
+counters):
+
+```html
+<style>
+  .tenframe { border-collapse: collapse; margin: 16px 0; }
+  .tenframe td { width: 74px; height: 74px; border: 3px solid #221e1a; }
+</style>
+<table class="tenframe">
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+```
+
 ## Design rules (binding)
 
 - The page belongs to the child, not to Homa: no logo header, no brand

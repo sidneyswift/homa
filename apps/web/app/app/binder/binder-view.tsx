@@ -1,14 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Search } from "lucide-react";
 
 import {
-  coverMaterials,
+  binderCover,
   filterMaterials,
   isDefaultFilter,
   KIND_LABELS,
   kindOptions,
+  noResultsMessage,
+  subjectOptions,
   type BinderFilter,
   type BinderMaterial,
 } from "../../../lib/materials/binder";
@@ -16,61 +19,101 @@ import { BinderCard } from "./binder-card";
 import { MaterialDetailOverlay } from "./material-detail-overlay";
 
 /**
- * The Binder page (binder design directions, 2026-07-11): Direction 1's
- * calm "this week" cover as the default landing, Direction 2's search,
- * filter chips, and large real previews underneath and whenever a
- * parent is actively narrowing. Scope (whole family or one kid) already
- * comes from the sidebar's view context, read once in page.tsx; this
- * component only searches and filters within whatever it was handed.
+ * The Binder page (binder design directions, 2026-07-11; subject row
+ * and this-week cover from the portfolio review session, 2026-07-12):
+ * Direction 1's calm cover as the default landing, Direction 2's
+ * search, filter chips, and large real previews underneath and
+ * whenever a parent is actively narrowing. Scope (whole family or one
+ * kid) already comes from the sidebar's view context, read once in
+ * page.tsx; this component only searches and filters within whatever
+ * it was handed.
  */
 
 const COVER_COUNT = 3;
+
+/** Free-text subjects could sprawl; past this the search box does the tail. */
+const MAX_SUBJECT_CHIPS = 10;
+
+const CHIP_ON =
+  "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]";
+const CHIP_OFF =
+  "min-h-9 rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]";
+
+/**
+ * The kinds a brand-new binder previews in its empty state, spelled by
+ * the surface's one kind vocabulary (editor gate: no second inflection).
+ */
+const EMPTY_STATE_PREVIEW = [
+  KIND_LABELS.worksheet,
+  KIND_LABELS.coloring,
+  KIND_LABELS.flashcards,
+  KIND_LABELS.reader,
+  KIND_LABELS.game,
+];
 
 export function BinderView({
   materials,
   scopeChildName,
   timeZone,
+  now,
 }: {
   materials: BinderMaterial[];
   scopeChildName: string | null;
   timeZone: string;
+  /** Server-supplied, planner precedent: keeps render pure and testable. */
+  now: Date;
 }) {
-  const [filter, setFilter] = useState<BinderFilter>({ kind: null, query: "" });
+  const [filter, setFilter] = useState<BinderFilter>({
+    kind: null,
+    subject: null,
+    query: "",
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const kinds = useMemo(() => kindOptions(materials), [materials]);
+  const subjects = useMemo(
+    () => subjectOptions(materials).slice(0, MAX_SUBJECT_CHIPS),
+    [materials],
+  );
   const filtered = useMemo(() => filterMaterials(materials, filter), [materials, filter]);
   const showCover = materials.length > 0 && isDefaultFilter(filter);
+  const nowMs = now.getTime();
   const cover = useMemo(
-    () => (showCover ? coverMaterials(materials, COVER_COUNT) : []),
-    [materials, showCover],
+    () =>
+      showCover
+        ? binderCover(materials, nowMs, COVER_COUNT)
+        : { eyebrow: "", heading: "", items: [] },
+    [materials, showCover, nowMs],
   );
-  const coverIds = useMemo(() => new Set(cover.map((item) => item.id)), [cover]);
+  const coverIds = useMemo(() => new Set(cover.items.map((item) => item.id)), [cover]);
   const gridItems = showCover ? filtered.filter((item) => !coverIds.has(item.id)) : filtered;
   const selected = materials.find((item) => item.id === selectedId) ?? null;
 
+  const activeSubject = subjects.find((subject) => subject.key === filter.subject) ?? null;
   const sectionTitle = showCover
     ? "Everything else"
     : filter.query.trim()
       ? "Search results"
-      : filter.kind
-        ? KIND_LABELS[filter.kind]
-        : "Everything in your Binder";
+        : filter.kind
+          ? KIND_LABELS[filter.kind]
+          : activeSubject
+            ? activeSubject.label
+            : "In your Binder";
 
   return (
     <>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
-            Kept for later
+            Kept to use again
           </p>
           <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
             Binder
           </h1>
           <p className="mt-1.5 max-w-xl text-sm text-muted">
             {scopeChildName
-              ? `Everything approved for ${scopeChildName}, plus anything shared with the whole family.`
-              : "Everything your family has approved, in one place to browse and print again."}
+              ? `Everything kept for ${scopeChildName}, plus anything for the whole family.`
+              : "Everything your family keeps, in one place to browse and print."}
           </p>
         </div>
         <label className="flex min-h-11 min-w-[220px] items-center gap-2 rounded-pill border border-border-default bg-card px-4 py-2 text-subtle">
@@ -87,16 +130,15 @@ export function BinderView({
       </header>
 
       {kinds.length > 1 ? (
-        <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Filter by type">
+        <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by type">
+          <span className="mr-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
+            Type
+          </span>
           <button
             type="button"
             aria-pressed={filter.kind === null}
             onClick={() => setFilter((current) => ({ ...current, kind: null }))}
-            className={
-              filter.kind === null
-                ? "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
-                : "min-h-9 rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]"
-            }
+            className={filter.kind === null ? CHIP_ON : CHIP_OFF}
           >
             All
           </button>
@@ -106,13 +148,38 @@ export function BinderView({
               type="button"
               aria-pressed={filter.kind === kind}
               onClick={() => setFilter((current) => ({ ...current, kind }))}
-              className={
-                filter.kind === kind
-                  ? "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
-                  : "min-h-9 rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]"
-              }
+              className={filter.kind === kind ? CHIP_ON : CHIP_OFF}
             >
               {KIND_LABELS[kind]}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {subjects.length > 1 ? (
+        <div className="mt-2.5 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by subject">
+          <span className="mr-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
+            Subject
+          </span>
+          <button
+            type="button"
+            aria-pressed={filter.subject === null}
+            onClick={() => setFilter((current) => ({ ...current, subject: null }))}
+            className={filter.subject === null ? CHIP_ON : CHIP_OFF}
+          >
+            All
+          </button>
+          {subjects.map((subject) => (
+            <button
+              key={subject.key}
+              type="button"
+              aria-pressed={filter.subject === subject.key}
+              onClick={() =>
+                setFilter((current) => ({ ...current, subject: subject.key }))
+              }
+              className={filter.subject === subject.key ? CHIP_ON : CHIP_OFF}
+            >
+              {subject.label}
             </button>
           ))}
         </div>
@@ -123,22 +190,44 @@ export function BinderView({
           <p className="font-display text-lg font-semibold text-strong">Nothing kept yet.</p>
           <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
             {scopeChildName
-              ? `When you approve a worksheet, reader, or game Homa makes for ${scopeChildName}, it lands here.`
-              : "When you approve a worksheet, reader, or game Homa makes, it lands here automatically."}
+              ? `When you tell Homa that something she made for ${scopeChildName} is a keeper, it lands here on its own.`
+              : "When you tell Homa that something she made is a keeper, it lands here on its own."}
           </p>
+          <div
+            className="mx-auto mt-5 flex max-w-md flex-wrap justify-center gap-2"
+            aria-hidden="true"
+          >
+            {EMPTY_STATE_PREVIEW.map((label) => (
+              <span
+                key={label}
+                className="rounded-pill border border-dashed border-border-default px-3.5 py-1.5 text-xs font-bold text-subtle"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <p className="mx-auto mt-5 max-w-sm text-sm text-muted">
+            Your first one starts in chat.
+          </p>
+          <Link
+            href="/app"
+            className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+          >
+            Ask HOMA
+          </Link>
         </div>
       ) : (
         <>
-          {showCover && cover.length > 0 ? (
+          {showCover && cover.items.length > 0 ? (
             <section className="mt-6 rounded-[var(--radius-xl)] border border-border-subtle bg-card p-5 shadow-sm">
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
-                Ready now
+                {cover.eyebrow}
               </p>
               <h2 className="mt-1 font-display text-lg font-semibold text-strong">
-                The newest things you&apos;ve kept
+                {cover.heading}
               </h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {cover.map((material) => (
+                {cover.items.map((material) => (
                   <BinderCard key={material.id} material={material} onOpen={(item) => setSelectedId(item.id)} />
                 ))}
               </div>
@@ -149,7 +238,7 @@ export function BinderView({
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="font-display text-lg font-semibold text-strong">{sectionTitle}</h2>
               <span className="text-xs text-subtle">
-                {gridItems.length} {gridItems.length === 1 ? "item" : "items"}
+                {gridItems.length} {gridItems.length === 1 ? "thing" : "things"}
               </span>
             </div>
             {gridItems.length > 0 ? (
@@ -160,7 +249,7 @@ export function BinderView({
               </div>
             ) : (
               <p className="mt-4 rounded-lg border border-dashed border-border-default bg-card p-6 text-center text-sm text-muted">
-                Nothing matches that search. Try a different word or clear the filter.
+                {noResultsMessage(filter)}
               </p>
             )}
           </section>

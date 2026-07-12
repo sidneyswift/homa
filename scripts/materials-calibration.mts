@@ -146,6 +146,24 @@ const BRIEFS: Brief[] = [
       'A warm children\'s poster, portrait, soft watercolor style with large clear lettering: the exact title "Our Kind Words" at the top, and four short phrases on gentle banners: "Please", "Thank you", "I can help", "You first". Light colors, printable, no other text.',
   },
   {
+    id: "ten-frame",
+    ask: "Ten-frame counting mat: two exact 2x5 ten-frames with a title and one instruction line",
+    paths: ["image", "html"],
+    imagePrompt:
+      'A children\'s math manipulative page, portrait, black and white printable: title "My Ten-Frames", one instruction line "Put one counter in each box as you count.", then two ten-frames stacked vertically, each ten-frame EXACTLY a 2x5 grid of ten equal empty square cells with thick black borders. Nothing else on the page.',
+    html: () =>
+      `${TRACE_CSS}<style>.tenframe{border-collapse:collapse;margin:18px 0;}.tenframe td{width:74px;height:74px;border:3px solid #221e1a;}</style><div class="sheet"><h1>My Ten-Frames</h1><p class="hint">Put one counter in each box as you count.</p><table class="tenframe"><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></table><table class="tenframe"><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></table></div>`,
+  },
+  {
+    id: "letter-boxes",
+    ask: "Letter O practice in boxes (Handwriting Without Tears style): three rows of five equal boxes, a model O in each row's first box",
+    paths: ["image", "html"],
+    imagePrompt:
+      'A children\'s handwriting practice page, portrait, black and white printable: title "O in a Box", one instruction line "Write one O in each box.", then three rows, each row EXACTLY five equal empty square boxes with thick borders, and in the FIRST box of each row one large gray model letter O. No lines through the boxes, nothing else.',
+    html: () =>
+      `${TRACE_CSS}<style>.boxrow{display:flex;gap:12px;margin:16px 0;}.lbox{width:90px;height:90px;border:3px solid #221e1a;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-size:58px;color:#d9d2c7;}</style><div class="sheet"><h1>O in a Box</h1><p class="hint">Write one O in each box.</p><div class="boxrow"><div class="lbox">O</div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div></div><div class="boxrow"><div class="lbox">O</div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div></div><div class="boxrow"><div class="lbox">O</div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div><div class="lbox"></div></div></div>`,
+  },
+  {
     id: "reference-restyle",
     ask: "Reference test: regenerate the coloring page swapping the dragon for a fox, keeping style and layout",
     paths: ["image"],

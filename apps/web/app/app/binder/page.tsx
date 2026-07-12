@@ -62,6 +62,7 @@ export default async function BinderPage() {
         materials={binderMaterials}
         scopeChildName={focusChild?.name ?? null}
         timeZone={effectiveTimeZone(family.time_zone)}
+        now={new Date()}
       />
     </PageColumn>
   );

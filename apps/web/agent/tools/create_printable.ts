@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
-import { rateLimited } from "../../lib/map/ratelimit";
 import {
   blobConfigured,
   insertMaterialRowPinned,
@@ -27,9 +26,6 @@ import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-const MAX_MATERIALS_PER_FAMILY_PER_DAY = 20;
-
 /**
  * The materials studio's press (MS-2/MS-3, replacing create_worksheet):
  * turns a page the model designed into the real artifact the parent
@@ -42,8 +38,11 @@ const MAX_MATERIALS_PER_FAMILY_PER_DAY = 20;
  *
  * No template on purpose (founder rulings 2026-07-09/10): layout, style,
  * characters, difficulty, and PATH are the model's to choose per child.
- * Code owns tenancy, rate limits, the brand-law gate, the D7 footer, and
- * the review gate on delivery.
+ * Code owns tenancy, the brand-law gate, the D7 footer, and the review
+ * gate on delivery. No daily materials cap on purpose (founder ruling
+ * 2026-07-12, "no 20 a day cap"): series like an A-to-Z worksheet set
+ * must build without an artificial stop; usage stays visible through
+ * the model_usage ledger.
  */
 
 const printableInput = z.object({
@@ -138,12 +137,6 @@ export default defineTool({
     }
     const { familyId } = access;
 
-    if (rateLimited(`agent-material:${familyId}`, MAX_MATERIALS_PER_FAMILY_PER_DAY, DAY_MS)) {
-      return {
-        created: false,
-        note: "This family's materials budget for today is used up. Offer to pick it back up tomorrow.",
-      };
-    }
     if (!blobConfigured()) {
       return {
         created: false,

@@ -3,6 +3,86 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · Binder gets subjects, an honest this-week cover, and a first-day empty state (FS-1/2/4)
+
+Founder: "ship everything else you would ship" from the portfolio-review
+plan's Wave 0. Three tickets landed together:
+
+- FS-1: a Subject chip row (case-insensitive grouping over the free-text
+  subject metadata, first spelling wins, alphabetical, capped at 10) next
+  to a now-labeled Type row; the cover shows the trailing week's keepers
+  under "This week" and falls back to "Newest" when nothing is that
+  fresh, so the label never lies. New pure helpers (subjectOptions,
+  binderCover, noResultsMessage) in lib/materials/binder.ts, 20 tests.
+- FS-4: the empty state names the keep gesture ("when you tell Homa that
+  something she made is a keeper"), previews the kind vocabulary as
+  faint pills, and ends in an Ask HOMA button to /app.
+- FS-2: materials-studio SKILL.md gains a manipulatives section (offer a
+  printable ten-frame or household stand-ins for early math, offer never
+  lecture) and a letter-box recipe for box-based handwriting curricula;
+  the calibration harness gains ten-frame and letter-box briefs.
+
+Both copy gates ran on the new surface strings. Reader gate: five asks;
+four implemented (one keep/kept/keeper vocabulary everywhere, a
+first-day-true subtitle, a real chat door in the empty state, no-results
+copy that names only the narrowing actually applied) plus the cover
+label/heading agreement. The fifth (narrow by kid on the page) was
+declined: the app-wide view-context switcher already owns per-kid
+narrowing, the dispatch scenario simply had not shown it. Editor gate:
+six must-fixes implemented (garden path cured with "that", cover
+fallback pair agrees as "Newest", per-state no-results strings, Ask
+HOMA casing per the test-pinned Progress precedent, one "things" noun
+for counts, metaphor budget back to one) and all three suggestions
+(fewer "Everything" openers, singular kind vocabulary in the preview
+pills, "for the whole family" over "shared with").
+
+Decisions made alone: the cover switched from a fixed newest-3 to
+this-week-else-newest (the session's framing, kept honest); subject
+chips read the existing free-text metadata rather than waiting on FD-6
+vocabulary alignment; the editor's cross-surface finding that the
+planner's "Ask Homa to adjust the week" button sits on the lowercase
+side of D8 is parked as a follow-up rather than touched tonight; the
+homa-uxui-reviewer screenshot pass was deliberately skipped for this
+slice (the new rows duplicate the shipped chip pattern exactly) and can
+run against production after the conference. FS-3 (curriculum context
+injection) stays held past the conference on purpose: it changes what
+the model sees every turn, the night before a live demo.
+
+Verified: 20 binder tests, web typecheck, web lint, full next build (65
+routes), and eve build, all green on this tree. A parallel session's
+uncommitted work (desktop kid switcher, founder console) shares the
+working tree; this commit stages only the binder/studio files and this
+log's own entries.
+
+Founder, looking at the desktop rail's kid section: "the my kids tab is weird
+on desktop... there should just be a pfp at the top right of the app just like
+the mobile version to select kids on the pages that would benefit from it."
+Shipped: `DesktopContextSwitcher` (context-switcher.tsx), the same avatar
+button and menu the phone bar carries, floating at the viewport's top right as
+a small white card, rendered by the shell so it persists across navigations.
+Multi-kid families only (the phone bar's existing rule), and only on pages the
+selection affects: the new `pageShowsContextSwitcher` (view-context.ts, tested
+in view-context.test.ts) hides it on Tasks and Settings, the two /app surfaces
+that ignore the view context. The rail's kid rows (`ViewingRows`) left the
+desktop sidebar; the phone drawer keeps them via SidebarContent's explicit
+`withViewingRows` switch (the drawer is the whole sidebar, founder call
+2026-07-09, and the complaint named desktop). This supersedes the rail
+placement from the 2026-07-10 "one kid list in the sidebar" ruling; the merged
+one-control principle survives, the control moved corners. The shared menu id
+became a useId value because both hosts stay mounted (CSS swaps them at lg),
+so the old hardcoded id would have collided.
+
+Calls made alone: single-kid families now see no kid control in the desktop
+chrome at all, matching the phone bar (the old single-kid "My kids" link to
+the kid page now lives only in the phone drawer; kid pages stay reachable by
+deep link and by switch-on-page, and the Progress tab carries the day-to-day).
+Chat's focus hint names one place now ("Change who you're viewing from the top
+right.", the already-gated phone sentence; the desktop "from the sidebar"
+variant retired) and renders only for multi-kid families, closing a
+pre-existing dangling hint: a focused single-kid chat used to point phones at
+a switcher that does not exist for them. Verified: progress UI tests, web
+typecheck, web lint.
+
 ## 2026-07-12 · Task cards open an editor dialog; built-in schedules became editable
 
 Founder ask (chat, with reference shots of a modal task editor): clicking a
@@ -115,6 +195,44 @@ wrong?" door live inside the panel, answering both reader-gate reviews).
 Prototype only: no production code changed yet. Copy inside the prototype is
 placeholder and must pass homa-copy-reviewer then homa-copy-editor when the
 production build lands.
+
+## 2026-07-12 · Founder ruling: no daily materials cap (create_printable)
+
+Founder instruction in session, reviewing the portfolio-review plan's
+FD-3 (series generation vs the materials rate limit): "no 20 a day
+cap." Removed the 20-materials-per-family-per-day limit from
+`apps/web/agent/tools/create_printable.ts` (the limit, its refusal
+copy, and the now-unused rateLimited import). Scope read narrowly on
+purpose: the ruling named the 20-a-day materials cap, so the
+30-images-per-family-per-day limit in `generate_image.ts` and the
+other per-family limits (email, voice hours, curriculum calls) stand
+untouched. This overrides an agent-made limit from the 2026-07-10
+materials build ("Limits without billing: 20 sheets + 30 images"), not
+a founder ruling, so the reconciliation register is unchanged. Cost
+visibility continues through the MS-6 model_usage ledger. The
+portfolio-review plan doc was updated in place (context, I6, FS-6,
+FD-3 marked RULED). Verified: web typecheck, web lint, and eve build
+green.
+
+## 2026-07-12 · Portfolio review session distilled into a ticketed plan
+
+Founder supplied the 2026-07-11 family session transcript (Sidney,
+Alessa, Carolyn: binder review, materials organization, curriculum
+strategy, planner and logging, socials) and asked for insights,
+tickets, and a simplest-to-most-complex attack plan. Wrote
+`docs/homa-planning/plans/2026-07-12-portfolio-review-session-tickets.md`:
+26 insights reconciled against current code and the ticket registry,
+19 plan-local FS tickets across four waves plus a marketing lane, and
+six open founder decisions (subject chips vs tabs, folder UX, series
+cap policy, activity-log shape, curriculum copyright posture, subject
+vocabulary alignment). Decisions made alone: ticket IDs stay
+plan-local (FS-n, the T-n/RT-n convention) rather than minting M/MJ
+rows, big asks are mapped onto their existing registry homes (T9,
+M3-05/06, M2-10, M2-12, MJ-19, MJ-33) instead of duplicated, and the
+order defers schema-bearing work until after the July 13 conference.
+No product code changed. The new plan file will appear as a fresh
+candidate in the documentation reconciliation audit, which is
+expected.
 
 ## 2026-07-12 · Binder ships as a merged Direction 1 + Direction 2, first-release scope only
 
