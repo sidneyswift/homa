@@ -4,6 +4,7 @@ import {
   listFamilyDeliveryRecipients,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { dispatchContinuationToken } from "../../lib/conversation-continuity/dispatch-session-token";
+import { selectTaskDeliveryRecipients } from "../../lib/conversation-continuity/task-recipients";
 import { buildSignedReplyAddress } from "../../lib/conversation-continuity/email-reply-auth";
 import {
   markCanonicalMessageDelivered,
@@ -58,6 +59,9 @@ interface DispatchState {
   kind: FamilyTaskKind;
   deliveryPref: "text" | "email" | "none";
   label: string | null;
+  /** The one adult this task delivers to (founder ruling 2026-07-12);
+   * null falls back to the account owner at delivery time. */
+  recipientMemberUserId: string | null;
   delivered: boolean;
 }
 
@@ -97,6 +101,7 @@ export default defineChannel({
     kind: "journal_prompt",
     deliveryPref: "text",
     label: null,
+    recipientMemberUserId: null,
     delivered: false,
   } as DispatchState,
 
@@ -120,6 +125,7 @@ export default defineChannel({
       kind?: FamilyTaskKind;
       deliveryPref?: "text" | "email" | "none";
       label?: string | null;
+      recipientMemberUserId?: string | null;
     };
     const kind = target.kind ?? "journal_prompt";
     return await send(input.message, {
@@ -141,6 +147,7 @@ export default defineChannel({
         kind,
         deliveryPref: target.deliveryPref ?? "text",
         label: target.label ?? null,
+        recipientMemberUserId: target.recipientMemberUserId ?? null,
         delivered: false,
       },
       title: `${kind} ${target.familyId ?? ""}`.trim(),
@@ -158,8 +165,15 @@ export default defineChannel({
       if (data.finishReason !== "stop" || !data.message?.trim()) return;
       if (channel.state.delivered) return;
       const text = data.message.trim();
-      const { familyId, runId, kind, episodeId, deliveryPref, label } =
-        channel.state;
+      const {
+        familyId,
+        runId,
+        kind,
+        episodeId,
+        deliveryPref,
+        label,
+        recipientMemberUserId,
+      } = channel.state;
       if (!familyId) return;
 
       try {
@@ -175,7 +189,13 @@ export default defineChannel({
         if (!message || !episodeId) {
           throw new Error("dispatch message could not enter the continuity ledger");
         }
-        const recipients = await listFamilyDeliveryRecipients(familyId);
+        // Task texts reach ONE adult: the task's own recipient, or the
+        // account owner on legacy rows (founder ruling 2026-07-12).
+        // Invited co-parents are never auto-subscribed.
+        const recipients = selectTaskDeliveryRecipients(
+          await listFamilyDeliveryRecipients(familyId),
+          recipientMemberUserId,
+        );
         const delivery = await deliverTaskMessage(
           {
             familyId,

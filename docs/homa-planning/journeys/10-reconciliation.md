@@ -143,6 +143,7 @@ References must qualify colliding labels as global D3 age range, global D8 casin
 | `multi-parent-v0` | 2026-07-11 | The approved multi-parent slice supersedes the PRD's one-login-only cohort boundary. | `docs/homa-planning/plans/2026-07-11-multi-parent-v0-and-founder-account-merge.md` |
 | `full-birthday` | 2026-07-11 | Store month, day, and year product-wide. This supersedes month-and-year minimization and D-mp-4's day-01 normalization. | `docs/homa-planning/build-log.md` § Full-birthday intake ruling |
 | `nav-labels-simplified` | 2026-07-12 | App nav tabs read "Ask", "Progress", "Planner", "Tasks". Supersedes the D-ht-4 tab name and the "Ask HOMA" and "Week planner" nav labels, for the nav only; page titles keep the fuller names. | `docs/homa-planning/build-log.md` § App nav labels simplified |
+| `task-recipient-scoping` | 2026-07-12 | Only the account owner (the family's first member) is auto-subscribed to scheduled task texts: the morning brief, the evening check-in, and custom tasks. An invited adult is never auto-subscribed and opts in by creating their own task on the web tab, in chat, or over SMS. Supersedes the multi-parent v0 every-adult task fan-out. | `docs/homa-planning/build-log.md` § Task texts reach one adult |
 
 ### Open founder decisions
 

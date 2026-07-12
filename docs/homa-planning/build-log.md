@@ -3,6 +3,52 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · Binder ships as a merged Direction 1 + Direction 2, first-release scope only
+
+Founder asked to implement "a mixture of view 1 and view 2" from
+`docs/homa-planning/plans/2026-07-11-binder-design-directions.html` as the
+real `/app/binder` tab. That doc pre-answered five build-changing questions
+with recommendations (name "Binder", one Binder that follows the existing
+family/child view context rather than a second switcher, "this week" as the
+default landing, a sidebar tab, and saved child media staying explicit-only);
+none were overridden in this session, so the shipped surface follows those
+recommendations rather than asking again. Direction 1 (Living Binder)
+supplies the calm default landing (a "ready now" cover of the newest kept
+items) and the plain human framing; Direction 2 (Open Shelf) supplies the
+search box, kind filter chips, and large real preview images in place of the
+prototype's icon placeholders.
+
+Scoped to the doc's own release ladder, not the full four-section fantasy:
+v1 shows only finalized materials (`status = 'final'`, i.e. parent-approved
+worksheets/readers/games/etc. from `public.materials`), because Plans,
+Books & resources, Keepsakes, and Records either already live elsewhere
+(Progress, Planner) or need a content model and the minors' media privacy
+decision that don't exist yet. Building fake sections for those would have
+misrepresented what the product actually does. "Sections" became kind
+filter chips (the one real controlled vocabulary already on `materials`)
+instead of the prototype's invented categories.
+
+Discovered mid-build: `lib/materials/artifact-store.ts` bundled `@vercel/blob`
+and the Postgres-backed `lib/map/db.ts` at its top level, so anything that
+only needed the `MaterialKind` enum (like a client component's filter chips)
+dragged Postgres into the browser bundle and broke `next build` with
+`Module not found: net/tls/perf_hooks`. Fixed by extracting the enum into a
+new leaf module, `lib/materials/kinds.ts`, with zero other imports;
+`artifact-store.ts` now re-exports from it so `find_materials.ts`,
+`create_printable.ts`, and `mark_material_final.ts` need no changes.
+
+Implemented in `apps/web/lib/materials/kinds.ts` (new),
+`apps/web/lib/materials/binder.ts` + `.test.ts` (new, pure scope/search/cover
+logic), `apps/web/app/app/binder/page.tsx` + `binder-view.tsx` +
+`binder-card.tsx` + `material-detail-overlay.tsx` (new route; the overlay's
+focus trap mirrors the onboarding report's `ChartLightbox`, the house
+pattern for "look closer" panels), and one row added to `APP_NAV_ITEMS` in
+`apps/web/components/dashboard/sidebar-nav.tsx`. Verified: the new binder
+tests (15 cases), `pnpm check:progress-ui` and `pnpm check:isolation` still
+green, web typecheck and lint clean, and both `next build` and
+`eve build` succeed (the latter specifically to catch the artifact-store
+bundling issue above).
+
 ## 2026-07-12 · Live Progress keeps a door to the full report (founder instruction)
 
 Founder instruction in session: the live Progress view shows an "Open the
@@ -16,6 +62,47 @@ renders only when the child has a report token) and
 `apps/web/app/app/[childId]/progress/page.tsx` (passes the token href).
 Verified by `pnpm check:progress-ui` (98 tests), the web typecheck, and the
 web lint before commit.
+
+## 2026-07-12 · Task texts reach one adult: the recipient ruling ships
+
+Founder question: does an invited co-parent automatically get the daily
+texts? Answer, confirmed in code: yes, the dispatch channel fanned every
+task delivery out to every family adult (listFamilyDeliveryRecipients),
+so an invited dad started receiving the morning brief, the evening
+check-in, and every custom task text the moment his membership row
+landed. Founder ruling, same session: only the main parent, the account
+owner, is auto-subscribed to daily task texts. An invited adult is never
+auto-subscribed; they opt in by creating their own task on the web tab,
+in chat, or over SMS. Registered in the reconciliation later-ruling
+register as task-recipient-scoping.
+
+Built:
+
+1. Migration #72 (additive, applied to homa-prod ahead of the deploy):
+   agent_schedules.recipient_member_user_id names the one adult a task
+   delivers to; backfill stamps every existing row with the family's
+   first member (the account owner); single-adult families' unattributed
+   legacy phone rows attach to their only member so member-scoped
+   delivery still reaches them by text.
+2. Seeding stamps the account owner; createCustomTask stamps the
+   creating adult (web action passes the signed-in user, the chat/SMS
+   create_task tool passes the session's authenticated memberUserId).
+3. The dispatch channel narrows delivery through a pure selector
+   (lib/conversation-continuity/task-recipients.ts): the named
+   recipient, or the first member on legacy null rows; a single-adult
+   family keeps its unattributed phones; member-less families keep the
+   legacy fan-out. Seven tests written red-first drive the contract.
+
+Consequences stated plainly: in the founder's own household Alessa is
+the first member, so the built-in morning brief now texts her alone;
+Sidney opts in by asking Homa for his own brief task. Known v0 limit: an
+SMS-bridged adult with no account who asks Homa for a task gets it
+stamped null, so its texts fall back to the account owner; scoping to a
+bare phone number is future work if it matters.
+
+Verification: 94 continuity tests (7 new recipient tests red then
+green), web typecheck, web lint, eve build, and the production isolation
+guard before and after the schema change all pass.
 
 ## 2026-07-12 · Dispatch session tokens become per-run (HookConflictError incident)
 

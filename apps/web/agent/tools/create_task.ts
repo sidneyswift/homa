@@ -58,7 +58,17 @@ export default defineTool({
       throw error;
     }
 
-    const result = await createCustomTask(familyId, input, "homa");
+    // The authenticated adult on this session (web JWT or an attributed
+    // SMS number) becomes the task's one delivery recipient; an adult
+    // without an account falls back to the account owner.
+    const memberUserId = (attributes as { memberUserId?: unknown } | undefined)
+      ?.memberUserId;
+    const result = await createCustomTask(
+      familyId,
+      input,
+      "homa",
+      typeof memberUserId === "string" ? memberUserId : null,
+    );
     if (!result.ok) return { created: false, note: result.note };
     return {
       created: true,

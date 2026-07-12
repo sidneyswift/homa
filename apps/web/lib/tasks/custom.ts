@@ -100,6 +100,10 @@ export async function createCustomTask(
   familyId: string,
   input: CustomTaskInput,
   createdBy: "parent" | "homa",
+  // The creating adult, who becomes the task's one delivery recipient
+  // (founder ruling 2026-07-12). Null (SMS adults without an account)
+  // falls back to the account owner at delivery time.
+  recipientMemberUserId: string | null = null,
 ): Promise<{ ok: true; id: string } | { ok: false; note: string }> {
   const parsed = customTaskInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -132,11 +136,12 @@ export async function createCustomTask(
   const rows = await sql<{ id: string }[]>`
     insert into public.agent_schedules
       (family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
-       label, prompt, created_by)
+       label, prompt, created_by, recipient_member_user_id)
     values
       (${familyId}, 'custom', ${nextRun.toISOString()}, ${parsed.data.localHour},
        ${sql.array(parsed.data.weekdays)}::smallint[], ${parsed.data.deliveryPref},
-       ${parsed.data.label}, ${parsed.data.prompt}, ${createdBy})
+       ${parsed.data.label}, ${parsed.data.prompt}, ${createdBy},
+       ${recipientMemberUserId})
     returning id
   `;
   return { ok: true, id: rows[0].id };

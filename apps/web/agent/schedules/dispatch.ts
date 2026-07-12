@@ -151,6 +151,7 @@ export default defineSchedule({
                 deliveryPref: task.deliveryPref,
                 label: task.label,
                 episodeId,
+                recipientMemberUserId: task.recipientMemberUserId,
               },
               auth: {
                 authenticator: "dispatcher",

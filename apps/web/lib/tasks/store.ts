@@ -43,6 +43,9 @@ export interface DueFamilyTask {
    * SMS delivery reaches each of them). Empty when none is linked. */
   phoneNumbers: string[];
   email: string | null;
+  /** The one adult this task delivers to (founder ruling 2026-07-12).
+   * Null on legacy rows; delivery falls back to the account owner. */
+  recipientMemberUserId: string | null;
 }
 
 const SEEDABLE_KINDS = ["journal_prompt", "morning_brief"] as const;
@@ -59,8 +62,15 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
   const requireReport = kind === "morning_brief";
   const optOutFilter = kind === "journal_prompt";
 
-  const eligible = await sql<{ id: string; time_zone: string }[]>`
-    select f.id, f.time_zone from public.families f
+  const eligible = await sql<
+    { id: string; time_zone: string; owner_user_id: string | null }[]
+  >`
+    select f.id, f.time_zone,
+      (select m.user_id from public.family_members m
+       where m.family_id = f.id
+       order by m.created_at
+       limit 1) as owner_user_id
+    from public.families f
     where f.email is not null
       and f.time_zone is not null
       and f.created_at < now() - interval '20 hours'
@@ -87,14 +97,18 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
         config.defaultWeekdays,
         now,
       );
+      // The recipient is the account owner, the family's first member
+      // (founder ruling 2026-07-12): built-in texts never auto-subscribe
+      // an invited adult.
       await sql`
         insert into public.agent_schedules
-          (family_id, kind, next_run_at, local_hour, weekdays, delivery_pref, created_by)
+          (family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
+           created_by, recipient_member_user_id)
         values
           (${family.id}, ${kind}, ${nextRun.toISOString()},
            ${config.defaultLocalHour},
            ${sql.array(config.defaultWeekdays as number[])}::smallint[],
-           'text', 'system')
+           'text', 'system', ${family.owner_user_id})
         on conflict do nothing
       `;
     } catch (error) {
@@ -175,6 +189,7 @@ export async function claimDueFamilyTasks(options: {
       delivery_pref: "text" | "email" | "none";
       label: string | null;
       prompt: string | null;
+      recipient_member_user_id: string | null;
       first_name: string | null;
       parent_display_name: string | null;
       email: string | null;
@@ -196,11 +211,13 @@ export async function claimDueFamilyTasks(options: {
         for update skip locked
       )
       returning s.id, s.family_id, s.kind, s.local_hour, s.weekdays,
-                s.delivery_pref, s.label, s.prompt
+                s.delivery_pref, s.label, s.prompt,
+                s.recipient_member_user_id
     )
     select claimed.id as schedule_id, claimed.kind, claimed.local_hour,
            claimed.weekdays, claimed.delivery_pref, claimed.label,
-           claimed.prompt, f.id as family_id, f.time_zone,
+           claimed.prompt, claimed.recipient_member_user_id,
+           f.id as family_id, f.time_zone,
            f.first_name, f.parent_display_name, f.email,
            coalesce(
              (select array_agg(p.phone_e164 order by p.created_at)
@@ -230,6 +247,7 @@ export async function claimDueFamilyTasks(options: {
     kidPhrase: row.child_names.length === 1 ? row.child_names[0] : "the kids",
     phoneNumbers: row.phone_numbers,
     email: row.email,
+    recipientMemberUserId: row.recipient_member_user_id,
   }));
 }
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getMyFamily } from "../../../lib/family";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import {
   createCustomTask,
   deleteCustomTask,
@@ -26,6 +27,16 @@ export interface TaskActionState {
 async function requireFamilyId(): Promise<string | null> {
   const family = await getMyFamily();
   return family?.id ?? null;
+}
+
+/** The signed-in adult creating the task, who becomes its one delivery
+ * recipient (founder ruling 2026-07-12). */
+async function callerUserId(): Promise<string | null> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
 }
 
 function parseTaskForm(formData: FormData): CustomTaskInput | { error: string } {
@@ -63,7 +74,7 @@ export async function createTaskAction(
   const parsed = parseTaskForm(formData);
   if ("error" in parsed) return { error: parsed.error };
 
-  const result = await createCustomTask(familyId, parsed, "parent");
+  const result = await createCustomTask(familyId, parsed, "parent", await callerUserId());
   if (!result.ok) return { error: result.note };
   revalidatePath("/app/tasks");
   return { error: null };
