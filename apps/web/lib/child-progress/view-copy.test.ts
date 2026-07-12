@@ -39,7 +39,7 @@ describe("live Progress copy", () => {
           state as Parameters<typeof progressTopicStateLabel>[0],
         )
       ),
-      ["Observed today", "Older", "Ask me later", "Please confirm"],
+      ["Shared today", "Shared earlier", "HOMA asks later", "Please confirm"],
     );
   });
 

@@ -2,16 +2,21 @@ import type {
   OpenProgressConflictView,
   ProgressDomainView,
 } from "../../lib/child-progress/types";
-import { ProgressTopicRow } from "./progress-topic-row";
+import {
+  ProgressTopicRow,
+  type ProgressConflictActions,
+} from "./progress-topic-row";
 
 export function ProgressDomain({
   domain,
   conflicts,
   timeZone,
+  conflictActions,
 }: {
   domain: ProgressDomainView;
   conflicts: readonly OpenProgressConflictView[];
   timeZone: string;
+  conflictActions?: ProgressConflictActions;
 }) {
   const headingId = `progress-domain-${domain.domainId}`;
 
@@ -32,6 +37,7 @@ export function ProgressDomain({
               (candidate) => candidate.itemId === topic.itemId,
             )}
             timeZone={timeZone}
+            {...(conflictActions ? { conflictActions } : {})}
           />
         ))}
       </ul>

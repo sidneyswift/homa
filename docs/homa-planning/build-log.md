@@ -3,6 +3,75 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · Progress tab rebuilt as the living report with a map
+
+Implements the founder-chosen refined direction in production code. The
+Progress page (`apps/web/components/progress/progress-view.tsx`) is now a bare
+header (freshness line, title, "Open the full report", and an in-page sibling
+switcher reusing the kid page's pattern, the founder's "include the kid
+switcher"), the report's own snapshot chart (`ReportSnapshot`, fed by the
+child_reports history already on `getAppData`), and a subject tile map. Tiles
+(`progress-map.tsx`) carry core's reviewed `subjectLine` badge vocabulary with
+kidPill tones, the dashboard's positive-only movement rule, a freshness line
+(quiet after 30 days, a call this log owns), and the existing "Please confirm"
+chip. Tapping a tile opens `progress-detail-panel.tsx`: a bottom sheet on
+phones, a right side panel on desktop, house dialog patterns (chart-lightbox
+focus trap, mobile-nav scrim and transform-only entrance), containing the
+unchanged domain and topic hierarchy plus two chat doors ("Sort it out with
+HOMA" on conflicted subjects, "Something look wrong? Tell HOMA about {child}"
+always). The stacked subject cards, the intro sentence, and the "Latest
+information" badge retired; `progress-subject.tsx` deleted.
+
+Inline conflict resolution shipped with the same change (founder ask): the
+panel's two saved answers are now tappable, posting to the new authenticated
+`POST /api/progress/conflict` route, which derives the family only from the
+session (auth-context law), requires an attributed member, and calls the same
+`resolveProgressConflict` service the agent uses (family-scoped lookup, member
+lock, idempotency claim, answer validated against the conflict's own evidence
+rows). Success refreshes the server view into the open panel; a closed-elsewhere
+conflict (409/404) also refreshes so the view carries the truth; a failure shows
+the copy-kit retry line and changes nothing. The panel's "Confirm with HOMA"
+chat door retired because the tap IS the confirm; the hint line reuses the
+report's "tap to..." pattern. The isolation guard passed live, including the
+cross-family child-progress conflict mutation probes.
+Verified: 112 progress UI tests (new `map-model.test.ts`,
+`progress-detail-panel.test.tsx`, and `resolve-conflict-request.test.ts` joined
+`check:progress-ui`), 270 ChildProgress tests, the live isolation guard, event
+parity, web typecheck, web lint, and the Next build.
+
+Both copy gates ran on the new strings. Reader gate accepted: "Shared earlier"
+replaces the ambiguous "Older" chip, "HOMA asks later" plus a new body line
+replaces "Ask me later" (whose turn), the conflict body no longer implies
+deletion ("Both answers stay saved; confirming picks which one fits today"),
+the confirm task carries one name ending in the "Confirm with HOMA" button,
+and the ask-later chip dropped gold so gold only ever means "waiting on you".
+Declined from that read: chart-internal labels (report-owned, gated earlier).
+Editor gate must-fixes applied: one freshness verb everywhere (the quiet tier
+keeps its gold dot but reads "Updated {date}", never "Last touched"), one chip
+verb pair ("Shared today" / "Shared earlier"), and the panel footer link now
+names its action standalone ("Tell HOMA something looks wrong"). Also applied:
+"Updated today" without the redundant date. Declined with reasons: renaming
+"Open the full report" (founder-named this morning), "Switch kid" (matches the
+kid page's existing shared pattern), and deduplicating "Both answers are
+saved." from the subject summary (reassurance stays adjacent to the first
+mention of the disagreement; anti-guilt ordering outranks craft repetition).
+
+## 2026-07-12 · Progress tab direction chosen: living report with a map (founder instruction)
+
+The founder compared four Progress-tab structures in the disposable lab
+(`docs/homa-planning/plans/2026-07-12-progress-tab-directions.html`) and chose
+the living report, refined as follows: no subtitle under the "{Child}'s
+progress" header, no note-from-Homa letter card, and subject tiles (the map
+direction's grid) instead of stacked subject cards. Tapping a tile opens that
+subject's domain and topic detail in a right-side panel on desktop and a
+bottom sheet on phone. The refined single-direction prototype is
+`docs/homa-planning/plans/2026-07-12-progress-tab-refined.html` (21 browser
+checks passed, zero console errors; conflict confirm and the "Something look
+wrong?" door live inside the panel, answering both reader-gate reviews).
+Prototype only: no production code changed yet. Copy inside the prototype is
+placeholder and must pass homa-copy-reviewer then homa-copy-editor when the
+production build lands.
+
 ## 2026-07-12 · Binder ships as a merged Direction 1 + Direction 2, first-release scope only
 
 Founder asked to implement "a mixture of view 1 and view 2" from

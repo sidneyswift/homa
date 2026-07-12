@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homa Progress tab directions · disposable comparison lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=EB+Garamond:ital@1&family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Homa Design System v3 tokens (docs/homa-design/tokens), hand-copied
+       for this disposable lab. Fonts fall back to system stacks offline. */
+    :root {
+      --stone-50: #FBF7F0; --stone-100: #F3ECE1; --stone-200: #E7DDCE;
+      --stone-300: #D6C8B4; --stone-400: #B3A492; --stone-500: #8A7D6C;
+      --stone-600: #6B6259; --stone-700: #4E463E; --stone-800: #332E29;
+      --stone-900: #221E1A;
+      --clay-50: #FFF0E8; --clay-100: #FFDDC9; --clay-200: #FFC5A3;
+      --clay-300: #FB9868; --clay-400: #F1793F; --clay-500: #E7602F;
+      --clay-600: #C44C22; --clay-700: #9C3B1B;
+      --sage-50: #EAF6EC; --sage-100: #D2ECD6; --sage-300: #8CCB97;
+      --sage-500: #3D9A50; --sage-600: #2F7C40; --sage-700: #275F34;
+      --gold-100: #FFF3C2; --gold-300: #FFE175; --gold-400: #FFD43B;
+      --gold-ink: #8A6410; --gold-ink-strong: #402E05;
+      --sky-100: #DDF3F9; --sky-300: #9FDCEC; --sky-500: #4FB4D6; --sky-600: #2E8CAD;
+      --pop-cobalt: #2743D0; --pop-navy: #23304F; --pop-blush: #F5A3B5;
+      --brand: var(--clay-500); --brand-soft: var(--clay-50);
+      --bg-page: var(--stone-50); --surface-raised: #FFFFFF;
+      --surface-sunken: var(--stone-100);
+      --text-strong: var(--stone-900); --text-body: var(--stone-800);
+      --text-muted: var(--stone-600); --text-subtle: var(--stone-500);
+      --border: var(--stone-300); --border-subtle: var(--stone-200);
+      --info-soft: var(--sky-100);
+      --accent-sage-soft: var(--sage-50);
+      --radius-md: 10px; --radius-lg: 16px; --radius-xl: 22px; --radius-pill: 999px;
+      --shadow-sm: 0 1px 3px rgba(51,42,33,.08), 0 1px 2px rgba(51,42,33,.04);
+      --shadow-md: 0 4px 10px rgba(51,42,33,.07), 0 2px 4px rgba(51,42,33,.05);
+      --shadow-lg: 0 12px 28px rgba(51,42,33,.10), 0 4px 10px rgba(51,42,33,.05);
+      --font-display: "Schibsted Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-sans: "Hanken Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-serif: "EB Garamond", Georgia, serif;
+      --font-wordmark: Fredoka, "Arial Rounded MT Bold", sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --ease-out: cubic-bezier(.22,.8,.28,1);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0; background: var(--bg-page); color: var(--text-body);
+      font-family: var(--font-sans); font-size: 16px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid rgba(241,121,63,.4); outline-offset: 2px; border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    .lab { max-width: 1180px; margin: 0 auto; padding: 26px clamp(14px, 3vw, 40px) 80px; }
+
+    /* ---------- header ---------- */
+    .lab-head h1 {
+      margin: 10px 0 0; font-family: var(--font-display); font-weight: 700;
+      font-size: clamp(1.6rem, 3.4vw, 2.3rem); letter-spacing: -.015em; color: var(--text-strong);
+    }
+    .lab-head .lede { max-width: 780px; margin: 10px 0 0; color: var(--text-muted); }
+    .fake-banner {
+      display: inline-flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px;
+      border: 1px solid var(--gold-300); background: var(--gold-100); color: var(--gold-ink-strong);
+      border-radius: var(--radius-md); padding: 9px 13px; font-size: .82rem; font-weight: 600;
+    }
+    .decision {
+      margin-top: 16px; border-left: 4px solid var(--clay-300); background: var(--surface-raised);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
+      box-shadow: var(--shadow-sm); max-width: 860px;
+    }
+    .decision strong { color: var(--text-strong); }
+
+    /* ---------- findings ---------- */
+    .findings { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 18px; }
+    .finding {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 12px 14px; box-shadow: var(--shadow-sm);
+      font-size: .88rem;
+    }
+    .finding b { display: block; color: var(--text-strong); margin-bottom: 3px; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); font-weight: 700; }
+
+    /* ---------- direction bar + toggles ---------- */
+    .controls {
+      position: sticky; top: 0; z-index: 40; margin: 26px -8px 0; padding: 10px 8px;
+      background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+      backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-subtle);
+    }
+    .direction-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .bar-label { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); margin-right: 2px; }
+    .direction-button {
+      border: 1px solid var(--border-subtle); background: var(--surface-raised);
+      border-radius: 12px; padding: 8px 12px; text-align: left; min-height: 44px;
+      transition: border-color .15s var(--ease-out), background .15s var(--ease-out);
+    }
+    .direction-button strong { display: block; font-size: .88rem; color: var(--text-strong); }
+    .direction-button small { display: block; color: var(--text-subtle); font-size: .68rem; }
+    .direction-button[aria-pressed="true"] { border-color: var(--clay-300); background: var(--clay-50); }
+    .direction-button[aria-pressed="true"] strong { color: var(--clay-700); }
+    .toggles { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+    .toggle-group { display: inline-flex; align-items: center; gap: 6px; }
+    .toggle-group .seg {
+      display: inline-flex; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+      background: var(--surface-raised); padding: 2px;
+    }
+    .seg button {
+      border: 0; background: transparent; border-radius: var(--radius-pill);
+      padding: 6px 12px; font-size: .8rem; font-weight: 600; color: var(--text-muted); min-height: 34px;
+    }
+    .seg button[aria-pressed="true"] { background: var(--stone-800); color: #fff; }
+
+    /* ---------- direction section ---------- */
+    .direction-head { margin: 26px 0 12px; }
+    .direction-head h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; color: var(--text-strong); letter-spacing: -.01em; }
+    .direction-head .philosophy { margin: 5px 0 0; color: var(--text-muted); max-width: 820px; }
+
+    /* ---------- stage: the app frame ---------- */
+    .stage {
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+      background: var(--bg-page); box-shadow: var(--shadow-lg); overflow: hidden;
+    }
+    .frame { display: flex; min-height: 620px; }
+    .rail {
+      width: 218px; flex-shrink: 0; margin: 14px; padding: 14px 12px;
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+      display: flex; flex-direction: column; gap: 2px; align-self: flex-start;
+      position: sticky; top: 76px;
+    }
+    .wordmark { display: inline-flex; align-items: center; gap: 7px; padding: 4px 8px 14px; }
+    .wordmark svg { display: block; }
+    .wordmark .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.28rem; color: var(--text-strong); display: inline-flex; }
+    .wordmark .word span { display: inline-block; }
+    .wordmark .word span:nth-child(1) { transform: translateY(-.06em) rotate(-3deg); }
+    .wordmark .word span:nth-child(2) { transform: translateY(.05em); }
+    .wordmark .word span:nth-child(3) { transform: translateY(-.04em) rotate(2deg); }
+    .wordmark .word span:nth-child(4) { transform: translateY(.06em) rotate(-2deg); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; border-radius: var(--radius-md);
+      padding: 10px 11px; font-size: .93rem; font-weight: 500; color: var(--text-muted);
+      background: transparent; border: 0; text-align: left; min-height: 44px;
+    }
+    .nav-item svg { color: var(--text-subtle); }
+    .nav-item.active { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .nav-item.active svg { color: var(--brand); }
+    .rail-section { margin-top: 16px; padding: 0 11px; font-family: var(--font-mono); font-size: .6rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+    .kid-row { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: var(--radius-md); font-size: .93rem; font-weight: 500; color: var(--text-muted); border: 0; background: transparent; text-align: left; min-height: 44px; }
+    .kid-row.active { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; flex-shrink: 0; }
+    .canvas { flex: 1; min-width: 0; padding: 26px clamp(16px, 3vw, 40px) 44px; }
+    .canvas-inner { max-width: 760px; margin: 0 auto; }
+
+    /* phone frame mode */
+    .stage.phone .frame { justify-content: center; background: var(--stone-100); padding: 22px 0; }
+    .stage.phone .rail { display: none; }
+    .stage.phone .canvas {
+      width: 390px; flex: none; background: var(--bg-page); padding: 0 0 40px;
+      border: 8px solid var(--stone-800); border-radius: 34px; overflow: hidden;
+      max-height: 780px; overflow-y: auto;
+    }
+    .stage.phone .canvas-inner { max-width: none; padding: 18px 16px 0; }
+    .phone-bar { display: none; }
+    .stage.phone .phone-bar {
+      display: flex; position: sticky; top: 0; z-index: 5; align-items: center; justify-content: space-between;
+      height: 54px; padding: 0 12px; background: color-mix(in srgb, var(--bg-page) 95%, transparent);
+      border-bottom: 1px solid var(--border-subtle); backdrop-filter: blur(4px);
+    }
+    .phone-bar .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.2rem; color: var(--text-strong); }
+
+    /* ---------- shared page pieces ---------- */
+    .eyebrow {
+      display: inline-flex; border-radius: var(--radius-pill); background: var(--accent-sage-soft);
+      color: var(--sage-700); padding: 6px 12px; font-family: var(--font-mono);
+      font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .page-title { margin: 12px 0 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.55rem, 3vw, 2.05rem); letter-spacing: -.015em; color: var(--text-strong); line-height: 1.15; }
+    .page-sub { margin: 8px 0 0; color: var(--text-muted); font-size: .95rem; max-width: 560px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px; border-radius: var(--radius-pill);
+      padding: 4px 10px; font-size: .78rem; font-weight: 700; white-space: nowrap;
+    }
+    .pill.today { background: var(--accent-sage-soft); color: var(--sage-700); }
+    .pill.older { background: var(--info-soft); color: var(--pop-navy); }
+    .pill.confirm { background: var(--gold-100); color: var(--gold-ink); }
+    .pill.ahead { background: var(--accent-sage-soft); color: var(--sage-700); }
+    .pill.atage { background: var(--stone-100); color: var(--stone-700); }
+    .pill.growing { background: var(--sky-100); color: var(--sky-600); }
+    .pill.move { background: var(--gold-100); color: var(--gold-ink); }
+    .mono { font-family: var(--font-mono); }
+    .card {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 44px; padding: 9px 18px; border-radius: var(--radius-pill);
+      font-size: .9rem; font-weight: 600; border: 1px solid transparent;
+      transition: background .15s var(--ease-out), border-color .15s var(--ease-out);
+    }
+    .btn.primary { background: var(--clay-400); color: #fff; }
+    .btn.primary:hover { background: var(--clay-600); }
+    .btn.secondary { background: var(--surface-raised); border-color: var(--border); color: var(--text-strong); }
+    .btn.secondary:hover { border-color: var(--brand); }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .answer-chip {
+      border: 1px solid var(--border); background: var(--surface-raised); color: var(--text-strong);
+      border-radius: var(--radius-pill); padding: 8px 15px; font-size: .87rem; font-weight: 600; min-height: 42px;
+    }
+    .answer-chip:hover { border-color: var(--brand); }
+    .answer-chip[aria-pressed="true"], .answer-chip.picked { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .toast {
+      position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+      background: var(--stone-800); color: #fff; border-radius: var(--radius-pill);
+      padding: 10px 18px; font-size: .88rem; font-weight: 600; box-shadow: var(--shadow-lg);
+      z-index: 90; max-width: min(520px, 88vw); text-align: center;
+    }
+    .sim-note { font-size: .74rem; color: var(--text-subtle); font-style: italic; }
+
+    /* note from Homa */
+    .note-card { padding: 20px 22px; }
+    .note-card .greeting { font-family: var(--font-serif); font-style: italic; font-size: 1.12rem; color: var(--text-strong); margin: 0; }
+    .note-card p { margin: 9px 0 0; }
+    .note-card .signoff { margin-top: 12px; font-family: var(--font-caveat, Caveat, cursive); font-size: 1.25rem; color: var(--clay-600); }
+
+    /* chart */
+    .chart-card { padding: 16px 18px; }
+    .chart-card .caption { margin: 0 0 4px; font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+    .chart-card .explain { margin: 0 0 10px; font-size: .85rem; color: var(--text-muted); }
+    .chart-wrap { background: var(--surface-sunken); border-radius: var(--radius-md); padding: 10px; overflow-x: auto; }
+    .chart-wrap svg { display: block; width: 100%; height: auto; min-width: 420px; }
+
+    /* subject accordion (D1, D2 index) */
+    .subject-acc { overflow: hidden; }
+    .subject-acc + .subject-acc { margin-top: 12px; }
+    .subject-head {
+      display: flex; width: 100%; align-items: center; gap: 12px; padding: 15px 18px;
+      background: transparent; border: 0; text-align: left; min-height: 56px;
+    }
+    .subject-head .s-name { font-family: var(--font-display); font-weight: 600; font-size: 1.12rem; color: var(--text-strong); }
+    .subject-head .s-meta { font-size: .8rem; color: var(--text-subtle); margin-top: 1px; }
+    .subject-head .spacer { flex: 1; }
+    .chev { transition: transform .18s var(--ease-out); color: var(--text-subtle); flex-shrink: 0; }
+    .subject-acc.open .chev { transform: rotate(180deg); }
+    .subject-body { display: none; border-top: 1px dashed var(--border-subtle); padding: 14px 18px 18px; }
+    .subject-acc.open .subject-body { display: block; }
+    .domain-label { font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); margin: 14px 0 8px; }
+    .domain-label:first-child { margin-top: 0; }
+    .topic-line { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--stone-100); }
+    .topic-line:last-child { border-bottom: 0; }
+    .topic-line .t-statement { flex: 1; font-size: .93rem; color: var(--text-body); }
+    .topic-line .t-answer { font-weight: 700; color: var(--text-strong); font-size: .9rem; white-space: nowrap; }
+    .topic-line .t-date { font-family: var(--font-mono); font-size: .72rem; color: var(--text-subtle); white-space: nowrap; }
+
+    /* feed (D2) */
+    .feed-item { padding: 16px 18px; }
+    .feed-item + .feed-item { margin-top: 12px; }
+    .feed-kicker { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 8px; }
+    .conflict-grid { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin: 12px 0; }
+    .conflict-answer { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 11px 13px; background: var(--bg-page); }
+    .conflict-answer .who { font-size: .8rem; font-weight: 700; color: var(--text-strong); }
+    .conflict-answer .what { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--text-strong); margin-top: 2px; }
+    .conflict-answer .when { font-family: var(--font-mono); font-size: .7rem; color: var(--text-subtle); margin-top: 3px; }
+    .index-row {
+      display: flex; width: 100%; align-items: center; gap: 12px; padding: 12px 16px;
+      border: 0; background: transparent; text-align: left; min-height: 52px;
+      border-bottom: 1px solid var(--stone-100);
+    }
+    .index-row:last-child { border-bottom: 0; }
+    .index-row .s-name { font-weight: 700; color: var(--text-strong); font-size: .95rem; }
+    .index-row .s-line { font-size: .8rem; color: var(--text-muted); }
+    .fresh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .fresh-dot.today { background: var(--sage-500); }
+    .fresh-dot.recent { background: var(--stone-300); }
+    .fresh-dot.stale { background: var(--gold-400); }
+
+    /* map (D3) */
+    .tile-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); }
+    .stage.phone .tile-grid { grid-template-columns: 1fr 1fr; }
+    .tile {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+      padding: 13px 14px; text-align: left; border: 1px solid var(--border-subtle);
+      background: var(--surface-raised); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      min-height: 104px; transition: border-color .15s var(--ease-out);
+    }
+    .tile:hover { border-color: var(--clay-300); }
+    .tile[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); }
+    .tile .t-name { font-weight: 700; color: var(--text-strong); font-size: .92rem; line-height: 1.2; }
+    .tile .t-badge { margin-top: auto; }
+    .tile .t-fresh { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .66rem; color: var(--text-subtle); }
+    .map-detail { margin-top: 14px; padding: 18px; }
+
+    /* desk (D4) */
+    .desk-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .stage.phone .desk-grid { grid-template-columns: 1fr; }
+    .desk-summary { padding: 18px 20px; align-self: start; }
+    .desk-summary h3, .queue h3 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; color: var(--text-strong); }
+    .desk-summary .stat-line { font-family: var(--font-mono); font-size: .72rem; color: var(--text-subtle); margin-bottom: 10px; }
+    .desk-summary p { margin: 8px 0 0; font-size: .92rem; }
+    .queue-item { padding: 16px 18px; }
+    .queue-item + .queue-item { margin-top: 12px; }
+    .queue-item .q-why { font-size: .78rem; color: var(--text-subtle); margin-top: 8px; }
+    .done-line { display: flex; align-items: center; gap: 8px; color: var(--sage-700); font-weight: 600; font-size: .9rem; }
+
+    /* ---------- critique blocks ---------- */
+    .direction-review {
+      display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start; margin-top: 14px; background: var(--surface-raised);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      padding: 16px 18px; box-shadow: var(--shadow-sm);
+    }
+    .steal-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+    .steal-chip {
+      border: 1px solid var(--border-subtle); background: var(--bg-page); color: var(--text-body);
+      border-radius: var(--radius-pill); padding: 7px 13px; font-size: .8rem; font-weight: 600; min-height: 38px;
+    }
+    .steal-chip[aria-pressed="true"] { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .skip-line { margin-top: 10px; font-size: .84rem; color: var(--text-muted); }
+    .skip-line b { color: var(--gold-ink); font-family: var(--font-mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+    .winner-button {
+      border: 1px solid var(--brand); background: var(--brand); color: #fff;
+      border-radius: var(--radius-pill); padding: 10px 18px; font-weight: 700; font-size: .88rem;
+      white-space: nowrap; min-height: 44px;
+    }
+    .winner-button[aria-pressed="true"] { background: var(--sage-600); border-color: var(--sage-600); }
+    .review-label { font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+
+    /* ---------- questions & reply ---------- */
+    .questions { margin-top: 40px; }
+    .q-card { padding: 16px 18px; margin-top: 12px; }
+    .q-card h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--text-strong); }
+    .q-card .q-why { margin: 5px 0 10px; font-size: .85rem; color: var(--text-muted); }
+    .q-card .rec { font-family: var(--font-mono); font-size: .64rem; color: var(--sage-700); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-left: 6px; }
+    .notes-area { width: 100%; min-height: 90px; margin-top: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 14px; font: inherit; background: var(--surface-raised); resize: vertical; }
+    .reply-box { background: var(--stone-800); color: var(--stone-100); border-radius: var(--radius-lg); padding: 16px 18px; margin-top: 12px; }
+    .reply-box pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: .8rem; line-height: 1.55; }
+    .section-h { margin: 44px 0 4px; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; color: var(--text-strong); }
+    .section-sub { margin: 4px 0 0; color: var(--text-muted); max-width: 780px; }
+
+    .wiring { margin-top: 40px; border-top: 1px solid var(--border-subtle); padding-top: 18px; font-size: .86rem; color: var(--text-muted); }
+    .wiring code { font-family: var(--font-mono); font-size: .78rem; background: var(--stone-100); border-radius: 5px; padding: 1px 5px; color: var(--stone-700); }
+    .wiring h2 { font-size: 1.05rem; color: var(--text-strong); font-family: var(--font-display); }
+    .wiring ul { padding-left: 20px; }
+    .wiring li { margin: 4px 0; }
+
+    @media (max-width: 860px) {
+      .frame { flex-direction: column; }
+      .rail { display: none; }
+      .direction-review { grid-template-columns: 1fr; }
+      .conflict-grid { grid-template-columns: 1fr; }
+      .desk-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="lab">
+
+  <header class="lab-head">
+    <span class="eyebrow">Comparison lab · first round</span>
+    <h1>What should the Progress tab feel like?</h1>
+    <p class="lede">Four genuinely different structures for the signed-in Progress page, all showing the same fake family, so you can judge the shape of the product instead of the paint. Use the toggles to feel each one on a laptop and a phone, and with one kid or the whole family.</p>
+    <p class="fake-banner">
+      <span>Every person, record, and number here is fake.</span>
+      <span>No real family data is loaded.</span>
+      <span>No product code or route was changed.</span>
+    </p>
+    <div class="decision">
+      <strong>The core decision:</strong> when a mom taps Progress in a stolen five-minute window, what is the FIRST thing the page does for her: read like a letter (report), tell her what changed (front page), show her the whole map (grid), or hand her the next step (desk)?
+      <br><span class="sim-note">Core task held constant in every direction: see where Maya stands, notice what changed today, settle the scissors disagreement, and keep her check-in going.</span>
+    </div>
+  </header>
+
+  <section class="findings" aria-label="Project findings">
+    <div class="finding"><b>Locked hierarchy</b>Subject, then domain, then topic (founder ruling, subject-domain-topic-taxonomy). Every direction keeps it.</div>
+    <div class="finding"><b>Anti-guilt laws</b>No red, no "behind", drops never render as down-arrows, siblings never compared on one axis. All four directions obey them.</div>
+    <div class="finding"><b>Agent-led ruling</b>The agent is the preferred surface and Progress is one live view (agent-led-live-progress). Directions differ in HOW MUCH acting happens here versus in chat.</div>
+    <div class="finding"><b>Data already exists</b>Months-ahead scores, check-in history, movement, conflicts, and the trajectory chart all exist server-side today. Nothing shown here needs new measurement, only new layout.</div>
+  </section>
+
+  <nav class="controls" aria-label="Direction and view controls">
+    <div class="direction-bar" role="group" aria-label="Choose a direction to preview">
+      <span class="bar-label">Compare</span>
+      <button class="direction-button" data-dir="report" aria-pressed="true"><strong>1 · The living report</strong><small>the report she trusts, always current</small></button>
+      <button class="direction-button" data-dir="front" aria-pressed="false"><strong>2 · The front page</strong><small>what changed since you last looked</small></button>
+      <button class="direction-button" data-dir="map" aria-pressed="false"><strong>3 · The map</strong><small>every subject on one screen</small></button>
+      <button class="direction-button" data-dir="desk" aria-pressed="false"><strong>4 · Homa's desk</strong><small>Homa leads, you answer here</small></button>
+    </div>
+    <div class="toggles">
+      <span class="toggle-group"><span class="bar-label">Viewing</span>
+        <span class="seg" role="group" aria-label="Scope">
+          <button data-scope="maya" aria-pressed="true">Maya</button>
+          <button data-scope="family" aria-pressed="false">Whole family</button>
+        </span>
+      </span>
+      <span class="toggle-group"><span class="bar-label">Frame</span>
+        <span class="seg" role="group" aria-label="Device frame">
+          <button data-frame="desktop" aria-pressed="true">Laptop</button>
+          <button data-frame="phone" aria-pressed="false">Phone 390</button>
+        </span>
+      </span>
+    </div>
+  </nav>
+
+  <section id="direction-host"></section>
+
+  <section class="questions" aria-label="Build-changing questions">
+    <h2 class="section-h">Five questions that change the build</h2>
+    <p class="section-sub">Each answer changes routes, data loading, or component architecture, not just styling. Pick what feels right; the reply below assembles itself.</p>
+    <div id="questions-host"></div>
+  </section>
+
+  <section aria-label="Notes and reply">
+    <h2 class="section-h">Your notes</h2>
+    <p class="section-sub">Anything the chips could not say: what you would show a friend, what made you wince, what is missing.</p>
+    <textarea id="notes" class="notes-area" placeholder="Type freely. This lands in the reply below."></textarea>
+
+    <h2 class="section-h">Assembled reply</h2>
+    <p class="section-sub">Copy this and paste it back into chat. It updates as you pick.</p>
+    <div class="reply-box"><pre id="reply-text"></pre></div>
+    <p style="margin-top:12px"><button class="btn primary" id="copy-reply">Copy the reply</button> <span id="copy-status" class="sim-note" role="status"></span></p>
+  </section>
+
+  <footer class="wiring">
+    <h2>Wiring note (for the build after you choose)</h2>
+    <p>No real application code was touched by this lab. Likely integration paths, verified in the repository:</p>
+    <ul>
+      <li>Route and page: <code>apps/web/app/app/[childId]/progress/page.tsx</code> stays the entry; the index resolver <code>apps/web/app/app/progress/page.tsx</code> already picks the focused kid. A family-overview answer to question 4 would add a family variant at the index instead of redirecting.</li>
+      <li>Components to evolve or replace: <code>apps/web/components/progress/progress-view.tsx</code>, <code>progress-subject.tsx</code>, <code>progress-domain.tsx</code>, <code>progress-topic-row.tsx</code>. View copy lives in <code>apps/web/lib/child-progress/view-copy.ts</code>.</li>
+      <li>Chart: port <code>apps/web/app/onboarding/r/[token]/report-trajectory.tsx</code> (server-rendered SVG, no client JS) behind a Progress-page card; history comes from the existing report history and ChildProgress snapshots.</li>
+      <li>Months-ahead and movement: <code>packages/core/src/map/scoring.ts</code> (<code>MapScores</code>, already in <code>ChildProgressView.scores</code>) and the movement helpers in <code>apps/web/components/dashboard/movement.ts</code>.</li>
+      <li>Inline answers (question 3): check-ins are durable server workflows in <code>apps/web/lib/child-progress/check-in-service.ts</code> with web as an existing channel; a Progress-page answer would need a small authenticated route that calls the same service (no schema change, tenant isolation guard required before shipping).</li>
+      <li>Conflict resolution inline: same service surface; the conflict card data already exists (<code>ProgressConflictCard</code> in <code>apps/web/lib/child-progress/types.ts</code>).</li>
+      <li>Design tokens: <code>apps/web/app/globals.css</code> (hand-copied DS v3 until <code>packages/design</code>, ticket M1-17).</li>
+    </ul>
+    <p>Reuse versus new: everything above the fold in directions 1 and 3 is reuse plus layout. Direction 2's feed needs a new "changes since last visit" read (a projection over existing evidence rows, additive, no migration). Direction 4's inline queue is the only one that adds a write path from this page; it reuses the check-in service but needs the new route, idempotency, and an isolation-guard pass. No schema changes anywhere.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ */
+/* Fake dataset: one family, reused by every direction. All fake.     */
+/* ------------------------------------------------------------------ */
+const FAMILY = {
+  parent: "Elena",
+  kids: [
+    {
+      id: "maya", name: "Maya", age: "4 yrs 4 mo", avatarBg: "var(--clay-100)", avatarInk: "var(--clay-700)",
+      stats: { subjects: 8, observations: 21, updated: "Jul 12" },
+      note: {
+        greeting: "Elena,",
+        body: [
+          "Maya had a busy stretch. Phonics is her standout right now: she is working about 18 months past what is typical for her age, and it showed up again in Tuesday's letter game.",
+          "Counting past 20 is close. She got to 23 with you on the porch, so it is marked getting there, not done. That is honest, not slow.",
+          "If you have ten minutes today, the check-in has two quick questions left about adding with fingers and drawing a person."
+        ],
+        signoff: "Homa"
+      },
+      subjects: [
+        { id: "phonics", name: "Phonics", badge: { kind: "ahead", months: 18 }, obs: 4, last: "Jul 10", fresh: "recent", state: "older", move: "+2 mo since June",
+          domains: [ { name: "Letters & sounds", topics: [
+            { s: "Names most letter sounds when shown the letter", a: "Easily", d: "Jul 10", chip: "older" },
+            { s: "Claps out syllables in family names", a: "Easily", d: "Jul 10", chip: "older" } ] } ] },
+        { id: "science", name: "Science", badge: { kind: "ahead", months: 15 }, obs: 2, last: "Jun 28", fresh: "stale", state: "older", move: null,
+          domains: [ { name: "Curiosity & inquiry", topics: [
+            { s: "Asks testable why questions about the yard", a: "Easily", d: "Jun 28", chip: "older" } ] } ] },
+        { id: "literacy", name: "Literacy", badge: { kind: "ahead", months: 9 }, obs: 2, last: "Jul 5", fresh: "recent", state: "older", move: null,
+          domains: [ { name: "Letters & sounds", topics: [
+            { s: "Recognizes most uppercase letters", a: "Easily", d: "Jul 5", chip: "older" } ] } ] },
+        { id: "math", name: "Math", badge: { kind: "ahead", months: 8 }, obs: 5, last: "Jul 12", fresh: "today", state: "updated", move: "+1 mo since June",
+          domains: [
+            { name: "Counting & cardinality", topics: [
+              { s: "Counts past 20 without getting stuck", a: "Getting there", d: "Jul 12", chip: "today" },
+              { s: "Counts out loud to 10 without skipping numbers", a: "Easily", d: "Jul 8", chip: "older" },
+              { s: "Counts 5 objects one at a time and says how many", a: "Easily", d: "Jul 8", chip: "older" } ] },
+            { name: "Addition & subtraction", topics: [
+              { s: "Adds small numbers using fingers or objects", a: null, d: null, chip: "ask" } ] } ] },
+        { id: "finemotor", name: "Fine motor", badge: { kind: "ahead", months: 3 }, obs: 3, last: "Jul 11", fresh: "recent", state: "conflict", move: null,
+          domains: [ { name: "Hand skills", topics: [
+            { s: "Uses scissors to cut along a line", a: null, d: "Jul 11", chip: "confirm" },
+            { s: "Holds a crayon with a steady grip", a: "Easily", d: "Jul 2", chip: "older" } ] } ] },
+        { id: "socem", name: "Social-emotional", badge: { kind: "atage" }, obs: 2, last: "Jul 2", fresh: "recent", state: "older", move: null,
+          domains: [ { name: "Feelings & friends", topics: [
+            { s: "Names how she feels when she is upset", a: "Getting there", d: "Jul 2", chip: "older" } ] } ] },
+        { id: "grossmotor", name: "Gross motor", badge: { kind: "ahead", months: 3 }, obs: 1, last: "Jun 20", fresh: "stale", state: "older", move: null,
+          domains: [ { name: "Big movement", topics: [
+            { s: "Hops on one foot a few times in a row", a: "Easily", d: "Jun 20", chip: "older" } ] } ] },
+        { id: "selfcare", name: "Self-care", badge: { kind: "growing" }, obs: 1, last: "Jun 15", fresh: "stale", state: "older", move: null,
+          next: "Buttons a shirt by herself is the next step.",
+          domains: [ { name: "Everyday independence", topics: [
+            { s: "Puts her own shoes on the right feet", a: "Getting there", d: "Jun 15", chip: "older" } ] } ] }
+      ],
+      conflict: {
+        subject: "Fine motor", statement: "Uses scissors to cut along a line",
+        a: { who: "Elena", what: "Easily", when: "Conversation · Jul 9" },
+        b: { who: "Jordan", what: "Not yet", when: "Check-in · Jul 11" }
+      },
+      checkin: [
+        { q: "Does Maya add small numbers using her fingers or objects?", subject: "Math" },
+        { q: "Does Maya draw a person with a head, body, arms, and legs?", subject: "Art & creative" }
+      ],
+      chart: {
+        dates: ["Apr 29", "May 20", "Jun 10", "Jul 1"],
+        series: [
+          { name: "Phonics", color: "var(--pop-navy)", values: [0, 10, 14, 18] },
+          { name: "Science", color: "var(--sage-600)", values: [0, 8, 12, 15] },
+          { name: "Literacy", color: "var(--sky-600)", values: [0, 4, 7, 9] },
+          { name: "Math", color: "var(--pop-cobalt)", values: [0, 3, 6, 8] }
+        ]
+      }
+    },
+    {
+      id: "leo", name: "Leo", age: "7 yrs 1 mo", avatarBg: "var(--sky-100)", avatarInk: "var(--sky-600)",
+      stats: { subjects: 6, observations: 14, updated: "Jul 11" },
+      note: {
+        greeting: "Elena,",
+        body: [
+          "Leo finished his first full chapter book read-aloud this week, and retold the plot without prompting. Reading is about 12 months past typical.",
+          "Writing is the growing edge: he has ideas faster than his hand keeps up. The next step is one full sentence with a capital and a period."
+        ],
+        signoff: "Homa"
+      },
+      subjects: [
+        { id: "reading", name: "Reading", badge: { kind: "ahead", months: 12 }, obs: 5, last: "Jul 11", fresh: "today", state: "updated", move: "+2 mo since June",
+          domains: [ { name: "Fluency & meaning", topics: [
+            { s: "Reads a full chapter aloud and retells the plot", a: "Easily", d: "Jul 11", chip: "today" } ] } ] },
+        { id: "math", name: "Math", badge: { kind: "ahead", months: 6 }, obs: 4, last: "Jul 9", fresh: "recent", state: "older", move: null,
+          domains: [ { name: "Addition & subtraction", topics: [
+            { s: "Adds two-digit numbers on paper", a: "Getting there", d: "Jul 9", chip: "older" } ] } ] },
+        { id: "writing", name: "Writing", badge: { kind: "growing" }, obs: 2, last: "Jul 3", fresh: "recent", state: "older", move: null,
+          next: "One full sentence with a capital and a period is the next step.",
+          domains: [ { name: "Putting ideas down", topics: [
+            { s: "Writes a full sentence with a capital and a period", a: "Not yet", d: "Jul 3", chip: "older" } ] } ] },
+        { id: "science", name: "Science", badge: { kind: "atage" }, obs: 3, last: "Jun 30", fresh: "stale", state: "older", move: null,
+          domains: [ { name: "Curiosity & inquiry", topics: [
+            { s: "Explains what made his volcano experiment fizz", a: "Easily", d: "Jun 30", chip: "older" } ] } ] }
+      ],
+      conflict: null,
+      checkin: [ { q: "Does Leo tell time to the half hour on a clock with hands?", subject: "Math" } ],
+      chart: {
+        dates: ["Apr 29", "May 20", "Jun 10", "Jul 1"],
+        series: [
+          { name: "Reading", color: "var(--pop-navy)", values: [0, 6, 9, 12] },
+          { name: "Math", color: "var(--pop-cobalt)", values: [0, 3, 5, 6] }
+        ]
+      }
+    }
+  ]
+};
+
+/* ------------------------------------------------------------------ */
+/* Lab state                                                           */
+/* ------------------------------------------------------------------ */
+const state = {
+  dir: "report",
+  scope: "maya",
+  frame: "desktop",
+  winner: null,
+  steals: new Set(),
+  answers: {},
+  notes: "",
+  sim: {}
+};
+
+const DIRECTIONS = {
+  report: {
+    name: "The living report",
+    philosophy: "Optimizes trust and calm: the page IS the report she already loves, permanently current. Bets that the letter plus the chart is the mental model, and that actions belong in chat.",
+    steals: [
+      "A short note from Homa at the top, written like a letter",
+      "The months-ahead chart with plain end labels, no legend",
+      "Subjects collapsed to one honest line until tapped",
+      "Positive-only movement chips with dates"
+    ],
+    skip: "Heavy first paint on a phone: the letter and chart push today's actual change below the fold, and a quiet week reads the same as a busy one."
+  },
+  front: {
+    name: "The front page",
+    philosophy: "Optimizes the repeat visit: what changed since you last looked comes first, everything else is an index. Bets that after week one, Progress is a news page, not an encyclopedia.",
+    steals: [
+      "A 'since you last looked' header that counts the changes",
+      "The disagreement resolved inline with both answers named",
+      "The check-in continues right on the page",
+      "One-line subject index with freshness dots"
+    ],
+    skip: "On a quiet week the feed is nearly empty and the page feels like it is nagging; the whole-map answer to 'where does she stand' is a second tap away."
+  },
+  map: {
+    name: "The map",
+    philosophy: "Optimizes the three-second scan: every subject as one tile on one screen, detail on demand. Bets that 'where does she stand everywhere' is the question Progress exists to answer.",
+    steals: [
+      "Whole map on one screen with no scrolling on desktop",
+      "Tile badge language: '+18 mo', 'at age', 'growing', never a number below zero",
+      "Freshness dot per tile that says when it was last touched",
+      "Drill-in keeps subject, domain, topic order"
+    ],
+    skip: "A wall of tiles with numbers is one squint away from a gradebook, the thing that tightens her chest; and on a phone the grid loses its one-screen magic."
+  },
+  desk: {
+    name: "Homa's desk",
+    philosophy: "Optimizes the five stolen minutes: Homa puts the one next thing on top and she answers without leaving. Bets on the agent-led ruling all the way: Progress is a conversation surface shaped like a page.",
+    steals: [
+      "One next thing on top, never a pile",
+      "Answer chips that match the check-in answers exactly",
+      "A 'why Homa asks this' line under each question",
+      "The picture and the actions side by side on desktop"
+    ],
+    skip: "The page becomes a chores list: reading the full picture takes extra taps, and inline answers are the only direction that needs a new write path from this page."
+  }
+};
+
+const QUESTIONS = [
+  { id: "chart", label: "Chart on Progress",
+    why: "Changes what the page loads (score history and snapshots) and how heavy first paint is on a phone.",
+    options: ["No chart here, it stays in the full report", "Collapsed: a 'See the chart' card that opens it", "Hero: the chart sits at the top like the report"],
+    recommended: 1,
+    recWhy: "the founder kept the chart as the piece that earns its spot in the report, and it is the part you said you missed" },
+  { id: "default", label: "Default state on open",
+    why: "Pure information architecture: what she sees in the first three seconds.",
+    options: ["Everything expanded (today's build)", "Subjects collapsed to one-line summaries", "What changed first, everything else collapsed"] },
+  { id: "actions", label: "Acting from Progress",
+    why: "Anything inline needs a new authenticated write route through the existing check-in service, plus an isolation-guard pass.",
+    options: ["Read-only, every action goes to chat", "Confirmations only: disagreements settle inline", "Full inline: conflicts and check-in answers save from this page"] },
+  { id: "scope", label: "Family scope",
+    why: "Changes routes: today /app/progress redirects to one kid. A family overview is a new page, not a redirect.",
+    options: ["Always one kid, the switcher picks", "Family overview first, tap a kid to go deeper", "Both: family overview at /app/progress, kid pages below it"] },
+  { id: "freshness", label: "Freshness language",
+    why: "Changes the projection's view copy and how loud staleness is on every card.",
+    options: ["A chip on every card (today's OLDER build)", "One 'last updated' line per subject, cards drop the chips", "Only flag information older than 30 days"] }
+];
+
+/* ------------------------------------------------------------------ */
+/* Tiny helpers                                                        */
+/* ------------------------------------------------------------------ */
+function el(html) {
+  const t = document.createElement("template");
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+function badgeHtml(badge) {
+  if (badge.kind === "ahead") return '<span class="pill ahead">+' + badge.months + " mo ahead</span>";
+  if (badge.kind === "atage") return '<span class="pill atage">Right at age</span>';
+  return '<span class="pill growing">Growing</span>';
+}
+function chipHtml(chip) {
+  if (chip === "today") return '<span class="pill today mono" style="font-size:.66rem;letter-spacing:.08em">OBSERVED TODAY</span>';
+  if (chip === "older") return '<span class="pill older mono" style="font-size:.66rem;letter-spacing:.08em">OLDER</span>';
+  if (chip === "ask") return '<span class="pill confirm mono" style="font-size:.66rem;letter-spacing:.08em">ASK ME LATER</span>';
+  return '<span class="pill confirm mono" style="font-size:.66rem;letter-spacing:.08em">PLEASE CONFIRM</span>';
+}
+function stateChip(subject) {
+  if (subject.state === "updated") return '<span class="pill today">Updated today</span>';
+  if (subject.state === "conflict") return '<span class="pill confirm">Please confirm</span>';
+  return '<span class="pill older">Older information</span>';
+}
+function freshDot(fresh) { return '<span class="fresh-dot ' + fresh + '" aria-hidden="true"></span>'; }
+function freshWord(subject) {
+  if (subject.fresh === "today") return "updated today";
+  if (subject.fresh === "stale") return "last touched " + subject.last;
+  return "updated " + subject.last;
+}
+
+let toastTimer = null;
+function toast(msg) {
+  document.querySelectorAll(".toast").forEach((t) => t.remove());
+  const node = el('<div class="toast" role="status">' + esc(msg) + "</div>");
+  document.body.appendChild(node);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.remove(), 3200);
+}
+
+/* Trajectory chart as inline SVG: at-age baseline, direct end labels,
+   no legend, no negative numbers, cap +24. */
+function chartSvg(kid) {
+  const W = 560, H = 230, L = 46, R = 92, T = 18, B = 30;
+  const pw = W - L - R, ph = H - T - B, max = 24;
+  const xs = kid.chart.dates.map((_, i) => L + (pw * i) / (kid.chart.dates.length - 1 + 0.9));
+  const todayX = L + pw * 0.94;
+  const y = (v) => T + ph - (Math.min(v, max) / max) * ph;
+  let out = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Months ahead by subject over the last four check-ins">';
+  [0, 12, 24].forEach((g) => {
+    out += '<line x1="' + L + '" y1="' + y(g) + '" x2="' + (W - R + 40) + '" y2="' + y(g) + '" stroke="var(--stone-200)" stroke-width="1"/>';
+    out += '<text x="' + (L - 8) + '" y="' + (y(g) + 4) + '" text-anchor="end" font-size="11" font-family="var(--font-mono)" fill="var(--stone-500)">' + (g === 0 ? "At age" : "+" + g + " mo") + "</text>";
+  });
+  out += '<line x1="' + todayX + '" y1="' + T + '" x2="' + todayX + '" y2="' + (T + ph) + '" stroke="var(--stone-300)" stroke-width="1" stroke-dasharray="3 4"/>';
+  out += '<text x="' + todayX + '" y="' + (T + ph + 16) + '" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--stone-500)">today</text>';
+  kid.chart.dates.forEach((d, i) => {
+    out += '<text x="' + xs[i] + '" y="' + (T + ph + 16) + '" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--stone-400)">' + d + "</text>";
+  });
+  kid.chart.series.forEach((s) => {
+    const pts = s.values.map((v, i) => xs[i] + "," + y(v)).join(" ");
+    out += '<polyline points="' + pts + '" fill="none" stroke="' + s.color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+    s.values.forEach((v, i) => {
+      out += '<circle cx="' + xs[i] + '" cy="' + y(v) + '" r="3.4" fill="var(--surface-raised)" stroke="' + s.color + '" stroke-width="2"/>';
+    });
+    const endY = y(s.values[s.values.length - 1]);
+    out += '<text x="' + (xs[xs.length - 1] + 10) + '" y="' + (endY + 4) + '" font-size="11.5" font-weight="700" font-family="var(--font-sans)" fill="' + s.color + '">' + esc(s.name) + " +" + s.values[s.values.length - 1] + "</text>";
+  });
+  return out + "</svg>";
+}
+
+function railHtml(activeKidId) {
+  const kidRows = FAMILY.kids.map((k, i) =>
+    '<button class="kid-row' + (state.scope !== "family" && k.id === activeKidId ? " active" : "") + '" tabindex="-1">' +
+    '<span class="avatar" style="width:26px;height:26px;font-size:.72rem;background:' + k.avatarBg + ";color:" + k.avatarInk + '">' + k.name[0] + "</span>" + esc(k.name) + "</button>"
+  ).join("");
+  return (
+    '<div class="rail" aria-hidden="true">' +
+    '<span class="wordmark"><svg width="24" height="24" viewBox="0 0 48 48"><path d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z" fill="var(--brand)"/><circle cx="17.4" cy="26" r="4.8" fill="#fff"/><circle cx="30.6" cy="26" r="4.8" fill="#fff"/><circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A"/><circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A"/></svg>' +
+    '<span class="word"><span>H</span><span>o</span><span>m</span><span>a</span></span></span>' +
+    '<button class="nav-item" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>Ask</button>' +
+    '<button class="nav-item active" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Progress</button>' +
+    '<button class="nav-item" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>Planner</button>' +
+    '<button class="nav-item" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>Tasks</button>' +
+    '<div class="rail-section">Viewing</div>' +
+    '<button class="kid-row' + (state.scope === "family" ? " active" : "") + '" tabindex="-1"><span class="avatar" style="width:26px;height:26px;background:var(--stone-100);color:var(--stone-600)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Whole family</button>' +
+    kidRows +
+    "</div>"
+  );
+}
+
+function phoneBarHtml() {
+  return (
+    '<div class="phone-bar" aria-hidden="true">' +
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone-800)" stroke-width="2" stroke-linecap="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>' +
+    '<span class="word" style="font-family:var(--font-wordmark);font-weight:600">Homa</span>' +
+    '<span class="avatar" style="width:28px;height:28px;font-size:.72rem;background:var(--clay-100);color:var(--clay-700)">M</span>' +
+    "</div>"
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared interactive pieces (conflict + check-in), per direction sim  */
+/* ------------------------------------------------------------------ */
+function simKey(dir, kid, piece) { return dir + ":" + kid + ":" + piece; }
+
+function conflictCardHtml(dir, kid, inline) {
+  const c = kid.conflict;
+  if (!c) return "";
+  const key = simKey(dir, kid.id, "conflict");
+  const done = state.sim[key];
+  if (done) {
+    return '<div class="card feed-item"><div class="done-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Settled: "' + esc(done) + '" fits today. ' + esc(c.subject) + ' is updated. You can change this any time.</div><p class="sim-note" style="margin:6px 0 0">Simulated in this lab; nothing was saved.</p></div>';
+  }
+  const chips = inline
+    ? '<div class="chip-row" role="group" aria-label="Settle the disagreement">' +
+      '<button class="answer-chip" data-conflict-pick="' + esc(c.a.what) + '" data-key="' + key + '">"' + esc(c.a.what) + '" fits today</button>' +
+      '<button class="answer-chip" data-conflict-pick="' + esc(c.b.what) + '" data-key="' + key + '">"' + esc(c.b.what) + '" fits today</button>' +
+      '<button class="answer-chip" data-conflict-later data-key="' + key + '">Ask me tomorrow</button></div>'
+    : '<div class="chip-row"><button class="btn secondary" data-open-chat="the two saved answers">Sort it out with HOMA</button></div>';
+  return (
+    '<div class="card feed-item">' +
+    '<div class="feed-kicker">' + chipHtml("confirm") + "<span>" + esc(c.subject) + "</span></div>" +
+    '<h4 style="margin:0;font-family:var(--font-display);font-size:1.05rem;color:var(--text-strong)">' + esc(c.statement) + "</h4>" +
+    '<p style="margin:6px 0 0;font-size:.88rem;color:var(--text-muted)">You and Jordan noticed different things. Both answers are saved; nothing is lost either way.</p>' +
+    '<div class="conflict-grid">' +
+    '<div class="conflict-answer"><div class="who">' + esc(c.a.who) + '</div><div class="what">' + esc(c.a.what) + '</div><div class="when mono">' + esc(c.a.when) + "</div></div>" +
+    '<div class="conflict-answer"><div class="who">' + esc(c.b.who) + '</div><div class="what">' + esc(c.b.what) + '</div><div class="when mono">' + esc(c.b.when) + "</div></div>" +
+    "</div>" + chips + "</div>"
+  );
+}
+
+function checkinCardHtml(dir, kid, inline, title) {
+  const key = simKey(dir, kid.id, "checkin");
+  const step = state.sim[key] || 0;
+  const heading = title || "Keep " + kid.name + "'s check-in going";
+  if (!inline) {
+    return (
+      '<div class="card feed-item"><div class="feed-kicker"><span class="pill today mono" style="font-size:.66rem;letter-spacing:.08em">10 MINUTES</span><span>Check-in</span></div>' +
+      '<h4 style="margin:0;font-family:var(--font-display);font-size:1.05rem;color:var(--text-strong)">' + esc(heading) + "</h4>" +
+      '<p style="margin:6px 0 10px;font-size:.88rem;color:var(--text-muted)">' + kid.checkin.length + " quick questions are ready when you are. Stopping partway keeps every answer.</p>" +
+      '<button class="btn secondary" data-open-chat="the next check-in question">Continue in chat</button></div>'
+    );
+  }
+  if (step >= kid.checkin.length) {
+    return '<div class="card feed-item"><div class="done-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>That is all for today. ' + kid.checkin.length + ' answer' + (kid.checkin.length === 1 ? '' : 's') + ' saved. Homa will bring the next questions when they are ready.</div><p class="sim-note" style="margin:6px 0 0">Simulated in this lab; nothing was saved.</p></div>';
+  }
+  const q = kid.checkin[step];
+  return (
+    '<div class="card feed-item">' +
+    '<div class="feed-kicker"><span class="pill today mono" style="font-size:.66rem;letter-spacing:.08em">QUESTION ' + (step + 1) + " OF " + kid.checkin.length + "</span><span>" + esc(q.subject) + "</span></div>" +
+    '<h4 style="margin:0;font-family:var(--font-display);font-size:1.08rem;color:var(--text-strong)">' + esc(q.q) + "</h4>" +
+    '<div class="chip-row" style="margin-top:12px" role="group" aria-label="Answer">' +
+    ["Easily", "Getting there", "Not yet", "Not sure", "Skip"].map((a) =>
+      '<button class="answer-chip" data-checkin-answer="' + a + '" data-key="' + key + '">' + a + "</button>").join("") +
+    "</div>" +
+    '<p class="q-why">Why this one: it is the next age-eligible step in ' + esc(q.subject) + " with the fewest observations.</p></div>"
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Direction 1 · The living report                                     */
+/* ------------------------------------------------------------------ */
+function subjectAccordionHtml(kid, subject, dir) {
+  const openKey = simKey(dir, kid.id, "open-" + subject.id);
+  const open = !!state.sim[openKey];
+  const domains = subject.domains.map((d) =>
+    '<div class="domain-label">' + esc(d.name) + "</div>" +
+    d.topics.map((t) =>
+      '<div class="topic-line">' +
+      '<span class="t-statement">' + esc(t.s) + "</span>" +
+      (t.a ? '<span class="t-answer">' + esc(t.a) + "</span>" : chipHtml(t.chip)) +
+      (t.d ? '<span class="t-date mono">' + esc(t.d) + "</span>" : "") +
+      "</div>").join("")
+  ).join("");
+  const summaryBits = [subject.obs + " observation" + (subject.obs === 1 ? "" : "s"), freshWord(subject)];
+  if (subject.next) summaryBits.push(subject.next);
+  return (
+    '<div class="card subject-acc' + (open ? " open" : "") + '">' +
+    '<button class="subject-head" data-acc="' + openKey + '" aria-expanded="' + open + '">' +
+    '<span><span class="s-name">' + esc(subject.name) + '</span><div class="s-meta">' + esc(summaryBits.join(" · ")) + "</div></span>" +
+    '<span class="spacer"></span>' +
+    badgeHtml(subject.badge) +
+    (subject.move ? ' <span class="pill move">' + esc(subject.move) + "</span>" : "") +
+    (subject.state === "conflict" ? ' <span class="pill confirm">Please confirm</span>' : "") +
+    '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>' +
+    "</button>" +
+    '<div class="subject-body">' + domains +
+    (subject.state === "conflict" ? '<div style="margin-top:12px">' + conflictCardHtml("report", kid, false) + "</div>" : "") +
+    "</div></div>"
+  );
+}
+
+function kidReportHtml(kid) {
+  return (
+    '<span class="eyebrow">Always current</span>' +
+    '<h1 class="page-title">' + esc(kid.name) + "&#8217;s progress</h1>" +
+    '<p class="page-sub">The same report Homa writes for you, kept current as you share. ' + kid.stats.observations + " observations across " + kid.stats.subjects + " subjects · updated " + kid.stats.updated + ".</p>" +
+    '<div class="card note-card" style="margin-top:18px">' +
+    '<p class="greeting">' + esc(kid.note.greeting) + "</p>" +
+    kid.note.body.map((p) => "<p>" + esc(p) + "</p>").join("") +
+    '<p class="signoff">' + esc(kid.note.signoff) + "</p></div>" +
+    '<div class="card chart-card" style="margin-top:14px">' +
+    '<p class="caption">' + esc(kid.name) + "&#8217;s snapshot · Jul 12, 2026</p>" +
+    '<p class="explain">One line per subject, climbing as ' + esc(kid.name) + " moves past what is typical for their age.</p>" +
+    '<div class="chart-wrap">' + chartSvg(kid) + "</div></div>" +
+    '<div style="margin:20px 0 10px;display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-family:var(--font-display);font-size:1.2rem;color:var(--text-strong)">Subject by subject</h2><span class="sim-note">tap any subject to open it</span></div>' +
+    kid.subjects.map((s) => subjectAccordionHtml(kid, s, "report")).join("") +
+    '<div style="margin-top:16px">' + checkinCardHtml("report", kid, false) + "</div>"
+  );
+}
+
+function renderReportDirection(host) {
+  if (state.scope === "family") {
+    const activeKey = "report:familytab";
+    const active = state.sim[activeKey] || "maya";
+    const kid = FAMILY.kids.find((k) => k.id === active);
+    host.innerHTML =
+      '<div class="chip-row" role="group" aria-label="Pick a kid" style="margin-bottom:16px">' +
+      FAMILY.kids.map((k) =>
+        '<button class="answer-chip" data-famtab="' + k.id + '" aria-pressed="' + (k.id === active) + '"' + (k.id === active ? ' style="border-color:var(--clay-400);background:var(--clay-50);color:var(--clay-700)"' : "") + ">" +
+        '<span class="avatar" style="width:22px;height:22px;font-size:.66rem;background:' + k.avatarBg + ";color:" + k.avatarInk + '">' + k.name[0] + "</span>" + esc(k.name) + " · " + esc(k.age) + "</button>").join("") +
+      "</div>" + kidReportHtml(kid);
+  } else {
+    host.innerHTML = kidReportHtml(FAMILY.kids[0]);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Direction 2 · The front page                                        */
+/* ------------------------------------------------------------------ */
+function indexRowsHtml(kid, dir) {
+  return (
+    '<div class="card" style="margin-top:10px">' +
+    kid.subjects.map((s) => {
+      const openKey = simKey(dir, kid.id, "idx-" + s.id);
+      const open = !!state.sim[openKey];
+      return (
+        '<div class="subject-acc' + (open ? " open" : "") + '" style="border:0;box-shadow:none;background:transparent">' +
+        '<button class="index-row" data-acc="' + openKey + '" aria-expanded="' + open + '">' +
+        freshDot(s.fresh) +
+        '<span style="flex:1;min-width:0"><span class="s-name">' + esc(s.name) + '</span><div class="s-line">' + esc(freshWord(s)) + " · " + s.obs + " observation" + (s.obs === 1 ? "" : "s") + "</div></span>" +
+        badgeHtml(s.badge) +
+        '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>' +
+        "</button>" +
+        '<div class="subject-body" style="padding:6px 16px 14px">' +
+        s.domains.map((d) => '<div class="domain-label">' + esc(d.name) + "</div>" +
+          d.topics.map((t) => '<div class="topic-line"><span class="t-statement">' + esc(t.s) + "</span>" + (t.a ? '<span class="t-answer">' + esc(t.a) + "</span>" : chipHtml(t.chip)) + (t.d ? '<span class="t-date mono">' + esc(t.d) + "</span>" : "") + "</div>").join("")).join("") +
+        "</div></div>"
+      );
+    }).join("") + "</div>"
+  );
+}
+
+function frontFeedHtml(kid, showKidTag) {
+  const tag = showKidTag
+    ? '<span class="avatar" style="width:20px;height:20px;font-size:.62rem;background:' + kid.avatarBg + ";color:" + kid.avatarInk + '">' + kid.name[0] + "</span><span>" + esc(kid.name) + "</span>"
+    : "";
+  const newToday = kid.subjects.filter((s) => s.state === "updated").map((s) => {
+    const t = s.domains[0].topics[0];
+    return (
+      '<div class="card feed-item"><div class="feed-kicker">' + chipHtml("today") + "<span>" + esc(s.name) + "</span>" + tag + "</div>" +
+      '<h4 style="margin:0;font-family:var(--font-display);font-size:1.05rem;color:var(--text-strong)">' + esc(t.s) + "</h4>" +
+      '<p style="margin:5px 0 0;font-size:.9rem"><b>' + esc(t.a) + "</b> · shared in conversation today</p></div>"
+    );
+  }).join("");
+  return newToday + conflictCardHtml("front", kid, true) + (kid.checkin.length ? checkinCardHtml("front", kid, true) : "");
+}
+
+function renderFrontDirection(host) {
+  if (state.scope === "family") {
+    const changeCount = 4;
+    host.innerHTML =
+      '<span class="eyebrow">Since you last looked</span>' +
+      '<h1 class="page-title">' + changeCount + " new things across the family</h1>" +
+      '<p class="page-sub">Yesterday evening to now. Newest first; each kid keeps their own cards.</p>' +
+      '<div style="margin-top:16px">' +
+      FAMILY.kids.map((k) => frontFeedHtml(k, true)).join("") +
+      "</div>" +
+      FAMILY.kids.map((k) =>
+        '<h2 style="margin:26px 0 0;font-family:var(--font-display);font-size:1.15rem;color:var(--text-strong)">' + esc(k.name) + "&#8217;s subjects</h2>" + indexRowsHtml(k, "front")).join("");
+  } else {
+    const kid = FAMILY.kids[0];
+    host.innerHTML =
+      '<span class="eyebrow">Since you last looked</span>' +
+      '<h1 class="page-title">3 new things for ' + esc(kid.name) + "</h1>" +
+      '<p class="page-sub">Yesterday evening to now: one new observation, one thing to settle, and two quick questions waiting.</p>' +
+      '<div style="margin-top:16px">' + frontFeedHtml(kid, false) + "</div>" +
+      '<h2 style="margin:26px 0 0;font-family:var(--font-display);font-size:1.15rem;color:var(--text-strong)">All of ' + esc(kid.name) + "&#8217;s subjects</h2>" +
+      '<p class="sim-note" style="margin:4px 0 0">Quiet subjects live here, one line each, so the top of the page stays about today.</p>' +
+      indexRowsHtml(kid, "front");
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Direction 3 · The map                                               */
+/* ------------------------------------------------------------------ */
+function tileGridHtml(kid, dir) {
+  const selKey = simKey(dir, kid.id, "tile");
+  const sel = state.sim[selKey];
+  const tiles = kid.subjects.map((s) =>
+    '<button class="tile" data-tile="' + s.id + '" data-selkey="' + selKey + '" aria-pressed="' + (sel === s.id) + '">' +
+    '<span class="t-name">' + esc(s.name) + (s.state === "conflict" ? ' <span class="pill confirm" style="font-size:.62rem;padding:2px 8px">confirm</span>' : "") + "</span>" +
+    '<span class="t-badge">' + badgeHtml(s.badge) + "</span>" +
+    '<span class="t-fresh">' + freshDot(s.fresh) + esc(freshWord(s)) + "</span>" +
+    "</button>").join("");
+  let detail = "";
+  if (sel) {
+    const s = kid.subjects.find((x) => x.id === sel);
+    detail =
+      '<div class="card map-detail">' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '<h3 style="margin:0;font-family:var(--font-display);font-size:1.2rem;color:var(--text-strong)">' + esc(s.name) + "</h3>" +
+      badgeHtml(s.badge) + (s.move ? '<span class="pill move">' + esc(s.move) + "</span>" : "") + stateChip(s) +
+      '<span class="spacer" style="flex:1"></span>' +
+      '<button class="btn secondary" data-tile="" data-selkey="' + selKey + '" style="min-height:38px;padding:6px 14px">Close</button></div>' +
+      (s.next ? '<p style="margin:8px 0 0;font-size:.9rem;color:var(--text-muted)">' + esc(s.next) + "</p>" : "") +
+      s.domains.map((d) => '<div class="domain-label">' + esc(d.name) + "</div>" +
+        d.topics.map((t) => '<div class="topic-line"><span class="t-statement">' + esc(t.s) + "</span>" + (t.a ? '<span class="t-answer">' + esc(t.a) + "</span>" : chipHtml(t.chip)) + (t.d ? '<span class="t-date mono">' + esc(t.d) + "</span>" : "") + "</div>").join("")).join("") +
+      (s.state === "conflict" ? '<div style="margin-top:12px">' + conflictCardHtml("map", kid, true) + "</div>" : "") +
+      "</div>";
+  }
+  return '<div class="tile-grid">' + tiles + "</div>" + detail;
+}
+
+function renderMapDirection(host) {
+  if (state.scope === "family") {
+    host.innerHTML =
+      '<span class="eyebrow">The whole map</span>' +
+      '<h1 class="page-title">Where everyone stands</h1>' +
+      '<p class="page-sub">Each kid keeps their own map. Tap any subject to open it; the green dot means it was updated today.</p>' +
+      FAMILY.kids.map((k) =>
+        '<div style="display:flex;align-items:baseline;gap:10px;margin:22px 0 10px">' +
+        '<span class="avatar" style="width:26px;height:26px;font-size:.72rem;background:' + k.avatarBg + ";color:" + k.avatarInk + '">' + k.name[0] + "</span>" +
+        '<h2 style="margin:0;font-family:var(--font-display);font-size:1.2rem;color:var(--text-strong)">' + esc(k.name) + "</h2>" +
+        '<span class="sim-note">' + esc(k.age) + "</span></div>" + tileGridHtml(k, "map")).join("");
+  } else {
+    const kid = FAMILY.kids[0];
+    host.innerHTML =
+      '<span class="eyebrow">The whole map</span>' +
+      '<h1 class="page-title">Where ' + esc(kid.name) + " stands</h1>" +
+      '<p class="page-sub">All ' + kid.stats.subjects + " subjects at once. Tap one to see the skills behind it; the green dot means updated today, the gold dot means it has been a while.</p>" +
+      '<div style="margin-top:16px">' + tileGridHtml(kid, "map") + "</div>";
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Direction 4 · Homa's desk                                           */
+/* ------------------------------------------------------------------ */
+function deskSummaryHtml(kid) {
+  const strongest = kid.subjects[0];
+  const growing = kid.subjects.find((s) => s.badge.kind === "growing");
+  return (
+    '<div class="card desk-summary">' +
+    '<h3>Homa&#8217;s picture of ' + esc(kid.name) + "</h3>" +
+    '<p class="stat-line mono">' + kid.stats.subjects + " subjects · " + kid.stats.observations + " observations · updated " + kid.stats.updated + "</p>" +
+    "<p><b>Standing out:</b> " + esc(strongest.name) + " is about " + strongest.badge.months + " months past typical.</p>" +
+    "<p><b>Moved lately:</b> " + esc(kid.subjects.filter((s) => s.move).map((s) => s.name).join(" and ") || "a quiet week, which is fine") + ".</p>" +
+    (growing ? "<p><b>Growing edge:</b> " + esc(growing.name.toLowerCase()) + ". " + esc(growing.next || "") + "</p>" : "") +
+    '<div class="chart-wrap" style="margin-top:12px">' + chartSvg(kid) + "</div>" +
+    '<p class="sim-note" style="margin-top:8px">The full subject-by-subject view lives one tap away; this desk keeps only the picture and the next steps.</p>' +
+    "</div>"
+  );
+}
+
+function deskQueueHtml(kid) {
+  return (
+    '<div class="queue">' +
+    "<h3>Today with HOMA</h3>" +
+    '<p class="sim-note" style="margin:0 0 10px">One thing at a time, newest first. Everything here saves the moment you answer.</p>' +
+    conflictCardHtml("desk", kid, true) +
+    checkinCardHtml("desk", kid, true) +
+    '<div class="card feed-item"><div class="feed-kicker"><span class="pill atage mono" style="font-size:.66rem;letter-spacing:.08em">ANYTIME</span><span>Tell Homa something new</span></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" aria-label="Tell Homa something new" placeholder="She counted to 23 on the porch..." style="flex:1;min-width:200px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);padding:10px 16px;font:inherit;background:var(--bg-page)">' +
+    '<button class="btn primary" data-open-chat="your note, ready to send">Send to HOMA</button></div>' +
+    '<p class="q-why">Notes like this become observations when they show a real skill.</p></div>' +
+    "</div>"
+  );
+}
+
+function renderDeskDirection(host) {
+  if (state.scope === "family") {
+    host.innerHTML =
+      '<span class="eyebrow">Homa&#8217;s desk</span>' +
+      '<h1 class="page-title">The family desk</h1>' +
+      '<p class="page-sub">Each kid&#8217;s picture on the left, everything waiting for you on the right, tagged by kid.</p>' +
+      '<div class="desk-grid" style="margin-top:16px">' +
+      "<div>" + FAMILY.kids.map((k) => '<div style="margin-bottom:14px">' + deskSummaryHtml(k) + "</div>").join("") + "</div>" +
+      "<div>" +
+      FAMILY.kids.map((k) =>
+        '<div style="display:flex;align-items:center;gap:8px;margin:0 0 8px"><span class="avatar" style="width:22px;height:22px;font-size:.66rem;background:' + k.avatarBg + ";color:" + k.avatarInk + '">' + k.name[0] + "</span><b>" + esc(k.name) + "</b></div>" + deskQueueHtml(k)).join('<div style="height:18px"></div>') +
+      "</div></div>";
+  } else {
+    const kid = FAMILY.kids[0];
+    host.innerHTML =
+      '<span class="eyebrow">Homa&#8217;s desk</span>' +
+      '<h1 class="page-title">' + esc(kid.name) + " today</h1>" +
+      '<p class="page-sub">The picture on the left, the next steps on the right. Five minutes here keeps everything current.</p>' +
+      '<div class="desk-grid" style="margin-top:16px">' + deskSummaryHtml(kid) + deskQueueHtml(kid) + "</div>";
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Direction frame + critique                                          */
+/* ------------------------------------------------------------------ */
+const RENDERERS = { report: renderReportDirection, front: renderFrontDirection, map: renderMapDirection, desk: renderDeskDirection };
+
+function renderDirection() {
+  const dir = DIRECTIONS[state.dir];
+  const hostSection = document.getElementById("direction-host");
+  hostSection.innerHTML = "";
+  const head = el(
+    '<div class="direction-head"><h2>' + esc(dir.name) + "</h2>" +
+    '<p class="philosophy">' + esc(dir.philosophy) + "</p></div>"
+  );
+  const stage = el(
+    '<div class="stage' + (state.frame === "phone" ? " phone" : "") + '">' +
+    '<div class="frame">' + railHtml("maya") +
+    '<div class="canvas">' + phoneBarHtml() + '<div class="canvas-inner" id="canvas-inner"></div></div>' +
+    "</div></div>"
+  );
+  const review = el(
+    '<div class="direction-review">' +
+    "<div>" +
+    '<span class="review-label">Worth stealing even if this direction loses</span>' +
+    '<div class="steal-row">' +
+    dir.steals.map((s) => {
+      const id = state.dir + "::" + s;
+      return '<button class="steal-chip" data-steal="' + esc(id) + '" aria-pressed="' + state.steals.has(id) + '">' + esc(s) + "</button>";
+    }).join("") +
+    "</div>" +
+    '<p class="skip-line"><b>Honest cost</b> · ' + esc(dir.skip) + "</p>" +
+    "</div>" +
+    '<button class="winner-button" data-winner="' + state.dir + '" aria-pressed="' + (state.winner === state.dir) + '">' +
+    (state.winner === state.dir ? "Winner ✓" : "Make this the winner") + "</button>" +
+    "</div>"
+  );
+  hostSection.append(head, stage, review);
+  RENDERERS[state.dir](document.getElementById("canvas-inner"));
+}
+
+/* ------------------------------------------------------------------ */
+/* Questions + reply                                                   */
+/* ------------------------------------------------------------------ */
+function renderQuestions() {
+  const host = document.getElementById("questions-host");
+  host.innerHTML = "";
+  QUESTIONS.forEach((q) => {
+    const picked = state.answers[q.id];
+    host.appendChild(el(
+      '<div class="card q-card"><h3>' + esc(q.label) +
+      (q.recommended !== undefined ? '<span class="rec">recommended: option ' + (q.recommended + 1) + "</span>" : "") +
+      "</h3>" +
+      '<p class="q-why">' + esc(q.why) + (q.recWhy ? " Recommended because " + esc(q.recWhy) + "." : "") + "</p>" +
+      '<div class="chip-row" role="group" aria-label="' + esc(q.label) + '">' +
+      q.options.map((o) =>
+        '<button class="answer-chip" data-q="' + q.id + '" data-a="' + esc(o) + '" aria-pressed="' + (picked === o) + '">' + esc(o) + "</button>").join("") +
+      "</div></div>"
+    ));
+  });
+}
+
+function buildReply() {
+  const lines = ["UI direction feedback", ""];
+  lines.push("Winning direction: " + (state.winner ? DIRECTIONS[state.winner].name : "none yet"));
+  const steals = [...state.steals].map((s) => {
+    const [dirKey, label] = s.split("::");
+    return label + " (from " + DIRECTIONS[dirKey].name + ")";
+  });
+  lines.push("Details to steal: " + (steals.length ? steals.join("; ") : "none"));
+  lines.push("");
+  QUESTIONS.forEach((q) => {
+    if (state.answers[q.id]) lines.push("- " + q.label + ": " + state.answers[q.id]);
+  });
+  if (!QUESTIONS.some((q) => state.answers[q.id])) lines.push("- (no build questions answered yet)");
+  const notes = state.notes.trim();
+  if (notes) { lines.push(""); lines.push("Notes: " + notes); }
+  return lines.join("\n");
+}
+
+function renderReply() {
+  document.getElementById("reply-text").textContent = buildReply();
+}
+
+/* ------------------------------------------------------------------ */
+/* Events (one delegated listener keeps every re-render wired)         */
+/* ------------------------------------------------------------------ */
+document.addEventListener("click", (event) => {
+  const target = event.target.closest("button");
+  if (!target) return;
+
+  if (target.dataset.dir) {
+    state.dir = target.dataset.dir;
+    document.querySelectorAll(".direction-button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dir === state.dir)));
+    renderDirection();
+    return;
+  }
+  if (target.dataset.scope) {
+    state.scope = target.dataset.scope;
+    document.querySelectorAll("[data-scope]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.scope === state.scope)));
+    renderDirection();
+    return;
+  }
+  if (target.dataset.frame) {
+    state.frame = target.dataset.frame;
+    document.querySelectorAll("[data-frame]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.frame === state.frame)));
+    renderDirection();
+    return;
+  }
+  if (target.dataset.acc) {
+    state.sim[target.dataset.acc] = !state.sim[target.dataset.acc];
+    renderDirection();
+    return;
+  }
+  if (target.dataset.selkey !== undefined && target.dataset.tile !== undefined) {
+    const key = target.dataset.selkey;
+    state.sim[key] = target.dataset.tile === "" ? null : (state.sim[key] === target.dataset.tile ? null : target.dataset.tile);
+    renderDirection();
+    return;
+  }
+  if (target.dataset.conflictPick) {
+    state.sim[target.dataset.key] = target.dataset.conflictPick;
+    renderDirection();
+    toast("Settled (simulated). In the product this records a resolution through the existing conflict flow.");
+    return;
+  }
+  if (target.hasAttribute("data-conflict-later")) {
+    toast("Homa will ask again tomorrow (simulated).");
+    return;
+  }
+  if (target.dataset.checkinAnswer) {
+    const key = target.dataset.key;
+    state.sim[key] = (state.sim[key] || 0) + 1;
+    renderDirection();
+    toast('Saved "' + target.dataset.checkinAnswer + '" (simulated). Real answers write through the existing check-in service.');
+    return;
+  }
+  if (target.dataset.openChat !== undefined) {
+    toast("In the product this opens chat with " + target.dataset.openChat + ". Simulated here.");
+    return;
+  }
+  if (target.dataset.famtab) {
+    state.sim["report:familytab"] = target.dataset.famtab;
+    renderDirection();
+    return;
+  }
+  if (target.dataset.steal) {
+    const id = target.dataset.steal;
+    if (state.steals.has(id)) state.steals.delete(id); else state.steals.add(id);
+    target.setAttribute("aria-pressed", String(state.steals.has(id)));
+    renderReply();
+    return;
+  }
+  if (target.dataset.winner) {
+    state.winner = state.winner === target.dataset.winner ? null : target.dataset.winner;
+    renderDirection();
+    renderReply();
+    return;
+  }
+  if (target.dataset.q) {
+    const q = target.dataset.q;
+    state.answers[q] = state.answers[q] === target.dataset.a ? undefined : target.dataset.a;
+    renderQuestions();
+    renderReply();
+    return;
+  }
+  if (target.id === "copy-reply") {
+    const text = buildReply();
+    const status = document.getElementById("copy-status");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        () => { status.textContent = "Copied. Paste it into chat."; },
+        () => { fallbackCopy(text, status); }
+      );
+    } else {
+      fallbackCopy(text, status);
+    }
+  }
+});
+
+function fallbackCopy(text, status) {
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.position = "fixed";
+  area.style.left = "-9999px";
+  document.body.appendChild(area);
+  area.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch { ok = false; }
+  area.remove();
+  status.textContent = ok
+    ? "Copied. Paste it into chat."
+    : "Copy was blocked; select the reply text above and copy it by hand.";
+}
+
+document.getElementById("notes").addEventListener("input", (event) => {
+  state.notes = event.target.value;
+  renderReply();
+});
+
+renderDirection();
+renderQuestions();
+renderReply();
+</script>
+</body>
+</html>

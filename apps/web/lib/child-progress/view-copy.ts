@@ -35,11 +35,18 @@ export function progressTopicStateLabel(
 ): string {
   switch (state) {
     case "observed_today":
-      return "Observed today";
+      // One verb for the whole chip pair ("Shared today" / "Shared
+      // earlier"): the editor gate flagged observed/shared as two names
+      // for one fact.
+      return "Shared today";
     case "older":
-      return "Older";
+      // "Older" alone read as being about ages (reader gates, Jul 12);
+      // "Shared earlier" names what is older, the information.
+      return "Shared earlier";
     case "ask_next":
-      return "Ask me later";
+      // Chat's "Ask me later" button is the PARENT deferring; this chip
+      // is HOMA owning the follow-up, so it names the actor.
+      return "HOMA asks later";
     case "conflict":
       return "Please confirm";
     default:

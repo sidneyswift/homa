@@ -62,12 +62,25 @@ export default async function ChildProgressPage({
 
   // The permanent token report stays reachable from live Progress
   // (agent-led-live-progress ruling: token and share reports remain).
-  const reportToken = data.reports.get(child.id)?.token;
+  const report = data.reports.get(child.id) ?? null;
 
   return (
     <ProgressView
       view={pageState.view}
-      reportHref={reportToken ? `/onboarding/r/${reportToken}` : null}
+      reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
+      report={report}
+      plans={data.plans
+        .filter((plan) => plan.childId === child.id)
+        .map((plan) => ({
+          subjectId: plan.subjectId,
+          done: plan.done,
+          total: plan.total,
+          retestAt: plan.retestAt,
+        }))}
+      kids={data.children.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+      }))}
     />
   );
 }
