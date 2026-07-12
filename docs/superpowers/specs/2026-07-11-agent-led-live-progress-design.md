@@ -1,6 +1,10 @@
 # Agent-led live progress
 
 **Status:** Approved by founder feedback on 2026-07-11  
+**Production status:** READY on 2026-07-12. Migration, reconciliation,
+production isolation, flag activation, public probes, permanent token report,
+synthetic service flow, and a temporary authenticated Progress probe passed.
+A real linked-family SMS provider probe remains open.
 **Prototype:** `docs/homa-planning/plans/2026-07-11-agent-led-live-progress.html`
 
 ## Goal
@@ -154,7 +158,36 @@ One transaction:
 - Existing token routes keep `ReportView`.
 - Existing `child_reports.history` remains stored but no longer receives one entry per agent observation.
 - New internal snapshots begin with this feature. Lost historical evidence is never fabricated.
-- Existing direct writers migrate behind ChildProgress in later tasks.
+- Existing answer, correction, walk, and signup writers enter one flag-aware
+  compatibility adapter.
+- Family folds update every composite ChildProgress identity through deferred
+  `ON UPDATE CASCADE` relationships. Evidence, live state, revisions,
+  operations, check-ins, responses, conflicts, and snapshots move with the
+  child without cross-family references. The child family update bumps the
+  canonical source revision once so the destination family rebuilds any live
+  projection that carries family-local time or attribution.
+- `onboarding_walk` evidence answers use ChildProgress. `not_sure` and `skip`
+  remain direct `child_answers` coverage under the shared advisory lock, after
+  validation against lightweight assessment-topic metadata. They never become
+  anchored correction evidence or change `MapScores`.
+- Corrections, deletes, `not_sure`, and `skip` tombstone every active
+  same-item evidence row observed at or before the correction cutoff. Resolved
+  conflict history cannot resurrect an older observation.
+- Graph walk cards use server-only `map_walk_prompts` receipts. An answer must
+  consume the exact unexpired child, family, subject, and topic prompt.
+  Exact-key retries return the stored result; changed keys or payloads refuse.
+  One ChildProgress repository transaction owns evidence or coverage,
+  consumption, next-prompt creation, and the result. The accepted prompt is
+  the one event boundary.
+- Expired, stale, and explicitly stopped prompts close with a bounded terminal
+  reason and stored result. Their active-subject slot is released, exact
+  retries replay, and concurrent restarts converge on one fresh prompt.
+- A prompt stores its expected sitting, source revision, and latest item
+  observation. One active prompt may exist per child, family, and subject.
+  A changed item or stale sitting refuses before any supersession.
+- A duplicate evidence operation is successful only when its stored original
+  status was `recorded` or `conflict_open`. Stored `conflict_pending` remains a
+  refusal and leaves the prompt current.
 
 ## Agent behavior
 
@@ -217,9 +250,32 @@ No event includes quotes, messages, adult names, email addresses, or phone numbe
 ## Rollout
 
 - Additive migration only.
+- Task 9 moves every direct `child_answers` writer behind ChildProgress before rollout.
+- Deploy code with `HOMA_LIVE_PROGRESS_ENABLED` off.
+- Apply the migration and initial backfill, then run `private.reconcile_child_answers_to_progress()` immediately before flag activation.
+- Normal writers share the global reconciliation advisory lock. The final reconciliation takes it exclusively, making the handoff quiescent without serializing ordinary writes.
 - Local and preview verification first.
 - `HOMA_LIVE_PROGRESS_ENABLED` gates new agent and UI entry points.
-- Legacy report and `record_observation` paths remain available for rollback.
+- The Eve `record_observation` tool is disabled. Flag-off internal checklist,
+  deep-dive, walk, correction, and unlinked SMS compatibility writers are the
+  rollback path.
+- Browser save and undo intents retain one key across network retry, replace
+  it when the answer or action changes, and clear it only after success.
+- HTTP 408, 429, and 5xx responses retain retry identity. Permanent 4xx
+  responses reject the intent and keep the UI honest. Report corrections use
+  immutable versioned snapshots so edits made during a request remain pending.
+- A progress conflict is a distinct permanent answer result: the attempted
+  answer remains visible and the flow stops for confirmation. An idempotency
+  mismatch clears its stale key and asks for a new intent.
+- Telnyx stamps provider-message and inbound-receipt identity before family
+  linkage, so reclaimed unlinked signup turns keep the same answer key across
+  runtime session rotation.
+- Child deletion and both family-fold paths take the shared reconciliation
+  lock first. Family folds then lock source and destination family rows in UUID
+  order before checking membership or merging context.
+- A confirmed missing auth session may remain unattributed. Auth client and
+  membership lookup failures surface as an explicit server error instead of
+  silently writing unattributed evidence.
 - Turning the flag off never deletes new tables or evidence.
 - Production completion requires READY deployment, migration evidence, authenticated probe, and reconciliation evidence.
 

@@ -80,7 +80,7 @@ This is a migration-history divergence. It is not proof that a schema behavior i
 
 ### Repository drift after the remote snapshot
 
-The local migration directory was last re-counted at `2026-07-11T12:55:00-04:00` and contained 70 files. Twelve files appeared after the comparison above, carrying ten distinct names: `conversation_continuity`, `conversation_continuity_hardening`, `conversation_continuity_indexes`, `conversation_delivery_uncertain`, `conversation_episode_backfill`, `conversation_inbound_receipts`, `conversation_task_uncertain`, `conversation_task_partial_uncertain`, `family_sms_invite_dual_confirmation`, and `family_sms_invite_submission_hardening`. `conversation_inbound_receipts` appears under three timestamped filenames.
+The local migration directory was last re-counted at `2026-07-12T04:31:00-04:00` and contained 71 files. Thirteen files appeared after the comparison above, carrying eleven distinct names: `agent_led_live_progress`, `conversation_continuity`, `conversation_continuity_hardening`, `conversation_continuity_indexes`, `conversation_delivery_uncertain`, `conversation_episode_backfill`, `conversation_inbound_receipts`, `conversation_task_uncertain`, `conversation_task_partial_uncertain`, `family_sms_invite_dual_confirmation`, and `family_sms_invite_submission_hardening`. `conversation_inbound_receipts` appears under three timestamped filenames. The `agent_led_live_progress` migration was later applied and recorded during the rollout below. The older counts remain a historical snapshot rather than a current parity claim.
 
 The remote history was not re-queried during this targeted drift check. Therefore the 58-local, 53-remote, 51-shared, 7-local-only, and 2-remote-only values above are a time-bounded historical observation, not a current parity claim. A fresh remote query is required before any current migration comparison is terminal.
 
@@ -97,8 +97,44 @@ These public probes do not inspect draft files, waitlist rows, consent, social a
 ## Limitations
 
 - No authenticated user flow was exercised.
-- No private family row, billing row, waitlist row, or external-service account was inspected.
+- No private values were retained or printed. The later rollout check used
+  aggregate progress counts and a temporary synthetic family only.
 - No successful cron execution was established.
 - The failed `--linked` migration command is a checkout-link limitation, not migration evidence.
 - READY state does not prove the paywall, planner, mobile, email, SMS, Stripe, Resend, Telnyx, or vendor claims in human-operational documentation.
 - The state-academic mapping, child-interaction absolute, and planner-reshuffle claims require dedicated implementation and production evidence.
+
+## Agent-led live progress rollout
+
+Observed at: `2026-07-12T10:31:00-04:00`
+
+- Production deployment `dpl_CVSe24nqdAHa5PdKhJJTUF97XSoS` reached READY
+  from commit `635e16f92112011b8f8f4790c80ed96ab2cc6644`.
+- The first flag-off preview rejected the retired `record_observation` file
+  during Eve build. Commit `635e16f` removed that file, and the replacement
+  preview plus both production builds completed successfully.
+- The additive `agent_led_live_progress` migration applied to production and
+  was recorded in migration history. All nine new public tables have RLS
+  enabled.
+- Initial backfill created 231 evidence rows from 231 evidence-bearing
+  compatibility answers. Final dry-run and committed reconciliation each
+  reported zero additional inserts and zero supersessions.
+- The production isolation suite passed every anonymous, authenticated,
+  cross-family, RLS, and ChildProgress constraint probe after its synthetic
+  fixtures were updated to the final prompt and message-provenance shape.
+- `HOMA_LIVE_PROGRESS_ENABLED` is set for Production. The enabled deployment
+  is aliased to `thankshoma.com` and `www.thankshoma.com`.
+- Public `/` and `/onboarding` returned HTTP 200. A private permanent token
+  report probe returned HTTP 200 without recording the token.
+- A sanitized live read returned a nonempty 16-subject projection with 44
+  observations and no open conflicts. A synthetic production check-in started,
+  created one baseline snapshot, stopped, and was fully deleted afterward.
+- A temporary authenticated Supabase session loaded `/app/progress` with HTTP
+  200 and rendered its synthetic child's live Progress surface. The temporary
+  family, child, membership, and Auth user were deleted immediately afterward.
+- Vercel reported no runtime error clusters in the 15-minute post-rollout
+  window.
+
+The rollout did not send a real linked-family SMS. Provider delivery remains a
+separate follow-up check and is not implied by the authenticated synthetic
+browser probe.
