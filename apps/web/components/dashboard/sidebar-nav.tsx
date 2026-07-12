@@ -22,10 +22,10 @@ import {
  * signed-in visitors (same tabs, same icons, no drift).
  */
 export const APP_NAV_ITEMS = [
-  { href: "/app", label: "Ask HOMA", icon: Sparkles },
+  { href: "/app", label: "Ask", icon: Sparkles },
   { href: "/app/progress", label: "Progress", icon: ChartLine },
-  { href: "/app/planner", label: "Week planner", icon: Calendar },
-  { href: "/app/tasks", label: "HOMA's tasks", icon: ListChecks },
+  { href: "/app/planner", label: "Planner", icon: Calendar },
+  { href: "/app/tasks", label: "Tasks", icon: ListChecks },
 ] as const;
 
 const KID_PROGRESS_PATH = /^\/app\/[^/]+\/progress$/;

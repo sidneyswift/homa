@@ -3,6 +3,18 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · App nav labels simplified (founder ruling)
+
+Founder instruction in session: the app sidebar tabs are now "Ask",
+"Progress", "Planner", and "Tasks". This supersedes the D-ht-4 tab name
+("Homa's tasks") and the earlier "Ask HOMA" and "Week planner" labels, for
+the nav only. Page titles and in-page headings keep their fuller names
+("Week planner", "Homa's tasks") because the nav needs to scan fast while
+pages can afford the extra words. Changed in `APP_NAV_ITEMS`
+(`apps/web/components/dashboard/sidebar-nav.tsx`), which also feeds the
+marketing Nav's signed-in phone menu. Registered in the reconciliation
+later-ruling register as `nav-labels-simplified`.
+
 ## 2026-07-12 · Agent-led live progress reaches production
 
 Production now runs commit `635e16f92112011b8f8f4790c80ed96ab2cc6644`

@@ -142,6 +142,7 @@ References must qualify colliding labels as global D3 age range, global D8 casin
 | `onboarding-depth` | 2026-07-11 | A parent may choose the longer graph-first assessment path while a quick path remains available. | `docs/homa-planning/plans/2026-07-11-onboarding-depth-fork.md` |
 | `multi-parent-v0` | 2026-07-11 | The approved multi-parent slice supersedes the PRD's one-login-only cohort boundary. | `docs/homa-planning/plans/2026-07-11-multi-parent-v0-and-founder-account-merge.md` |
 | `full-birthday` | 2026-07-11 | Store month, day, and year product-wide. This supersedes month-and-year minimization and D-mp-4's day-01 normalization. | `docs/homa-planning/build-log.md` § Full-birthday intake ruling |
+| `nav-labels-simplified` | 2026-07-12 | App nav tabs read "Ask", "Progress", "Planner", "Tasks". Supersedes the D-ht-4 tab name and the "Ask HOMA" and "Week planner" nav labels, for the nav only; page titles keep the fuller names. | `docs/homa-planning/build-log.md` § App nav labels simplified |
 
 ### Open founder decisions
 
