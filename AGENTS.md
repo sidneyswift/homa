@@ -14,17 +14,28 @@ Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo mon
 - Build: `pnpm build`
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`
+- ChildProgress guards: `pnpm check:child-progress` for core events, default
+  module tests, walk events, and reconciliation; `pnpm check:progress-ui` for
+  focused route and card tests; and `pnpm child-progress:e2e` for the
+  disposable local PostgreSQL harness. The E2E command creates and removes its
+  own cluster and needs no remote credentials.
 - Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
 - Documentation reconciliation: `pnpm check:docs -- --allow-open` during the audit and `pnpm check:docs` for the zero-open completion gate
 - Conversation continuity tests: `pnpm check:continuity` when changing the continuity module or a channel adapter
 - Before ANY eve version bump, no exceptions: `node scripts/eve-upgrade-check.mjs` (procedure: `docs/homa-planning/runbooks/eve-version-bump.md`)
-- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, the five required guards, the Next build, and the eve build. Confirm the actual workflow result before describing CI as green.
+- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, the five required guards, the Next build, and the eve build. It also runs ChildProgress, Progress UI, and the disposable ChildProgress PostgreSQL E2E. Confirm the actual workflow result before describing CI as green.
 
 ## Deploys & migrations
 
 - Prod schema and prod code ship together. Never apply a breaking migration (a rename, a drop, a tightened constraint) ahead of the deploy that reads it: push the code, watch the Vercel deploy go READY, then apply the migration, or use expand-contract (add the new shape, dual-read, drop the old later). Additive-only migrations may lead. Cause: the 2026-07-10 /app outage (build-log entry) was the previous deploy reading a renamed column.
 - A green `pnpm build` is not a green deploy. Vercel also runs `eve build`, which compiles agent tool modules outside Next's bundler, so imports Next tolerates (`next/server`, JSON loaders) can still sink the deploy. CI runs it now; before pushing changes under `apps/web/agent/`, run `pnpm --filter web exec eve build` locally.
 - After any push that touches schema or the deploy pipeline, stay until the Vercel deployment is READY and probe the live site before calling it done.
+- ChildProgress rollout starts with `HOMA_LIVE_PROGRESS_ENABLED` false. Deploy
+  code and verify READY plus legacy paths first. Then apply the additive
+  migration, run `pnpm progress:reconcile -- --dry-run` and the real
+  reconciliation with an explicit database URL, enable the flag, and probe
+  authenticated Progress, token reports, corrections, and linked SMS.
+  Rollback turns the flag off first and leaves the additive ledger intact.
 
 ## Code style & voice
 
