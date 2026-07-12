@@ -9,7 +9,9 @@ import {
   deleteCustomTask,
   setTaskPaused,
   updateCustomTask,
+  updateTaskSchedule,
   type CustomTaskInput,
+  type TaskScheduleInput,
 } from "../../../lib/tasks/custom";
 
 /**
@@ -39,9 +41,9 @@ async function callerUserId(): Promise<string | null> {
   return user?.id ?? null;
 }
 
-function parseTaskForm(formData: FormData): CustomTaskInput | { error: string } {
-  const label = String(formData.get("label") ?? "").trim();
-  const prompt = String(formData.get("prompt") ?? "").trim();
+function parseScheduleFields(
+  formData: FormData,
+): { weekdays: number[]; localHour: number } | { error: string } {
   const weekdays = [
     ...new Set(
       formData
@@ -51,17 +53,33 @@ function parseTaskForm(formData: FormData): CustomTaskInput | { error: string } 
     ),
   ].sort((left, right) => left - right);
   const localHour = Number(formData.get("localHour"));
+
+  if (weekdays.length === 0) return { error: "Pick at least one day." };
+  if (!Number.isInteger(localHour) || localHour < 0 || localHour > 23) {
+    return { error: "Pick a time." };
+  }
+  return { weekdays, localHour };
+}
+
+function parseTaskForm(formData: FormData): CustomTaskInput | { error: string } {
+  const label = String(formData.get("label") ?? "").trim();
+  const prompt = String(formData.get("prompt") ?? "").trim();
   const deliveryRaw = String(formData.get("deliveryPref") ?? "text");
   const deliveryPref =
     deliveryRaw === "email" || deliveryRaw === "none" ? deliveryRaw : ("text" as const);
 
   if (label.length < 3) return { error: "Give the task a short name (at least 3 characters)." };
   if (prompt.length < 10) return { error: "Tell Homa what to do in a sentence or two." };
-  if (weekdays.length === 0) return { error: "Pick at least one day." };
-  if (!Number.isInteger(localHour) || localHour < 0 || localHour > 23) {
-    return { error: "Pick a time." };
-  }
-  return { label, prompt, weekdays, localHour, deliveryPref };
+  const schedule = parseScheduleFields(formData);
+  if ("error" in schedule) return schedule;
+  return { label, prompt, ...schedule, deliveryPref };
+}
+
+function parseTaskScheduleForm(formData: FormData): TaskScheduleInput | { error: string } {
+  const schedule = parseScheduleFields(formData);
+  if ("error" in schedule) return schedule;
+  const deliveryRaw = String(formData.get("deliveryPref") ?? "text");
+  return { ...schedule, deliveryPref: deliveryRaw === "email" ? "email" : "text" };
 }
 
 export async function createTaskAction(
@@ -92,6 +110,26 @@ export async function updateTaskAction(
   if ("error" in parsed) return { error: parsed.error };
 
   const result = await updateCustomTask(familyId, taskId, parsed);
+  if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
+}
+
+/** Built-in tasks (morning brief, evening check-in): the words are
+ * Homa's, the schedule is the parent's. Only days, hour, and channel
+ * move here; label and prompt stay untouched. */
+export async function updateTaskScheduleAction(
+  taskId: string,
+  _prev: TaskActionState,
+  formData: FormData,
+): Promise<TaskActionState> {
+  const familyId = await requireFamilyId();
+  if (!familyId) return { error: "Set up your family first." };
+
+  const parsed = parseTaskScheduleForm(formData);
+  if ("error" in parsed) return { error: parsed.error };
+
+  const result = await updateTaskSchedule(familyId, taskId, parsed);
   if (!result.ok) return { error: result.note };
   revalidatePath("/app/tasks");
   return { error: null };

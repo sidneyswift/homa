@@ -3,7 +3,51 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-12 · Progress tab rebuilt as the living report with a map
+## 2026-07-12 · Task cards open an editor dialog; built-in schedules became editable
+
+Founder ask (chat, with reference shots of a modal task editor): clicking a
+task card on /app/tasks should let the parent update it. Implemented as one
+dialog (`task-edit-overlay.tsx`, house focus-trap pattern from the Binder's
+MaterialDetailOverlay) opened by every real task card and by "Add a task";
+custom tasks get the full form plus "Delete this task", and the old card
+footer links retired. Decisions made alone, sized to that ask: built-in kinds
+(morning brief, evening check-in) became schedule-editable (days, hour,
+text/email delivery) because the founder's visible cards ARE built-ins and the
+dispatcher already honors per-row local_hour/weekdays/delivery_pref; their
+label and prompt stay Homa's (vocabulary law, gated copy). Save-only ("none")
+delivery stays custom-only: a built-in that only writes to the page would be a
+check-in question nobody hears. The new `updateTaskSchedule` in
+lib/tasks/custom.ts carries the rule for web and chat; `update_task` routes
+schedule-only patches through it, so "move my brief to 7am" works in chat too,
+and list_tasks' note now says movable, never renamed or deleted.
+
+Both copy gates ran on the dialog strings. Reader gate accepted: the "Text me"
+option now states the caller's own situation instead of a conditional rule
+(the page reads family_phones on the server connection and swaps wording, plus
+a "Set up texting in Settings" link when unlinked); the built-in dialog intro
+names the fixed part, the changeable part, and where the off switch lives; the
+card descriptions dropped their cadence words ("Every weekday morning",
+"in the evening") because the schedule is now editable and the schedule line
+under each card is the one place that says when; the custom-task example
+became a research ask (reminders were teaching parents that reminders are all
+Homa does); both dialogs ask the same plain "How should it reach you?".
+Editor gate must-fix applied: the create flow keeps one name ("Add a task"
+button and heading, "Add this task" commit, "Create task" retired); its
+cadence-in-example suggestion applied ("Find one new phonics game and explain
+how to play it."); the save-verb collision suggestion declined, "saved to this
+page" is this surface's fixed vocabulary. Verified: web typecheck, lint,
+isolation guard, eve build, and the Next build, all green. No rendered-UI
+review ran; the dialog reuses house patterns and tokens only.
+
+Same session, founder "test": the surface got its first UI tests
+(`apps/web/app/app/tasks/tasks-view.test.tsx`, 8 tests in the progress-UI
+style: static render, HTML contract). They pin the card-opens-dialog wiring
+(aria-haspopup, editor closed on first paint, Edit/Delete gone from cards,
+switch stays on the card), the per-kind dialog contract (custom: full form
+plus "Delete this task"; built-in: schedule only, no rename or reword or
+delete or save-only), the one-name create flow, the per-caller texting
+wording swap, and the schedule label helpers. New root script
+`check:tasks-ui`, wired into CI beside the research-brief check.
 
 Implements the founder-chosen refined direction in production code. The
 Progress page (`apps/web/components/progress/progress-view.tsx`) is now a bare

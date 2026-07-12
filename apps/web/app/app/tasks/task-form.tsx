@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { createTaskAction, updateTaskAction, type TaskActionState } from "./actions";
@@ -10,7 +11,9 @@ import type { TaskRowView } from "./tasks-view";
  * Create/edit form for a custom task (HT-6). One form, two actions: no
  * task prop means create. Weekday chips and an hour select keep input
  * inside what the dispatcher can actually honor (on the hour, chosen
- * days, the family's own zone).
+ * days, the family's own zone). The schedule field components are
+ * exported for the built-in editor in task-edit-overlay.tsx, which
+ * shares days/time/delivery but never label or prompt.
  */
 
 const DAYS: ReadonlyArray<{ value: number; short: string }> = [
@@ -32,7 +35,145 @@ function hourOption(hour: number): string {
 
 const INITIAL_STATE: TaskActionState = { error: null };
 
-export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => void }) {
+export const taskInputClass =
+  "w-full rounded-md border border-border bg-page px-3 py-2 text-sm text-body outline-none focus:border-brand";
+
+export function WeekdayChips({ defaultSelected }: { defaultSelected: ReadonlySet<number> }) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-strong">Which days?</legend>
+      <div className="mt-1.5 flex gap-1.5">
+        {DAYS.map((day, index) => (
+          <label
+            key={`${day.value}-${index}`}
+            className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center"
+          >
+            <input
+              type="checkbox"
+              name="weekdays"
+              value={day.value}
+              defaultChecked={defaultSelected.has(day.value)}
+              className="peer sr-only"
+            />
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-pill border border-border bg-card text-xs font-bold text-muted transition-colors peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:text-[var(--clay-700)]">
+              {day.short}
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+export function HourField({ defaultHour }: { defaultHour: number }) {
+  return (
+    <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
+      What time?
+      <select name="localHour" defaultValue={defaultHour} className={taskInputClass}>
+        {HOURS.map((hour) => (
+          <option key={hour} value={hour}>
+            {hourOption(hour)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/** The "Text me" label tells the parent her own situation instead of a
+ * conditional rule (reader gate 2026-07-12: "have I set up texting? The
+ * app knows and this sentence won't tell me"). */
+function deliveryOptions(textingLinked: boolean) {
+  return [
+    {
+      value: "text",
+      label: textingLinked
+        ? "Text me."
+        : "Text me. Until texting is set up, it emails you instead.",
+    },
+    { value: "email", label: "Email me." },
+    { value: "none", label: "Just save it to this page." },
+  ] as const;
+}
+
+export function DeliveryChoice({
+  values,
+  defaultValue,
+  textingLinked,
+}: {
+  values: ReadonlyArray<"text" | "email" | "none">;
+  defaultValue: "text" | "email" | "none";
+  textingLinked: boolean;
+}) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-strong">How should it reach you?</legend>
+      <div className="mt-1.5 flex flex-col gap-1 text-sm text-body">
+        {deliveryOptions(textingLinked)
+          .filter((option) => values.includes(option.value))
+          .map((option) => (
+            <label key={option.value} className="inline-flex items-center gap-2">
+              <input
+                type="radio"
+                name="deliveryPref"
+                value={option.value}
+                defaultChecked={defaultValue === option.value}
+                className="accent-[var(--brand,#E7602F)]"
+              />
+              {option.label}
+            </label>
+          ))}
+        {!textingLinked ? (
+          <Link
+            href="/app/settings"
+            className="text-xs font-semibold text-brand hover:underline"
+          >
+            Set up texting in Settings
+          </Link>
+        ) : null}
+      </div>
+    </fieldset>
+  );
+}
+
+export function TaskFormButtons({
+  pending,
+  submitLabel,
+  onCancel,
+}: {
+  pending: boolean;
+  submitLabel: string;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="flex gap-2">
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+      >
+        {submitLabel}
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+export function TaskForm({
+  task,
+  textingLinked,
+  onDone,
+}: {
+  task?: TaskRowView;
+  textingLinked: boolean;
+  onDone: () => void;
+}) {
   const router = useRouter();
   const action = task ? updateTaskAction.bind(null, task.id) : createTaskAction;
   const [state, formAction, pending] = useActionState(
@@ -55,20 +196,22 @@ export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => v
     deliveryPref: task?.deliveryPref ?? "text",
   };
 
-  const inputClass =
-    "w-full rounded-md border border-border bg-page px-3 py-2 text-sm text-body outline-none focus:border-brand";
-
   return (
     <form action={formAction} className="flex flex-col gap-3">
+      {/* Example task swapped from a reminder to a look-it-up ask
+          (reader gate 2026-07-12): reminders are the obvious use, the
+          example is the one place that shows Homa can research too.
+          No cadence words in the example (editor gate, same day): the
+          day and time fields below are the one home for timing. */}
       <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
         What should it be called?
         <input
           name="label"
           defaultValue={defaults.label}
-          placeholder="Co-op prep"
+          placeholder="Phonics game ideas"
           maxLength={60}
           required
-          className={inputClass}
+          className={taskInputClass}
         />
       </label>
 
@@ -77,94 +220,35 @@ export function TaskForm({ task, onDone }: { task?: TaskRowView; onDone: () => v
         <textarea
           name="prompt"
           defaultValue={defaults.prompt}
-          placeholder="Remind me to pack the co-op bag and print this week's pages."
+          placeholder="Find one new phonics game and explain how to play it."
           maxLength={1000}
           rows={3}
           required
-          className={inputClass}
+          className={taskInputClass}
         />
       </label>
 
-      <fieldset>
-        <legend className="text-sm font-semibold text-strong">Which days?</legend>
-        <div className="mt-1.5 flex gap-1.5">
-          {DAYS.map((day, index) => (
-            <label
-              key={`${day.value}-${index}`}
-              className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center"
-            >
-              <input
-                type="checkbox"
-                name="weekdays"
-                value={day.value}
-                defaultChecked={defaults.weekdays.has(day.value)}
-                className="peer sr-only"
-              />
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-pill border border-border bg-card text-xs font-bold text-muted transition-colors peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:text-[var(--clay-700)]">
-                {day.short}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <WeekdayChips defaultSelected={defaults.weekdays} />
 
       <div className="flex flex-wrap gap-4">
-        <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
-          What time?
-          <select name="localHour" defaultValue={defaults.localHour} className={inputClass}>
-            {HOURS.map((hour) => (
-              <option key={hour} value={hour}>
-                {hourOption(hour)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <fieldset>
-          <legend className="text-sm font-semibold text-strong">
-            How should each result reach you?
-          </legend>
-          <div className="mt-1.5 flex flex-col gap-1 text-sm text-body">
-            {(
-              [
-                { value: "text", label: "Text me. Without texting set up, it emails instead." },
-                { value: "email", label: "Email me." },
-                { value: "none", label: "Just save it to this page." },
-              ] as const
-            ).map((option) => (
-              <label key={option.value} className="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="deliveryPref"
-                  value={option.value}
-                  defaultChecked={defaults.deliveryPref === option.value}
-                  className="accent-[var(--brand,#E7602F)]"
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <HourField defaultHour={defaults.localHour} />
+        <DeliveryChoice
+          values={["text", "email", "none"]}
+          defaultValue={defaults.deliveryPref}
+          textingLinked={textingLinked}
+        />
       </div>
 
       {state.error ? <p className="text-sm text-muted">{state.error}</p> : null}
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
-        >
-          {task ? "Save changes" : "Create task"}
-        </button>
-        <button
-          type="button"
-          onClick={onDone}
-          className="rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
-        >
-          Cancel
-        </button>
-      </div>
+      {/* "Add this task", never "Create task": the button that opened
+          this dialog says "Add a task", and one action keeps one name
+          (editor gate 2026-07-12). */}
+      <TaskFormButtons
+        pending={pending}
+        submitLabel={task ? "Save changes" : "Add this task"}
+        onCancel={onDone}
+      />
     </form>
   );
 }

@@ -4,16 +4,19 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, FlaskConical, Moon, Plus } from "lucide-react";
 
-import { deleteTaskAction, setTaskPausedAction } from "./actions";
-import { TaskForm } from "./task-form";
+import { setTaskPausedAction } from "./actions";
+import { BUILT_IN_COPY } from "./task-copy";
+import { TaskEditOverlay } from "./task-edit-overlay";
 import { TaskHistory } from "./task-history";
 
 /**
  * The Homa's tasks board (HT-5/HT-6): scheduled work on top, what the
  * runs produced below. Pure client render over page-loaded data; every
- * write goes through the server actions. Copy follows the copy rulebook:
- * sentence case, offers never commands, no red or "behind" framing (a
- * failed run reads as "didn't send", muted, never alarmed).
+ * write goes through the server actions. Clicking a task card opens the
+ * editor dialog (task-edit-overlay.tsx); the on/off switch is the one
+ * control that acts directly from the card. Copy follows the copy
+ * rulebook: sentence case, offers never commands, no red or "behind"
+ * framing (a failed run reads as "didn't send", muted, never alarmed).
  */
 
 export interface TaskRowView {
@@ -45,26 +48,6 @@ export interface TaskRunView {
   deliveredChannel: "sms" | "email" | "none" | null;
   startedAt: string;
 }
-
-// Copy passed both gates 2026-07-10 (reader, then editor). Vocabulary
-// law for this surface: the morning artifact is a "brief" (its card
-// title carries the name, nothing else renames it), parent-created
-// things are "tasks", and results are "saved to this page".
-const BUILT_IN_COPY: Record<
-  "morning_brief" | "journal_prompt",
-  { label: string; description: string }
-> = {
-  morning_brief: {
-    label: "Morning research brief",
-    description:
-      "Every weekday morning: one thing Homa looked into for your kids, and why it matters.",
-  },
-  journal_prompt: {
-    label: "Evening check-in",
-    description:
-      "One easy question in the evening. Answer in a sentence and Homa remembers the day.",
-  },
-};
 
 export function hourLabel(hour: number): string {
   const twelve = hour % 12 === 0 ? 12 : hour % 12;
@@ -123,12 +106,14 @@ function PauseToggle({ task }: { task: TaskRowView }) {
       aria-checked={on}
       aria-label={on ? "Turn this task off" : "Turn this task on"}
       disabled={pending}
-      onClick={() =>
+      onClick={(event) => {
+        // The switch acts from the card without opening the editor.
+        event.stopPropagation();
         startTransition(async () => {
           const result = await setTaskPausedAction(task.id, on);
           if (result.error === null) router.refresh();
-        })
-      }
+        });
+      }}
       className={
         on
           ? "relative h-6 w-11 shrink-0 rounded-pill bg-brand transition-colors disabled:opacity-60"
@@ -146,10 +131,16 @@ function PauseToggle({ task }: { task: TaskRowView }) {
   );
 }
 
-function TaskCard({ task, timeZone }: { task: TaskRowView; timeZone: string }) {
-  const router = useRouter();
+function TaskCard({
+  task,
+  timeZone,
+  textingLinked,
+}: {
+  task: TaskRowView;
+  timeZone: string;
+  textingLinked: boolean;
+}) {
   const [editing, setEditing] = useState(false);
-  const [pending, startTransition] = useTransition();
   const copy =
     task.kind === "custom"
       ? { label: task.label ?? "Your task", description: task.prompt ?? "" }
@@ -157,63 +148,56 @@ function TaskCard({ task, timeZone }: { task: TaskRowView; timeZone: string }) {
   const next = task.paused ? null : nextRunLabel(task.nextRunAt, timeZone);
 
   return (
-    <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 text-brand">
-            <TaskIcon kind={task.kind} />
-          </span>
-          <div>
-            <p className="font-semibold text-strong">{copy.label}</p>
-            <p className="mt-0.5 text-sm text-muted">{copy.description}</p>
-            <p className="mt-2 text-xs font-semibold text-subtle">
-              {weekdaysLabel(task.weekdays)} {"\u00b7"} {hourLabel(task.localHour)}
-              {task.kind === "custom"
-                ? ` \u00b7 ${
-                    task.deliveryPref === "text"
-                      ? "by text"
-                      : task.deliveryPref === "email"
-                        ? "by email"
-                        : "saved to this page"
-                  }`
-                : ""}
-              {next ? ` \u00b7 next: ${next}` : task.paused ? " \u00b7 off" : ""}
-            </p>
+    <>
+      {/* The whole card is a generous pointer target; the title button
+          carries the real semantics for keyboard and screen readers
+          (a native button cannot wrap the switch). */}
+      <div
+        onClick={() => setEditing(true)}
+        className="cursor-pointer rounded-lg border border-border-subtle bg-card p-4 shadow-sm transition-colors duration-(--dur-fast) ease-out hover:border-[var(--clay-300)]"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 text-brand">
+              <TaskIcon kind={task.kind} />
+            </span>
+            <div>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={editing}
+                onClick={() => setEditing(true)}
+                className="text-left font-semibold text-strong"
+              >
+                {copy.label}
+              </button>
+              <p className="mt-0.5 text-sm text-muted">{copy.description}</p>
+              <p className="mt-2 text-xs font-semibold text-subtle">
+                {weekdaysLabel(task.weekdays)} {"\u00b7"} {hourLabel(task.localHour)}
+                {task.kind === "custom"
+                  ? ` \u00b7 ${
+                      task.deliveryPref === "text"
+                        ? "by text"
+                        : task.deliveryPref === "email"
+                          ? "by email"
+                          : "saved to this page"
+                    }`
+                  : ""}
+                {next ? ` \u00b7 next: ${next}` : task.paused ? " \u00b7 off" : ""}
+              </p>
+            </div>
           </div>
+          <PauseToggle task={task} />
         </div>
-        <PauseToggle task={task} />
       </div>
-      {task.kind === "custom" ? (
-        <div className="mt-3 flex gap-3 border-t border-border-subtle pt-3">
-          <button
-            type="button"
-            onClick={() => setEditing((value) => !value)}
-            className="text-xs font-semibold text-brand hover:underline"
-          >
-            {editing ? "Close" : "Edit"}
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => {
-              if (!window.confirm(`Delete "${copy.label}"? This can't be undone.`)) return;
-              startTransition(async () => {
-                const result = await deleteTaskAction(task.id);
-                if (result.error === null) router.refresh();
-              });
-            }}
-            className="text-xs font-semibold text-muted hover:underline disabled:opacity-60"
-          >
-            Delete
-          </button>
-        </div>
-      ) : null}
       {editing ? (
-        <div className="mt-3">
-          <TaskForm task={task} onDone={() => setEditing(false)} />
-        </div>
+        <TaskEditOverlay
+          task={task}
+          textingLinked={textingLinked}
+          onClose={() => setEditing(false)}
+        />
       ) : null}
-    </div>
+    </>
   );
 }
 
@@ -247,12 +231,14 @@ export function TasksView({
   timeZone,
   briefFlagOn,
   journalFlagOn,
+  textingLinked,
 }: {
   tasks: TaskRowView[];
   runs: TaskRunView[];
   timeZone: string;
   briefFlagOn: boolean;
   journalFlagOn: boolean;
+  textingLinked: boolean;
 }) {
   const [creating, setCreating] = useState(false);
   const hasBrief = tasks.some((task) => task.kind === "morning_brief");
@@ -276,7 +262,9 @@ export function TasksView({
         </div>
         <button
           type="button"
-          onClick={() => setCreating((value) => !value)}
+          aria-haspopup="dialog"
+          aria-expanded={creating}
+          onClick={() => setCreating(true)}
           className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
         >
           <Plus size={16} /> Add a task
@@ -284,9 +272,11 @@ export function TasksView({
       </header>
 
       {creating ? (
-        <div className="mt-5 rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <TaskForm onDone={() => setCreating(false)} />
-        </div>
+        <TaskEditOverlay
+          task={null}
+          textingLinked={textingLinked}
+          onClose={() => setCreating(false)}
+        />
       ) : null}
 
       <section className="mt-6">
@@ -313,7 +303,12 @@ export function TasksView({
             />
           ) : null}
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} timeZone={timeZone} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              timeZone={timeZone}
+              textingLinked={textingLinked}
+            />
           ))}
         </div>
       </section>

@@ -60,6 +60,9 @@ jobs:
       - name: Morning research brief format
         run: pnpm check:research-brief
 
+      - name: Homa's tasks UI checks (cards, editor dialog)
+        run: pnpm check:tasks-ui
+
       - name: Install PostgreSQL 16 for disposable E2E
         run: |
           sudo apt-get update

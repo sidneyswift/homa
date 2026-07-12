@@ -157,12 +157,20 @@ export async function updateCustomTask(
     return { ok: false, note: parsed.error.issues[0]?.message ?? "Invalid change." };
   }
   const sql = mapDb();
-  const rows = await sql<{ id: string; local_hour: number; weekdays: number[] }[]>`
-    select id, local_hour, weekdays from public.agent_schedules
-    where id = ${taskId} and family_id = ${familyId} and kind = 'custom'
+  const rows = await sql<
+    { id: string; kind: FamilyTaskKind; local_hour: number; weekdays: number[] }[]
+  >`
+    select id, kind, local_hour, weekdays from public.agent_schedules
+    where id = ${taskId} and family_id = ${familyId}
   `;
   const current = rows[0];
   if (!current) return { ok: false, note: "That task is not in this family." };
+  if (current.kind !== "custom") {
+    return {
+      ok: false,
+      note: "Built-in task words are Homa's. Only its days, hour, and text/email delivery can change (updateTaskSchedule).",
+    };
+  }
 
   const localHour = parsed.data.localHour ?? current.local_hour;
   const weekdays = parsed.data.weekdays ?? current.weekdays;
@@ -179,6 +187,59 @@ export async function updateCustomTask(
         delivery_pref = coalesce(${parsed.data.deliveryPref ?? null}, delivery_pref),
         next_run_at = ${nextRun.toISOString()}
     where id = ${taskId} and family_id = ${familyId} and kind = 'custom'
+  `;
+  return { ok: true };
+}
+
+export const taskScheduleInputSchema = z.object({
+  weekdays: taskWeekdaysSchema,
+  localHour: z.number().int().min(0).max(23),
+  // Built-in tasks always produce a message for the parent, so "none"
+  // (save-only) stays a custom-task option.
+  deliveryPref: z.enum(["text", "email"]),
+});
+export type TaskScheduleInput = z.infer<typeof taskScheduleInputSchema>;
+
+/**
+ * Schedule-only edit, valid for every kind. Built-in tasks keep their
+ * fixed name and prompt (Homa writes those), but the parent owns when
+ * they arrive and how they reach her. The dispatcher already honors
+ * per-row local_hour/weekdays/delivery_pref for built-ins, and seeding
+ * never rewrites them, so the edit sticks. Partial patches fill from
+ * the current row, same posture as updateCustomTask.
+ */
+export async function updateTaskSchedule(
+  familyId: string,
+  taskId: string,
+  patch: Partial<TaskScheduleInput>,
+): Promise<{ ok: true } | { ok: false; note: string }> {
+  const parsed = taskScheduleInputSchema.partial().safeParse(patch);
+  if (!parsed.success) {
+    return { ok: false, note: parsed.error.issues[0]?.message ?? "Invalid change." };
+  }
+  const sql = mapDb();
+  const rows = await sql<
+    { id: string; local_hour: number; weekdays: number[] }[]
+  >`
+    select id, local_hour, weekdays from public.agent_schedules
+    where id = ${taskId} and family_id = ${familyId}
+  `;
+  const current = rows[0];
+  if (!current) return { ok: false, note: "That task is not in this family." };
+
+  const localHour = parsed.data.localHour ?? current.local_hour;
+  const weekdays = parsed.data.weekdays ?? current.weekdays;
+  const timeZone = await familyTimeZone(familyId);
+  if (!timeZone) return { ok: false, note: "The family's time zone is not set yet." };
+  const nextRun = nextTaskRunInstant(timeZone, localHour, weekdays, new Date());
+
+  await sql`
+    update public.agent_schedules
+    set local_hour = ${localHour},
+        weekdays = ${sql.array(weekdays)}::smallint[],
+        delivery_pref = coalesce(${parsed.data.deliveryPref ?? null}, delivery_pref),
+        next_run_at = ${nextRun.toISOString()}
+    where id = ${taskId} and family_id = ${familyId}
   `;
   return { ok: true };
 }

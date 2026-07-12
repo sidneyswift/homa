@@ -37,7 +37,7 @@ export default defineTool({
         paused: task.paused,
         nextRunAt: task.nextRunAt,
       })),
-      note: "Built-in kinds (journal_prompt, morning_brief) can be paused or resumed but never edited or deleted; custom tasks can be changed freely.",
+      note: "Built-in kinds (journal_prompt, morning_brief) can be paused, resumed, or moved (days, hour, text/email delivery) but never renamed, reworded, or deleted; custom tasks can be changed freely.",
     };
   },
 });

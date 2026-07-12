@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getMyFamily } from "../../../lib/family";
+import { getFamilyPhones } from "../../../lib/family-phone";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { PageColumn } from "../../../components/dashboard/page-column";
@@ -12,7 +13,10 @@ import { TasksView, type TaskRowView, type TaskRunView } from "./tasks-view";
  * on her own schedule and what those runs produced; clearly not the
  * kids' Week planner. Reads ride the caller's own RLS (the new SELECT
  * policies from migration #49); every write goes through the server
- * actions beside this file.
+ * actions beside this file. The one exception is the texting lookup:
+ * family_phones is deny-all, so getFamilyPhones runs on the server
+ * connection with familyId from the caller's own membership (tenancy
+ * law), feeding the honest "Text me" wording in the task editor.
  */
 
 export const metadata: Metadata = {
@@ -25,7 +29,7 @@ export default async function TasksPage() {
   if (!family?.profile_completed_at) redirect("/onboarding");
 
   const supabase = await createSupabaseServerClient();
-  const [scheduleResult, runsResult] = await Promise.all([
+  const [scheduleResult, runsResult, phones, userResult] = await Promise.all([
     supabase
       .from("agent_schedules")
       .select(
@@ -37,6 +41,8 @@ export default async function TasksPage() {
       .select("id, kind, status, title, summary, delivered_channel, started_at")
       .order("started_at", { ascending: false })
       .limit(30),
+    getFamilyPhones(family.id),
+    supabase.auth.getUser(),
   ]);
   if (scheduleResult.error) {
     throw new Error(`agent schedules read failed: ${scheduleResult.error.message}`);
@@ -68,6 +74,14 @@ export default async function TasksPage() {
     startedAt: row.started_at as string,
   }));
 
+  // Texting counts as set up for THIS adult when a linked number is
+  // theirs or predates per-member attribution (task delivery follows
+  // the same rule in selectTaskDeliveryRecipients).
+  const callerUserId = userResult.data.user?.id ?? null;
+  const textingLinked = phones.some(
+    (phone) => phone.member_user_id === null || phone.member_user_id === callerUserId,
+  );
+
   return (
     <PageColumn>
       <TasksView
@@ -76,6 +90,7 @@ export default async function TasksPage() {
         timeZone={effectiveTimeZone(family.time_zone)}
         briefFlagOn={process.env.MORNING_BRIEF_ENABLED === "true"}
         journalFlagOn={process.env.JOURNAL_PROMPT_ENABLED === "true"}
+        textingLinked={textingLinked}
       />
     </PageColumn>
   );
