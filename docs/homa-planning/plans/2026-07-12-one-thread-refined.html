@@ -164,12 +164,14 @@
     /* ---------- thread ---------- */
     .chat-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-height: 40px; }
     .chat-top h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; color: var(--text-strong); flex: 1; }
+    /* Chats button: a quiet ghost, no border chrome (founder trim). */
     .chrome-pill {
-      display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border-subtle);
-      background: var(--surface-raised); color: var(--text-strong); border-radius: var(--radius-pill);
-      padding: 8px 14px; font-size: .84rem; font-weight: 700; min-height: 40px;
+      display: inline-flex; align-items: center; gap: 6px; border: 0;
+      background: transparent; color: var(--text-muted); border-radius: var(--radius-md);
+      padding: 8px 12px; font-size: .9rem; font-weight: 700; min-height: 40px;
     }
-    .chrome-pill:hover { border-color: var(--brand); }
+    .chrome-pill:hover { background: var(--surface-sunken); color: var(--text-strong); }
+    .chrome-pill[aria-expanded="true"] { background: var(--clay-50); color: var(--clay-700); }
     .stage.phone .chat-top .chrome-pill { display: none; }
 
     .thread-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
@@ -269,13 +271,22 @@
     .context-chip .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .context-chip button { border: 0; background: transparent; color: inherit; font-size: .95rem; padding: 4px 9px; min-width: 32px; min-height: 30px; border-radius: var(--radius-pill); }
 
-    /* Chats panel (the winner, renamed) */
+    /* Chats panel: on desktop a real sidebar, docked to the chat
+       column's right edge, full height, sliding in (founder call). */
     .side-panel {
-      width: 262px; flex-shrink: 0; margin-left: 14px; border: 1px solid var(--border-subtle);
-      background: var(--surface-raised); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
-      padding: 12px; overflow-y: auto; max-height: 520px;
+      position: absolute; top: 0; right: 0; bottom: 0; width: 302px; z-index: 15;
+      background: var(--surface-raised); border-left: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-lg); padding: 14px 14px 18px; overflow-y: auto;
     }
-    .side-panel h4, .chats-sheet h4 { margin: 2px 0 8px; font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-strong); }
+    .panel-head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+    .panel-head h4 { margin: 0; flex: 1; }
+    .panel-close {
+      width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent;
+      color: var(--text-subtle); display: inline-flex; align-items: center; justify-content: center;
+    }
+    .panel-close:hover { background: var(--surface-sunken); color: var(--text-strong); }
+    .side-panel h4, .chats-sheet h4 { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-strong); }
+    .chats-sheet h4 { margin: 2px 0 8px; }
     .panel-search {
       width: 100%; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
       background: var(--bg-page); padding: 8px 14px; font: inherit; font-size: .84rem; min-height: 40px;
@@ -737,7 +748,7 @@ function frameHtml() {
   const inner = '' +
     '<div class="chat-top">' +
       "<h3>Ask</h3>" +
-      '<button type="button" class="chrome-pill" id="open-chats" aria-expanded="' + (state.panelOpen ? "true" : "false") + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h12"/></svg>Chats</button>' +
+      '<button type="button" class="chrome-pill" id="open-chats" aria-expanded="' + (state.panelOpen ? "true" : "false") + '">Chats</button>' +
     "</div>" +
     '<div class="thread-wrap">' +
       '<div class="thread-col">' + threadHtml() +
@@ -747,7 +758,6 @@ function frameHtml() {
         '<div class="day-float" id="day-float" aria-hidden="true"></div>' +
         '<button type="button" class="backnow" id="backnow" hidden aria-label="Back to now"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></button>' +
       "</div>" +
-      (!isPhone && state.panelOpen ? '<aside class="side-panel" id="side-panel" aria-label="Chats"><h4>Chats</h4>' + chatsListHtml() + "</aside>" : "") +
     "</div>" +
     '<div class="composer-zone">' +
       continuingChipHtml() +
@@ -755,12 +765,23 @@ function frameHtml() {
     "</div>" +
     overlay;
 
+  /* The desktop sidebar docks to the canvas edge, outside the centered
+     chat column, so it reads as part of the app frame. */
+  const sidebar = !isPhone && state.panelOpen
+    ? '<aside class="side-panel" id="side-panel" aria-label="Chats">' +
+        '<div class="panel-head"><h4>Chats</h4>' +
+        '<button type="button" class="panel-close" id="close-side" aria-label="Close chats"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>' +
+        chatsListHtml() +
+      "</aside>"
+    : "";
+
   return '<div class="stage ' + (isPhone ? "phone" : "desktop") + '">' +
     '<div class="frame">' +
       railHtml() +
       '<div class="canvas">' +
         phoneBarHtml() +
         '<div class="canvas-inner">' + inner + "</div>" +
+        sidebar +
       "</div>" +
     "</div>" +
   "</div>";
@@ -972,6 +993,22 @@ function wireFrame() {
     render(true);
     const opener = document.getElementById("open-chats-bar") || document.getElementById("open-chats");
     if (opener) opener.focus();
+  });
+  const closeSide = host.querySelector("#close-side");
+  if (closeSide) closeSide.addEventListener("click", () => {
+    state.panelOpen = false;
+    render(true);
+    const opener = document.getElementById("open-chats");
+    if (opener) opener.focus();
+  });
+  const sidePanel = host.querySelector("#side-panel");
+  if (sidePanel) sidePanel.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      state.panelOpen = false;
+      render(true);
+      const opener = document.getElementById("open-chats");
+      if (opener) opener.focus();
+    }
   });
   const overlay = host.querySelector("#chats-overlay");
   if (overlay) {
