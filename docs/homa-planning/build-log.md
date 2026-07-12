@@ -3,7 +3,31 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-12 · App nav labels simplified (founder ruling)
+## 2026-07-12 · Dispatch session tokens become per-run (HookConflictError incident)
+
+Incident, found while investigating the founder's "no morning text today"
+report (the answer to that report itself: the morning brief is Mon-Fri by
+design and today is Sunday; Saturday was the one-time seeded exception).
+The Gomes family paused the built-in brief on 2026-07-11 and had Homa
+create three custom per-kid 6am briefs (Alma, Ara, Amalia). All three
+fired in the same dispatcher tick this morning; only Alma's delivered.
+The dispatch channel's continuation token was kind:familyId:day, so the
+three custom tasks collided on one eve hook token and eve rejected the
+second and third sessions with HookConflictError (Vercel logs 10:00:34
+UTC, conflicting run wrun_01KXAWAYM0ED17DMD62WNC14JE). Both runs sat
+"running" until the reaper failed them at 13:00 UTC. Daily tasks plus a
+date-only token means the collision repeats every morning.
+
+Fix: the token now appends the homa_task_runs run id
+(lib/conversation-continuity/dispatch-session-token.ts), which is unique
+per schedule per family-local day, so sibling custom tasks get their own
+sessions while a true redelivery of one run still resumes its own. The
+day-scoped fallback remains for callers without a run row. Regression
+test dispatch-session-token.test.ts reproduces the collision (watched red
+on the old shape, green on the fix). Verified: check:continuity 87 tests,
+web typecheck, web lint, and eve build all pass. No data repair needed:
+the failed runs are honestly recorded and every schedule already advanced
+to 2026-07-13.
 
 Founder instruction in session: the app sidebar tabs are now "Ask",
 "Progress", "Planner", and "Tasks". This supersedes the D-ht-4 tab name

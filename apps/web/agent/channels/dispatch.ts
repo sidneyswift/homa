@@ -3,6 +3,7 @@ import { defineChannel, GET } from "eve/channels";
 import {
   listFamilyDeliveryRecipients,
 } from "../../lib/conversation-continuity/delivery-ledger";
+import { dispatchContinuationToken } from "../../lib/conversation-continuity/dispatch-session-token";
 import { buildSignedReplyAddress } from "../../lib/conversation-continuity/email-reply-auth";
 import {
   markCanonicalMessageDelivered,
@@ -123,7 +124,14 @@ export default defineChannel({
     const kind = target.kind ?? "journal_prompt";
     return await send(input.message, {
       auth: input.auth ?? null,
-      continuationToken: `${kind}:${target.familyId ?? "unknown"}:${new Date().toISOString().slice(0, 10)}`,
+      // Per run, not per family-day: two custom tasks for one family in
+      // one tick must not collide on one eve hook token (2026-07-12
+      // HookConflictError incident, two of three per-kid briefs lost).
+      continuationToken: dispatchContinuationToken(
+        kind,
+        target.familyId,
+        target.runId,
+      ),
       state: {
         familyId: target.familyId ?? null,
         phoneNumbers: target.phoneNumbers ?? [],
