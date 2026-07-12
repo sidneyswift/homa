@@ -3,6 +3,7 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { logGap } from "../../lib/knowledge/gaps";
 import { recallPinned } from "../../lib/agent-pinned";
 import { embedText } from "../../lib/learning/embeddings";
 import { effectiveTimeZone } from "../../lib/time-zone";
@@ -87,6 +88,12 @@ export default defineTool({
         limit: input.limit,
       });
       if (results.length === 0) {
+        // Best-effort knowledge gap logging on recall miss
+        try {
+          await logGap(input.query, input.query, access.familyId, "recall_miss");
+        } catch {
+          // Gap logging must never break recall.
+        }
         return {
           found: 0,
           note: "Nothing in this family's history matches those words. A miss never proves the conversation did not happen: try different words once, then ask the parent for a detail instead of guessing or denying.",
@@ -236,6 +243,12 @@ export default defineTool({
     }
 
     if (results.length === 0) {
+      // Best-effort knowledge gap logging on recall miss
+      try {
+        await logGap(input.query, input.query, familyId, "recall_miss");
+      } catch {
+        // Gap logging must never break recall.
+      }
       return {
         found: 0,
         note: "Nothing in this family's history matches those words. A miss never proves the conversation did not happen: try different words once, then ask the parent for a detail instead of guessing or denying.",

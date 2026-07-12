@@ -134,11 +134,24 @@ export async function fetchDemandQueue(limit: number): Promise<DemandCell[]> {
         lateral jsonb_array_elements_text(coalesce(f.context->'curriculums', '[]'::jsonb)) as cur(value)
       group by 2
     ),
+    -- Knowledge gaps from the self-improving system feed into demand.
+    gap_cells as (
+      select
+        'knowledge_gap'::text as lens,
+        btrim(lower(regexp_replace(topic, '[^a-zA-Z0-9]+', '-', 'g')), '-') as topic_key,
+        null::text as stage,
+        'other'::text as topic_type,
+        (research_priority + 1)::int as demand
+      from public.knowledge_gaps
+      where status = 'open'
+        and topic ~ '^[a-zA-Z0-9 _-]{2,60}$'
+    ),
     cells as (
       select * from subject_cells
       union all select * from study_cells
       union all select * from method_cells
       union all select * from curriculum_cells
+      union all select * from gap_cells
     ),
     freshest as (
       select lens, topic_key, stage,
