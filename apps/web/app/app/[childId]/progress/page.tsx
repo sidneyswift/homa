@@ -60,5 +60,14 @@ export default async function ChildProgressPage({
     );
   }
 
-  return <ProgressView view={pageState.view} />;
+  // The permanent token report stays reachable from live Progress
+  // (agent-led-live-progress ruling: token and share reports remain).
+  const reportToken = data.reports.get(child.id)?.token;
+
+  return (
+    <ProgressView
+      view={pageState.view}
+      reportHref={reportToken ? `/onboarding/r/${reportToken}` : null}
+    />
+  );
 }

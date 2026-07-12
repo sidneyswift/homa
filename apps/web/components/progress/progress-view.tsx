@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { ChildProgressView } from "../../lib/child-progress/types";
 import { progressEmptyState } from "../../lib/child-progress/view-copy";
 import { PageColumn } from "../dashboard/page-column";
@@ -36,7 +38,17 @@ function ProgressEmptyState({
   );
 }
 
-export function ProgressView({ view }: { view: ChildProgressView }) {
+export function ProgressView({
+  view,
+  reportHref,
+}: {
+  view: ChildProgressView;
+  /**
+   * The child's permanent token report, kept available by the
+   * agent-led-live-progress ruling. Null when no report exists yet.
+   */
+  reportHref: string | null;
+}) {
   return (
     <PageColumn>
       <div className="mx-auto w-full max-w-[var(--container-md)]">
@@ -53,6 +65,16 @@ export function ProgressView({ view }: { view: ChildProgressView }) {
             These are the skills you have shared with HOMA. Journal
             notes, check-in answers, and corrections update them here.
           </p>
+          {reportHref ? (
+            <div className="mt-5">
+              <Link
+                href={reportHref}
+                className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+              >
+                Open the full report
+              </Link>
+            </div>
+          ) : null}
         </header>
 
         <div className="mt-7">

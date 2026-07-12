@@ -3,6 +3,20 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · Live Progress keeps a door to the full report (founder instruction)
+
+Founder instruction in session: the live Progress view shows an "Open the
+full report" link to the child's permanent token report. This is consistent
+with `agent-led-live-progress`, which keeps token and share reports
+available, so no ruling is superseded and the register is unchanged. The
+founder also flagged the live Progress view itself for a larger redesign
+later; this link is the interim path back to the report's chart and cards.
+Implemented in `apps/web/components/progress/progress-view.tsx` (the link
+renders only when the child has a report token) and
+`apps/web/app/app/[childId]/progress/page.tsx` (passes the token href).
+Verified by `pnpm check:progress-ui` (98 tests), the web typecheck, and the
+web lint before commit.
+
 ## 2026-07-12 · Dispatch session tokens become per-run (HookConflictError incident)
 
 Incident, found while investigating the founder's "no morning text today"

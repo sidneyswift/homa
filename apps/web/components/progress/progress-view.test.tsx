@@ -183,7 +183,15 @@ describe("ProgressView", () => {
       snapshots: [{ label: "PRIVATE SNAPSHOT" }],
     };
     const html = renderToStaticMarkup(
-      <ProgressView view={viewWithInternalData} />,
+      <ProgressView
+        view={viewWithInternalData}
+        reportHref="/onboarding/r/tok-abc123"
+      />,
+    );
+
+    assert.match(
+      html,
+      /<a[^>]*href="\/onboarding\/r\/tok-abc123"[^>]*>Open the full report<\/a>/,
     );
 
     assert.match(html, /Maya(?:&#x27;|')s progress/);
@@ -258,6 +266,7 @@ describe("ProgressView", () => {
       <AppRouterContext.Provider value={ROUTER}>
         <ProgressView
           view={{ ...progressView, subjects: [], conflicts: [] }}
+          reportHref={null}
         />
       </AppRouterContext.Provider>,
     );
@@ -268,6 +277,7 @@ describe("ProgressView", () => {
       /You have not shared any specific skills for Maya yet\./,
     );
     assert.match(html, /Ask HOMA about Maya/);
+    assert.doesNotMatch(html, /Open the full report/);
     assert.doesNotMatch(html, /0 skills|0 observations|0%/i);
     assert.match(html, /min-h-11/);
     assert.match(html, /bg-\[var\(--brand-active\)\]/);
