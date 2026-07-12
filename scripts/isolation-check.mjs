@@ -405,7 +405,13 @@ async function expectPrivilegedSqlRejected(label, operation) {
       code === "23503"
       || code === "23505"
       || code === "23514";
-    report(label, expectedConstraintCode, `SQLSTATE ${code}`);
+    const message =
+      error instanceof Error ? error.message.replace(/\s+/gu, " ") : "unknown";
+    report(
+      label,
+      expectedConstraintCode,
+      `SQLSTATE ${code}: ${message.slice(0, 180)}`,
+    );
     return;
   }
   report(label, false, "constraint probe returned without a result");
@@ -474,6 +480,29 @@ async function insertChildProgressFixtures(
     )
     returning id
   `;
+  const [inboundMessage] = await sql`
+    insert into public.conversation_messages (
+      family_id,
+      session_id,
+      sequence,
+      role,
+      content,
+      channel,
+      member_user_id,
+      provider_message_id
+    )
+    values (
+      ${familyId},
+      ${`isolation-progress:${childId}`},
+      1,
+      'user',
+      'Isolation progress response.',
+      'web',
+      ${evidenceMemberUserIdA},
+      ${`isolation-progress:${childId}`}
+    )
+    returning id
+  `;
   const [live] = await sql`
     insert into public.child_progress_live (
       child_id,
@@ -511,7 +540,9 @@ async function insertChildProgressFixtures(
       active_member_user_id,
       prompt_recipient_member_user_id,
       revision,
-      current_item_id
+      current_item_id,
+      pending_runtime_session_id,
+      pending_turn_id
     )
     values (
       ${childId},
@@ -522,14 +553,11 @@ async function insertChildProgressFixtures(
       ${evidenceMemberUserIdA},
       ${evidenceMemberUserIdA},
       1,
-      'isolation.progress.item'
+      'isolation.progress.item',
+      'isolation-progress-session',
+      'isolation-progress-turn'
     )
     returning id
-  `;
-  await sql`
-    update public.child_progress_evidence
-    set check_in_id = ${checkIn.id}
-    where id in (${evidenceA.id}, ${evidenceB.id})
   `;
   const [response] = await sql`
     insert into public.progress_check_in_responses (
@@ -540,8 +568,7 @@ async function insertChildProgressFixtures(
       item_id,
       answer,
       member_user_id,
-      is_evidence,
-      evidence_id,
+      inbound_message_id,
       idempotency_key
     )
     values (
@@ -550,10 +577,9 @@ async function insertChildProgressFixtures(
       ${checkIn.id},
       1,
       'isolation.progress.item',
-      'easily',
+      'skip',
       ${evidenceMemberUserIdA},
-      true,
-      ${evidenceA.id},
+      ${inboundMessage.id},
       'isolation:response:1'
     )
     returning id
@@ -1031,6 +1057,27 @@ async function expectChildProgressConstraintRejections(context) {
   await expectPrivilegedSqlRejected(
     "constraint rejects response evidence from another member",
     async (transaction) => {
+      const [inboundMessage] = await transaction`
+        insert into public.conversation_messages (
+          family_id,
+          session_id,
+          sequence,
+          role,
+          content,
+          channel,
+          member_user_id
+        )
+        values (
+          ${context.familyBId},
+          'isolation-probe-response-member',
+          1,
+          'user',
+          'Isolation member mismatch response.',
+          'web',
+          ${context.familyBSecondUserId}
+        )
+        returning id
+      `;
       const checkIns = await transaction`
         insert into public.progress_check_ins (
           child_id,
@@ -1060,6 +1107,8 @@ async function expectChildProgressConstraintRejections(context) {
           answer,
           source,
           member_user_id,
+          channel,
+          message_id,
           check_in_id,
           idempotency_key
         )
@@ -1070,6 +1119,8 @@ async function expectChildProgressConstraintRejections(context) {
           'easily',
           'check_in',
           ${context.familyBUserId},
+          'web',
+          ${inboundMessage.id},
           ${checkIns[0].id},
           'isolation:probe:response-member'
         )
@@ -1084,6 +1135,7 @@ async function expectChildProgressConstraintRejections(context) {
           item_id,
           answer,
           member_user_id,
+          inbound_message_id,
           is_evidence,
           evidence_id,
           idempotency_key
@@ -1096,6 +1148,7 @@ async function expectChildProgressConstraintRejections(context) {
           'isolation.probe.response-member',
           'easily',
           ${context.familyBSecondUserId},
+          ${inboundMessage.id},
           true,
           ${evidence[0].id},
           'isolation:probe:response-member'
@@ -1107,6 +1160,54 @@ async function expectChildProgressConstraintRejections(context) {
   await expectPrivilegedSqlRejected(
     "constraint rejects response evidence for another item",
     async (transaction) => {
+      const [inboundMessage] = await transaction`
+        insert into public.conversation_messages (
+          family_id,
+          session_id,
+          sequence,
+          role,
+          content,
+          channel,
+          member_user_id
+        )
+        values (
+          ${context.familyBId},
+          'isolation-probe-response-item',
+          1,
+          'user',
+          'Isolation item mismatch response.',
+          'web',
+          ${context.familyBUserId}
+        )
+        returning id
+      `;
+      const [evidence] = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          channel,
+          message_id,
+          check_in_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.progress.item',
+          'easily',
+          'check_in',
+          ${context.familyBUserId},
+          'web',
+          ${inboundMessage.id},
+          ${context.checkInId},
+          'isolation:probe:wrong-item-evidence'
+        )
+        returning id
+      `;
       await transaction`
         insert into public.progress_check_in_responses (
           child_id,
@@ -1116,6 +1217,7 @@ async function expectChildProgressConstraintRejections(context) {
           item_id,
           answer,
           member_user_id,
+          inbound_message_id,
           is_evidence,
           evidence_id,
           idempotency_key
@@ -1128,8 +1230,9 @@ async function expectChildProgressConstraintRejections(context) {
           'isolation.probe.wrong-item',
           'easily',
           ${context.familyBUserId},
+          ${inboundMessage.id},
           true,
-          ${context.evidenceId},
+          ${evidence.id},
           'isolation:probe:wrong-item'
         )
       `;
@@ -1585,6 +1688,7 @@ async function expectAuthenticatedIsolation() {
       familyBUserId: familyBUser.userId,
       familyBSecondUserId: familyBSecondUser.userId,
       checkInId: childProgressFixtures.checkInId,
+      conflictId: childProgressFixtures.conflictId,
       evidenceId: childProgressFixtures.evidenceId,
       evidenceIdB: childProgressFixtures.evidenceIdB,
     });
