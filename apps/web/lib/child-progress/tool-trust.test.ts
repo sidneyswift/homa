@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { z } from "zod";
+
 import {
   createProgressToolContext,
   DISABLED_PROGRESS_NOTE,
   manageChildProgressInputSchema,
   manageChildProgressResultSchema,
+  manageChildProgressToolInputSchema,
   progressOperationIdempotencyKey,
 } from "./tool-contract";
 import {
@@ -46,6 +49,15 @@ function throwingOperations(
 }
 
 describe("trusted progress command schema", () => {
+  it("publishes a provider-compatible top-level object schema", () => {
+    const jsonSchema = z.toJSONSchema(
+      manageChildProgressToolInputSchema,
+    );
+
+    assert.equal(jsonSchema.type, "object");
+    assert.ok(jsonSchema.properties?.action);
+  });
+
   it("accepts commands without model-owned revision, quote, or idempotency", () => {
     const commands = [
       {

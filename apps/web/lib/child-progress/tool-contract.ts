@@ -38,7 +38,42 @@ const progressResponseAnswerSchema = z.enum([
 ]);
 
 /**
- * The one model-facing command schema. Strict action objects prevent
+ * Eve publishes this single object schema to model providers. Anthropic
+ * requires a top-level `type: object`, which union-root JSON schemas omit.
+ * The stricter discriminated command schema below validates execution.
+ */
+export const manageChildProgressToolInputSchema = z
+  .object({
+    action: z.enum([
+      "start_check_in",
+      "respond_check_in",
+      "pause_check_in",
+      "resume_check_in",
+      "stop_check_in",
+      "takeover_check_in",
+      "record_journal_evidence",
+      "resolve_conflict",
+      "undo_progress_update",
+    ]),
+    childId: childIdSchema.optional(),
+    purpose: z
+      .enum([
+        "whole_map_refresh",
+        "subject_deep_dive",
+        "age_refresh",
+      ])
+      .optional(),
+    subjectId: subjectIdSchema.optional(),
+    checkInId: uuidSchema.optional(),
+    answer: progressResponseAnswerSchema.optional(),
+    reason: z.enum(["topic_change", "explicit_stop"]).optional(),
+    conflictId: uuidSchema.optional(),
+    operationId: uuidSchema.optional(),
+  })
+  .strict();
+
+/**
+ * The execution command schema. Strict action objects prevent
  * authenticated identity and server-selected item fields from crossing the
  * tool boundary as model input.
  */
