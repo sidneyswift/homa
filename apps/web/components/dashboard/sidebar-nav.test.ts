@@ -66,6 +66,10 @@ describe("desktop sidebar visibility", () => {
   it("uses a dedicated screen-only host that cannot be filtered as an aside", () => {
     assert.match(SIDEBAR_SOURCE, /<div\s+data-app-sidebar/u);
     assert.doesNotMatch(SIDEBAR_SOURCE, /<aside/u);
+    assert.match(
+      SIDEBAR_SOURCE,
+      /data-app-sidebar=""\s+role="complementary"\s+aria-label="App sidebar"/u,
+    );
     assert.match(SIDEBAR_SOURCE, /className="app-sidebar /u);
     assert.doesNotMatch(SIDEBAR_SOURCE, /hidden.*lg:flex|lg:flex.*hidden/u);
     assert.match(
