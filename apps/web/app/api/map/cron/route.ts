@@ -1,5 +1,7 @@
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
+import { maybeSendAdminDigest, type DigestOutcome } from "../../../../lib/admin/digest";
+import { recordCronRun } from "../../../../lib/admin/heartbeat";
 import {
   sweepThankYouCards,
   type ThankYouCardSweepResult,
@@ -38,6 +40,12 @@ import {
  *   6. The thank-you card sweep (lib/cards/thank-you.ts): one real
  *      handwritten card per family, 48h after web onboarding completes.
  *      DARK unless THANK_YOU_CARDS_ENABLED + Handwrytten env are set.
+ *   7. The founder digest (lib/admin/digest.ts): one internal email per
+ *      day at HOMA_ADMIN_DIGEST_HOUR_UTC. DARK unless
+ *      HOMA_ADMIN_DIGEST_EMAIL is set.
+ *
+ * Every tick also writes one cron_runs heartbeat row (founder console
+ * MJ-14), success or failure, so a dead cron is visible from /admin.
  *
  * The evening journal prompt moved OUT of this cron: loops that talk to
  * families wake the agent (gateway-plan GW-4; agent/schedules/dispatch.ts
@@ -68,11 +76,12 @@ export async function GET(request: Request): Promise<Response> {
     mailed: 0,
     failed: 0,
   };
+  let digest: DigestOutcome = { skipped: true, sent: false };
 
   try {
     for (const family of await familiesNeedingReminder()) {
       const token = await mintLinkToken(family.id);
-      const sent = await sendReminderEmail(family.email, family.first_child, token);
+      const sent = await sendReminderEmail(family.email, family.first_child, token, family.id);
       if (sent) {
         await markReminderSent(family.id);
         await emitMapEvent("map.reminder_sent", { family_id: family.id });
@@ -82,7 +91,7 @@ export async function GET(request: Request): Promise<Response> {
 
     for (const child of await childrenNowInBand()) {
       const token = await mintLinkToken(child.family_id);
-      const sent = await sendBandReadyEmail(child.email, child.child_name, token);
+      const sent = await sendBandReadyEmail(child.email, child.child_name, token, child.family_id);
       if (sent) {
         await markBandReady(child.family_id, child.child_id);
         await emitMapEvent("map.band_ready_emailed", {
@@ -107,6 +116,7 @@ export async function GET(request: Request): Promise<Response> {
         subjectName,
         token,
         isMonth ? "" : `${plan.child_id}.${plan.subject_id}`,
+        plan.family_id,
       );
       if (sent) {
         await markRetestEmailed(plan.plan_id);
@@ -121,13 +131,30 @@ export async function GET(request: Request): Promise<Response> {
     purged = await purgeEmptyAnonymousLeads();
     transcripts = await syncCallTranscripts();
     cards = await sweepThankYouCards();
+    digest = await maybeSendAdminDigest();
   } catch (error) {
-    console.error("map/cron failed:", error instanceof Error ? error.message : "unknown");
+    const message = error instanceof Error ? error.message : "unknown";
+    console.error("map/cron failed:", message);
+    await recordCronRun(
+      "map_cron",
+      false,
+      { reminders, bandReady, retests, purged, transcripts, cards, digest },
+      message,
+    );
     return Response.json(
-      { ok: false, reminders, bandReady, retests, purged, transcripts, cards },
+      { ok: false, reminders, bandReady, retests, purged, transcripts, cards, digest },
       { status: 500 },
     );
   }
 
-  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards });
+  await recordCronRun("map_cron", true, {
+    reminders,
+    bandReady,
+    retests,
+    purged,
+    transcripts,
+    cards,
+    digest,
+  });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards, digest });
 }

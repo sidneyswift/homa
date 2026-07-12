@@ -30,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
     const family = await getFamilyByEmail(parsed.data.email);
     if (family) {
       const token = await mintLinkToken(family.id);
-      await sendResumeEmail(parsed.data.email, token);
+      await sendResumeEmail(parsed.data.email, token, family.id);
     }
     return Response.json({ ok: true });
   } catch (error) {

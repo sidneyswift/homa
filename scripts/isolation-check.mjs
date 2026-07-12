@@ -2168,6 +2168,11 @@ await expectReadDenied("model_usage");
 // Thank-you card outbox (migration #53): deny-all, server-only. It holds
 // mailing-address snapshots, so no Data API role may ever see or touch it.
 await expectEmptyRead("thank_you_cards");
+// Founder console ledgers (migration #73): deny-all, server-only. The
+// email ledger holds address hashes and delivery errors; the cron
+// heartbeat is pure ops state. No Data API role reads or writes either.
+await expectReadDenied("email_sends");
+await expectReadDenied("cron_runs");
 
 await expectInsertDenied(
   "families",
@@ -2524,6 +2529,21 @@ await expectInsertDenied(
     message: "This must never be writable over the Data API.",
   },
   "anon cannot forge thank-you cards",
+);
+await expectInsertDenied(
+  "email_sends",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    kind: "report_link",
+    to_hash: "0".repeat(64),
+    status: "submitted",
+  },
+  "anon cannot forge email ledger rows",
+);
+await expectInsertDenied(
+  "cron_runs",
+  { job: "map_cron", ok: true },
+  "anon cannot forge cron heartbeats",
 );
 await expectInsertDenied(
   "child_reports",

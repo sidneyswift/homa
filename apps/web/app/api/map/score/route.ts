@@ -90,7 +90,7 @@ export async function POST(request: Request): Promise<Response> {
       }
       try {
         if (!alreadyEmailed && report.email) {
-          const emailed = await sendReportEmail(report.email, report.childName, report.token);
+          const emailed = await sendReportEmail(report.email, report.childName, report.token, family.id);
           if (emailed) await markReportEmailed(family.id, report.childId);
         }
       } catch (error) {

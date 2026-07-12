@@ -74,7 +74,7 @@ export async function sendFamilyInvite(input: {
 
   const url = `${siteUrl()}/join?t=${token}`;
   const inviter = input.inviterName?.trim() || "A parent in your family";
-  const sent = await sendFamilyInviteEmail(email, inviter, input.familyName, url);
+  const sent = await sendFamilyInviteEmail(email, inviter, input.familyName, url, input.familyId);
   if (!sent) {
     await sql`
       delete from public.family_invites

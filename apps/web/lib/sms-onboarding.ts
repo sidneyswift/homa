@@ -381,7 +381,7 @@ export async function finishChildReport(
     }
     try {
       if (!alreadyEmailed && report.email) {
-        const emailed = await sendReportEmail(report.email, report.childName, report.token);
+        const emailed = await sendReportEmail(report.email, report.childName, report.token, familyId);
         if (emailed) await markReportEmailed(familyId, report.childId);
       }
     } catch (error) {

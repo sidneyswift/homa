@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
 import { escapeHtml } from "../html-escape";
@@ -24,6 +26,26 @@ export function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://thankshoma.com";
 }
 
+/** The map-flow email kinds the email_sends ledger accepts. This union is
+ * the validation for email_sends.kind (free text in the schema, the
+ * model_usage posture): a new kind is added here, never in a migration.
+ * Task emails (journal, brief, custom) are absent on purpose; the
+ * dispatch channel already owns their receipts in conversation_deliveries
+ * and one send must never count twice. */
+export type EmailLedgerKind =
+  | "report_link"
+  | "resume_link"
+  | "reminder_24h"
+  | "retest"
+  | "band_ready"
+  | "family_invite"
+  | "admin_digest";
+
+interface EmailLedger {
+  kind: EmailLedgerKind;
+  familyId?: string | null;
+}
+
 interface SendArgs {
   to: string;
   subject: string;
@@ -36,6 +58,10 @@ interface SendArgs {
   /** The line under the card. Defaults to the signed-up-family framing,
    * which is FALSE for a brand-new invitee; the invite email overrides. */
   outerNote?: string;
+  /** When set, the submission outcome is recorded in public.email_sends
+   * (founder console, MJ-14). Best-effort: the ledger never breaks the
+   * send it is recording. */
+  ledger?: EmailLedger;
 }
 
 export type HomaEmailSubmission =
@@ -51,11 +77,57 @@ export function classifyResendHttpFailure(
     : "rejected";
 }
 
+/** sha256 of the lowercased address, the ledger's PII posture (matches
+ * conversation_deliveries.destination_hash). */
+function emailHash(address: string): string {
+  return createHash("sha256").update(address.trim().toLowerCase()).digest("hex");
+}
+
+/**
+ * recordEmailSend(ledger, to, submission, error): void
+ * One email_sends row per submitted map-flow email. Best-effort by law:
+ * the ledger must never break the send it is recording, so failures are
+ * logged and swallowed (the emitMapEvent posture).
+ */
+async function recordEmailSend(
+  ledger: EmailLedger,
+  to: string,
+  submission: HomaEmailSubmission,
+  error?: string,
+): Promise<void> {
+  try {
+    const sql = mapDb();
+    await sql`
+      insert into public.email_sends (family_id, kind, to_hash, status, provider_message_id, error)
+      values (
+        ${ledger.familyId ?? null},
+        ${ledger.kind},
+        ${emailHash(to)},
+        ${submission.status},
+        ${submission.status === "submitted" ? submission.messageId : null},
+        ${error ?? null}
+      )
+    `;
+  } catch (ledgerError) {
+    console.error("email ledger write failed:", ledgerError);
+  }
+}
+
 async function submit(args: SendArgs): Promise<HomaEmailSubmission> {
+  const submission = await submitToResend(args);
+  if (args.ledger) {
+    await recordEmailSend(args.ledger, args.to, submission.result, submission.error);
+  }
+  return submission.result;
+}
+
+async function submitToResend(
+  args: SendArgs,
+): Promise<{ result: HomaEmailSubmission; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.error("map email: RESEND_API_KEY not set, skipping send");
-    return { status: "rejected" };
+    return { result: { status: "rejected" }, error: "RESEND_API_KEY not set" };
   }
 
   const paragraphs = args.bodyLines
@@ -100,15 +172,21 @@ async function submit(args: SendArgs): Promise<HomaEmailSubmission> {
     });
     if (!response.ok) {
       console.error(`map email: send failed HTTP ${response.status}`);
-      return { status: classifyResendHttpFailure(response.status) };
+      return {
+        result: { status: classifyResendHttpFailure(response.status) },
+        error: `HTTP ${response.status}`,
+      };
     }
     const payload = (await response.json()) as { id?: unknown };
     return typeof payload.id === "string" && payload.id
-      ? { status: "submitted", messageId: payload.id }
-      : { status: "unknown" };
+      ? { result: { status: "submitted", messageId: payload.id } }
+      : { result: { status: "unknown" }, error: "no id in Resend response" };
   } catch (error) {
     console.error("map email: send failed:", error);
-    return { status: "unknown" };
+    return {
+      result: { status: "unknown" },
+      error: error instanceof Error ? error.message : "fetch failed",
+    };
   }
 }
 
@@ -133,8 +211,10 @@ export async function sendFamilyInviteEmail(
   inviterName: string,
   familyName: string,
   joinUrl: string,
+  familyId?: string,
 ): Promise<boolean> {
   return send({
+    ledger: { kind: "family_invite", familyId },
     to,
     subject: `${inviterName} invited you to your family's Homa`,
     preview: `This invite adds you to ${familyName}'s Homa.`,
@@ -150,9 +230,15 @@ export async function sendFamilyInviteEmail(
   });
 }
 
-export async function sendReportEmail(to: string, childName: string, reportToken: string): Promise<boolean> {
+export async function sendReportEmail(
+  to: string,
+  childName: string,
+  reportToken: string,
+  familyId?: string,
+): Promise<boolean> {
   const url = `${siteUrl()}/onboarding/r/${reportToken}`;
   return send({
+    ledger: { kind: "report_link", familyId },
     to,
     subject: reportEmailSubject(childName),
     preview: reportEmailPreview(),
@@ -166,9 +252,14 @@ export async function sendReportEmail(to: string, childName: string, reportToken
   });
 }
 
-export async function sendResumeEmail(to: string, resumeToken: string): Promise<boolean> {
+export async function sendResumeEmail(
+  to: string,
+  resumeToken: string,
+  familyId?: string,
+): Promise<boolean> {
   const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
   return send({
+    ledger: { kind: "resume_link", familyId },
     to,
     subject: "Pick up where you left off",
     preview: "Your answers are saved. This link picks up on any device.",
@@ -183,10 +274,12 @@ export async function sendReminderEmail(
   to: string,
   childName: string | null,
   resumeToken: string,
+  familyId?: string,
 ): Promise<boolean> {
   const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
   const who = childName ?? "your child";
   return send({
+    ledger: { kind: "reminder_24h", familyId },
     to,
     subject: childName ? `${childName}'s progress report is a few taps away` : "Your child's progress report is a few taps away",
     preview: "Your answers are saved. A few minutes finishes the report.",
@@ -206,9 +299,11 @@ export async function sendRetestEmail(
   subjectName: string,
   resumeToken: string,
   deepDiveParam: string,
+  familyId?: string,
 ): Promise<boolean> {
   const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}&dd=${encodeURIComponent(deepDiveParam)}`;
   return send({
+    ledger: { kind: "retest", familyId },
     to,
     subject: `Retest week: see what moved in ${childName}'s ${subjectName.toLowerCase()}`,
     preview: "Four weeks of work deserve a fresh number.",
@@ -375,9 +470,11 @@ export async function sendBandReadyEmail(
   to: string,
   childName: string,
   resumeToken: string,
+  familyId?: string,
 ): Promise<boolean> {
   const url = `${siteUrl()}/api/map/resume-link?t=${resumeToken}`;
   return send({
+    ledger: { kind: "band_ready", familyId },
     to,
     subject: `${childName}'s questionnaire is ready`,
     preview: "The questionnaire for their age just shipped, as promised.",
@@ -388,5 +485,29 @@ export async function sendBandReadyEmail(
     ],
     cta: { label: `Start ${childName}'s questionnaire`, url },
     footerNote: "Everything you shared is already saved.",
+  });
+}
+
+/**
+ * The founder digest (founder console, MJ-14): one internal email to the
+ * founder's own address, sent by the hourly cron once per UTC day when
+ * HOMA_ADMIN_DIGEST_EMAIL is set. Internal tooling, so the family-facing
+ * footer framing is replaced; the shared shell and ledger stay.
+ */
+export async function sendAdminDigestEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+): Promise<boolean> {
+  return send({
+    ledger: { kind: "admin_digest" },
+    to,
+    subject,
+    preview: bodyLines[0]?.slice(0, 120) ?? subject,
+    heading: subject,
+    bodyLines,
+    cta: { label: "Open the founder console", url: `${siteUrl()}/admin` },
+    footerNote: "Internal digest for the Homa founder console.",
+    outerNote: "Sent by your own Homa deployment's hourly cron to its configured founder address.",
   });
 }

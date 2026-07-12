@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homa founder dashboard directions · disposable comparison lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=EB+Garamond:ital@1&family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Homa Design System v3 tokens, hand-copied from apps/web/app/globals.css
+       for this disposable lab. Fonts fall back to system stacks offline. */
+    :root {
+      --stone-50: #FBF7F0; --stone-100: #F3ECE1; --stone-200: #E7DDCE;
+      --stone-300: #D6C8B4; --stone-400: #B3A492; --stone-500: #8A7D6C;
+      --stone-600: #6B6259; --stone-700: #4E463E; --stone-800: #332E29;
+      --stone-900: #221E1A;
+      --clay-50: #FFF0E8; --clay-100: #FFDDC9; --clay-300: #FB9868;
+      --clay-400: #F1793F; --clay-500: #E7602F; --clay-600: #C44C22; --clay-700: #9C3B1B;
+      --sage-50: #EAF6EC; --sage-100: #D2ECD6; --sage-500: #3D9A50;
+      --sage-600: #2F7C40; --sage-700: #275F34;
+      --gold-100: #FFF3C2; --gold-300: #FFE175; --gold-ink: #8A6410; --gold-ink-strong: #402E05;
+      --sky-100: #DDF3F9; --sky-500: #4FB4D6; --sky-600: #2E8CAD;
+      --rose-100: #FDE1D8; --rose-500: #E2593B; --rose-600: #BC4527;
+      --pop-navy: #23304F;
+      --brand: var(--clay-500); --brand-soft: var(--clay-50);
+      --bg-page: var(--stone-50); --surface-raised: #FFFFFF;
+      --surface-sunken: var(--stone-100);
+      --text-strong: var(--stone-900); --text-body: var(--stone-800);
+      --text-muted: var(--stone-600); --text-subtle: var(--stone-500);
+      --border: var(--stone-300); --border-subtle: var(--stone-200);
+      --danger: var(--rose-500); --danger-soft: var(--rose-100);
+      --warning-soft: var(--gold-100); --success-soft: var(--sage-50);
+      --info-soft: var(--sky-100);
+      --radius-md: 10px; --radius-lg: 16px; --radius-xl: 22px; --radius-pill: 999px;
+      --shadow-sm: 0 1px 3px rgba(51,42,33,.08), 0 1px 2px rgba(51,42,33,.04);
+      --shadow-md: 0 4px 10px rgba(51,42,33,.07), 0 2px 4px rgba(51,42,33,.05);
+      --shadow-lg: 0 12px 28px rgba(51,42,33,.10), 0 4px 10px rgba(51,42,33,.05);
+      --font-display: "Schibsted Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-sans: "Hanken Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-serif: "EB Garamond", Georgia, serif;
+      --font-wordmark: Fredoka, "Arial Rounded MT Bold", sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --ease-out: cubic-bezier(.22,.8,.28,1);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0; background: var(--bg-page); color: var(--text-body);
+      font-family: var(--font-sans); font-size: 16px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; color: inherit; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid rgba(241,121,63,.4); outline-offset: 2px; border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    .lab { max-width: 1180px; margin: 0 auto; padding: 26px clamp(14px, 3vw, 40px) 80px; }
+
+    /* ---------- lab header ---------- */
+    .brandline { display: flex; align-items: center; gap: 10px; }
+    .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.35rem; color: var(--text-strong); letter-spacing: .01em; }
+    .word span { display: inline-block; }
+    .word span:nth-child(1) { transform: translateY(-.06em) rotate(-3deg); }
+    .word span:nth-child(2) { transform: translateY(.05em); }
+    .word span:nth-child(3) { transform: translateY(-.04em) rotate(2deg); }
+    .word span:nth-child(4) { transform: translateY(.06em) rotate(-2deg); }
+    .date-pill { font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 5px 11px; background: var(--surface-raised); }
+    .lab-head h1 { margin: 12px 0 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 3.4vw, 2.3rem); letter-spacing: -.015em; color: var(--text-strong); }
+    .lab-head h1 em { font-style: normal; color: var(--clay-600); }
+    .lab-head .lede { max-width: 800px; margin: 10px 0 0; color: var(--text-muted); }
+    .fake-banner {
+      display: inline-flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px;
+      border: 1px solid var(--gold-300); background: var(--gold-100); color: var(--gold-ink-strong);
+      border-radius: var(--radius-md); padding: 9px 13px; font-size: .82rem; font-weight: 600;
+    }
+    .core-task {
+      margin-top: 16px; border-left: 4px solid var(--clay-300); background: var(--surface-raised);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
+      box-shadow: var(--shadow-sm); max-width: 880px;
+    }
+    .core-task strong { color: var(--text-strong); }
+
+    /* ---------- findings + blindspots ---------- */
+    .sect-eyebrow { margin: 34px 0 4px; font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-subtle); }
+    .sect-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; color: var(--text-strong); }
+    .sect-sub { margin: 6px 0 0; color: var(--text-muted); max-width: 820px; font-size: .93rem; }
+    .findings { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 14px; }
+    .finding { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 14px; box-shadow: var(--shadow-sm); font-size: .88rem; }
+    .finding b { display: block; color: var(--text-strong); margin-bottom: 3px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; font-family: var(--font-mono); font-weight: 700; }
+    .finding code, .blind code, .wiring code, .q-card code { font-family: var(--font-mono); font-size: .8em; background: var(--surface-sunken); border-radius: 5px; padding: 1px 5px; white-space: nowrap; }
+
+    .blinds { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-top: 14px; }
+    .blind { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; box-shadow: var(--shadow-sm); font-size: .88rem; }
+    .blind .sev { display: inline-flex; border-radius: var(--radius-pill); padding: 3px 9px; font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
+    .sev.high { background: var(--danger-soft); color: var(--rose-600); }
+    .sev.med { background: var(--warning-soft); color: var(--gold-ink); }
+    .sev.low { background: var(--info-soft); color: var(--sky-600); }
+    .blind h3 { margin: 0 0 5px; font-family: var(--font-display); font-size: 1rem; color: var(--text-strong); }
+    .blind p { margin: 0 0 7px; color: var(--text-muted); }
+    .blind .watch { font-size: .82rem; color: var(--text-body); }
+    .blind .watch b { color: var(--sage-700); font-weight: 700; }
+
+    /* ---------- sticky controls ---------- */
+    .controls {
+      position: sticky; top: 0; z-index: 40; margin: 30px -8px 0; padding: 10px 8px;
+      background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+      backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-subtle);
+    }
+    .direction-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .bar-label { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); margin-right: 2px; }
+    .direction-button {
+      border: 1px solid var(--border-subtle); background: var(--surface-raised);
+      border-radius: 12px; padding: 8px 12px; text-align: left; min-height: 44px;
+      transition: border-color .15s var(--ease-out), background .15s var(--ease-out);
+    }
+    .direction-button strong { display: block; font-size: .88rem; color: var(--text-strong); }
+    .direction-button small { display: block; color: var(--text-subtle); font-size: .68rem; }
+    .direction-button[aria-pressed="true"] { border-color: var(--clay-300); background: var(--clay-50); }
+    .direction-button[aria-pressed="true"] strong { color: var(--clay-700); }
+    .toggle-group { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
+    .seg { display: inline-flex; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); background: var(--surface-raised); padding: 2px; }
+    .seg button { border: 0; background: transparent; border-radius: var(--radius-pill); padding: 6px 12px; font-size: .8rem; font-weight: 600; color: var(--text-muted); min-height: 34px; }
+    .seg button[aria-pressed="true"] { background: var(--stone-800); color: #fff; }
+
+    /* ---------- direction section + stage ---------- */
+    .direction-head { margin: 26px 0 12px; }
+    .direction-head h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; color: var(--text-strong); letter-spacing: -.01em; }
+    .direction-head .philosophy { margin: 5px 0 0; color: var(--text-muted); max-width: 840px; }
+    .stage { border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); background: var(--bg-page); box-shadow: var(--shadow-lg); overflow: hidden; position: relative; }
+    .frame { display: flex; min-height: 640px; }
+    .rail {
+      width: 212px; flex-shrink: 0; margin: 14px; padding: 14px 12px 12px;
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+      display: flex; flex-direction: column; gap: 2px; align-self: flex-start;
+      position: sticky; top: 76px;
+    }
+    .rail .word { font-size: 1.22rem; padding: 4px 8px 2px; }
+    .rail-tag { padding: 0 8px 12px; font-family: var(--font-mono); font-size: .6rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--clay-600); }
+    .nav-item { display: flex; align-items: center; gap: 10px; border-radius: var(--radius-md); padding: 10px 11px; font-size: .93rem; font-weight: 500; color: var(--text-muted); background: transparent; border: 0; text-align: left; min-height: 44px; }
+    .nav-item svg { color: var(--text-subtle); flex-shrink: 0; }
+    .nav-item.active { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .nav-item.active svg { color: var(--brand); }
+    .rail-foot { margin-top: 18px; border-top: 1px solid var(--border-subtle); padding: 10px 8px 0; font-size: .78rem; color: var(--text-subtle); }
+    .canvas { flex: 1; min-width: 0; padding: 24px clamp(16px, 3vw, 38px) 44px; }
+    .canvas-inner { max-width: 830px; margin: 0 auto; }
+
+    /* phone frame mode */
+    .stage.phone .frame { justify-content: center; background: var(--stone-100); padding: 22px 0; }
+    .stage.phone .rail { display: none; }
+    .stage.phone .canvas {
+      width: 390px; flex: none; background: var(--bg-page); padding: 0 0 40px;
+      border: 8px solid var(--stone-800); border-radius: 34px; overflow: hidden;
+      max-height: 780px; overflow-y: auto;
+    }
+    .stage.phone .canvas-inner { max-width: none; padding: 16px 14px 0; }
+    .phone-bar { display: none; }
+    .stage.phone .phone-bar {
+      display: flex; position: sticky; top: 0; z-index: 5; align-items: center; gap: 8px;
+      height: 52px; padding: 0 14px; background: color-mix(in srgb, var(--bg-page) 95%, transparent);
+      border-bottom: 1px solid var(--border-subtle); backdrop-filter: blur(4px);
+    }
+    .phone-bar .word { font-size: 1.15rem; }
+    .phone-bar .chip { font-family: var(--font-mono); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--clay-600); background: var(--clay-50); border-radius: var(--radius-pill); padding: 4px 9px; }
+
+    /* ---------- shared canvas pieces ---------- */
+    .page-eyebrow { display: inline-flex; border-radius: var(--radius-pill); background: var(--surface-sunken); color: var(--stone-700); padding: 6px 12px; font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .page-title { margin: 10px 0 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.4rem, 2.6vw, 1.85rem); letter-spacing: -.015em; color: var(--text-strong); line-height: 1.15; }
+    .page-sub { margin: 6px 0 0; color: var(--text-muted); font-size: .92rem; max-width: 640px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: var(--radius-pill); padding: 3px 10px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+    .pill.new { background: var(--info-soft); color: var(--sky-600); }
+    .pill.onb { background: var(--gold-100); color: var(--gold-ink); }
+    .pill.act { background: var(--sage-50); color: var(--sage-700); }
+    .pill.steady { background: var(--stone-100); color: var(--stone-700); }
+    .pill.quiet { background: var(--surface-raised); color: var(--stone-600); border: 1px dashed var(--border); }
+    .pill.trial { background: var(--clay-50); color: var(--clay-700); }
+    .pill.comped { background: var(--stone-100); color: var(--stone-600); }
+    .pill.free { background: var(--surface-raised); color: var(--stone-500); border: 1px solid var(--border-subtle); }
+    .pill.ok { background: var(--sage-50); color: var(--sage-700); }
+    .pill.fail { background: var(--danger-soft); color: var(--rose-600); }
+    .pill.unc { background: var(--gold-100); color: var(--gold-ink); }
+    .pill.skip { background: var(--stone-100); color: var(--stone-600); }
+    .mono { font-family: var(--font-mono); }
+    .card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .spark { display: block; }
+    .spark polyline { fill: none; stroke: var(--clay-400); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .spark.calm polyline { stroke: var(--stone-400); }
+
+    /* D1 tiles */
+    .alert-strip { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .alert { display: flex; gap: 10px; align-items: flex-start; border-radius: var(--radius-md); padding: 10px 13px; font-size: .87rem; border: 1px solid var(--border-subtle); background: var(--surface-raised); }
+    .alert.fail { border-color: var(--rose-500); background: var(--danger-soft); color: var(--rose-600); }
+    .alert.unc { border-color: var(--gold-300); background: var(--gold-100); color: var(--gold-ink-strong); }
+    .alert.info { background: var(--info-soft); color: var(--pop-navy); border-color: var(--sky-100); }
+    .alert b { font-weight: 700; }
+    .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; margin-top: 16px; }
+    .tile { text-align: left; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 13px 14px 11px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px; min-height: 104px; transition: border-color .15s var(--ease-out); }
+    .tile:hover { border-color: var(--clay-300); }
+    .tile[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); }
+    .tile .t-label { font-size: .72rem; font-weight: 700; color: var(--text-muted); letter-spacing: .02em; }
+    .tile .t-value { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--text-strong); line-height: 1.05; }
+    .tile .t-sub { font-size: .72rem; color: var(--text-subtle); }
+    .tile .t-sub.good { color: var(--sage-600); font-weight: 600; }
+    .tile .t-sub.warn { color: var(--gold-ink); font-weight: 600; }
+    .tile .t-sub.bad { color: var(--rose-600); font-weight: 600; }
+    .tile.ghost { border-style: dashed; background: transparent; box-shadow: none; }
+    .tile.ghost .t-value { color: var(--text-subtle); font-size: 1rem; padding-top: 6px; }
+    .detail-panel { margin-top: 14px; padding: 14px 16px; }
+    .detail-panel h4 { margin: 0 0 8px; font-family: var(--font-display); font-size: .98rem; color: var(--text-strong); }
+    .detail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+    .detail-list li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: .85rem; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 7px; }
+    .detail-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .detail-list .who { font-weight: 700; color: var(--text-strong); min-width: 130px; }
+
+    /* D2 roster */
+    .sum-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .sum { border-radius: var(--radius-md); background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 8px 13px; font-size: .8rem; color: var(--text-muted); }
+    .sum b { display: block; font-family: var(--font-display); font-size: 1.15rem; color: var(--text-strong); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; align-items: center; }
+    .fchip { border: 1px solid var(--border); background: var(--surface-raised); color: var(--text-body); border-radius: var(--radius-pill); padding: 6px 13px; font-size: .8rem; font-weight: 600; min-height: 36px; }
+    .fchip[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); color: var(--clay-700); }
+    .roster { margin-top: 12px; overflow: hidden; }
+    .roster-row { display: grid; grid-template-columns: minmax(150px,1.4fr) 110px 52px minmax(90px,1fr) 120px 96px; gap: 8px; align-items: center; width: 100%; text-align: left; padding: 11px 14px; border: 0; border-bottom: 1px solid var(--border-subtle); background: transparent; font-size: .86rem; }
+    .roster-row:last-child { border-bottom: 0; }
+    .roster-row:hover { background: var(--stone-50); }
+    .roster-row .name { font-weight: 700; color: var(--text-strong); }
+    .roster-row .name small { display: block; font-weight: 500; color: var(--text-subtle); font-size: .72rem; }
+    .roster-head { display: grid; grid-template-columns: minmax(150px,1.4fr) 110px 52px minmax(90px,1fr) 120px 96px; gap: 8px; padding: 8px 14px; font-family: var(--font-mono); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); border-bottom: 1px solid var(--border-subtle); background: var(--surface-sunken); }
+    .sends-cell { display: inline-flex; gap: 4px; }
+    .dot { width: 17px; height: 17px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 800; }
+    .dot.ok { background: var(--sage-100); color: var(--sage-700); }
+    .dot.fail { background: var(--danger-soft); color: var(--rose-600); }
+    .dot.unc { background: var(--gold-100); color: var(--gold-ink); }
+    .dot.skip { background: var(--stone-100); color: var(--stone-500); }
+    .kidlabel { display: none; font-style: normal; }
+    /* Inside the phone frame the media query never fires (it is a class,
+       not a viewport), so the roster reflows to stacked rows here. */
+    .stage.phone .roster-head { display: none; }
+    .stage.phone .roster-row { display: flex; flex-wrap: wrap; gap: 5px 14px; align-items: center; }
+    .stage.phone .roster-row .name { flex: 1 1 100%; }
+    .stage.phone .kidlabel { display: inline; color: var(--text-subtle); font-size: .72rem; }
+    .drawer {
+      position: absolute; top: 0; right: 0; bottom: 0; width: min(400px, 92%);
+      background: var(--surface-raised); border-left: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-lg); z-index: 20; padding: 20px 20px 30px; overflow-y: auto;
+      transform: translateX(102%); transition: transform .22s var(--ease-out);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer h3 { margin: 0; font-family: var(--font-display); font-size: 1.25rem; color: var(--text-strong); }
+    .drawer .close { position: absolute; top: 14px; right: 14px; border: 1px solid var(--border-subtle); background: var(--surface-raised); border-radius: var(--radius-pill); width: 34px; height: 34px; font-size: 1rem; line-height: 1; }
+    .drawer dl { margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; font-size: .84rem; }
+    .drawer dt { color: var(--text-subtle); font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
+    .drawer dd { margin: 0; color: var(--text-body); }
+    .drawer h4 { margin: 18px 0 7px; font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+    .mini-feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: .82rem; }
+    .mini-feed li { display: flex; gap: 8px; align-items: baseline; }
+    .mini-feed .when { font-family: var(--font-mono); font-size: .68rem; color: var(--text-subtle); min-width: 58px; }
+
+    /* D3 pulse feed */
+    .day-group { margin-top: 20px; }
+    .day-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+    .day-head h4 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; color: var(--text-strong); }
+    .day-digest { font-family: var(--font-serif); font-style: italic; color: var(--text-muted); font-size: .95rem; }
+    .feed { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .feed-item { width: 100%; }
+    .feed-line { width: 100%; display: flex; gap: 10px; align-items: flex-start; text-align: left; border: 1px solid var(--border-subtle); background: var(--surface-raised); border-radius: var(--radius-md); padding: 9px 12px; font-size: .86rem; box-shadow: var(--shadow-sm); }
+    .feed-line:hover { border-color: var(--clay-300); }
+    .cat-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+    .cat-signup { background: var(--sage-500); }
+    .cat-send { background: var(--sky-500); }
+    .cat-fail { background: var(--rose-500); }
+    .cat-usage { background: var(--stone-400); }
+    .cat-billing { background: var(--gold-300); }
+    .feed-line .when { font-family: var(--font-mono); font-size: .68rem; color: var(--text-subtle); min-width: 52px; padding-top: 2px; }
+    .feed-line .what b { color: var(--text-strong); }
+    .feed-detail { margin: 4px 0 2px 31px; border-left: 3px solid var(--border-subtle); padding: 6px 12px; font-size: .8rem; color: var(--text-muted); background: var(--surface-sunken); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    .feed-detail code { background: var(--surface-raised); }
+
+    /* D4 funnel */
+    .funnel { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .fstage { display: grid; grid-template-columns: minmax(120px, 170px) 1fr 66px; gap: 10px; align-items: center; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-raised); padding: 8px 12px; text-align: left; font-size: .85rem; }
+    .fstage:hover { border-color: var(--clay-300); }
+    .fstage[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); }
+    .fstage .fname { font-weight: 700; color: var(--text-strong); }
+    .fstage .fname small { display: block; font-weight: 500; color: var(--text-subtle); font-size: .7rem; }
+    .fbar { height: 20px; border-radius: 6px; background: var(--surface-sunken); overflow: hidden; }
+    .fbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--clay-300), var(--clay-500)); border-radius: 6px; }
+    .fnum { font-family: var(--font-mono); font-size: .8rem; font-weight: 700; color: var(--text-strong); text-align: right; }
+    .fdrop { margin-left: calc(min(170px, 24%) + 10px); font-size: .72rem; color: var(--text-subtle); padding: 0 0 2px; }
+    .pipe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .pnode { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-raised); padding: 9px 13px; font-size: .82rem; text-align: left; min-width: 108px; box-shadow: var(--shadow-sm); }
+    .pnode:hover { border-color: var(--clay-300); }
+    .pnode[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); }
+    .pnode b { display: block; font-family: var(--font-display); font-size: 1.25rem; color: var(--text-strong); }
+    .pnode.fail b { color: var(--rose-600); }
+    .pnode.unc b { color: var(--gold-ink); }
+    .pnode small { color: var(--text-subtle); font-size: .72rem; }
+    .parrow { align-self: center; color: var(--text-subtle); font-size: 1rem; }
+    .cohort { margin-top: 14px; border-collapse: collapse; font-size: .78rem; width: 100%; max-width: 560px; }
+    .cohort th, .cohort td { border: 1px solid var(--border-subtle); padding: 6px 9px; text-align: center; }
+    .cohort th { font-family: var(--font-mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-subtle); background: var(--surface-sunken); font-weight: 700; }
+    .cohort td.hot { background: var(--sage-50); color: var(--sage-700); font-weight: 700; }
+    .cohort td.mid { background: var(--stone-100); }
+    .cohort td.na { color: var(--text-subtle); background: transparent; }
+
+    /* ---------- critique / review blocks ---------- */
+    .critique { margin-top: 14px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .crit-card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 13px 15px; box-shadow: var(--shadow-sm); font-size: .87rem; }
+    .crit-card h4 { margin: 0 0 8px; font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+    .steal-chip { display: inline-flex; margin: 0 6px 6px 0; border: 1px solid var(--border); background: var(--surface-raised); border-radius: var(--radius-pill); padding: 7px 13px; font-size: .8rem; font-weight: 600; min-height: 38px; align-items: center; }
+    .steal-chip[aria-pressed="true"] { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .skip-note { color: var(--text-muted); }
+    .skip-note b { color: var(--gold-ink); }
+    .win-btn { border: 1px solid var(--border); background: var(--surface-raised); border-radius: var(--radius-pill); padding: 10px 18px; font-weight: 700; min-height: 44px; font-size: .9rem; }
+    .win-btn[aria-pressed="true"] { border-color: var(--clay-500); background: var(--clay-500); color: #fff; }
+
+    /* ---------- questions ---------- */
+    .q-card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 15px 17px; box-shadow: var(--shadow-sm); margin-top: 12px; }
+    .q-card h3 { margin: 0; font-family: var(--font-display); font-size: 1.02rem; color: var(--text-strong); }
+    .q-card .trade { margin: 5px 0 10px; font-size: .85rem; color: var(--text-muted); }
+    .answer-chip { border: 1px solid var(--border); background: var(--surface-raised); color: var(--text-strong); border-radius: var(--radius-pill); padding: 8px 15px; font-size: .85rem; font-weight: 600; min-height: 42px; margin: 0 7px 7px 0; }
+    .answer-chip:hover { border-color: var(--brand); }
+    .answer-chip[aria-pressed="true"] { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .answer-chip .rec { font-family: var(--font-mono); font-size: .58rem; font-weight: 700; letter-spacing: .08em; color: var(--clay-600); background: var(--clay-50); border-radius: var(--radius-pill); padding: 2px 6px; margin-left: 6px; }
+
+    /* ---------- assembler ---------- */
+    .assembler { margin-top: 30px; background: var(--stone-800); color: var(--stone-100); border-radius: var(--radius-xl); padding: 22px 24px 24px; box-shadow: var(--shadow-lg); }
+    .assembler h2 { margin: 0; font-family: var(--font-display); color: #fff; font-size: 1.3rem; }
+    .assembler p { color: var(--stone-300); font-size: .9rem; max-width: 720px; }
+    .assembler textarea#founder-notes { width: 100%; min-height: 84px; border-radius: var(--radius-md); border: 1px solid var(--stone-600); background: var(--stone-900); color: var(--stone-100); padding: 10px 12px; font: inherit; font-size: .9rem; resize: vertical; }
+    .assembler pre { white-space: pre-wrap; background: var(--stone-900); border: 1px solid var(--stone-600); border-radius: var(--radius-md); padding: 14px 16px; font-family: var(--font-mono); font-size: .8rem; line-height: 1.55; color: var(--stone-100); margin: 12px 0 0; }
+    .copy-btn { margin-top: 12px; border: 0; background: var(--clay-500); color: #fff; border-radius: var(--radius-pill); padding: 12px 22px; font-weight: 700; font-size: .95rem; min-height: 46px; }
+    .copy-btn:hover { background: var(--clay-600); }
+    .assembler label { display: block; font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--stone-400); margin: 16px 0 6px; }
+
+    /* ---------- wiring ---------- */
+    .wiring { margin-top: 26px; border: 1px dashed var(--border); border-radius: var(--radius-lg); padding: 16px 18px; font-size: .85rem; color: var(--text-muted); background: var(--surface-raised); }
+    .wiring h2 { margin: 0 0 8px; font-family: var(--font-display); font-size: 1.05rem; color: var(--text-strong); }
+    .wiring ul { margin: 8px 0 0; padding-left: 20px; }
+    .wiring li { margin-bottom: 5px; }
+
+    .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: var(--stone-800); color: #fff; border-radius: var(--radius-pill); padding: 10px 20px; font-size: .88rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s var(--ease-out), transform .2s var(--ease-out); z-index: 90; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 760px) {
+      .frame { min-height: 0; }
+      .rail { display: none; }
+      .roster-head { display: none; }
+      .roster-row { grid-template-columns: 1fr 1fr; }
+      .toggle-group { margin-left: 0; }
+      .fstage { grid-template-columns: 1fr; gap: 4px; }
+      .fnum { text-align: left; }
+      .fdrop { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="lab">
+
+  <!-- ============ header ============ -->
+  <header class="lab-head">
+    <div class="brandline">
+      <span class="word" aria-label="HOMA"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+      <span class="date-pill">Founder console lab · Jul 12, 2026</span>
+    </div>
+    <h1>Founder dashboard: <em>four ways to watch the fleet</em></h1>
+    <p class="lede">One admin surface for you (Sidney) to track who is using Homa, where every family sits in the journey, and whether the machine (scheduled tasks, email, SMS) actually delivered. Same fake families, same Monday-morning task in all four directions; only the structure changes.</p>
+    <div class="fake-banner" role="note">
+      <span>Every family, name, number, and event below is invented.</span>
+      <span>No real user data is loaded.</span>
+      <span>No product code or route was changed.</span>
+      <span>No admin surface exists in Homa today; all of this is proposal.</span>
+    </div>
+    <div class="core-task">
+      <strong>The core task, held constant:</strong> it is Monday 7am. In under a minute, answer four questions: did the weekend sends go out · who is new since Friday · who has gone quiet · is anything broken. Then drill into one family (the Durans) to see their whole story.
+      <br><strong>The decision:</strong> which mental model runs the console: numbers first, people first, time first, or pipelines first.
+    </div>
+  </header>
+
+  <!-- ============ findings ============ -->
+  <section aria-labelledby="findings-h">
+    <p class="sect-eyebrow">What the repo already says</p>
+    <h2 class="sect-title" id="findings-h">Four findings that shape every direction</h2>
+    <div class="findings">
+      <div class="finding"><b>Already a ticket</b>MJ-14 "Founder dashboard v0 (12 tiles + 5 wake-up alerts)" is in the [M-R] launch set (<code>journeys/10</code> §2). The historical spec in <code>journeys/06</code> §5 defines the read order; its event names are outdated, the shape survives.</div>
+      <div class="finding"><b>The data mostly exists</b><code>public.events</code> (60+ typed names in <code>packages/core/src/events.ts</code>), <code>homa_task_runs</code>, <code>conversation_deliveries</code>, <code>model_usage</code>, and <code>families</code> timestamps can power most tiles today with plain SQL.</div>
+      <div class="finding"><b>No admin anything yet</b>No <code>/admin</code> route, no role or <code>is_admin</code> column, no metrics endpoint. The gate and the queries (server-side via <code>mapDb()</code>) are new work, whatever direction wins.</div>
+      <div class="finding"><b>House rules apply inside too</b>Quiet families are a call list, never a "behind" list. Danger red is reserved for machine failures (a bounced email), never for a family's pace.</div>
+    </div>
+  </section>
+
+  <!-- ============ blindspots ============ -->
+  <section aria-labelledby="blind-h">
+    <p class="sect-eyebrow">The unknown unknowns you asked for</p>
+    <h2 class="sect-title" id="blind-h">Six blind spots · what the dashboard cannot show until they are fixed</h2>
+    <p class="sect-sub">Each one is real, with the file or table that proves it. The dashed "not instrumented yet" tiles inside the directions come straight from this list.</p>
+    <div class="blinds">
+      <div class="blind">
+        <span class="sev high">High · silent loss</span>
+        <h3>Report and reminder emails vanish without a trace</h3>
+        <p>Onboarding-funnel email (report links, 24h reminders, retest nudges) goes out through <code>apps/web/lib/map/email.ts</code>, which returns submitted / rejected / unknown, and every caller logs it to the console only. Only dispatch-channel sends (journal, brief, custom tasks) land in <code>conversation_deliveries</code>. "Did emails get received" is unanswerable for half your email today.</p>
+        <p class="watch"><b>Close it:</b> Resend webhooks (delivered / bounced) into a ledger, or write map sends into <code>conversation_deliveries</code> too.</p>
+      </div>
+      <div class="blind">
+        <span class="sev high">High · money</span>
+        <h3>Billing truth lives in Stripe, not in your database</h3>
+        <p>There is no Stripe webhook handler. <code>families.trial_started_at</code> is stamped only when the parent lands back on <code>/api/billing/confirm</code>; a closed tab after payment leaves money in Stripe and nothing in Postgres. Paying-family and MRR tiles cannot be trusted from the DB alone.</p>
+        <p class="watch"><b>Close it:</b> the M1-06 webhook (checkout.completed, subscription.updated), or a nightly Stripe API pull into a local table.</p>
+      </div>
+      <div class="blind">
+        <span class="sev med">Medium · false signal</span>
+        <h3><code>families.status</code> lies about "where they're at"</h3>
+        <p>The enum (open, complete, claimed, deleted) exists but app code almost never writes it. Lifecycle stage must be derived: account (<code>auth.users</code>) → setup (<code>profile_completed_at</code>) → kids (<code>children</code> rows) → report (<code>child_reports.generated_at</code>) → trial (<code>trial_started_at</code>) → active (recent <code>conversation_messages</code>).</p>
+        <p class="watch"><b>Close it:</b> one SQL view (<code>family_stage</code>) computed from those timestamps, so every surface agrees.</p>
+      </div>
+      <div class="blind">
+        <span class="sev med">Medium · scary bucket</span>
+        <h3>"Uncertain" is a first-class delivery state, not an edge case</h3>
+        <p><code>homa_task_runs.status</code> includes partial_uncertain and uncertain; <code>conversation_deliveries.status</code> includes uncertain (a send with no provider receipt). A sent/failed binary quietly hides the bucket where you genuinely do not know whether a mom got her text.</p>
+        <p class="watch"><b>Close it:</b> render three outcomes everywhere (sent · failed · uncertain) and treat a growing uncertain count as its own alert.</p>
+      </div>
+      <div class="blind">
+        <span class="sev med">Medium · dead man's switch</span>
+        <h3>The hourly cron has no heartbeat</h3>
+        <p><code>vercel.json</code> fires <code>/api/map/cron</code> hourly (reminders, retests, transcript sync, thank-you cards). Failures are console + HTTP 500, kept only in Vercel logs. A dead cron looks identical to a healthy quiet one. <code>homa_task_runs</code> covers the eve dispatcher, not this route.</p>
+        <p class="watch"><b>Close it:</b> a <code>cron_runs</code> row per tick (job, counts, error), and the dashboard alarms on a missing hour.</p>
+      </div>
+      <div class="blind">
+        <span class="sev low">Low · wrong proxy</span>
+        <h3>Logins are not activity, and cost is already measurable</h3>
+        <p>Sessions persist, so <code>auth.users.last_sign_in_at</code> barely moves; "active" must come from <code>conversation_messages</code> and <code>events</code>, not logins. Meanwhile <code>model_usage</code> already records per-family AI spend per call, and the margin law (P50 under $10 per family per month, <code>journeys/06</code> §3) is checkable today; nobody is looking at it.</p>
+        <p class="watch"><b>Close it:</b> define "active = any message or evidence event", and put the cost percentile tile on the default view.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ sticky controls ============ -->
+  <div class="controls" id="controls">
+    <div class="direction-bar" role="group" aria-label="Choose a direction to preview">
+      <span class="bar-label">Directions</span>
+      <button class="direction-button" data-dir="1" aria-pressed="true"><strong>1 · Mission control</strong><small>numbers first · tiles + alerts</small></button>
+      <button class="direction-button" data-dir="2" aria-pressed="false"><strong>2 · The roster</strong><small>people first · stage per family</small></button>
+      <button class="direction-button" data-dir="3" aria-pressed="false"><strong>3 · The pulse</strong><small>time first · a written daily log</small></button>
+      <button class="direction-button" data-dir="4" aria-pressed="false"><strong>4 · Funnels &amp; flows</strong><small>pipelines first · humans + machine</small></button>
+      <div class="toggle-group">
+        <span class="bar-label" id="frame-label">Frame</span>
+        <div class="seg" role="group" aria-labelledby="frame-label">
+          <button data-frame="desktop" aria-pressed="true">Laptop</button>
+          <button data-frame="phone" aria-pressed="false">Phone</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ direction sections (canvas rendered by JS) ============ -->
+  <section class="direction" id="dir-1" aria-labelledby="dir-1-h">
+    <div class="direction-head">
+      <h2 id="dir-1-h">Direction 1 · Mission control</h2>
+      <p class="philosophy">The MJ-14 bet, literally: a wall of twelve numbers with an alert strip pinned on top, believing your Monday question is "what are the rates" and names are a drill-down. Honest gaps render as dashed tiles instead of pretending.</p>
+    </div>
+    <div class="stage" data-stage="1">
+      <div class="frame">
+        <aside class="rail" aria-label="Founder console rail (mock)">
+          <span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+          <span class="rail-tag">Founder console</span>
+          <button class="nav-item active" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Families</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/></svg>Deliveries</button>
+          <div class="rail-foot">Internal · founder only<br><span class="mono" style="font-size:.68rem">not in the parent sidebar</span></div>
+        </aside>
+        <div class="canvas">
+          <div class="phone-bar"><span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span><span class="chip">Founder</span></div>
+          <div class="canvas-inner" id="canvas-1" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="critique">
+      <div class="crit-card"><h4>Steal from this one</h4>
+        <button class="steal-chip" data-steal="Alert strip pinned above everything, failures and uncertains first" aria-pressed="false">Alert strip pinned above everything</button>
+        <button class="steal-chip" data-steal="Dashed 'not instrumented yet' ghost tiles that admit blind spots" aria-pressed="false">Honest dashed ghost tiles</button>
+        <button class="steal-chip" data-steal="This week / 4 weeks range toggle that rewrites every number" aria-pressed="false">Range toggle rewrites every number</button>
+      </div>
+      <div class="crit-card"><h4>Where it is wrong</h4>
+        <p class="skip-note"><b>Skip if:</b> you manage 12 names, not 12 rates. Averages hide people; "2 quiet families" still needs a click before you know it is Rachel and Kate, and Monday becomes tile-poking.</p>
+      </div>
+      <div class="crit-card"><h4>Verdict</h4>
+        <button class="win-btn" data-win="1 · Mission control" aria-pressed="false">Pick as the winning direction</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="direction" id="dir-2" aria-labelledby="dir-2-h" hidden>
+    <div class="direction-head">
+      <h2 id="dir-2-h">Direction 2 · The roster</h2>
+      <p class="philosophy">People first: at 12 families the dashboard is a class roster, one row per family with a derived lifecycle stage, last-touch, weekly rhythm, and send health. Fleet numbers shrink to a thin strip; the drawer holds everything about one family.</p>
+    </div>
+    <div class="stage" data-stage="2">
+      <div class="frame">
+        <aside class="rail" aria-label="Founder console rail (mock)">
+          <span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+          <span class="rail-tag">Founder console</span>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+          <button class="nav-item active" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Families</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/></svg>Deliveries</button>
+          <div class="rail-foot">Internal · founder only<br><span class="mono" style="font-size:.68rem">not in the parent sidebar</span></div>
+        </aside>
+        <div class="canvas">
+          <div class="phone-bar"><span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span><span class="chip">Founder</span></div>
+          <div class="canvas-inner" id="canvas-2" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-2" role="dialog" aria-modal="false" aria-label="Family detail" hidden></div>
+    </div>
+    <div class="critique">
+      <div class="crit-card"><h4>Steal from this one</h4>
+        <button class="steal-chip" data-steal="Derived stage chip vocabulary (new, onboarding, activated, steady, quiet) on every family row" aria-pressed="false">Stage chip vocabulary on every row</button>
+        <button class="steal-chip" data-steal="Right-side family drawer with funnel timeline and send history" aria-pressed="false">Family drawer with send history</button>
+        <button class="steal-chip" data-steal="One-tap triage filters: new, quiet, delivery issues" aria-pressed="false">Issues filter as one-tap triage</button>
+      </div>
+      <div class="crit-card"><h4>Where it is wrong</h4>
+        <p class="skip-note"><b>Skip if:</b> the cohort grows. Row-per-family thinking stops scaling past roughly 60 families, and fleet-level trends (cost creep, reply-rate slide) live off-screen in a strip nobody reads.</p>
+      </div>
+      <div class="crit-card"><h4>Verdict</h4>
+        <button class="win-btn" data-win="2 · The roster" aria-pressed="false">Pick as the winning direction</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="direction" id="dir-3" aria-labelledby="dir-3-h" hidden>
+    <div class="direction-head">
+      <h2 id="dir-3-h">Direction 3 · The pulse</h2>
+      <p class="philosophy">Time first: an operations diary the system writes for you, newest day on top, one plain sentence per day and one line per thing that happened. The bet is that your real question is "what happened since I last looked", and rates are something you feel across days.</p>
+    </div>
+    <div class="stage" data-stage="3">
+      <div class="frame">
+        <aside class="rail" aria-label="Founder console rail (mock)">
+          <span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+          <span class="rail-tag">Founder console</span>
+          <button class="nav-item active" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Pulse</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Families</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/></svg>Deliveries</button>
+          <div class="rail-foot">Internal · founder only<br><span class="mono" style="font-size:.68rem">not in the parent sidebar</span></div>
+        </aside>
+        <div class="canvas">
+          <div class="phone-bar"><span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span><span class="chip">Founder</span></div>
+          <div class="canvas-inner" id="canvas-3" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="critique">
+      <div class="crit-card"><h4>Steal from this one</h4>
+        <button class="steal-chip" data-steal="Plain-sentence daily digest header above each day" aria-pressed="false">Plain-sentence daily digest</button>
+        <button class="steal-chip" data-steal="Category dots with one-tap filters (signups, sends, failures, billing, usage)" aria-pressed="false">Category dots + one-tap filters</button>
+        <button class="steal-chip" data-steal="Failures render expanded by default, never folded away" aria-pressed="false">Failures expanded by default</button>
+      </div>
+      <div class="crit-card"><h4>Where it is wrong</h4>
+        <p class="skip-note"><b>Skip if:</b> you need baselines. A feed has no denominators: a quiet week reads as calm even when reply rate is sliding, and answering "how many kids does the median family have" means scrolling, not reading.</p>
+      </div>
+      <div class="crit-card"><h4>Verdict</h4>
+        <button class="win-btn" data-win="3 · The pulse" aria-pressed="false">Pick as the winning direction</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="direction" id="dir-4" aria-labelledby="dir-4-h" hidden>
+    <div class="direction-head">
+      <h2 id="dir-4-h">Direction 4 · Funnels &amp; flows</h2>
+      <p class="philosophy">Pipelines first: the product is two conveyor belts, humans moving through onboarding stages and messages moving through the delivery machine. Every count is a click away from the exact families sitting in that bucket. The bet is that leaks matter more than levels.</p>
+    </div>
+    <div class="stage" data-stage="4">
+      <div class="frame">
+        <aside class="rail" aria-label="Founder console rail (mock)">
+          <span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+          <span class="rail-tag">Founder console</span>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+          <button class="nav-item active" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18l-6 7v5l-6 3v-8Z"/></svg>Funnels</button>
+          <button class="nav-item" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/></svg>Deliveries</button>
+          <div class="rail-foot">Internal · founder only<br><span class="mono" style="font-size:.68rem">not in the parent sidebar</span></div>
+        </aside>
+        <div class="canvas">
+          <div class="phone-bar"><span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span><span class="chip">Founder</span></div>
+          <div class="canvas-inner" id="canvas-4" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="critique">
+      <div class="crit-card"><h4>Steal from this one</h4>
+        <button class="steal-chip" data-steal="Clicking any funnel stage reveals the exact families stuck there" aria-pressed="false">Stage click reveals the stuck families</button>
+        <button class="steal-chip" data-steal="Machine delivery pipeline (scheduled, ran, sent, failed, uncertain, replied) mirrored next to the human funnel" aria-pressed="false">Machine pipeline next to human funnel</button>
+        <button class="steal-chip" data-steal="Weekly cohort strip for week-over-week retention" aria-pressed="false">Cohort strip for retention</button>
+      </div>
+      <div class="crit-card"><h4>Where it is wrong</h4>
+        <p class="skip-note"><b>Skip if:</b> the day-to-day matters more than the aggregate. Funnels answer acquisition questions; a single broken Tuesday send or one family's bad week is buried two clicks deep, and at n=12 conversion percentages swing wildly on one family.</p>
+      </div>
+      <div class="crit-card"><h4>Verdict</h4>
+        <button class="win-btn" data-win="4 · Funnels &amp; flows" aria-pressed="false">Pick as the winning direction</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ questions ============ -->
+  <section aria-labelledby="q-h">
+    <p class="sect-eyebrow">Build-changing questions</p>
+    <h2 class="sect-title" id="q-h">Five decisions that change routes, schema, or wiring</h2>
+
+    <div class="q-card" data-q="Placement and gate">
+      <h3>1 · Where does the console live?</h3>
+      <p class="trade">Inside the deployment means one codebase and instant <code>mapDb()</code> access, but the gate must be airtight. A separate app isolates risk and adds a second deploy to babysit. Saved SQL is zero build but no alerts, no drill-down.</p>
+      <button class="answer-chip" data-a="apps/web route at /admin, founder-gated" aria-pressed="false">Route in the web app at /admin<span class="rec">REC</span></button>
+      <button class="answer-chip" data-a="separate internal app and deployment" aria-pressed="false">Separate internal app</button>
+      <button class="answer-chip" data-a="Supabase saved queries only for now" aria-pressed="false">Saved SQL queries for now</button>
+    </div>
+
+    <div class="q-card" data-q="Gate mechanism">
+      <h3>2 · How is it locked to you?</h3>
+      <p class="trade">An env allowlist of founder user ids checked in the server layout is smallest and needs no migration. A role column is cleaner long-term but touches schema (isolation guard, RLS review). A secret URL is weakest, held only by obscurity.</p>
+      <button class="answer-chip" data-a="env allowlist of founder user ids, checked server-side" aria-pressed="false">Env allowlist, server-checked<span class="rec">REC</span></button>
+      <button class="answer-chip" data-a="admin role column in the database" aria-pressed="false">Role column in the database</button>
+      <button class="answer-chip" data-a="unlisted secret path" aria-pressed="false">Unlisted secret path</button>
+    </div>
+
+    <div class="q-card" data-q="Alert delivery v0">
+      <h3>3 · MJ-14 promises 5 wake-up alerts. What is v0?</h3>
+      <p class="trade">Dashboard-only means you find failures when you look. A 7am email digest costs one cron job. SMS-to-you within the hour needs a Telnyx self-notify path but matches the "a new family is standing in her kitchen right now" alert philosophy in journeys/06 §5.</p>
+      <button class="answer-chip" data-a="dashboard only, no pushes yet" aria-pressed="false">Dashboard only for v0</button>
+      <button class="answer-chip" data-a="daily 7am email digest of failures and signups" aria-pressed="false">Daily 7am email digest<span class="rec">REC</span></button>
+      <button class="answer-chip" data-a="SMS to Sidney within the hour for failures" aria-pressed="false">SMS within the hour for failures</button>
+    </div>
+
+    <div class="q-card" data-q="Close first (instrumentation)" data-multi="2">
+      <h3>4 · Which blind spot gets closed first? (pick up to 2)</h3>
+      <p class="trade">Each is a small schema or webhook addition; ordering decides what the v0 dashboard can honestly display versus what stays a dashed ghost tile.</p>
+      <button class="answer-chip" data-a="map email delivery ledger (Resend webhook)" aria-pressed="false">Map-email delivery ledger<span class="rec">REC</span></button>
+      <button class="answer-chip" data-a="Stripe webhook for billing truth" aria-pressed="false">Stripe webhook</button>
+      <button class="answer-chip" data-a="cron heartbeat ledger (cron_runs)" aria-pressed="false">Cron heartbeat ledger</button>
+      <button class="answer-chip" data-a="derived family_stage SQL view" aria-pressed="false">Derived family_stage view</button>
+    </div>
+
+    <div class="q-card" data-q="Data freshness">
+      <h3>5 · Live queries or rollups?</h3>
+      <p class="trade">Live SQL on page load is honest and fine at n under 100 families, but history (sparklines, week-over-week) only exists if something snapshots it. Nightly rollup rows cost one job and give you trends forever.</p>
+      <button class="answer-chip" data-a="live queries now, add nightly snapshots when trends matter" aria-pressed="false">Live now, snapshots later<span class="rec">REC</span></button>
+      <button class="answer-chip" data-a="nightly rollup table from day one" aria-pressed="false">Nightly rollup from day one</button>
+    </div>
+  </section>
+
+  <!-- ============ assembler ============ -->
+  <section class="assembler" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your reply, assembled</h2>
+    <p>Tap a winner, steal details from any direction, answer the five questions, add notes. Copy the text and paste it back in chat; that becomes the build spec.</p>
+    <label for="founder-notes">Freeform notes (optional)</label>
+    <textarea id="founder-notes" placeholder="Anything the chips cannot say..."></textarea>
+    <pre id="reply-output" aria-live="polite"></pre>
+    <button class="copy-btn" id="copy-reply" type="button">Copy reply</button>
+  </section>
+
+  <!-- ============ wiring note ============ -->
+  <section class="wiring" aria-labelledby="wire-h">
+    <h2 id="wire-h">Technical wiring note (nothing was touched)</h2>
+    <p>This file is disposable and changed no product code. If a direction wins, the likely real paths are:</p>
+    <ul>
+      <li><b>Route:</b> new segment <code>apps/web/app/admin/</code> (own layout, NOT inside the parent <code>/app</code> shell; <code>APP_NAV_ITEMS</code> in <code>apps/web/components/dashboard/sidebar-nav.tsx</code> stays untouched).</li>
+      <li><b>Gate:</b> server layout checks the session (<code>apps/web/proxy.ts</code> pattern via <code>supabase.auth.getClaims()</code>) against a founder allowlist env var; all queries stay server-side.</li>
+      <li><b>Data access:</b> <code>mapDb()</code> in <code>apps/web/lib/map/db.ts</code> (direct Postgres, bypasses RLS) reading <code>families</code>, <code>children</code>, <code>events</code>, <code>homa_task_runs</code>, <code>conversation_deliveries</code>, <code>conversation_messages</code>, <code>model_usage</code>, <code>materials</code>, <code>hours_log</code>; last sign-in via Supabase admin API only if question 5 wants it.</li>
+      <li><b>Reuse:</b> stat-tile pattern from <code>apps/web/components/dashboard/stat-tiles.tsx</code>, pill and card conventions from the app, tokens from <code>apps/web/app/globals.css</code>.</li>
+      <li><b>New schema (only if chosen in question 4):</b> map-email delivery ledger or Resend webhook receipts, <code>cron_runs</code> heartbeat, Stripe webhook handler under <code>apps/web/app/api/billing/</code>, a derived <code>family_stage</code> view. Every one is additive; run <code>pnpm check:isolation</code> before any of it.</li>
+      <li><b>Ticket home:</b> MJ-14 (journeys/10 §2); decision belongs in <code>docs/homa-planning/build-log.md</code> once you reply.</li>
+    </ul>
+  </section>
+
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* All data below is synthetic. Twelve fake families, one shared story. */
+const FAMILIES = [
+  { id: "alvarez", name: "Alvarez family", parent: "Priya", state: "TX", signedUpDays: 2,
+    stage: "onboarding", stageNote: "stalled at the checklist, no report yet",
+    kids: [{ n: "Rosa", a: 5 }], lastActiveH: 26, act7: [0,0,0,0,3,6,0], msgs7: 9, mats7: 0,
+    sat: "sent", mon: "skip", monWhy: "no scored report yet", replied: false,
+    billing: "free", cost: 0.8, channel: "sms" },
+  { id: "bennett", name: "Bennett family", parent: "Casey", state: "OH", signedUpDays: 1,
+    stage: "new", stageNote: "account created, family setup not started",
+    kids: [], lastActiveH: 20, act7: [0,0,0,0,0,2,0], msgs7: 2, mats7: 0,
+    sat: "skip", satWhy: "under 20h old, no kids yet", mon: "skip", monWhy: "not eligible yet", replied: false,
+    billing: "free", cost: 0.1, channel: "email" },
+  { id: "calloway", name: "Calloway family", parent: "Dana", state: "GA", signedUpDays: 9,
+    stage: "activated", stageNote: "report done day 2, trial day 5, texts most days",
+    kids: [{ n: "Miles", a: 6 }, { n: "June", a: 4 }], lastActiveH: 3, act7: [4,7,2,9,6,3,5], msgs7: 36, mats7: 3,
+    sat: "sent", mon: "sent", replied: true,
+    billing: "trial", cost: 4.2, channel: "sms" },
+  { id: "duran", name: "Duran family", parent: "Alicia", state: "AZ", signedUpDays: 16,
+    stage: "activated", stageNote: "steady weekly rhythm, email-first household",
+    kids: [{ n: "Sofia", a: 7 }], lastActiveH: 22, act7: [2,0,4,1,3,2,2], msgs7: 14, mats7: 1,
+    sat: "fail", satWhy: "email bounced at the provider (delivery_pref: email)", mon: "sent", replied: false,
+    billing: "trial", cost: 2.9, channel: "email" },
+  { id: "ellison", name: "Ellison family", parent: "Meg", state: "NC", signedUpDays: 23,
+    stage: "steady", stageNote: "three kids, journals back most evenings",
+    kids: [{ n: "Theo", a: 5 }, { n: "Ivy", a: 3 }, { n: "Ben", a: 8 }], lastActiveH: 8, act7: [1,2,3,0,2,2,1], msgs7: 11, mats7: 1,
+    sat: "sent", mon: "sent", replied: true,
+    billing: "comped", cost: 3.4, channel: "both" },
+  { id: "fontaine", name: "Fontaine family", parent: "Rachel", state: "MI", signedUpDays: 30,
+    stage: "quiet", stageNote: "16 days without a message · worth a call this week",
+    kids: [{ n: "Noah", a: 6 }], lastActiveH: 384, act7: [0,0,0,0,0,0,0], msgs7: 0, mats7: 0,
+    sat: "sent", mon: "sent", replied: false,
+    billing: "trial", cost: 0.4, channel: "sms" },
+  { id: "grover", name: "Grover family", parent: "Sam", state: "CO", signedUpDays: 34,
+    stage: "steady", stageNote: "light but regular, one kid",
+    kids: [{ n: "Wren", a: 4 }], lastActiveH: 30, act7: [1,0,2,1,0,3,1], msgs7: 8, mats7: 0,
+    sat: "unc", satWhy: "no provider receipt within 24h (conversation_deliveries: uncertain)", mon: "sent", replied: false,
+    billing: "free", cost: 1.8, channel: "sms" },
+  { id: "holloway", name: "Holloway family", parent: "Jess", state: "FL", signedUpDays: 41,
+    stage: "steady", stageNote: "power user · four kids · voice and SMS daily",
+    kids: [{ n: "Eli", a: 6 }, { n: "Mae", a: 5 }, { n: "Gus", a: 2 }, { n: "Pia", a: 8 }], lastActiveH: 1, act7: [8,6,9,7,5,10,7], msgs7: 52, mats7: 4,
+    sat: "sent", mon: "sent", replied: true,
+    billing: "trial", cost: 6.8, channel: "both" },
+  { id: "ibarra", name: "Ibarra family", parent: "Monica", state: "CA", signedUpDays: 48,
+    stage: "steady", stageNote: "weekly planner sessions, checks state hours",
+    kids: [{ n: "Leo", a: 7 }, { n: "Nina", a: 5 }], lastActiveH: 6, act7: [2,3,1,4,2,3,2], msgs7: 17, mats7: 0,
+    sat: "sent", mon: "sent", replied: false,
+    billing: "trial", cost: 3.1, channel: "email" },
+  { id: "jensen", name: "Jensen family", parent: "Kate", state: "UT", signedUpDays: 55,
+    stage: "quiet", stageNote: "15 days without a message · opted out of journal email",
+    kids: [{ n: "Ada", a: 6 }], lastActiveH: 360, act7: [0,0,0,0,0,0,0], msgs7: 0, mats7: 0,
+    sat: "skip", satWhy: "journal email opt-out (journal_opt_out_at set)", mon: "sent", replied: false,
+    billing: "free", cost: 0.2, channel: "email", optOut: true },
+  { id: "kessler", name: "Kessler family", parent: "Lauren", state: "PA", signedUpDays: 61,
+    stage: "steady", stageNote: "two kids, morning-brief regular",
+    kids: [{ n: "Finn", a: 8 }, { n: "Rue", a: 5 }], lastActiveH: 12, act7: [2,1,2,2,3,1,1], msgs7: 12, mats7: 0,
+    sat: "sent", mon: "sent", replied: false,
+    billing: "comped", cost: 2.2, channel: "both" },
+  { id: "lindqvist", name: "Lindqvist family", parent: "Amy", state: "WA", signedUpDays: 12,
+    stage: "activated", stageNote: "report week 1, now building a reading plan",
+    kids: [{ n: "Saga", a: 4 }], lastActiveH: 5, act7: [3,2,4,3,2,5,2], msgs7: 21, mats7: 2,
+    sat: "sent", mon: "sent", replied: true,
+    billing: "free", cost: 2.4, channel: "sms" },
+];
+
+const STAGE_LABEL = { new: ["New", "new"], onboarding: ["Onboarding", "onb"], activated: ["Activated", "act"], steady: ["Steady", "steady"], quiet: ["Quiet 14d+", "quiet"] };
+const BILL_LABEL = { trial: ["Trial", "trial"], comped: ["Comped", "comped"], free: ["Free era", "free"] };
+const SEND_LABEL = { sent: ["Sent", "ok"], fail: ["Failed", "fail"], unc: ["Uncertain", "unc"], skip: ["Skipped", "skip"] };
+
+/* Fleet numbers, hand-tallied from the roster above so every direction agrees. */
+const RANGES = {
+  week: {
+    label: "This week", active: 10, signups: 2, onbMid: 2,
+    sends: { scheduled: 20, sent: 16, fail: 1, unc: 1, skip: 2, replies: 4 },
+    msgs: 182, mats: 9, hours: "14.2h", trials: 5, mrrPotential: 145,
+    costP50: 2.9, costTop: 6.8, quiet: 2, optOuts: 1, jobsOk: 18, jobsAll: 20,
+    sparkMsgs: [24, 31, 22, 28, 26, 30, 21], sparkActive: [8, 9, 8, 10, 9, 10, 10],
+  },
+  month: {
+    label: "Last 4 weeks", active: 11, signups: 7, onbMid: 2,
+    sends: { scheduled: 82, sent: 71, fail: 3, unc: 2, skip: 6, replies: 19 },
+    msgs: 738, mats: 31, hours: "58h", trials: 5, mrrPotential: 145,
+    costP50: 2.7, costTop: 7.9, quiet: 2, optOuts: 1, jobsOk: 78, jobsAll: 82,
+    sparkMsgs: [162, 178, 216, 182], sparkActive: [9, 10, 11, 10],
+  },
+};
+
+/* The pulse feed, one shared weekend story (today is Sun Jul 12, fake). */
+const FEED = [
+  { day: "Sunday, July 12 · today", digest: "A calm Sunday so far: three families in before lunch, nothing broken.",
+    items: [
+      { t: "9:40a", cat: "usage", who: "holloway", text: "<b>Holloway family</b> · 14 messages this morning, one coloring page made for Gus" },
+      { t: "8:55a", cat: "usage", who: "lindqvist", text: "<b>Lindqvist family</b> · checked off 2 reading-plan items (map.plan_progress)", detail: "Saga's reading plan is 6 of 12 items done in week 2. Source: events row map.plan_progress, done_count 6." },
+      { t: "7:02a", cat: "send", who: null, text: "Journal prompts for Sunday · <b>not scheduled</b> (journal is a weekday-evening task this cohort)" },
+    ] },
+  { day: "Saturday, July 11", digest: "Weekend journal prompts went to 10 of 12: one bounce, one no-receipt, and Casey Bennett signed up.",
+    items: [
+      { t: "6:04p", cat: "fail", who: "duran", text: "<b>Journal prompt to the Duran family failed</b> · email bounced at the provider", detail: "homa_task_runs status: failed · conversation_deliveries error: hard bounce · delivery_pref email. Alicia has texted since (Sunday), so she is reachable by SMS: consider flipping delivery_pref.", open: true },
+      { t: "6:04p", cat: "fail", who: "grover", text: "<b>Grover send uncertain</b> · SMS accepted by provider, no delivery receipt in 24h", detail: "conversation_deliveries status: uncertain, attempt_count 1. Telnyx gave no final receipt; not retried by design (no duplicate texts).", open: true },
+      { t: "6:03p", cat: "send", who: null, text: "Journal prompts · <b>8 sent, 2 skipped</b> (Bennett too new, Jensen email opt-out), 3 replies by 9pm" },
+      { t: "2:20p", cat: "signup", who: "bennett", text: "<b>Casey Bennett signed up</b> (organic) · account created, family setup not started", detail: "families row created 2:20p, profile_completed_at null. If still null Monday evening, the 24h reminder email fires from /api/map/cron." },
+      { t: "11:05a", cat: "usage", who: "calloway", text: "<b>Calloway family</b> · Dana replied to Saturday's prompt with a voice note, 2 evidence rows recorded" },
+    ] },
+  { day: "Friday, July 10", digest: "Priya Alvarez arrived and got halfway through onboarding; morning briefs all landed.",
+    items: [
+      { t: "7:31p", cat: "signup", who: "alvarez", text: "<b>Priya Alvarez signed up</b> (referral) · setup done, Rosa added, checklist half-finished", detail: "profile_completed_at stamped 7:44p, 1 child row, 9 of 20 checklist answers, no report yet. Classic stall point: the report email would re-engage, but map emails have no delivery ledger (blind spot 1)." },
+      { t: "9:12a", cat: "usage", who: "ibarra", text: "<b>Ibarra family</b> · logged 1.5h of science (hours_log via chat)" },
+      { t: "7:00a", cat: "send", who: null, text: "Morning briefs · <b>8 of 8 sent</b>, 1 reply" },
+    ] },
+  { day: "Thursday, July 9", digest: "Quiet-watch tripped for the Fontaine family; a normal usage day otherwise.",
+    items: [
+      { t: "8:00p", cat: "usage", who: "fontaine", text: "<b>Fontaine family crossed 14 quiet days</b> · added to the call list", detail: "Zero conversation_messages since Jun 25. Trial still active. House rule: this is a call-list entry, never an automated guilt nudge." },
+      { t: "4:45p", cat: "billing", who: null, text: "Wall doors tapped twice this week (wall dark, baseline data) · no checkouts", detail: "events: report.action_tapped walled:false. The wall flag HOMA_WALL_ENABLED is off; taps are free-era baseline." },
+      { t: "7:00a", cat: "send", who: null, text: "Morning briefs · <b>8 of 8 sent</b>, 2 replies" },
+    ] },
+];
+
+/* Funnel + pipeline, last 4 weeks, consistent with the roster story. */
+const FUNNEL = [
+  { key: "visits", name: "Map visits", sub: "landing + /map sessions", n: 412, note: "Vercel Analytics, outside events", stuck: [] },
+  { key: "started", name: "Map started", sub: "map.started", n: 58, stuck: [] },
+  { key: "account", name: "Account created", sub: "map.account_created", n: 21, stuck: ["bennett"] },
+  { key: "setup", name: "Family setup", sub: "profile_completed_at", n: 16, stuck: ["alvarez"] },
+  { key: "kids", name: "Kids added", sub: "children rows", n: 15, stuck: [] },
+  { key: "report", name: "Report generated", sub: "map.report_generated", n: 13, stuck: [] },
+  { key: "trial", name: "Trial started", sub: "billing.trial_started", n: 5, stuck: [] },
+];
+const PIPE = [
+  { key: "scheduled", label: "Scheduled", n: 82, sub: "agent_schedules due", who: [] },
+  { key: "ran", label: "Ran", n: 79, sub: "homa_task_runs", who: [] },
+  { key: "sent", label: "Sent", n: 71, sub: "deliveries sent", who: [] },
+  { key: "failed", label: "Failed", n: 3, sub: "hard errors", cls: "fail", who: ["duran"] },
+  { key: "uncertain", label: "Uncertain", n: 2, sub: "no receipt", cls: "unc", who: ["grover"] },
+  { key: "replied", label: "Replied", n: 19, sub: "within 48h", who: ["calloway", "ellison", "holloway", "lindqvist"] },
+];
+const COHORT = [
+  { week: "Jun 15", n: 3, w: [3, 2, 2, 2] },
+  { week: "Jun 22", n: 2, w: [2, 2, 1, null] },
+  { week: "Jun 29", n: 3, w: [3, 3, null, null] },
+  { week: "Jul 6", n: 4, w: [4, null, null, null] },
+];
+
+/* ---------- state ---------- */
+const state = {
+  dir: 1, frame: "desktop", range: "week",
+  winner: null, steals: new Set(), answers: {}, tile: "alerts",
+  feedFilter: "all", rosterFilter: "all", rosterSort: "stage",
+  funnelPick: null, pipePick: "failed", drawerFam: null,
+};
+
+/* ---------- tiny helpers ---------- */
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const fam = (id) => FAMILIES.find((f) => f.id === id);
+const pill = (kind, map, key) => { const [label, cls] = map[key]; return '<span class="pill ' + cls + '">' + label + "</span>"; };
+const ago = (h) => (h < 24 ? h + "h ago" : Math.round(h / 24) + "d ago");
+function spark(values, w, h, calm) {
+  const max = Math.max.apply(null, values.concat([1]));
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * (w - 4) + 2;
+    const y = h - 3 - (v / max) * (h - 8);
+    return x.toFixed(1) + "," + y.toFixed(1);
+  }).join(" ");
+  return '<svg class="spark' + (calm ? " calm" : "") + '" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + " " + h + '" aria-hidden="true"><polyline points="' + pts + '"/></svg>';
+}
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+/* ---------- D1 mission control ---------- */
+function renderD1() {
+  const r = RANGES[state.range];
+  const s = r.sends;
+  const tiles = [
+    { k: "active", label: "Families active", v: r.active + " of 12", sub: "sent anything " + r.label.toLowerCase(), spark: r.sparkActive, tone: "good" },
+    { k: "signups", label: "New signups", v: String(r.signups), sub: state.range === "week" ? "Alvarez, Bennett" : "7 accounts, 5 finished setup", tone: "good" },
+    { k: "onb", label: "Mid-onboarding", v: String(r.onbMid), sub: "stalled before the report", tone: "warn" },
+    { k: "sends", label: "Task sends", v: s.sent + " of " + s.scheduled, sub: s.fail + " failed · " + s.unc + " uncertain · " + s.skip + " skipped", tone: s.fail ? "bad" : "good" },
+    { k: "replies", label: "Replies to sends", v: Math.round((s.replies / s.sent) * 100) + "%", sub: s.replies + " of " + s.sent + " sent", tone: "good" },
+    { k: "quiet", label: "Quiet 14d+", v: String(r.quiet), sub: "call list, never a nudge list", tone: "warn" },
+    { k: "msgs", label: "Messages", v: String(r.msgs), sub: "all channels", spark: r.sparkMsgs },
+    { k: "mats", label: "Materials made", v: String(r.mats), sub: "worksheets, pages, readers" },
+    { k: "hours", label: "Hours logged", v: r.hours, sub: "hours_log rows" },
+    { k: "trials", label: "Trials active", v: String(r.trials), sub: "$" + r.mrrPotential + " MRR when the wall turns on", tone: "good" },
+    { k: "cost", label: "AI cost per family", v: "$" + r.costP50.toFixed(2), sub: "P50 · top $" + r.costTop.toFixed(2) + " · law: under $10", tone: "good" },
+    { k: "jobs", label: "Job success", v: Math.round((r.jobsOk / r.jobsAll) * 100) + "%", sub: r.jobsOk + " of " + r.jobsAll + " runs ok", tone: r.jobsOk === r.jobsAll ? "good" : "warn" },
+  ];
+  const tileHtml = tiles.map((t) =>
+    '<button class="tile" data-tile="' + t.k + '" aria-pressed="' + (state.tile === t.k) + '">' +
+      '<span class="t-label">' + t.label + "</span>" +
+      '<span class="t-value">' + t.v + "</span>" +
+      (t.spark ? spark(t.spark, 120, 26, true) : "") +
+      '<span class="t-sub' + (t.tone ? " " + t.tone : "") + '">' + t.sub + "</span>" +
+    "</button>").join("") +
+    '<div class="tile ghost"><span class="t-label">Report-email deliveries</span><span class="t-value">Not instrumented yet</span><span class="t-sub">map emails have no ledger · blind spot 1</span></div>' +
+    '<div class="tile ghost"><span class="t-label">Cron heartbeat</span><span class="t-value">Not instrumented yet</span><span class="t-sub">/api/map/cron has no run ledger · blind spot 5</span></div>';
+
+  const details = {
+    alerts: { h: "Needs a look first", list: [
+      '<li><span class="who">Duran family</span><span class="pill fail">Failed</span>Sat 6:04pm journal prompt · email hard bounce · she texted Sunday, so SMS works: flip delivery_pref</li>',
+      '<li><span class="who">Grover family</span><span class="pill unc">Uncertain</span>Sat SMS accepted, no receipt in 24h · not retried by design</li>',
+      '<li><span class="who">Fontaine + Jensen</span><span class="pill quiet">Quiet 14d+</span>on the call list this week</li>',
+    ] },
+    sends: { h: "Weekend sends, line by line", list: FAMILIES.map((f) =>
+      '<li><span class="who">' + esc(f.name) + "</span>" + pill(0, SEND_LABEL, f.sat) +
+      (f.satWhy ? "<span>" + esc(f.satWhy) + "</span>" : "<span>journal prompt, Sat evening</span>") + "</li>") },
+    signups: { h: "New this week", list: [
+      '<li><span class="who">Alvarez family</span><span class="pill onb">Onboarding</span>Fri 7:31pm · setup done, checklist half-finished, no report yet</li>',
+      '<li><span class="who">Bennett family</span><span class="pill new">New</span>Sat 2:20pm · account only · 24h reminder fires Monday evening if still stalled</li>',
+    ] },
+    quiet: { h: "The call list", list: [
+      '<li><span class="who">Fontaine family</span>16 days quiet · trial active · last topic was reading practice for Noah</li>',
+      '<li><span class="who">Jensen family</span>15 days quiet · journal email opted out · SMS never linked</li>',
+    ] },
+  };
+  const d = details[state.tile] || details.alerts;
+
+  $("#canvas-1").innerHTML =
+    '<span class="page-eyebrow">Founder · fleet overview</span>' +
+    '<h3 class="page-title">Monday morning, twelve numbers</h3>' +
+    '<p class="page-sub">Alerts first, then the tiles. Tap a tile to open its list below. All data fake.</p>' +
+    '<div class="seg" role="group" aria-label="Time range" style="margin-top:12px">' +
+      '<button data-range="week" aria-pressed="' + (state.range === "week") + '">This week</button>' +
+      '<button data-range="month" aria-pressed="' + (state.range === "month") + '">Last 4 weeks</button>' +
+    "</div>" +
+    '<div class="alert-strip">' +
+      '<div class="alert fail"><b>1 failed send.</b>&nbsp;Journal prompt to the Duran family bounced (email). She is reachable by SMS.</div>' +
+      '<div class="alert unc"><b>1 uncertain.</b>&nbsp;Grover Saturday SMS has no provider receipt after 24h.</div>' +
+      '<div class="alert info"><b>2 on the call list.</b>&nbsp;Fontaine and Jensen crossed 14 quiet days. A call, not a nudge.</div>' +
+    "</div>" +
+    '<div class="tile-grid">' + tileHtml + "</div>" +
+    '<div class="card detail-panel"><h4>' + d.h + '</h4><ul class="detail-list">' + d.list.join("") + "</ul></div>";
+
+  $$("#canvas-1 [data-range]").forEach((b) => b.addEventListener("click", () => { state.range = b.dataset.range; renderD1(); }));
+  $$("#canvas-1 .tile[data-tile]").forEach((b) => b.addEventListener("click", () => {
+    state.tile = details[b.dataset.tile] ? b.dataset.tile : "alerts"; renderD1();
+  }));
+}
+
+/* ---------- D2 roster ---------- */
+function rosterRows() {
+  let rows = FAMILIES.slice();
+  if (state.rosterFilter === "new") rows = rows.filter((f) => f.stage === "new" || f.stage === "onboarding");
+  if (state.rosterFilter === "quiet") rows = rows.filter((f) => f.stage === "quiet");
+  if (state.rosterFilter === "issues") rows = rows.filter((f) => f.sat === "fail" || f.sat === "unc" || f.mon === "fail");
+  const order = { new: 0, onboarding: 1, quiet: 2, activated: 3, steady: 4 };
+  if (state.rosterSort === "stage") rows.sort((a, b) => order[a.stage] - order[b.stage] || a.lastActiveH - b.lastActiveH);
+  if (state.rosterSort === "recent") rows.sort((a, b) => a.lastActiveH - b.lastActiveH);
+  if (state.rosterSort === "newest") rows.sort((a, b) => a.signedUpDays - b.signedUpDays);
+  return rows;
+}
+function renderD2() {
+  const rows = rosterRows();
+  const strip =
+    '<div class="sum-strip">' +
+      '<div class="sum"><b>12</b>families</div>' +
+      '<div class="sum"><b>10</b>active this week</div>' +
+      '<div class="sum"><b>2</b>new</div>' +
+      '<div class="sum"><b>2</b>quiet 14d+</div>' +
+      '<div class="sum"><b>2</b>send issues</div>' +
+      '<div class="sum"><b>21</b>kids across the fleet</div>' +
+    "</div>";
+  const filters = [["all", "All"], ["new", "New + onboarding"], ["quiet", "Quiet"], ["issues", "Delivery issues"]]
+    .map(([k, l]) => '<button class="fchip" data-rf="' + k + '" aria-pressed="' + (state.rosterFilter === k) + '">' + l + "</button>").join("");
+  const sorts = [["stage", "By stage"], ["recent", "Last active"], ["newest", "Newest"]]
+    .map(([k, l]) => '<button data-rs="' + k + '" aria-pressed="' + (state.rosterSort === k) + '">' + l + "</button>").join("");
+  const body = rows.map((f) =>
+    '<button class="roster-row" data-fam="' + f.id + '">' +
+      '<span class="name">' + esc(f.name) + "<small>" + esc(f.parent) + " · " + f.state + " · joined " + f.signedUpDays + "d ago</small></span>" +
+      "<span>" + pill(0, STAGE_LABEL, f.stage) + "</span>" +
+      '<span class="mono" style="font-size:.8rem"><span class="kidlabel">kids </span>' + f.kids.length + "</span>" +
+      "<span>" + spark(f.act7, 84, 22, f.msgs7 === 0) + "</span>" +
+      '<span class="mono" style="font-size:.74rem;color:var(--text-subtle)">' + ago(f.lastActiveH) + "</span>" +
+      '<span class="sends-cell" aria-label="Sat journal, Mon brief">' +
+        '<span class="dot ' + f.sat + '" title="Sat journal: ' + SEND_LABEL[f.sat][0] + '">' + (f.sat === "sent" ? "S" : f.sat === "fail" ? "!" : f.sat === "unc" ? "?" : "·") + "</span>" +
+        '<span class="dot ' + f.mon + '" title="Mon brief: ' + SEND_LABEL[f.mon][0] + '">' + (f.mon === "sent" ? "M" : f.mon === "fail" ? "!" : f.mon === "unc" ? "?" : "·") + "</span>" +
+        (f.replied ? '<span class="dot ok" title="Replied">↩</span>' : "") +
+      "</span>" +
+    "</button>").join("");
+
+  $("#canvas-2").innerHTML =
+    '<span class="page-eyebrow">Founder · families</span>' +
+    '<h3 class="page-title">The roster, one row per family</h3>' +
+    '<p class="page-sub">Stage is derived from timestamps (families.status is not trusted). Tap a row for the whole story. All data fake.</p>' +
+    strip +
+    '<div class="filter-row">' + filters + '<span style="flex:1"></span><div class="seg" role="group" aria-label="Sort">' + sorts + "</div></div>" +
+    '<div class="card roster">' +
+      '<div class="roster-head"><span>Family</span><span>Stage</span><span>Kids</span><span>7-day rhythm</span><span>Last active</span><span>Sends</span></div>' +
+      body +
+    "</div>";
+
+  $$("#canvas-2 [data-rf]").forEach((b) => b.addEventListener("click", () => { state.rosterFilter = b.dataset.rf; renderD2(); }));
+  $$("#canvas-2 [data-rs]").forEach((b) => b.addEventListener("click", () => { state.rosterSort = b.dataset.rs; renderD2(); }));
+  $$("#canvas-2 .roster-row").forEach((b) => b.addEventListener("click", () => openDrawer(b.dataset.fam, b)));
+}
+function openDrawer(id, opener) {
+  const f = fam(id); if (!f) return;
+  state.drawerFam = id;
+  const dr = $("#drawer-2");
+  const funnelSteps = [
+    ["Account created", true], ["Family setup", f.stage !== "new"],
+    ["Kids added", f.kids.length > 0], ["Report generated", ["activated", "steady", "quiet"].includes(f.stage)],
+    ["Trial started", f.billing === "trial"],
+  ];
+  dr.innerHTML =
+    '<button class="close" type="button" aria-label="Close family detail">✕</button>' +
+    "<h3>" + esc(f.name) + "</h3>" +
+    '<p style="margin:4px 0 0;color:var(--text-muted);font-size:.88rem">' + esc(f.parent) + " · " + f.state + " · joined " + f.signedUpDays + " days ago</p>" +
+    '<p style="margin:8px 0 0">' + pill(0, STAGE_LABEL, f.stage) + " " + pill(0, BILL_LABEL, f.billing) + (f.optOut ? ' <span class="pill skip">Email opt-out</span>' : "") + "</p>" +
+    '<p style="margin:8px 0 0;font-size:.86rem;color:var(--text-muted)">' + esc(f.stageNote) + "</p>" +
+    "<dl>" +
+      "<dt>Kids</dt><dd>" + (f.kids.length ? f.kids.map((k) => esc(k.n) + " (" + k.a + ")").join(", ") : "none yet") + "</dd>" +
+      "<dt>Last active</dt><dd>" + ago(f.lastActiveH) + "</dd>" +
+      "<dt>Messages 7d</dt><dd>" + f.msgs7 + "</dd>" +
+      "<dt>Materials 7d</dt><dd>" + f.mats7 + "</dd>" +
+      "<dt>AI cost mo</dt><dd>$" + f.cost.toFixed(2) + "</dd>" +
+      "<dt>Channel</dt><dd>" + f.channel + "</dd>" +
+    "</dl>" +
+    "<h4>Journey</h4>" +
+    '<ul class="mini-feed">' + funnelSteps.map(([s, done]) =>
+      '<li><span class="when">' + (done ? "done" : "·") + "</span><span" + (done ? "" : ' style="color:var(--text-subtle)"') + ">" + s + "</span></li>").join("") + "</ul>" +
+    "<h4>Recent sends</h4>" +
+    '<ul class="mini-feed">' +
+      "<li><span class=\"when\">Mon 7a</span><span>Morning brief · " + SEND_LABEL[f.mon][0] + (f.monWhy ? " · " + esc(f.monWhy) : "") + "</span></li>" +
+      "<li><span class=\"when\">Sat 6p</span><span>Journal prompt · " + SEND_LABEL[f.sat][0] + (f.satWhy ? " · " + esc(f.satWhy) : "") + (f.replied ? " · replied" : "") + "</span></li>" +
+    "</ul>";
+  dr.hidden = false;
+  requestAnimationFrame(() => dr.classList.add("open"));
+  const close = () => {
+    dr.classList.remove("open");
+    setTimeout(() => { dr.hidden = true; }, 220);
+    if (opener) opener.focus();
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  $(".close", dr).addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  $(".close", dr).focus();
+}
+
+/* ---------- D3 pulse ---------- */
+function renderD3() {
+  const cats = [["all", "Everything"], ["signup", "Signups"], ["send", "Sends"], ["fail", "Failures"], ["usage", "Usage"], ["billing", "Billing"]];
+  const chips = cats.map(([k, l]) => '<button class="fchip" data-ff="' + k + '" aria-pressed="' + (state.feedFilter === k) + '">' + l + "</button>").join("");
+  const days = FEED.map((day, di) => {
+    const items = day.items.filter((it) => state.feedFilter === "all" || it.cat === state.feedFilter);
+    if (!items.length) return "";
+    const lines = items.map((it, ii) => {
+      const id = "fd-" + di + "-" + ii;
+      const expandable = Boolean(it.detail);
+      const expanded = expandable && (it.open || renderD3._open.has(id));
+      return '<li class="feed-item">' +
+        (expandable
+          ? '<button class="feed-line" data-fd="' + id + '" aria-expanded="' + expanded + '">'
+          : '<div class="feed-line">') +
+        '<span class="cat-dot cat-' + it.cat + '" aria-hidden="true"></span>' +
+        '<span class="when">' + it.t + "</span>" +
+        '<span class="what">' + it.text + (expandable ? ' <span class="mono" style="font-size:.66rem;color:var(--text-subtle)">' + (expanded ? "hide" : "detail") + "</span>" : "") + "</span>" +
+        (expandable ? "</button>" : "</div>") +
+        (expanded ? '<div class="feed-detail">' + it.detail + "</div>" : "") +
+      "</li>";
+    }).join("");
+    return '<div class="day-group"><div class="day-head"><h4>' + day.day + '</h4><span class="day-digest">' + day.digest + "</span></div><ul class=\"feed\">" + lines + "</ul></div>";
+  }).join("");
+
+  $("#canvas-3").innerHTML =
+    '<span class="page-eyebrow">Founder · the pulse</span>' +
+    '<h3 class="page-title">What happened since you last looked</h3>' +
+    '<p class="page-sub">The system writes the diary; failures never fold away. Sourced from events, homa_task_runs, and conversation_deliveries. All data fake.</p>' +
+    '<div class="filter-row">' + chips + "</div>" +
+    (days || '<p class="page-sub" style="margin-top:20px">Nothing in this category over these four days.</p>');
+
+  $$("#canvas-3 [data-ff]").forEach((b) => b.addEventListener("click", () => { state.feedFilter = b.dataset.ff; renderD3(); }));
+  $$("#canvas-3 [data-fd]").forEach((b) => b.addEventListener("click", () => {
+    const id = b.dataset.fd;
+    if (renderD3._open.has(id)) renderD3._open.delete(id); else renderD3._open.add(id);
+    /* failures marked open:true stay open unless explicitly toggled off */
+    const item = FEED.flatMap((d, di) => d.items.map((it, ii) => ({ it, id: "fd-" + di + "-" + ii }))).find((x) => x.id === id);
+    if (item && item.it.open) { item.it.open = false; }
+    renderD3();
+  }));
+}
+renderD3._open = new Set();
+
+/* ---------- D4 funnels ---------- */
+function renderD4() {
+  const max = FUNNEL[1].n; /* scale bars to map started, visits shown but off-scale */
+  const stages = FUNNEL.map((s, i) => {
+    const prev = i > 0 ? FUNNEL[i - 1].n : null;
+    const conv = prev ? Math.round((s.n / prev) * 100) : null;
+    const w = Math.min(100, Math.round((s.n / max) * 100));
+    return '<button class="fstage" data-fs="' + s.key + '" aria-pressed="' + (state.funnelPick === s.key) + '">' +
+      '<span class="fname">' + s.name + "<small>" + s.sub + "</small></span>" +
+      '<span class="fbar"><i style="width:' + w + '%"></i></span>' +
+      '<span class="fnum">' + s.n + "</span>" +
+    "</button>" +
+    (conv !== null && i > 1 ? '<div class="fdrop">' + conv + "% of previous stage</div>" : "");
+  }).join("");
+  const pipe = PIPE.map((p, i) =>
+    '<button class="pnode' + (p.cls ? " " + p.cls : "") + '" data-pp="' + p.key + '" aria-pressed="' + (state.pipePick === p.key) + '">' +
+      "<b>" + p.n + "</b>" + p.label + "<br><small>" + p.sub + "</small></button>" +
+    (i < PIPE.length - 1 ? '<span class="parrow" aria-hidden="true">→</span>' : "")).join("");
+
+  const fs = FUNNEL.find((s) => s.key === state.funnelPick);
+  const pp = PIPE.find((p) => p.key === state.pipePick);
+  let panel = "";
+  if (fs) {
+    panel = '<div class="card detail-panel"><h4>' + fs.name + " · who is here</h4><ul class=\"detail-list\">" +
+      (fs.stuck.length
+        ? fs.stuck.map((id) => { const f = fam(id); return '<li><span class="who">' + esc(f.name) + "</span>" + pill(0, STAGE_LABEL, f.stage) + "<span>" + esc(f.stageNote) + "</span></li>"; }).join("")
+        : "<li><span>" + (fs.note ? esc(fs.note) + " · " : "") + "no named families parked at this stage; the rest moved on within the window (fake data)</span></li>") +
+      "</ul></div>";
+  } else if (pp) {
+    panel = '<div class="card detail-panel"><h4>Delivery bucket · ' + pp.label.toLowerCase() + " (" + pp.n + ")</h4><ul class=\"detail-list\">" +
+      (pp.who.length
+        ? pp.who.map((id) => { const f = fam(id); return '<li><span class="who">' + esc(f.name) + "</span>" + pill(0, SEND_LABEL, f.sat === "sent" ? "sent" : f.sat) + "<span>" + esc(f.satWhy || "journal prompt, Sat evening") + "</span></li>"; }).join("")
+        : "<li><span>Aggregate bucket over 4 weeks; per-row drill-down reads conversation_deliveries (fake data)</span></li>") +
+      "</ul></div>";
+  }
+  const cohortRows = COHORT.map((c) =>
+    "<tr><td class=\"mono\" style=\"font-size:.72rem\">" + c.week + " · " + c.n + " fam</td>" +
+    c.w.map((v) => v === null ? '<td class="na">·</td>' : '<td class="' + (v === c.n ? "hot" : "mid") + '">' + v + "</td>").join("") + "</tr>").join("");
+
+  $("#canvas-4").innerHTML =
+    '<span class="page-eyebrow">Founder · funnels &amp; flows</span>' +
+    '<h3 class="page-title">Two conveyor belts, last 4 weeks</h3>' +
+    '<p class="page-sub">The human funnel on top, the machine pipeline under it. Click any stage or bucket for names. All data fake.</p>' +
+    '<h4 style="margin:18px 0 0;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle)">Humans · signup to trial</h4>' +
+    '<div class="funnel">' + stages + "</div>" +
+    '<h4 style="margin:22px 0 0;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle)">Machine · scheduled sends</h4>' +
+    '<div class="pipe">' + pipe + "</div>" +
+    panel +
+    '<h4 style="margin:22px 0 0;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle)">Cohorts · families active each week after signup</h4>' +
+    '<table class="cohort"><thead><tr><th>Cohort</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th></tr></thead><tbody>' + cohortRows + "</tbody></table>";
+
+  $$("#canvas-4 [data-fs]").forEach((b) => b.addEventListener("click", () => {
+    state.funnelPick = state.funnelPick === b.dataset.fs ? null : b.dataset.fs;
+    if (state.funnelPick) state.pipePick = null;
+    renderD4();
+  }));
+  $$("#canvas-4 [data-pp]").forEach((b) => b.addEventListener("click", () => {
+    state.pipePick = state.pipePick === b.dataset.pp ? null : b.dataset.pp;
+    if (state.pipePick) state.funnelPick = null;
+    renderD4();
+  }));
+}
+
+/* ---------- direction + frame switching ---------- */
+const RENDER = { 1: renderD1, 2: renderD2, 3: renderD3, 4: renderD4 };
+function showDir(n) {
+  state.dir = n;
+  $$(".direction").forEach((sec) => { sec.hidden = sec.id !== "dir-" + n; });
+  $$(".direction-button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dir === String(n))));
+  RENDER[n]();
+  applyFrame();
+}
+function applyFrame() {
+  $$(".stage").forEach((st) => st.classList.toggle("phone", state.frame === "phone"));
+  $$("[data-frame]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.frame === state.frame)));
+}
+$$(".direction-button").forEach((b) => b.addEventListener("click", () => showDir(Number(b.dataset.dir))));
+$$("[data-frame]").forEach((b) => b.addEventListener("click", () => { state.frame = b.dataset.frame; applyFrame(); }));
+
+/* ---------- winner, steals, answers, reply ---------- */
+$$(".win-btn").forEach((b) => b.addEventListener("click", () => {
+  state.winner = state.winner === b.dataset.win ? null : b.dataset.win;
+  $$(".win-btn").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.win === state.winner)));
+  updateReply();
+}));
+$$(".steal-chip").forEach((b) => b.addEventListener("click", () => {
+  const v = b.dataset.steal;
+  if (state.steals.has(v)) { state.steals.delete(v); b.setAttribute("aria-pressed", "false"); }
+  else { state.steals.add(v); b.setAttribute("aria-pressed", "true"); }
+  updateReply();
+}));
+$$(".q-card").forEach((card) => {
+  const q = card.dataset.q;
+  const multi = Number(card.dataset.multi || 1);
+  $$(".answer-chip", card).forEach((b) => b.addEventListener("click", () => {
+    const v = b.dataset.a;
+    let cur = state.answers[q] || [];
+    if (cur.includes(v)) cur = cur.filter((x) => x !== v);
+    else {
+      if (multi === 1) cur = [v];
+      else if (cur.length >= multi) { toast("Pick at most " + multi); return; }
+      else cur = cur.concat([v]);
+    }
+    state.answers[q] = cur;
+    $$(".answer-chip", card).forEach((x) => x.setAttribute("aria-pressed", String(cur.includes(x.dataset.a))));
+    updateReply();
+  }));
+});
+function updateReply() {
+  const notes = $("#founder-notes").value.trim();
+  const qOrder = ["Placement and gate", "Gate mechanism", "Alert delivery v0", "Close first (instrumentation)", "Data freshness"];
+  const lines = [
+    "UI direction feedback",
+    "",
+    "Winning direction: " + (state.winner || "not decided yet"),
+    "Details to steal: " + (state.steals.size ? Array.from(state.steals).join("; ") : "none selected"),
+    "",
+  ].concat(qOrder.map((q) => "- " + q + ": " + ((state.answers[q] || []).join(" + ") || "not decided yet")));
+  if (notes) lines.push("", "Notes: " + notes);
+  $("#reply-output").textContent = lines.join("\n");
+}
+$("#founder-notes").addEventListener("input", updateReply);
+$("#copy-reply").addEventListener("click", async () => {
+  const text = $("#reply-output").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("Copied. Paste it back in chat.");
+  } catch (err) {
+    /* clipboard can be unavailable on file:// pages; fall back to a selectable range */
+    const range = document.createRange();
+    range.selectNodeContents($("#reply-output"));
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(range);
+    const ok = document.execCommand && document.execCommand("copy");
+    toast(ok ? "Copied. Paste it back in chat." : "Copy blocked: text is selected, press Cmd+C.");
+  }
+});
+
+/* ---------- boot (hash can preselect, e.g. #d2-phone for screenshots) ---------- */
+(function boot() {
+  const m = location.hash.match(/^#d([1-4])(-phone)?$/);
+  if (m) { state.dir = Number(m[1]); if (m[2]) state.frame = "phone"; }
+  updateReply();
+  showDir(state.dir);
+})();
+</script>
+</body>
+</html>
