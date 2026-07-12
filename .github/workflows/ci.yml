@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-and-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +36,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: ChildProgress unit and compatibility checks
+        run: pnpm check:child-progress
+
+      - name: Progress UI checks
+        run: pnpm check:progress-ui
+
       - name: Map content + scorer checks (claims law, citations, golden kids)
         run: pnpm check:map
 
@@ -53,6 +59,16 @@ jobs:
 
       - name: Morning research brief format
         run: pnpm check:research-brief
+
+      - name: Install PostgreSQL 16 for disposable E2E
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
+      - name: ChildProgress disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm child-progress:e2e
 
       - name: Conversation continuity database E2E (multi-parent causality)
         run: pnpm continuity:e2e

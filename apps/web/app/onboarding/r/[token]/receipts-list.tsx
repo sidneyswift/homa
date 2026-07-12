@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { MapAnswer } from "@homa/core";
 
+import {
+  classifyMapAnswerRequestStatus,
+} from "../../map-answer-attempt";
+import {
+  clearAcceptedReceiptChanges,
+  snapshotReceiptChanges,
+  type VersionedReceiptChange,
+} from "../../receipt-correction-intent";
 import { reportButtonClass } from "./report-button";
 
 /**
@@ -47,15 +55,24 @@ export function ReceiptsList({
   editable: boolean;
 }) {
   const router = useRouter();
-  const [pending, setPending] = useState<Record<string, MapAnswer>>({});
+  const [pending, setPending] =
+    useState<Record<string, VersionedReceiptChange>>({});
   const [editing, setEditing] = useState<string | null>(null);
-  const [state, setState] = useState<"idle" | "busy" | "no-session">("idle");
+  const [state, setState] = useState<
+    "idle" | "busy" | "no-session" | "conflict" | "error"
+  >("idle");
+  const correctionAttemptKey = useRef<string | null>(null);
+  const changeVersion = useRef(0);
 
   const pendingCount = Object.keys(pending).length;
 
   async function saveChanges() {
     if (pendingCount === 0) return;
     setState("busy");
+    const submitted = snapshotReceiptChanges(pending);
+    const idempotencyKey =
+      correctionAttemptKey.current ?? crypto.randomUUID();
+    correctionAttemptKey.current = idempotencyKey;
     try {
       const response = await fetch("/api/map/report/correct", {
         method: "POST",
@@ -63,21 +80,38 @@ export function ReceiptsList({
         body: JSON.stringify({
           childId,
           source: "report_correction",
-          changes: Object.entries(pending).map(([itemId, answer]) => ({ itemId, answer })),
+          changes: Object.entries(submitted).map(
+            ([itemId, change]) => ({
+              itemId,
+              answer: change.answer,
+            }),
+          ),
+          idempotencyKey,
         }),
       });
-      if (response.status === 401) {
-        setState("no-session");
-        return;
-      }
-      if (response.ok) {
-        setPending({});
-        setEditing(null);
+      const outcome =
+        classifyMapAnswerRequestStatus(response.status);
+      if (outcome === "success") {
+        correctionAttemptKey.current = null;
+        setPending((current) =>
+          clearAcceptedReceiptChanges(current, submitted)
+        );
         setState("idle");
         router.refresh();
         return;
       }
-      setState("idle");
+      if (outcome === "retryable") {
+        setState("idle");
+        return;
+      }
+      correctionAttemptKey.current = null;
+      setState(
+        response.status === 401
+          ? "no-session"
+          : response.status === 409
+            ? "conflict"
+            : "error",
+      );
     } catch {
       setState("idle");
     }
@@ -89,7 +123,8 @@ export function ReceiptsList({
         {[...rows]
           .sort((a, b) => a.typicalMonths - b.typicalMonths)
           .map((row) => {
-            const shown = pending[row.itemId] ?? row.answer;
+            const shown =
+              pending[row.itemId]?.answer ?? row.answer;
             return (
               <li key={row.itemId} className="rounded-md bg-[var(--surface-sunken)] px-4 py-3">
                 {/* One flowing line: the question, a quiet leader, the
@@ -114,6 +149,7 @@ export function ReceiptsList({
                     <button
                       type="button"
                       onClick={() => setEditing(row.itemId)}
+                      disabled={state === "busy"}
                       className="ml-2 text-xs font-semibold text-brand underline-offset-2 hover:underline print:hidden"
                     >
                       change
@@ -127,13 +163,24 @@ export function ReceiptsList({
                       <button
                         key={choice}
                         type="button"
+                        disabled={state === "busy"}
                         onClick={() => {
+                          correctionAttemptKey.current = null;
+                          setState("idle");
+                          changeVersion.current += 1;
+                          const version = changeVersion.current;
                           setPending((current) =>
                             choice === row.answer
                               ? Object.fromEntries(
                                   Object.entries(current).filter(([key]) => key !== row.itemId),
                                 )
-                              : { ...current, [row.itemId]: choice },
+                              : {
+                                  ...current,
+                                  [row.itemId]: {
+                                    answer: choice,
+                                    version,
+                                  },
+                                },
                           );
                           setEditing(null);
                         }}
@@ -157,6 +204,14 @@ export function ReceiptsList({
         <p className="mt-2 text-xs text-muted print:hidden">
           Changes work on the device you used for the questionnaire, or open your email link here
           first.
+        </p>
+      ) : state === "conflict" ? (
+        <p className="mt-2 text-xs text-muted print:hidden">
+          This answer needs confirmation in Progress before it can be changed here.
+        </p>
+      ) : state === "error" ? (
+        <p className="mt-2 text-xs text-muted print:hidden">
+          Those changes were not saved. They are still here for you to review.
         </p>
       ) : pendingCount > 0 ? (
         <div className="mt-3 flex items-center gap-3 print:hidden">

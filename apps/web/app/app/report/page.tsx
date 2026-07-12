@@ -2,20 +2,25 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppData } from "../../../lib/app-data";
+import { liveProgressEnabled } from "../../../lib/child-progress/flag";
+import { progressRoutePolicy } from "../../../lib/child-progress/route-policy";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 
 /**
- * /app/report: the sidebar tab's stable address for "the progress
- * report". Reports are per kid (/app/[childId]/report), but the nav
- * renders once with no kid in hand, so this route resolves a kid: the
- * one selected in the context switcher first (their page handles the
- * no-report-yet case by routing to /onboarding, the standing law), then
- * the first kid with a report. No report anywhere means the questions
- * aren't done: /onboarding is the one place they live (founder call
- * 2026-07-08).
+ * The legacy in-app report resolver remains the rollback route while live
+ * Progress is dark. Once enabled, its stable replacement owns child
+ * selection and this route redirects there without loading report data.
  */
 
 export default async function ReportIndexPage() {
+  const policy = progressRoutePolicy(
+    { surface: "report_index" },
+    liveProgressEnabled(),
+  );
+  if (policy.kind === "redirect") {
+    redirect(policy.href);
+  }
+
   const data = await getAppData();
   if (!data) redirect("/onboarding");
 

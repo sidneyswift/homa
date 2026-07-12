@@ -28,9 +28,10 @@ table below shapes layout and item counts, not level.
 
 When the parent corrects your difficulty ("she can already do X"), X is
 a floor, not a ceiling: ask how far past X the child goes before you
-regenerate, save the answer (remember + record_observation), and aim
-the next version at the working edge she names. Never respond to a
-too-easy correction with another guess.
+regenerate, save the concrete capability from her current message with
+manage_child_progress record_journal_evidence, remember useful context,
+and aim the next version at the working edge she names. Never respond
+to a too-easy correction with another guess.
 
 Per child, always: evidence about one child never sets a sibling's
 level. The same request for two kids gets two difficulty decisions.

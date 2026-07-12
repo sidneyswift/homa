@@ -21,12 +21,33 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  appendPreparedChatSendToQueue,
+  focusChatComposerInput,
+  prepareChatSend,
+  type ChatSendAcceptance,
+  type ChatSendSource,
+  type ChatTurnModality,
+  type QueuedChatMessage,
+} from "./chat-send-policy";
+import {
   DictationRow,
   MicButton,
   RECORDING_HINT_MESSAGE,
   useDictation,
 } from "./dictation";
 import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
+import {
+  beginProgressAction,
+  createProgressActionLifecycleState,
+  progressActionUnavailableKeys,
+  releaseProgressAction,
+  settleProgressAction,
+  type ProgressActionLifecycleState,
+} from "./progress-action-lifecycle";
+import {
+  latestProgressMessageInteraction,
+  type ProgressMessageInteraction,
+} from "./progress-interaction-policy";
 import { SlashComposer } from "./slash-composer";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
@@ -134,7 +155,7 @@ export function ChatClient({
 }: {
   storageKey: string;
   familyId: string | null;
-  timeZone: string | null;
+  timeZone: string;
   parentName: string | null;
   /** The wall (plans/2026-07-11-the-wall.md): checkout URLs when this
    * family is walled, null when the composer is open (the default, and
@@ -168,7 +189,8 @@ export function ChatClient({
   const lastStreamActivityRef = useRef(0);
   /** Messages sent while a turn was running; flushed as one message the
    *  moment the line is free. */
-  const [queued, setQueued] = useState<string[]>([]);
+  const [queued, setQueued] = useState<QueuedChatMessage[]>([]);
+  const queuedTurnModalityRef = useRef<ChatTurnModality>("text");
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer (the React
    *  Compiler rejects that self-capture on mobile; twins stay alike). */
@@ -179,7 +201,17 @@ export function ChatClient({
   // turn in flight (read later by onFinish / the error effect). Refs,
   // not state: nothing renders from them.
   const draftFromVoiceRef = useRef(false);
-  const turnModalityRef = useRef<"text" | "voice">("text");
+  const turnModalityRef = useRef<ChatTurnModality>("text");
+  const progressActionLifecycleRef =
+    useRef<ProgressActionLifecycleState>(
+      createProgressActionLifecycleState(),
+    );
+  const [
+    progressActionLifecycle,
+    setProgressActionLifecycle,
+  ] = useState<ProgressActionLifecycleState>(
+    createProgressActionLifecycleState,
+  );
   // Lost-turn recovery bookkeeping (turn-recovery.ts): the durable
   // stream cursor (session streamIndex at mount + one per received
   // event, surviving localStorage event trimming), what the last send
@@ -269,12 +301,13 @@ export function ChatClient({
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
       if (!snapshot.error && queued.length > 0) {
-        const message = queued.join("\n\n");
+        const message = queued.map((entry) => entry.text).join("\n\n");
         setQueued([]);
         // Next tick: this callback runs inside the previous send's
         // teardown, and eve rejects overlapping sends.
         setTimeout(() => {
           setBusySeconds(0);
+          turnModalityRef.current = queuedTurnModalityRef.current;
           lastSendRef.current = { text: message, atMs: currentTimeMs() };
           markTurnStarted();
           void sendRef.current?.({ message });
@@ -293,6 +326,7 @@ export function ChatClient({
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const composerFormRef = useRef<HTMLFormElement>(null);
   const firstScrollDoneRef = useRef(false);
   const busy = agent.status === "submitted" || agent.status === "streaming";
   // The wall (plans/2026-07-11-the-wall.md): the chat door. One
@@ -439,6 +473,18 @@ export function ChatClient({
     live: agent.data.messages,
     liveTimes,
   });
+  const liveMessageSet = new Set<EveMessage>(agent.data.messages);
+  const progressSessionKey =
+    agent.session?.sessionId ??
+    prepared.initialSession?.sessionId ??
+    "pending";
+  const progressInteraction = latestProgressMessageInteraction({
+    messages: agent.data.messages,
+    sessionKey: progressSessionKey,
+    unavailableActionKeys: progressActionUnavailableKeys(
+      progressActionLifecycle,
+    ),
+  });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
@@ -453,9 +499,92 @@ export function ChatClient({
     firstScrollDoneRef.current = true;
   }, [agent.data.messages, archived, queued]);
 
-  function sendMessage(text: string) {
-    const message = text.trim();
-    if (message.length === 0) return;
+  const focusComposer = useCallback(() => {
+    focusChatComposerInput(composerFormRef.current);
+  }, []);
+
+  function updateProgressActionLifecycle(
+    next: ProgressActionLifecycleState,
+  ): void {
+    progressActionLifecycleRef.current = next;
+    setProgressActionLifecycle(next);
+  }
+
+  function beginCurrentProgressInteraction(
+    partKey: string,
+  ): ProgressMessageInteraction | null {
+    const interaction = latestProgressMessageInteraction({
+      messages: agent.data.messages,
+      sessionKey: progressSessionKey,
+      unavailableActionKeys: progressActionUnavailableKeys(
+        progressActionLifecycleRef.current,
+      ),
+    });
+    if (!interaction || interaction.partKey !== partKey) return null;
+    const started = beginProgressAction(
+      progressActionLifecycleRef.current,
+      interaction.actionKey,
+    );
+    if (!started.accepted) return null;
+    updateProgressActionLifecycle(started.state);
+    return interaction;
+  }
+
+  function sendProgressCardAction(
+    partKey: string,
+    text: string,
+  ): void {
+    const interaction = beginCurrentProgressInteraction(partKey);
+    if (!interaction) return;
+    const result = sendMessage(text, {
+      kind: "progress_card",
+      progressActionKey: interaction.actionKey,
+    });
+    updateProgressActionLifecycle(
+      settleProgressAction(
+        progressActionLifecycleRef.current,
+        interaction.actionKey,
+        result,
+      ),
+    );
+  }
+
+  function focusComposerFromProgressCard(partKey: string): void {
+    const interaction = beginCurrentProgressInteraction(partKey);
+    if (!interaction) return;
+    focusComposer();
+    updateProgressActionLifecycle(
+      settleProgressAction(
+        progressActionLifecycleRef.current,
+        interaction.actionKey,
+        "sent",
+      ),
+    );
+  }
+
+  function releaseQueuedProgressAction(
+    progressActionKey: string | null,
+  ): void {
+    if (progressActionKey === null) return;
+    updateProgressActionLifecycle(
+      releaseProgressAction(
+        progressActionLifecycleRef.current,
+        progressActionKey,
+      ),
+    );
+  }
+
+  function sendMessage(
+    text: string,
+    source: ChatSendSource = { kind: "composer" },
+  ): ChatSendAcceptance {
+    const plan = prepareChatSend({
+      text,
+      busy,
+      draftFromVoice: draftFromVoiceRef.current,
+      source,
+    });
+    if (!plan) return "rejected";
     // The chat door's tap beacon, once per visit, wall on or off (the
     // paywall decision wants baseline tap-through data).
     if (!chatDoorTappedRef.current) {
@@ -466,19 +595,19 @@ export function ChatClient({
     // eve turn never starts, so nothing is half-sent behind the wall.
     if (wall) {
       setWallOpen(true);
-      return;
+      return "rejected";
     }
-    // The registry's modality signal (chat.turn_completed): "voice"
-    // when dictation fed any part of this draft.
-    turnModalityRef.current = draftFromVoiceRef.current ? "voice" : "text";
-    draftFromVoiceRef.current = false;
-    setDraft("");
+    if (plan.resetDraftFromVoice) draftFromVoiceRef.current = false;
+    if (plan.clearDraft) setDraft("");
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
     // composer and goes out the moment the line is free.
-    if (busy) {
-      setQueued((current) => [...current, message]);
-      return;
+    if (plan.destination === "queue") {
+      queuedTurnModalityRef.current = plan.modality;
+      setQueued((current) =>
+        appendPreparedChatSendToQueue(current, plan),
+      );
+      return "queued";
     }
     // A manual send takes the composer back: a still-running recovery
     // of the previous turn stands down (its reply would land into a
@@ -489,12 +618,27 @@ export function ChatClient({
     if (!agent.session?.sessionId) durableCursorRef.current = 0;
     // A queue held back by a failed turn rides along with the next
     // manual send, in the order she wrote everything.
-    const outgoing = [...queued, message].join("\n\n");
+    const outgoing = [
+      ...queued.map((entry) => entry.text),
+      plan.message,
+    ].join("\n\n");
     setQueued([]);
     setBusySeconds(0);
+    turnModalityRef.current = plan.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     markTurnStarted();
     void agent.send({ message: outgoing });
+    return "sent";
+  }
+
+  function removeQueuedMessage(
+    index: number,
+    entry: QueuedChatMessage,
+  ): void {
+    releaseQueuedProgressAction(entry.progressActionKey);
+    setQueued((current) =>
+      current.filter((_, at) => at !== index),
+    );
   }
 
   return (
@@ -527,13 +671,44 @@ export function ChatClient({
           </div>
         ) : (
           <>
-            {transcript.map((item) =>
-              item.kind === "separator" ? (
-                <DaySeparator key={item.key} label={item.label} />
-              ) : (
-                <MessageView key={item.key} message={item.message} />
-              ),
-            )}
+            {transcript.map((item) => {
+              if (item.kind === "separator") {
+                return <DaySeparator key={item.key} label={item.label} />;
+              }
+              const isLiveMessage = liveMessageSet.has(item.message);
+              const actionableInteraction =
+                isLiveMessage &&
+                item.message.id === progressInteraction?.messageId
+                  ? progressInteraction
+                  : null;
+              return (
+                <MessageView
+                  key={item.key}
+                  message={item.message}
+                  timeZone={timeZone}
+                  actionableProgressPartKey={
+                    actionableInteraction?.partKey
+                  }
+                  onSendSuggestion={
+                    actionableInteraction
+                      ? (text) =>
+                          sendProgressCardAction(
+                            actionableInteraction.partKey,
+                            text,
+                          )
+                      : undefined
+                  }
+                  onFocusComposer={
+                    actionableInteraction
+                      ? () =>
+                          focusComposerFromProgressCard(
+                            actionableInteraction.partKey,
+                          )
+                      : undefined
+                  }
+                />
+              );
+            })}
             {showSuggestions ? (
               <div className="flex flex-wrap justify-center gap-2 pt-2">
                 {SUGGESTIONS.map((suggestion) => (
@@ -573,23 +748,23 @@ export function ChatClient({
           // stopping the turn is all it takes, the flush in onFinish
           // delivers the queue the moment the abort settles.
           <div className="flex flex-col items-end gap-2">
-            {queued.map((text, index) => (
+            {queued.map((entry, index) => (
               <div
-                key={`${index}:${text.slice(0, 24)}`}
+                key={`${index}:${entry.text.slice(0, 24)}`}
                 className="flex max-w-[76%] items-center gap-2"
               >
                 <button
                   type="button"
                   aria-label="Remove from queue"
-                  onClick={() =>
-                    setQueued((current) => current.filter((_, at) => at !== index))
-                  }
+                  onClick={() => removeQueuedMessage(index, entry)}
                   className="text-subtle transition-colors hover:text-strong"
                 >
                   <X size={14} aria-hidden="true" />
                 </button>
                 <div className="rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand opacity-70">
-                  <p className="whitespace-pre-wrap">{text}</p>
+                  <p className="whitespace-pre-wrap">
+                    {entry.text}
+                  </p>
                 </div>
               </div>
             ))}
@@ -649,6 +824,7 @@ export function ChatClient({
           </p>
         ) : null}
         <form
+          ref={composerFormRef}
           className="mx-auto flex w-full max-w-[780px] items-center gap-2.5 rounded-pill border border-border-subtle bg-card py-2 pl-5 pr-2 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
           onSubmit={(event) => {
             event.preventDefault();

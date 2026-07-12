@@ -185,6 +185,235 @@ describe("conversation reply resolution", () => {
     assert.equal(result.kind, "matched");
   });
 
+  it("matches a natural check-in answer to one same-channel choice loop", () => {
+    const result = resolveReplyIntent({
+      text: "She can do it with a little help.",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:check-in-1:revision:3",
+          messageContent: "Can Story count up to five?",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "matched");
+    if (result.kind === "matched") {
+      assert.equal(result.candidate.deliveryId, "delivery-1");
+    }
+  });
+
+  it("does not let a choice loop capture an unrelated statement", () => {
+    const result = resolveReplyIntent({
+      text: "We switched to science and built a paper bridge.",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:check-in-1:revision:3",
+          messageContent: "Can Story count up to five?",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "none");
+  });
+
+  it("matches a clear cannot answer to the current choice loop", () => {
+    const result = resolveReplyIntent({
+      text: "She can't do that yet.",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:check-in-1:revision:3",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "matched");
+  });
+
+  it("matches an exact answer-chip phrase across channels", () => {
+    const result = resolveReplyIntent({
+      text: "Getting there",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "web",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "choice",
+          channel: "sms",
+          promptKey:
+            "progress-check-in:check-in-1:revision:3",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "matched");
+  });
+
+  it("keeps a short sometimes answer but rejects a sometimes tangent", () => {
+    const choice = candidate({
+      replyKind: "choice",
+      promptKey:
+        "progress-check-in:check-in-1:revision:3",
+    });
+    const base = {
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms" as const,
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [choice],
+    };
+
+    assert.equal(
+      resolveReplyIntent({
+        ...base,
+        text: "Sometimes.",
+      }).kind,
+      "matched",
+    );
+    assert.equal(
+      resolveReplyIntent({
+        ...base,
+        text: "Sometimes we switch to science instead.",
+      }).kind,
+      "none",
+    );
+  });
+
+  it("keeps generic yes and progress answers on their own loop kinds", () => {
+    const yesNo = candidate({
+      deliveryId: "delivery-yes-no",
+      replyKind: "yes_no",
+      promptKey: "morning-brief-offer",
+    });
+    const choice = candidate({
+      deliveryId: "delivery-progress",
+      replyKind: "choice",
+      promptKey:
+        "progress-check-in:dddddddd-dddd-4ddd-8ddd-dddddddddddd:revision:2",
+    });
+    const base = {
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms" as const,
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+    };
+
+    const yes = resolveReplyIntent({
+      ...base,
+      text: "Yes",
+      candidates: [choice],
+    });
+    const progressOnYesNo = resolveReplyIntent({
+      ...base,
+      text: "Getting there",
+      candidates: [yesNo],
+    });
+    const mixed = resolveReplyIntent({
+      ...base,
+      text: "Getting there",
+      candidates: [yesNo, choice],
+    });
+
+    assert.equal(yes.kind, "none");
+    assert.equal(progressOnYesNo.kind, "none");
+    assert.equal(mixed.kind, "matched");
+    if (mixed.kind === "matched") {
+      assert.equal(mixed.candidate.deliveryId, "delivery-progress");
+    }
+  });
+
+  it("rejects a subject-changing progress-shaped sentence", () => {
+    const result = resolveReplyIntent({
+      text: "She needs help with reading instead",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:dddddddd-dddd-4ddd-8ddd-dddddddddddd:revision:2",
+          messageContent: "Can Maya count out loud from 1 to 5?",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "none");
+  });
+
+  it("treats plain negative replies as bounded progress choices", () => {
+    const choice = candidate({
+      deliveryId: "delivery-progress-negative",
+      replyKind: "choice",
+      promptKey:
+        "progress-check-in:dddddddd-dddd-4ddd-8ddd-dddddddddddd:revision:2",
+    });
+    for (const text of ["No", "Nope", "No, not yet"]) {
+      const result = resolveReplyIntent({
+        text,
+        now: NOW,
+        memberUserId: "sidney",
+        currentChannel: "sms",
+        explicitDeliveryId: null,
+        providerReplyTo: null,
+        candidates: [choice],
+      });
+      assert.equal(result.kind, "matched", text);
+    }
+  });
+
+  it("keeps a plain negative ambiguous across yes/no and progress loops", () => {
+    const result = resolveReplyIntent({
+      text: "No",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          deliveryId: "delivery-yes-no",
+          replyKind: "yes_no",
+          promptKey: "morning-brief-offer",
+        }),
+        candidate({
+          deliveryId: "delivery-progress",
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:dddddddd-dddd-4ddd-8ddd-dddddddddddd:revision:2",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "ambiguous");
+  });
+
   it("uses a parent's clarification to select one previously ambiguous loop", () => {
     const result = resolveReplyIntent({
       text: "The morning brief",

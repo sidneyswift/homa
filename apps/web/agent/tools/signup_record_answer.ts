@@ -2,6 +2,9 @@ import { MAP_ANSWERS } from "@homa/core";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  legacyProgressTransportIdempotencyKey,
+} from "../../lib/child-progress/legacy-adapters";
 import { saveAnswer } from "../../lib/map/store";
 import { nextChecklistItem } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
@@ -21,13 +24,48 @@ export default defineTool({
     answer: z.enum(MAP_ANSWERS),
   }),
   async execute(input, ctx) {
-    const session = await resolveSignupSession(ctx.session.auth.current?.attributes);
+    const attributes = (
+      ctx.session.auth.current?.attributes ?? {}
+    ) as {
+      canonicalInboundMessageId?: string;
+      inboundReceiptId?: string;
+      memberUserId?: string;
+      providerMessageId?: string;
+    };
+    const session = await resolveSignupSession(attributes);
     if (!session) return { recorded: false, note: NOT_SMS_REFUSAL };
     if (!session.familyId) {
       return { recorded: false, note: "No signup is open for this number. Call begin_text_signup first." };
     }
 
-    const result = await saveAnswer(session.familyId, input.childId, input.itemId, input.answer);
+    const result = await saveAnswer(
+      session.familyId,
+      input.childId,
+      input.itemId,
+      input.answer,
+      {
+        source: "checklist",
+        memberUserId:
+          typeof attributes.memberUserId === "string"
+            ? attributes.memberUserId
+            : null,
+        channel: "sms",
+        messageId: attributes.canonicalInboundMessageId,
+        providerMessageId: attributes.providerMessageId,
+        observedAt: new Date().toISOString(),
+        idempotencyKey:
+          legacyProgressTransportIdempotencyKey({
+            operation: "signup-answer",
+            channel: "sms",
+            providerMessageId:
+              attributes.providerMessageId ?? null,
+            inboundReceiptId:
+              attributes.inboundReceiptId ?? null,
+            runtimeSessionId: ctx.session.id,
+            turnId: ctx.session.turn.id,
+          }),
+      },
+    );
     if (!result.ok) {
       return {
         recorded: false,

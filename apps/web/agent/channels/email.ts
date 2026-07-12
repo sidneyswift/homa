@@ -1,5 +1,7 @@
 import { defineChannel, POST } from "eve/channels";
 
+import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
+import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import {
   beginDeliveryAttempt,
   findDeliveryEmailIdentity,
@@ -277,6 +279,15 @@ export default defineChannel({
           turnId: inboundReceipt.id,
           providerMessageId,
         });
+        if (persistedInbound) {
+          Object.assign(
+            continuityAttributes,
+            canonicalInboundAuthAttributes({
+              text: email.text,
+              messageId: persistedInbound.id,
+            }),
+          );
+        }
         if (
           continuityAttributes.repliedDeliveryId &&
           !persistedInbound?.replyClaimed
@@ -383,17 +394,47 @@ export default defineChannel({
         destination: to,
         providerThreadKey: `email:${to.toLowerCase()}`,
       });
+      const genericContract = replyContractForReactiveMessage(
+        data.message,
+      );
+      const openLoopAfterOutcome = async (
+        deliveryOutcome: "sent" | "uncertain" | "failed",
+      ) => {
+        const progress =
+          data.turnId
+            ? await bindDeliveredProgressCheckIn({
+                attempt,
+                deliveryOutcome,
+                runtimeSessionId: ctx.session.id,
+                turnId: data.turnId,
+                deliveredContent: data.message ?? undefined,
+              })
+            : { status: "no_unique_prompt" as const };
+        if (
+          progress.status !== "bound" &&
+          progress.status !== "delivery_paused" &&
+          deliveryOutcome !== "failed" &&
+          genericContract
+        ) {
+          await openReplyLoop({
+            attempt,
+            contract: genericContract,
+          });
+        }
+      };
       if (!attempt.shouldSend) {
         if (attempt.existingStatus === "sent") {
           await markCanonicalMessageDelivered({
             familyId,
             messageId: persisted.id,
           });
+          await openLoopAfterOutcome("sent");
+        } else if (attempt.existingStatus === "uncertain") {
+          await openLoopAfterOutcome("uncertain");
         }
         return;
       }
-      const contract = replyContractForReactiveMessage(data.message);
-      if (contract) await openReplyLoop({ attempt, contract });
+      let providerOutcome: "sent" | "uncertain" | null = null;
       try {
         const replySecret = process.env.RESEND_INBOUND_SECRET;
         const submission = await submitAgentComposedEmail(
@@ -419,7 +460,21 @@ export default defineChannel({
                 uncertain: submission.status === "unknown",
               }),
         });
-        if (submission.status !== "submitted") {
+        providerOutcome =
+          submission.status === "submitted"
+            ? "sent"
+            : submission.status === "unknown"
+              ? "uncertain"
+              : null;
+        if (submission.status === "unknown") {
+          await openLoopAfterOutcome("uncertain");
+          if (attributes.inboundReceiptId) {
+            await completeInboundReceipt(attributes.inboundReceiptId);
+          }
+          return;
+        }
+        if (submission.status === "rejected") {
+          await openLoopAfterOutcome("failed");
           if (attributes.inboundReceiptId) {
             await completeInboundReceipt(attributes.inboundReceiptId);
           }
@@ -429,14 +484,18 @@ export default defineChannel({
           familyId,
           messageId: persisted.id,
         });
+        await openLoopAfterOutcome("sent");
         if (attributes.inboundReceiptId) {
           await completeInboundReceipt(attributes.inboundReceiptId);
         }
       } catch (error) {
-        await finishDeliveryAttempt(attempt, {
-          delivered: false,
-          error: error instanceof Error ? error.message : "unknown",
-        });
+        if (providerOutcome === null) {
+          await finishDeliveryAttempt(attempt, {
+            delivered: false,
+            error: error instanceof Error ? error.message : "unknown",
+          });
+          await openLoopAfterOutcome("failed");
+        }
         if (attributes.inboundReceiptId) {
           await completeInboundReceipt(attributes.inboundReceiptId);
         }

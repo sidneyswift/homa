@@ -5,6 +5,13 @@ import {
   MissingFamilyContextError,
 } from "../../lib/agent-db";
 import { type MemoryRow } from "../../lib/agent-memory";
+import {
+  getChildProgressView,
+  listActiveFamilyProgressCheckIns,
+} from "../../lib/child-progress/runtime";
+import {
+  loadEnabledChildProgressAgentContext,
+} from "../../lib/child-progress/agent-context";
 import { loadContinuityContext } from "../../lib/conversation-continuity/ledger";
 import {
   loadFamilyContextPinned,
@@ -139,6 +146,30 @@ export default defineDynamic({
           focusChildId: attributes?.viewChildId,
           speakingWith: attributes?.memberName ?? null,
         });
+        let progressContext = "";
+        if (attributes?.familyId) {
+          try {
+            progressContext =
+              await loadEnabledChildProgressAgentContext(
+              {
+                familyId: attributes.familyId,
+                childIds: rows.children.map((child) => child.id),
+              },
+              {
+                listFamilyCheckIns:
+                  listActiveFamilyProgressCheckIns,
+                getChildProgressView,
+              },
+            );
+          } catch (error) {
+            // The established family context remains available when the new
+            // progress read model is temporarily unavailable.
+            console.error(
+              "family context: child progress load failed:",
+              error instanceof Error ? error.message : "unknown",
+            );
+          }
+        }
         let continuityContext = attributes?.continuityContext ?? "";
         if (attributes?.familyId && continuityContext.length === 0) {
           try {
@@ -157,7 +188,11 @@ export default defineDynamic({
           }
         }
         return defineInstructions({
-          markdown: [familyContext, continuityContext]
+          markdown: [
+            familyContext,
+            progressContext,
+            continuityContext,
+          ]
             .filter((block) => block.length > 0)
             .join("\n\n"),
         });

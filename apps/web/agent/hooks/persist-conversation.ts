@@ -1,5 +1,6 @@
 import { defineHook } from "eve/hooks";
 
+import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import { persistConversationMessage } from "../../lib/conversation-log";
 
 /**
@@ -25,7 +26,7 @@ export default defineHook({
   events: {
     async "message.received"(event, ctx) {
       try {
-        await persistConversationMessage({
+        const persisted = await persistConversationMessage({
           attributes: ctx.session.auth.current?.attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
@@ -34,6 +35,16 @@ export default defineHook({
           content: event.data.message,
           turnId: event.data.turnId,
         });
+        const attributes = ctx.session.auth.current?.attributes;
+        if (persisted && attributes) {
+          Object.assign(
+            attributes,
+            canonicalInboundAuthAttributes({
+              text: event.data.message,
+              messageId: persisted.id,
+            }),
+          );
+        }
       } catch (error) {
         console.error(
           "persist-conversation (user) failed:",

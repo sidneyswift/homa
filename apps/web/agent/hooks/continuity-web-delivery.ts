@@ -1,6 +1,11 @@
 import { defineHook } from "eve/hooks";
 
-import { recordReactiveDelivery } from "../../lib/conversation-continuity/delivery-ledger";
+import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
+import {
+  openReplyLoop,
+  recordReactiveDelivery,
+} from "../../lib/conversation-continuity/delivery-ledger";
+import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
 import { persistCanonicalMessage } from "../../lib/conversation-continuity/ledger";
 
 /**
@@ -33,7 +38,7 @@ export default defineHook({
         terminal: true,
       });
       if (!persisted) return;
-      await recordReactiveDelivery({
+      const recorded = await recordReactiveDelivery({
         familyId: attributes.familyId,
         episodeId: persisted.episodeId,
         messageId: persisted.id,
@@ -44,6 +49,28 @@ export default defineHook({
         content: event.data.message,
         delivered: true,
       });
+      const progress =
+        event.data.turnId
+          ? await bindDeliveredProgressCheckIn({
+              attempt: recorded.attempt,
+              deliveryOutcome: recorded.deliveryOutcome,
+              runtimeSessionId: ctx.session.id,
+              turnId: event.data.turnId,
+            })
+          : { status: "no_unique_prompt" as const };
+      const genericContract = replyContractForReactiveMessage(
+        event.data.message,
+      );
+      if (
+        progress.status !== "bound" &&
+        recorded.deliveryOutcome === "sent" &&
+        genericContract
+      ) {
+        await openReplyLoop({
+          attempt: recorded.attempt,
+          contract: genericContract,
+        });
+      }
     },
   },
 });

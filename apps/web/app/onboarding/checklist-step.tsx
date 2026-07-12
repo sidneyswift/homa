@@ -5,6 +5,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getMapSubject, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
+import {
+  classifyMapAnswerResponse,
+  createMapAnswerAttempt,
+  MapAnswerAttemptKeyPolicy,
+  mapAnswerAttemptRequestBody,
+  type MapAnswerAttempt,
+  type MapAnswerResponse,
+} from "./map-answer-attempt";
 import { buildQueue } from "./question-queue";
 import { ReportRail, type RailSubject } from "./report-rail";
 
@@ -96,9 +104,21 @@ export function ChecklistStep({
   const [flashAnswer, setFlashAnswer] = useState<MapAnswer | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [undoing, setUndoing] = useState(false);
-  const pendingSaves = useRef<Array<{ itemId: string; answer: MapAnswer }>>([]);
-  const inFlightSaves = useRef<Map<string, Set<Promise<boolean>>>>(new Map());
+  const [confirmationItemId, setConfirmationItemId] =
+    useState<string | null>(null);
+  const pendingSaves = useRef<MapAnswerAttempt[]>([]);
+  const permanentSaveFailures = useRef<Set<string>>(new Set());
+  const inFlightSaves =
+    useRef<Map<string, Set<Promise<MapAnswerResponse>>>>(
+      new Map(),
+    );
   const answerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attemptKeys =
+    useRef<MapAnswerAttemptKeyPolicy | null>(null);
+  if (attemptKeys.current === null) {
+    attemptKeys.current = new MapAnswerAttemptKeyPolicy();
+  }
+  const attemptKeyPolicy = attemptKeys.current;
 
   const queue = buildQueue(plans, answers);
   const current = queue[0];
@@ -127,25 +147,95 @@ export function ChecklistStep({
     };
   }, []);
 
-  async function postAnswer(itemId: string, answer: MapAnswer): Promise<boolean> {
+  async function postAnswer(
+    attempt: MapAnswerAttempt,
+  ): Promise<MapAnswerResponse> {
+    const intent = {
+      action: "save" as const,
+      childId: child.id,
+      itemId: attempt.itemId,
+      answer: attempt.answer,
+      source: attempt.source,
+    };
     try {
       const response = await fetch("/api/map/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId: child.id, itemId, answer }),
+        body: JSON.stringify(
+          mapAnswerAttemptRequestBody(child.id, attempt),
+        ),
       });
-      if (response.ok) return true;
-      pendingSaves.current.push({ itemId, answer });
-      return false;
+      const errorBody = response.status === 409
+        ? await response.json().catch(() => null) as {
+            reason?: string;
+          } | null
+        : null;
+      const outcome = classifyMapAnswerResponse(
+        response.status,
+        errorBody?.reason,
+      );
+      if (outcome === "success") {
+        attemptKeyPolicy.markSucceeded(intent);
+        permanentSaveFailures.current.delete(attempt.itemId);
+        return outcome;
+      }
+      if (outcome === "retryable") {
+        pendingSaves.current.push(attempt);
+        return outcome;
+      }
+      attemptKeyPolicy.markPermanentFailure(intent);
+      permanentSaveFailures.current.add(attempt.itemId);
+      if (outcome === "conflict_pending") {
+        setConfirmationItemId(attempt.itemId);
+        setSaveError(
+          "This answer is saved for confirmation in Progress before the questionnaire can continue.",
+        );
+        return outcome;
+      }
+      setAnswers((currentAnswers) => {
+        if (currentAnswers[attempt.itemId] !== attempt.answer) {
+          return currentAnswers;
+        }
+        const next = { ...currentAnswers };
+        delete next[attempt.itemId];
+        return next;
+      });
+      setSittingHistory((history) =>
+        history.filter((itemId) => itemId !== attempt.itemId)
+      );
+      setSaveError(
+        outcome === "idempotency_mismatch"
+          ? "That answer changed while saving. Please answer it again."
+          : "That answer was not saved. You can answer it again.",
+      );
+      return outcome;
     } catch {
-      pendingSaves.current.push({ itemId, answer });
-      return false;
+      pendingSaves.current.push(attempt);
+      return "retryable";
     }
   }
 
   function trackPostAnswer(itemId: string, answer: MapAnswer): void {
-    const save = postAnswer(itemId, answer);
-    const existing = inFlightSaves.current.get(itemId) ?? new Set<Promise<boolean>>();
+    const intent = {
+      action: "save" as const,
+      childId: child.id,
+      itemId,
+      answer,
+      source: "checklist" as const,
+    };
+    permanentSaveFailures.current.delete(itemId);
+    if (confirmationItemId === itemId) {
+      setConfirmationItemId(null);
+    }
+    const idempotencyKey = attemptKeyPolicy.keyFor(intent);
+    const attempt = createMapAnswerAttempt(
+      { itemId, answer, source: "checklist" },
+      () => idempotencyKey,
+    );
+    const save = postAnswer(attempt);
+    const existing =
+      inFlightSaves.current.get(itemId) ??
+      new Set<Promise<MapAnswerResponse>>();
     existing.add(save);
     inFlightSaves.current.set(itemId, existing);
     void save.finally(() => {
@@ -173,9 +263,12 @@ export function ChecklistStep({
     const retries = [...pendingSaves.current];
     pendingSaves.current = [];
     for (const entry of retries) {
-      await postAnswer(entry.itemId, entry.answer);
+      await postAnswer(entry);
     }
-    return pendingSaves.current.length === 0;
+    return (
+      pendingSaves.current.length === 0 &&
+      permanentSaveFailures.current.size === 0
+    );
   }
 
   async function completeWhenSaved(): Promise<void> {
@@ -195,13 +288,47 @@ export function ChecklistStep({
     await waitForItemSaves(itemId);
     const matchingPending = pendingSaves.current.filter((entry) => entry.itemId === itemId);
     pendingSaves.current = pendingSaves.current.filter((entry) => entry.itemId !== itemId);
+    const intent = {
+      action: "delete" as const,
+      childId: child.id,
+      itemId,
+    };
+    const idempotencyKey = attemptKeyPolicy.keyFor(intent);
     try {
       const response = await fetch("/api/map/answer", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId: child.id, itemId }),
+        body: JSON.stringify({
+          childId: child.id,
+          itemId,
+          idempotencyKey,
+        }),
       });
-      if (response.ok) return true;
+      const errorBody = response.status === 409
+        ? await response.json().catch(() => null) as {
+            reason?: string;
+          } | null
+        : null;
+      const outcome = classifyMapAnswerResponse(
+        response.status,
+        errorBody?.reason,
+      );
+      if (outcome === "success") {
+        attemptKeyPolicy.markSucceeded(intent);
+        return true;
+      }
+      if (
+        outcome === "permanent" ||
+        outcome === "conflict_pending" ||
+        outcome === "idempotency_mismatch"
+      ) {
+        attemptKeyPolicy.markPermanentFailure(intent);
+        setSaveError(
+          outcome === "conflict_pending"
+            ? "This answer needs confirmation in Progress before it can be undone."
+            : "That saved answer could not be undone. It is still included.",
+        );
+      }
     } catch {
       // Keep local state unchanged below, so the parent can try again.
     }

@@ -57,6 +57,20 @@ export interface NextItem {
   remainingAtLeast: number;
 }
 
+export function nextChecklistItemFromAnswers(
+  ageMonths: number,
+  answers: Readonly<Record<string, MapAnswer>>,
+): NextItem | null {
+  const queue = buildQueue(planQuestions(ageMonths), answers);
+  if (queue.length === 0) return null;
+  return {
+    itemId: queue[0].item.id,
+    statement: queue[0].item.statement,
+    answered: Object.keys(answers).length,
+    remainingAtLeast: queue.length,
+  };
+}
+
 /** The signup family for this phone: the linked one when the number is
  * already linked, else a fresh anonymous family (source 'sms') with the
  * phone attached. */
@@ -273,14 +287,7 @@ export async function nextChecklistItem(
   if (!child) return null;
   const ageMonths = ageInMonths(child.birth_month);
   const answers = await childAnswers(familyId, childId);
-  const queue = buildQueue(planQuestions(ageMonths), answers);
-  if (queue.length === 0) return null;
-  return {
-    itemId: queue[0].item.id,
-    statement: queue[0].item.statement,
-    answered: Object.keys(answers).length,
-    remainingAtLeast: queue.length,
-  };
+  return nextChecklistItemFromAnswers(ageMonths, answers);
 }
 
 /** Sets the report email, refusing addresses that already belong to a

@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./domains": "./src/domains.ts"
+    "./domains": "./src/domains.ts",
+    "./progress": "./src/progress.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

@@ -74,9 +74,21 @@ function answer(
   itemId: string,
   value: MapAnswer,
   answeredAt: string,
-  evidenceId = `${itemId}:${answeredAt}:${value}`,
+  selectionId = `${itemId}:${answeredAt}:${value}`,
 ): ProgressSelectionAnswer {
-  return { evidenceId, itemId, answer: value, answeredAt };
+  const evidenceId =
+    value === "easily" ||
+    value === "getting_there" ||
+    value === "not_yet"
+      ? selectionId
+      : null;
+  return {
+    selectionId,
+    evidenceId,
+    itemId,
+    answer: value,
+    answeredAt,
+  };
 }
 
 describe("shared map question queue", () => {
@@ -167,7 +179,7 @@ describe("shared map question queue", () => {
 
 describe("agent check-in item selection", () => {
   it("uses the full age plan when subject scope is omitted", () => {
-    const ageMonths = 84;
+    const ageMonths = 72;
     const expectedPlan = planQuestions(ageMonths).find(
       (plan) => plan.subjectId === "literacy",
     );
@@ -192,14 +204,14 @@ describe("agent check-in item selection", () => {
 
   it("selects an unanswered age-plan base item", () => {
     const result = selectNextProgressItem({
-      ageMonths: 84,
+      ageMonths: 72,
       subjectIds: ["literacy"],
       answers: [],
     });
 
     assert.equal(
       result?.id,
-      getAgePlanBaseItem(84, "literacy").id,
+      getAgePlanBaseItem(72, "literacy").id,
     );
   });
 
@@ -304,15 +316,17 @@ describe("agent check-in item selection", () => {
   });
 
   it("orders offset timestamps by their actual instant", () => {
-    const literacyPlan = planQuestions(84).find(
+    const literacyPlan = planQuestions(72).find(
       (plan) => plan.subjectId === "literacy",
     );
     assert.ok(literacyPlan);
-    const firstLadderItem = literacyPlan.ladders[0];
+    const firstLadderItem = literacyPlan.ladders.find(
+      (item) => !AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has(item.id),
+    );
     assert.ok(firstLadderItem);
 
     const result = selectNextProgressItem({
-      ageMonths: 84,
+      ageMonths: 72,
       subjectIds: ["literacy"],
       answers: [
         answer(
@@ -333,16 +347,18 @@ describe("agent check-in item selection", () => {
     assert.equal(result?.id, firstLadderItem.id);
   });
 
-  it("uses evidence ID to order responses at the same instant", () => {
-    const literacyPlan = planQuestions(84).find(
+  it("uses selection ID to order responses at the same instant", () => {
+    const literacyPlan = planQuestions(72).find(
       (plan) => plan.subjectId === "literacy",
     );
     assert.ok(literacyPlan);
-    const firstLadderItem = literacyPlan.ladders[0];
+    const firstLadderItem = literacyPlan.ladders.find(
+      (item) => !AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has(item.id),
+    );
     assert.ok(firstLadderItem);
 
     const result = selectNextProgressItem({
-      ageMonths: 84,
+      ageMonths: 72,
       subjectIds: ["literacy"],
       answers: [
         answer(
@@ -356,6 +372,38 @@ describe("agent check-in item selection", () => {
           "easily",
           "2026-07-01T10:00:00+02:00",
           "evidence_1",
+        ),
+      ],
+    });
+
+    assert.equal(result?.id, firstLadderItem.id);
+  });
+
+  it("orders responses by full Postgres microsecond precision", () => {
+    const literacyPlan = planQuestions(72).find(
+      (plan) => plan.subjectId === "literacy",
+    );
+    assert.ok(literacyPlan);
+    const firstLadderItem = literacyPlan.ladders.find(
+      (item) => !AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has(item.id),
+    );
+    assert.ok(firstLadderItem);
+
+    const result = selectNextProgressItem({
+      ageMonths: 72,
+      subjectIds: ["literacy"],
+      answers: [
+        answer(
+          literacyPlan.base.id,
+          "not_yet",
+          "2026-07-01T08:00:00.000001Z",
+          "z-older",
+        ),
+        answer(
+          literacyPlan.base.id,
+          "easily",
+          "2026-07-01T08:00:00.000002Z",
+          "a-newer",
         ),
       ],
     });
@@ -383,7 +431,7 @@ describe("agent check-in item selection", () => {
       {
         name: "TypeError",
         message:
-          'Invalid answeredAt "not-a-timestamp" for evidence "evidence-invalid"',
+          'Invalid answeredAt "not-a-timestamp" for selection "evidence-invalid"',
       },
     );
   });
@@ -422,6 +470,18 @@ describe("agent check-in item selection", () => {
       AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has("math.skip-counting"),
       true,
     );
+    assert.equal(
+      AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has(
+        "literacy.chapter-books",
+      ),
+      true,
+    );
+    assert.equal(
+      AGENT_CHECK_IN_EXCLUDED_ITEM_IDS.has(
+        "literacy.reads-short-book",
+      ),
+      true,
+    );
     assert.equal(result?.id, "math.times-tables");
   });
 
@@ -445,6 +505,26 @@ describe("agent check-in item selection", () => {
       ],
     });
     assert.equal(afterFallback?.id, "math.times-tables");
+  });
+
+  it("does not refresh an answered item after a response exhausts scope", () => {
+    const artBase = getAgePlanBaseItem(84, "art");
+
+    assert.equal(
+      selectNextProgressItem({
+        ageMonths: 84,
+        subjectIds: ["art"],
+        answers: [
+          answer(
+            artBase.id,
+            "not_yet",
+            "2026-07-11T18:00:00.000000Z",
+          ),
+        ],
+        allowRefresh: false,
+      }),
+      null,
+    );
   });
 
   it("returns null when the requested subject scope is empty", () => {

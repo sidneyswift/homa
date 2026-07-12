@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MAP_ANSWERS } from "./map/bank";
 import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
 
 /**
@@ -17,6 +18,12 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  *  report.action_tapped schemas and the beacon route's request schema. */
 export const WALL_DOORS = ["plan", "month", "call", "chat"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
+
+const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
+  .string()
+  .min(1)
+  .max(80)
+  .regex(/^[a-z][a-z0-9_-]*$/u);
 
 export const EVENT_SCHEMAS = {
   "waitlist.joined": z.object({
@@ -150,6 +157,109 @@ export const EVENT_SCHEMAS = {
     source: z.enum(["report_correction", "report_probe", "recheck"]),
     changes: z.number().int().min(1),
   }),
+  // ChildProgress emits only after a committed, non-replayed operation.
+  // Item identifiers, operation identifiers, quotes, messages, and adult
+  // contact or display data stay out of analytics properties.
+  "progress.evidence_recorded": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      source: z.enum([
+        "journal",
+        "conversation",
+        "check_in",
+        "checklist",
+        "deep_dive",
+        "correction",
+        "report_correction",
+        "report_probe",
+        "recheck",
+        "onboarding_walk",
+        "legacy",
+      ]),
+      items: z.number().int().min(1),
+      supersedes: z.boolean(),
+    })
+    .strict(),
+  "progress.checkin_started": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      scope: z.enum(["whole", "subject"]),
+      subject: PROGRESS_EVENT_DIMENSION_ID_SCHEMA.optional(),
+    })
+    .strict()
+    .superRefine((value, context) => {
+      if (value.scope === "whole" && value.subject !== undefined) {
+        context.addIssue({
+          code: "custom",
+          message: "Whole-progress check-ins cannot name one subject",
+          path: ["subject"],
+        });
+      }
+    }),
+  "progress.checkin_answered": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+      domain: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+      answer: z.enum(MAP_ANSWERS),
+    })
+    .strict(),
+  "progress.checkin_paused": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      reason: z.enum([
+        "topic_change",
+        "explicit_stop",
+        "conflict",
+        "delivery_uncertain",
+        "delivery_failed",
+        "member_removed",
+      ]),
+    })
+    .strict(),
+  "progress.checkin_resumed": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      takeover: z.boolean(),
+    })
+    .strict(),
+  "progress.checkin_ended": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      outcome: z.enum(["completed", "stopped"]),
+    })
+    .strict(),
+  "progress.conflict_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+      domain: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+    })
+    .strict(),
+  "progress.conflict_resolved": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+      domain: PROGRESS_EVENT_DIMENSION_ID_SCHEMA,
+      resolution: z.literal("confirmed"),
+    })
+    .strict(),
+  "progress.projection_updated": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subjects_touched: z.number().int().min(1),
+      had_conflict: z.boolean(),
+    })
+    .strict(),
   // The report's one-tap month: the parent explicitly asked Homa to build
   // the plan and check back, which is what arms the retest email.
   "map.plan_consented": z.object({

@@ -1,0 +1,198 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { EVENT_SCHEMAS } from "./events";
+import { MAP_ANSWERS } from "./map/bank";
+
+const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
+const CHILD_ID = "00000000-0000-4000-8000-000000000002";
+
+const validProgressEvents = {
+  "progress.evidence_recorded": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    source: "journal",
+    items: 2,
+    supersedes: false,
+  },
+  "progress.checkin_started": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    scope: "subject",
+    subject: "math",
+  },
+  "progress.checkin_answered": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    domain: "counting-cardinality",
+    answer: "easily",
+  },
+  "progress.checkin_paused": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    reason: "topic_change",
+  },
+  "progress.checkin_resumed": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    takeover: false,
+  },
+  "progress.checkin_ended": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    outcome: "completed",
+  },
+  "progress.conflict_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    domain: "counting-cardinality",
+  },
+  "progress.conflict_resolved": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    domain: "counting-cardinality",
+    resolution: "confirmed",
+  },
+  "progress.projection_updated": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subjects_touched: 1,
+    had_conflict: false,
+  },
+} as const;
+
+test("progress event registry contains all nine exact names", () => {
+  assert.deepEqual(
+    Object.keys(EVENT_SCHEMAS)
+      .filter((name) => name.startsWith("progress."))
+      .sort(),
+    Object.keys(validProgressEvents).sort(),
+  );
+});
+
+test("progress event schemas accept every exact valid shape", () => {
+  for (const [name, props] of Object.entries(validProgressEvents)) {
+    const schema =
+      EVENT_SCHEMAS[name as keyof typeof validProgressEvents];
+    assert.equal(schema.safeParse(props).success, true, name);
+  }
+});
+
+test("progress check-in answers accept every MAP answer", () => {
+  for (const answer of MAP_ANSWERS) {
+    assert.equal(
+      EVENT_SCHEMAS["progress.checkin_answered"].safeParse({
+        ...validProgressEvents["progress.checkin_answered"],
+        answer,
+      }).success,
+      true,
+      answer,
+    );
+  }
+});
+
+test("progress event numeric boundaries are enforced", () => {
+  assert.equal(
+    EVENT_SCHEMAS["progress.evidence_recorded"].safeParse({
+      ...validProgressEvents["progress.evidence_recorded"],
+      items: 0,
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["progress.projection_updated"].safeParse({
+      ...validProgressEvents["progress.projection_updated"],
+      subjects_touched: 0,
+    }).success,
+    false,
+  );
+});
+
+test("check-in scope keeps whole and multi-subject shapes exact", () => {
+  assert.equal(
+    EVENT_SCHEMAS["progress.checkin_started"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      scope: "whole",
+    }).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["progress.checkin_started"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      scope: "subject",
+    }).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["progress.checkin_started"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      scope: "whole",
+      subject: "math",
+    }).success,
+    false,
+  );
+});
+
+test("progress dimensions accept identifiers, not display text", () => {
+  assert.equal(
+    EVENT_SCHEMAS["progress.checkin_answered"].safeParse({
+      ...validProgressEvents["progress.checkin_answered"],
+      subject: "Maya",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["progress.conflict_opened"].safeParse({
+      ...validProgressEvents["progress.conflict_opened"],
+      domain: "Counting and cardinality",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["progress.conflict_resolved"].safeParse({
+      ...validProgressEvents["progress.conflict_resolved"],
+      resolution: "deferred",
+    }).success,
+    false,
+  );
+});
+
+test("progress events reject PII and operation identifiers", () => {
+  const forbiddenProperties = [
+    "quote",
+    "item",
+    "item_id",
+    "itemId",
+    "adult",
+    "adult_name",
+    "adultName",
+    "contact",
+    "email",
+    "email_address",
+    "phone",
+    "phone_number",
+    "message",
+    "message_text",
+    "operation",
+    "operation_id",
+    "operationId",
+  ] as const;
+
+  for (const [name, props] of Object.entries(validProgressEvents)) {
+    const schema =
+      EVENT_SCHEMAS[name as keyof typeof validProgressEvents];
+    for (const property of forbiddenProperties) {
+      assert.equal(
+        schema.safeParse({ ...props, [property]: "forbidden" }).success,
+        false,
+        `${name} accepted ${property}`,
+      );
+    }
+  }
+});

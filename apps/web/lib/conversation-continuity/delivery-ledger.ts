@@ -2,7 +2,6 @@ import { mapDb } from "../map/db";
 import type { FamilyTaskKind } from "../tasks/kinds";
 import { hashContinuityKey } from "./continuity-service";
 import {
-  replyContractForReactiveMessage,
   replyContractForTask,
   type TaskReplyContract,
 } from "./delivery-policy";
@@ -151,6 +150,7 @@ export interface DeliveryAttempt {
   providerThreadKey: string | null;
   existingStatus: "pending" | "sent" | "failed" | "uncertain";
   shouldSend: boolean;
+  sentAtMs?: number | null;
 }
 
 export async function beginDeliveryAttempt(input: {
@@ -171,7 +171,11 @@ export async function beginDeliveryAttempt(input: {
     ? hashContinuityKey(input.providerThreadKey)
     : null;
   const rows = await sql<
-    { id: string; status: "pending" | "sent" | "failed" | "uncertain" }[]
+    {
+      id: string;
+      status: "pending" | "sent" | "failed" | "uncertain";
+      sent_at_ms: string | null;
+    }[]
   >`
     insert into public.conversation_deliveries
       (family_id, episode_id, message_id, task_run_id,
@@ -187,15 +191,22 @@ export async function beginDeliveryAttempt(input: {
         updated_at = now()
     where public.conversation_deliveries.status = 'failed'
       and public.conversation_deliveries.attempt_count < 3
-    returning id, status
+    returning id, status,
+      (extract(epoch from sent_at) * 1000)::text as sent_at_ms
   `;
   const row =
     rows[0] ??
     (
       await sql<
-        { id: string; status: "pending" | "sent" | "failed" | "uncertain" }[]
+        {
+          id: string;
+          status: "pending" | "sent" | "failed" | "uncertain";
+          sent_at_ms: string | null;
+        }[]
       >`
-        select id, status from public.conversation_deliveries
+        select id, status,
+          (extract(epoch from sent_at) * 1000)::text as sent_at_ms
+        from public.conversation_deliveries
         where message_id = ${input.messageId}
           and channel = ${input.channel}
           and destination_hash = ${destinationHash}
@@ -214,6 +225,10 @@ export async function beginDeliveryAttempt(input: {
     providerThreadKey: input.providerThreadKey ?? null,
     existingStatus: row.status,
     shouldSend: Boolean(rows[0]),
+    sentAtMs:
+      row.sent_at_ms === null
+        ? null
+        : Number(row.sent_at_ms),
   };
 }
 
@@ -257,7 +272,20 @@ export async function openReplyLoop(input: {
   contract: TaskReplyContract;
   now?: Date;
 }): Promise<void> {
-  const sql = mapDb();
+  return openReplyLoopWithDatabase(mapDb(), input);
+}
+
+/**
+ * Injectable SQL seam used by the disposable PostgreSQL integration harness.
+ */
+export async function openReplyLoopWithDatabase(
+  sql: ReturnType<typeof mapDb>,
+  input: {
+    attempt: DeliveryAttempt;
+    contract: TaskReplyContract;
+    now?: Date;
+  },
+): Promise<void> {
   const now = input.now ?? new Date();
   const expiresAt = new Date(
     now.getTime() + input.contract.expiresAfterMs,
@@ -272,8 +300,12 @@ export async function openReplyLoop(input: {
        ${input.contract.kind}, ${input.contract.promptKey},
        ${expiresAt.toISOString()})
     on conflict (delivery_id) do update
-    set state = 'open', expires_at = excluded.expires_at,
+    set kind = excluded.kind,
+        prompt_key = excluded.prompt_key,
+        state = 'open',
+        expires_at = excluded.expires_at,
         resolved_at = null, resolved_by_message_id = null
+    where public.conversation_open_loops.state <> 'resolved'
   `;
 }
 
@@ -296,6 +328,11 @@ export async function setTaskRunRuntimeSession(
   `;
 }
 
+export interface ReactiveDeliveryRecord {
+  attempt: DeliveryAttempt;
+  deliveryOutcome: "sent" | "failed";
+}
+
 export async function recordReactiveDelivery(input: {
   familyId: string;
   episodeId: string;
@@ -307,7 +344,7 @@ export async function recordReactiveDelivery(input: {
   providerMessageId?: string | null;
   content: string;
   delivered: boolean;
-}): Promise<void> {
+}): Promise<ReactiveDeliveryRecord> {
   const attempt = await beginDeliveryAttempt({
     familyId: input.familyId,
     episodeId: input.episodeId,
@@ -326,10 +363,17 @@ export async function recordReactiveDelivery(input: {
         : { delivered: false, error: "reactive delivery failed" },
     );
   }
-  const contract = replyContractForReactiveMessage(input.content);
-  if (input.delivered && attempt.shouldSend && contract) {
-    await openReplyLoop({ attempt, contract });
-  }
+  return {
+    attempt,
+    deliveryOutcome:
+      input.delivered &&
+      (
+        attempt.shouldSend ||
+        attempt.existingStatus === "sent"
+      )
+        ? "sent"
+        : "failed",
+  };
 }
 
 export async function markStalePendingDeliveriesUncertain(

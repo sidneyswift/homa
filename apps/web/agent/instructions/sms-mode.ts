@@ -1,5 +1,7 @@
 import { defineDynamic, defineInstructions } from "eve/instructions";
 
+import { LINKED_SMS_PROGRESS_GUIDANCE } from "../../lib/child-progress/instruction-guidance";
+
 /**
  * SMS-mode guidance, injected only for sessions arriving through the
  * Telnyx channel (agent/channels/telnyx.ts). Web sessions get nothing
@@ -112,6 +114,7 @@ export default defineDynamic({
 - Your memory tools work over text: remember, forget, log_hours,
   update_child_profile, and recall all work here exactly like web chat.
   Save durable facts and log school time the moment they come up.
+${LINKED_SMS_PROGRESS_GUIDANCE}
 - An evening text that reads like "here's how today went" IS the
   journal: reply warmly in one or two sentences, save the durable
   bits, and log any school time mentioned. Never recite what you

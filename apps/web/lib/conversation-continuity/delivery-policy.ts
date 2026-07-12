@@ -61,6 +61,24 @@ export function replyContractForReactiveMessage(
     : null;
 }
 
+/**
+ * Pins a reply loop to the exact durable progress prompt that was delivered.
+ * The workflow's revision check still decides whether a later answer is current.
+ */
+export function replyContractForProgressCheckIn(
+  checkInId: string,
+  revision: number,
+): TaskReplyContract {
+  if (checkInId.trim().length === 0 || !Number.isInteger(revision) || revision < 1) {
+    throw new TypeError("Progress reply contract requires a current prompt");
+  }
+  return {
+    kind: "choice",
+    promptKey: `progress-check-in:${checkInId}:revision:${revision}`,
+    expiresAfterMs: 24 * 60 * 60_000,
+  };
+}
+
 export function replyContractForTask(
   kind: FamilyTaskKind,
   text: string,

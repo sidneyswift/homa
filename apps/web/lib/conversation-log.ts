@@ -42,7 +42,9 @@ function channelLabel(
 
 export async function persistConversationMessage(
   input: PersistMessageInput,
-): Promise<void> {
+): Promise<
+  Awaited<ReturnType<typeof persistCanonicalMessage>>
+> {
   const attrs = (input.attributes ?? {}) as {
     familyId?: string;
     memberUserId?: string;
@@ -52,10 +54,10 @@ export async function persistConversationMessage(
     email?: string;
   };
   const familyId = attrs.familyId;
-  if (!familyId) return;
+  if (!familyId) return null;
 
   const content = input.content.trim().slice(0, CONTENT_MAX_CHARS);
-  if (content.length === 0) return;
+  if (content.length === 0) return null;
   const channel = channelLabel(input.attributes, input.channelKind);
   let continuityAttributes: Record<string, string> = {};
   if (input.role === "user" && !attrs.episodeId) {
@@ -113,4 +115,5 @@ export async function persistConversationMessage(
       where id = ${persisted.id} and embedding is null
     `;
   }
+  return persisted;
 }
