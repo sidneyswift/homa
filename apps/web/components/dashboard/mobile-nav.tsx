@@ -132,7 +132,7 @@ export function MobileNav(props: SidebarProps) {
               </button>
             </div>
 
-            <SidebarContent {...props} />
+            <SidebarContent {...props} withViewingRows />
           </div>
         </>
       ) : null}

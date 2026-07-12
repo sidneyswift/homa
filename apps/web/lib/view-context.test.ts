@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   kidSwitchTargetPath,
+  pageShowsContextSwitcher,
   resolveProgressChildId,
 } from "./view-context";
 
@@ -19,6 +20,37 @@ describe("kidSwitchTargetPath", () => {
       kidSwitchTargetPath("/app/child-one/report", "child-two"),
       "/app/child-two/report",
     );
+  });
+});
+
+describe("pageShowsContextSwitcher", () => {
+  it("shows on the surfaces the selection affects", () => {
+    for (const pathname of [
+      "/app",
+      "/app/child-one/progress",
+      "/app/progress",
+      "/app/planner",
+      "/app/binder",
+      "/app/child-one/report",
+      "/app/kids/child-one",
+    ]) {
+      assert.equal(pageShowsContextSwitcher(pathname), true, pathname);
+    }
+  });
+
+  it("hides on the surfaces that ignore the selection", () => {
+    for (const pathname of [
+      "/app/tasks",
+      "/app/settings",
+      "/app/settings/billing",
+    ]) {
+      assert.equal(pageShowsContextSwitcher(pathname), false, pathname);
+    }
+  });
+
+  it("never shows outside the app frame", () => {
+    assert.equal(pageShowsContextSwitcher("/onboarding"), false);
+    assert.equal(pageShowsContextSwitcher("/apple"), false);
   });
 });
 

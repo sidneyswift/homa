@@ -54,6 +54,8 @@ uncommitted work (desktop kid switcher, founder console) shares the
 working tree; this commit stages only the binder/studio files and this
 log's own entries.
 
+## 2026-07-12 · Founder ruling: the desktop kid switcher is a top-right avatar; the rail keeps nav and account only
+
 Founder, looking at the desktop rail's kid section: "the my kids tab is weird
 on desktop... there should just be a pfp at the top right of the app just like
 the mobile version to select kids on the pages that would benefit from it."

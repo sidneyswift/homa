@@ -144,6 +144,7 @@ References must qualify colliding labels as global D3 age range, global D8 casin
 | `full-birthday` | 2026-07-11 | Store month, day, and year product-wide. This supersedes month-and-year minimization and D-mp-4's day-01 normalization. | `docs/homa-planning/build-log.md` § Full-birthday intake ruling |
 | `nav-labels-simplified` | 2026-07-12 | App nav tabs read "Ask", "Progress", "Planner", "Tasks". Supersedes the D-ht-4 tab name and the "Ask HOMA" and "Week planner" nav labels, for the nav only; page titles keep the fuller names. | `docs/homa-planning/build-log.md` § App nav labels simplified |
 | `task-recipient-scoping` | 2026-07-12 | Only the account owner (the family's first member) is auto-subscribed to scheduled task texts: the morning brief, the evening check-in, and custom tasks. An invited adult is never auto-subscribed and opts in by creating their own task on the web tab, in chat, or over SMS. Supersedes the multi-parent v0 every-adult task fan-out. | `docs/homa-planning/build-log.md` § Task texts reach one adult |
+| `desktop-context-switcher-top-right` | 2026-07-12 | On desktop the kid context switcher is an avatar at the app's top right (multi-kid families, on pages the selection affects); the desktop sidebar lists nav and account only. Supersedes the sidebar placement from the 2026-07-10 one-kid-list ruling. The phone bar and drawer are unchanged. | `docs/homa-planning/build-log.md` § Founder ruling: the desktop kid switcher is a top-right avatar |
 
 ### Open founder decisions
 

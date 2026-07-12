@@ -81,6 +81,26 @@ export function kidSwitchTargetPath(
   return null;
 }
 
+/** The /app surfaces that ignore the view context: Homa's own tasks and
+ * account settings. Everything else either scopes to the selection (chat
+ * focus, planner, binder) or swaps kid pages with it (Progress, report,
+ * kid pages). */
+const CONTEXT_FREE_PAGES = ["/app/tasks", "/app/settings"] as const;
+
+/**
+ * pageShowsContextSwitcher(pathname): boolean
+ * Whether the desktop top-right switcher belongs on this page (founder
+ * ruling 2026-07-12: a kid avatar at the app's top right, like the phone
+ * bar, on the pages the selection actually affects). Only the desktop
+ * host reads this; the phone bar keeps its always-on switcher.
+ */
+export function pageShowsContextSwitcher(pathname: string): boolean {
+  if (pathname !== "/app" && !pathname.startsWith("/app/")) return false;
+  return !CONTEXT_FREE_PAGES.some(
+    (page) => pathname === page || pathname.startsWith(`${page}/`),
+  );
+}
+
 /**
  * readViewContextCookie(cookieHeader): string | null
  * Pulls the raw cookie value out of a Cookie header string, for callers

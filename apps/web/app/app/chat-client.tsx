@@ -809,18 +809,19 @@ export function ChatClient({
           // The context switcher has one kid selected; say so where she
           // types, so a focused chat never comes as a surprise, and name
           // the way back (reader-gate fix: the pill alone read as a
-          // mystery button). The switcher lives in the top bar on phones
-          // and in the sidebar on desktop, so the hint names each.
+          // mystery button). The switcher sits at the top right on every
+          // size now (founder ruling 2026-07-12), and it only exists for
+          // multi-kid families, so the hint holds its tongue when there
+          // is no control to point at.
           <p className="mx-auto mb-2.5 flex w-full max-w-[780px] items-center gap-2">
             <span className="inline-flex items-center rounded-pill bg-brand-soft px-3 py-1 text-xs font-semibold text-[var(--clay-700)]">
               About {focusChildName}
             </span>
-            <span className="text-xs text-subtle lg:hidden">
-              Change who you&apos;re viewing from the top right.
-            </span>
-            <span className="hidden text-xs text-subtle lg:inline">
-              Change who you&apos;re viewing from the sidebar.
-            </span>
+            {(kids?.length ?? 0) > 1 ? (
+              <span className="text-xs text-subtle">
+                Change who you&apos;re viewing from the top right.
+              </span>
+            ) : null}
           </p>
         ) : null}
         <form

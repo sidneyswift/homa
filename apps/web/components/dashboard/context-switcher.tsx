@@ -2,32 +2,40 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { Check, Users } from "lucide-react";
 
 import { ageLabel } from "@homa/core";
 
 import { setViewContextAction } from "../../app/app/view-context-actions";
-import { kidSwitchTargetPath, VIEW_CONTEXT_FAMILY } from "../../lib/view-context";
+import {
+  kidSwitchTargetPath,
+  pageShowsContextSwitcher,
+  VIEW_CONTEXT_FAMILY,
+} from "../../lib/view-context";
 import { avatarTone, type SidebarKid } from "./sidebar";
 
 /**
  * The family / per-child context switcher (founder direction 2026-07-10,
  * merged design ruled same day): one selection that answers "who am I
- * looking at right now", with two hosts sharing one behavior:
+ * looking at right now", with three hosts sharing one behavior:
  *
  *   ContextSwitcher · the avatar button on the phone top bar's right
  *     edge; its menu drops in place, so switching never needs the drawer.
- *   ViewingRows · the sidebar section that REPLACED the old "My kids"
- *     link list (founder ruling: two kid lists in one rail was one too
- *     many). A "Whole family" row, then the kid rows, active highlighted.
+ *   DesktopContextSwitcher · the same avatar at the viewport's top right
+ *     on desktop (founder ruling 2026-07-12: the kid switcher belongs at
+ *     the app's top right like the phone bar, not in the rail), shown
+ *     only on pages the selection affects (pageShowsContextSwitcher).
+ *   ViewingRows · the switcher rows the phone DRAWER renders (the drawer
+ *     is the whole sidebar); the desktop rail dropped them with the same
+ *     2026-07-12 ruling.
  *
  * Picking anyone keeps the parent on her current surface: kid-scoped
  * pages (a report, a kid page) swap to the sibling's same page, and
  * everything else re-reads the selection in place (the planner narrows,
  * chat refocuses). "Whole family" always stays put. Families with one
- * kid see no switcher anywhere; the sidebar keeps a plain "My kids" link
- * to the kid's page instead.
+ * kid see no switcher anywhere; the phone drawer keeps a plain "My kids"
+ * link to the kid's page instead.
  *
  * Menu behavior matches the house menus (AccountMenu, MobileNav): closes
  * on Escape, an outside tap, or a pick; entrance is opacity + transform
@@ -104,17 +112,26 @@ function useViewContextPick(selected: string) {
   return { current, pick };
 }
 
-/** The phone top bar's avatar button + drop menu. Multi-kid only. */
-export function ContextSwitcher({
+/**
+ * The avatar button + drop menu, the shared guts of the phone bar's and
+ * the desktop corner's switcher. Multi-kid only; the hosts differ only
+ * in where they sit and how the button is dressed. The menu id comes
+ * from useId because both hosts stay mounted (CSS swaps them at lg), so
+ * a hardcoded id would collide.
+ */
+function SwitcherMenu({
   kids,
   selected,
+  buttonClassName,
 }: {
   kids: SidebarKid[];
   /** "family" or one of the kids' ids (the layout validated it). */
   selected: string;
+  buttonClassName: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
   const { current, pick } = useViewContextPick(selected);
 
   useEffect(() => {
@@ -148,14 +165,14 @@ export function ContextSwitcher({
       <button
         type="button"
         aria-expanded={open ? "true" : "false"}
-        aria-controls="context-switcher-menu"
+        aria-controls={menuId}
         aria-label={
           currentKid
             ? `Viewing ${currentKid.name}. Change who you're viewing`
             : "Viewing the whole family. Change who you're viewing"
         }
         onClick={() => setOpen((value) => !value)}
-        className="flex cursor-pointer items-center rounded-full p-0.5 transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+        className={buttonClassName}
       >
         {currentKid ? (
           <KidAvatar kid={currentKid} index={currentKidIndex} size={32} />
@@ -166,7 +183,7 @@ export function ContextSwitcher({
 
       {open ? (
         <div
-          id="context-switcher-menu"
+          id={menuId}
           role="menu"
           className="absolute right-0 top-full z-50 mt-2 w-60 origin-top-right rounded-md border border-border-subtle bg-card p-1.5 shadow-lg transition-[opacity,translate,scale] duration-(--dur-base) ease-out starting:-translate-y-1 starting:scale-[0.98] starting:opacity-0 motion-reduce:transition-none"
         >
@@ -208,11 +225,59 @@ export function ContextSwitcher({
   );
 }
 
+/** The phone top bar's avatar button + drop menu. Multi-kid only. */
+export function ContextSwitcher({
+  kids,
+  selected,
+}: {
+  kids: SidebarKid[];
+  selected: string;
+}) {
+  return (
+    <SwitcherMenu
+      kids={kids}
+      selected={selected}
+      buttonClassName="flex cursor-pointer items-center rounded-full p-0.5 transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+    />
+  );
+}
+
 /**
- * The sidebar's one kid list. Multi-kid families get the switcher rows
- * ("Viewing": Whole family + each kid, active highlighted, tap to
- * rescope in place). A single-kid family keeps the old "My kids" link
- * to the kid's page: with nothing to switch, a switcher would be noise.
+ * Desktop's kid switcher (founder ruling 2026-07-12): the same avatar,
+ * floating at the viewport's top right where the phone bar keeps its
+ * own, dressed as a small white card so it reads over any page. Multi-kid
+ * only, and only on pages the selection affects; Tasks and Settings
+ * ignore it, so there it steps away. Fixed to the viewport like the
+ * rail, hidden below lg where the phone bar takes over.
+ */
+export function DesktopContextSwitcher({
+  kids,
+  selected,
+}: {
+  kids: SidebarKid[];
+  selected: string;
+}) {
+  const pathname = usePathname();
+  if (kids.length < 2 || !pageShowsContextSwitcher(pathname)) return null;
+
+  return (
+    <div className="fixed right-3.5 top-3.5 z-30 hidden lg:block print:hidden">
+      <SwitcherMenu
+        kids={kids}
+        selected={selected}
+        buttonClassName="flex cursor-pointer items-center rounded-full border border-border-subtle bg-card p-1 shadow-[var(--shadow-md)] transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+      />
+    </div>
+  );
+}
+
+/**
+ * The phone drawer's kid list (the drawer renders the whole sidebar;
+ * the desktop rail dropped these rows, founder ruling 2026-07-12).
+ * Multi-kid families get the switcher rows ("Viewing": Whole family +
+ * each kid, active highlighted, tap to rescope in place). A single-kid
+ * family keeps the old "My kids" link to the kid's page: with nothing
+ * to switch, a switcher would be noise.
  */
 export function ViewingRows({
   kids,

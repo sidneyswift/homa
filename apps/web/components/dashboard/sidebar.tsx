@@ -8,16 +8,19 @@ import { SidebarNav } from "./sidebar-nav";
 /**
  * The app's left rail, ported from the design system's web-app template
  * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
- * card, nav, the viewing rows (the kit's "kid switcher"; founder ruling
- * 2026-07-10 merged the old "My kids" link list into it, two kid lists
- * in one rail was one too many), and the account footer (AccountMenu:
- * the name row opens Settings and Sign out). Rendered once by the /app
- * layout, so it stays mounted while pages change; nav links only to
- * surfaces that exist (the library row joins when that page lands).
- * SidebarContent is the shared inside: the desktop rail here and the phone
- * drawer (mobile-nav.tsx) both render it, so the two never drift apart. The
- * desktop host is a div on purpose because browser content filters can hide
- * generic aside elements; its explicit role preserves the prior landmark.
+ * card, nav, and the account footer (AccountMenu: the name row opens
+ * Settings and Sign out). The kid rows left the desktop rail (founder
+ * ruling 2026-07-12: the kid switcher is the top-right avatar,
+ * DesktopContextSwitcher, same corner as the phone bar's); the phone
+ * drawer still renders them because the drawer is the whole sidebar.
+ * Rendered once by the /app layout, so it stays mounted while pages
+ * change; nav links only to surfaces that exist (the library row joins
+ * when that page lands). SidebarContent is the shared inside: the
+ * desktop rail here and the phone drawer (mobile-nav.tsx) both render
+ * it, and the withViewingRows switch is the one deliberate difference.
+ * The desktop host is a div on purpose because browser content filters
+ * can hide generic aside elements; its explicit role preserves the prior
+ * landmark.
  */
 
 export interface SidebarKid {
@@ -63,15 +66,17 @@ export function Sidebar(props: SidebarProps) {
         </Link>
       </div>
 
-      <SidebarContent {...props} />
+      {/* The rail carries no kid rows: desktop's switcher is the
+          top-right avatar (DesktopContextSwitcher, in the shell). */}
+      <SidebarContent {...props} withViewingRows={false} />
     </div>
   );
 }
 
 /**
- * Everything inside the rail below the logo: nav, kids, account.
- * A fragment on purpose, both hosts are flex columns and AccountMenu's
- * mt-auto needs to push against them directly.
+ * Everything inside the rail below the logo: nav, the kid rows (drawer
+ * only), account. A fragment on purpose, both hosts are flex columns
+ * and AccountMenu's mt-auto needs to push against them directly.
  */
 export function SidebarContent({
   parentName,
@@ -79,14 +84,21 @@ export function SidebarContent({
   avatarUrl,
   kids,
   viewContext,
-}: SidebarProps) {
+  withViewingRows,
+}: SidebarProps & {
+  /** True in the phone drawer (the drawer is the whole sidebar), false
+   * in the desktop rail, whose switcher is the top-right avatar. */
+  withViewingRows: boolean;
+}) {
   return (
     <>
       <SidebarNav />
 
-      {/* The one kid list: switcher rows for multi-kid families, a plain
-          kid-page link for single-kid ones (see ViewingRows). */}
-      <ViewingRows kids={kids} selected={viewContext} />
+      {withViewingRows ? (
+        // The drawer's kid list: switcher rows for multi-kid families, a
+        // plain kid-page link for single-kid ones (see ViewingRows).
+        <ViewingRows kids={kids} selected={viewContext} />
+      ) : null}
 
       <AccountMenu parentName={parentName} familyName={familyName} avatarUrl={avatarUrl} />
     </>
