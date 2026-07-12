@@ -66,7 +66,7 @@ export async function classifyConversation(
     .join("\n");
 
   // Use a cheap model for classification to keep costs low.
-  const classifyModel = process.env.HOMA_CLASSIFY_MODEL ?? "openai/gpt-4o-mini";
+  const classifyModel = process.env.HOMA_CLASSIFY_MODEL ?? "openai/gpt-5.6-terra";
 
   const { object } = await generateObject({
     model: classifyModel as Parameters<typeof generateObject>[0]["model"],
