@@ -10,7 +10,7 @@ const PASSIVE_ACTIVITY_PATTERN =
   /\b(?:watched|listened to)\b.*\b(?:video|lesson|podcast)\b/iu;
 const CONCRETE_SKILL_PATTERNS = [
   /\bread\b[^.!?]*\b(?:retold|explained)\b/iu,
-  /\b(?:can|cannot|can't|could)\s+(?:still\s+)?(?:read|write|count|solve|retell|explain|build|pedal|swim)\w*\b/iu,
+  /\b(?:still\s+)?(?:can|cannot|can't|could(?:\s+not)?|couldn't)\s+(?:still\s+)?(?:read|write|count|solve|retell|explain|build|pedal|swim)\w*\b/iu,
   /\b(?:read|write|count|solve|retell|retold|explain|build|pedal|swim)\w*\b[^.!?]*\b(?:without help|by themself|on their own)\b/iu,
 ] as const;
 const CONCRETE_SKILL_SOURCE = CONCRETE_SKILL_PATTERNS

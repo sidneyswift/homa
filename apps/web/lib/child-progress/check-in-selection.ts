@@ -8,27 +8,32 @@ import {
 } from "@homa/core";
 
 import { isProgressEvidenceAnswer } from "./evidence-policy";
+import { parseOffsetIsoTimestampEpochNanoseconds } from "./timestamp";
 import type {
   ProgressSelectionAnswer,
   ProgressSelectionInput,
 } from "./types";
 
 export const AGENT_CHECK_IN_EXCLUDED_ITEM_IDS: ReadonlySet<string> =
-  new Set(["math.skip-counting"]);
+  new Set([
+    "math.skip-counting",
+    "literacy.reads-short-book",
+    "literacy.chapter-books",
+  ]);
 
 interface SubjectEvidenceSummary {
   realObservationCount: number;
-  latestEvidenceAtEpochMs: number | null;
+  latestEvidenceAtEpochNanoseconds: bigint | null;
 }
 
 interface RefreshCandidate {
   item: MapItem;
   subjectId: string;
-  evidenceAtEpochMs: number | null;
+  evidenceAtEpochNanoseconds: bigint | null;
 }
 
 interface TimedProgressSelectionAnswer extends ProgressSelectionAnswer {
-  answeredAtEpochMs: number;
+  answeredAtEpochNanoseconds: bigint;
 }
 
 function compareStableIds(left: string, right: string): number {
@@ -49,27 +54,32 @@ function compareStableIds(left: string, right: string): number {
   return leftCodePoints.length - rightCodePoints.length;
 }
 
-function compareOptionalEpochMs(
-  left: number | null,
-  right: number | null,
+function compareOptionalEpochNanoseconds(
+  left: bigint | null,
+  right: bigint | null,
 ): number {
   if (left === right) return 0;
   if (left === null) return -1;
   if (right === null) return 1;
-  return left - right;
+  return left < right ? -1 : 1;
 }
 
 function parseSelectionAnswerTimestamps(
   answers: readonly ProgressSelectionAnswer[],
 ): TimedProgressSelectionAnswer[] {
   return answers.map((answer) => {
-    const answeredAtEpochMs = Date.parse(answer.answeredAt);
-    if (!Number.isFinite(answeredAtEpochMs)) {
+    let answeredAtEpochNanoseconds: bigint;
+    try {
+      answeredAtEpochNanoseconds =
+        parseOffsetIsoTimestampEpochNanoseconds(
+          answer.answeredAt,
+        );
+    } catch {
       throw new TypeError(
-        `Invalid answeredAt "${answer.answeredAt}" for evidence "${answer.evidenceId}"`,
+        `Invalid answeredAt "${answer.answeredAt}" for selection "${answer.selectionId}"`,
       );
     }
-    return { ...answer, answeredAtEpochMs };
+    return { ...answer, answeredAtEpochNanoseconds };
   });
 }
 
@@ -81,9 +91,11 @@ function buildLatestResponseByItem(
     const current = latestByItem.get(answer.itemId);
     if (
       current === undefined ||
-      answer.answeredAtEpochMs > current.answeredAtEpochMs ||
-      (answer.answeredAtEpochMs === current.answeredAtEpochMs &&
-        compareStableIds(answer.evidenceId, current.evidenceId) > 0)
+      answer.answeredAtEpochNanoseconds >
+        current.answeredAtEpochNanoseconds ||
+      (answer.answeredAtEpochNanoseconds ===
+        current.answeredAtEpochNanoseconds &&
+        compareStableIds(answer.selectionId, current.selectionId) > 0)
     ) {
       latestByItem.set(answer.itemId, answer);
     }
@@ -147,14 +159,16 @@ function summarizeSubjectEvidence(
 
     const summary = summaries.get(bankEntry.subject.id) ?? {
       realObservationCount: 0,
-      latestEvidenceAtEpochMs: null,
+      latestEvidenceAtEpochNanoseconds: null,
     };
     summary.realObservationCount += 1;
     if (
-      summary.latestEvidenceAtEpochMs === null ||
-      answer.answeredAtEpochMs > summary.latestEvidenceAtEpochMs
+      summary.latestEvidenceAtEpochNanoseconds === null ||
+      answer.answeredAtEpochNanoseconds >
+        summary.latestEvidenceAtEpochNanoseconds
     ) {
-      summary.latestEvidenceAtEpochMs = answer.answeredAtEpochMs;
+      summary.latestEvidenceAtEpochNanoseconds =
+        answer.answeredAtEpochNanoseconds;
     }
     summaries.set(bankEntry.subject.id, summary);
   }
@@ -179,7 +193,7 @@ function compareSubjectCoveragePriority(
 function collectAnsweredEligibleItems(
   plans: readonly MapQuestionPlan[],
   latestByItem: ReadonlyMap<string, ProgressSelectionAnswer>,
-  latestEvidenceAtByItem: ReadonlyMap<string, number>,
+  latestEvidenceAtByItem: ReadonlyMap<string, bigint>,
 ): RefreshCandidate[] {
   const candidates: RefreshCandidate[] = [];
   for (const plan of plans) {
@@ -189,7 +203,8 @@ function collectAnsweredEligibleItems(
       candidates.push({
         item,
         subjectId: plan.subjectId,
-        evidenceAtEpochMs: latestEvidenceAtByItem.get(item.id) ?? null,
+        evidenceAtEpochNanoseconds:
+          latestEvidenceAtByItem.get(item.id) ?? null,
       });
       if (response.answer !== "easily") break;
     }
@@ -199,15 +214,18 @@ function collectAnsweredEligibleItems(
 
 function buildLatestEvidenceAtByItem(
   answers: readonly TimedProgressSelectionAnswer[],
-): Map<string, number> {
-  const latestEvidenceAtByItem = new Map<string, number>();
+): Map<string, bigint> {
+  const latestEvidenceAtByItem = new Map<string, bigint>();
   for (const answer of answers) {
     if (!isProgressEvidenceAnswer(answer.answer)) continue;
     const current = latestEvidenceAtByItem.get(answer.itemId);
-    if (current === undefined || answer.answeredAtEpochMs > current) {
+    if (
+      current === undefined ||
+      answer.answeredAtEpochNanoseconds > current
+    ) {
       latestEvidenceAtByItem.set(
         answer.itemId,
-        answer.answeredAtEpochMs,
+        answer.answeredAtEpochNanoseconds,
       );
     }
   }
@@ -236,15 +254,16 @@ export function selectNextProgressItem(
         right.subjectId,
         subjectEvidence,
       ) ||
-      compareOptionalEpochMs(
-        subjectEvidence.get(left.subjectId)?.latestEvidenceAtEpochMs ??
-          null,
-        subjectEvidence.get(right.subjectId)?.latestEvidenceAtEpochMs ??
-          null,
+      compareOptionalEpochNanoseconds(
+        subjectEvidence.get(left.subjectId)
+          ?.latestEvidenceAtEpochNanoseconds ?? null,
+        subjectEvidence.get(right.subjectId)
+          ?.latestEvidenceAtEpochNanoseconds ?? null,
       ) ||
       compareStableIds(left.item.id, right.item.id),
   );
   if (unanswered[0] !== undefined) return unanswered[0].item;
+  if (input.allowRefresh === false) return null;
 
   const refreshCandidates = collectAnsweredEligibleItems(
     plans,
@@ -257,9 +276,9 @@ export function selectNextProgressItem(
         right.subjectId,
         subjectEvidence,
       ) ||
-      compareOptionalEpochMs(
-        left.evidenceAtEpochMs,
-        right.evidenceAtEpochMs,
+      compareOptionalEpochNanoseconds(
+        left.evidenceAtEpochNanoseconds,
+        right.evidenceAtEpochNanoseconds,
       ) ||
       compareStableIds(left.item.id, right.item.id),
   );

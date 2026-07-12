@@ -3,6 +3,156 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · Agent-led live progress reaches production
+
+Production now runs commit `635e16f92112011b8f8f4790c80ed96ab2cc6644`
+with `HOMA_LIVE_PROGRESS_ENABLED` enabled. Deployment
+`dpl_CVSe24nqdAHa5PdKhJJTUF97XSoS` reached READY and owns the
+`thankshoma.com` aliases.
+
+The rollout followed the guarded sequence: flag-off code first, public route
+probes, additive migration, dry-run reconciliation, committed reconciliation,
+production flag activation, and a fresh production build. The migration
+backfilled 231 evidence rows from 231 evidence-bearing compatibility answers.
+Both final reconciliation passes reported zero additional inserts and zero
+supersessions.
+
+The production isolation guard passed every anonymous, authenticated,
+cross-family, RLS, and ChildProgress constraint probe. Public landing and
+onboarding returned HTTP 200, a private token-report probe returned HTTP 200,
+and Vercel reported no recent runtime error clusters. A sanitized live read
+returned 16 subjects and 44 observations. A temporary synthetic check-in
+started, created one baseline snapshot, stopped, and was deleted.
+
+The first preview exposed one production-only Eve rule: `disableTool()` may
+override framework tools only, not a retired custom tool. The obsolete
+`record_observation.ts` file was removed in `635e16f`, after which the preview
+and production builds passed.
+
+A temporary authenticated Supabase session loaded the signed-in Progress
+surface with HTTP 200, then its family, child, membership, and Auth user were
+deleted. No real linked-family SMS was sent. Provider delivery remains an
+explicit follow-up probe rather than implied production evidence.
+
+## 2026-07-12 · Task 10 final quality closure
+
+Task 10 returned to in-progress status while six final gaps were closed, then
+returned to verified repository-complete at
+`2026-07-12T10:04:05-04:00` only after the fresh matrix passed.
+
+Progress events now use one bank-first, assessment-taxonomy-second dimension
+locator. Taxonomy evidence, conflicts, and resolutions carry their trusted
+subject and domain, and projection events never report zero touched subjects.
+The private membership-removal trigger inserts one PII-free
+`progress.checkin_paused` row in the same transaction as each real transition.
+Rollback leaves neither pause nor event. Runtime emitters exclude that reason
+because the database owns it.
+
+The disposable PostgreSQL harness now rejects every failed settled race. This
+exposed an older same-item deadlock that the prior unchecked branch had hidden.
+Legacy writers now lock the scoped child before `child_answers`, preserving the
+pre-migration-safe child-first order. The harness also requires every binary,
+bounds process and database waits, and proves PostgreSQL stopped plus the
+temporary directory disappeared before printing cleanup PASS. CI gives the E2E
+step a ten-minute outer limit.
+
+The focused guards now include reconciliation under `check:child-progress` and
+the narrow taxonomy metadata test under `check:taxonomy`. TSX message-part and
+card tests remain under `check:progress-ui`.
+
+Fresh evidence: 261 ChildProgress tests, 36 taxonomy graph checks plus 2
+progress metadata tests, event parity, 10 disposable-Postgres PASS markers, 97
+Progress UI tests, all 4 workspace typechecks, both linted applications, the
+63-route Next build, and the Eve build passed.
+
+This remains repository evidence only. No remote database, migration
+application, isolation probe, deployment, feature flag, provider, commit, or
+production state changed.
+
+## 2026-07-12 · Agent-led live progress closes in the repository only
+
+The founder-approved `agent-led-live-progress` ruling makes the agent the
+preferred authenticated app-home surface and makes signed-in Progress one live
+subject, domain, and topic view. It supersedes the earlier
+`report-as-dashboard` ruling only for the default app-home and dashboard
+surface. Permanent token and share reports remain, and existing report history
+stays stored.
+
+Task 10 registered all nine strict, PII-free `progress.*` event schemas and
+wired emission only after committed, nonduplicate, nonrefused operations.
+Analytics failures remain best effort and cannot change the product result.
+The root now exposes `check:child-progress`, `check:progress-ui`, and
+`child-progress:e2e`. CI runs all three and pins Ubuntu 24.04 plus PostgreSQL 16
+for the secret-free disposable database proof.
+
+The existing PostgreSQL harness was retained and extended rather than
+rewritten. Its static PASS markers cover pre-migration flag-off writers,
+cross-family denial, two-adult takeover, conflict replay and resolution,
+journal and partial check-in behavior, family folds and child deletion, walk
+prompts, corrections and reconciliation, report token and history preservation,
+and temporary-cluster cleanup.
+
+Fresh local verification passed 254 ChildProgress tests, 96 Progress UI tests,
+the disposable PostgreSQL E2E, map and walk checks, event parity,
+skills-targeting, taxonomy, 83 continuity tests, workspace typecheck, root
+lint, the Next build, the Eve build, and the isolation script syntax check. A
+safe flag-off route and card smoke passed 21 tests without a server or database.
+
+The repository-wide `check:docs -- --allow-open` command still exits 1 on
+concurrent audit debt outside this feature. Its final Task 10 run found 13
+unrelated or concurrent candidates absent from the immutable baseline and
+manifest, plus pre-existing missing Higgsfield files awaiting terminal
+lifecycle dispositions. Task 10's plans, specification, notes, two tracked
+prototypes, and local migration claim are covered. The claim ledger itself is
+structurally valid.
+
+This is repository evidence only. No commit, push, deployment, remote
+migration, remote isolation run, feature-flag activation, provider change, or
+production probe occurred. Rollout still requires a flag-off code deployment,
+Vercel READY and legacy probes, additive migration application, dry-run and
+real reconciliation, flag activation, authenticated Progress and correction
+checks, permanent token-report verification, linked-SMS verification, and a
+fresh production evidence update.
+
+## 2026-07-12 · ChildProgress legacy-writer lock order
+
+Task 9 moved checklist, deep-dive, taxonomy walk, SMS signup, delete, and
+report-correction writes behind one flag-aware ChildProgress adapter. The old
+model-facing item ID tool is disabled; `manage_child_progress` is the only
+model mutation boundary.
+
+The requested `child_answers` trigger only bumps the canonical source revision.
+It does not take the global advisory lock itself because PostgreSQL acquires
+the table lock before a row trigger runs, which would invert reconciliation's
+advisory-then-table order. Every application writer instead takes the shared
+advisory lock before its `child_answers` statement. The committed PostgreSQL
+harness covers the trigger, lock ordering, exact evidence linkage, correction
+append and supersession, deletion, conflict refusal, and same-answer new-date
+invalidation.
+
+Family folding exposed a second lock-and-identity seam. All 22 composite
+ChildProgress foreign keys now defer and cascade family updates, and account
+attachment shares the same family-data fold transaction as SMS stub
+reconciliation. This avoids choosing one of several inconsistent update paths:
+conversation provenance and child ownership can move in one transaction, then
+all constraints verify the destination family at commit.
+
+The final walk hardening removed a nested progress transaction. Prompt state,
+progress state, and next-card state now commit or roll back together. Prompt
+receipts carry expected sitting and item-observation state, while family folds
+re-check membership only after deterministic family row locks.
+
+Walk `not_sure` and `skip` stay compatibility coverage rather than fabricated
+evidence. Browser save and undo keys now follow one intent across retry, while
+Telnyx provider and receipt identity is stamped before family linkage. These
+are repository behaviors only; no provider configuration or production state
+was changed.
+
+Rollout remains code-first with the live flag false, then additive migration,
+explicit final reconciliation, and only then flag enablement. Rollback sets
+the flag false and leaves the additive ledger in place. No reverse bridge was
+added and no remote state changed.
+
 ## 2026-07-11 (late afternoon) · Slow SMS turns now speak before they work
 
 Founder problem: a reasoning-heavy SMS request left the phone silent long

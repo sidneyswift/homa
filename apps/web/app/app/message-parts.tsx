@@ -4,6 +4,13 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { ProgressConflictCard } from "./progress-conflict-card";
+import {
+  parseProgressMessagePart,
+  type ProgressAssistantItem,
+} from "./progress-message-parts";
+import { ProgressQuestionCard } from "./progress-question-card";
+import { ProgressUpdateChip } from "./progress-update-chip";
 
 /**
  * Message rendering for the chat transcript, in the assistant-transcript
@@ -81,20 +88,35 @@ const TOOL_DONE_LABELS: Record<string, string> = {
  * lines (consecutive ones collapse into a single mid-dot line, the way
  * the reference transcript groups "used X, did Y"), flowing markdown
  * text, material cards, and memory chips. */
+type SourcedProgressAssistantItem = ProgressAssistantItem & {
+  sourcePartIndex: number;
+  sourceActionKey: string;
+};
+
 type AssistantItem =
   | { kind: "activity"; labels: string[] }
   | { kind: "text"; text: string }
   | { kind: "material"; material: MaterialArtifact }
-  | { kind: "chip"; chip: MemoryChipContent };
+  | { kind: "chip"; chip: MemoryChipContent }
+  | SourcedProgressAssistantItem;
 
-function assistantItems(parts: readonly EveMessagePart[]): AssistantItem[] {
+function assistantItems(message: EveMessage): AssistantItem[] {
   const items: AssistantItem[] = [];
-  for (const part of parts) {
+  for (const [partIndex, part] of message.parts.entries()) {
     if (part.type === "text") {
       if (part.text.trim().length > 0) items.push({ kind: "text", text: part.text });
       continue;
     }
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
+    const progressItem = parseProgressMessagePart(part);
+    if (progressItem) {
+      items.push({
+        ...progressItem,
+        sourcePartIndex: partIndex,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
     if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
       // create_worksheet is the retired v1 name: restored localStorage
       // transcripts may still carry its parts, shaped {worksheet}.
@@ -125,7 +147,28 @@ function assistantItems(parts: readonly EveMessagePart[]): AssistantItem[] {
   return items;
 }
 
-function AssistantItemView({ item }: { item: AssistantItem }) {
+function AssistantItemView({
+  item,
+  onSendSuggestion,
+  onFocusComposer,
+  actionableProgressPartKey,
+  timeZone,
+}: {
+  item: AssistantItem;
+  onSendSuggestion?: (message: string) => void;
+  onFocusComposer?: () => void;
+  actionableProgressPartKey?: string;
+  timeZone: string;
+}) {
+  const progressPartIsActionable =
+    "sourceActionKey" in item &&
+    item.sourceActionKey === actionableProgressPartKey;
+  const progressSendSuggestion = progressPartIsActionable
+    ? onSendSuggestion
+    : undefined;
+  const progressFocusComposer = progressPartIsActionable
+    ? onFocusComposer
+    : undefined;
   switch (item.kind) {
     case "activity":
       return <p className="text-sm text-subtle">{item.labels.join(" · ")}</p>;
@@ -139,6 +182,43 @@ function AssistantItemView({ item }: { item: AssistantItem }) {
       return <MaterialCard material={item.material} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
+    case "progress_update":
+      return (
+        <ProgressUpdateChip
+          update={item.update}
+          onSendSuggestion={progressSendSuggestion}
+        />
+      );
+    case "progress_question":
+      return (
+        <ProgressQuestionCard
+          card={item.card}
+          onSendSuggestion={progressSendSuggestion}
+          onFocusComposer={progressFocusComposer}
+        />
+      );
+    case "progress_conflict":
+      return (
+        <ProgressConflictCard
+          card={item.card}
+          timeZone={timeZone}
+          onSendSuggestion={progressSendSuggestion}
+        />
+      );
+    case "progress_workflow":
+      return (
+        <div className="flex max-w-full flex-col items-start gap-2">
+          {item.update ? (
+            <ProgressUpdateChip
+              update={item.update}
+              onSendSuggestion={progressSendSuggestion}
+            />
+          ) : null}
+          <p className="inline-flex min-h-8 items-center rounded-pill border border-border-subtle bg-page px-3 py-1.5 text-sm font-semibold text-muted">
+            {item.label}
+          </p>
+        </div>
+      );
     default: {
       const exhaustive: never = item;
       return exhaustive;
@@ -146,7 +226,19 @@ function AssistantItemView({ item }: { item: AssistantItem }) {
   }
 }
 
-export function MessageView({ message }: { message: EveMessage }) {
+export function MessageView({
+  message,
+  onSendSuggestion,
+  onFocusComposer,
+  actionableProgressPartKey,
+  timeZone,
+}: {
+  message: EveMessage;
+  onSendSuggestion?: (message: string) => void;
+  onFocusComposer?: () => void;
+  actionableProgressPartKey?: string;
+  timeZone: string;
+}) {
   if (message.role === "user") {
     const text = message.parts
       .map((part) => (part.type === "text" ? part.text : ""))
@@ -164,12 +256,19 @@ export function MessageView({ message }: { message: EveMessage }) {
     );
   }
 
-  const items = assistantItems(message.parts);
+  const items = assistantItems(message);
   if (items.length === 0) return null;
   return (
     <div className="flex flex-col items-start gap-3">
       {items.map((item, index) => (
-        <AssistantItemView key={index} item={item} />
+        <AssistantItemView
+          key={index}
+          item={item}
+          onSendSuggestion={onSendSuggestion}
+          onFocusComposer={onFocusComposer}
+          actionableProgressPartKey={actionableProgressPartKey}
+          timeZone={timeZone}
+        />
       ))}
     </div>
   );
@@ -187,6 +286,7 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   save_skill: "saving that as a skill…",
   forget_skill: "removing the skill…",
   load_skill: "looking up how we do this…",
+  manage_child_progress: "updating progress…",
 };
 
 /**

@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* The signed-in desktop rail uses one explicit display contract. Keeping
+   this outside the hidden/lg:flex utility pair prevents browser content
+   filters from leaving both desktop and mobile navigation hidden. `screen`
+   preserves the existing print behavior without another override. */
+.app-sidebar {
+  display: none;
+}
+
+@media screen and (min-width: 64rem) {
+  .app-sidebar {
+    display: flex !important;
+  }
+}
+
 /* ============================================================================
    Homa Design System v3 tokens, copied VERBATIM and in full from
    docs/homa-design/tokens/{colors,shapes,typography,spacing,radius,shadows,

@@ -1,0 +1,48 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+
+import { setViewContextAction } from "../../app/app/view-context-actions";
+import { focusChildThenOpenChat } from "./ask-homa-about-child-action";
+
+const ASK_HOMA_CLASSES = {
+  primary:
+    "inline-flex min-h-11 items-center rounded-pill bg-[var(--brand-active)] px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-[var(--clay-600)] disabled:opacity-60",
+  secondary:
+    "inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60",
+} as const;
+
+export function AskHomaAboutChild({
+  childId,
+  childName,
+  variant = "secondary",
+}: {
+  childId: string;
+  childName: string;
+  variant?: keyof typeof ASK_HOMA_CLASSES;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  function openFocusedChat() {
+    startTransition(async () => {
+      await focusChildThenOpenChat(childId, {
+        setViewContext: setViewContextAction,
+        navigate: (href) => router.push(href),
+      });
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={openFocusedChat}
+      disabled={isPending}
+      aria-busy={isPending ? "true" : undefined}
+      className={ASK_HOMA_CLASSES[variant]}
+    >
+      Ask HOMA about {childName}
+    </button>
+  );
+}

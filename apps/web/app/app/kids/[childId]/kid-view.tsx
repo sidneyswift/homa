@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ageInMonths, ageLabel, homaNote, isInScoredRange, noteGreeting } from "@homa/core";
 
 import type { ChildCurriculumRow } from "../../../../lib/curriculum";
+import { kidProgressAction } from "../../../../lib/child-progress/kid-action";
 import type { ChildRecord } from "../../../../lib/family";
 import type { DashboardPlan, DashboardReport, RecentWin } from "../../../../lib/dashboard";
 import { avatarTone } from "../../../../components/dashboard/sidebar";
@@ -12,6 +13,7 @@ import { MonthCard } from "../../../../components/dashboard/month-card";
 import { movedUpCount } from "../../../../components/dashboard/movement";
 import { StatTiles } from "../../../../components/dashboard/stat-tiles";
 import { WinsCard } from "../../../../components/dashboard/wins-card";
+import { AskHomaAboutChild } from "../../../../components/progress/ask-homa-about-child";
 import { SubjectList } from "./subject-list";
 
 /**
@@ -51,6 +53,10 @@ export function KidView({
   const pill = kidPill(report, months);
   const moved = report ? movedUpCount(report.scores, report.history[0]?.scores) : 0;
   const childNames = new Map([[child.id, child.name]]);
+  const progressAction = kidProgressAction(
+    child.id,
+    report?.token,
+  );
 
   return (
     <>
@@ -118,7 +124,7 @@ export function KidView({
           report opens with, plus the movement celebration when earned. */}
       {report ? (
         <section
-          aria-label="A note from Homa"
+          aria-label="A note from HOMA"
           className="mt-4 flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5"
         >
           <div className="flex-shrink-0 pt-0.5">
@@ -129,7 +135,7 @@ export function KidView({
               className="font-mono text-[0.65rem] uppercase tracking-widest"
               style={{ color: "var(--sage-700)" }}
             >
-              A note from Homa
+              A note from HOMA
             </p>
             <p className="mt-1 font-serif italic text-strong">{noteGreeting(parentFirstName)}</p>
             <p className="mt-1 text-body">
@@ -196,25 +202,23 @@ export function KidView({
         </section>
       ) : curriculumPending ? (
         <p className="mt-4 text-sm text-muted">
-          Homa is building {child.name}&apos;s curriculum from your call.
+          HOMA is building {child.name}&apos;s curriculum from your call.
         </p>
       ) : null}
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {report?.token ? (
+        {progressAction ? (
           <Link
-            href={`/app/${child.id}/report`}
-            className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
+            href={progressAction.href}
+            className="inline-flex min-h-11 items-center rounded-pill bg-[var(--brand-active)] px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-[var(--clay-600)]"
           >
-            Open the full report
+            {progressAction.label}
           </Link>
         ) : null}
-        <Link
-          href="/app"
-          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
-        >
-          Ask Homa about {child.name}
-        </Link>
+        <AskHomaAboutChild
+          childId={child.id}
+          childName={child.name}
+        />
       </div>
     </>
   );

@@ -10,6 +10,13 @@
 
 **Design contract:** `docs/superpowers/specs/2026-07-11-agent-led-live-progress-design.md`
 
+**Status:** Production rollout completed on 2026-07-12. Deployment
+`dpl_CVSe24nqdAHa5PdKhJJTUF97XSoS` is READY, the additive migration and
+reconciliation completed, production isolation passed, and the feature flag is
+enabled. Public, token-report, service, synthetic check-in, and temporary
+authenticated Progress probes passed. A real linked-family SMS provider probe
+remains open.
+
 **Git constraint:** Do not create commits unless the user explicitly requests one.
 
 **Workspace constraint:** Implement in the current non-main branch because the working tree contains uncommitted multi-parent and conversation-continuity prerequisites. Do not overwrite or discard unrelated changes.
@@ -834,6 +841,11 @@ pnpm build
 - Modify: `apps/web/app/api/map/report/correct/route.ts`
 - Modify: `apps/web/lib/sms-onboarding.ts`
 - Modify: `apps/web/lib/map/walk-store.ts`
+- Modify: `apps/web/lib/family-fold.ts`
+- Modify: `apps/web/agent/channels/telnyx.ts`
+- Modify: `apps/web/app/onboarding/map-answer-attempt.ts`
+- Modify: `supabase/migrations/20260711213330_agent_led_live_progress.sql`
+- Create: `scripts/reconcile-child-progress.mts`
 - Add compatibility tests.
 
 - [ ] **Step 1: Write failing compatibility tests**
@@ -844,6 +856,12 @@ Assert:
 - Existing report correction supersedes evidence and updates live projection.
 - SMS onboarding still resumes from compatibility answers.
 - Walk topic evidence appears in live domain/topic projection but not `MapScores`.
+- Walk `not_sure` and `skip` persist as non-evidence coverage and still advance
+  the sitting.
+- Browser save and undo retries reuse one key per unchanged intent.
+- Linked and unlinked SMS turns carry trusted provider or receipt identity.
+- Both account attachment and SMS stub folds preserve every populated
+  ChildProgress relationship while deleting the old family.
 - Report token remains stable.
 - `child_reports.history` length does not grow per agent observation.
 
@@ -855,15 +873,12 @@ pnpm exec tsx --test apps/web/lib/child-progress/compatibility.test.ts
 
 - [ ] **Step 3: Convert direct writers to adapters**
 
-Each old function keeps its public signature but calls ChildProgress:
+Each supported compatibility function keeps its public return shape while the
+flag-aware adapter selects the legacy or ChildProgress writer. The unused
+`recordObservation` store API is removed, and the Eve tool remains a
+`disableTool()` sentinel.
 
-```ts
-export async function recordObservation(...) {
-  return await acceptProgressEvidence(...);
-}
-```
-
-Checklist answer persistence may dual-write evidence while preserving the current scoring completion beat.
+Every direct `child_answers` writer must move behind ChildProgress before rollout. The migration intentionally installs no reverse trigger.
 
 - [ ] **Step 4: Preserve token reports**
 
@@ -877,6 +892,64 @@ pnpm check:taxonomy
 pnpm check:continuity
 pnpm --filter web exec eve build
 ```
+
+- [x] **Task 9 closure: family-fold compatibility**
+
+All 22 composite ChildProgress foreign keys use deferred
+`ON UPDATE CASCADE`. The disposable Postgres harness exercises populated
+evidence, operations, revisions, live rows, check-ins, responses, conflicts,
+and snapshots through both `attachAuthUser` and `foldStubFamilyIntoTx`.
+
+- [x] **Task 9 closure: walk and retry identity**
+
+Focused tests cover all five walk answers, taxonomy assessment validation,
+revision-only invalidation, unchanged `MapScores`, browser save and undo retry
+keys, and Telnyx identity before family linkage.
+
+- [x] **Task 9 closure: repository evidence boundary**
+
+These checks establish local repository behavior only. The migration remains
+unapplied, the live flag remains off, and production readiness still requires
+the Task 10 rollout sequence and fresh production probes.
+
+- [x] **Task 9 quality closure: tombstones and prompt receipts**
+
+Corrections supersede every active item row at or before their cutoff, including
+resolved-conflict history. Graph walk cards are bound to server-only durable
+prompt receipts; exact retries replay, while expired, mismatched, reused-key,
+and changed-payload submissions refuse without another write or event.
+
+- [x] **Task 9 quality closure: concurrency and provenance**
+
+Child deletion takes the reconciliation lock before scoped deletion and family
+touch. Family folds lock both family rows in UUID order before validation.
+Browser retry classification, versioned report edits, linked and unlinked SMS
+identity, provider provenance, explicit auth-failure responses, and real
+flag-off pre-migration writes are covered by focused and Postgres tests.
+
+- [x] **Task 9 final closure: atomic walk and inverse races**
+
+Walk answer persistence, prompt consumption, stored response, and next prompt
+now share one ChildProgress repository transaction with the required lock
+order. Prompt sitting and item-observation snapshots reject stale work.
+Fault-injection tests roll back after progress writes and before next-prompt
+insert. Family-fold tests cover both membership race directions and concurrent
+folds.
+
+- [x] **Task 9 final closure: explicit client conflicts**
+
+Checklist and deep-dive clients parse 409 reasons. Conflict-pending answers
+remain visible and stop retry for confirmation; idempotency mismatch clears the
+stale key. Report editing is disabled while its immutable versioned snapshot
+is in flight.
+
+- [x] **Task 9 terminal prompt closure**
+
+Expired, stale, and explicit-stop prompt receipts retire atomically with safe
+terminal reasons. Exact retries replay, the partial unique slot is released,
+and concurrent restarts return one fresh prompt. Duplicate ChildProgress
+results inspect their stored original status, so `conflict_pending` never
+consumes or advances a walk.
 
 ---
 
@@ -894,7 +967,7 @@ pnpm --filter web exec eve build
 - Modify: `docs/homa-planning/build-log.md`
 - Finish: `docs/notes/agent-led-live-progress-implementation.md`
 
-- [ ] **Step 1: Add failing event parity**
+- [x] **Step 1: Add failing event parity**
 
 Add emitters and then run:
 
@@ -904,21 +977,25 @@ pnpm check:events
 
 Expected before registry update: FAIL naming each unregistered `progress.*` event.
 
-- [ ] **Step 2: Register PII-free schemas**
+- [x] **Step 2: Register PII-free schemas**
 
 No quote, message, adult name, email, or phone properties.
 
-- [ ] **Step 3: Add the ChildProgress guard**
+- [x] **Step 3: Add the ChildProgress guard**
 
-Root script:
+The core ChildProgress, event parity, and walk-event tests run under:
 
 ```json
-"check:child-progress": "tsx --test \"apps/web/lib/child-progress/*.test.ts\" \"apps/web/app/app/message-parts-progress.test.ts\""
+"check:child-progress": "tsx --tsconfig apps/web/tsconfig.json --test \"packages/core/src/events.test.ts\" \"apps/web/lib/child-progress/*.test.ts\" \"apps/web/lib/map/walk-answer-event.test.ts\" \"scripts/reconcile-child-progress.test.ts\""
 ```
 
-Add a CI step before build.
+The TSX message-parts and card tests run under `check:progress-ui`,
+including `progress-chat-cards.test.tsx` and
+`message-parts-progress.test.tsx`.
 
-- [ ] **Step 4: Add real-database E2E**
+Add both focused CI steps before build.
+
+- [x] **Step 4: Add real-database E2E**
 
 Modeled on `conversation-continuity-e2e.mts`:
 
@@ -932,11 +1009,12 @@ Modeled on `conversation-continuity-e2e.mts`:
 8. Verify live projection.
 9. Clean up in `finally`.
 
-- [ ] **Step 5: Run the complete local gate**
+- [x] **Step 5: Run the authorized repository gate**
 
 ```bash
 pnpm check:child-progress
-pnpm check:isolation
+pnpm check:progress-ui
+pnpm child-progress:e2e
 pnpm check:map
 pnpm check:events
 pnpm check:skills-targeting
@@ -946,11 +1024,17 @@ pnpm typecheck
 pnpm lint
 pnpm build
 pnpm --filter web exec eve build
+node --check scripts/isolation-check.mjs
 ```
 
 Expected: every command exits 0.
 
 - [ ] **Step 6: Browser verification**
+
+The safe flag-off route and card smoke passed 21 synthetic rendering and
+policy tests on 2026-07-12. The authenticated flag-on database flow remains
+pending until the code deploy, additive migration, reconciliation, and flag
+activation are explicitly authorized.
 
 At desktop and 390×844 phone:
 
@@ -964,7 +1048,7 @@ At desktop and 390×844 phone:
 - Progress route shows subject → domain → topic.
 - Legacy token report still renders.
 
-- [ ] **Step 7: Update docs and implementation notes**
+- [x] **Step 7: Update docs and implementation notes**
 
 Record:
 
@@ -977,14 +1061,16 @@ Record:
 
 - [ ] **Step 8: Production rollout only after explicit push/deploy instruction**
 
-1. Push code.
-2. Wait for Vercel READY.
-3. Apply additive migration.
-4. Enable `HOMA_LIVE_PROGRESS_ENABLED`.
-5. Probe authenticated web and linked SMS.
-6. Update production baseline and claim ledger.
+1. Complete Task 9 so no direct progress writer bypasses ChildProgress.
+2. Push code with `HOMA_LIVE_PROGRESS_ENABLED` off.
+3. Wait for Vercel READY.
+4. Apply the additive migration and its initial backfill.
+5. Immediately run `select * from private.reconcile_child_answers_to_progress();`.
+6. Enable `HOMA_LIVE_PROGRESS_ENABLED`.
+7. Probe authenticated web and linked SMS.
+8. Update production baseline and claim ledger.
 
-Do not call the feature shipped without all six.
+Do not call the feature shipped without all eight.
 
 ---
 

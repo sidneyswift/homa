@@ -621,3 +621,17 @@ Classify the design-system corpus into canonical current sources, M1-17
 prototype inputs, and historical explorations. Remove current-product readings
 from prototypes before reconciling agent skills that consume design and copy
 rules.
+
+## 2026-07-12 Task 9 documentation intake
+
+- The agent-led live Progress plan, design specification, and implementation
+  note were added to the first-seen baseline and manifest as unresolved
+  pre-existing untracked documentation.
+- Their rows distinguish local repository and disposable-Postgres evidence
+  from unapplied migration and unverified production state.
+- The local migration recount advanced from 70 to 71 for
+  `agent_led_live_progress`. The remote migration history was not queried.
+- `pnpm check:docs -- --allow-open` now reports valid Task 9 coverage and valid
+  migration drift evidence. It still fails on unrelated concurrent drift:
+  14 candidates remain absent from the baseline and manifest, and pre-existing
+  absent Higgsfield rows still need terminal lifecycle dispositions.

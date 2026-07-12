@@ -5,6 +5,7 @@ import { getAppData } from "../../lib/app-data";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
+import { effectiveTimeZone } from "../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
 import { ChatClient } from "./chat-client";
 
@@ -64,7 +65,7 @@ export default async function ChatPage({
       wall={wall}
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
-      timeZone={app?.family.time_zone ?? null}
+      timeZone={effectiveTimeZone(app?.family.time_zone)}
       parentName={app?.memberDisplayName ?? app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
       kids={(app?.children ?? []).map((child) => ({ id: child.id, name: child.name }))}

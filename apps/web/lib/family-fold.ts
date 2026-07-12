@@ -1,5 +1,8 @@
 import type postgres from "postgres";
 
+import {
+  CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
+} from "./child-progress/postgres-repository-helpers";
 import { mergeFamilyContextBags } from "./family-context-merge";
 import { mapDb } from "./map/db";
 import type { DbJson } from "./map/db";
@@ -35,99 +38,196 @@ const SIMPLE_FAMILY_TABLES = [
   "child_curriculum_calls",
 ] as const;
 
-type SqlClient = postgres.Sql | postgres.TransactionSql;
-
-async function isTrueStubWithSql(sql: SqlClient, familyId: string): Promise<boolean> {
-  const rows = await sql<{ email: string | null; members: number }[]>`
-    select f.email,
-           (select count(*)::int from public.family_members m where m.family_id = f.id) as members
-    from public.families f where f.id = ${familyId}
-  `;
-  const row = rows[0];
-  return Boolean(row) && row.email === null && row.members === 0;
+interface LockedFamilyFoldRow {
+  id: string;
+  email: string | null;
+  context: Record<string, unknown> | null;
 }
 
-export async function foldStubFamilyIntoTx(
-  tx: SqlClient,
-  stubId: string,
-  intoId: string,
-): Promise<boolean> {
-  if (stubId === intoId) return false;
-  if (!(await isTrueStubWithSql(tx, stubId))) return false;
-  const contextRows = await tx<{ id: string; context: Record<string, unknown> | null }[]>`
-    select id, context from public.families where id in (${stubId}, ${intoId})
+export interface FamilyFoldTestHooks {
+  afterFamilyLocks?: () => Promise<void>;
+}
+
+async function lockFamilyRowsForFold(
+  tx: postgres.TransactionSql,
+  sourceFamilyId: string,
+  destinationFamilyId: string,
+  testHooks: FamilyFoldTestHooks,
+): Promise<LockedFamilyFoldRow[] | null> {
+  await tx`
+    select pg_advisory_xact_lock_shared(
+      ${CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY}::bigint
+    )
   `;
-  const stubContext = contextRows.find((row) => row.id === stubId)?.context;
-  const intoContext = contextRows.find((row) => row.id === intoId)?.context;
-  const mergedContext = mergeFamilyContextBags(intoContext, stubContext);
+  const rows = await tx<LockedFamilyFoldRow[]>`
+    select family.id, family.email, family.context
+    from public.families family
+    where family.id in (${sourceFamilyId}, ${destinationFamilyId})
+    order by family.id
+    for update
+  `;
+  await testHooks.afterFamilyLocks?.();
+  return rows.length === 2 ? rows : null;
+}
+
+async function countFamilyMembersAfterLock(
+  tx: postgres.TransactionSql,
+  familyId: string,
+): Promise<number> {
+  const rows = await tx<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.family_members member
+    where member.family_id = ${familyId}
+  `;
+  return rows[0]?.count ?? 0;
+}
+
+async function moveLockedFamilyDataIntoTx(
+  tx: postgres.TransactionSql,
+  sourceFamilyId: string,
+  destinationFamilyId: string,
+  lockedRows: readonly LockedFamilyFoldRow[],
+): Promise<boolean> {
+  const sourceContext = lockedRows.find(
+    (row) => row.id === sourceFamilyId,
+  )?.context;
+  const destinationContext = lockedRows.find(
+    (row) => row.id === destinationFamilyId,
+  )?.context;
+  const mergedContext = mergeFamilyContextBags(
+    destinationContext,
+    sourceContext,
+  );
   await tx`
     update public.families
     set context = ${tx.json(mergedContext as unknown as DbJson)},
         updated_at = now()
-    where id = ${intoId}
+    where id = ${destinationFamilyId}
   `;
   for (const table of SIMPLE_FAMILY_TABLES) {
     await tx`
-      update ${tx(table)} set family_id = ${intoId}
-      where family_id = ${stubId}
+      update ${tx(table)} set family_id = ${destinationFamilyId}
+      where family_id = ${sourceFamilyId}
     `;
   }
 
   await tx`
     update public.conversation_thread_bindings source
-    set family_id = ${intoId}
-    where source.family_id = ${stubId}
+    set family_id = ${destinationFamilyId}
+    where source.family_id = ${sourceFamilyId}
       and not exists (
         select 1 from public.conversation_thread_bindings target
-        where target.family_id = ${intoId}
+        where target.family_id = ${destinationFamilyId}
           and target.channel = source.channel
           and target.thread_key_hash = source.thread_key_hash
       )
   `;
   await tx`
     delete from public.conversation_thread_bindings
-    where family_id = ${stubId}
+    where family_id = ${sourceFamilyId}
   `;
 
   await tx`
-    update public.events set family_id = ${intoId}
-    where family_id = ${stubId}
+    update public.events set family_id = ${destinationFamilyId}
+    where family_id = ${sourceFamilyId}
   `;
 
   await tx`
     update public.family_skills source
-    set family_id = ${intoId}, updated_at = now()
-    where source.family_id = ${stubId}
+    set family_id = ${destinationFamilyId}, updated_at = now()
+    where source.family_id = ${sourceFamilyId}
       and not exists (
         select 1 from public.family_skills target
-        where target.family_id = ${intoId} and target.name = source.name
+        where target.family_id = ${destinationFamilyId}
+          and target.name = source.name
       )
   `;
   await tx`
-    delete from public.family_skills where family_id = ${stubId}
+    delete from public.family_skills
+    where family_id = ${sourceFamilyId}
   `;
 
   await tx`
     update public.agent_schedules source
-    set family_id = ${intoId}
-    where source.family_id = ${stubId}
+    set family_id = ${destinationFamilyId}
+    where source.family_id = ${sourceFamilyId}
       and (
         source.kind not in ('journal_prompt', 'morning_brief')
         or not exists (
           select 1 from public.agent_schedules target
-          where target.family_id = ${intoId} and target.kind = source.kind
+          where target.family_id = ${destinationFamilyId}
+            and target.kind = source.kind
         )
       )
   `;
   await tx`
-    delete from public.agent_schedules where family_id = ${stubId}
+    delete from public.agent_schedules
+    where family_id = ${sourceFamilyId}
   `;
 
   await tx`
-    update public.children set family_id = ${intoId} where family_id = ${stubId}
+    update public.children
+    set family_id = ${destinationFamilyId}
+    where family_id = ${sourceFamilyId}
   `;
-  await tx`delete from public.families where id = ${stubId}`;
+  await tx`
+    delete from public.families
+    where id = ${sourceFamilyId}
+  `;
   return true;
+}
+
+export async function foldFamilyDataIntoTx(
+  tx: postgres.TransactionSql,
+  sourceFamilyId: string,
+  destinationFamilyId: string,
+  testHooks: FamilyFoldTestHooks = {},
+): Promise<boolean> {
+  if (sourceFamilyId === destinationFamilyId) return false;
+  const lockedRows = await lockFamilyRowsForFold(
+    tx,
+    sourceFamilyId,
+    destinationFamilyId,
+    testHooks,
+  );
+  return lockedRows
+    ? moveLockedFamilyDataIntoTx(
+        tx,
+        sourceFamilyId,
+        destinationFamilyId,
+        lockedRows,
+      )
+    : false;
+}
+
+export async function foldStubFamilyIntoTx(
+  tx: postgres.TransactionSql,
+  stubId: string,
+  intoId: string,
+  testHooks: FamilyFoldTestHooks = {},
+): Promise<boolean> {
+  if (stubId === intoId) return false;
+  const lockedRows = await lockFamilyRowsForFold(
+    tx,
+    stubId,
+    intoId,
+    testHooks,
+  );
+  const stub = lockedRows?.find((row) => row.id === stubId);
+  if (
+    !lockedRows ||
+    !stub ||
+    stub.email !== null ||
+    await countFamilyMembersAfterLock(tx, stubId) !== 0
+  ) {
+    return false;
+  }
+  return moveLockedFamilyDataIntoTx(
+    tx,
+    stubId,
+    intoId,
+    lockedRows,
+  );
 }
 
 export async function foldStubFamilyInto(stubId: string, intoId: string): Promise<boolean> {

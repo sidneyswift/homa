@@ -19,15 +19,65 @@ pnpm --filter web dev   # http://localhost:3000
 - `app/` includes `/`, `/onboarding`, `/blog`, `/privacy`, `/terms`,
   `/signin`, and `/join`. Internal onboarding code retains the earlier map
   name in `/api/map/*` and `lib/map/`.
-- Authenticated routes live under `/app`: `/app` is chat, `/app/report`
-  resolves the current child report, `/app/[childId]/report` renders one
-  report, and planner, tasks, child, and settings surfaces have their own
-  routes. Settings includes saved memories and adult membership controls.
+- Authenticated routes live under `/app`: `/app` is chat, `/app/progress`
+  resolves the focused or first child, and `/app/[childId]/progress` renders
+  the feature-flagged live subject, domain, and topic hierarchy. Legacy
+  in-app report routes remain the flag-off rollback path. Planner, tasks,
+  child, and settings surfaces have their own routes. Settings includes
+  saved memories and adult membership controls.
+- The web chat parses completed `manage_child_progress` output through
+  `app/app/progress-message-parts.ts`. Its update, question, conflict, and
+  workflow cards send visible choices through the existing chat queue without
+  clearing a composer draft. Only the latest actionable live tool part is
+  enabled, using stable message-and-part identity. Accepted sends consume that
+  action; a wall rejection or removed queue entry releases it for retry.
+  Archived, stale, and consumed cards remain readable with disabled controls.
+  SMS and email keep their plain-text progress replies.
+- `lib/child-progress/tool-result-contract.ts` is the one bounded,
+  client-safe result schema shared by the Eve tool and web parser. It carries
+  strict offset-bearing dates and conflict evidence sources without importing
+  server crypto into the client path.
+- `lib/child-progress/legacy-adapters.ts` owns the flag-off versus flag-on
+  writer seam and transport-derived idempotency. Its colocated test proves
+  every disabled writer makes zero ChildProgress calls.
+- `lib/child-progress/selection-answer.ts` gives compatibility answer rows a
+  stable selection identity shared by transactions and Postgres projection
+  reads.
+- `app/onboarding/map-answer-attempt.ts` owns the ref-backed save and undo
+  intent-key policy. Failure retains a key, a changed answer or action replaces
+  it, and success clears the matching intent.
+- `app/onboarding/receipt-correction-intent.ts` snapshots versioned report
+  edits and clears only versions accepted by the server. Receipt controls stay
+  disabled while that snapshot is in flight.
+- `lib/child-progress/legacy-tool-disabled.test.ts` protects the disabled
+  `record_observation` sentinel.
+- `lib/child-progress/sms-onboarding-resume.test.ts` protects compatibility
+  answer resume for the unlinked SMS checklist.
+- `lib/sms-inbound-auth.ts` stamps provider-message and inbound-receipt
+  identity before an SMS number is linked to a family. Its test covers linked,
+  unlinked, and reclaimed-receipt behavior.
+- `lib/family-fold.ts` is the shared account-attachment and SMS-stub fold
+  transaction. ChildProgress composite foreign keys move child-scoped state
+  with the child.
+- `lib/map/walk-answer-event.ts` preserves the existing `map.walk_answered`
+  properties for all five answer values. Its colocated test protects parity.
+- `lib/map/walk-prompt-store.ts` creates and consumes server-only durable graph
+  walk prompts in the same ChildProgress repository transaction as the answer
+  write and next prompt. Exact retries replay; stale sittings and newer item
+  observations retire safely before mutation. Expired, stale, and stopped
+  prompts release their active slot so restart returns one fresh prompt.
+- `lib/map/family-actor-auth.ts` distinguishes authenticated, confirmed
+  anonymous, and failed browser actor lookups so failures never become
+  unattributed writes.
 - `agent/` contains the eve instructions, tools, channel adapters, schedules,
   and hooks. A source prompt does not prove that an external provider has
   been re-provisioned with its current bytes.
-- `lib/map/` owns onboarding and report data. Onboarding writes directly to
-  family and child data after the ONE WORLD retirement of the `lead_*` tables.
+- `lib/map/` owns onboarding and report data. Progress answer, walk, delete,
+  and report-correction writers enter `lib/child-progress/legacy-adapters.ts`.
+  With the live flag off, the adapter calls only the existing `child_answers`
+  implementation. With it on, evidence and atomic corrections use
+  ChildProgress while `child_answers` remains the compatibility projection.
+  There is no reverse database bridge.
   `lib/agent-db.ts` uses caller JWT plus RLS for web chat and authenticated
   family-pinned access for server-originated channels; M1-02 owns the remaining
   transaction-local role hardening.
@@ -39,9 +89,23 @@ pnpm --filter web dev   # http://localhost:3000
 
 ## Guards
 
-Use the current root command list in `AGENTS.md`. Agent-module changes also
-require `pnpm --filter web exec eve build`. Do not infer that CI passed from
-the workflow definition; inspect the actual run.
+Use `pnpm check:child-progress` for core events, default ChildProgress modules,
+walk events, and reconciliation. Use `pnpm check:progress-ui` for focused route,
+message-part, and card behavior, and `pnpm child-progress:e2e` for the
+disposable local PostgreSQL proof. Use the remaining root command list in
+`AGENTS.md`. Agent-module changes also require
+`pnpm --filter web exec eve build`. Do not infer that CI passed from the
+workflow definition; inspect the actual run.
+
+## ChildProgress rollout
+
+The repository implementation and local migration do not establish production
+state. Keep `HOMA_LIVE_PROGRESS_ENABLED` false for the code deployment, wait
+for Vercel READY, and probe legacy onboarding, reports, and unlinked SMS. Then
+apply the additive migration, run the dry-run and real progress reconciliation,
+enable the flag, and probe authenticated Progress, permanent token reports,
+corrections, and linked-family SMS. Rollback disables the flag first and keeps
+the additive tables and evidence.
 
 ## Public summary ownership
 

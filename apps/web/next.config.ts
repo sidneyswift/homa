@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
       // to transfer) and the freed top-level names may become marketing
       // pages later, which a browser-cached permanent redirect would
       // fight. Query strings carry over automatically.
-      { source: "/home", destination: "/app/report", permanent: false },
+      { source: "/home", destination: "/app/progress", permanent: false },
       { source: "/chat", destination: "/app", permanent: false },
       { source: "/planner", destination: "/app/planner", permanent: false },
       { source: "/kids/:path*", destination: "/app/kids/:path*", permanent: false },
@@ -59,12 +59,11 @@ const nextConfig: NextConfig = {
       // (/app/chat?draft=journal) still points there.
       { source: "/app/chat", destination: "/app", permanent: false },
       // The card dashboard lived at /app/home for a day, then
-      // /app/dashboard for another, then retired for the in-app report
-      // (founder ask 2026-07-10: the report IS the home surface). Both
-      // old names route to the report resolver for open tabs and
-      // history.
-      { source: "/app/home", destination: "/app/report", permanent: false },
-      { source: "/app/dashboard", destination: "/app/report", permanent: false },
+      // /app/dashboard for another, then retired for live Progress.
+      // Both old names use the Progress resolver, whose feature flag
+      // keeps the legacy report available during rollout.
+      { source: "/app/home", destination: "/app/progress", permanent: false },
+      { source: "/app/dashboard", destination: "/app/progress", permanent: false },
     ];
   },
 };

@@ -39,8 +39,26 @@ export function parseViewContext(
   return { kind: "family" };
 }
 
+/**
+ * Chooses the child for the stable live Progress route without depending
+ * on whether a legacy report exists.
+ */
+export function resolveProgressChildId(
+  viewContext: ViewContext,
+  childIds: readonly string[],
+): string | null {
+  if (
+    viewContext.kind === "child" &&
+    childIds.includes(viewContext.childId)
+  ) {
+    return viewContext.childId;
+  }
+  return childIds[0] ?? null;
+}
+
 /** Kid-scoped routes, where switching kids should keep the surface and
- * swap the kid (report stays a report, kid page stays a kid page). */
+ * swap the kid (Progress stays Progress, report stays report). */
+const PROGRESS_PAGE = /^\/app\/([^/]+)\/progress$/;
 const REPORT_PAGE = /^\/app\/([^/]+)\/report$/;
 const KIDS_PAGE = /^\/app\/kids\/([^/]+)$/;
 
@@ -51,7 +69,13 @@ const KIDS_PAGE = /^\/app\/kids\/([^/]+)$/;
  * Shared by the phone bar switcher and the sidebar's viewing rows so the
  * two can never drift apart.
  */
-export function kidSwitchTargetPath(pathname: string, childId: string): string | null {
+export function kidSwitchTargetPath(
+  pathname: string,
+  childId: string,
+): string | null {
+  if (PROGRESS_PAGE.test(pathname)) {
+    return `/app/${childId}/progress`;
+  }
   if (REPORT_PAGE.test(pathname)) return `/app/${childId}/report`;
   if (KIDS_PAGE.test(pathname)) return `/app/kids/${childId}`;
   return null;

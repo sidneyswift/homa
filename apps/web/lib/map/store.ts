@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import {
   ageInMonths,
   buildFourWeekPlan,
@@ -6,7 +8,6 @@ import {
   MONTH_PLAN_SUBJECT,
   isInScoredRange,
   MAP_BANK_VERSION,
-  planQuestions,
   SCORED_MAX_MONTHS,
   SCORED_MIN_MONTHS,
   scoreMap,
@@ -18,7 +19,17 @@ import {
   type ReportNarrative,
 } from "@homa/core";
 
-import { mergeFamilyContextBags } from "../family-context-merge";
+import {
+  correctLegacyProgressAnswers,
+  deleteLegacyProgressAnswer,
+  saveLegacyProgressAnswer,
+  type LegacyProgressAdapterResult,
+  type LegacyProgressAnswerSource,
+} from "../child-progress/legacy-adapters";
+import {
+  CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
+} from "../child-progress/postgres-repository-helpers";
+import { foldFamilyDataIntoTx } from "../family-fold";
 import { mapDb, type DbJson } from "./db";
 import {
   cleanProfileFocus,
@@ -115,22 +126,19 @@ export async function startAnonymousFamily(
 /** Moves every child of `fromId` into `intoId`, then deletes the empty
  * husk. Children carry their answers, reports, and plans with them (all
  * child-keyed), so a fold never touches those tables. */
-async function foldFamilyInto(fromId: string, intoId: string): Promise<void> {
-  const sql = mapDb();
-  const contextRows = await sql<{ id: string; context: Record<string, unknown> | null }[]>`
-    select id, context from public.families where id in (${fromId}, ${intoId})
-  `;
-  const fromContext = contextRows.find((row) => row.id === fromId)?.context;
-  const intoContext = contextRows.find((row) => row.id === intoId)?.context;
-  const mergedContext = mergeFamilyContextBags(intoContext, fromContext);
-  await sql`
-    update public.families
-    set context = ${sql.json(mergedContext as unknown as DbJson)},
-        updated_at = now()
-    where id = ${intoId}
-  `;
-  await sql`update public.children set family_id = ${intoId} where family_id = ${fromId}`;
-  await sql`delete from public.families where id = ${fromId}`;
+type MapDatabase = ReturnType<typeof mapDb>;
+
+async function foldFamilyInto(
+  sql: MapDatabase,
+  fromId: string,
+  intoId: string,
+): Promise<void> {
+  const folded = await sql.begin((tx) =>
+    foldFamilyDataIntoTx(tx, fromId, intoId)
+  );
+  if (!folded) {
+    throw new Error("Family fold source or destination is missing");
+  }
 }
 
 interface AttachAuthUserInput {
@@ -154,8 +162,8 @@ interface AttachAuthUserInput {
  */
 export async function attachAuthUser(
   input: AttachAuthUserInput,
+  sql: MapDatabase = mapDb(),
 ): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
-  const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
   // Some IdPs preserve email case; the column's lowercase constraint
@@ -174,7 +182,7 @@ export async function attachAuthUser(
 
   const familyId = existing[0]?.id ?? input.familyId;
   if (existing.length > 0) {
-    await foldFamilyInto(input.familyId, familyId);
+    await foldFamilyInto(sql, input.familyId, familyId);
   }
 
   await sql`
@@ -204,7 +212,7 @@ export async function attachAuthUser(
       on conflict do nothing
     `;
   }
-  await seedWhatWorksMemories(familyId);
+  await seedWhatWorksMemories(familyId, sql);
 
   return { familyId, returning: existing.length > 0, resumeToken };
 }
@@ -214,8 +222,10 @@ export async function attachAuthUser(
  * parent's own whats-working notes, seeded only while the child has none
  * (agent consolidation is never fought; re-runs never duplicate).
  */
-async function seedWhatWorksMemories(familyId: string): Promise<void> {
-  const sql = mapDb();
+async function seedWhatWorksMemories(
+  familyId: string,
+  sql: MapDatabase = mapDb(),
+): Promise<void> {
   const kids = await sql<{ id: string; context: Record<string, unknown> }[]>`
     select id, context from public.children where family_id = ${familyId}
   `;
@@ -346,23 +356,30 @@ export async function addChild(
  * where clause carries the tenancy re-scope: a childId belonging to a
  * different family deletes nothing.
  */
-export async function removeChild(familyId: string, childId: string): Promise<boolean> {
-  const sql = mapDb();
-  await sql`delete from public.child_answers where child_id = ${childId}
-    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
-  await sql`delete from public.child_reports where child_id = ${childId}
-    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
-  await sql`delete from public.child_plans where child_id = ${childId}
-    and exists (select 1 from public.children c where c.id = ${childId} and c.family_id = ${familyId})`;
-  await sql`delete from public.family_memories where child_id = ${childId} and family_id = ${familyId}`;
-  const rows = await sql<{ id: string }[]>`
-    delete from public.children
-    where id = ${childId} and family_id = ${familyId}
-    returning id
-  `;
-  if (rows.length === 0) return false;
-  await touchFamily(familyId);
-  return true;
+export async function removeChild(
+  familyId: string,
+  childId: string,
+  sql: MapDatabase = mapDb(),
+): Promise<boolean> {
+  return sql.begin(async (tx) => {
+    await tx`
+      select pg_advisory_xact_lock_shared(
+        ${CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY}::bigint
+      )
+    `;
+    const rows = await tx<{ id: string }[]>`
+      delete from public.children
+      where id = ${childId} and family_id = ${familyId}
+      returning id
+    `;
+    if (rows.length === 0) return false;
+    await tx`
+      update public.families
+      set updated_at = now()
+      where id = ${familyId}
+    `;
+    return true;
+  });
 }
 
 /** True when the child exists and belongs to this family. */
@@ -379,20 +396,76 @@ export async function saveAnswer(
   childId: string,
   itemId: string,
   answer: MapAnswer,
+  options: {
+    source?: Extract<
+      LegacyProgressAnswerSource,
+      "checklist" | "deep_dive"
+    >;
+    memberUserId?: string | null;
+    channel?: "web" | "sms" | "email";
+    messageId?: string;
+    providerMessageId?: string;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
 ): Promise<{ ok: boolean; subject?: string }> {
-  const item = getMapItem(itemId);
-  if (!item) return { ok: false };
-  if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
+  const saved = await saveAnswerWithProgressStatus(
+    familyId,
+    childId,
+    itemId,
+    answer,
+    options,
+  );
+  return saved.result.status === "saved"
+    ? { ok: true, subject: saved.subject }
+    : { ok: false };
+}
 
-  const sql = mapDb();
-  await sql`
-    insert into public.child_answers (child_id, question_id, answer, source)
-    values (${childId}, ${itemId}, ${answer}, 'checklist')
-    on conflict (child_id, question_id)
-    do update set answer = excluded.answer, answered_at = now()
-  `;
-  await touchFamily(familyId);
-  return { ok: true, subject: item.subject.id };
+export async function saveAnswerWithProgressStatus(
+  familyId: string,
+  childId: string,
+  itemId: string,
+  answer: MapAnswer,
+  options: {
+    source?: Extract<
+      LegacyProgressAnswerSource,
+      "checklist" | "deep_dive"
+    >;
+    memberUserId?: string | null;
+    channel?: "web" | "sms" | "email";
+    messageId?: string;
+    providerMessageId?: string;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
+): Promise<{
+  result: LegacyProgressAdapterResult;
+  subject?: string;
+}> {
+  const item = getMapItem(itemId);
+  if (!item) {
+    return { result: { status: "unknown_child_or_item" } };
+  }
+  if (!(await childBelongsToFamily(childId, familyId))) {
+    return { result: { status: "unknown_child_or_item" } };
+  }
+  return {
+    result: await saveLegacyProgressAnswer({
+      familyId,
+      childId,
+      itemId,
+      answer,
+      source: options.source ?? "checklist",
+      memberUserId: options.memberUserId ?? null,
+      channel: options.channel,
+      messageId: options.messageId,
+      providerMessageId: options.providerMessageId,
+      observedAt: options.observedAt ?? new Date().toISOString(),
+      idempotencyKey:
+        options.idempotencyKey ?? `legacy-answer:${randomUUID()}`,
+    }),
+    subject: item.subject.id,
+  };
 }
 
 /**
@@ -407,25 +480,55 @@ export async function deleteAnswer(
   familyId: string,
   childId: string,
   itemId: string,
+  options: {
+    memberUserId?: string | null;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
 ): Promise<{ ok: boolean; subject?: string }> {
-  const item = getMapItem(itemId);
-  if (!item) return { ok: false };
-  if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
+  const deleted = await deleteAnswerWithProgressStatus(
+    familyId,
+    childId,
+    itemId,
+    options,
+  );
+  return deleted.result.status === "saved"
+    ? { ok: true, subject: deleted.subject }
+    : { ok: false };
+}
 
-  const sql = mapDb();
-  await sql`
-    delete from public.child_answers
-    where child_id = ${childId}
-      and question_id = ${itemId}
-      and exists (
-        select 1
-        from public.children c
-        where c.id = ${childId}
-          and c.family_id = ${familyId}
-      )
-  `;
-  await touchFamily(familyId);
-  return { ok: true, subject: item.subject.id };
+export async function deleteAnswerWithProgressStatus(
+  familyId: string,
+  childId: string,
+  itemId: string,
+  options: {
+    memberUserId?: string | null;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
+): Promise<{
+  result: LegacyProgressAdapterResult;
+  subject?: string;
+}> {
+  const item = getMapItem(itemId);
+  if (!item) {
+    return { result: { status: "unknown_child_or_item" } };
+  }
+  if (!(await childBelongsToFamily(childId, familyId))) {
+    return { result: { status: "unknown_child_or_item" } };
+  }
+  return {
+    result: await deleteLegacyProgressAnswer({
+      familyId,
+      childId,
+      itemId,
+      memberUserId: options.memberUserId ?? null,
+      observedAt: options.observedAt ?? new Date().toISOString(),
+      idempotencyKey:
+        options.idempotencyKey ?? `legacy-delete:${randomUUID()}`,
+    }),
+    subject: item.subject.id,
+  };
 }
 
 /**
@@ -440,84 +543,51 @@ export async function correctAnswers(
   childId: string,
   changes: Array<{ itemId: string; answer: MapAnswer }>,
   source: "report_correction" | "report_probe" | "recheck" | "conversation",
+  options: {
+    memberUserId?: string | null;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
 ): Promise<boolean> {
-  if (!(await childBelongsToFamily(childId, familyId))) return false;
-  const valid = changes.filter((change) => getMapItem(change.itemId));
-  if (valid.length === 0) return false;
-
-  const sql = mapDb();
-  for (const change of valid) {
-    await sql`
-      insert into public.child_answers (child_id, question_id, answer, source)
-      values (${childId}, ${change.itemId}, ${change.answer}, ${source})
-      on conflict (child_id, question_id)
-      do update set answer = excluded.answer, answered_at = now(), source = excluded.source
-    `;
-  }
-  await touchFamily(familyId);
-  return true;
+  return (
+    await correctAnswersWithProgressStatus(
+      familyId,
+      childId,
+      changes,
+      source,
+      options,
+    )
+  ).status === "saved";
 }
 
-export interface ObservationResult {
-  childName: string;
-  ageMonths: number;
-  subjectId: string;
-  position: string;
-  monthsAhead: number | null;
-  frontierStatement: string | null;
-  /** The next unanswered bank item on this subject's ladder at this age:
-   * the natural thing to ask about next time it comes up. */
-  nextProbeStatement: string | null;
-}
-
-/**
- * The agent's write path into the map (skill-graph plan, gap #2 of the
- * Mac Mini comparison): a conversational report ("she read a whole Bob
- * Book by herself") lands as a chip answer with provenance 'conversation',
- * triggers the same deterministic rescore as any checklist sitting, and
- * hands back the fresh subject reading plus the next natural probe.
- * Tenancy: familyId comes from session auth; the child is re-scoped here.
- */
-export async function recordObservation(
+export async function correctAnswersWithProgressStatus(
   familyId: string,
   childId: string,
-  itemId: string,
-  answer: "easily" | "getting_there" | "not_yet",
-): Promise<ObservationResult | null> {
-  const found = getMapItem(itemId);
-  if (!found) return null;
-  const saved = await correctAnswers(familyId, childId, [{ itemId, answer }], "conversation");
-  if (!saved) return null;
-
-  const report = await createReport(familyId, childId);
-  if (!report) return null;
-
-  const subjectScore = report.scores.subjects.find(
-    (score) => score.subjectId === found.subject.id,
-  );
-
-  const sql = mapDb();
-  const answered = await sql<{ question_id: string }[]>`
-    select question_id from public.child_answers where child_id = ${childId}
-  `;
-  const answeredIds = new Set(answered.map((row) => row.question_id));
-  const plan = planQuestions(report.ageMonths).find(
-    (entry) => entry.subjectId === found.subject.id,
-  );
-  const nextProbe =
-    [plan?.base, ...(plan?.ladders ?? [])].find(
-      (item) => item && !answeredIds.has(item.id),
-    ) ?? null;
-
-  return {
-    childName: report.childName,
-    ageMonths: report.ageMonths,
-    subjectId: found.subject.id,
-    position: subjectScore?.position ?? "not_mapped",
-    monthsAhead: subjectScore?.monthsAhead ?? null,
-    frontierStatement: subjectScore?.frontierStatement ?? null,
-    nextProbeStatement: nextProbe?.statement ?? null,
-  };
+  changes: Array<{ itemId: string; answer: MapAnswer | null }>,
+  source:
+    | "report_correction"
+    | "report_probe"
+    | "recheck"
+    | "conversation",
+  options: {
+    memberUserId?: string | null;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
+): Promise<LegacyProgressAdapterResult> {
+  if (!(await childBelongsToFamily(childId, familyId))) {
+    return { status: "unknown_child_or_item" };
+  }
+  return correctLegacyProgressAnswers({
+    familyId,
+    childId,
+    changes,
+    source,
+    memberUserId: options.memberUserId ?? null,
+    observedAt: options.observedAt ?? new Date().toISOString(),
+    idempotencyKey:
+      options.idempotencyKey ?? `legacy-correction:${randomUUID()}`,
+  });
 }
 
 /**

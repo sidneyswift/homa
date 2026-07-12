@@ -324,6 +324,41 @@ async function expectReadDenied(table) {
   );
 }
 
+async function expectAnonymousNoRowsOrDenied(table) {
+  coveredTables.add(table);
+  const response = await rest(`${table}?select=*&limit=5`, { headers: { Prefer: "" } });
+  const raw = await response.text();
+  if (response.status === 401 || response.status === 403) {
+    report(`anon read of ${table} exposes nothing`, true, `HTTP ${response.status}`);
+    return;
+  }
+  if (!response.ok) {
+    report(
+      `anon read of ${table} exposes nothing`,
+      false,
+      `HTTP ${response.status}, ${raw.slice(0, 100)}`,
+    );
+    return;
+  }
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    report(
+      `anon read of ${table} exposes nothing`,
+      false,
+      `HTTP ${response.status}, non-JSON body ${raw.slice(0, 100)}`,
+    );
+    return;
+  }
+  const ok = Array.isArray(body) && body.length === 0;
+  report(
+    `anon read of ${table} exposes nothing`,
+    ok,
+    `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`,
+  );
+}
+
 async function expectInsertDenied(table, row, label) {
   coveredTables.add(table);
   const response = await rest(table, { method: "POST", body: JSON.stringify(row) });
@@ -331,10 +366,78 @@ async function expectInsertDenied(table, row, label) {
   report(label, ok, `HTTP ${response.status}`);
 }
 
-async function insertChildProgressFixtures(childId, memberUserId) {
+async function childProgressSchemaExists() {
+  const rows = await sql`
+    select count(*)::integer as table_count
+    from unnest(array[
+      'public.child_progress_evidence',
+      'public.child_progress_operations',
+      'public.child_progress_revisions',
+      'public.child_progress_live',
+      'public.progress_check_ins',
+      'public.progress_check_in_responses',
+      'public.child_progress_conflicts',
+      'public.child_progress_snapshots',
+      'public.map_walk_prompts'
+    ]) as expected(table_name)
+    where to_regclass(expected.table_name) is not null
+  `;
+  return rows[0]?.table_count === 9;
+}
+
+async function expectPrivilegedSqlRejected(label, operation) {
+  const acceptedSentinel = `constraint probe accepted: ${label}`;
+  try {
+    await sql.begin(async (transaction) => {
+      await operation(transaction);
+      await transaction`set constraints all immediate`;
+      throw new Error(acceptedSentinel);
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === acceptedSentinel) {
+      report(label, false, "privileged SQL was accepted");
+      return;
+    }
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? String(error.code)
+      : "unknown";
+    const expectedConstraintCode =
+      code === "23503"
+      || code === "23505"
+      || code === "23514";
+    const message =
+      error instanceof Error ? error.message.replace(/\s+/gu, " ") : "unknown";
+    report(
+      label,
+      expectedConstraintCode,
+      `SQLSTATE ${code}: ${message.slice(0, 180)}`,
+    );
+    return;
+  }
+  report(label, false, "constraint probe returned without a result");
+}
+
+async function insertFixtureFamilyMember(familyId, userId, label) {
+  const rows = await sql`
+    insert into public.family_members (family_id, user_id, role)
+    values (${familyId}, ${userId}, 'partner')
+    returning user_id
+  `;
+  if (rows[0]?.user_id !== userId) {
+    throw new Error(`${label} returned no member user id`);
+  }
+}
+
+async function insertChildProgressFixtures(
+  childId,
+  familyId,
+  evidenceMemberUserIdA,
+  evidenceMemberUserIdB,
+) {
   const [evidenceA] = await sql`
     insert into public.child_progress_evidence (
       child_id,
+      family_id,
       item_id,
       answer,
       source,
@@ -344,10 +447,11 @@ async function insertChildProgressFixtures(childId, memberUserId) {
     )
     values (
       ${childId},
+      ${familyId},
       'isolation.progress.item',
       'easily',
       'checklist',
-      ${memberUserId},
+      ${evidenceMemberUserIdA},
       'Isolation evidence A.',
       'isolation:evidence:a'
     )
@@ -356,6 +460,7 @@ async function insertChildProgressFixtures(childId, memberUserId) {
   const [evidenceB] = await sql`
     insert into public.child_progress_evidence (
       child_id,
+      family_id,
       item_id,
       answer,
       source,
@@ -365,69 +470,116 @@ async function insertChildProgressFixtures(childId, memberUserId) {
     )
     values (
       ${childId},
+      ${familyId},
       'isolation.progress.item',
       'not_yet',
       'checklist',
-      ${memberUserId},
+      ${evidenceMemberUserIdB},
       'Isolation evidence B.',
       'isolation:evidence:b'
+    )
+    returning id
+  `;
+  const [inboundMessage] = await sql`
+    insert into public.conversation_messages (
+      family_id,
+      session_id,
+      sequence,
+      role,
+      content,
+      channel,
+      member_user_id,
+      provider_message_id
+    )
+    values (
+      ${familyId},
+      ${`isolation-progress:${childId}`},
+      1,
+      'user',
+      'Isolation progress response.',
+      'web',
+      ${evidenceMemberUserIdA},
+      ${`isolation-progress:${childId}`}
     )
     returning id
   `;
   const [live] = await sql`
     insert into public.child_progress_live (
       child_id,
+      family_id,
       projection,
       scores,
       bank_version,
+      projection_version,
+      projection_date,
+      source_revision,
       evidence_count,
       open_conflict_count
     )
-    values (${childId}, '{}'::jsonb, '{}'::jsonb, 'isolation-bank', 2, 1)
+    values (
+      ${childId},
+      ${familyId},
+      '{}'::jsonb,
+      '{}'::jsonb,
+      'isolation-bank',
+      'isolation-projection',
+      current_date,
+      2,
+      2,
+      1
+    )
     returning child_id
   `;
   const [checkIn] = await sql`
     insert into public.progress_check_ins (
       child_id,
+      family_id,
       purpose,
       scope,
       state,
       active_member_user_id,
       prompt_recipient_member_user_id,
       revision,
-      current_item_id
+      current_item_id,
+      pending_runtime_session_id,
+      pending_turn_id
     )
     values (
       ${childId},
+      ${familyId},
       'whole_map_refresh',
       '{}'::jsonb,
       'active',
-      ${memberUserId},
-      ${memberUserId},
+      ${evidenceMemberUserIdA},
+      ${evidenceMemberUserIdA},
       1,
-      'isolation.progress.item'
+      'isolation.progress.item',
+      'isolation-progress-session',
+      'isolation-progress-turn'
     )
     returning id
   `;
   const [response] = await sql`
     insert into public.progress_check_in_responses (
+      child_id,
+      family_id,
       check_in_id,
       revision,
       item_id,
       answer,
       member_user_id,
-      is_evidence,
-      evidence_id,
+      inbound_message_id,
       idempotency_key
     )
     values (
+      ${childId},
+      ${familyId},
       ${checkIn.id},
       1,
       'isolation.progress.item',
-      'easily',
-      ${memberUserId},
-      true,
-      ${evidenceA.id},
+      'skip',
+      ${evidenceMemberUserIdA},
+      ${inboundMessage.id},
       'isolation:response:1'
     )
     returning id
@@ -435,26 +587,55 @@ async function insertChildProgressFixtures(childId, memberUserId) {
   const [conflict] = await sql`
     insert into public.child_progress_conflicts (
       child_id,
+      family_id,
       item_id,
       evidence_id_a,
-      evidence_id_b,
-      member_user_id_a,
-      member_user_id_b
+      evidence_id_b
     )
     values (
       ${childId},
+      ${familyId},
       'isolation.progress.item',
       ${evidenceA.id},
-      ${evidenceB.id},
-      ${memberUserId},
-      ${memberUserId}
+      ${evidenceB.id}
     )
     returning id
+  `;
+  const operationKey = 'isolation:operation:1';
+  await sql`
+    insert into public.child_progress_operations (
+      child_id,
+      family_id,
+      idempotency_key,
+      payload_hash,
+      status,
+      evidence_ids,
+      affected_item_ids,
+      conflict_ids,
+      result
+    )
+    values (
+      ${childId},
+      ${familyId},
+      ${operationKey},
+      ${"a".repeat(64)},
+      'conflict_open',
+      array[${evidenceB.id}::uuid],
+      array['isolation.progress.item'],
+      array[${conflict.id}::uuid],
+      ${sql.json({
+        status: "conflict_open",
+        evidenceIds: [evidenceB.id],
+        affectedItemIds: ["isolation.progress.item"],
+        conflictIds: [conflict.id],
+      })}
+    )
   `;
   const [snapshot] = await sql`
     insert into public.child_progress_snapshots (
       child_id,
-      trigger,
+      family_id,
+      snapshot_kind,
       check_in_id,
       evidence_ids,
       age_months,
@@ -465,6 +646,7 @@ async function insertChildProgressFixtures(childId, memberUserId) {
     )
     values (
       ${childId},
+      ${familyId},
       'check_in_group',
       ${checkIn.id},
       array[${evidenceA.id}::uuid, ${evidenceB.id}::uuid],
@@ -483,9 +665,925 @@ async function insertChildProgressFixtures(childId, memberUserId) {
     conflictId: conflict.id,
     evidenceId: evidenceA.id,
     evidenceIdB: evidenceB.id,
+    operationKey,
     responseId: response.id,
     snapshotId: snapshot.id,
   };
+}
+
+async function expectChildProgressConstraintRejections(context) {
+  await expectPrivilegedSqlRejected(
+    "constraint rejects wrong-family child progress operation",
+    async (transaction) => {
+      await transaction`
+        insert into public.child_progress_operations (
+          child_id,
+          family_id,
+          idempotency_key,
+          payload_hash,
+          status,
+          result
+        )
+        values (
+          ${context.childBId},
+          ${context.familyAId},
+          'isolation:operation:wrong-family',
+          ${"e".repeat(64)},
+          'pending',
+          '{"status":"pending"}'::jsonb
+        )
+      `;
+    },
+  );
+  await expectPrivilegedSqlRejected(
+    "constraint rejects operation evidence outside its child",
+    async (transaction) => {
+      const missingEvidenceId = await transaction`
+        select gen_random_uuid() as id
+      `;
+      await transaction`
+        insert into public.child_progress_operations (
+          child_id,
+          family_id,
+          idempotency_key,
+          payload_hash,
+          status,
+          evidence_ids,
+          affected_item_ids,
+          result
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation:operation:missing-evidence',
+          ${"f".repeat(64)},
+          'recorded',
+          array[${missingEvidenceId[0].id}::uuid],
+          array['math.probe'],
+          ${transaction.json({
+            status: "recorded",
+            evidenceIds: [missingEvidenceId[0].id],
+            affectedItemIds: ["math.probe"],
+            conflictIds: [],
+          })}
+        )
+      `;
+    },
+  );
+  await expectPrivilegedSqlRejected(
+    "constraint rejects wrong-family child evidence",
+    async (transaction) => {
+      await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyAId},
+          'isolation.probe.wrong-family',
+          'easily',
+          'checklist',
+          'isolation:probe:wrong-family'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects member outside evidence family",
+    async (transaction) => {
+      await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.bad-member',
+          'easily',
+          'checklist',
+          ${context.familyAUserId},
+          'isolation:probe:bad-member'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects open conflict without attributed adults",
+    async (transaction) => {
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          idempotency_key
+        )
+        values
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.unattributed',
+            'easily',
+            'checklist',
+            'isolation:probe:unattributed:a'
+          ),
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.unattributed',
+            'not_yet',
+            'checklist',
+            'isolation:probe:unattributed:b'
+          )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.unattributed',
+          ${evidence[0].id},
+          ${evidence[1].id}
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects resolved conflict inserted without resolver",
+    async (transaction) => {
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b,
+          state,
+          resolved_answer,
+          resolved_evidence_id,
+          resolved_at
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.progress.item',
+          ${context.evidenceId},
+          ${context.evidenceIdB},
+          'resolved',
+          'easily',
+          ${context.evidenceId},
+          now()
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects third-row conflict resolution",
+    async (transaction) => {
+      const [thirdEvidence] = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.progress.item',
+          'easily',
+          'checklist',
+          ${context.familyBUserId},
+          'isolation:probe:third-resolution-row'
+        )
+        returning id
+      `;
+      await transaction`
+        update public.child_progress_conflicts
+        set state = 'resolved',
+            resolved_answer = 'easily',
+            resolved_evidence_id = ${thirdEvidence.id},
+            resolved_by_member_user_id = ${context.familyBUserId},
+            resolved_at = now()
+        where id = ${context.conflictId}
+          and child_id = ${context.childBId}
+          and family_id = ${context.familyBId}
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects unattributed resolved conflict insert",
+    async (transaction) => {
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          idempotency_key
+        )
+        values
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.resolved-unattributed',
+            'easily',
+            'checklist',
+            'isolation:probe:resolved-unattributed:a'
+          ),
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.resolved-unattributed',
+            'not_yet',
+            'checklist',
+            'isolation:probe:resolved-unattributed:b'
+          )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b,
+          state,
+          resolved_answer,
+          resolved_evidence_id,
+          resolved_by_member_user_id,
+          resolved_at
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.resolved-unattributed',
+          ${evidence[0].id},
+          ${evidence[1].id},
+          'resolved',
+          'easily',
+          ${evidence[0].id},
+          ${context.familyBUserId},
+          now()
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects conflict with the same evidence twice",
+    async (transaction) => {
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.same-evidence',
+          'easily',
+          'checklist',
+          ${context.familyBUserId},
+          'isolation:probe:same-evidence'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.same-evidence',
+          ${evidence[0].id},
+          ${evidence[0].id}
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects conflict evidence with equal answers",
+    async (transaction) => {
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          idempotency_key
+        )
+        values
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.equal-answers',
+            'easily',
+            'checklist',
+            ${context.familyBUserId},
+            'isolation:probe:equal-answers:a'
+          ),
+          (
+            ${context.childBId},
+            ${context.familyBId},
+            'isolation.probe.equal-answers',
+            'easily',
+            'checklist',
+            ${context.familyBSecondUserId},
+            'isolation:probe:equal-answers:b'
+          )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.equal-answers',
+          ${evidence[0].id},
+          ${evidence[1].id}
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects response evidence from another member",
+    async (transaction) => {
+      const [inboundMessage] = await transaction`
+        insert into public.conversation_messages (
+          family_id,
+          session_id,
+          sequence,
+          role,
+          content,
+          channel,
+          member_user_id
+        )
+        values (
+          ${context.familyBId},
+          'isolation-probe-response-member',
+          1,
+          'user',
+          'Isolation member mismatch response.',
+          'web',
+          ${context.familyBSecondUserId}
+        )
+        returning id
+      `;
+      const checkIns = await transaction`
+        insert into public.progress_check_ins (
+          child_id,
+          family_id,
+          purpose,
+          scope,
+          state,
+          revision,
+          completed_at
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'age_refresh',
+          '{}'::jsonb,
+          'completed',
+          1,
+          now()
+        )
+        returning id
+      `;
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          channel,
+          message_id,
+          check_in_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.response-member',
+          'easily',
+          'check_in',
+          ${context.familyBUserId},
+          'web',
+          ${inboundMessage.id},
+          ${checkIns[0].id},
+          'isolation:probe:response-member'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.progress_check_in_responses (
+          child_id,
+          family_id,
+          check_in_id,
+          revision,
+          item_id,
+          answer,
+          member_user_id,
+          inbound_message_id,
+          is_evidence,
+          evidence_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          ${checkIns[0].id},
+          1,
+          'isolation.probe.response-member',
+          'easily',
+          ${context.familyBSecondUserId},
+          ${inboundMessage.id},
+          true,
+          ${evidence[0].id},
+          'isolation:probe:response-member'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects response evidence for another item",
+    async (transaction) => {
+      const [inboundMessage] = await transaction`
+        insert into public.conversation_messages (
+          family_id,
+          session_id,
+          sequence,
+          role,
+          content,
+          channel,
+          member_user_id
+        )
+        values (
+          ${context.familyBId},
+          'isolation-probe-response-item',
+          1,
+          'user',
+          'Isolation item mismatch response.',
+          'web',
+          ${context.familyBUserId}
+        )
+        returning id
+      `;
+      const [evidence] = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          channel,
+          message_id,
+          check_in_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.progress.item',
+          'easily',
+          'check_in',
+          ${context.familyBUserId},
+          'web',
+          ${inboundMessage.id},
+          ${context.checkInId},
+          'isolation:probe:wrong-item-evidence'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.progress_check_in_responses (
+          child_id,
+          family_id,
+          check_in_id,
+          revision,
+          item_id,
+          answer,
+          member_user_id,
+          inbound_message_id,
+          is_evidence,
+          evidence_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          ${context.checkInId},
+          2,
+          'isolation.probe.wrong-item',
+          'easily',
+          ${context.familyBUserId},
+          ${inboundMessage.id},
+          true,
+          ${evidence.id},
+          'isolation:probe:wrong-item'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects snapshot check-in from another family",
+    async (transaction) => {
+      const children = await transaction`
+        insert into public.children (family_id, name, birth_month)
+        values (
+          ${context.familyAId},
+          'Isolation probe child',
+          '2020-01-01'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_snapshots (
+          child_id,
+          family_id,
+          snapshot_kind,
+          check_in_id,
+          age_months,
+          bank_version,
+          scorer_version,
+          projection,
+          scores
+        )
+        values (
+          ${children[0].id},
+          ${context.familyAId},
+          'legacy',
+          ${context.checkInId},
+          72,
+          'isolation-bank',
+          'isolation-scorer',
+          '{}'::jsonb,
+          '{}'::jsonb
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects snapshot evidence from another family",
+    async (transaction) => {
+      const children = await transaction`
+        insert into public.children (family_id, name, birth_month)
+        values (
+          ${context.familyAId},
+          'Isolation evidence child',
+          '2020-01-01'
+        )
+        returning id
+      `;
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          member_user_id,
+          idempotency_key
+        )
+        values (
+          ${children[0].id},
+          ${context.familyAId},
+          'isolation.probe.foreign-snapshot',
+          'easily',
+          'checklist',
+          ${context.familyAUserId},
+          'isolation:probe:foreign-snapshot'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_snapshots (
+          child_id,
+          family_id,
+          snapshot_kind,
+          evidence_ids,
+          age_months,
+          bank_version,
+          scorer_version,
+          projection,
+          scores
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'legacy',
+          array[${evidence[0].id}::uuid],
+          72,
+          'isolation-bank',
+          'isolation-scorer',
+          '{}'::jsonb,
+          '{}'::jsonb
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects self-superseding evidence",
+    async (transaction) => {
+      const identities = await transaction`select gen_random_uuid() as id`;
+      await transaction`
+        insert into public.child_progress_evidence (
+          id,
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          supersedes_id,
+          idempotency_key
+        )
+        values (
+          ${identities[0].id},
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.self-supersession',
+          'easily',
+          'checklist',
+          ${identities[0].id},
+          'isolation:probe:self-supersession'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects cross-item evidence supersession",
+    async (transaction) => {
+      const evidence = await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.supersession-a',
+          'easily',
+          'checklist',
+          'isolation:probe:supersession:a'
+        )
+        returning id
+      `;
+      await transaction`
+        insert into public.child_progress_evidence (
+          child_id,
+          family_id,
+          item_id,
+          answer,
+          source,
+          supersedes_id,
+          idempotency_key
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.probe.supersession-b',
+          'not_yet',
+          'checklist',
+          ${evidence[0].id},
+          'isolation:probe:supersession:b'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects duplicate open child check-ins",
+    async (transaction) => {
+      await transaction`
+        insert into public.progress_check_ins (
+          child_id,
+          family_id,
+          purpose,
+          scope,
+          state,
+          current_item_id
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'whole_map_refresh',
+          '{}'::jsonb,
+          'active',
+          'isolation.progress.duplicate'
+        )
+      `;
+    },
+  );
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects duplicate open child-item conflicts",
+    async (transaction) => {
+      await transaction`
+        insert into public.child_progress_conflicts (
+          child_id,
+          family_id,
+          item_id,
+          evidence_id_a,
+          evidence_id_b
+        )
+        values (
+          ${context.childBId},
+          ${context.familyBId},
+          'isolation.progress.item',
+          ${context.evidenceId},
+          ${context.evidenceIdB}
+        )
+      `;
+    },
+  );
+}
+
+async function expectAuthenticatedChildAnswersWritesDenied(
+  accessToken,
+  childId,
+  familyId,
+) {
+  await sql`
+    insert into public.child_answers (
+      child_id,
+      question_id,
+      answer,
+      source
+    )
+    values (
+      ${childId},
+      'isolation.boundary.fixture',
+      'easily',
+      'checklist'
+    )
+    on conflict (child_id, question_id)
+    do update set answer = excluded.answer, source = excluded.source
+  `;
+  const before = await sql`
+    select
+      count(*)::integer as total_count,
+      count(*) filter (where superseded_at is null)::integer as active_count,
+      max(created_at)::text as newest_created_at
+    from public.child_progress_evidence
+    where child_id = ${childId}
+      and family_id = ${familyId}
+      and idempotency_key like 'legacy-reconcile:%'
+  `;
+
+  await expectAuthenticatedInsertDenied(
+    accessToken,
+    "child_answers",
+    {
+      child_id: childId,
+      question_id: "isolation.boundary.forged",
+      answer: "easily",
+      source: "checklist",
+    },
+    "auth member cannot insert child answers directly",
+  );
+  await expectAuthenticatedUpdateDenied(
+    accessToken,
+    "child_answers",
+    "child_id",
+    childId,
+    { answer: "not_yet", source: "correction" },
+    "auth member cannot update child answers directly",
+  );
+  await expectAuthenticatedDeleteDenied(
+    accessToken,
+    "child_answers",
+    "child_id",
+    childId,
+    "auth member cannot delete child answers directly",
+  );
+
+  const after = await sql`
+    select
+      count(*)::integer as total_count,
+      count(*) filter (where superseded_at is null)::integer as active_count,
+      max(created_at)::text as newest_created_at
+    from public.child_progress_evidence
+    where child_id = ${childId}
+      and family_id = ${familyId}
+      and idempotency_key like 'legacy-reconcile:%'
+  `;
+  const unchanged =
+    before[0]?.total_count === after[0]?.total_count
+    && before[0]?.active_count === after[0]?.active_count
+    && before[0]?.newest_created_at === after[0]?.newest_created_at;
+  report(
+    "denied child_answers writes create no reconciliation evidence",
+    unchanged,
+    JSON.stringify({ before: before[0], after: after[0] }),
+  );
+}
+
+async function expectMultiColumnMemberDeletion(childId, familyId, userId) {
+  try {
+    await sql.begin(async (transaction) => {
+      const checkIns = await transaction`
+        update public.progress_check_ins
+        set active_member_user_id = ${userId},
+            prompt_recipient_member_user_id = ${userId}
+        where child_id = ${childId}
+          and family_id = ${familyId}
+          and state = 'active'
+        returning id
+      `;
+      if (checkIns.length !== 1) {
+        throw new Error("member-removal fixture has no active check-in");
+      }
+      await transaction`delete from auth.users where id = ${userId}`;
+      await transaction`set constraints all immediate`;
+      const finalRows = await transaction`
+        select state, pause_reason, active_member_user_id,
+               prompt_recipient_member_user_id, revision
+        from public.progress_check_ins
+        where id = ${checkIns[0].id}
+      `;
+      if (
+        finalRows[0]?.state !== "paused"
+        || finalRows[0]?.pause_reason !== "member_removed"
+        || finalRows[0]?.active_member_user_id !== null
+        || finalRows[0]?.prompt_recipient_member_user_id !== null
+        || finalRows[0]?.revision !== 2
+      ) {
+        throw new Error("member removal did not pause and clear check-in ownership");
+      }
+    });
+    report(
+      "Auth deletion pauses and clears owned check-ins",
+      true,
+      "paused with cleared ownership",
+    );
+  } catch (error) {
+    report(
+      "Auth deletion pauses and clears owned check-ins",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 }
 
 async function cleanupIsolationFixtures() {
@@ -520,8 +1618,20 @@ async function expectAuthenticatedIsolation() {
     const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const familyAUser = await signUpFixtureUser("a", suffix);
     const familyBUser = await signUpFixtureUser("b", suffix);
+    const familyBSecondUser = await signUpFixtureUser("b-second", suffix);
+    const familyBMultiColumnUser = await signUpFixtureUser("b-multi", suffix);
     const familyAId = await createFixtureFamily(familyAUser, "A");
     const familyBId = await createFixtureFamily(familyBUser, "B");
+    await insertFixtureFamilyMember(
+      familyBId,
+      familyBSecondUser.userId,
+      "create second Family B adult fixture",
+    );
+    await insertFixtureFamilyMember(
+      familyBId,
+      familyBMultiColumnUser.userId,
+      "create multi-column Family B adult fixture",
+    );
 
     await expectAuthenticatedReadDenied(
       familyAUser.accessToken,
@@ -556,9 +1666,36 @@ async function expectAuthenticatedIsolation() {
       { family_id: familyBId, name: "Isolation B child", birth_month: "2020-01-01" },
       "create Family B child fixture",
     );
+    if (!(await childProgressSchemaExists())) {
+      throw new Error("ChildProgress migration is not applied to the target");
+    }
     const childProgressFixtures = await insertChildProgressFixtures(
       childBId,
+      familyBId,
       familyBUser.userId,
+      familyBSecondUser.userId,
+    );
+    await expectAuthenticatedChildAnswersWritesDenied(
+      familyBUser.accessToken,
+      childBId,
+      familyBId,
+    );
+    await expectChildProgressConstraintRejections({
+      familyAId,
+      familyAUserId: familyAUser.userId,
+      childBId,
+      familyBId,
+      familyBUserId: familyBUser.userId,
+      familyBSecondUserId: familyBSecondUser.userId,
+      checkInId: childProgressFixtures.checkInId,
+      conflictId: childProgressFixtures.conflictId,
+      evidenceId: childProgressFixtures.evidenceId,
+      evidenceIdB: childProgressFixtures.evidenceIdB,
+    });
+    await expectMultiColumnMemberDeletion(
+      childBId,
+      familyBId,
+      familyBMultiColumnUser.userId,
     );
     const memoryBId = await insertFixtureRow(
       familyBUser,
@@ -637,6 +1774,43 @@ async function expectAuthenticatedIsolation() {
         keyValue: childProgressFixtures.evidenceId,
       },
       {
+        table: "child_progress_operations",
+        keyColumn: "idempotency_key",
+        keyValue: childProgressFixtures.operationKey,
+      },
+      {
+        table: "child_progress_revisions",
+        keyColumn: "child_id",
+        keyValue: childProgressFixtures.childId,
+      },
+      {
+        table: "child_progress_operations",
+        label: "child progress operation",
+        keyColumn: "idempotency_key",
+        keyValue: childProgressFixtures.operationKey,
+        insertRow: {
+          child_id: childBId,
+          family_id: familyBId,
+          idempotency_key: "isolation:operation:client-forge",
+          payload_hash: "b".repeat(64),
+          status: "pending",
+          result: { status: "pending" },
+        },
+        updateRow: { payload_hash: "c".repeat(64) },
+      },
+      {
+        table: "child_progress_revisions",
+        label: "child progress revision",
+        keyColumn: "child_id",
+        keyValue: childProgressFixtures.childId,
+        insertRow: {
+          child_id: childBId,
+          family_id: familyBId,
+          revision: 999,
+        },
+        updateRow: { revision: 999 },
+      },
+      {
         table: "child_progress_live",
         keyColumn: "child_id",
         keyValue: childProgressFixtures.childId,
@@ -681,14 +1855,15 @@ async function expectAuthenticatedIsolation() {
       );
     }
 
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "child_progress_evidence",
+    const childProgressWriteFixtures = [
       {
+        table: "child_progress_evidence",
+        label: "child progress evidence",
         keyColumn: "id",
         keyValue: childProgressFixtures.evidenceId,
         insertRow: {
           child_id: childBId,
+          family_id: familyBId,
           item_id: "isolation.progress.client-forge",
           answer: "easily",
           source: "checklist",
@@ -696,47 +1871,48 @@ async function expectAuthenticatedIsolation() {
         },
         updateRow: { quote: "Authenticated clients cannot alter evidence." },
       },
-      "auth member cannot mutate own child progress evidence",
-    );
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "child_progress_live",
       {
+        table: "child_progress_live",
+        label: "live child progress",
         keyColumn: "child_id",
         keyValue: childProgressFixtures.childId,
         insertRow: {
           child_id: childBId,
+          family_id: familyBId,
           projection: {},
           scores: {},
           bank_version: "client-forge",
+          projection_version: "client-forge",
+          projection_date: "2026-07-11",
+          source_revision: 0,
         },
         updateRow: { evidence_count: 99 },
       },
-      "auth member cannot mutate own live child progress",
-    );
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "progress_check_ins",
       {
+        table: "progress_check_ins",
+        label: "progress check-in",
         keyColumn: "id",
         keyValue: childProgressFixtures.checkInId,
         insertRow: {
           child_id: childBId,
+          family_id: familyBId,
           purpose: "age_refresh",
           scope: {},
           state: "completed",
+          revision: 1,
+          current_item_id: null,
+          completed_at: new Date().toISOString(),
         },
         updateRow: { state: "stopped" },
       },
-      "auth member cannot mutate own progress check-in",
-    );
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "progress_check_in_responses",
       {
+        table: "progress_check_in_responses",
+        label: "progress check-in response",
         keyColumn: "id",
         keyValue: childProgressFixtures.responseId,
         insertRow: {
+          child_id: childBId,
+          family_id: familyBId,
           check_in_id: childProgressFixtures.checkInId,
           revision: 2,
           item_id: "isolation.progress.item",
@@ -744,35 +1920,42 @@ async function expectAuthenticatedIsolation() {
           is_evidence: false,
           idempotency_key: "isolation:response:client-forge",
         },
-        updateRow: { answer: "getting_there" },
+        updateRow: { idempotency_key: "isolation:response:client-update" },
       },
-      "auth member cannot mutate own check-in response",
-    );
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "child_progress_conflicts",
       {
+        table: "child_progress_conflicts",
+        label: "child progress conflict",
         keyColumn: "id",
         keyValue: childProgressFixtures.conflictId,
         insertRow: {
           child_id: childBId,
-          item_id: "isolation.progress.client-forge",
+          family_id: familyBId,
+          item_id: "isolation.progress.item",
           evidence_id_a: childProgressFixtures.evidenceId,
           evidence_id_b: childProgressFixtures.evidenceIdB,
+          state: "resolved",
+          resolved_answer: "easily",
+          resolved_evidence_id: childProgressFixtures.evidenceId,
+          resolved_by_member_user_id: familyBUser.userId,
+          resolved_at: new Date().toISOString(),
         },
-        updateRow: { state: "resolved" },
+        updateRow: {
+          state: "resolved",
+          resolved_answer: "easily",
+          resolved_evidence_id: childProgressFixtures.evidenceId,
+          resolved_by_member_user_id: familyBUser.userId,
+          resolved_at: new Date().toISOString(),
+        },
       },
-      "auth member cannot mutate own child progress conflict",
-    );
-    await expectAuthenticatedWritesDenied(
-      familyBUser.accessToken,
-      "child_progress_snapshots",
       {
+        table: "child_progress_snapshots",
+        label: "child progress snapshot",
         keyColumn: "id",
         keyValue: childProgressFixtures.snapshotId,
         insertRow: {
           child_id: childBId,
-          trigger: "legacy",
+          family_id: familyBId,
+          snapshot_kind: "legacy",
           age_months: 72,
           bank_version: "client-forge",
           scorer_version: "client-forge",
@@ -781,8 +1964,21 @@ async function expectAuthenticatedIsolation() {
         },
         updateRow: { scorer_version: "client-forge" },
       },
-      "auth member cannot mutate own child progress snapshot",
-    );
+    ];
+    for (const fixture of childProgressWriteFixtures) {
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        fixture.table,
+        fixture,
+        `auth member cannot mutate own ${fixture.label}`,
+      );
+      await expectAuthenticatedWritesDenied(
+        familyAUser.accessToken,
+        fixture.table,
+        fixture,
+        `cross-family token cannot mutate Family B ${fixture.label}`,
+      );
+    }
 
     await expectAuthenticatedInsertDenied(
       familyAUser.accessToken,
@@ -903,16 +2099,20 @@ await expectEmptyRead("child_reports");
 await expectEmptyRead("child_answers");
 await expectEmptyRead("child_plans");
 // ChildProgress storage is read-only through the authenticated Data API.
-// Anon sees empty sets, while server-side SQL owns every mutation.
+// Anon receives no table grant; older deployments that still return an
+// RLS-filtered empty set are also safe during rollout.
 for (const table of [
   "child_progress_evidence",
+  "child_progress_operations",
+  "child_progress_revisions",
   "child_progress_live",
   "progress_check_ins",
   "progress_check_in_responses",
   "child_progress_conflicts",
   "child_progress_snapshots",
+  "map_walk_prompts",
 ]) {
-  await expectEmptyRead(table);
+  await expectAnonymousNoRowsOrDenied(table);
 }
 // "Call Homa" curriculum feature (migration #24): same is_child_family_member
 // posture. Only the server-only connection ever writes a curriculum, so a
@@ -1104,6 +2304,7 @@ await expectInsertDenied(
   "child_progress_evidence",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
     item_id: "math.probe",
     answer: "easily",
     source: "checklist",
@@ -1112,12 +2313,37 @@ await expectInsertDenied(
   "anon cannot forge child progress evidence",
 );
 await expectInsertDenied(
+  "child_progress_operations",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    idempotency_key: "isolation:anon:operation",
+    payload_hash: "d".repeat(64),
+    status: "pending",
+    result: { status: "pending" },
+  },
+  "anon cannot forge child progress operations",
+);
+await expectInsertDenied(
+  "child_progress_revisions",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    revision: 999,
+  },
+  "anon cannot forge child progress revisions",
+);
+await expectInsertDenied(
   "child_progress_live",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
     projection: {},
     scores: {},
     bank_version: "isolation",
+    projection_version: "isolation",
+    projection_date: "2026-07-11",
+    source_revision: 0,
   },
   "anon cannot forge live child progress",
 );
@@ -1125,6 +2351,7 @@ await expectInsertDenied(
   "progress_check_ins",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
     purpose: "whole_map_refresh",
     scope: {},
   },
@@ -1133,6 +2360,8 @@ await expectInsertDenied(
 await expectInsertDenied(
   "progress_check_in_responses",
   {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
     check_in_id: "00000000-0000-0000-0000-000000000000",
     revision: 1,
     item_id: "math.probe",
@@ -1145,6 +2374,7 @@ await expectInsertDenied(
   "child_progress_conflicts",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
     item_id: "math.probe",
     evidence_id_a: "00000000-0000-0000-0000-000000000001",
     evidence_id_b: "00000000-0000-0000-0000-000000000002",
@@ -1155,7 +2385,8 @@ await expectInsertDenied(
   "child_progress_snapshots",
   {
     child_id: "00000000-0000-0000-0000-000000000000",
-    trigger: "legacy",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    snapshot_kind: "legacy",
     age_months: 0,
     bank_version: "isolation",
     scorer_version: "isolation",
@@ -1163,6 +2394,19 @@ await expectInsertDenied(
     scores: {},
   },
   "anon cannot forge child progress snapshots",
+);
+await expectInsertDenied(
+  "map_walk_prompts",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    subject_id: "math",
+    topic_id: "math.comparing-groups-more-or-fewer",
+    sitting: 1,
+    source_revision: 0,
+    expires_at: new Date(Date.now() + 60_000).toISOString(),
+  },
+  "anon cannot forge map walk prompts",
 );
 await expectInsertDenied(
   "child_curriculum_calls",

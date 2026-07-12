@@ -10,6 +10,7 @@ import {
   CONTACT_CARD_FIRST_TEXT,
   sendHomaContactCard,
 } from "../../lib/contact-card";
+import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
 import {
   claimInboundReceipt,
   completeInboundReceipt,
@@ -28,6 +29,7 @@ import {
   openReplyLoop,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
+import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import {
   findFamilyIdentityByPhone,
   findPhoneAccessEpoch,
@@ -47,6 +49,7 @@ import {
 import { emitMapEvent } from "../../lib/map/events";
 import { recordLeadContact } from "../../lib/phone-leads";
 import { signupProgress } from "../../lib/sms-onboarding";
+import { trustedSmsInboundIdentityAttributes } from "../../lib/sms-inbound-auth";
 import {
   buildSmsSessionThreadId,
   stripSmsSessionEpoch,
@@ -170,17 +173,45 @@ const { bot, channel, send } = chatSdkChannel({
         destination: attributes.phoneNumber,
         providerThreadKey: channel.thread.id,
       });
+      const genericContract = replyContractForReactiveMessage(
+        event.message,
+      );
+      const openLoopAfterOutcome = async (
+        deliveryOutcome: "sent" | "uncertain",
+      ) => {
+        const progress =
+          event.turnId
+            ? await bindDeliveredProgressCheckIn({
+                attempt,
+                deliveryOutcome,
+                runtimeSessionId: ctx.session.id,
+                turnId: event.turnId,
+                deliveredContent: event.message ?? undefined,
+              })
+            : { status: "no_unique_prompt" as const };
+        if (
+          progress.status !== "bound" &&
+          progress.status !== "delivery_paused" &&
+          genericContract
+        ) {
+          await openReplyLoop({
+            attempt,
+            contract: genericContract,
+          });
+        }
+      };
       if (!attempt.shouldSend) {
         if (attempt.existingStatus === "sent") {
           await markCanonicalMessageDelivered({
             familyId: attributes.familyId,
             messageId: persisted.id,
           });
+          await openLoopAfterOutcome("sent");
+        } else if (attempt.existingStatus === "uncertain") {
+          await openLoopAfterOutcome("uncertain");
         }
         return;
       }
-      const contract = replyContractForReactiveMessage(event.message);
-      if (contract) await openReplyLoop({ attempt, contract });
       try {
         const posted = (await channel.thread.post(event.message)) as {
           id?: string;
@@ -193,6 +224,7 @@ const { bot, channel, send } = chatSdkChannel({
           familyId: attributes.familyId,
           messageId: persisted.id,
         });
+        await openLoopAfterOutcome("sent");
         if (attributes.inboundReceiptId) {
           await completeInboundReceipt(attributes.inboundReceiptId);
         }
@@ -202,6 +234,7 @@ const { bot, channel, send } = chatSdkChannel({
           error: error instanceof Error ? error.message : "unknown",
           uncertain: true,
         });
+        await openLoopAfterOutcome("uncertain");
         if (attributes.inboundReceiptId) {
           await completeInboundReceipt(attributes.inboundReceiptId);
         }
@@ -465,6 +498,15 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
         turnId: inboundReceipt.id,
         providerMessageId: message.id,
       });
+      if (persistedInbound) {
+        Object.assign(
+          continuityAttributes,
+          canonicalInboundAuthAttributes({
+            text: turnText,
+            messageId: persistedInbound.id,
+          }),
+        );
+      }
       if (
         continuityAttributes.repliedDeliveryId &&
         !persistedInbound?.replyClaimed
@@ -495,7 +537,10 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
           attributes: {
             channel: "sms",
             phoneNumber: senderNumber,
-            inboundReceiptId: inboundReceipt.id,
+            ...trustedSmsInboundIdentityAttributes({
+              providerMessageId: message.id,
+              inboundReceiptId: inboundReceipt.id,
+            }),
             ...(familyId ? { familyId } : {}),
             ...continuityAttributes,
             ...(memberName ? { memberName } : {}),

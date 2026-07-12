@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vercel deployment artifacts (generated, never hand-edited):
+    ".vercel/**",
     // eve build/runtime artifacts (generated, never hand-edited):
     ".eve/**",
     ".output/**",

@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 
 import { getAppData } from "../../../../lib/app-data";
 import { familyWallCheckout } from "../../../../lib/billing/wall";
+import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
+import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../lib/map/store";
@@ -10,14 +12,8 @@ import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
 import { ReportView } from "../../../onboarding/r/[token]/report-view";
 
 /**
- * /app/[childId]/report: the progress report as the app's home surface
- * (founder ask 2026-07-10: the report IS the dashboard; onboarding ends
- * when the questions do, and the results live in the app). Renders the
- * same ReportView as the emailed token URL, inside the /app frame, so
- * the sidebar and phone nav ride along. The child id resolves inside
- * the caller's own family (RLS), so a foreign id is a 404, never a
- * leak; the report itself loads by the family's own token. A kid with
- * no report yet routes to /onboarding, the one place questions live.
+ * Legacy signed-in report route. Flag-on requests move to live Progress
+ * before report data loads. Token report routes remain independent.
  */
 
 export const metadata: Metadata = {
@@ -31,6 +27,14 @@ export default async function AppReportPage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = await params;
+  const policy = progressRoutePolicy(
+    { surface: "child_report", childId },
+    liveProgressEnabled(),
+  );
+  if (policy.kind === "redirect") {
+    redirect(policy.href);
+  }
+
   const data = await getAppData();
   if (!data) redirect("/onboarding");
 

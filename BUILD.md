@@ -72,6 +72,27 @@ If a capability is absent from the current repository or lacks production eviden
 9. Production schema and production code ship together. Breaking migrations never lead the code that reads them. Use code-first deployment or expand-contract; additive migrations may lead.
 10. Imports remain at the top of the file. Do not add inline imports.
 
+## ChildProgress rollout order
+
+ChildProgress uses an exact flag because its code must be safe before its
+additive tables exist. Use this order:
+
+1. Keep `HOMA_LIVE_PROGRESS_ENABLED` false.
+2. Deploy the repository code, wait for Vercel READY, and probe legacy web
+   onboarding, token reports, and unlinked SMS signup.
+3. Apply the additive ChildProgress migration and its initial backfill.
+4. Run `pnpm progress:reconcile -- --dry-run` with an explicit
+   `HOMA_PROGRESS_DATABASE_URL`, review its PII-free counts, then run the same
+   command without `--dry-run`.
+5. Enable `HOMA_LIVE_PROGRESS_ENABLED`, wait for READY, then probe authenticated
+   Progress, permanent token reports, web corrections, and linked-family SMS.
+
+Rollback is flag-first. If a post-enable probe fails, set the flag false and
+wait for READY. Do not drop the additive tables or install a reverse database
+bridge. Legacy writers continue through `child_answers`; run the final
+reconciliation again before a later re-enable. Before the flag is enabled, a
+migration or reconciliation problem is handled by leaving the flag false.
+
 ## Verification before handoff
 
 Run the commands listed in `AGENTS.md` that match the change. The full repository handoff gate is:
@@ -79,6 +100,9 @@ Run the commands listed in `AGENTS.md` that match the change. The full repositor
 ```sh
 pnpm typecheck
 pnpm lint
+pnpm check:child-progress
+pnpm check:progress-ui
+pnpm child-progress:e2e
 pnpm build
 pnpm --filter web exec eve build
 pnpm check:isolation
@@ -86,6 +110,7 @@ pnpm check:map
 pnpm check:events
 pnpm check:skills-targeting
 pnpm check:taxonomy
+pnpm check:continuity
 ```
 
 During the documentation reconciliation, also run `pnpm check:docs`. The `--allow-open` form is an interim structural check only and is not a completion signal.

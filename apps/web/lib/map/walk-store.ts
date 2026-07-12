@@ -1,6 +1,9 @@
+import { randomUUID } from "node:crypto";
+
 import { ageInMonths, MAP_ANSWERS, type MapAnswer } from "@homa/core";
 import { getTaxonomyDomain, getTopic, type WalkAnswers } from "@homa/taxonomy";
 
+import { saveLegacyProgressAnswer } from "../child-progress/legacy-adapters";
 import { mapDb } from "./db";
 import { childBelongsToFamily } from "./store";
 
@@ -41,6 +44,11 @@ export async function saveWalkAnswer(
   subjectId: string,
   topicId: string,
   answer: MapAnswer,
+  options: {
+    memberUserId?: string | null;
+    observedAt?: string;
+    idempotencyKey?: string;
+  } = {},
 ): Promise<{ ok: boolean; domainId?: string }> {
   const topic = getTopic(topicId);
   if (!topic || topic.subject !== subjectId) return { ok: false };
@@ -48,14 +56,20 @@ export async function saveWalkAnswer(
   if (!domain || domain.kind !== "assessment") return { ok: false };
   if (!(await childBelongsToFamily(childId, familyId))) return { ok: false };
 
-  const sql = mapDb();
-  await sql`
-    insert into public.child_answers (child_id, question_id, answer, source)
-    values (${childId}, ${topicId}, ${answer}, 'onboarding_walk')
-    on conflict (child_id, question_id)
-    do update set answer = excluded.answer, answered_at = now()
-  `;
-  return { ok: true, domainId: topic.domain };
+  const saved = await saveLegacyProgressAnswer({
+    familyId,
+    childId,
+    itemId: topicId,
+    answer,
+    source: "onboarding_walk",
+    memberUserId: options.memberUserId ?? null,
+    observedAt: options.observedAt ?? new Date().toISOString(),
+    idempotencyKey:
+      options.idempotencyKey ?? `legacy-walk:${randomUUID()}`,
+  });
+  return saved.status === "saved"
+    ? { ok: true, domainId: topic.domain }
+    : { ok: false };
 }
 
 /**

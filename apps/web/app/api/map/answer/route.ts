@@ -1,11 +1,25 @@
 import { mapAnswerSchema } from "@homa/core";
+import { z } from "zod";
 
+import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireFamily } from "../../../../lib/map/session";
-import { deleteAnswer, saveAnswer } from "../../../../lib/map/store";
+import { requireFamilyWithActor } from "../../../../lib/map/session";
+import {
+  deleteAnswerWithProgressStatus,
+  saveAnswerWithProgressStatus,
+} from "../../../../lib/map/store";
 
-const clearAnswerSchema = mapAnswerSchema.pick({ childId: true, itemId: true });
+const answerAttemptFields = {
+  idempotencyKey: z.uuid().optional(),
+};
+const saveAnswerSchema = mapAnswerSchema.extend({
+  ...answerAttemptFields,
+  source: z.enum(["checklist", "deep_dive"]).default("checklist"),
+});
+const clearAnswerSchema = mapAnswerSchema
+  .pick({ childId: true, itemId: true })
+  .extend(answerAttemptFields);
 
 /**
  * POST /api/map/answer
@@ -18,8 +32,20 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
-  if (!family) {
+  let access;
+  try {
+    access = await requireFamilyWithActor();
+  } catch (error) {
+    console.error(
+      "map/answer auth lookup failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return Response.json(
+      { ok: false, reason: "auth-lookup-failed" },
+      { status: 502 },
+    );
+  }
+  if (!access) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -29,19 +55,65 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
-  const parsed = mapAnswerSchema.safeParse(raw);
+  const parsed = saveAnswerSchema.safeParse(raw);
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
+  if (liveProgressEnabled() && !parsed.data.idempotencyKey) {
+    return Response.json(
+      { ok: false, reason: "missing-idempotency-key" },
+      { status: 400 },
+    );
+  }
 
   try {
-    const saved = await saveAnswer(family.id, parsed.data.childId, parsed.data.itemId, parsed.data.answer);
-    if (!saved.ok) {
-      return Response.json({ ok: false, reason: "unknown-item-or-child" }, { status: 400 });
+    const saved = await saveAnswerWithProgressStatus(
+      access.family.id,
+      parsed.data.childId,
+      parsed.data.itemId,
+      parsed.data.answer,
+      {
+        source: parsed.data.source,
+        memberUserId: access.memberUserId,
+        channel: "web",
+        idempotencyKey: parsed.data.idempotencyKey,
+      },
+    );
+    switch (saved.result.status) {
+      case "saved":
+        break;
+      case "unknown_child_or_item":
+        return Response.json(
+          { ok: false, reason: "unknown-item-or-child" },
+          { status: 400 },
+        );
+      case "unknown_actor":
+        return Response.json(
+          { ok: false, reason: "unknown-actor" },
+          { status: 403 },
+        );
+      case "idempotency_mismatch":
+        return Response.json(
+          { ok: false, reason: "idempotency-mismatch" },
+          { status: 409 },
+        );
+      case "conflict_pending":
+        return Response.json(
+          {
+            ok: false,
+            reason: "conflict-pending",
+            conflictId: saved.result.conflictId,
+          },
+          { status: 409 },
+        );
+      default: {
+        const exhaustiveResult: never = saved.result;
+        return exhaustiveResult;
+      }
     }
 
     await emitMapEvent("map.question_answered", {
-      family_id: family.id,
+      family_id: access.family.id,
       child_id: parsed.data.childId,
       subject: saved.subject ?? "unknown",
       answer: parsed.data.answer,
@@ -65,8 +137,20 @@ export async function DELETE(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
-  if (!family) {
+  let access;
+  try {
+    access = await requireFamilyWithActor();
+  } catch (error) {
+    console.error(
+      "map/answer delete auth lookup failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return Response.json(
+      { ok: false, reason: "auth-lookup-failed" },
+      { status: 502 },
+    );
+  }
+  if (!access) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
@@ -80,11 +164,54 @@ export async function DELETE(request: Request): Promise<Response> {
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
+  if (liveProgressEnabled() && !parsed.data.idempotencyKey) {
+    return Response.json(
+      { ok: false, reason: "missing-idempotency-key" },
+      { status: 400 },
+    );
+  }
 
   try {
-    const deleted = await deleteAnswer(family.id, parsed.data.childId, parsed.data.itemId);
-    if (!deleted.ok) {
-      return Response.json({ ok: false, reason: "unknown-item-or-child" }, { status: 400 });
+    const deleted = await deleteAnswerWithProgressStatus(
+      access.family.id,
+      parsed.data.childId,
+      parsed.data.itemId,
+      {
+        memberUserId: access.memberUserId,
+        idempotencyKey: parsed.data.idempotencyKey,
+      },
+    );
+    switch (deleted.result.status) {
+      case "saved":
+        break;
+      case "unknown_child_or_item":
+        return Response.json(
+          { ok: false, reason: "unknown-item-or-child" },
+          { status: 400 },
+        );
+      case "unknown_actor":
+        return Response.json(
+          { ok: false, reason: "unknown-actor" },
+          { status: 403 },
+        );
+      case "idempotency_mismatch":
+        return Response.json(
+          { ok: false, reason: "idempotency-mismatch" },
+          { status: 409 },
+        );
+      case "conflict_pending":
+        return Response.json(
+          {
+            ok: false,
+            reason: "conflict-pending",
+            conflictId: deleted.result.conflictId,
+          },
+          { status: 409 },
+        );
+      default: {
+        const exhaustiveResult: never = deleted.result;
+        return exhaustiveResult;
+      }
     }
 
     return Response.json({ ok: true });

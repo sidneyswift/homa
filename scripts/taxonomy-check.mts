@@ -37,6 +37,10 @@ import {
   walkSummary,
   type WalkAnswer,
 } from "../packages/taxonomy/src/index.js";
+import {
+  PROGRESS_TAXONOMY_TOPICS,
+  getProgressTaxonomyTopic,
+} from "../packages/taxonomy/src/progress.js";
 import { MAP_SUBJECTS } from "../packages/core/src/map/content.js";
 import { BANK_ITEM_DOMAINS } from "../packages/core/src/map/item-domains.js";
 
@@ -193,7 +197,54 @@ report("every edge references real topics", danglingEdges === 0, `${danglingEdge
   report("every standards ref resolves in the registry", unresolvedRefs === 0, `${unresolvedRefs} unresolved`);
 }
 
-// 6. Walk-engine laws
+// 6. Progress metadata parity
+{
+  const assessmentTopics = taxonomy.topics.filter(
+    (topic) =>
+      getTaxonomyDomain(topic.domain)?.kind === "assessment",
+  );
+  const assessmentById = new Map(
+    assessmentTopics.map((topic) => [topic.id, topic]),
+  );
+  let progressMetadataMismatches = 0;
+  for (const topic of PROGRESS_TAXONOMY_TOPICS) {
+    const expected = assessmentById.get(topic.id);
+    if (
+      expected === undefined ||
+      topic.subject !== expected.subject ||
+      topic.domain !== expected.domain ||
+      topic.name !== expected.name ||
+      topic.teachingWindowMonths[0] !==
+        expected.teachingWindowMonths[0] ||
+      topic.teachingWindowMonths[1] !==
+        expected.teachingWindowMonths[1]
+    ) {
+      progressMetadataMismatches += 1;
+    }
+  }
+  report(
+    "progress metadata count matches assessment topics",
+    PROGRESS_TAXONOMY_TOPICS.length === assessmentTopics.length,
+    `${PROGRESS_TAXONOMY_TOPICS.length} generated, ${assessmentTopics.length} expected`,
+  );
+  report(
+    "progress metadata matches assembled assessment topics",
+    progressMetadataMismatches === 0,
+    `${progressMetadataMismatches} mismatches`,
+  );
+  report(
+    "progress metadata includes a known assessment topic",
+    getProgressTaxonomyTopic(
+      "math.comparing-groups-more-or-fewer",
+    ) !== undefined,
+  );
+  report(
+    "progress metadata excludes a known content topic",
+    getProgressTaxonomyTopic("science.dinosaur-sizes") === undefined,
+  );
+}
+
+// 7. Walk-engine laws
 {
   // A real hard edge between two assessment topics of one subject: the
   // fixture every law below runs against, so the checks hold for the

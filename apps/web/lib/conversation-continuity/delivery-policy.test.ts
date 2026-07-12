@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   aggregateDeliveryOutcomes,
+  replyContractForProgressCheckIn,
   replyContractForReactiveMessage,
   replyContractForTask,
   type DeliveryOutcome,
@@ -96,6 +97,19 @@ describe("reactive message reply contracts", () => {
     assert.equal(
       replyContractForReactiveMessage("Your page is ready."),
       null,
+    );
+  });
+});
+
+describe("progress check-in reply contracts", () => {
+  it("keys the bounded loop to the exact check-in revision", () => {
+    assert.deepEqual(
+      replyContractForProgressCheckIn("check-in-1", 7),
+      {
+        kind: "choice",
+        promptKey: "progress-check-in:check-in-1:revision:7",
+        expiresAfterMs: 24 * 60 * 60_000,
+      },
     );
   });
 });

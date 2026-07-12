@@ -95,7 +95,10 @@ export {
 } from "./map/sentences";
 
 export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
-export { BANK_ITEM_DOMAINS } from "./map/item-domains";
+export {
+  BANK_ITEM_DOMAINS,
+  domainForBankItem,
+} from "./map/item-domains";
 
 export type {
   Curriculum,

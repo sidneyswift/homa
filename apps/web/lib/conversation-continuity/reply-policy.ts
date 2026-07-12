@@ -39,6 +39,28 @@ export interface ResolveReplyIntentInput {
 
 const REFERENTIAL_REPLY =
   /^(?:yes|yes please|yep|yeah|sure|okay|ok|do it|send it|please|sounds good|tell me more|show me|no|no thanks|not now|why|how)(?:[.!?]*)$/iu;
+const PROGRESS_CHIP_REPLY =
+  /^(?:easily|getting there|not yet|not sure|skip|almost|sometimes)$/iu;
+const PROGRESS_NEGATIVE_REPLY =
+  /^(?:no|nope|no,?\s+not\s+yet)$/iu;
+const PROGRESS_NATURAL_REPLY =
+  /^(?:(?:he|she|they)\s+)?(?:can(?:not|['’]t)(?:\s+do\s+(?:it|that))?(?:\s+yet)?|can\s+do\s+(?:it|that)\s+easily|does\s+(?:it|that)\s+easily|is\s+getting\s+there|needs?\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|can\s+do\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|does\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help)$/iu;
+
+function isProgressChoiceReply(text: string): boolean {
+  const normalized = text
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .trim()
+    .replace(/[.!]+$/u, "");
+  return (
+    !/\binstead\b/iu.test(normalized) &&
+    (
+      PROGRESS_CHIP_REPLY.test(normalized) ||
+      PROGRESS_NEGATIVE_REPLY.test(normalized) ||
+      PROGRESS_NATURAL_REPLY.test(normalized)
+    )
+  );
+}
 
 function candidateBelongsToMember(
   candidate: PendingDeliveryCandidate,
@@ -157,13 +179,39 @@ export function resolveReplyIntent(
     return { kind: "ambiguous", candidates: clarified };
   }
 
-  const referential = REFERENTIAL_REPLY.test(input.text.trim());
+  const trimmedText = input.text.trim();
+  const genericReferential = REFERENTIAL_REPLY.test(trimmedText);
+  const progressChipReply = PROGRESS_CHIP_REPLY.test(
+    trimmedText.replace(/[.!]+$/u, "").replaceAll("_", " "),
+  ) || PROGRESS_NEGATIVE_REPLY.test(
+    trimmedText.replace(/[.!]+$/u, ""),
+  );
+  const progressChoiceReply = isProgressChoiceReply(input.text);
   const eligible = active.filter(
     (candidate) =>
-      (candidate.replyKind === "free_text" &&
+      (
+        candidate.replyKind === "free_text" &&
         candidate.channel === input.currentChannel &&
-        !currentAsksQuestion) ||
-      referential,
+        !currentAsksQuestion
+      ) ||
+      (
+        candidate.replyKind === "choice" &&
+        !currentAsksQuestion &&
+        (
+          progressChipReply ||
+          (
+            candidate.channel === input.currentChannel &&
+            progressChoiceReply
+          )
+        )
+      ) ||
+      (
+        (
+          candidate.replyKind === "yes_no" ||
+          candidate.replyKind === "approval"
+        ) &&
+        genericReferential
+      ),
   );
   if (eligible.length === 0) {
     return { kind: "none", nearbyCandidates: active };
