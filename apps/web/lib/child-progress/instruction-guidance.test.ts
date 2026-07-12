@@ -21,6 +21,14 @@ describe("linked SMS progress guidance", () => {
     );
     assert.match(
       LINKED_SMS_PROGRESS_GUIDANCE,
+      /word for word/u,
+    );
+    assert.match(
+      LINKED_SMS_PROGRESS_GUIDANCE,
+      /no live delivered question matches/u,
+    );
+    assert.match(
+      LINKED_SMS_PROGRESS_GUIDANCE,
       /one or two sentences/u,
     );
     assert.match(

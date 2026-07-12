@@ -16,6 +16,7 @@ import {
   progressUpdateResult,
   progressWorkflowResult,
   refusedProgressResult,
+  reissueProgressResult,
 } from "./tool-result-payloads";
 import {
   ACTIVITY_ONLY_PROGRESS_NOTE,
@@ -101,11 +102,12 @@ export async function adaptCheckInResult(input: {
           })
         : refusedProgressResult();
     }
-    case "unknown_child":
     case "no_active_check_in":
     case "stale_prompt":
-    case "wrong_recipient":
     case "wrong_delivery":
+      return reissueProgressResult();
+    case "unknown_child":
+    case "wrong_recipient":
     case "idempotency_mismatch":
     case "invalid_scope":
       return refusedProgressResult();

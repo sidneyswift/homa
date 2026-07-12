@@ -105,6 +105,8 @@ export const AMBIGUOUS_PROGRESS_NOTE =
   "More than one progress skill could fit. Ask one short clarifying question before recording progress.";
 export const REFUSED_PROGRESS_NOTE =
   "Progress was not changed. Saved family data is safe. Use the current signed-in family and check-in context before trying again.";
+export const REISSUE_PROGRESS_NOTE =
+  "Progress was not changed. Saved family data is safe. This reply does not match a live delivered question. Call start_check_in for the child to get the current question again, send that statement word for word in your next message, then translate the parent's next reply.";
 export const DISABLED_PROGRESS_NOTE =
   "Progress is not available right now. No family data was read or changed.";
 
@@ -149,7 +151,10 @@ export const manageChildProgressResultSchema = z.discriminatedUnion("kind", [
   }),
   z.strictObject({
     kind: z.literal("refused"),
-    note: z.literal(REFUSED_PROGRESS_NOTE),
+    note: z.union([
+      z.literal(REFUSED_PROGRESS_NOTE),
+      z.literal(REISSUE_PROGRESS_NOTE),
+    ]),
   }),
   z.strictObject({
     kind: z.literal("disabled"),

@@ -63,6 +63,40 @@ export type ProgressDeliveryBindingResult =
       revision: number;
     };
 
+/** Folds plural and third-person forms together ("asks" and "ask",
+ * "stays" and "stay") so both sides of the containment check normalize
+ * identically. Consistency matters more than linguistic correctness. */
+function stemPromptToken(token: string): string {
+  const base = token.replace(/'s$/u, "");
+  if (
+    base.length > 3 &&
+    base.endsWith("s") &&
+    !base.endsWith("ss")
+  ) {
+    return base.slice(0, -1);
+  }
+  return base;
+}
+
+function normalizedPromptTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s']/gu, " ")
+    .split(/\s+/u)
+    .filter((token) => token.length > 0)
+    .map(stemPromptToken);
+}
+
+/**
+ * A reply must never be scored against a question the parent did not see,
+ * so the delivered text has to carry the current statement. Models restate
+ * the statement as a natural question ("does Story ask why and how
+ * questions" for "Story asks why and how questions"), which an exact
+ * substring check refuses; that mismatch left a live check-in permanently
+ * unbound (2026-07-12 SMS incident). Requiring every normalized statement
+ * word to appear in the message keeps the guarantee while tolerating
+ * do-support rephrasing, punctuation, and case.
+ */
 function textDeliveryContainsPrompt(
   checkIn: ProgressCheckInRecord,
   content: string | undefined,
@@ -75,8 +109,11 @@ function textDeliveryContainsPrompt(
   const prompt = personalizeStatement(
     checkIn.childName,
     located.item,
-  ).replace(/\s+/gu, " ");
-  return content.replace(/\s+/gu, " ").includes(prompt);
+  );
+  const messageTokens = new Set(normalizedPromptTokens(content));
+  return normalizedPromptTokens(prompt).every((token) =>
+    messageTokens.has(token),
+  );
 }
 
 /**

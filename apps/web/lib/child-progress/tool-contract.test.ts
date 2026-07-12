@@ -8,6 +8,10 @@ import {
   type ChildProgressToolOperations,
 } from "./tool-adapter";
 import { createProgressToolContext } from "./tool-contract";
+import {
+  REFUSED_PROGRESS_NOTE,
+  REISSUE_PROGRESS_NOTE,
+} from "./tool-result-contract";
 import type {
   ChildProgressView,
   ProgressCheckInRecord,
@@ -213,6 +217,40 @@ describe("child progress tool result adapter", () => {
         undoToken: OPERATION_ID,
         affectedTopics: ["Counts out loud from 1 to 5"],
       },
+    });
+  });
+
+  it("guides recovery for an unbound reply but stays generic for identity refusals", async () => {
+    const unbound = await executeChildProgressCommand(
+      {
+        action: "respond_check_in",
+        checkInId: CHECK_IN_ID,
+        answer: "easily",
+      },
+      context(),
+      operations({
+        respondCheckIn: async () => ({ status: "wrong_delivery" }),
+      }),
+    );
+    assert.deepEqual(unbound, {
+      kind: "refused",
+      note: REISSUE_PROGRESS_NOTE,
+    });
+
+    const identity = await executeChildProgressCommand(
+      {
+        action: "respond_check_in",
+        checkInId: CHECK_IN_ID,
+        answer: "easily",
+      },
+      context(),
+      operations({
+        respondCheckIn: async () => ({ status: "wrong_recipient" }),
+      }),
+    );
+    assert.deepEqual(identity, {
+      kind: "refused",
+      note: REFUSED_PROGRESS_NOTE,
     });
   });
 

@@ -248,6 +248,75 @@ describe("post-delivery progress binding", () => {
     );
   });
 
+  it("binds a text prompt restated as a natural question", async () => {
+    const order: string[] = [];
+    const current = checkIn();
+    const result =
+      await bindProgressCheckInAfterSuccessfulDelivery(
+        {
+          attempt: attempt(),
+          deliveryOutcome: "sent",
+          runtimeSessionId: "runtime-1",
+          turnId: "turn-1",
+          deliveredContent:
+            "Quick check: does Maya count out loud from 1 to 5, mostly in order?",
+          now: NOW,
+        },
+        {
+          listFamilyCheckIns: async () => [current],
+          bindDelivery: async (_context, input) => {
+            order.push("bind");
+            return {
+              status: "bound",
+              checkIn: {
+                ...current,
+                currentDeliveryId: input.deliveryId,
+              },
+            };
+          },
+          pauseUndeliveredPrompt: async () => ({
+            status: "no_active_check_in",
+          }),
+          openReplyLoop: async () => {
+            order.push("open");
+          },
+        },
+      );
+
+    assert.equal(result.status, "bound");
+    assert.deepEqual(order, ["bind", "open"]);
+  });
+
+  it("never binds a text that does not carry the question", async () => {
+    let binds = 0;
+    const result =
+      await bindProgressCheckInAfterSuccessfulDelivery(
+        {
+          attempt: attempt(),
+          deliveryOutcome: "sent",
+          runtimeSessionId: "runtime-1",
+          turnId: "turn-1",
+          deliveredContent:
+            "Great, moving on to reading next time.",
+          now: NOW,
+        },
+        {
+          listFamilyCheckIns: async () => [checkIn()],
+          bindDelivery: async () => {
+            binds += 1;
+            return { status: "wrong_delivery" };
+          },
+          pauseUndeliveredPrompt: async () => ({
+            status: "no_active_check_in",
+          }),
+          openReplyLoop: async () => {},
+        },
+      );
+
+    assert.deepEqual(result, { status: "no_unique_prompt" });
+    assert.equal(binds, 0);
+  });
+
   it("opens no loop when strict binding refuses", async () => {
     let opens = 0;
     const result =

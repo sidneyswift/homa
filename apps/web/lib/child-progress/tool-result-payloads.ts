@@ -12,6 +12,7 @@ import {
   DISABLED_PROGRESS_NOTE,
   manageChildProgressResultSchema,
   REFUSED_PROGRESS_NOTE,
+  REISSUE_PROGRESS_NOTE,
   type ManageChildProgressResult,
 } from "./tool-result-contract";
 
@@ -37,6 +38,15 @@ function parsed(
 
 export function refusedProgressResult(): ManageChildProgressResult {
   return parsed({ kind: "refused", note: REFUSED_PROGRESS_NOTE });
+}
+
+/**
+ * The refusal for a workflow desync the model can repair itself: the
+ * check-in exists but this reply is not bound to its delivered question.
+ * Identity and contract violations keep the generic refusal instead.
+ */
+export function reissueProgressResult(): ManageChildProgressResult {
+  return parsed({ kind: "refused", note: REISSUE_PROGRESS_NOTE });
 }
 
 export function disabledProgressResult(): ManageChildProgressResult {
