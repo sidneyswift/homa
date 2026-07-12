@@ -1,0 +1,1585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homa chat history directions · disposable comparison lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=EB+Garamond:ital@1&family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Homa Design System v3 tokens (docs/homa-design/tokens), hand-copied
+       for this disposable lab. Fonts fall back to system stacks offline. */
+    :root {
+      --stone-50: #FBF7F0; --stone-100: #F3ECE1; --stone-200: #E7DDCE;
+      --stone-300: #D6C8B4; --stone-400: #B3A492; --stone-500: #8A7D6C;
+      --stone-600: #6B6259; --stone-700: #4E463E; --stone-800: #332E29;
+      --stone-900: #221E1A;
+      --clay-50: #FFF0E8; --clay-100: #FFDDC9; --clay-200: #FFC5A3;
+      --clay-300: #FB9868; --clay-400: #F1793F; --clay-500: #E7602F;
+      --clay-600: #C44C22; --clay-700: #9C3B1B;
+      --sage-50: #EAF6EC; --sage-100: #D2ECD6; --sage-300: #8CCB97;
+      --sage-500: #3D9A50; --sage-600: #2F7C40; --sage-700: #275F34;
+      --gold-100: #FFF3C2; --gold-300: #FFE175; --gold-400: #FFD43B;
+      --gold-ink: #8A6410; --gold-ink-strong: #402E05;
+      --sky-100: #DDF3F9; --sky-300: #9FDCEC; --sky-500: #4FB4D6; --sky-600: #2E8CAD;
+      --pop-cobalt: #2743D0; --pop-navy: #23304F; --pop-blush: #F5A3B5;
+      --brand: var(--clay-500); --brand-soft: var(--clay-50);
+      --bg-page: var(--stone-50); --surface-raised: #FFFFFF;
+      --surface-sunken: var(--stone-100);
+      --text-strong: var(--stone-900); --text-body: var(--stone-800);
+      --text-muted: var(--stone-600); --text-subtle: var(--stone-500);
+      --border: var(--stone-300); --border-subtle: var(--stone-200);
+      --info-soft: var(--sky-100);
+      --accent-sage-soft: var(--sage-50);
+      --radius-md: 10px; --radius-lg: 16px; --radius-xl: 22px; --radius-pill: 999px;
+      --shadow-sm: 0 1px 3px rgba(51,42,33,.08), 0 1px 2px rgba(51,42,33,.04);
+      --shadow-md: 0 4px 10px rgba(51,42,33,.07), 0 2px 4px rgba(51,42,33,.05);
+      --shadow-lg: 0 12px 28px rgba(51,42,33,.10), 0 4px 10px rgba(51,42,33,.05);
+      --font-display: "Schibsted Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-sans: "Hanken Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-serif: "EB Garamond", Georgia, serif;
+      --font-wordmark: Fredoka, "Arial Rounded MT Bold", sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --ease-out: cubic-bezier(.22,.8,.28,1);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0; background: var(--bg-page); color: var(--text-body);
+      font-family: var(--font-sans); font-size: 16px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid rgba(241,121,63,.4); outline-offset: 2px; border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    .lab { max-width: 1180px; margin: 0 auto; padding: 26px clamp(14px, 3vw, 40px) 80px; }
+
+    /* ---------- header ---------- */
+    .lab-head h1 {
+      margin: 10px 0 0; font-family: var(--font-display); font-weight: 700;
+      font-size: clamp(1.6rem, 3.4vw, 2.3rem); letter-spacing: -.015em; color: var(--text-strong);
+    }
+    .lab-head .lede { max-width: 780px; margin: 10px 0 0; color: var(--text-muted); }
+    .fake-banner {
+      display: inline-flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px;
+      border: 1px solid var(--gold-300); background: var(--gold-100); color: var(--gold-ink-strong);
+      border-radius: var(--radius-md); padding: 9px 13px; font-size: .82rem; font-weight: 600;
+    }
+    .decision {
+      margin-top: 16px; border-left: 4px solid var(--clay-300); background: var(--surface-raised);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
+      box-shadow: var(--shadow-sm); max-width: 860px;
+    }
+    .decision strong { color: var(--text-strong); }
+    .eyebrow {
+      display: inline-flex; border-radius: var(--radius-pill); background: var(--accent-sage-soft);
+      color: var(--sage-700); padding: 6px 12px; font-family: var(--font-mono);
+      font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .sim-note { font-size: .74rem; color: var(--text-subtle); font-style: italic; }
+    .mono { font-family: var(--font-mono); }
+
+    /* ---------- findings ---------- */
+    .findings { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 18px; }
+    .finding {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 12px 14px; box-shadow: var(--shadow-sm);
+      font-size: .88rem;
+    }
+    .finding b { display: block; color: var(--text-strong); margin-bottom: 3px; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); font-weight: 700; }
+
+    /* ---------- system map ---------- */
+    .section-h { margin: 44px 0 4px; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; color: var(--text-strong); }
+    .section-sub { margin: 4px 0 0; color: var(--text-muted); max-width: 780px; }
+    .map-card {
+      margin-top: 16px; background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-md); padding: 16px;
+    }
+    .map-toolbar { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-bottom: 10px; }
+    .bar-label { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); margin-right: 2px; }
+    .seg {
+      display: inline-flex; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+      background: var(--surface-raised); padding: 2px;
+    }
+    .seg button {
+      border: 0; background: transparent; border-radius: var(--radius-pill);
+      padding: 6px 12px; font-size: .8rem; font-weight: 600; color: var(--text-muted); min-height: 34px;
+    }
+    .seg button[aria-pressed="true"] { background: var(--stone-800); color: #fff; }
+    .map-legend { font-size: .74rem; color: var(--text-subtle); }
+    .map-scroll { overflow-x: auto; background: var(--surface-sunken); border-radius: var(--radius-lg); }
+    .map-canvas { position: relative; width: 980px; height: 620px; }
+    .map-canvas svg.edges { position: absolute; inset: 0; pointer-events: none; }
+    .map-canvas svg.edges path { fill: none; stroke: var(--stone-300); stroke-width: 2; transition: stroke .15s var(--ease-out); }
+    .map-canvas svg.edges path.read-edge { stroke-dasharray: 6 5; opacity: 0; }
+    .map-canvas.mode-m102 svg.edges path.read-edge { opacity: 1; stroke: var(--sky-500); }
+    .map-canvas svg.edges path.lit { stroke: var(--clay-400); stroke-width: 3; }
+    .map-node {
+      position: absolute; text-align: left; border: 1.5px solid var(--border-subtle);
+      background: var(--surface-raised); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      padding: 10px 12px; transition: border-color .15s var(--ease-out), box-shadow .15s var(--ease-out);
+    }
+    .map-node:hover { border-color: var(--clay-300); }
+    .map-node[aria-pressed="true"] { border-color: var(--clay-400); background: var(--clay-50); box-shadow: var(--shadow-md); }
+    .map-node.lit { border-color: var(--clay-400); box-shadow: 0 0 0 3px var(--clay-100); }
+    .map-node .n-kicker { display: block; font-family: var(--font-mono); font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); }
+    .map-node .n-name { display: block; font-family: var(--font-display); font-weight: 600; font-size: .95rem; color: var(--text-strong); line-height: 1.2; margin-top: 2px; }
+    .map-node .n-sub { display: block; font-size: .72rem; color: var(--text-muted); margin-top: 3px; }
+    .map-node .n-badge {
+      display: inline-flex; margin-top: 6px; border-radius: var(--radius-pill); padding: 2px 8px;
+      font-family: var(--font-mono); font-size: .6rem; font-weight: 700;
+      background: var(--stone-100); color: var(--stone-700);
+    }
+    .map-canvas.mode-m102 .map-node .n-badge.cache-badge { background: var(--sky-100); color: var(--sky-600); }
+    .live-tag { position: absolute; top: -9px; right: 10px; background: var(--sage-50); color: var(--sage-700); border: 1px solid var(--sage-300); border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: .56rem; font-weight: 700; letter-spacing: .06em; padding: 1px 7px; text-transform: uppercase; }
+    .mismatch-chip {
+      position: absolute; left: 24px; top: 206px; z-index: 3;
+      background: var(--gold-100); color: var(--gold-ink-strong); border: 1px solid var(--gold-300);
+      border-radius: var(--radius-pill); padding: 3px 10px; font-size: .68rem; font-weight: 700;
+    }
+    .map-canvas.mode-m102 .mismatch-chip { background: var(--sage-50); color: var(--sage-700); border-color: var(--sage-300); }
+    .map-side { display: grid; gap: 14px; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); margin-top: 14px; }
+    .map-explain { background: var(--bg-page); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; min-height: 132px; }
+    .map-explain h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; color: var(--text-strong); }
+    .map-explain p { margin: 7px 0 0; font-size: .9rem; }
+    .map-explain .path { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: .72rem; background: var(--stone-100); border-radius: 5px; padding: 2px 7px; color: var(--stone-700); }
+    .map-walk { background: var(--bg-page); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; }
+    .map-walk h3 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; color: var(--text-strong); }
+    .map-walk .step-count { font-family: var(--font-mono); font-size: .68rem; color: var(--text-subtle); }
+    .map-walk p { margin: 8px 0 10px; font-size: .9rem; min-height: 66px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 40px; padding: 8px 16px; border-radius: var(--radius-pill);
+      font-size: .88rem; font-weight: 600; border: 1px solid transparent;
+      transition: background .15s var(--ease-out), border-color .15s var(--ease-out);
+    }
+    .btn.primary { background: var(--clay-400); color: #fff; }
+    .btn.primary:hover { background: var(--clay-600); }
+    .btn.secondary { background: var(--surface-raised); border-color: var(--border); color: var(--text-strong); }
+    .btn.secondary:hover { border-color: var(--brand); }
+    .btn[disabled] { opacity: .45; cursor: default; }
+    .btn[disabled]:hover { background: var(--surface-raised); border-color: var(--border); }
+    .btn.primary[disabled]:hover { background: var(--clay-400); }
+
+    /* ---------- direction bar ---------- */
+    .controls {
+      position: sticky; top: 0; z-index: 40; margin: 26px -8px 0; padding: 10px 8px;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .direction-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .direction-button {
+      border: 1px solid var(--border-subtle); background: var(--surface-raised);
+      border-radius: 12px; padding: 8px 12px; text-align: left; min-height: 44px;
+      transition: border-color .15s var(--ease-out), background .15s var(--ease-out);
+    }
+    .direction-button strong { display: block; font-size: .88rem; color: var(--text-strong); }
+    .direction-button small { display: block; color: var(--text-subtle); font-size: .68rem; }
+    .direction-button[aria-pressed="true"] { border-color: var(--clay-300); background: var(--clay-50); }
+    .direction-button[aria-pressed="true"] strong { color: var(--clay-700); }
+    .toggles { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+    .toggle-group { display: inline-flex; align-items: center; gap: 6px; }
+
+    /* ---------- direction section ---------- */
+    .direction-head { margin: 26px 0 12px; }
+    .direction-head h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; color: var(--text-strong); letter-spacing: -.01em; }
+    .direction-head .philosophy { margin: 5px 0 0; color: var(--text-muted); max-width: 820px; }
+    .concept-chip { display: inline-flex; margin-left: 8px; vertical-align: 3px; border-radius: var(--radius-pill); background: var(--info-soft); color: var(--pop-navy); font-family: var(--font-mono); font-size: .58rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; }
+
+    /* ---------- stage: the app frame ---------- */
+    .stage {
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+      background: var(--bg-page); box-shadow: var(--shadow-lg); overflow: hidden;
+    }
+    .frame { display: flex; min-height: 620px; }
+    .rail {
+      width: 226px; flex-shrink: 0; margin: 14px; padding: 14px 12px;
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+      display: flex; flex-direction: column; gap: 2px; align-self: flex-start;
+      position: sticky; top: 76px;
+    }
+    .wordmark { display: inline-flex; align-items: center; gap: 7px; padding: 4px 8px 14px; }
+    .wordmark svg { display: block; }
+    .wordmark .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.28rem; color: var(--text-strong); display: inline-flex; }
+    .wordmark .word span { display: inline-block; }
+    .wordmark .word span:nth-child(1) { transform: translateY(-.06em) rotate(-3deg); }
+    .wordmark .word span:nth-child(2) { transform: translateY(.05em); }
+    .wordmark .word span:nth-child(3) { transform: translateY(-.04em) rotate(2deg); }
+    .wordmark .word span:nth-child(4) { transform: translateY(.06em) rotate(-2deg); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; border-radius: var(--radius-md);
+      padding: 10px 11px; font-size: .93rem; font-weight: 500; color: var(--text-muted);
+      background: transparent; border: 0; text-align: left; min-height: 44px; width: 100%;
+    }
+    .nav-item svg { color: var(--text-subtle); flex-shrink: 0; }
+    .nav-item.active { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .nav-item.active svg { color: var(--brand); }
+    .rail-section { margin-top: 16px; padding: 0 11px; font-family: var(--font-mono); font-size: .6rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+    .kid-row { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: var(--radius-md); font-size: .93rem; font-weight: 500; color: var(--text-muted); border: 0; background: transparent; text-align: left; min-height: 44px; }
+    .avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; flex-shrink: 0; }
+    .canvas { flex: 1; min-width: 0; padding: 20px clamp(16px, 3vw, 36px) 28px; display: flex; flex-direction: column; }
+    .canvas-inner { max-width: 720px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; flex: 1; }
+
+    /* recents sub-list (D2) */
+    .recents { margin: 2px 0 4px 14px; padding-left: 12px; border-left: 2px solid var(--stone-100); display: flex; flex-direction: column; gap: 1px; }
+    .recent-row {
+      display: flex; align-items: center; gap: 7px; border: 0; background: transparent;
+      border-radius: 8px; padding: 7px 8px; text-align: left; font-size: .82rem; color: var(--text-muted);
+      min-height: 38px; width: 100%;
+    }
+    .recent-row:hover { background: var(--bg-page); }
+    .recent-row[aria-pressed="true"] { background: var(--clay-50); color: var(--clay-700); font-weight: 700; }
+    .recent-row .r-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recent-row .r-when { font-family: var(--font-mono); font-size: .62rem; color: var(--text-subtle); flex-shrink: 0; }
+    .recent-row .r-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--clay-400); flex-shrink: 0; }
+    .new-chat-row { color: var(--clay-600); font-weight: 700; }
+
+    /* phone frame mode */
+    .stage.phone .frame { justify-content: center; background: var(--stone-100); padding: 22px 0; }
+    .stage.phone .rail { display: none; }
+    .stage.phone .canvas {
+      width: 390px; flex: none; background: var(--bg-page); padding: 0 0 14px;
+      border: 8px solid var(--stone-800); border-radius: 34px; overflow: hidden;
+      max-height: 780px; overflow-y: auto; position: relative;
+    }
+    .stage.phone .canvas-inner { max-width: none; padding: 12px 14px 0; }
+    .phone-bar { display: none; }
+    .stage.phone .phone-bar {
+      display: flex; position: sticky; top: 0; z-index: 5; align-items: center; justify-content: space-between;
+      height: 54px; padding: 0 12px; background: var(--bg-page);
+      border-bottom: 1px solid var(--border-subtle); gap: 8px;
+    }
+    .phone-bar .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.2rem; color: var(--text-strong); }
+    .phone-bar .bar-btn { border: 1px solid var(--border-subtle); background: var(--surface-raised); border-radius: var(--radius-pill); padding: 5px 11px; font-size: .76rem; font-weight: 700; color: var(--text-strong); min-height: 34px; }
+
+    /* ---------- chat pieces ---------- */
+    .chat-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .chat-top h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; color: var(--text-strong); flex: 1; }
+    .search-wrap { display: flex; align-items: center; gap: 6px; }
+    .search-input {
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); background: var(--surface-raised);
+      padding: 8px 14px; font: inherit; font-size: .85rem; min-height: 40px; width: min(230px, 100%);
+    }
+    .day-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .day-chip {
+      border: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text-muted);
+      border-radius: var(--radius-pill); padding: 5px 12px; font-size: .76rem; font-weight: 700; min-height: 34px;
+    }
+    .day-chip:hover { border-color: var(--brand); color: var(--text-strong); }
+    .transcript { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 430px; padding: 4px 2px 8px; scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { .transcript { scroll-behavior: auto; } }
+    .day-sep { display: flex; align-items: center; gap: 12px; margin: 10px 0 2px; }
+    .day-sep::before, .day-sep::after { content: ""; flex: 1; border-top: 1px solid var(--border-subtle); }
+    .day-sep span { font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-subtle); }
+    .msg { max-width: 86%; }
+    .msg .bubble { border-radius: var(--radius-lg); padding: 10px 14px; font-size: .92rem; }
+    .msg.user { align-self: flex-end; }
+    .msg.user .bubble { background: var(--clay-400); color: #fff; border-bottom-right-radius: 6px; }
+    .msg.homa { align-self: flex-start; }
+    .msg.homa .bubble { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-bottom-left-radius: 6px; }
+    .msg .meta { display: flex; gap: 6px; align-items: center; margin: 3px 4px 0; }
+    .msg.user .meta { justify-content: flex-end; }
+    .chan-chip {
+      display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-pill);
+      padding: 1px 8px; font-family: var(--font-mono); font-size: .6rem; font-weight: 700;
+      background: var(--sky-100); color: var(--sky-600); white-space: nowrap;
+    }
+    .chan-chip.brief { background: var(--gold-100); color: var(--gold-ink); }
+    .msg mark { background: var(--gold-300); border-radius: 3px; padding: 0 2px; }
+    .composer-zone { margin-top: 12px; }
+    .loop-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 9px; }
+    .loop-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--clay-200); background: var(--clay-50); color: var(--clay-700);
+      border-radius: var(--radius-pill); padding: 7px 13px; font-size: .8rem; font-weight: 600; min-height: 38px;
+    }
+    .loop-chip:hover { border-color: var(--clay-400); }
+    .loop-chip.quiet { border-color: var(--border-subtle); background: var(--surface-raised); color: var(--text-muted); }
+    .loop-chip.active { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .loop-chip.done { border-color: var(--border-subtle); background: var(--surface-sunken); color: var(--text-subtle); }
+    .context-chip {
+      display: inline-flex; align-items: center; gap: 7px; margin-bottom: 8px;
+      background: var(--sage-50); border: 1px solid var(--sage-300); color: var(--sage-700);
+      border-radius: var(--radius-pill); padding: 5px 6px 5px 12px; font-size: .78rem; font-weight: 700;
+    }
+    .context-chip button { border: 0; background: transparent; color: inherit; font-size: .95rem; padding: 4px 9px; min-width: 32px; min-height: 30px; border-radius: var(--radius-pill); }
+    .composer {
+      display: flex; align-items: center; gap: 9px; border: 1px solid var(--border-subtle);
+      background: var(--surface-raised); border-radius: var(--radius-pill); padding: 8px 8px 8px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .composer .hint { flex: 1; color: var(--text-subtle); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .composer .hint.filled { color: var(--text-strong); }
+    .composer .send {
+      width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--clay-100);
+      color: var(--clay-600); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sync-note { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; border-radius: var(--radius-pill); background: var(--accent-sage-soft); color: var(--sage-700); padding: 4px 11px; font-size: .74rem; font-weight: 700; }
+
+    /* journal (D3) */
+    .journal-list { display: flex; flex-direction: column; gap: 12px; }
+    .journal-page { padding: 16px 18px; }
+    .journal-page .j-day { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); }
+    .journal-page h4 { margin: 4px 0 6px; font-family: var(--font-display); font-weight: 600; font-size: 1.06rem; color: var(--text-strong); }
+    .journal-page p.j-sum { margin: 0 0 10px; font-size: .9rem; color: var(--text-muted); }
+    .journal-line { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; border-top: 1px dashed var(--stone-100); font-size: .87rem; }
+    .journal-line .who { font-weight: 700; color: var(--text-strong); flex-shrink: 0; }
+    .card {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    .back-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+    /* D2 new-chat hero (the Claude-style fresh start: greeting + centered composer) */
+    .newchat-hero {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px; padding: 24px 0 56px; min-height: 340px;
+    }
+    .newchat-hero .greet {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--font-display); font-weight: 700; letter-spacing: -.015em;
+      font-size: clamp(1.5rem, 3vw, 2.05rem); color: var(--text-strong);
+    }
+    .newchat-hero .greet svg { flex-shrink: 0; }
+    .newchat-hero .composer {
+      width: min(560px, 100%); box-shadow: var(--shadow-md); padding: 12px 10px 12px 20px;
+    }
+    .newchat-hero .suggest-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+    /* D2 phone overlay */
+    .chats-overlay {
+      position: absolute; inset: 0; z-index: 20; background: color-mix(in srgb, var(--stone-900) 42%, transparent);
+      display: flex; align-items: flex-end;
+    }
+    .chats-sheet {
+      width: 100%; background: var(--surface-raised); border-radius: 22px 22px 0 0;
+      padding: 16px 16px 22px; max-height: 72%; overflow-y: auto; box-shadow: var(--shadow-lg);
+    }
+    .chats-sheet h4 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--text-strong); }
+
+    /* toast */
+    .toast {
+      position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+      background: var(--stone-800); color: #fff; border-radius: var(--radius-pill);
+      padding: 10px 18px; font-size: .88rem; font-weight: 600; box-shadow: var(--shadow-lg);
+      z-index: 90; max-width: min(520px, 88vw); text-align: center;
+    }
+
+    /* ---------- critique blocks ---------- */
+    .direction-review {
+      display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start; margin-top: 14px; background: var(--surface-raised);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      padding: 16px 18px; box-shadow: var(--shadow-sm);
+    }
+    .steal-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+    .steal-chip {
+      border: 1px solid var(--border-subtle); background: var(--bg-page); color: var(--text-body);
+      border-radius: var(--radius-pill); padding: 7px 13px; font-size: .8rem; font-weight: 600; min-height: 38px;
+    }
+    .steal-chip[aria-pressed="true"] { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .skip-line { margin-top: 10px; font-size: .84rem; color: var(--text-muted); }
+    .skip-line b { color: var(--gold-ink); font-family: var(--font-mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+    .winner-button {
+      border: 1px solid var(--brand); background: var(--brand); color: #fff;
+      border-radius: var(--radius-pill); padding: 10px 18px; font-weight: 700; font-size: .88rem;
+      white-space: nowrap; min-height: 44px;
+    }
+    .winner-button[aria-pressed="true"] { background: var(--sage-600); border-color: var(--sage-600); }
+    .review-label { font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); }
+
+    /* ---------- questions & reply ---------- */
+    .questions { margin-top: 40px; }
+    .q-card { padding: 16px 18px; margin-top: 12px; }
+    .q-card h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--text-strong); }
+    .q-card .q-why { margin: 5px 0 10px; font-size: .85rem; color: var(--text-muted); }
+    .q-card .rec { font-family: var(--font-mono); font-size: .64rem; color: var(--sage-700); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-left: 6px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .answer-chip {
+      border: 1px solid var(--border); background: var(--surface-raised); color: var(--text-strong);
+      border-radius: var(--radius-pill); padding: 8px 15px; font-size: .87rem; font-weight: 600; min-height: 42px;
+    }
+    .answer-chip:hover { border-color: var(--brand); }
+    .answer-chip[aria-pressed="true"] { border-color: var(--sage-500); background: var(--sage-50); color: var(--sage-700); }
+    .notes-area { width: 100%; min-height: 90px; margin-top: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 14px; font: inherit; background: var(--surface-raised); resize: vertical; }
+    .reply-box { background: var(--stone-800); color: var(--stone-100); border-radius: var(--radius-lg); padding: 16px 18px; margin-top: 12px; }
+    .reply-box pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: .8rem; line-height: 1.55; }
+
+    .wiring { margin-top: 40px; border-top: 1px solid var(--border-subtle); padding-top: 18px; font-size: .86rem; color: var(--text-muted); }
+    .wiring code { font-family: var(--font-mono); font-size: .78rem; background: var(--stone-100); border-radius: 5px; padding: 1px 5px; color: var(--stone-700); overflow-wrap: anywhere; }
+    .wiring h2 { font-size: 1.05rem; color: var(--text-strong); font-family: var(--font-display); }
+    .wiring ul { padding-left: 20px; }
+    .wiring li { margin: 4px 0; }
+
+    @media (max-width: 860px) {
+      .frame { flex-direction: column; }
+      .rail { display: none; }
+      .direction-review { grid-template-columns: 1fr; }
+      .map-side { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="lab">
+
+  <header class="lab-head">
+    <span class="eyebrow">Comparison lab · first round</span>
+    <h1>How should past conversation work?</h1>
+    <p class="lede">Two things in one lab. First, a clickable map of how messages, sessions, episodes, and memories actually fit together in Homa today, and why two devices can show different chats right now. Then four genuinely different product shapes for finding and continuing past conversation, all on the same fake family, so you can judge the structure instead of the paint.</p>
+    <p class="fake-banner">
+      <span>Every person, message, and record here is fake.</span>
+      <span>No real family data is loaded.</span>
+      <span>No product code or route was changed.</span>
+    </p>
+    <div class="decision">
+      <strong>The core decision:</strong> when a parent wants yesterday's conversation (which may have happened on another device, over text, or in email), what does she navigate: one synced thread with search, a list of chats in the sidebar, a separate readable journal, or just Homa herself?
+      <br><span class="sim-note">Core task held constant in every direction: it is Sunday on the laptop. Find Thursday night's plan for Maya (made on the phone) and Friday's text about scissors, then pick that plan back up.</span>
+    </div>
+  </header>
+
+  <section class="findings" aria-label="Project findings">
+    <div class="finding"><b>Standing ruling</b>Founder direction 2026-07-10: one family chat, not a ChatGPT-style thread list; day separators plus a fresh model session each morning. This lab exists because that ruling is being re-examined; a winner that contradicts it must update the ruling register.</div>
+    <div class="finding"><b>The record already exists</b>Every message on every channel (web, text, email, Homa-initiated) is written server-side to conversation_messages the moment it happens. The devices-disagree pain is a render-source gap (each browser draws from its own cache until M1-02), not missing data.</div>
+    <div class="finding"><b>Sessions are not chats</b>A session is the model's working memory: per device and channel, rotated after 4am. Episodes are the server's conversation grouping (messages that belong together, across channels). Any UI that lists raw sessions will show meaningless splits.</div>
+    <div class="finding"><b>Memory lives outside threads</b>The family context block, saved memories, and the recall search are rebuilt into every fresh session. Continuing a conversation never technically requires reopening it; the question is what the parent needs to SEE.</div>
+  </section>
+
+  <section aria-label="System map">
+    <h2 class="section-h">The system under every direction</h2>
+    <p class="section-sub">Click any box for a plain-words explanation. Everything on this map is live in production today. The toggle shows the one thing changing with M1-02: where your screen reads from.</p>
+
+    <div class="map-card">
+      <div class="map-toolbar">
+        <span class="toggle-group"><span class="bar-label">Screens read from</span>
+          <span class="seg" role="group" aria-label="Render source">
+            <button type="button" data-mapmode="today" aria-pressed="true">Today · device cache</button>
+            <button type="button" data-mapmode="m102" aria-pressed="false">After M1-02 · the record</button>
+          </span>
+        </span>
+        <span class="map-legend">solid line: how words flow in · dashed line: what your screen reads</span>
+      </div>
+      <div class="map-scroll">
+        <div class="map-canvas mode-today" id="map-canvas">
+          <svg class="edges" viewBox="0 0 980 620" aria-hidden="true">
+            <path id="e-lap-sess"   d="M 200 66  C 260 66, 250 180, 300 192"/>
+            <path id="e-pho-sess"   d="M 200 158 C 250 158, 250 200, 300 212"/>
+            <path id="e-sms-sess"   d="M 200 280 C 250 280, 250 240, 300 236"/>
+            <path id="e-eml-sess"   d="M 200 372 C 255 372, 250 262, 300 256"/>
+            <path id="e-dis-sess"   d="M 200 468 C 265 468, 250 285, 300 270"/>
+            <path id="e-sess-msg"   d="M 505 232 C 550 232, 540 150, 585 138"/>
+            <path id="e-msg-epi"    d="M 690 205 C 690 235, 690 250, 690 268"/>
+            <path id="e-msg-mem"    d="M 640 205 C 600 300, 600 380, 640 428"/>
+            <path id="e-msg-rec"    d="M 800 120 C 850 120, 850 200, 872 218"/>
+            <path id="e-mem-rec"    d="M 800 470 C 870 470, 880 380, 890 330"/>
+            <path id="e-rec-sess"   d="M 872 300 C 700 560, 450 480, 390 300" />
+            <path class="read-edge" d="M 585 90  C 420 40,  300 40,  200 58"/>
+            <path class="read-edge" d="M 585 110 C 420 90,  300 120, 200 158"/>
+          </svg>
+
+          <span class="mismatch-chip" id="mismatch-chip">These two can disagree today</span>
+
+          <button type="button" class="map-node" data-node="laptop" style="left:24px; top:24px; width:176px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Where you talk</span>
+            <span class="n-name">Laptop browser</span>
+            <span class="n-badge cache-badge" data-cache-badge>Shows: this device's cache</span>
+          </button>
+          <button type="button" class="map-node" data-node="phone" style="left:24px; top:116px; width:176px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Where you talk</span>
+            <span class="n-name">Phone browser</span>
+            <span class="n-badge cache-badge" data-cache-badge>Shows: this device's cache</span>
+          </button>
+          <button type="button" class="map-node" data-node="sms" style="left:24px; top:238px; width:176px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Where you talk</span>
+            <span class="n-name">Texting</span>
+            <span class="n-sub">same Homa, over SMS</span>
+          </button>
+          <button type="button" class="map-node" data-node="email" style="left:24px; top:330px; width:176px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Where you talk</span>
+            <span class="n-name">Email</span>
+            <span class="n-sub">reply to any Homa email</span>
+          </button>
+          <button type="button" class="map-node" data-node="dispatch" style="left:24px; top:424px; width:176px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Homa reaches out</span>
+            <span class="n-name">Scheduled moments</span>
+            <span class="n-sub">morning brief · evening check-in</span>
+          </button>
+
+          <button type="button" class="map-node" data-node="sessions" style="left:300px; top:160px; width:205px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Working memory</span>
+            <span class="n-name">Model sessions</span>
+            <span class="n-sub">one per surface · fresh each morning after 4am · ids like <span class="mono">wrun_…</span></span>
+            <span class="n-badge">Disposable on purpose</span>
+          </button>
+
+          <button type="button" class="map-node" data-node="messages" style="left:585px; top:60px; width:210px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">The permanent record</span>
+            <span class="n-name">Every message</span>
+            <span class="n-sub"><span class="mono">conversation_messages</span> · every word, every channel, written as it happens</span>
+          </button>
+
+          <button type="button" class="map-node" data-node="episodes" style="left:585px; top:268px; width:210px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Threading</span>
+            <span class="n-name">Episodes + open loops</span>
+            <span class="n-sub">messages that belong together, across channels · questions still waiting on you</span>
+          </button>
+
+          <button type="button" class="map-node" data-node="memories" style="left:585px; top:428px; width:210px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Distilled</span>
+            <span class="n-name">Family memories</span>
+            <span class="n-sub">facts worth keeping forever, saved through one guarded path</span>
+          </button>
+
+          <button type="button" class="map-node" data-node="recall" style="left:872px; top:218px; width:96px; min-height:120px;">
+            <span class="live-tag">Live today</span>
+            <span class="n-kicker">Flows back</span>
+            <span class="n-name">Context + recall</span>
+            <span class="n-sub">into every new session</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="map-side">
+        <div class="map-explain" id="map-explain" aria-live="polite">
+          <h3>Click a box to unpack it</h3>
+          <p>Start with "Model sessions": that is the word that has been causing the confusion. The mode toggle above shows why your laptop and phone disagreed this week.</p>
+        </div>
+        <div class="map-walk">
+          <h3>Follow one message <span class="step-count" id="walk-count">step 0 of 6</span></h3>
+          <p id="walk-text">Walk one real-shaped moment through the whole system: a Friday text about Maya's scissors. Six steps, no magic.</p>
+          <button type="button" class="btn secondary" id="walk-prev" disabled>Back</button>
+          <button type="button" class="btn primary" id="walk-next">Start the walk</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="controls" aria-label="Direction and view controls">
+    <div class="direction-bar" role="group" aria-label="Choose a direction to preview">
+      <span class="bar-label">Compare</span>
+      <button type="button" class="direction-button" data-dir="thread" aria-pressed="true"><strong>1 · One thread, everywhere</strong><small>sync it, then add wayfinding</small></button>
+      <button type="button" class="direction-button" data-dir="recents" aria-pressed="false"><strong>2 · Recents under Ask</strong><small>chats become a sidebar list</small></button>
+      <button type="button" class="direction-button" data-dir="journal" aria-pressed="false"><strong>3 · Chat + journal</strong><small>talk today, read the past</small></button>
+      <button type="button" class="direction-button" data-dir="carried" aria-pressed="false"><strong>4 · Homa carries it</strong><small>no navigation, just ask</small></button>
+    </div>
+    <div class="toggles">
+      <span class="toggle-group"><span class="bar-label">Frame</span>
+        <span class="seg" role="group" aria-label="Device frame">
+          <button type="button" data-frame="desktop" aria-pressed="true">Laptop</button>
+          <button type="button" data-frame="phone" aria-pressed="false">Phone 390</button>
+        </span>
+      </span>
+      <span class="toggle-group" id="d3-placement-group" hidden><span class="bar-label">History lives</span>
+        <span class="seg" role="group" aria-label="History placement">
+          <button type="button" data-place="ask" aria-pressed="true">Under Ask</button>
+          <button type="button" data-place="binder" aria-pressed="false">In the Binder</button>
+        </span>
+      </span>
+    </div>
+  </nav>
+
+  <section id="direction-host"></section>
+
+  <section class="questions" aria-label="Build-changing questions">
+    <h2 class="section-h">Five questions that change the build</h2>
+    <p class="section-sub">Each answer changes routes, data modeling, or the ruling register, not just styling. Pick what feels right; the reply below assembles itself.</p>
+    <div id="questions-host"></div>
+  </section>
+
+  <section aria-label="Notes and reply">
+    <h2 class="section-h">Your notes</h2>
+    <p class="section-sub">Anything the chips could not say: what clicked, what made you wince, what is missing.</p>
+    <textarea id="notes" class="notes-area" placeholder="Type freely. This lands in the reply below."></textarea>
+
+    <h2 class="section-h">Assembled reply</h2>
+    <p class="section-sub">Copy this and paste it back into chat. It updates as you pick.</p>
+    <div class="reply-box"><pre id="reply-text"></pre></div>
+    <p style="margin-top:12px"><button type="button" class="btn primary" id="copy-reply">Copy the reply</button> <span id="copy-status" class="sim-note" role="status"></span></p>
+  </section>
+
+  <footer class="wiring">
+    <h2>Wiring note (for the build after you choose)</h2>
+    <p>No real application code was touched by this lab. Likely integration paths, verified in the repository:</p>
+    <ul>
+      <li>Chat surface: <code>apps/web/app/app/page.tsx</code> + <code>chat-client.tsx</code>; render cache and 4am rotation in <code>apps/web/app/app/chat-storage.ts</code>; day separators in <code>transcript-days.ts</code>. Mobile twins: <code>apps/mobile/src/features/chat/chat-session.tsx</code>, <code>apps/mobile/src/lib/chat-storage.ts</code>.</li>
+      <li>Sidebar and nav: <code>apps/web/components/dashboard/sidebar.tsx</code>, <code>sidebar-nav.tsx</code> (APP_NAV_ITEMS), phone drawer in <code>mobile-nav.tsx</code>. Directions 2 and 3 add rows or sub-rows here.</li>
+      <li>The server record every direction reads: <code>apps/web/agent/hooks/persist-conversation.ts</code> → <code>apps/web/lib/conversation-log.ts</code>; threading in <code>apps/web/lib/conversation-continuity/</code> (episodes, deliveries, open loops); web deliveries in <code>apps/web/agent/hooks/continuity-web-delivery.ts</code>. Channel adapters feeding the same record: <code>apps/web/agent/channels/telnyx.ts</code> (SMS) and <code>apps/web/agent/channels/email.ts</code> (email replies via Resend inbound, reply-to <code>homa@mail.thankshoma.com</code>). Tables: <code>supabase/migrations/20260709121000_conversation_messages.sql</code>, <code>20260711143707_conversation_continuity.sql</code>.</li>
+      <li>Memory and context: <code>apps/web/lib/learning/save-memory.ts</code>, <code>apps/web/agent/tools/recall.ts</code>, <code>apps/web/agent/instructions/family-context.ts</code>.</li>
+      <li>Policy: the one-thread ruling lives in the build log (2026-07-10 evening) and the founder-ruling register (<code>docs/homa-planning/journeys/10-reconciliation.md</code> §5). A direction 2 or 3 winner requires a ruling update there, logged in <code>docs/homa-planning/build-log.md</code>.</li>
+    </ul>
+    <p>Reuse versus new: direction 1 is M1-02 (Postgres becomes the render source) plus an in-thread search over existing RLS-readable rows; no schema change. Direction 2 needs episode titles (new column or projection: a schema decision), a scoped transcript read, and a sidebar list; it also re-opens the composer-scoping question. Direction 3 needs a read-only day-page projection over existing rows plus a "pick this back up" context injection (the continuity context pattern already exists). Direction 4 is the smallest: open loops are already tracked; it needs loop chips above the composer and a catch-up prompt. Every new read path goes through the isolation guard (<code>pnpm check:isolation</code>) before shipping.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ */
+/* Fake dataset: one family, reused by every direction. All fake.     */
+/* ------------------------------------------------------------------ */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+const PARENT_NAME = "Elena";
+
+/* The real product's empty-state suggestion chips (chat-client.tsx). */
+const SUGGESTIONS = [
+  "What should we work on this week?",
+  "Make a worksheet for today",
+  "We had a rough morning, help me reset"
+];
+
+const EPISODES = {
+  scissors:  { title: "Maya's scissors week",       when: "Thu·Fri", chan: "web + text", unread: true },
+  worksheet: { title: "Butterfly counting sheet",   when: "Sat",     chan: "web",        unread: false },
+  brief:     { title: "Friday morning brief",       when: "Fri",     chan: "from Homa",  unread: false },
+  leo:       { title: "Leo's reading check-in",     when: "Today",   chan: "web",        unread: false, open: true },
+  started:   { title: "Getting started",            when: "Jul 5",   chan: "web",        unread: false }
+};
+
+/* channel: which surface the message happened on. */
+const DAYS = [
+  { key: "thu", label: "Thursday, July 9", title: "Planned Maya's week", summary: "Scissors practice plus butterfly counting. Two sheets went to the Binder.", items: [
+    { who: "user", channel: "phone", ep: "scissors", text: "What should Maya work on this week?" },
+    { who: "homa", channel: "phone", ep: "scissors", text: "She has been loving scissors work, so that can be the spine: a few minutes of cut-along-the-line practice a day, plus butterfly counting on your walks. Want me to make a cutting sheet?" },
+    { who: "user", channel: "phone", ep: "scissors", text: "Yes, and something with butterflies" },
+    { who: "homa", channel: "phone", ep: "scissors", text: "Done, two pages are in the Binder: a cutting sheet and a butterfly count-and-circle page. I will check in Friday to hear how the scissors went." }
+  ]},
+  { key: "fri", label: "Friday, July 10", title: "The scissors milestone", summary: "You texted a photo: Maya cut along the whole line. Marked as getting there.", items: [
+    { who: "homa", channel: "dispatch", ep: "brief", text: "Good morning Elena. One small thing for today: five minutes of cutting practice with Maya, the sheet is in the Binder. Leo is two chapters from finishing his book." },
+    { who: "user", channel: "sms", ep: "scissors", text: "[Photo] Maya cut along the whole line today!" },
+    { who: "homa", channel: "sms", ep: "scissors", text: "That is a real milestone: she went from little snips to a full line in one week. I marked cutting along a line as getting there. Worth a small celebration tonight." }
+  ]},
+  { key: "sat", label: "Saturday, July 11", title: "A counting worksheet", summary: "The evening check-in went out by email; you replied from your inbox. A butterfly count-to-25 worksheet went to the Binder.", items: [
+    { who: "user", channel: "laptop", ep: "worksheet", text: "Can you make a counting worksheet for tomorrow?" },
+    { who: "homa", channel: "laptop", ep: "worksheet", text: "Made: butterfly count-to-25, in the Binder next to the cutting sheet. She counted to 23 on the porch this week, so this one stretches just past that." },
+    { who: "user", channel: "email", ep: "worksheet", text: "Quiet day otherwise. Maya counted the stairs up to 25 tonight without help." },
+    { who: "homa", channel: "email", ep: "worksheet", text: "That is past her porch record, noted. Tomorrow's sheet will feel just right then." }
+  ]},
+  { key: "today", label: "Today", title: "Leo's reading check-in", summary: "Leo's reading check-in is mid-way. One question is waiting.", items: [
+    { who: "homa", channel: "laptop", ep: "leo", text: "Quick one about Leo when you have a minute: does he ask why and how questions, and stay on topic when you answer?" },
+    { who: "user", channel: "laptop", ep: "leo", text: "Getting there" },
+    { who: "homa", channel: "laptop", ep: "leo", text: "Marked. Next: does he retell what happened in a story in his own words?" }
+  ]}
+];
+
+const CHANNEL_CHIP = {
+  laptop:   { label: "on your laptop", cls: "" },
+  phone:    { label: "from your phone", cls: "" },
+  sms:      { label: "texted", cls: "" },
+  email:    { label: "by email", cls: "" },
+  dispatch: { label: "Homa's morning brief", cls: "brief" }
+};
+
+/* ------------------------------------------------------------------ */
+/* System map: explanations and the walk                              */
+/* ------------------------------------------------------------------ */
+const NODE_EXPLAIN = {
+  laptop: {
+    title: "Laptop browser",
+    body: "One of the places you talk to Homa. Today it also keeps its own private copy of what the transcript looks like (the render cache), which is exactly why a laptop and a phone can show different history right now. After M1-02 it reads the shared record instead.",
+    path: "apps/web/app/app/page.tsx · localStorage homa-chat-<user>"
+  },
+  phone: {
+    title: "Phone browser",
+    body: "The same web app on your phone. Same account, same server record, but its OWN render cache and its own model session. That is the whole mystery from the two screenshots: neither device was wrong, they were each showing their own cache.",
+    path: "apps/web/app/app/chat-storage.ts (the mobile app twin: apps/mobile/src/lib/chat-storage.ts)"
+  },
+  sms: {
+    title: "Texting",
+    body: "Homa over SMS. Texts run in their own session, but every message still lands in the same permanent record and threads into the same episodes, so a text on Friday can continue Thursday's web conversation.",
+    path: "apps/web/agent/channels/telnyx.ts"
+  },
+  email: {
+    title: "Email",
+    body: "Reply to any Homa email (the evening check-in, the morning brief, an invite) and the reply becomes a real agent turn; Homa answers back in the same email thread. Only a family's own registered address gets through; strangers are dropped. Replying 'stop' turns evening check-ins off without waking the agent.",
+    path: "apps/web/agent/channels/email.ts · reply-to homa@mail.thankshoma.com + signed reply+ aliases"
+  },
+  dispatch: {
+    title: "Scheduled moments",
+    body: "Homa-initiated turns: the morning brief, the evening check-in. Each runs as its own short session and gets recorded like everything else. They are why the record shows sessions you never started.",
+    path: "apps/web/agent/schedules/dispatch.ts"
+  },
+  sessions: {
+    title: "Model sessions (working memory)",
+    body: "What Homa is actively holding in her head: one per surface, and each morning after 4am a fresh one starts. Sessions are disposable on purpose: nothing important lives ONLY here, so rotating them costs nothing. They are plumbing, not chats.",
+    path: "apps/web/app/app/chat-storage.ts · ids like wrun_… in conversation_messages.session_id"
+  },
+  messages: {
+    title: "Every message (the permanent record)",
+    body: "The family's full transcript: every word from every surface, written server-side the moment it happens, before Homa even replies. This is the source of truth. Both of your screenshots this week already live here, side by side.",
+    path: "agent/hooks/persist-conversation.ts → public.conversation_messages"
+  },
+  episodes: {
+    title: "Episodes + open loops",
+    body: "The server's idea of one conversation: messages that belong together, even across surfaces (Thursday's web plan and Friday's text join the same episode). Open loops track questions Homa asked that nobody answered yet, so a reply days later still lands right.",
+    path: "lib/conversation-continuity/ → public.conversation_episodes, conversation_open_loops"
+  },
+  memories: {
+    title: "Family memories",
+    body: "Distilled facts worth keeping forever, like Maya loves butterflies. Saved through one guarded path with a safety scan, a per-family budget, and dedupe. Small on purpose: this is what Homa knows, not everything ever said.",
+    path: "lib/learning/save-memory.ts → public.family_memories"
+  },
+  recall: {
+    title: "Context + recall",
+    body: "What every brand-new session starts with: the family context block (who you are, your kids, saved memories) plus a recall tool that searches the whole record on demand. This is why a fresh morning session does not feel like amnesia.",
+    path: "agent/instructions/family-context.ts · agent/tools/recall.ts"
+  }
+};
+
+const WALK_STEPS = [
+  { text: "Friday, 12:40pm. You text: \"Maya cut along the whole line today!\" It is just a text message so far.", nodes: ["sms"], edges: [] },
+  { text: "The texting session wakes up: Homa's working memory for this surface. If it is a new day, it is a fresh session, and that is fine.", nodes: ["sms", "sessions"], edges: ["e-sms-sess"] },
+  { text: "Before Homa even replies, the persist hook writes your message into the permanent record. Nothing shown to you depends on a device cache for this part.", nodes: ["sessions", "messages"], edges: ["e-sess-msg"] },
+  { text: "Continuity files it into the same episode as Thursday night's plan, because it continues that conversation, even though Thursday happened on the web and this is a text.", nodes: ["messages", "episodes"], edges: ["e-msg-epi"] },
+  { text: "That night, the learning pass distills a memory: scissors, cutting along a line, getting there. The transcript stays in the record; the fact graduates to memories.", nodes: ["messages", "memories"], edges: ["e-msg-mem"] },
+  { text: "Sunday morning, a fresh session starts on ANY device already knowing it: the context block carries the memory in, and recall can pull the exact texts back on demand.", nodes: ["memories", "recall", "sessions"], edges: ["e-mem-rec", "e-rec-sess"] }
+];
+
+/* ------------------------------------------------------------------ */
+/* State                                                              */
+/* ------------------------------------------------------------------ */
+const state = {
+  dir: "thread",
+  frame: "desktop",
+  mapMode: "today",
+  walkStep: 0,
+  winner: null,
+  steals: {},          // key: dir index string -> true
+  answers: {},         // qid -> label
+  notes: "",
+  d2Episode: "scissors",
+  d2Overlay: false,
+  d2Draft: "",         // hero composer draft (suggestion chip tapped)
+  d3Placement: "ask",
+  d3View: "chat",      // chat | history
+  d3Context: null,     // context chip text
+  d3Expanded: {},      // day key -> replay expanded
+  d4Log: [],           // extra simulated exchanges appended in D4
+  d4Picked: null,      // which loop chip was tapped (visible state change)
+  searchQuery: ""
+};
+
+/* ------------------------------------------------------------------ */
+/* Shared frame chrome                                                */
+/* ------------------------------------------------------------------ */
+const NAV_ICONS = {
+  ask: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>',
+  progress: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
+  planner: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
+  binder: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
+  tasks: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  history: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>'
+};
+
+function wordmarkHtml() {
+  return '<span class="wordmark"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z" fill="var(--brand)"/><circle cx="17.4" cy="26" r="4.8" fill="#fff"/><circle cx="30.6" cy="26" r="4.8" fill="#fff"/><circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A"/><circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A"/></svg>' +
+    '<span class="word"><span>H</span><span>o</span><span>m</span><span>a</span></span></span>';
+}
+
+/* Decorative rail (directions 1 and 4); interactiveExtras injects rows. */
+function railHtml(extras) {
+  const dead = ' tabindex="-1" aria-hidden="true"';
+  return '<div class="rail">' + wordmarkHtml() +
+    '<button type="button" class="nav-item active"' + dead + '>' + NAV_ICONS.ask + 'Ask</button>' +
+    (extras && extras.underAsk ? extras.underAsk : "") +
+    '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.progress + 'Progress</button>' +
+    '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.planner + 'Planner</button>' +
+    '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.binder + 'Binder</button>' +
+    (extras && extras.binderRow ? extras.binderRow : "") +
+    '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.tasks + 'Tasks</button>' +
+    (extras && extras.afterTasks ? extras.afterTasks : "") +
+    '<span class="rail-section">My kids</span>' +
+    '<button type="button" class="kid-row"' + dead + '><span class="avatar" style="width:26px;height:26px;font-size:.72rem;background:var(--clay-100);color:var(--clay-700)">M</span>Maya</button>' +
+    '<button type="button" class="kid-row"' + dead + '><span class="avatar" style="width:26px;height:26px;font-size:.72rem;background:var(--sky-100);color:var(--sky-600)">L</span>Leo</button>' +
+    '</div>';
+}
+
+function phoneBarHtml(extraBtn) {
+  return '<div class="phone-bar">' +
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone-800)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>' +
+    '<span class="word">Homa</span>' +
+    (extraBtn || '<span class="avatar" style="width:28px;height:28px;font-size:.72rem;background:var(--clay-100);color:var(--clay-700)" aria-hidden="true">E</span>') +
+    "</div>";
+}
+
+function composerHtml(hint, filled) {
+  return '<div class="composer" aria-hidden="true">' +
+    '<span class="hint' + (filled ? " filled" : "") + '">' + esc(hint || "Tell Homa about your day...") + "</span>" +
+    '<span class="send"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></span>' +
+    "</div>";
+}
+
+function chanChipHtml(channel, currentDevice) {
+  /* A chip appears when the message happened somewhere other than the
+     device you are looking at. */
+  if (channel === currentDevice) return "";
+  const c = CHANNEL_CHIP[channel];
+  return '<span class="chan-chip ' + c.cls + '">' + esc(c.label) + "</span>";
+}
+
+function markText(text, q) {
+  if (!q) return esc(text);
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  let out = "", i = 0;
+  while (true) {
+    const hit = lower.indexOf(needle, i);
+    if (hit === -1) { out += esc(text.slice(i)); break; }
+    out += esc(text.slice(i, hit)) + "<mark>" + esc(text.slice(hit, hit + q.length)) + "</mark>";
+    i = hit + q.length;
+  }
+  return out;
+}
+
+/* showChip: the persona review's "tag lint" fix. A chip renders only
+   when the surface CHANGES mid-transcript, not under every bubble. */
+function messageHtml(item, currentDevice, q, showChip) {
+  if (q && item.text.toLowerCase().indexOf(q.toLowerCase()) === -1) return "";
+  const chip = showChip === false ? "" : chanChipHtml(item.channel, currentDevice);
+  return '<div class="msg ' + item.who + '">' +
+    '<div class="bubble">' + markText(item.text, q) + "</div>" +
+    (chip ? '<div class="meta">' + chip + "</div>" : "") +
+    "</div>";
+}
+
+/* Walks a day's items and decides which get a chip: the first message
+   from a non-local surface, and any message where the surface changes. */
+function chipFlags(items, currentDevice) {
+  let prev = currentDevice;
+  return items.map((item) => {
+    const show = item.channel !== currentDevice && item.channel !== prev;
+    prev = item.channel;
+    return show;
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Directions                                                         */
+/* ------------------------------------------------------------------ */
+const DIRECTIONS = {
+  thread: {
+    name: "One thread, everywhere",
+    philosophy: "The standing ruling, completed: one continuous family chat that is finally identical on every device, with search and day-jumping so the past is findable without ever becoming a list of chats.",
+    steals: ["Channel chips on messages from other surfaces", "Search inside the one thread", "Day-jump chips at the top"],
+    skip: "Parallel topics braid into one stream. A planning conversation, a worksheet request, and daily chatter interleave; finding \"the plan\" two months from now still means searching, never opening a tidy page."
+  },
+  recents: {
+    name: "Recents under Ask",
+    philosophy: "Conversations become things you can see and manage: a titled list in the sidebar, jump into any, continue any, start new ones freely. The ChatGPT shape, bet on parent control.",
+    steals: ["Auto-titled conversations, no naming chores", "A dot when a chat moved on another surface", "Fresh-chat hero: greeting + centered composer"],
+    skip: "Every message now carries a where-does-this-go decision, and replying in the wrong thread makes Homa look forgetful (the exact failure class the one-thread ruling was written to prevent). Picking this direction means updating that ruling on purpose."
+  },
+  journal: {
+    name: "Chat + journal",
+    philosophy: "Talking and re-reading are different moods: chat stays one clean today-thread, and the past becomes a readable journal of day pages you browse, search, and pull forward with one tap.",
+    steals: ["Read-only day pages with a one-line summary", "Pick this back up: past context into today's composer", "Every channel merged into the day it happened"],
+    skip: "Two surfaces to learn instead of one, and the seam between reading yesterday and replying today has to be earned: if the day summaries are weak, the journal becomes a place conversations go to be lost."
+  },
+  carried: {
+    name: "Homa carries it",
+    philosophy: "No navigation at all: open questions surface as chips above the composer, arriving on a new device gets a catch-up offer, and the past is something you ask for, not somewhere you go.",
+    steals: ["Open-loop chips above the composer", "Catch-up offer when you arrive mid-story", "Asking for the past in plain words"],
+    skip: "Opaque by design: she has to trust that recall is flawless, because there is no way to SEE the record herself. One bad miss (the microwave class of failure) and the whole surface feels like it is hiding things."
+  }
+};
+
+function taskBanner() {
+  return '<p class="sim-note" style="margin:0 0 10px">Try it here: find Thursday\u2019s plan and Friday\u2019s text, then pick the scissors plan back up. Concept only, nothing here is built.</p>';
+}
+
+/* ---------- D1 · One thread, everywhere ---------- */
+function renderThread() {
+  const device = state.frame === "desktop" ? "laptop" : "phone";
+  const q = state.searchQuery;
+  let body = "";
+  for (const day of DAYS) {
+    const flags = chipFlags(day.items, device);
+    let dayMsgs = "";
+    day.items.forEach((item, i) => { dayMsgs += messageHtml(item, device, q, flags[i]); });
+    if (dayMsgs) {
+      body += '<div class="day-sep" data-day="' + day.key + '"><span>' + esc(day.label) + "</span></div>" + dayMsgs;
+    }
+  }
+  if (!body) body = '<p class="sim-note" style="align-self:center;margin-top:40px">Nothing matches that search.</p>';
+  /* "Older..." answers the where-does-last-month-live question the
+     four day chips otherwise leave hanging (persona review). */
+  const dayChips = DAYS.map(d =>
+    '<button type="button" class="day-chip" data-jump="' + d.key + '">' + esc(d.label.split(",")[0]) + "</button>"
+  ).join("") + '<button type="button" class="day-chip" data-older="1">Older\u2026</button>';
+  return '' +
+    '<div class="chat-top">' +
+      '<h3>Ask</h3>' +
+      '<span class="sync-note">Same thread on every device</span>' +
+    "</div>" +
+    '<div class="chat-top">' +
+      '<div class="day-chips" role="group" aria-label="Jump to a day">' + dayChips + "</div>" +
+      '<div class="search-wrap"><input type="search" class="search-input" id="thread-search" placeholder="Search this thread" value="' + esc(q) + '" aria-label="Search this thread"></div>' +
+    "</div>" +
+    '<div class="transcript" id="thread-scroll">' + body + "</div>" +
+    '<div class="composer-zone">' + composerHtml() + "</div>";
+}
+
+function timeGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 4 || hour >= 17) return "Evening";
+  if (hour < 12) return "Morning";
+  return "Afternoon";
+}
+
+/* ---------- D2 · Recents under Ask ---------- */
+function recentsListHtml(interactive) {
+  const rows = Object.keys(EPISODES).map(id => {
+    const e = EPISODES[id];
+    return '<button type="button" class="recent-row" data-ep="' + id + '" aria-pressed="' + (state.d2Episode === id) + '">' +
+      (e.unread ? '<span class="r-dot" title="Updated on another surface"></span>' : "") +
+      '<span class="r-title">' + esc(e.title) + "</span>" +
+      '<span class="r-when">' + esc(e.when) + "</span>" +
+      "</button>";
+  }).join("");
+  return '<div class="recents"' + (interactive ? "" : ' aria-hidden="true"') + '>' +
+    '<button type="button" class="recent-row new-chat-row" data-newchat="1">+ New chat</button>' +
+    rows +
+    '<button type="button" class="recent-row" data-allchats="1">All chats\u2026</button>' +
+    "</div>";
+}
+
+function renderRecents() {
+  const device = state.frame === "desktop" ? "laptop" : "phone";
+  const epId = state.d2Episode;
+  const overlay = state.d2Overlay ?
+    '<div class="chats-overlay" id="chats-overlay">' +
+      '<div class="chats-sheet" role="dialog" aria-modal="true" aria-label="Your chats" id="chats-sheet">' +
+        "<h4>Your chats</h4>" + recentsListHtml(true) +
+        '<p style="margin:10px 0 0"><button type="button" class="btn secondary" id="close-overlay">Close</button></p>' +
+      "</div>" +
+    "</div>" : "";
+
+  /* Fresh chat: the Claude-shape hero, in Homa's clothes. Greeting +
+     mark centered, the composer mid-screen, the product's real
+     suggestion chips underneath. No transcript, no bottom composer. */
+  if (!epId) {
+    const chips = SUGGESTIONS.map(s =>
+      '<button type="button" class="day-chip" data-suggest="' + esc(s) + '">' + esc(s) + "</button>"
+    ).join("");
+    return '' +
+      '<div class="newchat-hero">' +
+        '<div class="greet">' +
+          '<svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z" fill="var(--brand)"/><circle cx="17.4" cy="26" r="4.8" fill="#fff"/><circle cx="30.6" cy="26" r="4.8" fill="#fff"/><circle cx="18.3" cy="26.7" r="2.2" fill="#221E1A"/><circle cx="31.5" cy="26.7" r="2.2" fill="#221E1A"/></svg>' +
+          '<span>' + esc(timeGreeting()) + ", " + esc(PARENT_NAME) + "</span>" +
+        "</div>" +
+        composerHtml(state.d2Draft || "Tell Homa about your day...", !!state.d2Draft) +
+        '<div class="suggest-row" role="group" aria-label="Ways to start">' + chips + "</div>" +
+      "</div>" +
+      overlay;
+  }
+
+  const ep = EPISODES[epId];
+  let body = "";
+  for (const day of DAYS) {
+    const inDay = day.items.filter(i => i.ep === epId);
+    if (!inDay.length) continue;
+    const flags = chipFlags(inDay, device);
+    body += '<div class="day-sep"><span>' + esc(day.label) + "</span></div>";
+    inDay.forEach((item, i) => { body += messageHtml(item, device, "", flags[i]); });
+  }
+  if (!body) body = '<p class="sim-note" style="align-self:center;margin-top:40px">This conversation started before this fake dataset.</p>';
+  return '' +
+    '<div class="chat-top">' +
+      '<h3>' + esc(ep.title) + "</h3>" +
+      (epId !== "leo" ? '<button type="button" class="day-chip" data-backtoday="1">Back to today</button>' : "") +
+    "</div>" +
+    '<div class="transcript">' + body + "</div>" +
+    '<div class="composer-zone">' + composerHtml("Reply in: " + ep.title) + "</div>" +
+    overlay;
+}
+
+/* ---------- D3 · Chat + journal ---------- */
+function renderJournal() {
+  const device = state.frame === "desktop" ? "laptop" : "phone";
+  if (state.d3View === "history") {
+    /* Persona review fixes: the button sits under the summary (the
+       summary already sold her), and the replayed messages collapse
+       behind one tap so the page is a shelf, not a re-read. */
+    const pages = DAYS.slice(0, 3).map(day => {
+      const flags = chipFlags(day.items, "none");
+      const lines = day.items.map((i, idx) =>
+        '<div class="journal-line"><span class="who">' + (i.who === "homa" ? "Homa" : "You") + "</span><span>" + esc(i.text) + "</span>" +
+        (flags[idx] ? '<span style="margin-left:auto">' + chanChipHtml(i.channel, "none") + "</span>" : "") +
+        "</div>"
+      ).join("");
+      const open = !!state.d3Expanded[day.key];
+      return '<article class="card journal-page">' +
+        '<span class="j-day">' + esc(day.label) + "</span>" +
+        "<h4>" + esc(day.title) + "</h4>" +
+        '<p class="j-sum">' + esc(day.summary) + "</p>" +
+        '<p style="margin:0 0 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+          '<button type="button" class="btn secondary" data-pickup="' + day.key + '">Pick this back up</button>' +
+          '<button type="button" class="day-chip" data-expand="' + day.key + '" aria-expanded="' + open + '">' + (open ? "Hide that day\u2019s messages" : "Show that day\u2019s messages") + "</button>" +
+        "</p>" +
+        (open ? '<div class="journal-lines">' + lines + "</div>" : "") +
+        "</article>";
+    }).join("");
+    return '<div class="back-row"><button type="button" class="day-chip" data-d3back="1">\u2190 Back to today</button><h3 style="margin:0;font-family:var(--font-display);font-size:1.1rem;color:var(--text-strong)">History</h3></div>' +
+      '<div class="chat-top"><div class="search-wrap"><input type="search" class="search-input" placeholder="Search everything" aria-label="Search everything"></div></div>' +
+      '<div class="journal-list">' + pages + "</div>";
+  }
+  const today = DAYS[3];
+  const flags = chipFlags(today.items, device);
+  let body = '<div class="day-sep"><span>Today</span></div>';
+  today.items.forEach((item, i) => { body += messageHtml(item, device, "", flags[i]); });
+  const ctx = state.d3Context ?
+    '<span class="context-chip">Continuing: ' + esc(state.d3Context) + ' <button type="button" data-clearctx="1" aria-label="Stop continuing this">\u00d7</button></span>' : "";
+  /* Phone copy drops the desktop-only placement note (persona review:
+     never describe a screen she is not holding). */
+  const whereNote = state.frame === "phone"
+    ? "Chat holds only today. Everything older lives in History."
+    : "Chat holds only today. Everything older lives in History" + (state.d3Placement === "ask" ? " (the row under Ask in the rail)." : " (a section of the Binder).");
+  return '' +
+    '<div class="chat-top"><h3>Ask</h3>' +
+      '<button type="button" class="day-chip" data-d3history="1">' + "History" + "</button>" +
+    "</div>" +
+    '<p class="sim-note" style="margin:0 0 8px">' + whereNote + "</p>" +
+    '<div class="transcript">' + body + "</div>" +
+    '<div class="composer-zone">' + ctx + composerHtml(state.d3Context ? "About Thursday\u2019s plan..." : undefined, !!state.d3Context) + "</div>";
+}
+
+/* ---------- D4 · Homa carries it ---------- */
+function renderCarried() {
+  const device = state.frame === "desktop" ? "laptop" : "phone";
+  const today = DAYS[3];
+  /* Catch-up copy: attributes the milestone correctly (persona review:
+     "while you were on your phone, we marked" read as news from
+     elsewhere and cost a re-read) and drops the time-of-day greeting. */
+  let body = '<div class="msg homa"><div class="bubble">Picking up from Friday: you texted Maya\u2019s scissors milestone and I marked it. Want the short version of the week?</div><div class="meta"><span class="chan-chip brief">catch-up offer</span></div></div>';
+  body += '<div class="day-sep"><span>Today</span></div>';
+  const flags = chipFlags(today.items, device);
+  today.items.forEach((item, i) => { body += messageHtml(item, device, "", flags[i]); });
+  for (const extra of state.d4Log) {
+    body += '<div class="msg ' + extra.who + '"><div class="bubble">' + esc(extra.text) + "</div></div>";
+  }
+  /* Tapped pills visibly become something (persona review: a button
+     that does not notice being tapped makes her doubt the tap). */
+  const leoChip = state.d4Picked === "leo"
+    ? '<button type="button" class="loop-chip done" data-loop="leo">Done: Leo\u2019s reading check-in</button>'
+    : '<button type="button" class="loop-chip" data-loop="leo">Finish: Leo\u2019s reading check-in</button>';
+  const scissorsChip = state.d4Picked === "scissors"
+    ? '<button type="button" class="loop-chip active" data-loop="scissors">Continuing: Maya\u2019s scissors week</button>'
+    : '<button type="button" class="loop-chip" data-loop="scissors">Pick up: Maya\u2019s scissors week</button>';
+  return '' +
+    '<div class="chat-top"><h3>Ask</h3></div>' +
+    '<div class="transcript" id="d4-scroll">' + body + "</div>" +
+    '<div class="composer-zone">' +
+      '<div class="loop-chips" role="group" aria-label="Open threads Homa is holding">' +
+        leoChip + scissorsChip +
+        '<button type="button" class="loop-chip quiet" data-loop="catchup">Catch me up</button>' +
+      "</div>" +
+      composerHtml(state.d4Picked === "scissors" ? "About Maya\u2019s scissors week..." : undefined, state.d4Picked === "scissors") +
+    "</div>";
+}
+
+/* ------------------------------------------------------------------ */
+/* Critique + host rendering                                          */
+/* ------------------------------------------------------------------ */
+function critiqueHtml(dirId) {
+  const d = DIRECTIONS[dirId];
+  const chips = d.steals.map((s, i) => {
+    const key = dirId + ":" + i;
+    return '<button type="button" class="steal-chip" data-steal="' + key + '" aria-pressed="' + !!state.steals[key] + '">' + esc(s) + "</button>";
+  }).join("");
+  return '<div class="direction-review">' +
+    "<div>" +
+      '<span class="review-label">Worth stealing</span>' +
+      '<div class="steal-row">' + chips + "</div>" +
+      '<p class="skip-line"><b>Skip if</b> ' + esc(d.skip) + "</p>" +
+    "</div>" +
+    '<button type="button" class="winner-button" data-winner="' + dirId + '" aria-pressed="' + (state.winner === dirId) + '">This is the one</button>' +
+    "</div>";
+}
+
+function frameHtml(dirId) {
+  let inner = "", railExtras = null, phoneExtra = null;
+  if (dirId === "thread") inner = renderThread();
+  if (dirId === "recents") {
+    inner = renderRecents();
+    railExtras = { underAsk: recentsListHtml(true) };
+    phoneExtra = '<button type="button" class="bar-btn" id="open-chats">Chats</button>';
+  }
+  if (dirId === "journal") {
+    inner = renderJournal();
+    const histActive = state.d3View === "history";
+    const histRow = '<button type="button" class="nav-item' + (histActive ? " active" : "") + '" data-d3history-nav="1" style="padding-left:34px;font-size:.85rem;min-height:38px">' + NAV_ICONS.history + "History</button>";
+    railExtras = state.d3Placement === "ask" ? { underAsk: histRow } : { binderRow: histRow };
+  }
+  if (dirId === "carried") inner = renderCarried();
+
+  return '<div class="stage ' + (state.frame === "phone" ? "phone" : "desktop") + '">' +
+    '<div class="frame">' +
+      railHtml(railExtras) +
+      '<div class="canvas">' +
+        phoneBarHtml(phoneExtra) +
+        '<div class="canvas-inner">' + taskBanner() + inner + "</div>" +
+      "</div>" +
+    "</div>" +
+  "</div>";
+}
+
+function renderDirection() {
+  const d = DIRECTIONS[state.dir];
+  const idx = Object.keys(DIRECTIONS).indexOf(state.dir) + 1;
+  document.getElementById("d3-placement-group").hidden = state.dir !== "journal";
+  document.getElementById("direction-host").innerHTML =
+    '<div class="direction-head">' +
+      "<h2>" + idx + " \u00b7 " + esc(d.name) + '<span class="concept-chip">Concept, not built</span></h2>' +
+      '<p class="philosophy">' + esc(d.philosophy) + "</p>" +
+    "</div>" +
+    '<div id="frame-host">' + frameHtml(state.dir) + "</div>" +
+    '<div id="critique-host">' + critiqueHtml(state.dir) + "</div>";
+  wireCritique();
+  wireFrame();
+}
+
+/* Critique buttons live OUTSIDE #frame-host and survive in-frame
+   re-renders, so they are wired once per direction render here. Wiring
+   them inside wireFrame stacked a duplicate listener on every
+   re-render, making one click toggle several times. */
+function wireCritique() {
+  const host = document.getElementById("critique-host");
+  host.querySelectorAll("[data-steal]").forEach(b =>
+    b.addEventListener("click", () => {
+      const key = b.dataset.steal;
+      state.steals[key] = !state.steals[key];
+      b.setAttribute("aria-pressed", String(!!state.steals[key]));
+      assembleReply();
+    }));
+  host.querySelectorAll("[data-winner]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.winner = state.winner === b.dataset.winner ? null : b.dataset.winner;
+      b.setAttribute("aria-pressed", String(state.winner === b.dataset.winner));
+      assembleReply();
+      if (state.winner) toast("Winner noted: " + DIRECTIONS[state.winner].name);
+    }));
+}
+
+function rerenderFrameOnly() {
+  document.getElementById("frame-host").innerHTML = frameHtml(state.dir);
+  wireFrame();
+}
+
+/* ------------------------------------------------------------------ */
+/* Questions                                                          */
+/* ------------------------------------------------------------------ */
+const QUESTIONS = [
+  {
+    id: "sync",
+    title: "Does cross-device sync ship before any history UI?",
+    why: "M1-02 (screens read the server record) fixes the devices-disagree pain on its own and every direction here assumes it. Building history UI on top of today's device caches means building it twice.",
+    rec: 0,
+    options: ["Yes: sync first, then the chosen direction", "Together in one push", "No: build on today's caches now"]
+  },
+  {
+    id: "unit",
+    title: "When past conversation is shown, what is one \u201cchat\u201d?",
+    why: "Days need no new naming model (the transcript already groups by day). Episodes need titles and status but match how continuity already threads things. Raw sessions would expose meaningless 4am splits.",
+    rec: 2,
+    options: ["Days", "Episodes", "Hybrid: days to read, open episodes to resume", "Sessions (shown for honesty, not recommended)"]
+  },
+  {
+    id: "parallel",
+    title: "Can a parent keep two conversations open on purpose?",
+    why: "Real parallel threads change the episode model, composer scoping, and the continuity ledger, and they re-open the wrong-thread failure class. Archive-on-new-chat (today's law) keeps one live thread.",
+    rec: null,
+    options: ["No: one live thread, new chat archives", "Yes: real parallel threads she can return to"]
+  },
+  {
+    id: "placement",
+    title: "Where does past conversation live?",
+    why: "Inside the chat means no new routes. A sidebar list changes the rail and the phone drawer. A separate surface adds a route and a tab-level decision.",
+    rec: null,
+    options: ["Inside the chat (search + jump)", "Sidebar under Ask", "Its own surface (History / journal)", "Nowhere visible: Homa carries it"]
+  },
+  {
+    id: "smsmerge",
+    title: "Do texted and emailed messages render fully inside the web transcript?",
+    why: "The rows already exist server-side with family visibility (SMS and email replies both persist through the same ledger), so a full merge is a read-path change. Summarizing instead needs a new projection; hiding them keeps those channels private-feeling but makes the record look incomplete.",
+    rec: 0,
+    options: ["Yes: full merge with a chip (\u201ctexted\u201d, \u201cby email\u201d)", "Summarized only (\u201cyou texted about\u2026\u201d)", "Not shown, only remembered"]
+  }
+];
+
+function renderQuestions() {
+  document.getElementById("questions-host").innerHTML = QUESTIONS.map(q => {
+    const chips = q.options.map((label, i) =>
+      '<button type="button" class="answer-chip" data-q="' + q.id + '" data-a="' + esc(label) + '" aria-pressed="' + (state.answers[q.id] === label) + '">' +
+        esc(label) + (q.rec === i ? '<span class="rec">rec</span>' : "") +
+      "</button>"
+    ).join("");
+    return '<div class="card q-card">' +
+      "<h3>" + esc(q.title) + "</h3>" +
+      '<p class="q-why">' + esc(q.why) + "</p>" +
+      '<div class="chip-row" role="group" aria-label="' + esc(q.title) + '">' + chips + "</div>" +
+    "</div>";
+  }).join("");
+}
+
+/* ------------------------------------------------------------------ */
+/* Reply assembly                                                     */
+/* ------------------------------------------------------------------ */
+function assembleReply() {
+  const lines = ["UI direction feedback", ""];
+  lines.push("Winning direction: " + (state.winner ? DIRECTIONS[state.winner].name : "none yet"));
+  const steals = [];
+  for (const key in state.steals) {
+    if (!state.steals[key]) continue;
+    const [dirId, i] = key.split(":");
+    steals.push(DIRECTIONS[dirId].steals[Number(i)] + " (" + DIRECTIONS[dirId].name + ")");
+  }
+  lines.push("Details to steal: " + (steals.length ? steals.join("; ") : "none"));
+  lines.push("");
+  let any = false;
+  for (const q of QUESTIONS) {
+    if (state.answers[q.id]) { lines.push("- " + q.title + ": " + state.answers[q.id]); any = true; }
+  }
+  if (!any) lines.push("- (no build questions answered yet)");
+  if (state.notes.trim()) { lines.push(""); lines.push("Notes: " + state.notes.trim()); }
+  document.getElementById("reply-text").textContent = lines.join("\n");
+}
+
+/* ------------------------------------------------------------------ */
+/* Toast                                                              */
+/* ------------------------------------------------------------------ */
+let toastTimer = null;
+function toast(msg) {
+  let el = document.getElementById("lab-toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "lab-toast";
+    el.className = "toast";
+    el.setAttribute("role", "status");
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = "none"; }, 3200);
+}
+
+/* ------------------------------------------------------------------ */
+/* System map wiring                                                  */
+/* ------------------------------------------------------------------ */
+const mapCanvas = document.getElementById("map-canvas");
+
+function setMapMode(mode) {
+  state.mapMode = mode;
+  mapCanvas.classList.toggle("mode-today", mode === "today");
+  mapCanvas.classList.toggle("mode-m102", mode === "m102");
+  document.querySelectorAll("[data-mapmode]").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.mapmode === mode)));
+  document.querySelectorAll("[data-cache-badge]").forEach(b => {
+    b.textContent = mode === "today" ? "Shows: this device's cache" : "Shows: the family record";
+  });
+  document.getElementById("mismatch-chip").textContent =
+    mode === "today" ? "These two can disagree today" : "Always in sync";
+}
+
+function clearMapHighlights() {
+  mapCanvas.querySelectorAll(".map-node").forEach(n => n.classList.remove("lit"));
+  mapCanvas.querySelectorAll("svg.edges path").forEach(p => p.classList.remove("lit"));
+}
+
+function explainNode(id) {
+  const info = NODE_EXPLAIN[id];
+  document.getElementById("map-explain").innerHTML =
+    "<h3>" + esc(info.title) + "</h3><p>" + esc(info.body) + '</p><span class="path">' + esc(info.path) + "</span>";
+  mapCanvas.querySelectorAll(".map-node").forEach(n =>
+    n.setAttribute("aria-pressed", String(n.dataset.node === id)));
+}
+
+function setWalkStep(step) {
+  state.walkStep = step;
+  clearMapHighlights();
+  const count = document.getElementById("walk-count");
+  const text = document.getElementById("walk-text");
+  const prev = document.getElementById("walk-prev");
+  const next = document.getElementById("walk-next");
+  count.textContent = "step " + step + " of " + WALK_STEPS.length;
+  if (step === 0) {
+    text.textContent = "Walk one real-shaped moment through the whole system: a Friday text about Maya's scissors. Six steps, no magic.";
+    prev.disabled = true;
+    next.textContent = "Start the walk";
+    return;
+  }
+  const s = WALK_STEPS[step - 1];
+  text.textContent = s.text;
+  for (const n of s.nodes) mapCanvas.querySelector('[data-node="' + n + '"]').classList.add("lit");
+  for (const e of s.edges) { const el = document.getElementById(e); if (el) el.classList.add("lit"); }
+  prev.disabled = false;
+  next.textContent = step === WALK_STEPS.length ? "Start over" : "Next";
+}
+
+document.querySelectorAll("[data-mapmode]").forEach(b =>
+  b.addEventListener("click", () => setMapMode(b.dataset.mapmode)));
+mapCanvas.addEventListener("click", e => {
+  const node = e.target.closest(".map-node");
+  if (node) { clearMapHighlights(); explainNode(node.dataset.node); }
+});
+document.getElementById("walk-next").addEventListener("click", () =>
+  setWalkStep(state.walkStep >= WALK_STEPS.length ? 0 : state.walkStep + 1));
+document.getElementById("walk-prev").addEventListener("click", () =>
+  setWalkStep(Math.max(0, state.walkStep - 1)));
+
+/* ------------------------------------------------------------------ */
+/* Direction + frame wiring                                           */
+/* ------------------------------------------------------------------ */
+document.querySelectorAll(".direction-button").forEach(b =>
+  b.addEventListener("click", () => {
+    state.dir = b.dataset.dir;
+    state.searchQuery = "";
+    state.d2Overlay = false;
+    state.d2Draft = "";
+    document.querySelectorAll(".direction-button").forEach(x =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    renderDirection();
+  }));
+
+document.querySelectorAll("[data-frame]").forEach(b =>
+  b.addEventListener("click", () => {
+    state.frame = b.dataset.frame;
+    state.d2Overlay = false;
+    document.querySelectorAll("[data-frame]").forEach(x =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    rerenderFrameOnly();
+  }));
+
+document.querySelectorAll("[data-place]").forEach(b =>
+  b.addEventListener("click", () => {
+    state.d3Placement = b.dataset.place;
+    document.querySelectorAll("[data-place]").forEach(x =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    rerenderFrameOnly();
+  }));
+
+function wireFrame() {
+  const host = document.getElementById("frame-host");
+
+  /* D1 */
+  const search = host.querySelector("#thread-search");
+  if (search) {
+    search.addEventListener("input", () => {
+      state.searchQuery = search.value;
+      const scroller = host.querySelector("#thread-scroll");
+      const device = state.frame === "desktop" ? "laptop" : "phone";
+      let body = "";
+      for (const day of DAYS) {
+        let dayMsgs = "";
+        for (const item of day.items) dayMsgs += messageHtml(item, device, state.searchQuery);
+        if (dayMsgs) body += '<div class="day-sep" data-day="' + day.key + '"><span>' + esc(day.label) + "</span></div>" + dayMsgs;
+      }
+      scroller.innerHTML = body || '<p class="sim-note" style="align-self:center;margin-top:40px">Nothing matches that search.</p>';
+      if (state.searchQuery.toLowerCase().includes("scissor")) {
+        toast("Found it: Thursday's plan and Friday's text, one thread, both devices.");
+      }
+    });
+  }
+  host.querySelectorAll("[data-jump]").forEach(b =>
+    b.addEventListener("click", () => {
+      const sep = host.querySelector('.day-sep[data-day="' + b.dataset.jump + '"]');
+      if (sep) sep.scrollIntoView({ block: "start" });
+    }));
+  host.querySelectorAll("[data-older]").forEach(b =>
+    b.addEventListener("click", () =>
+      toast("Concept: a date picker over the full record, back to the family's first day.")));
+
+  /* D2 */
+  host.querySelectorAll("[data-ep]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.d2Episode = b.dataset.ep;
+      if (b.dataset.ep === "scissors") EPISODES.scissors.unread = false;
+      state.d2Overlay = false;
+      state.d2Draft = "";
+      rerenderFrameOnly();
+      if (b.dataset.ep === "scissors") toast("Opened Maya's scissors week: Thursday's plan and Friday's text in one place.");
+    }));
+  host.querySelectorAll("[data-newchat]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.d2Episode = null;
+      state.d2Overlay = false;
+      state.d2Draft = "";
+      rerenderFrameOnly();
+      toast("New chat started. Nothing was erased.");
+    }));
+  host.querySelectorAll("[data-suggest]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.d2Draft = b.dataset.suggest;
+      rerenderFrameOnly();
+      toast("Concept: this becomes the first message of the new chat.");
+    }));
+  host.querySelectorAll("[data-allchats]").forEach(b =>
+    b.addEventListener("click", () => toast("Concept: a full, searchable list of every conversation.")));
+  host.querySelectorAll("[data-backtoday]").forEach(b =>
+    b.addEventListener("click", () => { state.d2Episode = "leo"; rerenderFrameOnly(); }));
+  const openChats = host.querySelector("#open-chats");
+  if (openChats) openChats.addEventListener("click", () => {
+    state.d2Overlay = true;
+    rerenderFrameOnly();
+    const sheet = document.getElementById("chats-sheet");
+    if (sheet) {
+      const first = sheet.querySelector("button");
+      if (first) first.focus();
+    }
+  });
+  const closeOverlay = host.querySelector("#close-overlay");
+  if (closeOverlay) closeOverlay.addEventListener("click", () => {
+    state.d2Overlay = false;
+    rerenderFrameOnly();
+    const opener = host.querySelector("#open-chats");
+    if (opener) opener.focus();
+  });
+  const overlay = host.querySelector("#chats-overlay");
+  if (overlay) {
+    overlay.addEventListener("click", e => {
+      if (e.target === overlay) {
+        state.d2Overlay = false;
+        rerenderFrameOnly();
+        const opener = host.querySelector("#open-chats");
+        if (opener) opener.focus();
+      }
+    });
+    overlay.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        state.d2Overlay = false;
+        rerenderFrameOnly();
+        const opener = host.querySelector("#open-chats");
+        if (opener) opener.focus();
+      }
+    });
+  }
+
+  /* D3 */
+  host.querySelectorAll("[data-d3history],[data-d3history-nav]").forEach(b =>
+    b.addEventListener("click", () => { state.d3View = "history"; rerenderFrameOnly(); }));
+  host.querySelectorAll("[data-d3back]").forEach(b =>
+    b.addEventListener("click", () => { state.d3View = "chat"; rerenderFrameOnly(); }));
+  host.querySelectorAll("[data-expand]").forEach(b =>
+    b.addEventListener("click", () => {
+      const key = b.dataset.expand;
+      state.d3Expanded[key] = !state.d3Expanded[key];
+      rerenderFrameOnly();
+      const again = host.querySelector('[data-expand="' + key + '"]');
+      if (again) again.focus();
+    }));
+  host.querySelectorAll("[data-pickup]").forEach(b =>
+    b.addEventListener("click", () => {
+      const day = DAYS.find(d => d.key === b.dataset.pickup);
+      state.d3Context = day.key === "thu" ? "Thursday's plan for Maya" : day.label + "'s conversation";
+      state.d3View = "chat";
+      rerenderFrameOnly();
+      toast("Composer ready: continuing " + state.d3Context + ".");
+    }));
+  host.querySelectorAll("[data-clearctx]").forEach(b =>
+    b.addEventListener("click", () => { state.d3Context = null; rerenderFrameOnly(); }));
+
+  /* D4 */
+  host.querySelectorAll("[data-loop]").forEach(b =>
+    b.addEventListener("click", () => {
+      const kind = b.dataset.loop;
+      if (kind === "leo") {
+        state.d4Picked = "leo";
+        state.d4Log = [
+          { who: "user", text: "Yes, he retells stories in his own words" },
+          { who: "homa", text: "Marked, and that closes Leo's reading check-in. He is building a real narrator's memory." }
+        ];
+      } else if (kind === "scissors") {
+        state.d4Picked = "scissors";
+        state.d4Log = [
+          { who: "user", text: "Pick up Maya's scissors week" },
+          { who: "homa", text: "Here is where we left off: Thursday we planned daily cut-along-the-line practice, and Friday you texted that she cut a whole line, so it is marked getting there. A natural next step is cutting simple curves. Want a curves sheet for tomorrow?" }
+        ];
+      } else {
+        state.d4Picked = null;
+        state.d4Log = [
+          { who: "user", text: "Catch me up" },
+          { who: "homa", text: "Since you were last here: Friday's brief went out, you texted Maya's scissors milestone (marked getting there), and Saturday we made a butterfly count-to-25 sheet. Still open: one question in Leo's reading check-in." }
+        ];
+      }
+      rerenderFrameOnly();
+      const scroller = host.querySelector("#d4-scroll");
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+      toast("Simulated: Homa pulled this from the record (recall + open loops).");
+    }));
+}
+
+/* ------------------------------------------------------------------ */
+/* Questions + notes + copy wiring                                    */
+/* ------------------------------------------------------------------ */
+function wireQuestions() {
+  document.querySelectorAll("[data-q]").forEach(b =>
+    b.addEventListener("click", () => {
+      const q = b.dataset.q, a = b.dataset.a;
+      state.answers[q] = state.answers[q] === a ? undefined : a;
+      document.querySelectorAll('[data-q="' + q + '"]').forEach(x =>
+        x.setAttribute("aria-pressed", String(state.answers[q] === x.dataset.a)));
+      assembleReply();
+    }));
+}
+
+document.getElementById("notes").addEventListener("input", e => {
+  state.notes = e.target.value;
+  assembleReply();
+});
+
+document.getElementById("copy-reply").addEventListener("click", async () => {
+  const text = document.getElementById("reply-text").textContent;
+  const status = document.getElementById("copy-status");
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = "Copied.";
+  } catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      status.textContent = "Copied (fallback).";
+    } catch {
+      status.textContent = "Copy blocked by the browser: select the text above and copy it by hand.";
+    }
+  }
+  setTimeout(() => { status.textContent = ""; }, 4000);
+});
+
+/* ------------------------------------------------------------------ */
+/* Boot                                                               */
+/* ------------------------------------------------------------------ */
+setMapMode("today");
+setWalkStep(0);
+renderDirection();
+renderQuestions();
+wireQuestions();
+assembleReply();
+</script>
+</body>
+</html>

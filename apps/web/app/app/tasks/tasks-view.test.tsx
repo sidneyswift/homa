@@ -157,10 +157,15 @@ describe("TaskEditOverlay", () => {
     const html = renderOverlay(BRIEF_TASK);
 
     assert.match(html, /<h2 id="task-edit-title"[^>]*>Morning research brief<\/h2>/);
+    // One sentence on what it does, the card's own description; the old
+    // three-sentence you-decide explainer stays gone (founder ruling
+    // 2026-07-12).
     assert.match(
       html,
-      /Homa decides what it says\. You decide the days, the time, and how it reaches you\. The switch on its card turns it off any time\./,
+      /One thing Homa looked into for your kids, and why it matters\./,
     );
+    assert.doesNotMatch(html, /Homa decides what it says/);
+    assert.doesNotMatch(html, /The switch on its card/);
 
     // Schedule fields present, prefilled.
     assert.match(html, /Which days\?/);

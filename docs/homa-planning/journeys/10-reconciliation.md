@@ -145,6 +145,7 @@ References must qualify colliding labels as global D3 age range, global D8 casin
 | `nav-labels-simplified` | 2026-07-12 | App nav tabs read "Ask", "Progress", "Planner", "Tasks". Supersedes the D-ht-4 tab name and the "Ask HOMA" and "Week planner" nav labels, for the nav only; page titles keep the fuller names. | `docs/homa-planning/build-log.md` § App nav labels simplified |
 | `task-recipient-scoping` | 2026-07-12 | Only the account owner (the family's first member) is auto-subscribed to scheduled task texts: the morning brief, the evening check-in, and custom tasks. An invited adult is never auto-subscribed and opts in by creating their own task on the web tab, in chat, or over SMS. Supersedes the multi-parent v0 every-adult task fan-out. | `docs/homa-planning/build-log.md` § Task texts reach one adult |
 | `desktop-context-switcher-top-right` | 2026-07-12 | On desktop the kid context switcher is an avatar at the app's top right (multi-kid families, on pages the selection affects); the desktop sidebar lists nav and account only. Supersedes the sidebar placement from the 2026-07-10 one-kid-list ruling. The phone bar and drawer are unchanged. | `docs/homa-planning/build-log.md` § Founder ruling: the desktop kid switcher is a top-right avatar |
+| `chat-privacy-per-adult` | 2026-07-12 | Conversations are per-adult: an adult sees only their own chats with Homa on every channel, plus messages Homa addressed to them. No family member reads another adult's chat, in the transcript, in search, or through recall. All other family state stays shared (progress, memories, materials, planner, tasks); distilled shared facts may cross adults, raw chat lines may not. | `docs/homa-planning/build-log.md` § Founder ruling: chats are per-adult, everything else stays family-shared |
 
 ### Open founder decisions
 
@@ -156,6 +157,7 @@ These are unresolved policy, not implementation latitude:
 | DM7 | Keep waitlist email use invite and launch scoped, or ask for ongoing-content consent before nurture email is sent. | `docs/homa-planning/14-marketing-demand-engine.md` §10 |
 | Direct printer integration | Approve or reject the proposed reversal of the current no-direct-printer scope. | `docs/homa-planning/send-to-printer-plan.md` § Founder decision queue |
 | Private minors' media | Decide whether child photos and other minors' media are private by default despite global D7's general artifact-sharing rule. | `docs/homa-planning/build-log.md` § Voice and text via Telnyx |
+| Voice transcript visibility | Decide whether voice-call transcripts and their recall follow `chat-privacy-per-adult` (per-adult) or remain family-readable; `voice-retention` set storage and retention, not visibility. | `docs/homa-planning/build-log.md` § Founder ruling: chats are per-adult, everything else stays family-shared |
 
 ## 6. What remains (senior PM capstone, after decisions D1–D4)
 

@@ -191,14 +191,10 @@ export function TaskEditOverlay({
 
         {builtIn && task ? (
           <>
-            {/* Reader gate 2026-07-12: state the fixed part and the
-                changeable part straight, and show where the off switch
-                lives. The card's own description is not repeated here
-                because the day picker makes its cadence editable. */}
-            <p className="mt-2 text-sm text-body">
-              Homa decides what it says. You decide the days, the time, and how
-              it reaches you. The switch on its card turns it off any time.
-            </p>
+            {/* One sentence on what the task does, the card's own
+                description (founder ruling 2026-07-12; it replaced a
+                three-sentence you-decide explainer). */}
+            <p className="mt-1 text-sm text-muted">{builtIn.description}</p>
             <div className="mt-4">
               <BuiltInScheduleForm
                 task={task}

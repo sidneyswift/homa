@@ -3,6 +3,182 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · One thread, refined: the Chats synthesis (round three)
+
+Founder feedback on the one-thread navigation lab: the moments panel
+wins but is named "Chats" (moments is ambiguous); combine it with the
+timeline rail, the Homa-navigates pills, and the source tags on
+bubbles. Per the exploring-ui-directions converge step, one refined
+direction now lives at
+plans/2026-07-12-one-thread-refined.html, superseding the two
+comparison labs from earlier today (2026-07-12-chat-history-directions
+.html and 2026-07-12-one-thread-navigation-directions.html, kept as
+history).
+
+The synthesized shape, all navigating ONE continuous per-adult thread:
+
+- Chats panel: side panel on desktop, slide-up sheet on phone;
+  auto-titled conversations OF the one thread; whole card goes there,
+  Pick up arms the composer; search lives at the top of the panel.
+- Timeline rail: one labeled dot per day on the thread's edge, day name
+  on touch before commit, sticky after landing; calendar for the deep
+  past.
+- Pick up feedback: one green Continuing chip above the composer,
+  dismissible, surviving time jumps; the composer hint re-aims to the
+  picked-up conversation.
+- Source tags: chips only when the surface changes and only under the
+  parent's messages (Homa's bubbles carry tags only for briefs and task
+  results).
+
+Founder trim (same evening, on screenshots of the build): the pills row
+(Finish / Pick up / Catch me up) and the "What does Homa see?" peek were
+CUT, and Back to now became a small centered round arrow floating over
+the thread's bottom edge. Pick up now lives only in the Chats panel,
+indicated by the one Continuing chip. Noted for later: the persona
+reviewer had called the plain-speech peek the most trust-building
+element of the round; its content is a candidate to resurface behind a
+tap on the Continuing chip if trust questions come back in testing.
+
+Ruling watch: the Chats panel navigates the one thread (cards scroll
+it, Pick up aims the composer); it creates no separate transcripts, so
+the 2026-07-10 fresh-mornings-one-thread ruling STANDS unamended, and
+chat-privacy-per-adult (same day) governs whose rows render.
+
+Persona gate on the refined build (before the trim): verdict yes ("if
+this shipped as my chat tomorrow I'd be happy"); her five fixes were
+applied in the lab (single persistent Continuing indicator, landing
+offset so the target sentence is never clipped, the two taps on a chat
+row explained in one line, panel titles wrap instead of truncating,
+device tags removed from under Homa's bubbles). After the trim, 29
+automated browser checks pass, zero console errors.
+
+Open toward implementation, awaiting the founder's lab reply: the five
+build questions (pickup context shape, tasks-in-thread rendering,
+arrival position, cross-adult memory use, search scope). Build order
+after that: M1-02 render source with the per-adult filter and policy
+tightening, episode auto-titles (schema), then the panel, pills, and
+rail as client work over those reads.
+
+## 2026-07-12 · Founder ruling: chats are per-adult, everything else stays family-shared
+
+Founder ruling, verbatim intent (answering the one-thread navigation
+lab's question 4, plans/2026-07-12-one-thread-navigation-directions.html):
+"we def need per adult filtering. chats should not be visible by family.
+only by user. it should be shared family everything else. but not chats."
+
+Policy as registered (`chat-privacy-per-adult` in journeys/10 §5): an
+adult sees only their own conversations with Homa, on every channel:
+their web thread, their texts, their email replies, and the messages
+Homa addressed to them (briefs, check-ins). No family member reads
+another adult's chat, in the transcript, in search, or through recall.
+Everything else stays family-shared: progress, memories, materials,
+planner, tasks. The coherent consequence for Homa's memory: distilled
+shared state (family memories, ChildProgress) crosses adults; raw chat
+lines do not.
+
+Where reality stands today, honestly:
+
+- The shipped UI is per-adult by construction already: transcripts
+  render from localStorage keyed by user id, so no surface shows
+  another adult's chat today.
+- The data layer is NOT: migration
+  20260711150308_conversation_continuity_hardening.sql gave
+  conversation_messages a family-wide SELECT policy (visibility =
+  'family' and is_family_member), and the recall tool searches
+  conversation_messages under the caller's token, so Homa could quote
+  adult A's chat to adult B in a recall answer. That gap is now policy
+  debt, owned by the M1-02 slice.
+- The filter is buildable: conversation_messages carries
+  member_user_id, and the delivery ledger is already per-recipient.
+  Legacy rows with null member_user_id need an attribution decision
+  (account owner vs hidden from everyone).
+
+Follow-ups this ruling creates (M1-02 scope grows):
+
+- The merged-thread render source filters to the caller: own
+  member_user_id plus deliveries addressed to them.
+- The conversation SELECT policy tightens from family-wide to
+  per-adult: a breaking policy change, expand-contract order, isolation
+  guard before and after.
+- recall.ts: the conversation arm filters to the caller;
+  family_memories and other shared state stay family-wide.
+- Continuity already keys episodes and open loops by member; verify no
+  cross-member episode bleed in context injection.
+- OPEN (added to journeys/10 §5 open decisions): whether voice-call
+  transcripts follow chat privacy (per-adult) or stay family-readable.
+  voice-retention (2026-07-09) set storage and retention, not
+  visibility.
+
+Lab updated in the same sitting: question 4 became settled policy and
+its successor question asks whether Homa may use one adult's chat when
+talking to the other (recommended: shared facts only, matching this
+ruling).
+
+## 2026-07-12 · Founder console ships whole: /admin, ledgers, webhooks, heartbeat (MJ-14)
+
+Founder instruction on the founder-dashboard direction lab
+(plans/2026-07-12-founder-dashboard-directions.html): "DO IT ALL BOIL THE
+OCEAN." So instead of one winning direction, all four shipped as tabs of
+one env-allowlisted console, and every blind spot the lab named got its
+instrumentation closed the same sitting.
+
+What landed:
+
+- /admin (apps/web/app/admin/): Overview (alert strip + live tiles +
+  trouble + call list, 7d/28d), Families (derived-stage roster + filters
+  + per-family page), Pulse (day-grouped operations diary), Funnels
+  (event funnel, delivery pipeline, weekly cohorts). Own segment, never
+  in APP_NAV_ITEMS; requireFounder() (HOMA_ADMIN_EMAILS allowlist,
+  fail-closed notFound) gates the layout AND every page.
+- Lifecycle stages are DERIVED (lib/admin/stage.ts, tested): new,
+  onboarding, activated, steady, quiet 14d+ from profile_completed_at,
+  children, child_reports, and last user message; families.status stays
+  untrusted per the lab's blind spot 3.
+- Migration #73 (additive, applied via MCP before push): email_sends
+  (map-flow email ledger, deny-all), cron_runs (hourly heartbeat,
+  deny-all), families subscription mirror columns. Isolation guard
+  extended to cover both new tables; full guard green.
+- lib/map/email.ts submit() now writes one email_sends row per map-flow
+  send (report, resume, reminder, retest, band-ready, invite, digest);
+  task emails stay out (conversation_deliveries owns them, no double
+  counting).
+- Webhooks, both DARK until secrets exist: /api/email/webhook (Resend,
+  svix HMAC verified in lib/email-webhook.ts with tests) upgrades
+  email_sends and escalates bounced task deliveries to failed;
+  /api/billing/webhook (Stripe) is the closed-tab-checkout safety net
+  (idempotent startFamilyTrial) and mirrors subscription status onto
+  families.
+- /api/map/cron writes a cron_runs heartbeat every tick and sends the
+  once-per-UTC-day founder digest (HOMA_ADMIN_DIGEST_EMAIL, hour
+  HOMA_ADMIN_DIGEST_HOUR_UTC default 11) with the email_sends ledger as
+  its dedupe guard.
+- pnpm check:admin (stage + webhook-signature tests) and pnpm
+  admin:smoke (counts-only live query smoke) added; README repo map and
+  .env.example updated.
+
+Decisions made alone, biggest first: lib/admin/db.ts exists because the
+Supabase transaction pooler deadlocked postgres.js under concurrency
+(verified by probe: max 2 with three parallel one-row selects hangs
+forever; pipelined batches on one connection hang too; an array_agg
+type-OID fetch mid-pipeline was one trigger). The console therefore uses
+ONE connection, strictly sequential awaits, ::text/::int casts, and
+json_agg over array_agg; the rule is documented in the module header.
+Product code keeps mapDb(), but any existing Promise.all over mapDb
+deserves an audit with the same probe. Other calls: gate by email
+allowlist (lab question 2 REC), live queries with no rollups (question
+5 REC), digest email as alert v0 (question 3 REC), roster scoped to
+families with a family_members row (one-world funnel visitors belong to
+Funnels, not the roster), and message content stays out of the console
+(counts and receipts only).
+
+Verified: typecheck, lint, check:events, check:isolation (with the two
+new tables covered), check:admin 14/14, admin:smoke green over live
+data, next build green, and a Playwright walk over a real signed-in
+session: all five surfaces render live production data, signed-out
+/admin and subroutes 404, phone viewport has no horizontal overflow,
+zero page errors. Deploy order note: migration #73 is already applied
+(additive may lead); the code can push whenever.
+
 ## 2026-07-12 · Binder gets subjects, an honest this-week cover, and a first-day empty state (FS-1/2/4)
 
 Founder: "ship everything else you would ship" from the portfolio-review
@@ -130,6 +306,13 @@ plus "Delete this task"; built-in: schedule only, no rename or reword or
 delete or save-only), the one-name create flow, the per-caller texting
 wording swap, and the schedule label helpers. New root script
 `check:tasks-ui`, wired into CI beside the research-brief check.
+
+Founder ruling, same evening, on the live dialog: the built-in intro
+("Homa decides what it says. You decide the days...") is out; the dialog
+says one thing, what the task does, so it now reuses the card's own
+one-line description from task-copy.ts. This overrides the reader-gate
+line that named the fixed part, the changeable part, and the off switch.
+Tests updated to pin the description and the explainer's absence.
 
 Implements the founder-chosen refined direction in production code. The
 Progress page (`apps/web/components/progress/progress-view.tsx`) is now a bare
