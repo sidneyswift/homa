@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BookOpen,
   Calendar,
   ChartLine,
   ListChecks,
@@ -25,6 +26,7 @@ export const APP_NAV_ITEMS = [
   { href: "/app", label: "Ask", icon: Sparkles },
   { href: "/app/progress", label: "Progress", icon: ChartLine },
   { href: "/app/planner", label: "Planner", icon: Calendar },
+  { href: "/app/binder", label: "Binder", icon: BookOpen },
   { href: "/app/tasks", label: "Tasks", icon: ListChecks },
 ] as const;
 

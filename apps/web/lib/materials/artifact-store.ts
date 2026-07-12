@@ -1,6 +1,9 @@
 import { del, list, put } from "@vercel/blob";
 
 import { mapDb } from "../map/db";
+import { MATERIAL_KINDS, type MaterialKind } from "./kinds";
+
+export { MATERIAL_KINDS, type MaterialKind };
 
 /**
  * Where a material (and the generated images inside it) lives (BUILD.md
@@ -38,18 +41,6 @@ export function isFamilyArtifactUrl(url: string, familyId: string): boolean {
     return false;
   }
 }
-
-export const MATERIAL_KINDS = [
-  "worksheet",
-  "coloring",
-  "flashcards",
-  "reader",
-  "poster",
-  "infographic",
-  "game",
-  "other",
-] as const;
-export type MaterialKind = (typeof MATERIAL_KINDS)[number];
 
 export type MaterialSource = "html" | "image" | "hybrid";
 
