@@ -16,7 +16,13 @@ import { join } from "node:path";
 import { EVENT_SCHEMAS } from "../packages/core/src/index";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
-const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [];
+const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
+  // The chat attachments stream is mid-build (2026-07-13,
+  // docs/notes/chat-redesign-attachments-implementation.md); its schema
+  // rode into the registry with the child-photos commit. Remove this
+  // entry when the attachments emitter lands.
+  ["chat.attachment_processed", "chat-attachments-2026-07-13"],
+];
 
 const failures: string[] = [];
 
