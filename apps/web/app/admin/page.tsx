@@ -3,28 +3,55 @@ import Link from "next/link";
 
 import { requireFounder } from "../../lib/admin/gate";
 import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-data";
+import type { HandledAlert } from "../../lib/admin/alert-acks";
 import { formatInt, formatTokens, medianExact, percent, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
 import { QUIET_AFTER_DAYS } from "../../lib/admin/stage";
+import { AlertAckButton } from "./alert-ack-button";
 import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
 
 /**
  * /admin: mission control (MJ-14 tile 1..12 shape, refit to the signals
  * that exist today). Alerts first, then the tiles, then the lists a
  * Monday morning actually needs: trouble, new signups, the call list.
+ * Every row-backed alert carries a Mark handled chip (founder ask
+ * 2026-07-13); handled alerts hide but stay countable and reversible.
  */
 
 export const metadata: Metadata = { title: "Overview" };
 
+/** One line for a handled alert, matching the live alerts' wording. */
+function handledAlertText(item: HandledAlert): string {
+  const status = item.status.replace(/_/g, " ");
+  const descriptor = item.descriptor.replace(/_/g, " ");
+  switch (item.source) {
+    case "task_run":
+      return `${descriptor} run ${status} · ${item.familyName ?? "fleet"}`;
+    case "delivery":
+      return `${status} ${descriptor} send · ${item.familyName}`;
+    case "email_send":
+      return `Email ${status} · ${descriptor}`;
+    default: {
+      const exhausted: never = item.source;
+      return String(exhausted);
+    }
+  }
+}
+
 export default async function AdminOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ range?: string }>;
+  searchParams: Promise<{ range?: string; handled?: string }>;
 }) {
   await requireFounder();
   const params = await searchParams;
   const rangeDays: OverviewRange = params.range === "28d" ? 28 : 7;
+  const showHandled = params.handled === "1";
   const data = await getFleetOverview(rangeDays);
+  const rangeQuery = rangeDays === 28 ? "?range=28d" : "";
+  const showHandledHref =
+    rangeDays === 28 ? "/admin?range=28d&handled=1#handled" : "/admin?handled=1#handled";
+  const hideHandledHref = `/admin${rangeQuery}`;
 
   const runsOk = (data.runCounts.done ?? 0) + (data.runCounts.skipped ?? 0);
   const runsTotal = Object.values(data.runCounts).reduce((sum, n) => sum + n, 0);
@@ -77,24 +104,39 @@ export default async function AdminOverviewPage({
       <div className="mt-4 flex flex-col gap-2">
         {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 ? (
           <AlertRow tone="sky">
-            <b>Deliveries look clean {rangeLabel}.</b> No failed or uncertain sends recorded.
+            <b>Deliveries look clean {rangeLabel}.</b>{" "}
+            {data.handledAlerts.length > 0
+              ? `Everything that failed is marked handled (${data.handledAlerts.length}).`
+              : "No failed or uncertain sends recorded."}
           </AlertRow>
         ) : (
           <>
-            {data.deliveryTrouble.slice(0, 4).map((t, index) => (
-              <AlertRow key={`d-${index}`} tone={t.status === "failed" ? "rose" : "gold"}>
+            {data.deliveryTrouble.slice(0, 4).map((t) => (
+              <AlertRow
+                key={`d-${t.id}`}
+                tone={t.status === "failed" ? "rose" : "gold"}
+                action={<AlertAckButton source="delivery" sourceId={t.id} />}
+              >
                 <b>{t.status === "failed" ? "Failed" : "Uncertain"} {t.channel} send</b> ·{" "}
                 {t.familyName} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
               </AlertRow>
             ))}
-            {data.runTrouble.slice(0, 4).map((t, index) => (
-              <AlertRow key={`r-${index}`} tone={t.status === "failed" ? "rose" : "gold"}>
+            {data.runTrouble.slice(0, 4).map((t) => (
+              <AlertRow
+                key={`r-${t.id}`}
+                tone={t.status === "failed" ? "rose" : "gold"}
+                action={<AlertAckButton source="task_run" sourceId={t.id} />}
+              >
                 <b>{t.kind.replace(/_/g, " ")} run {t.status.replace(/_/g, " ")}</b> ·{" "}
                 {t.familyName ?? "fleet"} · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
               </AlertRow>
             ))}
-            {data.emailTrouble.slice(0, 3).map((t, index) => (
-              <AlertRow key={`e-${index}`} tone="rose">
+            {data.emailTrouble.slice(0, 3).map((t) => (
+              <AlertRow
+                key={`e-${t.id}`}
+                tone="rose"
+                action={<AlertAckButton source="email_send" sourceId={t.id} />}
+              >
                 <b>Email {t.status}</b> · {t.kind.replace(/_/g, " ")} · {t.error ?? "provider receipt"} ·{" "}
                 {timeAgo(t.at)}
               </AlertRow>
@@ -113,6 +155,18 @@ export default async function AdminOverviewPage({
           <AlertRow tone="gold">
             <b>The hourly cron looks stale.</b> Last heartbeat {timeAgo(data.cronLastAt)}.
           </AlertRow>
+        ) : null}
+        {data.handledAlerts.length > 0 ? (
+          <p className="px-1 text-xs text-subtle">
+            {data.handledAlerts.length} handled{" "}
+            {data.handledAlerts.length === 1 ? "alert" : "alerts"} hidden {rangeLabel}.{" "}
+            <Link
+              href={showHandled ? hideHandledHref : showHandledHref}
+              className="font-semibold text-muted underline underline-offset-2 hover:text-strong"
+            >
+              {showHandled ? "Hide them" : "Show them"}
+            </Link>
+          </p>
         ) : null}
       </div>
 
@@ -223,12 +277,17 @@ export default async function AdminOverviewPage({
         sub="Failed and uncertain sends with the family they belong to. Uncertain means the provider never confirmed; it is its own bucket on purpose."
       />
       {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 ? (
-        <EmptyNote>Nothing failed or went uncertain {rangeLabel}.</EmptyNote>
+        <EmptyNote>
+          Nothing failed or went uncertain {rangeLabel}
+          {data.handledAlerts.length > 0
+            ? `, beyond the ${data.handledAlerts.length} marked handled.`
+            : "."}
+        </EmptyNote>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
-          {data.deliveryTrouble.map((t, index) => (
+          {data.deliveryTrouble.map((t) => (
             <li
-              key={index}
+              key={`dt-${t.id}`}
               className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
             >
               <span className="font-bold text-strong">{t.familyName}</span>
@@ -236,11 +295,14 @@ export default async function AdminOverviewPage({
               <span className="text-muted">
                 {t.channel} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
               </span>
+              <span className="ml-auto">
+                <AlertAckButton source="delivery" sourceId={t.id} />
+              </span>
             </li>
           ))}
-          {data.runTrouble.map((t, index) => (
+          {data.runTrouble.map((t) => (
             <li
-              key={`rt-${index}`}
+              key={`rt-${t.id}`}
               className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
             >
               <span className="font-bold text-strong">{t.familyName ?? "Fleet"}</span>
@@ -248,20 +310,51 @@ export default async function AdminOverviewPage({
               <span className="text-muted">
                 {t.kind.replace(/_/g, " ")} run · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
               </span>
+              <span className="ml-auto">
+                <AlertAckButton source="task_run" sourceId={t.id} />
+              </span>
             </li>
           ))}
-          {data.emailTrouble.map((t, index) => (
+          {data.emailTrouble.map((t) => (
             <li
-              key={`et-${index}`}
+              key={`et-${t.id}`}
               className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
             >
               <span className="font-bold text-strong">{t.kind.replace(/_/g, " ")}</span>
               <Pill tone={statusTone(t.status)}>{t.status}</Pill>
               <span className="text-muted">{t.error ?? "provider receipt"} · {timeAgo(t.at)}</span>
+              <span className="ml-auto">
+                <AlertAckButton source="email_send" sourceId={t.id} />
+              </span>
             </li>
           ))}
         </ul>
       )}
+      {showHandled && data.handledAlerts.length > 0 ? (
+        <>
+          <p id="handled" className="mt-5 text-[0.72rem] font-bold text-muted">
+            Marked handled ({data.handledAlerts.length})
+          </p>
+          <ul className="mt-2 flex flex-col gap-2">
+            {data.handledAlerts.map((item) => (
+              <li
+                key={`h-${item.source}-${item.sourceId}`}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-border-default bg-card px-3.5 py-2.5 text-sm"
+              >
+                <Pill tone="stone">handled</Pill>
+                <span className="font-semibold text-muted">{handledAlertText(item)}</span>
+                <span className="text-subtle">
+                  {item.error ?? "no error recorded"} · failed {timeAgo(item.at)} · handled{" "}
+                  {timeAgo(item.handledAt)}
+                </span>
+                <span className="ml-auto">
+                  <AlertAckButton source={item.source} sourceId={item.sourceId} mode="undo" />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
 
       <SectionHead
         eyebrow="People"

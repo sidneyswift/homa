@@ -1,3 +1,4 @@
+import { listHandledAlerts, type HandledAlert } from "./alert-acks";
 import { adminDb } from "./db";
 import { getFamilySnapshots, type FamilySnapshot } from "./roster-data";
 import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
@@ -7,11 +8,17 @@ import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
  * control). One call fans out the range-scoped SQL and merges it with the
  * family snapshots; every number is a live query, no rollups (lab
  * question 5, founder answer 2026-07-12: live now, snapshots later).
+ *
+ * Alerts the founder marked handled (admin_alert_acknowledgments, the
+ * 2026-07-13 "mark handled" ask) drop out of the trouble lists here but
+ * stay inside every count: hiding an alert never edits history. The
+ * hide rules live in lib/admin/alert-acks.ts.
  */
 
 export type OverviewRange = 7 | 28;
 
 export interface DeliveryTrouble {
+  id: string;
   familyName: string;
   channel: string;
   status: "failed" | "uncertain";
@@ -20,6 +27,7 @@ export interface DeliveryTrouble {
 }
 
 export interface RunTrouble {
+  id: string;
   familyName: string | null;
   kind: string;
   status: string;
@@ -28,6 +36,7 @@ export interface RunTrouble {
 }
 
 export interface EmailTrouble {
+  id: string;
   kind: string;
   status: string;
   error: string | null;
@@ -60,6 +69,8 @@ export interface FleetOverview {
   modelTokens: number;
   /** Price-book estimate of range spend, plus any unpriced models. */
   modelCost: UsageCostSummary;
+  /** Alerts marked handled that would otherwise show in this range. */
+  handledAlerts: HandledAlert[];
 }
 
 export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetOverview> {
@@ -73,12 +84,16 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     where started_at >= now() - ${interval}::interval
     group by status
   `;
-  const runTroubleRows = await sql<{ family_name: string | null; kind: string; status: string; error: string | null; at: string }[]>`
-    select f.name as family_name, r.kind, r.status, r.error, r.started_at::text as at
+  const runTroubleRows = await sql<{ id: string; family_name: string | null; kind: string; status: string; error: string | null; at: string }[]>`
+    select r.id, f.name as family_name, r.kind, r.status, r.error, r.started_at::text as at
     from public.homa_task_runs r
     left join public.families f on f.id = r.family_id
     where r.status in ('failed', 'uncertain', 'partial', 'partial_uncertain')
       and r.started_at >= now() - ${interval}::interval
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'task_run' and a.source_id = r.id
+      )
     order by r.started_at desc
     limit 12
   `;
@@ -87,12 +102,19 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     where created_at >= now() - ${interval}::interval
     group by status
   `;
-  const troubleRows = await sql<{ family_name: string; channel: string; status: string; error: string | null; at: string }[]>`
-    select f.name as family_name, d.channel, d.status, d.error, d.updated_at::text as at
+  // A delivery can fail again after being marked handled (retries bump
+  // updated_at), so the ack only hides rows it is newer than.
+  const troubleRows = await sql<{ id: string; family_name: string; channel: string; status: string; error: string | null; at: string }[]>`
+    select d.id, f.name as family_name, d.channel, d.status, d.error, d.updated_at::text as at
     from public.conversation_deliveries d
     join public.families f on f.id = d.family_id
     where d.status in ('failed', 'uncertain')
       and d.updated_at >= now() - ${interval}::interval
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'delivery' and a.source_id = d.id
+          and a.created_at >= d.updated_at
+      )
     order by d.updated_at desc
     limit 12
   `;
@@ -123,11 +145,17 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     where created_at >= now() - ${interval}::interval
     group by status
   `;
-  const emailTroubleRows = await sql<{ kind: string; status: string; error: string | null; at: string }[]>`
-    select kind, status, error, updated_at::text as at from public.email_sends
-    where status in ('rejected', 'bounced', 'complained')
-      and updated_at >= now() - ${interval}::interval
-    order by updated_at desc
+  const emailTroubleRows = await sql<{ id: string; kind: string; status: string; error: string | null; at: string }[]>`
+    select e.id, e.kind, e.status, e.error, e.updated_at::text as at
+    from public.email_sends e
+    where e.status in ('rejected', 'bounced', 'complained')
+      and e.updated_at >= now() - ${interval}::interval
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'email_send' and a.source_id = e.id
+          and a.created_at >= e.updated_at
+      )
+    order by e.updated_at desc
     limit 12
   `;
   const cronRows = await sql<{ ran_at: string; ok: boolean }[]>`
@@ -156,6 +184,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     where created_at >= now() - ${interval}::interval
     group by model
   `;
+  const handledAlerts = await listHandledAlerts(rangeDays);
 
   const cutoff = Date.now() - rangeDays * 24 * 60 * 60 * 1000;
   const activeIds = new Set(
@@ -176,6 +205,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     newSignups: snapshots.filter((s) => new Date(s.createdAt).getTime() >= cutoff),
     runCounts: toCounts(runRows),
     runTrouble: runTroubleRows.map((row) => ({
+      id: row.id,
       familyName: row.family_name,
       kind: row.kind,
       status: row.status,
@@ -184,6 +214,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     })),
     deliveryCounts: toCounts(deliveryRows),
     deliveryTrouble: troubleRows.map((row) => ({
+      id: row.id,
       familyName: row.family_name,
       channel: row.channel,
       status: row.status as "failed" | "uncertain",
@@ -197,6 +228,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     hoursMinutes: hourRows[0].minutes,
     emailCounts: toCounts(emailRows),
     emailTrouble: emailTroubleRows.map((row) => ({
+      id: row.id,
       kind: row.kind,
       status: row.status,
       error: row.error,
@@ -218,5 +250,6 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
         cacheWriteTokens: row.cache_write,
       })),
     ),
+    handledAlerts,
   };
 }

@@ -32,16 +32,24 @@ export interface FounderSession {
   email: string;
 }
 
-export const requireFounder = cache(async (): Promise<FounderSession> => {
+/** The nullable check behind requireFounder, for callers (server
+ * actions) that must fail with a plain result instead of a thrown 404. */
+export const getFounderSession = cache(async (): Promise<FounderSession | null> => {
   const allowlist = allowedEmails();
-  if (allowlist.size === 0) notFound();
+  if (allowlist.size === 0) return null;
 
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const email = user?.email?.toLowerCase();
-  if (!user || !email || !allowlist.has(email)) notFound();
+  if (!user || !email || !allowlist.has(email)) return null;
 
   return { userId: user.id, email };
 });
+
+export async function requireFounder(): Promise<FounderSession> {
+  const session = await getFounderSession();
+  if (!session) notFound();
+  return session;
+}

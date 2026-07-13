@@ -3,6 +3,40 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · /admin alerts get a "Mark handled" check-off
+
+Founder ask (screenshot of two long-since-fixed "custom run failed"
+alerts still sitting on /admin): "these errors have been addressed.
+please add a way I can check them to hide them from the ui." Built as
+migration #81 `admin_alert_acknowledgments` (deny-all RLS + revokes,
+the email_sends posture; applied to prod via MCP, additive so it may
+lead the deploy) plus a founder-gated server action pair
+(`apps/web/app/admin/actions.ts`), `lib/admin/alert-acks.ts`, and a
+Mark handled chip on every row-backed alert (strip and trouble list).
+Decisions made alone, conservative on each fork:
+
+- **Hide, never delete.** An ack row hides the alert; the run counts,
+  delivery counts, and pulse feed keep the failure. The page says
+  "N handled alerts hidden" with a Show them link, and every handled
+  row has a Bring back undo, so a mis-click is recoverable in place.
+- **Re-failure resurfaces.** Task runs are terminal, so their ack is
+  forever. Deliveries and email sends can fail again on the same row
+  (retries, webhooks), so those acks only hide while newer than the
+  row's updated_at.
+- **No foreign keys** on source_id (three possible source tables); a
+  cascade-deleted source leaves an orphan ack nothing joins back to.
+- **Attribution**: acknowledged_by stores the founder email from the
+  session, and the action gate is getFounderSession() (a nullable twin
+  of requireFounder(), since server actions should fail with a result,
+  not a thrown 404).
+- The "call list" and stale-cron strips stay un-checkable on purpose:
+  they clear themselves when the underlying state clears.
+
+Verified: typecheck, lint, check:isolation (new table covered as
+deny-all + insert probe), admin:smoke, and a Playwright pass on a dev
+server with a fixture founder (ack → hidden note → Show them →
+Bring back → re-ack), fixture family and acks deleted after.
+
 ## 2026-07-13 · Console dollars: the model price book joins the usage ledger at read time
 
 Founder ask: convert all token usage across the app into USD, model-aware

@@ -125,15 +125,28 @@ export function Spark({ values, width = 110, height = 26 }: { values: number[]; 
   );
 }
 
-export function AlertRow({ tone, children }: { tone: "rose" | "gold" | "sky"; children: ReactNode }) {
+export function AlertRow({
+  tone,
+  action,
+  children,
+}: {
+  tone: "rose" | "gold" | "sky";
+  /** Right-aligned control, e.g. the Mark handled chip. */
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   const styles = {
     rose: { background: "var(--danger-soft)", border: "1px solid var(--rose-500)", color: "var(--rose-600)" },
     gold: { background: "var(--gold-100)", border: "1px solid var(--gold-300)", color: "var(--gold-ink-strong)" },
     sky: { background: "var(--info-soft)", border: "1px solid var(--sky-100)", color: "var(--pop-navy, var(--stone-800))" },
   }[tone];
   return (
-    <div className="rounded-md px-3.5 py-2.5 text-sm" style={styles}>
-      {children}
+    <div
+      className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md px-3.5 py-2.5 text-sm"
+      style={styles}
+    >
+      <div className="min-w-0">{children}</div>
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }

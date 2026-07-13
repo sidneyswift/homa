@@ -2227,6 +2227,9 @@ await expectEmptyRead("thank_you_cards");
 // heartbeat is pure ops state. No Data API role reads or writes either.
 await expectReadDenied("email_sends");
 await expectReadDenied("cron_runs");
+// Founder alert acks (migration #81): deny-all, server-only; only the
+// founder-gated /admin action writes.
+await expectReadDenied("admin_alert_acknowledgments");
 // The agent flight recorder (migration #79): tool calls and injected
 // context snapshots hold family conversation material, deny-all,
 // server-only writes, founder-console reads only.
@@ -2607,6 +2610,15 @@ await expectInsertDenied(
   "cron_runs",
   { job: "map_cron", ok: true },
   "anon cannot forge cron heartbeats",
+);
+await expectInsertDenied(
+  "admin_alert_acknowledgments",
+  {
+    source: "task_run",
+    source_id: "00000000-0000-0000-0000-000000000000",
+    acknowledged_by: "intruder@example.com",
+  },
+  "anon cannot forge alert acknowledgments",
 );
 await expectInsertDenied(
   "agent_tool_calls",
