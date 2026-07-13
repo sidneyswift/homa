@@ -168,7 +168,7 @@ export async function updateCustomTask(
   if (current.kind !== "custom") {
     return {
       ok: false,
-      note: "Built-in task words are Homa's. Only its days, hour, and text/email delivery can change (updateTaskSchedule).",
+      note: "Built-in task words are Homa's. Only its days, hour, and delivery can change (updateTaskSchedule).",
     };
   }
 
@@ -194,9 +194,10 @@ export async function updateCustomTask(
 export const taskScheduleInputSchema = z.object({
   weekdays: taskWeekdaysSchema,
   localHour: z.number().int().min(0).max(23),
-  // Built-in tasks always produce a message for the parent, so "none"
-  // (save-only) stays a custom-task option.
-  deliveryPref: z.enum(["text", "email"]),
+  // All three channels for every kind, "none" = saved to the tasks page
+  // only (founder ruling 2026-07-12 evening: built-ins offer the web
+  // option too).
+  deliveryPref: z.enum(["text", "email", "none"]),
 });
 export type TaskScheduleInput = z.infer<typeof taskScheduleInputSchema>;
 

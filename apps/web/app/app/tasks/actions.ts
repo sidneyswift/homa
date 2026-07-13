@@ -79,7 +79,9 @@ function parseTaskScheduleForm(formData: FormData): TaskScheduleInput | { error:
   const schedule = parseScheduleFields(formData);
   if ("error" in schedule) return schedule;
   const deliveryRaw = String(formData.get("deliveryPref") ?? "text");
-  return { ...schedule, deliveryPref: deliveryRaw === "email" ? "email" : "text" };
+  const deliveryPref =
+    deliveryRaw === "email" || deliveryRaw === "none" ? deliveryRaw : ("text" as const);
+  return { ...schedule, deliveryPref };
 }
 
 export async function createTaskAction(
@@ -116,8 +118,9 @@ export async function updateTaskAction(
 }
 
 /** Built-in tasks (morning brief, evening check-in): the words are
- * Homa's, the schedule is the parent's. Only days, hour, and channel
- * move here; label and prompt stay untouched. */
+ * Homa's, the schedule is the parent's. Only days, hour, and delivery
+ * (text, email, or saved to the page) move here; label and prompt stay
+ * untouched. */
 export async function updateTaskScheduleAction(
   taskId: string,
   _prev: TaskActionState,

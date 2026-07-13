@@ -379,6 +379,37 @@ one-line description from task-copy.ts. This overrides the reader-gate
 line that named the fixed part, the changeable part, and the off switch.
 Tests updated to pin the description and the explainer's absence.
 
+Second founder ruling, same evening ("add web"): built-in tasks offer
+all three delivery doors, text, email, or just the tasks page, which
+supersedes this entry's earlier save-only-is-custom-only call. The
+schedule schema, the web dialog, update_task, and list_tasks all take
+"none" for every kind now; the dispatcher's journal and brief messages
+tell the model its reply is saved to the page (never promising a text)
+when that is the choice, and the card's schedule line names the
+delivery for every kind. The delivery vocabulary stays "Just save it to
+this page." / "saved to this page". Verified: tasks UI tests, web
+typecheck, lint, eve build.
+
+Third founder ruling, same evening: the evening check-in goes LIVE
+(JOURNAL_PROMPT_ENABLED flips true) but ships switched off per family,
+the parent opts in from the card ("keep it toggled off for users...
+I might auto turn it on later"). Built-ins are the premade task set the
+main account holder receives (recipients already owner-scoped by the
+task-recipient ruling), and each kind now carries its own on/off
+default: TASK_KIND_CONFIG gains seedPaused (journal true, brief false),
+seeding stamps paused_at at insert only, and the parent's switch owns
+it from then on (unpausing already recomputes next_run_at, so a
+months-later opt-in never fires off the stale seed timestamp). The
+journal placeholder note now reads "Almost ready. It stays off until
+you turn it on." (both old notes promised it starts on its own, no
+longer true; small copy, written to the rulebook, gates not rerun).
+Order of operations for the flip: deploy this code READY first, then
+set the env var and bake it with a redeploy, because the old code would
+seed journal rows UNPAUSED on the next hourly tick. Verified before the
+flip: prod has zero journal_prompt rows (nothing stale can fire), 9
+tasks UI tests (a new one pins the per-kind defaults), typecheck, lint,
+eve build.
+
 Implements the founder-chosen refined direction in production code. The
 Progress page (`apps/web/components/progress/progress-view.tsx`) is now a bare
 header (freshness line, title, "Open the full report", and an in-page sibling

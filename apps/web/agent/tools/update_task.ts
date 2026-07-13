@@ -12,7 +12,7 @@ import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
 export default defineTool({
   description:
-    "Change one of this family's scheduled tasks: pause or resume any task, edit a custom task's label, instructions, days, hour, or delivery, or change a built-in task's (morning brief, evening check-in) days, hour, or delivery. Built-in words stay Homa's: their label and prompt can never change. Use list_tasks first when the target is ambiguous.",
+    "Change one of this family's scheduled tasks: pause or resume any task, edit a custom task's label or instructions, or change ANY task's days, hour, or delivery (text, email, or none = saved to the tasks page only). Built-in words stay Homa's: the morning brief and evening check-in label and prompt can never change. Use list_tasks first when the target is ambiguous.",
   inputSchema: z.object({
     taskId: z.string().uuid().describe("The id from list_tasks."),
     paused: z.boolean().optional().describe("Set to pause/resume; works for every kind."),
@@ -42,14 +42,11 @@ export default defineTool({
       Object.entries(patch).filter(([, value]) => value !== undefined),
     ) as Partial<CustomTaskInput>;
     const hasPatch = Object.keys(cleanPatch).length > 0;
-    // Days, hour, and text/email delivery are schedule fields, movable
-    // on every kind. Label, prompt, and save-only delivery stay
-    // custom-task territory (built-in words are Homa's; built-ins
-    // always message the parent).
+    // Days, hour, and delivery (text, email, or save to the tasks page)
+    // are schedule fields, movable on every kind. Label and prompt stay
+    // custom-task territory: built-in words are Homa's.
     const scheduleOnly =
-      cleanPatch.label === undefined &&
-      cleanPatch.prompt === undefined &&
-      cleanPatch.deliveryPref !== "none";
+      cleanPatch.label === undefined && cleanPatch.prompt === undefined;
 
     if (paused === undefined && !hasPatch) {
       return {
@@ -84,7 +81,7 @@ export default defineTool({
         ? await updateTaskSchedule(familyId, taskId, {
             ...(cleanPatch.weekdays !== undefined ? { weekdays: cleanPatch.weekdays } : {}),
             ...(cleanPatch.localHour !== undefined ? { localHour: cleanPatch.localHour } : {}),
-            ...(cleanPatch.deliveryPref === "text" || cleanPatch.deliveryPref === "email"
+            ...(cleanPatch.deliveryPref !== undefined
               ? { deliveryPref: cleanPatch.deliveryPref }
               : {}),
           })

@@ -99,16 +99,20 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
       );
       // The recipient is the account owner, the family's first member
       // (founder ruling 2026-07-12): built-in texts never auto-subscribe
-      // an invited adult.
+      // an invited adult. seedPaused kinds arrive switched off; the
+      // parent's card switch owns paused_at from here on (unpausing
+      // recomputes next_run_at, so a months-later opt-in never fires
+      // instantly off this stale timestamp).
       await sql`
         insert into public.agent_schedules
           (family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
-           created_by, recipient_member_user_id)
+           created_by, recipient_member_user_id, paused_at)
         values
           (${family.id}, ${kind}, ${nextRun.toISOString()},
            ${config.defaultLocalHour},
            ${sql.array(config.defaultWeekdays as number[])}::smallint[],
-           'text', 'system', ${family.owner_user_id})
+           'text', 'system', ${family.owner_user_id},
+           ${config.seedPaused ? now.toISOString() : null})
         on conflict do nothing
       `;
     } catch (error) {

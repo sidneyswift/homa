@@ -42,13 +42,22 @@ import dispatchChannel from "../channels/dispatch";
  * and the reaper below fails anything still 'running' hours later.
  */
 
+/** Built-ins honor the parent's delivery choice too (founder ruling
+ * 2026-07-12): "none" means the composed message only lands on the
+ * Homa's tasks page, so the model must not promise a text. */
+function saveOnlyLine(): string {
+  return "Your reply is saved to the family's Homa's tasks page exactly as written: write only the message itself, no preamble, no quotes, no sign-off.";
+}
+
 function journalMessage(task: DueFamilyTask): string {
   return [
     "It is this family's evening check-in moment (their local evening).",
     `Compose tonight's short journal prompt to ${task.parentFirstName ?? "the parent"}.`,
     "1 to 2 sentences in your own voice. When a saved memory or recent conversation gives you something real (a current interest, this week's focus, a recent win), reference it; otherwise keep it simple and ask about the day.",
     `The kids: ${task.kidPhrase}. End with one easy question she can answer in a sentence.`,
-    "Your reply is delivered to her EXACTLY as written, as a text message or short email: write only the message itself, no preamble, no quotes, no sign-off.",
+    task.deliveryPref === "none"
+      ? saveOnlyLine()
+      : "Your reply is delivered to her EXACTLY as written, as a text message or short email: write only the message itself, no preamble, no quotes, no sign-off.",
   ].join("\n");
 }
 
@@ -62,7 +71,9 @@ async function briefMessage(task: DueFamilyTask): Promise<string> {
     "",
     "Follow the skill's exact four-block format: research headline, What I learned, Why it's interesting, and one executable Want me to CTA. Preserve the blank lines. Do not add a preamble, sign-off, saved-note line, or URL.",
     `Compose this morning's brief to ${task.parentFirstName ?? "the parent"} about ${task.kidPhrase}.`,
-    "Your reply is delivered EXACTLY as written by text or email.",
+    task.deliveryPref === "none"
+      ? saveOnlyLine()
+      : "Your reply is delivered EXACTLY as written by text or email.",
   ].join("\n");
 }
 

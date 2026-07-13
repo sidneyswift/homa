@@ -28,6 +28,15 @@ export interface FamilyTaskKindConfig {
   /** 0 = Sunday .. 6 = Saturday. Custom rows override. */
   defaultWeekdays: readonly number[];
   /**
+   * Whether a freshly seeded row starts switched OFF (paused_at stamped
+   * at insert). Founder ruling 2026-07-12 evening: built-ins are the
+   * premade task set the main account holder receives, and each kind
+   * ships on or off by default; the check-in ships off until the parent
+   * turns it on. Only the insert reads this; the card switch owns
+   * paused_at from then on and hygiene never rewrites it.
+   */
+  seedPaused: boolean;
+  /**
    * How many hours past the scheduled local hour a claim may still
    * deliver. null = whenever due (the journal's original behavior). The
    * morning brief refuses to become an afternoon text: a run claimed
@@ -50,6 +59,10 @@ export const TASK_KIND_CONFIG: Record<FamilyTaskKind, FamilyTaskKindConfig> = {
     // (three real families got 11pm journal emails from leftover rows).
     deliveryWindowHours: 3,
     runTitle: "Evening check-in",
+    // Ships off: the card appears with its switch off and the parent
+    // opts in (founder ruling 2026-07-12 evening, "keep it toggled off
+    // for users"; auto-on may come later).
+    seedPaused: true,
     enabled: () => process.env.JOURNAL_PROMPT_ENABLED === "true",
   },
   morning_brief: {
@@ -57,6 +70,7 @@ export const TASK_KIND_CONFIG: Record<FamilyTaskKind, FamilyTaskKindConfig> = {
     defaultWeekdays: WEEKDAYS_MON_FRI,
     deliveryWindowHours: 3,
     runTitle: "Morning research brief",
+    seedPaused: false,
     enabled: () => process.env.MORNING_BRIEF_ENABLED === "true",
   },
   custom: {
@@ -64,6 +78,8 @@ export const TASK_KIND_CONFIG: Record<FamilyTaskKind, FamilyTaskKindConfig> = {
     defaultWeekdays: EVERY_DAY,
     deliveryWindowHours: null,
     runTitle: "Your task",
+    // Parent-created rows are never seeded; the knob is inert here.
+    seedPaused: false,
     enabled: () => true,
   },
 };

@@ -25,7 +25,8 @@ import type { TaskRowView } from "./tasks-view";
  * MaterialDetailOverlay, the house pattern for centered dialogs.
  * Custom tasks get the full form plus delete; built-in kinds
  * (morning brief, evening check-in) keep their fixed words and expose
- * only the schedule: which days, what time, text or email.
+ * only the schedule: which days, what time, and how it reaches her
+ * (text, email, or saved to the page).
  */
 
 const INITIAL_STATE: TaskActionState = { error: null };
@@ -57,9 +58,11 @@ function BuiltInScheduleForm({
       <WeekdayChips defaultSelected={new Set(task.weekdays)} />
       <div className="flex flex-wrap gap-4">
         <HourField defaultHour={task.localHour} />
+        {/* All three doors for built-ins too (founder ruling 2026-07-12
+            evening): text, email, or just the web page. */}
         <DeliveryChoice
-          values={["text", "email"]}
-          defaultValue={task.deliveryPref === "email" ? "email" : "text"}
+          values={["text", "email", "none"]}
+          defaultValue={task.deliveryPref}
           textingLinked={textingLinked}
         />
       </div>

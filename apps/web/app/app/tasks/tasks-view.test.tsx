@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
+import { TASK_KIND_CONFIG } from "../../../lib/tasks/kinds";
 import { TaskEditOverlay } from "./task-edit-overlay";
 import {
   TasksView,
@@ -65,7 +66,6 @@ function renderView(tasks: TaskRowView[]): string {
         runs={[]}
         timeZone="America/New_York"
         briefFlagOn
-        journalFlagOn
         textingLinked
       />
     </AppRouterContext.Provider>,
@@ -98,8 +98,9 @@ describe("TasksView", () => {
     // First paint keeps the editor closed.
     assert.doesNotMatch(html, /role="dialog"/);
 
-    // The schedule line stays the one place that says when.
-    assert.match(html, /Weekdays \u00b7 9:00 am/);
+    // The schedule line stays the one place that says when, and names
+    // delivery for every kind now that built-ins choose it too.
+    assert.match(html, /Weekdays \u00b7 9:00 am \u00b7 by text/);
     assert.match(html, /Tue, Thu \u00b7 3:00 pm \u00b7 by text/);
 
     // Edit and Delete left the card; they live in the dialog now.
@@ -107,9 +108,10 @@ describe("TasksView", () => {
     assert.doesNotMatch(html, />Delete</);
 
     // A seeded brief means no brief placeholder; the journal placeholder
-    // (dashed, not yet a real row) still shows and is not clickable.
+    // (dashed, not yet a real row) still shows, is not clickable, and
+    // never promises it starts on its own (it seeds switched off).
     assert.doesNotMatch(html, /Starts on its own once your family/);
-    assert.match(html, /Starts on its own in the evening\./);
+    assert.match(html, /Almost ready\. It stays off until you turn it on\./);
     assert.doesNotMatch(
       html,
       /<button[^>]*aria-haspopup="dialog"[^>]*>Evening check-in<\/button>/,
@@ -172,13 +174,14 @@ describe("TaskEditOverlay", () => {
     assert.match(html, /name="weekdays" checked="" value="1"/);
     assert.match(html, /<option value="9" selected="">9:00 am<\/option>/);
 
-    // No renaming, no rewording, no deleting, no save-only delivery.
+    // No renaming, no rewording, no deleting. All three delivery doors,
+    // including the page (founder ruling 2026-07-12 evening).
     assert.doesNotMatch(html, /What should it be called\?/);
     assert.doesNotMatch(html, /What should Homa do\?/);
     assert.doesNotMatch(html, /Delete this task/);
-    assert.doesNotMatch(html, /Just save it to this page\./);
     assert.match(html, /Text me\./);
     assert.match(html, /Email me\./);
+    assert.match(html, /Just save it to this page\./);
     assert.match(html, />Save changes<\/button>/);
   });
 
@@ -212,6 +215,13 @@ describe("TaskEditOverlay", () => {
       unlinked,
       /<a[^>]*href="\/app\/settings"[^>]*>Set up texting in Settings<\/a>/,
     );
+  });
+});
+
+describe("built-in seed defaults", () => {
+  it("ships the check-in off and the brief on (founder ruling 2026-07-12)", () => {
+    assert.equal(TASK_KIND_CONFIG.journal_prompt.seedPaused, true);
+    assert.equal(TASK_KIND_CONFIG.morning_brief.seedPaused, false);
   });
 });
 

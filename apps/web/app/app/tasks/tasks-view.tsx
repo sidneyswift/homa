@@ -172,17 +172,17 @@ function TaskCard({
                 {copy.label}
               </button>
               <p className="mt-0.5 text-sm text-muted">{copy.description}</p>
+              {/* Delivery shows for every kind since built-ins became a
+                  choice too (founder ruling 2026-07-12 evening). */}
               <p className="mt-2 text-xs font-semibold text-subtle">
                 {weekdaysLabel(task.weekdays)} {"\u00b7"} {hourLabel(task.localHour)}
-                {task.kind === "custom"
-                  ? ` \u00b7 ${
-                      task.deliveryPref === "text"
-                        ? "by text"
-                        : task.deliveryPref === "email"
-                          ? "by email"
-                          : "saved to this page"
-                    }`
-                  : ""}
+                {` \u00b7 ${
+                  task.deliveryPref === "text"
+                    ? "by text"
+                    : task.deliveryPref === "email"
+                      ? "by email"
+                      : "saved to this page"
+                }`}
                 {next ? ` \u00b7 next: ${next}` : task.paused ? " \u00b7 off" : ""}
               </p>
             </div>
@@ -230,14 +230,12 @@ export function TasksView({
   runs,
   timeZone,
   briefFlagOn,
-  journalFlagOn,
   textingLinked,
 }: {
   tasks: TaskRowView[];
   runs: TaskRunView[];
   timeZone: string;
   briefFlagOn: boolean;
-  journalFlagOn: boolean;
   textingLinked: boolean;
 }) {
   const [creating, setCreating] = useState(false);
@@ -293,13 +291,11 @@ export function TasksView({
             />
           ) : null}
           {!hasJournal ? (
+            // The check-in seeds switched off (kinds.ts seedPaused), so
+            // its placeholder never promises it starts on its own.
             <DarkKindCard
               kind="journal_prompt"
-              note={
-                journalFlagOn
-                  ? "Starts on its own in the evening."
-                  : "Almost ready. It starts on its own, nothing to set up."
-              }
+              note="Almost ready. It stays off until you turn it on."
             />
           ) : null}
           {tasks.map((task) => (

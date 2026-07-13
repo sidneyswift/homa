@@ -89,7 +89,6 @@ export default async function TasksPage() {
         runs={runs}
         timeZone={effectiveTimeZone(family.time_zone)}
         briefFlagOn={process.env.MORNING_BRIEF_ENABLED === "true"}
-        journalFlagOn={process.env.JOURNAL_PROMPT_ENABLED === "true"}
         textingLinked={textingLinked}
       />
     </PageColumn>
