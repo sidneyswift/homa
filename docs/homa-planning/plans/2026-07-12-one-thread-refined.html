@@ -555,7 +555,7 @@ function wordmarkHtml() {
 function railHtml() {
   const dead = ' tabindex="-1" aria-hidden="true"';
   return '<div class="rail">' + wordmarkHtml() +
-    '<button type="button" class="nav-item active"' + dead + '>' + NAV_ICONS.ask + 'Ask</button>' +
+    '<button type="button" class="nav-item active"' + dead + '>' + NAV_ICONS.ask + 'Chat</button>' +
     '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.progress + 'Progress</button>' +
     '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.planner + 'Planner</button>' +
     '<button type="button" class="nav-item"' + dead + '>' + NAV_ICONS.binder + 'Binder</button>' +
@@ -747,7 +747,7 @@ function frameHtml() {
     : "";
   const inner = '' +
     '<div class="chat-top">' +
-      "<h3>Ask</h3>" +
+      "<h3>Chat</h3>" +
       '<button type="button" class="chrome-pill" id="open-chats" aria-expanded="' + (state.panelOpen ? "true" : "false") + '">Chats</button>' +
     "</div>" +
     '<div class="thread-wrap">' +

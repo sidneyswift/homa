@@ -23,7 +23,7 @@ import {
  * signed-in visitors (same tabs, same icons, no drift).
  */
 export const APP_NAV_ITEMS = [
-  { href: "/app", label: "Ask", icon: Sparkles },
+  { href: "/app", label: "Chat", icon: Sparkles },
   { href: "/app/progress", label: "Progress", icon: ChartLine },
   { href: "/app/planner", label: "Planner", icon: Calendar },
   { href: "/app/binder", label: "Binder", icon: BookOpen },
