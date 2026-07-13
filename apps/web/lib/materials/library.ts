@@ -88,6 +88,94 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
   };
 }
 
+/**
+ * What show_material needs to put an existing material back in front of
+ * the parent: the card fields (child as a display name, not an id), the
+ * stored quality-check verdict (SMS re-sends stay behind the same review
+ * gate create_printable enforces), and the status (superseded drafts
+ * lose their Blob bytes at finalize, so they are not re-showable).
+ */
+export interface MaterialCardView {
+  id: string;
+  title: string;
+  kind: MaterialKind;
+  status: "draft" | "final" | "superseded";
+  skill: string | null;
+  childName: string | null;
+  previewUrl: string;
+  pdfUrl: string;
+  /** The stored review verdict; true when no review ran (create_printable's rule). */
+  reviewPassed: boolean;
+}
+
+interface MaterialCardRow {
+  id: string;
+  title: string;
+  kind: MaterialKind;
+  status: "draft" | "final" | "superseded";
+  skill: string | null;
+  child_name: string | null;
+  preview_url: string;
+  pdf_url: string;
+  review_pass: string | null;
+}
+
+function toCardView(row: MaterialCardRow): MaterialCardView {
+  return {
+    id: row.id,
+    title: row.title,
+    kind: row.kind,
+    status: row.status,
+    skill: row.skill,
+    childName: row.child_name,
+    previewUrl: row.preview_url,
+    pdfUrl: row.pdf_url,
+    reviewPassed: row.review_pass !== "false",
+  };
+}
+
+export async function getMaterialCardPinned(
+  familyId: string,
+  materialId: string,
+): Promise<MaterialCardView | null> {
+  const sql = mapDb();
+  const rows = await sql<MaterialCardRow[]>`
+    select m.id, m.title, m.kind, m.status, m.skill,
+           c.name as child_name, m.preview_url, m.pdf_url,
+           m.generation->'review'->>'pass' as review_pass
+    from public.materials m
+    left join public.children c
+      on c.id = m.child_id and c.family_id = m.family_id
+    where m.id = ${materialId} and m.family_id = ${familyId}
+  `;
+  return rows[0] ? toCardView(rows[0]) : null;
+}
+
+export async function getMaterialCardCaller(
+  db: SupabaseClient,
+  familyId: string,
+  materialId: string,
+): Promise<MaterialCardView | null> {
+  const { data, error } = await db
+    .from("materials")
+    .select(
+      "id, title, kind, status, skill, preview_url, pdf_url, " +
+        "review_pass:generation->review->>pass, children(name)",
+    )
+    .eq("family_id", familyId)
+    .eq("id", materialId)
+    .maybeSingle();
+  if (error) {
+    console.error("material card read failed:", error.message);
+    throw new Error("Could not read saved materials.");
+  }
+  if (!data) return null;
+  const row = data as unknown as Omit<MaterialCardRow, "child_name"> & {
+    children: { name: string } | null;
+  };
+  return toCardView({ ...row, child_name: row.children?.name ?? null });
+}
+
 /** One material with its html (the reuse path), or null. */
 export async function getMaterialPinned(
   familyId: string,

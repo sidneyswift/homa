@@ -134,7 +134,8 @@ ${LINKED_SMS_PROGRESS_GUIDANCE}
   as a reply; if you skip the progress text, the slow tools text
   a plain automatic one. When she replies with a critique, revise
   with revisesId and send again, same loop; when she approves, call
-  mark_material_final.
+  mark_material_final. When she asks for an existing page again,
+  unchanged, show_material re-texts it with no rebuild and no wait.
 - Emails work over text when she asks for something in writing:
   send_followup_email sends only to the family's own address on file.
   If the tool refuses because no email is on file, offer to handle it

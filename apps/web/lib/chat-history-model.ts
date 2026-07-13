@@ -26,6 +26,46 @@ export interface ChatHistoryMessage {
   atMs: number;
 }
 
+/**
+ * A material made during one of the scrollback's sessions, read from
+ * public.materials (which stamps its creating session in generation).
+ * conversation_messages stores plain text, so without this join a
+ * material card lives only in the live eve stream: one dead stream or
+ * one reload and the worksheet she was told to "take a look" at has no
+ * card anywhere (the Vega family incident, 2026-07-13).
+ */
+export interface ChatHistoryMaterial {
+  id: string;
+  sessionId: string;
+  title: string;
+  kind: string | null;
+  skill: string | null;
+  childName: string | null;
+  previewUrl: string;
+  pdfUrl: string;
+  /** materials.created_at as epoch ms, for transcript placement. */
+  atMs: number;
+}
+
+/** Raw row shape as selected from materials (JSON paths aliased). */
+export interface ChatHistoryMaterialRow {
+  id: string;
+  title: string | null;
+  kind: string | null;
+  skill: string | null;
+  preview_url: string | null;
+  pdf_url: string | null;
+  created_at: string;
+  session_id: string | null;
+  child_name: string | null;
+}
+
+/** Everything the chat page's server read hands the client. */
+export interface ChatHistoryPayload {
+  messages: ChatHistoryMessage[];
+  materials: ChatHistoryMaterial[];
+}
+
 /** Raw row shape as selected from conversation_messages. */
 export interface ChatHistoryRow {
   id: string;
@@ -86,31 +126,117 @@ export function mergeChatHistoryRows(
   return merged.length > cap ? merged.slice(merged.length - cap) : merged;
 }
 
+export function toChatHistoryMaterial(
+  row: ChatHistoryMaterialRow,
+): ChatHistoryMaterial | null {
+  if (!row.session_id || !row.title || !row.preview_url || !row.pdf_url) {
+    return null;
+  }
+  const atMs = Date.parse(row.created_at);
+  if (Number.isNaN(atMs)) return null;
+  return {
+    id: row.id,
+    sessionId: row.session_id,
+    title: row.title,
+    kind: row.kind,
+    skill: row.skill,
+    childName: row.child_name,
+    previewUrl: row.preview_url,
+    pdfUrl: row.pdf_url,
+    atMs,
+  };
+}
+
+/** The dynamic-tool part shape message-parts.tsx renders as a
+ *  MaterialCard, rebuilt from the durable materials row. */
+function materialToolPart(material: ChatHistoryMaterial) {
+  return {
+    type: "dynamic-tool",
+    state: "output-available",
+    toolName: "create_printable",
+    output: {
+      created: true,
+      material: {
+        id: material.id,
+        title: material.title,
+        kind: material.kind ?? undefined,
+        skill: material.skill,
+        childName: material.childName,
+        previewUrl: material.previewUrl,
+        pdfUrl: material.pdfUrl,
+      },
+    },
+  };
+}
+
 /**
- * archiveFromServerHistory(history, excludeSessionId): server rows in
+ * archiveFromServerHistory(payload, excludeSessionId): server rows in
  * the render archive's shape. The current live eve session's rows are
  * excluded: the live store replays those from its own event log, and
- * rendering both would double every message. The minimal EveMessage
- * built here (id, role, one text part) is exactly what the transcript
- * renderer reads; richer parts (tool cards) exist only in live
- * sessions. The `hist:` id prefix keeps server ids from ever colliding
- * with eve's per-session turn ids.
+ * rendering both would double every message. The `hist:` id prefix
+ * keeps server ids from ever colliding with eve's per-session turn ids.
+ *
+ * Materials render as cards in scrollback, same as a live turn: each
+ * one becomes a create_printable part on the first assistant message
+ * of its session at or after its creation (cards above the reply text,
+ * matching live part order). A material whose reply text never
+ * persisted still shows, as its own `mat:` message at its timestamp.
  */
 export function archiveFromServerHistory(
-  history: readonly ChatHistoryMessage[],
+  payload: ChatHistoryPayload,
   excludeSessionId: string | undefined,
 ): { at: number; channel: ChatHistoryChannel; message: EveMessage }[] {
-  return history
-    .filter((entry) => entry.sessionId !== excludeSessionId)
-    .map((entry) => ({
-      at: entry.atMs,
-      channel: entry.channel,
+  const history = payload.messages.filter(
+    (entry) => entry.sessionId !== excludeSessionId,
+  );
+  const materials = payload.materials.filter(
+    (material) => material.sessionId !== excludeSessionId,
+  );
+
+  const cardsByMessageId = new Map<string, ChatHistoryMaterial[]>();
+  const standalone: ChatHistoryMaterial[] = [];
+  for (const material of materials) {
+    const host = history.find(
+      (entry) =>
+        entry.role === "assistant" &&
+        entry.sessionId === material.sessionId &&
+        entry.atMs >= material.atMs,
+    );
+    if (host) {
+      const cards = cardsByMessageId.get(host.id) ?? [];
+      cards.push(material);
+      cardsByMessageId.set(host.id, cards);
+    } else {
+      standalone.push(material);
+    }
+  }
+
+  const archive = history.map((entry) => ({
+    at: entry.atMs,
+    channel: entry.channel,
+    message: {
+      id: `hist:${entry.id}`,
+      role: entry.role,
+      parts: [
+        ...(cardsByMessageId.get(entry.id) ?? []).map(materialToolPart),
+        { type: "text", text: entry.content },
+      ],
+    } as EveMessage,
+  }));
+
+  for (const material of standalone) {
+    archive.push({
+      at: material.atMs,
+      channel: "web",
       message: {
-        id: `hist:${entry.id}`,
-        role: entry.role,
-        parts: [{ type: "text", text: entry.content }],
+        id: `mat:${material.id}`,
+        role: "assistant",
+        parts: [materialToolPart(material)],
       } as EveMessage,
-    }));
+    });
+  }
+
+  return archive.sort((a, b) => a.at - b.at);
 }
 
 /**

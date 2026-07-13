@@ -13,6 +13,7 @@ import {
   timeLabel,
 } from "../../../../lib/admin/format";
 import { formatUsd } from "../../../../lib/model-pricing";
+import { AgentPromptButton } from "../../agent-prompt-button";
 import { EmptyNote, Pill, SectionHead, statusTone } from "../../ui";
 
 /**
@@ -104,13 +105,18 @@ export default async function AdminSessionDetailPage({
       <p className="mt-1 font-mono text-[0.62rem] text-subtle">{detail.sessionId}</p>
 
       {detail.run?.error ? (
-        <div className="mt-3 rounded-md border border-[var(--rose-500)] bg-[var(--danger-soft)] px-3.5 py-2.5 text-sm font-semibold text-[var(--rose-600)]">
-          {detail.run.error}
-          {detail.toolCalls.some((call) => call.status === "requested") ? (
-            <span className="block font-normal">
-              The trace below shows a tool call that never returned; that is where it died.
-            </span>
-          ) : null}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md border border-[var(--rose-500)] bg-[var(--danger-soft)] px-3.5 py-2.5 text-sm font-semibold text-[var(--rose-600)]">
+          <div className="min-w-0">
+            {detail.run.error}
+            {detail.toolCalls.some((call) => call.status === "requested") ? (
+              <span className="block font-normal">
+                The trace below shows a tool call that never returned; that is where it died.
+              </span>
+            ) : null}
+          </div>
+          <div className="shrink-0">
+            <AgentPromptButton source="task_run" sourceId={detail.run.id} />
+          </div>
         </div>
       ) : null}
 

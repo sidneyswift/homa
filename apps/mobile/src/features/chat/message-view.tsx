@@ -78,8 +78,14 @@ function MessagePartView({
     return <MarkdownText text={part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
-      // create_worksheet is the retired v1 name (legacy transcripts).
+    if (
+      part.toolName === "create_printable" ||
+      part.toolName === "show_material" ||
+      part.toolName === "create_worksheet"
+    ) {
+      // show_material re-surfaces an existing material as the same
+      // card; create_worksheet is the retired v1 name (legacy
+      // transcripts).
       const output = part.output as
         | { material?: MaterialArtifact; worksheet?: MaterialArtifact }
         | undefined;

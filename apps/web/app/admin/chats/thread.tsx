@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { ThreadMessage } from "../../../lib/admin/chats-data";
 import { dayKey, dayLabel, timeLabel } from "../../../lib/admin/format";
+import { MarkdownText } from "../../app/markdown-text";
 
 /**
  * The founder chat reader's thread (one component behind two doors:
@@ -10,6 +11,11 @@ import { dayKey, dayLabel, timeLabel } from "../../../lib/admin/format";
  * time zone; internal dispatch prompts render dashed and labeled so the
  * scheduler's words never read as the parent's. With xray on, every
  * bubble grows a session chip into the inspector.
+ *
+ * Each bubble reads as the parent experienced it: Homa's web replies
+ * render through the same markdown component as the parent's chat;
+ * texts, emails, the parent's own messages, and internal prompts are
+ * delivered as raw text, so they stay verbatim.
  */
 
 const CHANNEL_LABEL: Record<string, string> = {
@@ -55,6 +61,16 @@ export function ChatThread({
             {day.rows.map((message) => {
               const mine = message.role === "user";
               const internal = message.visibility === "internal";
+              // Web replies and family-visible task output (dispatch
+              // rows delivered into the web transcript) rendered as
+              // markdown for the parent, so they do here too. Texts and
+              // emails arrived as raw characters; raw is what she saw,
+              // and raw keeps an SMS markdown slip visible to the
+              // founder. Internal prompts she never saw.
+              const parentSawMarkdown =
+                !mine &&
+                !internal &&
+                (message.channel === "web" || message.channel === "dispatch");
               return (
                 <div
                   key={message.id}
@@ -74,7 +90,13 @@ export function ChatThread({
                         internal · the task&apos;s prompt to Homa
                       </p>
                     ) : null}
-                    <p className="whitespace-pre-wrap text-sm text-body">{message.content}</p>
+                    {parentSawMarkdown ? (
+                      <div className="text-sm text-body">
+                        <MarkdownText text={message.content} />
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap text-sm text-body">{message.content}</p>
+                    )}
                     <p className="mt-1.5 font-mono text-[0.62rem] text-subtle">
                       {timeLabel(message.createdAt, timeZone)}
                       {" · "}

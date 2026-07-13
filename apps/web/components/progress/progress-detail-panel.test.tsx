@@ -26,7 +26,6 @@ const TILE = {
     background: "var(--gold-100)",
     color: "var(--gold-ink)",
   },
-  movement: { label: "+1 mo since Jun 10", tone: "gold" as const },
   freshness: { kind: "today" as const, label: "Updated today" },
   needsConfirm: true,
 };
@@ -51,7 +50,8 @@ describe("ProgressDetailPanel", () => {
     assert.match(html, /aria-labelledby="progress-panel-math"/);
     assert.match(html, /<h2 id="progress-panel-math"/);
     assert.match(html, /Ahead \u00b7 \+8 mo/);
-    assert.match(html, /\+1 mo since Jun 10/);
+    // The dated movement chip retired from this surface (2026-07-13).
+    assert.doesNotMatch(html, /since Jun 10/);
     assert.match(
       html,
       /4 observations \u00b7 Elena and Jordan shared different answers on Jul 11, 2026\. Both answers are saved\./,

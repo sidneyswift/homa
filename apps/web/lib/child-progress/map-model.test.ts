@@ -84,7 +84,6 @@ describe("buildProgressTiles", () => {
           ["literacy", "math"],
         ),
       ),
-      undefined,
       NOW,
     );
 
@@ -113,7 +112,6 @@ describe("buildProgressTiles", () => {
           ["math", "literacy", "science"],
         ),
       ),
-      undefined,
       NOW,
     );
 
@@ -128,38 +126,6 @@ describe("buildProgressTiles", () => {
     assert.equal(byId.get("science")?.badge?.color, "var(--sky-600)");
     // Unmapped subjects carry no verdict at all.
     assert.equal(byId.get("art")?.badge, null);
-  });
-
-  it("shows positive movement only, from the prior scoring", () => {
-    const current = scores(
-      [
-        { subjectId: "math", monthsAhead: 8 },
-        { subjectId: "literacy", position: "on_track", monthsAhead: 2 },
-      ],
-      ["math", "literacy"],
-    );
-    const prior = scores(
-      [
-        { subjectId: "math", monthsAhead: 7 },
-        { subjectId: "literacy", position: "on_track", monthsAhead: 3 },
-      ],
-      ["math", "literacy"],
-    );
-    const tiles = buildProgressTiles(
-      view(
-        [
-          subjectView({ subjectId: "math" }),
-          subjectView({ subjectId: "literacy" }),
-        ],
-        current,
-      ),
-      { scores: prior, generated_at: "2026-06-10T16:00:00.000Z" },
-      NOW,
-    );
-
-    assert.equal(tiles[0].movement?.label, "+1 mo since Jun 10");
-    // The literacy drop renders nothing (anti-guilt law).
-    assert.equal(tiles[1].movement, null);
   });
 
   it("labels freshness as today, a dated update, or a quiet stretch", () => {
@@ -186,7 +152,6 @@ describe("buildProgressTiles", () => {
         ],
         scores([], []),
       ),
-      undefined,
       NOW,
     );
 
@@ -214,7 +179,6 @@ describe("buildProgressTiles", () => {
         ],
         scores([], []),
       ),
-      undefined,
       NOW,
     );
 

@@ -28,6 +28,8 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `apps/web/lib/attachments/` | Chat attachment module: marker format (caption + blob URL riding `conversation_messages`, parsed back for rendering) and the channel-neutral normalizer reusing the SMS lanes |
 | `apps/web/app/api/chat/upload/` and `apps/web/app/api/chat/attachments/` | Family-scoped Blob client-upload tokens for chat files, then the prepare step (normalize, caption, persist `chat_attachments`, return model parts and receipts) and the receipt's Undo |
 | `apps/web/app/app/chat-attachments.tsx`, `attachment-message-parts.tsx`, `worked-for.tsx`, and `snap-card.tsx` | Composer attach flow (+ menu, camera, staged chips), polaroid photos and save receipts in the transcript, the worked-for reasoning chain, and the ask_for_photo camera card with its dim rule |
+| `apps/web/lib/search/` and `apps/web/agent/tools/search_photos.ts`, `keep_photo.ts` | The studio's photo desk: SerpAPI Google Images with forced safe search, HMAC photo tokens (query-only model surface, never URLs), and rehosting into the family's blob space (`pnpm check:photo-search`; smoke: `apps/web/scripts/serpapi-smoke.mts`) |
+| `apps/web/lib/search/firecrawl.ts` and `apps/web/agent/tools/web_fetch.ts` | Web page reading: Firecrawl scrape to size-capped markdown for curriculum pages, TPT listings, and parent-shared links, budgeted per family per day (founder ruling 2026-07-13, `web-fetch-firecrawl`; `pnpm check:web-fetch`; smoke: `apps/web/scripts/firecrawl-smoke.mts`) |
 | `apps/web/lib/sms-progress.ts` | Shared, deduped progress-text submission for slow SMS turns and material fallbacks |
 | `apps/web/lib/sms-segments.ts` | Carrier segment math (GSM-7 vs UCS-2, 10-segment cap) shared by the SMS transport preflight and long-copy producers like the morning brief |
 | `apps/web/lib/conversation-continuity/` | Canonical cross-channel conversation module: episodes, bounded inbound provenance, actor/recipient causality, per-adult deliveries, open replies, transport bindings, context hydration |
@@ -49,6 +51,7 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `docs/homa-planning/` | Product contract, founder registry, ticket backlog, dated plans, runbooks, and preserved history |
 | `docs/homa-design/` | Brand + UI source of truth ("Warm and playful"): tokens, UI kits, voice rules |
 | `docs/homa-benchmarks/` | Internal national-benchmark corpus (ages 2 to 16, all subjects): sourced anchor base for the map bank and progress reports |
+| `docs/homa-curriculum-atlas/` | Curriculum atlas: dated competitive/reference profiles of the homeschool curriculum market (87 profiles with parseable front matter, category comparisons, market overview, product implications) |
 | `docs/notes/` | Running implementation notes that record discoveries and plan deviations |
 | `docs/superpowers/` | Approved feature designs and executable implementation plans |
 | `docs/homa-planning/reconciliation/` | Exhaustive documentation manifest, claim ledger, and time-bounded evidence |

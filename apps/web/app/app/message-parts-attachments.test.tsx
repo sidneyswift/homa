@@ -114,6 +114,12 @@ describe("worked-for line", () => {
         {
           type: "dynamic-tool",
           state: "output-available",
+          toolName: "show_material",
+          output: { material: { title: "Tails practice", previewUrl: "x", pdfUrl: "y" } },
+        },
+        {
+          type: "dynamic-tool",
+          state: "output-available",
           toolName: "some_new_tool",
           output: {},
         },
@@ -126,9 +132,10 @@ describe("worked-for line", () => {
     );
     assert.deepEqual(
       steps.map((step) => step.label),
-      ["Made the page", "Worked on it"],
+      ["Made the page", "Brought the page back", "Worked on it"],
     );
     assert.equal(steps[0]?.detail, "Tails practice");
+    assert.equal(steps[1]?.detail, "Tails practice");
   });
 
   it("renders one collapsed line with the seconds count", () => {
@@ -151,6 +158,59 @@ describe("worked-for line", () => {
     assert.match(html, /aria-expanded="false"/u);
     assert.doesNotMatch(html, /Checked your family(&#x27;|')s info/u);
     assert.match(html, /Here you go\./u);
+  });
+});
+
+describe("re-shown material", () => {
+  it("renders a show_material result as the same material card", () => {
+    const html = renderToStaticMarkup(
+      <MessageView
+        timeZone="America/Chicago"
+        message={assistantMessage([
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolName: "show_material",
+            output: {
+              shown: true,
+              material: {
+                title: "Mateo's Letter M Tracing",
+                kind: "worksheet",
+                skill: "letter M tracing",
+                childName: "Mateo",
+                previewUrl: "https://blob.example/preview.jpg",
+                pdfUrl: "https://blob.example/page.pdf",
+              },
+            },
+          },
+          { type: "text", text: "Here it is again." },
+        ])}
+      />,
+    );
+    assert.match(html, /Worksheet ready/u);
+    assert.match(html, /Mateo(&#x27;|')s Letter M Tracing/u);
+    assert.match(html, /src="https:\/\/blob\.example\/preview\.jpg"/u);
+    assert.match(html, />Print it</u);
+    assert.match(html, /Here it is again\./u);
+  });
+
+  it("renders no card when show_material found nothing", () => {
+    const html = renderToStaticMarkup(
+      <MessageView
+        timeZone="America/Chicago"
+        message={assistantMessage([
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolName: "show_material",
+            output: { shown: false, note: "not in this family" },
+          },
+          { type: "text", text: "Let me look again." },
+        ])}
+      />,
+    );
+    assert.doesNotMatch(html, /Print it/u);
+    assert.match(html, /Let me look again\./u);
   });
 });
 

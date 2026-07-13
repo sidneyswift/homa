@@ -45,6 +45,7 @@ const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
   get_children: { icon: Users, label: "Checked your family's info" },
   create_printable: { icon: FileText, label: "Made the page" },
   create_worksheet: { icon: FileText, label: "Made the page" },
+  show_material: { icon: FileText, label: "Brought the page back" },
   generate_image: { icon: ImageIcon, label: "Made an image" },
   find_materials: { icon: Search, label: "Looked through your materials" },
   mark_material_final: { icon: Check, label: "Kept the final version" },
@@ -68,7 +69,11 @@ const FALLBACK_STEP = { icon: Wrench, label: "Worked on it" };
 /** Findings worth a line under the step, per tool output shape. */
 function stepDetail(toolName: string, output: unknown): string | null {
   const record = (output ?? {}) as Record<string, unknown>;
-  if (toolName === "create_printable" || toolName === "create_worksheet") {
+  if (
+    toolName === "create_printable" ||
+    toolName === "create_worksheet" ||
+    toolName === "show_material"
+  ) {
     const material = (record.material ?? record.worksheet ?? {}) as Record<string, unknown>;
     if (typeof material.title === "string") return material.title;
   }

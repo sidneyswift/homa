@@ -12,7 +12,7 @@ import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
   archiveFromServerHistory,
-  type ChatHistoryMessage,
+  type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
@@ -177,11 +177,12 @@ export function ChatClient({
   familyId: string | null;
   timeZone: string;
   parentName: string | null;
-  /** The per-adult scrollback from Postgres (lib/chat-history.ts), the
-   * same on every device. Null when the fetch failed or the flag is
-   * off; the localStorage archive renders instead, exactly as before
-   * the M1-02 render slice. */
-  serverHistory?: ChatHistoryMessage[] | null;
+  /** The per-adult scrollback from Postgres (lib/chat-history.ts):
+   * messages plus the sessions' material cards, the same on every
+   * device. Null when the fetch failed or the flag is off; the
+   * localStorage archive renders instead, exactly as before the M1-02
+   * render slice. */
+  serverHistory?: ChatHistoryPayload | null;
   /** The wall (plans/2026-07-11-the-wall.md): checkout URLs when this
    * family is walled, null when the composer is open (the default, and
    * always the case while HOMA_WALL_ENABLED is off). */
@@ -205,6 +206,17 @@ export function ChatClient({
   // Load + rotation decision, once per mount (fresh morning = fresh
   // session; the old session's messages fold into the archive).
   const [prepared] = useState(() => prepareChat(storageKey, timeZone));
+  // A saved event log without a session id is a dead half-turn: the
+  // eve client wipes the id when a stream dies without reaching a
+  // boundary event. With the server record on screen those events
+  // would render the same turn twice (the Vega duplicate bubble,
+  // 2026-07-13), and there is nothing to resume anyway, so the server
+  // record wins and the store starts clean. Without server history the
+  // local events stay: half a transcript beats none.
+  const staleSessionlessEvents =
+    Boolean(serverHistory) &&
+    !prepared.initialSession?.sessionId &&
+    prepared.initialEvents.length > 0;
   // Scrollback: the server record when the page load carried it (one
   // thread, same on every device), the localStorage cache otherwise.
   // The live session's own rows are excluded server-side of the seam:
@@ -237,6 +249,8 @@ export function ChatClient({
   const sendRef = useRef<
     ((input: { message: string | UserContent }) => Promise<void>) | null
   >(null);
+  /** Lost-turn recovery, held by ref for onFinish (same reason). */
+  const startRecoveryRef = useRef<(() => void) | null>(null);
   // The attach flow (approved chat redesign): staged files upload to
   // the family's own blob space as she picks them; send trades URLs
   // for model parts and binder receipts.
@@ -285,10 +299,16 @@ export function ChatClient({
   // stream cursor (session streamIndex at mount + one per received
   // event, surviving localStorage event trimming), what the last send
   // carried, and the in-flight recovery's abort handle.
-  const durableCursorRef = useRef(prepared.initialSession?.streamIndex ?? 0);
+  const durableCursorRef = useRef(
+    staleSessionlessEvents ? 0 : prepared.initialSession?.streamIndex ?? 0,
+  );
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
+  /** True between a stall auto-stop (watchdog / wake grace) and the
+   *  onFinish it causes: the one stop that should trigger recovery,
+   *  because nobody chose it and the durable turn may have finished. */
+  const autoStoppedRef = useRef(false);
 
   const emitTurnCompleted = useCallback(
     async (
@@ -326,8 +346,8 @@ export function ChatClient({
       },
     },
     maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
-    initialEvents: prepared.initialEvents,
-    initialSession: prepared.initialSession,
+    initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
+    initialSession: staleSessionlessEvents ? undefined : prepared.initialSession,
     onEvent() {
       lastStreamActivityRef.current = currentTimeMs();
       durableCursorRef.current += 1;
@@ -392,6 +412,17 @@ export function ChatClient({
           markTurnStarted();
           void sendRef.current?.({ message });
         }, 0);
+      }
+      // A stall auto-stop is nobody's Stop and no error: the stream
+      // died silently while the durable turn kept working server-side
+      // (the Vega worksheet, 2026-07-13: watchdog at 225s, reply and
+      // cards finished fine in Postgres). Replay the session so the
+      // reply still lands. Her queued words keep priority; recovery
+      // stands down the moment she sends (sendMessage aborts it).
+      const autoStopped = autoStoppedRef.current;
+      autoStoppedRef.current = false;
+      if (autoStopped && !snapshot.error && queued.length === 0) {
+        startRecoveryRef.current?.();
       }
     },
   });
@@ -478,15 +509,16 @@ export function ChatClient({
     archivedRef.current = archived;
   }, [archived]);
 
-  useEffect(() => {
-    if (!agentError || agentError === reportedErrorRef.current) return;
-    reportedErrorRef.current = agentError;
-    void emitTurnCompleted("error", "turn_failed");
-
-    // Lost-turn recovery (incident 2026-07-11 follow-up): the durable
-    // run usually outlives a dead stream, so before leaving her with
-    // the error banner, replay the session server-side and fold the
-    // finished conversation, reply included, back into the transcript.
+  /**
+   * Lost-turn recovery (incident 2026-07-11 follow-up): the durable
+   * run usually outlives a dead stream, so replay the session
+   * server-side and fold the finished conversation, reply and material
+   * cards included, back into the transcript. Shared by the error
+   * banner path and the stall auto-stop path; no-ops while a recovery
+   * is already running, and stands down when she sends (the abort in
+   * sendMessage).
+   */
+  const startLostTurnRecovery = useCallback(() => {
     const lastSend = lastSendRef.current;
     if (!lastSend || recoveryRef.current) return;
     const controller = new AbortController();
@@ -537,7 +569,18 @@ export function ChatClient({
       }
       setRecovering(false);
     })();
-  }, [agentError, agentReset, emitTurnCompleted, liveTimes, storageKey, supabase]);
+  }, [agentReset, liveTimes, storageKey, supabase]);
+
+  useEffect(() => {
+    startRecoveryRef.current = startLostTurnRecovery;
+  }, [startLostTurnRecovery]);
+
+  useEffect(() => {
+    if (!agentError || agentError === reportedErrorRef.current) return;
+    reportedErrorRef.current = agentError;
+    void emitTurnCompleted("error", "turn_failed");
+    startLostTurnRecovery();
+  }, [agentError, emitTurnCompleted, startLostTurnRecovery]);
 
   // Give up a running recovery when she leaves the page.
   useEffect(() => {
@@ -566,11 +609,17 @@ export function ChatClient({
       wakeGraceTimer = setTimeout(() => {
         wakeGraceTimer = null;
         // Still nothing after the grace: the stream really is dead.
-        if (isStale(VISIBLE_STALL_MS)) agentStop();
+        if (isStale(VISIBLE_STALL_MS)) {
+          autoStoppedRef.current = true;
+          agentStop();
+        }
       }, WAKE_GRACE_MS);
     };
     const watchdog = setInterval(() => {
-      if (isStale(WATCHDOG_STALL_MS)) agentStop();
+      if (isStale(WATCHDOG_STALL_MS)) {
+        autoStoppedRef.current = true;
+        agentStop();
+      }
     }, 15_000);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
@@ -745,6 +794,7 @@ export function ChatClient({
     ].join("\n\n");
     setQueued([]);
     setBusySeconds(0);
+    autoStoppedRef.current = false;
     turnModalityRef.current = plan.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     turnStartedAtRef.current = currentTimeMs();
@@ -799,6 +849,7 @@ export function ChatClient({
       recoveryRef.current?.abort();
       if (!agent.session?.sessionId) durableCursorRef.current = 0;
       setBusySeconds(0);
+      autoStoppedRef.current = false;
       turnModalityRef.current = "text";
       lastSendRef.current = { text: summary, atMs: currentTimeMs() };
       turnStartedAtRef.current = currentTimeMs();

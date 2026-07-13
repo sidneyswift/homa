@@ -130,6 +130,12 @@ which happens deliberately with M0-03/M2-05 (the sandbox worksheet factory)
     and its deny-all egress + credential brokering posture. The original statement
     that no sentinel modules existed applied only before the ruling was implemented.
 
+> **Superseded in part, 2026-07-13** (`web-fetch-firecrawl` in the ruling
+> register, journeys/10-reconciliation.md §5): the founder re-enabled
+> `web_fetch` as an authored, Firecrawl-backed tool and explicitly accepted
+> the injection and exfiltration risk this section guarded against, ahead of
+> M2-14. `bash` and `write_file` remain disabled; nothing else here changes.
+
 ## 4. What Hermes/OpenClaw local can do that eve cloud cannot
 
 Structural, not fixable by building:

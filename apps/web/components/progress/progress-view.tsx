@@ -9,17 +9,22 @@ import type { ChildProgressView } from "../../lib/child-progress/types";
 import { progressEmptyState } from "../../lib/child-progress/view-copy";
 import type { DashboardReport } from "../../lib/dashboard";
 import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
+import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
 import { ProgressMap } from "./progress-map";
+import { ProgressSubjects } from "./progress-subjects";
+import type { SubjectDoorRow } from "./subject-door-context";
 
 /**
- * The live Progress page in the founder-chosen refined shape
- * (plans/2026-07-12-progress-tab-refined.html): a bare header with the
- * freshness line and the report door, the report's own trajectory chart,
- * then the subject map. Tiles open a detail panel (ProgressMap); the
- * stacked subject cards and the intro sentence retired with this layout.
+ * The live Progress page: a bare header with the freshness line and the
+ * report door, then ONE subject card (founder ask 2026-07-13): the
+ * snapshot chart whose legend rows are the subject-by-subject list,
+ * each row opening the subject's detail panel. The separate tile grid
+ * renders only when no chart exists yet (no scoring), so every subject
+ * keeps a door; the meaning box and the second card retired with this
+ * merge.
  */
 
 export interface ProgressViewKid {
@@ -108,9 +113,9 @@ export function ProgressView({
    * agent-led-live-progress ruling. Null when no report exists yet.
    */
   reportHref: string | null;
-  /** The child's report row (chart history and movement); null before
-   * the first scoring. */
-  report: Pick<DashboardReport, "scores" | "generatedAt" | "history"> | null;
+  /** The child's report row (the chart card's scoring date); null
+   * before the first scoring. */
+  report: Pick<DashboardReport, "generatedAt"> | null;
   /** The trajectory chart's scorings, oldest first, live last,
    * re-normalized server-side (lib/map/trajectory-eras). Empty before
    * the first scoring. */
@@ -119,7 +124,7 @@ export function ProgressView({
   kids: ProgressViewKid[];
 }) {
   const updatedLine = progressUpdatedLine(view);
-  const tiles = buildProgressTiles(view, report?.history[0], new Date());
+  const tiles = buildProgressTiles(view, new Date());
 
   const generatedDate = report
     ? new Date(report.generatedAt).toLocaleDateString("en-US", {
@@ -128,6 +133,20 @@ export function ProgressView({
         day: "numeric",
       })
     : null;
+
+  // The merged card needs a chart with at least one plottable line;
+  // before the first scoring the tile grid stays, so subjects keep
+  // their doors either way.
+  const hasChart =
+    report !== null &&
+    generatedDate !== null &&
+    eras.length > 0 &&
+    buildTrajectoryStory(eras).subjects.length > 0;
+  const doorRows: SubjectDoorRow[] = tiles.map((tile) => ({
+    subjectId: tile.subjectId,
+    displayName: tile.displayName,
+    needsConfirm: tile.needsConfirm,
+  }));
 
   return (
     <PageColumn>
@@ -169,33 +188,40 @@ export function ProgressView({
               childName={view.childName}
             />
           </div>
-        ) : (
-          <>
-            {report && generatedDate && eras.length > 0 ? (
+        ) : hasChart && generatedDate ? (
+          <div className="mt-6">
+            <ProgressSubjects
+              childId={view.childId}
+              subjects={view.subjects}
+              tiles={tiles}
+              conflicts={view.conflicts}
+              timeZone={view.timeZone}
+            >
               <ReportSnapshot
                 childName={view.childName}
                 birthMonth={view.birthDate}
                 generatedDate={generatedDate}
                 eras={eras}
-                className="mt-6"
+                className=""
+                doorRows={doorRows}
               />
-            ) : null}
-
-            <div className="mt-7">
-              <h2 className="font-display text-xl font-semibold text-strong">
-                Subject by subject
-              </h2>
-              <div className="mt-3">
-                <ProgressMap
-                  childId={view.childId}
-                  tiles={tiles}
-                  subjects={view.subjects}
-                  conflicts={view.conflicts}
-                  timeZone={view.timeZone}
-                />
-              </div>
+            </ProgressSubjects>
+          </div>
+        ) : (
+          <div className="mt-7">
+            <h2 className="font-display text-xl font-semibold text-strong">
+              Subject by subject
+            </h2>
+            <div className="mt-3">
+              <ProgressMap
+                childId={view.childId}
+                tiles={tiles}
+                subjects={view.subjects}
+                conflicts={view.conflicts}
+                timeZone={view.timeZone}
+              />
             </div>
-          </>
+          </div>
         )}
       </div>
     </PageColumn>

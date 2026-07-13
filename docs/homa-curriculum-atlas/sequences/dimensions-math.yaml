@@ -1,0 +1,345 @@
+# Generated from publisher scope-and-sequence documents; see README.md in
+# this folder for schema, protocol, and copyright policy. Chapter and
+# lesson titles are facts about the curriculum's organization; publisher
+# em dashes in titles are normalized to commas per repo law.
+id: dimensions-math
+name: Dimensions Math
+extracted: 2026-07-13
+sources:
+  - https://www.singaporemath.com/pages/scopes-sequences
+  - https://singapore-math.s3.us-west-2.amazonaws.com/scopes/DMPK5_Scope.pdf
+  - https://singapore-math.s3.us-west-2.amazonaws.com/scopes/DM68_Scope.pdf
+  - https://www.singaporemath.com/pages/dimensions-math-grades-prek-5-overviews
+  - https://singapore-math.s3.us-west-2.amazonaws.com/Alignments/DM_G2A-Overview.pdf
+  - https://singapore-math.s3.us-west-2.amazonaws.com/Alignments/DM_G2B-Overview.pdf
+notes: >
+  Grade 2 is extracted at lesson level, cross-checked between the PK-5
+  scope chart and the per-level overview PDFs (which also carry the
+  publisher's suggested class periods per chapter). Cumulative reviews
+  follow chapters 5, 7, 11, and 15 in grade 2. Grades 6-8 are extracted
+  at chapter level from the 6-8 scope tables; their lesson titles exist
+  in the same source and can be extracted next. PK-1 and 3-5 are pending:
+  the PK-5 chart's multi-column layout scrambles plain-text extraction,
+  so those levels wait for parsing against the per-level overview PDFs
+  (linked pattern: DM_G<level>-Overview.pdf) rather than being published
+  wrong. Periods for grade 2A chapters 6 and 7 are omitted because the
+  two chapters' tables merge in the overview extraction.
+levels:
+  - level: "PKA"
+    grade: PK
+    status: pending
+  - level: "PKB"
+    grade: PK
+    status: pending
+  - level: "KA"
+    grade: K
+    status: pending
+  - level: "KB"
+    grade: K
+    status: pending
+  - level: "1A"
+    grade: 1
+    status: pending
+  - level: "1B"
+    grade: 1
+    status: pending
+  - level: "2A"
+    grade: 2
+    status: lessons
+    chapters:
+      - n: 1
+        title: Numbers to 1,000
+        periods: "8-9"
+        lessons:
+          - Tens and Ones
+          - Counting by Tens or Ones
+          - Comparing Tens and Ones
+          - Hundreds, Tens, and Ones
+          - Place Value
+          - Comparing Hundreds, Tens, and Ones
+          - Counting by Hundreds, Tens, or Ones
+          - Practice
+      - n: 2
+        title: Addition and Subtraction, Part 1
+        periods: "5-6"
+        lessons:
+          - Strategies for Addition
+          - Strategies for Subtraction
+          - Parts and Whole
+          - Comparison
+          - Practice
+      - n: 3
+        title: Addition and Subtraction, Part 2
+        periods: "12-13"
+        lessons:
+          - Addition Without Regrouping
+          - Subtraction Without Regrouping
+          - Addition with Regrouping Ones
+          - Addition with Regrouping Tens
+          - Addition with Regrouping Tens and Ones
+          - Practice A
+          - Subtraction with Regrouping from Tens
+          - Subtraction with Regrouping from Hundreds
+          - Subtraction with Regrouping from Two Places
+          - Subtraction with Regrouping across Zeros
+          - Practice B
+          - Practice C
+      - n: 4
+        title: Length
+        periods: "8-9"
+        lessons:
+          - Centimeters
+          - Estimating Length in Centimeters
+          - Meters
+          - Estimating Length in Meters
+          - Inches
+          - Using Rulers
+          - Feet
+          - Practice
+      - n: 5
+        title: Weight
+        periods: "5-6"
+        lessons:
+          - Grams
+          - Kilograms
+          - Pounds
+          - Practice
+      - n: 6
+        title: Multiplication and Division
+        lessons:
+          - Multiplication, Part 1
+          - Multiplication, Part 2
+          - Practice A
+          - Division, Part 1
+          - Division, Part 2
+          - Multiplication and Division
+          - Practice B
+      - n: 7
+        title: Multiplication and Division of 2, 5, and 10
+        lessons:
+          - The Multiplication Table of 5
+          - Multiplication Facts of 5
+          - Practice A
+          - The Multiplication Table of 2
+          - Multiplication Facts of 2
+          - Practice B
+          - The Multiplication Table of 10
+          - Dividing by 2
+          - Dividing by 5 and 10
+          - Practice C
+          - Word Problems
+  - level: "2B"
+    grade: 2
+    status: lessons
+    chapters:
+      - n: 8
+        title: Mental Calculation
+        periods: "10-11"
+        lessons:
+          - Adding Ones Mentally
+          - Adding Tens Mentally
+          - Making 100
+          - Adding 97, 98, or 99
+          - Practice A
+          - Subtracting Ones Mentally
+          - Subtracting Tens Mentally
+          - Subtracting 97, 98, or 99
+          - Practice B
+          - Practice C
+      - n: 9
+        title: Multiplication and Division of 3 and 4
+        periods: "9-10"
+        lessons:
+          - The Multiplication Table of 3
+          - Multiplication Facts of 3
+          - Dividing by 3
+          - Practice A
+          - The Multiplication Table of 4
+          - Multiplication Facts of 4
+          - Dividing by 4
+          - Practice B
+          - Practice C
+      - n: 10
+        title: Money
+        periods: "8-9"
+        lessons:
+          - Making $1
+          - Dollars and Cents
+          - Making Change
+          - Comparing Money
+          - Practice A
+          - Adding Money
+          - Subtracting Money
+          - Practice B
+      - n: 11
+        title: Fractions
+        periods: "7-8"
+        lessons:
+          - Halves and Fourths
+          - Writing Unit Fractions
+          - Writing Fractions
+          - Fractions that Make 1 Whole
+          - Comparing and Ordering Fractions
+          - Practice
+      - n: 12
+        title: Time
+        periods: "4-5"
+        lessons:
+          - Telling Time
+          - Time Intervals
+          - A.M. and P.M.
+          - Practice
+      - n: 13
+        title: Capacity
+        periods: "3-4"
+        lessons:
+          - Comparing Capacity
+          - Units of Capacity
+          - Practice
+      - n: 14
+        title: Graphs
+        periods: "3-4"
+        lessons:
+          - Picture Graphs
+          - Bar Graphs
+          - Practice
+      - n: 15
+        title: Shapes
+        periods: "8-9"
+        lessons:
+          - Straight and Curved Sides
+          - Polygons
+          - Semicircles and Quarter-circles
+          - Patterns
+          - Solid Shapes
+          - Practice
+  - level: "3A"
+    grade: 3
+    status: pending
+  - level: "3B"
+    grade: 3
+    status: pending
+  - level: "4A"
+    grade: 4
+    status: pending
+  - level: "4B"
+    grade: 4
+    status: pending
+  - level: "5A"
+    grade: 5
+    status: pending
+  - level: "5B"
+    grade: 5
+    status: pending
+  - level: "6A"
+    grade: 6
+    status: chapters
+    chapters:
+      - n: 1
+        title: Whole Numbers
+      - n: 2
+        title: Fractions
+      - n: 3
+        title: Decimals
+      - n: 4
+        title: Metric Measurements and Decimals
+      - n: 5
+        title: Ratios
+      - n: 6
+        title: Rate
+      - n: 7
+        title: Percent
+  - level: "6B"
+    grade: 6
+    status: chapters
+    chapters:
+      - n: 8
+        title: Algebraic Expressions
+      - n: 9
+        title: Equations and Inequalities
+      - n: 10
+        title: Coordinates and Graphs
+      - n: 11
+        title: Area of Plane Figures
+      - n: 12
+        title: Volume and Surface Area of Solids
+      - n: 13
+        title: Displaying and Comparing Data
+  - level: "7A"
+    grade: 7
+    status: chapters
+    chapters:
+      - n: 1
+        title: Factors and Multiples
+      - n: 2
+        title: Addition and Additive Inverse
+      - n: 3
+        title: Subtraction and Absolute Value of the Difference
+      - n: 4
+        title: Multiplication, Division, and Combined Operations of Integers
+      - n: 5
+        title: Rational Numbers
+      - n: 6
+        title: Real Numbers and Use of Calculators
+      - n: 7
+        title: Rounding Numbers to Decimal Places
+      - n: 8
+        title: Angles, Triangles, and Quadrilaterals
+  - level: "7B"
+    grade: 7
+    status: chapters
+    chapters:
+      - n: 9
+        title: Number Patterns
+      - n: 10
+        title: Coordinates and Linear Graphs
+      - n: 11
+        title: Inequalities
+      - n: 12
+        title: Perimeters and Areas of Plane Figures
+      - n: 13
+        title: Volumes and Surface Areas of Solids
+      - n: 14
+        title: Proportions
+      - n: 15
+        title: Data Handling
+      - n: 16
+        title: Probability of Simple Events
+      - n: 17
+        title: Probability of Combined Events
+  - level: "8A"
+    grade: 8
+    status: chapters
+    chapters:
+      - n: 1
+        title: Exponents and Scientific Notation
+      - n: 2
+        title: Linear Equations in Two Variables
+      - n: 3
+        title: Expansion and Factorization of Algebraic Expressions
+      - n: 4
+        title: Quadratic Factorization and Equations
+      - n: 5
+        title: Simple Algebraic Fractions
+      - n: 6
+        title: Congruence and Similarity
+      - n: 7
+        title: Parallel Lines and Angles in Triangles and Polygons
+  - level: "8B"
+    grade: 8
+    status: chapters
+    chapters:
+      - n: 8
+        title: Graphs of Linear and Quadratic Functions
+      - n: 9
+        title: Graphs in Practical Situations
+      - n: 10
+        title: Pythagorean Theorem
+      - n: 11
+        title: Coordinate Geometry
+      - n: 12
+        title: Mensuration of Pyramids, Cylinders, Cones, and Spheres
+      - n: 13
+        title: Data Analysis
+      - n: 14
+        title: More About Quadratic Equations

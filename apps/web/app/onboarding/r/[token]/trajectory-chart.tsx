@@ -2,6 +2,11 @@
 
 import { useState, type PointerEvent as ReactPointerEvent } from "react";
 
+import {
+  useSubjectDoor,
+  type SubjectDoorRow,
+} from "../../../../components/progress/subject-door-context";
+import { progressSubjectHeadline } from "../../../../lib/child-progress/view-copy";
 import { ageAboutLabel } from "../../../../lib/map/trajectory-format";
 import type {
   TrajectoryStory,
@@ -23,6 +28,11 @@ import type {
  *   subject: its line lights up, the rest fade, and a meaning sentence
  *   translates the number into the actual skill and the age it is
  *   typical.
+ * - Inside a SubjectDoor provider (the live Progress page), the legend
+ *   card IS the subject-by-subject list (founder ask 2026-07-13): rows
+ *   and lines open the subject's detail panel instead of pinning a
+ *   meaning box, rows carry the open-conflict chip, and subjects the
+ *   chart cannot plot (exposure subjects) still get a door row.
  * - Below-age frontiers plot their REAL negative months (founder ruling
  *   2026-07-13, replacing the fixed "growing" slot). No red, no
  *   "behind" wording, ever; a capped number displays as "15+", a floor,
@@ -169,6 +179,7 @@ export function TrajectoryChart({
   childName,
   childAgeYears,
   now,
+  doorRows = [],
 }: {
   story: TrajectoryStory;
   childName: string;
@@ -176,7 +187,12 @@ export function TrajectoryChart({
   /** The render instant (epoch ms), passed from the server so this
    * component stays pure and server and client draw the same axis. */
   now: number;
+  /** The live view's subject rows (door mode only): conflict chips for
+   * charted subjects, plus door rows for subjects the chart cannot
+   * plot. Ignored outside a SubjectDoor provider. */
+  doorRows?: SubjectDoorRow[];
 }) {
+  const door = useSubjectDoor();
   /** Pinned by tap/click; toggles off on a second tap. */
   const [pinned, setPinned] = useState<string | null>(null);
   /** Follows the mouse only (touch never hovers). */
@@ -184,6 +200,15 @@ export function TrajectoryChart({
   const focus = hovered ?? pinned;
 
   if (story.subjects.length === 0) return null;
+
+  const doorRowById = new Map(doorRows.map((row) => [row.subjectId, row]));
+  const chartedIds = new Set(story.subjects.map((subject) => subject.subjectId));
+  /** Subjects with live evidence but no plottable line (exposure
+   * subjects): in door mode they keep a row, so every subject still
+   * has its door. */
+  const unchartedRows = door
+    ? doorRows.filter((row) => !chartedIds.has(row.subjectId))
+    : [];
 
   const moverIds = new Set(story.movers.map((subject) => subject.subjectId));
   const strongestId = story.subjects[0]?.subjectId ?? null;
@@ -269,7 +294,15 @@ export function TrajectoryChart({
       }),
   );
 
-  const togglePin = (subjectId: string): void => {
+  /** Door mode opens the subject's detail panel; otherwise a tap pins
+   * the line and its meaning box. A charted subject the live view does
+   * not know (no door row) keeps the pin even in door mode, so no tap
+   * ever dead-ends. */
+  const activate = (subjectId: string): void => {
+    if (door && doorRowById.has(subjectId)) {
+      door.openSubject(subjectId);
+      return;
+    }
     setPinned((current) => (current === subjectId ? null : subjectId));
   };
   const hoverIn = (subjectId: string) => (event: ReactPointerEvent): void => {
@@ -376,7 +409,7 @@ export function TrajectoryChart({
                 className="cursor-pointer"
                 onClick={(event) => {
                   event.stopPropagation();
-                  togglePin(subject.subjectId);
+                  activate(subject.subjectId);
                 }}
                 onPointerEnter={hoverIn(subject.subjectId)}
               >
@@ -469,16 +502,26 @@ export function TrajectoryChart({
       ) : null}
 
       {/* The legend card: every subject, ranked strongest first, values
-          visible at rest, movers badged. Rows are the focus controls. */}
+          visible at rest, movers badged. Rows are the focus controls; in
+          door mode they are the subject-by-subject list and each row
+          opens that subject's detail panel. */}
       <div className="mt-2 grid grid-cols-1 gap-x-2 rounded-md border border-border-subtle bg-card p-1.5 sm:grid-cols-2">
         {story.subjects.map((subject) => {
+          const doorRow = doorRowById.get(subject.subjectId);
           const isPinned = pinned === subject.subjectId;
+          const opensPanel = Boolean(door && doorRow);
           return (
             <button
               key={subject.subjectId}
               type="button"
-              aria-pressed={isPinned}
-              onClick={() => togglePin(subject.subjectId)}
+              aria-pressed={opensPanel ? undefined : isPinned}
+              aria-haspopup={opensPanel ? "dialog" : undefined}
+              aria-expanded={
+                opensPanel
+                  ? door?.openSubjectId === subject.subjectId
+                  : undefined
+              }
+              onClick={() => activate(subject.subjectId)}
               onPointerEnter={hoverIn(subject.subjectId)}
               onPointerLeave={hoverOut}
               className={`flex min-h-10 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors duration-(--dur-fast) ease-out ${
@@ -497,6 +540,14 @@ export function TrajectoryChart({
               >
                 {subject.name}
               </span>
+              {doorRow?.needsConfirm ? (
+                <span
+                  className="flex-shrink-0 rounded-pill px-2 py-0.5 text-[0.62rem] font-bold"
+                  style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
+                >
+                  {progressSubjectHeadline("conflict")}
+                </span>
+              ) : null}
               {subject.mover ? (
                 <span
                   className="flex-shrink-0 rounded-pill px-2 py-0.5 font-mono text-[0.62rem] font-bold"
@@ -515,6 +566,32 @@ export function TrajectoryChart({
             </button>
           );
         })}
+        {unchartedRows.map((row) => (
+          <button
+            key={row.subjectId}
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={door?.openSubjectId === row.subjectId}
+            onClick={() => door?.openSubject(row.subjectId)}
+            className="flex min-h-10 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+          >
+            <span
+              aria-hidden="true"
+              className="h-2.5 w-2.5 flex-shrink-0 rounded-full border-2 border-[var(--stone-300)]"
+            />
+            <span className="min-w-0 flex-1 truncate font-semibold text-strong">
+              {row.displayName}
+            </span>
+            {row.needsConfirm ? (
+              <span
+                className="flex-shrink-0 rounded-pill px-2 py-0.5 text-[0.62rem] font-bold"
+                style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
+              >
+                {progressSubjectHeadline("conflict")}
+              </span>
+            ) : null}
+          </button>
+        ))}
       </div>
     </div>
   );

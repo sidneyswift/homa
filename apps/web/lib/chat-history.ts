@@ -2,7 +2,11 @@ import { createSupabaseServerClient } from "./supabase/server";
 import {
   mergeChatHistoryRows,
   recentSessionIds,
+  toChatHistoryMaterial,
+  type ChatHistoryMaterial,
+  type ChatHistoryMaterialRow,
   type ChatHistoryMessage,
+  type ChatHistoryPayload,
   type ChatHistoryRow,
 } from "./chat-history-model";
 
@@ -34,15 +38,25 @@ const HISTORY_CAP = 240;
 const SLICE_LIMIT = 300;
 const SESSION_CAP = 60;
 const DELIVERY_CAP = 150;
+const MATERIAL_CAP = 80;
 
 const ROW_COLUMNS = "id, session_id, role, channel, content, created_at";
 
-export type { ChatHistoryMessage } from "./chat-history-model";
+/** materials columns for scrollback cards; the creating session and the
+ *  child's display name live inside the generation provenance JSON. */
+const MATERIAL_COLUMNS =
+  "id, title, kind, skill, preview_url, pdf_url, created_at, " +
+  "session_id:generation->>sessionId, child_name:generation->input->>childName";
+
+export type {
+  ChatHistoryMessage,
+  ChatHistoryPayload,
+} from "./chat-history-model";
 
 export async function fetchChatHistory(input: {
   familyId: string;
   userId: string;
-}): Promise<ChatHistoryMessage[] | null> {
+}): Promise<ChatHistoryPayload | null> {
   if (process.env.HOMA_CHAT_HISTORY_DISABLED === "1") return null;
   try {
     const supabase = await createSupabaseServerClient();
@@ -134,10 +148,42 @@ export async function fetchChatHistory(input: {
       }
     }
 
-    return mergeChatHistoryRows(
+    const messages = mergeChatHistoryRows(
       [mineRows, legacyMine, companions, deliveredRows],
       HISTORY_CAP,
     );
+
+    // The scrollback's material cards (Vega incident 2026-07-13: cards
+    // lived only in the live stream, so a dead stream or a reload lost
+    // them for good). Sourced from the durable materials rows of the
+    // sessions already on screen; RLS plus the family filter wall the
+    // read, and a fetch error just means text-only scrollback.
+    let materials: ChatHistoryMaterial[] = [];
+    const historySessionIds = [
+      ...new Set(messages.map((message) => message.sessionId)),
+    ];
+    if (historySessionIds.length > 0) {
+      const materialQuery = await supabase
+        .from("materials")
+        .select(MATERIAL_COLUMNS)
+        .eq("family_id", input.familyId)
+        .order("created_at", { ascending: false })
+        .limit(MATERIAL_CAP);
+      if (!materialQuery.error) {
+        const sessionSet = new Set(historySessionIds);
+        materials = (
+          (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
+        )
+          .map(toChatHistoryMaterial)
+          .filter(
+            (material): material is ChatHistoryMaterial =>
+              material !== null && sessionSet.has(material.sessionId),
+          )
+          .sort((a, b) => a.atMs - b.atMs);
+      }
+    }
+
+    return { messages, materials };
   } catch {
     return null;
   }

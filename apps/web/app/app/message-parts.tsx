@@ -126,9 +126,15 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       });
       continue;
     }
-    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
-      // create_worksheet is the retired v1 name: restored localStorage
-      // transcripts may still carry its parts, shaped {worksheet}.
+    if (
+      part.toolName === "create_printable" ||
+      part.toolName === "show_material" ||
+      part.toolName === "create_worksheet"
+    ) {
+      // show_material re-surfaces an existing material as the same
+      // card; create_worksheet is the retired v1 name: restored
+      // localStorage transcripts may still carry its parts, shaped
+      // {worksheet}.
       const output = part.output as
         | { material?: MaterialArtifact; worksheet?: MaterialArtifact }
         | undefined;
@@ -341,7 +347,10 @@ export function MessageView({
 const TOOL_STATUS_LABELS: Record<string, string> = {
   get_children: "checking your family's info…",
   create_printable: "putting the page together…",
+  show_material: "bringing the page back…",
   generate_image: "making the image…",
+  search_photos: "looking for real photos…",
+  keep_photo: "saving the photo…",
   find_materials: "looking through your materials…",
   mark_material_final: "keeping the final version…",
   remember: "saving a note…",
@@ -349,9 +358,118 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   update_child_profile: "updating the profile…",
   save_skill: "saving that as a skill…",
   forget_skill: "removing the skill…",
-  load_skill: "looking up how we do this…",
+  // "looking up how we do this…" read as checking the manual for its
+  // own job (copy-review 2026-07-13); plain setup language instead.
+  load_skill: "getting set up…",
   manage_child_progress: "updating progress…",
 };
+
+/** The skill whose load marks a material build starting; the studio
+ *  tools themselves are the other signals. */
+const MATERIALS_SKILL_NAME = "materials-studio";
+
+function isMaterialsBuildSignal(part: EveMessagePart): boolean {
+  if (part.type !== "dynamic-tool") return false;
+  if (
+    part.toolName === "create_printable" ||
+    part.toolName === "create_worksheet" ||
+    part.toolName === "generate_image"
+  ) {
+    return true;
+  }
+  if (part.toolName !== "load_skill") return false;
+  const input = (part.input ?? {}) as { skill?: unknown };
+  return (
+    typeof input.skill === "string" &&
+    input.skill.trim().toLowerCase() === MATERIALS_SKILL_NAME
+  );
+}
+
+/** Where a material build stands, judged from the turn's parts in
+ *  order (the last signal wins): "designing" until something concrete
+ *  exists, "writing" once a generated image is in hand and the model is
+ *  composing the page around it (a forward step, never a repeat, per
+ *  the 2026-07-13 copy review), "revising" when the finished page came
+ *  back with quality issues the agent will fix, "delivering" once a
+ *  passing page exists and the reply is being written. Null when no
+ *  build is in flight. */
+type MaterialsBuildPhase = "designing" | "writing" | "revising" | "delivering";
+
+function isCreateToolName(toolName: string): boolean {
+  return toolName === "create_printable" || toolName === "create_worksheet";
+}
+
+/** Whether a finished create call left a page the agent must redo:
+ *  the quality check flagged it, or the tool refused outright. */
+function createOutputNeedsFix(output: unknown): boolean {
+  const record = (output ?? {}) as {
+    created?: unknown;
+    review?: { pass?: unknown } | null;
+  };
+  if (record.created !== true) return true;
+  return Boolean(record.review && record.review.pass === false);
+}
+
+function materialsBuildPhase(message: EveMessage): MaterialsBuildPhase | null {
+  let phase: MaterialsBuildPhase | null = null;
+  let imageInHand = false;
+  for (const part of message.parts) {
+    if (!isMaterialsBuildSignal(part)) continue;
+    if (part.type !== "dynamic-tool") continue;
+    if (part.toolName === "generate_image" && part.state === "output-available") {
+      const output = (part.output ?? {}) as { generated?: unknown };
+      if (output.generated === true) imageInHand = true;
+    }
+    if (isCreateToolName(part.toolName) && part.state === "output-available") {
+      phase = createOutputNeedsFix(part.output) ? "revising" : "delivering";
+      continue;
+    }
+    phase = imageInHand ? "writing" : "designing";
+  }
+  return phase;
+}
+
+function materialsPhaseLabel(phase: MaterialsBuildPhase): string {
+  switch (phase) {
+    case "designing":
+      return "designing the page…";
+    case "writing":
+      return "writing the page…";
+    case "revising":
+      return "fixing a detail…";
+    case "delivering":
+      return "almost done…";
+    default: {
+      const exhaustive: never = phase;
+      throw new Error(`unhandled materials phase: ${String(exhaustive)}`);
+    }
+  }
+}
+
+/** Whether the newest create call is redoing a page this turn already
+ *  produced and flagged. The active render then keeps the "fixing a
+ *  detail…" label instead of repeating "putting the page together…"
+ *  (the copy review's rerun complaint); a second page for another
+ *  request in the same turn (last outcome clean) keeps the normal
+ *  label. */
+function activeCreateIsAFix(message: EveMessage): boolean {
+  let lastOutcomeNeedsFix = false;
+  for (const part of message.parts.slice(0, -1)) {
+    if (part.type !== "dynamic-tool") continue;
+    if (!isCreateToolName(part.toolName)) continue;
+    if (part.state !== "output-available") continue;
+    lastOutcomeNeedsFix = createOutputNeedsFix(part.output);
+  }
+  return lastOutcomeNeedsFix;
+}
+
+/** The label for a gap between parts (model reasoning, a finished
+ *  tool, a step boundary): the build phase when a material is in
+ *  flight, plain "thinking…" otherwise. */
+function gapLabel(message: EveMessage): string {
+  const phase = materialsBuildPhase(message);
+  return phase ? materialsPhaseLabel(phase) : "thinking…";
+}
 
 /**
  * What Homa is doing right now, or null when nothing needs a status line
@@ -364,6 +482,12 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
  * tool and the next streamed token, exactly the "is it working? is it not
  * working?" panic from the 2026-07-07 tester memos (memo 1, MJ-06). While
  * busy, something must always be visible.
+ *
+ * Gaps used to collapse to "thinking…" no matter what the turn was
+ * doing, which read as stuck across a 60-90s material build (the
+ * 2026-07-13 "thinking… 68s" report). Gaps now name the build phase
+ * when the turn's own tool parts show a material in flight; everything
+ * else keeps the old labels.
  */
 export function busyLabel(messages: readonly EveMessage[]): string | null {
   const last = messages.at(-1);
@@ -372,14 +496,28 @@ export function busyLabel(messages: readonly EveMessage[]): string | null {
   if (!part) return "thinking…";
   if (part.type === "dynamic-tool") {
     if (part.state === "input-streaming" || part.state === "input-available") {
+      // A create call redoing a flagged page keeps the fixing label she
+      // is already reading; a repeated step name reads as a do-over.
+      if (isCreateToolName(part.toolName) && activeCreateIsAFix(last)) {
+        return materialsPhaseLabel("revising");
+      }
       return TOOL_STATUS_LABELS[part.toolName] ?? "working on it…";
     }
     // Tool finished; the model is composing what comes next.
-    return "thinking…";
+    return gapLabel(last);
   }
-  // A streaming text block with content is already visible; no extra line.
-  if (part.type === "text") return part.text.trim().length > 0 ? null : "thinking…";
-  return "thinking…";
+  if (part.type === "text") {
+    if (part.text.trim().length === 0) return gapLabel(last);
+    // A streaming text block with content is already visible; no extra line.
+    if (part.state === "streaming") return null;
+    // A completed sentence with the turn still going: only a material
+    // build says anything here, so the moment after a final reply
+    // stays quiet exactly as before.
+    const phase = materialsBuildPhase(last);
+    return phase ? materialsPhaseLabel(phase) : null;
+  }
+  // Reasoning parts and step boundaries: the long quiet stretches.
+  return gapLabel(last);
 }
 
 /** Tool calls in the latest assistant message (chat.turn_completed prop). */

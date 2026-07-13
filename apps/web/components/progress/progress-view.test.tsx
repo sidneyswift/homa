@@ -54,28 +54,32 @@ describe("ProgressView", () => {
     assert.match(html, /href="\/app\/child-2\/progress"/);
     assert.match(html, /Leo/);
 
-    // The chart card is the report's own snapshot: the interactive
-    // chart, its data-written caption, and the legend card.
+    // ONE subject card (founder ask 2026-07-13): the snapshot chart
+    // whose legend rows are the subject-by-subject list. No second
+    // grid, no meaning box, no separate heading.
     assert.match(html, /Maya(?:&#x27;|')s snapshot/);
     assert.match(html, /<svg[^>]*months ahead by subject over time/);
     assert.match(html, /Math climbed from \+7 to \+8 this week\./);
-    assert.match(html, /aria-pressed="false"/);
+    assert.doesNotMatch(html, /Subject by subject/);
 
-    // The subject map: tiles that open a panel, strongest first (the
-    // chart above also names subjects, so order is asserted inside the
-    // grid section only).
-    assert.match(html, /Subject by subject/);
+    // Legend rows are doors: they open the detail panel, strongest
+    // first, values visible at rest, the conflict chip carried over
+    // from the retired tile grid.
     assert.match(
       html,
       /<button[^>]*aria-haspopup="dialog"[^>]*>/,
     );
-    const grid = html.slice(html.indexOf("Subject by subject"));
-    assert.ok(grid.indexOf(">Math<") !== -1);
-    assert.ok(grid.indexOf(">Math<") < grid.indexOf(">Literacy<"));
-    assert.match(html, /Ahead \u00b7 \+8 mo/);
-    assert.match(html, /On track/);
-    assert.match(html, /\+1 mo since Jun 10/);
+    assert.doesNotMatch(html, /aria-pressed/);
+    assert.ok(html.indexOf(">Math<") !== -1);
+    assert.ok(html.indexOf(">Math<") < html.indexOf(">Literacy<"));
+    assert.match(html, />\+8</);
+    assert.match(html, />\+0</);
     assert.match(html, /Please confirm/);
+    // The dated movement chip retired from this surface (2026-07-13).
+    assert.doesNotMatch(html, /since Jun 10/);
+    // The meaning box retired with the merge: a row opens the panel
+    // instead of pinning a translation card above the legend.
+    assert.doesNotMatch(html, /typical around age/);
 
     // The panel starts closed: topic detail stays out of first paint.
     assert.doesNotMatch(html, /Counts five objects accurately/);

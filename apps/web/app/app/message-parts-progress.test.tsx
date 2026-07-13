@@ -229,3 +229,175 @@ describe("busyLabel progress status", () => {
     );
   });
 });
+
+describe("busyLabel material build phases", () => {
+  const materialsSkillPart = {
+    type: "dynamic-tool",
+    state: "output-available",
+    toolName: "load_skill",
+    input: { skill: "materials-studio" },
+    output: "the studio skill text",
+  };
+
+  function printablePart(output: unknown) {
+    return {
+      type: "dynamic-tool",
+      state: "output-available",
+      toolName: "create_printable",
+      output,
+    };
+  }
+
+  it("keeps plain thinking for reasoning with no build in flight", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([{ type: "reasoning", state: "streaming", text: "hm" }]),
+      ]),
+      "thinking…",
+    );
+  });
+
+  it("names the design phase once the materials skill is loaded", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          materialsSkillPart,
+          { type: "reasoning", state: "streaming", text: "layout ideas" },
+        ]),
+      ]),
+      "designing the page…",
+    );
+  });
+
+  it("moves forward to writing once a generated image is in hand", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolName: "generate_image",
+            output: { generated: true, url: "https://example.com/pup.png" },
+          },
+        ]),
+      ]),
+      "writing the page…",
+    );
+  });
+
+  it("stays in the design phase when image generation was refused", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolName: "generate_image",
+            output: { generated: false, note: "budget used up" },
+          },
+        ]),
+      ]),
+      "designing the page…",
+    );
+  });
+
+  it("says almost done after a passing page, even under a finished interim sentence", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          materialsSkillPart,
+          printablePart({ created: true, review: { pass: true, issues: [] } }),
+          { type: "text", state: "done", text: "Here it comes." },
+        ]),
+      ]),
+      "almost done…",
+    );
+  });
+
+  it("says fixing a detail when the quality check flagged the page", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          printablePart({ created: true, review: { pass: false, issues: ["title typo"] } }),
+          { type: "reasoning", state: "streaming", text: "fix the title" },
+        ]),
+      ]),
+      "fixing a detail…",
+    );
+  });
+
+  it("reads as fixing when a create attempt was refused, never a step backwards", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          materialsSkillPart,
+          printablePart({ created: false, note: "Provide exactly one of html or pageImageUrl." }),
+        ]),
+      ]),
+      "fixing a detail…",
+    );
+  });
+
+  it("stays quiet while interim text is still streaming", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          materialsSkillPart,
+          { type: "text", state: "streaming", text: "On it. Skye's page" },
+        ]),
+      ]),
+      null,
+    );
+  });
+
+  it("lets an executing studio tool keep its own label", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          materialsSkillPart,
+          {
+            type: "dynamic-tool",
+            state: "input-streaming",
+            toolName: "create_printable",
+            input: undefined,
+          },
+        ]),
+      ]),
+      "putting the page together…",
+    );
+  });
+
+  it("keeps the fixing label while a flagged page is being redone", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          printablePart({ created: true, review: { pass: false, issues: ["title typo"] } }),
+          {
+            type: "dynamic-tool",
+            state: "input-streaming",
+            toolName: "create_printable",
+            input: undefined,
+          },
+        ]),
+      ]),
+      "fixing a detail…",
+    );
+  });
+
+  it("uses the normal label for a second page after a clean first one", () => {
+    assert.equal(
+      busyLabel([
+        assistantMessage([
+          printablePart({ created: true, review: { pass: true, issues: [] } }),
+          {
+            type: "dynamic-tool",
+            state: "input-streaming",
+            toolName: "create_printable",
+            input: undefined,
+          },
+        ]),
+      ]),
+      "putting the page together…",
+    );
+  });
+});

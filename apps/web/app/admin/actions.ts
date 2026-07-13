@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import {
+  buildAgentPrompt,
+  parseAgentPromptSource,
+} from "../../lib/admin/agent-prompt";
+import {
   acknowledgeAlert,
   parseAlertSource,
   unacknowledgeAlert,
@@ -59,4 +63,33 @@ export async function unacknowledgeAlertAction(
   await unacknowledgeAlert(parsed.source, sourceId);
   revalidatePath("/admin");
   return { error: null };
+}
+
+export interface AgentPromptState {
+  prompt: string | null;
+  error: string | null;
+}
+
+const CRON_JOB_PATTERN = /^[a-z0-9_]{1,40}$/;
+
+/** Builds the copy-paste diagnostic packet for one failure row (founder
+ * ask 2026-07-13: "a [Prompt for agent] button that copies as much info
+ * about the error as would help any agent diagnose it"). Read-only. */
+export async function buildAgentPromptAction(
+  source: string,
+  sourceId: string,
+): Promise<AgentPromptState> {
+  const founder = await getFounderSession();
+  if (!founder) return { prompt: null, error: "Only the founder can do this." };
+
+  const parsedSource = parseAgentPromptSource(source);
+  const idOk =
+    parsedSource === "cron" ? CRON_JOB_PATTERN.test(sourceId) : UUID_PATTERN.test(sourceId);
+  if (!parsedSource || !idOk) {
+    return { prompt: null, error: "That record could not be identified. Reload and try again." };
+  }
+
+  const prompt = await buildAgentPrompt(parsedSource, sourceId);
+  if (prompt === null) return { prompt: null, error: "That record's row is gone. Reload the page." };
+  return { prompt, error: null };
 }

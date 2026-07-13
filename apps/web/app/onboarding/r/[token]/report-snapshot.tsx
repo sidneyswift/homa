@@ -1,5 +1,6 @@
 import { ageInMonths } from "@homa/core";
 
+import type { SubjectDoorRow } from "../../../../components/progress/subject-door-context";
 import {
   trajectoryHasScaleChange,
   type TrajectoryEra,
@@ -25,6 +26,7 @@ export function ReportSnapshot({
   generatedDate,
   eras,
   className = "mt-4",
+  doorRows,
 }: {
   childName: string;
   /** "YYYY-MM-DD" (or "YYYY-MM"), for the meaning box's age sentence. */
@@ -37,6 +39,9 @@ export function ReportSnapshot({
    * this below the note (mt-4, the default); the in-app dashboard grid
    * spaces cards itself and passes "". */
   className?: string;
+  /** Live Progress only: the subject rows that turn the legend card
+   * into the subject-by-subject list (see subject-door-context). */
+  doorRows?: SubjectDoorRow[];
 }) {
   const story = buildTrajectoryStory(eras);
   const showsScaleChange = trajectoryHasScaleChange(eras);
@@ -56,6 +61,7 @@ export function ReportSnapshot({
           childName={childName}
           childAgeYears={childAgeYears}
           now={new Date().getTime()}
+          doorRows={doorRows}
         />
       </div>
       {/* The dotted-stretch caption lives with the chart, not in the card

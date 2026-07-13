@@ -1,18 +1,15 @@
 import { subjectLine } from "@homa/core";
 import type { MapScores } from "@homa/core";
 
-import {
-  movementFor,
-  type Movement,
-} from "../../components/dashboard/movement";
 import type { ChildProgressView, ProgressSubjectView } from "./types";
 import { formatProgressDate } from "./view-copy";
 
 /**
  * The Progress map's tile view model: one serializable card per subject,
  * built server-side so the client grid stays a pure renderer. Badge
- * wording reuses core's reviewed subjectLine vocabulary; movement reuses
- * the dashboard's anti-guilt movement rule (drops render nothing).
+ * wording reuses core's reviewed subjectLine vocabulary. The dated
+ * movement chip retired on founder request (2026-07-13): two number
+ * pills on one tile read as two verdicts.
  */
 
 /** After this many days without evidence a subject reads as quiet. */
@@ -34,7 +31,6 @@ export interface ProgressTileModel {
   subjectId: string;
   displayName: string;
   badge: ProgressTileBadge | null;
-  movement: Movement | null;
   freshness: ProgressTileFreshness | null;
   needsConfirm: boolean;
 }
@@ -101,7 +97,6 @@ function tileFreshness(
  */
 export function buildProgressTiles(
   view: ChildProgressView,
-  prior: { scores: MapScores; generated_at: string } | undefined,
   now: Date,
 ): ProgressTileModel[] {
   const bySubjectId = new Map(
@@ -118,19 +113,13 @@ export function buildProgressTiles(
     if (bySubjectId.has(subject.subjectId)) ordered.push(subject);
   }
 
-  return ordered.map((subject) => {
-    const score = view.scores.subjects.find(
-      (entry) => entry.subjectId === subject.subjectId,
-    );
-    return {
-      subjectId: subject.subjectId,
-      displayName: subject.displayName,
-      badge: tileBadge(view.scores, subject.subjectId, view.childName),
-      movement: score ? movementFor(score, prior) : null,
-      freshness: tileFreshness(subject, view.timeZone, now),
-      needsConfirm: subject.state === "conflict",
-    };
-  });
+  return ordered.map((subject) => ({
+    subjectId: subject.subjectId,
+    displayName: subject.displayName,
+    badge: tileBadge(view.scores, subject.subjectId, view.childName),
+    freshness: tileFreshness(subject, view.timeZone, now),
+    needsConfirm: subject.state === "conflict",
+  }));
 }
 
 export interface ProgressUpdatedLine {

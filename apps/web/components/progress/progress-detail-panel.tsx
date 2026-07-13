@@ -160,11 +160,6 @@ export function ProgressDetailPanel({
                   {tile.badge.label}
                 </span>
               ) : null}
-              {tile?.movement ? (
-                <span className="rounded-pill bg-[var(--gold-100)] px-2.5 py-1 text-[0.75rem] font-bold text-[var(--gold-ink)]">
-                  {tile.movement.label}
-                </span>
-              ) : null}
             </div>
             {summary ? (
               <p className="mt-1.5 text-sm leading-relaxed text-body">

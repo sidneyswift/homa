@@ -73,7 +73,11 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (part.toolName === "create_printable" || part.toolName === "create_worksheet") {
+    if (
+      part.toolName === "create_printable" ||
+      part.toolName === "show_material" ||
+      part.toolName === "create_worksheet"
+    ) {
       const output = (part.output ?? {}) as {
         material?: { previewUrl?: unknown };
         worksheet?: { previewUrl?: unknown };
@@ -90,6 +94,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
 const TOOL_STATUS_LABELS: Record<string, string> = {
   get_children: "checking your family's info\u2026",
   create_printable: "putting the page together\u2026",
+  show_material: "bringing the page back\u2026",
   generate_image: "making the image\u2026",
   find_materials: "looking through your materials\u2026",
   mark_material_final: "keeping the final version\u2026",

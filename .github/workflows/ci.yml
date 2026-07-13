@@ -63,6 +63,12 @@ jobs:
       - name: Morning research brief format
         run: pnpm check:research-brief
 
+      - name: Photo search (token signing, result normalization)
+        run: pnpm check:photo-search
+
+      - name: Web page reading (scrape normalization, url hygiene)
+        run: pnpm check:web-fetch
+
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 

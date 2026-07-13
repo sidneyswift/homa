@@ -82,7 +82,7 @@ export default defineTool({
       materials,
       note:
         materials.length > 0
-          ? "A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse."
+          ? "To show one of these to the parent again, call show_material with its id. A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse."
           : "Nothing saved matches. Design fresh, and finals you make will be here next time.",
     };
   },

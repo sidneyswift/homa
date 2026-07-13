@@ -397,6 +397,23 @@ export const EVENT_SCHEMAS = {
     channel: z.enum(["web", "sms", "email", "dispatch"]),
     versions_superseded: z.number().int().min(0),
   }),
+  // The studio's photo desk (SerpAPI Google Images): each search spends
+  // one unit of the small shared monthly quota, so volume per family is
+  // the story. Queries never enter props (they can carry topic text).
+  "materials.photo_searched": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    results: z.number().int().min(0),
+    duration_ms: z.number().int().min(0),
+  }),
+  // A found photo was copied into the family's own artifact space and
+  // became reusable (printable embeds, generate_image references).
+  "materials.photo_imported": z.object({
+    family_id: z.uuid(),
+    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    bytes: z.number().int().min(0),
+    duration_ms: z.number().int().min(0),
+  }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
   // curriculum is generated from what was discussed. No phone number,

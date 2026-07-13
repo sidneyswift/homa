@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SerpAPI decision · the photo desk (what a Google search key buys Homa)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;--stone-500:#8A7D6C;--stone-600:#6B6259;--stone-800:#332E29;--stone-900:#221E1A;
+  --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-500:#E7602F;--clay-700:#9C3B1B;
+  --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-500:#3D9A50;--sage-700:#275F34;
+  --gold-100:#FFF3C2;--gold-ink:#8A6410;
+  --sky-100:#DDF3F9;--sky-600:#3A8FA9;
+  --card:#FFFFFF;
+  --f-display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stone-50);color:var(--stone-800);font-family:var(--f-sans);-webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:36px 20px 90px}
+h1,h2,h3{font-family:var(--f-display);color:var(--stone-900);margin:0}
+h1{font-size:1.8rem;letter-spacing:-.015em}
+h2{font-size:1.25rem;margin-top:44px}
+p{margin:10px 0 0;max-width:76ch}
+.eyebrow{font-family:var(--f-mono);font-size:.66rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--stone-500);margin:0 0 8px}
+.notice{margin-top:16px;display:inline-flex;gap:8px;border:1px dashed var(--stone-300);border-radius:14px;background:var(--gold-100);color:var(--gold-ink);padding:10px 14px;font-size:.84rem;font-weight:600;max-width:80ch}
+.facts{margin-top:18px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.fact{background:var(--card);border:1px solid var(--stone-200);border-radius:14px;padding:12px 14px;font-size:.85rem}
+.fact b{display:block;color:var(--stone-900)}
+.fact .mono{font-family:var(--f-mono);font-size:.78rem;color:var(--stone-600)}
+.ladder{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.opt{background:var(--card);border:1px solid var(--stone-200);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:44px 1fr;gap:12px}
+.opt .rank{font-family:var(--f-mono);font-weight:700;font-size:1.05rem;color:var(--stone-400);padding-top:2px}
+.opt h3{font-size:1rem}
+.opt p{font-size:.86rem;max-width:none}
+.opt .evi{margin-top:8px;background:var(--stone-100);border-radius:10px;padding:8px 11px;font-size:.8rem}
+.opt .evi b{color:var(--stone-900)}
+.opt code{font-family:var(--f-mono);font-size:.76rem;background:var(--stone-100);border-radius:5px;padding:1px 5px}
+.opt .evi code{background:var(--card)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.tag{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+.t-size{background:var(--stone-100);color:var(--stone-600)}
+.t-built{background:var(--sage-100);color:var(--sage-700)}
+.t-later{background:var(--sky-100);color:var(--sky-600)}
+.t-skip{background:var(--stone-100);color:var(--stone-500)}
+.t-no{background:var(--clay-100);color:var(--clay-700)}
+table{border-collapse:collapse;margin-top:14px;width:100%;background:var(--card);border:1px solid var(--stone-200);border-radius:14px;overflow:hidden;font-size:.85rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--stone-100);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--stone-500);background:var(--stone-100)}
+tr:last-child td{border-bottom:none}
+td code,li code{font-family:var(--f-mono);font-size:.76rem;background:var(--stone-100);border-radius:5px;padding:1px 5px}
+.flow{margin-top:14px;background:var(--stone-900);color:var(--stone-100);border-radius:16px;padding:16px 18px;font-family:var(--f-mono);font-size:.8rem;line-height:1.9;overflow-x:auto;white-space:pre}
+ul{margin:10px 0 0;padding-left:22px}
+li{margin-top:6px;max-width:74ch;font-size:.9rem}
+.q{background:var(--card);border:1px solid var(--stone-200);border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;gap:10px;align-items:flex-start;font-size:.88rem}
+.q input{margin-top:3px;accent-color:var(--clay-500);width:16px;height:16px;flex-shrink:0}
+.q b{color:var(--stone-900)}
+.assembler{position:sticky;bottom:14px;margin-top:34px;background:var(--stone-900);border-radius:18px;padding:16px 18px;color:var(--stone-100);box-shadow:0 8px 24px rgba(34,30,26,.28)}
+.assembler h3{color:#fff;font-size:.95rem}
+.assembler textarea{width:100%;margin-top:10px;background:var(--stone-800);color:var(--stone-100);border:1px solid var(--stone-600);border-radius:10px;padding:10px;font-family:var(--f-mono);font-size:.78rem;min-height:88px;resize:vertical}
+.assembler button{margin-top:8px;background:var(--clay-500);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:var(--f-sans)}
+.assembler button:hover{background:var(--clay-700)}
+.small{font-size:.78rem;color:var(--stone-500)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="eyebrow">Decision record · 2026-07-13 · SerpAPI key</p>
+<h1>The photo desk: what a Google search key buys Homa</h1>
+<p>The founder handed over a SerpAPI key ("read their docs, decide what would be valuable, build it"). This is the record of what the codebase search found, the option ladder considered, what got built the same day, and the open questions the founder can still redirect. Everything below is grounded in real files and a live probe of the account.</p>
+<p class="notice">Account reality, probed live 2026-07-13: FREE plan, 250 searches per month shared fleet-wide, 229 left, resets Jul 18. Whatever this key powers must be occasional, capped per family, and fail-soft. Paid plans lift the ceiling when a feature earns it.</p>
+
+<div class="facts">
+  <div class="fact"><b>The one real gap found</b>Real photographs. <span class="mono">generate_image</span> (gpt-image-2) owns illustration but cannot honestly photograph a monarch, real coins, or a workbook cover.</div>
+  <div class="fact"><b>Text search already covered</b><span class="mono">web_search</span> is provider-run and was explicitly kept by the 2026-07-09 ruling. A second text-SERP tool would eat quota and confuse tool choice.</div>
+  <div class="fact"><b>The plumbing already existed</b><span class="mono">uploadStudioImageBytes()</span> rehosts bytes into <span class="mono">families/{id}/images/</span>, and <span class="mono">isFamilyArtifactUrl()</span> then admits that URL everywhere family images work.</div>
+  <div class="fact"><b>The hard constraint</b><span class="mono">web_fetch</span> is disabled by founder ruling: arbitrary-URL fetch plus untrusted content is the exfiltration pair. Any design here must never let the model choose a URL.</div>
+</div>
+
+<h2>The ladder (cheapest to most ambitious)</h2>
+<div class="ladder">
+
+  <div class="opt"><div class="rank">1</div><div>
+    <div class="tags"><span class="tag t-size">S · wiring</span><span class="tag t-built">Built today</span></div>
+    <h3>Env plumbing, fail-soft: the base for anything</h3>
+    <p><code>SERPAPI_API_KEY</code> in <code>.env.local</code>, <code>.env.example</code>, and all three Vercel environments. Absent key = the feature reports itself unavailable in a model-readable note, nothing breaks (the <code>blobConfigured()</code> pattern).</p>
+    <div class="evi"><b>Found in code:</b> the repo's config-over-convention posture (<code>HOMA_IMAGE_MODEL</code>, <code>TWELVELABS_API_KEY</code> both degrade gracefully when unset).</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">2</div><div>
+    <div class="tags"><span class="tag t-size">M · new tools</span><span class="tag t-built">Built today · the pick</span></div>
+    <h3>Real photos for the materials studio: search_photos + keep_photo</h3>
+    <p>Two-step: <code>search_photos</code> runs Google Images through SerpAPI server-side (safe search forced, unsafe results dropped, 10/family/day) and returns titles, sources, and sizes with HMAC-signed tokens, never URLs. <code>keep_photo</code> exchanges one token for a permanent copy in the family's own blob space; that URL then works in printables and as a generate_image reference with zero changes to those tools.</p>
+    <div class="evi"><b>Found in code:</b> the materials studio's path table has no honest answer for "real photograph"; Montessori-leaning families prefer real photography; <code>isFamilyArtifactUrl()</code> + <code>uploadStudioImageBytes()</code> made the safe version nearly free to build.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">3</div><div>
+    <div class="tags"><span class="tag t-size">S · new UI</span><span class="tag t-later">Later, if wanted</span></div>
+    <h3>Show a kept photo directly in chat</h3>
+    <p>"What does a red-winged blackbird look like?" could answer with the picture itself. The pieces exist (keep_photo returns a URL; the transcript renders material cards), but chat has no photo-answer card and instructions ban pasting links. A small card component away.</p>
+    <div class="evi"><b>Found in code:</b> <code>MarkdownText</code> deliberately renders no images; <code>MaterialCard</code> is printable-shaped. New surface, so it waits for a founder yes.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">4</div><div>
+    <div class="tags"><span class="tag t-size">M · new lifecycle</span><span class="tag t-later">Later</span></div>
+    <h3>Google Scholar for the nightly fleet research</h3>
+    <p>SerpAPI's <code>google_scholar</code> engine returns real citations with citation counts. The research-mode instructions already say "prefer primary and peer-reviewed material (PubMed/ERIC)". Quota math: 3 topics/night x 2 searches = ~180/month, most of the free plan; needs a paid plan or its own key.</p>
+    <div class="evi"><b>Found in code:</b> <code>agent/instructions/research-mode.ts</code> line 26; <code>fleet-research.ts</code> runs nightly behind <code>FLEET_RESEARCH_ENABLED</code>.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">5</div><div>
+    <div class="tags"><span class="tag t-size">S</span><span class="tag t-skip">Skipped</span></div>
+    <h3>Structured local results (co-ops, field trips)</h3>
+    <p>The <code>google_local</code> engine returns places with addresses and ratings. Provider web_search already answers "co-ops near Austin" well enough in prose, and location-precise queries invite exactly the family-data-in-query risk the instructions forbid.</p>
+    <div class="evi"><b>Found in code:</b> instructions.md already routes "a local co-op" to web_search.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">6</div><div>
+    <div class="tags"><span class="tag t-size">M</span><span class="tag t-skip">Skipped</span></div>
+    <h3>Google Shopping for curriculum prices</h3>
+    <p>Structured prices for "All About Reading level 1". Niche, staleness-prone, and the fleet research topic guidance already covers "current editions/pricing" through web_search.</p>
+    <div class="evi"><b>Found in code:</b> <code>TOPIC_GUIDANCE.other</code> in <code>fleet-research.ts</code>.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">7</div><div>
+    <div class="tags"><span class="tag t-size">L · new surface</span><span class="tag t-later">Later · separate key</span></div>
+    <h3>Brand-SERP and rank monitoring for marketing</h3>
+    <p>The acquisition journey names owning the "homa homeschool" SERP and programmatic state pages (NT-6). SerpAPI could watch rankings weekly. Internal ops, not product; should run on its own account so product quota never competes with marketing curiosity.</p>
+    <div class="evi"><b>Found in code:</b> <code>journeys/02-acquisition-activation.md</code> lines 316-340 and NT-6.</div>
+  </div></div>
+
+  <div class="opt"><div class="rank">8</div><div>
+    <div class="tags"><span class="tag t-size">any</span><span class="tag t-no">Rejected</span></div>
+    <h3>Reverse image search of family photos, and SERP-fed page fetching</h3>
+    <p>Reverse image search means shipping a family's photo (often a child) to Google: a D4 red line, never. And using SERP links to justify re-enabling <code>web_fetch</code> would undo the 2026-07-09 ruling; page fetching stays off until M2-14's scanning posture exists.</p>
+    <div class="evi"><b>Found in code:</b> <code>agent/tools/web_fetch.ts</code> sentinel and <code>15-agentic-architecture.md</code> §3.</div>
+  </div></div>
+
+</div>
+
+<h2>What was built (option 1 + 2, live in the repo)</h2>
+<div class="flow">parent asks for a real-photo page
+      |
+search_photos  "monarch butterfly on milkweed photo"
+      |  server-side: serpapi.com google_images · safe=active forced
+      |  unsafe-flagged dropped · https-only · 10/family/day
+      v
+  numbered results: title · source site · WxH · photoToken (HMAC, family-bound)
+      |            (no URLs cross the model boundary, ever)
+keep_photo  photoToken
+      |  verify signature + family · fetch bytes (20s, 8MB cap, raster-only, no SVG)
+      v
+  families/{familyId}/images/{uuid}.jpg  in the family's own blob space
+      |
+  create_printable html &lt;img&gt;  ·  generate_image reference  (unchanged tools)</div>
+
+<table>
+  <tr><th>File</th><th>What</th></tr>
+  <tr><td><code>apps/web/lib/search/serp-images.ts</code></td><td>Vendor client: forced safe search, result normalization, HMAC photo tokens, size-capped streaming byte fetch</td></tr>
+  <tr><td><code>apps/web/lib/search/serp-images.test.ts</code></td><td>10 tests: token round-trip, cross-family + tamper + malformed rejection, unsafe/http filtering, raster allowlist (<code>pnpm check:photo-search</code>, wired into CI)</td></tr>
+  <tr><td><code>apps/web/agent/tools/search_photos.ts</code>, <code>keep_photo.ts</code></td><td>The two agent tools, family-scoped through <code>resolveAgentAccess</code>, events emitted per use</td></tr>
+  <tr><td><code>packages/core/src/events.ts</code></td><td><code>materials.photo_searched</code> + <code>materials.photo_imported</code> (quota volume and import size are the story; queries never enter props)</td></tr>
+  <tr><td><code>agent/instructions.md</code>, <code>materials-studio SKILL.md</code></td><td>Tool-table row, "Looking things up" paragraph, and the studio's "Real photos from the web" craft section (when real beats illustrated, topic-only queries, keep-what-you-use)</td></tr>
+  <tr><td><code>apps/web/scripts/serpapi-smoke.mts</code></td><td>Live smoke over the exact production path; passed 2026-07-13 (5 results, token verified, 243KB jpeg fetched)</td></tr>
+</table>
+
+<h2>How the design maps to house law</h2>
+<table>
+  <tr><th>Law / ruling</th><th>Where it lands here</th></tr>
+  <tr><td>web_search kept, web_fetch off (2026-07-09): no model-chosen URLs</td><td>The model chooses only a query to one fixed vendor host. Fetch targets come from HMAC-signed tokens over Google-authored result URLs; a prompt-injected model can at worst pick among returned results, never compose a URL that smuggles data out.</td></tr>
+  <tr><td>Tenant isolation: familyId never from model input</td><td>Both tools resolve family from session auth; tokens are family-bound and rejected across families (tested).</td></tr>
+  <tr><td>Child safety / D4</td><td><code>safe=active</code> forced in code, <code>unsafe</code> results dropped, reverse image search rejected outright, queries are topic-only by binding instruction (the research-brief precedent; a code-level name guard was considered and dropped because kid names like "Story" false-positive on legit queries).</td></tr>
+  <tr><td>No executable content in family space</td><td>Raster-only allowlist; SVG explicitly refused; 8MB stream cap.</td></tr>
+  <tr><td>Tool honesty + fail-soft notes</td><td>Every failure (unconfigured, quota gone, daily cap, dead link, oversized file) returns a note telling the model the honest next move.</td></tr>
+  <tr><td>Spend visibility</td><td>Two typed events per the MJ-08 registry; searches are the scarce unit and every one is counted with its family and channel.</td></tr>
+</table>
+
+<h2>Open questions for the founder</h2>
+<p class="small">Tick what you want; the box at the bottom writes your reply.</p>
+<div class="q"><input type="checkbox" data-say="Upgrade the SerpAPI plan (or give Homa its own paid account) so photo search isn't sharing 250/month."><span><b>Quota.</b> Keep validating on the free 250/month, or upgrade once families actually use it? Current caps: 10 searches/family/day, identical repeat searches are free for an hour via their cache.</span></div>
+<div class="q"><input type="checkbox" data-say="Build the chat photo card so Homa can answer 'what does X look like' with the picture itself."><span><b>Photos as answers.</b> Should chat get a small photo card (ladder #3) so "what does a red-winged blackbird look like" answers with the picture, not just a printable?</span></div>
+<div class="q"><input type="checkbox" data-say="Add Google Scholar to the nightly fleet research once quota allows."><span><b>Scholar for fleet research.</b> Worth its own quota (ladder #4)? Strengthens the "peer-reviewed first" rule the research instructions already state.</span></div>
+<div class="q"><input type="checkbox" data-say="Restrict photo search to free-to-use licenses (licenses=f) even at the cost of result quality."><span><b>License posture.</b> Today: any indexed photo, for the family's own home printing (the tool's note says never present it as Homa's art or the child's work). Google's license filter exists but guts result quality. Flip it on anyway?</span></div>
+<div class="q"><input type="checkbox" data-say="Set up a separate SerpAPI account for marketing SERP monitoring; keep product and marketing quotas apart."><span><b>Marketing monitoring.</b> Want the brand-SERP watcher (ladder #7) on a separate account so it never competes with product quota?</span></div>
+
+<div class="assembler">
+  <h3>Your reply, assembled</h3>
+  <textarea id="reply" readonly placeholder="Tick boxes above and your reply writes itself. Add anything else on top."></textarea>
+  <button id="copy">Copy reply</button>
+</div>
+
+</div>
+<script>
+const boxes=[...document.querySelectorAll('.q input')];
+const reply=document.getElementById('reply');
+function refresh(){
+  const lines=boxes.filter(b=>b.checked).map(b=>'- '+b.dataset.say);
+  reply.value=lines.length?'On the SerpAPI photo desk:\n'+lines.join('\n'):'';
+}
+boxes.forEach(b=>b.addEventListener('change',refresh));
+document.getElementById('copy').addEventListener('click',async()=>{
+  refresh();
+  try{await navigator.clipboard.writeText(reply.value);}catch{reply.select();document.execCommand('copy');}
+});
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@ import type { HandledAlert } from "../../lib/admin/alert-acks";
 import { formatInt, formatTokens, medianExact, percent, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
 import { QUIET_AFTER_DAYS } from "../../lib/admin/stage";
+import { AgentPromptButton } from "./agent-prompt-button";
 import { AlertAckButton } from "./alert-ack-button";
 import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
 
@@ -16,6 +17,9 @@ import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from 
  * Monday morning actually needs: trouble, new signups, the call list.
  * Every row-backed alert carries a Mark handled chip (founder ask
  * 2026-07-13); handled alerts hide but stay countable and reversible.
+ * Every failure row also carries a Prompt for agent chip (founder ask
+ * 2026-07-13, same day) that copies a diagnostic packet for an AI
+ * coding agent; lib/admin/agent-prompt.ts builds it.
  */
 
 export const metadata: Metadata = { title: "Overview" };
@@ -115,7 +119,12 @@ export default async function AdminOverviewPage({
               <AlertRow
                 key={`d-${t.id}`}
                 tone={t.status === "failed" ? "rose" : "gold"}
-                action={<AlertAckButton source="delivery" sourceId={t.id} />}
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AgentPromptButton source="delivery" sourceId={t.id} />
+                    <AlertAckButton source="delivery" sourceId={t.id} />
+                  </span>
+                }
               >
                 <b>{t.status === "failed" ? "Failed" : "Uncertain"} {t.channel} send</b> ·{" "}
                 {t.familyName} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
@@ -125,7 +134,12 @@ export default async function AdminOverviewPage({
               <AlertRow
                 key={`r-${t.id}`}
                 tone={t.status === "failed" ? "rose" : "gold"}
-                action={<AlertAckButton source="task_run" sourceId={t.id} />}
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AgentPromptButton source="task_run" sourceId={t.id} />
+                    <AlertAckButton source="task_run" sourceId={t.id} />
+                  </span>
+                }
               >
                 <b>{t.kind.replace(/_/g, " ")} run {t.status.replace(/_/g, " ")}</b> ·{" "}
                 {t.familyName ?? "fleet"} · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
@@ -135,7 +149,12 @@ export default async function AdminOverviewPage({
               <AlertRow
                 key={`e-${t.id}`}
                 tone="rose"
-                action={<AlertAckButton source="email_send" sourceId={t.id} />}
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AgentPromptButton source="email_send" sourceId={t.id} />
+                    <AlertAckButton source="email_send" sourceId={t.id} />
+                  </span>
+                }
               >
                 <b>Email {t.status}</b> · {t.kind.replace(/_/g, " ")} · {t.error ?? "provider receipt"} ·{" "}
                 {timeAgo(t.at)}
@@ -151,9 +170,21 @@ export default async function AdminOverviewPage({
             ({QUIET_AFTER_DAYS}+ quiet days): {quiet.map((s) => s.name).join(", ")}. A call, not a nudge.
           </AlertRow>
         ) : null}
-        {cronLate ? (
-          <AlertRow tone="gold">
-            <b>The hourly cron looks stale.</b> Last heartbeat {timeAgo(data.cronLastAt)}.
+        {cronLate || data.cronLastOk === false ? (
+          <AlertRow
+            tone={data.cronLastOk === false ? "rose" : "gold"}
+            action={<AgentPromptButton source="cron" sourceId="map_cron" />}
+          >
+            {cronLate ? (
+              <>
+                <b>The hourly cron looks stale.</b> Last heartbeat {timeAgo(data.cronLastAt)}.
+              </>
+            ) : (
+              <>
+                <b>The hourly cron errored on its last tick.</b> Last heartbeat{" "}
+                {timeAgo(data.cronLastAt)}.
+              </>
+            )}
           </AlertRow>
         ) : null}
         {data.handledAlerts.length > 0 ? (
@@ -297,7 +328,8 @@ export default async function AdminOverviewPage({
               <span className="text-muted">
                 {t.channel} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
               </span>
-              <span className="ml-auto">
+              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                <AgentPromptButton source="delivery" sourceId={t.id} />
                 <AlertAckButton source="delivery" sourceId={t.id} />
               </span>
             </li>
@@ -312,7 +344,8 @@ export default async function AdminOverviewPage({
               <span className="text-muted">
                 {t.kind.replace(/_/g, " ")} run · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
               </span>
-              <span className="ml-auto">
+              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                <AgentPromptButton source="task_run" sourceId={t.id} />
                 <AlertAckButton source="task_run" sourceId={t.id} />
               </span>
             </li>
@@ -325,7 +358,8 @@ export default async function AdminOverviewPage({
               <span className="font-bold text-strong">{t.kind.replace(/_/g, " ")}</span>
               <Pill tone={statusTone(t.status)}>{t.status}</Pill>
               <span className="text-muted">{t.error ?? "provider receipt"} · {timeAgo(t.at)}</span>
-              <span className="ml-auto">
+              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                <AgentPromptButton source="email_send" sourceId={t.id} />
                 <AlertAckButton source="email_send" sourceId={t.id} />
               </span>
             </li>
@@ -349,7 +383,8 @@ export default async function AdminOverviewPage({
                   {item.error ?? "no error recorded"} · failed {timeAgo(item.at)} · handled{" "}
                   {timeAgo(item.handledAt)}
                 </span>
-                <span className="ml-auto">
+                <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                  <AgentPromptButton source={item.source} sourceId={item.sourceId} />
                   <AlertAckButton source={item.source} sourceId={item.sourceId} mode="undo" />
                 </span>
               </li>

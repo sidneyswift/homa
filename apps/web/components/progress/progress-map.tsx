@@ -11,10 +11,12 @@ import { progressSubjectHeadline } from "../../lib/child-progress/view-copy";
 import { ProgressDetailPanel } from "./progress-detail-panel";
 
 /**
- * The Progress map: one tile per subject, tap to open that subject's
- * domains and topics in a detail panel (a right-side panel on desktop, a
- * bottom sheet on phones; see ProgressDetailPanel). The page's only
- * client island; everything it renders arrives as serializable props.
+ * The Progress map, the page's no-chart fallback (2026-07-13 merge:
+ * once a scoring exists the snapshot card's legend rows are the
+ * subject-by-subject list, see ProgressSubjects). Before the first
+ * scoring this grid keeps every subject's door: one tile per subject,
+ * tap to open that subject's domains and topics in a detail panel.
+ * Everything it renders arrives as serializable props.
  */
 
 const TILE_DOT_TONES: Record<
@@ -25,11 +27,6 @@ const TILE_DOT_TONES: Record<
   recent: "var(--stone-300)",
   quiet: "var(--gold-400)",
 };
-
-const MOVEMENT_TONES = {
-  gold: { background: "var(--gold-100)", color: "var(--gold-ink)" },
-  sage: { background: "var(--accent-sage-soft)", color: "var(--sage-700)" },
-} as const;
 
 export function ProgressMap({
   childId,
@@ -106,14 +103,6 @@ export function ProgressMap({
                     }}
                   >
                     {tile.badge.label}
-                  </span>
-                ) : null}
-                {tile.movement ? (
-                  <span
-                    className="rounded-pill px-2.5 py-1 text-[0.75rem] font-bold"
-                    style={MOVEMENT_TONES[tile.movement.tone]}
-                  >
-                    {tile.movement.label}
                   </span>
                 ) : null}
               </span>
