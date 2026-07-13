@@ -16,6 +16,7 @@ import {
 import { ageInMonths, formatChildAge } from "./child-age";
 import { isProfileNonAnswer } from "./profile-quality";
 import { mapDb } from "./map/db";
+import { chartMonthsForScore, displayMonths } from "./map/trajectory-format";
 import { effectiveTimeZone } from "./time-zone";
 
 /**
@@ -121,9 +122,11 @@ function strongestEasilyBySubject(answers: ChildAnswerRow[]): Map<string, string
   return new Map([...best].map(([subjectId, value]) => [subjectId, value.statement]));
 }
 
-/** One compact line per mapped subject: the reading plus the concrete
- * floor (does easily) and working edge, which is exactly what
- * difficulty decisions need. */
+/** One compact line per mapped subject: the reading, the exact figure
+ * the parent's trajectory chart shows (same value law and formatter as
+ * the chart, so the number she is looking at is always in front of the
+ * agent), plus the concrete floor (does easily) and working edge, which
+ * is exactly what difficulty decisions need. */
 function describeSubjectScore(
   score: SubjectScore,
   easilyStatement: string | undefined,
@@ -141,6 +144,12 @@ function describeSubjectScore(
     reading = "growing";
   }
   const parts = [`${subjectName}: ${reading}`];
+  const chartMonths = chartMonthsForScore(score);
+  if (chartMonths !== null && !score.exposureBased) {
+    parts.push(
+      `chart reads ${displayMonths(chartMonths, score.beyondScale)} mo`,
+    );
+  }
   if (easilyStatement) {
     parts.push(`does easily: ${easilyStatement}`);
   }
@@ -195,12 +204,15 @@ function renderMapSnapshot(
     return `${child.name}:\n${lines.join("\n")}`;
   });
 
+  // Guidance renders BEFORE the per-child sections on purpose: the whole
+  // snapshot is character-bounded from the front, so a big family may lose
+  // trailing data lines but never the rules for reading them.
   return `
 
 What the map knows (checklist answers plus observations you recorded, scored like the report):
-${sections.join("\n")}
-
-Ground every difficulty choice (materials, activities, suggestions) in this snapshot and the saved memories. A subject with no reading for the skill you are targeting means ask the parent one short calibrating question first. Each child's snapshot stands alone: never set one child's level from a sibling's, and never compare siblings to each other.`;
+"chart reads" is the exact figure on that child's Progress trajectory chart: months between their confirmed working edge and what is typical for their age. A minus number means the working edge sits that many months earlier than typical; it locates where growth is happening, it is never a deficit or a grade. When the parent asks about a number she sees on Progress or a report, this is that number: confirm it, then explain it through the working edge. Never tell her you cannot see her child's progress data.
+Ground every difficulty choice (materials, activities, suggestions) in this snapshot and the saved memories. A subject with no reading for the skill you are targeting means ask the parent one short calibrating question first. Each child's snapshot stands alone: never set one child's level from a sibling's, and never compare siblings to each other.
+${sections.join("\n")}`;
 }
 
 /** Loads the context rows with reads pinned to the given familyId. */

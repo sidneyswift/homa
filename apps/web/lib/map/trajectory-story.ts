@@ -1,6 +1,6 @@
 import { getMapSubject, type MapPosition } from "@homa/core";
 
-import { displayMonths } from "./trajectory-format";
+import { chartMonthsForScore, displayMonths } from "./trajectory-format";
 import type { TrajectoryEra } from "./trajectory-eras";
 
 /**
@@ -14,6 +14,8 @@ import type { TrajectoryEra } from "./trajectory-eras";
  * frontier sits below age. The old fixed "growing" slot is gone. A
  * subject with no measurable frontier yet (a lone "not yet") has no
  * true point, so it contributes nothing rather than a made-up number.
+ * The law itself lives in trajectory-format's chartMonthsForScore,
+ * shared with the agent's map snapshot in lib/family-context.
  */
 
 export interface TrajectoryStoryPoint {
@@ -72,18 +74,6 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }
 
-/** The plotted value for one era's subject score: the display months,
- * or the real negative distance for a below-age frontier, or null when
- * nothing measurable exists yet. */
-function plotValue(score: {
-  monthsAhead: number | null;
-  frontierDeltaMonths?: number | null;
-}): number | null {
-  if (score.monthsAhead !== null) return score.monthsAhead;
-  const raw = score.frontierDeltaMonths ?? null;
-  return raw !== null && raw < 0 ? raw : null;
-}
-
 export function buildTrajectoryStory(
   eras: readonly TrajectoryEra[],
 ): TrajectoryStory {
@@ -112,7 +102,9 @@ export function buildTrajectoryStory(
     for (const era of eras) {
       const score = era.scores.subjects.find((entry) => entry.subjectId === subjectId);
       if (!score || score.exposureBased || score.position === "not_mapped") continue;
-      const months = plotValue(score);
+      // The shared value law (trajectory-format): the same function feeds
+      // the agent's map snapshot, so chart and Homa can never disagree.
+      const months = chartMonthsForScore(score);
       if (months === null) continue;
       const t = Date.parse(era.generated_at);
       if (!Number.isFinite(t)) continue;

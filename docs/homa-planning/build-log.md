@@ -3,6 +3,36 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · The agent now sees every chart figure the parent sees (founder ask)
+
+Founder ask (afternoon chat, screenshot): a parent asked "is Story really
+-9 months below in self-care?" and the agent answered that it did not have
+that figure. "Homa should know this. Fix the root cause and never let it
+happen again." Root cause: the morning's founder ruling put the REAL signed
+frontier distance on the trajectory chart ("Self-care -9 mo" via
+frontierDeltaMonths), but the agent's per-turn map snapshot
+(lib/family-context renderMapSnapshot) still rendered a below-age subject
+as the bare word "growing", so the product showed the parent a number its
+own agent could not see. Same class as the 2026-07-10 counting-page lesson:
+two projections of one scorer, one updated without the other.
+
+Fix, three layers. (1) The chart's value law moved into a shared helper
+(chartMonthsForScore in lib/map/trajectory-format) that both the trajectory
+story and the map snapshot call, so the two surfaces cannot drift again.
+(2) Every scored subject line in the snapshot now carries "chart reads
+X mo" through the chart's own formatter, and the snapshot's reading
+guidance moved ahead of the per-child sections so the 4,000-character bound
+can truncate data but never the rules for reading it; instructions.md
+teaches the agent to confirm an on-screen number and explain it through the
+working edge, never to disclaim the family's own progress data. (3) A new
+CI-run parity guard (pnpm check:agent-context,
+family-context-map-snapshot.test.ts) recomputes from the scorer what the
+chart would plot and requires each figure verbatim in the rendered context.
+Decisions made alone: the signed number enters the agent's context (data,
+not parent copy; the instructions keep growth framing for what she reads),
+and the previously orphaned family-context-security.test.ts, which no
+script ran, now runs under the same new CI step.
+
 ## 2026-07-13 · Founder ruling: parent input about a child is never wasted (the observation ledger)
 
 Founder ruling (2026-07-13 morning chat, "IMPLEMENT and ship"): ALL

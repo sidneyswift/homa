@@ -45,6 +45,9 @@ jobs:
       - name: Map content + scorer checks (claims law, citations, golden kids)
         run: pnpm check:map
 
+      - name: Agent context checks (chart parity, injection escaping)
+        run: pnpm check:agent-context
+
       - name: Events-registry parity check (MJ-08)
         run: pnpm check:events
 
