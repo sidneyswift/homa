@@ -30,7 +30,10 @@ try {
   // Fine in CI or when env arrives from the shell.
 }
 
+// After env load on purpose: the gateway client reads credentials at
+// call time and the db module reads its password at connect time.
 const { mapDb } = await import("../apps/web/lib/map/db");
+const { getModelPriceBook } = await import("../apps/web/lib/model-pricing-live");
 
 function argValue(flag: string): string | null {
   const index = process.argv.indexOf(flag);
@@ -71,6 +74,12 @@ const rows = await sql<SurfaceRow[]>`
   order by family_id nulls last, surface
 `;
 
+const priceBook = await getModelPriceBook();
+const priceSource =
+  priceBook.source === "gateway"
+    ? `gateway prices, fetched ${priceBook.fetchedAt}`
+    : "pinned fallback prices (gateway unavailable)";
+
 console.log(`model_usage · last ${days} day(s)${family ? ` · family ${family}` : ""}`);
 if (rows.length === 0) {
   console.log("  (no usage recorded in the window)");
@@ -88,12 +97,16 @@ if (rows.length === 0) {
         ? ` in=${row.input_tokens ?? 0} out=${row.output_tokens ?? 0}`
         : "";
     const images = row.images && row.images !== "0" ? ` images=${row.images}` : "";
-    const usd = estimateUsageCostUsd(row.model, {
-      inputTokens: Number(row.input_tokens ?? 0),
-      outputTokens: Number(row.output_tokens ?? 0),
-      cacheReadTokens: Number(row.cache_read ?? 0),
-      cacheWriteTokens: Number(row.cache_write ?? 0),
-    });
+    const usd = estimateUsageCostUsd(
+      row.model,
+      {
+        inputTokens: Number(row.input_tokens ?? 0),
+        outputTokens: Number(row.output_tokens ?? 0),
+        cacheReadTokens: Number(row.cache_read ?? 0),
+        cacheWriteTokens: Number(row.cache_write ?? 0),
+      },
+      { rates: priceBook.rates },
+    );
     if (usd === null) unpriced.add(row.model);
     else totalUsd += usd;
     const cost = usd === null ? " est=(no price on file)" : ` est=${formatUsd(usd)}`;
@@ -101,7 +114,7 @@ if (rows.length === 0) {
       `  ${row.surface.padEnd(18)} ${row.model.padEnd(34)} calls=${row.calls}${tokens}${images}${cost}`,
     );
   }
-  console.log(`\nestimated total: ${formatUsd(totalUsd)} (price book: apps/web/lib/model-pricing.ts)`);
+  console.log(`\nestimated total: ${formatUsd(totalUsd)} (${priceSource})`);
   if (unpriced.size > 0) {
     console.log(`not counted, no price on file: ${[...unpriced].sort().join(", ")}`);
   }

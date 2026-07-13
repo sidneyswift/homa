@@ -1,6 +1,7 @@
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
 import { estimateUsageCostUsd } from "../model-pricing";
+import { getModelPriceBook } from "../model-pricing-live";
 
 /**
  * The founder console's family backbone (MJ-14): one snapshot per family
@@ -66,6 +67,7 @@ interface FamilyRow {
 
 export async function getFamilySnapshots(now: Date = new Date()): Promise<FamilySnapshot[]> {
   const sql = adminDb();
+  const priceBook = await getModelPriceBook();
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const families = await sql<FamilyRow[]>`
@@ -146,12 +148,16 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
     );
     // Unpriced models add $0 here; the overview tile carries the alarm.
     const usd =
-      estimateUsageCostUsd(row.model, {
-        inputTokens: row.tokens_in,
-        outputTokens: row.tokens_out,
-        cacheReadTokens: row.cache_read,
-        cacheWriteTokens: row.cache_write,
-      }) ?? 0;
+      estimateUsageCostUsd(
+        row.model,
+        {
+          inputTokens: row.tokens_in,
+          outputTokens: row.tokens_out,
+          cacheReadTokens: row.cache_read,
+          cacheWriteTokens: row.cache_write,
+        },
+        { rates: priceBook.rates },
+      ) ?? 0;
     costBy.set(row.family_id, (costBy.get(row.family_id) ?? 0) + usd);
   }
 

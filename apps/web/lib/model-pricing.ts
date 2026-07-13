@@ -1,10 +1,15 @@
 /**
- * The model price book: provider list prices in USD per million tokens
- * for every model the consumption ledger (public.model_usage) contains,
- * joined to raw token quantities at read time. The ledger stores
- * quantities only, never dollars, because prices drift (the
- * model-usage.ts law); this module is where the founder console's
- * dollar figures come from.
+ * The model price book: pure pricing math plus the PINNED fallback
+ * rates, joined to the consumption ledger's raw token quantities at
+ * read time. The ledger stores quantities only, never dollars, because
+ * prices drift (the model-usage.ts law).
+ *
+ * Freshness comes from model-pricing-live.ts: it overlays the
+ * Gateway's current per-token prices on this table at read time, so
+ * the pinned rates below only price anything when the Gateway is
+ * unreachable. `pnpm check:model-pricing` fails when a ledger model is
+ * unpriced everywhere and prints a paste-ready diff when this fallback
+ * drifts from the live feed.
  *
  * These are ESTIMATES for monitoring, not billing-grade accounting:
  * the Vercel AI Gateway invoice is the source of truth, and the
@@ -33,14 +38,18 @@ export interface ModelRate {
   until?: string;
 }
 
+/** Model id -> dated rate windows (live overlays carry one undated window). */
+export type ModelRates = Record<string, ModelRate[]>;
+
 /**
- * List prices checked 2026-07-13 against provider pricing pages. When a
- * new model ships, add its row in the same PR (the 08-billing "no
- * unpriced actions" rule, applied to monitoring). A model missing here
- * never prices as zero: estimateUsageCostUsd returns null and the
- * console shows it as unpriced.
+ * Pinned fallback prices, checked 2026-07-13 against provider pricing
+ * pages. When a new model ships, add its row in the same PR (the
+ * 08-billing "no unpriced actions" rule, applied to monitoring). A
+ * model missing here AND missing from the live feed never prices as
+ * zero: estimateUsageCostUsd returns null and the console shows it as
+ * unpriced.
  */
-export const MODEL_RATES: Record<string, ModelRate[]> = {
+export const MODEL_RATES: ModelRates = {
   "anthropic/claude-sonnet-5": [
     {
       inputUsdPerMTok: 2,
@@ -75,10 +84,23 @@ export interface UsageQuantities {
   cacheWriteTokens?: number;
 }
 
-function rateFor(model: string, at: Date): ModelRate | null {
-  const windows = MODEL_RATES[model];
+/** How estimates are priced: `rates` defaults to the pinned table (pass
+ * the live book from model-pricing-live.ts for current prices), `at`
+ * picks the dated window and defaults to now. */
+export interface PricingOptions {
+  at?: Date;
+  rates?: ModelRates;
+}
+
+/** The rate window in effect for a model on a given day, or null when
+ * the model has no price on file. */
+export function currentModelRate(
+  model: string,
+  options: PricingOptions = {},
+): ModelRate | null {
+  const windows = (options.rates ?? MODEL_RATES)[model];
   if (!windows) return null;
-  const day = at.toISOString().slice(0, 10);
+  const day = (options.at ?? new Date()).toISOString().slice(0, 10);
   return (
     windows.find(
       (rate) => (!rate.from || day >= rate.from) && (!rate.until || day <= rate.until),
@@ -87,17 +109,17 @@ function rateFor(model: string, at: Date): ModelRate | null {
 }
 
 /**
- * estimateUsageCostUsd(model, usage, at): USD estimate for one call, or
- * one aggregated group of calls on a single model. Returns null when the
- * model has no price on file; callers must surface that as unpriced,
- * never as $0.
+ * estimateUsageCostUsd(model, usage, options): USD estimate for one
+ * call, or one aggregated group of calls on a single model. Returns
+ * null when the model has no price on file; callers must surface that
+ * as unpriced, never as $0.
  */
 export function estimateUsageCostUsd(
   model: string,
   usage: UsageQuantities,
-  at: Date = new Date(),
+  options: PricingOptions = {},
 ): number | null {
-  const rate = rateFor(model, at);
+  const rate = currentModelRate(model, options);
   if (!rate) return null;
   const cacheRead = Math.max(0, usage.cacheReadTokens ?? 0);
   const cacheWrite = Math.max(0, usage.cacheWriteTokens ?? 0);
@@ -122,12 +144,12 @@ export interface UsageCostSummary {
 /** Sums estimates across usage rows that may span several models. */
 export function summarizeUsageCost(
   rows: Array<{ model: string } & UsageQuantities>,
-  at: Date = new Date(),
+  options: PricingOptions = {},
 ): UsageCostSummary {
   let estimatedUsd = 0;
   const unpriced = new Set<string>();
   for (const row of rows) {
-    const usd = estimateUsageCostUsd(row.model, row, at);
+    const usd = estimateUsageCostUsd(row.model, row, options);
     if (usd === null) unpriced.add(row.model);
     else estimatedUsd += usd;
   }

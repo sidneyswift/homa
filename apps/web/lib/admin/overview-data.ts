@@ -2,6 +2,7 @@ import { listHandledAlerts, type HandledAlert } from "./alert-acks";
 import { adminDb } from "./db";
 import { getFamilySnapshots, type FamilySnapshot } from "./roster-data";
 import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
+import { getModelPriceBook, type PriceBookStatus } from "../model-pricing-live";
 
 /**
  * Fleet aggregates for the founder console's overview (MJ-14 mission
@@ -69,12 +70,15 @@ export interface FleetOverview {
   modelTokens: number;
   /** Price-book estimate of range spend, plus any unpriced models. */
   modelCost: UsageCostSummary;
+  /** Which prices did the math: live gateway or pinned fallback. */
+  priceBook: PriceBookStatus;
   /** Alerts marked handled that would otherwise show in this range. */
   handledAlerts: HandledAlert[];
 }
 
 export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetOverview> {
   const sql = adminDb();
+  const priceBook = await getModelPriceBook();
   const interval = `${rangeDays} days`;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
@@ -249,7 +253,9 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
         cacheReadTokens: row.cache_read,
         cacheWriteTokens: row.cache_write,
       })),
+      { rates: priceBook.rates },
     ),
+    priceBook: { source: priceBook.source, fetchedAt: priceBook.fetchedAt },
     handledAlerts,
   };
 }

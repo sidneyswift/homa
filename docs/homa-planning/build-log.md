@@ -37,6 +37,43 @@ deny-all + insert probe), admin:smoke, and a Playwright pass on a dev
 server with a fixture founder (ack → hidden note → Show them →
 Bring back → re-ack), fixture family and acks deleted after.
 
+## 2026-07-13 · Model prices go self-updating: the Gateway catalog overlays the pinned book
+
+Founder ask, same session as the price book: "make it so we always have
+the model costs up to date." Built as a live overlay, not a rewrite: the
+Gateway's model catalog (310 priced models, per-token USD, including
+Anthropic cache read/write rates) becomes the price source at read time,
+and the hand-pinned table demotes to a fallback for outages.
+
+- New `apps/web/lib/model-pricing-live.ts`: `gateway.getAvailableModels()`
+  (already in the `ai` dependency, same credentials the app's inference
+  uses, no new packages or keys) mapped to the price book shape, cached
+  in memory 15 minutes, refreshed at most once per interval. Callers
+  wait at most 5 seconds on a cold fetch, then get the last good book or
+  the pinned table; a late fetch still lands for the next reader. Every
+  book names its source ("gateway" or "pinned") and fetch time.
+- Pricing functions take `{ at, rates }` options; all four admin data
+  layers price with the live book. The overview tile appends "gateway
+  prices" or "pinned prices"; the session Bill section says which prices
+  did the math and when they were checked.
+- New guard `pnpm check:model-pricing`: FAILS when any model with
+  recorded `model_usage` rows is unpriced by both live catalog and
+  pinned table; WARNS with a paste-ready row when the pinned fallback
+  drifts from the gateway (drift never fails, live already overrides).
+  Runs coverage against pinned alone when the gateway is unreachable.
+- Decisions made alone: a new model on the gateway prices automatically
+  with no code change (the "up to date" ask); pinned dated windows (the
+  Sonnet 5 2026-09-01 rise) only matter during outages since the gateway
+  reflects changes itself; per-MTok conversion rounds at 8 decimals so
+  float artifacts (0.0000002 x 1e6) never hit display or drift checks.
+- Verified live: catalog fetch matches the pinned table exactly today
+  (drift check clean), usage report prints "gateway prices, fetched
+  <time>" with a $32.64/7d fleet total, simulated network failure
+  engages the pinned fallback with a console warning, and the catalog
+  endpoint even tolerates a missing/expired token (auth gates inference,
+  not the price list), so the fallback covers true network failure only.
+  check:admin 31 tests, typecheck, lint, full next build all green.
+
 ## 2026-07-13 · Console dollars: the model price book joins the usage ledger at read time
 
 Founder ask: convert all token usage across the app into USD, model-aware

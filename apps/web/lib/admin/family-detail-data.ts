@@ -1,6 +1,7 @@
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
 import { summarizeUsageCost } from "../model-pricing";
+import { getModelPriceBook } from "../model-pricing-live";
 
 /**
  * One family's whole story for /admin/families/[familyId] (MJ-14,
@@ -44,6 +45,7 @@ export interface FamilyDetail {
 
 export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | null> {
   const sql = adminDb();
+  const priceBook = await getModelPriceBook();
 
   const familyRows = await sql<
     {
@@ -241,6 +243,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
         cacheReadTokens: row.cache_read,
         cacheWriteTokens: row.cache_write,
       })),
+      { rates: priceBook.rates },
     ).estimatedUsd,
     recentEvents: events.map((event) => ({ name: event.name, createdAt: event.created_at })),
   };

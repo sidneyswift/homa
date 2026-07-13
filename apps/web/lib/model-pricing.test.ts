@@ -25,7 +25,7 @@ test("sonnet 5 chat call splits input into uncached, cache read, cache write", (
   const usd = estimateUsageCostUsd(
     "anthropic/claude-sonnet-5",
     { inputTokens: 40865, outputTokens: 1482, cacheReadTokens: 39540, cacheWriteTokens: 1323 },
-    INTRO,
+    { at: INTRO },
   );
   assertClose(usd, (2 * 2 + 39540 * 0.2 + 1323 * 2.5 + 1482 * 10) / 1_000_000);
 });
@@ -40,10 +40,10 @@ test("sonnet 5 reprices when the standard window starts", () => {
   const august = estimateUsageCostUsd(
     "anthropic/claude-sonnet-5",
     quantities,
-    new Date("2026-08-31T23:59:59Z"),
+    { at: new Date("2026-08-31T23:59:59Z") },
   );
   assertClose(august, (2 * 2 + 39540 * 0.2 + 1323 * 2.5 + 1482 * 10) / 1_000_000);
-  const september = estimateUsageCostUsd("anthropic/claude-sonnet-5", quantities, STANDARD);
+  const september = estimateUsageCostUsd("anthropic/claude-sonnet-5", quantities, { at: STANDARD });
   assertClose(september, (2 * 3 + 39540 * 0.3 + 1323 * 3.75 + 1482 * 15) / 1_000_000);
 });
 
@@ -51,7 +51,7 @@ test("models without cache columns price all input at the input rate", () => {
   const usd = estimateUsageCostUsd(
     "openai/gpt-5.4-mini",
     { inputTokens: 1000, outputTokens: 100 },
-    INTRO,
+    { at: INTRO },
   );
   assertClose(usd, (1000 * 0.75 + 100 * 4.5) / 1_000_000);
 });
@@ -60,7 +60,7 @@ test("image calls price text input and image output at their own rates", () => {
   const usd = estimateUsageCostUsd(
     "openai/gpt-image-2",
     { inputTokens: 1883, outputTokens: 19598 },
-    INTRO,
+    { at: INTRO },
   );
   assertClose(usd, (1883 * 5 + 19598 * 30) / 1_000_000);
 });
@@ -69,7 +69,7 @@ test("embeddings bill input only", () => {
   const usd = estimateUsageCostUsd(
     "openai/text-embedding-3-small",
     { inputTokens: 27224, outputTokens: 0 },
-    INTRO,
+    { at: INTRO },
   );
   assertClose(usd, (27224 * 0.02) / 1_000_000);
 });
@@ -78,16 +78,28 @@ test("cache tokens larger than input clamp the uncached share at zero", () => {
   const usd = estimateUsageCostUsd(
     "anthropic/claude-sonnet-5",
     { inputTokens: 100, outputTokens: 0, cacheReadTokens: 150 },
-    INTRO,
+    { at: INTRO },
   );
   assertClose(usd, (150 * 0.2) / 1_000_000);
 });
 
 test("an unknown model returns null, never zero", () => {
   assert.equal(
-    estimateUsageCostUsd("openai/some-new-model", { inputTokens: 1000, outputTokens: 10 }, INTRO),
+    estimateUsageCostUsd("openai/some-new-model", { inputTokens: 1000, outputTokens: 10 }, { at: INTRO }),
     null,
   );
+});
+
+test("a rates override (the live gateway book) beats the pinned table", () => {
+  const rates = {
+    "openai/some-new-model": [{ inputUsdPerMTok: 1, outputUsdPerMTok: 2 }],
+  };
+  const usd = estimateUsageCostUsd(
+    "openai/some-new-model",
+    { inputTokens: 1000, outputTokens: 500 },
+    { at: INTRO, rates },
+  );
+  assertClose(usd, (1000 * 1 + 500 * 2) / 1_000_000);
 });
 
 test("summarize sums priced rows and names unpriced ones", () => {
@@ -97,7 +109,7 @@ test("summarize sums priced rows and names unpriced ones", () => {
       { model: "openai/some-new-model", inputTokens: 5000, outputTokens: 500 },
       { model: "openai/some-new-model", inputTokens: 100, outputTokens: 1 },
     ],
-    INTRO,
+    { at: INTRO },
   );
   assertClose(summary.estimatedUsd, (1000 * 0.75 + 100 * 4.5) / 1_000_000);
   assert.deepEqual(summary.unpricedModels, ["openai/some-new-model"]);

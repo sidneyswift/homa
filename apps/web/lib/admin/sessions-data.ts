@@ -4,6 +4,7 @@ import {
   summarizeUsageCost,
   type UsageCostSummary,
 } from "../model-pricing";
+import { getModelPriceBook, type PriceBookStatus } from "../model-pricing-live";
 
 /**
  * The session inspector's data (deep view direction 2): every agent run
@@ -80,6 +81,7 @@ export async function listSessions(
   filters: SessionListFilters = {},
 ): Promise<SessionListRow[]> {
   const sql = adminDb();
+  const priceBook = await getModelPriceBook();
   const limit = Math.min(filters.limit ?? 60, 200);
   const channel = filters.channel ?? null;
   const familyId = filters.familyId ?? null;
@@ -200,6 +202,7 @@ export async function listSessions(
           cacheReadTokens: line.cacheRead,
           cacheWriteTokens: line.cacheWrite,
         })),
+        { rates: priceBook.rates },
       ),
       run: run
         ? { id: run.id, kind: run.kind, title: run.title, status: run.status, error: run.error }
@@ -291,6 +294,7 @@ export interface SessionDetail {
   snapshots: SessionSnapshot[];
   usage: SessionUsageLine[];
   usageCost: UsageCostSummary;
+  priceBook: PriceBookStatus;
   run: {
     id: string;
     kind: string;
@@ -323,6 +327,7 @@ function parseJsonText(value: string | null): unknown {
 
 export async function getSessionDetail(sessionId: string): Promise<SessionDetail | null> {
   const sql = adminDb();
+  const priceBook = await getModelPriceBook();
 
   const messages = await sql<
     {
@@ -495,12 +500,16 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
       calls: row.calls,
       tokensIn: row.tokens_in,
       tokensOut: row.tokens_out,
-      estimatedUsd: estimateUsageCostUsd(row.model, {
-        inputTokens: row.tokens_in,
-        outputTokens: row.tokens_out,
-        cacheReadTokens: row.cache_read,
-        cacheWriteTokens: row.cache_write,
-      }),
+      estimatedUsd: estimateUsageCostUsd(
+        row.model,
+        {
+          inputTokens: row.tokens_in,
+          outputTokens: row.tokens_out,
+          cacheReadTokens: row.cache_read,
+          cacheWriteTokens: row.cache_write,
+        },
+        { rates: priceBook.rates },
+      ),
     })),
     usageCost: summarizeUsageCost(
       usage.map((row) => ({
@@ -510,7 +519,9 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
         cacheReadTokens: row.cache_read,
         cacheWriteTokens: row.cache_write,
       })),
+      { rates: priceBook.rates },
     ),
+    priceBook: { source: priceBook.source, fetchedAt: priceBook.fetchedAt },
     run: run
       ? {
           id: run.id,

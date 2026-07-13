@@ -9,6 +9,7 @@ import {
   dayLabel,
   formatInt,
   formatTokens,
+  timeAgo,
   timeLabel,
 } from "../../../../lib/admin/format";
 import { formatUsd } from "../../../../lib/model-pricing";
@@ -197,7 +198,11 @@ export default async function AdminSessionDetailPage({
       <SectionHead
         eyebrow="Bill"
         title="What this session cost"
-        sub="Dollar figures are estimates from the price book in lib/model-pricing.ts; the Gateway invoice is the source of truth."
+        sub={
+          detail.priceBook.source === "gateway"
+            ? `Estimates at the gateway's current prices, checked ${timeAgo(detail.priceBook.fetchedAt)}; the Gateway invoice is the source of truth.`
+            : "Estimates from the pinned price book in lib/model-pricing.ts (live gateway prices unavailable right now); the Gateway invoice is the source of truth."
+        }
       />
       {detail.usage.length === 0 ? (
         <EmptyNote>No model usage recorded on this session id.</EmptyNote>

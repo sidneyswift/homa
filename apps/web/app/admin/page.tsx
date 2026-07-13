@@ -243,7 +243,9 @@ export default async function AdminOverviewPage({
           sub={
             data.modelCost.unpricedModels.length > 0
               ? `no price on file: ${data.modelCost.unpricedModels.join(", ")} · add it to lib/model-pricing.ts`
-              : `${formatTokens(data.modelTokens)} tokens · ${formatInt(data.modelCalls)} calls · P50 ${formatUsd(medianExact(costPerFamily))}/family (28d)`
+              : `${formatTokens(data.modelTokens)} tokens · ${formatInt(data.modelCalls)} calls · P50 ${formatUsd(medianExact(costPerFamily))}/family (28d) · ${
+                  data.priceBook.source === "gateway" ? "gateway prices" : "pinned prices"
+                }`
           }
           subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
         />
