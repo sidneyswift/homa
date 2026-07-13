@@ -29,15 +29,6 @@ export interface ProgressViewKid {
   avatarUrl: string | null;
 }
 
-/** The retest clock fields ReportSnapshot reads (DashboardPlan, less
- * the planner-only weeks). */
-export interface ProgressViewPlan {
-  subjectId: string;
-  done: number;
-  total: number;
-  retestAt: string;
-}
-
 function ProgressEmptyState({
   childId,
   childName,
@@ -109,7 +100,6 @@ export function ProgressView({
   reportHref,
   report,
   eras,
-  plans,
   kids,
 }: {
   view: ChildProgressView;
@@ -125,8 +115,6 @@ export function ProgressView({
    * re-normalized server-side (lib/map/trajectory-eras). Empty before
    * the first scoring. */
   eras: TrajectoryEra[];
-  /** This child's plans only, for the chart's re-check marker. */
-  plans: ProgressViewPlan[];
   /** The family's kids in family order (drives the switcher's tones). */
   kids: ProgressViewKid[];
 }) {
@@ -186,8 +174,8 @@ export function ProgressView({
             {report && generatedDate && eras.length > 0 ? (
               <ReportSnapshot
                 childName={view.childName}
+                birthMonth={view.birthDate}
                 generatedDate={generatedDate}
-                plans={plans}
                 eras={eras}
                 className="mt-6"
               />

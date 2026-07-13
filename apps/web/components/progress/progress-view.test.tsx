@@ -35,7 +35,6 @@ describe("ProgressView", () => {
         reportHref="/onboarding/r/tok-abc123"
         report={PROGRESS_FIXTURE_REPORT}
         eras={PROGRESS_FIXTURE_ERAS}
-        plans={[]}
         kids={PROGRESS_FIXTURE_KIDS}
       />,
     );
@@ -55,12 +54,12 @@ describe("ProgressView", () => {
     assert.match(html, /href="\/app\/child-2\/progress"/);
     assert.match(html, /Leo/);
 
-    // The chart card is the report's own snapshot.
+    // The chart card is the report's own snapshot: the interactive
+    // chart, its data-written caption, and the legend card.
     assert.match(html, /Maya(?:&#x27;|')s snapshot/);
-    assert.match(
-      html,
-      /<svg[^>]*months ahead by subject across 2 check-ins/,
-    );
+    assert.match(html, /<svg[^>]*months ahead by subject over time/);
+    assert.match(html, /Math climbed from \+7 to \+8 this week\./);
+    assert.match(html, /aria-pressed="false"/);
 
     // The subject map: tiles that open a panel, strongest first (the
     // chart above also names subjects, so order is asserted inside the
@@ -96,7 +95,6 @@ describe("ProgressView", () => {
         reportHref={null}
         report={null}
         eras={[]}
-        plans={[]}
         kids={[{ id: "child-1", name: "Maya", avatarUrl: null }]}
       />,
     );
@@ -115,7 +113,6 @@ describe("ProgressView", () => {
           reportHref={null}
           report={PROGRESS_FIXTURE_REPORT}
           eras={PROGRESS_FIXTURE_ERAS}
-          plans={[]}
           kids={PROGRESS_FIXTURE_KIDS}
         />
       </AppRouterContext.Provider>,

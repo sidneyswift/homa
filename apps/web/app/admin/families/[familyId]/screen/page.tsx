@@ -249,14 +249,6 @@ async function ProgressTab({
         reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
         report={report}
         eras={kidDeep.eras}
-        plans={data.plans
-          .filter((plan) => plan.childId === kid.id)
-          .map((plan) => ({
-            subjectId: plan.subjectId,
-            done: plan.done,
-            total: plan.total,
-            retestAt: plan.retestAt,
-          }))}
         kids={[{ id: kid.id, name: kid.name, avatarUrl: kid.avatar_url }]}
       />
       {xray ? (

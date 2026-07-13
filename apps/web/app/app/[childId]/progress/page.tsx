@@ -87,14 +87,6 @@ export default async function ChildProgressPage({
       reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
       report={report}
       eras={eras}
-      plans={data.plans
-        .filter((plan) => plan.childId === child.id)
-        .map((plan) => ({
-          subjectId: plan.subjectId,
-          done: plan.done,
-          total: plan.total,
-          retestAt: plan.retestAt,
-        }))}
       kids={data.children.map((entry) => ({
         id: entry.id,
         name: entry.name,

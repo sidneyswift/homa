@@ -236,12 +236,41 @@ report(
 );
 
 // Golden kid 4: struggling (all not yet) → growing everywhere, never a
-// negative number, never a banned word. The hardest honest case.
+// negative displayed number, never a banned word. The hardest honest
+// case. A lone "not yet" confirms nothing measurable, so the raw field
+// stays null too: no number is invented (ruling
+// trajectory-real-negative-months covers measured frontiers only).
 const strugglingKid = scoreMap(AGE, answersFor(AGE, () => "not_yet"));
 report(
-  "struggling kid: growing framing only, no negative numbers anywhere",
+  "struggling kid: growing framing only, no negative displayed numbers anywhere",
   strugglingKid.subjects.every((d) => d.position === "growing" || d.position === "not_mapped") &&
     strugglingKid.subjects.every((d) => d.monthsAhead === null),
+);
+report(
+  "struggling kid: no confirmed frontier, so no raw number either",
+  strugglingKid.subjects.every((d) => d.frontierDeltaMonths === null),
+);
+
+// Raw-field laws (additive 2026-07-13): the raw frontier delta is the
+// uncapped signed truth behind the display. Emerging answers on base
+// items can sit below age: the display floors at zero, the raw field
+// carries the real negative number for the trajectory chart.
+report(
+  "ahead kid: raw frontier delta is never smaller than the displayed months",
+  aheadKid.subjects.every(
+    (d) => d.monthsAhead === null || (d.frontierDeltaMonths ?? 0) >= d.monthsAhead,
+  ),
+);
+const emergingKid = scoreMap(AGE, answersFor(AGE, () => "getting_there"));
+report(
+  "emerging kid: display never negative, raw delta carries the real below-age number",
+  emergingKid.subjects.every((d) => (d.monthsAhead ?? 0) >= 0) &&
+    emergingKid.subjects.some(
+      (d) => d.frontierDeltaMonths !== null && d.frontierDeltaMonths < 0,
+    ),
+  JSON.stringify(
+    emergingKid.subjects.map((d) => [d.subjectId, d.monthsAhead, d.frontierDeltaMonths]),
+  ),
 );
 
 // Determinism: same answers, same map.

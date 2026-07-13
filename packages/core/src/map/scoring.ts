@@ -25,9 +25,12 @@ import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem }
  *    child's age (aheadCapForAge), the honest resolution limit of a
  *    short parent questionnaire, within the absolute +24 cap.
  *
- * Display law (BUILD.md #4): there is no negative number anywhere in the
- * output. A frontier below age renders as position "growing", the sanctioned
- * growth framing, with an activity attached by the caller.
+ * Display law (BUILD.md #4): `monthsAhead` is never negative. A frontier
+ * below age reads as position "growing" with `monthsAhead: null`, and the
+ * REAL signed distance travels separately in `frontierDeltaMonths`
+ * (founder ruling 2026-07-13: the trajectory chart plots the real
+ * negative number instead of a euphemism slot). Surfaces that still
+ * speak in growth framing simply keep ignoring the raw field.
  */
 
 export type MapPosition = "ahead" | "on_track" | "growing" | "not_mapped";
@@ -61,6 +64,17 @@ export interface SubjectScore {
   /** Whole months ahead of age; null unless position is "ahead" or "on_track". */
   monthsAhead: number | null;
   /**
+   * The RAW signed frontier distance: highest credited months minus age,
+   * uncapped in both directions, null when nothing measurable was
+   * confirmed (no easily/getting_there yet) or the subject is
+   * exposure-based. This is the honest number behind the display fields:
+   * negative for a below-age frontier (founder ruling 2026-07-13, the
+   * trajectory chart plots it as-is), above the cap for a frontier the
+   * display floors (beyondScale). Display surfaces keep using
+   * monthsAhead; charts and analysis read this.
+   */
+  frontierDeltaMonths: number | null;
+  /**
    * True when monthsAhead is a FLOOR, not the measurement: the child's
    * confirmed frontier ran past the display cap, or they confirmed the
    * highest item the bank has for this subject. Display and narrative
@@ -74,6 +88,9 @@ export interface SubjectScore {
   observations: number;
   /** Statement of the strongest item she confirmed, for honest evidence lines. */
   strongestObservedStatement: string | null;
+  /** The strongest observed item's typical-age anchor in months, so a
+   * surface can say "typical around age 4½" next to the statement. */
+  strongestObservedMonths: number | null;
   /**
    * Statement of the specific next step (the lowest "not yet" item), so a
    * growing subject can be named concretely instead of generically.
@@ -120,10 +137,12 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         subjectId: subject.id,
         position: "not_mapped" as const,
         monthsAhead: null,
+        frontierDeltaMonths: null,
         beyondScale: false,
         highConfidence: false,
         observations: 0,
         strongestObservedStatement: null,
+        strongestObservedMonths: null,
         frontierStatement: null,
         exposureBased: subject.exposureBased,
       };
@@ -182,25 +201,31 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         subjectId: subject.id,
         position,
         monthsAhead: null,
+        frontierDeltaMonths: null,
         beyondScale: false,
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: strongestStatement,
+        strongestObservedMonths: strongestAnchor,
         frontierStatement,
         exposureBased: true,
       };
     }
 
     if (frontier === null) {
-      // Only "not yet" signal: the frontier sits at or below her base item.
+      // Only "not yet" signal: the frontier sits at or below her base
+      // item, but nothing measurable was confirmed, so there is no
+      // number, raw or displayed.
       return {
         subjectId: subject.id,
         position: "growing" as const,
         monthsAhead: null,
+        frontierDeltaMonths: null,
         beyondScale: false,
         highConfidence,
         observations: observations.length,
         strongestObservedStatement: null,
+        strongestObservedMonths: null,
         frontierStatement,
         exposureBased: false,
       };
@@ -231,10 +256,12 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       subjectId: subject.id,
       position,
       monthsAhead,
+      frontierDeltaMonths: delta,
       beyondScale,
       highConfidence,
       observations: observations.length,
       strongestObservedStatement: strongestStatement,
+      strongestObservedMonths: strongestAnchor,
       frontierStatement,
       exposureBased: false,
     };

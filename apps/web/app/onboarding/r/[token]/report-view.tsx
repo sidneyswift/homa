@@ -353,14 +353,14 @@ export function ReportView({
     </div>
   );
 
-  // The snapshot: one chart, one sentence, tap to enlarge. Full width
-  // in the app grid (founder ask 2026-07-11: half a column squeezed
-  // the trajectory chart and its thirteen end labels into a squint).
+  // The snapshot: the interactive chart with its data-written caption.
+  // Full width in the app grid (founder ask 2026-07-11: half a column
+  // squeezed the trajectory chart into a squint).
   const snapshotCard = (
     <ReportSnapshot
       childName={report.childName}
+      birthMonth={report.birthMonth}
       generatedDate={generatedDate}
-      plans={report.plans}
       eras={eras}
       className={inApp ? "lg:col-span-2" : "mt-4"}
     />

@@ -14,10 +14,12 @@ export const PROGRESS_FIXTURE_SCORES: MapScores = {
       subjectId: "math",
       position: "ahead",
       monthsAhead: 8,
+      frontierDeltaMonths: 8,
       beyondScale: false,
       highConfidence: true,
       observations: 4,
       strongestObservedStatement: "Counts five objects accurately",
+      strongestObservedMonths: 48,
       frontierStatement: null,
       exposureBased: false,
     },
@@ -25,10 +27,12 @@ export const PROGRESS_FIXTURE_SCORES: MapScores = {
       subjectId: "literacy",
       position: "on_track",
       monthsAhead: 0,
+      frontierDeltaMonths: 0,
       beyondScale: false,
       highConfidence: false,
       observations: 1,
       strongestObservedStatement: "Reads a short early reader",
+      strongestObservedMonths: 72,
       frontierStatement: null,
       exposureBased: false,
     },
@@ -42,7 +46,9 @@ export const PROGRESS_FIXTURE_SCORES: MapScores = {
 const PRIOR_SCORES: MapScores = {
   ...PROGRESS_FIXTURE_SCORES,
   subjects: PROGRESS_FIXTURE_SCORES.subjects.map((score) =>
-    score.subjectId === "math" ? { ...score, monthsAhead: 7 } : score,
+    score.subjectId === "math"
+      ? { ...score, monthsAhead: 7, frontierDeltaMonths: 7 }
+      : score,
   ),
 };
 

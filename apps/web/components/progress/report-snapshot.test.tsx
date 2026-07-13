@@ -16,10 +16,12 @@ function scoresWithMath(monthsAhead: number): MapScores {
         subjectId: "math",
         position: "ahead",
         monthsAhead,
+        frontierDeltaMonths: monthsAhead,
         beyondScale: false,
         highConfidence: true,
         observations: 3,
         strongestObservedStatement: "Counts past 20 without getting stuck",
+        strongestObservedMonths: 54,
         frontierStatement: null,
         exposureBased: false,
       },
@@ -56,8 +58,8 @@ describe("ReportSnapshot scale boundaries", () => {
     const html = renderToStaticMarkup(
       <ReportSnapshot
         childName="Story"
+        birthMonth="2022-11-01"
         generatedDate="July 11, 2026"
-        plans={[]}
         eras={eraPair("2026.07.2|unknown|unknown", "current")}
       />,
     );
@@ -65,17 +67,21 @@ describe("ReportSnapshot scale boundaries", () => {
     assert.match(html, /stroke-dasharray="1 5"/);
     assert.match(html, /A dotted stretch means we improved how we measure/);
     assert.match(html, /Every number you see now is measured the new way\./);
-    // The drop itself still renders: no red, no warning treatment, and
-    // the down-segment is the dotted one, not a hidden one.
+    // The drop itself still renders: no red, no warning treatment, no
+    // celebration either (the anti-guilt law: a drop is never a mover).
     assert.doesNotMatch(html, /behind/i);
+    assert.doesNotMatch(html, /climbed/);
+    // The legend card names the subject with its value visible at rest.
+    assert.match(html, /aria-pressed="false"/);
+    assert.match(html, /\+15/);
   });
 
   it("stays quiet when every check-in shares one measuring stick", () => {
     const html = renderToStaticMarkup(
       <ReportSnapshot
         childName="Story"
+        birthMonth="2022-11-01"
         generatedDate="July 11, 2026"
-        plans={[]}
         eras={eraPair("current", "current")}
       />,
     );

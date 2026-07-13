@@ -57,12 +57,12 @@ export default async function AdminFamilyProgressPage({
               {kid.eras.length > 0 && kid.reportGeneratedAt ? (
                 <ReportSnapshot
                   childName={kid.childName}
+                  birthMonth={kid.birthDate}
                   generatedDate={new Date(kid.reportGeneratedAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
                   })}
-                  plans={[]}
                   eras={kid.eras}
                   className="mt-3"
                 />

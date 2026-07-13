@@ -1,34 +1,36 @@
+import { ageInMonths } from "@homa/core";
+
 import {
   trajectoryHasScaleChange,
   type TrajectoryEra,
 } from "../../../../lib/map/trajectory-eras";
-import { ChartLightbox } from "./chart-lightbox";
-import { ReportTrajectory } from "./report-trajectory";
+import { buildTrajectoryStory } from "../../../../lib/map/trajectory-story";
+import { TrajectoryChart } from "./trajectory-chart";
 
 /**
- * The snapshot: the trajectory chart with one sentence about what it
- * shows, tap to view it larger (founder ask 2026-07-08: the old
- * snapshot's strengths / growing / closest-to-age lists and meta lines
- * repeated what the header, the whole picture, and the subject cards
- * already say; the chart is the part that earns the spot). The chart
- * itself marks today and the armed re-check, so no extra caption rows.
- * When any stretch of the line crosses a measurement change (dotted on
- * the chart, mixed-scales fix 2), a short caption under the chart says
- * what the dots mean and that the shown numbers all use the new
- * measurement; charts with one continuous measuring stick never show it.
- * Pure display over already-computed scores; nothing here writes.
+ * The snapshot: the interactive trajectory chart with a caption the data
+ * writes itself (2026-07-13 pass, from the trajectory-chart directions
+ * lab). The caption names what actually moved this week; the chart's
+ * legend card names everything else, so the card never repeats what the
+ * header and the subject cards already say. The tap-to-enlarge lightbox
+ * retired with this pass: focusing a subject on the chart itself is the
+ * closer look. When any stretch of the line crosses a measurement
+ * change (dotted on the chart, mixed-scales fix 2), a short caption
+ * under the chart says what the dots mean. Pure display over
+ * already-computed scores; nothing here writes.
  */
 export function ReportSnapshot({
   childName,
+  birthMonth,
   generatedDate,
-  plans,
   eras,
   className = "mt-4",
 }: {
   childName: string;
+  /** "YYYY-MM-DD" (or "YYYY-MM"), for the meaning box's age sentence. */
+  birthMonth: string;
   /** Already formatted, e.g. "July 8, 2026" (matches the header band). */
   generatedDate: string;
-  plans: { subjectId: string; done: number; total: number; retestAt: string }[];
   /** Oldest first, the live report last (lib/map/trajectory-eras). */
   eras: TrajectoryEra[];
   /** Outer spacing, owned by the layout: the letter-style page flows
@@ -36,35 +38,25 @@ export function ReportSnapshot({
    * spaces cards itself and passes "". */
   className?: string;
 }) {
-  const now = new Date().getTime();
-  const nextRecheck = plans
-    .map((plan) => new Date(plan.retestAt))
-    .filter((date) => date.getTime() > now)
-    .sort((a, b) => a.getTime() - b.getTime())[0];
+  const story = buildTrajectoryStory(eras);
   const showsScaleChange = trajectoryHasScaleChange(eras);
+  const childAgeYears = Math.floor(ageInMonths(birthMonth) / 12);
+
+  if (story.subjects.length === 0) return null;
 
   return (
     <div className={`rounded-lg bg-[var(--surface-sunken)] p-5 ${className}`.trim()}>
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
         {childName}&apos;s snapshot {"\u00b7"} {generatedDate}
       </p>
-      <p className="mt-1 text-sm text-muted">
-        {/* Explicit join: Turbopack's SWC JSX transform strips the leading
-            space of a multi-line text node right after an expression,
-            which rendered "Mayamoves". */}
-        One line per subject, climbing as {childName}
-        {" "}moves past what&apos;s typical for their age.
-      </p>
+      <p className="mt-1 text-sm text-muted">{story.caption}</p>
       <div className="mt-3">
-        <ChartLightbox title={`${childName}'s months ahead, by subject`}>
-          <div className="rounded-md border border-border-subtle bg-card p-3 sm:p-4">
-            <ReportTrajectory
-              childName={childName}
-              eras={eras}
-              nextRecheckAt={nextRecheck ? nextRecheck.toISOString() : null}
-            />
-          </div>
-        </ChartLightbox>
+        <TrajectoryChart
+          story={story}
+          childName={childName}
+          childAgeYears={childAgeYears}
+          now={new Date().getTime()}
+        />
       </div>
       {/* The dotted-stretch caption lives with the chart, not in the card
           body: the copy-editor gate holds body copy to its two-sentence

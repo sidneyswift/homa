@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homa night manager directions · disposable options lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Homa Design System v3 tokens, hand-copied from apps/web/app/globals.css
+       for this disposable lab. Fonts fall back to system stacks offline. */
+    :root {
+      --stone-50: #FBF7F0; --stone-100: #F3ECE1; --stone-200: #E7DDCE;
+      --stone-300: #D6C8B4; --stone-400: #B3A492; --stone-500: #8A7D6C;
+      --stone-600: #6B6259; --stone-700: #4E463E; --stone-800: #332E29;
+      --stone-900: #221E1A;
+      --clay-50: #FFF0E8; --clay-100: #FFDDC9; --clay-300: #FB9868;
+      --clay-400: #F1793F; --clay-500: #E7602F; --clay-600: #C44C22; --clay-700: #9C3B1B;
+      --sage-50: #EAF6EC; --sage-100: #D2ECD6; --sage-500: #3D9A50;
+      --sage-600: #2F7C40; --sage-700: #275F34;
+      --gold-100: #FFF3C2; --gold-300: #FFE175; --gold-ink: #8A6410; --gold-ink-strong: #402E05;
+      --sky-100: #DDF3F9; --sky-500: #4FB4D6; --sky-600: #2E8CAD;
+      --rose-100: #FDE1D8; --rose-500: #E2593B; --rose-600: #BC4527;
+      --pop-navy: #23304F;
+      --brand: var(--clay-500);
+      --bg-page: var(--stone-50); --surface-raised: #FFFFFF;
+      --surface-sunken: var(--stone-100);
+      --text-strong: var(--stone-900); --text-body: var(--stone-800);
+      --text-muted: var(--stone-600); --text-subtle: var(--stone-500);
+      --border: var(--stone-300); --border-subtle: var(--stone-200);
+      --radius-md: 10px; --radius-lg: 16px; --radius-pill: 999px;
+      --shadow-sm: 0 1px 3px rgba(51,42,33,.08), 0 1px 2px rgba(51,42,33,.04);
+      --shadow-md: 0 4px 10px rgba(51,42,33,.07), 0 2px 4px rgba(51,42,33,.05);
+      --font-display: "Schibsted Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-sans: "Hanken Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      --font-wordmark: Fredoka, "Arial Rounded MT Bold", sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --ease-out: cubic-bezier(.22,.8,.28,1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg-page); color: var(--text-body);
+      font-family: var(--font-sans); font-size: 16px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; color: inherit; }
+    button:focus-visible, textarea:focus-visible, input:focus-visible, label:focus-within {
+      outline: 3px solid rgba(241,121,63,.4); outline-offset: 2px; border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+    .lab { max-width: 1080px; margin: 0 auto; padding: 26px clamp(14px, 3vw, 40px) 90px; }
+
+    /* header */
+    .brandline { display: flex; align-items: center; gap: 10px; }
+    .word { font-family: var(--font-wordmark); font-weight: 600; font-size: 1.35rem; color: var(--text-strong); }
+    .word span { display: inline-block; }
+    .word span:nth-child(1) { transform: translateY(-.06em) rotate(-3deg); }
+    .word span:nth-child(2) { transform: translateY(.05em); }
+    .word span:nth-child(3) { transform: translateY(-.04em) rotate(2deg); }
+    .word span:nth-child(4) { transform: translateY(.06em) rotate(-2deg); }
+    .date-pill { font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 5px 11px; background: var(--surface-raised); }
+    h1 { margin: 12px 0 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.55rem, 3.4vw, 2.2rem); letter-spacing: -.015em; color: var(--text-strong); }
+    h1 em { font-style: normal; color: var(--clay-600); }
+    .lede { max-width: 820px; margin: 10px 0 0; color: var(--text-muted); }
+    .fake-banner {
+      display: inline-flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px;
+      border: 1px solid var(--gold-300); background: var(--gold-100); color: var(--gold-ink-strong);
+      border-radius: var(--radius-md); padding: 9px 13px; font-size: .82rem; font-weight: 600;
+    }
+    .core-task {
+      margin-top: 16px; border-left: 4px solid var(--clay-300); background: var(--surface-raised);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 12px 16px;
+      box-shadow: var(--shadow-sm); max-width: 880px;
+    }
+    .core-task strong { color: var(--text-strong); }
+
+    /* sections */
+    .sect-eyebrow { margin: 36px 0 4px; font-family: var(--font-mono); font-size: .66rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-subtle); }
+    .sect-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; color: var(--text-strong); }
+    .sect-sub { margin: 6px 0 0; color: var(--text-muted); max-width: 840px; font-size: .93rem; }
+
+    /* findings */
+    .findings { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 14px; }
+    .finding { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 14px; box-shadow: var(--shadow-sm); font-size: .88rem; }
+    .finding b { display: block; color: var(--text-strong); margin-bottom: 3px; font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; font-family: var(--font-mono); font-weight: 700; }
+    code { font-family: var(--font-mono); font-size: .82em; background: var(--surface-sunken); border-radius: 5px; padding: 1px 5px; }
+
+    /* ladder */
+    .ladder { margin-top: 16px; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px 18px 12px; box-shadow: var(--shadow-sm); }
+    .rail { position: relative; height: 6px; border-radius: 3px; margin: 26px 8px 8px;
+      background: linear-gradient(90deg, var(--sage-100), var(--gold-100), var(--rose-100)); }
+    .rail-ends { display: flex; justify-content: space-between; margin: 0 8px; font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); }
+    .stops { display: flex; justify-content: space-between; margin: -23px 0 0; padding: 0 2px; position: relative; }
+    .stop { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 9%; text-decoration: none; color: inherit; }
+    .stop .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: .74rem; color: #fff; box-shadow: var(--shadow-sm); border: 2px solid #fff; }
+    .stop .nm { font-size: .68rem; text-align: center; color: var(--text-muted); line-height: 1.25; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 18px; font-size: .78rem; color: var(--text-muted); }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+    .k-wiring { background: var(--sage-500); }
+    .k-config { background: var(--sky-500); }
+    .k-product { background: var(--clay-500); }
+    .k-dev { background: #B98A00; }
+    .k-platform { background: var(--pop-navy); }
+    .k-infra { background: var(--rose-500); }
+
+    /* option cards */
+    .cards { display: grid; gap: 14px; margin-top: 16px; }
+    .card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px 18px; position: relative; transition: border-color .15s var(--ease-out); }
+    .card.reco { border-color: var(--clay-400); box-shadow: var(--shadow-md); }
+    .card.anti { opacity: .88; }
+    .card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .rank { font-family: var(--font-mono); font-weight: 700; font-size: .78rem; color: #fff; border-radius: var(--radius-pill); padding: 3px 10px; }
+    .card h3 { margin: 0; font-family: var(--font-display); font-size: 1.06rem; color: var(--text-strong); flex: 1 1 auto; }
+    .tag { font-family: var(--font-mono); font-size: .62rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; border-radius: var(--radius-pill); padding: 3px 9px; background: var(--surface-sunken); color: var(--text-muted); }
+    .tag.size { background: var(--stone-800); color: #fff; }
+    .tag.reco-tag { background: var(--clay-50); color: var(--clay-700); border: 1px solid var(--clay-300); }
+    .tag.anti-tag { background: var(--rose-100); color: var(--rose-600); }
+    .card p { margin: 8px 0 0; font-size: .92rem; }
+    .facts { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 10px; }
+    .fact { background: var(--surface-sunken); border-radius: var(--radius-md); padding: 9px 12px; font-size: .84rem; }
+    .fact b { display: block; font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 3px; }
+    .paths { margin-top: 9px; font-family: var(--font-mono); font-size: .74rem; color: var(--text-muted); line-height: 1.7; word-break: break-all; }
+    .resonate { margin-top: 12px; display: flex; align-items: center; gap: 9px; border-top: 1px dashed var(--border-subtle); padding-top: 11px; }
+    .resonate label { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: .9rem; color: var(--text-strong); cursor: pointer; }
+    .resonate input { width: 19px; height: 19px; accent-color: var(--clay-500); cursor: pointer; }
+
+    /* decision chips */
+    .qs { display: grid; gap: 12px; margin-top: 14px; }
+    .q-card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .q-card h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: .98rem; color: var(--text-strong); }
+    .q-card .why { margin: 0 0 9px; font-size: .84rem; color: var(--text-muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip { border: 1px solid var(--border); background: var(--surface-raised); border-radius: var(--radius-pill); padding: 7px 13px; font-size: .86rem; font-weight: 600; color: var(--text-body); transition: all .12s var(--ease-out); min-height: 38px; }
+    .chip[aria-pressed="true"] { background: var(--stone-800); border-color: var(--stone-800); color: #fff; }
+
+    /* assembler */
+    .assembler { margin-top: 40px; background: var(--surface-raised); border: 2px solid var(--clay-300); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-md); }
+    .assembler h2 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; color: var(--text-strong); }
+    .assembler .hint { margin: 5px 0 12px; font-size: .86rem; color: var(--text-muted); }
+    .reply { white-space: pre-wrap; font-family: var(--font-mono); font-size: .8rem; line-height: 1.65; background: var(--surface-sunken); border-radius: var(--radius-md); padding: 13px 15px; min-height: 90px; color: var(--text-body); }
+    .notes { width: 100%; margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; font: inherit; font-size: .9rem; min-height: 64px; resize: vertical; background: var(--surface-raised); color: var(--text-body); }
+    .copy-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .copy-btn { background: var(--clay-500); color: #fff; border: 0; border-radius: var(--radius-pill); padding: 11px 22px; font-weight: 700; font-size: .95rem; transition: background .12s var(--ease-out); }
+    .copy-btn:hover { background: var(--clay-600); }
+    .copied-note { font-size: .86rem; color: var(--sage-600); font-weight: 600; opacity: 0; transition: opacity .2s; }
+    .copied-note.show { opacity: 1; }
+
+    /* floating count */
+    .float-pill { position: fixed; right: 18px; bottom: 18px; z-index: 50; background: var(--stone-800); color: #fff; border-radius: var(--radius-pill); padding: 10px 16px; font-size: .84rem; font-weight: 700; box-shadow: var(--shadow-md); text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="lab">
+
+  <header class="lab-head">
+    <div class="brandline">
+      <span class="word"><span>H</span><span>O</span><span>M</span><span>A</span></span>
+      <span class="date-pill">Night manager · options lab · 2026-07-12</span>
+    </div>
+    <h1>Where should the <em>night manager</em> live?</h1>
+    <p class="lede">
+      An agent that reads customer usage and chats every night, then proactively identifies and
+      fixes bugs, improvements, and features. This lab lays out ten codebase-grounded ways to get
+      there, cheapest to most ambitious. Tap what resonates; the bottom of the page writes your
+      reply for you.
+    </p>
+    <div class="fake-banner">Disposable artifact · every claim below cites a real file or a doc checked 2026-07-12 · nothing here touches the app</div>
+    <div class="core-task">
+      <strong>The one structural finding:</strong> this is two jobs, not one. The <b>analyst</b>
+      (read usage and chats) needs production data credentials and must respect MJ-13 and tenant
+      isolation. The <b>builder</b> (fix and ship) needs repo, CI, and PR credentials. Your own
+      codebase already keeps these apart: the product agent's shell is disabled by founder ruling
+      (<code>agent/tools/bash.ts</code>) and its sandbox egress is deny-all
+      (<code>agent/sandbox.ts</code>). The strongest designs below keep that split on purpose.
+    </div>
+  </header>
+
+  <p class="sect-eyebrow">What is already true</p>
+  <h2 class="sect-title">Found in the codebase</h2>
+  <p class="sect-sub">The night manager is closer than it looks. Most of the analyst half already exists as rails, ledgers, and one dark feature.</p>
+  <div class="findings">
+    <div class="finding"><b>Nightly rail exists</b>Two schedules already fire as Vercel Cron Jobs: <code>agent/schedules/dispatch.ts</code> hourly and <code>agent/schedules/fleet-research.ts</code> nightly at 06:47 UTC behind <code>FLEET_RESEARCH_ENABLED</code>.</div>
+    <div class="finding"><b>The data is already collected</b>Every chat message on every channel lands in <code>conversation_messages</code> (<code>agent/hooks/persist-conversation.ts</code>); every model call lands in <code>model_usage</code> (<code>agent/hooks/record-usage.ts</code>).</div>
+    <div class="finding"><b>A digest is built and dark</b><code>lib/admin/digest.ts</code> composes a daily founder email (signups, failures, quiet families) and is DARK until <code>HOMA_ADMIN_DIGEST_EMAIL</code> is set.</div>
+    <div class="finding"><b>Fleet queries are written</b>The founder console (<code>/admin</code>, MJ-14) already computes overview, funnel, and pulse: <code>lib/admin/overview-data.ts</code>, <code>funnel-data.ts</code>, <code>pulse-data.ts</code>, with hard-won pooler rules in <code>lib/admin/db.ts</code>.</div>
+    <div class="finding"><b>The product agent cannot build</b>By design: shell off (<code>agent/tools/bash.ts</code>, ruling 2026-07-09), sandbox deny-all (<code>agent/sandbox.ts</code>). The builder half must live outside the product agent.</div>
+    <div class="finding"><b>CI gates already exist</b><code>.github/workflows/ci.yml</code> runs typecheck, lint, five guards, the Next build, and the eve build on every PR. Any PR a night agent opens is already checked.</div>
+    <div class="finding"><b>Privacy law is explicit</b>MJ-13 sensitive-context law (<code>03-backlog.md</code>) plus the tenant-isolation laws in <code>AGENTS.md</code>: raw family chats must not leak into GitHub surfaces.</div>
+    <div class="finding"><b>Deploy laws are strict</b>Schema and code ship together, watch READY, probe live (<code>AGENTS.md</code>, learned from the 2026-07-10 outage). Full auto-deploy autonomy must encode these as machine gates.</div>
+  </div>
+
+  <p class="sect-eyebrow">The ladder</p>
+  <h2 class="sect-title">Ten interventions, cheapest to most ambitious</h2>
+  <p class="sect-sub">Left end ships tonight with zero code. Right end changes how the product ships. Number 7 is the recommended architecture; it composes 3 and 4.</p>
+  <div class="ladder">
+    <div class="rail"></div>
+    <div class="stops">
+      <a class="stop" href="#opt1"><span class="dot k-wiring">1</span><span class="nm">Digest on</span></a>
+      <a class="stop" href="#opt2"><span class="dot k-config">2</span><span class="nm">Reviewers on</span></a>
+      <a class="stop" href="#opt3"><span class="dot k-product">3</span><span class="nm">Night report</span></a>
+      <a class="stop" href="#opt4"><span class="dot k-dev">4</span><span class="nm">Actions builder</span></a>
+      <a class="stop" href="#opt5"><span class="dot k-dev">5</span><span class="nm">Cursor automation</span></a>
+      <a class="stop" href="#opt6"><span class="dot k-platform">6</span><span class="nm">Anthropic managed</span></a>
+      <a class="stop" href="#opt7"><span class="dot k-product">7</span><span class="nm">Two-stage pipeline</span></a>
+      <a class="stop" href="#opt8"><span class="dot k-infra">8</span><span class="nm">Mac mini shift</span></a>
+      <a class="stop" href="#opt9"><span class="dot k-product">9</span><span class="nm">Second eve app</span></a>
+      <a class="stop" href="#opt10"><span class="dot k-infra">10</span><span class="nm">Full autonomy</span></a>
+    </div>
+    <div class="rail-ends" style="margin-top: 12px;"><span>Ship this evening</span><span>Quarter-long bet</span></div>
+    <div class="legend">
+      <span><i class="k-wiring"></i>Wiring (flag flip)</span>
+      <span><i class="k-config"></i>Vendor config</span>
+      <span><i class="k-product"></i>In-product code</span>
+      <span><i class="k-dev"></i>Dev platform</span>
+      <span><i class="k-platform"></i>New platform</span>
+      <span><i class="k-infra"></i>Infra you run</span>
+    </div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card" id="opt1">
+      <div class="card-top">
+        <span class="rank k-wiring">1</span>
+        <h3>Turn on the founder digest that is already built</h3>
+        <span class="tag size">S · tonight</span><span class="tag">wiring</span>
+      </div>
+      <p>Not an agent, but the first rung of "something watches the fleet every night and tells me". One env var lights it up.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code</b><code>lib/admin/digest.ts</code> is complete: signups, failed and uncertain sends, rejected emails, task-run trouble, quiet-family count. Sent by the hourly cron when the UTC hour matches <code>HOMA_ADMIN_DIGEST_HOUR_UTC</code> (default 11), double-send guarded by the <code>email_sends</code> ledger. DARK until <code>HOMA_ADMIN_DIGEST_EMAIL</code> is set.</div>
+        <div class="fact"><b>Impact</b>Every later option reuses this delivery rail and this reading habit. Zero code, zero risk, and you start learning what a useful night report contains.</div>
+      </div>
+      <div class="paths">apps/web/lib/admin/digest.ts · apps/web/lib/map/email.ts</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#1 flip on the founder digest email"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt2">
+      <div class="card-top">
+        <span class="rank k-config">2</span>
+        <h3>Turn on the reactive reviewers: Vercel Agent and Bugbot</h3>
+        <span class="tag size">S · this week</span><span class="tag">vendor config</span>
+      </div>
+      <p>Before an autonomous agent opens PRs at 3am, give the repo independent reviewers that never sleep. This is the safety net that makes every builder option below cheap to trust.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code / verified</b>The repo deploys on Vercel (<code>apps/web/vercel.json</code>, deploy laws in <code>AGENTS.md</code>). Vercel Agent (code review with sandbox-validated patches, production investigations, approved actions) went public beta 2026-06-30 for Pro and Enterprise teams; review pricing is $0.30 plus tokens. Bugbot and security-review subagents are already installed in your Cursor toolkit.</div>
+        <div class="fact"><b>Impact</b>Night-manager PRs get an independent review before you wake up. Investigations also cover the "why did errors spike" half of night management reactively.</div>
+      </div>
+      <div class="paths">vercel.com/docs/agent · dashboard setting, nothing in-repo to change</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#2 enable Vercel Agent review/investigations + Bugbot on PRs"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt3">
+      <div class="card-top">
+        <span class="rank k-product">3</span>
+        <h3>The analyst: a nightly night-report schedule inside the product</h3>
+        <span class="tag size">M · a day or two</span><span class="tag">in-product code</span>
+      </div>
+      <p>A third eve schedule, cloned from the fleet-research pattern: the handler queries the fleet ledgers deterministically, the model turns them into findings (bugs suspected, friction seen in chats, feature demand, spend anomalies), and the result lands as an email plus a saved report.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code</b><code>agent/schedules/fleet-research.ts</code> already proves the whole shape: nightly cron, env-flag kill switch, own channel (<code>agent/channels/research.ts</code>) with its own instruction mode, run rows in <code>homa_task_runs</code>. The dispatch schedule proves the "handler builds context, model composes" pattern via <code>loadBriefContext</code>.</div>
+        <div class="fact"><b>Tenant isolation kept</b>The model never gets a database tool. The handler (deterministic TypeScript) runs the <code>adminDb()</code> aggregates and hands pre-redacted context in the prompt, the same way the morning brief does. Chats stay inside the product trust boundary where they already live.</div>
+        <div class="fact"><b>Impact</b>This is the half of your ask that reads usage and chats. It cannot fix anything, and that is a feature: it has no repo credentials to leak family data into.</div>
+      </div>
+      <div class="paths">new: apps/web/agent/schedules/night-report.ts · new: apps/web/agent/channels/founder-report.ts · reuses: lib/admin/overview-data.ts, funnel-data.ts, pulse-data.ts, digest.ts</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#3 build the in-product nightly analyst (night-report schedule)"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt4">
+      <div class="card-top">
+        <span class="rank k-dev">4</span>
+        <h3>The builder: nightly GitHub Actions job running the Cursor CLI</h3>
+        <span class="tag size">M · a day</span><span class="tag">dev platform</span>
+      </div>
+      <p>A cron workflow next to your CI: check out the repo, run <code>agent -p</code> headless with a night-manager skill, let it triage findings, update the backlog by PR, and open small fix PRs. Everything the builder is and does lives as versioned files in the monorepo.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code / verified</b>CI already lives at <code>.github/workflows/ci.yml</code>, so secrets and Actions habits exist. Cursor's docs (cursor.com/docs/cli/github-actions) show exactly this: install CLI, <code>CURSOR_API_KEY</code> secret, <code>agent -p</code> with a scoped prompt, deterministic git/PR steps around it.</div>
+        <div class="fact"><b>Monorepo containment</b>Best of any option: the trigger (workflow YAML), the brain (a skill at <code>.agents/skills/night-manager/SKILL.md</code>, same convention as your existing skills), and the guardrails are all repo files reviewed like code.</div>
+        <div class="fact"><b>Impact</b>Morning becomes a review queue: a handful of small PRs, each already gated by CI and option 2's reviewers. No new vendor, billing on the Cursor key you already have.</div>
+      </div>
+      <div class="paths">new: .github/workflows/night-manager.yml · new: .agents/skills/night-manager/SKILL.md · secret: CURSOR_API_KEY</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#4 nightly GitHub Actions builder with Cursor CLI"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt5">
+      <div class="card-top">
+        <span class="rank k-dev">5</span>
+        <h3>The builder, alternate runner: a scheduled Cursor Automation</h3>
+        <span class="tag size">M · an afternoon</span><span class="tag">dev platform</span>
+      </div>
+      <p>Same brain, different trigger: a Cursor cloud agent on a cron schedule, scoped to the homa repo, opening PRs from an isolated VM. Configured in the Cursor dashboard rather than a workflow file.</p>
+      <div class="facts">
+        <div class="fact"><b>Verified</b>Cursor Automations (cursor.com/docs/cloud-agent/automations) support cron triggers, single-repo scope, PR creation, and encrypted secrets via the Secrets tab. Runs appear in the Agents window; Slack and webhook triggers exist too, so you could also poke it by message.</div>
+        <div class="fact"><b>Trade-off vs option 4</b>Zero YAML and better observability inside the tool you already live in, but the schedule and secrets are dashboard state, not repo files. The skill file stays in-repo either way, so switching between 4 and 5 later is cheap.</div>
+      </div>
+      <div class="paths">reuses: .agents/skills/night-manager/SKILL.md · trigger + secrets: Cursor dashboard</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#5 scheduled Cursor Automation as the builder runner"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt6">
+      <div class="card-top">
+        <span class="rank k-platform">6</span>
+        <h3>Anthropic Managed Agents: a scheduled deployment</h3>
+        <span class="tag size">L · a few days</span><span class="tag">new platform</span>
+      </div>
+      <p>Anthropic's hosted harness: define an agent (model, prompt, tools, skills), an environment (managed cloud sandbox or self-hosted), a vault, and a cron deployment. Each night a session wakes, works, and ends.</p>
+      <div class="facts">
+        <div class="fact"><b>Verified</b>Scheduled deployments are live in beta (header <code>managed-agents-2026-04-01</code>): 5-field cron plus IANA timezone, pause/resume, manual test runs, run history. Vaults hold env vars and attach real keys only at the network boundary, only for allowlisted domains, so the sandbox never sees the secret. GitHub, memory stores, and files are supported.</div>
+        <div class="fact"><b>Where it shines / where it rubs</b>Best managed-sandbox credential story of any option (a Supabase key scoped to allowed domains via HTTPS). But it is a second vendor in beta, PR ergonomics are thinner than Cursor's, and deployment state lives on Anthropic; you would keep it honest with a config-as-code upsert script in <code>scripts/</code>.</div>
+      </div>
+      <div class="paths">platform.claude.com/docs/en/managed-agents · optional new: scripts/night-manager-deploy.mjs</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#6 Anthropic Managed Agents scheduled deployment"> This resonates</label></div>
+    </div>
+
+    <div class="card reco" id="opt7">
+      <div class="card-top">
+        <span class="rank k-product">7</span>
+        <h3>The two-stage pipeline: analyst inside, builder outside</h3>
+        <span class="tag size">L · about a week</span><span class="tag reco-tag">Recommended</span>
+      </div>
+      <p>Compose 3 and 4 (or 5) with one new seam: the in-product analyst writes a <b>redacted</b> findings report (aggregates plus exemplar quotes stripped of names and identifiers, per MJ-13) to a table, served at a founder-gated endpoint. The builder fetches that report, never the database, and works the repo: triage, backlog PRs, small fix PRs, a morning summary.</p>
+      <div class="facts">
+        <div class="fact"><b>Why this is the structural win</b>Privacy stops being a blocker to autonomy. Raw chats never leave the product trust boundary; GitHub and the dev platform only ever see redacted findings. Each half is small, testable, and replaceable: swap the builder runner (4, 5, 6, or 8) without touching the analyst.</div>
+        <div class="fact"><b>Found in code</b>Every rail exists: nightly schedule pattern (<code>fleet-research.ts</code>), fleet queries (<code>lib/admin/*</code>), report delivery (<code>digest.ts</code> email plus an admin page), founder gating (<code>lib/admin/gate.ts</code> and <code>requireFounder()</code>), CI gates, and your review subagents. The new pieces are one schedule, one channel, one table, one endpoint, one workflow.</div>
+        <div class="fact"><b>The morning loop</b>You wake to: one analyst email (what the fleet did, what hurt, what families asked for), a backlog PR (proposed tickets with evidence), and 0 to 3 small fix PRs each already reviewed by CI and option 2. You merge or close over coffee; founder rulings stay yours.</div>
+      </div>
+      <div class="paths">option 3 pieces · new: /api/admin/night-report (bearer-gated) · option 4 or 5 as the consumer</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#7 the two-stage pipeline (recommended architecture)"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt8">
+      <div class="card-top">
+        <span class="rank k-infra">8</span>
+        <h3>The Mac mini night shift</h3>
+        <span class="tag size">M build · high ops</span><span class="tag">infra you run</span>
+      </div>
+      <p>A launchd cron on the mini runs the Cursor CLI (or Claude Code) against a local checkout each night, with local env files for data access. It could also serve as a self-hosted sandbox for option 6.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code</b><code>AGENTS.md</code>'s boundary list proves the machine exists and already holds live secrets and family data (<code>homa-macmini/</code> is a hard do-not-touch in this workspace).</div>
+        <div class="fact"><b>Honest trade-offs</b>Cheapest way to give one agent both database and repo credentials with no new cloud surface, and no per-run compute bill. But you become the SRE (sleep, updates, uptime), and it concentrates an autonomous dev agent on the same box as live family data, which weakens exactly the boundary the two-stage pipeline exists to protect.</div>
+      </div>
+      <div class="paths">launchd plist on the mini · same repo skill as options 4 and 5</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#8 Mac mini as the nightly runner"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt9">
+      <div class="card-top">
+        <span class="rank k-product">9</span>
+        <h3>A second eve agent in the monorepo (apps/manager)</h3>
+        <span class="tag size">L to XL</span><span class="tag">re-scored 2026-07-12 evening</span>
+      </div>
+      <p>Originally marked "not recommended" on serverless-runtime grounds. Two June 2026 Vercel releases weaken that objection, so this card is re-scored: <b>viable now, still the DIY path</b>. A thin eve app, deployed as its own Vercel project, whose nightly schedule spawns a Vercel Sandbox that clones the repo, works, and opens a PR.</p>
+      <div class="facts">
+        <div class="fact"><b>What changed (verified)</b>Vercel Sandbox runs up to 24 hours on Pro (changelog 2026-06-16, up from 5), supports <code>source: git</code> clones of private repos, persistent snapshots across runs, per-sandbox egress policy, and 8 vCPUs on Pro. Separately, Dockerfile deploys landed 2026-06-30, but those are HTTP servers on Fluid compute (must listen on <code>$PORT</code>, scale to zero after 5 idle minutes), so they are a trigger surface, not the night worker.</div>
+        <div class="fact"><b>How it would run</b>The schedule handler (not the model) creates the sandbox with a scoped GitHub token, allowlisted egress (github.com, npm, the model API), runs install plus the guard suite, and ships a branch via <code>gh pr create</code>. eve already ships the <code>vercel()</code> sandbox backend this repo uses in prod (<code>agent/sandbox.ts</code>), and its runs land in the same <code>homa_task_runs</code> ledger the founder console reads. Never run the work inside the function itself: function duration caps are minutes, the sandbox is the compute.</div>
+        <div class="fact"><b>What it still costs</b>You hand-roll what Cursor and Anthropic sell: git credential custody, PR conventions, retries, a review surface, budget caps, and most of all the coding-harness quality gap. eve gives bash and file tools; Cursor's agent is a tuned coding harness. The pragmatic hybrid: the sandbox installs and runs the Cursor CLI headless (<code>agent -p</code>), so Vercel hosts the night shift while Cursor supplies the coder. Isolation law: separate Vercel project, separate env, no product service-role keys anywhere near it.</div>
+      </div>
+      <div class="paths">new: apps/manager (eve app, own Vercel project) · reuses: eve vercel() sandbox backend, homa_task_runs · vercel.com/changelog/vercel-sandbox-can-now-run-for-up-to-24-hours</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#9 apps/manager eve app spawning a Vercel Sandbox (single-vendor Vercel route)"> This resonates</label></div>
+    </div>
+
+    <div class="card" id="opt10">
+      <div class="card-top">
+        <span class="rank k-infra">10</span>
+        <h3>Full autonomy: auto-merge and nightly deploys</h3>
+        <span class="tag size">XL · quarter bet</span><span class="tag">changes how you ship</span>
+      </div>
+      <p>The far pole: the night manager merges its own green PRs and ships them. Only sane once the deploy laws are machine-enforced: CI green plus eve build, no-migration diff (or proven expand-contract), Vercel READY watch, post-deploy live probe, budget caps, and a kill-switch env flag, with option 2's reviewers as a required check.</p>
+      <div class="facts">
+        <div class="fact"><b>Found in code</b>The laws to encode are already written down because they were paid for: the 2026-07-10 outage entry and the deploy section of <code>AGENTS.md</code>. <code>FLEET_RESEARCH_ENABLED</code> shows the kill-switch pattern.</div>
+        <div class="fact"><b>Impact</b>Homa improves while you sleep, for real. Not a v1 move; earn it after weeks of clean option-7 mornings.</div>
+      </div>
+      <div class="paths">branch protection rules · required checks · probe scripts</div>
+      <div class="resonate"><label><input type="checkbox" class="opt-check" data-name="#10 eventual full autonomy (auto-merge behind machine-enforced gates)"> This resonates</label></div>
+    </div>
+
+  </div>
+
+  <p class="sect-eyebrow">Decisions only you can make</p>
+  <h2 class="sect-title">Five dials</h2>
+  <p class="sect-sub">These change the architecture, so they are worth answering now. Tap one per row (tap again to clear).</p>
+  <div class="qs">
+
+    <div class="q-card">
+      <h3>1 · How much may it do at night, at first?</h3>
+      <p class="why">Sets the builder's permissions and how scary a bad night can be.</p>
+      <div class="chips" data-q="Autonomy">
+        <button class="chip" data-v="report only, no writes anywhere">Report only</button>
+        <button class="chip" data-v="file issues + backlog PRs, no code PRs yet">Issues + backlog PRs</button>
+        <button class="chip" data-v="small fix PRs too, human merges everything">Fix PRs, I merge</button>
+        <button class="chip" data-v="auto-merge trivial green fixes behind gates">Auto-merge trivial</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>2 · What may the night manager see of family chats?</h3>
+      <p class="why">MJ-13 and tenant isolation make this the load-bearing privacy call.</p>
+      <div class="chips" data-q="Chat access">
+        <button class="chip" data-v="aggregates and counts only, never chat text">Aggregates only</button>
+        <button class="chip" data-v="redacted exemplar quotes, composed inside the product (recommended)">Redacted excerpts, in-product</button>
+        <button class="chip" data-v="raw chats readable inside the product analyst only">Raw, analyst only</button>
+        <button class="chip" data-v="raw chats readable by the external builder too (I accept the risk)">Raw, everywhere</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>3 · Where should findings land each morning?</h3>
+      <p class="why">Pick the surfaces you will actually read on a Tuesday.</p>
+      <div class="chips" data-q="Findings land in">
+        <button class="chip" data-v="email digest">Email</button>
+        <button class="chip" data-v="a page under /admin">Admin page</button>
+        <button class="chip" data-v="GitHub issues">GitHub issues</button>
+        <button class="chip" data-v="backlog updates as PRs to docs/homa-planning/03-backlog.md">Backlog PRs</button>
+        <button class="chip" data-v="email + admin page + PRs (all of it)">All of it</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>4 · Which runner should the builder use?</h3>
+      <p class="why">The skill file is shared, so this stays swappable; still, one has to go first.</p>
+      <div class="chips" data-q="Builder runner">
+        <button class="chip" data-v="GitHub Actions + Cursor CLI (most monorepo-contained)">GH Actions + Cursor CLI</button>
+        <button class="chip" data-v="a scheduled Cursor Automation">Cursor Automation</button>
+        <button class="chip" data-v="Anthropic Managed Agents">Anthropic managed</button>
+        <button class="chip" data-v="apps/manager eve app spawning a Vercel Sandbox (single-vendor Vercel)">apps/manager + Vercel Sandbox</button>
+        <button class="chip" data-v="the Mac mini">Mac mini</button>
+        <button class="chip" data-v="no builder yet, analyst first">No builder yet</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>5 · Nightly budget ceiling?</h3>
+      <p class="why">Caps model spend across analyst + builder before it caps you.</p>
+      <div class="chips" data-q="Nightly budget">
+        <button class="chip" data-v="about $1/night">~$1</button>
+        <button class="chip" data-v="about $5/night">~$5</button>
+        <button class="chip" data-v="about $20/night">~$20</button>
+        <button class="chip" data-v="uncapped, alert me past $20">Uncapped + alert</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="assembler" id="assembler">
+    <h2>Your reply, assembled</h2>
+    <p class="hint">Tap cards and chips above; this composes itself. Add anything else in the notes, then copy and paste it back into chat.</p>
+    <div class="reply" id="reply">Nothing selected yet. Tap "This resonates" on the options you like and answer the five dials.</div>
+    <textarea class="notes" id="notes" placeholder="Anything else: constraints, worries, a different idea entirely..."></textarea>
+    <div class="copy-row">
+      <button class="copy-btn" id="copyBtn">Copy reply</button>
+      <span class="copied-note" id="copiedNote">Copied. Paste it into the chat.</span>
+    </div>
+  </div>
+
+  <a class="float-pill" href="#assembler" id="floatPill">0 selected</a>
+
+</div>
+
+<script>
+  var checks = Array.prototype.slice.call(document.querySelectorAll(".opt-check"));
+  var chipGroups = Array.prototype.slice.call(document.querySelectorAll(".chips"));
+  var notes = document.getElementById("notes");
+  var replyEl = document.getElementById("reply");
+  var floatPill = document.getElementById("floatPill");
+  var copyBtn = document.getElementById("copyBtn");
+  var copiedNote = document.getElementById("copiedNote");
+
+  chipGroups.forEach(function (group) {
+    group.addEventListener("click", function (e) {
+      var chip = e.target.closest(".chip");
+      if (!chip) return;
+      var wasOn = chip.getAttribute("aria-pressed") === "true";
+      group.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", wasOn ? "false" : "true");
+      render();
+    });
+  });
+  checks.forEach(function (c) { c.addEventListener("change", render); });
+  notes.addEventListener("input", render);
+
+  function render() {
+    var picked = checks.filter(function (c) { return c.checked; }).map(function (c) { return c.dataset.name; });
+    var lines = ["Night manager reactions (2026-07-12 lab):"];
+    lines.push(picked.length ? "Resonates:\n- " + picked.join("\n- ") : "Resonates: (none picked yet)");
+    chipGroups.forEach(function (group) {
+      var on = group.querySelector('.chip[aria-pressed="true"]');
+      if (on) lines.push(group.dataset.q + ": " + on.dataset.v + ".");
+    });
+    var n = notes.value.trim();
+    if (n) lines.push("Notes: " + n);
+    replyEl.textContent = lines.join("\n\n");
+    floatPill.textContent = picked.length + " selected";
+  }
+
+  copyBtn.addEventListener("click", function () {
+    var text = replyEl.textContent;
+    function done() {
+      copiedNote.classList.add("show");
+      setTimeout(function () { copiedNote.classList.remove("show"); }, 2200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done);
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta); done();
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>

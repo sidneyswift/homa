@@ -368,6 +368,8 @@ export async function getFamilyMaterialsDeep(familyId: string): Promise<FamilyMa
 export interface FamilyChildProgress {
   childId: string;
   childName: string;
+  /** "YYYY-MM-DD", for the snapshot's meaning-box age sentence. */
+  birthDate: string;
   view: ChildProgressView | null;
   eras: TrajectoryEra[];
   reportGeneratedAt: string | null;
@@ -460,6 +462,7 @@ export async function getFamilyProgressDeep(
     out.push({
       childId: kid.id,
       childName: kid.name,
+      birthDate: kid.birth_month,
       view,
       eras,
       reportGeneratedAt: report?.generated_at ?? null,

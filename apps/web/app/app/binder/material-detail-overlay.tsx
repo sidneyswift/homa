@@ -8,8 +8,9 @@ import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder"
 /**
  * The Binder item detail overlay: a bigger look at the real preview plus
  * its metadata, before deciding to print it. Focus-trap and Escape
- * behavior mirror the onboarding report's ChartLightbox (the house
- * pattern for "look closer" overlays) rather than inventing a new one.
+ * behavior follow the house pattern for "look closer" overlays (first
+ * built as the report's ChartLightbox, retired 2026-07-13 when the
+ * chart became interactive) rather than inventing a new one.
  * One action on purpose: "Print it" reuses material-card.tsx's own
  * wording, since the PDF link is the same reuse-worthy destination
  * (the browser's own viewer handles print, download, and AirPrint).

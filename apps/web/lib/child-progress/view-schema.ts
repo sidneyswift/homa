@@ -167,10 +167,12 @@ const subjectScoreSchema = z
       "not_mapped",
     ]),
     monthsAhead: z.number().int().nullable(),
+    frontierDeltaMonths: z.number().int().nullable(),
     beyondScale: z.boolean(),
     highConfidence: z.boolean(),
     observations: z.number().int().nonnegative(),
     strongestObservedStatement: z.string().nullable(),
+    strongestObservedMonths: z.number().int().nullable(),
     frontierStatement: z.string().nullable(),
     exposureBased: z.boolean(),
   })

@@ -133,6 +133,55 @@ export function reconstructAnswersAsOf(
 }
 
 /**
+ * Stored scorings predate the scorer's raw fields (frontierDeltaMonths,
+ * strongestObservedMonths, both additive 2026-07-13), so a JSON-parsed
+ * era can carry `undefined` where fresh scores carry numbers. The chart
+ * plots real negative months from the raw delta (founder ruling
+ * 2026-07-13), so eras the ledger can reach get the raw fields filled by
+ * rescoring that day's answers; display fields (monthsAhead, position)
+ * stay exactly as stored. Eras the ledger cannot reach normalize the
+ * missing fields to null: no number is invented.
+ */
+function withRawFields(
+  scores: MapScores,
+  evidence: readonly TrajectoryEvidenceRow[],
+  birthDate: string,
+  atMs: number,
+): MapScores {
+  const missing = scores.subjects.some(
+    (subject) => subject.frontierDeltaMonths === undefined,
+  );
+  if (!missing) return scores;
+
+  const answers = Number.isFinite(atMs)
+    ? reconstructAnswersAsOf(evidence, atMs)
+    : [];
+  const raw =
+    answers.length > 0
+      ? new Map(
+          scoreMap(ageInMonths(birthDate, new Date(atMs)), answers).subjects.map(
+            (subject) => [subject.subjectId, subject],
+          ),
+        )
+      : new Map<string, { frontierDeltaMonths: number | null; strongestObservedMonths: number | null }>();
+
+  return {
+    ...scores,
+    subjects: scores.subjects.map((subject) => ({
+      ...subject,
+      frontierDeltaMonths:
+        subject.frontierDeltaMonths ??
+        raw.get(subject.subjectId)?.frontierDeltaMonths ??
+        null,
+      strongestObservedMonths:
+        subject.strongestObservedMonths ??
+        raw.get(subject.subjectId)?.strongestObservedMonths ??
+        null,
+    })),
+  };
+}
+
+/**
  * The trajectory chart's eras, oldest first, the live scoring last.
  * Archived eras rescore from the ledger where it reaches back that far
  * (renormalized, current basis); the rest keep stored numbers and their
@@ -155,7 +204,7 @@ export function buildTrajectoryEras(input: {
     if (answers.length === 0) {
       return {
         generated_at: era.generated_at,
-        scores: era.scores,
+        scores: withRawFields(era.scores, input.evidence, input.birthDate, atMs),
         renormalized: false,
         basisKey: storedBasisKey(era),
       };
@@ -172,7 +221,12 @@ export function buildTrajectoryEras(input: {
   });
   eras.push({
     generated_at: input.live.generated_at,
-    scores: input.live.scores,
+    scores: withRawFields(
+      input.live.scores,
+      input.evidence,
+      input.birthDate,
+      Date.parse(input.live.generated_at),
+    ),
     renormalized: false,
     basisKey: liveBasis,
   });
