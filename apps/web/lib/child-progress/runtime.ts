@@ -11,6 +11,8 @@ import {
   progressEventsForCheckInTakeover,
   progressEventsForCorrectionResult,
   progressEventsForEvidenceResult,
+  progressEventsForJournalObservation,
+  progressEventsForObservationUsed,
   progressEventsForUndoResult,
   withCommittedProgressEvents,
 } from "./progress-events";
@@ -103,8 +105,40 @@ export function recordJournalProgressEvidence(
 ) {
   return withCommittedProgressEvents(
     childProgressService.recordJournalProgressEvidence(input),
-    emitEvidenceResultEvents,
+    async (result) => {
+      await emitEvidenceResultEvents(result);
+      await emitProgressEvents(
+        progressEventsForJournalObservation(input, result),
+      );
+    },
   );
+}
+
+/**
+ * Flips one observation to used (observation ledger, OBS-3). Family
+ * scope and the task-run id come from trusted context, never the model.
+ */
+export async function markChildObservationUsed(input: {
+  familyId: string;
+  observationId: string;
+  usedTaskRunId: string | null;
+  usedAt: string;
+}) {
+  const result = await childProgressRepository.markObservationUsed({
+    familyId: input.familyId,
+    observationId: input.observationId,
+    usedTaskRunId: input.usedTaskRunId,
+    usedAt: input.usedAt,
+  });
+  if (result.outcome === "used") {
+    await emitProgressEvents(
+      progressEventsForObservationUsed({
+        familyId: input.familyId,
+        childId: result.childId,
+      }),
+    );
+  }
+  return result;
 }
 
 export function correctProgressAnswers(

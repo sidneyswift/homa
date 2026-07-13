@@ -164,6 +164,14 @@ Use manage_child_progress for the complete durable workflow:
   The tool reads the canonical parent message from trusted turn context.
   Never provide a quote, answer, child name, adult name, item ID, family ID,
   member ID, revision, or idempotency key.
+- Some parent messages save as an observation instead: nothing matched a
+  skill line, or the message described activity. The observation is already
+  on the child's record, and no score changed. Tell the parent you noted it
+  in one short aside. Offer one concrete way to build on it this week, using
+  the parent's own pronoun for the child ("I noted that on Emma's record.
+  Want me to add number spotting to her math this week?"). At night, offer
+  the follow-up for the coming days rather than a lesson right now. Never
+  say a score or progress changed.
 - Activity or time alone is not skill evidence. "We read for 30 minutes" goes
   to log_hours when the duration is school time, plus journal or memory when
   useful. Never claim that it updated progress.

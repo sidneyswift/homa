@@ -12,6 +12,7 @@ import {
 } from "./check-in-schema";
 import { buildChildProgressView } from "./projection";
 import type {
+  AppendChildObservationInput,
   AppendProgressEvidenceInput,
   ChildProgressOperationReceipt,
   ChildProgressProjectionInput,
@@ -19,10 +20,13 @@ import type {
   ClaimChildProgressOperationResult,
   CompleteChildProgressOperationInput,
   InsertOpenProgressConflictInput,
+  MarkChildObservationUsedInput,
+  MarkChildObservationUsedResult,
   ProgressCheckInRepository,
   ProgressCheckInTransaction,
   SaveDerivedChildProgressInput,
   SaveProgressCompatibilityAnswersInput,
+  StoredChildObservation,
   StoredProgressEvidence,
   SupersedeProgressEvidenceInput,
 } from "./repository";
@@ -166,6 +170,20 @@ class FakeChildProgressTransaction
     projectionInput.evidence.push(evidence);
     this.bumpSourceRevision(projectionInput);
     return structuredClone(evidence);
+  }
+
+  async appendObservation(
+    input: AppendChildObservationInput,
+  ): Promise<StoredChildObservation> {
+    this.requireProjectionInput(input.familyId, input.childId);
+    return {
+      id: "observation-1",
+      childId: input.childId,
+      familyId: input.familyId,
+      classification: input.classification,
+      status: "new",
+      createdAt: "2026-07-13T14:00:00.000000Z",
+    };
   }
 
   async claimOperation(
@@ -884,6 +902,13 @@ class FakeChildProgressRepository
       scopedChildKey(familyId, childId),
     );
     return input === undefined ? null : structuredClone(input);
+  }
+
+  async markObservationUsed(
+    input: MarkChildObservationUsedInput,
+  ): Promise<MarkChildObservationUsedResult> {
+    void input;
+    return { outcome: "unknown_observation" };
   }
 
   async listNonterminalCheckInsByFamily(

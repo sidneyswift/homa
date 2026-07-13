@@ -3,6 +3,64 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · Founder ruling: parent input about a child is never wasted (the observation ledger)
+
+Founder ruling (2026-07-13 morning chat, "IMPLEMENT and ship"): ALL
+parent input about a child's abilities is saved as something and/or
+linked to progress, classified by its effect on scoring (none, raises,
+lowers), and fed forward so Homa uses it for the family within the
+week. Homa must not be blocked by our own system.
+
+Trigger: the 2026-07-12 11pm Noser exchange. Sara reported Emma (3)
+recognizing "chapter 11" in print; the journal matcher correctly
+returned no_match (no bank item, and the clause attributed "read" to
+the parent), but the only durable write was the operations audit row.
+Homa replied "I'll hold that as a sweet moment" while holding nothing:
+the family's Brain had zero memories. "Can't score it" was accidentally
+doing double duty as "don't keep it."
+
+What shipped (plan `plans/2026-07-13-observation-ledger.md`, tickets
+OBS-1..5, all in this pass):
+
+- **Migration `20260713134500_child_observations.sql`** (additive,
+  applied to homa-prod ahead of the deploy per the additive-only law):
+  quote, provenance, matcher classification, nearest-candidate items
+  with scores, subject hints, and a new/used lifecycle. RLS members
+  read, server-only writes; isolation guard extended and green.
+- **Server-side capture, never model-optional:**
+  `recordJournalProgressEvidence` writes the observation inside the
+  same transaction as the operation receipt for every no_match,
+  activity_only, and ambiguous outcome. The matcher now returns its
+  top below-threshold candidates on no_match instead of discarding
+  them. Replays cannot double-write (the idempotency claim
+  short-circuits first). Scores are untouched: matched evidence
+  remains the only way a score moves.
+- **Same-turn contract:** the three non-scoring tool notes now say the
+  report was saved as an observation and instruct the model to say so
+  and offer one concrete way to build on it this week (at night, for
+  the coming days). instructions.md and the SMS guidance carry the
+  same behavior.
+- **Reinforcement loop:** the morning-brief context block now carries
+  the week's status-new observations (7-day window, 3 per child) next
+  to each child's frontier, the research-brief skill makes a fresh
+  parent observation the number-one angle, and a new
+  manage_child_progress action `mark_observation_used` (valid on
+  dispatch sessions; run id from trusted attributes) retires an
+  observation so it is never suggested twice.
+- **Founder visibility:** the family file's Brain tab gains an
+  "Observation ledger" section (new/used, classification, nearest
+  subjects).
+- **Events:** `progress.observation_saved` and
+  `progress.observation_used` join the MJ-08 registry with PII-free
+  props.
+
+Agent-decided defaults under the ruling (Q1-Q4 of the plan, founder
+said ship): no web chat card for observation saves yet, admin-only
+visibility for launch week, 7-day freshness with 3 per child in the
+brief, and activity_only reports are captured too. Deferred
+explicitly: back-crediting observations when a bank item later ships,
+fleet-wide gap clustering, any parent-facing observations surface.
+
 ## 2026-07-13 · Morning-brief texts died on the carrier segment cap (emoji + UCS-2)
 
 Founder ask (screenshot of three "Failed sms send · SMS send rejected"

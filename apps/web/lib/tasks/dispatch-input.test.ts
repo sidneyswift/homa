@@ -40,6 +40,7 @@ const FAKE_BRIEF_CONTEXT = {
   styleKeys: ["montessori"],
   positionLines: ["- Nova: phonics: ahead (+8mo)"],
   knowledge: [],
+  observations: [],
 };
 
 describe("buildTaskMessage", () => {

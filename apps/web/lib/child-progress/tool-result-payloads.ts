@@ -11,6 +11,8 @@ import type {
 import {
   DISABLED_PROGRESS_NOTE,
   manageChildProgressResultSchema,
+  OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
+  OBSERVATION_USED_PROGRESS_NOTE,
   REFUSED_PROGRESS_NOTE,
   REISSUE_PROGRESS_NOTE,
   type ManageChildProgressResult,
@@ -51,6 +53,17 @@ export function reissueProgressResult(): ManageChildProgressResult {
 
 export function disabledProgressResult(): ManageChildProgressResult {
   return parsed({ kind: "disabled", note: DISABLED_PROGRESS_NOTE });
+}
+
+export function observationUsedResult(
+  alreadyUsed: boolean,
+): ManageChildProgressResult {
+  return parsed({
+    kind: "observation_used",
+    note: alreadyUsed
+      ? OBSERVATION_ALREADY_USED_PROGRESS_NOTE
+      : OBSERVATION_USED_PROGRESS_NOTE,
+  });
 }
 
 export function progressQuestionResult(

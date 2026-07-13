@@ -9,6 +9,8 @@ import {
 } from "./tool-adapter";
 import { createProgressToolContext } from "./tool-contract";
 import {
+  OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
+  OBSERVATION_USED_PROGRESS_NOTE,
   REFUSED_PROGRESS_NOTE,
   REISSUE_PROGRESS_NOTE,
 } from "./tool-result-contract";
@@ -129,6 +131,7 @@ function operations(
     recordJournalEvidence: unexpected,
     resolveConflict: unexpected,
     undoProgressUpdate: unexpected,
+    markObservationUsed: unexpected,
     listFamilyCheckIns: async () => [],
     getChildProgressView: async () => null,
     ...overrides,
@@ -303,5 +306,100 @@ describe("child progress tool result adapter", () => {
       undoToken: OPERATION_ID,
     });
     assert.equal(JSON.stringify(result).includes(canonicalText), false);
+  });
+
+  it("marks an observation used, including from a dispatch session", async () => {
+    const OBSERVATION_ID =
+      "22222222-2222-4222-8222-222222222222";
+    const dispatchContext = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        channel: "dispatch",
+        taskRunId: "33333333-3333-4333-8333-333333333333",
+      },
+      sessionId: "session-dispatch",
+      turnId: "turn-dispatch",
+      now: NOW,
+    });
+    const seenTaskRunIds: Array<string | null> = [];
+
+    const used = await executeChildProgressCommand(
+      {
+        action: "mark_observation_used",
+        observationId: OBSERVATION_ID,
+      },
+      dispatchContext,
+      operations({
+        markObservationUsed: async (operationContext) => {
+          seenTaskRunIds.push(operationContext.taskRunId ?? null);
+          return { outcome: "used", childId: CHILD_ID };
+        },
+      }),
+    );
+    assert.deepEqual(used, {
+      kind: "observation_used",
+      note: OBSERVATION_USED_PROGRESS_NOTE,
+    });
+    assert.deepEqual(seenTaskRunIds, [
+      "33333333-3333-4333-8333-333333333333",
+    ]);
+
+    const repeat = await executeChildProgressCommand(
+      {
+        action: "mark_observation_used",
+        observationId: OBSERVATION_ID,
+      },
+      context(),
+      operations({
+        markObservationUsed: async () => ({
+          outcome: "already_used",
+          childId: CHILD_ID,
+        }),
+      }),
+    );
+    assert.deepEqual(repeat, {
+      kind: "observation_used",
+      note: OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
+    });
+
+    const unknown = await executeChildProgressCommand(
+      {
+        action: "mark_observation_used",
+        observationId: OBSERVATION_ID,
+      },
+      context(),
+      operations({
+        markObservationUsed: async () => ({
+          outcome: "unknown_observation",
+        }),
+      }),
+    );
+    assert.deepEqual(unknown, {
+      kind: "refused",
+      note: REFUSED_PROGRESS_NOTE,
+    });
+  });
+
+  it("still refuses other actions on the dispatch channel", async () => {
+    const dispatchContext = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: { channel: "dispatch" },
+      sessionId: "session-dispatch",
+      turnId: "turn-dispatch",
+      now: NOW,
+    });
+    const result = await executeChildProgressCommand(
+      {
+        action: "start_check_in",
+        childId: CHILD_ID,
+        purpose: "whole_map_refresh",
+      },
+      dispatchContext,
+      operations({}),
+    );
+    assert.deepEqual(result, {
+      kind: "refused",
+      note: REFUSED_PROGRESS_NOTE,
+    });
   });
 });

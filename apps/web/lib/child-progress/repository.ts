@@ -74,6 +74,56 @@ export type ChildProgressOperationStatus =
   | "answers_corrected"
   | "undone";
 
+/**
+ * The observation ledger (plan 2026-07-13-observation-ledger.md).
+ * Journal input the matcher cannot score is still written durably,
+ * inside the same transaction as the operation receipt. Rows never
+ * move scores; they feed the weekly reinforcement loop.
+ */
+export type ChildObservationClassification =
+  | "no_match"
+  | "activity_only"
+  | "ambiguous";
+
+export interface ChildObservationCandidate {
+  itemId: string;
+  score: number;
+}
+
+export interface AppendChildObservationInput {
+  childId: string;
+  familyId: string;
+  memberUserId: string | null;
+  quote: string;
+  channel: Extract<ProgressCheckInChannel, "web" | "sms" | "email">;
+  messageId: string | null;
+  classification: ChildObservationClassification;
+  candidates: readonly ChildObservationCandidate[];
+  subjectHints: readonly string[];
+  observedAt: string;
+}
+
+export interface StoredChildObservation {
+  id: string;
+  childId: string;
+  familyId: string;
+  classification: ChildObservationClassification;
+  status: "new" | "used";
+  createdAt: string;
+}
+
+export interface MarkChildObservationUsedInput {
+  familyId: string;
+  observationId: string;
+  usedTaskRunId: string | null;
+  usedAt: string;
+}
+
+export type MarkChildObservationUsedResult =
+  | { outcome: "used"; childId: string }
+  | { outcome: "already_used"; childId: string }
+  | { outcome: "unknown_observation" };
+
 export interface ChildProgressOperationReceipt {
   id: string;
   childId: string;
@@ -406,6 +456,9 @@ export interface ChildProgressTransaction {
   appendEvidence(
     input: AppendProgressEvidenceInput,
   ): Promise<StoredProgressEvidence>;
+  appendObservation(
+    input: AppendChildObservationInput,
+  ): Promise<StoredChildObservation>;
   claimOperation(
     input: ClaimChildProgressOperationInput,
   ): Promise<ClaimChildProgressOperationResult>;
@@ -513,6 +566,9 @@ export interface ChildProgressRepository {
     familyId: string,
     childId: string,
   ): Promise<ChildProgressProjectionInput | null>;
+  markObservationUsed(
+    input: MarkChildObservationUsedInput,
+  ): Promise<MarkChildObservationUsedResult>;
 }
 
 export interface ProgressCheckInRepository

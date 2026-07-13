@@ -260,6 +260,26 @@ export const EVENT_SCHEMAS = {
       had_conflict: z.boolean(),
     })
     .strict(),
+  // The observation ledger (plan 2026-07-13-observation-ledger.md):
+  // journal input the matcher cannot score is kept as an observation.
+  // Quotes, item identifiers, and adult data stay out of properties.
+  "progress.observation_saved": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      classification: z.enum([
+        "no_match",
+        "activity_only",
+        "ambiguous",
+      ]),
+    })
+    .strict(),
+  "progress.observation_used": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+    })
+    .strict(),
   // The report's one-tap month: the parent explicitly asked Homa to build
   // the plan and check back, which is what arms the retest email.
   "map.plan_consented": z.object({

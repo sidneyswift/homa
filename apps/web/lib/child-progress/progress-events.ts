@@ -185,6 +185,46 @@ export function progressEventsForEvidenceResult(
   ];
 }
 
+/**
+ * Observation-ledger events (plan 2026-07-13-observation-ledger.md).
+ * The journal service writes the observation row inside the committed
+ * transaction for exactly these three statuses, so the status alone is
+ * the emission signal. Replays surface as "duplicate" and never re-emit.
+ */
+export function progressEventsForJournalObservation(
+  input: { familyId: string; childId: string },
+  result: RecordJournalProgressEvidenceResult,
+): ProgressEvent[] {
+  if (
+    result.status !== "no_match" &&
+    result.status !== "activity_only" &&
+    result.status !== "ambiguous"
+  ) {
+    return [];
+  }
+  return [{
+    name: "progress.observation_saved",
+    props: {
+      family_id: input.familyId,
+      child_id: input.childId,
+      classification: result.status,
+    },
+  }];
+}
+
+export function progressEventsForObservationUsed(input: {
+  familyId: string;
+  childId: string;
+}): ProgressEvent[] {
+  return [{
+    name: "progress.observation_used",
+    props: {
+      family_id: input.familyId,
+      child_id: input.childId,
+    },
+  }];
+}
+
 export function progressEventsForCorrectionResult(
   familyId: string,
   result: CorrectProgressAnswersResult,
@@ -575,6 +615,20 @@ async function emitProgressEvent(
         await emitter("progress.projection_updated", event.props);
       } else {
         await emitMapEvent("progress.projection_updated", event.props);
+      }
+      break;
+    case "progress.observation_saved":
+      if (emitter) {
+        await emitter("progress.observation_saved", event.props);
+      } else {
+        await emitMapEvent("progress.observation_saved", event.props);
+      }
+      break;
+    case "progress.observation_used":
+      if (emitter) {
+        await emitter("progress.observation_used", event.props);
+      } else {
+        await emitMapEvent("progress.observation_used", event.props);
       }
       break;
     default: {

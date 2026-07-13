@@ -39,6 +39,12 @@ const migrationPath = path.join(
   repoRoot,
   "supabase/migrations/20260711213330_agent_led_live_progress.sql",
 );
+// The observation ledger's additive migration
+// (plan 2026-07-13-observation-ledger.md) rides the same harness.
+const observationsMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260713134500_child_observations.sql",
+);
 const familyId = "00000000-0000-0000-0000-000000000001";
 const childId = "00000000-0000-0000-0000-000000000002";
 const adultA = "00000000-0000-0000-0000-000000000003";
@@ -3144,6 +3150,96 @@ async function runAdapterAssertions(input: {
       channel: "web",
       message_id: progressEvidenceMessageId,
     });
+
+    // Observation ledger (plan 2026-07-13-observation-ledger.md):
+    // a journal call the matcher cannot score persists the parent's
+    // words as a child_observations row in the same transaction, and
+    // the reinforcement loop can later flip it to used.
+    const observationResult =
+      await service.recordJournalProgressEvidence({
+        ...journalInput,
+        quote: "Maya had a wonderful curious afternoon",
+        idempotencyKey: "postgres-journal-observation",
+      });
+    assert.equal(observationResult.status, "no_match");
+    const [persistedObservation] = await sql<
+      {
+        id: string;
+        classification: string;
+        status: string;
+        quote: string;
+        channel: string;
+        message_id: string | null;
+        member_user_id: string | null;
+      }[]
+    >`
+      select id, classification, status, quote, channel,
+             message_id, member_user_id
+      from public.child_observations
+      where child_id = ${childId}
+        and family_id = ${familyId}
+    `;
+    assert.ok(persistedObservation);
+    assert.deepEqual(
+      {
+        classification: persistedObservation.classification,
+        status: persistedObservation.status,
+        quote: persistedObservation.quote,
+        channel: persistedObservation.channel,
+        message_id: persistedObservation.message_id,
+        member_user_id: persistedObservation.member_user_id,
+      },
+      {
+        classification: "no_match",
+        status: "new",
+        quote: "Maya had a wonderful curious afternoon",
+        channel: "web",
+        message_id: progressEvidenceMessageId,
+        member_user_id: adultA,
+      },
+    );
+    const observationReplay =
+      await service.recordJournalProgressEvidence({
+        ...journalInput,
+        quote: "Maya had a wonderful curious afternoon",
+        idempotencyKey: "postgres-journal-observation",
+      });
+    assert.equal(observationReplay.status, "duplicate");
+    const [observationCount] = await sql<{ count: number }[]>`
+      select count(*)::integer as count
+      from public.child_observations
+      where child_id = ${childId}
+        and family_id = ${familyId}
+    `;
+    assert.equal(observationCount.count, 1);
+    assert.deepEqual(
+      await repository.markObservationUsed({
+        familyId: randomUUID(),
+        observationId: persistedObservation.id,
+        usedTaskRunId: null,
+        usedAt: "2026-07-13T14:00:00.000000Z",
+      }),
+      { outcome: "unknown_observation" },
+    );
+    assert.deepEqual(
+      await repository.markObservationUsed({
+        familyId,
+        observationId: persistedObservation.id,
+        usedTaskRunId: null,
+        usedAt: "2026-07-13T14:00:00.000000Z",
+      }),
+      { outcome: "used", childId },
+    );
+    assert.deepEqual(
+      await repository.markObservationUsed({
+        familyId,
+        observationId: persistedObservation.id,
+        usedTaskRunId: null,
+        usedAt: "2026-07-13T14:01:00.000000Z",
+      }),
+      { outcome: "already_used", childId },
+    );
+
     const undoSource = await service.recordProgressEvidence({
       familyId,
       childId,
@@ -5607,6 +5703,25 @@ async function main(): Promise<void> {
         database,
         "-f",
         migrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "--single-transaction",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        observationsMigrationPath,
       ],
       env,
     );

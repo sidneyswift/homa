@@ -20,6 +20,7 @@ import {
   type StoredChildProgressOperationResult,
 } from "./operation-receipt";
 import type {
+  ChildObservationClassification,
   ChildProgressProjectionInput,
   ChildProgressRepository,
   ChildProgressTransaction,
@@ -462,7 +463,17 @@ export class ChildProgressService {
         subjectId: input.subjectId,
       });
       switch (match.classification) {
+        // Non-scoring outcomes still write a child_observations row in
+        // this same transaction (plan 2026-07-13-observation-ledger.md):
+        // the parent's report survives even though no score moves, and
+        // durability never depends on the model calling another tool.
         case "activity_only":
+          await this.appendJournalObservation(
+            transaction,
+            input,
+            "activity_only",
+            [],
+          );
           return this.completeOperation(
             transaction,
             input,
@@ -470,6 +481,12 @@ export class ChildProgressService {
             { status: "activity_only" },
           );
         case "no_match":
+          await this.appendJournalObservation(
+            transaction,
+            input,
+            "no_match",
+            match.candidates,
+          );
           return this.completeOperation(
             transaction,
             input,
@@ -477,6 +494,12 @@ export class ChildProgressService {
             { status: "no_match" },
           );
         case "ambiguous":
+          await this.appendJournalObservation(
+            transaction,
+            input,
+            "ambiguous",
+            match.matches,
+          );
           return this.completeOperation(
             transaction,
             input,
@@ -1390,6 +1413,52 @@ export class ChildProgressService {
       compatibilityAnswers,
     });
     return view;
+  }
+
+  /**
+   * Rounds candidate scores for storage; four decimals is plenty for
+   * "which bank items were closest" and keeps the jsonb stable.
+   */
+  private observationCandidates(
+    candidates: readonly JournalEvidenceMatch[],
+  ): Array<{ itemId: string; score: number }> {
+    return candidates.map((candidate) => ({
+      itemId: candidate.itemId,
+      score: Math.round(candidate.score * 10_000) / 10_000,
+    }));
+  }
+
+  private observationSubjectHints(
+    input: RecordJournalProgressEvidenceInput,
+    candidates: readonly JournalEvidenceMatch[],
+  ): string[] {
+    const hints = new Set<string>();
+    if (input.subjectId !== undefined) hints.add(input.subjectId);
+    for (const candidate of candidates) {
+      const located = getMapItem(candidate.itemId);
+      if (located !== undefined) hints.add(located.subject.id);
+    }
+    return [...hints].sort();
+  }
+
+  private async appendJournalObservation(
+    transaction: ChildProgressTransaction,
+    input: RecordJournalProgressEvidenceInput,
+    classification: ChildObservationClassification,
+    candidates: readonly JournalEvidenceMatch[],
+  ): Promise<void> {
+    await transaction.appendObservation({
+      childId: input.childId,
+      familyId: input.familyId,
+      memberUserId: input.memberUserId,
+      quote: input.quote,
+      channel: input.channel,
+      messageId: input.messageId,
+      classification,
+      candidates: this.observationCandidates(candidates),
+      subjectHints: this.observationSubjectHints(input, candidates),
+      observedAt: input.observedAt,
+    });
   }
 
   private validateOperationInput(

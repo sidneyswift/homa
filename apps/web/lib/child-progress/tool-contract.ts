@@ -54,6 +54,7 @@ export const manageChildProgressToolInputSchema = z
       "record_journal_evidence",
       "resolve_conflict",
       "undo_progress_update",
+      "mark_observation_used",
     ]),
     childId: childIdSchema.optional(),
     purpose: z
@@ -69,6 +70,7 @@ export const manageChildProgressToolInputSchema = z
     reason: z.enum(["topic_change", "explicit_stop"]).optional(),
     conflictId: uuidSchema.optional(),
     operationId: uuidSchema.optional(),
+    observationId: uuidSchema.optional(),
   })
   .strict();
 
@@ -143,6 +145,12 @@ export const manageChildProgressInputSchema = z
         operationId: uuidSchema,
       })
       .strict(),
+    z
+      .object({
+        action: z.literal("mark_observation_used"),
+        observationId: uuidSchema,
+      })
+      .strict(),
   ])
   .superRefine((input, context) => {
     if (
@@ -170,6 +178,7 @@ interface ProgressToolAuthAttributes {
   episodeId?: unknown;
   canonicalInboundText?: unknown;
   canonicalInboundMessageId?: unknown;
+  taskRunId?: unknown;
 }
 
 function optionalAttribute(value: unknown): string | null {
@@ -248,6 +257,7 @@ export function createProgressToolContext(input: {
     inboundMessageId: optionalUuidAttribute(
       attributes.canonicalInboundMessageId,
     ),
+    taskRunId: optionalUuidAttribute(attributes.taskRunId),
     now: now.toISOString(),
   };
 }

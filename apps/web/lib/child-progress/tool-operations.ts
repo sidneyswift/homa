@@ -2,6 +2,7 @@ import type {
   RecordJournalProgressEvidenceResult,
   UndoProgressOperationResult,
 } from "./progress-service";
+import type { MarkChildObservationUsedResult } from "./repository";
 import type {
   ChildProgressView,
   ProgressCheckInContext,
@@ -80,6 +81,10 @@ export interface ChildProgressToolOperations {
       idempotencyKey: string;
     },
   ): Promise<UndoProgressOperationResult>;
+  markObservationUsed(
+    context: ProgressCheckInContext,
+    input: { observationId: string },
+  ): Promise<MarkChildObservationUsedResult>;
   listFamilyCheckIns(
     familyId: string,
   ): Promise<ProgressCheckInRecord[]>;

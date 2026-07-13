@@ -42,6 +42,7 @@ function throwingOperations(
     recordJournalEvidence: unexpected,
     resolveConflict: unexpected,
     undoProgressUpdate: unexpected,
+    markObservationUsed: unexpected,
     listFamilyCheckIns: async () => [],
     getChildProgressView: async () => null,
     ...overrides,
@@ -195,6 +196,7 @@ describe("trusted progress runtime context", () => {
       canonicalInboundText:
         "Maya read the whole early reader by herself.",
       inboundMessageId: MESSAGE_ID,
+      taskRunId: null,
       now: NOW.toISOString(),
     });
   });

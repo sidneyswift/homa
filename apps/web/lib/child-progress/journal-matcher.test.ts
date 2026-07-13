@@ -116,9 +116,34 @@ describe("journal evidence matcher", () => {
       "Maya watched Jordan carefully retell the story",
       "Maya listened as Jordan successfully retold the story",
     ]) {
-      assert.deepEqual(
-        matchJournalEvidence({ quote, childName: "Maya" }),
-        { classification: "no_match", matches: [] },
+      const result = matchJournalEvidence({
+        quote,
+        childName: "Maya",
+      });
+      assert.equal(result.classification, "no_match");
+      assert.deepEqual(result.matches, []);
+    }
+  });
+
+  it("keeps the nearest below-threshold candidates on no_match", () => {
+    const result = matchJournalEvidence({
+      quote: "Maya retold it briefly",
+      childName: "Maya",
+    });
+
+    assert.equal(result.classification, "no_match");
+    if (result.classification !== "no_match") return;
+    assert.deepEqual(result.matches, []);
+    assert.ok(result.candidates.length >= 1);
+    assert.ok(result.candidates.length <= 3);
+    const itemIds = result.candidates.map(
+      (candidate) => candidate.itemId,
+    );
+    assert.equal(new Set(itemIds).size, itemIds.length);
+    for (let index = 1; index < result.candidates.length; index += 1) {
+      assert.ok(
+        result.candidates[index - 1].score >=
+          result.candidates[index].score,
       );
     }
   });

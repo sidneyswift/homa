@@ -62,9 +62,18 @@ const validProgressEvents = {
     subjects_touched: 1,
     had_conflict: false,
   },
+  "progress.observation_saved": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    classification: "no_match",
+  },
+  "progress.observation_used": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+  },
 } as const;
 
-test("progress event registry contains all nine exact names", () => {
+test("progress event registry contains all eleven exact names", () => {
   assert.deepEqual(
     Object.keys(EVENT_SCHEMAS)
       .filter((name) => name.startsWith("progress."))

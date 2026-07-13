@@ -231,6 +231,7 @@ export function parseProgressMessagePart(
     case "activity_only":
     case "no_match":
     case "ambiguous":
+    case "observation_used":
     case "refused":
     case "disabled":
       return null;

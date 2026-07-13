@@ -9,6 +9,10 @@ export const LINKED_SMS_PROGRESS_GUIDANCE = `
   reads this exact inbound text from trusted channel context. Never supply
   quote, revision, or idempotency fields. Activity or time alone belongs in
   log_hours or journal memory, never skill evidence.
+- When the result says the message saved as an observation, it is on the
+  child's record but no score changed. Say you noted it and offer one way to
+  build on it this week; late at night, offer it for the coming days. Never
+  claim a score or progress changed.
 - When she asks to take the assessment or check-in, use start_check_in.
   Keep one question per text and use the exact server statement,
   word for word, with a question mark. A short lead-in before it is

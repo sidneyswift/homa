@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import { buildChildProgressView } from "./projection";
 import type {
+  AppendChildObservationInput,
   AppendProgressEvidenceInput,
   ChildProgressOperationReceipt,
   ChildProgressProjectionInput,
@@ -12,8 +13,11 @@ import type {
   ClaimChildProgressOperationResult,
   CompleteChildProgressOperationInput,
   InsertOpenProgressConflictInput,
+  MarkChildObservationUsedInput,
+  MarkChildObservationUsedResult,
   SaveDerivedChildProgressInput,
   SaveProgressCompatibilityAnswersInput,
+  StoredChildObservation,
   StoredProgressEvidence,
   SupersedeProgressEvidenceInput,
 } from "./repository";
@@ -45,6 +49,14 @@ interface FakeReport {
   narrativeMeta: unknown;
 }
 
+interface FakeStoredObservation {
+  id: string;
+  input: AppendChildObservationInput;
+  status: "new" | "used";
+  usedTaskRunId: string | null;
+  usedAt: string | null;
+}
+
 interface FakeRepositoryState {
   projectionInput: ChildProgressProjectionInput | null;
   liveView: ChildProgressView | null;
@@ -60,6 +72,7 @@ interface FakeRepositoryState {
     { answer: string; source: string; observedAt: string }
   >;
   operationReceipts: Map<string, ChildProgressOperationReceipt>;
+  observations: FakeStoredObservation[];
 }
 
 function cloneFakeState(
@@ -86,6 +99,7 @@ function cloneFakeState(
         structuredClone(receipt),
       ]),
     ),
+    observations: structuredClone(state.observations),
   };
 }
 
@@ -227,6 +241,30 @@ class InMemoryChildProgressTransaction
     this.draft.projectionInput?.evidence.push(evidence);
     this.bumpSourceRevision();
     return structuredClone(evidence);
+  }
+
+  async appendObservation(
+    input: AppendChildObservationInput,
+  ): Promise<StoredChildObservation> {
+    if (!this.matchesChild(input.familyId, input.childId)) {
+      throw new Error("Unknown observation child");
+    }
+    const stored: FakeStoredObservation = {
+      id: `observation-${this.draft.observations.length + 1}`,
+      input: structuredClone(input) as AppendChildObservationInput,
+      status: "new",
+      usedTaskRunId: null,
+      usedAt: null,
+    };
+    this.draft.observations.push(stored);
+    return {
+      id: stored.id,
+      childId: input.childId,
+      familyId: input.familyId,
+      classification: input.classification,
+      status: "new",
+      createdAt: "2026-07-13T14:00:00.000000Z",
+    };
   }
 
   async claimOperation(
@@ -486,6 +524,7 @@ class InMemoryChildProgressRepository
     report: null,
     compatibilityAnswers: new Map(),
     operationReceipts: new Map(),
+    observations: [],
   };
   private transactionQueue: Promise<void> = Promise.resolve();
   readonly familyMembers = new Map([
@@ -531,6 +570,9 @@ class InMemoryChildProgressRepository
   }
   get operationReceipts() {
     return this.state.operationReceipts;
+  }
+  get observations() {
+    return this.state.observations;
   }
 
   async withTransaction<T>(
@@ -586,6 +628,29 @@ class InMemoryChildProgressRepository
     memberUserId: string,
   ): string | undefined {
     return this.familyMembers.get(`${familyId}:${memberUserId}`);
+  }
+
+  async markObservationUsed(
+    input: MarkChildObservationUsedInput,
+  ): Promise<MarkChildObservationUsedResult> {
+    const observation = this.state.observations.find(
+      (candidate) =>
+        candidate.id === input.observationId &&
+        candidate.input.familyId === input.familyId,
+    );
+    if (observation === undefined) {
+      return { outcome: "unknown_observation" };
+    }
+    if (observation.status === "used") {
+      return {
+        outcome: "already_used",
+        childId: observation.input.childId,
+      };
+    }
+    observation.status = "used";
+    observation.usedTaskRunId = input.usedTaskRunId;
+    observation.usedAt = input.usedAt;
+    return { outcome: "used", childId: observation.input.childId };
   }
 
   simulateSameCountSupersession(): void {
@@ -732,9 +797,18 @@ describe("child progress evidence service", () => {
     assert.equal(repository.operationReceipts.size, 1);
     assert.equal(repository.appendCount, 0);
     assert.equal(repository.savedDerivedProgress.length, 0);
+    assert.equal(repository.observations.length, 1);
+    assert.equal(
+      repository.observations[0].input.classification,
+      "activity_only",
+    );
+    assert.equal(
+      repository.observations[0].input.quote,
+      "We read for 30 minutes",
+    );
   });
 
-  it("returns ambiguous and no-match journal outcomes without writing", async () => {
+  it("returns ambiguous and no-match journal outcomes without scoring, keeping observations", async () => {
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
     const service = createService(repository);
@@ -763,6 +837,50 @@ describe("child progress evidence service", () => {
     assert.equal(repository.operationReceipts.size, 2);
     assert.equal(repository.appendCount, 0);
     assert.equal(repository.savedDerivedProgress.length, 0);
+    assert.deepEqual(
+      repository.observations.map(
+        (observation) => observation.input.classification,
+      ),
+      ["ambiguous", "no_match"],
+    );
+    const ambiguousObservation = repository.observations[0].input;
+    assert.equal(
+      ambiguousObservation.quote,
+      "Maya can count out loud to 10",
+    );
+    assert.ok(ambiguousObservation.candidates.length >= 1);
+    assert.ok(ambiguousObservation.subjectHints.length >= 1);
+    for (const observation of repository.observations) {
+      assert.equal(observation.status, "new");
+      assert.equal(observation.input.channel, "web");
+      assert.equal(
+        observation.input.messageId,
+        JOURNAL_MESSAGE_ID,
+      );
+      assert.equal(observation.input.memberUserId, "adult-1");
+    }
+  });
+
+  it("writes a no-match observation exactly once across replays", async () => {
+    const repository = new InMemoryChildProgressRepository();
+    repository.projectionInput = emptyProjectionInput();
+    const service = createService(repository);
+    const input = {
+      ...JOURNAL_PROVENANCE,
+      familyId: FAMILY_ID,
+      childId: CHILD_ID,
+      memberUserId: "adult-1",
+      quote: "Maya had a good learning day",
+      observedAt: "2026-07-11T17:30:00.000000Z",
+      idempotencyKey: "journal-observation-replay",
+    };
+
+    const first = await service.recordJournalProgressEvidence(input);
+    const replay = await service.recordJournalProgressEvidence(input);
+
+    assert.equal(first.status, "no_match");
+    assert.equal(replay.status, "duplicate");
+    assert.equal(repository.observations.length, 1);
   });
 
   it("records one high-confidence journal match as one evidence row", async () => {
@@ -784,6 +902,7 @@ describe("child progress evidence service", () => {
     });
 
     assert.equal(result.status, "recorded");
+    assert.equal(repository.observations.length, 0);
     if (result.status === "recorded") {
       assert.deepEqual(
         result.evidence.map((evidence) => evidence.itemId),

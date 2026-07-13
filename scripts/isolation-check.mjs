@@ -378,11 +378,12 @@ async function childProgressSchemaExists() {
       'public.progress_check_in_responses',
       'public.child_progress_conflicts',
       'public.child_progress_snapshots',
-      'public.map_walk_prompts'
+      'public.map_walk_prompts',
+      'public.child_observations'
     ]) as expected(table_name)
     where to_regclass(expected.table_name) is not null
   `;
-  return rows[0]?.table_count === 9;
+  return rows[0]?.table_count === 10;
 }
 
 async function expectPrivilegedSqlRejected(label, operation) {
@@ -658,6 +659,27 @@ async function insertChildProgressFixtures(
     )
     returning id
   `;
+  const [observation] = await sql`
+    insert into public.child_observations (
+      child_id,
+      family_id,
+      member_user_id,
+      quote,
+      channel,
+      classification,
+      observed_at
+    )
+    values (
+      ${childId},
+      ${familyId},
+      ${evidenceMemberUserIdA},
+      'Isolation observation quote.',
+      'web',
+      'no_match',
+      now()
+    )
+    returning id
+  `;
 
   return {
     childId: live.child_id,
@@ -665,6 +687,7 @@ async function insertChildProgressFixtures(
     conflictId: conflict.id,
     evidenceId: evidenceA.id,
     evidenceIdB: evidenceB.id,
+    observationId: observation.id,
     operationKey,
     responseId: response.id,
     snapshotId: snapshot.id,
@@ -1889,6 +1912,11 @@ async function expectAuthenticatedIsolation() {
         keyColumn: "id",
         keyValue: childProgressFixtures.snapshotId,
       },
+      {
+        table: "child_observations",
+        keyColumn: "id",
+        keyValue: childProgressFixtures.observationId,
+      },
     ];
     for (const row of childProgressRows) {
       await expectAuthenticatedRead(
@@ -2017,6 +2045,21 @@ async function expectAuthenticatedIsolation() {
           scores: {},
         },
         updateRow: { scorer_version: "client-forge" },
+      },
+      {
+        table: "child_observations",
+        label: "child observation",
+        keyColumn: "id",
+        keyValue: childProgressFixtures.observationId,
+        insertRow: {
+          child_id: childBId,
+          family_id: familyBId,
+          quote: "Client-forged observation should be denied.",
+          channel: "web",
+          classification: "no_match",
+          observed_at: new Date().toISOString(),
+        },
+        updateRow: { status: "used", used_at: new Date().toISOString() },
       },
     ];
     for (const fixture of childProgressWriteFixtures) {
@@ -2165,6 +2208,7 @@ for (const table of [
   "child_progress_conflicts",
   "child_progress_snapshots",
   "map_walk_prompts",
+  "child_observations",
 ]) {
   await expectAnonymousNoRowsOrDenied(table);
 }
@@ -2478,6 +2522,18 @@ await expectInsertDenied(
     expires_at: new Date(Date.now() + 60_000).toISOString(),
   },
   "anon cannot forge map walk prompts",
+);
+await expectInsertDenied(
+  "child_observations",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    quote: "Anon-forged observation should be denied.",
+    channel: "web",
+    classification: "no_match",
+    observed_at: new Date().toISOString(),
+  },
+  "anon cannot forge child observations",
 );
 await expectInsertDenied(
   "child_curriculum_calls",

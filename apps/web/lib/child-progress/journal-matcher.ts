@@ -128,9 +128,20 @@ const JOURNAL_ALIAS_RULES: readonly JournalAliasRule[] = [
   },
 ];
 
+export const JOURNAL_NO_MATCH_CANDIDATE_LIMIT = 3;
+
 export type JournalEvidenceMatchResult =
   | { classification: "activity_only"; matches: [] }
-  | { classification: "no_match"; matches: [] }
+  | {
+      classification: "no_match";
+      matches: [];
+      /**
+       * The nearest bank items even though none crossed the match
+       * threshold. The observation ledger keeps them as tags
+       * (plan 2026-07-13-observation-ledger.md); they never score.
+       */
+      candidates: JournalEvidenceMatch[];
+    }
   | {
       classification: "matched";
       matches: [JournalEvidenceMatch];
@@ -383,6 +394,27 @@ function publicMatch(
   };
 }
 
+function topScoredCandidates(
+  candidates: readonly ScoredJournalCandidate[],
+  limit: number,
+): JournalEvidenceMatch[] {
+  const bestByItem = new Map<string, ScoredJournalCandidate>();
+  for (const candidate of candidates) {
+    const existing = bestByItem.get(candidate.itemId);
+    if (existing === undefined || candidate.score > existing.score) {
+      bestByItem.set(candidate.itemId, candidate);
+    }
+  }
+  return [...bestByItem.values()]
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        compareAsciiIds(left.itemId, right.itemId),
+    )
+    .slice(0, limit)
+    .map(publicMatch);
+}
+
 /**
  * Matches a named child's concrete journal clause to reviewed bank items.
  * Activity-only text exits before any bank matching work.
@@ -405,12 +437,14 @@ export function matchJournalEvidence(input: {
   );
   const selected: JournalEvidenceMatch[] = [];
   const ambiguous: JournalEvidenceMatch[] = [];
+  const allScored: ScoredJournalCandidate[] = [];
 
   for (const predicate of predicates) {
     const candidates = scoreCandidates({
       predicate,
       subjectId: input.subjectId,
     });
+    allScored.push(...candidates);
     const strong = candidates.filter(
       (candidate) =>
         candidate.score >= JOURNAL_MATCH_HIGH_CONFIDENCE_SCORE,
@@ -471,7 +505,14 @@ export function matchJournalEvidence(input: {
     };
   }
   if (matches.length === 0) {
-    return { classification: "no_match", matches: [] };
+    return {
+      classification: "no_match",
+      matches: [],
+      candidates: topScoredCandidates(
+        allScored,
+        JOURNAL_NO_MATCH_CANDIDATE_LIMIT,
+      ),
+    };
   }
   if (matches.length === 1) {
     return { classification: "matched", matches: [matches[0]] };

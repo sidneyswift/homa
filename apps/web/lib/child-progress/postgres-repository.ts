@@ -22,8 +22,10 @@ import {
   type PostgresLiveProgressRow,
 } from "./postgres-repository-helpers";
 import type {
+  AppendChildObservationInput,
   AppendProgressEvidenceInput,
   BindProgressCheckInDeliveryInput,
+  ChildObservationClassification,
   ChildProgressProjectionInput,
   ClaimChildProgressOperationInput,
   ClaimChildProgressOperationResult,
@@ -41,9 +43,12 @@ import type {
   InsertMapWalkPromptResult,
   LoadActiveProgressCheckInInput,
   LockedProgressConflict,
+  MarkChildObservationUsedInput,
+  MarkChildObservationUsedResult,
   ProgressCheckInRepository,
   ProgressCheckInTransaction,
   ProgressConflictIdentity,
+  StoredChildObservation,
   ResolveProgressConflictInput,
   SaveDerivedChildProgressInput,
   SaveProgressCompatibilityAnswersInput,
@@ -747,6 +752,62 @@ class PostgresChildProgressTransaction
       throw new Error("Progress evidence child scope changed");
     }
     return mapPostgresProgressEvidenceRow(row);
+  }
+
+  async appendObservation(
+    input: AppendChildObservationInput,
+  ): Promise<StoredChildObservation> {
+    const rows = await this.sql<
+      {
+        id: string;
+        child_id: string;
+        family_id: string;
+        classification: ChildObservationClassification;
+        status: "new" | "used";
+        created_at: string;
+      }[]
+    >`
+      insert into public.child_observations (
+        child_id, family_id, member_user_id, quote, channel,
+        message_id, classification, candidates, subject_hints,
+        observed_at
+      )
+      select ${input.childId}, ${input.familyId},
+             ${input.memberUserId}, ${input.quote},
+             ${input.channel}, ${input.messageId},
+             ${input.classification},
+             ${this.sql.json(
+               input.candidates.map((candidate) => ({
+                 itemId: candidate.itemId,
+                 score: candidate.score,
+               })),
+             )},
+             ${[...input.subjectHints]},
+             ${input.observedAt}
+      where exists (
+        select 1
+        from public.children child
+        where child.id = ${input.childId}
+          and child.family_id = ${input.familyId}
+      )
+      returning id, child_id, family_id, classification, status,
+                to_char(
+                  created_at at time zone 'UTC',
+                  'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'
+                ) as created_at
+    `;
+    const row = rows[0];
+    if (row === undefined) {
+      throw new Error("Child observation scope changed");
+    }
+    return {
+      id: row.id,
+      childId: row.child_id,
+      familyId: row.family_id,
+      classification: row.classification,
+      status: row.status,
+      createdAt: row.created_at,
+    };
   }
 
   async claimOperation(
@@ -1902,5 +1963,37 @@ export class PostgresChildProgressRepository
       ),
     }));
     return wrapped.value;
+  }
+
+  async markObservationUsed(
+    input: MarkChildObservationUsedInput,
+  ): Promise<MarkChildObservationUsedResult> {
+    const sql = this.getDatabase();
+    const updated = await sql<{ child_id: string }[]>`
+      update public.child_observations
+      set status = 'used',
+          used_at = ${input.usedAt},
+          used_task_run_id = ${input.usedTaskRunId}
+      where id = ${input.observationId}
+        and family_id = ${input.familyId}
+        and status = 'new'
+      returning child_id
+    `;
+    if (updated[0] !== undefined) {
+      return { outcome: "used", childId: updated[0].child_id };
+    }
+    const existing = await sql<
+      { status: "new" | "used"; child_id: string }[]
+    >`
+      select status, child_id
+      from public.child_observations
+      where id = ${input.observationId}
+        and family_id = ${input.familyId}
+    `;
+    const row = existing[0];
+    if (row === undefined || row.status !== "used") {
+      return { outcome: "unknown_observation" };
+    }
+    return { outcome: "already_used", childId: row.child_id };
   }
 }

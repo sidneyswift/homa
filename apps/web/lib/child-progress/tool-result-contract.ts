@@ -98,11 +98,15 @@ const conflictPayloadSchema = z.strictObject({
 });
 
 export const ACTIVITY_ONLY_PROGRESS_NOTE =
-  "This describes activity or time, not a specific skill. Use log_hours for a stated duration, and use the journal or memory for the day itself.";
+  "This describes activity or time, so no score changed. The parent's message is saved as an observation on this child's record. Use log_hours when the parent named a school-time duration. Offer one concrete way to build on the activity this week.";
 export const NO_MATCH_PROGRESS_NOTE =
-  "No specific progress skill matched strongly enough. Keep this as journal or memory context, and do not claim a progress update.";
+  "Saved as an observation on this child's record. No score changed: the parent's message did not match a skill line yet. Tell the parent you noted it, and offer one concrete way to build on it this week.";
 export const AMBIGUOUS_PROGRESS_NOTE =
-  "More than one progress skill could fit. Ask one short clarifying question before recording progress.";
+  "More than one skill line could fit, so no score changed. The parent's message is saved as an observation. Ask one short clarifying question before recording progress.";
+export const OBSERVATION_USED_PROGRESS_NOTE =
+  "Marked that observation as used. It will not be offered again. Do not mark it again.";
+export const OBSERVATION_ALREADY_USED_PROGRESS_NOTE =
+  "That observation was already marked used. Nothing changed. Do not mark it again.";
 export const REFUSED_PROGRESS_NOTE =
   "Progress was not changed. Saved family data is safe. Use the current signed-in family and check-in context before trying again.";
 export const REISSUE_PROGRESS_NOTE =
@@ -148,6 +152,13 @@ export const manageChildProgressResultSchema = z.discriminatedUnion("kind", [
   z.strictObject({
     kind: z.literal("ambiguous"),
     note: z.literal(AMBIGUOUS_PROGRESS_NOTE),
+  }),
+  z.strictObject({
+    kind: z.literal("observation_used"),
+    note: z.union([
+      z.literal(OBSERVATION_USED_PROGRESS_NOTE),
+      z.literal(OBSERVATION_ALREADY_USED_PROGRESS_NOTE),
+    ]),
   }),
   z.strictObject({
     kind: z.literal("refused"),

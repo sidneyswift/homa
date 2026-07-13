@@ -113,6 +113,8 @@ export interface ProgressCheckInContext {
   turnId: string;
   canonicalInboundText: string | null;
   inboundMessageId: string | null;
+  /** Dispatch sessions carry their task run for observation provenance. */
+  taskRunId?: string | null;
   now: string;
 }
 

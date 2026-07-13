@@ -12,6 +12,7 @@ import {
 import { liveProgressEnabled } from "./flag";
 import {
   disabledProgressResult,
+  observationUsedResult,
   refusedProgressResult,
 } from "./tool-result-payloads";
 import type {
@@ -51,10 +52,15 @@ export async function executeChildProgressCommand(
   context: ProgressCheckInContext,
   operations: ChildProgressToolOperations,
 ): Promise<ManageChildProgressResult> {
+  // mark_observation_used also works from dispatch sessions: the
+  // morning brief is where observations get woven into the family's
+  // week (plan 2026-07-13-observation-ledger.md, OBS-3).
+  const allowsDispatch = command.action === "mark_observation_used";
   if (
     context.channel !== "web" &&
     context.channel !== "sms" &&
-    context.channel !== "email"
+    context.channel !== "email" &&
+    !(allowsDispatch && context.channel === "dispatch")
   ) {
     return refusedProgressResult();
   }
@@ -164,6 +170,23 @@ export async function executeChildProgressCommand(
         context,
         operations,
       });
+    case "mark_observation_used": {
+      const result = await operations.markObservationUsed(context, {
+        observationId: command.observationId,
+      });
+      switch (result.outcome) {
+        case "used":
+          return observationUsedResult(false);
+        case "already_used":
+          return observationUsedResult(true);
+        case "unknown_observation":
+          return refusedProgressResult();
+        default: {
+          const exhaustiveOutcome: never = result;
+          return exhaustiveOutcome;
+        }
+      }
+    }
     default: {
       const exhaustiveCommand: never = command;
       return exhaustiveCommand;

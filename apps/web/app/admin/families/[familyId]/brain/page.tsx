@@ -89,6 +89,43 @@ export default async function AdminFamilyBrainPage({
           </div>
 
           <SectionHead
+            eyebrow="Observation ledger"
+            title="Observations"
+            sub="A parent's message about a child's ability saves here when it matches no skill line. An observation never changes a score. The morning brief builds on new ones and marks them used."
+          />
+          {brain.observations.length === 0 ? (
+            <EmptyNote>
+              No observations saved yet. The next parent message that matches
+              no skill line saves one.
+            </EmptyNote>
+          ) : (
+            <div className="mt-3 grid gap-2">
+              {brain.observations.map((observation) => (
+                <div
+                  key={observation.id}
+                  className="flex flex-wrap items-start gap-2 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm"
+                >
+                  <Pill tone={observation.status === "used" ? "sage" : "sky"}>
+                    {observation.status === "used" ? "used" : "new"}
+                  </Pill>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-body">&ldquo;{observation.quote}&rdquo;</p>
+                    <p className="mt-0.5 font-mono text-[0.62rem] text-subtle">
+                      {observation.childName ? `${observation.childName} · ` : ""}
+                      {observation.classification.replace(/_/g, " ")} · {observation.channel} ·{" "}
+                      {timeAgo(observation.createdAt)}
+                      {observation.subjectHints.length > 0
+                        ? ` · near ${observation.subjectHints.join(", ")}`
+                        : ""}
+                      {observation.usedAt ? ` · used ${timeAgo(observation.usedAt)}` : ""}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <SectionHead
             eyebrow="Injected"
             title="What a session carries in"
             sub="The newest captured context snapshot: the dynamic blocks (family, progress, continuity) assembled for a real turn. The static soul and channel rules live in code on top of this."

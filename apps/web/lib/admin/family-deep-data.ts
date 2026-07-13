@@ -193,8 +193,21 @@ export interface FamilyMemoryRow {
   createdAt: string;
 }
 
+export interface FamilyObservationRow {
+  id: string;
+  childName: string | null;
+  quote: string;
+  classification: string;
+  status: string;
+  channel: string;
+  subjectHints: string[];
+  usedAt: string | null;
+  createdAt: string;
+}
+
 export interface FamilyBrain {
   memories: FamilyMemoryRow[];
+  observations: FamilyObservationRow[];
   activeChars: number;
   latestSnapshot: {
     content: string;
@@ -228,6 +241,29 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
     order by m.created_at desc
     limit 300
   `;
+  const observations = await sql<
+    {
+      id: string;
+      child_name: string | null;
+      quote: string;
+      classification: string;
+      status: string;
+      channel: string;
+      subject_hints: string[];
+      used_at: string | null;
+      created_at: string;
+    }[]
+  >`
+    select o.id, c.name as child_name, o.quote, o.classification,
+           o.status, o.channel, o.subject_hints,
+           o.used_at::text as used_at,
+           o.created_at::text as created_at
+    from public.child_observations o
+    left join public.children c on c.id = o.child_id
+    where o.family_id = ${familyId}
+    order by o.created_at desc
+    limit 100
+  `;
   const snapshotRows = await sql<
     { content: string; channel: string | null; session_id: string; created_at: string }[]
   >`
@@ -258,6 +294,17 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
       source: row.source,
       sessionId: row.session_id,
       supersededAt: row.superseded_at,
+      createdAt: row.created_at,
+    })),
+    observations: observations.map((row) => ({
+      id: row.id,
+      childName: row.child_name,
+      quote: row.quote,
+      classification: row.classification,
+      status: row.status,
+      channel: row.channel,
+      subjectHints: row.subject_hints,
+      usedAt: row.used_at,
       createdAt: row.created_at,
     })),
     activeChars,
