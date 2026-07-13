@@ -38,3 +38,34 @@ A 25-page PDF containing a *foldable* (print-fold-glue interactive notebook inse
 - Practice embedded IN the reference — not separate worksheet, the foldable itself has practice problems
 
 **Status:** applied-to-taste-model
+
+### 2026-07-12 | Sid | TPT Free Download
+**Source:** "Five Paragraph Essay Outline" by The Daring English Teacher (2015)
+**What's valuable:** layout | scaffolding | structure-teaching | writing-process
+**Summary:**
+An 8-page PDF with a structured essay outline worksheet. Two difficulty variants included:
+
+- *2-example version* — each body paragraph has space for 2 examples + explanations
+- *3-example version* — same layout but with 3 examples per body paragraph (more rigorous)
+
+*Structure (both versions):*
+- Header: Name / Date / Period / Essay Topic / Essay Title / Draft due dates
+- I. Introduction: Attention Getter → Background Information → Thesis
+- II–IV. Body Paragraphs 1–3: Topic Sentence → Examples + Explanations → Transition
+- V. Conclusion: Restate Thesis → Final Thought
+
+*Format details:*
+- Clean, minimal black-and-white design — no doodles, no color, no clipart
+- Two-column table layout: left column = what goes here (definitions/instructions), right column = blank lines for student writing
+- Bold section headers with Roman numerals (I–V)
+- Each section explicitly labels what's expected ("a. topic sentence", "b. information, examples, quotes...")
+- Portrait orientation, print-ready
+
+*Key design patterns:*
+- *Scaffolded writing process* — breaks the intimidating "write an essay" into a clear 5-section fill-in-the-blank framework
+- *Built-in instruction* — left column teaches what each part IS while the right column asks student to DO it. Learn and apply simultaneously.
+- *Difficulty differentiation* — 2 vs 3 examples per paragraph = easy toggle for different grade levels or abilities
+- *Process metadata* — rough draft due date + final draft due date fields reinforce writing-as-process, not one-shot
+- *No visual flair* — stark contrast to the PEMDAS foldable. This is all structure, zero decoration. Suggests Sid values BOTH approaches.
+
+**Status:** applied-to-taste-model

@@ -158,23 +158,72 @@ in Homa's own design language.
 
 1. If the reference is a PDF, extract only the actual worksheet/material
    pages (skip cover pages, terms of use, alignment charts, ads). Use
-   pymupdf (`import fitz`) to render the key pages as PNGs.
-2. Write a gpt-image-2 prompt that describes the **structural patterns**
-   from the reference — layout, panel structure, element types, spacing
-   — but expressed in Homa's style (see materials-studio SKILL.md for
-   design rules). Never copy the original's specific content, characters,
-   branding, or copyrighted text. Use a different subject/topic as the
-   example content.
-3. Generate via the Vercel AI Gateway:
+   pymupdf (`import fitz`) to render the key pages as PNGs at 2x zoom
+   for clean detail.
+2. **Pass the extracted page images as visual references** to gpt-image-2
+   alongside your prompt. The model can *see* the original layout —
+   panel structure, spacing, fold geometry, visual hierarchy — and
+   produce a far more accurate Homa-style version than text description
+   alone. Use the OpenAI images API with the extracted PNGs as input
+   images (base64-encoded).
+3. Write a gpt-image-2 prompt that describes **what to keep and what to
+   change**. The prompt steers the model away from copying copyrighted
+   content while preserving structural patterns:
+   - Keep: layout structure, panel geometry, spacing ratios, visual
+     hierarchy, element placement, fold lines, section organization
+   - Change: subject/topic (use a different one), all text content,
+     characters (use Homa's design language), branding (none), color
+     palette (Homa's warm playful palette)
+   - Example prompt: "Using the reference image as a structural guide,
+     create a Homa-style [format] for [different topic]. Keep the same
+     panel layout, fold geometry, and spacing. Replace all text with
+     [new content]. Use Fredoka font style, warm earthy colors
+     (#6b6259, #b3a492, #f5f0e8), hand-drawn doodle aesthetic. No
+     branding, no copyrighted characters."
+4. Generate via the Vercel AI Gateway:
    - Model: `gpt-image-2` (via `$OPENAI_BASE_URL`)
    - Size: `1536x1024` for landscape formats (foldables), `1024x1536`
      for portrait formats (outlines, worksheets)
    - Source API key: `source ~/.gbrain/env.sh` for `OPENAI_API_KEY` and
      `OPENAI_BASE_URL`
-4. Save the generated image to
+   - Reference images: pass up to 4 extracted page PNGs as base64 input
+     images. Pick the most structurally informative pages (the actual
+     worksheet/activity pages, not cover or filler).
+
+   ```python
+   import fitz, base64, requests, os
+
+   # Extract key pages as base64 PNGs
+   doc = fitz.open(pdf_path)
+   reference_images = []
+   for page_num in key_page_indices:  # e.g. [2, 3] — the actual worksheet pages
+       page = doc[page_num]
+       pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+       png_bytes = pix.tobytes("png")
+       b64 = base64.b64encode(png_bytes).decode()
+       reference_images.append({
+           "type": "input_image",
+           "image_url": f"data:image/png;base64,{b64}"
+       })
+   doc.close()
+
+   # Generate with visual references
+   response = requests.post(
+       f"{os.environ['OPENAI_BASE_URL']}/images/generations",
+       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+       json={
+           "model": "gpt-image-2",
+           "prompt": prompt,  # structural description + what to change
+           "size": size,      # "1024x1536" or "1536x1024"
+           "image": reference_images,  # extracted page PNGs as visual input
+       }
+   )
+   ```
+
+5. Save the generated image to
    `apps/web/agent/skills/materials-studio/references/homa-<format>-reference.png`
    (e.g. `homa-foldable-reference.png`, `homa-outline-reference.png`).
-5. If the reference introduces a **new recipe type** not yet in the
+6. If the reference introduces a **new recipe type** not yet in the
    materials-studio skill, add a recipe section to
    `apps/web/agent/skills/materials-studio/SKILL.md` with:
    - A `Reference image:` pointer to the generated image
@@ -182,7 +231,7 @@ in Homa's own design language.
    - Creation path guidance (image-direct vs html vs hybrid)
    - Design patterns extracted from the reference
    Also update the creation path judgment rules in the same skill.
-6. If the reference matches an **existing recipe**, add the generated
+7. If the reference matches an **existing recipe**, add the generated
    image as an additional reference (rename to avoid collisions, e.g.
    `homa-foldable-reference-2.png`).
 
