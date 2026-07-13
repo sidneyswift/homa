@@ -49,6 +49,28 @@ Write a curriculum with:
   can shop or gather everything once.
 - A warm closing note in your own voice.
 
+## Format-aware activities
+
+Consult the activity format registry (activity-formats.md, loaded as context) when writing
+weekly activities. When a format from the registry fits the activity naturally, prefer it
+and include the format slug in square brackets before the activity description:
+
+> `[foldable] Build a PEMDAS foldable with practice problems`
+> `[cut-and-paste] Short A CVC word work with write-and-paste tiles`
+
+Not every activity needs a slug. Real-world activities (nature walks, kitchen measuring,
+read-alouds) stay as plain text. Only tag activities that materials-studio can actually build.
+
+When the child's age, subject, or method suggests a specific format, prefer it:
+- Kinesthetic learners and interactive notebook families: foldables
+- K-2 phonics and sight words: cut-and-paste for multi-sensory practice
+- Math fact drill that needs engagement: maze-practice
+- New concept introduction with follow-up drill: notes-and-practice-bundle
+- Essay or report assignments: structured-outline
+
+Never force a format where a real-world activity is better. A nature walk beats a
+worksheet about nature. A baking session beats a fractions coloring page.
+
 Ground every activity in the child's real interests and the family's real
 constraints as reported. A curriculum that ignores what the parent told you
 is worse than no curriculum.

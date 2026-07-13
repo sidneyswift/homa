@@ -295,6 +295,40 @@ Knowledge bank:
 - [ ] Add charlotte-mason-k-format (method_format)
 ```
 
+### Write to knowledge bank
+
+Layer 1 (philosophy/method) findings get written to the knowledge bank through the existing gate at `apps/web/lib/knowledge/gate.ts`. Format each entry as:
+- `topic_type`: `method_philosophy` or `method_format`
+- `topic_key`: kebab-case slug (e.g., `charlotte-mason`, `montessori-three-period`)
+- `lens`: `method`
+- `title`: ≤120 chars
+- `summary`: ≤500 chars
+- `content`: ≤8000 chars (the full methodology description)
+- `citations`: array with URL + title of the source curriculum
+- `confidence`: `high`
+- `source_tier`: 2
+- `contributed_by`: `founder`
+
+The gate handles validation, sanitization, and citation resolution. No new write path needed.
+
+### Enrich taxonomy
+
+Layer 2 unmapped topics get added directly to `packages/taxonomy/data/topics.json`. Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL", subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`. Run `pnpm --filter @homa/taxonomy validate` after adding. Update topic counts in `packages/taxonomy/data/manifest.json`.
+
+### Add activity formats and recipes
+
+Layer 4 activity types that have `status: "no_recipe"`:
+- Add recipe sections to `apps/web/agent/skills/materials-studio/SKILL.md` (before "Design rules (binding)")
+- Add entries to `apps/web/agent/activity-formats.md`
+
+Follow the format of existing recipes and registry entries.
+
+### Update curriculum writer methodology
+
+If the curriculum introduces a methodology the curriculum writer doesn't know about:
+- Add a methodology note to `apps/web/agent/curriculum-writer.md` explaining how that method structures weeks, sessions, and assessment
+- Examples: Charlotte Mason short-lesson rotation with narration, Montessori three-period lesson structure, classical trivium staging
+
 **3. Full analysis link**
 
 Point to the JSON: "Full analysis at `.cosmo/curriculums/cur-2026-07-12-charlotte-mason-k.json`"
@@ -322,11 +356,11 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 | Taxonomy types | `packages/taxonomy/src/types.ts` |
 | Curriculum writer | `apps/web/agent/curriculum-writer.md` |
 | Materials-studio skill | `apps/web/agent/skills/materials-studio/SKILL.md` |
+| Activity format registry | `apps/web/agent/activity-formats.md` |
+| Knowledge bank gate | `apps/web/lib/knowledge/gate.ts` |
+| Knowledge bank schema | `supabase/migrations/20260711031000_knowledge_bank.sql` |
 
 ## Notes
 
-- Never modify the app codebase. This is an ops skill — analysis and cataloging only.
-- Knowledge bank entries suggested here are proposals — they go through `lib/knowledge/gate.ts` when actually added.
-- Taxonomy additions need Sid's approval before being added to `packages/taxonomy/data/`.
-- The curriculum-writer reference is for understanding Homa's output format, not for modifying it.
+- This skill modifies product files directly: materials-studio SKILL.md, activity-formats.md, taxonomy data, knowledge bank, and curriculum-writer methodology notes. Every curriculum ingested makes Homa smarter across lesson planning, material generation, and knowledge delivery.
 - One curriculum per JSON file. One analysis per curriculum drop.
