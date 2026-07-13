@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import { getAppData } from "../../lib/app-data";
 import { familyWallCheckout } from "../../lib/billing/wall";
+import { fetchChatHistory } from "../../lib/chat-history";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
@@ -60,9 +61,18 @@ export default async function ChatPage({
   // for exempt or trialing families.
   const wall = app ? await familyWallCheckout(app.family.id) : null;
 
+  // The per-adult scrollback from Postgres (M1-02 render slice +
+  // chat-privacy-per-adult, 2026-07-12): the same thread on every
+  // device. Null on failure; the client falls back to its local cache.
+  const serverHistory =
+    app && userId !== "anonymous"
+      ? await fetchChatHistory({ familyId: app.family.id, userId })
+      : null;
+
   return (
     <ChatClient
       wall={wall}
+      serverHistory={serverHistory}
       storageKey={`homa-chat-${userId}`}
       familyId={app?.family.id ?? null}
       timeZone={effectiveTimeZone(app?.family.time_zone)}

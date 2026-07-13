@@ -48,6 +48,9 @@ export interface ArchivedMessage {
   /** Client-observed arrival time, null for legacy saves. */
   at: number | null;
   message: EveMessage;
+  /** Which surface the message arrived from, when the archive came from
+   * the server record (sms, email, dispatch...). Local saves omit it. */
+  channel?: string;
 }
 
 export interface SavedChat {

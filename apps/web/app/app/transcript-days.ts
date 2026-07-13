@@ -15,7 +15,15 @@ import type { ArchivedMessage } from "./chat-storage";
 
 export type TranscriptItem =
   | { kind: "separator"; key: string; label: string }
-  | { kind: "message"; key: string; message: EveMessage };
+  | {
+      kind: "message";
+      key: string;
+      message: EveMessage;
+      /** "Texted", "By email", "From Homa's tasks": shown under a bubble
+       * that arrived from another surface, only where the surface
+       * changes (a run of texts gets one tag, not one per bubble). */
+      sourceLabel?: string;
+    };
 
 /** One local-day bucket, used to decide where separators go. */
 function dayKeyOf(at: number): string {
@@ -50,6 +58,25 @@ export function dayLabelFor(at: number, now: number = Date.now()): string {
 }
 
 /**
+ * sourceLabelFor(role, channel): the little tag under a bubble that
+ * arrived from another surface (founder direction 2026-07-12, the
+ * one-thread merge: "tag the bubble with where it's from"). Device
+ * tags sit only under the parent's own messages; Homa's bubbles carry
+ * a tag only when a scheduled task produced them (the persona-review
+ * rule: a device tag under Homa's own reply reads as noise).
+ */
+export function sourceLabelFor(
+  role: string,
+  channel: string | undefined,
+): string | null {
+  if (!channel) return null;
+  if (role === "user" && channel === "sms") return "Texted";
+  if (role === "user" && channel === "email") return "By email";
+  if (role === "assistant" && channel === "dispatch") return "From Homa's tasks";
+  return null;
+}
+
+/**
  * buildTranscript(...): archived history first, then the live session,
  * with a separator wherever the local day changes. Item keys are
  * namespaced (archived vs live) because eve message ids restart with
@@ -69,8 +96,17 @@ export function buildTranscript(input: {
   const items: TranscriptItem[] = [];
   let previousDay: string | null = null;
   let earlierShown = false;
+  // Tags mark surface CHANGES: a run of texted messages reads as one
+  // texted stretch. The thread itself is the web surface, so "web"
+  // starts the comparison.
+  let previousChannel = "web";
 
-  const push = (key: string, message: EveMessage, at: number | null) => {
+  const push = (
+    key: string,
+    message: EveMessage,
+    at: number | null,
+    channel?: string,
+  ) => {
     if (at === null) {
       if (!earlierShown && items.length === 0) {
         earlierShown = true;
@@ -87,12 +123,23 @@ export function buildTranscript(input: {
         });
       }
     }
-    items.push({ kind: "message", key, message });
+    const label =
+      channel && channel !== previousChannel
+        ? sourceLabelFor(message.role, channel)
+        : null;
+    if (channel) previousChannel = channel;
+    items.push({
+      kind: "message",
+      key,
+      message,
+      ...(label ? { sourceLabel: label } : {}),
+    });
   };
 
   input.archived.forEach((entry, index) => {
-    push(`a${index}:${entry.message.id}`, entry.message, entry.at);
+    push(`a${index}:${entry.message.id}`, entry.message, entry.at, entry.channel);
   });
+  previousChannel = "web";
   for (const message of input.live) {
     push(`m:${message.id}`, message, input.liveTimes[message.id] ?? now);
   }

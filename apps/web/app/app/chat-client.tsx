@@ -2,13 +2,17 @@
 
 import { emitEvent } from "@homa/core";
 import { useEveAgent, type EveMessage } from "eve/react";
-import { ArrowUp, Sparkles, Square, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Sparkles, Square, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
+import {
+  archiveFromServerHistory,
+  type ChatHistoryMessage,
+} from "../../lib/chat-history-model";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
@@ -151,12 +155,18 @@ export function ChatClient({
   initialDraft,
   kids,
   slashSkills,
+  serverHistory = null,
   wall = null,
 }: {
   storageKey: string;
   familyId: string | null;
   timeZone: string;
   parentName: string | null;
+  /** The per-adult scrollback from Postgres (lib/chat-history.ts), the
+   * same on every device. Null when the fetch failed or the flag is
+   * off; the localStorage archive renders instead, exactly as before
+   * the M1-02 render slice. */
+  serverHistory?: ChatHistoryMessage[] | null;
   /** The wall (plans/2026-07-11-the-wall.md): checkout URLs when this
    * family is walled, null when the composer is open (the default, and
    * always the case while HOMA_WALL_ENABLED is off). */
@@ -176,7 +186,18 @@ export function ChatClient({
   // Load + rotation decision, once per mount (fresh morning = fresh
   // session; the old session's messages fold into the archive).
   const [prepared] = useState(() => prepareChat(storageKey, timeZone));
-  const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
+  // Scrollback: the server record when the page load carried it (one
+  // thread, same on every device), the localStorage cache otherwise.
+  // The live session's own rows are excluded server-side of the seam:
+  // the eve store replays them from its event log.
+  const [archived, setArchived] = useState<ArchivedMessage[]>(() =>
+    serverHistory
+      ? archiveFromServerHistory(
+          serverHistory,
+          prepared.initialSession?.sessionId,
+        )
+      : prepared.archived,
+  );
   // Message id -> arrival time. State (not a ref) because the transcript
   // grouping reads it during render.
   const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
@@ -328,6 +349,16 @@ export function ChatClient({
   const bottomRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
   const firstScrollDoneRef = useRef(false);
+  // The way home from a scrollback: one centered arrow, shown only when
+  // she is genuinely away from now (founder cut 2026-07-12: no words,
+  // just the arrow).
+  const transcriptRef = useRef<HTMLElement | null>(null);
+  const [showBackToNow, setShowBackToNow] = useState(false);
+  const handleTranscriptScroll = useCallback(() => {
+    const el = transcriptRef.current;
+    if (!el) return;
+    setShowBackToNow(el.scrollHeight - el.clientHeight - el.scrollTop > 600);
+  }, []);
   const busy = agent.status === "submitted" || agent.status === "streaming";
   // The wall (plans/2026-07-11-the-wall.md): the chat door. One
   // door-tap beacon per visit (the ref), and a walled family's send
@@ -647,7 +678,11 @@ export function ChatClient({
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
-      <main className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
+      <main
+        ref={transcriptRef}
+        onScroll={handleTranscriptScroll}
+        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6"
+      >
         {!hasAnyMessages ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
@@ -681,9 +716,8 @@ export function ChatClient({
                 item.message.id === progressInteraction?.messageId
                   ? progressInteraction
                   : null;
-              return (
+              const messageView = (
                 <MessageView
-                  key={item.key}
                   message={item.message}
                   timeZone={timeZone}
                   actionableProgressPartKey={
@@ -707,6 +741,27 @@ export function ChatClient({
                       : undefined
                   }
                 />
+              );
+              // The source tag: a quiet chip under a bubble that arrived
+              // from another surface (texted, by email, Homa's tasks),
+              // shown where the surface changes (transcript-days.ts).
+              return (
+                <div key={item.key} className="flex flex-col gap-1.5">
+                  {messageView}
+                  {item.sourceLabel ? (
+                    <p
+                      className={
+                        item.message.role === "user"
+                          ? "flex justify-end"
+                          : "flex"
+                      }
+                    >
+                      <span className="inline-flex items-center rounded-pill border border-border-subtle bg-card px-2.5 py-0.5 text-[11px] font-semibold text-subtle">
+                        {item.sourceLabel}
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
               );
             })}
             {showSuggestions ? (
@@ -799,6 +854,23 @@ export function ChatClient({
         ) : null}
         <div ref={bottomRef} />
       </main>
+
+      {showBackToNow ? (
+        // Floats over the transcript's bottom edge, centered: the way
+        // back to now after reading old days, no words needed.
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="Back to now"
+            onClick={() =>
+              bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="absolute -top-14 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-strong shadow-md transition-colors hover:border-brand hover:text-brand"
+          >
+            <ArrowDown size={18} aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
 
       {/* The kit's composer (ChatView.jsx): a white pill card on the page
           background, sparkles at the left, a borderless input, and a round

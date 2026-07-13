@@ -124,13 +124,28 @@ export default defineTool({
     }
 
     if (input.scope === "chats" || input.scope === "all") {
-      const { data } = await db
+      // chat-privacy-per-adult (2026-07-12): another adult's own words
+      // never surface in this adult's recall. Their user rows carry
+      // their member_user_id and are excluded here; unattributed rows
+      // (Homa's replies, legacy history) stay searchable. Full
+      // enforcement, including the semantic RPC, lands with the M1-02
+      // policy tightening (build-log follow-up).
+      const attrs = ctx.session.auth.current?.attributes as
+        | { memberUserId?: string }
+        | undefined;
+      const callerFilter =
+        typeof attrs?.memberUserId === "string" && attrs.memberUserId.length > 0
+          ? `member_user_id.eq.${attrs.memberUserId},member_user_id.is.null`
+          : null;
+      let chatQuery = db
         .from("conversation_messages")
         .select("role, content, channel, created_at")
         .eq("family_id", familyId)
         .textSearch("content", input.query, searchText)
         .order("created_at", { ascending: false })
         .limit(input.limit);
+      if (callerFilter) chatQuery = chatQuery.or(callerFilter);
+      const { data } = await chatQuery;
       for (const row of data ?? []) {
         const speaker = row.role === "user" ? "the parent" : "Homa";
         hits.push({

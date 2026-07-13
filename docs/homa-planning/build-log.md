@@ -3,6 +3,61 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-12 · The chat syncs: per-adult server scrollback ships (M1-02 render slice)
+
+Founder call after the one-thread exploration: "we are overcomplicating
+the chat", then approval of the minimal cut, implement and ship. The
+chat is just a chat: one synced thread, everything flowing in with
+source tags, scroll, and a centered back-to-now arrow. No Chats
+sidebar, no timeline rail, no pickup chip tonight (all shelved in
+plans/2026-07-12-one-thread-refined.html if long threads ever need
+them).
+
+What shipped:
+
+- lib/chat-history-model.ts + lib/chat-history.ts: the per-adult
+  scrollback read, under the CALLER'S OWN JWT. Three slices:
+  my member-attributed rows, Homa's replies in my sessions (assistant
+  rows carry no member attribution by design, sessions tie them back),
+  and messages delivered to me (conversation_deliveries: briefs, task
+  results). Single-adult families also claim legacy pre-attribution
+  rows; in multi-adult families those stay hidden, the privacy-safe
+  direction under chat-privacy-per-adult. Merged, deduped, capped at
+  240; any error returns null.
+- app/app/page.tsx passes the history to the client;
+  app/app/chat-client.tsx renders it as the archive instead of the
+  localStorage cache (which stays as the fallback AND the live-session
+  resume mechanism; the live session's own rows are excluded from the
+  server slice to prevent double render). Kill switch:
+  HOMA_CHAT_HISTORY_DISABLED=1 restores the previous behavior whole.
+- Source tags (transcript-days.ts sourceLabelFor + chat-client chip):
+  "Texted", "By email" under the parent's own bubbles, "From Homa's
+  tasks" under scheduled output, shown where the surface CHANGES, one
+  tag per run. Persona-review rule kept: never a device tag under
+  Homa's plain replies.
+- Back to now: one centered round arrow floating over the transcript's
+  bottom edge, visible past 600px of scrollback.
+- recall.ts chats arm: excludes other adults' member-attributed user
+  rows (their own words never surface in this adult's recall).
+
+Decisions made alone: the 240-message render cap (recall covers the
+deep past); "From Homa's tasks" as the dispatch tag wording (matches
+the Tasks tab, the product home of scheduled work); legacy null-member
+rows resolve to the adult only in single-adult families.
+
+Follow-ups, owned by the M1-02 policy slice: tighten the family-wide
+SELECT policy to per-adult (expand-contract, isolation guard both
+sides); per-adult filtering for the semantic recall RPC and the pinned
+(SMS) recall path; assistant-row attribution for multi-adult legacy
+sessions; the mobile app twin still renders from its local cache;
+no realtime cross-device updates mid-page (reload picks them up).
+
+Verified before push: new model tests (10) and transcript label tests,
+check:progress-ui (115), check:isolation, web typecheck, lint, next
+build, eve build. Founder-account data sanity: 2 family members, 15
+attributed rows, 54 legacy user rows (hidden until attribution effort,
+multi-adult family), 141 family-visible messages.
+
 ## 2026-07-12 · One thread, refined: the Chats synthesis (round three)
 
 Founder feedback on the one-thread navigation lab: the moments panel
@@ -38,6 +93,16 @@ indicated by the one Continuing chip. Noted for later: the persona
 reviewer had called the plain-speech peek the most trust-building
 element of the round; its content is a candidate to resurface behind a
 tap on the Continuing chip if trust questions come back in testing.
+
+Same evening, two more founder calls on the build: (1) the desktop
+Chats panel is a docked full-height sidebar on the chat column's right
+edge (not a floating card) and the Chats button is a borderless ghost;
+(2) the first nav tab reads "Chat", not "Ask" (registered as
+nav-chat-label, superseding nav-labels-simplified for that one label).
+The label change was applied to PRODUCT code, not just the lab:
+apps/web/components/dashboard/sidebar-nav.tsx APP_NAV_ITEMS, which the
+marketing Nav's signed-in phone menu reuses. The /app page metadata
+title was already "Chat". No route change; /app stays the chat's home.
 
 Ruling watch: the Chats panel navigates the one thread (cards scroll
 it, Pick up aims the composer); it creates no separate transcripts, so
