@@ -18,8 +18,10 @@ export function Hero() {
   const openPopup = useSignupPopup();
   return (
     <section style={{ position: "relative", overflow: "hidden" }}>
-      <Doodle name="star" size={34} rotate={-12} style={{ position: "absolute", top: 10, left: "2%", pointerEvents: "none" }} />
-      <Doodle name="sun" size={34} color="var(--gold-500)" style={{ position: "absolute", top: 6, right: "8%", pointerEvents: "none" }} />
+      <div className="lp-hero-doodles">
+        <Doodle name="star" size={34} rotate={-12} style={{ position: "absolute", top: 10, left: "2%", pointerEvents: "none" }} />
+        <Doodle name="sun" size={34} color="var(--gold-500)" style={{ position: "absolute", top: 6, right: "8%", pointerEvents: "none" }} />
+      </div>
       <Doodle
         name="squiggle"
         size={44}

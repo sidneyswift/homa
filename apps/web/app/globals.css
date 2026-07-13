@@ -438,6 +438,9 @@ h1, h2, h3, h4, h5, h6 {
     padding-top: 56px !important;
     padding-bottom: 48px !important;
   }
+  .lp-hero-doodles {
+    display: none !important;
+  }
   /* Keep the fixture phone starting inside the first phone screen so a cold
      visitor sees product proof before they scroll. */
   .lp-hero-shell .lp-hero-actions {
