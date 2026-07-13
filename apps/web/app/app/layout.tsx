@@ -28,7 +28,7 @@ import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family, children: kids, memberDisplayName } = data;
+  const { family, children: kids, memberDisplayName, memberAvatarUrl } = data;
 
   // The view-context cookie (who the parent is viewing) validates against
   // the family's own kids here, once, so everything below the shell only
@@ -43,7 +43,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <DashboardShell
       parentName={memberDisplayName ?? parentFirstName(family)}
       familyName={family.name}
-      avatarUrl={family.parent_avatar_url}
+      // The signed-in adult's OWN photo (migration #74), never the
+      // family-level one: a co-parent should not wear the uploader's face.
+      avatarUrl={memberAvatarUrl}
       kids={kids.map((kid) => ({
         id: kid.id,
         name: kid.name,

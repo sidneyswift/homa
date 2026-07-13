@@ -74,7 +74,7 @@ export function PhoneClaim({
         setError("That code expired. Send a fresh one.");
         setPhase("offer");
       } else {
-        setError("That didn't take. Try once more.");
+        setError("That didn't work. Try once more.");
       }
     } catch {
       setError("Couldn't reach us just now. Try again in a minute.");

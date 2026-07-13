@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { normalizeUsPhoneE164, US_STATES } from "@homa/core";
 
 import { PhoneClaim } from "../../components/phone-claim";
-import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import { uploadAvatarPhoto } from "../../lib/avatar-upload";
 
 /**
  * The create-your-family step (founder call 2026-07-08: one onboarding
@@ -56,29 +56,6 @@ export function FamilyStep({
     setPhotoPreview(file ? URL.createObjectURL(file) : null);
   }
 
-  /** Browser-to-bucket upload; returns the public URL, or null on any
-   * failure (the photo is optional, so a failure surfaces as an inline
-   * error rather than blocking the save silently). */
-  async function uploadPhoto(file: File): Promise<string | null> {
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return null;
-      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${user.id}/avatar-${Date.now()}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (uploadError) return null;
-      return supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
-    } catch {
-      return null;
-    }
-  }
-
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedFamilyName = familyName.trim();
@@ -96,7 +73,7 @@ export function FamilyStep({
       return;
     }
     if (!phone.trim() || !normalizeUsPhoneE164(phone)) {
-      setError("That doesn't look like a US cell number yet. Ten digits does it.");
+      setError("That doesn't look like a US cell number. It needs all ten digits.");
       return;
     }
     setError(null);
@@ -104,7 +81,7 @@ export function FamilyStep({
 
     let avatarUrl: string | undefined;
     if (photo) {
-      const uploaded = await uploadPhoto(photo);
+      const uploaded = await uploadAvatarPhoto(photo);
       if (!uploaded) {
         setError("That photo didn't upload. Try a different one, or remove it and continue.");
         setBusy(false);
@@ -136,7 +113,7 @@ export function FamilyStep({
       if (!data.ok) {
         setError(
           data.reason === "bad-phone"
-            ? "That doesn't look like a US cell number yet. Ten digits does it."
+            ? "That doesn't look like a US cell number. It needs all ten digits."
             : "That didn't save. One more try usually does it.",
         );
         setBusy(false);

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { MAP_INTERESTS_CAP } from "@homa/core";
 
+import { helpSuggestions, interestSuggestions } from "../../lib/kid-suggestions";
 import type { FlowChild } from "./flow-types";
 import { TagInput } from "./tag-input";
 
@@ -20,22 +21,6 @@ import { TagInput } from "./tag-input";
  * not the lead flow. Everything here is still skippable in one tap.
  */
 
-function interestSuggestions(ageMonths: number): readonly string[] {
-  if (ageMonths < 96) {
-    return ["dinosaurs", "horses", "space", "princesses", "trucks", "bugs", "ocean", "drawing", "music", "animals"];
-  }
-  return ["sports", "music", "gaming", "drawing", "reading", "animals", "building things", "science", "cooking", "fashion"];
-}
-
-function helpSuggestions(ageMonths: number): readonly string[] {
-  if (ageMonths < 60) {
-    return ["letters", "counting", "writing their name", "scissors", "colors and shapes", "calm-down skills"];
-  }
-  if (ageMonths < 96) {
-    return ["reading", "handwriting", "math", "focus", "science curiosity", "confidence"];
-  }
-  return ["reading", "writing", "math", "focus", "study habits", "confidence"];
-}
 
 export function ExtrasStep({
   child,

@@ -28,6 +28,9 @@ export interface SetupFormState {
   /** Set when the number belongs to another family: the card offers
    * the verified claim (text a code) instead of a dead end. */
   phoneTaken?: string;
+  /** True on a successful save; disclosure forms watch it to close
+   * themselves and selects use it to show "Saved". */
+  saved?: boolean;
 }
 
 export async function addFamilyPhoneAction(
@@ -41,7 +44,7 @@ export async function addFamilyPhoneAction(
 
   const phoneE164 = normalizeUsPhoneE164(raw);
   if (!phoneE164) {
-    return { error: "That doesn't look like a US cell number yet. Ten digits does it." };
+    return { error: "That doesn't look like a US cell number. It needs all ten digits." };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -60,12 +63,12 @@ export async function addFamilyPhoneAction(
   if (!result.ok) {
     return {
       error:
-        "That number is connected to a different Homa family right now. If it's your number, verify it below and it moves here.",
+        "That number is linked to a different Homa family right now. If it's your number, verify it below and it moves here.",
       phoneTaken: phoneE164,
     };
   }
   revalidatePath("/app/settings");
-  return { error: null };
+  return { error: null, saved: true };
 }
 
 export async function removeFamilyPhoneAction(
@@ -137,7 +140,7 @@ export async function inviteCoParentAction(
     }
   }
   revalidatePath("/app/settings");
-  return { error: null };
+  return { error: null, saved: true };
 }
 
 export async function cancelInviteAction(
@@ -167,7 +170,7 @@ export async function setFamilyTimeZoneAction(
 ): Promise<SetupFormState> {
   const timeZone = String(formData.get("time_zone") ?? "").trim();
   if (!isValidTimeZone(timeZone)) {
-    return { error: "That time zone didn't take. Pick one from the list." };
+    return { error: "That time zone didn't save. Pick one from the list." };
   }
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
@@ -175,7 +178,7 @@ export async function setFamilyTimeZoneAction(
   // The zone drives the dashboard greeting and the planner's week dates
   // too; one layout-wide revalidate refreshes every /app page.
   revalidatePath("/app", "layout");
-  return { error: null };
+  return { error: null, saved: true };
 }
 
 export async function addChildAction(
@@ -189,7 +192,7 @@ export async function addChildAction(
 
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
-  if (!name) return { error: "A name is required." };
+  if (!name) return { error: "Add their name and try again." };
   // The full birthday (founder ruling 2026-07-11). isValidBirthDate
   // checks it is a real calendar date (no Feb 30) in an 18-year window.
   const birthDate = [
@@ -223,5 +226,5 @@ export async function addChildAction(
   // and the sidebar's kid list on every page of the group; one
   // layout-wide revalidate covers them all.
   revalidatePath("/app", "layout");
-  return { error: null };
+  return { error: null, saved: true };
 }

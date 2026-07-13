@@ -10,7 +10,7 @@ import { getPendingCurriculumChildIds } from "./curriculum";
 import {
   getMyChildren,
   getMyFamily,
-  getMyMemberDisplayName,
+  getMyMemberProfile,
   type ChildRecord,
   type FamilyRecord,
 } from "./family";
@@ -33,6 +33,9 @@ export interface AppData {
   /** The signed-in adult's own name (multi-parent v0): greetings prefer
    * it over the family-level parent_display_name. Null when unset. */
   memberDisplayName: string | null;
+  /** The signed-in adult's own photo (migration #74): the account row
+   * prefers it over the family-level parent_avatar_url. */
+  memberAvatarUrl: string | null;
 }
 
 /**
@@ -47,12 +50,20 @@ export const getAppData = cache(async (): Promise<AppData | null> => {
   if (children.length === 0) return null;
 
   const childIds = children.map((child) => child.id);
-  const [reports, plans, pendingCurriculumChildIds, memberDisplayName] = await Promise.all([
+  const [reports, plans, pendingCurriculumChildIds, memberProfile] = await Promise.all([
     getReportsForChildren(childIds),
     getPlansForChildren(childIds),
     getPendingCurriculumChildIds(childIds),
-    getMyMemberDisplayName(),
+    getMyMemberProfile(),
   ]);
 
-  return { family, children, reports, plans, pendingCurriculumChildIds, memberDisplayName };
+  return {
+    family,
+    children,
+    reports,
+    plans,
+    pendingCurriculumChildIds,
+    memberDisplayName: memberProfile?.display_name ?? null,
+    memberAvatarUrl: memberProfile?.avatar_url ?? null,
+  };
 });

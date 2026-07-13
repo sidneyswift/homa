@@ -27,6 +27,7 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `apps/web/app/app/progress-interaction-policy.ts`, `progress-action-lifecycle.ts`, and `chat-send-policy.ts` | Latest-part action identity, accepted-send consumption, queue cancellation release, and draft-preserving card sends |
 | `apps/web/lib/sms-progress.ts` | Shared, deduped progress-text submission for slow SMS turns and material fallbacks |
 | `apps/web/lib/conversation-continuity/` | Canonical cross-channel conversation module: episodes, bounded inbound provenance, actor/recipient causality, per-adult deliveries, open replies, transport bindings, context hydration |
+| `apps/web/app/app/settings/` and `apps/web/lib/family-profile.ts` | The family settings page (kids editable in place, per-member names/photos/emails, texting numbers, family details, memories) and its server-only families/family_members writes |
 | `apps/web/app/admin/` and `apps/web/lib/admin/` | Founder console (MJ-14): env-allowlisted /admin surface (overview, families, pulse, funnels) plus its gate, derived stages, sequential single-connection reads, digest, and cron heartbeat |
 | `apps/web/app/api/email/webhook/` and `apps/web/app/api/billing/webhook/` | Resend and Stripe webhook mirrors feeding the `email_sends` ledger, `conversation_deliveries` escalation, and the families subscription columns; both dark until their signing secrets are set |
 | `scripts/admin-console-smoke.mts` | Counts-only live smoke over every founder-console data module (`pnpm admin:smoke`) |

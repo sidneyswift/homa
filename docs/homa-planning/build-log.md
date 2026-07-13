@@ -3,7 +3,128 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-12 · The chat syncs: per-adult server scrollback ships (M1-02 render slice)
+## 2026-07-12 (late evening) · Settings consolidates to one family card (founder direction)
+
+Founder reaction to the settings-directions lab
+(plans/2026-07-12-settings-directions.html): merge the cards, phones
+belong to parents, no Text-with-Homa card, time zone derives from the
+address, surface the onboarding homeschool answers and kid preferences,
+tag the main account. Shipped as one "Your family" card with sections,
+plus the memories card:
+
+- Kids: each row now shows interests; the editor adds the profile the
+  agent reads (interests via the shared TagInput, focus, notes), the
+  same children.profile keys onboarding's extras beat and chat's
+  update_child_profile write. Full-replace merge preserves unknown keys.
+- Parents: each adult row carries photo, email, and their own cell;
+  the signed-in adult's editor saves name, photo, AND number together
+  (updateMyProfileAction + syncMyPhone: add-then-retire so each adult
+  keeps one number; taken numbers hand back the verified claim). The
+  family's first adult wears a "Main account" tag surfacing migration
+  #72's ruling (task texts go to the account owner), with the plain
+  sentence above the list. Homa's number is one Text-Homa line here;
+  the texting card is gone. Pre-attribution numbers render as "Linked
+  number" rows with the two-tap Remove.
+- How you homeschool (new): families.context styles / strictness /
+  curriculums / values, read via getMyFamilyHomeschool and written via
+  the same saveFamilyContext onboarding uses; labels extracted to
+  lib/homeschool-styles.ts so both surfaces share one vocabulary.
+- Family details: name + address; the time zone is now a quiet
+  read-only line with a rare-path Change (save-on-pick). It fills from
+  the device (TimeZoneSync, unchanged) and now from the address:
+  timeZoneFromState covers whole-zone states only (split states
+  deliberately absent), fills when empty, and follows a move into a
+  single-zone state (updateFamilyDetailsAction). Founder ruling, same
+  night: the "occasional real piece of mail from Homa" sentence in the
+  address helper reads as creepy, removed; the state-rules reason
+  stands alone (supersedes the 2026-07-12 reader-gate note that asked
+  the copy to cover the street-address ask).
+- What Homa remembers: lede now names the differentiation (Homa's own
+  notebook from chats and calls) vs the parent-stated profile and
+  homeschool answers above it.
+
+Decisions made alone: kids stay FIRST inside the card (the founder
+example read "family, parents, kids" but the 2026-07-12 UX gate's
+headline finding was the kid errand, one-line to flip); removing
+another adult's attributed number left the UI (each adult manages
+their own; legacy rows keep Remove); "Main account" as the tag wording;
+split-state families keep device-captured zones rather than guessing.
+Copy gates were NOT re-run this round: most strings reuse already-gated
+onboarding copy verbatim, and the few new lines follow the rulebook;
+run reader + editor before the next deploy if wanted.
+
+Verified: web typecheck, lint, next build, eve build, check:isolation
+all green after the change.
+
+## 2026-07-12 (evening) · Settings redesigned: kids visible and editable, per-member photos (migration #74)
+
+Founder ask: review /app/settings with finding-unknowns plus the UX and
+copy gates, clean it up, add what a parent would miss. Both gates read a
+fake-data replica (the Parker family) before and after; the headline
+finding from round one was that a parent arriving to fix a birthday
+could not even SEE her kids, the page only had an add form.
+
+What shipped:
+
+- Kids card leads the page: each child with a tone avatar, age, and
+  birthday, editable in place (name + full birthday, validated by
+  isValidBirthDate); the add-a-child form moved behind a "+ Add a
+  child" disclosure. New updateChildAction writes through RLS (tenancy
+  v0 update policy) with the family_id belt on top.
+- Per-member avatars: migration #74 adds family_members.avatar_url
+  (additive, applied to homa-prod before this code deploys; backfill
+  matched the one existing family photo to its uploader via the
+  owner-scoped bucket path). Each adult now edits their OWN name and
+  photo on the parents card; the sidebar account row shows the
+  signed-in adult's photo, never the uploader's
+  (memberAvatarUrl in getAppData). Onboarding's saveFamilySetup now
+  stamps the member row too. families/family_members stay deny-all for
+  writes: new lib/family-profile.ts runs on the server-only connection,
+  familyId always from the caller's own membership.
+- Parents card shows each adult's sign-in email (server-only
+  getFamilyMemberEmails join to auth.users; co-parents joined by
+  emailed invite, addresses are not secrets inside the family). Round
+  two of the UX gate: a bare "Ben" row beside an invite form read as
+  "is Ben set up?".
+- Texting card: rows are now "Sidney's phone" over the digits
+  (member_user_id join), Homa's number is a tappable "Text Homa ·
+  (number)" sms: line, and Remove is two-tap (ConfirmRemoveButton,
+  "Remove" then "Remove?"), also used by the memories card.
+- Family details card (new): family name, address (the reason names
+  both uses: state rules AND real mail, reader-gate finding), city /
+  state / ZIP, one Save. Time zone is its own card and saves on pick
+  with a visible Saved status (round-one finding: picker + separate
+  save button was a silent trap). One saving rule per card (round two).
+- What Homa remembers: real card heading, one label logic ("from your
+  chats" / "you told Homa" / "you told Homa at signup" / "from a phone
+  call"), a named correction path (remove, then tell Homa in chat),
+  and every fetched memory renders (the reader gate refused "6 of 14,
+  ask in chat for the rest").
+- Page is one column (max 720px), sorted kids, parents, texting,
+  family, time zone, memories; footer shows "Signed in as {email}" +
+  Sign out. Old add-child-form.tsx and time-zone-card.tsx deleted.
+
+Decisions made alone: per-member avatar as an additive column with a
+path-match backfill (1 of 1 family photos matched); member emails
+readable inside the family; two-tap Remove instead of a dialog; no
+child delete in the UI (no DELETE policy exists; deliberate, a rare
+support-path action); billing/subscription stays off the page while
+the wall ships dark (plans/2026-07-11-the-wall.md owns it).
+
+Both copy gates ran in order on the final strings (reader, then the
+homa-copy-editor craft gate): the editor pass retired the "does it" /
+"didn't take" idiom tics page-wide (including the onboarding copy of
+the phone error), split the invite disclosure into one idea per
+sentence, fixed the ambiguous photo-error pronoun, renamed the
+memory-source chips to one non-overlapping vocabulary ("you told her"
+/ "Homa noticed" / "from signup" / "from a call"), and unified cell
+number wording, progress labels ("Adding…"), and short-month dates.
+
+Verified: check:isolation (before and after schema change), web
+typecheck, lint, next build, eve build all green; migration #74
+applied to homa-prod and backfill counts checked (1 member photo, 7
+member rows). Deploy order note: the migration ALREADY leads the code,
+so the next push is safe on its own.
 
 Founder call after the one-thread exploration: "we are overcomplicating
 the chat", then approval of the minimal cut, implement and ship. The

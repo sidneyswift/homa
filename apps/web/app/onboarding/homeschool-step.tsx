@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { HOMESCHOOL_STYLES } from "@homa/core";
 
+import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
 import { TagInput } from "./tag-input";
 
 /**
@@ -21,18 +22,6 @@ import { TagInput } from "./tag-input";
  * report card used, so plans and materials read the exact same context
  * fields downstream.
  */
-
-const STYLE_LABELS: Record<(typeof HOMESCHOOL_STYLES)[number], string> = {
-  montessori: "Montessori",
-  charlotte_mason: "Charlotte Mason",
-  classical: "Classical",
-  reggio: "Reggio",
-  waldorf: "Waldorf",
-  unit_studies: "Unit studies",
-  unschooling: "Unschooling",
-  eclectic: "Eclectic (a bit of everything)",
-  traditional: "Traditional",
-};
 
 export function HomeschoolStep({ onDone }: { onDone: () => void }) {
   const [styles, setStyles] = useState<string[]>([]);
@@ -111,7 +100,7 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
                       : "border-border bg-card text-strong hover:border-brand"
                   }`}
                 >
-                  {STYLE_LABELS[value]}
+                  {HOMESCHOOL_STYLE_LABELS[value]}
                 </button>
               );
             })}

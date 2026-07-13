@@ -1262,9 +1262,13 @@ export async function saveFamilySetup(
     where id = ${familyId}
   `;
   if (authUserId) {
+    // The photo is the parent's own, so it lands on their membership row
+    // too (migration #74); coalesce keeps a photo they already had when
+    // this form is submitted without one.
     await sql`
       update public.family_members
-      set display_name = ${input.firstName}
+      set display_name = ${input.firstName},
+          avatar_url = coalesce(${input.avatarUrl ?? null}, avatar_url)
       where family_id = ${familyId} and user_id = ${authUserId}
     `;
   }
