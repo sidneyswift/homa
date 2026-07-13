@@ -133,16 +133,20 @@ export default async function AdminFamilyScreenPage({
         <main className="min-w-0 flex-1 px-4 py-5 lg:px-7 lg:py-6">
           {data.children.length > 1 && (tab === "progress" || tab === "binder" || tab === "planner") ? (
             <nav aria-label="Mirror kid scope" className="mb-4 flex flex-wrap gap-1.5">
-              <Link
-                href={href({ childId: null })}
-                className={
-                  !focusChild
-                    ? "inline-flex min-h-9 items-center rounded-pill bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
-                    : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm text-muted hover:text-body"
-                }
-              >
-                Whole family
-              </Link>
+              {/* Progress is always one kid (ProgressTab falls back to the
+                  first), so a family scope would be a dead pill there. */}
+              {tab !== "progress" ? (
+                <Link
+                  href={href({ childId: null })}
+                  className={
+                    !focusChild
+                      ? "inline-flex min-h-9 items-center rounded-pill bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
+                      : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm text-muted hover:text-body"
+                  }
+                >
+                  Whole family
+                </Link>
+              ) : null}
               {data.children.map((child) => (
                 <Link
                   key={child.id}
