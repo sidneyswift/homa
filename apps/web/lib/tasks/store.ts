@@ -265,6 +265,136 @@ export function withinDeliveryWindow(task: DueFamilyTask, now: Date): boolean {
 }
 
 /**
+ * One task with its delivery-ready family context, for the parent's own
+ * Run now button. Same shape as a claimed row but with NO lease and NO
+ * due-time filter: a manual run ignores next_run_at and the paused
+ * switch (the click is the parent's explicit ask), while `enabled`
+ * (system eligibility: email, zone, kids, the brief's first report)
+ * still gates it, because an ineligible run has nothing real to say.
+ * Tenancy: taskId is re-scoped by the caller-derived familyId, so a
+ * forged id from another family loads nothing.
+ */
+export async function loadFamilyTaskForRun(
+  familyId: string,
+  taskId: string,
+): Promise<
+  | { ok: true; task: DueFamilyTask }
+  | { ok: false; note: string }
+> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      schedule_id: string;
+      kind: FamilyTaskKind;
+      enabled: boolean;
+      time_zone: string | null;
+      local_hour: number;
+      weekdays: number[];
+      delivery_pref: "text" | "email" | "none";
+      label: string | null;
+      prompt: string | null;
+      recipient_member_user_id: string | null;
+      family_id: string;
+      first_name: string | null;
+      parent_display_name: string | null;
+      email: string | null;
+      phone_numbers: string[];
+      child_names: string[];
+    }[]
+  >`
+    select s.id as schedule_id, s.kind, s.enabled, s.local_hour, s.weekdays,
+           s.delivery_pref, s.label, s.prompt, s.recipient_member_user_id,
+           f.id as family_id, f.time_zone,
+           f.first_name, f.parent_display_name, f.email,
+           coalesce(
+             (select array_agg(p.phone_e164 order by p.created_at)
+              from public.family_phones p where p.family_id = f.id),
+             '{}'
+           ) as phone_numbers,
+           coalesce(
+             (select array_agg(c.name order by c.created_at)
+              from public.children c where c.family_id = f.id),
+             '{}'
+           ) as child_names
+    from public.agent_schedules s
+    join public.families f on f.id = s.family_id
+    where s.id = ${taskId} and s.family_id = ${familyId}
+  `;
+  const row = rows[0];
+  if (!row) {
+    // Reachable only when the row vanished after the page rendered (a
+    // delete in another tab) or the id was forged; the copy speaks to
+    // the honest case. Copy passed both gates 2026-07-13.
+    return {
+      ok: false,
+      note: "This task isn't here anymore. Refresh the page to see the current list.",
+    };
+  }
+  if (!TASK_KIND_CONFIG[row.kind].enabled()) {
+    // The founder kill switch for this kind is still off fleet-wide.
+    return {
+      ok: false,
+      note: "This task can't run yet. It's almost ready on Homa's side, nothing you need to set up.",
+    };
+  }
+  if (!row.enabled) {
+    // System eligibility (seeding hygiene) turned the row off. The brief's
+    // usual reason is the missing first report; the rest is family setup.
+    return {
+      ok: false,
+      note:
+        row.kind === "morning_brief"
+          ? "This task can't run yet. The brief starts once your family's first report is ready."
+          : "This task can't run yet. Check that your family's email and time zone are set in Settings.",
+    };
+  }
+  if (!row.time_zone) {
+    return {
+      ok: false,
+      note: "This task can't run yet. Set your family's time zone in Settings, then try again.",
+    };
+  }
+  return {
+    ok: true,
+    task: {
+      scheduleId: row.schedule_id,
+      familyId: row.family_id,
+      kind: row.kind,
+      timeZone: row.time_zone,
+      localHour: row.local_hour,
+      weekdays: row.weekdays,
+      deliveryPref: row.delivery_pref,
+      label: row.label,
+      prompt: row.prompt,
+      parentFirstName: row.parent_display_name ?? row.first_name,
+      kidPhrase: row.child_names.length === 1 ? row.child_names[0] : "the kids",
+      phoneNumbers: row.phone_numbers,
+      email: row.email,
+      recipientMemberUserId: row.recipient_member_user_id,
+    },
+  };
+}
+
+/** True while any run for this schedule is still 'running': the Run now
+ * throttle, so a mashed button (or a manual run racing the scheduled
+ * one) never stacks sessions for one task. */
+export async function hasRunningTaskRun(scheduleId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    select id from public.homa_task_runs
+    where schedule_id = ${scheduleId} and status = 'running'
+    limit 1
+  `;
+  return rows.length > 0;
+}
+
+function taskRunTitle(task: DueFamilyTask): string {
+  return task.kind === "custom"
+    ? (task.label ?? TASK_KIND_CONFIG.custom.runTitle)
+    : TASK_KIND_CONFIG[task.kind].runTitle;
+}
+
+/**
  * The outbox: inserts this run's row for the family's current local day.
  * Returns the run id, or null when a run for (schedule, day) already
  * exists, which is exactly the at-least-once redelivery case.
@@ -275,9 +405,7 @@ export async function beginTaskRun(
   options?: { status?: "running" | "skipped"; error?: string },
 ): Promise<string | null> {
   const sql = mapDb();
-  const title = task.kind === "custom"
-    ? (task.label ?? TASK_KIND_CONFIG.custom.runTitle)
-    : TASK_KIND_CONFIG[task.kind].runTitle;
+  const title = taskRunTitle(task);
   try {
     const rows = await sql<{ id: string }[]>`
       insert into public.homa_task_runs
@@ -295,6 +423,26 @@ export async function beginTaskRun(
     if (code === "23505") return null;
     throw error;
   }
+}
+
+/**
+ * A Run now run's row. scheduled_for stays null on purpose: the partial
+ * unique outbox index only covers scheduled days, so a manual run never
+ * collides with (or blocks) today's scheduled run. Everything
+ * downstream (delivery, finishTaskRun, the reaper, the History feed)
+ * reads the run by id and treats it like any other run.
+ */
+export async function beginManualTaskRun(task: DueFamilyTask): Promise<string> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    insert into public.homa_task_runs
+      (family_id, schedule_id, kind, status, scheduled_for, title)
+    values
+      (${task.familyId}, ${task.scheduleId}, ${task.kind}, 'running', null,
+       ${taskRunTitle(task)})
+    returning id
+  `;
+  return rows[0].id;
 }
 
 /** The dispatch channel's write: the composed text and where it went. */

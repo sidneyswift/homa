@@ -1,12 +1,14 @@
-import { defineChannel, GET } from "eve/channels";
+import { defineChannel, GET, POST } from "eve/channels";
 
 import {
   listFamilyDeliveryRecipients,
+  setTaskRunRuntimeSession,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { dispatchContinuationToken } from "../../lib/conversation-continuity/dispatch-session-token";
 import { selectTaskDeliveryRecipients } from "../../lib/conversation-continuity/task-recipients";
 import { buildSignedReplyAddress } from "../../lib/conversation-continuity/email-reply-auth";
 import {
+  createProactiveEpisode,
   markCanonicalMessageDelivered,
   persistCanonicalMessage,
 } from "../../lib/conversation-continuity/ledger";
@@ -22,7 +24,18 @@ import {
 } from "../../lib/map/email";
 import { mapDb } from "../../lib/map/db";
 import { emitMapEvent } from "../../lib/map/events";
-import { finishTaskRun, markTaskRunDelivered } from "../../lib/tasks/store";
+import {
+  buildDispatchAuth,
+  buildDispatchTarget,
+  buildTaskMessage,
+} from "../../lib/tasks/dispatch-input";
+import {
+  beginManualTaskRun,
+  finishTaskRun,
+  hasRunningTaskRun,
+  loadFamilyTaskForRun,
+  markTaskRunDelivered,
+} from "../../lib/tasks/store";
 import { type FamilyTaskKind } from "../../lib/tasks/kinds";
 import { submitHomaSms } from "../../lib/voice/telnyx-api";
 
@@ -46,6 +59,15 @@ import { submitHomaSms } from "../../lib/voice/telnyx-api";
  * receive() falls back to route-fingerprint matching when bundle
  * boundaries break reference identity; a channel with zero routes has
  * no fingerprint and cannot be dispatched to.
+ *
+ * The run-now route is not conversational either: it is the tasks
+ * page's own Run now button arriving over HTTP, because eve's send()
+ * only exists inside the runtime and the Next server action lives
+ * outside it. The route is gated by CRON_SECRET (the deployment's own
+ * internal-trigger secret, same trust boundary as the Vercel cron) and
+ * trusts the posted familyId only because the caller holds that
+ * secret: the server action derives it from the signed-in parent's OWN
+ * membership, and every query re-scopes taskId by it.
  */
 
 interface DispatchState {
@@ -63,6 +85,47 @@ interface DispatchState {
    * null falls back to the account owner at delivery time. */
   recipientMemberUserId: string | null;
   delivered: boolean;
+}
+
+interface DispatchTargetInput {
+  familyId?: string;
+  phoneNumbers?: string[];
+  email?: string | null;
+  runId?: string;
+  episodeId?: string;
+  kind?: FamilyTaskKind;
+  deliveryPref?: "text" | "email" | "none";
+  label?: string | null;
+  recipientMemberUserId?: string | null;
+}
+
+/** One session identity and state per run, shared by the receive hook
+ * (scheduled runs) and the run-now route (manual runs). */
+function dispatchSendOptions(target: DispatchTargetInput) {
+  const kind = target.kind ?? "journal_prompt";
+  return {
+    // Per run, not per family-day: two custom tasks for one family in
+    // one tick must not collide on one eve hook token (2026-07-12
+    // HookConflictError incident, two of three per-kid briefs lost).
+    continuationToken: dispatchContinuationToken(
+      kind,
+      target.familyId,
+      target.runId,
+    ),
+    state: {
+      familyId: target.familyId ?? null,
+      phoneNumbers: target.phoneNumbers ?? [],
+      email: target.email ?? null,
+      runId: target.runId ?? null,
+      episodeId: target.episodeId ?? null,
+      kind,
+      deliveryPref: target.deliveryPref ?? "text",
+      label: target.label ?? null,
+      recipientMemberUserId: target.recipientMemberUserId ?? null,
+      delivered: false,
+    } satisfies DispatchState,
+    title: `${kind} ${target.familyId ?? ""}`.trim(),
+  };
 }
 
 async function sendTaskEmail(
@@ -116,41 +179,10 @@ export default defineChannel({
   },
 
   async receive(input, { send }) {
-    const target = (input.target ?? {}) as {
-      familyId?: string;
-      phoneNumbers?: string[];
-      email?: string | null;
-      runId?: string;
-      episodeId?: string;
-      kind?: FamilyTaskKind;
-      deliveryPref?: "text" | "email" | "none";
-      label?: string | null;
-      recipientMemberUserId?: string | null;
-    };
-    const kind = target.kind ?? "journal_prompt";
+    const target = (input.target ?? {}) as DispatchTargetInput;
     return await send(input.message, {
       auth: input.auth ?? null,
-      // Per run, not per family-day: two custom tasks for one family in
-      // one tick must not collide on one eve hook token (2026-07-12
-      // HookConflictError incident, two of three per-kid briefs lost).
-      continuationToken: dispatchContinuationToken(
-        kind,
-        target.familyId,
-        target.runId,
-      ),
-      state: {
-        familyId: target.familyId ?? null,
-        phoneNumbers: target.phoneNumbers ?? [],
-        email: target.email ?? null,
-        runId: target.runId ?? null,
-        episodeId: target.episodeId ?? null,
-        kind,
-        deliveryPref: target.deliveryPref ?? "text",
-        label: target.label ?? null,
-        recipientMemberUserId: target.recipientMemberUserId ?? null,
-        delivered: false,
-      },
-      title: `${kind} ${target.familyId ?? ""}`.trim(),
+      ...dispatchSendOptions(target),
     });
   },
 
@@ -288,5 +320,81 @@ export default defineChannel({
     },
   },
 
-  routes: [GET("/eve/v1/dispatch/health", async () => Response.json({ ok: true }))],
+  routes: [
+    GET("/eve/v1/dispatch/health", async () => Response.json({ ok: true })),
+
+    // The tasks page's Run now button (runTaskNowAction): one immediate
+    // run of one task, on demand. The schedule row is untouched, so
+    // next_run_at, the paused switch, and the daily outbox all keep
+    // their meaning; the manual run row rides scheduled_for null. Path
+    // under /eve/v1/ on purpose: only /eve/* is guaranteed to reach the
+    // eve runtime through proxy.ts and the withEve() mount.
+    POST<DispatchState>("/eve/v1/dispatch/run-now", async (req, { send }) => {
+      const secret = process.env.CRON_SECRET;
+      if (!secret) {
+        return Response.json(
+          { ok: false, note: "Homa couldn't start this run. Try again in a bit." },
+          { status: 503 },
+        );
+      }
+      if (req.headers.get("authorization") !== `Bearer ${secret}`) {
+        return Response.json({ ok: false }, { status: 401 });
+      }
+
+      let body: { taskId?: unknown; familyId?: unknown };
+      try {
+        body = (await req.json()) as typeof body;
+      } catch {
+        return Response.json({ ok: false }, { status: 400 });
+      }
+      const uuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const taskId = typeof body.taskId === "string" ? body.taskId : "";
+      const familyId = typeof body.familyId === "string" ? body.familyId : "";
+      if (!uuidShape.test(taskId) || !uuidShape.test(familyId)) {
+        return Response.json({ ok: false }, { status: 400 });
+      }
+
+      const loaded = await loadFamilyTaskForRun(familyId, taskId);
+      if (!loaded.ok) {
+        return Response.json({ ok: false, note: loaded.note }, { status: 409 });
+      }
+      const task = loaded.task;
+      if (await hasRunningTaskRun(task.scheduleId)) {
+        // The dialog's helper line above this note already names History
+        // as where the result lands, so this stays one sentence.
+        return Response.json(
+          { ok: false, note: "Homa is already working on this task." },
+          { status: 409 },
+        );
+      }
+
+      // Build the message before the run row exists so a context-load
+      // failure leaves no orphaned 'running' row behind.
+      const message = await buildTaskMessage(task, "manual");
+      const runId = await beginManualTaskRun(task);
+      const episodeId = await createProactiveEpisode({ familyId: task.familyId });
+      try {
+        const session = await send(message, {
+          auth: buildDispatchAuth(task, runId, episodeId),
+          ...dispatchSendOptions(buildDispatchTarget(task, runId, episodeId)),
+        });
+        await setTaskRunRuntimeSession(runId, session.id);
+        return Response.json({ ok: true, runId });
+      } catch (error) {
+        await finishTaskRun(runId, {
+          familyId: task.familyId,
+          kind: task.kind,
+          status: "failed",
+          error:
+            error instanceof Error
+              ? error.message.slice(0, 500)
+              : "session startup failed",
+        });
+        return Response.json(
+          { ok: false, note: "Homa couldn't start this run. Try again in a bit." },
+          { status: 502 },
+        );
+      }
+    }),
+  ],
 });

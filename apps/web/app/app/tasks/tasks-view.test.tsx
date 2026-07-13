@@ -140,6 +140,22 @@ describe("TasksView", () => {
 });
 
 describe("TaskEditOverlay", () => {
+  it("offers Run now on every saved task, built-in or custom", () => {
+    const custom = renderOverlay(CUSTOM_TASK);
+    assert.match(custom, />Run now<\/button>/);
+    assert.match(
+      custom,
+      /Homa runs this task right away, exactly as saved\. The result shows up in History\. The schedule stays the same\./,
+    );
+
+    const builtIn = renderOverlay(BRIEF_TASK);
+    assert.match(builtIn, />Run now<\/button>/);
+
+    // Nothing is saved yet in create mode, so there is nothing to run.
+    const creating = renderOverlay(null);
+    assert.doesNotMatch(creating, />Run now<\/button>/);
+  });
+
   it("gives a custom task the full form plus delete", () => {
     const html = renderOverlay(CUSTOM_TASK);
 

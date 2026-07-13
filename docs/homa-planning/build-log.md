@@ -3,6 +3,56 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · Run now on every scheduled task (founder ask)
+
+Founder ask: "Add a button and the ability to run the task now on any
+scheduled task." Shipped in the task editor dialog: a Run now row for
+every saved task, built-in or custom, that starts one immediate run and
+leaves the schedule alone.
+
+How it runs: eve's send() only exists inside the runtime, so the tasks
+page reaches it over HTTP, the same posture as lib/harness/
+resume-session.ts. A new POST /eve/v1/dispatch/run-now route on the
+dispatch channel starts the session; the runTaskNowAction server action
+calls it on the deployment's own origin. The message builders and the
+session's auth identity moved from the schedule file into
+lib/tasks/dispatch-input.ts so both doors wake the agent identically;
+manual runs tell the model the parent just asked (never "it is this
+family's ... moment") and ride homa_task_runs with scheduled_for null,
+which the partial outbox index ignores, so a manual run never collides
+with or blocks the day's scheduled run. advanceTaskSchedule is never
+called: next_run_at, the paused switch, and the outbox all keep their
+meaning. No schema change.
+
+Decisions made alone, smallest-safe versions:
+- Auth: the route is gated by CRON_SECRET (already set in prod and dev),
+  the same internal-trigger trust boundary as the Vercel cron, so the
+  feature ships dark nowhere. The posted familyId is trusted only
+  because the caller holds the secret; the server action derives it from
+  the caller's OWN membership and every query re-scopes taskId by it.
+- A paused task may Run now (the click is the parent's explicit ask; the
+  switch governs the schedule). An enabled=false row refuses with a calm
+  note (an ineligible brief has nothing real to say), and a dark kind
+  flag refuses too.
+- Throttle: one 'running' run per schedule at a time
+  (hasRunningTaskRun); no daily cap beyond that. Revisit if manual runs
+  show up in model-usage costs.
+- The journal's origin-claim line and the brief's "this morning's" become
+  honest on manual runs ("about today" / "today's brief").
+
+Copy passed both gates 2026-07-13 (reader, then editor): the helper line
+names History as where the result lands, refusal notes share the "This
+task can't run yet." opener and each carries a next step. Verified: new
+dispatch-input unit tests plus overlay contract tests (check:tasks-ui,
+wired into that script), typecheck, lint, eve build, check:events,
+check:continuity, check:isolation, and a live smoke against the real dev
+agent + homa-prod (synthetic family, save-only delivery, cascade
+cleanup): run accepted, second click refused, run finished done with
+composed text, scheduled_for null, next_run_at untouched. Housekeeping:
+the expired VERCEL_OIDC_TOKEN in apps/web/.env.local was replaced via
+vercel link + env pull (same fix as 2026-07-10) so the dev agent could
+compose.
+
 ## 2026-07-12 (late evening) · Settings consolidates to one family card (founder direction)
 
 Founder reaction to the settings-directions lab
