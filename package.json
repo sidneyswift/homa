@@ -14,6 +14,7 @@
     "check:admin": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/admin/stage.test.ts apps/web/lib/email-webhook.test.ts apps/web/lib/observability/agent-trace.test.ts",
     "check:research-brief": "tsx --test apps/web/lib/tasks/research-brief-format.test.ts",
     "check:tasks-ui": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/app/app/tasks/tasks-view.test.tsx apps/web/lib/tasks/dispatch-input.test.ts",
+    "check:chat-ui": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/attachments/markers.test.ts apps/web/app/app/message-parts-attachments.test.tsx apps/web/app/app/transcript-days.test.ts",
     "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
     "check:continuity": "tsx --test \"apps/web/lib/conversation-continuity/*.test.ts\" \"apps/web/lib/email-inbound-continuity.test.ts\" \"apps/web/lib/map/email-submission.test.ts\" \"apps/web/lib/map/family-actor-auth.test.ts\" \"apps/web/lib/sms-inbound-auth.test.ts\" \"apps/web/lib/sms-progress.test.ts\" \"apps/web/lib/sms-session-epoch.test.ts\" \"apps/web/lib/voice/telnyx-api.test.ts\"",
     "child-progress:e2e": "pnpm test:child-progress:postgres",

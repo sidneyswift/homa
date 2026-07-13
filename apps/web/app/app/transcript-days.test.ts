@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { EveMessage } from "eve/client";
 
-import { buildTranscript, sourceLabelFor } from "./transcript-days";
+import { buildTranscript, dayLabelFor, sourceLabelFor } from "./transcript-days";
 import type { ArchivedMessage } from "./chat-storage";
 
 function fakeMessage(id: string, role: "user" | "assistant"): EveMessage {
@@ -25,6 +25,22 @@ function entry(
     ...(channel ? { channel } : {}),
   };
 }
+
+describe("dayLabelFor", () => {
+  it("renders the compact one-line header for every distance", () => {
+    const now = Date.parse("2026-07-14T15:00:00");
+    assert.equal(dayLabelFor(Date.parse("2026-07-14T09:00:00"), now), "Today · July 14");
+    assert.equal(
+      dayLabelFor(Date.parse("2026-07-13T09:00:00"), now),
+      "Yesterday · July 13",
+    );
+    assert.equal(
+      dayLabelFor(Date.parse("2026-07-07T09:00:00"), now),
+      "Tuesday · July 7",
+    );
+    assert.equal(dayLabelFor(Date.parse("2025-07-03T09:00:00"), now), "July 3 · 2025");
+  });
+});
 
 describe("sourceLabelFor", () => {
   it("tags the parent's texts and emails, and Homa's scheduled notes", () => {

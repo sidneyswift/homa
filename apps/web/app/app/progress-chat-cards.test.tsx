@@ -187,17 +187,24 @@ describe("ProgressQuestionCard", () => {
       html.indexOf("Progress updated") <
         html.indexOf("Can Maya count out loud from 1 to 5?"),
     );
-    assert.match(html, /role="group"[^>]*aria-label="Answer options"/u);
+    // No handlers = a settled card: the options stay readable as plain
+    // text, never as buttons (chat redesign 2026-07-13).
+    assert.match(html, /Easily · Getting there · Not yet/u);
+    assert.doesNotMatch(html, /aria-label="Answer options"/u);
   });
 
-  it("disables every action when handlers are omitted", () => {
+  it("keeps every remaining action disabled when handlers are omitted", () => {
     const buttons = buttonsIn(ProgressQuestionCard({ card: QUESTION }));
 
-    assert.ok(buttons.length > 0);
+    // The nested update's Undo is the only button left on a settled
+    // card, and it must be inert; answer options render as text.
     assert.equal(
       buttons.every((button) => button.props.disabled === true),
       true,
     );
+    const html = renderToStaticMarkup(<ProgressQuestionCard card={QUESTION} />);
+    assert.doesNotMatch(html, /aria-label="Answer options"/u);
+    assert.doesNotMatch(html, /Save and stop/u);
   });
 });
 

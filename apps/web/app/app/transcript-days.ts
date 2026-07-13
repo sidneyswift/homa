@@ -31,30 +31,27 @@ function dayKeyOf(at: number): string {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
-const WEEKDAY_MONTH_DAY: Intl.DateTimeFormatOptions = {
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-};
-
 /**
- * dayLabelFor(at, now): "Today", "Yesterday", "Friday, July 3", or
- * "July 3, 2025" once the year differs. Local time on purpose: the
- * separator answers "when was this, for the person reading it here".
+ * dayLabelFor(at, now): the compact one-line day header (founder call
+ * 2026-07-13, chat-refined question 3): "Today · July 13",
+ * "Yesterday · July 12", "Tuesday · July 14", and "July 3 · 2025" once
+ * the year differs. Local time on purpose: the separator answers "when
+ * was this, for the person reading it here".
  */
 export function dayLabelFor(at: number, now: number = Date.now()): string {
   const day = dayKeyOf(at);
-  if (day === dayKeyOf(now)) return "Today";
-  if (day === dayKeyOf(now - 24 * 60 * 60 * 1000)) return "Yesterday";
   const date = new Date(at);
-  if (date.getFullYear() === new Date(now).getFullYear()) {
-    return date.toLocaleDateString("en-US", WEEKDAY_MONTH_DAY);
-  }
-  return date.toLocaleDateString("en-US", {
+  const monthDay = date.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
-    year: "numeric",
   });
+  if (day === dayKeyOf(now)) return `Today · ${monthDay}`;
+  if (day === dayKeyOf(now - 24 * 60 * 60 * 1000)) return `Yesterday · ${monthDay}`;
+  if (date.getFullYear() === new Date(now).getFullYear()) {
+    const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+    return `${weekday} · ${monthDay}`;
+  }
+  return `${monthDay} · ${date.getFullYear()}`;
 }
 
 /**

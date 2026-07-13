@@ -2,6 +2,12 @@
 
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { parseAttachmentMarkers } from "../../lib/attachments/markers";
+import {
+  AttachmentReceiptChips,
+  UserAttachmentDisplay,
+} from "./attachment-message-parts";
+import type { ChatAttachmentReceipt } from "./chat-attachments";
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
 import { ProgressConflictCard } from "./progress-conflict-card";
@@ -11,17 +17,21 @@ import {
 } from "./progress-message-parts";
 import { ProgressQuestionCard } from "./progress-question-card";
 import { ProgressUpdateChip } from "./progress-update-chip";
+import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
+import { WorkedForLine, workedForSteps } from "./worked-for";
 
 /**
- * Message rendering for the chat transcript, in the assistant-transcript
- * style (founder screenshot review 2026-07-09, "Claude structure, Homa
- * skin"): the parent's messages sit in the kit's brand bubble on the
- * right (ui_kits/web-app/ChatView.jsx), Homa's replies render FLAT on the
- * page, no card, and the work Homa did stays visible as quiet past-tense
- * activity lines ("Checked your family's info") plus the named-effect
- * memory chips and material cards (the MJ-02 confirmation spirit: when
- * Homa saves, updates, or deletes something durable, the effect is
- * visible in the transcript, not silent).
+ * Message rendering for the chat transcript (approved chat redesign
+ * 2026-07-13, the scrapbook direction calmed): the parent's messages
+ * sit in a soft coral bubble on the right (calmer than the old brand
+ * fill: strong coral now belongs to actions), photos she sent display
+ * big on white with their caption handwritten underneath, and files
+ * ride as quiet chips. Homa's replies render FLAT on the page, no card;
+ * the work behind a reply folds into one "Worked for N seconds" line
+ * (worked-for.tsx) that opens into plain-words steps, plus the
+ * named-effect memory chips and material cards (the MJ-02 confirmation
+ * spirit: when Homa saves, updates, or deletes something durable, the
+ * effect is visible in the transcript, not silent).
  */
 
 interface MemoryChipContent {
@@ -74,30 +84,20 @@ function MemoryChip({ chip }: { chip: MemoryChipContent }) {
   );
 }
 
-/** Past-tense lines for finished tools with no visible output of their
- * own (chips and cards carry the rest). The in-flight siblings live in
- * TOOL_STATUS_LABELS below. */
-const TOOL_DONE_LABELS: Record<string, string> = {
-  get_children: "Checked your family's info",
-  load_skill: "Looked up how we do this",
-  generate_image: "Made an image",
-  find_materials: "Looked through your materials",
-};
-
-/** What one assistant message renders as, in part order: quiet activity
- * lines (consecutive ones collapse into a single mid-dot line, the way
- * the reference transcript groups "used X, did Y"), flowing markdown
- * text, material cards, and memory chips. */
+/** What one assistant message renders as, in part order: flowing
+ * markdown text, material cards, memory chips, and progress cards. The
+ * work itself (every tool call) folds into the message's single
+ * worked-for line, rendered above these items. */
 type SourcedProgressAssistantItem = ProgressAssistantItem & {
   sourcePartIndex: number;
   sourceActionKey: string;
 };
 
 type AssistantItem =
-  | { kind: "activity"; labels: string[] }
   | { kind: "text"; text: string }
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "chip"; chip: MemoryChipContent }
+  | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
   | SourcedProgressAssistantItem;
 
 function assistantItems(message: EveMessage): AssistantItem[] {
@@ -113,6 +113,15 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({
         ...progressItem,
         sourcePartIndex: partIndex,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
+    const snapCard = parseSnapCardPart(part);
+    if (snapCard) {
+      items.push({
+        kind: "snap",
+        card: snapCard,
         sourceActionKey: `${message.id}:${partIndex}`,
       });
       continue;
@@ -135,14 +144,6 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({ kind: "chip", chip });
       continue;
     }
-    const label = TOOL_DONE_LABELS[part.toolName];
-    if (!label) continue;
-    const last = items.at(-1);
-    if (last?.kind === "activity") {
-      if (!last.labels.includes(label)) last.labels.push(label);
-    } else {
-      items.push({ kind: "activity", labels: [label] });
-    }
   }
   return items;
 }
@@ -153,12 +154,20 @@ function AssistantItemView({
   onFocusComposer,
   actionableProgressPartKey,
   timeZone,
+  progressAnswers,
+  activeSnapPartKey,
+  onSnapAddFiles,
+  onSnapTypeInstead,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
   onFocusComposer?: () => void;
   actionableProgressPartKey?: string;
   timeZone: string;
+  progressAnswers?: ReadonlyMap<string, string>;
+  activeSnapPartKey?: string;
+  onSnapAddFiles?: (files: readonly File[]) => void;
+  onSnapTypeInstead?: () => void;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -170,8 +179,6 @@ function AssistantItemView({
     ? onFocusComposer
     : undefined;
   switch (item.kind) {
-    case "activity":
-      return <p className="text-sm text-subtle">{item.labels.join(" · ")}</p>;
     case "text":
       return (
         <div className="leading-relaxed text-body">
@@ -182,6 +189,21 @@ function AssistantItemView({
       return <MaterialCard material={item.material} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
+    case "snap":
+      return (
+        <SnapCard
+          card={item.card}
+          active={item.sourceActionKey === activeSnapPartKey}
+          onAddFiles={
+            item.sourceActionKey === activeSnapPartKey ? onSnapAddFiles : undefined
+          }
+          onTypeInstead={
+            item.sourceActionKey === activeSnapPartKey
+              ? onSnapTypeInstead
+              : undefined
+          }
+        />
+      );
     case "progress_update":
       return (
         <ProgressUpdateChip
@@ -195,6 +217,7 @@ function AssistantItemView({
           card={item.card}
           onSendSuggestion={progressSendSuggestion}
           onFocusComposer={progressFocusComposer}
+          answeredLabel={progressAnswers?.get(item.sourceActionKey) ?? null}
         />
       );
     case "progress_conflict":
@@ -232,34 +255,71 @@ export function MessageView({
   onFocusComposer,
   actionableProgressPartKey,
   timeZone,
+  familyId = null,
+  attachmentReceipts,
+  childNameById,
+  workedForSeconds = null,
+  progressAnswers,
+  activeSnapPartKey,
+  onSnapAddFiles,
+  onSnapTypeInstead,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
   onFocusComposer?: () => void;
   actionableProgressPartKey?: string;
   timeZone: string;
+  /** The render wall for attachment markers; media only draws from this
+   * family's own chat blob space. */
+  familyId?: string | null;
+  /** Save receipts for the attachments this user message carried
+   * (live-session state; scrollback shows the media without them). */
+  attachmentReceipts?: readonly ChatAttachmentReceipt[];
+  childNameById?: ReadonlyMap<string, string>;
+  /** Turn duration for the worked-for line, when the client observed it. */
+  workedForSeconds?: number | null;
+  /** Progress-card partKey -> the tapped answer, for spent cards. */
+  progressAnswers?: ReadonlyMap<string, string>;
+  /** The one snap card still answerable, plus its handlers. */
+  activeSnapPartKey?: string;
+  onSnapAddFiles?: (files: readonly File[]) => void;
+  onSnapTypeInstead?: () => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
       .map((part) => (part.type === "text" ? part.text : ""))
       .join("")
       .trim();
-    if (text.length === 0) return null;
+    const { visibleText, markers } = parseAttachmentMarkers(text);
+    if (visibleText.length === 0 && markers.length === 0) return null;
     return (
-      <div className="flex justify-end">
-        {/* The kit's user bubble: brand fill, radius-lg with a tucked
-            bottom-right corner, at most 76% of the column. */}
-        <div className="max-w-[76%] rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand shadow-sm">
-          <p className="whitespace-pre-wrap">{text}</p>
-        </div>
+      <div className="flex flex-col gap-2">
+        <UserAttachmentDisplay markers={markers} familyId={familyId} />
+        {visibleText.length > 0 ? (
+          <div className="flex justify-end">
+            {/* The calmer coral bubble (founder pick): soft fill, dark
+                text, radius-lg with a tucked bottom-right corner. */}
+            <div className="max-w-[76%] rounded-lg rounded-br-sm bg-[var(--brand-soft-2)] px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong">
+              <p className="whitespace-pre-wrap">{visibleText}</p>
+            </div>
+          </div>
+        ) : null}
+        {attachmentReceipts && attachmentReceipts.length > 0 ? (
+          <AttachmentReceiptChips
+            receipts={attachmentReceipts}
+            childNameById={childNameById ?? new Map()}
+          />
+        ) : null}
       </div>
     );
   }
 
   const items = assistantItems(message);
-  if (items.length === 0) return null;
+  const steps = workedForSteps(message);
+  if (items.length === 0 && steps.length === 0) return null;
   return (
     <div className="flex flex-col items-start gap-3">
+      <WorkedForLine steps={steps} seconds={workedForSeconds} />
       {items.map((item, index) => (
         <AssistantItemView
           key={index}
@@ -268,6 +328,10 @@ export function MessageView({
           onFocusComposer={onFocusComposer}
           actionableProgressPartKey={actionableProgressPartKey}
           timeZone={timeZone}
+          progressAnswers={progressAnswers}
+          activeSnapPartKey={activeSnapPartKey}
+          onSnapAddFiles={onSnapAddFiles}
+          onSnapTypeInstead={onSnapTypeInstead}
         />
       ))}
     </div>

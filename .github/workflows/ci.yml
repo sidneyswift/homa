@@ -63,6 +63,9 @@ jobs:
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
+      - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
+        run: pnpm check:chat-ui
+
       - name: Install PostgreSQL 16 for disposable E2E
         run: |
           sudo apt-get update

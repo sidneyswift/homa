@@ -206,7 +206,12 @@ describe("MessageView progress parts", () => {
     const firstCard = html.slice(firstStart, secondStart);
     const secondCard = html.slice(secondStart);
 
-    assert.match(firstCard, / disabled=""/u);
+    // The stale card reads as settled text (chat redesign 2026-07-13:
+    // a spent button must never look pressable); only the actionable
+    // card offers live answer buttons.
+    assert.doesNotMatch(firstCard, /<button/u);
+    assert.match(firstCard, /Easily · Getting there/u);
+    assert.match(secondCard, /<button/u);
     assert.doesNotMatch(secondCard, / disabled=""/u);
     assert.doesNotMatch(html, /turn_1:assistant:1/u);
   });

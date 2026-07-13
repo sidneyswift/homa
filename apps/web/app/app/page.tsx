@@ -78,6 +78,7 @@ export default async function ChatPage({
       timeZone={effectiveTimeZone(app?.family.time_zone)}
       parentName={app?.memberDisplayName ?? app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
+      focusChildId={focusChild?.id ?? null}
       kids={(app?.children ?? []).map((child) => ({
         id: child.id,
         name: child.name,

@@ -1,9 +1,10 @@
 "use client";
 
 import { emitEvent } from "@homa/core";
+import type { UserContent } from "ai";
 import { useEveAgent, type EveMessage } from "eve/react";
-import { ArrowDown, ArrowUp, Sparkles, Square, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, ChevronDown, Square, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
@@ -15,6 +16,15 @@ import {
 } from "../../lib/chat-history-model";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import {
+  AttachMenuButton,
+  CameraButton,
+  PendingAttachmentChips,
+  prepareAttachmentsForSend,
+  summarizeOutgoingParts,
+  useChatAttachments,
+  type ChatAttachmentReceipt,
+} from "./chat-attachments";
 import {
   archiveMessages,
   foldEventsToMessages,
@@ -53,6 +63,7 @@ import {
   type ProgressMessageInteraction,
 } from "./progress-interaction-policy";
 import { SlashComposer } from "./slash-composer";
+import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 import { recoverLostTurn } from "./turn-recovery";
@@ -117,6 +128,9 @@ const SUGGESTIONS = [
   "We had a rough morning, help me reset",
 ] as const;
 
+/** One-time flag for the filing tag's self-introduction. */
+const FILING_HINT_STORAGE_KEY = "homa-chat-filing-hint";
+
 /** A backgrounded phone kills the stream within seconds; a stream this
  *  quiet when the tab comes back is dead, not thinking. */
 const VISIBLE_STALL_MS = 20_000;
@@ -152,6 +166,7 @@ export function ChatClient({
   timeZone,
   parentName,
   focusChildName,
+  focusChildId = null,
   initialDraft,
   kids,
   slashSkills,
@@ -175,6 +190,10 @@ export function ChatClient({
    * family. Display only: the agent learns the focus server-side from
    * the same cookie, this just keeps the composer honest about it. */
   focusChildName?: string | null;
+  /** The same selection's id: where attachments get filed ("About
+   * Maya" = saved in Maya's binder). Verified server-side against the
+   * family's own children before any row is written. */
+  focusChildId?: string | null;
   /** Pre-fills the composer (the journal email's deep link); the parent
    * still edits and sends herself, nothing auto-sends. */
   initialDraft?: string;
@@ -215,8 +234,37 @@ export function ChatClient({
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer (the React
    *  Compiler rejects that self-capture on mobile; twins stay alike). */
-  const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
-    null,
+  const sendRef = useRef<
+    ((input: { message: string | UserContent }) => Promise<void>) | null
+  >(null);
+  // The attach flow (approved chat redesign): staged files upload to
+  // the family's own blob space as she picks them; send trades URLs
+  // for model parts and binder receipts.
+  const attachments = useChatAttachments(familyId);
+  const [preparingAttachments, setPreparingAttachments] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
+  /** Save receipts keyed by the sent message's summary text, so the
+   *  receipt chips render under the exact user bubble that carried the
+   *  files (live-session state; scrollback shows media without them). */
+  const [receiptsBySummary, setReceiptsBySummary] = useState<
+    Record<string, ChatAttachmentReceipt[]>
+  >({});
+  /** Message id -> turn duration in whole seconds, the worked-for
+   *  line's count. Client-observed, live session only. */
+  const [turnSeconds, setTurnSeconds] = useState<Record<string, number>>({});
+  /** Progress-card partKey -> the answer she tapped, so the spent card
+   *  reads past tense (live-session state, like the receipts). */
+  const [progressAnswers, setProgressAnswers] = useState<Record<string, string>>(
+    {},
+  );
+  const turnStartedAtRef = useRef<number | null>(null);
+  const childNameById = useMemo(
+    () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
+    [kids],
+  );
+  const progressAnswersMap = useMemo(
+    () => new Map(Object.entries(progressAnswers)),
+    [progressAnswers],
   );
   // Whether dictation fed the current draft, and the modality of the
   // turn in flight (read later by onFinish / the error effect). Refs,
@@ -294,6 +342,16 @@ export function ChatClient({
         snapshot.data.messages,
       );
       setLiveTimes(stamped);
+      // The worked-for line's count: how long this turn ran, keyed by
+      // the reply it produced.
+      const lastMessage = snapshot.data.messages.at(-1);
+      if (lastMessage?.role === "assistant" && turnStartedAtRef.current !== null) {
+        const seconds = Math.floor(
+          (currentTimeMs() - turnStartedAtRef.current) / 1000,
+        );
+        setTurnSeconds((current) => ({ ...current, [lastMessage.id]: seconds }));
+      }
+      turnStartedAtRef.current = null;
       saveChat(storageKey, {
         archived: archivedRef.current,
         events: snapshot.events,
@@ -330,6 +388,7 @@ export function ChatClient({
           setBusySeconds(0);
           turnModalityRef.current = queuedTurnModalityRef.current;
           lastSendRef.current = { text: message, atMs: currentTimeMs() };
+          turnStartedAtRef.current = currentTimeMs();
           markTurnStarted();
           void sendRef.current?.({ message });
         }, 0);
@@ -354,10 +413,15 @@ export function ChatClient({
   // just the arrow).
   const transcriptRef = useRef<HTMLElement | null>(null);
   const [showBackToNow, setShowBackToNow] = useState(false);
+  // The top edge fades the past into "everything above" (approved
+  // redesign, the founder's dim rule); it lifts at the very top, where
+  // there is nothing left to fade into.
+  const [topFaded, setTopFaded] = useState(false);
   const handleTranscriptScroll = useCallback(() => {
     const el = transcriptRef.current;
     if (!el) return;
     setShowBackToNow(el.scrollHeight - el.clientHeight - el.scrollTop > 600);
+    setTopFaded(el.scrollTop > 8);
   }, []);
   const busy = agent.status === "submitted" || agent.status === "streaming";
   // The wall (plans/2026-07-11-the-wall.md): the chat door. One
@@ -365,6 +429,23 @@ export function ChatClient({
   // opens the offer instead of the turn, draft intact.
   const [wallOpen, setWallOpen] = useState(false);
   const chatDoorTappedRef = useRef(false);
+  // The filing tag's plain-words hint: opens once by itself the first
+  // time the tag ever appears, then only on tap. After first paint on
+  // purpose (no SSR mismatch, no setState-in-effect cascade).
+  const [filingHintOpen, setFilingHintOpen] = useState(false);
+  useEffect(() => {
+    if (!focusChildName) return;
+    const frame = requestAnimationFrame(() => {
+      try {
+        if (window.localStorage.getItem(FILING_HINT_STORAGE_KEY)) return;
+        window.localStorage.setItem(FILING_HINT_STORAGE_KEY, "shown");
+        setFilingHintOpen(true);
+      } catch {
+        // Storage blocked: the tag still opens the hint on tap.
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [focusChildName]);
 
   // Voice input (FR-4's dictation leg): the transcript joins whatever
   // is already typed, and she reviews the words before sending. The
@@ -520,6 +601,10 @@ export function ChatClient({
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions = agent.data.messages.length === 0 && !busy;
+  // The snap card's dim rule (founder call): while Homa's camera ask is
+  // the live question, everything above it steps back. The only full
+  // dim in the product; the card's own message stays full strength.
+  const activeSnap = busy ? null : latestSnapRequest(agent.data.messages);
 
   useEffect(() => {
     // First paint lands at the bottom instantly (yesterday above the
@@ -571,6 +656,11 @@ export function ChatClient({
       kind: "progress_card",
       progressActionKey: interaction.actionKey,
     });
+    if (result !== "rejected") {
+      // The answered card reads past tense from here on ("You said:
+      // Easily"), reader-gate fix: a spent button must never look live.
+      setProgressAnswers((current) => ({ ...current, [partKey]: text }));
+    }
     updateProgressActionLifecycle(
       settleProgressAction(
         progressActionLifecycleRef.current,
@@ -657,9 +747,72 @@ export function ChatClient({
     setBusySeconds(0);
     turnModalityRef.current = plan.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
+    turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
     void agent.send({ message: outgoing });
     return "sent";
+  }
+
+  /**
+   * The attach send path: trades the staged blob URLs for model parts,
+   * marker text, and binder receipts (/api/chat/attachments), then
+   * sends ONE turn carrying text + media parts. Runs only while idle
+   * (the send button holds staged files back during a running turn, so
+   * the queue stays text-only).
+   */
+  async function sendMessageWithAttachments(text: string): Promise<void> {
+    if (busy || preparingAttachments) return;
+    if (!chatDoorTappedRef.current) {
+      chatDoorTappedRef.current = true;
+      sendWallBeacon({ kind: "door_tap", door: "chat" });
+    }
+    if (wall) {
+      setWallOpen(true);
+      return;
+    }
+    setPreparingAttachments(true);
+    setAttachError(null);
+    try {
+      const prepared = await prepareAttachmentsForSend(
+        attachments.staged,
+        focusChildId,
+      );
+      const trimmed = text.trim();
+      const turnText = [
+        ...(trimmed.length > 0 ? [trimmed] : []),
+        ...prepared.textBlocks,
+      ].join("\n\n");
+      const parts: UserContent = [
+        { type: "text", text: turnText },
+        ...prepared.parts,
+      ];
+      const summary = summarizeOutgoingParts(parts);
+      if (prepared.receipts.length > 0) {
+        setReceiptsBySummary((current) => ({
+          ...current,
+          [summary]: prepared.receipts,
+        }));
+      }
+      setDraft("");
+      draftFromVoiceRef.current = false;
+      attachments.clear();
+      recoveryRef.current?.abort();
+      if (!agent.session?.sessionId) durableCursorRef.current = 0;
+      setBusySeconds(0);
+      turnModalityRef.current = "text";
+      lastSendRef.current = { text: summary, atMs: currentTimeMs() };
+      turnStartedAtRef.current = currentTimeMs();
+      markTurnStarted();
+      void agent.send({ message: parts });
+    } catch {
+      // Files stay staged; her words stay in the composer. One quiet
+      // line under the composer says to try again.
+      setAttachError(
+        "That didn't attach. Everything is still here, try once more.",
+      );
+    } finally {
+      setPreparingAttachments(false);
+    }
   }
 
   function removeQueuedMessage(
@@ -683,32 +836,39 @@ export function ChatClient({
         onScroll={handleTranscriptScroll}
         className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6"
       >
+        {/* The morning scrolls into everything above it: a soft fade at
+            the top edge whenever there is more past to scroll to. */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
+        />
         {!hasAnyMessages ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
             </h1>
-            <p className="mt-2 font-serif text-lg italic text-muted">
+            <p className="mt-2 text-lg text-muted">
               Ask me anything about your homeschool day.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {SUGGESTIONS.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => sendMessage(suggestion)}
-                  className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           <>
             {transcript.map((item) => {
+              // Dim rule: everything above the live snap card steps
+              // back; the card's own message stays full strength.
+              const dimmed =
+                activeSnap !== null &&
+                (item.kind === "separator" ||
+                  item.message !== activeSnap.message);
               if (item.kind === "separator") {
-                return <DaySeparator key={item.key} label={item.label} />;
+                return (
+                  <div
+                    key={item.key}
+                    className={dimmed ? "opacity-45 transition-opacity" : undefined}
+                  >
+                    <DaySeparator label={item.label} />
+                  </div>
+                );
               }
               const isLiveMessage = liveMessageSet.has(item.message);
               const actionableInteraction =
@@ -716,10 +876,33 @@ export function ChatClient({
                 item.message.id === progressInteraction?.messageId
                   ? progressInteraction
                   : null;
+              const userSummary =
+                item.message.role === "user"
+                  ? item.message.parts
+                      .map((part) => (part.type === "text" ? part.text : ""))
+                      .join("")
+                      .trim()
+                  : null;
               const messageView = (
                 <MessageView
                   message={item.message}
                   timeZone={timeZone}
+                  familyId={familyId}
+                  childNameById={childNameById}
+                  attachmentReceipts={
+                    userSummary !== null && isLiveMessage
+                      ? receiptsBySummary[userSummary]
+                      : undefined
+                  }
+                  workedForSeconds={
+                    isLiveMessage ? turnSeconds[item.message.id] ?? null : null
+                  }
+                  progressAnswers={progressAnswersMap}
+                  activeSnapPartKey={
+                    isLiveMessage ? activeSnap?.partKey : undefined
+                  }
+                  onSnapAddFiles={attachments.addFiles}
+                  onSnapTypeInstead={focusComposer}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
                   }
@@ -746,7 +929,10 @@ export function ChatClient({
               // from another surface (texted, by email, Homa's tasks),
               // shown where the surface changes (transcript-days.ts).
               return (
-                <div key={item.key} className="flex flex-col gap-1.5">
+                <div
+                  key={item.key}
+                  className={`flex flex-col gap-1.5 ${dimmed ? "opacity-45 transition-opacity" : ""}`}
+                >
                   {messageView}
                   {item.sourceLabel ? (
                     <p
@@ -764,20 +950,6 @@ export function ChatClient({
                 </div>
               );
             })}
-            {showSuggestions ? (
-              <div className="flex flex-wrap justify-center gap-2 pt-2">
-                {SUGGESTIONS.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => sendMessage(suggestion)}
-                    className="rounded-pill border border-border bg-card px-4 py-2 text-sm text-strong transition-colors hover:border-brand"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            ) : null}
           </>
         )}
         {busy && busyLabel(agent.data.messages) ? (
@@ -872,100 +1044,158 @@ export function ChatClient({
         </div>
       ) : null}
 
-      {/* The kit's composer (ChatView.jsx): a white pill card on the page
-          background, sparkles at the left, a borderless input, and a round
-          arrow-up send button. Typing stays enabled while Homa works, and
-          sending mid-turn queues; nothing ever waits on her. */}
-      <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3.5 sm:px-6">
-        {focusChildName ? (
-          // The context switcher has one kid selected; say so where she
-          // types, so a focused chat never comes as a surprise, and name
-          // the way back (reader-gate fix: the pill alone read as a
-          // mystery button). The switcher sits at the top right on every
-          // size now (founder ruling 2026-07-12), and it only exists for
-          // multi-kid families, so the hint holds its tongue when there
-          // is no control to point at.
-          <p className="mx-auto mb-2.5 flex w-full max-w-[780px] items-center gap-2">
-            <span className="inline-flex items-center rounded-pill bg-brand-soft px-3 py-1 text-xs font-semibold text-[var(--clay-700)]">
-              About {focusChildName}
-            </span>
-            {(kids?.length ?? 0) > 1 ? (
-              <span className="text-xs text-subtle">
-                Change who you&apos;re viewing from the top right.
-              </span>
-            ) : null}
-          </p>
+      {/* The redesigned composer (chat-refined, approved 2026-07-13):
+          docked suggestion chips, then a soft card holding the pending
+          attachment chips, the input, and a toolbar rail (+, camera,
+          the About tag, mic, send). Typing stays enabled while Homa
+          works, and sending mid-turn queues; staged files hold Send
+          until the line is free (the queue stays text-only). */}
+      <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3 sm:px-6">
+        {showSuggestions ? (
+          // The chips dock quietly by the keyboard (D1 steal, founder
+          // pick) instead of floating mid-transcript.
+          <div className="mx-auto mb-2.5 flex w-full max-w-[780px] flex-wrap gap-2">
+            {SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => sendMessage(suggestion)}
+                className="rounded-pill bg-[var(--stone-100)] px-3.5 py-1.5 text-[0.8rem] text-muted transition-colors hover:bg-[var(--stone-200)] hover:text-strong"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
         ) : null}
         <form
           ref={composerFormRef}
-          className="mx-auto flex w-full max-w-[780px] items-center gap-2.5 rounded-pill border border-border-subtle bg-card py-2 pl-5 pr-2 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
+          className="mx-auto w-full max-w-[780px] rounded-[22px] border border-border-subtle bg-card px-3 pb-2 pt-2.5 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
           onSubmit={(event) => {
             event.preventDefault();
-            sendMessage(draft);
+            if (attachments.readyCount > 0) {
+              // Enter can submit past a disabled button; the same guard
+              // the button uses holds here.
+              if (busy || attachments.anyUploading || preparingAttachments) return;
+              void sendMessageWithAttachments(draft);
+            } else {
+              sendMessage(draft);
+            }
           }}
         >
-          <Sparkles size={20} className="shrink-0 text-brand" aria-hidden="true" />
+          <PendingAttachmentChips
+            staged={attachments.staged}
+            onRemove={attachments.remove}
+          />
           {dictation.phase !== "idle" ? (
             // Talking replaces typing for the moment: the listening row
             // takes the input's place, X drops the take, the check turns
             // it into editable words. Nothing sends until she sends.
-            <DictationRow
-              phase={dictation.phase}
-              seconds={dictation.seconds}
-              onCancel={dictation.cancel}
-              onAccept={dictation.accept}
-            />
+            <div className="flex min-h-10 items-center px-1">
+              <DictationRow
+                phase={dictation.phase}
+                seconds={dictation.seconds}
+                onCancel={dictation.cancel}
+                onAccept={dictation.accept}
+              />
+            </div>
           ) : (
-            <>
+            <div className="px-1">
               <SlashComposer
                 kids={kids ?? []}
                 skills={slashSkills ?? []}
                 draft={draft}
                 onDraftChange={setDraft}
-                placeholder="Tell Homa about your day…"
+                placeholder={
+                  attachments.staged.length > 0
+                    ? "Add a caption…"
+                    : "Tell Homa about your day…"
+                }
               />
-              {dictation.supported ? <MicButton onStart={dictation.start} /> : null}
-              {/* The Claude-composer shape (founder ruling 2026-07-10
-                  night): while Homa works, an empty composer shows Stop;
-                  a typed one shows Stop AND Send, where Send queues the
-                  message for the moment the turn ends. Idle shows Send. */}
-              {busy ? (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Stop"
-                    onClick={() => agent.stop()}
-                    className={
-                      draft.trim().length > 0
-                        ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong shadow-sm transition-colors hover:border-brand"
-                        : "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-                    }
-                  >
-                    <Square size={14} fill="currentColor" aria-hidden="true" />
-                  </button>
-                  {draft.trim().length > 0 ? (
-                    <button
-                      type="submit"
-                      aria-label="Send"
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-                    >
-                      <ArrowUp size={18} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </>
-              ) : (
-                <button
-                  type="submit"
-                  aria-label="Send"
-                  disabled={draft.trim().length === 0}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
-                >
-                  <ArrowUp size={18} aria-hidden="true" />
-                </button>
-              )}
-            </>
+            </div>
           )}
+          {filingHintOpen && focusChildName ? (
+            <p className="mb-1.5 ml-[52px] w-fit rounded-md bg-[var(--stone-900)] px-2.5 py-1.5 text-xs font-medium text-[var(--stone-50)]">
+              Photos and files you send are saved in {focusChildName}&apos;s
+              binder. Change kids at the top right.
+            </p>
+          ) : null}
+          <div className="mt-0.5 flex items-center gap-0.5">
+            <AttachMenuButton
+              onFiles={attachments.addFiles}
+              disabled={!familyId}
+            />
+            <CameraButton onFiles={attachments.addFiles} disabled={!familyId} />
+            {focusChildName ? (
+              // The filing tag (reader-gate fix: it must explain
+              // itself): tap toggles the plain-words hint above.
+              <button
+                type="button"
+                aria-label={`Attachments save to ${focusChildName}'s binder; tap for details`}
+                onClick={() => setFilingHintOpen((current) => !current)}
+                className="ml-1 inline-flex min-h-8 items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-semibold text-[var(--clay-700)]"
+              >
+                About {focusChildName}
+                <ChevronDown size={12} aria-hidden="true" />
+              </button>
+            ) : null}
+            <span className="flex-1" />
+            {dictation.phase === "idle" && dictation.supported ? (
+              <MicButton onStart={dictation.start} />
+            ) : null}
+            {/* The Claude-composer shape (founder ruling 2026-07-10
+                night): while Homa works, an empty composer shows Stop;
+                a typed one shows Stop AND Send, where Send queues the
+                message for the moment the turn ends. Idle shows Send. */}
+            {busy ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Stop"
+                  onClick={() => agent.stop()}
+                  className={
+                    draft.trim().length > 0
+                      ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong shadow-sm transition-colors hover:border-brand"
+                      : "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                  }
+                >
+                  <Square size={14} fill="currentColor" aria-hidden="true" />
+                </button>
+                {draft.trim().length > 0 && attachments.staged.length === 0 ? (
+                  <button
+                    type="submit"
+                    aria-label="Send"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                  >
+                    <ArrowUp size={18} aria-hidden="true" />
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <button
+                type="submit"
+                aria-label="Send"
+                disabled={
+                  attachments.readyCount > 0
+                    ? attachments.anyUploading || preparingAttachments
+                    : draft.trim().length === 0 || attachments.anyUploading
+                }
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+              >
+                <ArrowUp size={18} aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </form>
+        {attachError ? (
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-danger" role="alert">
+            {attachError}
+          </p>
+        ) : null}
+        {busy && attachments.staged.length > 0 ? (
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-subtle" role="status">
+            Your files go out when Homa finishes this reply.
+          </p>
+        ) : null}
         {dictation.phase === "recording" ? (
           // The contract, visible while she talks (reader gate
           // 2026-07-10: "does the check send my raw words?"): the check

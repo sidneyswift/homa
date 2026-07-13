@@ -3,7 +3,108 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-13 · Child photos: the D4 floor ships with the pfp upload
+## 2026-07-13 · The trajectory chart becomes interactive; real negative months (founder rulings)
+
+From the trajectory-chart comparison lab
+(plans/2026-07-13-trajectory-chart-directions.html, built on Story's
+real history re-scored under one ruler) and three explicit founder
+rulings in that session:
+
+- **Founder ruling, negative months**: "remove that rule. put the real
+  data. if a child is below age put the - number." The chart now plots
+  a below-age frontier at its real negative value (self-care reads -10,
+  not a fixed "growing" slot); the y-axis extends below at-age with
+  plain negative labels. Scoped to the chart: `monthsAhead` stays
+  non-negative everywhere, and the new additive scorer fields
+  `frontierDeltaMonths` (raw signed frontier minus age, uncapped) and
+  `strongestObservedMonths` (the strongest item's anchor) carry the
+  honest numbers. A subject whose only evidence is "not yet" still has
+  no number: the ruling covers measured below-age frontiers, not
+  unmeasured ones. BUILD.md law 4 amended; register row
+  `trajectory-real-negative-months`.
+- **Founder ruling, re-check marker removed**: the armed re-check line
+  is gone from the chart; ReportSnapshot no longer takes plans.
+- **Founder ask, interaction**: report-trajectory.tsx (server SVG) and
+  chart-lightbox.tsx retired, replaced by trajectory-chart.tsx, a
+  client component: at rest only this week's movers plus the strongest
+  subject carry end labels and full color; a ranked legend card below
+  the chart (the founder's "should have a card") lists every subject
+  with its value and a "+N this week" badge and is the hover/tap focus
+  control; a pinned subject opens a meaning box translating the number
+  into the skill and the age it is typical ("typical around age 4½ ·
+  Story is 3"), with the beyondScale "checklist stops here" chip.
+  Capped values display as "15+". Dotted cross-basis stretches and
+  their caption are unchanged.
+- New pure module lib/map/trajectory-story.ts derives movers (net
+  increases only, per the anti-guilt law: drops plot but are never
+  headlined), below-age standings, and the caption the card now writes
+  from data ("Math and language climbed this week..."), deterministic
+  from the eras (the week window anchors to the newest scoring, not
+  render time). lib/map/trajectory-format.ts keeps the client bundle
+  free of @homa/core.
+
+Decisions made alone, smallest-safe versions: the meaning box opens on
+pin only (hover moves line emphasis, never layout); the week-one at-age
+origin convention stays, so a below-age subject's first segment draws
+down (trajectory-downward ruling covers it); stored era JSON that
+predates the new scorer fields gets them filled by ledger rescoring
+where possible, null otherwise, never invented. Subject report cards,
+narrative, and email keep growth framing: the negative-months ruling was
+made on the chart and this pass does not extend it further.
+
+Verified: typecheck, lint, check:map (new below-age fixtures),
+check:isolation, check:events, check:skills-targeting, check:taxonomy,
+check:child-progress, check:progress-ui, next build, and browser
+screenshots of the sample report and Story's live report at phone and
+desktop sizes.
+
+## 2026-07-13 · Chat redesign + attachments ship (approved refined design)
+
+The founder approved the refined chat design (design round:
+plans/2026-07-13-chat-directions.html; approved single design:
+plans/2026-07-13-chat-refined.html, "Refined chat design: approved,
+build it", with tape corners, handwritten photo captions, the compact
+one-line day header, and the seconds count all kept). Built in this
+pass:
+
+- Attachments end to end (founder scope call: "everything SMS takes",
+  saved with the child's records): migration #80 `chat_attachments`
+  (additive, applied to prod via MCP before code ships, allowed to
+  lead), family-scoped Blob upload token route `/api/chat/upload`,
+  prepare/undo route `/api/chat/attachments`, a chat-side normalizer
+  reusing the SMS lanes (captions, STT, Twelve Labs, mammoth, SheetJS),
+  and marker lines (`lib/attachments/markers.ts`) that carry caption +
+  blob URL through `conversation_messages` so scrollback re-renders
+  media. New `chat.attachment_processed` event in the registry.
+- Composer: + menu (photo or video, file), camera button, staged
+  thumbnail chips with an x, browser downscale for photos (EXIF
+  dropped, child-photo posture), the About-kid filing tag with a
+  one-time plain-words hint, docked suggestion chips.
+- Transcript: calmer soft-coral user bubbles, polaroid-style photos
+  with Caveat captions, sage save receipts with Undo (delete removes
+  the row and the blob), compact day labels ("Tuesday · July 14"), a
+  top-edge fade, and the worked-for line ("Worked for N seconds")
+  opening into plain-words steps mapped from tool calls.
+- Spent progress cards read past tense ("You said: Easily"); stale
+  options render as text, never as live-looking buttons (three reader
+  gates flagged this).
+- The snap card: new `ask_for_photo` tool renders a camera card; the
+  full-dim rule lands exactly as ruled (history dims ONLY while a snap
+  card is the live ask). Snapping stages the photo; nothing auto-sends.
+- Copy went through the homa-copy-editor gate; 7 must-fixes landed.
+
+Agent-alone calls, logged with rationale in
+docs/notes/chat-redesign-attachments-implementation.md: the send queue
+stays text-only (staged files hold Send during a running turn), save
+receipts and worked-for seconds are live-session state (scrollback
+shows media without them), chain findings ship sparse until tool
+outputs carry summaries, and the snap card stages instead of
+auto-sending (nothing sends until she sends). Guards at ship time:
+isolation (with new chat_attachments probes), map, events, taxonomy,
+skills-targeting, continuity, child-progress, progress-ui, lint, Next
+build, and eve build all green. Known-unrelated: the concurrent
+trajectory-chart session's SubjectScore change has three of its own
+files failing repo typecheck; this build's files typecheck clean.
 
 Founder instruction: "let me upload a pfp of each kid, and let's use
 that as reference for picturebooks and other materials that are
