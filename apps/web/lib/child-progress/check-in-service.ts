@@ -1,5 +1,6 @@
 import {
   MAP_BANK_VERSION,
+  MAP_SCORER_VERSION,
   ageInMonths,
   getMapItem,
   getMapSubject,
@@ -47,7 +48,9 @@ import type {
   ProgressEvidenceAnswer,
 } from "./types";
 
-const CHILD_PROGRESS_SCORER_VERSION = "map-score-v1";
+/** The core scorer's version, re-exported name kept for existing call
+ * sites; the value now lives beside the scorer it describes. */
+const CHILD_PROGRESS_SCORER_VERSION = MAP_SCORER_VERSION;
 
 interface LockedCheckInContext {
   checkIn: ProgressCheckInRecord;

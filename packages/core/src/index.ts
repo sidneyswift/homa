@@ -70,6 +70,7 @@ export {
 } from "./map/plans";
 
 export {
+  MAP_SCORER_VERSION,
   maxQuestionsForAge,
   scoreMap,
   type SubjectScore,

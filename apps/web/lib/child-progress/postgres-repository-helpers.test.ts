@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { MAP_BANK_VERSION } from "@homa/core";
+import { MAP_BANK_VERSION, ageInMonths } from "@homa/core";
 
 import {
   CHILD_PROGRESS_SNAPSHOT_TRANSACTION_SQL,
@@ -462,11 +462,20 @@ describe("compatibility write contract", () => {
       "generatedAt",
       "narrative",
       "narrativeMeta",
+      "scoredAgeMonths",
+      "scoredBirthDate",
+      "scorerVersion",
       "scores",
       "updatedAt",
     ]);
     assert.equal("token" in update, false);
     assert.equal("history" in update, false);
+    assert.equal(update.scoredBirthDate, view.birthDate);
+    assert.equal(
+      update.scoredAgeMonths,
+      ageInMonths(view.birthDate, new Date("2026-07-11T12:00:00.000Z")),
+    );
+    assert.equal(typeof update.scorerVersion, "string");
   });
 });
 

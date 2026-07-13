@@ -1,4 +1,7 @@
-import type { GrowthEra } from "./growth-story";
+import {
+  trajectoryHasScaleChange,
+  type TrajectoryEra,
+} from "../../../../lib/map/trajectory-eras";
 import { ChartLightbox } from "./chart-lightbox";
 import { ReportTrajectory } from "./report-trajectory";
 
@@ -9,6 +12,10 @@ import { ReportTrajectory } from "./report-trajectory";
  * repeated what the header, the whole picture, and the subject cards
  * already say; the chart is the part that earns the spot). The chart
  * itself marks today and the armed re-check, so no extra caption rows.
+ * When any stretch of the line crosses a measurement change (dotted on
+ * the chart, mixed-scales fix 2), a short caption under the chart says
+ * what the dots mean and that the shown numbers all use the new
+ * measurement; charts with one continuous measuring stick never show it.
  * Pure display over already-computed scores; nothing here writes.
  */
 export function ReportSnapshot({
@@ -22,8 +29,8 @@ export function ReportSnapshot({
   /** Already formatted, e.g. "July 8, 2026" (matches the header band). */
   generatedDate: string;
   plans: { subjectId: string; done: number; total: number; retestAt: string }[];
-  /** Oldest first, the live report last (report-view's eras). */
-  eras: GrowthEra[];
+  /** Oldest first, the live report last (lib/map/trajectory-eras). */
+  eras: TrajectoryEra[];
   /** Outer spacing, owned by the layout: the letter-style page flows
    * this below the note (mt-4, the default); the in-app dashboard grid
    * spaces cards itself and passes "". */
@@ -34,6 +41,7 @@ export function ReportSnapshot({
     .map((plan) => new Date(plan.retestAt))
     .filter((date) => date.getTime() > now)
     .sort((a, b) => a.getTime() - b.getTime())[0];
+  const showsScaleChange = trajectoryHasScaleChange(eras);
 
   return (
     <div className={`rounded-lg bg-[var(--surface-sunken)] p-5 ${className}`.trim()}>
@@ -58,6 +66,16 @@ export function ReportSnapshot({
           </div>
         </ChartLightbox>
       </div>
+      {/* The dotted-stretch caption lives with the chart, not in the card
+          body: the copy-editor gate holds body copy to its two-sentence
+          budget, and the dots this explains are right above it. */}
+      {showsScaleChange ? (
+        <p className="mt-2 text-xs text-muted">
+          A dotted stretch means we improved how we measure, not that
+          {" "}{childName} changed. Every number you see now is measured the
+          new way.
+        </p>
+      ) : null}
     </div>
   );
 }

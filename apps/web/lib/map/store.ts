@@ -8,6 +8,7 @@ import {
   MONTH_PLAN_SUBJECT,
   isInScoredRange,
   MAP_BANK_VERSION,
+  MAP_SCORER_VERSION,
   SCORED_MAX_MONTHS,
   SCORED_MIN_MONTHS,
   scoreMap,
@@ -41,6 +42,11 @@ import {
   uniqueStrings,
 } from "./profile-context";
 import { hashToken, newToken } from "./tokens";
+import {
+  buildTrajectoryEras,
+  type TrajectoryEra,
+  type TrajectoryEvidenceRow,
+} from "./trajectory-eras";
 
 /**
  * All database access for the onboarding flow, ONE WORLD (founder ruling
@@ -734,11 +740,20 @@ export interface ScoredReport {
 
 /** One archived scoring, kept so the report can show dated movement.
  * Snapshots from the narrative era also archive the words that shipped
- * with those numbers; older entries simply lack the keys. */
+ * with those numbers; older entries simply lack the keys. Snapshots
+ * from the measurement-basis era (2026-07-13) also carry the ruler that
+ * produced the numbers: the scorer rules version and the birth date +
+ * age used at scoring time (the trajectory investigation found all
+ * three changing under the chart with no way to tell from the archive).
+ * Older entries lack the stamps, which render paths read as "basis
+ * unknown". */
 export interface ScoreSnapshot {
   scores: MapScores;
   generated_at: string;
   bank_version: string;
+  scorer_version?: string | null;
+  birth_date?: string | null;
+  age_months?: number | null;
   narrative?: ReportNarrative | null;
   narrative_meta?: NarrativeMeta | null;
 }
@@ -775,13 +790,18 @@ export async function createReport(familyId: string, childId: string): Promise<S
       scores: MapScores;
       generated_at: string;
       bank_version: string;
+      scorer_version: string | null;
+      scored_birth_date: string | null;
+      scored_age_months: number | null;
       history: ScoreSnapshot[];
       narrative: ReportNarrative | null;
       narrative_meta: NarrativeMeta | null;
       token: string | null;
     }[]
   >`
-    select scores, generated_at::text as generated_at, bank_version, history,
+    select scores, generated_at::text as generated_at, bank_version,
+           scorer_version, to_char(scored_birth_date, 'YYYY-MM-DD') as scored_birth_date,
+           scored_age_months, history,
            narrative, narrative_meta, token
     from public.child_reports where child_id = ${childId}
   `;
@@ -792,6 +812,9 @@ export async function createReport(familyId: string, childId: string): Promise<S
             scores: existing[0].scores,
             generated_at: existing[0].generated_at,
             bank_version: existing[0].bank_version,
+            scorer_version: existing[0].scorer_version,
+            birth_date: existing[0].scored_birth_date,
+            age_months: existing[0].scored_age_months,
             narrative: existing[0].narrative,
             narrative_meta: existing[0].narrative_meta,
           },
@@ -804,11 +827,17 @@ export async function createReport(familyId: string, childId: string): Promise<S
   // history and the live row's narrative resets until generation lands.
   const token = existing[0]?.token ?? newToken();
   await sql`
-    insert into public.child_reports (child_id, scores, bank_version, token, history, generated_at, updated_at)
-    values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION}, ${token},
-            ${sql.json(history as unknown as DbJson)}, now(), now())
+    insert into public.child_reports (child_id, scores, bank_version,
+            scorer_version, scored_birth_date, scored_age_months,
+            token, history, generated_at, updated_at)
+    values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION},
+            ${MAP_SCORER_VERSION}, ${childRows[0].birth_month}, ${ageMonths},
+            ${token}, ${sql.json(history as unknown as DbJson)}, now(), now())
     on conflict (child_id) do update
       set scores = excluded.scores, bank_version = excluded.bank_version,
+          scorer_version = excluded.scorer_version,
+          scored_birth_date = excluded.scored_birth_date,
+          scored_age_months = excluded.scored_age_months,
           generated_at = now(), updated_at = now(), history = excluded.history,
           narrative = null, narrative_meta = null
   `;
@@ -1031,6 +1060,11 @@ export interface ReportView {
   answers: { itemId: string; answer: MapAnswer }[];
   /** Prior scorings, newest first, for the movement chips. */
   history: ScoreSnapshot[];
+  /** The trajectory chart's scorings, oldest first, re-normalized to
+   * one measuring stick where the evidence ledger reaches (fix 3 of the
+   * mixed-scales investigation); stored numbers plus a basis
+   * fingerprint where it does not. */
+  eras: TrajectoryEra[];
   /** The family's other kids, for the map-the-next-kid handoff. */
   otherKids: { id: string; name: string; inRange: boolean; started: boolean; hasReport: boolean }[];
   /** The LLM-written layer (null until generated; see narrative-store). */
@@ -1043,6 +1077,48 @@ export interface ReportView {
    * migration #22), so the "Call Homa" card can prefill instead of ask
    * again. Null when nothing is linked yet. */
   familyPhone: string | null;
+}
+
+/**
+ * The evidence ledger slice the trajectory re-normalization reads:
+ * every row (active and superseded) for one child, so answer sets can
+ * be reconstructed as of any past scoring. The where clause carries the
+ * tenancy re-scope; a childId under another family reads nothing.
+ */
+export async function getTrajectoryEvidence(
+  familyId: string,
+  childId: string,
+): Promise<TrajectoryEvidenceRow[]> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      item_id: string;
+      answer: TrajectoryEvidenceRow["answer"];
+      observed_at: string;
+      superseded_at: string | null;
+      created_at: string;
+    }[]
+  >`
+    select item_id, answer,
+           to_char(observed_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as observed_at,
+           case when superseded_at is null then null else
+             to_char(superseded_at at time zone 'UTC',
+                     'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')
+           end as superseded_at,
+           to_char(created_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as created_at
+    from public.child_progress_evidence
+    where child_id = ${childId} and family_id = ${familyId}
+    order by observed_at, created_at
+  `;
+  return rows.map((row) => ({
+    itemId: row.item_id,
+    answer: row.answer,
+    observedAt: row.observed_at,
+    supersededAt: row.superseded_at,
+    createdAt: row.created_at,
+  }));
 }
 
 export async function getReportEventIdsByToken(
@@ -1128,6 +1204,14 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     limit 1
   `;
 
+  const history = row.history ?? [];
+  const eras = buildTrajectoryEras({
+    archived: [...history].reverse(),
+    live: { generated_at: row.generated_at, scores: row.scores },
+    evidence: await getTrajectoryEvidence(row.family_id, row.child_id),
+    birthDate: row.birth_month,
+  });
+
   const profile = row.profile ?? {};
   return {
     token: row.token,
@@ -1143,7 +1227,8 @@ export async function getReportByToken(token: string): Promise<ReportView | null
     childId: row.child_id,
     firstView,
     answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
-    history: row.history ?? [],
+    history,
+    eras,
     narrative: row.narrative,
     narrativeMeta: row.narrative_meta,
     otherKids: siblingRows.map((kid) => ({

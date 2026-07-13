@@ -32,6 +32,19 @@ import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem }
 
 export type MapPosition = "ahead" | "on_track" | "growing" | "not_mapped";
 
+/**
+ * Names the scoring RULES in effect, separate from the bank version
+ * (content) and the child's recorded birthday (age basis). Stamped on
+ * every stored scoring (child_reports, its history snapshots, and
+ * child_progress_snapshots) so an archived number can always be traced
+ * to the rules that produced it: the 2026-07-08 rule change (window
+ * credit + age-scaled cap) moved live charts with zero change in child
+ * evidence, and the archives couldn't say why. Bump this whenever
+ * scoring semantics change. "v1" is the window-credit + age-cap era,
+ * matching the value check-in snapshots already store.
+ */
+export const MAP_SCORER_VERSION = "map-score-v1";
+
 /** Ahead begins at half a band above age; below that is "right in the band". */
 export const AHEAD_THRESHOLD_MONTHS = 6;
 /** "Getting there" earns the anchor minus half a band. */

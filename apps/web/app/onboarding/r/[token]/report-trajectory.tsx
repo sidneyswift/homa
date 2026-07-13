@@ -1,6 +1,6 @@
 import { getMapSubject } from "@homa/core";
 
-import type { GrowthEra } from "./growth-story";
+import type { TrajectoryEra } from "../../../../lib/map/trajectory-eras";
 
 /**
  * The trajectory chart: months ahead by subject across check-ins, the
@@ -20,6 +20,11 @@ import type { GrowthEra } from "./growth-story";
  * - Lines that moved are featured; flat lines recede. Each line is
  *   direct-labeled at its endpoint in the future space (no legend, no
  *   color matching across thirteen hues).
+ * - Where adjacent check-ins were measured under different rules (the
+ *   basisKey from lib/map/trajectory-eras: bank, scorer, or recorded
+ *   birthday changed, mixed-scales fix 2), the connecting stretch draws
+ *   dotted instead of solid: the chart never pretends two measuring
+ *   sticks were one line. The snapshot card explains the dots.
  * - What still never renders: negative axis numbers, "behind" wording,
  *   red or warning treatment on a drop, family target lines; +24
  *   remains the display cap, never a goal.
@@ -75,6 +80,9 @@ const FALLBACK_COLOR = "var(--stone-500)";
 interface SeriesPoint {
   t: number;
   months: number;
+  /** The measuring stick behind this point; a change between adjacent
+   * points draws their connecting segment dotted. */
+  basisKey: string;
   /** True for the synthetic at-age starting anchor (drawn lineless-ly:
    * the fan of lines leaving it is the marker). */
   origin?: boolean;
@@ -93,7 +101,7 @@ interface TrajectorySeries {
 /** One line per mapped, age-normed subject, strongest first. Each series
  * opens with the at-age origin anchor; eras where a subject wasn't
  * mapped yet simply contribute no point. */
-function buildSeries(eras: GrowthEra[], tStart: number): TrajectorySeries[] {
+function buildSeries(eras: TrajectoryEra[], tStart: number): TrajectorySeries[] {
   const latest = eras[eras.length - 1];
   return latest.scores.strengthOrder
     .map((subjectId) => {
@@ -104,11 +112,19 @@ function buildSeries(eras: GrowthEra[], tStart: number): TrajectorySeries[] {
         points.push({
           t: new Date(era.generated_at).getTime(),
           months: score.monthsAhead ?? GROWING_MONTHS,
+          basisKey: era.basisKey,
         });
       }
       points.sort((a, b) => a.t - b.t);
       if (points.length > 0) {
-        points.unshift({ t: tStart, months: 0, origin: true });
+        // The synthetic anchor shares the first real point's basis, so
+        // the week-one segment always draws solid.
+        points.unshift({
+          t: tStart,
+          months: 0,
+          basisKey: points[0].basisKey,
+          origin: true,
+        });
       }
       const moved = points.some((point) => point.months !== points[0].months);
       const lastMonths = points.length > 0 ? points[points.length - 1].months : 0;
@@ -164,8 +180,8 @@ export function ReportTrajectory({
   nextRecheckAt = null,
 }: {
   childName: string;
-  /** Oldest first, the live report last (report-view's eras). */
-  eras: GrowthEra[];
+  /** Oldest first, the live report last (lib/map/trajectory-eras). */
+  eras: TrajectoryEra[];
   /** ISO date of the soonest armed plan re-check, marked in the future
    * window when present. */
   nextRecheckAt?: string | null;
@@ -332,25 +348,32 @@ export function ReportTrajectory({
         </>
       ) : null}
 
-      {/* Muted lines first, featured lines on top of them. */}
+      {/* Muted lines first, featured lines on top of them. Each line is
+          drawn segment by segment so a stretch between check-ins that
+          were measured differently can go dotted (mixed-scales fix 2)
+          while the rest stays solid. */}
       {[...series]
         .map((entry, seriesIndex) => ({ entry, seriesIndex }))
         .sort((a, b) => Number(a.entry.featured) - Number(b.entry.featured))
         .map(({ entry, seriesIndex }) => (
           <g key={entry.subjectId} opacity={entry.featured ? 0.95 : 0.45}>
-            <polyline
-              points={entry.points
-                .map(
-                  (point) =>
-                    `${x(point.t).toFixed(1)},${laneY(point.months, seriesIndex).toFixed(1)}`,
-                )
-                .join(" ")}
-              fill="none"
-              stroke={entry.color}
-              strokeWidth={entry.featured ? 2.5 : 1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            {entry.points.slice(1).map((point, index) => {
+              const from = entry.points[index];
+              const crossesScales = from.basisKey !== point.basisKey;
+              return (
+                <line
+                  key={`${entry.subjectId}-seg-${point.t}`}
+                  x1={x(from.t).toFixed(1)}
+                  y1={laneY(from.months, seriesIndex).toFixed(1)}
+                  x2={x(point.t).toFixed(1)}
+                  y2={laneY(point.months, seriesIndex).toFixed(1)}
+                  stroke={entry.color}
+                  strokeWidth={entry.featured ? 2.5 : 1.5}
+                  strokeLinecap="round"
+                  strokeDasharray={crossesScales ? "1 5" : undefined}
+                />
+              );
+            })}
             {entry.points.map((point, index) =>
               point.origin ? null : (
                 <circle

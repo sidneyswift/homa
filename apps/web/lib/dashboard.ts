@@ -5,6 +5,7 @@ import {
   type PlanWeek,
 } from "@homa/core";
 
+import type { ArchivedScoring } from "./map/trajectory-eras";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -25,8 +26,10 @@ export interface DashboardReport {
   token: string | null;
   scores: MapScores;
   generatedAt: string;
-  /** Prior scorings, newest first, for honest movement lines. */
-  history: { scores: MapScores; generated_at: string }[];
+  /** Prior scorings, newest first, for honest movement lines. Entries
+   * written after migration #78 also carry their measurement-basis
+   * stamps, which the trajectory chart reads. */
+  history: ArchivedScoring[];
 }
 
 export async function getReportsForChildren(
@@ -47,7 +50,7 @@ export async function getReportsForChildren(
         token: (row.token as string | null) ?? null,
         scores: row.scores as MapScores,
         generatedAt: row.generated_at as string,
-        history: (row.history ?? []) as { scores: MapScores; generated_at: string }[],
+        history: (row.history ?? []) as ArchivedScoring[],
       },
     ]),
   );

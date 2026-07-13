@@ -21,11 +21,11 @@ import {
 } from "@homa/core";
 
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
+import type { TrajectoryEra } from "../../../../lib/map/trajectory-eras";
 import type { WallCheckout } from "../../../../lib/billing/wall-types";
 import { Logo } from "../../../../components/brand/Logo";
 import { DoorLink } from "../../../../components/billing/door-link";
 import { CallHomaPs } from "./call-homa-ps";
-import type { GrowthEra } from "./growth-story";
 import { MonthButton } from "./month-button";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
 import { ReportActions } from "./report-actions";
@@ -74,6 +74,10 @@ export interface ReportViewData {
   childId: string;
   answers: { itemId: string; answer: MapAnswer }[];
   history: { scores: MapScores; generated_at: string; narrative?: ReportNarrative | null }[];
+  /** The trajectory chart's scorings, oldest first, live last,
+   * re-normalized to one measuring stick where the evidence ledger
+   * allows (lib/map/trajectory-eras). */
+  eras: TrajectoryEra[];
   otherKids: { id: string; name: string; inRange: boolean; hasReport: boolean }[];
   /** Built months and their synced check-off counts (empty on sample). */
   plans: { subjectId: string; done: number; total: number; retestAt: string }[];
@@ -218,22 +222,10 @@ export function ReportView({
    * as "this month's plan"). */
   const monthName = new Date().toLocaleDateString("en-US", { month: "long" });
 
-  // The growth story reads the whole archive, oldest chapter first, the
-  // live report as the closing chapter.
-  const eras: GrowthEra[] = [
-    ...[...report.history]
-      .reverse()
-      .map((entry) => ({
-        generated_at: entry.generated_at,
-        scores: entry.scores,
-        narrative: entry.narrative ?? null,
-      })),
-    {
-      generated_at: report.generatedAt,
-      scores: report.scores,
-      narrative: narrativeView?.narrative ?? null,
-    },
-  ];
+  // The trajectory's eras arrive precomputed (oldest first, live last,
+  // re-normalized where the evidence ledger allows), so this renderer
+  // never mixes measuring sticks itself.
+  const eras = report.eras;
 
   const sourceKeys = new Set<string>();
   for (const score of scores) {

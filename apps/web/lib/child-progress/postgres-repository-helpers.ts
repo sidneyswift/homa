@@ -1,4 +1,9 @@
-import { MAP_BANK_VERSION, type MapAnswer } from "@homa/core";
+import {
+  ageInMonths,
+  MAP_BANK_VERSION,
+  MAP_SCORER_VERSION,
+  type MapAnswer,
+} from "@homa/core";
 
 import { parseProgressCheckInRecord } from "./check-in-schema";
 import type {
@@ -399,6 +404,16 @@ export function buildChildReportCompatibilityUpdate(
   return {
     scores: input.view.scores,
     bankVersion: input.bankVersion,
+    // The measurement-basis stamps (migration #78): noon UTC of the
+    // projection's zoned date is the same age convention the projector
+    // itself uses (projection.ts utcNoonForDateKey), so the stamped age
+    // always equals the age inside the scores.
+    scorerVersion: MAP_SCORER_VERSION,
+    scoredBirthDate: input.view.birthDate,
+    scoredAgeMonths: ageInMonths(
+      input.view.birthDate,
+      new Date(`${input.projectionDate}T12:00:00.000Z`),
+    ),
     generatedAt: input.view.projectedAt,
     updatedAt: input.view.projectedAt,
     narrative: null,

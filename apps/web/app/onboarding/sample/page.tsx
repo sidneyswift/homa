@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { scoreMap } from "@homa/core";
 
+import type { TrajectoryEra } from "../../../lib/map/trajectory-eras";
 import { ReportView, type ReportViewData } from "../r/[token]/report-view";
 import { SAMPLE_NARRATIVE } from "./narrative.fixture";
 import { SAMPLE_AGE_MONTHS, SAMPLE_ANSWERS, SAMPLE_PRIOR_ANSWERS } from "./sample-answers";
@@ -57,11 +58,30 @@ export default function SampleReportPage() {
   const monthAgo = new Date();
   monthAgo.setDate(monthAgo.getDate() - 28);
 
+  // Both sample scorings are computed right here under one bank and one
+  // scorer, so the eras declare one shared basis: the demonstration
+  // chart must never grow a "we changed how we measure" boundary.
+  const generatedAt = new Date().toISOString();
+  const eras: TrajectoryEra[] = [
+    {
+      generated_at: monthAgo.toISOString(),
+      scores: priorScores,
+      renormalized: false,
+      basisKey: "sample",
+    },
+    {
+      generated_at: generatedAt,
+      scores,
+      renormalized: false,
+      basisKey: "sample",
+    },
+  ];
+
   const data: ReportViewData = {
     token: "sample",
     scores,
     bankVersion: "sample",
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     childName: "Maya",
     birthMonth,
     parentFirstName: "Sarah",
@@ -70,6 +90,7 @@ export default function SampleReportPage() {
     childId: "00000000-0000-0000-0000-000000000000",
     answers: answers.map((entry) => ({ itemId: entry.itemId, answer: entry.answer })),
     history: [{ scores: priorScores, generated_at: monthAgo.toISOString() }],
+    eras,
     otherKids: [],
     plans: [],
     familyPhone: null,
