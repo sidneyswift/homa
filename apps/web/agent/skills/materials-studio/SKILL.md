@@ -305,9 +305,12 @@ counters):
 
 ## Foldable / interactive notebook insert
 
-Reference file: `references/2026-07-12-pemdas-foldable-math-doodles.pdf`
-— a 25-page PEMDAS foldable by Math Doodles (TPT). Study it for layout,
-fold geometry, color-coding, mnemonic anchoring, and embedded practice.
+Reference image: `references/homa-foldable-reference.png`
+— a Homa-style foldable example showing tri-fold layout, fold lines,
+glue tab, color-coded operation symbols, definitions panel, and embedded
+practice panel. Study it for layout, fold geometry, and panel structure.
+Original structural patterns drawn from TPT foldable inspo (Math Doodles
+PEMDAS), re-expressed in Homa's design language.
 
 A foldable is a tactile learning tool the child prints, cuts, folds,
 and glues into a notebook. The reference material and the practice
@@ -410,10 +413,13 @@ surgical revision matters more than organic feel.
 
 ## Structured outline / essay scaffold
 
-Reference file: `references/2026-07-12-five-paragraph-essay-outline-daring-english-teacher.pdf`
-— an 8-page five-paragraph essay outline by The Daring English Teacher
-(TPT). Study it for two-column instruction|work layout, Roman numeral
-sections, difficulty variants (2 vs 3 examples), and process metadata.
+Reference image: `references/homa-outline-reference.png`
+— a Homa-style structured outline example showing two-column
+instruction|work layout, Roman numeral section headers, labeled
+sub-fields with blank writing lines, and clean B&W design. Study it
+for layout proportions, section structure, and field labeling.
+Original structural patterns drawn from TPT essay outline inspo
+(The Daring English Teacher), re-expressed in Homa's design language.
 
 A structured outline breaks a complex task — writing an essay, planning
 a research project, outlining a book report — into a fill-in-the-blank
