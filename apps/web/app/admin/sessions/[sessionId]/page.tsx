@@ -11,6 +11,7 @@ import {
   formatTokens,
   timeLabel,
 } from "../../../../lib/admin/format";
+import { formatUsd } from "../../../../lib/model-pricing";
 import { EmptyNote, Pill, SectionHead, statusTone } from "../../ui";
 
 /**
@@ -96,7 +97,8 @@ export default async function AdminSessionDetailPage({
         )}
         {startedAt ? `${dayLabel(startedAt, timeZone)} · ${timeLabel(startedAt, timeZone)} · ` : ""}
         {detail.messages.length} messages · {detail.toolCalls.length} tool calls ·{" "}
-        {formatTokens(totalTokensIn)} in / {formatTokens(totalTokensOut)} out
+        {formatTokens(totalTokensIn)} in / {formatTokens(totalTokensOut)} out ·{" "}
+        {formatUsd(detail.usageCost.estimatedUsd)}
       </p>
       <p className="mt-1 font-mono text-[0.62rem] text-subtle">{detail.sessionId}</p>
 
@@ -192,25 +194,43 @@ export default async function AdminSessionDetailPage({
         </ol>
       )}
 
-      <SectionHead eyebrow="Bill" title="What this session cost" />
+      <SectionHead
+        eyebrow="Bill"
+        title="What this session cost"
+        sub="Dollar figures are estimates from the price book in lib/model-pricing.ts; the Gateway invoice is the source of truth."
+      />
       {detail.usage.length === 0 ? (
         <EmptyNote>No model usage recorded on this session id.</EmptyNote>
       ) : (
-        <ul className="mt-3 flex flex-col gap-1.5">
-          {detail.usage.map((line, index) => (
-            <li
-              key={index}
-              className="flex flex-wrap items-center gap-2 rounded-md border border-border-subtle bg-card px-3.5 py-2 text-sm shadow-sm"
-            >
-              <span className="font-semibold text-body">{line.surface}</span>
-              <span className="font-mono text-xs text-subtle">{line.model}</span>
-              <span className="ml-auto font-mono text-xs text-muted">
-                {line.calls} calls · {formatTokens(line.tokensIn)} in /{" "}
-                {formatTokens(line.tokensOut)} out
+        <>
+          <ul className="mt-3 flex flex-col gap-1.5">
+            {detail.usage.map((line, index) => (
+              <li
+                key={index}
+                className="flex flex-wrap items-center gap-2 rounded-md border border-border-subtle bg-card px-3.5 py-2 text-sm shadow-sm"
+              >
+                <span className="font-semibold text-body">{line.surface}</span>
+                <span className="font-mono text-xs text-subtle">{line.model}</span>
+                <span className="ml-auto font-mono text-xs text-muted">
+                  {line.calls} calls · {formatTokens(line.tokensIn)} in /{" "}
+                  {formatTokens(line.tokensOut)} out ·{" "}
+                  <span className="font-semibold text-body">
+                    {line.estimatedUsd === null ? "no price on file" : formatUsd(line.estimatedUsd)}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm font-semibold text-body">
+            Estimated total · {formatUsd(detail.usageCost.estimatedUsd)}
+            {detail.usageCost.unpricedModels.length > 0 ? (
+              <span className="font-normal text-subtle">
+                {" "}
+                · not counted, no price on file: {detail.usageCost.unpricedModels.join(", ")}
               </span>
-            </li>
-          ))}
-        </ul>
+            ) : null}
+          </p>
+        </>
       )}
 
       {detail.run ? (

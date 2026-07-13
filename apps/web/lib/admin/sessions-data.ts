@@ -1,4 +1,9 @@
 import { adminDb } from "./db";
+import {
+  estimateUsageCostUsd,
+  summarizeUsageCost,
+  type UsageCostSummary,
+} from "../model-pricing";
 
 /**
  * The session inspector's data (deep view direction 2): every agent run
@@ -12,6 +17,8 @@ import { adminDb } from "./db";
  *   - homa_task_runs (proactive work), merged by session_id.
  *
  * Sequential queries, ::text casts, json aggregates as text (db.ts laws).
+ * Usage is aggregated per model so the price book can cost each model at
+ * its own rates before rows collapse into one session line.
  */
 
 export interface SessionListRow {
@@ -28,6 +35,7 @@ export interface SessionListRow {
   toolCallCount: number;
   tokensIn: number;
   tokensOut: number;
+  cost: UsageCostSummary;
   run: {
     id: string;
     kind: string;
@@ -110,24 +118,41 @@ export async function listSessions(
   // sql.array() and json parameters both mis-serialize (db.ts posture);
   // session ids and uuids never contain commas.
   const sessionIds = grouped.map((row) => row.session_id).join(",");
-  const usageBySession = new Map<string, { tokensIn: number; tokensOut: number }>();
+  const usageBySession = new Map<
+    string,
+    { model: string; tokensIn: number; tokensOut: number; cacheRead: number; cacheWrite: number }[]
+  >();
   const toolsBySession = new Map<string, number>();
   if (grouped.length > 0) {
     const usage = await sql<
-      { session_id: string; tokens_in: number; tokens_out: number }[]
+      {
+        session_id: string;
+        model: string;
+        tokens_in: number;
+        tokens_out: number;
+        cache_read: number;
+        cache_write: number;
+      }[]
     >`
-      select session_id,
+      select session_id, model,
              coalesce(sum(input_tokens), 0)::int as tokens_in,
-             coalesce(sum(output_tokens), 0)::int as tokens_out
+             coalesce(sum(output_tokens), 0)::int as tokens_out,
+             coalesce(sum(cache_read_tokens), 0)::int as cache_read,
+             coalesce(sum(cache_write_tokens), 0)::int as cache_write
       from public.model_usage
       where session_id in (select unnest(string_to_array(${sessionIds}, ',')))
-      group by session_id
+      group by session_id, model
     `;
     for (const row of usage) {
-      usageBySession.set(row.session_id, {
+      const lines = usageBySession.get(row.session_id) ?? [];
+      lines.push({
+        model: row.model,
         tokensIn: row.tokens_in,
         tokensOut: row.tokens_out,
+        cacheRead: row.cache_read,
+        cacheWrite: row.cache_write,
       });
+      usageBySession.set(row.session_id, lines);
     }
     const tools = await sql<{ session_id: string; n: number }[]>`
       select session_id, count(*)::int as n
@@ -147,7 +172,7 @@ export async function listSessions(
 
   const rows: SessionListRow[] = grouped.map((row) => {
     const run = runsBySession.get(row.session_id) ?? null;
-    const usage = usageBySession.get(row.session_id);
+    const usage = usageBySession.get(row.session_id) ?? [];
     let channels: string[] = [];
     try {
       channels = JSON.parse(row.channels) as string[];
@@ -165,8 +190,17 @@ export async function listSessions(
       messageCount: row.message_count,
       userMessageCount: row.user_message_count,
       toolCallCount: toolsBySession.get(row.session_id) ?? 0,
-      tokensIn: usage?.tokensIn ?? 0,
-      tokensOut: usage?.tokensOut ?? 0,
+      tokensIn: usage.reduce((sum, line) => sum + line.tokensIn, 0),
+      tokensOut: usage.reduce((sum, line) => sum + line.tokensOut, 0),
+      cost: summarizeUsageCost(
+        usage.map((line) => ({
+          model: line.model,
+          inputTokens: line.tokensIn,
+          outputTokens: line.tokensOut,
+          cacheReadTokens: line.cacheRead,
+          cacheWriteTokens: line.cacheWrite,
+        })),
+      ),
       run: run
         ? { id: run.id, kind: run.kind, title: run.title, status: run.status, error: run.error }
         : null,
@@ -192,6 +226,7 @@ export async function listSessions(
       toolCallCount: run.session_id ? toolsBySession.get(run.session_id) ?? 0 : 0,
       tokensIn: 0,
       tokensOut: 0,
+      cost: { estimatedUsd: 0, unpricedModels: [] },
       run: { id: run.id, kind: run.kind, title: run.title, status: run.status, error: run.error },
     });
   }
@@ -243,6 +278,8 @@ export interface SessionUsageLine {
   calls: number;
   tokensIn: number;
   tokensOut: number;
+  /** Price-book estimate for this line, null when the model is unpriced. */
+  estimatedUsd: number | null;
 }
 
 export interface SessionDetail {
@@ -253,6 +290,7 @@ export interface SessionDetail {
   toolCalls: SessionToolCall[];
   snapshots: SessionSnapshot[];
   usage: SessionUsageLine[];
+  usageCost: UsageCostSummary;
   run: {
     id: string;
     kind: string;
@@ -379,11 +417,21 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
   `;
 
   const usage = await sql<
-    { surface: string; model: string; calls: number; tokens_in: number; tokens_out: number }[]
+    {
+      surface: string;
+      model: string;
+      calls: number;
+      tokens_in: number;
+      tokens_out: number;
+      cache_read: number;
+      cache_write: number;
+    }[]
   >`
     select surface, model, count(*)::int as calls,
            coalesce(sum(input_tokens), 0)::int as tokens_in,
-           coalesce(sum(output_tokens), 0)::int as tokens_out
+           coalesce(sum(output_tokens), 0)::int as tokens_out,
+           coalesce(sum(cache_read_tokens), 0)::int as cache_read,
+           coalesce(sum(cache_write_tokens), 0)::int as cache_write
     from public.model_usage
     where session_id = ${sessionId}
     group by surface, model
@@ -447,7 +495,22 @@ export async function getSessionDetail(sessionId: string): Promise<SessionDetail
       calls: row.calls,
       tokensIn: row.tokens_in,
       tokensOut: row.tokens_out,
+      estimatedUsd: estimateUsageCostUsd(row.model, {
+        inputTokens: row.tokens_in,
+        outputTokens: row.tokens_out,
+        cacheReadTokens: row.cache_read,
+        cacheWriteTokens: row.cache_write,
+      }),
     })),
+    usageCost: summarizeUsageCost(
+      usage.map((row) => ({
+        model: row.model,
+        inputTokens: row.tokens_in,
+        outputTokens: row.tokens_out,
+        cacheReadTokens: row.cache_read,
+        cacheWriteTokens: row.cache_write,
+      })),
+    ),
     run: run
       ? {
           id: run.id,

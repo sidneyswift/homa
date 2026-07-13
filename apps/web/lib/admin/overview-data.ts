@@ -1,5 +1,6 @@
 import { adminDb } from "./db";
 import { getFamilySnapshots, type FamilySnapshot } from "./roster-data";
+import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
 
 /**
  * Fleet aggregates for the founder console's overview (MJ-14 mission
@@ -57,6 +58,8 @@ export interface FleetOverview {
   cronLate: boolean;
   modelCalls: number;
   modelTokens: number;
+  /** Price-book estimate of range spend, plus any unpriced models. */
+  modelCost: UsageCostSummary;
 }
 
 export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetOverview> {
@@ -132,11 +135,26 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     where job = 'map_cron'
     order by ran_at desc limit 1
   `;
-  const usageRows = await sql<{ calls: number; tokens: number }[]>`
-    select count(*)::int as calls,
-           (coalesce(sum(input_tokens), 0) + coalesce(sum(output_tokens), 0))::int as tokens
+  // Grouped by model so each one prices at its own input/output/cache
+  // rates; the tile then shows the summed estimate.
+  const usageRows = await sql<
+    {
+      model: string;
+      calls: number;
+      tokens_in: number;
+      tokens_out: number;
+      cache_read: number;
+      cache_write: number;
+    }[]
+  >`
+    select model, count(*)::int as calls,
+           coalesce(sum(input_tokens), 0)::int as tokens_in,
+           coalesce(sum(output_tokens), 0)::int as tokens_out,
+           coalesce(sum(cache_read_tokens), 0)::int as cache_read,
+           coalesce(sum(cache_write_tokens), 0)::int as cache_write
     from public.model_usage
     where created_at >= now() - ${interval}::interval
+    group by model
   `;
 
   const cutoff = Date.now() - rangeDays * 24 * 60 * 60 * 1000;
@@ -189,7 +207,16 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     cronLate: cronRows[0]
       ? Date.now() - new Date(cronRows[0].ran_at).getTime() > 2 * 60 * 60 * 1000
       : false,
-    modelCalls: usageRows[0].calls,
-    modelTokens: usageRows[0].tokens,
+    modelCalls: usageRows.reduce((sum, row) => sum + row.calls, 0),
+    modelTokens: usageRows.reduce((sum, row) => sum + row.tokens_in + row.tokens_out, 0),
+    modelCost: summarizeUsageCost(
+      usageRows.map((row) => ({
+        model: row.model,
+        inputTokens: row.tokens_in,
+        outputTokens: row.tokens_out,
+        cacheReadTokens: row.cache_read,
+        cacheWriteTokens: row.cache_write,
+      })),
+    ),
   };
 }

@@ -1,5 +1,6 @@
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
+import { estimateUsageCostUsd } from "../model-pricing";
 
 /**
  * The founder console's family backbone (MJ-14): one snapshot per family
@@ -44,6 +45,8 @@ export interface FamilySnapshot {
   activityByDay: number[];
   latestRuns: Partial<Record<"journal_prompt" | "morning_brief", LatestRun>>;
   tokens28d: number;
+  /** Price-book estimate of the family's 28 day AI spend. */
+  cost28dUsd: number;
   stage: FamilyStage;
 }
 
@@ -111,18 +114,46 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
     where family_id is not null and kind in ('journal_prompt', 'morning_brief')
     order by family_id, kind, started_at desc
   `;
-  const usage = await sql<{ family_id: string; tokens: number }[]>`
-    select family_id,
-           (coalesce(sum(input_tokens), 0) + coalesce(sum(output_tokens), 0))::int as tokens
+  const usage = await sql<
+    {
+      family_id: string;
+      model: string;
+      tokens_in: number;
+      tokens_out: number;
+      cache_read: number;
+      cache_write: number;
+    }[]
+  >`
+    select family_id, model,
+           coalesce(sum(input_tokens), 0)::int as tokens_in,
+           coalesce(sum(output_tokens), 0)::int as tokens_out,
+           coalesce(sum(cache_read_tokens), 0)::int as cache_read,
+           coalesce(sum(cache_write_tokens), 0)::int as cache_write
     from public.model_usage
     where family_id is not null and created_at >= now() - interval '28 days'
-    group by family_id
+    group by family_id, model
   `;
 
   const kidsBy = new Map(kids.map((row) => [row.family_id, row]));
   const reportsBy = new Map(reports.map((row) => [row.family_id, row]));
   const activityBy = new Map(activity.map((row) => [row.family_id, row]));
-  const usageBy = new Map(usage.map((row) => [row.family_id, row.tokens]));
+  const tokensBy = new Map<string, number>();
+  const costBy = new Map<string, number>();
+  for (const row of usage) {
+    tokensBy.set(
+      row.family_id,
+      (tokensBy.get(row.family_id) ?? 0) + row.tokens_in + row.tokens_out,
+    );
+    // Unpriced models add $0 here; the overview tile carries the alarm.
+    const usd =
+      estimateUsageCostUsd(row.model, {
+        inputTokens: row.tokens_in,
+        outputTokens: row.tokens_out,
+        cacheReadTokens: row.cache_read,
+        cacheWriteTokens: row.cache_write,
+      }) ?? 0;
+    costBy.set(row.family_id, (costBy.get(row.family_id) ?? 0) + usd);
+  }
 
   const dayKeys: string[] = [];
   for (let back = 6; back >= 0; back -= 1) {
@@ -182,7 +213,8 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
       userMessages7d: activityRow?.recent ?? 0,
       activityByDay: dayKeys.map((key) => days?.get(key) ?? 0),
       latestRuns: runsBy.get(family.id) ?? {},
-      tokens28d: usageBy.get(family.id) ?? 0,
+      tokens28d: tokensBy.get(family.id) ?? 0,
+      cost28dUsd: costBy.get(family.id) ?? 0,
       stage,
     };
   });

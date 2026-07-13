@@ -18,6 +18,11 @@ import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import {
+  estimateUsageCostUsd,
+  formatUsd,
+} from "../apps/web/lib/model-pricing";
+
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
   loadEnvFile(path.join(repoRoot, "apps/web/.env.local"));
@@ -43,6 +48,8 @@ interface SurfaceRow {
   calls: string;
   input_tokens: string | null;
   output_tokens: string | null;
+  cache_read: string | null;
+  cache_write: string | null;
   images: string | null;
 }
 
@@ -54,6 +61,8 @@ const rows = await sql<SurfaceRow[]>`
          count(*)::text as calls,
          sum(input_tokens)::text as input_tokens,
          sum(output_tokens)::text as output_tokens,
+         sum(cache_read_tokens)::text as cache_read,
+         sum(cache_write_tokens)::text as cache_write,
          sum(images_count)::text as images
   from public.model_usage
   where created_at >= ${since}
@@ -67,6 +76,8 @@ if (rows.length === 0) {
   console.log("  (no usage recorded in the window)");
 } else {
   let currentFamily: string | null | undefined;
+  let totalUsd = 0;
+  const unpriced = new Set<string>();
   for (const row of rows) {
     if (row.family_id !== currentFamily) {
       currentFamily = row.family_id;
@@ -77,9 +88,22 @@ if (rows.length === 0) {
         ? ` in=${row.input_tokens ?? 0} out=${row.output_tokens ?? 0}`
         : "";
     const images = row.images && row.images !== "0" ? ` images=${row.images}` : "";
+    const usd = estimateUsageCostUsd(row.model, {
+      inputTokens: Number(row.input_tokens ?? 0),
+      outputTokens: Number(row.output_tokens ?? 0),
+      cacheReadTokens: Number(row.cache_read ?? 0),
+      cacheWriteTokens: Number(row.cache_write ?? 0),
+    });
+    if (usd === null) unpriced.add(row.model);
+    else totalUsd += usd;
+    const cost = usd === null ? " est=(no price on file)" : ` est=${formatUsd(usd)}`;
     console.log(
-      `  ${row.surface.padEnd(18)} ${row.model.padEnd(34)} calls=${row.calls}${tokens}${images}`,
+      `  ${row.surface.padEnd(18)} ${row.model.padEnd(34)} calls=${row.calls}${tokens}${images}${cost}`,
     );
+  }
+  console.log(`\nestimated total: ${formatUsd(totalUsd)} (price book: apps/web/lib/model-pricing.ts)`);
+  if (unpriced.size > 0) {
+    console.log(`not counted, no price on file: ${[...unpriced].sort().join(", ")}`);
   }
 }
 

@@ -76,6 +76,15 @@ export function median(values: number[]): number {
   return sorted.length % 2 === 0 ? Math.round((sorted[middle - 1] + sorted[middle]) / 2) : sorted[middle];
 }
 
+/** Median without the integer rounding, for dollar amounts where cents
+ * carry the meaning (median() would turn $0.42 into $0). */
+export function medianExact(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
 /** Age in whole years from a full birth date (children.birth_month holds
  * YYYY-MM-DD since the 2026-07-11 ruling). */
 export function ageYears(birthDate: string, now: Date = new Date()): number {

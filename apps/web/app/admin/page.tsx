@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import { requireFounder } from "../../lib/admin/gate";
 import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-data";
-import { formatInt, formatTokens, median, percent, timeAgo } from "../../lib/admin/format";
+import { formatInt, formatTokens, medianExact, percent, timeAgo } from "../../lib/admin/format";
+import { formatUsd } from "../../lib/model-pricing";
 import { QUIET_AFTER_DAYS } from "../../lib/admin/stage";
 import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
 
@@ -41,7 +42,7 @@ export default async function AdminOverviewPage({
   const paying = data.snapshots.filter(
     (s) => s.subscriptionStatus === "active" || s.subscriptionStatus === "trialing",
   );
-  const tokensPerFamily = data.snapshots.filter((s) => s.tokens28d > 0).map((s) => s.tokens28d);
+  const costPerFamily = data.snapshots.filter((s) => s.cost28dUsd > 0).map((s) => s.cost28dUsd);
   const emailSubmitted =
     (data.emailCounts.submitted ?? 0) + (data.emailCounts.delivered ?? 0);
   const emailTroubleCount =
@@ -183,9 +184,14 @@ export default async function AdminOverviewPage({
           subTone={paying.length > 0 ? "sage" : "muted"}
         />
         <Tile
-          label="AI usage"
-          value={formatTokens(data.modelTokens)}
-          sub={`${formatInt(data.modelCalls)} calls · P50 ${formatTokens(median(tokensPerFamily))}/family (28d) · pricing joins at M1-13`}
+          label="AI cost (est)"
+          value={formatUsd(data.modelCost.estimatedUsd)}
+          sub={
+            data.modelCost.unpricedModels.length > 0
+              ? `no price on file: ${data.modelCost.unpricedModels.join(", ")} · add it to lib/model-pricing.ts`
+              : `${formatTokens(data.modelTokens)} tokens · ${formatInt(data.modelCalls)} calls · P50 ${formatUsd(medianExact(costPerFamily))}/family (28d)`
+          }
+          subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
         />
         <Tile
           label="Map emails"

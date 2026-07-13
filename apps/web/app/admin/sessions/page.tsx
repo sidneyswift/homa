@@ -4,6 +4,7 @@ import Link from "next/link";
 import { listSessions } from "../../../lib/admin/sessions-data";
 import { requireFounder } from "../../../lib/admin/gate";
 import { adminTimeZone, dayKey, formatTokens, timeLabel } from "../../../lib/admin/format";
+import { formatUsd } from "../../../lib/model-pricing";
 import { EmptyNote, Pill, statusTone } from "../ui";
 
 /**
@@ -116,6 +117,8 @@ export default async function AdminSessionsPage({
                   <span className="block font-mono text-[0.66rem] text-subtle">
                     {session.messageCount} messages · {session.toolCallCount} tool calls ·{" "}
                     {formatTokens(session.tokensIn)} in / {formatTokens(session.tokensOut)} out
+                    {session.cost.estimatedUsd > 0 ? ` · ${formatUsd(session.cost.estimatedUsd)}` : ""}
+                    {session.cost.unpricedModels.length > 0 ? " · unpriced usage" : ""}
                     {session.run?.error ? ` · ${session.run.error}` : ""}
                   </span>
                 </span>

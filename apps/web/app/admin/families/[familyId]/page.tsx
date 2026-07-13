@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getFamilyDetail } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
 import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
+import { formatUsd } from "../../../../lib/model-pricing";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone } from "../../ui";
 import { FamilyTabs } from "./family-tabs";
@@ -127,8 +128,9 @@ export default async function AdminFamilyDetailPage({
           <p className="mt-1 font-display text-xl font-semibold text-strong">{detail.memoriesCount}</p>
         </div>
         <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <p className="text-[0.72rem] font-bold text-muted">AI tokens 28d</p>
-          <p className="mt-1 font-display text-xl font-semibold text-strong">{formatTokens(detail.tokens28d)}</p>
+          <p className="text-[0.72rem] font-bold text-muted">AI cost 28d (est)</p>
+          <p className="mt-1 font-display text-xl font-semibold text-strong">{formatUsd(detail.cost28dUsd)}</p>
+          <p className="mt-1 text-[0.72rem] text-subtle">{formatTokens(detail.tokens28d)} tokens</p>
         </div>
       </div>
 

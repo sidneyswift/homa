@@ -1,5 +1,6 @@
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
+import { summarizeUsageCost } from "../model-pricing";
 
 /**
  * One family's whole story for /admin/families/[familyId] (MJ-14,
@@ -36,6 +37,8 @@ export interface FamilyDetail {
   hoursMinutes28d: number;
   memoriesCount: number;
   tokens28d: number;
+  /** Price-book estimate of the family's 28 day AI spend. */
+  cost28dUsd: number;
   recentEvents: { name: string; createdAt: string }[];
 }
 
@@ -134,10 +137,23 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
   const memories = await sql<{ n: number }[]>`
     select count(*)::int as n from public.family_memories where family_id = ${familyId}
   `;
-  const usage = await sql<{ tokens: number }[]>`
-    select (coalesce(sum(input_tokens), 0) + coalesce(sum(output_tokens), 0))::int as tokens
+  const usage = await sql<
+    {
+      model: string;
+      tokens_in: number;
+      tokens_out: number;
+      cache_read: number;
+      cache_write: number;
+    }[]
+  >`
+    select model,
+           coalesce(sum(input_tokens), 0)::int as tokens_in,
+           coalesce(sum(output_tokens), 0)::int as tokens_out,
+           coalesce(sum(cache_read_tokens), 0)::int as cache_read,
+           coalesce(sum(cache_write_tokens), 0)::int as cache_write
     from public.model_usage
     where family_id = ${familyId} and created_at >= now() - interval '28 days'
+    group by model
   `;
   const events = await sql<{ name: string; created_at: string }[]>`
     select name, created_at::text as created_at
@@ -216,7 +232,16 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     })),
     hoursMinutes28d: hours[0].minutes,
     memoriesCount: memories[0].n,
-    tokens28d: usage[0].tokens,
+    tokens28d: usage.reduce((sum, row) => sum + row.tokens_in + row.tokens_out, 0),
+    cost28dUsd: summarizeUsageCost(
+      usage.map((row) => ({
+        model: row.model,
+        inputTokens: row.tokens_in,
+        outputTokens: row.tokens_out,
+        cacheReadTokens: row.cache_read,
+        cacheWriteTokens: row.cache_write,
+      })),
+    ).estimatedUsd,
     recentEvents: events.map((event) => ({ name: event.name, createdAt: event.created_at })),
   };
 }
