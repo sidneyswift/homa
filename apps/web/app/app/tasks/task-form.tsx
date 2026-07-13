@@ -192,7 +192,10 @@ export function TaskForm({
     label: task?.label ?? "",
     prompt: task?.prompt ?? "",
     weekdays: new Set(task?.weekdays ?? [1, 2, 3, 4, 5]),
-    localHour: task?.localHour ?? 9,
+    // 3pm, not 9am: the morning brief already texts at 9, and a new
+    // task should not stack on it unless she picks that on purpose
+    // (reader gate 2026-07-13).
+    localHour: task?.localHour ?? 15,
     deliveryPref: task?.deliveryPref ?? "text",
   };
 

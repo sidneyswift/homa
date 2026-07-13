@@ -113,29 +113,61 @@ function RunNowSection({ task, onDone }: { task: TaskRowView; onDone: () => void
   );
 }
 
+/** Two taps to delete, both inside the dialog: the browser's own
+ * confirm box was the one grey system popup in a product of house
+ * dialogs (reader gate 2026-07-13). */
 function DeleteTaskButton({ task, onDone }: { task: TaskRowView; onDone: () => void }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [confirming, setConfirming] = useState(false);
   const name = task.label ?? "Your task";
+
+  if (!confirming) {
+    return (
+      <div className="mt-4 border-t border-border-subtle pt-3">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="text-xs font-semibold text-muted hover:underline"
+        >
+          Delete this task
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 border-t border-border-subtle pt-3">
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => {
-          if (!window.confirm(`Delete "${name}"? This can't be undone.`)) return;
-          startTransition(async () => {
-            const result = await deleteTaskAction(task.id);
-            if (result.error === null) {
-              onDone();
-              router.refresh();
-            }
-          });
-        }}
-        className="text-xs font-semibold text-muted hover:underline disabled:opacity-60"
-      >
-        Delete this task
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs font-semibold text-muted">
+          {`Delete "${name}"? This can't be undone.`}
+        </p>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              startTransition(async () => {
+                const result = await deleteTaskAction(task.id);
+                if (result.error === null) {
+                  onDone();
+                  router.refresh();
+                }
+              });
+            }}
+            className="rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-strong transition-colors hover:border-brand disabled:opacity-60"
+          >
+            {pending ? "Deleting\u2026" : "Delete"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="rounded-pill px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:text-body"
+          >
+            Keep
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

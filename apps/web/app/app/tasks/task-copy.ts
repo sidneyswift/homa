@@ -10,6 +10,11 @@
  * are "tasks", and results are "saved to this page".
  */
 
+/** How many runs the page loads and History shows. Shared here (a
+ * directive-free module) so the server page's query and the client
+ * feed's end-of-list line can never disagree. */
+export const HISTORY_RUN_LIMIT = 30;
+
 export const BUILT_IN_COPY: Record<
   "morning_brief" | "journal_prompt",
   { label: string; description: string }

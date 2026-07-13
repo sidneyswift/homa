@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, FlaskConical, Moon } from "lucide-react";
 
+import { HISTORY_RUN_LIMIT } from "./task-copy";
 import type { TaskRunView } from "./tasks-view";
 
 /**
@@ -30,28 +32,35 @@ function runIcon(kind: TaskRunView["kind"]) {
   }
 }
 
-/** Status copy passed both gates 2026-07-10. Sentence case; a brief
- * often ends with an offer, so the sent lines name the reply path. */
+/** Status copy passed both gates 2026-07-10; the done lines shortened
+ * 2026-07-13 when the Ask Homa link took over naming the on-page door
+ * (reader gate: the offer in a brief had no on-page way to say yes).
+ * The failed line matches the dispatcher's real behavior: a released
+ * schedule is retried by the next hourly tick, so "soon" is the truth
+ * the Next chip also tells; a retry that misses the delivery window
+ * records its own skipped row with the next-scheduled-time story. */
 function statusNote(run: TaskRunView): string | null {
   switch (run.status) {
     case "done":
       return run.deliveredChannel === "sms"
-        ? "Sent by text. Reply there and Homa answers."
+        ? "Sent by text."
         : run.deliveredChannel === "email"
-          ? "Sent by email. Reply there and Homa answers."
+          ? "Sent by email."
           : run.deliveredChannel === "none"
             ? "Saved to this page."
             : null;
     case "skipped":
-      return "Skipped: its time was already over. It runs again at the next scheduled time.";
+      return "Skipped: the moment for this one had already passed. It runs at the next scheduled time.";
     case "partial":
-      return "Sent to part of the family. One delivery did not go through.";
+      // No counts: the string can't know how many deliveries failed
+      // (editor gate 2026-07-13, no invented numbers).
+      return "Sent to part of the family. Whoever missed it can read it here.";
     case "partial_uncertain":
-      return "Sent to part of the family. Another phone carrier did not confirm the result.";
+      return "Sent to part of the family. Homa can't tell yet whether the rest arrived. It's saved here either way.";
     case "uncertain":
-      return "Homa sent this, but the phone carrier did not confirm the result.";
+      return "Homa sent this, but can't tell yet whether it arrived. It's saved here either way.";
     case "failed":
-      return "Didn't send. Homa tries again at the next scheduled time.";
+      return "Didn't send. Homa tries again soon.";
     case "running":
       return "Working on it now.";
     default: {
@@ -59,6 +68,15 @@ function statusNote(run: TaskRunView): string | null {
       throw new Error(`unhandled run status: ${String(exhaustive)}`);
     }
   }
+}
+
+/** A finished run is a conversation the parent can pick back up: the
+ * brief's own offer ("want it in her week? just reply") needs a door on
+ * THIS page, not a hunt for the text thread. "Ask Homa", never "Reply":
+ * reply implies a message she may not have gotten (save-only runs), and
+ * it would compete with texting back, which also works. */
+function showsAskHoma(run: TaskRunView): boolean {
+  return run.status === "done";
 }
 
 function dayKey(date: Date, timeZone: string): string {
@@ -134,7 +152,7 @@ export function TaskHistory({
         <div className="mt-3 rounded-lg border border-border-subtle bg-card p-6 text-center shadow-sm">
           <p className="font-display text-lg font-semibold text-strong">Nothing here yet.</p>
           <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
-            The first time a task above runs, what it made shows up here.
+            The first time a task above runs, its work shows up here.
           </p>
         </div>
       ) : (
@@ -147,6 +165,7 @@ export function TaskHistory({
               <ol className="mt-2 flex flex-col gap-2.5">
                 {group.runs.map((run) => {
                   const note = statusNote(run);
+                  const askable = showsAskHoma(run);
                   return (
                     <li
                       key={run.id}
@@ -166,8 +185,20 @@ export function TaskHistory({
                           {run.summary}
                         </p>
                       ) : null}
-                      {note ? (
-                        <p className="mt-2 text-xs font-semibold text-subtle">{note}</p>
+                      {note || askable ? (
+                        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                          {note ? (
+                            <p className="text-xs font-semibold text-subtle">{note}</p>
+                          ) : null}
+                          {askable ? (
+                            <Link
+                              href="/app"
+                              className="text-xs font-semibold text-brand hover:underline"
+                            >
+                              Ask Homa about this
+                            </Link>
+                          ) : null}
+                        </div>
                       ) : null}
                     </li>
                   );
@@ -175,6 +206,14 @@ export function TaskHistory({
               </ol>
             </div>
           ))}
+          {/* The feed ends on purpose, and the capped line answers the
+              real question plainly: kept, not thrown away (reader gate
+              2026-07-13 flagged the soft version as trust-costing). */}
+          <p className="text-center text-xs font-semibold text-subtle">
+            {runs.length >= HISTORY_RUN_LIMIT
+              ? "This list shows the newest 30. Older runs are kept, just not shown here."
+              : "That's everything so far."}
+          </p>
         </div>
       )}
     </section>

@@ -60,15 +60,21 @@ const CUSTOM_TASK: TaskRowView = {
   nextRunAt: "2026-07-14T19:00:00.000Z",
 };
 
-function renderView(tasks: TaskRowView[]): string {
+/** Saturday Jul 11, 2026, 6pm in New York: before both fixture tasks'
+ * next runs, so their Next chips render dated (a fixed now keeps these
+ * tests deterministic as real time passes the fixture dates). */
+const RENDER_NOW = new Date("2026-07-11T22:00:00.000Z");
+
+function renderView(tasks: TaskRowView[], runs: TaskRunView[] = []): string {
   return renderToStaticMarkup(
     <AppRouterContext.Provider value={ROUTER}>
       <TasksView
         tasks={tasks}
-        runs={[]}
+        runs={runs}
         timeZone="America/New_York"
         briefFlagOn
         textingLinked
+        now={RENDER_NOW}
       />
     </AppRouterContext.Provider>,
   );
@@ -112,8 +118,11 @@ describe("TasksView", () => {
     // A seeded brief means no brief placeholder; the journal placeholder
     // (dashed, not yet a real row) still shows, is not clickable, and
     // never promises it starts on its own (it seeds switched off).
-    assert.doesNotMatch(html, /Starts on its own once your family/);
-    assert.match(html, /Almost ready\. It stays off until you turn it on\./);
+    assert.doesNotMatch(html, /Starts on its own within a day/);
+    assert.match(
+      html,
+      /Off until you turn it on\. The switch shows up here within a day\./,
+    );
     assert.doesNotMatch(
       html,
       /<button[^>]*aria-haspopup="dialog"[^>]*>Evening check-in<\/button>/,
@@ -136,6 +145,62 @@ describe("TasksView", () => {
     assert.match(offHtml, />Off</);
     assert.doesNotMatch(offHtml, /Next \u00b7/);
     assert.doesNotMatch(offHtml, /bg-brand-soft text-brand/);
+  });
+
+  it("says soon, never a past time, while the scheduler catches up", () => {
+    // A failed run keeps next_run_at until the retry tick, and a
+    // finished run advances it only after the fact; in those windows a
+    // dated chip would contradict History right below the card.
+    const html = renderView([
+      { ...BRIEF_TASK, nextRunAt: "2026-07-10T13:00:00.000Z" },
+    ]);
+    assert.match(html, /Next \u00b7 soon/);
+    assert.doesNotMatch(html, /Jul 10/);
+  });
+
+  it("ends History on purpose and puts a reply door on finished runs", () => {
+    const doneRun: TaskRunView = {
+      id: "run-done",
+      kind: "morning_brief",
+      status: "done",
+      title: "Morning research brief",
+      summary: "One thing Homa looked into.",
+      deliveredChannel: "sms",
+      startedAt: "2026-07-11T13:00:00.000Z",
+    };
+    const failedRun: TaskRunView = {
+      ...doneRun,
+      id: "run-failed",
+      status: "failed",
+      deliveredChannel: null,
+      summary: null,
+      startedAt: "2026-07-10T13:00:00.000Z",
+    };
+    const html = renderView([BRIEF_TASK], [doneRun, failedRun]);
+
+    // The short status note plus the on-page door (the old "Reply
+    // there and Homa answers" sentence retired with the link).
+    assert.match(html, /Sent by text\./);
+    assert.doesNotMatch(html, /Reply there and Homa answers/);
+    assert.match(html, /<a[^>]*href="\/app"[^>]*>Ask Homa about this<\/a>/);
+
+    // A failed run keeps its calm note, telling the same "soon" story
+    // as the card's Next chip, and gets no ask door.
+    assert.match(html, /Didn&#x27;t send\. Homa tries again soon\./);
+
+    // Under the limit the end line says the list is complete; at the
+    // limit it says older runs are kept, plainly.
+    assert.match(html, /That&#x27;s everything so far\./);
+    const manyRuns = Array.from({ length: 30 }, (_, index) => ({
+      ...doneRun,
+      id: `run-${index}`,
+    }));
+    const capped = renderView([BRIEF_TASK], manyRuns);
+    assert.match(
+      capped,
+      /This list shows the newest 30\. Older runs are kept, just not shown here\./,
+    );
+    assert.doesNotMatch(capped, /That&#x27;s everything so far\./);
   });
 });
 

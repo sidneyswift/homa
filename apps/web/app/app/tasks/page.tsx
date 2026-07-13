@@ -6,6 +6,7 @@ import { getFamilyPhones } from "../../../lib/family-phone";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { PageColumn } from "../../../components/dashboard/page-column";
+import { HISTORY_RUN_LIMIT } from "./task-copy";
 import { TasksView, type TaskRowView, type TaskRunView } from "./tasks-view";
 
 /**
@@ -40,7 +41,7 @@ export default async function TasksPage() {
       .from("homa_task_runs")
       .select("id, kind, status, title, summary, delivered_channel, started_at")
       .order("started_at", { ascending: false })
-      .limit(30),
+      .limit(HISTORY_RUN_LIMIT),
     getFamilyPhones(family.id),
     supabase.auth.getUser(),
   ]);
@@ -90,6 +91,9 @@ export default async function TasksPage() {
         timeZone={effectiveTimeZone(family.time_zone)}
         briefFlagOn={process.env.MORNING_BRIEF_ENABLED === "true"}
         textingLinked={textingLinked}
+        // Serialized to the client so hydration renders the same chip
+        // words the server did.
+        now={new Date()}
       />
     </PageColumn>
   );

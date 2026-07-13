@@ -67,8 +67,7 @@ export function weekdaysLabel(weekdays: number[]): string {
     .join(", ");
 }
 
-function nextRunLabel(iso: string | null, timeZone: string): string | null {
-  if (!iso) return null;
+function nextRunLabel(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleString("en-US", {
     weekday: "short",
     month: "short",
@@ -100,6 +99,9 @@ function PauseToggle({ task }: { task: TaskRowView }) {
   const [pending, startTransition] = useTransition();
   const on = !task.paused;
   return (
+    // The padding + negative margin trades no visual space for a 44px
+    // hit area: a near-miss lands on the switch, never on the card
+    // behind it (which would open the editor).
     <button
       type="button"
       role="switch"
@@ -114,19 +116,24 @@ function PauseToggle({ task }: { task: TaskRowView }) {
           if (result.error === null) router.refresh();
         });
       }}
-      className={
-        on
-          ? "relative h-6 w-11 shrink-0 rounded-pill bg-brand transition-colors disabled:opacity-60"
-          : "relative h-6 w-11 shrink-0 rounded-pill bg-[var(--clay-100,#eadfd2)] transition-colors disabled:opacity-60"
-      }
+      className="-m-2.5 shrink-0 cursor-pointer rounded-pill p-2.5 disabled:opacity-60"
     >
       <span
+        aria-hidden="true"
         className={
           on
-            ? "absolute top-0.5 left-[1.4rem] h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
-            : "absolute top-0.5 left-0.5 h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
+            ? "relative block h-6 w-11 rounded-pill bg-brand transition-colors"
+            : "relative block h-6 w-11 rounded-pill bg-[var(--brand-soft-2)] transition-colors"
         }
-      />
+      >
+        <span
+          className={
+            on
+              ? "absolute top-0.5 left-[1.4rem] h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
+              : "absolute top-0.5 left-0.5 h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
+          }
+        />
+      </span>
     </button>
   );
 }
@@ -135,10 +142,12 @@ function TaskCard({
   task,
   timeZone,
   textingLinked,
+  now,
 }: {
   task: TaskRowView;
   timeZone: string;
   textingLinked: boolean;
+  now: Date;
 }) {
   const [editing, setEditing] = useState(false);
   const on = !task.paused;
@@ -146,7 +155,13 @@ function TaskCard({
     task.kind === "custom"
       ? { label: task.label ?? "Your task", description: task.prompt ?? "" }
       : BUILT_IN_COPY[task.kind];
-  const next = on ? nextRunLabel(task.nextRunAt, timeZone) : null;
+  // next_run_at lags the scheduler on purpose (it advances after a run
+  // finishes, and a failed run keeps it until the retry). A timestamp
+  // already in the past would contradict History right below, so those
+  // windows say "soon" instead.
+  const upcoming =
+    on && task.nextRunAt !== null && new Date(task.nextRunAt).getTime() > now.getTime();
+  const next = upcoming && task.nextRunAt !== null ? nextRunLabel(task.nextRunAt, timeZone) : null;
 
   return (
     <>
@@ -166,7 +181,7 @@ function TaskCard({
               className={
                 on
                   ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-brand-soft text-brand"
-                  : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--clay-100,#eadfd2)] text-subtle"
+                  : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--brand-soft-2)] text-subtle"
               }
             >
               <TaskIcon kind={task.kind} />
@@ -205,8 +220,12 @@ function TaskCard({
             <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-[0.7rem] font-bold text-[var(--clay-700)]">
               Next {"\u00b7"} {next}
             </span>
+          ) : on && task.nextRunAt !== null ? (
+            <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-[0.7rem] font-bold text-[var(--clay-700)]">
+              Next {"\u00b7"} soon
+            </span>
           ) : !on ? (
-            <span className="rounded-pill bg-[var(--clay-100,#eadfd2)] px-2.5 py-1 text-[0.7rem] font-bold text-muted">
+            <span className="rounded-pill bg-[var(--brand-soft-2)] px-2.5 py-1 text-[0.7rem] font-bold text-muted">
               Off
             </span>
           ) : (
@@ -243,7 +262,7 @@ function DarkKindCard({
       <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--clay-100,#eadfd2)] text-subtle"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--brand-soft-2)] text-subtle"
         >
           <TaskIcon kind={kind} />
         </span>
@@ -263,12 +282,16 @@ export function TasksView({
   timeZone,
   briefFlagOn,
   textingLinked,
+  now,
 }: {
   tasks: TaskRowView[];
   runs: TaskRunView[];
   timeZone: string;
   briefFlagOn: boolean;
   textingLinked: boolean;
+  /** The server's render instant, so the Next chip never shows a past
+   * time and server and client hydrate the same words. */
+  now: Date;
 }) {
   const [creating, setCreating] = useState(false);
   const hasBrief = tasks.some((task) => task.kind === "morning_brief");
@@ -285,9 +308,10 @@ export function TasksView({
             Homa&apos;s tasks
           </h1>
           <p className="mt-1.5 max-w-xl text-sm text-muted">
-            Homa works on these by herself: research for your kids, check-ins,
-            and any tasks you give her. Everything she finishes shows up
-            below. Your kids&apos; week stays in the Week planner.
+            Homa works on these by herself: morning briefs about your kids,
+            evening check-ins, and any tasks you give her. Everything she
+            does shows up below. Your kids&apos; week stays in the
+            Planner tab.
           </p>
         </div>
         <button
@@ -313,21 +337,26 @@ export function TasksView({
         <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">Scheduled</h2>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {!hasBrief ? (
+            // The placeholder names time, never a control or a concept
+            // she has not met yet (reader gate 2026-07-13: "report"
+            // read as jargon on the first visit).
             <DarkKindCard
               kind="morning_brief"
               note={
                 briefFlagOn
-                  ? "Starts on its own once your family's first report is ready."
+                  ? "Starts on its own within a day. Nothing to set up."
                   : "Almost ready. It starts on its own, nothing to set up."
               }
             />
           ) : null}
           {!hasJournal ? (
-            // The check-in seeds switched off (kinds.ts seedPaused), so
-            // its placeholder never promises it starts on its own.
+            // The check-in seeds switched off (kinds.ts seedPaused), and
+            // its placeholder has no switch yet, so the note explains
+            // when the switch appears instead of pointing at a control
+            // that is not there (reader gate 2026-07-13).
             <DarkKindCard
               kind="journal_prompt"
-              note="Almost ready. It stays off until you turn it on."
+              note="Off until you turn it on. The switch shows up here within a day."
             />
           ) : null}
           {tasks.map((task) => (
@@ -336,6 +365,7 @@ export function TasksView({
               task={task}
               timeZone={timeZone}
               textingLinked={textingLinked}
+              now={now}
             />
           ))}
         </div>
