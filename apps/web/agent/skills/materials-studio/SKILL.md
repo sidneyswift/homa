@@ -305,6 +305,10 @@ counters):
 
 ## Foldable / interactive notebook insert
 
+Reference file: `references/2026-07-12-pemdas-foldable-math-doodles.pdf`
+— a 25-page PEMDAS foldable by Math Doodles (TPT). Study it for layout,
+fold geometry, color-coding, mnemonic anchoring, and embedded practice.
+
 A foldable is a tactile learning tool the child prints, cuts, folds,
 and glues into a notebook. The reference material and the practice
 live on the same physical object — not a separate worksheet. Foldables
@@ -405,6 +409,11 @@ text-heavy reference foldables (vocabulary, formula cards) where
 surgical revision matters more than organic feel.
 
 ## Structured outline / essay scaffold
+
+Reference file: `references/2026-07-12-five-paragraph-essay-outline-daring-english-teacher.pdf`
+— an 8-page five-paragraph essay outline by The Daring English Teacher
+(TPT). Study it for two-column instruction|work layout, Roman numeral
+sections, difficulty variants (2 vs 3 examples), and process metadata.
 
 A structured outline breaks a complex task — writing an essay, planning
 a research project, outlining a book report — into a fill-in-the-blank
