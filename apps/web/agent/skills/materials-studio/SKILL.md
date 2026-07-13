@@ -1,5 +1,5 @@
 ---
-description: Use when designing any printable or visual material for a child, worksheets, tracing or coloring pages, flash cards, counting mats, posters, infographics. Contains the creation-path guide (image model vs HTML vs both), reference-image discipline, metadata and finalize discipline, and proven recipes.
+description: Use when designing any printable or visual material for a child, worksheets, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds. Contains the creation-path guide (image model vs HTML vs both), reference-image discipline, metadata and finalize discipline, and proven recipes.
 ---
 
 # The materials studio
@@ -134,6 +134,13 @@ from calibration runs, re-check after any model swap):
   objects), generate a SINGLE object on a white background, nothing
   else, and repeat it yourself. Never repeat a full-page image
   (calibration's one failure, caught by the quality check).
+- Foldable / interactive notebook insert: prefer hybrid (doodle art +
+  HTML structure) or image-direct when the whole panel is art-driven.
+  Use html alone only for text-heavy reference foldables (vocab, formulas)
+  where surgical revision matters more than organic feel.
+- Structured outline or essay scaffold: html, always. Text precision,
+  table alignment, and cheap surgical revision are the whole point;
+  no organic art needed. Structure IS the design.
 
 ## Working with generate_image
 
@@ -295,6 +302,218 @@ counters):
   <tr><td></td><td></td><td></td><td></td><td></td></tr>
 </table>
 ```
+
+## Foldable / interactive notebook insert
+
+A foldable is a tactile learning tool the child prints, cuts, folds,
+and glues into a notebook. The reference material and the practice
+live on the same physical object — not a separate worksheet. Foldables
+are the format when the parent or inspo asks for interactive notebooks,
+fold-and-glue inserts, or accordion-style reference cards.
+
+The platform shell is portrait (8.5×11in). A foldable's content area
+lives inside that shell rotated or divided so the final printed page
+folds into the right shape. Never declare `@page`; the shell owns the
+page. Two common layouts:
+
+**Accordion tri-fold** (the PEMDAS pattern): divide the page into
+three equal horizontal bands. Each band is one panel of the folded
+strip. Top band = cover (title, mnemonic art, glue tab). Middle band
+= definitions / reference. Bottom band = embedded practice problems.
+The child cuts along the outer border, folds along the band borders,
+and glues the tab into a notebook.
+
+**Two-flap / four-flap book**: divide the page into a fixed base and
+2–4 flaps that fold over it. Under each flap: a term, rule, or step.
+On the flap surface: a prompt or question.
+
+Design patterns (all binding for foldables):
+
+- **Fold lines**: `border-top: 2.5px dashed #b3a492;` between panels.
+  Label faintly: "✂️ cut" on outer edges, "— fold —" on internal
+  creases, "glue here ▸" on the attachment tab.
+- **Glue tab**: a narrow strip (~0.75in) on one end with a dotted
+  border and "GLUE" in small caps. Background `#f5f0e8` so the child
+  sees it is not content.
+- **Large display text**: the key concept in big, bold letters
+  (`font-size: 72px–110px; font-weight: 700;`). Bubble-letter style
+  for younger kids (Fredoka weight 600+). Each letter or step can
+  carry its own accent color for color-coded-by-concept.
+- **Practice panel**: practice problems are part of the foldable, not
+  a separate page. Place them in the bottom or back panel with answer
+  blanks (`border-bottom: 2px solid #6b6259; width: 60px; display:
+  inline-block;`).
+- **Scaffolded versions**: generate the blank (fill-in) version first.
+  Offer answer-key and color versions as follow-ups if the parent
+  wants them — same layout, answers in a muted accent color, or full
+  color fills on each section.
+- **Mnemonic anchoring**: pair a verbal mnemonic with a small
+  illustration (use generate_image for one small character/icon on
+  white background, embed via hybrid path). Humor helps memory.
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  .foldable { width: 100%; }
+  .panel { min-height: 200px; padding: 20px 24px;
+    border-bottom: 2.5px dashed #b3a492; position: relative; }
+  .panel:last-child { border-bottom: none; }
+  .fold-label { position: absolute; right: 12px; top: -10px;
+    font-size: 10px; color: #b3a492; font-family: sans-serif;
+    letter-spacing: 0.1em; }
+  .glue-tab { height: 56px; border: 2px dotted #b3a492;
+    background: #f5f0e8; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; letter-spacing: 0.2em;
+    color: #b3a492; text-transform: uppercase; }
+  .concept-letter { font-family: 'Fredoka', sans-serif;
+    font-weight: 700; font-size: 96px; display: inline-block;
+    margin: 0 6px; }
+  .practice-blank { border-bottom: 2px solid #6b6259;
+    width: 60px; display: inline-block; margin: 0 4px; }
+</style>
+
+<div class="foldable">
+  <div class="glue-tab">✂️ cut along outer edge · glue this tab into notebook</div>
+  <div class="panel">
+    <span class="fold-label">— fold —</span>
+    <!-- Cover panel: title + mnemonic art -->
+    <div style="text-align:center;">
+      <span class="concept-letter" style="color:#e25b45;">P</span>
+      <span class="concept-letter" style="color:#f5a623;">E</span>
+      <span class="concept-letter" style="color:#4caf50;">M</span>
+      <span class="concept-letter" style="color:#00897b;">D</span>
+      <span class="concept-letter" style="color:#2196f3;">A</span>
+      <span class="concept-letter" style="color:#9c27b0;">S</span>
+    </div>
+  </div>
+  <div class="panel">
+    <span class="fold-label">— fold —</span>
+    <!-- Reference panel: definitions -->
+  </div>
+  <div class="panel">
+    <!-- Practice panel: embedded problems -->
+    <p>Solve: 3 + (4 × 2) = <span class="practice-blank"></span></p>
+  </div>
+</div>
+```
+
+Path choice: hybrid is the default (generate_image for the mnemonic
+character or decorative art, HTML for structure and text). Use
+image-direct when the whole foldable is art-driven (a coloring
+foldable, a visual-only science diagram). Use html alone for
+text-heavy reference foldables (vocabulary, formula cards) where
+surgical revision matters more than organic feel.
+
+## Structured outline / essay scaffold
+
+A structured outline breaks a complex task — writing an essay, planning
+a research project, outlining a book report — into a fill-in-the-blank
+framework with labeled sections. The structure teaches the process:
+the child learns what goes where by filling it in. This is the format
+when the parent asks for essay outlines, writing scaffolds, planning
+sheets, or process organizers.
+
+Always html path. Text precision, table alignment, and cheap surgical
+revision are the whole point. No organic art, no images. Structure IS
+the design.
+
+Design patterns (all binding for outlines):
+
+- **Two-column layout**: left column = instruction (what goes here,
+  in italic or muted color), right column = blank lines for student
+  work. The left column teaches; the right column practices.
+- **Section headers**: bold, with Roman numerals or numbered steps.
+  A thin top border separates sections. Header carries the section
+  name ("I. Introduction", "II. Body Paragraph 1").
+- **Sub-fields**: each section breaks into labeled sub-parts
+  ("a. topic sentence", "b. supporting evidence", "c. explanation").
+  Sub-labels in the left column; blank lines in the right.
+- **Blank lines**: `border-bottom: 1.5px solid #6b6259; min-height:
+  24px;` — generous spacing so the child can write comfortably.
+  3–4 lines per sub-field for younger writers, 2 lines for older.
+- **Difficulty variants**: same layout, different field counts. A
+  simpler version has 2 evidence slots per body paragraph; a harder
+  version has 3. Generate the version that matches the child's level
+  (from the difficulty-from-evidence rules above), and offer the
+  other if the parent wants it.
+- **Process metadata header**: name, date, topic/title, and optionally
+  draft-due and final-due date fields. Reinforces writing-as-process.
+- **No decoration**: stark, clean B&W. No doodles, no clipart, no
+  color accents. The absence of visual noise signals "this is serious
+  work" and keeps the focus on the writing.
+- **Print-friendly**: portrait, single page when possible. A five-
+  paragraph essay outline fits one page for grades 7+; for younger
+  kids with more writing space, allow two pages.
+
+```html
+<style>
+  .outline-header { display: flex; flex-wrap: wrap; gap: 8px 24px;
+    margin-bottom: 20px; font-size: 13px;
+    font-family: 'Plus Jakarta Sans', sans-serif; }
+  .outline-header .field { flex: 1 1 40%; }
+  .outline-header .field-line { border-bottom: 1.5px solid #6b6259;
+    min-width: 120px; display: inline-block; margin-left: 4px; }
+  .section { border-top: 2px solid #221e1a; margin-top: 16px;
+    padding-top: 10px; }
+  .section-title { font-weight: 700; font-size: 15px;
+    margin-bottom: 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .two-col { display: grid; grid-template-columns: 170px 1fr;
+    gap: 4px 12px; margin-bottom: 6px; }
+  .two-col .label { font-size: 12px; color: #6b6259;
+    font-style: italic; padding-top: 4px; }
+  .two-col .blank { border-bottom: 1.5px solid #6b6259;
+    min-height: 24px; }
+</style>
+
+<div class="outline-header">
+  <div class="field">Name: <span class="field-line"></span></div>
+  <div class="field">Date: <span class="field-line"></span></div>
+  <div class="field">Essay Topic: <span class="field-line"></span></div>
+  <div class="field">Essay Title: <span class="field-line"></span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">I. Introduction</div>
+  <div class="two-col">
+    <div class="label">a. attention getter</div>
+    <div class="blank"></div>
+  </div>
+  <div class="two-col">
+    <div class="label">b. background information</div>
+    <div class="blank"></div>
+  </div>
+  <div class="two-col">
+    <div class="label">c. thesis statement</div>
+    <div class="blank"></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">II. Body Paragraph 1</div>
+  <div class="two-col">
+    <div class="label">a. topic sentence</div>
+    <div class="blank"></div>
+  </div>
+  <div class="two-col">
+    <div class="label">b. example / evidence</div>
+    <div class="blank"></div>
+  </div>
+  <div class="two-col">
+    <div class="label">c. explanation</div>
+    <div class="blank"></div>
+  </div>
+  <div class="two-col">
+    <div class="label">d. transition</div>
+    <div class="blank"></div>
+  </div>
+</div>
+<!-- Repeat for Body Paragraphs 2-3, then V. Conclusion -->
+```
+
+Adapt the section names and sub-fields to the actual task. A book
+report outline replaces "thesis" with "main idea" and adds a
+"characters" section. A research outline adds "sources" fields. The
+two-column instruction|work pattern stays constant; the labels change.
 
 ## Design rules (binding)
 
