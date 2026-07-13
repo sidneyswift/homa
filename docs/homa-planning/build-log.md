@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · Console dollars: the model price book joins the usage ledger at read time
+
+Founder ask: convert all token usage across the app into USD, model-aware
+(input vs output rates, several models per session). Built as the read-time
+price join the ledger was designed for (model-usage.ts / migration #43 both
+say quantities only, prices join later), NOT as M1-13: the action_costs
+registry and margin view stay a separate billing-grade ticket. These are
+monitoring estimates; the Gateway invoice is the source of truth.
+
+- New `apps/web/lib/model-pricing.ts`: provider list prices in USD per
+  million tokens for every model in the live ledger (checked 2026-07-13):
+  claude-sonnet-5 (with the 2026-09-01 price rise as a second dated window,
+  cache read + 5 minute cache write rates), gpt-5.4-mini, gpt-image-2,
+  text-embedding-3-small. `estimateUsageCostUsd()` prices one model's
+  quantities; `summarizeUsageCost()` sums across models; `formatUsd()` for
+  the console. Unknown models return null and surface as "no price on
+  file", never $0 (the 08-billing "no unpriced actions" rule applied to
+  monitoring).
+- Cache math decision, verified against live rows: the ledger's
+  input_tokens INCLUDES cache_read + cache_write tokens, so the estimator
+  prices uncached input = input - cache read - cache write, each bucket at
+  its own rate. Without the split, chat cost overstates roughly 10x at our
+  ~95% cache-hit traffic.
+- Admin data layers now aggregate usage grouped by model (so each model
+  prices at its own rates) and carry estimates: sessions list + session
+  detail (per-line and total), fleet overview tile (was "pricing joins at
+  M1-13"; now shows the estimated dollars and flags unpriced models),
+  roster snapshots + family detail (cost28dUsd). `pnpm usage:report`
+  prints per-line and total estimates.
+- Decisions made alone: aggregated ranges price at the rate in effect at
+  read time (a window spanning the Sonnet 5 price change drifts slightly);
+  gpt-image-2 input prices at the text-input rate since reference-image
+  input tokens are not separable in the ledger (reference-driven calls
+  estimate slightly low); per-family roster cost adds $0 for unpriced
+  models, the overview tile carries that alarm instead.
+
+Verified: new model-pricing tests wired into check:admin (27 pass),
+check:isolation, typecheck, lint, admin:smoke against live data, and a
+live `pnpm usage:report --days 30` ($32.32 fleet total, hand-checked
+against the sonnet math).
+
 ## 2026-07-13 · The trajectory chart becomes interactive; real negative months (founder rulings)
 
 From the trajectory-chart comparison lab
