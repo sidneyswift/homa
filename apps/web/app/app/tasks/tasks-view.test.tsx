@@ -6,11 +6,13 @@ import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared
 
 import { TASK_KIND_CONFIG } from "../../../lib/tasks/kinds";
 import { TaskEditOverlay } from "./task-edit-overlay";
+import { groupRunsByDay } from "./task-history";
 import {
   TasksView,
   hourLabel,
   weekdaysLabel,
   type TaskRowView,
+  type TaskRunView,
 } from "./tasks-view";
 
 /**
@@ -123,6 +125,18 @@ describe("TasksView", () => {
     assert.match(html, /role="switch"[^>]*aria-checked="true"/);
     assert.match(html, /aria-label="Turn this task off"/);
   });
+
+  it("wears its state: Next chip and warm disc on, Off chip and muted disc off", () => {
+    const onHtml = renderView([BRIEF_TASK]);
+    assert.match(onHtml, /Next \u00b7 Mon, Jul 13, 9:00 AM/);
+    assert.match(onHtml, /bg-brand-soft text-brand/);
+    assert.doesNotMatch(onHtml, />Off</);
+
+    const offHtml = renderView([{ ...BRIEF_TASK, paused: true }]);
+    assert.match(offHtml, />Off</);
+    assert.doesNotMatch(offHtml, /Next \u00b7/);
+    assert.doesNotMatch(offHtml, /bg-brand-soft text-brand/);
+  });
 });
 
 describe("TaskEditOverlay", () => {
@@ -214,6 +228,46 @@ describe("TaskEditOverlay", () => {
     assert.match(
       unlinked,
       /<a[^>]*href="\/app\/settings"[^>]*>Set up texting in Settings<\/a>/,
+    );
+  });
+});
+
+describe("groupRunsByDay", () => {
+  function run(id: string, startedAt: string): TaskRunView {
+    return {
+      id,
+      kind: "morning_brief",
+      status: "done",
+      title: "Morning research brief",
+      summary: null,
+      deliveredChannel: "sms",
+      startedAt,
+    };
+  }
+
+  it("groups newest-first runs under Today, Yesterday, then dated days", () => {
+    // Sunday Jul 12, 2026, 6pm in New York.
+    const now = new Date("2026-07-12T22:00:00.000Z");
+    const groups = groupRunsByDay(
+      [
+        run("a", "2026-07-12T13:00:00.000Z"),
+        run("b", "2026-07-11T13:00:00.000Z"),
+        run("c", "2026-07-11T03:11:00.000Z"),
+        run("d", "2026-07-10T13:00:00.000Z"),
+      ],
+      "America/New_York",
+      now,
+    );
+
+    assert.deepEqual(
+      groups.map((group) => [group.label, group.runs.map((r) => r.id)]),
+      [
+        ["Today", ["a"]],
+        ["Yesterday", ["b"]],
+        // 03:11 UTC on Jul 11 is 11:11 PM on Jul 10 in New York: the
+        // family-local day owns the grouping, never the UTC day.
+        ["Fri, Jul 10", ["c", "d"]],
+      ],
     );
   });
 });

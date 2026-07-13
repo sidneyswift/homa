@@ -408,7 +408,25 @@ set the env var and bake it with a redeploy, because the old code would
 seed journal rows UNPAUSED on the next hourly tick. Verified before the
 flip: prod has zero journal_prompt rows (nothing stale can fire), 9
 tasks UI tests (a new one pins the per-kind defaults), typecheck, lint,
-eve build.
+eve build. Flip verified after the 9pm tick: 4 journal rows seeded, all
+4 paused, brief rows untouched.
+
+Design pass, same evening (founder: "what would make this page 10x
+better, then implement"). Scheduled cards now wear their state: the
+icon sits in a disc (brand-soft when on, clay-100 when off, matching
+the switch's own off color), the description mutes when off, and the
+buried "next: ..." micro-text tail became a chip row: "Next · Mon,
+Jul 13, 9:00 AM" in brand-soft when on, a quiet "Off" chip when not,
+plus a subtle chevron and the app's standard press scale so tap-to-edit
+is discoverable. History groups runs under one day label (Today,
+Yesterday, then "Fri, Jul 10"), computed in the family's own time zone
+(the 11:11 PM incident runs correctly group under their local day, not
+their UTC day); each card keeps only its time, and summaries cap at
+65ch for reading measure. The load-bearing footer ("Sent by text. Reply
+there and Homa answers.") stays. New words are chips and day labels
+only (Next, Off, Today, Yesterday), written to the rulebook, gates not
+rerun; no new colors, type, or motion beyond existing tokens. 11 tasks
+UI tests green (state chips and day grouping pinned), typecheck, lint.
 
 Implements the founder-chosen refined direction in production code. The
 Progress page (`apps/web/components/progress/progress-view.tsx`) is now a bare

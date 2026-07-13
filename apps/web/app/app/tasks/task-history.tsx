@@ -6,9 +6,12 @@ import type { TaskRunView } from "./tasks-view";
 
 /**
  * The runs feed (HT-5): newest first, the parent-readable outcome of
- * each proactive run. Fleet research rows never reach this component
- * (RLS hides family_id-null rows), so everything here is this family's
- * own record. Failure copy stays calm by design law: no red, no alarm.
+ * each proactive run. Runs group under one quiet day label (Today,
+ * Yesterday, then the date) so the feed scans as a week, not a wall of
+ * repeated timestamps; each card keeps only its time. Fleet research
+ * rows never reach this component (RLS hides family_id-null rows), so
+ * everything here is this family's own record. Failure copy stays calm
+ * by design law: no red, no alarm.
  */
 
 function runIcon(kind: TaskRunView["kind"]) {
@@ -58,15 +61,63 @@ function statusNote(run: TaskRunView): string | null {
   }
 }
 
-function whenLabel(iso: string, timeZone: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
+function dayKey(date: Date, timeZone: string): string {
+  return date.toLocaleDateString("en-CA", { timeZone });
+}
+
+function timeLabel(iso: string, timeZone: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     timeZone,
   });
+}
+
+export interface TaskRunDayGroup {
+  key: string;
+  label: string;
+  runs: TaskRunView[];
+}
+
+/**
+ * groupRunsByDay(runs, timeZone, now): one group per family-local day,
+ * newest day first (the input is already newest-run-first). Labels stay
+ * plain: Today, Yesterday, then the dated weekday.
+ */
+export function groupRunsByDay(
+  runs: TaskRunView[],
+  timeZone: string,
+  now: Date = new Date(),
+): TaskRunDayGroup[] {
+  const todayKey = dayKey(now, timeZone);
+  const yesterdayKey = dayKey(new Date(now.getTime() - 24 * 60 * 60 * 1000), timeZone);
+
+  const groups: TaskRunDayGroup[] = [];
+  for (const run of runs) {
+    const started = new Date(run.startedAt);
+    const key = dayKey(started, timeZone);
+    const current = groups[groups.length - 1];
+    if (current && current.key === key) {
+      current.runs.push(run);
+      continue;
+    }
+    groups.push({
+      key,
+      label:
+        key === todayKey
+          ? "Today"
+          : key === yesterdayKey
+            ? "Yesterday"
+            : started.toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                timeZone,
+              }),
+      runs: [run],
+    });
+  }
+  return groups;
 }
 
 export function TaskHistory({
@@ -87,33 +138,44 @@ export function TaskHistory({
           </p>
         </div>
       ) : (
-        <ol className="mt-3 flex flex-col gap-2.5">
-          {runs.map((run) => {
-            const note = statusNote(run);
-            return (
-              <li
-                key={run.id}
-                className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="flex items-center gap-2 font-semibold text-strong">
-                    <span className="text-brand">{runIcon(run.kind)}</span>
-                    {run.title}
-                  </p>
-                  <p className="shrink-0 text-xs font-semibold text-subtle">
-                    {whenLabel(run.startedAt, timeZone)}
-                  </p>
-                </div>
-                {run.summary ? (
-                  <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-body">
-                    {run.summary}
-                  </p>
-                ) : null}
-                {note ? <p className="mt-2 text-xs font-semibold text-subtle">{note}</p> : null}
-              </li>
-            );
-          })}
-        </ol>
+        <div className="mt-3 flex flex-col gap-5">
+          {groupRunsByDay(runs, timeZone).map((group) => (
+            <div key={group.key}>
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+                {group.label}
+              </p>
+              <ol className="mt-2 flex flex-col gap-2.5">
+                {group.runs.map((run) => {
+                  const note = statusNote(run);
+                  return (
+                    <li
+                      key={run.id}
+                      className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="flex items-center gap-2 font-semibold text-strong">
+                          <span className="text-brand">{runIcon(run.kind)}</span>
+                          {run.title}
+                        </p>
+                        <p className="shrink-0 text-xs font-semibold text-subtle">
+                          {timeLabel(run.startedAt, timeZone)}
+                        </p>
+                      </div>
+                      {run.summary ? (
+                        <p className="mt-2 max-w-[65ch] whitespace-pre-line text-sm leading-relaxed text-body">
+                          {run.summary}
+                        </p>
+                      ) : null}
+                      {note ? (
+                        <p className="mt-2 text-xs font-semibold text-subtle">{note}</p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          ))}
+        </div>
       )}
     </section>
   );

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, FlaskConical, Moon, Plus } from "lucide-react";
+import { Bell, ChevronRight, FlaskConical, Moon, Plus } from "lucide-react";
 
 import { setTaskPausedAction } from "./actions";
 import { BUILT_IN_COPY } from "./task-copy";
@@ -141,24 +141,34 @@ function TaskCard({
   textingLinked: boolean;
 }) {
   const [editing, setEditing] = useState(false);
+  const on = !task.paused;
   const copy =
     task.kind === "custom"
       ? { label: task.label ?? "Your task", description: task.prompt ?? "" }
       : BUILT_IN_COPY[task.kind];
-  const next = task.paused ? null : nextRunLabel(task.nextRunAt, timeZone);
+  const next = on ? nextRunLabel(task.nextRunAt, timeZone) : null;
 
   return (
     <>
       {/* The whole card is a generous pointer target; the title button
           carries the real semantics for keyboard and screen readers
-          (a native button cannot wrap the switch). */}
+          (a native button cannot wrap the switch). The icon disc and
+          the Next/Off chip wear the on/off state, so it reads from
+          across the room, not just off the switch. */}
       <div
         onClick={() => setEditing(true)}
-        className="cursor-pointer rounded-lg border border-border-subtle bg-card p-4 shadow-sm transition-colors duration-(--dur-fast) ease-out hover:border-[var(--clay-300)]"
+        className="group flex cursor-pointer flex-col rounded-lg border border-border-subtle bg-card p-4 shadow-sm transition duration-(--dur-fast) ease-out hover:border-[var(--clay-300)] motion-safe:active:scale-[var(--press-scale)]"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 text-brand">
+            <span
+              aria-hidden="true"
+              className={
+                on
+                  ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-brand-soft text-brand"
+                  : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--clay-100,#eadfd2)] text-subtle"
+              }
+            >
               <TaskIcon kind={task.kind} />
             </span>
             <div>
@@ -171,7 +181,9 @@ function TaskCard({
               >
                 {copy.label}
               </button>
-              <p className="mt-0.5 text-sm text-muted">{copy.description}</p>
+              <p className={on ? "mt-0.5 text-sm text-muted" : "mt-0.5 text-sm text-subtle"}>
+                {copy.description}
+              </p>
               {/* Delivery shows for every kind since built-ins became a
                   choice too (founder ruling 2026-07-12 evening). */}
               <p className="mt-2 text-xs font-semibold text-subtle">
@@ -183,11 +195,28 @@ function TaskCard({
                       ? "by email"
                       : "saved to this page"
                 }`}
-                {next ? ` \u00b7 next: ${next}` : task.paused ? " \u00b7 off" : ""}
               </p>
             </div>
           </div>
           <PauseToggle task={task} />
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          {next ? (
+            <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-[0.7rem] font-bold text-[var(--clay-700)]">
+              Next {"\u00b7"} {next}
+            </span>
+          ) : !on ? (
+            <span className="rounded-pill bg-[var(--clay-100,#eadfd2)] px-2.5 py-1 text-[0.7rem] font-bold text-muted">
+              Off
+            </span>
+          ) : (
+            <span />
+          )}
+          <ChevronRight
+            size={16}
+            aria-hidden="true"
+            className="shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-hover:translate-x-0.5"
+          />
         </div>
       </div>
       {editing ? (
@@ -212,7 +241,10 @@ function DarkKindCard({
   return (
     <div className="rounded-lg border border-dashed border-border-subtle bg-card p-4">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 text-subtle">
+        <span
+          aria-hidden="true"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--clay-100,#eadfd2)] text-subtle"
+        >
           <TaskIcon kind={kind} />
         </span>
         <div>
