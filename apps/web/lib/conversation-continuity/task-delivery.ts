@@ -39,7 +39,7 @@ export interface TaskDeliveryTransports {
   ): Promise<
     | boolean
     | { status: "submitted"; messageId: string }
-    | { status: "rejected" }
+    | { status: "rejected"; reason?: string }
     | { status: "unknown" }
   >;
   sendEmail(
@@ -110,6 +110,13 @@ async function attemptSms(
       (typeof submission === "object" && submission.status === "submitted");
     const uncertain =
       typeof submission === "object" && submission.status === "unknown";
+    // A transport that knows WHY it refused (segment cap, provider
+    // error code) puts that reason on the founder's alert instead of
+    // the generic line.
+    const rejectionReason =
+      typeof submission === "object" && submission.status === "rejected"
+        ? submission.reason
+        : undefined;
     await dependencies.ledger.finishAttempt(
       attempt,
       delivered
@@ -123,7 +130,9 @@ async function attemptSms(
           }
         : {
             delivered: false,
-            error: uncertain ? "SMS submission uncertain" : "SMS send rejected",
+            error: uncertain
+              ? "SMS submission uncertain"
+              : (rejectionReason ?? "SMS send rejected"),
             uncertain,
           },
     );

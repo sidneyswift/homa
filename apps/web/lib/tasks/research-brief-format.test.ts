@@ -218,4 +218,28 @@ describe("morning research brief format", () => {
       ),
     ], "length");
   });
+
+  it("rejects briefs the emoji pushes past the carrier segment cap", () => {
+    // The 2026-07-13 incident shape: a well-formed brief in the 700 to
+    // 830 character range. The required emoji makes carriers count 67
+    // characters per segment, so anything past 670 cannot leave as one
+    // SMS (Telnyx error 40302).
+    const incidentLengthBrief = VALID.replace(
+      "Connected phonation helps",
+      `${"Very ".repeat(80)}Connected phonation helps`,
+    );
+    assert.ok(incidentLengthBrief.length > 670);
+    assert.ok(incidentLengthBrief.length < 900);
+    assertInvalid([incidentLengthBrief], "length");
+  });
+
+  it("accepts a brief that fills the whole deliverable budget", () => {
+    const nearCapBrief = VALID.replace(
+      "Connected phonation helps",
+      `${"Very ".repeat(40)}Connected phonation helps`,
+    );
+    assert.ok(nearCapBrief.length > 550);
+    assert.ok(nearCapBrief.length <= 669);
+    assert.deepEqual(validateResearchBriefFormat(nearCapBrief), { ok: true });
+  });
 });

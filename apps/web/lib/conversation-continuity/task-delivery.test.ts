@@ -13,7 +13,8 @@ import type {
 
 class FakeLedger implements TaskDeliveryLedger {
   attempts: DeliveryAttempt[] = [];
-  finished: Array<{ id: string; delivered: boolean }> = [];
+  finished: Array<{ id: string; delivered: boolean; error?: string | null }> =
+    [];
   openedLoops: string[] = [];
   reuseSentAttempt = false;
   reusePendingAttempt = false;
@@ -38,9 +39,13 @@ class FakeLedger implements TaskDeliveryLedger {
 
   async finishAttempt(
     attempt: DeliveryAttempt,
-    outcome: { delivered: boolean; uncertain?: boolean },
+    outcome: { delivered: boolean; error?: string | null; uncertain?: boolean },
   ): Promise<void> {
-    this.finished.push({ id: attempt.id, delivered: outcome.delivered });
+    this.finished.push({
+      id: attempt.id,
+      delivered: outcome.delivered,
+      error: outcome.error,
+    });
     if (!outcome.delivered && !outcome.uncertain) {
       this.openedLoops = this.openedLoops.filter((id) => id !== attempt.id);
     }
@@ -184,6 +189,34 @@ describe("per-recipient task delivery", () => {
     assert.equal(transportCalls, 0);
     assert.equal(result.status, "done");
     assert.equal(result.deliveredCount, 1);
+  });
+
+  it("records the transport's rejection reason and still falls back to email", async () => {
+    const ledger = new FakeLedger();
+    const reason = "SMS over the carrier size limit (12 segments, max 10)";
+
+    const result = await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return { status: "rejected", reason };
+          },
+          async sendEmail() {
+            return true;
+          },
+        },
+      },
+    );
+
+    assert.equal(result.status, "done");
+    assert.equal(result.deliveredChannel, "email");
+    assert.deepEqual(ledger.finished[0], {
+      id: "attempt-1",
+      delivered: false,
+      error: reason,
+    });
   });
 
   it("does not email-fallback or replay when SMS submission is uncertain", async () => {

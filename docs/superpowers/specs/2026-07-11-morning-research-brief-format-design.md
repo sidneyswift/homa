@@ -77,9 +77,13 @@ application, or CTA contract.
 - The same formatted text is sent by SMS or the email fallback.
 - The exact text is stored in `homa_task_runs.summary` and displayed in Homa's
   tasks history with line breaks preserved.
-- The whole message stays within the provider's 1,600-character SMS ceiling.
-  If the draft is too long, Homa cuts detail rather than removing a required
-  section.
+- The whole message stays deliverable as one SMS. Corrected 2026-07-13: the
+  original 1,600-character ceiling was wrong for this format, because the
+  required emoji switches the message to UCS-2 encoding (67 characters per
+  segment, 10-segment provider cap, so about 670 characters). The skill now
+  instructs a 600-character budget and the format contract enforces the real
+  segment cap. If the draft is too long, Homa cuts detail rather than
+  removing a required section.
 - This format replaces the current freeform 2-to-4-sentence brief and its
   optional unlabeled offer.
 

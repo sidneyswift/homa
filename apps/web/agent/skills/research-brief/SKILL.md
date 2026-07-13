@@ -87,8 +87,10 @@ Want me to {one specific action Homa can complete}?
   CTA.
 - Do not include "Saved it to" or any URL until the dedicated research-note
   route exists.
-- Keep the complete message at or below 1,600 characters. Cut supporting
-  detail before removing a required block.
+- Keep the complete message at or below 600 characters. The emoji makes
+  phone carriers count this text in short segments, and past about 670
+  characters the brief cannot be delivered as one text message. Cut
+  supporting detail before removing a required block.
 
 ## Guardrails (binding)
 

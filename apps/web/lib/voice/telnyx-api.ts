@@ -6,6 +6,8 @@
  * deployment without the key degrades to a clean skip, never a crash.
  */
 
+import { fitsInOneSms, smsSegmentCount } from "../sms-segments";
+
 const API_BASE = "https://api.telnyx.com/v2";
 
 export function telnyxConfigured(): boolean {
@@ -85,7 +87,7 @@ export async function downloadTelnyxMedia(
  */
 export type HomaSmsSubmission =
   | { status: "submitted"; messageId: string }
-  | { status: "rejected" }
+  | { status: "rejected"; reason?: string }
   | { status: "unknown" };
 
 export function classifyTelnyxHttpFailure(
@@ -94,6 +96,26 @@ export function classifyTelnyxHttpFailure(
   return status === 408 || status === 429 || status >= 500
     ? "unknown"
     : "rejected";
+}
+
+/** Pulls Telnyx's own error codes and titles out of a failure body so
+ *  the log line says WHY, not just the HTTP status (the 2026-07-13
+ *  morning-brief incident was diagnosable only by replaying the send). */
+function describeTelnyxErrorBody(body: string): string | null {
+  try {
+    const payload = JSON.parse(body) as {
+      errors?: Array<{ code?: string; title?: string; detail?: string }>;
+    };
+    const described = (payload.errors ?? [])
+      .map((entry) =>
+        [entry.code, entry.title ?? entry.detail].filter(Boolean).join(" "),
+      )
+      .filter((line) => line.length > 0)
+      .join("; ");
+    return described.length > 0 ? described.slice(0, 300) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -110,7 +132,16 @@ export async function submitHomaSms(
   const apiKey = process.env.TELNYX_API_KEY;
   const fromNumber = process.env.TELNYX_FROM_NUMBER;
   if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) {
-    return { status: "rejected" };
+    return { status: "rejected", reason: "SMS channel not configured" };
+  }
+
+  // Telnyx hard-rejects texts over the carrier segment cap (HTTP 400,
+  // error 40302); refusing here keeps the reason precise and skips a
+  // doomed API call. MMS payloads size by media, not segments.
+  if ((!mediaUrls || mediaUrls.length === 0) && !fitsInOneSms(text)) {
+    const reason = `SMS over the carrier size limit (${smsSegmentCount(text)} segments, max 10)`;
+    console.error(`sendHomaSms refused: ${reason}`);
+    return { status: "rejected", reason };
   }
 
   try {
@@ -129,8 +160,19 @@ export async function submitHomaSms(
       signal,
     });
     if (!response.ok) {
-      console.error(`sendHomaSms failed: HTTP ${response.status}`);
-      return { status: classifyTelnyxHttpFailure(response.status) };
+      const detail = describeTelnyxErrorBody(await response.text());
+      console.error(
+        `sendHomaSms failed: HTTP ${response.status}${detail ? ` (${detail})` : ""}`,
+      );
+      const status = classifyTelnyxHttpFailure(response.status);
+      return status === "rejected"
+        ? {
+            status,
+            reason: detail
+              ? `Telnyx rejected the send: ${detail}`
+              : `Telnyx rejected the send (HTTP ${response.status})`,
+          }
+        : { status };
     }
     const payload = (await response.json()) as { data?: { id?: unknown } };
     const messageId = payload.data?.id;

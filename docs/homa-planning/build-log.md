@@ -3,6 +3,57 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · Morning-brief texts died on the carrier segment cap (emoji + UCS-2)
+
+Founder ask (screenshot of three "Failed sms send · SMS send rejected"
+alerts on /admin): investigate deeply and fix the root cause. All three
+2026-07-13 morning briefs (Riley, Nouvelle, Swift) failed as texts and
+fell back to email, which delivered.
+
+Root cause, confirmed by replaying the send against the live Telnyx
+API: the brief format's required 🔬 headline switches the entire SMS
+from GSM-7 (153 chars per segment) to UCS-2 (67 chars per segment), and
+Telnyx hard-rejects anything over 10 segments (HTTP 400, error 40302,
+"The SMS message would be divided into N parts. The maximum is 10.").
+The format spec approved 2026-07-11 carried a 1,600-character budget,
+which is the GSM-7 view of the world; with the emoji the real ceiling
+is about 670 characters. Today's briefs ran 755 to 830 characters (12
+to 13 segments). The one emoji text that DID send today was 665 chars,
+exactly 10 segments. Perfect correlation, no other cause in play.
+The transport also logged only "HTTP 400" without Telnyx's error body,
+which is why the alert could not explain itself.
+
+Fix, three layers:
+
+- `apps/web/lib/sms-segments.ts` (new, tested): GSM 03.38 segment math
+  (`smsSegmentCount`, `fitsInOneSms`, `MAX_SMS_SEGMENTS`), verified
+  against Telnyx's own "parts" numbers from the incident replay.
+- `apps/web/lib/voice/telnyx-api.ts`: `submitHomaSms` now preflights
+  text-only sends over the cap (precise rejection reason, no doomed API
+  call), and reads Telnyx's error body on failures so the log line
+  carries the provider's own code and title. Rejected submissions now
+  carry an optional `reason`, and task delivery
+  (`lib/conversation-continuity/task-delivery.ts`) writes it to the
+  delivery ledger, so the /admin alert names the real cause instead of
+  the generic "SMS send rejected".
+- Producer contract: `research-brief/SKILL.md` now instructs a
+  600-character budget and explains why, and
+  `lib/tasks/research-brief-format.ts` enforces the true constraint
+  (must fit one deliverable SMS via the shared segment math) instead of
+  the flat 1,600 cap. Spec doc amended in place with a dated
+  correction. The 665-char passing brief proves the format works at
+  this size; the founder-approved four-block shape is unchanged.
+
+Decision made alone: the emoji stays (founder-approved format); the
+budget moved to fit it, rather than dropping the emoji to keep the
+1,600-character budget. Email fallback behavior is untouched.
+
+Verified: segment math matches live Telnyx verdicts (400/40302 red
+replay, 200 green replay at 10 segments, both to the founder's own
+number); `check:research-brief` includes a regression fixture at the
+incident length; `check:continuity` green; lint, typecheck, eve build
+green.
+
 ## 2026-07-13 · /admin alerts get a "Mark handled" check-off
 
 Founder ask (screenshot of two long-since-fixed "custom run failed"

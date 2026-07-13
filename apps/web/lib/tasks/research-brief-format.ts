@@ -1,4 +1,5 @@
-const MAX_CHARS = 1600;
+import { fitsInOneSms } from "../sms-segments";
+
 const EXACT_LINE_COUNT = 7;
 const HEADLINE =
   /^🔬 (Last night|This morning) I researched (\S(?:.*\S)?)$/u;
@@ -130,7 +131,12 @@ export function validateResearchBriefFormat(
   if (CALENDAR_REFERENCE.test(cta)) errors.push("calendar promise");
   if (INTERNAL_VOCABULARY.test(text)) errors.push("internal vocabulary");
   if (text.includes("\u2014")) errors.push("em dash");
-  if (text.length > MAX_CHARS) errors.push("length");
+  // The required emoji forces UCS-2 encoding, so carriers count 67
+  // characters per segment and reject anything over 10 segments
+  // (about 670 characters). The old flat 1,600-character cap let the
+  // 2026-07-13 briefs through at 755 to 830 characters, and Telnyx
+  // rejected all three texts with error 40302.
+  if (!fitsInOneSms(text)) errors.push("length");
 
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
 }
