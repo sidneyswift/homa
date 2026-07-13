@@ -27,19 +27,14 @@ export interface SidebarKid {
   id: string;
   name: string;
   ageMonths: number;
+  /** The kid's profile photo (migration #75); null keeps the initial. */
+  avatarUrl: string | null;
 }
 
-const AVATAR_TONES: ReadonlyArray<readonly [string, string]> = [
-  ["var(--clay-100)", "var(--clay-700)"],
-  ["var(--sky-100)", "var(--sky-600)"],
-  ["var(--sage-100)", "var(--sage-700)"],
-  ["var(--gold-100)", "var(--gold-ink)"],
-];
-
-/** Deterministic avatar tone per list position, shared with KidCard. */
-export function avatarTone(index: number): readonly [string, string] {
-  return AVATAR_TONES[index % AVATAR_TONES.length];
-}
+// The tone helper moved to kid-avatar.tsx with the photo work
+// (migration #75); the re-export keeps this module the import point
+// every surface already uses.
+export { avatarTone } from "./kid-avatar";
 
 export interface SidebarProps {
   parentName: string;

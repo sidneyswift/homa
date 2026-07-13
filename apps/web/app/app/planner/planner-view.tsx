@@ -9,7 +9,7 @@ import {
   type DashboardReport,
 } from "../../../lib/dashboard";
 import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
-import { avatarTone } from "../../../components/dashboard/sidebar";
+import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
   DayGrid,
   type PlannerDay,
@@ -53,8 +53,9 @@ function subjectLabel(subjectId: string): string {
 interface FocusRow {
   key: string;
   kidName: string | null;
-  avatarBg: string;
-  avatarInk: string;
+  /** Position in the family list (tone) and the photo when added. */
+  kidIndex: number;
+  kidAvatarUrl: string | null;
   subjectLabel: string;
   /** Names what the focus line IS before it speaks (reader gate
    * 2026-07-11: the bare bank statement read as a beheaded sentence).
@@ -109,11 +110,10 @@ export function PlannerView({
     const token = reports.get(child.id)?.token;
     if (!token) return;
     const kidPlans = plansByKid.get(child.id) ?? [];
-    const [avatarBg, avatarInk] = avatarTone(kidIndex);
 
     // Gather the kid's whole week first, then spread it over the five
     // days, so one kid's activities pace the week instead of piling up.
-    const gathered: Omit<PlannerDayItem, "kidName" | "avatarBg" | "avatarInk">[] = [];
+    const gathered: Omit<PlannerDayItem, "kidName" | "kidIndex" | "kidAvatarUrl">[] = [];
     kidPlans.forEach((plan) => {
       const weekIdx = currentWeekIndex(plan, nowMs);
       const week = plan.weeks[weekIdx];
@@ -132,8 +132,8 @@ export function PlannerView({
       focusRows.push({
         key: planKey,
         kidName: focusKid ? null : child.name,
-        avatarBg,
-        avatarInk,
+        kidIndex,
+        kidAvatarUrl: child.avatar_url,
         subjectLabel: subjectLabel(plan.subjectId),
         focusPrefix: plan.subjectId === MONTH_PLAN_SUBJECT ? "This month:" : "The goal:",
         focus: week.focus,
@@ -159,8 +159,8 @@ export function PlannerView({
       days[slots[index]].items.push({
         ...entry,
         kidName: focusKid ? null : child.name,
-        avatarBg,
-        avatarInk,
+        kidIndex,
+        kidAvatarUrl: child.avatar_url,
       });
     });
   });
@@ -247,14 +247,13 @@ export function PlannerView({
                 style={{ background: row.tone.bg }}
               >
                 {row.kidName ? (
-                  <span
-                    className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold"
-                    style={{ background: row.avatarBg, color: row.avatarInk }}
-                    title={row.kidName}
-                    aria-label={row.kidName}
-                  >
-                    {row.kidName.charAt(0)}
-                  </span>
+                  <KidAvatar
+                    name={row.kidName}
+                    index={row.kidIndex}
+                    avatarUrl={row.kidAvatarUrl}
+                    size={22}
+                    label={row.kidName}
+                  />
                 ) : null}
                 <span
                   className="text-[0.62rem] font-bold uppercase tracking-[0.05em]"

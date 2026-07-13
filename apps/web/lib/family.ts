@@ -22,6 +22,10 @@ export interface FamilyRecord {
   address_line: string | null;
   address_city: string | null;
   address_zip: string | null;
+  /** When an adult agreed to child photo personalization on the D4
+   * consent screen (migration #75); null means the screen has not been
+   * agreed to and no child photo can be added yet. */
+  child_photo_consent_at: string | null;
 }
 
 export interface ChildRecord {
@@ -30,6 +34,9 @@ export interface ChildRecord {
   name: string;
   birth_month: string;
   profile: ChildProfile;
+  /** The child's profile photo (migration #75): a Blob URL under this
+   * family's own artifact prefix, or null for the initial circle. */
+  avatar_url: string | null;
 }
 
 export interface ChildProfile {
@@ -52,7 +59,7 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
     .select(
-      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip",
+      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at",
     )
     .limit(1)
     .maybeSingle();
@@ -161,7 +168,7 @@ export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("children")
-    .select("id, family_id, name, birth_month, profile")
+    .select("id, family_id, name, birth_month, profile, avatar_url")
     .eq("family_id", familyId)
     .order("created_at", { ascending: true });
   if (error) throw new Error(`children read failed: ${error.message}`);

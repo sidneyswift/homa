@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import type { WeekdayCell } from "../../../lib/time-zone";
+import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 
 /**
  * The week board as a Monday-to-Friday calendar. Server code
@@ -34,8 +35,9 @@ export interface PlannerDayItem {
   text: string;
   /** Kid chip, shown only on the whole-family board. */
   kidName: string | null;
-  avatarBg: string;
-  avatarInk: string;
+  /** Position in the family list (tone) and the photo when added. */
+  kidIndex: number;
+  kidAvatarUrl: string | null;
   toneBg: string;
   toneInk: string;
   subjectLabel: string;
@@ -65,14 +67,13 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
           {item.subjectLabel}
         </span>
         {item.kidName ? (
-          <span
-            className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[0.6rem] font-bold"
-            style={{ background: item.avatarBg, color: item.avatarInk }}
-            title={item.kidName}
-            aria-label={item.kidName}
-          >
-            {item.kidName.charAt(0)}
-          </span>
+          <KidAvatar
+            name={item.kidName}
+            index={item.kidIndex}
+            avatarUrl={item.kidAvatarUrl}
+            size={18}
+            label={item.kidName}
+          />
         ) : null}
       </div>
       <label className="mt-1.5 flex cursor-pointer items-start gap-2">

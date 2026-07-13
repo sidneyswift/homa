@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import type { GrowthEra } from "../../app/onboarding/r/[token]/growth-story";
 import { ReportSnapshot } from "../../app/onboarding/r/[token]/report-snapshot";
 import {
   buildProgressTiles,
@@ -9,8 +8,9 @@ import {
 import type { ChildProgressView } from "../../lib/child-progress/types";
 import { progressEmptyState } from "../../lib/child-progress/view-copy";
 import type { DashboardReport } from "../../lib/dashboard";
+import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
+import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
-import { avatarTone } from "../dashboard/sidebar";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
 import { ProgressMap } from "./progress-map";
 
@@ -25,6 +25,8 @@ import { ProgressMap } from "./progress-map";
 export interface ProgressViewKid {
   id: string;
   name: string;
+  /** The kid's profile photo (migration #75); null keeps the initial. */
+  avatarUrl: string | null;
 }
 
 /** The retest clock fields ReportSnapshot reads (DashboardPlan, less
@@ -81,7 +83,6 @@ function KidSwitcher({
   return (
     <nav aria-label="Switch kid" className="mt-4 flex flex-wrap gap-2">
       {kids.map((kid, index) => {
-        const [bg, ink] = avatarTone(index);
         const current = kid.id === currentChildId;
         return (
           <Link
@@ -94,12 +95,7 @@ function KidSwitcher({
                 : "inline-flex items-center gap-2 rounded-pill border border-border-subtle bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition-colors hover:border-brand hover:text-body"
             }
           >
-            <span
-              className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.65rem] font-bold"
-              style={{ background: bg, color: ink }}
-            >
-              {kid.name.charAt(0)}
-            </span>
+            <KidAvatar name={kid.name} index={index} avatarUrl={kid.avatarUrl} size={20} />
             {kid.name}
           </Link>
         );
@@ -112,6 +108,7 @@ export function ProgressView({
   view,
   reportHref,
   report,
+  eras,
   plans,
   kids,
 }: {
@@ -124,6 +121,10 @@ export function ProgressView({
   /** The child's report row (chart history and movement); null before
    * the first scoring. */
   report: Pick<DashboardReport, "scores" | "generatedAt" | "history"> | null;
+  /** The trajectory chart's scorings, oldest first, live last,
+   * re-normalized server-side (lib/map/trajectory-eras). Empty before
+   * the first scoring. */
+  eras: TrajectoryEra[];
   /** This child's plans only, for the chart's re-check marker. */
   plans: ProgressViewPlan[];
   /** The family's kids in family order (drives the switcher's tones). */
@@ -132,17 +133,6 @@ export function ProgressView({
   const updatedLine = progressUpdatedLine(view);
   const tiles = buildProgressTiles(view, report?.history[0], new Date());
 
-  // Oldest chapter first, the live scoring as the closing chapter, the
-  // same archive read as the report's snapshot.
-  const eras: GrowthEra[] = report
-    ? [
-        ...[...report.history].reverse().map((entry) => ({
-          generated_at: entry.generated_at,
-          scores: entry.scores,
-        })),
-        { generated_at: report.generatedAt, scores: report.scores },
-      ]
-    : [];
   const generatedDate = report
     ? new Date(report.generatedAt).toLocaleDateString("en-US", {
         year: "numeric",

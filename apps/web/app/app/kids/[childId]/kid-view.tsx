@@ -6,7 +6,7 @@ import type { ChildCurriculumRow } from "../../../../lib/curriculum";
 import { kidProgressAction } from "../../../../lib/child-progress/kid-action";
 import type { ChildRecord } from "../../../../lib/family";
 import type { DashboardPlan, DashboardReport, RecentWin } from "../../../../lib/dashboard";
-import { avatarTone } from "../../../../components/dashboard/sidebar";
+import { KidAvatar } from "../../../../components/dashboard/kid-avatar";
 import { kidPill } from "../../../../components/dashboard/kid-pill";
 import { Logo } from "../../../../components/brand/Logo";
 import { MonthCard } from "../../../../components/dashboard/month-card";
@@ -49,7 +49,6 @@ export function KidView({
 }) {
   const child = kids[kidIndex];
   const months = ageInMonths(child.birth_month);
-  const [avatarBg, avatarInk] = avatarTone(kidIndex);
   const pill = kidPill(report, months);
   const moved = report ? movedUpCount(report.scores, report.history[0]?.scores) : 0;
   const childNames = new Map([[child.id, child.name]]);
@@ -61,12 +60,7 @@ export function KidView({
   return (
     <>
       <header className="flex flex-wrap items-center gap-4">
-        <span
-          className="inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-xl font-bold"
-          style={{ background: avatarBg, color: avatarInk }}
-        >
-          {child.name.charAt(0)}
-        </span>
+        <KidAvatar name={child.name} index={kidIndex} avatarUrl={child.avatar_url} size={52} />
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-[1.8rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
             {child.name}&apos;s progress
@@ -92,7 +86,6 @@ export function KidView({
       {kids.length > 1 ? (
         <nav aria-label="Switch kid" className="mt-4 flex flex-wrap gap-2">
           {kids.map((entry, index) => {
-            const [bg, ink] = avatarTone(index);
             const current = entry.id === child.id;
             return (
               <Link
@@ -105,12 +98,7 @@ export function KidView({
                     : "inline-flex items-center gap-2 rounded-pill border border-border-subtle bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition-colors hover:border-brand hover:text-body"
                 }
               >
-                <span
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.65rem] font-bold"
-                  style={{ background: bg, color: ink }}
-                >
-                  {entry.name.charAt(0)}
-                </span>
+                <KidAvatar name={entry.name} index={index} avatarUrl={entry.avatar_url} size={20} />
                 {entry.name}
               </Link>
             );

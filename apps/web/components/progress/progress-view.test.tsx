@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import {
+  PROGRESS_FIXTURE_ERAS,
   PROGRESS_FIXTURE_KIDS,
   PROGRESS_FIXTURE_REPORT,
   PROGRESS_FIXTURE_VIEW,
@@ -33,6 +34,7 @@ describe("ProgressView", () => {
         view={viewWithInternalData}
         reportHref="/onboarding/r/tok-abc123"
         report={PROGRESS_FIXTURE_REPORT}
+        eras={PROGRESS_FIXTURE_ERAS}
         plans={[]}
         kids={PROGRESS_FIXTURE_KIDS}
       />,
@@ -93,8 +95,9 @@ describe("ProgressView", () => {
         view={PROGRESS_FIXTURE_VIEW}
         reportHref={null}
         report={null}
+        eras={[]}
         plans={[]}
-        kids={[{ id: "child-1", name: "Maya" }]}
+        kids={[{ id: "child-1", name: "Maya", avatarUrl: null }]}
       />,
     );
 
@@ -111,6 +114,7 @@ describe("ProgressView", () => {
           view={{ ...PROGRESS_FIXTURE_VIEW, subjects: [], conflicts: [] }}
           reportHref={null}
           report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
           plans={[]}
           kids={PROGRESS_FIXTURE_KIDS}
         />

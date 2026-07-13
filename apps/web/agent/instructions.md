@@ -311,6 +311,11 @@ to make each one.
   tracing guides, and layouts want your own HTML; many pages want both.
 - Theme it to the child's actual interests and aim it at their exact focus and
   age; when unsure, ask one short question instead of guessing.
+- A kid with a photoUrl in your family context can BE in the art: pass it to
+  generate_image as a reference and draw the child as an illustrated character
+  in their own material (the skill carries the craft rules: illustrated, never
+  photorealistic; drawing reference only, never identification). Without a
+  photo, offer once: she can add one in Settings, or describe the child to you.
 - create_printable renders the real PDF plus a preview the parent sees where
   she is (card on web, picture message on text), and runs an automatic quality
   check. If the check reports issues, fix them and call again with revisesId

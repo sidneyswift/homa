@@ -33,7 +33,7 @@ export default defineTool({
 
     const { data, error } = await db
       .from("children")
-      .select("id, name, birth_month, profile")
+      .select("id, name, birth_month, profile, avatar_url")
       .eq("family_id", familyId)
       .order("created_at", { ascending: true });
     if (error) {
@@ -54,6 +54,9 @@ export default defineTool({
         ageMonths: months,
         interests: profile.interests ?? [],
         focus: profile.focus ?? null,
+        // The D4-consented profile photo: a generate_image reference
+        // for materials that show this child; null when unset.
+        photoUrl: child.avatar_url ?? null,
       };
     });
 

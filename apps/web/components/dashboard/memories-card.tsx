@@ -23,11 +23,12 @@ export interface MemoryCardRow {
 }
 
 /** How the memory arrived, two or three words each, no overlap: "you
- * told her" when the parent said it outright, "Homa noticed" when she
+ * told Homa" when the parent said it outright ("her" pointed readers at
+ * the child one row up, 2026-07-13 UX read), "Homa noticed" when she
  * drew it from conversation herself. */
 const SOURCE_LABELS: Record<string, string> = {
   homa: "Homa noticed",
-  parent: "you told her",
+  parent: "you told Homa",
   onboarding: "from signup",
   call: "from a call",
   review: "Homa noticed",

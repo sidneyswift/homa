@@ -179,7 +179,7 @@ export function ChatClient({
    * still edits and sends herself, nothing auto-sends. */
   initialDraft?: string;
   /** The composer's "/" menu: kids to mention + the advertised skills. */
-  kids?: { id: string; name: string }[];
+  kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
 }) {
   const [supabase] = useState(() => createSupabaseBrowserClient());

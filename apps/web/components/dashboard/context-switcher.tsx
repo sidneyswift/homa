@@ -13,7 +13,8 @@ import {
   pageShowsContextSwitcher,
   VIEW_CONTEXT_FAMILY,
 } from "../../lib/view-context";
-import { avatarTone, type SidebarKid } from "./sidebar";
+import { KidAvatar } from "./kid-avatar";
+import { type SidebarKid } from "./sidebar";
 
 /**
  * The family / per-child context switcher (founder direction 2026-07-10,
@@ -62,22 +63,8 @@ function FamilyAvatar({ size }: { size: number }) {
   );
 }
 
-function KidAvatar({ kid, index, size }: { kid: SidebarKid; index: number; size: number }) {
-  const [bg, ink] = avatarTone(index);
-  return (
-    <span
-      className="inline-flex shrink-0 items-center justify-center rounded-full font-bold"
-      style={{
-        width: size,
-        height: size,
-        background: bg,
-        color: ink,
-        fontSize: size * 0.45,
-      }}
-    >
-      {kid.name.charAt(0)}
-    </span>
-  );
+function SwitcherKidAvatar({ kid, index, size }: { kid: SidebarKid; index: number; size: number }) {
+  return <KidAvatar name={kid.name} index={index} avatarUrl={kid.avatarUrl} size={size} />;
 }
 
 /**
@@ -175,7 +162,7 @@ function SwitcherMenu({
         className={buttonClassName}
       >
         {currentKid ? (
-          <KidAvatar kid={currentKid} index={currentKidIndex} size={32} />
+          <SwitcherKidAvatar kid={currentKid} index={currentKidIndex} size={32} />
         ) : (
           <FamilyAvatar size={32} />
         )}
@@ -212,7 +199,7 @@ function SwitcherMenu({
               onClick={() => pickAndClose(kid.id)}
               className="flex w-full cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
             >
-              <KidAvatar kid={kid} index={index} size={26} />
+              <SwitcherKidAvatar kid={kid} index={index} size={26} />
               <span className="min-w-0 flex-1 truncate">{kid.name}</span>
               {current === kid.id ? (
                 <Check size={16} className="shrink-0 text-brand" aria-hidden="true" />
@@ -303,7 +290,7 @@ export function ViewingRows({
               href={`/app/kids/${kid.id}`}
               className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
             >
-              <KidAvatar kid={kid} index={0} size={30} />
+              <SwitcherKidAvatar kid={kid} index={0} size={30} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-body">
                   {kid.name}
@@ -363,7 +350,7 @@ export function ViewingRows({
               onClick={() => pick(kid.id)}
               className={rowClass(active)}
             >
-              <KidAvatar kid={kid} index={index} size={30} />
+              <SwitcherKidAvatar kid={kid} index={index} size={30} />
               <span className="min-w-0 flex-1">
                 <span
                   className={`block truncate text-sm ${

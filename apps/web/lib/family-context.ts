@@ -43,6 +43,10 @@ export interface ChildRow {
   name: string;
   birth_month: string;
   profile: { interests?: string[]; focus?: string } | null;
+  /** The parent-added profile photo (migration #75, D4-consented), a
+   * URL in this family's own artifact space; the studio accepts it as a
+   * generate_image reference. Null when the family has not added one. */
+  avatar_url?: string | null;
 }
 
 /** One raw checklist/observation answer; scoring happens at render time
@@ -210,7 +214,7 @@ export async function loadFamilyContextPinned(
       from public.families where id = ${familyId}
     `,
     sql<ChildRow[]>`
-      select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_month, profile
+      select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_month, profile, avatar_url
       from public.children where family_id = ${familyId}
       order by created_at
     `,
@@ -304,6 +308,10 @@ export function renderFamilyContext(
             boundedContextField(interest, 120) ?? "",
         ),
       focus: boundedContextField(child.profile?.focus),
+      // The D4-consented profile photo: a generate_image reference for
+      // materials that show this child (materials-studio skill owns the
+      // craft rules). Absent when the family has not added one.
+      ...(child.avatar_url ? { photoUrl: boundedContextField(child.avatar_url, 500) } : {}),
       summary: boundedContextField(
         describeChild(child, now),
         500,

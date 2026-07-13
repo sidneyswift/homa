@@ -42,6 +42,7 @@ function child(overrides: Partial<ChildRecord> = {}): ChildRecord {
     name: "Maya",
     birth_month: "2019-03",
     profile: {},
+    avatar_url: null,
     ...overrides,
   };
 }

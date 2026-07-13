@@ -86,6 +86,21 @@ export async function setMemberDisplayName(
 }
 
 /**
+ * setChildPhotoConsent(familyId, userId): stamps the D4 consent moment
+ * (migration #75): this adult agreed, on the dedicated consent screen,
+ * to child photo personalization for this family. Stamped once; a
+ * second agree (another adult, another day) keeps the first record.
+ */
+export async function setChildPhotoConsent(familyId: string, userId: string): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.families
+    set child_photo_consent_at = now(), child_photo_consent_by = ${userId}
+    where id = ${familyId} and child_photo_consent_at is null
+  `;
+}
+
+/**
  * setMemberAvatarUrl(familyId, userId, avatarUrl): this adult's own
  * photo (migration #74). The caller validates the URL points at our
  * avatars bucket before it gets here; null clears the photo.

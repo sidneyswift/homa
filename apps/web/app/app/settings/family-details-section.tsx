@@ -12,16 +12,22 @@ import { SectionHeading } from "./section-heading";
  * The details section of the one family card on /app/settings: the
  * family name and the address onboarding captured (the state drives
  * which homeschool rules Homa follows, and the street address is where
- * the thank-you card mails). The time zone fills itself, from the
- * device on first visit and from the address on a move (founder
- * direction 2026-07-12), so it renders as a quiet read-only line with a
- * rare-path Change control that saves on pick.
+ * the thank-you card mails). At rest it reads as label-and-value lines
+ * with one Edit, the same row grammar as every other section; the form
+ * only exists once asked for (2026-07-13 UX read: five always-open
+ * inputs were the page's loudest block). The time zone fills itself,
+ * from the device on first visit and from the address on a move
+ * (founder direction 2026-07-12), so it renders as a quiet read-only
+ * line with a rare-path Change control that saves on pick.
  */
 
 const INITIAL_STATE: SetupFormState = { error: null };
 
 const inputClass =
   "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+
+const rowButtonClass =
+  "min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong disabled:opacity-60";
 
 const US_ZONES: ReadonlyArray<readonly [string, string]> = [
   ["America/New_York", "Eastern"],
@@ -116,117 +122,168 @@ function TimeZoneRow({ currentTimeZone }: { currentTimeZone: string }) {
   );
 }
 
+/** "123 Maple Street, Maplewood, FL 33301" from whatever parts exist. */
+function addressDisplay(details: FamilyDetails): string {
+  const stateZip = [details.usState, details.zip].filter(Boolean).join(" ");
+  return [details.addressLine, details.city, stateZip].filter(Boolean).join(", ");
+}
+
 export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
-  const [state, action, pending] = useActionState(updateFamilyDetailsAction, INITIAL_STATE);
+  const [editing, setEditing] = useState(false);
+  // The wrapper closes the editor on success (the section-wide pattern);
+  // the refreshed rows above it are the save confirmation.
+  const [state, action, pending] = useActionState(
+    async (prev: SetupFormState, formData: FormData) => {
+      const result = await updateFamilyDetailsAction(prev, formData);
+      if (result.saved) setEditing(false);
+      return result;
+    },
+    INITIAL_STATE,
+  );
+  const address = addressDisplay(details);
 
   return (
     <div>
       <SectionHeading>Family details</SectionHeading>
 
-      <form action={action}>
-        <label className="mt-3 block text-sm font-medium text-strong" htmlFor="family-name">
-          Family name
-        </label>
-        <input
-          id="family-name"
-          name="family_name"
-          type="text"
-          required
-          defaultValue={details.name}
-          className={inputClass}
-        />
+      {editing ? (
+        <form action={action} className="mt-3 rounded-md bg-page p-4">
+          <label className="block text-sm font-medium text-strong" htmlFor="family-name">
+            Family name
+          </label>
+          <input
+            id="family-name"
+            name="family_name"
+            type="text"
+            required
+            defaultValue={details.name}
+            className={inputClass}
+          />
 
-        <label className="mt-4 block text-sm font-medium text-strong" htmlFor="family-address">
-          Address
-        </label>
-        {/* The mail sentence retired (founder ask 2026-07-12: "real mail
-            from Homa is creepy"); the state-rules reason stands alone. */}
-        <p className="mt-1 text-sm text-body">
-          The state sets which homeschool rules Homa follows.
-        </p>
-        <input
-          id="family-address"
-          name="address_line"
-          type="text"
-          autoComplete="address-line1"
-          required
-          defaultValue={details.addressLine}
-          className={inputClass}
-        />
-
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
-          <div>
-            <label className="block text-sm font-medium text-strong" htmlFor="family-city">
-              City
-            </label>
-            <input
-              id="family-city"
-              name="address_city"
-              type="text"
-              autoComplete="address-level2"
-              required
-              defaultValue={details.city}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-strong" htmlFor="family-state">
-              State
-            </label>
-            <select
-              id="family-state"
-              name="us_state"
-              autoComplete="address-level1"
-              required
-              defaultValue={details.usState}
-              className={inputClass}
-            >
-              <option value="" disabled>
-                State
-              </option>
-              {US_STATES.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.code}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-strong" htmlFor="family-zip">
-              ZIP
-            </label>
-            <input
-              id="family-zip"
-              name="address_zip"
-              type="text"
-              inputMode="numeric"
-              autoComplete="postal-code"
-              required
-              defaultValue={details.zip}
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        {state.error ? (
-          <p className="mt-3 text-sm text-danger" role="alert">
-            {state.error}
+          <label className="mt-4 block text-sm font-medium text-strong" htmlFor="family-address">
+            Address
+          </label>
+          {/* The mail sentence retired (founder ask 2026-07-12: "real mail
+              from Homa is creepy"); the state-rules reason stands alone. */}
+          <p className="mt-1 text-sm text-body">
+            The state sets which homeschool rules Homa follows.
           </p>
-        ) : null}
+          <input
+            id="family-address"
+            name="address_line"
+            type="text"
+            autoComplete="address-line1"
+            required
+            defaultValue={details.addressLine}
+            className={inputClass}
+          />
 
-        <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
+            <div>
+              <label className="block text-sm font-medium text-strong" htmlFor="family-city">
+                City
+              </label>
+              <input
+                id="family-city"
+                name="address_city"
+                type="text"
+                autoComplete="address-level2"
+                required
+                defaultValue={details.city}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-strong" htmlFor="family-state">
+                State
+              </label>
+              <select
+                id="family-state"
+                name="us_state"
+                autoComplete="address-level1"
+                required
+                defaultValue={details.usState}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  State
+                </option>
+                {US_STATES.map((state) => (
+                  <option key={state.code} value={state.code}>
+                    {state.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-strong" htmlFor="family-zip">
+                ZIP
+              </label>
+              <input
+                id="family-zip"
+                name="address_zip"
+                type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                required
+                defaultValue={details.zip}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          {state.error ? (
+            <p className="mt-3 text-sm text-danger" role="alert">
+              {state.error}
+            </p>
+          ) : null}
+
+          <div className="mt-4 flex gap-2">
+            <button
+              type="submit"
+              disabled={pending}
+              className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+            >
+              {pending ? "Saving\u2026" : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="flex items-start justify-between gap-3">
+          <dl className="mt-2 min-w-0 flex-1 space-y-1.5">
+            <div className="text-sm">
+              <dt className="inline text-muted">Family name: </dt>
+              <dd className="inline text-strong">{details.name}</dd>
+            </div>
+            <div className="text-sm">
+              <dt className="inline text-muted">Address: </dt>
+              <dd className="inline text-strong">
+                {address ? (
+                  address
+                ) : (
+                  <span className="font-normal text-body">
+                    None yet. The state sets which homeschool rules Homa follows.
+                  </span>
+                )}
+              </dd>
+            </div>
+          </dl>
           <button
-            type="submit"
-            disabled={pending}
-            className="min-h-10 cursor-pointer rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60"
+            type="button"
+            onClick={() => setEditing(true)}
+            className={`mt-1 shrink-0 ${rowButtonClass}`}
           >
-            {pending ? "Saving\u2026" : "Save changes"}
+            Edit
           </button>
-          <span className="text-xs text-muted" role="status">
-            {state.saved && !pending ? "Saved" : ""}
-          </span>
         </div>
-      </form>
+      )}
 
       <TimeZoneRow currentTimeZone={details.timeZone} />
     </div>

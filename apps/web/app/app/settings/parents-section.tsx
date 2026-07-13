@@ -86,7 +86,16 @@ function AdultAvatar({ adult, size }: { adult: AdultRow; size: number }) {
   );
 }
 
-function AdultRowLine({ adult }: { adult: AdultRow }) {
+function AdultRowLine({
+  adult,
+  showPrimaryTag,
+}: {
+  adult: AdultRow;
+  /** The tag only means something next to a second adult: single-parent
+   * families (most) never see it (2026-07-13 UX read: explainers were
+   * rendering for people they don't apply to). */
+  showPrimaryTag: boolean;
+}) {
   return (
     <span className="min-w-0 flex-1">
       {/* The name line wraps (never truncates): on a 390px screen the
@@ -94,7 +103,7 @@ function AdultRowLine({ adult }: { adult: AdultRow }) {
       <span className="block font-semibold text-strong">
         {adult.name}
         {adult.isYou ? <span className="font-normal text-muted"> (you)</span> : null}
-        {adult.isPrimary ? (
+        {showPrimaryTag && adult.isPrimary ? (
           <span className="ml-2 inline-flex whitespace-nowrap rounded-pill bg-[var(--stone-100)] px-2 py-0.5 align-middle text-[0.66rem] font-bold uppercase tracking-[0.06em] text-muted">
             Main account
           </span>
@@ -109,7 +118,7 @@ function AdultRowLine({ adult }: { adult: AdultRow }) {
 }
 
 /** The signed-in adult's row with its name-photo-number editor. */
-function MyAdultItem({ adult }: { adult: AdultRow }) {
+function MyAdultItem({ adult, showPrimaryTag }: { adult: AdultRow; showPrimaryTag: boolean }) {
   const [editing, setEditing] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -148,7 +157,7 @@ function MyAdultItem({ adult }: { adult: AdultRow }) {
     <li className="py-3 first:pt-1 last:pb-0">
       <div className="flex items-center gap-3">
         <AdultAvatar adult={adult} size={40} />
-        <AdultRowLine adult={adult} />
+        <AdultRowLine adult={adult} showPrimaryTag={showPrimaryTag} />
         {editing ? null : (
           <button type="button" onClick={() => setEditing(true)} className={rowButtonClass}>
             Edit
@@ -398,10 +407,17 @@ export function ParentsSection({
   homaNumberDisplay: string | null;
   homaNumberE164: string | null;
 }) {
+  // The main-account concept only exists once a second adult (or an
+  // invite on its way to one) is in the picture; the self-edit rule is
+  // only worth stating when another adult's row visibly has no Edit
+  // (2026-07-13 UX read: Ben's missing Edit was a silent dead end).
+  const multiAdult = adults.length > 1 || pendingInvites.length > 0;
+  const hasOtherAdult = adults.some((adult) => !adult.isYou);
+
   return (
     <div>
       <SectionHeading>Parents</SectionHeading>
-      {adults.some((adult) => adult.isPrimary) ? (
+      {multiAdult && adults.some((adult) => adult.isPrimary) ? (
         <p className="mt-2 text-sm text-body">
           The main account set up Homa and gets her task texts.
         </p>
@@ -409,11 +425,11 @@ export function ParentsSection({
       <ul className="divide-y divide-[var(--stone-100)]">
         {adults.map((adult) =>
           adult.isYou ? (
-            <MyAdultItem key={adult.userId} adult={adult} />
+            <MyAdultItem key={adult.userId} adult={adult} showPrimaryTag={multiAdult} />
           ) : (
             <li key={adult.userId} className="flex items-center gap-3 py-3 first:pt-1 last:pb-0">
               <AdultAvatar adult={adult} size={40} />
-              <AdultRowLine adult={adult} />
+              <AdultRowLine adult={adult} showPrimaryTag={multiAdult} />
             </li>
           ),
         )}
@@ -424,13 +440,18 @@ export function ParentsSection({
           <LegacyPhoneItem key={phone.e164} phone={phone} />
         ))}
       </ul>
+      {hasOtherAdult ? (
+        <p className="mt-1 text-xs text-muted">Each parent edits their own info.</p>
+      ) : null}
 
       {homaNumberDisplay && homaNumberE164 ? (
         <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-body">
-          {/* sms:, never tel:: tapping this opens Messages, it never dials. */}
+          {/* sms:, never tel:: tapping this opens Messages, it never
+              dials. whitespace-nowrap: the number itself must never
+              split across lines (2026-07-13 UX read). */}
           <a
             href={`sms:${homaNumberE164}`}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+            className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
           >
             <MessageCircle size={15} className="text-brand" aria-hidden="true" />
             Text Homa {"\u00b7"} {homaNumberDisplay}

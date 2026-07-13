@@ -1,6 +1,7 @@
 import type { MapScores } from "@homa/core";
 
 import type { ChildProgressView } from "../../lib/child-progress/types";
+import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
 
 /**
  * Shared Progress fixtures (test-only): one two-subject live view with a
@@ -52,6 +53,23 @@ export const PROGRESS_FIXTURE_REPORT = {
     { scores: PRIOR_SCORES, generated_at: "2026-06-10T16:00:00.000Z" },
   ],
 };
+
+/** The report row's scorings as the server-side re-normalization hands
+ * them to the chart: one shared basis, so no dotted stretches. */
+export const PROGRESS_FIXTURE_ERAS: TrajectoryEra[] = [
+  {
+    generated_at: "2026-06-10T16:00:00.000Z",
+    scores: PRIOR_SCORES,
+    renormalized: false,
+    basisKey: "fixture",
+  },
+  {
+    generated_at: "2026-07-11T16:00:00.000Z",
+    scores: PROGRESS_FIXTURE_SCORES,
+    renormalized: false,
+    basisKey: "fixture",
+  },
+];
 
 export const PROGRESS_FIXTURE_TODAY_TOPIC = {
   itemId: "math.counts-to-5",
@@ -207,6 +225,6 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
 };
 
 export const PROGRESS_FIXTURE_KIDS = [
-  { id: "child-1", name: "Maya" },
-  { id: "child-2", name: "Leo" },
+  { id: "child-1", name: "Maya", avatarUrl: null },
+  { id: "child-2", name: "Leo", avatarUrl: null },
 ];

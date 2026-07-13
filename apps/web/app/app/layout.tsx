@@ -50,6 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         id: kid.id,
         name: kid.name,
         ageMonths: ageInMonths(kid.birth_month),
+        avatarUrl: kid.avatar_url,
       }))}
       viewContext={viewContext.kind === "child" ? viewContext.childId : VIEW_CONTEXT_FAMILY}
     >

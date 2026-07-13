@@ -184,8 +184,11 @@ export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
       {editing ? (
         <HomeschoolEditor current={current} onClose={() => setEditing(false)} />
       ) : hasAnything ? (
-        <>
-          <dl className="mt-2 space-y-1.5">
+        // Values left, one Edit pill trailing right: the same row grammar
+        // as the kid and parent rows (2026-07-13 UX read: four section
+        // shapes on one page is what "clunky" feels like).
+        <div className="flex items-start justify-between gap-3">
+          <dl className="mt-2 min-w-0 flex-1 space-y-1.5">
             {current.styles.length > 0 ? (
               <div className="text-sm">
                 <dt className="inline text-muted">Styles: </dt>
@@ -213,11 +216,11 @@ export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="mt-3 min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+            className="mt-1 min-h-9 shrink-0 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
           >
             Edit
           </button>
-        </>
+        </div>
       ) : (
         <>
           <p className="mt-2 text-sm text-body">

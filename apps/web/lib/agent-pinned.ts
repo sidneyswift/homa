@@ -25,14 +25,23 @@ export interface PinnedChild {
   ageMonths: number;
   interests: string[];
   focus: string | null;
+  /** The D4-consented profile photo (migration #75), a generate_image
+   * reference for materials that show this child; null when unset. */
+  photoUrl: string | null;
 }
 
 export async function getChildrenPinned(familyId: string): Promise<PinnedChild[]> {
   const sql = mapDb();
   const rows = await sql<
-    { id: string; name: string; birth_month: string; profile: Record<string, unknown> | null }[]
+    {
+      id: string;
+      name: string;
+      birth_month: string;
+      profile: Record<string, unknown> | null;
+      avatar_url: string | null;
+    }[]
   >`
-    select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_month, profile
+    select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_month, profile, avatar_url
     from public.children where family_id = ${familyId}
     order by created_at
   `;
@@ -47,6 +56,7 @@ export async function getChildrenPinned(familyId: string): Promise<PinnedChild[]
       ageMonths: months,
       interests: profile.interests ?? [],
       focus: profile.focus ?? null,
+      photoUrl: child.avatar_url,
     };
   });
 }

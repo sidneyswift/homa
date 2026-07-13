@@ -514,6 +514,22 @@ export const EVENT_SCHEMAS = {
     scope: z.enum(["calls", "chats", "memories", "all"]),
     results: z.number().int().min(0),
   }),
+  // Web chat attachments (approved chat redesign 2026-07-13), the
+  // sms.attachment_processed twin: one event per attached file, naming
+  // the lane it took. Never any content, filename, or URL.
+  "chat.attachment_processed": z.object({
+    kind: z.enum(["image", "audio", "video", "document", "text", "other"]),
+    media_type: z.string(),
+    outcome: z.enum([
+      "model_native",
+      "described",
+      "transcribed",
+      "extracted",
+      "inlined",
+      "failed",
+    ]),
+    filed_to_child: z.boolean(),
+  }),
   // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
   // token and family_id (events policy, migration #13). No message content.
   "chat.turn_completed": z.object({
@@ -566,6 +582,17 @@ export const EVENT_SCHEMAS = {
   "family.invite_accepted": z.object({
     family_id: z.uuid(),
     channel: z.enum(["email", "sms"]),
+  }),
+  // Child photo personalization (D4, migration #75): the dedicated
+  // consent screen's agree moment, then each photo change on a child.
+  // Ids only, never URLs or names (MJ-08).
+  "family.child_photo_consented": z.object({
+    family_id: z.uuid(),
+  }),
+  "family.child_photo_updated": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    action: z.enum(["set", "removed"]),
   }),
   // A research row entered (or was refused by) the knowledge bank's
   // automated gate (HT-2, D-ht-5). Topic type only, never content.

@@ -28,7 +28,7 @@ const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
  */
 export default defineTool({
   description:
-    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, or an earlier generate_image URL) to match a style or swap a character while keeping the layout. Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
+    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
   inputSchema: z.object({
     prompt: z
       .string()
@@ -49,7 +49,7 @@ export default defineTool({
       .max(4)
       .optional()
       .describe(
-        "Up to 4 URLs from THIS family's materials (find_materials previewUrl, or an earlier generate_image URL) whose style, layout, or characters should guide the result.",
+        "Up to 4 URLs from THIS family's own space (find_materials previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) whose style, layout, characters, or likeness should guide the result.",
       ),
   }),
   async execute(input, ctx) {

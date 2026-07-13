@@ -78,7 +78,11 @@ export default async function ChatPage({
       timeZone={effectiveTimeZone(app?.family.time_zone)}
       parentName={app?.memberDisplayName ?? app?.family.parent_display_name ?? null}
       focusChildName={focusChild?.name ?? null}
-      kids={(app?.children ?? []).map((child) => ({ id: child.id, name: child.name }))}
+      kids={(app?.children ?? []).map((child) => ({
+        id: child.id,
+        name: child.name,
+        avatarUrl: child.avatar_url,
+      }))}
       slashSkills={slashSkills}
       // The journal email's deep link (?draft=journal) lands with the
       // composer already started; she edits and sends herself.

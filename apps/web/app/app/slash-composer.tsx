@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Zap } from "lucide-react";
 
-import { avatarTone } from "../../components/dashboard/sidebar";
+import { KidAvatar } from "../../components/dashboard/kid-avatar";
 import { setViewContextAction } from "./view-context-actions";
 
 /**
@@ -27,6 +27,8 @@ import { setViewContextAction } from "./view-context-actions";
 export interface SlashKid {
   id: string;
   name: string;
+  /** The kid's profile photo (migration #75); null keeps the initial. */
+  avatarUrl: string | null;
 }
 
 export interface SlashSkill {
@@ -42,6 +44,7 @@ interface MenuItem {
   sub?: string;
   kidId?: string;
   kidIndex?: number;
+  kidAvatarUrl?: string | null;
 }
 
 function escapeRegex(text: string): string {
@@ -97,6 +100,7 @@ export function SlashComposer({
         label: kid.name,
         kidId: kid.id,
         kidIndex: index,
+        kidAvatarUrl: kid.avatarUrl,
       })),
       ...skills.map((skill) => ({
         key: `skill-${skill.name}`,
@@ -195,15 +199,12 @@ export function SlashComposer({
         }`}
       >
         {item.group === "kids" ? (
-          <span
-            className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-xs font-bold"
-            style={{
-              background: avatarTone(item.kidIndex ?? 0)[0],
-              color: avatarTone(item.kidIndex ?? 0)[1],
-            }}
-          >
-            {item.label.charAt(0)}
-          </span>
+          <KidAvatar
+            name={item.label}
+            index={item.kidIndex ?? 0}
+            avatarUrl={item.kidAvatarUrl ?? null}
+            size={26}
+          />
         ) : (
           <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-page text-subtle">
             <Zap size={14} aria-hidden="true" />

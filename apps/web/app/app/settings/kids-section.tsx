@@ -6,17 +6,23 @@ import { Plus } from "lucide-react";
 import { addChildAction, type SetupFormState } from "./actions";
 import { updateChildAction } from "./profile-actions";
 import { BirthdayFields } from "./birthday-fields";
+import {
+  applyKidPhotoToFormData,
+  KidPhotoField,
+  type KidPhotoState,
+} from "./kid-photo-field";
 import { SectionHeading } from "./section-heading";
 import { interestSuggestions } from "../../../lib/kid-suggestions";
 import { TagInput } from "../../onboarding/tag-input";
-import { avatarTone } from "../../../components/dashboard/sidebar";
+import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 
 /**
  * The kids section of the one family card on /app/settings: each child
  * visible and editable in place, name and birthday plus the profile the
  * agent reads (interests, focus, notes), the same fields onboarding's
  * extras beat and chat's update_child_profile tool write (founder
- * direction 2026-07-12: kid preferences belong in settings too).
+ * direction 2026-07-12: kid preferences belong in settings too), and
+ * the child's photo behind the D4 consent screen (migration #75).
  */
 
 const INITIAL_STATE: SetupFormState = { error: null };
@@ -40,35 +46,37 @@ export interface KidRow {
   interests: string[];
   focus: string | null;
   notes: string | null;
+  /** The kid's profile photo (migration #75); null keeps the initial. */
+  avatarUrl: string | null;
   /** Position in the family list, drives the avatar tone. */
   index: number;
 }
 
 /** One kid: the row, and the same row opened for editing. */
-function KidItem({ kid }: { kid: KidRow }) {
+function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGranted: boolean }) {
   const [editing, setEditing] = useState(false);
   const [interests, setInterests] = useState<string[]>(kid.interests);
+  const [photo, setPhoto] = useState<KidPhotoState>({ blob: null, remove: false });
   // The wrapper closes the editor on success (the task-form pattern).
+  // The prepared photo blob (never the camera original) rides the same
+  // FormData, so the photo saves with everything else in one Save.
   const [state, action, pending] = useActionState(
     async (prev: SetupFormState, formData: FormData) => {
+      applyKidPhotoToFormData(formData, photo);
       const result = await updateChildAction(prev, formData);
-      if (result.saved) setEditing(false);
+      if (result.saved) {
+        setEditing(false);
+        setPhoto({ blob: null, remove: false });
+      }
       return result;
     },
     INITIAL_STATE,
   );
-  const [bg, ink] = avatarTone(kid.index);
 
   return (
     <li className="py-3 first:pt-1 last:pb-0">
       <div className="flex items-center gap-3">
-        <span
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-bold"
-          style={{ background: bg, color: ink }}
-          aria-hidden="true"
-        >
-          {kid.name.charAt(0)}
-        </span>
+        <KidAvatar name={kid.name} index={kid.index} avatarUrl={kid.avatarUrl} size={40} />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold text-strong">{kid.name}</span>
           <span className="block text-sm text-muted">
@@ -85,6 +93,7 @@ function KidItem({ kid }: { kid: KidRow }) {
             type="button"
             onClick={() => {
               setInterests(kid.interests);
+              setPhoto({ blob: null, remove: false });
               setEditing(true);
             }}
             className={rowButtonClass}
@@ -112,6 +121,16 @@ function KidItem({ kid }: { kid: KidRow }) {
             className={`${inputClass}`}
           />
           <BirthdayFields idPrefix={`kid-${kid.id}`} defaultDate={kid.birthDate} />
+
+          <KidPhotoField
+            kidId={kid.id}
+            kidName={kid.name}
+            kidIndex={kid.index}
+            currentUrl={kid.avatarUrl}
+            consentGranted={photoConsentGranted}
+            state={photo}
+            onChange={setPhoto}
+          />
 
           <div className="mt-4">
             <TagInput
@@ -233,13 +252,20 @@ function AddChildDisclosure() {
   );
 }
 
-export function KidsSection({ kids }: { kids: KidRow[] }) {
+export function KidsSection({
+  kids,
+  photoConsentGranted,
+}: {
+  kids: KidRow[];
+  /** families.child_photo_consent_at is stamped (the D4 agreement). */
+  photoConsentGranted: boolean;
+}) {
   return (
     <div>
       <SectionHeading first>Kids</SectionHeading>
       <ul className="divide-y divide-[var(--stone-100)]">
         {kids.map((kid) => (
-          <KidItem key={kid.id} kid={kid} />
+          <KidItem key={kid.id} kid={kid} photoConsentGranted={photoConsentGranted} />
         ))}
       </ul>
       <AddChildDisclosure />

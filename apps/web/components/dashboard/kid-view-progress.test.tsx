@@ -14,6 +14,7 @@ const CHILD: ChildRecord = {
   name: "Maya",
   birth_month: "2020-07-01",
   profile: {},
+  avatar_url: null,
 };
 const GLOBALS_CSS = readFileSync(
   new URL("../../app/globals.css", import.meta.url),

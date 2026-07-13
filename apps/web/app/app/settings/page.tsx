@@ -116,8 +116,10 @@ export default async function SettingsPage() {
                 interests: child.profile.interests ?? [],
                 focus: child.profile.focus ?? null,
                 notes: child.profile.notes ?? null,
+                avatarUrl: child.avatar_url,
                 index,
               }))}
+              photoConsentGranted={Boolean(family.child_photo_consent_at)}
             />
 
             <ParentsSection

@@ -11,6 +11,13 @@ import {
 } from "@homa/core";
 
 import {
+  deleteChildPhotoBlob,
+  isAllowedChildPhotoType,
+  MAX_CHILD_PHOTO_BYTES,
+  uploadChildPhotoBytes,
+} from "../../../lib/child-photos";
+import {
+  setChildPhotoConsent,
   setFamilyAddress,
   setFamilyName,
   setMemberAvatarUrl,
@@ -19,7 +26,9 @@ import {
 import { addFamilyPhone, getFamilyPhones, removeFamilyPhone } from "../../../lib/family-phone";
 import { setFamilyTimeZone, timeZoneFromState } from "../../../lib/family-time-zone";
 import { getMyFamily } from "../../../lib/family";
+import { emitMapEvent } from "../../../lib/map/events";
 import { saveFamilyContext } from "../../../lib/map/store";
+import { blobConfigured } from "../../../lib/materials/artifact-store";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import type { SetupFormState } from "./actions";
 
@@ -62,6 +71,11 @@ export async function updateChildAction(
     .slice(0, MAP_INTERESTS_CAP);
   const focus = String(formData.get("focus") ?? "").trim().slice(0, 200);
   const notes = String(formData.get("notes") ?? "").trim().slice(0, 1000);
+  // The photo arrives already downscaled (lib/child-photo-prepare.ts);
+  // the raw camera file never rides this action.
+  const photoEntry = formData.get("child_photo");
+  const photoFile = photoEntry instanceof File && photoEntry.size > 0 ? photoEntry : null;
+  const removePhoto = formData.get("remove_photo") === "1";
 
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
@@ -75,12 +89,53 @@ export async function updateChildAction(
   // a forged child_id can never touch another family's row.
   const { data: current, error: readError } = await supabase
     .from("children")
-    .select("profile")
+    .select("profile, avatar_url")
     .eq("id", childId)
     .eq("family_id", family.id)
     .maybeSingle();
   if (readError || !current) {
     return { error: "That didn't save. Refresh the page and try again." };
+  }
+
+  // A new photo uploads before the row write, so a failed upload leaves
+  // everything untouched and the form still holding her changes. The
+  // consent check is the D4 belt; the form never shows a picker before
+  // the consent screen was agreed to.
+  let nextAvatarUrl: string | null | undefined;
+  if (photoFile) {
+    if (!family.child_photo_consent_at) {
+      return {
+        error:
+          "Photos need the one-time agreement first. It appears in this form, above the Choose a photo button.",
+      };
+    }
+    if (!blobConfigured()) {
+      return {
+        error:
+          "Adding photos isn't available right now. Tap Remove on the photo, then save again.",
+      };
+    }
+    if (!isAllowedChildPhotoType(photoFile.type) || photoFile.size > MAX_CHILD_PHOTO_BYTES) {
+      return {
+        error: "That photo didn't come through right. Try choosing it again, or choose a different photo.",
+      };
+    }
+    try {
+      nextAvatarUrl = await uploadChildPhotoBytes({
+        familyId: family.id,
+        childId,
+        bytes: Buffer.from(await photoFile.arrayBuffer()),
+        mediaType: photoFile.type,
+      });
+    } catch (error) {
+      console.error("child photo upload failed:", error instanceof Error ? error.message : "unknown");
+      return {
+        error:
+          "That photo didn't save. Your edits are still here, nothing saved yet. Try once more, or remove the photo and save the rest.",
+      };
+    }
+  } else if (removePhoto) {
+    nextAvatarUrl = null;
   }
 
   // Full replace of the profile keys this form owns; other keys (from
@@ -94,15 +149,59 @@ export async function updateChildAction(
 
   const { error } = await supabase
     .from("children")
-    .update({ name, birth_month: birthDate, profile, updated_at: new Date().toISOString() })
+    .update({
+      name,
+      birth_month: birthDate,
+      profile,
+      ...(nextAvatarUrl !== undefined ? { avatar_url: nextAvatarUrl } : {}),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", childId)
     .eq("family_id", family.id);
   if (error) {
     console.error("update child failed:", error.message);
     return { error: "That didn't save. Your changes are still here, try once more." };
   }
+
+  // The row no longer points at the old file, so the bytes go too: the
+  // consent screen promises removal deletes the photo, and a replaced
+  // photo keeps the same promise.
+  if (nextAvatarUrl !== undefined && current.avatar_url && current.avatar_url !== nextAvatarUrl) {
+    await deleteChildPhotoBlob(current.avatar_url, family.id);
+  }
+  if (nextAvatarUrl !== undefined) {
+    await emitMapEvent("family.child_photo_updated", {
+      family_id: family.id,
+      child_id: childId,
+      action: nextAvatarUrl ? "set" : "removed",
+    });
+  }
+
   // The name shows on the drawer's kid rows, the planner's columns, and
   // the kid's own page; one layout-wide revalidate covers them all.
+  revalidatePath("/app", "layout");
+  return { error: null, saved: true };
+}
+
+/**
+ * The D4 consent screen's agree button (dedicated screen, separate from
+ * signup): stamps who agreed and when on the family, once. Until this
+ * stamp exists no child photo can be added, here or anywhere.
+ */
+export async function agreeChildPhotoConsentAction(): Promise<SetupFormState> {
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You're signed out. Sign in and try again." };
+
+  if (!family.child_photo_consent_at) {
+    await setChildPhotoConsent(family.id, user.id);
+    await emitMapEvent("family.child_photo_consented", { family_id: family.id });
+  }
   revalidatePath("/app", "layout");
   return { error: null, saved: true };
 }
