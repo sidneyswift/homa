@@ -91,6 +91,8 @@ export async function extractMemoriesFromText(input: {
   source: ExtractionSource;
   text: string;
   conversationLabel: string;
+  /** The reviewed session, when one exists (provenance stamp). */
+  sessionId?: string | null;
 }): Promise<ExtractionOutcome> {
   const model = extractionModel();
   const started = Date.now();
@@ -148,6 +150,7 @@ export async function extractMemoriesFromText(input: {
       kind: entry.kind,
       source: input.source,
       childName: entry.childName ?? null,
+      sessionId: input.sessionId ?? null,
     });
     if (saved.saved) {
       outcome.saved.push({

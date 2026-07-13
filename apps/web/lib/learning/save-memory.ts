@@ -34,6 +34,9 @@ export interface SaveMemoryInput {
   source: ServerMemorySource;
   childId?: string | null;
   childName?: string | null;
+  /** The eve session that taught this (provenance for the founder deep
+   * view). Null on paths with no session, e.g. voice call extraction. */
+  sessionId?: string | null;
 }
 
 export type SaveMemoryResult =
@@ -111,8 +114,11 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
   }
 
   await sql`
-    insert into public.family_memories (family_id, child_id, kind, content, source, embedding)
-    values (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source}, ${embedding})
+    insert into public.family_memories
+      (family_id, child_id, kind, content, source, embedding, session_id)
+    values
+      (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
+       ${embedding}, ${input.sessionId ?? null})
   `;
   return { saved: true, childId, conflicts };
 }

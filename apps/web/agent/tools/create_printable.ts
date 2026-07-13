@@ -255,6 +255,29 @@ export default defineTool({
       previewJpeg: rendered.previewJpeg,
     });
 
+    // Provenance for the founder deep view: the tool's input metadata
+    // (never the html, which lives on the row already), the session that
+    // made it, and the review verdict beside the output.
+    const generation = {
+      sessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+      channel,
+      input: {
+        title: input.title,
+        kind,
+        skill: input.skill ?? null,
+        subject: input.subject ?? null,
+        curriculum: input.curriculum ?? null,
+        theme: input.theme ?? null,
+        characters: input.characters ?? [],
+        childName: input.childName ?? null,
+        requestSummary: input.requestSummary ?? null,
+        revisesId: input.revisesId ?? null,
+        path: hasPageImage ? "pageImageUrl" : "html",
+      },
+      review,
+    };
+
     // The durable record (Postgres is truth; html is what a future
     // session revises or re-themes instead of re-imagining the page).
     let materialId: string;
@@ -275,6 +298,7 @@ export default defineTool({
         source,
         revises: input.revisesId ?? null,
         channel,
+        generation,
       });
       if (!inserted.ok) {
         return { created: false, note: inserted.note };
@@ -315,6 +339,7 @@ export default defineTool({
           source,
           revises: input.revisesId ?? null,
           channel,
+          generation,
         })
         .select("id")
         .single();

@@ -21,6 +21,7 @@ import {
   type FamilyContextRows,
   type MemberRow,
 } from "../../lib/family-context";
+import { recordContextSnapshot } from "../../lib/observability/agent-trace";
 
 /**
  * Per-family dynamic context (M2-01/M2-02): the cloud equivalent of the
@@ -51,7 +52,7 @@ async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRow
         .maybeSingle(),
       db
         .from("children")
-        .select("id, name, birth_month, profile")
+        .select("id, name, birth_month, profile, avatar_url")
         .eq("family_id", familyId)
         .order("created_at", { ascending: true }),
       db
@@ -187,15 +188,28 @@ export default defineDynamic({
             );
           }
         }
-        return defineInstructions({
-          markdown: [
-            familyContext,
-            progressContext,
-            continuityContext,
-          ]
-            .filter((block) => block.length > 0)
-            .join("\n\n"),
+        const markdown = [
+          familyContext,
+          progressContext,
+          continuityContext,
+        ]
+          .filter((block) => block.length > 0)
+          .join("\n\n");
+        // Flight recorder (founder deep view): what this turn actually
+        // carried. Fire-and-forget so assembly latency stays untouched;
+        // the module dedupes per session and never throws.
+        void recordContextSnapshot({
+          familyId: attributes?.familyId ?? null,
+          sessionId: ctx.session.id,
+          // The dynamic-instructions callback context is typed without
+          // `turn` (SessionContext has it, DynamicResolverContext does
+          // not), so read it defensively; the recorder accepts null.
+          turnId:
+            (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
+          channel: attributes?.channel ?? "web",
+          content: markdown,
         });
+        return defineInstructions({ markdown });
       } catch (error) {
         if (error instanceof MissingFamilyContextError) {
           return defineInstructions({

@@ -60,6 +60,7 @@ export default defineTool({
         kind: input.kind,
         source: "homa",
         childId: input.childId ?? null,
+        sessionId: ctx.session.id,
       });
       if (!result.saved) {
         const notes: Record<string, string> = {
@@ -165,6 +166,7 @@ export default defineTool({
       kind: input.kind,
       content: input.content,
       source: "homa",
+      session_id: ctx.session.id,
       ...(embedding ? { embedding } : {}),
     });
     if (insertError) {

@@ -97,6 +97,7 @@ export async function runSessionReview(
       source: "review",
       text,
       conversationLabel: "recent chat messages with this family",
+      sessionId,
     });
     await sql`
       update public.learning_reviews

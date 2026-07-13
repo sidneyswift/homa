@@ -7,6 +7,7 @@ import { requireFounder } from "../../../../lib/admin/gate";
 import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone } from "../../ui";
+import { FamilyTabs } from "./family-tabs";
 
 /**
  * /admin/families/[familyId]: one family's whole story (the lab drawer,
@@ -56,6 +57,7 @@ export default async function AdminFamilyDetailPage({
         {detail.email ?? "no email"} · {detail.phone ?? "no phone"} ·{" "}
         {detail.timeZone ?? "no time zone"}
       </p>
+      <FamilyTabs familyId={detail.id} />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">

@@ -1,11 +1,19 @@
 "use client";
 
-import { ChartNoAxesColumn, Filter, ListTree, Users } from "lucide-react";
+import {
+  Activity,
+  ChartNoAxesColumn,
+  Filter,
+  ListTree,
+  MessagesSquare,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /**
- * The founder console's nav (MJ-14). Client component only for the active
+ * The founder console's nav (MJ-14; Chats and Sessions added by the
+ * 2026-07-13 deep view build). Client component only for the active
  * state; deliberately NOT wired into the parent app's APP_NAV_ITEMS, the
  * console lives on its own /admin segment.
  */
@@ -13,6 +21,8 @@ import { usePathname } from "next/navigation";
 const ITEMS = [
   { href: "/admin", label: "Overview", icon: ChartNoAxesColumn },
   { href: "/admin/families", label: "Families", icon: Users },
+  { href: "/admin/chats", label: "Chats", icon: MessagesSquare },
+  { href: "/admin/sessions", label: "Sessions", icon: Activity },
   { href: "/admin/pulse", label: "Pulse", icon: ListTree },
   { href: "/admin/funnels", label: "Funnels", icon: Filter },
 ] as const;

@@ -24,6 +24,11 @@ const { getFleetOverview } = await import("../apps/web/lib/admin/overview-data")
 const { getPulseDays } = await import("../apps/web/lib/admin/pulse-data");
 const { getFunnelData } = await import("../apps/web/lib/admin/funnel-data");
 const { getFamilyDetail } = await import("../apps/web/lib/admin/family-detail-data");
+const { listChatFamilies, getFamilyThread } = await import("../apps/web/lib/admin/chats-data");
+const { listSessions, getSessionDetail } = await import("../apps/web/lib/admin/sessions-data");
+const { getFamilyTasks, getFamilyBrain, getFamilyMaterialsDeep, getFamilyProgressDeep } =
+  await import("../apps/web/lib/admin/family-deep-data");
+const { getFamilyScreenData } = await import("../apps/web/lib/admin/screen-data");
 
 let failed = false;
 
@@ -74,6 +79,57 @@ try {
     );
   } else {
     pass("family detail", "skipped, no families with accounts yet");
+  }
+
+  // Deep view modules (2026-07-13): counts only, same privacy posture.
+  const chatFamilies = await listChatFamilies();
+  pass("chat families", `${chatFamilies.length} rows`);
+  const talker = chatFamilies.find((family) => family.messagesTotal > 0);
+  if (talker) {
+    const thread = await getFamilyThread(talker.id, { limit: 50 });
+    pass("family thread (newest talker)", `${thread.length} messages`);
+  } else {
+    pass("family thread", "skipped, no messages yet");
+  }
+
+  const sessions = await listSessions({ limit: 20 });
+  pass("sessions list", `${sessions.length} rows`);
+  const firstSession = sessions.find((session) => session.sessionId);
+  if (firstSession?.sessionId) {
+    const sessionDetail = await getSessionDetail(firstSession.sessionId);
+    if (!sessionDetail) throw new Error("newest session detail came back null");
+    pass(
+      "session detail (newest)",
+      `messages ${sessionDetail.messages.length} · toolCalls ${sessionDetail.toolCalls.length} · snapshots ${sessionDetail.snapshots.length} · usage ${sessionDetail.usage.length} · deliveries ${sessionDetail.deliveries.length}`,
+    );
+  } else {
+    pass("session detail", "skipped, no sessions yet");
+  }
+
+  if (snapshots.length > 0) {
+    const familyId = snapshots[0].id;
+    const tasks = await getFamilyTasks(familyId);
+    pass("family tasks", `schedules ${tasks.schedules.length} · runs ${tasks.runs.length}`);
+    const brain = await getFamilyBrain(familyId);
+    pass(
+      "family brain",
+      `memories ${brain.memories.length} · snapshot ${brain.latestSnapshot ? "yes" : "none"} · reviews ${brain.reviews.length}`,
+    );
+    const materials = await getFamilyMaterialsDeep(familyId);
+    pass("family materials", `${materials.length} rows`);
+    const progress = await getFamilyProgressDeep(familyId);
+    pass(
+      "family progress",
+      progress
+        .map((kid) => `kid ${kid.childId.slice(0, 6)}: subjects ${kid.view?.subjects.length ?? 0} eras ${kid.eras.length}`)
+        .join(" · ") || "no kids",
+    );
+    const screen = await getFamilyScreenData(familyId);
+    if (!screen) throw new Error("screen data came back null");
+    pass(
+      "her screen",
+      `kids ${screen.children.length} · reports ${screen.reports.size} · plans ${screen.plans.length} · binder ${screen.binder.length}`,
+    );
   }
 } catch (error) {
   fail("admin console smoke", error);

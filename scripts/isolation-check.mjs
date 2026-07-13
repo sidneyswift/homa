@@ -1723,6 +1723,23 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B material fixture",
     );
+    // Chat attachments are server-write-only, so the fixture goes in
+    // through the privileged connection, like the ChildProgress rows.
+    const [chatAttachmentB] = await sql`
+      insert into public.chat_attachments (
+        family_id, child_id, member_user_id, url, media_type, kind, caption
+      )
+      values (
+        ${familyBId},
+        ${childBId},
+        ${familyBUser.userId},
+        'https://example.public.blob.vercel-storage.com/families/isolation/chat/fixture.jpg',
+        'image/jpeg',
+        'image',
+        'Isolation chat attachment fixture.'
+      )
+      returning id
+    `;
 
     await expectAuthenticatedRead(
       familyBUser.accessToken,
@@ -1765,6 +1782,43 @@ async function expectAuthenticatedIsolation() {
       materialBId,
       0,
       "auth member cannot read another family's material",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "chat_attachments",
+      chatAttachmentB.id,
+      1,
+      "auth member can read own chat attachment",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "chat_attachments",
+      chatAttachmentB.id,
+      0,
+      "auth member cannot read another family's chat attachment",
+    );
+    const chatAttachmentWriteFixture = {
+      keyColumn: "id",
+      keyValue: chatAttachmentB.id,
+      insertRow: {
+        family_id: familyBId,
+        url: "https://example.com/client-forge.jpg",
+        media_type: "image/jpeg",
+        kind: "image",
+      },
+      updateRow: { caption: "Clients must never alter attachments." },
+    };
+    await expectAuthenticatedWritesDenied(
+      familyBUser.accessToken,
+      "chat_attachments",
+      chatAttachmentWriteFixture,
+      "auth member cannot mutate own chat attachment",
+    );
+    await expectAuthenticatedWritesDenied(
+      familyAUser.accessToken,
+      "chat_attachments",
+      chatAttachmentWriteFixture,
+      "cross-family token cannot mutate Family B chat attachment",
     );
 
     const childProgressRows = [
@@ -2173,6 +2227,15 @@ await expectEmptyRead("thank_you_cards");
 // heartbeat is pure ops state. No Data API role reads or writes either.
 await expectReadDenied("email_sends");
 await expectReadDenied("cron_runs");
+// The agent flight recorder (migration #79): tool calls and injected
+// context snapshots hold family conversation material, deny-all,
+// server-only writes, founder-console reads only.
+await expectReadDenied("agent_tool_calls");
+await expectReadDenied("session_context_snapshots");
+// Chat attachments (migration #80): members read their own family's
+// rows; anon has explicit revokes; only the server-side attachment
+// routes write.
+await expectReadDenied("chat_attachments");
 
 await expectInsertDenied(
   "families",
@@ -2544,6 +2607,36 @@ await expectInsertDenied(
   "cron_runs",
   { job: "map_cron", ok: true },
   "anon cannot forge cron heartbeats",
+);
+await expectInsertDenied(
+  "agent_tool_calls",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    session_id: "intruder",
+    call_id: "intruder",
+    tool: "intruder",
+  },
+  "anon cannot forge tool-call trace rows",
+);
+await expectInsertDenied(
+  "chat_attachments",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    url: "https://example.com/intruder.jpg",
+    media_type: "image/jpeg",
+    kind: "image",
+  },
+  "anon cannot forge chat attachments",
+);
+await expectInsertDenied(
+  "session_context_snapshots",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    session_id: "intruder",
+    content: "intruder",
+    content_hash: "0".repeat(64),
+  },
+  "anon cannot forge context snapshots",
 );
 await expectInsertDenied(
   "child_reports",

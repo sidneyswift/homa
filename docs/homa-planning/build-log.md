@@ -3,6 +3,229 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-13 · Child photos: the D4 floor ships with the pfp upload
+
+Founder instruction: "let me upload a pfp of each kid, and let's use
+that as reference for picturebooks and other materials that are
+personalized." This is the D4 capability (photo-personalized magic,
+decided 2026-07-03 to ship day one "startup right"), so the D4 floor's
+code half ships WITH it in this build. What landed:
+
+1. Migration #75 (timestamp 20260713053000_child_photos, additive,
+   applied to homa-prod via MCP ahead of the deploy): children.avatar_url
+   plus families.child_photo_consent_at/_by, the dedicated consent
+   screen's stamp.
+2. The dedicated consent screen (D4's first floor plank): first photo
+   attempt on /app/settings opens a consent card inside the kid editor,
+   separate from signup as ruled. Copy went through both gates
+   (homa-copy-reviewer, then homa-copy-editor; the art tool is named
+   plainly, "never learns from the photo" replaced the ML word
+   "trains"). Agreeing stamps who and when on the family; every photo
+   write re-checks the stamp server-side.
+3. Storage posture (agent call, logged for audit): kid photos live in
+   Vercel Blob under families/{familyId}/children/{childId}/ with
+   random-suffix URLs, the EXACT posture of every materials artifact,
+   NOT the public avatars bucket (migration #29 deliberately scoped
+   that to adults' own self-photos). This prefix is what makes the
+   photo a valid generate_image reference through the existing
+   isFamilyArtifactUrl wall with no new trust path.
+4. Raw-photo TTL (agent read of D4's "short TTL on raws", logged for
+   founder veto): raws are never stored at all. The browser downscales
+   to a ~1024px JPEG before upload (lib/child-photo-prepare.ts), which
+   also drops EXIF GPS metadata; the stored object is the parent-chosen
+   reference itself, kept until replaced or removed. Replace and remove
+   both delete the old bytes (the consent copy promises "removing
+   deletes it, not just hides it", and the code keeps that promise).
+5. Reference wiring: photoUrl rides the family context per child (both
+   auth paths), get_children, and the pinned reader; generate_image's
+   description and the materials-studio skill teach the move (child as
+   an ILLUSTRATED character, never photorealistic, drawing reference
+   only, never identification, offer-never-demand per I22, a sibling's
+   photo never rides another kid's material uninvited). No face
+   recognition anywhere, per the D4 floor.
+6. The pfp also displays: settings kid rows, context switcher (all
+   three hosts), kid page header and sibling switcher, progress
+   switcher, planner chips, slash-composer menu, via one shared
+   KidAvatar component (photo, else the toned initial).
+7. Events: family.child_photo_consented and family.child_photo_updated
+   (set/removed), ids only, registry + emitters, check:events green.
+
+NOT code, flagged for the founder (D4's remaining planks are
+paperwork): the executed no-training/no-retention DPA with the image
+provider (OpenAI gpt-image-2 through the Vercel AI Gateway; API terms
+already exclude training by default, the formal signed artifact is
+still to do) and the standing unresolved ruling on private-by-default
+minors' media (not invented here: the photo is never shared by the
+product, it sits at an unguessable URL exactly like every existing
+family artifact; if the founder wants kid photos behind auth-checked
+serving, that is a follow-up ticket). Onboarding deliberately does NOT
+offer photo upload (D4: consent separate from signup); settings is the
+one door. Mobile app not touched.
+
+Verified live against homa-prod with a disposable fixture family (auth
+user + family + child created, then fully deleted including blobs):
+consent card renders → agree stamps → photo picks, downscales, saves →
+children.avatar_url points into families/{id}/children/ → passes
+isFamilyArtifactUrl → generateStudioImage with the photo as reference
+returns a real image (foreign-URL and foreign-family references both
+refused with the model-readable note) → remove clears the row AND the
+blob 404s. Both events landed. typecheck, lint, check:events, eve
+build, full pnpm build all green; binder, progress-view, and kid-view
+tests pass. One drive-by: family-context.ts read ctx.session.turn.id,
+which the dynamic-resolver context type does not carry; now read
+defensively with a null fallback (the concurrent deep-view session's
+recorder accepts null).
+
+## 2026-07-13 · Child photos ship behind the D4 consent screen (migration #75)
+
+Committed by the deep-view session on behalf of the settings session
+that built and verified it (its working tree passed typecheck, lint,
+the full progress-UI and child-progress suites, check:events, and the
+isolation guard together with the other 2026-07-13 streams; migration
+#75 was already applied to homa-prod).
+
+Children gain a parent-added profile photo: children.avatar_url plus
+families.child_photo_consent_at (the dedicated consent screen's agree
+moment), events family.child_photo_consented and family.child_photo_set
+(ids only, MJ-08). Settings' kids card gets the photo field and consent
+flow; one KidAvatar component replaces the initial-circle markup in the
+sidebar, context switcher, kid pages, planner, slash composer, and
+progress kid switcher (photo when added, tone initial otherwise). The
+agent side: get_children and the pinned family context expose photoUrl
+as a generate_image drawing reference with the instructions and skill
+carrying the craft rule (illustrated, never photorealistic; reference,
+never identification). Memories card copy: "you told her" becomes "you
+told Homa" (2026-07-13 UX read).
+
+## 2026-07-13 · Founder deep view: capture layer, family file, chat reader, session inspector, her screen
+
+Founder instruction ("build 1 2 3, boil the ocean") over the deep-view
+directions lab (plans/2026-07-13-founder-deep-view-directions.html). The
+lab's five build-changing questions resolve to their recommended
+answers by that instruction: full capture now, her-screen renders the
+real parent components read-only, one chat reader mounted behind two
+doors, keep captured data through beta, and this build lands ahead of
+the night manager (whose /admin/chats it now provides).
+
+1. Capture layer (migration #79, additive, applied to homa-prod ahead
+   of the deploy; isolation guard green before and after). What Homa
+   did not write down she could not show: agent_tool_calls (one row per
+   model tool call, name + sanitized args + result, written by the new
+   agent/hooks/record-tool-calls.ts on eve's actions.requested and
+   action.result events), session_context_snapshots (the dynamic
+   family/progress/continuity blocks each turn carries, deduped per
+   session by content hash, written fire-and-forget from
+   family-context.ts), family_memories.session_id (remember tool, both
+   auth paths, and the background review loop now stamp provenance),
+   and materials.generation (create_printable stores its input
+   metadata, session, and review verdict beside the output). All writes
+   follow the recordModelUsage law: telemetry never breaks the feature
+   emitting it. Voice-call extraction stays unstamped (no session).
+2. The family file: /admin/families/[familyId] grows tabs. Tasks (each
+   schedule's actual prompt text, recipient, and run record), Chats
+   (below), Brain (memories with provenance links, the newest injected-
+   context snapshot, extraction audits), Materials (real previews plus
+   the generation record), Progress (the family's own ReportSnapshot
+   chart over re-normalized eras, live subject states, newest evidence
+   quotes).
+3. The chat reader (ruling D-nm-2, now registered in the §5 register as
+   founder-full-chat-access): one thread component behind /admin/chats
+   (family picker) and the family file's Chats tab; every channel, day-
+   grouped in founder time, internal dispatch prompts labeled, x-ray
+   chips linking any bubble to its session trace. This supersedes the
+   shipped MJ-14 constraint that message content stays out of the
+   console.
+4. The session inspector: /admin/sessions unions message-grouped
+   sessions with homa_task_runs so a run that died before eve started
+   (the 2026-07-12 HookConflictError pair) still gets a row; the detail
+   page interleaves context snapshots, messages, and tool calls in
+   model order with the per-surface token bill, run outcome, and
+   delivery receipts. Pre-capture sessions honestly show messages and
+   outcomes only.
+5. Her screen: /admin/families/[familyId]/screen renders the parent app
+   for one family, founder-gated, read-only by construction (no actions
+   wired, no impersonated JWT, founder-scoped reads through adminDb and
+   the same pure loaders the app uses). Progress mounts the REAL
+   ProgressView/ReportSnapshot over admin-fetched props (conflict
+   actions hidden), Binder mounts the real BinderView, Tasks reuses
+   TaskHistory with read-only schedule cards, Planner renders the week
+   board read-only, Chat shows the family-visible thread. X-ray pins
+   tables, session links, and provenance onto each tab.
+
+Implementation notes for the record: adminDb (fetch_types off) cannot
+serialize sql.array() or json parameters, so id lists travel as one
+comma-joined text parameter split by string_to_array server-side, and
+jsonb columns are read through ::text casts. agent_schedules.weekdays
+reads via to_json(...)::text for the same reason. The isolation guard
+gained deny-all read and insert probes for both capture tables (its
+coverage check caught them before the migration applied, as designed).
+
+Verified: typecheck, lint, eve build (agent modules changed), 94
+continuity tests, check:admin (new sanitizer tests), production
+isolation guard green after the migration, and admin:smoke extended to
+every new data module running green against production (counts only).
+Ships together with the trajectory-chart entry below in one push; the
+deep-view session verified both trees.
+
+## 2026-07-13 · Trajectory chart mixed-scales fixes ship (investigation 2026-07-12)
+
+Implements all three fixes from plans/2026-07-12-trajectory-chart-mixed-
+scales-investigation.md: the chart was drawing scores from different
+measurement regimes (bank, scorer rules, recorded birthday) as one line.
+
+- Fix 1, basis stamps: migration #78 (20260713050000_report_measurement_
+  basis.sql, additive, nullable) adds scorer_version, scored_birth_date,
+  scored_age_months to child_reports. createReport writes them and
+  archives them into each history snapshot; the flag-on compatibility
+  update in saveDerivedProgress stamps them too. MAP_SCORER_VERSION now
+  lives in packages/core/src/map/scoring.ts ("map-score-v1", matching
+  what check-in snapshots already stored) and the check-in service
+  imports it, one constant for every stamp. Applied to homa-prod ahead
+  of the deploy per the additive-may-lead law; columns verified present.
+- Fix 3, re-normalize at render: new pure module apps/web/lib/map/
+  trajectory-eras.ts reconstructs each archived era's answer set from
+  child_progress_evidence as of that era's timestamp (latest active row
+  per item; supersession-aware, so corrections and retractions replay
+  honestly) and rescores it under the CURRENT bank + scorer + birthday.
+  getReportByToken and the live Progress page both serve the chart these
+  eras; the sample page pins its own single-basis eras. Replayed against
+  Story's production archive + ledger (read-only): all three scoring
+  events re-normalize to one basis, the music +24 to +15 cliff and the
+  birthday shift disappear from the line, and hasScaleChange reads false.
+- Fix 2, honest boundaries: where adjacent eras still carry different
+  basis fingerprints (pre-ledger archives), the connecting stretch draws
+  dotted (report-trajectory segments) and one caption under the chart
+  explains it. Caption passed both copy gates 2026-07-13; the editor
+  gate moved it below the chart to keep the card body inside its
+  two-sentence budget.
+
+Decisions made alone, smallest-safe versions:
+- The live era is never rescored: its stored scores are canonical, and
+  a stale ledger (flag-off writers do not append evidence) must never
+  move the headline numbers. Only archived eras re-normalize.
+- An era whose reconstruction comes back empty keeps its stored numbers
+  and stored basis (the investigation's "eras older than the ledger"
+  rule); an unstamped archive fingerprints as unknown, which never
+  equals the current basis, so unprovable continuity draws as a
+  boundary rather than as one line.
+- Movement chips and the evidence page still read stored history
+  (provenance surfaces, not trajectory); fix 4's data hygiene (the two
+  empty duplicate Story rows, preserving superseded rows under bulk
+  mirrors) stays open.
+- The ReportSnapshot boundary test lives in components/progress/ (added
+  to check:progress-ui): Node's test runner reads the report route's
+  [token] directory as a glob class and cannot address files inside it.
+- The trajectory-eras unit tests joined check:map's command.
+
+Verified: typecheck, lint, check:map, check:child-progress,
+check:progress-ui, check:events, check:skills-targeting, check:taxonomy,
+and the disposable PostgreSQL E2E (its harness schema gained the three
+columns) all green. check:isolation passes every check that existed
+before this session; its coverage assertion currently fails on
+agent_tool_calls + session_context_snapshots from the parallel
+founder-deep-view migration in this working tree, which this change does
+not touch.
+
 ## 2026-07-13 · Run now on every scheduled task (founder ask)
 
 Founder ask: "Add a button and the ability to run the task now on any
@@ -53,6 +276,30 @@ the expired VERCEL_OIDC_TOKEN in apps/web/.env.local was replaced via
 vercel link + env pull (same fix as 2026-07-10) so the dev agent could
 compose.
 
+## 2026-07-13 · Settings de-clunk pass from two interface reads
+
+Founder reaction to the shipped consolidation ("idk if the settings ui
+is clean and simple enough, it seems complex and clunky"), routed
+through homa-uxui-reviewer twice on the settings direction lab's
+fixture screens (phone, one pass each: the one-roster structure and the
+denser one-sheet). Verdict kept the structure: both merged layouts
+passed the persona's three-second test, so no rooms, no sub-navigation.
+The clunk was five specifics, all fixed in place: (1) one row grammar,
+family details now rests as label-and-value lines with one Edit and its
+five always-open inputs moved behind it (closing on save, the section
+pattern), and the homeschool summary's Edit moved trailing-right like
+every people row; (2) the "Main account" tag and its explainer sentence
+render only for multi-adult families (or with an invite pending);
+(3) multi-adult families get one quiet rule line, "Each parent edits
+their own info.", so a co-parent row without Edit stops being a silent
+dead end; (4) the Text Homa pill carries whitespace-nowrap so the
+number can never split across lines; (5) the memories source label
+"you told her" became "you told Homa" ("her" pointed the reader at the
+child one row up). New micro-copy (the rule line, "None yet." on an
+empty address) written to the rulebook; gates not rerun for two short
+lines. Verified: web typecheck, lint, and the Next build. The reviewer
+findings that need product work beyond settings (correcting a memory
+instead of deleting it) stay follow-ups, routed to chat.
 ## 2026-07-12 (late evening) · Settings consolidates to one family card (founder direction)
 
 Founder reaction to the settings-directions lab

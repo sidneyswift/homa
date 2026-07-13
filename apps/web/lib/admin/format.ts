@@ -82,3 +82,24 @@ export function ageYears(birthDate: string, now: Date = new Date()): number {
   const born = new Date(birthDate);
   return Math.max(0, Math.floor((now.getTime() - born.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
 }
+
+/** "6:00 am" for a task's local hour (server-safe twin of the tasks
+ * tab's client helper; that module is "use client" and cannot be
+ * imported here). */
+export function taskHourLabel(hour: number): string {
+  const twelve = hour % 12 === 0 ? 12 : hour % 12;
+  return `${twelve}:00 ${hour < 12 ? "am" : "pm"}`;
+}
+
+const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export function taskWeekdaysLabel(weekdays: number[]): string {
+  const set = new Set(weekdays);
+  if (set.size === 7) return "Every day";
+  if (set.size === 5 && [1, 2, 3, 4, 5].every((day) => set.has(day))) return "Weekdays";
+  if (set.size === 2 && set.has(0) && set.has(6)) return "Weekends";
+  return [...set]
+    .sort((a, b) => a - b)
+    .map((day) => DAY_SHORT[day])
+    .join(", ");
+}
