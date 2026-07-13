@@ -284,7 +284,36 @@ Append to `.cosmo/homa-taste.md` under a section for the dropper:
 
 Look for patterns across multiple drops from the same person. When you see a pattern emerge (3+ consistent signals), promote it to a **confirmed preference** at the top of their section.
 
-### 7. Reply in Slack thread
+### 7. Graduate to materials-studio
+
+If the reference demonstrates a format pattern NOT already in materials-studio SKILL.md:
+- Write a new recipe section directly into `apps/web/agent/skills/materials-studio/SKILL.md` (before "Design rules (binding)")
+- Include: reference image pointer, HTML/CSS template, creation path guidance, design patterns
+- Follow the exact format of existing recipes (foldable, outline, cut-and-paste sections)
+
+If the reference matches an existing recipe but demonstrates a NEW design pattern:
+- Add the pattern to the existing recipe section's design patterns list
+
+### 8. Update activity format registry
+
+- Add or update the format entry in `apps/web/agent/activity-formats.md`
+- Include slug, name, what it is, best for, subjects, ages, creation path, example activity
+- Follow the exact format of existing entries
+
+### 9. Enrich taxonomy
+
+If the reference targets concepts not in `packages/taxonomy/data/topics.json`:
+- Add topics directly. Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL", subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`
+- Run `pnpm --filter @homa/taxonomy validate` after adding
+- Update topic counts in `packages/taxonomy/data/manifest.json`
+
+### 10. Write teaching approach rules
+
+If the reference reveals how a subject should be taught at a specific age:
+- Write the rule directly into materials-studio SKILL.md's "Subject decision rules" section
+- Examples: "For phonics practice at K-2 level, prefer multi-sensory formats (write + cut + paste) when the parent hasn't specified a format." or "For math operations at grades 4-6, color-coded step sequences aid memorization."
+
+### 11. Reply in Slack thread
 
 Use the **teach-me-explainer** technique from finding-unknowns: give the non-technical user vocabulary to describe what they are responding to.
 
@@ -308,10 +337,13 @@ Keep it warm, concrete, and jargon-light. These are homeschool moms, not designe
 | Taste model | `.cosmo/homa-taste.md` |
 | Materials-studio skill | `apps/web/agent/skills/materials-studio/SKILL.md` |
 | Taxonomy types | `packages/taxonomy/src/types.ts` |
+| Activity format registry | `apps/web/agent/activity-formats.md` |
+| Taxonomy topics | `packages/taxonomy/data/topics.json` |
+| Taxonomy manifest | `packages/taxonomy/data/manifest.json` |
 
 ## Notes
 
-- Never modify the app codebase. This is an ops skill — analysis and cataloging only.
+- This skill modifies product files directly: materials-studio SKILL.md, activity-formats.md, taxonomy data, and subject decision rules. Every write makes Homa smarter for the next family that asks for a material or curriculum.
 - If you cannot determine a dimension (e.g. print format from a low-res screenshot), mark it `"unknown"` and note why.
 - When in doubt about taxonomy mapping, check the taxonomy data files in `packages/taxonomy/data/`.
-- One reference per JSON file. One analysis per Slack message drop.
+- One reference per JSON file. One analysis per Slack message drop. Every drop should leave the product measurably smarter: at minimum a taste log entry, ideally also a recipe, format entry, or taxonomy addition.

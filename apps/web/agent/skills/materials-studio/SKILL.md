@@ -575,6 +575,290 @@ report outline replaces "thesis" with "main idea" and adds a
 "characters" section. A research outline adds "sources" fields. The
 two-column instruction|work pattern stays constant; the labels change.
 
+## Cut-and-paste word work
+
+Reference image: `references/homa-cut-and-paste-reference.png`
+
+A multi-sensory word work page where the child sees the model word,
+writes it on a practice line, then cuts out a tile and pastes it into
+a notebook or sorting activity. Four modalities for one concept: see,
+write, cut, paste. This is the format when the parent asks for
+cut-and-paste activities, word work, word sorts, or multi-sensory
+phonics practice.
+
+Great for: CVC words, word families, sight words, vocabulary,
+sorting activities. Especially effective for K-2 phonics and
+special education where kinesthetic manipulation reinforces learning.
+
+Always html path. Precise grid geometry, dotted cut lines, and
+writing lines need surgical precision that the image model cannot
+reliably produce.
+
+Design patterns (all binding for cut-and-paste):
+
+- **Grid layout**: 2-column grid, one word per cell. 6-8 words
+  per page for K-2; can increase to 10-12 for older students.
+- **Cell structure**: each cell contains three elements stacked
+  vertically: (1) printed model word in large clear type, (2) a
+  writing practice line matching the handwriting-practice baseline,
+  (3) a cut-out tile at the bottom of the cell.
+- **Dotted cut borders**: `border: 2px dashed #b3a492;` on cut-out
+  tiles and the horizontal separator line between the practice area
+  and the tile strip.
+- **Cut tiles strip**: a horizontal band at the bottom of the page,
+  separated from the main grid by a labeled cut line
+  ("✂️ cut along this line"). Each tile repeats the word in a
+  bordered box the child cuts out individually.
+- **Writing lines**: match the tracing-guide baseline style
+  (`border-bottom: 2px solid #6b6259; min-height: 28px;`).
+- **Consistent cell sizing**: all cells equal height and width for
+  clean grid alignment.
+- **Visual clarity**: large, clear font for model words
+  (`font-size: 32px; font-weight: 600;`). Enough spacing between
+  cells for small hands to cut.
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Andika&display=swap" rel="stylesheet">
+<style>
+  .cwp-grid { display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 24px; }
+  .cwp-cell { border: 1.5px solid #6b6259; border-radius: 6px;
+    padding: 14px 16px; text-align: center; }
+  .cwp-model { font-family: 'Andika', sans-serif; font-size: 32px;
+    font-weight: 600; color: #221e1a; margin-bottom: 8px; }
+  .cwp-write-line { border-bottom: 2px solid #6b6259;
+    min-height: 28px; margin: 8px auto; width: 85%; }
+  .cwp-cut-separator { border-top: 2.5px dashed #b3a492;
+    margin: 20px 0 12px; position: relative; padding-top: 4px; }
+  .cwp-cut-label { font-size: 10px; color: #b3a492;
+    letter-spacing: 0.1em; text-align: center; }
+  .cwp-tiles { display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; }
+  .cwp-tile { border: 2px dashed #b3a492; border-radius: 4px;
+    padding: 10px; text-align: center; font-family: 'Andika', sans-serif;
+    font-size: 22px; }
+</style>
+
+<div class="cwp-grid">
+  <div class="cwp-cell">
+    <div class="cwp-model">cat</div>
+    <div class="cwp-write-line"></div>
+  </div>
+  <div class="cwp-cell">
+    <div class="cwp-model">hat</div>
+    <div class="cwp-write-line"></div>
+  </div>
+  <!-- repeat for remaining words -->
+</div>
+
+<div class="cwp-cut-separator">
+  <div class="cwp-cut-label">✂️ cut along this line</div>
+</div>
+
+<div class="cwp-tiles">
+  <div class="cwp-tile">cat</div>
+  <div class="cwp-tile">hat</div>
+  <!-- one tile per word -->
+</div>
+```
+
+Path choice: html, always. The grid geometry, dotted cut lines, and
+writing-line precision are exactly what the html path exists for.
+Image-direct would lose the cut-line fidelity that makes this format
+work as a physical manipulative.
+
+## Maze / puzzle practice
+
+Reference image: `references/homa-maze-reference.png`
+
+A maze that transforms rote drill into a navigation challenge.
+Correct answers advance through the maze; wrong answers hit dead
+ends. Self-checking without needing an answer key. This is the format
+when the parent asks for mazes, puzzle worksheets, or gamified
+practice.
+
+Works for: math facts (follow the correct products), phonics (follow
+the CVC words), vocabulary matching, sight words, any fact-based
+drill that has right/wrong answers.
+
+Design patterns (all binding for mazes):
+
+- **Clear start/finish markers**: labeled "START" and "FINISH" with
+  bold borders or arrows. The child knows exactly where to begin.
+- **Decision points with answer choices**: each fork in the path
+  presents a problem or question. The correct answer leads forward;
+  wrong answers dead-end visibly.
+- **Dead ends are visible**: wrong paths should clearly terminate
+  (wall, blocked path) so the child self-corrects without an
+  answer key.
+- **Progressive difficulty**: early decision points are easier;
+  later ones are harder. Graduated on-ramp within one maze.
+- **Themed illustrations**: the maze path can weave through themed
+  artwork (space, jungle, ocean) to make it visually engaging.
+- **Answer labels at decision points**: large, clear text for each
+  answer choice (`font-size: 18px; font-weight: 600;`).
+- **Path width**: wide enough for a pencil line (~20px visual width
+  in the maze artwork).
+
+```html
+<style>
+  .maze-container { position: relative; width: 100%; }
+  .maze-img { width: 100%; display: block; }
+  .maze-label { position: absolute; font-family: 'Fredoka', sans-serif;
+    font-size: 18px; font-weight: 600; color: #221e1a;
+    background: rgba(255,255,255,0.85); padding: 2px 8px;
+    border-radius: 4px; }
+  .maze-start { position: absolute; font-family: 'Fredoka', sans-serif;
+    font-size: 14px; font-weight: 700; color: #4caf50;
+    letter-spacing: 0.1em; text-transform: uppercase; }
+  .maze-finish { position: absolute; font-family: 'Fredoka', sans-serif;
+    font-size: 14px; font-weight: 700; color: #e25b45;
+    letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+
+<div class="maze-container">
+  <img class="maze-img" src="{generated_maze_image_url}" alt="practice maze" />
+  <span class="maze-start" style="top: 5%; left: 8%;">Start</span>
+  <span class="maze-finish" style="bottom: 5%; right: 8%;">Finish</span>
+  <!-- Position answer labels at each decision point -->
+  <span class="maze-label" style="top: 20%; left: 30%;">7 x 8 = 56</span>
+  <span class="maze-label" style="top: 20%; left: 60%;">7 x 8 = 54</span>
+  <!-- repeat for each fork -->
+</div>
+```
+
+Path choice: hybrid is preferred. Use generate_image for the maze
+artwork and paths (the organic, hand-drawn feel is the whole point),
+then overlay answer labels at decision points with HTML absolute
+positioning. For very simple mazes (few forks, no theming),
+image-direct works — include the answer text in the image prompt.
+
+## Notes-and-practice bundle
+
+Reference image: `references/homa-notes-bundle-reference.png`
+
+A two-page format: page 1 is guided notes (Cornell-style two-column
+layout with terms and fill-in-the-blank explanations), page 2 is a
+practice activity (drill problems, fill-in-the-blank, or matching).
+Teach then practice in one printable. This is the format when the
+parent asks for notes-and-practice, guided notes with an activity,
+or teach-then-drill pages.
+
+Works for: any subject where concept introduction precedes drill.
+Math operations, grammar rules, science vocabulary, history facts.
+Especially strong for grades 3-8 where students are learning to
+take notes and need structure.
+
+Uses the packet recipe (two pages, one PDF) via create_printable's
+`pages` input. Each page is an html entry.
+
+Design patterns (all binding for notes-and-practice bundles):
+
+- **Page 1 — guided notes**:
+  - Two-column layout: narrow term column (~120px) on the left,
+    wide explanation column on the right.
+  - Section dividers: thin horizontal rules between concept groups.
+  - Fill-in-the-blank: key terms or values left as blank lines
+    within the explanation text.
+  - Student notes area: 2-3 blank lines at the bottom of each
+    section for the student's own observations.
+  - Header: topic title, name field, date field.
+
+- **Page 2 — practice activity**:
+  - Numbered problems or matching columns.
+  - Problems progress from straightforward application to
+    multi-step or tricky edge cases.
+  - Answer blanks: `border-bottom: 2px solid #6b6259; width: 80px;`
+  - For matching: two columns with items to connect.
+  - Include 8-12 problems for grades 3-5, 12-16 for grades 6-8.
+
+- **Visual continuity**: both pages share the same header style,
+  font family, and spacing conventions so they read as one unit.
+
+```html
+<!-- PAGE 1: Guided Notes -->
+<style>
+  .notes-header { display: flex; flex-wrap: wrap; gap: 8px 24px;
+    margin-bottom: 16px; font-size: 13px;
+    font-family: 'Plus Jakarta Sans', sans-serif; }
+  .notes-header .field { flex: 1 1 40%; }
+  .notes-header .field-line { border-bottom: 1.5px solid #6b6259;
+    min-width: 120px; display: inline-block; margin-left: 4px; }
+  .notes-title { font-family: 'Fredoka', sans-serif; font-size: 22px;
+    font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .notes-section { border-top: 1.5px solid #d9d2c7; margin-top: 14px;
+    padding-top: 10px; }
+  .notes-two-col { display: grid; grid-template-columns: 120px 1fr;
+    gap: 4px 14px; margin-bottom: 8px; }
+  .notes-term { font-size: 13px; font-weight: 700; color: #221e1a;
+    padding-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .notes-explanation { font-size: 13px; color: #6b6259;
+    line-height: 1.8; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .notes-blank { border-bottom: 2px solid #6b6259; width: 80px;
+    display: inline-block; margin: 0 4px; }
+  .notes-student-lines { margin-top: 6px; }
+  .notes-student-lines div { border-bottom: 1.5px solid #d9d2c7;
+    min-height: 22px; margin-bottom: 4px; }
+</style>
+
+<div class="notes-header">
+  <div class="field">Name: <span class="field-line"></span></div>
+  <div class="field">Date: <span class="field-line"></span></div>
+</div>
+<div class="notes-title">Two-Step Equations</div>
+
+<div class="notes-section">
+  <div class="notes-two-col">
+    <div class="notes-term">Two-step equation</div>
+    <div class="notes-explanation">
+      An equation that takes <span class="notes-blank"></span> steps to solve.
+      First, use <span class="notes-blank"></span> operations (add/subtract),
+      then use <span class="notes-blank"></span> operations (multiply/divide).
+    </div>
+  </div>
+  <div class="notes-student-lines">
+    <div></div><div></div>
+  </div>
+</div>
+<!-- Repeat sections for each concept -->
+```
+
+```html
+<!-- PAGE 2: Practice -->
+<style>
+  .practice-title { font-family: 'Fredoka', sans-serif; font-size: 20px;
+    font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .practice-problem { font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px; margin-bottom: 14px; display: flex;
+    align-items: baseline; gap: 8px; }
+  .practice-num { font-weight: 700; min-width: 24px; }
+  .practice-blank { border-bottom: 2px solid #6b6259; width: 80px;
+    display: inline-block; margin: 0 4px; }
+  .practice-work-area { border: 1.5px solid #d9d2c7; border-radius: 4px;
+    min-height: 48px; margin-left: 32px; margin-bottom: 8px; }
+</style>
+
+<div class="practice-title">Practice: Two-Step Equations</div>
+
+<div class="practice-problem">
+  <span class="practice-num">1.</span>
+  <span>3x + 5 = 20 &rarr; x = <span class="practice-blank"></span></span>
+</div>
+<div class="practice-work-area"></div>
+
+<div class="practice-problem">
+  <span class="practice-num">2.</span>
+  <span>2x - 7 = 11 &rarr; x = <span class="practice-blank"></span></span>
+</div>
+<div class="practice-work-area"></div>
+<!-- Repeat for remaining problems -->
+```
+
+Path choice: html for both pages, always. Text precision, table
+alignment, and cheap surgical revision matter on both the notes and
+the practice page. Use the packet recipe to combine both pages into
+one PDF via create_printable's `pages` input.
+
 ## Design rules (binding)
 
 - The page belongs to the child, not to Homa: no logo header, no brand

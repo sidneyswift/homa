@@ -1,7 +1,9 @@
-# Homa Taste Model
+# Homa Taste Model — Changelog
 
-Built from Aless and Carolyng's feedback and inspo drops. This file is the living spec
-for what "good" looks like to them. Materials-studio should consult this.
+This file is a LOG of patterns extracted from inspo drops, not a staging area.
+Durable patterns are written directly to materials-studio SKILL.md, activity-formats.md,
+taxonomy data, and subject decision rules as they are discovered. This file records
+what was seen and when, for pattern detection across drops.
 
 ## Visual Preferences
 <!-- Updated as patterns emerge from #homa-inspo and #homa-feedback -->
@@ -22,6 +24,11 @@ _No data yet — will populate as they drop references and give feedback._
 - *Mnemonic anchoring* — visual + verbal memory aids (e.g., "Please Excuse My Dear Aunt Sally" with a cute sheep). Humor helps.
 - *Practice embedded in the reference material* — not a separate worksheet. The foldable itself contains practice problems alongside the definitions.
 - *Built-in instruction alongside the work* — left column defines what each section is, right column asks student to do it. Learn and apply simultaneously.
+- *Gamified practice (maze/puzzle format)* — transforms rote drill into a navigation challenge. Correct answers advance through the maze; wrong answers hit dead ends. Self-checking without needing an answer key.
+- *Notes + practice bundles* — guided notes page that teaches the concept, paired with an activity page that drills it. Teach → practice in one printable.
+- *Progressive difficulty within a single page* — start with review of prerequisites, build to the new concept, end with tricky edge cases. Graduated on-ramp.
+- *Cut-and-paste word work* — multi-sensory format: see the word → write the word → cut the tile → paste the tile. Four modalities for one concept. Tactile manipulation adds kinesthetic memory. Great for early learners and special ed.
+- *Leveled progression systems* — same format, graduated difficulty (Level 1 → Level 2 → ...). Also works across a series (short a → short e → blends → digraphs). Systematic, not random.
 - *Print-friendly layouts* — designed for home/school printers. Landscape accordion folds (math) and portrait single-page (writing) both valued.
 
 ### Design Signals
@@ -33,6 +40,7 @@ _No data yet — will populate as they drop references and give feedback._
 
 ## Curriculum Style Signals
 - Order of Operations (PEMDAS) at 5th grade level — suggests ~grades 3-6 target range
+- Two-step equations (algebra) at grades 6-8 level — confirms middle school math is in scope
 - Five Paragraph Essay outline at secondary level (grades 7-10) — broader range than just elementary
 - TEKS/Common Core aligned content valued (standards awareness)
 - Foldable format suggests interactive notebook methodology — Charlotte Mason / eclectic leaning (hands-on, not textbook-driven)
@@ -52,6 +60,8 @@ _No explicit anti-signals yet. Inferring from the positive signals:_
 - Dropped the PEMDAS foldable — interested in interactive/tactile math formats
 - Dropped Five Paragraph Essay Outline — interested in structured writing scaffolds too. Not just math.
 - Two drops in one night = actively researching worksheet formats for Homa. Signal: this is a priority area.
+- Dropped Two-Step Equations Notes + Maze (2026-07-17) — interested in maze/puzzle-as-practice format. Also signals guided-notes format (Cornell-style two-column). Consistent pattern: Sid values formats where *structure does the teaching*, not just blank worksheets.
+- Dropped Short A CVC Cut & Paste (2026-07-17) — interested in multi-sensory word work (write + cut + paste). First early-learner / phonics drop — range now spans K-2 phonics through grades 6-8 algebra. Also first special-ed-origin resource (Adapting for Autism) — signals interest in inclusive/accessible design patterns.
 
 ### Aless
 _No signal yet._
