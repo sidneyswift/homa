@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1590,
+  "topicCount": 1593,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -31219,6 +31219,60 @@
       "centrality": 0.213406292749658,
       "evidence": [],
       "assessmentPrompt": "Has {{name}} heard of geoengineering? Can they describe one proposal for deliberately cooling the Earth and explain one potential risk of attempting it — and say whether they think individuals or governments bear more responsibility for tackling climate change?",
+      "standards": []
+    },
+    {
+      "id": "mt_Rk7vPnEsWq",
+      "type": "PROCEDURAL",
+      "subject": "English",
+      "domain": "Writing Composition",
+      "name": "Structured Essay Planning",
+      "description": "Plan and organize a multi-paragraph essay using a structured framework: thesis statement, supporting body paragraphs with evidence and explanation, and a conclusion that restates the thesis. Includes process awareness (draft stages) and difficulty scaling (2 vs 3 evidence points per paragraph).",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 14,
+      "centrality": 0.02,
+      "evidence": [
+        "Write a clear thesis statement that states the main argument",
+        "Organize supporting evidence into body paragraphs with topic sentences, examples, and explanations",
+        "Write a conclusion that restates the thesis and offers a final thought"
+      ],
+      "assessmentPrompt": "Could {{name}} take a writing topic and plan out a five-paragraph essay with a clear thesis, three body paragraphs each with a topic sentence and supporting evidence, and a conclusion?",
+      "standards": []
+    },
+    {
+      "id": "mt_Yw3cLdKa8n",
+      "type": "PROCEDURAL",
+      "subject": "English",
+      "domain": "Phonics & Word Reading",
+      "name": "Reading and Writing CVC Words",
+      "description": "Read and write consonant-vowel-consonant words fluently, progressing through short vowel sounds systematically (short a, then short e, short i, short o, short u). Includes multi-sensory approaches: see the word, write the word, cut and paste letter tiles. Builds on single letter sounds and blending.",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.03,
+      "evidence": [
+        "Read at least 10 CVC words with short 'a' sounds aloud without sounding out each letter",
+        "Write CVC words from dictation, choosing the correct vowel sound",
+        "Sort CVC words by vowel sound (short a vs short e vs short i)"
+      ],
+      "assessmentPrompt": "Could {{name}} read a list of short 'a' CVC words like 'cat', 'map', 'bag' fluently, and then write a few from dictation?",
+      "standards": []
+    },
+    {
+      "id": "mt_Fh9tNxQm2j",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Algebra",
+      "name": "Solving Two-Step Algebraic Equations",
+      "description": "Solve two-step algebraic equations involving inverse operations: isolate the variable by undoing addition/subtraction first, then multiplication/division (or recognizing when to reverse that order for fraction coefficients). Includes edge cases where division must precede subtraction.",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 14,
+      "centrality": 0.025,
+      "evidence": [
+        "Solve equations like 2x + 5 = 13 by applying inverse operations in the correct order",
+        "Solve equations with fraction coefficients by multiplying both sides by the reciprocal",
+        "Identify and solve 'Watch Out' equations where the standard order of inverse operations must be reversed"
+      ],
+      "assessmentPrompt": "Could {{name}} solve an equation like 3x - 7 = 14 by first adding 7 to both sides and then dividing by 3, and explain why they do those steps in that order?",
       "standards": []
     }
   ]

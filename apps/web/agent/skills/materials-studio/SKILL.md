@@ -89,6 +89,30 @@ page.
   focus.
 - End with something guaranteed: counting something they can always count.
 
+**CVC words and early phonics** (roughly ages 4 to 7):
+
+- Multi-sensory beats single-channel. When the parent asks for phonics practice and hasn't named a specific format, prefer cut-and-paste (see → write → cut → paste = four modalities reinforcing one word) over plain fill-in-the-blank.
+- Systematic progression matters. Short a CVC words before short e, before blends, before digraphs. The format stays constant; the phonics content progresses. One vowel sound per page, not mixed.
+- Six to eight words per page for early readers. Enough to practice without overwhelming.
+- Model-then-do: the printed word is always visible as reference while the student writes and matches. Never ask a K-2 child to produce a word from memory alone unless the parent says they're ready.
+- Level the same format: Level 1 = simple CVC (cab, map), Level 2 = more words or harder patterns. Same layout, different content. Parents appreciate the consistency.
+
+**Essay and structured writing** (roughly ages 9 to 14):
+
+- Structure IS instruction. A two-column layout where the left column defines what each section is ("a. topic sentence", "b. supporting evidence") and the right column has blanks teaches process and practice simultaneously.
+- Difficulty differentiation via evidence slots: 2 examples per body paragraph for younger/developing writers, 3 for more rigorous work. Same skeleton, different depth.
+- Process metadata reinforces writing-as-process: include name, date, topic/title, and draft-due fields. The outline is not a one-shot assignment.
+- No visual decoration for writing scaffolds. Clean B&W, structure-only. The absence of visual noise signals "this is serious work."
+
+**Math operations and algebra** (roughly ages 9 to 14):
+
+- Color-coded step sequences aid memorization for multi-step processes (PEMDAS, equation-solving algorithms). Each operation or step gets its own accent color.
+- Mnemonic anchoring: pair a verbal mnemonic with a small illustration for sequential processes. Humor helps memory ("Please Excuse My Dear Aunt Sally" + sheep).
+- Teach-then-practice bundles: guided notes page introduces the concept (Cornell-style two-column: category | worked examples with blanks), followed by a practice activity on the next page. Single printable, two functions.
+- Progressive on-ramp within a single material: review prerequisites before the new concept, build to standard problems, end with "Watch Out" edge cases that break the default algorithm.
+- Self-checking formats (mazes, puzzles) replace answer keys for drill. Wrong answers = dead ends = instant feedback without red-pen anxiety.
+- Practice embedded in reference materials: foldables that contain practice problems alongside definitions are more engaging than separate drill sheets.
+
 ## Before designing: check the library
 
 Call find_materials first when the request sounds like something this
