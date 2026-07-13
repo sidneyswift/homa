@@ -57,9 +57,6 @@ export function SampleReportProof() {
           <p style={{ maxWidth: 510, margin: "18px 0 0", color: "var(--text-body)", fontSize: "1.05rem", lineHeight: 1.65 }}>
             {SAMPLE_REPORT_COPY.body}
           </p>
-          <p style={{ maxWidth: 500, margin: "12px 0 0", color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.5 }}>
-            {SAMPLE_REPORT_COPY.setupNote}
-          </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
             <Button
               variant="primary"

@@ -68,7 +68,6 @@ test("the sample proof explains the mechanism before the result", () => {
   assert.match(SAMPLE_REPORT_COPY.body, /five-minute questionnaire per child/i);
   assert.match(SAMPLE_REPORT_COPY.body, /national standards and education research/i);
   assert.match(SAMPLE_REPORT_COPY.reassurance, /starts with strengths/i);
-  assert.match(SAMPLE_REPORT_COPY.setupNote, /takes an afternoon/i);
 });
 
 test("the founder story uses the public co-founder signature", () => {

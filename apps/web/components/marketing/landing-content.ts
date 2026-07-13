@@ -90,7 +90,6 @@ export const SAMPLE_REPORT_COPY = {
     "You answer a five-minute questionnaire per child. Homa checks each answer against published national standards and education research. The report groups the answers by subject.",
   reassurance:
     "This is not a test for your child. The report starts with strengths. Each area that is still growing includes a next step.",
-  setupNote: "Setting up Homa for your whole family comes later and takes an afternoon.",
   action: "See the sample report",
   href: "/onboarding/sample",
 } as const;
