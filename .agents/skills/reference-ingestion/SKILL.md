@@ -148,7 +148,62 @@ Update the manifest at `.cosmo/references/index.json`:
 
 If `index.json` already exists, append to the `references` array.
 
-### 4. Cross-reference against materials-studio recipes
+### 4. Generate Homa-style reference image
+
+Never store copyrighted originals in the repo. Instead, transform the
+reference into a Homa-style example that captures the structural patterns
+in Homa's own design language.
+
+**Process:**
+
+1. If the reference is a PDF, extract only the actual worksheet/material
+   pages (skip cover pages, terms of use, alignment charts, ads). Use
+   pymupdf (`import fitz`) to render the key pages as PNGs.
+2. Write a gpt-image-2 prompt that describes the **structural patterns**
+   from the reference — layout, panel structure, element types, spacing
+   — but expressed in Homa's style (see materials-studio SKILL.md for
+   design rules). Never copy the original's specific content, characters,
+   branding, or copyrighted text. Use a different subject/topic as the
+   example content.
+3. Generate via the Vercel AI Gateway:
+   - Model: `gpt-image-2` (via `$OPENAI_BASE_URL`)
+   - Size: `1536x1024` for landscape formats (foldables), `1024x1536`
+     for portrait formats (outlines, worksheets)
+   - Source API key: `source ~/.gbrain/env.sh` for `OPENAI_API_KEY` and
+     `OPENAI_BASE_URL`
+4. Save the generated image to
+   `apps/web/agent/skills/materials-studio/references/homa-<format>-reference.png`
+   (e.g. `homa-foldable-reference.png`, `homa-outline-reference.png`).
+5. If the reference introduces a **new recipe type** not yet in the
+   materials-studio skill, add a recipe section to
+   `apps/web/agent/skills/materials-studio/SKILL.md` with:
+   - A `Reference image:` pointer to the generated image
+   - HTML/CSS recipe code for the format
+   - Creation path guidance (image-direct vs html vs hybrid)
+   - Design patterns extracted from the reference
+   Also update the creation path judgment rules in the same skill.
+6. If the reference matches an **existing recipe**, add the generated
+   image as an additional reference (rename to avoid collisions, e.g.
+   `homa-foldable-reference-2.png`).
+
+**What the prompt should capture vs. what it should change:**
+
+| Capture (structural pattern) | Change (expression) |
+|---|---|
+| Panel layout, fold geometry | Different subject/topic |
+| Two-column instruction/work split | Different field labels |
+| Section header style | Different title text |
+| Spacing, density, visual hierarchy | Homa's design language |
+| Scaffold structure (blank/filled variants) | Original example content |
+
+| Never include | Why |
+|---|---|
+| Original brand name or logo | Copyright |
+| Original characters (e.g. specific sheep mascot) | Copyright |
+| Exact text/problems from original | Copyright |
+| Terms of use, alignment charts | Not the material |
+
+### 5. Cross-reference against materials-studio recipes
 
 The materials-studio supports these creation paths: **image-direct**, **html**, **hybrid**. It has proven recipes for:
 
@@ -157,6 +212,8 @@ The materials-studio supports these creation paths: **image-direct**, **html**, 
 - Counting mats, number worksheets (html or image-direct)
 - Flash cards (html)
 - Themed worksheets with art + exercises (hybrid)
+- Foldables / interactive notebook inserts (hybrid or image-direct)
+- Structured outlines / essay scaffolds (html)
 
 For each reference, ask:
 - **Which existing recipe would produce this?** Record in `recipeMatch.matchedRecipes`.
@@ -164,7 +221,7 @@ For each reference, ask:
 
 Gap examples: "maze generator", "cut-and-paste sorting activity", "multi-page booklet", "board game layout".
 
-### 5. Update taste signals
+### 6. Update taste signals
 
 Append to `.cosmo/homa-taste.md` under a section for the dropper:
 
@@ -178,7 +235,7 @@ Append to `.cosmo/homa-taste.md` under a section for the dropper:
 
 Look for patterns across multiple drops from the same person. When you see a pattern emerge (3+ consistent signals), promote it to a **confirmed preference** at the top of their section.
 
-### 6. Reply in Slack thread
+### 7. Reply in Slack thread
 
 Use the **teach-me-explainer** technique from finding-unknowns: give the non-technical user vocabulary to describe what they are responding to.
 
