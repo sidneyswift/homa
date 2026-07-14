@@ -10,20 +10,30 @@
 > fleet numbers below are measured against homa-prod on 2026-07-14, not
 > estimated.
 >
-> Build state: additive migration #51 applied to homa-prod (nullable
-> stage/lens columns, cell index, lens backfilled from topic_type: 15
-> how_to_teach, 12 method, 2 current_study, all stage-null under
-> dual-read). Code is NOT yet deployed; when it ships the migration
-> already leads it (additive rule). Verified green: typecheck, check:map,
-> check:taxonomy, check:isolation, check:tasks-ui (+2 new tests),
-> check:child-progress, check:progress-ui, eve build, lint. Two changes
-> beyond the written tickets, both recorded below: the map scorer now
-> emits frontierItemId/frontierDomain (KC-1 prerequisite), which bumped
-> CHILD_PROGRESS_PROJECTION_VERSION 2 to 3 so stored projections recompute
-> instead of failing a strict parse; and custom-task research context is
-> gated by a RESEARCH_SIGNAL keyword match (KC-4) so reminders stay plain.
-> Not built here: KC-5 (backfill ops) and flipping FLEET_RESEARCH_ENABLED,
-> which stay the staged deploy follow-up.
+> Build state: SHIPPED to homa-prod 2026-07-14. Additive migration #51
+> applied (nullable stage/lens columns, cell index, lens backfilled from
+> topic_type: 15 how_to_teach, 12 method, 2 current_study, all stage-null
+> under dual-read); it led the deploy per the additive rule. Code merged
+> to main (commit 108b25e) and deployed: CI green, Vercel READY and
+> aliased to thankshoma.com, eve runtime health + app probes 200.
+> Verified green before push: typecheck, pnpm build, eve build, lint,
+> check:map, check:taxonomy, check:isolation, check:tasks-ui (+2 new
+> tests), check:child-progress, check:progress-ui. Two changes beyond the
+> written tickets: the map scorer now emits frontierItemId/frontierDomain
+> (KC-1 prerequisite), which bumped CHILD_PROGRESS_PROJECTION_VERSION 2 to
+> 3 so stored projections recompute instead of failing a strict parse; and
+> custom-task research context is gated by a RESEARCH_SIGNAL keyword match
+> (KC-4) so reminders stay plain.
+>
+> Backfill (KC-5) ARMED, not yet run: RESEARCH_TOPICS_PER_NIGHT=10 set in
+> prod and baked into the live deployment. FLEET_RESEARCH_ENABLED was
+> already true (9 fleet runs over the prior 3 nights). The nightly
+> fleet-research cron (47 6 UTC, about 2:47am ET) is the only trigger,
+> prod exposes no manual fire, so the first stage+domain-tagged rows land
+> on the next cron. At 10 cells/night the reachable grid (~a couple dozen
+> cells now, hundreds as the fleet's ages spread) fills over roughly two
+> to three weeks; drop RESEARCH_TOPICS_PER_NIGHT back to 3 after, or the
+> nightly spend stays at the backfill rate.
 
 ## Why now (measured, not assumed)
 
