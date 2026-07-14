@@ -257,6 +257,13 @@ export async function setFamilySandboxAction(
  * can never disappear a customer. The reserved alias stays reusable:
  * attachAuthUser skips deleted families when it picks a fold target, so
  * signing in again with the same email starts a fresh family.
+ *
+ * Two rows must die WITH the family or it keeps living (founder "what
+ * if my real phone" question, 2026-07-14 evening): its family_phones
+ * row (or inbound texts from that number keep routing into the deleted
+ * family's context, and the number stays stolen from its real home)
+ * and its agent_schedules rows (or the dispatcher keeps texting the
+ * morning brief from beyond the grave).
  */
 export async function deleteSandboxFamilyAction(
   familyId: string,
@@ -267,13 +274,19 @@ export async function deleteSandboxFamilyAction(
     return { error: "That family could not be identified. Reload and try again." };
   }
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    update public.families
-    set status = 'deleted', updated_at = now()
-    where id = ${familyId} and sandbox and status <> 'deleted'
-    returning id
-  `;
-  if (rows.length === 0) {
+  const deleted = await sql.begin(async (tx) => {
+    const rows = await tx<{ id: string }[]>`
+      update public.families
+      set status = 'deleted', updated_at = now()
+      where id = ${familyId} and sandbox and status <> 'deleted'
+      returning id
+    `;
+    if (rows.length === 0) return false;
+    await tx`delete from public.family_phones where family_id = ${familyId}`;
+    await tx`delete from public.agent_schedules where family_id = ${familyId}`;
+    return true;
+  });
+  if (!deleted) {
     return { error: "Only a family marked as a test family can be deleted here." };
   }
   revalidatePath("/admin/families");
