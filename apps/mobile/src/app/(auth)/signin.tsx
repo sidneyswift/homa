@@ -3,21 +3,24 @@ import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
 import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { TextField } from "../../components/ui/text-field";
 import { useSession } from "../../features/auth/session-provider";
+import { signInWithGoogle } from "../../lib/google-auth";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
 
 /**
  * Email + password sign-in, matching the web /signin flow. Account
@@ -30,6 +33,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googlePending, setGooglePending] = useState(false);
 
   if (session) return <Redirect href="/" />;
 
@@ -49,6 +53,17 @@ export default function SignInScreen() {
     if (signInError) {
       console.error("mobile signin failed:", signInError.message);
       setError("That email and password didn't match. You can try again when you're ready.");
+    }
+    // Success: SessionProvider picks up the session and this screen redirects.
+  }
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setGooglePending(true);
+    const { error: googleError } = await signInWithGoogle();
+    setGooglePending(false);
+    if (googleError) {
+      setError(googleError);
     }
     // Success: SessionProvider picks up the session and this screen redirects.
   }
@@ -83,6 +98,61 @@ export default function SignInScreen() {
           </View>
 
           <Card style={{ gap: space.md }}>
+            {/* Google sign-in — matches web's "Continue with Google" button */}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void handleGoogleSignIn()}
+              disabled={googlePending}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                minHeight: 48,
+                borderRadius: radius.pill,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+                paddingVertical: 12,
+                paddingHorizontal: space.lg,
+                opacity: googlePending ? 0.6 : 1,
+                transform: [{ scale: pressed ? pressScale : 1 }],
+              })}
+            >
+              <GoogleGlyph />
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodySemibold,
+                  fontSize: fontSize.base,
+                  color: colors.textStrong,
+                }}
+              >
+                {googlePending ? "Redirecting to Google\u2026" : "Continue with Google"}
+              </Text>
+            </Pressable>
+
+            {/* Divider */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
+              <Text
+                style={{
+                  fontFamily: fontFamilies.body,
+                  fontSize: fontSize.sm,
+                  color: colors.textMuted,
+                }}
+              >
+                or
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
+            </View>
+
+            {/* Email + password */}
             <TextField
               label="Email"
               value={email}
