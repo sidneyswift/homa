@@ -153,7 +153,7 @@ describe("live Progress copy", () => {
         },
         "America/Los_Angeles",
       ),
-      "3 observations · Journal note · Jul 11, 2026",
+      "3 answers · latest: Journal note · Jul 11, 2026",
     );
   });
 
@@ -175,7 +175,7 @@ describe("live Progress copy", () => {
         },
         "America/Los_Angeles",
       ),
-      "2 observations · Elena and Jordan shared different answers on Jul 11, 2026. Both answers are saved.",
+      "2 answers · Elena and Jordan shared different answers on Jul 11, 2026. Both are saved.",
     );
   });
 
@@ -197,7 +197,7 @@ describe("live Progress copy", () => {
         },
         "America/Los_Angeles",
       ),
-      "2 observations · Adult 1 and Adult 2 shared different answers on Jul 11, 2026. Both answers are saved.",
+      "2 answers · Adult 1 and Adult 2 shared different answers on Jul 11, 2026. Both are saved.",
     );
   });
 });

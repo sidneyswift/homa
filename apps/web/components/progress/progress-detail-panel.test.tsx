@@ -60,7 +60,7 @@ describe("ProgressDetailPanel", () => {
     assert.doesNotMatch(html, /since Jun 10/);
     assert.match(
       html,
-      /4 observations \u00b7 Elena and Jordan shared different answers on Jul 11, 2026\. Both answers are saved\./,
+      /4 answers \u00b7 Elena and Jordan shared different answers on Jul 11, 2026\. Both are saved\./,
     );
 
     // The domain and topic hierarchy, moved here from the old page body.

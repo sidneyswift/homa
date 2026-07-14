@@ -32,6 +32,16 @@ length cap; cut a whole idea instead, or split the sentence.
 - One name per concept, everywhere: "progress report" never "map",
   "subject" never "domain", plain age words never "band", colors in copy
   are yellow / green / blue.
+- The countable datum is an "answer", never "observation" (founder ruling
+  2026-07-14): what an adult said or showed about one skill, whatever the
+  channel (checklist tap, deeper question, report correction, check-in
+  reply, journal note or lesson Homa matched to a skill). Counts read
+  "N answers"; the source label next to an answer says where it came
+  from. This vocabulary must survive past onboarding: never count
+  "questions answered" (later answers arrive without questions). The
+  formal third-party artifacts (evidence pack, one-pager, method page,
+  terms) may keep "a parent's observations" in prose; that register is
+  for evaluators, not for her.
 - No meta-commentary about the copy itself: "here's the honest picture",
   "the part worth circling", "the real story is". Just say the thing.
 - Metaphors are a budget of one per surface, zero in a tie. Stacked images

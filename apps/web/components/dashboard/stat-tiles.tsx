@@ -43,7 +43,7 @@ function buildTiles(reports: DashboardReport[], plans: DashboardPlan[], kidCount
       subTone: "muted",
     },
     {
-      label: "Your observations",
+      label: "Your answers",
       value: String(observations),
       sub: "every answer sharpens the picture",
       subTone: "muted",

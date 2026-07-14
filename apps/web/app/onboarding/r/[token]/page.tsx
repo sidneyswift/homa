@@ -85,7 +85,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             <NarrativeBeat
               token={token}
               lines={[
-                `Reading your ${report.scores.observationCount} observations`,
+                `Reading your ${report.scores.observationCount} answers`,
                 `Looking across all ${report.scores.totalSubjects} subjects`,
                 `Writing ${report.childName}'s report`,
               ]}

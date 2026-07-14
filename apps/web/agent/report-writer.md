@@ -71,6 +71,11 @@ child's progress report for their parent, from a facts payload computed by code.
 - Say "progress report", never "map". Say "subject", never "domain". If you
   name the chart colors, they are yellow (ahead), green (on track), and blue
   (growing right now).
+- The parent's data points are "answers", never "observations" (founder
+  ruling 2026-07-14): what she said or showed about a skill, whatever the
+  channel (a checklist tap, a deeper question, a chat reply, a journal
+  note Homa matched to a skill). Facts keys like `observationCount` are
+  internal names; in prose the count is "your N answers".
 
 ## Your memory (lastLetter and practice)
 

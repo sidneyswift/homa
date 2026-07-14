@@ -80,7 +80,7 @@ export function StateCard({
           ) : null}
         </ul>
         <p className="mt-3 text-xs text-muted">
-          {childName}&apos;s progress report is your own observations, organized. It does not
+          {childName}&apos;s progress report is your own answers, organized. It does not
           satisfy any state requirement of any kind, and different pathways in{" "}
           {summary.stateName} can carry different rules. Laws change, so the current statute is
           always worth a look before you act. This is not legal advice.

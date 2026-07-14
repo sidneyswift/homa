@@ -73,6 +73,7 @@ const SOURCE_DETAILS: Record<ProgressSourceKind, string> = {
   recheck: "Recorded in a follow-up check.",
   onboarding_walk: "Recorded during onboarding.",
   legacy: "Recorded in an earlier progress answer.",
+  lesson_listen: "Heard in a recorded lesson.",
 };
 
 function compareAsciiIds(left: string, right: string): number {
@@ -277,7 +278,7 @@ function buildOpenConflict(
         source: null,
         observedAt: latestEvidence.observedAt,
         detail:
-          "Two adults shared different observations. Both answers are kept for confirmation.",
+          "Two adults shared different answers. Both are kept for confirmation.",
       },
     },
     view: {

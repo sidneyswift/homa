@@ -146,8 +146,8 @@ function MeaningBox({
       <p className="font-semibold text-strong">
         {subject.name} {subject.display} mo
         <span className="ml-2 font-mono text-[0.65rem] font-medium text-subtle">
-          {subject.observations}{" "}
-          {subject.observations === 1 ? "observation" : "observations"}
+          from {subject.observations}{" "}
+          {subject.observations === 1 ? "answer" : "answers"}
         </span>
       </p>
       {statement ? (

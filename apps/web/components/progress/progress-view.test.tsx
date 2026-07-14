@@ -131,7 +131,7 @@ describe("ProgressView", () => {
     assert.doesNotMatch(html, /Open the full report/);
     assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);
     assert.doesNotMatch(html, /Subject by subject/);
-    assert.doesNotMatch(html, /0 skills|0 observations|0%/i);
+    assert.doesNotMatch(html, /0 skills|0 observations|0 answers|0%/i);
     assert.match(html, /min-h-11/);
     assert.match(html, /bg-\[var\(--brand-active\)\]/);
     assert.match(html, /text-on-brand/);

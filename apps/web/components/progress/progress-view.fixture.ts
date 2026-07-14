@@ -143,7 +143,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
               itemId: "math.one-to-one",
               statement: "Matches one number to each object",
               detail:
-                "Two adults shared different observations. Both answers are kept for confirmation.",
+                "Two adults shared different answers. Both are kept for confirmation.",
               state: "conflict",
               answer: null,
               source: null,

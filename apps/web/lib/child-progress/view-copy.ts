@@ -95,6 +95,8 @@ export function progressSourceLabel(
       return "Onboarding";
     case "legacy":
       return "Earlier progress answer";
+    case "lesson_listen":
+      return "Lesson recording";
     default:
       return unsupportedProgressCopyState(source);
   }
@@ -130,8 +132,16 @@ export function formatProgressDate(
   return formatter.format(new Date(observedAt));
 }
 
-function progressObservationCountLabel(count: number): string {
-  return `${count} ${count === 1 ? "observation" : "observations"}`;
+/**
+ * The family vocabulary for the countable datum is "answer", one name
+ * everywhere (founder ruling 2026-07-14): what an adult said or showed
+ * about one skill, whatever the channel. A checklist tap, a deeper
+ * question, a chat reply, and a journal note Homa matched to a skill
+ * all count the same way; the source label next to it says which.
+ * "Observation" stays internal (and in the formal evidence pack).
+ */
+function progressAnswerCountLabel(count: number): string {
+  return `${count} ${count === 1 ? "answer" : "answers"}`;
 }
 
 export function progressSubjectSummary(
@@ -139,7 +149,7 @@ export function progressSubjectSummary(
   timeZone: string,
 ): string | null {
   if (subject.summary === null) return null;
-  const count = progressObservationCountLabel(
+  const count = progressAnswerCountLabel(
     subject.evidenceCount,
   );
   const date = formatProgressDate(
@@ -148,11 +158,9 @@ export function progressSubjectSummary(
   );
   switch (subject.summary.kind) {
     case "evidence":
-      return [
-        count,
-        progressSourceLabel(subject.summary.source.kind),
-        date,
-      ].join(" · ");
+      // "latest:" scopes the source and date to the newest answer; the
+      // bare triplet read as if every answer came from that one source.
+      return `${count} · latest: ${progressSourceLabel(subject.summary.source.kind)} · ${date}`;
     case "conflict": {
       const first =
         subject.summary.adultDisplayNames[0]?.trim() ||
@@ -162,7 +170,7 @@ export function progressSubjectSummary(
         "Adult 2";
       return (
         `${count} · ${first} and ${second} shared different ` +
-        `answers on ${date}. Both answers are saved.`
+        `answers on ${date}. Both are saved.`
       );
     }
     default:
