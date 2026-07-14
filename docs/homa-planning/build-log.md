@@ -3,7 +3,79 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
-## 2026-07-14 · Founder ruling: prod bugs get fixed, not stored
+## 2026-07-14 · Founder ruling: her data points are "answers", one word from onboarding onward
+
+Founder ask (2026-07-14 afternoon, registered as `answers-vocabulary` in
+journeys/10-reconciliation.md §5): the Progress counts must be crystal
+clear ("4 questions answered or something simpler"), AND the vocabulary
+must survive the product's whole life, because scores soon move from
+journal notes, chat mentions, check-ins, and lesson recordings, none of
+which are the mom answering a question.
+
+The chosen topology counts the durable noun, not the activity. An
+"answer" is what an adult said or showed about one skill, whatever the
+channel; the evidence ledger already stores exactly that (an answer
+value per skill item, with a source). So "4 answers" is true at
+onboarding (four checklist taps) and true in month six (two taps, one
+journal match, one check-in reply), and the source label sitting next
+to every answer says which channel it came from. "Questions answered"
+was rejected because it breaks the moment a journal note scores;
+"observations" was rejected by the reader gate as clinical
+(specialist-with-a-clipboard) and demoted to the formal third-party
+artifacts only (evidence pack, one-pager, method page, terms), where
+the evaluator register is the point.
+
+Shipped in the same session: Progress panel summary counts (now also
+scoped "latest: <source> · <date>" so four answers never read as four
+journal notes), the chart meaning box ("from 4 answers"), the
+report-writing beat line, the dashboard tile, the state card, and the
+conflict copy ("Two adults shared different answers"). The rule is
+recorded in the copy rulebook's one-name-per-concept list, and the
+report writer prompt carries it as a vocabulary law (v2026.07.20,
+fixtures regenerated, gate-clean). The same reply reaffirmed
+`trajectory-real-negative-months`: the chart's signed numbers stay
+("its -15").
+
+## 2026-07-14 · Founder ruling: the thank-you card follows the family, addressed to the primary parent
+
+Founder instruction (2026-07-14 morning, registered as
+`card-per-family-primary-parent` in journeys/10-reconciliation.md §5):
+only a primary parent's signup earns the handwritten thank-you card.
+One card per new FAMILY, never one per new account.
+
+Audit result first: the sweep (lib/cards/thank-you.ts) already keys on
+families, not accounts. Eligibility is the family's own completed web
+onboarding (profile_completed_at + 48 quiet hours + full address +
+email), and the thank_you_cards unique family_id row is the once-ever
+guarantee, enforced by the schema. A second adult joining through
+/join or an SMS invite only inserts a family_members row and cannot
+mint a card. Production checked the same morning: 4 cards ever, all
+sent or mailed; 3 families pending the 48-hour clock, all
+single-member with distinct addresses; nothing per-account queued.
+
+What the audit DID find: the card's recipient is a queue-time snapshot
+of the family-level first_name / parent_display_name, and two
+boundaries allowed a LATER account to rewrite those fields and re-stamp
+profile_completed_at (renaming the card's recipient and resetting its
+48-hour clock for a family not yet carded):
+
+- POST /api/map/family accepted replays on a family whose profile was
+  already complete. Any signed-in member resolved through requireFamily
+  (including a joined co-parent) could re-run family setup. Now a
+  completed family returns a quiet success without writing, which also
+  keeps a lost-response retry from stranding the primary's own step.
+- signup_set_family (text signup) resolved its family from the phone
+  mapping, so a model misfire on a number linked to a real, membered
+  family would re-run saveFamilySetup. saveFamilyBasicsFromSms now
+  refuses any family that already has a family_members row and the tool
+  tells the model so honestly. Mid-signup name corrections keep
+  working: a text-signup family stays memberless until its web claim.
+
+With both boundaries closed, the family identity fields are write-once
+after onboarding completes, so the recipient snapshot is the primary
+parent by construction. This parallels task-recipient-scoping
+(2026-07-12), which already defined the account owner as the family's
+first member.
 
 At 23:41 a user photo showed a family's report page stuck on the
 writing beat in production. The cause (BUG-P1-1, an untypeable
@@ -26,6 +98,66 @@ backlog row is prohibited. Findings documents carry per-bug status:
 FIXED with the commit hash, or an escalation timestamp. Enforced in
 AGENTS.md (new "Production bugs" section) and BUILD.md non-negotiable
 law 11; the field study's BUG-P1-1 rows now carry FIXED markers.
+
+## 2026-07-13 (late night) · Lesson listen ships dark (founder "BUILD")
+
+Founder ruling `lesson-listen-child-audio` (registered in
+journeys/10-reconciliation.md §5): a parent may record a whole lesson
+that includes their child's voice, behind a dedicated family-level
+consent screen, superseding the personas line "no child voice
+ingestion in v1" for lesson recordings only. Commitments enforced in
+code: raw audio deletes after 30 days (cron TTL sweep), transcripts
+and reviews stay, AI processing rides no-training terms
+(disallowPromptTraining on every call), nothing identifies anyone by
+voice, lesson transcripts are family-shared like progress (plan §7
+Q1; the older open call/chat transcript visibility ruling stays open).
+
+Built this session, everything dark behind HOMA_LESSON_LISTEN_ENABLED
+(plan 2026-07-13-lesson-listen.md, tickets LL-0 through LL-6):
+consent stamp + screen, migrations (lesson_recordings, segments,
+media, reviews; 'lesson_listen' evidence source and 'lesson' channel
+constraint extensions), the segmented recorder with wake lock, camera
+button, and fallback file upload, upload token route + five lesson
+routes, per-segment Whisper transcription plus the audio-model tone
+lane (both inline, claim-and-sweep retries on the hourly cron), the
+synthesis pass with the pairs trust boundary (verbatim-excerpt
+substring check + token-overlap floor + sha256 clause idempotency
+keys, capped at 12), journal-path evidence fan-out (source
+lesson_listen via runtime.ts so MJ-08 events fire), the review page
+with status poll, and the kid-page entry.
+
+Decisions made alone while building, conservative calls:
+
+1. The plan's §4.6 "canonical chat message on ready" is DEFERRED. A
+   wrong persistCanonicalMessage write pollutes every adult's
+   transcript (chat-privacy-per-adult), and wiring a sessionless
+   artifact into the continuity ledger deserves its own reviewed
+   slice. The review page, status poll, kid-page list, and morning
+   brief weave (automatic via child_observations) carry delivery
+   for v1. Plan §4.6 updated to match.
+2. When HOMA_LIVE_PROGRESS_ENABLED is off, the clause fan-out is
+   skipped entirely (pairs are kept on the review as
+   skipped_flag_off) rather than the plan's "clauses still land as
+   observations": the journal service has no observation-only mode,
+   and inventing one risks the shipped journal path. Live progress is
+   on in production, so the gate is belt-and-suspenders.
+3. Consent, recorder, and review copy passed both gates the same
+   night: the reader gate (ICP read) drove the retry framing ("Homa
+   couldn't finish", never "needs another try"), kitchen-table privacy
+   bullets, the screen-close consequences line, and a real DELETE
+   /api/lessons/{id} route so the delete promise is enforceable; the
+   editor gate then settled one-name-per-concept (recording vs
+   listening vs review vs progress) and sentence shapes. Remaining
+   soft note: the moment-chip vocabulary mixes grammatical shapes;
+   revisit alongside the homa-uxui-reviewer pass on real screenshots
+   during dogfooding.
+4. The tone model default is google/gemini-3-flash behind
+   HOMA_LESSON_TONE_MODEL; the LL-5 spike (send one real webm and one
+   iOS mp4 segment through the gateway) pins or corrects it before
+   enablement. Tone is fail-soft everywhere.
+5. lesson_listen evidence carries memberUserId = the recording adult
+   (created_by), channel 'lesson', messageId null, enforced by a new
+   validateProgressEvidenceWrite branch.
 
 ## 2026-07-13 · Curriculum atlas wave 1 (founder ask)
 
@@ -83,6 +215,45 @@ homa-implications.md, fragile facts recorded in backlog.md. Note for
 auditors: commit 04eddce (a parallel founder session) swept in the
 atlas files that existed mid-wave; later agent output remains in the
 working tree for the next commit.
+
+Third continuation, same night (founder: "CONTINUE. BOIL THE OCEAN"):
+ten more parallel agents launched: six sequence-extraction agents
+(Saxon; Math-U-See plus Math with Confidence; All About Learning; Story
+of the World plus Mystery of History; Apologia plus Mystery Science;
+TGTB language arts plus math) following the sequences protocol with
+founder-sanctioned Firecrawl access, and four wave 2b research agents
+(online academies and unit studies; international providers including
+Wolsey Hall and Twinkl; coding and accessibility ecosystems; Etsy and
+printable marketplaces). Two wave 3 items shipped by the parent agent
+meanwhile: `materials-patterns.md` (the materials pattern library, 16
+structural patterns across format, pedagogy, and trust lenses, each
+with atlas evidence and a Homa spec, feeding the materials studio) and
+the first sequence-to-taxonomy crosswalk seed
+(`sequences/crosswalks/dimensions-math-grade2.yaml`, 15 chapters to 43
+topic ids, machine-verified against the taxonomy snapshot, explicitly
+status seed pending human review, docs-side only, no
+`packages/taxonomy/` changes). The sequences README gained the
+flat-structure schema variant and a shared-file rule so parallel
+extraction agents cannot collide.
+
+All ten agents completed the same night. Close-out numbers, all
+validator-verified: 155 profiles (26 new: online academies, unit
+studies, international including Twinkl and Wolsey Hall, coding and
+accessibility, Etsy and small marketplaces), 18 comparison docs, and 11
+sequence files totaling 109 levels, 640 chapters, and 5,171 lesson
+entries across Dimensions Math, Saxon, Math-U-See, Math with
+Confidence, Simply Good and Beautiful Math, All About
+Reading/Spelling, TGTB Language Arts, Story of the World, Mystery of
+History, Apologia, and Mystery Science. Extraction agents cross-checked
+every published level against two independent sources and recorded
+publication-ceiling limits honestly (Saxon K-3 and TGTB LA Level 7
+pending, MwC grades 3-6 at the publisher's unit-level ceiling). One
+stale link fixed in the Memoria Press profile (academy moved to
+memoriaacademy.com). Catalog regenerated. The founder's original ask
+(a repo of curricula, then the lessons, usable as a baseline) now has
+its skeleton: profiles for competitive knowledge, sequences for
+position resolution, patterns for materials quality, and one verified
+crosswalk seed pointing at the skill graph.
 
 Second continuation, same evening (founder: "Continue"): the flagship
 sequence extraction was completed. `sequences/dimensions-math.yaml` now
