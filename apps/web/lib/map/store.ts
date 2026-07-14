@@ -1403,11 +1403,14 @@ export async function mirrorToWaitlist(input: {
 }
 
 /**
- * Families eligible for the single 24h reminder. Email-gated: since signup
- * happens at the end of the checklist (not the start), most stalled
- * families have no email yet and are simply unreachable until they return
- * on the same device; this only nudges the ones who reached signup,
- * stalled after, and never scored.
+ * Families eligible for the single 24h reminder: signed up, stalled for
+ * hours, and NO report generated for anyone yet (the true onboarding
+ * stall; a family with any report gets the retest loop instead, never
+ * this). Statuses 'open' and 'claimed' both qualify. Since signup moved
+ * to the start of the flow (founder call 2026-07-08), every family with
+ * an email is 'claimed' the moment it exists, and the old status = 'open'
+ * gate silently matched nobody: zero reminders ever sent in production
+ * (found 2026-07-14 tracing a stalled family).
  */
 export async function familiesNeedingReminder(): Promise<
   { id: string; email: string; first_child: string | null }[]
@@ -1420,15 +1423,19 @@ export async function familiesNeedingReminder(): Promise<
           and not exists (select 1 from public.child_reports r where r.child_id = c.id)
         order by c.created_at limit 1) as first_child
     from public.families f
-    where f.status = 'open'
+    where f.status in ('open', 'claimed')
       and f.email is not null
       and f.reminder_sent_at is null
       and f.created_at < now() - interval '24 hours'
       and f.updated_at < now() - interval '4 hours'
+      and not exists (
+        select 1 from public.child_reports r
+        join public.children c on c.id = r.child_id
+        where c.family_id = f.id
+      )
       and exists (
         select 1 from public.children c
         where c.family_id = f.id and not c.pending_band
-          and not exists (select 1 from public.child_reports r where r.child_id = c.id)
       )
     limit 50
   `;

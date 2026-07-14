@@ -1,3 +1,12 @@
+import {
+  ageInMonths,
+  buildMapQuestionQueue,
+  isInScoredRange,
+  isMapChecklistComplete,
+  planQuestions,
+  type MapAnswer,
+} from "@homa/core";
+
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
 import { summarizeUsageCost } from "../model-pricing";
@@ -9,6 +18,33 @@ import { getModelPriceBook } from "../model-pricing-live";
  * message content stays out of the console on purpose; the founder can
  * read totals and delivery truth without paging through conversations.
  */
+
+/**
+ * One kid's onboarding truth for the family page: how far the checklist
+ * got, whether the report exists, and whether one could build right now.
+ * Answers the founder's stuck-family question ("did she answer all the
+ * questions, or did scoring fail?") from data instead of guesswork.
+ */
+export interface FamilyDetailKid {
+  id: string;
+  name: string;
+  birthDate: string;
+  /** False for kids outside the scored 2 to 16 band (pending_band). */
+  inScoredBand: boolean;
+  /** Checklist answers saved so far. */
+  answered: number;
+  /** Questions the adaptive queue would still ask today (0 = done). */
+  questionsLeft: number;
+  /** True when the checklist started and nothing remains to ask, which
+   * means a report can be scored right now; it builds automatically the
+   * moment she returns to the flow. */
+  readyToScore: boolean;
+  lastAnswerAt: string | null;
+  hasReport: boolean;
+  reportAt: string | null;
+  reportViewedAt: string | null;
+  reportEmailedAt: string | null;
+}
 
 export interface FamilyDetail {
   id: string;
@@ -27,7 +63,7 @@ export interface FamilyDetail {
   journalOptOutAt: string | null;
   stage: FamilyStage;
   members: { email: string | null; role: string; displayName: string | null; lastSignInAt: string | null }[];
-  kids: { id: string; name: string; birthDate: string; hasReport: boolean; reportAt: string | null }[];
+  kids: FamilyDetailKid[];
   lastUserActivityAt: string | null;
   messages28d: number;
   messagesByDay14: { day: string; n: number }[];
@@ -87,13 +123,36 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     where m.family_id = ${familyId}
     order by m.created_at
   `;
-  const kids = await sql<{ id: string; name: string; birth_month: string; report_at: string | null }[]>`
+  const kids = await sql<
+    {
+      id: string;
+      name: string;
+      birth_month: string;
+      report_at: string | null;
+      report_viewed_at: string | null;
+      report_emailed_at: string | null;
+    }[]
+  >`
     select c.id, c.name, c.birth_month::text as birth_month,
-           r.generated_at::text as report_at
+           r.generated_at::text as report_at,
+           r.viewed_at::text as report_viewed_at,
+           r.emailed_at::text as report_emailed_at
     from public.children c
     left join public.child_reports r on r.child_id = c.id
     where c.family_id = ${familyId}
     order by c.created_at
+  `;
+  // Every saved checklist answer for this family's kids, so the kid rows
+  // can say "questions done" vs "12 left" with the real adaptive queue
+  // instead of a bare count. A checklist is ~30 rows per kid, so this
+  // stays a small read.
+  const answerRows = await sql<
+    { child_id: string; question_id: string; answer: MapAnswer; answered_at: string }[]
+  >`
+    select a.child_id, a.question_id, a.answer, a.answered_at::text as answered_at
+    from public.child_answers a
+    join public.children c on c.id = a.child_id
+    where c.family_id = ${familyId}
   `;
   const activity = await sql<{ last_at: string | null; n28: number }[]>`
     select max(created_at) filter (where role = 'user')::text as last_at,
@@ -164,6 +223,44 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     order by created_at desc limit 12
   `;
 
+  const answersByKid = new Map<
+    string,
+    { record: Record<string, MapAnswer>; lastAnswerAt: string }
+  >();
+  for (const row of answerRows) {
+    const entry = answersByKid.get(row.child_id) ?? { record: {}, lastAnswerAt: row.answered_at };
+    entry.record[row.question_id] = row.answer;
+    if (row.answered_at > entry.lastAnswerAt) entry.lastAnswerAt = row.answered_at;
+    answersByKid.set(row.child_id, entry);
+  }
+
+  const detailKids: FamilyDetailKid[] = kids.map((kid) => {
+    const months = ageInMonths(kid.birth_month);
+    const inScoredBand = isInScoredRange(months);
+    const answers = answersByKid.get(kid.id);
+    const record = answers?.record ?? {};
+    const answered = Object.keys(record).length;
+    const questionsLeft = inScoredBand
+      ? buildMapQuestionQueue(planQuestions(months), record).length
+      : 0;
+    const complete =
+      inScoredBand && isMapChecklistComplete({ ageMonths: months, answers: record, answered });
+    return {
+      id: kid.id,
+      name: kid.name,
+      birthDate: kid.birth_month,
+      inScoredBand,
+      answered,
+      questionsLeft,
+      readyToScore: complete && kid.report_at === null,
+      lastAnswerAt: answers?.lastAnswerAt ?? null,
+      hasReport: kid.report_at !== null,
+      reportAt: kid.report_at,
+      reportViewedAt: kid.report_viewed_at,
+      reportEmailedAt: kid.report_emailed_at,
+    };
+  });
+
   const stage = deriveFamilyStage({
     createdAt: new Date(family.created_at),
     profileCompletedAt: family.profile_completed_at ? new Date(family.profile_completed_at) : null,
@@ -195,13 +292,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
       displayName: m.display_name,
       lastSignInAt: m.last_sign_in_at,
     })),
-    kids: kids.map((kid) => ({
-      id: kid.id,
-      name: kid.name,
-      birthDate: kid.birth_month,
-      hasReport: kid.report_at !== null,
-      reportAt: kid.report_at,
-    })),
+    kids: detailKids,
     lastUserActivityAt: activity[0]?.last_at ?? null,
     messages28d: activity[0]?.n28 ?? 0,
     messagesByDay14: perDay,

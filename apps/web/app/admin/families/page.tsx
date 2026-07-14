@@ -161,7 +161,7 @@ export default async function AdminFamiliesPage({
                       </span>
                     </span>
                     <span>
-                      <Pill tone={stage.tone}>{stage.label}</Pill>
+                      <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
                     </span>
                     <span className="font-mono text-xs text-muted">
                       <span className="md:hidden">kids </span>

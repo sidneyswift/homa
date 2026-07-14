@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { getFamilyDetail } from "../../../../lib/admin/family-detail-data";
+import { getFamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
 import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
 import { formatUsd } from "../../../../lib/model-pricing";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
-import { EmptyNote, Pill, SectionHead, Spark, statusTone } from "../../ui";
+import { EmptyNote, Pill, SectionHead, Spark, statusTone, type PillTone } from "../../ui";
 import { FamilyTabs } from "./family-tabs";
 
 /**
@@ -17,6 +17,44 @@ import { FamilyTabs } from "./family-tabs";
  */
 
 export const metadata: Metadata = { title: "Family" };
+
+/**
+ * One pill + one small line per kid, answering the stuck-family
+ * questions in order: is there a report, and if not, is it the questions
+ * that stopped (how many left) or did she finish them and just never
+ * reach scoring (report can build now).
+ */
+function kidChecklistState(kid: FamilyDetailKid): { tone: PillTone; pill: string; line: string } {
+  if (kid.hasReport) {
+    const opened = kid.reportViewedAt
+      ? `opened ${timeAgo(kid.reportViewedAt)}`
+      : "not opened yet";
+    const emailed = kid.reportEmailedAt ? "emailed" : "not emailed";
+    return { tone: "sage", pill: `report ${timeAgo(kid.reportAt)}`, line: `${emailed} · ${opened}` };
+  }
+  if (!kid.inScoredBand) {
+    return {
+      tone: "stone",
+      pill: "outside checklist ages",
+      line: "the checklist covers ages 2 to 16 · under-2s get the band-ready email when they age in",
+    };
+  }
+  if (kid.answered === 0) {
+    return { tone: "stone", pill: "questions not started", line: "no checklist answers saved yet" };
+  }
+  if (kid.readyToScore) {
+    return {
+      tone: "clay",
+      pill: "questions done · report can build now",
+      line: `all ${kid.answered} answers saved · scores automatically when she returns · last answer ${timeAgo(kid.lastAnswerAt)}`,
+    };
+  }
+  return {
+    tone: "gold",
+    pill: `${kid.answered} answered · ${kid.questionsLeft} left`,
+    line: `mid checklist · last answer ${timeAgo(kid.lastAnswerAt)}`,
+  };
+}
 
 export default async function AdminFamilyDetailPage({
   params,
@@ -45,7 +83,7 @@ export default async function AdminFamilyDetailPage({
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-2xl font-bold text-strong">{detail.name}</h1>
-        <Pill tone={stage.tone}>{stage.label}</Pill>
+        <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
         {detail.billingExempt ? <Pill tone="stone">Comped</Pill> : null}
         {detail.trialStartedAt && !detail.billingExempt ? <Pill tone="clay">Trial</Pill> : null}
         {detail.subscriptionStatus ? (
@@ -83,18 +121,20 @@ export default async function AdminFamilyDetailPage({
           {detail.kids.length === 0 ? (
             <p className="mt-2 text-sm text-subtle">No kids added yet.</p>
           ) : (
-            <ul className="mt-2 flex flex-col gap-1.5 text-sm">
-              {detail.kids.map((kid) => (
-                <li key={kid.id} className="flex flex-wrap items-center gap-2">
-                  <span className="font-bold text-strong">{kid.name}</span>
-                  <span className="text-subtle">{ageYears(kid.birthDate)} yrs</span>
-                  {kid.hasReport ? (
-                    <Pill tone="sage">report {timeAgo(kid.reportAt)}</Pill>
-                  ) : (
-                    <Pill tone="gold">no report yet</Pill>
-                  )}
-                </li>
-              ))}
+            <ul className="mt-2 flex flex-col gap-2 text-sm">
+              {detail.kids.map((kid) => {
+                const state = kidChecklistState(kid);
+                return (
+                  <li key={kid.id}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-strong">{kid.name}</span>
+                      <span className="text-subtle">{ageYears(kid.birthDate)} yrs</span>
+                      <Pill tone={state.tone}>{state.pill}</Pill>
+                    </div>
+                    <p className="mt-0.5 text-xs text-subtle">{state.line}</p>
+                  </li>
+                );
+              })}
             </ul>
           )}
           <p className="mt-3 text-[0.72rem] font-bold text-muted">Adults</p>

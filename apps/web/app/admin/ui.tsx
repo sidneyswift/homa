@@ -24,12 +24,22 @@ const PILL_STYLES: Record<PillTone, { background: string; color: string; border?
   },
 };
 
-export function Pill({ tone, children }: { tone: PillTone; children: ReactNode }) {
+export function Pill({
+  tone,
+  title,
+  children,
+}: {
+  tone: PillTone;
+  /** Hover explanation (the stage pills carry their derivation rule here). */
+  title?: string;
+  children: ReactNode;
+}) {
   const style = PILL_STYLES[tone];
   return (
     <span
       className="inline-flex items-center whitespace-nowrap rounded-pill px-2.5 py-0.5 text-[0.72rem] font-bold"
       style={{ background: style.background, color: style.color, border: style.border }}
+      title={title}
     >
       {children}
     </span>
