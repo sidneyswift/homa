@@ -3,6 +3,44 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-14 (evening) · Council pass on the channel lab: one more fix shipped, one failure escalated
+
+A five-expert council (skeptical PM, SMS-first phone-only persona, staff
+engineer, SMS compliance and deliverability, design strategist) reviewed
+plans/2026-07-14-channel-introduction-directions.html and the lab was
+rewritten from their verified findings (five directions, sequencing
+frame, re-cut questions, compliance bindings, measurement plan).
+
+Fixed, not stored, during the pass: the default email outer note
+claimed "Reply and a real person answers", false since GW-8 routed
+replies from a family's registered address into the agent. Every
+family-facing email carried it. Shipped as ed768d7 (deploy READY),
+replacing the sentence with the reply-and-Homa-answers pattern already
+live in the research-brief footer. The privacy page's "A real person
+confirms within a few days" was left alone: it describes the human
+data-deletion mailbox and remains plausibly true.
+
+ESCALATED (2026-07-14 ~7:00pm, in-session, awaiting founder ruling):
+the tokenized report page's two action buttons dead-end forever for a
+text-born family. "Have me call you now" posts to a signed-in-only
+route (api/voice/curriculum/start, 401 with no Supabase user; text
+signup mints no account and no password) and "Open the month" needs a
+resume cookie or session the tokenized page never sets
+(api/map/plan/consent via requireFamily). Both then hint "Open your
+email link on this device once", which is circular: the report email
+links back to the same sessionless page. Not silently patched because
+the report token is shareable by design; honoring it as a credential
+would let any forwarded-link holder ring the family's phone or build
+months. Ruling options are listed in the lab's escalation block
+(channel-aware fallback, suppress when sessionless, token honors month
+but never calls, or a text-born sign-in hint).
+
+Also verified during the pass, for the record: SMS-first signups
+currently receive the contact card twice (first stranger text, then
+the link notifier firing mid-signup via ensureSignupFamily), and
+pnpm check:events is name-level parity only, so it stayed green while
+the linked trigger was lost; a trigger-level guard would be new work.
+
 ## 2026-07-14 · Regression fixed: the linked-number contact card is back (91337b9)
 
 Found while grounding the channel-introduction lab
