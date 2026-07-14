@@ -39,6 +39,7 @@ function task(overrides: Partial<DueFamilyTask> = {}): DueFamilyTask {
 const FAKE_BRIEF_CONTEXT = {
   styleKeys: ["montessori"],
   positionLines: ["- Nova: phonics: ahead (+8mo)"],
+  stages: ["early_years"],
   knowledge: [],
   observations: [],
 };
@@ -113,6 +114,33 @@ describe("buildTaskMessage", () => {
       /^The parent just asked, from the Homa's tasks page, to run a task they set up themselves once right now: "Co-op prep"\./,
     );
     assert.match(manual, /Remind me to pack the co-op bag\./);
+  });
+
+  it("leaves a non-research custom task free of corpus context", async () => {
+    let loaded = false;
+    const message = await buildTaskMessage(
+      task({ kind: "custom", label: "Co-op prep", prompt: "Remind me to pack the co-op bag." }),
+      "scheduled",
+      async () => {
+        loaded = true;
+        return FAKE_BRIEF_CONTEXT;
+      },
+    );
+    assert.equal(loaded, false);
+    assert.doesNotMatch(message, /shared knowledge/);
+  });
+
+  it("gives a research-flavored custom task the corpus context and query hygiene", async () => {
+    const custom = task({
+      kind: "custom",
+      label: "Amalia's morning research brief",
+      prompt:
+        "Research one concrete finding about early literacy relevant to Amalia and offer an activity.",
+    });
+    const message = await buildTaskMessage(custom, "scheduled", async () => FAKE_BRIEF_CONTEXT);
+    assert.match(message, /This task involves research/);
+    assert.match(message, /never a child's name or any private detail/);
+    assert.match(message, /Their homeschool style: montessori/);
   });
 });
 

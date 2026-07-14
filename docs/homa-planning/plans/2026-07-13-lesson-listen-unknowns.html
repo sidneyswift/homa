@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson listen unknowns · found before the first line of code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;--stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+  --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;--clay-700:#9C3B1B;
+  --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-300:#7CC689;--sage-500:#3D9A50;--sage-700:#275F34;
+  --gold-100:#FFF3C2;--gold-400:#FFD43B;--gold-ink:#8A6410;
+  --sky-100:#DDF3F9;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
+  --bg-page:var(--stone-50);--card:#FFFFFF;
+  --text-strong:var(--stone-900);--text-body:var(--stone-800);--text-muted:var(--stone-600);--text-subtle:var(--stone-500);
+  --brand:var(--clay-500);--border-subtle:var(--stone-200);--border:var(--stone-300);
+  --r-sm:10px;--r-md:16px;--r-pill:999px;
+  --sh-sm:0 1px 3px rgba(51,42,33,.08),0 1px 2px rgba(51,42,33,.04);
+  --f-display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--f-sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;color:var(--text-strong)}
+button{font-family:var(--f-sans);cursor:pointer}
+code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background:var(--stone-100);border-radius:4px;padding:1px 5px;word-break:break-word}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 90px}
+
+.lab-head h1{font-size:1.9rem;font-weight:700;letter-spacing:-.015em}
+.lab-head .sub{margin:10px 0 0;max-width:76ch;line-height:1.55}
+.notice{margin-top:14px;display:inline-flex;gap:8px;align-items:flex-start;border:1px dashed var(--border);border-radius:var(--r-md);background:var(--gold-100);color:var(--gold-ink);padding:10px 14px;font-size:.82rem;font-weight:600;max-width:80ch;line-height:1.5}
+
+.verdicts{margin-top:20px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.verdict{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-sm)}
+.verdict .q{font-family:var(--f-mono);font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-subtle)}
+.verdict .a{margin:6px 0 6px;font-size:1.05rem;font-weight:700;color:var(--text-strong);font-family:var(--f-display)}
+.verdict p{margin:0;font-size:.85rem;line-height:1.5}
+
+.mines{margin-top:44px}
+.mines h2{font-size:1.2rem}
+.count-line{margin:8px 0 0;font-size:.85rem;color:var(--text-muted)}
+.mine{background:var(--card);border:1px solid var(--border-subtle);border-left:4px solid var(--clay-500);border-radius:var(--r-md);padding:14px 16px;margin-top:12px}
+.mine.convention{border-left-color:var(--gold-400)}
+.mine.concept{border-left-color:var(--sky-500)}
+.mine.history{border-left-color:var(--stone-400)}
+.mine h3{font-size:.98rem}
+.mine .kind{font-family:var(--f-mono);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle)}
+.mine p{margin:8px 0 0;font-size:.86rem;line-height:1.55}
+.mine .fix{margin-top:10px;background:var(--stone-100);border-radius:var(--r-sm);padding:10px 12px;font-size:.82rem;line-height:1.5}
+.mine .fix b{color:var(--text-strong)}
+
+.decisions{margin-top:48px}
+.decisions h2{font-size:1.2rem}
+.decisions .rungs{margin-top:8px;font-size:.8rem;color:var(--text-muted)}
+.opt{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;margin-top:14px;box-shadow:var(--sh-sm)}
+.opt h3{font-size:1.05rem}
+.opt .what{margin:8px 0 0;font-size:.88rem;line-height:1.55}
+.choices{margin-top:12px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.choice{border:1px solid var(--border-subtle);border-radius:var(--r-sm);padding:12px;font-size:.83rem;line-height:1.5;background:var(--bg-page);text-align:left}
+.choice b{display:block;color:var(--text-strong);margin-bottom:4px}
+.choice .rec{display:inline-block;font-family:var(--f-mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r-pill);padding:2px 8px;background:var(--sage-50);color:var(--sage-700);margin-bottom:6px}
+.choice[aria-pressed="true"]{border-color:var(--sage-500);background:var(--sage-50);box-shadow:inset 0 0 0 1px var(--sage-500)}
+
+.assemble{margin-top:52px}
+.assemble h2{font-size:1.2rem}
+.assemble .hint{margin:6px 0 0;font-size:.84rem;color:var(--text-muted)}
+.assemble textarea{width:100%;min-height:64px;border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;font-family:var(--f-sans);font-size:.88rem;margin-top:12px;background:var(--card);color:var(--text-body)}
+.reply{margin-top:14px;background:var(--stone-900);color:var(--stone-50);border-radius:var(--r-md);padding:16px;font-family:var(--f-mono);font-size:.76rem;white-space:pre-wrap;line-height:1.55}
+.copybtn{margin-top:10px;border:none;background:var(--brand);color:#fff;border-radius:var(--r-pill);padding:10px 22px;font-size:.9rem;font-weight:600}
+.copybtn[data-ok="true"]{background:var(--sage-500)}
+.wiring{margin-top:44px;font-size:.8rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border-subtle);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="lab-head">
+    <h1>Lesson listen · unknowns found before the first line of code</h1>
+    <p class="sub">A blindspot pass over the decided plan (<code>2026-07-13-lesson-listen.md</code>). The task sounds like "record, transcribe, analyze, update progress on rails that all exist." What you are actually walking into: a scoring pipeline whose matcher was built to read a MOTHER'S SENTENCES, being fed a CLASSROOM TRANSCRIPT for the first time, plus a transcription vendor whose fine print both helps and hurts the plan. Every card below is bought with a file path or a vendor doc, and ends with the sentence that fixes the implementation prompt.</p>
+    <p class="notice">The one to read if you read nothing else: landmine 1. As written, LL-5 would ship a pipeline where almost every lesson quietly produces ZERO evidence rows, the same shape as the Noser incident that triggered the observation ledger, at 45 minutes of audio per occurrence instead of one text.</p>
+
+    <div class="verdicts">
+      <div class="verdict">
+        <div class="q">Does the plan survive?</div>
+        <div class="a">Yes, with two amendments.</div>
+        <p>The upload, storage, consent, TTL, and review surfaces all stand as planned. LL-5 (analysis) needs a different extraction contract (landmine 1), and the pipeline wording gets simpler, not harder (missing concept). Nothing grows in size except LL-5, by roughly half a day.</p>
+      </div>
+      <div class="verdict">
+        <div class="q">Best surprise</div>
+        <div class="a">The fallback file got cheaper and safer.</div>
+        <p>Telnyx STT takes files to 100MB and accepts a public <code>file_url</code> instead of uploaded bytes. Our Blob URLs are already public with random suffixes, so a 60-minute Voice Memos file never has to pass through a Vercel function at all (landmine 4).</p>
+      </div>
+      <div class="verdict">
+        <div class="q">Worst surprise</div>
+        <div class="a">Our Whisper model returns text only.</div>
+        <p>No timestamps of any kind from <code>openai/whisper-large-v3-turbo</code>. The plan promised minute-stamped moments; time can only come from segment boundaries, which makes segment length a product decision, not a tuning knob (landmine 2, decision 2).</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="mines">
+    <h2>What the pass found</h2>
+    <p class="count-line">4 landmines · 2 unwritten conventions · 1 missing concept · 1 history note. Each card ends with the constraint to fold into the build prompt; the assembler at the bottom folds them for you.</p>
+
+    <div class="mine">
+      <span class="kind">Landmine 1 · the big one</span>
+      <h3>The journal matcher refuses dialogue: verbatim transcript quotes will score almost nothing</h3>
+      <p>The whole evidence lane assumes lesson quotes flow through the journal path. But <code>journal-matcher.ts</code> only scores clauses whose SUBJECT is the child's name: <code>childAttributedPredicates</code> (line 237) anchors on <code>^Emma\s+</code>, bails to "other" on any capitalized non-child actor (line 262, <code>OTHER_ACTOR_PATTERN</code>), and <code>evidence-policy.ts</code> (lines 5 to 10) routes "we read..." to activity_only before matching even starts. A real lesson transcript is "Mom: try the next one. Kid: I did it!", which contains no child-name-subject sentences at all. The observation ledger's own origin story proves how strict this is: Sara's sentence no_matched partly because "read" attributed to the parent (<code>observation-ledger.md</code> §2). Tests would not catch it because synthetic test quotes are always written in parent-report style.</p>
+      <div class="fix"><b>Prompt fix:</b> "The extraction emits PAIRS: a normalized child-attributed clause in parent-report style ('Emma read the whole page aloud without help') AS matcher input, plus the verbatim transcript excerpt and segment number as provenance. The server verifies the excerpt is a literal substring of the transcript AND that the clause shares enough meaningful tokens with its excerpt (reuse <code>normalizeMeaningfulTokens</code>, require overlap above a tested floor) so the model cannot launder invented claims through normalization. Store both; the review shows the excerpt."</div>
+    </div>
+
+    <div class="mine">
+      <span class="kind">Landmine 2</span>
+      <h3>whisper-large-v3-turbo returns text only, so "minute-stamped moments" have exactly one clock: segment boundaries</h3>
+      <p>The Telnyx API reference is explicit: <code>openai/whisper-large-v3-turbo</code> returns <code>text</code> only; segment timestamps need <code>distil-whisper</code>, and word-level timestamps plus diarization need <code>deepgram/nova-3</code>. Our <code>transcribeAudio</code> reads <code>payload.text</code> and nothing else (<code>transcribe.ts</code> line 110). The plan's moments timeline ("distracted around minute 20") can only be as precise as one segment. Nova-3 sounds tempting but its format allowlist is mp3 and wav only, and our recorder produces webm and mp4; riding the filename trick that saves AMR voice notes today (<code>transcribe.ts</code> header, verified live 2026-07-09) would double the blast radius of the day Telnyx starts trusting extensions.</p>
+      <div class="fix"><b>Prompt fix:</b> "Moments are stamped to the segment that contains them and phrased softly ('about 20 minutes in'). Do not switch STT models in v1; park a nova-3 diarization experiment as its own later ticket."</div>
+    </div>
+
+    <div class="mine">
+      <span class="kind">Landmine 3</span>
+      <h3>Idempotency keyed by clause INDEX double-writes the day analysis retries</h3>
+      <p>The plan keys evidence operations as <code>lesson:{lessonId}:clause:{n}</code>. Analysis is retried by design (claim column plus cron sweep), and a retried <code>generateObject</code> pass will not return clauses in the same order or count. Same clause at a new index writes twice; different clause at an old index silently replays the wrong receipt (<code>claimOperationOrReplay</code> short-circuits on key match, per <code>progress-service.test.ts</code> replay tests). The dispatch rails learned this exact lesson, which is why task runs key on <code>(schedule_id, scheduled_for)</code>, not on position.</p>
+      <div class="fix"><b>Prompt fix:</b> "Key each evidence operation as lesson:{lessonId}:{sha256(normalizedClause)} so retries are stable regardless of order, and cap accepted clauses per lesson (12) so one hallucinating pass cannot spray operations."</div>
+    </div>
+
+    <div class="mine">
+      <span class="kind">Landmine 4</span>
+      <h3>The fallback single file should never pass through our function: Telnyx takes a URL</h3>
+      <p>A 60-minute Voice Memos m4a runs 30 to 60MB. Vercel caps request bodies near 4.5MB (the reason <code>video/upload</code> exists, per its own header comment), and pulling the blob into a function just to re-upload it to Telnyx burns memory and wall clock inside <code>maxDuration = 300</code>. The vendor docs close the loop: STT accepts <code>file_url</code> with the same 100MB cap, downloads server-side (15s download timeout), and requires a public URL with no auth headers, which is exactly what our random-suffix Blob URLs are. One catch: <code>transcribeAudio</code> only accepts bytes today.</p>
+      <div class="fix"><b>Prompt fix:</b> "For the fallback file, add an additive transcribeAudioUrl export beside transcribeAudio (new function, zero change to existing exports or callers) that posts file_url instead of bytes. Segments keep using the bytes path. Cap fallback uploads at 100MB with honest copy."</div>
+    </div>
+
+    <div class="mine convention">
+      <span class="kind">Unwritten convention 1</span>
+      <h3>Progress writes go through runtime.ts or the MJ-08 events never fire</h3>
+      <p>There are three layers that can record journal evidence and only one is correct for a server pipeline. The agent tool adapter is flag-gated and channel-shaped (<code>tool-adapter.ts</code> line 35). The service (<code>progress-service.ts</code> line 421) writes rows but emits nothing. Only <code>runtime.ts</code> line 103 wraps the call in <code>withCommittedProgressEvents</code>, which is where <code>progress.evidence_recorded</code> and <code>progress.observation_saved</code> actually fire after commit. A pipeline that calls the service directly would pass every unit test and silently produce zero analytics, which also blanks half the PMF signals in plan §8.5.</p>
+      <div class="fix"><b>Prompt fix:</b> "LL-5 calls recordJournalProgressEvidence from lib/child-progress/runtime.ts, never the service or repository directly, and gates the whole evidence lane on liveProgressEnabled() while the review write stays ungated."</div>
+    </div>
+
+    <div class="mine convention">
+      <span class="kind">Unwritten convention 2</span>
+      <h3>Provenance columns assume a conversation exists, and a lesson is not one</h3>
+      <p>Journal evidence provenance carries channel, messageId, and providerMessageId, and <code>child_observations</code> enforces <code>channel in ('web','sms','email')</code> plus a foreign key from message_id into <code>conversation_messages</code> (migration <code>20260713134500</code>, lines 16 to 23 and 47 to 52). Lesson clauses have no conversation message, so inserts fail on the channel check the first time the pipeline runs against a real database, which the InMemory-repository unit tests will never show.</p>
+      <div class="fix"><b>Prompt fix:</b> "LL-1's migration extends the child_observations channel check with 'lesson' and the evidence source constraint with 'lesson_listen', message_id stays null for lesson rows, and the TypeScript unions in types.ts, view-schema.ts, and tool-result-contract.ts gain the same members in the same commit."</div>
+    </div>
+
+    <div class="mine concept">
+      <span class="kind">Missing concept</span>
+      <h3>This repo has no "kick background work from a route" primitive, and lesson listen does not need one</h3>
+      <p>The plan says segment registration "kicks a fire-and-forget transcription", but nothing in apps/web does that today: <code>waitUntil</code> appears only inside eve schedule handlers, call-memory runs inside the hourly cron, and narrative generation runs inline with a status poll. Inventing a fire-and-forget primitive here would be the first of its kind, unreviewed, in a feature that does not need it: a 3-minute segment transcribes in seconds, well inside a route's budget, and the recorder never waits on the response anyway.</p>
+      <div class="fix"><b>Prompt fix:</b> "No new async primitive. The segment-register route transcribes inline before responding (the client does not await it for UX), finish runs analysis inline under maxDuration = 300, and the hourly cron sweep is the only retry mechanism, with a bounded attempts column."</div>
+    </div>
+
+    <div class="mine history">
+      <span class="kind">History note</span>
+      <h3>The 3-minute dictation cap is a size law in disguise, and it sizes our segments</h3>
+      <p>Dictation's 3 minutes exists to stay under 4MB "on iOS AAC bitrates" (<code>dictation.tsx</code> header): Safari ignores the 32kbps hint and records AAC at its own bitrate, several times fatter per minute than Chrome's Opus. A 5-minute iOS segment could run 4 to 8MB, which is fine for Telnyx (100MB) but is real upload time on the rural connections the personas call out. Shorter segments fix three things at once: upload size, crash-loss window, and landmine 2's moment resolution.</p>
+      <div class="fix"><b>Prompt fix:</b> "Copy dictation.tsx's MIME fallback chain exactly (webm opus, webm, mp4) and treat segment length as the moment-resolution dial; see decision 2."</div>
+    </div>
+  </section>
+
+  <section class="decisions">
+    <h2>Three decisions the pass cannot make for you</h2>
+    <p class="rungs">Tap one choice per row. The assembler writes your reply.</p>
+
+    <div class="opt" data-decision="d1" data-title="Entry point">
+      <h3>Decision 1 · where does "Record a lesson" live?</h3>
+      <p class="what">The plan pins reviews to the kid page and chat but never says where recording STARTS. The kid must be picked before recording (evidence needs an unambiguous child_id), which makes kid-scoped surfaces natural. Real surfaces that exist today: the kid page (<code>/app/{childId}</code>, where "See all progress" already lives per <code>kid-action.ts</code>), the chat attach menu (<code>chat-attachments.tsx</code>), the planner, and tasks.</p>
+      <div class="choices">
+        <button class="choice" data-value="Kid page button (recommended): recording starts from the kid you are teaching, review lands right below it" aria-pressed="false"><span class="rec">Recommended</span><b>Kid page button</b>One obvious door on the page that already owns this kid's progress. The child is pre-picked by context, no picker screen needed. Chat can deep-link here later.</button>
+        <button class="choice" data-value="Chat attach menu entry: recorder opens from the + menu with a kid picker step" aria-pressed="false"><b>Chat attach menu</b>Chat is the habit surface, so put the door where she already is. Costs a kid-picker step and mixes a 45-minute mode into a composer built for seconds.</button>
+        <button class="choice" data-value="Both doors in v1: kid page primary, chat attach secondary" aria-pressed="false"><b>Both doors</b>Maximum discoverability, two surfaces to build and test in v1.</button>
+      </div>
+    </div>
+
+    <div class="opt" data-decision="d2" data-title="Segment length">
+      <h3>Decision 2 · segment length, which is also moment resolution</h3>
+      <p class="what">Because our Whisper returns no timestamps (landmine 2), a moment can only be located to its segment. Segment length trades moment precision and crash-loss window against upload chattiness.</p>
+      <div class="choices">
+        <button class="choice" data-value="3-minute segments (recommended): moments resolve to about 3 minutes, crash loses at most 3 minutes, iOS segments stay small" aria-pressed="false"><span class="rec">Recommended</span><b>3 minutes</b>Roughly 15 uploads per 45-minute lesson. Tighter moment stamps, smaller worst-case loss, iOS AAC segments stay comfortably small on slow uploads.</button>
+        <button class="choice" data-value="5-minute segments: fewer uploads, coarser moments" aria-pressed="false"><b>5 minutes</b>Nine uploads per lesson. Moments blur to "around the 20 to 25 minute stretch" and an iOS crash can cost 5 minutes of audio.</button>
+      </div>
+    </div>
+
+    <div class="opt" data-decision="d3" data-title="STT model posture">
+      <h3>Decision 3 · stay on whisper-turbo, or chase diarization now?</h3>
+      <p class="what">Telnyx's same endpoint offers <code>deepgram/nova-3</code> with speaker labels and word timestamps, which would upgrade the moments timeline from inference to measurement. But its format allowlist is mp3 and wav only, so our webm and mp4 segments would ride the same filename trick that carries AMR voice notes today, and <code>transcribe.ts</code>'s own header warns that trick breaks loudly the day Telnyx trusts extensions.</p>
+      <div class="choices">
+        <button class="choice" data-value="Stay on whisper-turbo for v1 (recommended); park a nova-3 diarization experiment as its own later ticket" aria-pressed="false"><span class="rec">Recommended</span><b>Stay, park the experiment</b>Ship v1 on the model every other lane trusts. One later ticket tests nova-3 against a real lesson recording before any commitment.</button>
+        <button class="choice" data-value="Run the nova-3 diarization experiment during LL-4, dev flag only, before locking the extraction prompt" aria-pressed="false"><b>Experiment during LL-4</b>Spend half a day early: if speaker labels work on renamed webm, the extraction prompt gets built around them once instead of retrofitted.</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="assemble">
+    <h2>Assemble your reply</h2>
+    <p class="hint">Tap your choices above, add anything in your own words, then copy. The landmine constraints are folded in automatically; they apply regardless of your picks.</p>
+    <textarea id="freeform" placeholder="Anything else in your own words (optional)…"></textarea>
+    <div class="reply" id="reply">(tap a choice above to start composing)</div>
+    <button class="copybtn" id="copy">Copy reply</button>
+  </section>
+
+  <p class="wiring">Evidence sources: <code>apps/web/lib/child-progress/journal-matcher.ts</code>, <code>evidence-policy.ts</code>, <code>progress-service.ts</code>, <code>runtime.ts</code>, <code>tool-adapter.ts</code>, <code>progress-service.test.ts</code>; <code>supabase/migrations/20260713134500_child_observations.sql</code>; <code>apps/web/lib/voice/transcribe.ts</code>; <code>apps/web/app/app/dictation.tsx</code>; <code>apps/web/app/api/video/upload/route.ts</code>; <code>docs/homa-planning/plans/2026-07-13-observation-ledger.md</code> §2; Telnyx STT REST API docs fetched 2026-07-13 (100MB cap, file_url with 15s download timeout, per-model format and timestamp tables). This artifact is disposable, changes nothing in the product, and its findings fold into <code>2026-07-13-lesson-listen.md</code> once you reply.</p>
+
+</div>
+<script>
+(function(){
+  var ALWAYS = [
+    "Extraction contract (landmine 1): the model emits normalized child-attributed clauses in parent-report style as matcher input, each paired with a verbatim transcript excerpt and segment number; the server verifies the excerpt substring and a meaningful-token overlap floor between clause and excerpt before any ledger write.",
+    "Moments are stamped to their containing segment and phrased softly; no STT model change in v1 (landmine 2).",
+    "Evidence idempotency keys are lesson:{lessonId}:{sha256(normalizedClause)}, capped at 12 accepted clauses per lesson (landmine 3).",
+    "Fallback file transcribes via a new additive transcribeAudioUrl export using Telnyx file_url; segments keep the bytes path; existing transcribeAudio callers untouched (landmine 4).",
+    "All progress writes go through lib/child-progress/runtime.ts behind liveProgressEnabled(); the review write is ungated (convention 1).",
+    "LL-1 extends the child_observations channel check with 'lesson' and the evidence source constraint with 'lesson_listen', message_id null for lesson rows, TypeScript unions updated in the same commit (convention 2).",
+    "No new async primitive: segment routes transcribe inline, finish analyzes inline under maxDuration 300, the hourly cron sweep is the only retry, attempts bounded (missing concept).",
+    "Recorder copies dictation.tsx's MIME fallback chain; device-test on a real iPhone before calling LL-3 done: screen lock, phone call interruption, Low Power Mode, airplane-mode segment upload retry (history note)."
+  ];
+  var decisions = Array.prototype.slice.call(document.querySelectorAll(".opt"));
+  var replyEl = document.getElementById("reply");
+  var freeform = document.getElementById("freeform");
+  function compose(){
+    var picked = [];
+    decisions.forEach(function(opt){
+      var chosen = opt.querySelector('.choice[aria-pressed="true"]');
+      if(chosen){
+        picked.push("- " + opt.getAttribute("data-title") + ": " + chosen.getAttribute("data-value"));
+      }
+    });
+    if(picked.length === 0 && !freeform.value.trim()){
+      replyEl.textContent = "(tap a choice above to start composing)";
+      return;
+    }
+    var lines = ["Lesson listen unknowns, my picks:", ""];
+    lines = lines.concat(picked);
+    lines.push("");
+    lines.push("Fold every landmine constraint into the plan:");
+    ALWAYS.forEach(function(c){ lines.push("- " + c); });
+    if(freeform.value.trim()){
+      lines.push("");
+      lines.push(freeform.value.trim());
+    }
+    lines.push("");
+    lines.push("Work order: amend 2026-07-13-lesson-listen.md with all of the above, then build LL-0 and LL-1. Stop after LL-1 and show me the extraction JSON contract with one worked example transcript before any of LL-5 is written.");
+    replyEl.textContent = lines.join("\n");
+  }
+  decisions.forEach(function(opt){
+    var choices = Array.prototype.slice.call(opt.querySelectorAll(".choice"));
+    choices.forEach(function(choice){
+      choice.addEventListener("click", function(){
+        var wasOn = choice.getAttribute("aria-pressed") === "true";
+        choices.forEach(function(c){ c.setAttribute("aria-pressed", "false"); });
+        if(!wasOn) choice.setAttribute("aria-pressed", "true");
+        compose();
+      });
+    });
+  });
+  freeform.addEventListener("input", compose);
+  document.getElementById("copy").addEventListener("click", function(){
+    var b = this;
+    navigator.clipboard.writeText(replyEl.textContent).then(function(){
+      b.dataset.ok = "true"; b.textContent = "Copied";
+      setTimeout(function(){ b.dataset.ok = "false"; b.textContent = "Copy reply"; }, 1600);
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -43,7 +43,8 @@ Premium tier ($239/yr) adding sheet music, theory worksheets, practice
 plans, games, and progress tracking. Hoffman himself is the product: a
 gentle, funny on-camera teacher regularly compared to Mister Rogers,
 teaching an ear-first, Suzuki-influenced method that starts children as
-young as 4-5. The publisher self-reports over two million students. For
+young as 4-5. Reviewers relay a publisher figure of over two million
+students taught (unverified independently). For
 large homeschool families it is often the first music curriculum tried
 and the standing recommendation in every "cheap piano lessons" thread.
 

@@ -1,0 +1,927 @@
+# Generated from publisher sample PDFs and tables of contents; see README.md
+# in this folder for schema, protocol, and copyright policy. Chapter and
+# section titles are facts about the curriculum's organization; publisher
+# em dashes in titles are normalized to commas per repo law.
+id: story-of-the-world
+name: The Story of the World
+extracted: 2026-07-13
+sources:
+  - https://welltrainedmind.com/c/series/the-story-of-the-world/
+  - http://downloads.peacehillpress.com.s3.amazonaws.com/pdfs/samples/sotw1sample.pdf (Volume 1 revised edition sample with full TOC)
+  - http://downloads.peacehillpress.com.s3.amazonaws.com/pdfs/samples/sotw2sample.pdf and http://downloads.peacehillpress.com.s3.amazonaws.com/samples/STOW2_Sampler/StoryOfTheWorldVolume2_Sample.pdf (Volume 2 revised edition samples)
+  - http://downloads.peacehillpress.com.s3.amazonaws.com/pdfs/samples/sotw3sample.pdf (Volume 3, 2004 edition sample)
+  - https://www.conklinacademy.com/uploads/6/2/9/5/6295823/sotw3_text_revisededition.pdf (mirror of the publisher's Volume 3 revised edition sample)
+  - http://downloads.peacehillpress.com.s3.amazonaws.com/pdfs/samples/sotw4sample.pdf (Volume 4, 2005 edition sample)
+  - https://www.memoriapress.com/wp-content/uploads/2021/07/The-Story-of-the-World-Vol-4.pdf (mirror of the publisher's Volume 4 revised edition sample)
+  - https://s3.us-east-1.amazonaws.com/samples.welltrainedmind.com/SOTW_Samples/SOTW_PDF_Samples/Volume1/25thAnniversary/SOTW1_25AEE_Text_Sample.pdf (Volume 1 25th Anniversary Expanded Edition sample, see notes)
+  - https://campusstore.miamioh.edu/story-world-bauer-s-wise-martirosian/bk/9780971412965 (independent Volume 1 TOC cross-check)
+  - https://www.richlandlibrary.com/catalog/detail/1542729 (independent Volume 2 contents cross-check)
+  - https://staging.simplycharlottemason.com/resources/detail/53643 and https://apps.simplycharlottemason.com/resources/detail/61855 (independent Volume 3 and 4 chapter list cross-checks)
+  - https://www.amblesideonline.org/contents-sotw (independent Volume 4 section list cross-check)
+notes: >
+  All four volumes are extracted at chapter and section level from the
+  publisher's sample PDFs, which include the full tables of contents; the
+  TOC-listed section titles are recorded as lessons. Editions encoded:
+  Volume 1 revised edition (2006), Volume 2 revised edition (2007), Volume
+  3 cross-checked between the 2004 sample and the revised edition sample
+  with identical chapter and section lists, Volume 4 cross-checked between
+  the 2005 sample and the revised edition sample with identical chapter and
+  section lists. Chapter lists are additionally cross-checked against
+  independent library, retailer, and community tables of contents. Grade
+  anchors follow the publisher's suggested spans: Volume 1 grades 1 to 4,
+  Volume 2 grades 2 to 5, Volume 3 grades 3 to 6, Volume 4 grades 4 to 8,
+  and the publisher does not recommend Volume 4 before grade 4. Each
+  volume is one school year of 42 chapters; the publisher prints no
+  per-chapter pacing. Unnumbered front matter (the Volume 1 introduction
+  with its What Is History? and What Is Archaeology? sections) and the
+  appendices are omitted. Publisher em dashes inside titles are normalized
+  to commas (for example "China, Vietnam, and France" and "Communism
+  Crumbles, but Survives") and en dash year ranges to hyphens ("The Thirty
+  Years' War, 1618-1648"); capitalization quirks are kept as printed
+  ("Greece's War With Persia", "Armies In China", "The Jakata Tales"). The
+  25th Anniversary Expanded Edition of Volume 1 (2026) also has 42
+  chapters but resequences and retitles part of the list with new China,
+  Korea, and Silk Road material and History-Maker inserts; its sample TOC
+  extraction scrambled the chapter order, so that edition stays
+  unpublished here with the source linked, and the classic revised edition
+  list stands.
+levels:
+  - level: "Volume 1: Ancient Times"
+    grade: "1"
+    status: lessons
+    chapters:
+      - n: 1
+        title: "The Earliest People"
+        lessons:
+          - "The First Nomads"
+          - "The First Nomads Become Farmers"
+      - n: 2
+        title: "Egyptians Lived on the Nile River"
+        lessons:
+          - "Two Kingdoms Become One"
+          - "Gods of Ancient Egypt"
+      - n: 3
+        title: "The First Writing"
+        lessons:
+          - "Hieroglyphs and Cuneiform"
+      - n: 4
+        title: "The Old Kingdom of Egypt"
+        lessons:
+          - "Making Mummies"
+          - "Egyptian Pyramids"
+      - n: 5
+        title: "The First Sumerian Dictator"
+        lessons:
+          - "Sargon and the Akkadians"
+      - n: 6
+        title: "The Jewish People"
+        lessons:
+          - "God Speaks to Abraham"
+          - "Joseph Goes to Egypt"
+      - n: 7
+        title: "Hammurabi and the Babylonians"
+        lessons:
+          - "Hammurabi's Code"
+      - n: 8
+        title: "The Assyrians"
+        lessons:
+          - "Shamshi-Adad, King of the Whole World"
+          - "The Story of Gilgamesh"
+      - n: 9
+        title: "The First Cities of India"
+        lessons:
+          - "The River-Road"
+          - "The Mystery of Mohenjo-Daro"
+      - n: 10
+        title: "The Far East: Ancient China"
+        lessons:
+          - "Lei Zu and the Silkworm"
+          - "The Pictograms of Ancient China"
+          - "Farming in Ancient China"
+      - n: 11
+        title: "Ancient Africa"
+        lessons:
+          - "Ancient Peoples of West Africa"
+          - "Anansi and Turtle"
+          - "Anansi and the Make-Believe Food"
+      - n: 12
+        title: "The Middle Kingdom of Egypt"
+        lessons:
+          - "Egypt Invades Nubia"
+          - "The Hyksos Invade Egypt"
+      - n: 13
+        title: "The New Kingdom of Egypt"
+        lessons:
+          - "The General and the Woman Pharaoh"
+          - "Amenhotep and King Tut"
+      - n: 14
+        title: "The Israelites Leave Egypt"
+        lessons:
+          - "The Baby Moses"
+          - "The Exodus From Egypt"
+      - n: 15
+        title: "The Phoenicians"
+        lessons:
+          - "Phoenician Traders"
+          - "The Founding of Carthage"
+      - n: 16
+        title: "The Return of Assyria"
+        lessons:
+          - "Ashurbanipal's Attack"
+          - "The Library of Nineveh"
+      - n: 17
+        title: "Babylon Takes Over Again!"
+        lessons:
+          - "Nebuchadnezzar's Madness"
+          - "The Hanging Gardens of Babylon"
+      - n: 18
+        title: "Life in Early Crete"
+        lessons:
+          - "Bull-Jumpers and Sailors"
+          - "King Minos and the Minotaur"
+          - "The Mysterious End of the Minoans"
+      - n: 19
+        title: "The Early Greeks"
+        lessons:
+          - "The Mycenaeans"
+          - "The Greek Dark Ages"
+      - n: 20
+        title: "Greece Gets Civilized Again"
+        lessons:
+          - "Greece Gets an Alphabet"
+          - "The Stories of Homer"
+          - "The First Olympic Games"
+      - n: 21
+        title: "The Medes and the Persians"
+        lessons:
+          - "A New Empire"
+          - "Cyrus the Great"
+      - n: 22
+        title: "Sparta and Athens"
+        lessons:
+          - "Life in Sparta"
+          - "Life in Athens"
+      - n: 23
+        title: "The Greek Gods"
+        lessons:
+          - "The Golden Apple"
+      - n: 24
+        title: "The Wars of the Greeks"
+        lessons:
+          - "Greece's War With Persia"
+          - "The Greeks Fight Each Other"
+      - n: 25
+        title: "Alexander the Great"
+        lessons:
+          - "Philip and His Son"
+          - "Alexander's Invasions"
+          - "The Death of Alexander"
+      - n: 26
+        title: "The People of the Americas"
+        lessons:
+          - "The Nazca Drawings"
+          - "The Heads of the Olmecs"
+          - "Rabbit Shoots the Sun"
+      - n: 27
+        title: "The Rise of Rome"
+        lessons:
+          - "Romulus and Remus"
+          - "The Power of Rome"
+      - n: 28
+        title: "The Roman Empire"
+        lessons:
+          - "The Roman Gods"
+          - "The Roman Builders"
+          - "The Roman Gladiators"
+          - "The Gladiator School"
+      - n: 29
+        title: "Rome's War With Carthage"
+        lessons:
+          - "The Punic Wars"
+      - n: 30
+        title: "The Aryans of India"
+        lessons:
+          - "Life on the Ganges River"
+          - "The Castes of Ancient India"
+      - n: 31
+        title: "The Mauryan Empire of India"
+        lessons:
+          - "The Empire United"
+          - "The Jakata Tales"
+      - n: 32
+        title: "China: Writing and the Qin"
+        lessons:
+          - "Calligraphy in China"
+          - "Warring States"
+          - "The First Emperor and the Great Wall"
+          - "The First Emperor's Grave"
+      - n: 33
+        title: "Confucius"
+        lessons:
+          - "China's Wise Teacher"
+      - n: 34
+        title: "The Rise of Julius Caesar"
+        lessons:
+          - "Caesar Is Kidnapped"
+          - "The Consuls of Rome"
+          - "Caesar and the Senate"
+      - n: 35
+        title: "Caesar the Hero"
+        lessons:
+          - "Caesar Fights the Celts"
+          - "Caesar Crosses the Rubicon"
+          - "Caesar and Cleopatra"
+          - "The Death of Caesar"
+      - n: 36
+        title: "The First Roman Prince"
+        lessons:
+          - "Augustus Caesar"
+      - n: 37
+        title: "The Beginning of Christianity"
+        lessons:
+          - "The Birth of Jesus"
+          - "Jesus Crucified and Resurrected"
+      - n: 38
+        title: "The End of the Ancient Jewish Nation"
+        lessons:
+          - "The Destruction of the Temple"
+      - n: 39
+        title: "Rome and the Christians"
+        lessons:
+          - "Nero, the Evil Emperor"
+          - "Christians in the Catacombs"
+          - "The Emperor Is a Christian!"
+      - n: 40
+        title: "Rome Begins to Weaken"
+        lessons:
+          - "The British Rebellion"
+          - "Rome Divided in Two"
+      - n: 41
+        title: "The Attacking Barbarians"
+        lessons:
+          - "Attila the Hun"
+          - "Stilicho, Roman and Barbarian"
+          - "The Coming of the Visigoths"
+      - n: 42
+        title: "The End of Rome"
+        lessons:
+          - "The Last Roman Emperor"
+          - "The Gifts of Rome"
+  - level: "Volume 2: The Middle Ages"
+    grade: "2"
+    status: lessons
+    chapters:
+      - n: 1
+        title: "The Glory That Was Rome"
+        lessons:
+          - "Wandering Through the Roman Empire"
+          - "The Fall of Rome"
+      - n: 2
+        title: "The Early Days of Britain"
+        lessons:
+          - "The Celts of Britain"
+          - "Barbarians Come to Britain"
+          - "Beowulf the Hero"
+      - n: 3
+        title: "Christianity Comes to Britain"
+        lessons:
+          - "Augustine Comes to England"
+          - "Medieval Monasteries"
+          - "Writing Books by Hand"
+      - n: 4
+        title: "The Byzantine Empire"
+        lessons:
+          - "The Beauty of Constantinople"
+          - "Justinian, the Just Emperor"
+          - "The Empress Theodora"
+          - "The Church in the East"
+      - n: 5
+        title: "The Medieval Indian Empire"
+        lessons:
+          - "A King Named Skandagupta"
+          - "Monks in Caves"
+      - n: 6
+        title: "The Rise of Islam"
+        lessons:
+          - "Muhammad's Vision"
+          - "Muhammad Flees to Medina"
+          - "The Koran: Islam's Holy Book"
+      - n: 7
+        title: "Islam Becomes an Empire"
+        lessons:
+          - "The Fight for Mecca"
+          - "The Spread of Islam"
+          - "The City of Baghdad"
+          - "Sinbad in the Valley of Snakes"
+      - n: 8
+        title: "The Great Dynasties of China"
+        lessons:
+          - "Yang Chien Unites North and South"
+          - "The Tang Dynasty"
+      - n: 9
+        title: "East of China"
+        lessons:
+          - "The Yamato Dynasty of Japan"
+          - "A Tale of Three Countries: Korea, China, and Japan"
+      - n: 10
+        title: "The Bottom of the World"
+        lessons:
+          - "The First People of Australia"
+          - "The Long Journey of the Maori"
+      - n: 11
+        title: "The Kingdom of the Franks"
+        lessons:
+          - "Clovis, The Ex-Barbarian"
+          - "Four Tribes, One Empire"
+      - n: 12
+        title: "The Islamic Invasion"
+        lessons:
+          - "Islam in Spain and Africa"
+      - n: 13
+        title: "The Great Kings of France"
+        lessons:
+          - "Charles the Hammer"
+          - "The Greatest King: Charlemagne"
+      - n: 14
+        title: "The Arrival of the Norsemen"
+        lessons:
+          - "The Viking Invasion"
+          - "Eric the Red and \"Eric's Son\""
+          - "The Norse Gods"
+          - "Thor and the Giant King"
+      - n: 15
+        title: "The First Kings of England"
+        lessons:
+          - "The Vikings Invade England"
+          - "Alfred the Great"
+          - "The Battle of Hastings"
+      - n: 16
+        title: "England After the Conquest"
+        lessons:
+          - "The English Language"
+          - "Serfs and Noblemen"
+          - "Stone Castles"
+      - n: 17
+        title: "Knights and Samurai"
+        lessons:
+          - "The English Code of Chivalry"
+          - "The Samurai: Japanese Knights"
+      - n: 18
+        title: "The Age of Crusades"
+        lessons:
+          - "A Command from the Pope"
+          - "Recapturing Jerusalem"
+          - "Saladin of Jerusalem"
+          - "El Cid and the \"Reconquest of Spain\""
+      - n: 19
+        title: "A New Kind of King"
+        lessons:
+          - "Richard the Lionhearted"
+          - "John Lackland and the Magna Carta"
+          - "Robin Hood"
+          - "Robin Hood and the Butcher"
+      - n: 20
+        title: "The Diaspora"
+        lessons:
+          - "The Scattering of the Jews"
+          - "A Tale of the Diaspora"
+          - "The Clever Rabbi of Cordova"
+      - n: 21
+        title: "The Mongols Devastate the East"
+        lessons:
+          - "Genghis Khan, Emperor of All Men"
+          - "The Mongol Conquest of China"
+      - n: 22
+        title: "Exploring the Mysterious East"
+        lessons:
+          - "Marco Polo Goes to China"
+          - "The Forbidden City of the Ming"
+      - n: 23
+        title: "The First Russians"
+        lessons:
+          - "The Rus Come to Constantinople"
+          - "Ivan the Great and Ivan the Terrible"
+      - n: 24
+        title: "The Ottoman Empire"
+        lessons:
+          - "The Ottoman Turks Attack"
+          - "The Sheep-Rocks"
+          - "The Capture of Constantinople"
+          - "Suleiman the Lawgiver"
+      - n: 25
+        title: "The End of the World"
+        lessons:
+          - "The Plague"
+          - "A New Way of Living"
+      - n: 26
+        title: "France and England at War"
+        lessons:
+          - "Henry V and the Battle of Agincourt"
+          - "Joan of Arc"
+      - n: 27
+        title: "War for the English Throne"
+        lessons:
+          - "The Wars of the Roses"
+          - "The Princes in the Tower"
+      - n: 28
+        title: "The Kingdoms of Spain and Portugal"
+        lessons:
+          - "Ferdinand and Isabella Unite Spain"
+          - "Henry the Navigator, Prince of Portugal"
+      - n: 29
+        title: "African Kingdoms"
+        lessons:
+          - "Gold, Salt, and Ghana"
+          - "Mansa Musa of Mali"
+          - "The Songhay Empire"
+      - n: 30
+        title: "India Under the Moghuls"
+        lessons:
+          - "The Moghul Dynasty"
+          - "Akbar of India"
+          - "The Bad-Luck Servant"
+      - n: 31
+        title: "Exploring New Worlds"
+        lessons:
+          - "Christopher Columbus"
+          - "Vespucci and Magellan"
+      - n: 32
+        title: "The American Kingdoms"
+        lessons:
+          - "The Mayans of Central America"
+          - "The Marvelous City of Tenochtitlan"
+          - "The Incas"
+      - n: 33
+        title: "Spain, Portugal, and the New World"
+        lessons:
+          - "The Slave Trade"
+          - "Cortés and Montezuma"
+      - n: 34
+        title: "Martin Luther's New Ideas"
+        lessons:
+          - "Martin Luther's List"
+          - "Henry VIII's Problem"
+      - n: 35
+        title: "The Renaissance"
+        lessons:
+          - "A New Way of Thinking"
+          - "Gutenberg's Great Invention"
+      - n: 36
+        title: "Reformation and Counter Reformation"
+        lessons:
+          - "The Spread of the Reformation"
+          - "The Council of Trent"
+      - n: 37
+        title: "The New Universe"
+        lessons:
+          - "The Revolution of Copernicus"
+          - "Galileo's Strange Notions"
+      - n: 38
+        title: "England's Greatest Queen"
+        lessons:
+          - "The Queen Who Almost Wasn't"
+          - "Good Queen Bess"
+      - n: 39
+        title: "England's Greatest Playwright"
+        lessons:
+          - "William Shakespeare"
+          - "Macbeth"
+          - "Macbeth's Decision"
+      - n: 40
+        title: "New Ventures to the Americas"
+        lessons:
+          - "Walter Raleigh and the New World"
+          - "The Lost Colony"
+      - n: 41
+        title: "Explorations in the North"
+        lessons:
+          - "The New-Found Land"
+          - "Jacques Cartier's Discoveries"
+      - n: 42
+        title: "Empires Collide"
+        lessons:
+          - "Spain and England's War"
+          - "The World at the End of the Sixteenth Century"
+  - level: "Volume 3: Early Modern Times"
+    grade: "3"
+    status: lessons
+    chapters:
+      - n: 1
+        title: "A World of Empires"
+        lessons:
+          - "The Holy Roman Empire"
+          - "The Riches of Spain"
+      - n: 2
+        title: "Protestant Rebellions"
+        lessons:
+          - "The Dutch Revolt"
+          - "The Queen Without a Country"
+      - n: 3
+        title: "James, King of Two Countries"
+        lessons:
+          - "James and His Enemies"
+          - "King James's Town"
+      - n: 4
+        title: "Searching for the Northwest Passage"
+        lessons:
+          - "The French in the New World"
+          - "Henry Hudson's Quest"
+      - n: 5
+        title: "Warlords of Japan"
+        lessons:
+          - "Hideyoshi, Japan's Great Leader"
+          - "The First Tokugawa Ruler"
+      - n: 6
+        title: "New Colonies in the New World"
+        lessons:
+          - "Strangers and Saints in Plymouth"
+          - "The Dutch in the New World"
+      - n: 7
+        title: "The Spread of Slavery"
+        lessons:
+          - "Tobacco, and Unwilling Colonists"
+          - "Queen Nzinga of Angola"
+      - n: 8
+        title: "The Middle of the East"
+        lessons:
+          - "The Persian Puzzle"
+          - "The Ottoman Turks"
+      - n: 9
+        title: "The Western War"
+        lessons:
+          - "The Thirty Years' War, 1618-1648"
+      - n: 10
+        title: "Far East of Europe"
+        lessons:
+          - "Japan's Isolation: Closed Doors in the East"
+          - "The \"Foreign Conquest\" of China: The Rise of the Manchu"
+      - n: 11
+        title: "The Moghul Emperors of India"
+        lessons:
+          - "World Seizer, King of the World, and Conqueror of the World"
+          - "Aurangzeb's Three Decisions"
+      - n: 12
+        title: "Battle, Fire, and Plague in England"
+        lessons:
+          - "Charles Loses His Head"
+          - "Cromwell's Protectorate"
+          - "Plague and Fire"
+      - n: 13
+        title: "The Sun King"
+        lessons:
+          - "The Sun King of France"
+      - n: 14
+        title: "The Rise of Prussia"
+        lessons:
+          - "Frederick, the First Prussian King"
+      - n: 15
+        title: "A New World in Conflict"
+        lessons:
+          - "War Against the Colonies: King Philip's War"
+          - "War Against the Colonies: Louis XIV Saves France"
+          - "William Penn's Holy Experiment"
+      - n: 16
+        title: "The West"
+        lessons:
+          - "The Universal Laws of Newton and Locke"
+          - "Scientific Farming"
+      - n: 17
+        title: "Russia Looks West"
+        lessons:
+          - "Peter the Great"
+          - "Peter's Port to the West"
+      - n: 18
+        title: "East and West Collide"
+        lessons:
+          - "The Ottomans Look West, Twice"
+      - n: 19
+        title: "The English in India"
+        lessons:
+          - "The Indian Empire Falls Apart"
+          - "The Shopkeepers' Invasion"
+      - n: 20
+        title: "The Imperial East"
+        lessons:
+          - "Emperor Chi'en-lung's Library"
+          - "The Land of the Dragon"
+      - n: 21
+        title: "Fighting Over North America"
+        lessons:
+          - "Three Pointless Wars"
+          - "The Seven-Year War"
+      - n: 22
+        title: "Revolution!"
+        lessons:
+          - "Discontent in the British Colonies"
+          - "The American Revolution"
+      - n: 23
+        title: "The New Country"
+        lessons:
+          - "The American Constitution"
+          - "The First American President (1789-1797)"
+      - n: 24
+        title: "Sailing South"
+        lessons:
+          - "Captain Cook Reaches Botany Bay"
+          - "The Convict Settlement"
+      - n: 25
+        title: "Revolution Gone Sour"
+        lessons:
+          - "The Storming of the Bastille"
+          - "The Reign of Terror"
+      - n: 26
+        title: "Catherine the Great"
+        lessons:
+          - "Princess Catherine Comes to Russia"
+          - "Catherine the Great"
+      - n: 27
+        title: "A Changing World"
+        lessons:
+          - "Steam and Coal in Britain"
+          - "Cotton and Guns in America"
+      - n: 28
+        title: "China and the Rest of the World"
+        lessons:
+          - "The Kingdom at the Center of the World"
+          - "The Rise of the Opium Trade"
+      - n: 29
+        title: "The Rise of Bonaparte"
+        lessons:
+          - "Napoleon Comes to Power"
+          - "The Emperor Napoleon"
+      - n: 30
+        title: "Freedom in the Caribbean"
+        lessons:
+          - "The Haitian Revolt"
+      - n: 31
+        title: "A Different Kind of Rebellion"
+        lessons:
+          - "The World of the Factories"
+          - "The Luddites"
+      - n: 32
+        title: "The Opened West"
+        lessons:
+          - "Lewis and Clark Map the West"
+          - "Tecumseh's Resistance"
+      - n: 33
+        title: "The End of Napoleon"
+        lessons:
+          - "Napoleon's Wars (And 1812, Too)"
+          - "Waterloo!"
+      - n: 34
+        title: "Freedom for South America"
+        lessons:
+          - "Simón Bolívar: The Liberator"
+          - "Freedom, But Not Unity"
+      - n: 35
+        title: "Mexican Independence"
+        lessons:
+          - "The Cry of Dolores"
+          - "The Republic of Mexico"
+      - n: 36
+        title: "The Slave Trade Ends"
+        lessons:
+          - "The Work of the Abolitionists"
+      - n: 37
+        title: "Troubled Africa"
+        lessons:
+          - "The Zulu Kingdom"
+          - "The Boers and the British"
+      - n: 38
+        title: "American Tragedies"
+        lessons:
+          - "The Trail of Tears"
+          - "Nat Turner's Revolt"
+      - n: 39
+        title: "China Adrift"
+        lessons:
+          - "The First Opium War"
+      - n: 40
+        title: "Mexico and Her Neighbor"
+        lessons:
+          - "Remember the Alamo"
+          - "The Mexican-American War"
+      - n: 41
+        title: "New Zealand and Her Rulers"
+        lessons:
+          - "The Treaty of Waitangi"
+          - "The New Zealand Wars"
+      - n: 42
+        title: "The World of Forty-Nine"
+        lessons:
+          - "The Gold Rush"
+          - "A World of Unrest"
+  - level: "Volume 4: The Modern Age"
+    grade: "4"
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Britain's Empire"
+        lessons:
+          - "Victoria's England"
+          - "The Sepoy Mutiny"
+      - n: 2
+        title: "West Against East"
+        lessons:
+          - "Japan Re-Opens"
+          - "The Crimean War"
+      - n: 3
+        title: "British Invasions"
+        lessons:
+          - "The Great Game"
+          - "Wandering Through Africa"
+      - n: 4
+        title: "Resurrection and Rebellion"
+        lessons:
+          - "Italy's \"Resurrection\""
+          - "The Taiping Rebellion"
+      - n: 5
+        title: "The American Civil War"
+        lessons:
+          - "South Against North"
+          - "After the Civil War"
+      - n: 6
+        title: "Two Tries For Freedom"
+        lessons:
+          - "Paraguay and the Triple Alliance"
+          - "The Dominion of Canada"
+      - n: 7
+        title: "Two Empires, Three Republics, and One Kingdom"
+        lessons:
+          - "Two Empires and Three Republics"
+          - "The Second Reich"
+      - n: 8
+        title: "Becoming Modern"
+        lessons:
+          - "Rails, Zones, and Bulbs"
+          - "Japan's Meiji Restoration"
+      - n: 9
+        title: "Two More Empires, Two Rebellions"
+        lessons:
+          - "The Dutch East Indies"
+          - "The Sick Man of Europe"
+      - n: 10
+        title: "A Canal to the East and a Very Dry Desert"
+        lessons:
+          - "The War of the Pacific"
+          - "The Suez Canal"
+      - n: 11
+        title: "The Far Parts of the World"
+        lessons:
+          - "The Iron Outlaw"
+          - "Carving Up Africa"
+      - n: 12
+        title: "Unhappy Unions"
+        lessons:
+          - "Ireland's Troubles"
+          - "The Boers and the British"
+      - n: 13
+        title: "The Old-Fashioned Emperor and the Red Sultan"
+        lessons:
+          - "Brazil's Republic"
+          - "Abdulhamid the Red"
+      - n: 14
+        title: "Two Czars and Two Emperors"
+        lessons:
+          - "The Next-to-Last Czar of Russia"
+          - "Ethiopia and Italy"
+      - n: 15
+        title: "Small Countries With Large Invaders"
+        lessons:
+          - "The Korean Battleground"
+          - "The Spanish-American War"
+      - n: 16
+        title: "The Expanding United States"
+        lessons:
+          - "Moving West"
+          - "Stocks, Philanthropists, and Outlaws"
+      - n: 17
+        title: "China's Troubles"
+        lessons:
+          - "The Boxer Rebellion"
+          - "The Czar and the Admiral"
+      - n: 18
+        title: "Europe and the Countries Just East"
+        lessons:
+          - "Persia, Its Enemies, and Its \"Friends\""
+          - "The Balkan Mess"
+      - n: 19
+        title: "China, Vietnam, and France"
+        lessons:
+          - "The Last Emperor"
+          - "The Vietnamese Restoration Society"
+      - n: 20
+        title: "Revolution In the Americas ... War In the World"
+        lessons:
+          - "The Mexican Revolution"
+          - "World War I"
+      - n: 21
+        title: "A Revolution Begins, and the Great War Ends"
+        lessons:
+          - "The Russian Revolution"
+          - "The End of World War I"
+      - n: 22
+        title: "National Uprisings"
+        lessons:
+          - "The Easter Uprising"
+          - "Indian Nationalism"
+      - n: 23
+        title: "\"Peace\" and a Man of War"
+        lessons:
+          - "The Peace of Versailles"
+          - "The Rise of Joseph Stalin"
+      - n: 24
+        title: "The King and Il Duce"
+        lessons:
+          - "The First King of Egypt"
+          - "Fascism in Italy"
+      - n: 25
+        title: "Armies In China"
+        lessons:
+          - "Japan, China, and a Pretend Emperor"
+          - "The Long March"
+      - n: 26
+        title: "The Great Crash, and What Came of It"
+        lessons:
+          - "Black Tuesday and a New Deal"
+          - "Hitler's Rise to Power"
+      - n: 27
+        title: "Civil War and Invasion"
+        lessons:
+          - "Red Spain, Black Spain, a King, and a General"
+          - "Rebuilding the \"Fatherland\""
+      - n: 28
+        title: "The Second World War"
+        lessons:
+          - "The Three-War War"
+          - "The Holocaust"
+      - n: 29
+        title: "The End of World War II"
+        lessons:
+          - "The War that Stretched Across the World"
+          - "The Atom Bomb"
+      - n: 30
+        title: "Partitioned Countries"
+        lessons:
+          - "Muslims and Hindus in India"
+          - "The Partitioning of Palestine"
+      - n: 31
+        title: "Western Bullies and American Money"
+        lessons:
+          - "The Suez Crisis"
+          - "The Marshall Plan"
+      - n: 32
+        title: "Africa and China After World War II"
+        lessons:
+          - "One Country, Two Different Worlds"
+          - "Two Republics of China"
+      - n: 33
+        title: "Communism in Asia"
+        lessons:
+          - "Ho Chi Minh and the Viet Minh"
+          - "The Korean War"
+      - n: 34
+        title: "Dictators in South America and Africa"
+        lessons:
+          - "Argentina's President and His Wife"
+          - "Freedom in the Belgian Congo"
+      - n: 35
+        title: "The Cold War"
+        lessons:
+          - "The Space Race"
+          - "Thirteen Days in October"
+      - n: 36
+        title: "Struggles and Assassinations"
+        lessons:
+          - "The Death of John F. Kennedy"
+          - "Civil Rights"
+      - n: 37
+        title: "Two Short Wars and One Long One"
+        lessons:
+          - "The Vietnam War"
+          - "Trouble in the Middle East"
+      - n: 38
+        title: "Two Ways of Fighting"
+        lessons:
+          - "Soviet Invasions"
+          - "Terrorism"
+      - n: 39
+        title: "The 1980s in the East and the Mideast"
+        lessons:
+          - "India After Partition"
+          - "Iran and Iraq"
+      - n: 40
+        title: "The 1980s in the USSR"
+        lessons:
+          - "Chernobyl and Nuclear Power"
+          - "The End of the Cold War"
+      - n: 41
+        title: "Communism Crumbles, but Survives"
+        lessons:
+          - "Democracy in China?"
+          - "Communism Crumbles"
+      - n: 42
+        title: "The End of the Twentieth Century"
+        lessons:
+          - "The First Persian Gulf War"
+          - "Africa, Independent"

@@ -1,0 +1,322 @@
+# Generated from publisher scope-and-sequence documents; see README.md in
+# this folder for schema, protocol, and copyright policy. Unit and Mystery
+# titles are facts about the curriculum's organization. Mystery titles are
+# the publisher's kid-facing question prompts and are kept verbatim.
+id: mystery-science
+name: Mystery Science
+extracted: 2026-07-13
+sources:
+  - https://mysteryscience.com/
+  - https://mysteryscience.com/animal-secrets
+  - https://mysteryscience.com/plant-secrets
+  - https://mysteryscience.com/storms
+  - https://mysteryscience.com/seasons
+  - https://mysteryscience.com/sunlight
+  - https://mysteryscience.com/pushes
+  - https://mysteryscience.com/animal-superpowers
+  - https://mysteryscience.com/plant-superpowers
+  - https://mysteryscience.com/sun-shadows
+  - https://mysteryscience.com/moon-stars
+  - https://mysteryscience.com/light
+  - https://mysteryscience.com/biodiversity
+  - https://mysteryscience.com/plants
+  - https://mysteryscience.com/water
+  - https://mysteryscience.com/materials
+  - https://mysteryscience.com/solids-liquids
+  - https://mysteryscience.com/fossils
+  - https://mysteryscience.com/circle-of-life
+  - https://mysteryscience.com/selection
+  - https://mysteryscience.com/weather
+  - https://mysteryscience.com/forces
+  - https://mysteryscience.com/body
+  - https://mysteryscience.com/adaptations
+  - https://mysteryscience.com/rocks
+  - https://mysteryscience.com/waves
+  - https://mysteryscience.com/energy
+  - https://mysteryscience.com/electricity
+  - https://mysteryscience.com/ecosystems
+  - https://mysteryscience.com/earth
+  - https://mysteryscience.com/astronomy
+  - https://mysteryscience.com/solarsystem
+  - https://mysteryscience.com/chemistry
+  - https://cloud.mysteryscience.com/image/upload/v1564615287/Mystery_Science_-_K-5_-_NGSS_Planning_Guide_kpdxol.pdf
+notes: >
+  Mystery Science organizes each grade (K to 5) into several units, and each
+  unit into ordered lessons the publisher calls "Mysteries." Units are
+  modeled as chapters within a grade level, numbered in the order the live
+  site lists them for that grade; unit order is not prescribed (the publisher
+  says units may be taught in any order) but Mysteries within a unit are
+  sequential and build on one another. Each Mystery's title is the kid-facing
+  question prompt, taken verbatim from the current public unit pages on
+  mysteryscience.com; a few are read-along Mysteries in the early grades, not
+  flagged individually here. Core lesson time is about 30 to 45 minutes per
+  Mystery in K to 1 and about an hour in grades 2 to 5, with roughly one to
+  two hours of optional extras per Mystery. Cross-check: the publisher's 2019
+  K-5 NGSS planning guide PDF corroborates the per-grade unit set, Mystery
+  ordering, and pacing, but the live site has since reorganized several units
+  (for example the 2019 combined "Plant & Animal Secrets" kindergarten unit
+  is now split into "Animal Secrets" and "Plant Secrets") and renamed or
+  replaced some Mysteries (notably in grade 5 Web of Life), so the current
+  site is treated as authoritative for titles and structure and the planning
+  guide as the structural and pacing cross-check. Counts reflect the current
+  site: 32 units and 137 Mysteries across K to 5. Titles are preserved with
+  their original punctuation, including one curly apostrophe in a grade 2
+  title; no em or en dashes appear in any Mystery title.
+levels:
+  - level: "Grade K"
+    grade: K
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Animal Secrets"
+        lessons:
+          - "Why do woodpeckers peck wood?"
+          - "Where do animals live?"
+          - "How can you find animals in the woods?"
+          - "How do animals make their homes in the forest?"
+      - n: 2
+        title: "Plant Secrets"
+        lessons:
+          - "Are plants alive?"
+          - "How do plants and trees grow?"
+          - "Why would you want an old log in your backyard?"
+      - n: 3
+        title: "Wild Weather"
+        lessons:
+          - "How can you get ready for a big storm?"
+          - "Have you ever watched a storm?"
+          - "How many different kinds of weather are there?"
+      - n: 4
+        title: "Circle of Seasons"
+        lessons:
+          - "How do you know what to wear for the weather?"
+          - "What will the weather be like on your birthday?"
+          - "Why do birds lay eggs in the spring?"
+      - n: 5
+        title: "Sunny Skies"
+        lessons:
+          - "How could you walk barefoot across hot pavement without burning your feet?"
+          - "How could you warm up a frozen playground?"
+          - "Why does it get cold in winter?"
+      - n: 6
+        title: "Force Olympics"
+        lessons:
+          - "What's the biggest excavator?"
+          - "Why do builders need so many big machines?"
+          - "How can you knock down a heavy wall?"
+          - "How can you knock down the most bowling pins?"
+          - "How can we protect a mountain town from falling rocks?"
+          - "How could you invent a trap?"
+  - level: "Grade 1"
+    grade: 1
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Animal Superpowers"
+        lessons:
+          - "How can you help a lost baby animal find its parents?"
+          - "Can you predict what an animal's babies will look like?"
+          - "Why are baby birds so loud?"
+          - "Why do birds have beaks?"
+          - "Why are polar bears white?"
+      - n: 2
+        title: "Plant Superpowers"
+        lessons:
+          - "What will a baby plant look like when it grows up?"
+          - "Why don't trees blow down in the wind?"
+          - "What do sunflowers do when you're not looking?"
+      - n: 3
+        title: "Sun & Shadows"
+        lessons:
+          - "Could a statue's shadow move?"
+          - "What does your shadow do when you're not looking?"
+          - "How can the Sun help you if you're lost?"
+          - "Why do you have to go to bed early in the summer?"
+      - n: 4
+        title: "Moon & Stars"
+        lessons:
+          - "When can you see the full moon?"
+          - "Why do the stars come out at night?"
+          - "How can stars help you if you get lost?"
+      - n: 5
+        title: "Lights & Sounds"
+        lessons:
+          - "How do they make silly sounds in cartoons?"
+          - "Where do sounds come from?"
+          - "What if there were no windows?"
+          - "Can you see in the dark?"
+          - "How could you send a secret message to someone far away?"
+          - "How do boats find their way in the fog?"
+  - level: "Grade 2"
+    grade: 2
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Animal Adventures"
+        lessons:
+          - "How many different kinds of animals are there?"
+          - "Why would a wild animal visit a playground?"
+          - "Why do frogs say \"ribbit\"?"
+          - "How could you get more birds to visit a bird feeder?"
+      - n: 2
+        title: "Plant Adventures"
+        lessons:
+          - "How did a tree travel halfway around the world?"
+          - "Why do seeds have so many different shapes?"
+          - "Why do you find flowers and bees together?"
+          - "Could a plant survive without light?"
+          - "How much water should you give a plant?"
+      - n: 3
+        title: "Work of Water"
+        lessons:
+          - "Where's the best place to hide a treasure?"
+          - "If you floated down a river, where would you end up?"
+          - "Why is there sand at the beach?"
+          - "Where do flash floods happen?"
+          - "What’s strong enough to make a canyon?"
+          - "How can you stop a landslide?"
+      - n: 4
+        title: "Material Magic"
+        lessons:
+          - "Why do we wear clothes?"
+          - "Can you really fry an egg on a hot sidewalk?"
+          - "Could you build a house out of paper?"
+          - "How do you build a city out of mud?"
+      - n: 5
+        title: "States of Matter"
+        lessons:
+          - "Where do animals find the water they need?"
+          - "How is an ice cube like a crayon?"
+          - "Why are so many toys made out of plastic?"
+  - level: "Grade 3"
+    grade: 3
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Animals Through Time"
+        lessons:
+          - "Where can you find whales in a desert?"
+          - "How do we know what dinosaurs looked like?"
+          - "Can you outrun a dinosaur?"
+      - n: 2
+        title: "Circle of Life"
+        lessons:
+          - "How is your life like an alligator's life?"
+          - "What's the best way to get rid of mosquitoes?"
+          - "Why do plants grow flowers?"
+          - "Why do plants give us fruit?"
+          - "Why are there so many different kinds of flowers?"
+      - n: 3
+        title: "Fates of Traits"
+        lessons:
+          - "How do you identify a mysterious fruit?"
+          - "What do dogs and pigeons have in common?"
+          - "How could a lizard's toes help it survive?"
+          - "Why do some animals live in groups?"
+          - "How long can people (and animals) survive in outer space?"
+      - n: 4
+        title: "Stormy Skies"
+        lessons:
+          - "Where do clouds come from?"
+          - "How can we predict when it's going to storm?"
+          - "Where's the best place to build a snow fort?"
+          - "Why are some places always hot?"
+          - "How can you keep a house from blowing away in a windstorm?"
+      - n: 5
+        title: "Invisible Forces"
+        lessons:
+          - "How could you win a tug-of-war against a bunch of adults?"
+          - "What makes bridges so strong?"
+          - "How high can you swing on a flying trapeze?"
+          - "What can magnets do?"
+          - "How can you unlock a door using a magnet?"
+  - level: "Grade 4"
+    grade: 4
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Human Machine"
+        lessons:
+          - "Why do your biceps bulge?"
+          - "What do people who are blind see?"
+          - "How can some animals see in the dark?"
+          - "How does your brain control your body?"
+      - n: 2
+        title: "Animal & Plant Adaptations"
+        lessons:
+          - "Why do some sea creatures look so strange?"
+          - "Why would a sea turtle eat a plastic bag?"
+          - "Why don't the same trees grow everywhere?"
+      - n: 3
+        title: "The Birth of Rocks"
+        lessons:
+          - "Could a volcano pop up where you live?"
+          - "Why do some volcanoes explode?"
+          - "Will a mountain last forever?"
+          - "What did your town look like 100 million years ago?"
+          - "Can you design a building that survives an earthquake?"
+      - n: 4
+        title: "Waves of Sound"
+        lessons:
+          - "How do you send a secret code?"
+          - "How far can a whisper travel?"
+          - "What would happen if you screamed in outer space?"
+          - "Why are some sounds high and some sounds low?"
+      - n: 5
+        title: "Energizing Everything"
+        lessons:
+          - "How is your body similar to a car?"
+          - "What makes roller coasters go so fast?"
+          - "How can marbles save the world?"
+          - "Could you knock down a building using only dominoes?"
+          - "Can you build a chain reaction machine?"
+      - n: 6
+        title: "Electricity, Light, & Heat"
+        lessons:
+          - "What's the best way to light up a city?"
+          - "What if there were no electricity?"
+          - "How long did it take to travel across the country before cars and planes?"
+  - level: "Grade 5"
+    grade: 5
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Web of Life"
+        lessons:
+          - "What if all the ants disappeared?"
+          - "How does a tiny seed become one of the heaviest trees on Earth?"
+          - "Where do fallen leaves go?"
+          - "Do worms really eat dirt?"
+          - "How could a fish feed a forest?"
+          - "How can we protect Earth's environments?"
+          - "Why did the dinosaurs go extinct?"
+      - n: 2
+        title: "Watery Planet"
+        lessons:
+          - "How much water is in the world?"
+          - "How much salt is in the ocean?"
+          - "When you turn on the faucet, where does the water come from?"
+          - "Can we make it rain?"
+          - "How can you save a town from a hurricane?"
+      - n: 3
+        title: "Spaceship Earth"
+        lessons:
+          - "How fast does the Earth spin?"
+          - "Who set the first clock?"
+          - "How can the Sun tell you the season?"
+          - "Why do the stars change with the seasons?"
+          - "Why does the Moon change shape?"
+      - n: 4
+        title: "Stars & Planets"
+        lessons:
+          - "How can the Sun help us explore other planets?"
+          - "Why is gravity different on other planets?"
+          - "Could there be life on other planets?"
+      - n: 5
+        title: "Chemical Magic"
+        lessons:
+          - "Can you identify a mysterious ingredient?"
+          - "Why can you smell things you can't see?"
+          - "How can you tell if acids are hiding in your fridge?"
+          - "Why do some things explode?"
+          - "What do fireworks, rubber, and Silly Putty have in common?"

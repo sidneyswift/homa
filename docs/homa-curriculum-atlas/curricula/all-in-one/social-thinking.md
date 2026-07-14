@@ -48,7 +48,7 @@ library; its own materials-use rules are notably strict about copying.
 
 - Enormous institutional mindshare: the publisher reports its work has
   reached over 2.5 million educators, clinicians, and families, and
-  Superflex characters (Rock Brain, the UnthinkaBots) are recognizable
+  Superflex's Thinkable and UnthinkaBot characters are recognizable
   vocabulary in many schools. Products carry education-industry awards,
   and homeschool special-needs lists routinely include We Thinkers! and
   Superflex as the social-skills slot.

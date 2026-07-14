@@ -34,8 +34,8 @@ Before Five in a Row (BFIAR) is the preschool entry of the Five in a
 Row family, the picture-book unit study franchise profiled at
 [../all-in-one/five-in-a-row.md](../all-in-one/five-in-a-row.md). One
 softcover or digital guide by Jane Claire Lambert builds gentle
-mini-units around 24 classic picture books (Goodnight Moon, The Runaway
-Bunny, Caps for Sale and kin) for ages 2 to 4, followed by More Before
+mini-units around 24 classic picture books (Goodnight Moon and The ABC
+Bunny among them) for ages 2 to 4, followed by More Before
 Five in a Row (MBFIAR), a newer companion using 14 slightly harder
 books for ages 3 to 5. Where the flagship volumes prescribe reading one
 book five days in a row with a rotating subject lens, BFIAR is looser
@@ -85,13 +85,14 @@ opening each unit.
 - Before Five in a Row: 24 picture-book units for ages 2 to 4, each
   with story-connected activities across Bible, science, math,
   language, art, motor skills, and relationships, plus the Parent's
-  Treasury section. 149 pages in the current edition.
+  Treasury section (about four guide pages per book).
 - More Before Five in a Row: 14 picture-book units for ages 3 to 5
   with more detailed activities, expanded Bible content, story disks,
   a storybook map, and an animal classification game.
-- Between the two guides, 38 week-sized lessons: one relaxed year, or
-  two years at a few days per week, which is how the publisher
-  positions them (use two or three times weekly, or at bedtime).
+- Between the two guides, 38 week-sized lessons: a little more than a
+  year at one per week, or a relaxed two-year span, which is how the
+  publisher positions them (use two or three times weekly, or at
+  bedtime).
 - Each guide includes story disks and a fanciful storybook-map spread
   at the back (color laminated disks ship with publisher-direct
   copies): after finishing a book, the child places its disk on the

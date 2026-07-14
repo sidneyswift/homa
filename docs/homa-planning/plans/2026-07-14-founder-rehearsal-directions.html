@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rehearsal mode directions · walk in her shoes without touching her data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;--stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
+  --clay-50:#FFF0E8;--clay-100:#FFDDC9;--clay-300:#FB9868;--clay-500:#E7602F;--clay-600:#C44C22;--clay-700:#9C3B1B;
+  --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-300:#7CC689;--sage-500:#3D9A50;--sage-700:#275F34;
+  --gold-100:#FFF3C2;--gold-400:#FFD43B;--gold-ink:#8A6410;
+  --sky-100:#DDF3F9;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
+  --rose-600:#C2453E;--danger-soft:#FCE8E6;
+  --bg-page:var(--stone-50);--card:#FFFFFF;
+  --text-strong:var(--stone-900);--text-body:var(--stone-800);--text-muted:var(--stone-600);--text-subtle:var(--stone-500);
+  --brand:var(--clay-500);--border-subtle:var(--stone-200);--border:var(--stone-300);
+  --r-sm:10px;--r-md:16px;--r-lg:22px;--r-pill:999px;
+  --sh-sm:0 1px 3px rgba(51,42,33,.08),0 1px 2px rgba(51,42,33,.04);
+  --sh-md:0 4px 12px rgba(51,42,33,.08),0 2px 4px rgba(51,42,33,.05);
+  --f-display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--f-sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;color:var(--text-strong)}
+button{font-family:var(--f-sans);cursor:pointer}
+code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background:var(--stone-100);border-radius:4px;padding:1px 5px;word-break:break-word}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 90px}
+.lab-head h1{font-size:1.85rem;font-weight:700;letter-spacing:-.015em}
+.lab-head .sub{margin:10px 0 0;max-width:78ch;line-height:1.55}
+.notice{margin-top:14px;display:inline-flex;gap:8px;align-items:flex-start;border:1px dashed var(--border);border-radius:var(--r-md);background:var(--gold-100);color:var(--gold-ink);padding:10px 14px;font-size:.82rem;font-weight:600;max-width:80ch;line-height:1.5}
+.verdicts{margin-top:20px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.verdict{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-sm)}
+.verdict .q{font-family:var(--f-mono);font-size:.64rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--text-subtle)}
+.verdict .a{margin:6px 0 6px;font-size:1rem;font-weight:700;color:var(--text-strong);font-family:var(--f-display);line-height:1.35}
+.verdict p{margin:0;font-size:.82rem;line-height:1.5;color:var(--text-muted)}
+.task-strip{margin-top:22px;background:var(--stone-900);color:var(--stone-50);border-radius:var(--r-md);padding:14px 18px;font-size:.9rem;line-height:1.55}
+.task-strip b{color:#fff}
+h2.section{margin-top:34px;font-size:1.25rem}
+.dir-tabs{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.dir-tab{border:1px solid var(--border);background:var(--card);border-radius:var(--r-pill);padding:9px 16px;font-size:.88rem;font-weight:600;color:var(--text-muted)}
+.dir-tab[aria-selected="true"]{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
+.dir-tab:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--sky-500);outline-offset:2px}
+.dir{margin-top:16px;background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden}
+.dir-head{padding:18px 20px;border-bottom:1px solid var(--border-subtle);display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+.dir-head .phil{font-size:.9rem;color:var(--text-muted);max-width:62ch;line-height:1.5}
+.win{border:2px solid var(--sage-500);background:var(--card);color:var(--sage-700);font-weight:700;border-radius:var(--r-pill);padding:8px 16px;font-size:.85rem;white-space:nowrap}
+.win[aria-pressed="true"]{background:var(--sage-500);color:#fff}
+.frame{padding:18px 20px;background:var(--stone-100)}
+.chrome{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-sm)}
+.chrome .bar{display:flex;align-items:center;gap:8px;background:var(--stone-800);color:var(--stone-300);font-family:var(--f-mono);font-size:.68rem;padding:7px 12px}
+.chrome .bar .dot{width:9px;height:9px;border-radius:50%;background:var(--stone-500)}
+.chrome .bar .url{margin-left:6px;color:var(--stone-100)}
+.pane{padding:16px}
+.crumb{font-size:.8rem;font-weight:700;color:var(--clay-600)}
+.famrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:6px}
+.famrow h3{font-size:1.15rem}
+.pill{display:inline-flex;align-items:center;border-radius:var(--r-pill);padding:2px 10px;font-size:.68rem;font-weight:700}
+.pill.gold{background:var(--gold-100);color:var(--gold-ink)}
+.pill.sage{background:var(--sage-50);color:var(--sage-700)}
+.pill.sky{background:var(--sky-100);color:var(--sky-600)}
+.pill.stone{background:var(--stone-100);color:var(--stone-700)}
+.pill.clay{background:var(--clay-50);color:var(--clay-700)}
+.pill.rose{background:var(--danger-soft);color:var(--rose-600)}
+.btn{border:none;border-radius:var(--r-pill);padding:10px 16px;font-size:.85rem;font-weight:700}
+.btn.primary{background:var(--clay-500);color:#fff}
+.btn.primary:hover{background:var(--clay-600)}
+.btn.secondary{background:var(--card);border:1.5px solid var(--border);color:var(--text-strong)}
+.btn.quiet{background:transparent;border:none;color:var(--clay-600);font-weight:700;text-decoration:underline;text-underline-offset:2px;padding:6px 4px}
+.btn.danger{background:var(--card);border:1.5px solid var(--rose-600);color:var(--rose-600)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.stagecard{border:1px solid var(--border-subtle);border-radius:var(--r-md);background:var(--bg-page);padding:14px;margin-top:12px}
+.stagecard h4{font-size:.95rem}
+.stagecard .mut{font-size:.8rem;color:var(--text-muted);line-height:1.5;margin:4px 0 0}
+.kidline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:.86rem}
+.kidline b{color:var(--text-strong)}
+.qcard{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;margin-top:10px}
+.qcard .stmt{font-weight:600;color:var(--text-strong);line-height:1.45}
+.answers{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ansbtn{border:1.5px solid var(--border);background:var(--card);border-radius:var(--r-pill);padding:8px 14px;font-size:.83rem;font-weight:600;color:var(--text-body)}
+.ansbtn:hover{border-color:var(--clay-300)}
+.moment{margin-top:10px;border-left:4px solid var(--gold-400);background:var(--gold-100);color:var(--gold-ink);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:9px 12px;font-size:.8rem;font-weight:600;line-height:1.5}
+.deltabox{margin-top:12px;background:var(--sage-50);border:1px solid var(--sage-300);border-radius:var(--r-md);padding:14px;font-size:.88rem;line-height:1.6}
+.deltabox b{color:var(--sage-700)}
+.ledger{margin-top:12px;border:1px dashed var(--border);border-radius:var(--r-md);background:var(--card);padding:12px 14px;font-family:var(--f-mono);font-size:.72rem;line-height:1.7;color:var(--text-muted)}
+.ledger .ok{color:var(--sage-700);font-weight:700}
+.ledger .mute{color:var(--rose-600);font-weight:700}
+.critique{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));padding:16px 20px;border-top:1px solid var(--border-subtle)}
+.steal{border:1.5px solid var(--sage-300);background:var(--card);border-radius:var(--r-md);padding:11px 13px;font-size:.8rem;line-height:1.5;text-align:left;color:var(--text-body)}
+.steal b{display:block;color:var(--sage-700);font-family:var(--f-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.steal[aria-pressed="true"]{background:var(--sage-50);border-color:var(--sage-500)}
+.skip{border:1.5px solid var(--border);background:var(--stone-100);border-radius:var(--r-md);padding:11px 13px;font-size:.8rem;line-height:1.5;color:var(--text-muted)}
+.skip b{display:block;color:var(--rose-600);font-family:var(--f-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.qs{margin-top:16px;display:grid;gap:12px}
+.qblock{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-sm)}
+.qblock .qq{font-weight:700;color:var(--text-strong);line-height:1.45}
+.qblock .why{margin:6px 0 10px;font-size:.8rem;color:var(--text-muted);line-height:1.5}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1.5px solid var(--border);background:var(--card);border-radius:var(--r-pill);padding:8px 14px;font-size:.82rem;font-weight:600;color:var(--text-body)}
+.opt[aria-pressed="true"]{background:var(--stone-900);border-color:var(--stone-900);color:#fff}
+.opt .rec{font-family:var(--f-mono);font-size:.6rem;color:var(--sage-700);margin-left:6px}
+.opt[aria-pressed="true"] .rec{color:var(--sage-300)}
+.assemble{margin-top:26px;background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-md)}
+.assemble textarea{width:100%;min-height:64px;border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;font-family:var(--f-sans);font-size:.88rem;margin-top:12px;background:var(--card);color:var(--text-body)}
+.reply{margin-top:14px;background:var(--stone-900);color:var(--stone-50);border-radius:var(--r-md);padding:16px;font-family:var(--f-mono);font-size:.76rem;white-space:pre-wrap;line-height:1.55}
+.copybtn{margin-top:10px}
+.wiring{margin-top:26px;border:1px dashed var(--border);border-radius:var(--r-md);padding:16px 18px;font-size:.82rem;line-height:1.65;color:var(--text-muted);background:var(--card)}
+.wiring b{color:var(--text-strong)}
+@media (max-width:640px){.dir-head{flex-direction:column}.critique{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="lab-head">
+  <h1>Rehearsal mode: walk in her shoes without touching her data</h1>
+  <p class="sub">You want to feel the product exactly as a family feels it, click for click (the deeper language check, the rescore, the rewritten report), before she does, without risking her rows or anyone else's. Four ways to build that, one shared errand, pick and steal below.</p>
+  <div class="notice">Every family, kid, number, and message below is fake (the Alvarez famy does not exist). No real family data is loaded, and no product code or route was changed by this document.</div>
+</header>
+
+<div class="verdicts" aria-label="What the codebase already settles">
+  <div class="verdict"><div class="q">Finding 1 · becoming a family is cheap</div><div class="a">The resume cookie IS identity</div><p><code>requireFamily()</code> checks the resume cookie before the login session. Whoever holds a family's link token walks its onboarding, deep dives, and report as that family. The admin already mints these tokens for reminder emails.</p></div>
+  <div class="verdict"><div class="q">Finding 2 · the clone kit half-exists</div><div class="a">Family fold = a table map</div><p><code>lib/family-fold.ts</code> already enumerates every family-scoped table to MOVE a family. A clone is the same walk with copy instead of move, plus fresh ids and tokens.</p></div>
+  <div class="verdict"><div class="q">Finding 3 · the real danger is outbound</div><div class="a">Email, SMS, a mailed card, crons</div><p>Report and reminder emails, task texts, the physical thank-you card sweep, retest crons, and the funnels all key on families. A rehearsal family must be fenced at these chokepoints or it emails a real person and pollutes your metrics.</p></div>
+  <div class="verdict"><div class="q">Finding 4 · precedent exists</div><div class="a">A sim family already ran the product</div><p>The season sim (<code>scripts/_tmp_season_sim</code>) drove a synthetic persona through signup, chat, and reports with Playwright. And <code>scripts/prod-write-guard.mts</code> already gates hosted-DB writes behind <code>--confirm-prod</code>.</p></div>
+</div>
+
+<div class="task-strip"><b>The shared errand in every direction:</b> from the admin file of the (fake) Alvarez famy, become them safely, run Nico's deeper language check (his chart reads -12), answer three questions, watch the number and report react, note the reassurance moments, then throw the rehearsal away. Real rows untouched, nothing sent to anyone.</div>
+
+<h2 class="section">Four directions</h2>
+<div class="dir-tabs" role="tablist" aria-label="Direction selector" id="dirTabs"></div>
+<div id="dirHost"></div>
+
+<h2 class="section">Build-changing questions</h2>
+<div class="qs" id="qHost"></div>
+
+<div class="assemble">
+  <h2 style="font-size:1.15rem">Your reply, assembled</h2>
+  <p style="margin:6px 0 0;font-size:.84rem;color:var(--text-muted)">Tap a winner, steal details from any direction, answer the questions, add notes. Copy the block and paste it back to me.</p>
+  <textarea id="notes" placeholder="Freeform notes (optional)" aria-label="Freeform notes"></textarea>
+  <div class="reply" id="reply" aria-live="polite"></div>
+  <button class="btn primary copybtn" id="copyBtn">Copy reply</button>
+  <span id="copyState" style="margin-left:10px;font-size:.8rem;color:var(--sage-700);font-weight:700"></span>
+</div>
+
+<div class="wiring">
+  <b>Wiring note (no application code was touched by this lab).</b><br>
+  Likely real homes, all paths verified in the repo: the rehearse button and shadow strip live on <code>apps/web/app/admin/families/[familyId]/page.tsx</code> with actions in <code>apps/web/app/admin/actions.ts</code> (founder-gated via <code>lib/admin/gate.ts</code>). The clone walk derives from <code>apps/web/lib/family-fold.ts</code> plus the child-scoped tables in <code>supabase/migrations/20260707190000_child_reports.sql</code> and <code>20260711213330_agent_led_live_progress.sql</code>. Becoming the family rides <code>mintLinkToken</code> (<code>lib/map/store.ts</code>) and <code>/api/map/resume-link</code>; a disposable login per rehearsal would ride Supabase admin user creation (new work). Outbound fences belong at <code>lib/map/email.ts send()</code>, the SMS sender, <code>lib/cards/thank-you.ts</code>, the sweeps in <code>lib/map/store.ts</code>, <code>app/api/map/cron/route.ts</code>, and the admin readers under <code>lib/admin/*-data.ts</code>.<br><br>
+  <b>Decisions this forces:</b> one additive migration (a sandbox marker on <code>families</code> plus source-family link), a guard that keeps rehearsal families out of every outbound path and founder metric (a check like <code>check:isolation</code> so new outbound code cannot forget), and a purge policy. Reuse: fold machinery, resume tokens, founder gate, season-sim harness. New: clone routine, outbound fence, rehearsal strip UI, burn/reset actions.
+</div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- shared fake dataset ---------- */
+var FAM = {
+  name: "The Alvarez famy",
+  parent: "Rosa",
+  kids: [
+    { name: "Nico", age: 9, scored: true, langBefore: -12, answers: 24 },
+    { name: "Tessa", age: 6, scored: false },
+    { name: "Ben", age: 3, scored: false }
+  ]
+};
+var QUESTIONS = [
+  "Retells yesterday's events in the order they happened?",
+  "Keeps a back-and-forth conversation going for several turns?",
+  "Explains the rules of a game so a younger kid could play?"
+];
+
+/* ---------- directions ---------- */
+var DIRECTIONS = [
+  {
+    id: "shadow",
+    name: "A · Shadow family",
+    tagline: "Clone her into a fenced twin inside prod, then walk the real product as the twin.",
+    phil: "Optimizes fidelity per minute. Bet: the safest copy of her exact state is one flagged row-family away, and the real app is the only honest simulator.",
+    steals: [
+      "One-click \u201cRehearse as this family\u201d on the kid row you already use",
+      "Diff panel after the walk: her real state vs the twin, answer by answer",
+      "Burn button plus auto-purge, so twins never linger"
+    ],
+    skip: "The fence is a LIST (emails, SMS, cards, crons, funnels). Every future outbound feature must respect the flag, so this direction is only as safe as its guard test."
+  },
+  {
+    id: "branch",
+    name: "B · Branch universe",
+    tagline: "Snapshot prod into a disposable branch database and rehearse there; prod cannot be touched by construction.",
+    phil: "Optimizes worst-case safety. Bet: the only fence that never leaks is a separate database; feeling the product can happen off prod entirely.",
+    steals: [
+      "Isolation by construction: no flag to forget, nothing to fence",
+      "Free rein: send emails, run crons, break things, discard the universe",
+      "Doubles as a rehearsal for migrations and risky deploys"
+    ],
+    skip: "Not one-click today: needs a branch seed plus a second app pointed at it, and the copy goes stale the moment prod moves. Feels like a lab, not the store shelf."
+  },
+  {
+    id: "filmstrip",
+    name: "C · Dress rehearsal bot",
+    tagline: "A scripted bot walks her flow in a shadow twin and hands you an annotated filmstrip of every click.",
+    phil: "Optimizes founder minutes and shareability. Bet: for most checks you need to SEE her journey frame by frame, not drive it yourself.",
+    steals: [
+      "Moment markers: the bot flags every screen where reassurance or delight could land",
+      "Runs nightly after deploys: journey regressions surface as changed frames",
+      "Filmstrips are shareable evidence for copy and design sessions"
+    ],
+    skip: "Watching is not feeling. It cannot answer \u201cdoes this click feel scary,\u201d so it complements a drivable mode rather than replacing one."
+  },
+  {
+    id: "stable",
+    name: "D · Persona stable",
+    tagline: "A shelf of hand-built fake families pinned at interesting moments, with one-tap reset to rehearse a moment repeatedly.",
+    phil: "Optimizes repetition. Bet: the moments you tune (scary number, first report, conflict) recur across families, so rehearse the MOMENT, not one family.",
+    steals: [
+      "Reset-to-moment: rerun the same scary-number scene five times while tuning copy",
+      "A persona per lifecycle stage doubles as a living QA suite",
+      "No clone freshness worries: the stable is the fixture"
+    ],
+    skip: "It is never HER: a synthetic family misses the exact answer pattern that produced a real family's -12, so real-family questions still need a clone."
+  }
+];
+
+/* ---------- questions ---------- */
+var QS = [
+  {
+    id: "boundary",
+    q: "Where does the rehearsal live?",
+    why: "This is the architecture fork. In-prod twins reuse the deployed app and your admin, but need a fence with a guard test. A branch universe needs environment plumbing but cannot leak by construction.",
+    opts: ["In prod, flagged twin (recommended today)", "Branch database universe", "Both: twin today, branch for risky work"],
+    rec: 0
+  },
+  {
+    id: "identity",
+    q: "How do you become the twin?",
+    why: "A minted resume link opens onboarding, deep dives, and reports with zero auth work, but /app (chat, progress, planner) needs a signed-in member, which means a disposable login per rehearsal.",
+    opts: ["Resume link only (flows, no /app)", "Disposable login too: full app (recommended)", "Resume link now, login later"],
+    rec: 1
+  },
+  {
+    id: "outbound",
+    q: "What happens to emails and texts a rehearsal fires?",
+    why: "Sends are part of the feel. Redirecting them to your own inbox keeps the experience whole; muting is simpler and quieter. Physical mail (the thank-you card) should be impossible either way.",
+    opts: ["Redirect all to founder inbox (recommended)", "Mute everything", "Per-rehearsal toggle"],
+    rec: 0
+  },
+  {
+    id: "lifespan",
+    q: "How long does a twin live?",
+    why: "Twins that linger become confusing rows in your own console and drift from the source family. Burn-on-demand plus an auto-purge keeps the world clean without making rehearsal feel precious.",
+    opts: ["Burn button + auto-purge after 7 days (recommended)", "Burn on close, always", "Keep until burned by hand"],
+    rec: 0
+  },
+  {
+    id: "ledger",
+    q: "Should rehearsals leave a trail?",
+    why: "A rehearsal ledger (who was cloned, what you walked, what you felt) turns rehearsals into product research and powers the diff panel. Skipping it is less build.",
+    opts: ["Yes: ledger + diff panel (recommended)", "No: twins are throwaway, notes live in your head"],
+    rec: 0
+  }
+];
+
+/* ---------- state ---------- */
+var state = {
+  dir: "shadow",
+  winner: null,
+  steals: {},
+  answers: {},
+  sim: {}
+};
+DIRECTIONS.forEach(function(d){
+  state.sim[d.id] = { spawned:false, step:0, done:false, burned:false, diff:false, persona:null };
+});
+
+/* ---------- rendering helpers ---------- */
+function el(tag, attrs, children){
+  var node = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k){
+    if (k === "text") node.textContent = attrs[k];
+    else if (k === "html") node.innerHTML = attrs[k];
+    else if (k.slice(0,2) === "on") node.addEventListener(k.slice(2), attrs[k]);
+    else node.setAttribute(k, attrs[k]);
+  });
+  (children || []).forEach(function(c){ if (c) node.appendChild(c); });
+  return node;
+}
+function pill(tone, text){ return el("span", { class: "pill " + tone, text: text }); }
+
+/* ---------- the walkthrough stage (shared task, per-direction chrome) ---------- */
+function stage(dirId){
+  var sim = state.sim[dirId];
+  var host = el("div");
+
+  if (dirId === "filmstrip") return filmstripStage(sim);
+
+  if (dirId === "stable" && !sim.persona){
+    var picker = el("div", { class: "stagecard" });
+    picker.appendChild(el("h4", { text: "The stable" }));
+    picker.appendChild(el("p", { class: "mut", text: "Fake families pinned at moments worth rehearsing. Becoming one never touches a real family; reset returns it to its pinned moment." }));
+    [
+      ["Scary number", "The Alvarez famy \u00b7 Nico 9 \u00b7 language reads -12"],
+      ["Fresh signup", "The Okafor famy \u00b7 nothing answered yet"],
+      ["Two adults disagree", "The Byrne famy \u00b7 open conflict on one skill"],
+      ["Quiet 14 days", "The Novak famy \u00b7 report built, then silence"]
+    ].forEach(function(p, i){
+      var row = el("div", { class: "kidline" });
+      row.appendChild(pill(i === 0 ? "gold" : "stone", p[0]));
+      row.appendChild(el("span", { text: p[1] }));
+      row.appendChild(el("button", { class: "btn secondary", text: "Become", style: "margin-left:auto", onclick: function(){ sim.persona = p[0]; render(); } }));
+      picker.appendChild(row);
+    });
+    host.appendChild(picker);
+    return host;
+  }
+
+  if (!sim.spawned){
+    var card = el("div", { class: "stagecard" });
+    if (dirId === "shadow"){
+      card.appendChild(el("h4", { text: "Kids" }));
+      var row = el("div", { class: "kidline" });
+      row.appendChild(el("b", { text: "Nico" }));
+      row.appendChild(el("span", { text: "9 yrs" }));
+      row.appendChild(pill("sage", "report 3d ago"));
+      row.appendChild(el("button", { class: "btn primary", text: "Rehearse as this family", style: "margin-left:auto", onclick: function(){ sim.spawned = true; render(); } }));
+      card.appendChild(row);
+      card.appendChild(el("p", { class: "mut", text: "Spawns a fenced twin: every kid, answer, report, and progress row copied under fresh ids. Phone dropped, email re-pointed at you, marked sandbox so no cron, email, card, or metric can see it." }));
+    } else if (dirId === "branch"){
+      card.appendChild(el("h4", { text: "Rehearsal universe" }));
+      card.appendChild(el("p", { class: "mut", text: "Snapshot prod into a disposable branch database, boot the app against it, and step in. The real database is not reachable from inside." }));
+      card.appendChild(el("button", { class: "btn primary", text: "Create branch + open universe", style: "margin-top:10px", onclick: function(){ sim.spawned = true; render(); } }));
+    } else {
+      card.appendChild(el("h4", { text: sim.persona }));
+      card.appendChild(el("p", { class: "mut", text: "Pinned moment loaded. Reset anytime; the pinned state never drifts." }));
+      card.appendChild(el("button", { class: "btn primary", text: "Open her screens", style: "margin-top:10px", onclick: function(){ sim.spawned = true; render(); } }));
+    }
+    host.appendChild(card);
+    return host;
+  }
+
+  /* spawned: the ledger + the deep-dive walk */
+  var fence = el("div", { class: "ledger" });
+  if (dirId === "shadow"){
+    fence.innerHTML = '<span class="ok">twin ready</span> alvarez-rehearsal \u00b7 source untouched<br>' +
+      '<span class="mute">fenced</span> report + reminder email \u2192 your inbox \u00b7 SMS muted \u00b7 thank-you card impossible \u00b7 out of funnels, stage lists, AI cost, cron sweeps';
+  } else if (dirId === "branch"){
+    fence.innerHTML = '<span class="ok">universe ready</span> branch of this morning 6:00 AM \u00b7 prod unreachable from here<br>' +
+      '<span class="ok">free rein</span> emails and crons fire INSIDE the branch only';
+  } else {
+    fence.innerHTML = '<span class="ok">moment loaded</span> ' + (sim.persona || "Scary number") + ' \u00b7 fixture family, resettable<br>' +
+      '<span class="mute">fenced</span> same outbound fence as a twin';
+  }
+  host.appendChild(fence);
+
+  if (sim.burned){
+    var burnt = el("div", { class: "stagecard" });
+    burnt.appendChild(el("h4", { text: dirId === "branch" ? "Universe discarded" : "Twin burned" }));
+    burnt.appendChild(el("p", { class: "mut", text: "Every rehearsal row is gone. The real family never knew." }));
+    burnt.appendChild(el("button", { class: "btn secondary", text: "Rehearse again", style: "margin-top:10px", onclick: function(){ state.sim[dirId] = { spawned:false, step:0, done:false, burned:false, diff:false, persona:null }; render(); } }));
+    host.appendChild(burnt);
+    return host;
+  }
+
+  if (!sim.done){
+    var q = el("div", { class: "qcard" });
+    q.appendChild(el("div", { style: "font-family:var(--f-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle)", text: "Nico's deeper language check \u00b7 question " + (sim.step + 1) + " of 3 \u00b7 you are Rosa" }));
+    q.appendChild(el("p", { class: "stmt", text: QUESTIONS[sim.step] }));
+    var answers = el("div", { class: "answers" });
+    ["Easily", "Getting there", "Not yet"].forEach(function(a){
+      answers.appendChild(el("button", { class: "ansbtn", text: a, onclick: function(){
+        sim.step += 1;
+        if (sim.step >= 3) sim.done = true;
+        render();
+      }}));
+    });
+    q.appendChild(answers);
+    if (sim.step === 0) q.appendChild(el("div", { class: "moment", text: "Moment to feel: she just left a -12. Does this screen reassure her before it asks?" }));
+    if (sim.step === 2) q.appendChild(el("div", { class: "moment", text: "Moment to feel: third question in. Does she know how many are left, and that stopping is fine?" }));
+    host.appendChild(q);
+    return host;
+  }
+
+  var delta = el("div", { class: "deltabox" });
+  delta.innerHTML = "<b>Rescored.</b> Language: -12 \u2192 <b>-6</b> \u00b7 report rewriting now, and the new letter will say why: \u201cyou took a deeper look at language, and the reading moved.\u201d Every screen you just felt is exactly what she would feel.";
+  host.appendChild(delta);
+
+  var actions = el("div", { style: "display:flex;flex-wrap:wrap;gap:8px;margin-top:12px" });
+  if (dirId === "shadow" || dirId === "stable"){
+    actions.appendChild(el("button", { class: "btn secondary", text: sim.diff ? "Hide diff vs her real state" : "Diff vs her real state", "aria-pressed": String(sim.diff), onclick: function(){ sim.diff = !sim.diff; render(); } }));
+  }
+  if (dirId === "stable"){
+    actions.appendChild(el("button", { class: "btn secondary", text: "Reset to pinned moment", onclick: function(){ sim.step = 0; sim.done = false; sim.diff = false; render(); } }));
+  }
+  actions.appendChild(el("button", { class: "btn danger", text: dirId === "branch" ? "Discard universe" : "Burn the twin", onclick: function(){ sim.burned = true; render(); } }));
+  host.appendChild(actions);
+
+  if (sim.diff){
+    var diff = el("div", { class: "ledger" });
+    diff.innerHTML = 'REHEARSAL DIFF \u00b7 twin vs real family<br>' +
+      '+ 3 language answers (deep dive) \u00b7 language -12 \u2192 -6 \u00b7 report regenerated, narrative acknowledges the deeper look<br>' +
+      'real family: <span class="ok">0 rows changed</span>';
+    host.appendChild(diff);
+  }
+  return host;
+}
+
+function filmstripStage(sim){
+  var host = el("div");
+  if (!sim.spawned){
+    var card = el("div", { class: "stagecard" });
+    card.appendChild(el("h4", { text: "Run a rehearsal film" }));
+    card.appendChild(el("p", { class: "mut", text: "Pick a scenario; the bot clones a fenced twin, walks it with a browser, and films every screen. You review the strip, not the clicks." }));
+    var row = el("div", { class: "kidline" });
+    row.appendChild(pill("gold", "Scenario"));
+    row.appendChild(el("span", { text: "Nico's deeper language check after a -12" }));
+    row.appendChild(el("button", { class: "btn primary", text: "Run + film", style: "margin-left:auto", onclick: function(){ sim.spawned = true; sim.done = true; render(); } }));
+    card.appendChild(row);
+    host.appendChild(card);
+    return host;
+  }
+  var strip = el("div", { class: "stagecard" });
+  strip.appendChild(el("h4", { text: "The filmstrip \u00b7 11 frames \u00b7 2m 40s of her time" }));
+  [
+    ["Frame 3", "Panel opens on Language -12", "gold", "MOMENT: first sight of the number; reassurance runs one line thin here"],
+    ["Frame 5", "Question 1 of the deeper check", "stone", "Clear; she knows why she is here"],
+    ["Frame 8", "Rescore beat (-12 \u2192 -6)", "gold", "MOMENT: the number moves on screen; nothing celebrates it yet"],
+    ["Frame 11", "Rewritten report acknowledges her deeper look", "sage", "The letter says why it changed; lands well"]
+  ].forEach(function(f){
+    var row = el("div", { class: "kidline" });
+    row.appendChild(pill(f[2], f[0]));
+    var wrap = el("div", { style: "flex:1;min-width:200px" });
+    wrap.appendChild(el("div", { style: "font-weight:700;color:var(--text-strong);font-size:.85rem", text: f[1] }));
+    wrap.appendChild(el("div", { style: "font-size:.76rem;color:var(--text-muted)", text: f[3] }));
+    row.appendChild(wrap);
+    strip.appendChild(row);
+  });
+  strip.appendChild(el("button", { class: "btn secondary", text: "Re-run after next deploy", style: "margin-top:12px", onclick: function(){} }));
+  host.appendChild(strip);
+  return host;
+}
+
+/* ---------- direction frame ---------- */
+function renderDirections(){
+  var tabs = document.getElementById("dirTabs");
+  tabs.innerHTML = "";
+  DIRECTIONS.forEach(function(d){
+    tabs.appendChild(el("button", {
+      class: "dir-tab", role: "tab", id: "tab-" + d.id,
+      "aria-selected": String(state.dir === d.id),
+      text: d.name,
+      onclick: function(){ state.dir = d.id; render(); }
+    }));
+  });
+
+  var d = DIRECTIONS.find(function(x){ return x.id === state.dir; });
+  var host = document.getElementById("dirHost");
+  host.innerHTML = "";
+  var dir = el("div", { class: "dir", role: "tabpanel", "aria-labelledby": "tab-" + d.id });
+
+  var head = el("div", { class: "dir-head" });
+  var left = el("div", { style: "min-width:230px;flex:1" });
+  left.appendChild(el("h3", { text: d.name + " \u00b7 " + d.tagline, style: "font-size:1.05rem;line-height:1.4" }));
+  left.appendChild(el("p", { class: "phil", text: d.phil }));
+  head.appendChild(left);
+  head.appendChild(el("button", {
+    class: "win", "aria-pressed": String(state.winner === d.id),
+    text: state.winner === d.id ? "\u2713 Winner" : "Pick as winner",
+    onclick: function(){ state.winner = state.winner === d.id ? null : d.id; render(); }
+  }));
+  dir.appendChild(head);
+
+  var frame = el("div", { class: "frame" });
+  var chrome = el("div", { class: "chrome" });
+  var bar = el("div", { class: "bar" });
+  bar.appendChild(el("span", { class: "dot" })); bar.appendChild(el("span", { class: "dot" })); bar.appendChild(el("span", { class: "dot" }));
+  var url = d.id === "branch" ? "rehearsal-universe.local \u00b7 branch of prod, 6:00 AM" : "thankshoma.com/admin/families/alvarez (FAKE)";
+  bar.appendChild(el("span", { class: "url", text: url }));
+  chrome.appendChild(bar);
+
+  var pane = el("div", { class: "pane" });
+  pane.appendChild(el("div", { class: "crumb", text: "Back to families" }));
+  var famrow = el("div", { class: "famrow" });
+  famrow.appendChild(el("h3", { text: FAM.name }));
+  famrow.appendChild(pill("sage", "Activated"));
+  if (state.sim[d.id].spawned && d.id !== "branch" && d.id !== "filmstrip") famrow.appendChild(pill("clay", "rehearsal twin live"));
+  pane.appendChild(famrow);
+  pane.appendChild(stage(d.id));
+  chrome.appendChild(pane);
+  frame.appendChild(chrome);
+  dir.appendChild(frame);
+
+  var critique = el("div", { class: "critique" });
+  d.steals.forEach(function(s, i){
+    var key = d.id + ":" + i;
+    critique.appendChild(el("button", {
+      class: "steal", "aria-pressed": String(Boolean(state.steals[key])),
+      html: "<b>steal" + (state.steals[key] ? " \u2713" : "") + "</b>" + s,
+      onclick: function(){ state.steals[key] = !state.steals[key]; render(); }
+    }));
+  });
+  critique.appendChild(el("div", { class: "skip", html: "<b>skip / honest cost</b>" + d.skip }));
+  dir.appendChild(critique);
+  host.appendChild(dir);
+}
+
+/* ---------- questions ---------- */
+function renderQuestions(){
+  var host = document.getElementById("qHost");
+  host.innerHTML = "";
+  QS.forEach(function(q){
+    var block = el("div", { class: "qblock" });
+    block.appendChild(el("div", { class: "qq", text: q.q }));
+    block.appendChild(el("p", { class: "why", text: q.why }));
+    var opts = el("div", { class: "opts", role: "group", "aria-label": q.q });
+    q.opts.forEach(function(o, i){
+      var btn = el("button", {
+        class: "opt", "aria-pressed": String(state.answers[q.id] === o),
+        onclick: function(){ state.answers[q.id] = state.answers[q.id] === o ? undefined : o; render(); }
+      });
+      btn.textContent = o;
+      opts.appendChild(btn);
+    });
+    block.appendChild(opts);
+    host.appendChild(block);
+  });
+}
+
+/* ---------- reply assembler ---------- */
+function buildReply(){
+  var lines = ["UI direction feedback", ""];
+  var win = DIRECTIONS.find(function(d){ return d.id === state.winner; });
+  lines.push("Winning direction: " + (win ? win.name : "none yet"));
+  var steals = [];
+  DIRECTIONS.forEach(function(d){
+    d.steals.forEach(function(s, i){ if (state.steals[d.id + ":" + i]) steals.push("[" + d.name.slice(0,1) + "] " + s); });
+  });
+  lines.push("Details to steal: " + (steals.length ? "" : "none"));
+  steals.forEach(function(s){ lines.push("  - " + s); });
+  lines.push("");
+  QS.forEach(function(q){
+    lines.push("- " + q.q + " " + (state.answers[q.id] || "(unanswered)"));
+  });
+  var notes = document.getElementById("notes").value.trim();
+  if (notes) { lines.push(""); lines.push("Notes: " + notes); }
+  return lines.join("\n");
+}
+function renderReply(){
+  document.getElementById("reply").textContent = buildReply();
+}
+
+/* ---------- top-level render ---------- */
+function render(){
+  renderDirections();
+  renderQuestions();
+  renderReply();
+}
+document.getElementById("notes").addEventListener("input", renderReply);
+document.getElementById("copyBtn").addEventListener("click", function(){
+  var text = buildReply();
+  var stateEl = document.getElementById("copyState");
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); stateEl.textContent = "Copied."; }
+    catch(e){ stateEl.textContent = "Select the block above and copy by hand."; }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ stateEl.textContent = "Copied."; }, fallback);
+  } else fallback();
+});
+render();
+})();
+</script>
+</body>
+</html>

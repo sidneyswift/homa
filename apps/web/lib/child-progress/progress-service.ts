@@ -79,11 +79,19 @@ export interface RecordJournalProgressEvidenceInput {
   childId: string;
   memberUserId: string | null;
   quote: string;
-  channel: Extract<ProgressCheckInChannel, "web" | "sms" | "email">;
-  messageId: string;
+  channel: Extract<
+    ProgressCheckInChannel,
+    "web" | "sms" | "email" | "lesson"
+  >;
+  /** Conversation provenance. Null only on the lesson channel, where
+   * the quote's provenance is the lesson row, not a message. */
+  messageId: string | null;
   observedAt: string;
   idempotencyKey: string;
   subjectId?: string;
+  /** Lesson listen rides the journal path with its own source label
+   * (plan 2026-07-13-lesson-listen.md §4.5). Absent means "journal". */
+  source?: "journal" | "lesson_listen";
 }
 
 export type RecordProgressEvidenceResult =
@@ -321,6 +329,19 @@ function validateProgressEvidenceWrite(
   write: ProgressEvidenceWrite,
 ): void {
   validateCheckInProvenance(write.source, write.checkInId);
+  // Lesson evidence carries the lesson channel and no message ids: its
+  // provenance is the lesson_recordings row named inside the
+  // idempotency key (plan 2026-07-13-lesson-listen.md §4.5).
+  if (write.source === "lesson_listen" && write.channel !== "lesson") {
+    throw new TypeError(
+      "lesson_listen evidence requires the lesson channel",
+    );
+  }
+  if (write.source !== "lesson_listen" && write.channel === "lesson") {
+    throw new TypeError(
+      "the lesson channel is reserved for lesson_listen evidence",
+    );
+  }
   const needsConversationProvenance =
     write.source === "journal" ||
     write.source === "conversation" ||
@@ -1490,7 +1511,7 @@ export class ChildProgressService {
       familyId: input.familyId,
       childId: input.childId,
       memberUserId: input.memberUserId,
-      source: "journal",
+      source: input.source ?? "journal",
       itemId: candidate.itemId,
       answer: candidate.answer,
       quote: Array.from(candidate.clause).slice(0, 500).join(""),

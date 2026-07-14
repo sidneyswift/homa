@@ -1,0 +1,220 @@
+# Seed crosswalk: Dimensions Math grade 2 chapters to Homa taxonomy
+# topics. Agent-proposed, status seed: requires human review before any
+# product use. See README.md in this folder for schema and rules.
+id: dimensions-math
+band: grade2
+taxonomy_snapshot: packages/taxonomy/data/topics.json, 1590 topics, read 2026-07-13
+method: manual seed, chapter to topic, confidence labeled
+status: seed
+mappings:
+  - level: "2A"
+    chapter: 1
+    chapter_title: Numbers to 1,000
+    topics:
+      - id: mt_98c2qwEF7Q
+        name: Place Value to 1000
+        confidence: high
+      - id: mt_aPBzD28_mT
+        name: The three digits of a three-digit number
+        confidence: high
+      - id: mt_8gy7uxRlF6
+        name: A Hundred Is Ten Tens
+        confidence: high
+      - id: mt_AQcVRBddko
+        name: Ordering Numbers to 1000
+        confidence: high
+      - id: mt_M2v1A9OEuM
+        name: Counting Within 1,000
+        confidence: high
+      - id: mt_izien3ZX51
+        name: 10 or 100 More or Less
+        confidence: high
+  - level: "2A"
+    chapter: 2
+    chapter_title: Addition and Subtraction, Part 1
+    topics:
+      - id: mt__t4afSyZRm
+        name: Fluent adding and subtracting within 20
+        confidence: high
+      - id: mt_zxST3MarI9
+        name: Addition and subtraction strategies (age 7+)
+        confidence: high
+      - id: mt_DLcEzmmj2r
+        name: Addition and subtraction word problems
+        confidence: high
+  - level: "2A"
+    chapter: 3
+    chapter_title: Addition and Subtraction, Part 2
+    topics:
+      - id: mt_ewmuMMPAzP
+        name: Addition and subtraction within 1000
+        confidence: high
+      - id: mt_cChv2j_-Da
+        name: Fluent adding and subtracting within 100
+        confidence: high
+  - level: "2A"
+    chapter: 4
+    chapter_title: Length
+    topics:
+      - id: mt_e4x3l2JeLI
+        name: Measuring length (age 7+)
+        confidence: high
+      - id: mt_OzRZ89GrQW
+        name: Estimating Lengths
+        confidence: high
+      - id: mt_jHv4BgRK8B
+        name: Measuring with different units
+        confidence: high
+      - id: mt_xWg0lI_gG4
+        name: Comparing lengths by measuring
+        confidence: high
+  - level: "2A"
+    chapter: 5
+    chapter_title: Weight
+    topics:
+      - id: mt_-af65bxfdp
+        name: Measuring Liquids & Masses
+        confidence: medium
+        note: taxonomy places mass measurement at ages 8-9; DM teaches grams, kilograms, pounds in grade 2, consistent with the program's documented ahead-lean
+  - level: "2A"
+    chapter: 6
+    chapter_title: Multiplication and Division
+    topics:
+      - id: mt_gtTl3R5buH
+        name: What Multiplication Means
+        confidence: medium
+        note: taxonomy ages 8-9; DM introduces the concepts in grade 2
+      - id: mt_iNdrM2-oJf
+        name: What Division Means
+        confidence: medium
+        note: taxonomy ages 8-9; DM introduces the concepts in grade 2
+      - id: mt_wh3UqnWsa7
+        name: Multiplication as repeated addition (age 6+)
+        confidence: high
+  - level: "2A"
+    chapter: 7
+    chapter_title: Multiplication and Division of 2, 5, and 10
+    topics:
+      - id: mt_wQ89AEXhz3
+        name: Times tables (age 7+)
+        confidence: high
+      - id: mt_HhuSDxwDNM
+        name: Times tables
+        confidence: medium
+        note: taxonomy ages 6-7 band; included because DM grade 2 is where tables of 2, 5, 10 begin
+  - level: "2B"
+    chapter: 8
+    chapter_title: Mental Calculation
+    topics:
+      - id: mt_oDU_8zMZjp
+        name: Mental addition and subtraction (age 7+)
+        confidence: high
+      - id: mt_xPqczp7zPX
+        name: Mentally adding hundreds to 3-digit numbers
+        confidence: high
+      - id: mt_aHQ9kNt3is
+        name: Mentally adding tens to 3-digit numbers
+        confidence: high
+  - level: "2B"
+    chapter: 9
+    chapter_title: Multiplication and Division of 3 and 4
+    topics:
+      - id: mt_wQ89AEXhz3
+        name: Times tables (age 7+)
+        confidence: high
+      - id: mt_WX30dzi4dt
+        name: Fluent multiplication and division facts
+        confidence: medium
+        note: taxonomy ages 8-9; DM grade 2 builds fact fluency for 2-5 and 10
+  - level: "2B"
+    chapter: 10
+    chapter_title: Money
+    topics:
+      - id: mt_iQYPw8bMfN
+        name: Working with money
+        confidence: high
+      - id: mt_6_O6THdEDK
+        name: Giving Change
+        confidence: high
+      - id: mt_mFJ-2ZF6Tk
+        name: Estimating and comparing money
+        confidence: medium
+        note: taxonomy ages 8-9; DM covers comparing money in grade 2
+  - level: "2B"
+    chapter: 11
+    chapter_title: Fractions
+    topics:
+      - id: mt_k2WE0-22-4
+        name: Unit fractions
+        confidence: high
+      - id: mt_Xp-rj46S2w
+        name: Splitting shapes into equal parts (age 7+)
+        confidence: high
+      - id: mt_IfEgu0X449
+        name: Comparing fractions
+        confidence: high
+      - id: mt_vKcxX6iNOA
+        name: Fraction Notation
+        confidence: high
+  - level: "2B"
+    chapter: 12
+    chapter_title: Time
+    topics:
+      - id: mt_4m8BimI4G5
+        name: Telling time to the minute (age 7+)
+        confidence: high
+      - id: mt_4emC463IyW
+        name: Comparing Time Durations
+        confidence: high
+      - id: mt_EXlmTURK_o
+        name: Time Units and Calendar Facts
+        confidence: medium
+        note: DM chapter covers a.m./p.m. and intervals; calendar facts partial
+  - level: "2B"
+    chapter: 13
+    chapter_title: Capacity
+    topics:
+      - id: mt_-af65bxfdp
+        name: Measuring Liquids & Masses
+        confidence: medium
+        note: same taxonomy node as weight; taxonomy ages 8-9, DM grade 2
+      - id: mt_DOe893F6gN
+        name: Choosing measurement units
+        confidence: medium
+        note: taxonomy ages 6-7; capacity units squarely overlap the skill
+  - level: "2B"
+    chapter: 14
+    chapter_title: Graphs
+    topics:
+      - id: mt_VhBH8wrFC6
+        name: Picture & Bar Graphs
+        confidence: high
+      - id: mt_c29FaCTNsx
+        name: Pictograms and tally charts
+        confidence: medium
+        note: pictograms overlap picture graphs; tally charts not a DM grade 2 focus
+  - level: "2B"
+    chapter: 15
+    chapter_title: Shapes
+    topics:
+      - id: mt_vJUa62bxeR
+        name: 2-D shapes (age 7+)
+        confidence: high
+      - id: mt_Mnodea7mG_
+        name: Edges, vertices, and faces
+        confidence: medium
+        note: taxonomy ages 6-7; DM chapter covers polygons and solids
+      - id: mt_MqqR7VUoz1
+        name: Composing Shapes
+        confidence: medium
+        note: DM covers patterns and shape composition within the chapter
+notes: >
+  Seeded 2026-07-13 by mapping the 15 verified grade 2 chapters in
+  ../dimensions-math.yaml against the 503 math topics in the taxonomy
+  snapshot, restricted to nodes overlapping ages 6-9. Age-band
+  mismatches are recorded as medium confidence with notes; they are
+  consistent with the program's documented ahead-lean
+  (docs/homa-benchmarks/13-curriculum-crosswalk-math.md §2). Known
+  gap: the taxonomy has no dedicated node for bar modeling as a
+  strategy; DM's word-problem method rides the word-problem and
+  strategy nodes. Requires human review before promotion to reviewed.

@@ -10,336 +10,1626 @@ sources:
   - https://singapore-math.s3.us-west-2.amazonaws.com/scopes/DMPK5_Scope.pdf
   - https://singapore-math.s3.us-west-2.amazonaws.com/scopes/DM68_Scope.pdf
   - https://www.singaporemath.com/pages/dimensions-math-grades-prek-5-overviews
-  - https://singapore-math.s3.us-west-2.amazonaws.com/Alignments/DM_G2A-Overview.pdf
-  - https://singapore-math.s3.us-west-2.amazonaws.com/Alignments/DM_G2B-Overview.pdf
+  - https://singapore-math.s3.us-west-2.amazonaws.com/Alignments/ (per-level DM_G<level>-Overview.pdf, all 14 PK-5 levels)
 notes: >
-  Grade 2 is extracted at lesson level, cross-checked between the PK-5
-  scope chart and the per-level overview PDFs (which also carry the
-  publisher's suggested class periods per chapter). Cumulative reviews
-  follow chapters 5, 7, 11, and 15 in grade 2. Grades 6-8 are extracted
-  at chapter level from the 6-8 scope tables; their lesson titles exist
-  in the same source and can be extracted next. PK-1 and 3-5 are pending:
-  the PK-5 chart's multi-column layout scrambles plain-text extraction,
-  so those levels wait for parsing against the per-level overview PDFs
-  (linked pattern: DM_G<level>-Overview.pdf) rather than being published
-  wrong. Periods for grade 2A chapters 6 and 7 are omitted because the
-  two chapters' tables merge in the overview extraction.
+  All 20 levels are extracted at lesson level. PK-5 lesson lists and
+  suggested class periods come from the publisher's per-level overview
+  PDFs; chapter numbering and titles are cross-checked against the PK-5
+  scope chart, and grade 1 chapter titles the chart scrambled (1A 5-8,
+  1B 13) were verified against independently published tables of
+  contents. Where the overview PDF merges adjacent chapter tables (2A
+  chapters 6-7, 1A chapters 5-8, 1B chapters 10-11, 5B chapters 13-14),
+  periods are omitted rather than guessed. Cumulative review sections
+  are not numbered lessons and are omitted, except PKB chapter 13,
+  which is a review chapter by design. Grades 6-8 chapters and numbered
+  sections come from the 6-8 scope tables; the grade 7 chapter list is
+  verified against two independent tables of contents (an earlier
+  chapter-only extraction had promoted 7A section titles to chapters,
+  now corrected). Lettered sub-parts (for example 2.5A) exist beneath
+  numbered sections in 6-8 and are not itemized here.
 levels:
   - level: "PKA"
     grade: PK
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Match, Sort, and Classify"
+        periods: "10-11"
+        lessons:
+          - "Red and Blue"
+          - "Yellow and Green"
+          - "Color Review"
+          - "Soft and Hard"
+          - "Rough, Bumpy, and Smooth"
+          - "Sticky and Grainy"
+          - "Size, Part 1"
+          - "Size, Part 2"
+          - "Sort Into Two Groups"
+          - "Practice"
+      - n: 2
+        title: "Compare Objects"
+        periods: "5-6"
+        lessons:
+          - "Big and Small"
+          - "Long and Short"
+          - "Tall and Short"
+          - "Heavy and Light"
+          - "Practice"
+      - n: 3
+        title: "Patterns"
+        periods: "4-5"
+        lessons:
+          - "Movement Patterns"
+          - "Sound Patterns"
+          - "Create Patterns"
+          - "Practice"
+      - n: 4
+        title: "Numbers to 5, Part 1"
+        periods: "14-15"
+        lessons:
+          - "Count 1 to 5, Part 1"
+          - "Count 1 to 5, Part 2"
+          - "Count Back"
+          - "Count on and Back"
+          - "Count 1 Object"
+          - "Count 2 Objects"
+          - "Count Up to 3 Objects"
+          - "Count Up to 4 Objects"
+          - "Count Up to 5 Objects"
+          - "How Many?, Part 1"
+          - "How Many?, Part 2"
+          - "How Many Now?, Part 1"
+          - "How Many Now?, Part 2"
+          - "Practice"
+      - n: 5
+        title: "Numbers to 5, Part 2"
+        periods: "8-9"
+        lessons:
+          - "1,2, 3"
+          - "1,2, 3,4, 5, Part 1"
+          - "1,2, 3,4, 5, Part 2"
+          - "How Many?, Part 1"
+          - "How Many?, Part 2"
+          - "How Many Do You See?"
+          - "How Many Do You See Now?"
+          - "Practice"
+      - n: 6
+        title: "Numbers to 10, Part 1"
+        periods: "13-14"
+        lessons:
+          - "0"
+          - "Count to 10, Part 1"
+          - "Count to 10, Part 2"
+          - "Count Back"
+          - "Order Numbers"
+          - "Count Up to 6 Objects"
+          - "Count Up to 7 Objects"
+          - "Count Up to 8 Objects"
+          - "Count Up to 9 Objects"
+          - "Count Up to 10 Objects, Part 1"
+          - "Count Up to 10 Objects, Part 2"
+          - "How Many?"
+          - "Practice"
+      - n: 7
+        title: "Numbers to 10, Part 2"
+        periods: "9-10"
+        lessons:
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "0 to 10"
+          - "Count and Match, Part 1"
+          - "Count and Match, Part 2"
+          - "Practice"
   - level: "PKB"
     grade: PK
-    status: pending
+    status: lessons
+    chapters:
+      - n: 8
+        title: "Ordinal Numbers"
+        periods: "4-5"
+        lessons:
+          - "First"
+          - "Second and Third"
+          - "Fourth and Fifth"
+          - "Practice"
+      - n: 9
+        title: "Shapes and Solids"
+        periods: "10-11"
+        lessons:
+          - "Cubes, Cylinders, and Spheres"
+          - "Cubes"
+          - "Positions"
+          - "Build with Solids"
+          - "Rectangles and Circles"
+          - "Squares"
+          - "Triangles"
+          - "Squares, Circles, Rectangles, and Triangles, Part 1"
+          - "Squares, Circles, Rectangles, and Triangles, Part 2"
+          - "Practice"
+      - n: 10
+        title: "Compare Sets"
+        periods: "5-6"
+        lessons:
+          - "Match Objects"
+          - "Which Set Has More?"
+          - "Which Set has Fewer?"
+          - "More or Fewer?"
+          - "Practice"
+      - n: 11
+        title: "Compose and Decompose"
+        periods: "6-7"
+        lessons:
+          - "Altogether, Part 1"
+          - "Altogether, Part 2"
+          - "Show Me"
+          - "What&#x 27;s the Other Part?, Part 1"
+          - "What&#x 27;s the Other Part?, Part 2"
+          - "Practice"
+      - n: 12
+        title: "Explore Addition"
+        periods: "8-9"
+        lessons:
+          - "Add to 5, Part 1"
+          - "Add to 5, Part 2"
+          - "Two Parts Make a Whole"
+          - "How Many in All?"
+          - "Subtract Within 5, Part 1"
+          - "Subtract Within 5, Part 2"
+          - "How Many Are Left?"
+          - "Practice"
+      - n: 13
+        title: "Cumulative Review"
+        periods: "23"
+        lessons:
+          - "Review 1 Match and Color"
+          - "Review 2 Big and Small"
+          - "Review 3 Heavy and Light"
+          - "Review 4 Count to 5"
+          - "Review 5 Count 5 Objects"
+          - "Review 60"
+          - "Review 7 Count Beads"
+          - "Review 8 Patterns"
+          - "Review 9 Length"
+          - "Review 10 How Many?"
+          - "Review 11 Ordinal Numbers"
+          - "Review 12 Solids and Shapes"
   - level: "KA"
     grade: K
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Match, Sort, and Classify"
+        periods: "7-8"
+        lessons:
+          - "Left and Right"
+          - "Same and Similar"
+          - "Look for One That is Different"
+          - "How Does it Feel?"
+          - "Match the Things That Go Together"
+          - "Sort"
+          - "Practice"
+      - n: 2
+        title: "Numbers to 5"
+        periods: "12-13"
+        lessons:
+          - "Count to 5"
+          - "Count Things Up to 5"
+          - "Recognize the Numbers 1 to 3"
+          - "Recognize the Numbers 4 and 5"
+          - "Count and Match"
+          - "Write the Numbers 1 and 2"
+          - "Write the Number 3"
+          - "Write the Number 4"
+          - "Trace and Write 1 to 5"
+          - "Zero"
+          - "Picture Graphs"
+          - "Practice"
+      - n: 3
+        title: "Numbers to 10"
+        periods: "13-14"
+        lessons:
+          - "Count 1 to 10"
+          - "Count Up to 7 Things"
+          - "Count Up to 9 Things"
+          - "Counting Up to 10 Things, Part 1"
+          - "Counting Up to 10 Things, Part 2"
+          - "Recognize the Numbers 6 to 10"
+          - "Write the Numbers 6 and 7"
+          - "Write the Numbers 8,9, and 10"
+          - "Write the Numbers 6 to 10"
+          - "Count and Write the Numbers 1 to 10"
+          - "Ordinal Positions"
+          - "One More Than"
+          - "Practice"
+      - n: 4
+        title: "Shapes and Solids"
+        periods: "12-13"
+        lessons:
+          - "Curved or Flat"
+          - "Solid Shapes"
+          - "Closed Shapes"
+          - "Rectangles"
+          - "Squares"
+          - "Circles and Triangles"
+          - "Where is It?"
+          - "Hexagons"
+          - "Sizes and Shapes"
+          - "Combine Shapes"
+          - "Graphs"
+          - "Practice"
+      - n: 5
+        title: "Compare Height, Length, Weight, and Capacity"
+        periods: "10-11"
+        lessons:
+          - "Comparing Height"
+          - "Comparing Length"
+          - "Height and Length, Part 1"
+          - "Height and Length, Part 2"
+          - "Weight, Part 1"
+          - "Weight, Part 2"
+          - "Weight, Part 3"
+          - "Capacity, Part 1"
+          - "Capacity, Part 2"
+          - "Practice"
+      - n: 6
+        title: "Comparing Numbers Within 10"
+        periods: "5-6"
+        lessons:
+          - "Same and More"
+          - "More and Fewer"
+          - "More and Less"
+          - "Practice, Part 1"
+          - "Practice, Part 2"
   - level: "KB"
     grade: K
-    status: pending
+    status: lessons
+    chapters:
+      - n: 7
+        title: "Numbers to 20"
+        periods: "11-12"
+        lessons:
+          - "Ten and Some More"
+          - "Count Ten and Some More"
+          - "Two Ways to Count"
+          - "Numbers 16 to 20"
+          - "Number Words 0 to 10"
+          - "Number Words 11 to 15"
+          - "Number Words 16 to 20"
+          - "Number Order"
+          - "1 More Than or Less Than"
+          - "Practice, Part 1"
+          - "Practice, Part 2"
+      - n: 8
+        title: "Number Bonds"
+        periods: "14-15"
+        lessons:
+          - "Putting Numbers Together, Part 1"
+          - "Putting Numbers Together, Part 2"
+          - "Parts Making a Whole"
+          - "Look for a Part"
+          - "Number Bonds for 2,3, and 4"
+          - "Number Bonds for 5"
+          - "Number Bonds for 6"
+          - "Number Bonds for 7"
+          - "Number Bonds for 8"
+          - "Number Bonds for 9"
+          - "Number Bonds for 10"
+          - "Practice, Part 1"
+          - "Practice, Part 2"
+          - "Practice, Part 3"
+      - n: 9
+        title: "Addition"
+        periods: "12-13"
+        lessons:
+          - "Introduction to Addition, Part 1"
+          - "Introduction to Addition, Part 2"
+          - "Introduction to Addition, Part 3"
+          - "Addition"
+          - "Count On, Part 1"
+          - "Count On, Part 2"
+          - "Add Up to 3 and 4"
+          - "Add Up to 5 and 6"
+          - "Add Up to 7 and 8"
+          - "Add Up to 9 and 10"
+          - "Addition Practice"
+          - "Practice"
+      - n: 10
+        title: "Subtraction"
+        periods: "10-11"
+        lessons:
+          - "Take Away to Subtract, Part 1"
+          - "Take Away to Subtract, Part 2"
+          - "Take Away to Subtract, Part 3"
+          - "Take Apart to Subtract, Part 1"
+          - "Take Apart to Subtract, Part 2"
+          - "Count Back"
+          - "Subtract Within 5"
+          - "Subtract Within 10, Part 1"
+          - "Subtract Within 10, Part 2"
+          - "Practice"
+      - n: 11
+        title: "Addition and Subtraction"
+        periods: "7-8"
+        lessons:
+          - "Add and Subtract"
+          - "Practice Addition and Subtraction"
+          - "Part-Whole Addition and Subtraction"
+          - "Add to or Take Away"
+          - "Put Together or Take Apart"
+          - "Practice"
+      - n: 12
+        title: "Numbers to 100"
+        periods: "11-12"
+        lessons:
+          - "Count by Tens, Part 1"
+          - "Count by Tens, Part 2"
+          - "Numbers to 30"
+          - "Numbers to 40"
+          - "Numbers to 50"
+          - "Numbers to 80"
+          - "Numbers to 100, Part 1"
+          - "Numbers to 100, Part 2"
+          - "Count by Fives, Part 1"
+          - "Count by Fives, Part 2"
+          - "Practice"
+      - n: 13
+        title: "Time"
+        periods: "5-6"
+        lessons:
+          - "Day and Night"
+          - "Learning Aboutthe Clock"
+          - "Telling Time to the Hour, Part 1"
+          - "Telling Time to the Hour, Part 2"
+          - "Practice"
+      - n: 14
+        title: "Money"
+        periods: "6-7"
+        lessons:
+          - "Coins"
+          - "Pennies"
+          - "Nickels"
+          - "Dimes"
+          - "Quarters"
+          - "Practice"
   - level: "1A"
     grade: 1
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Numbers to 10"
+        periods: "5-6"
+        lessons:
+          - "Numbers to 10"
+          - "The Number 0"
+          - "Order Numbers"
+          - "Compare Numbers"
+          - "Practice"
+      - n: 2
+        title: "Number Bonds"
+        periods: "7-8"
+        lessons:
+          - "Make 6"
+          - "Make 7"
+          - "Make 8"
+          - "Make 9"
+          - "Make 10, Part 1"
+          - "Make 10, Part 2"
+          - "Practice"
+      - n: 3
+        title: "Addition"
+        periods: "8-9"
+        lessons:
+          - "Addition as Putting Together"
+          - "Addition as Adding More"
+          - "Addition with 0"
+          - "Addition with Number Bonds"
+          - "Addition by Counting On"
+          - "Make Addition Stories"
+          - "Addition Facts"
+          - "Practice"
+      - n: 4
+        title: "Subtraction"
+        periods: "11-12"
+        lessons:
+          - "Subtraction as Taking Away"
+          - "Subtraction as Taking Apart"
+          - "Subtraction by Counting Back"
+          - "Subtraction with 0"
+          - "Make Subtraction Stories"
+          - "Subtraction with Number Bonds"
+          - "Addition and Subtraction"
+          - "Make Addition and Subtraction Story Problems"
+          - "Subtraction Facts"
+          - "Practice"
+      - n: 5
+        title: "Numbers to 20"
+        lessons:
+          - "Numbers to 20"
+          - "Add or Subtract Tens or Ones"
+          - "Order Numbers to 20"
+          - "Compare Numbers to 20"
+          - "Addition"
+          - "Subtraction"
+          - "Practice"
+      - n: 6
+        title: "Addition to 20"
+        lessons:
+          - "Add by Making 10, Part 1"
+          - "Add by Making 10, Part 2"
+          - "Add by Making 10, Part 3"
+          - "Addition Facts to 20"
+          - "Practice"
+      - n: 7
+        title: "Subtraction Within 20"
+        lessons:
+          - "Subtract from 10, Part 1"
+          - "Subtract from 10, Part 2"
+          - "Subtract the Ones First"
+          - "Word Problems"
+          - "Subtraction Facts Within 20"
+          - "Practice"
+      - n: 8
+        title: "Shapes"
+        lessons:
+          - "Solid and Flat Shapes"
+          - "Grouping Shapes"
+          - "Making Shapes"
+          - "Practice"
+      - n: 9
+        title: "Ordinal Numbers"
+        periods: "4-5"
+        lessons:
+          - "Naming Positions"
+          - "Word Problems"
+          - "Practice"
   - level: "1B"
     grade: 1
-    status: pending
+    status: lessons
+    chapters:
+      - n: 10
+        title: "Length"
+        lessons:
+          - "Comparing Lengths Directly"
+          - "Comparing Lengths Indirectly"
+          - "Comparing Lengths with Units"
+          - "Practice"
+      - n: 11
+        title: "Comparing"
+        lessons:
+          - "Subtraction as Comparison"
+          - "Making Comparison Subtraction Stories"
+          - "Picture Graphs"
+          - "Practice"
+      - n: 12
+        title: "Numbers to 40"
+        periods: "5-6"
+        lessons:
+          - "Numbers to 40"
+          - "Tens and Ones"
+          - "Counting by Tens and Ones"
+          - "Comparing"
+          - "Practice"
+      - n: 13
+        title: "Addition and Subtraction Within 40"
+        periods: "8-9"
+        lessons:
+          - "Add Ones"
+          - "Subtract Ones"
+          - "Make the Next Ten"
+          - "Use Addition Facts"
+          - "Subtract from Tens"
+          - "Use Subtraction Facts"
+          - "Add Three Numbers"
+          - "Practice"
+      - n: 14
+        title: "Grouping and Sharing"
+        periods: "4-5"
+        lessons:
+          - "Adding Equal Groups"
+          - "Sharing"
+          - "Grouping"
+          - "Practice"
+      - n: 15
+        title: "Fractions"
+        periods: "4-5"
+        lessons:
+          - "Halves"
+          - "Fourths"
+          - "Practice"
+      - n: 16
+        title: "Numbers to 100"
+        periods: "5-6"
+        lessons:
+          - "Numbers to 100"
+          - "Tens and Ones"
+          - "Count by Ones or Tens"
+          - "Compare Numbers to 100"
+          - "Practice"
+      - n: 17
+        title: "Addition and Subtraction Within 100"
+        periods: "12-13"
+        lessons:
+          - "Add Ones, Part 1"
+          - "Add Tens"
+          - "Add Ones, Part 2"
+          - "Add Tens and Ones, Part 1"
+          - "Add Tens and Ones, Part 2"
+          - "Subtract Ones, Part 1"
+          - "Subtract from Tens"
+          - "Subtract Ones, Part 2"
+          - "Subtract Tens"
+          - "Subtract Tens and Ones, Part 1"
+          - "Subtract Tens and Ones, Part 2"
+          - "Practice"
+      - n: 18
+        title: "Time"
+        periods: "4-5"
+        lessons:
+          - "Telling Time to the Hour"
+          - "Telling Time to the Half Hour"
+          - "Telling Time to the 5 Minutes"
+          - "Practice"
+      - n: 19
+        title: "Money"
+        periods: "6-7"
+        lessons:
+          - "Coins"
+          - "Counting Money"
+          - "Bills"
+          - "Shopping"
+          - "Practice"
   - level: "2A"
     grade: 2
     status: lessons
     chapters:
       - n: 1
-        title: Numbers to 1,000
+        title: "Numbers to 1,000"
         periods: "8-9"
         lessons:
-          - Tens and Ones
-          - Counting by Tens or Ones
-          - Comparing Tens and Ones
-          - Hundreds, Tens, and Ones
-          - Place Value
-          - Comparing Hundreds, Tens, and Ones
-          - Counting by Hundreds, Tens, or Ones
-          - Practice
+          - "Tens and Ones"
+          - "Counting by Tens or Ones"
+          - "Comparing Tens and Ones"
+          - "Hundreds, Tens, and Ones"
+          - "Place Value"
+          - "Comparing Hundreds, Tens, and Ones"
+          - "Counting by Hundreds, Tens, or Ones"
+          - "Practice"
       - n: 2
-        title: Addition and Subtraction, Part 1
+        title: "Addition and Subtraction, Part 1"
         periods: "5-6"
         lessons:
-          - Strategies for Addition
-          - Strategies for Subtraction
-          - Parts and Whole
-          - Comparison
-          - Practice
+          - "Strategies for Addition"
+          - "Strategies for Subtraction"
+          - "Parts and Whole"
+          - "Comparison"
+          - "Practice"
       - n: 3
-        title: Addition and Subtraction, Part 2
+        title: "Addition and Subtraction, Part 2"
         periods: "12-13"
         lessons:
-          - Addition Without Regrouping
-          - Subtraction Without Regrouping
-          - Addition with Regrouping Ones
-          - Addition with Regrouping Tens
-          - Addition with Regrouping Tens and Ones
-          - Practice A
-          - Subtraction with Regrouping from Tens
-          - Subtraction with Regrouping from Hundreds
-          - Subtraction with Regrouping from Two Places
-          - Subtraction with Regrouping across Zeros
-          - Practice B
-          - Practice C
+          - "Addition Without Regrouping"
+          - "Subtraction Without Regrouping"
+          - "Addition with Regrouping Ones"
+          - "Addition with Regrouping Tens"
+          - "Addition with Regrouping Tens and Ones"
+          - "Practice A"
+          - "Subtraction with Regrouping from Tens"
+          - "Subtraction with Regrouping from Hundreds"
+          - "Subtraction with Regrouping from Two Places"
+          - "Subtraction with Regrouping across Zeros"
+          - "Practice B"
+          - "Practice C"
       - n: 4
-        title: Length
+        title: "Length"
         periods: "8-9"
         lessons:
-          - Centimeters
-          - Estimating Length in Centimeters
-          - Meters
-          - Estimating Length in Meters
-          - Inches
-          - Using Rulers
-          - Feet
-          - Practice
+          - "Centimeters"
+          - "Estimating Length in Centimeters"
+          - "Meters"
+          - "Estimating Length in Meters"
+          - "Inches"
+          - "Using Rulers"
+          - "Feet"
+          - "Practice"
       - n: 5
-        title: Weight
+        title: "Weight"
         periods: "5-6"
         lessons:
-          - Grams
-          - Kilograms
-          - Pounds
-          - Practice
+          - "Grams"
+          - "Kilograms"
+          - "Pounds"
+          - "Practice"
       - n: 6
-        title: Multiplication and Division
+        title: "Multiplication and Division"
         lessons:
-          - Multiplication, Part 1
-          - Multiplication, Part 2
-          - Practice A
-          - Division, Part 1
-          - Division, Part 2
-          - Multiplication and Division
-          - Practice B
+          - "Multiplication, Part 1"
+          - "Multiplication, Part 2"
+          - "Practice A"
+          - "Division, Part 1"
+          - "Division, Part 2"
+          - "Multiplication and Division"
+          - "Practice B"
       - n: 7
-        title: Multiplication and Division of 2, 5, and 10
+        title: "Multiplication and Division of 2, 5, and 10"
         lessons:
-          - The Multiplication Table of 5
-          - Multiplication Facts of 5
-          - Practice A
-          - The Multiplication Table of 2
-          - Multiplication Facts of 2
-          - Practice B
-          - The Multiplication Table of 10
-          - Dividing by 2
-          - Dividing by 5 and 10
-          - Practice C
-          - Word Problems
+          - "The Multiplication Table of 5"
+          - "Multiplication Facts of 5"
+          - "Practice A"
+          - "The Multiplication Table of 2"
+          - "Multiplication Facts of 2"
+          - "Practice B"
+          - "The Multiplication Table of 10"
+          - "Dividing by 2"
+          - "Dividing by 5 and 10"
+          - "Practice C"
+          - "Word Problems"
   - level: "2B"
     grade: 2
     status: lessons
     chapters:
       - n: 8
-        title: Mental Calculation
+        title: "Mental Calculation"
         periods: "10-11"
         lessons:
-          - Adding Ones Mentally
-          - Adding Tens Mentally
-          - Making 100
-          - Adding 97, 98, or 99
-          - Practice A
-          - Subtracting Ones Mentally
-          - Subtracting Tens Mentally
-          - Subtracting 97, 98, or 99
-          - Practice B
-          - Practice C
+          - "Adding Ones Mentally"
+          - "Adding Tens Mentally"
+          - "Making 100"
+          - "Adding 97, 98, or 99"
+          - "Practice A"
+          - "Subtracting Ones Mentally"
+          - "Subtracting Tens Mentally"
+          - "Subtracting 97, 98, or 99"
+          - "Practice B"
+          - "Practice C"
       - n: 9
-        title: Multiplication and Division of 3 and 4
+        title: "Multiplication and Division of 3 and 4"
         periods: "9-10"
         lessons:
-          - The Multiplication Table of 3
-          - Multiplication Facts of 3
-          - Dividing by 3
-          - Practice A
-          - The Multiplication Table of 4
-          - Multiplication Facts of 4
-          - Dividing by 4
-          - Practice B
-          - Practice C
+          - "The Multiplication Table of 3"
+          - "Multiplication Facts of 3"
+          - "Dividing by 3"
+          - "Practice A"
+          - "The Multiplication Table of 4"
+          - "Multiplication Facts of 4"
+          - "Dividing by 4"
+          - "Practice B"
+          - "Practice C"
       - n: 10
-        title: Money
+        title: "Money"
         periods: "8-9"
         lessons:
-          - Making $1
-          - Dollars and Cents
-          - Making Change
-          - Comparing Money
-          - Practice A
-          - Adding Money
-          - Subtracting Money
-          - Practice B
+          - "Making $1"
+          - "Dollars and Cents"
+          - "Making Change"
+          - "Comparing Money"
+          - "Practice A"
+          - "Adding Money"
+          - "Subtracting Money"
+          - "Practice B"
       - n: 11
-        title: Fractions
+        title: "Fractions"
         periods: "7-8"
         lessons:
-          - Halves and Fourths
-          - Writing Unit Fractions
-          - Writing Fractions
-          - Fractions that Make 1 Whole
-          - Comparing and Ordering Fractions
-          - Practice
+          - "Halves and Fourths"
+          - "Writing Unit Fractions"
+          - "Writing Fractions"
+          - "Fractions that Make 1 Whole"
+          - "Comparing and Ordering Fractions"
+          - "Practice"
       - n: 12
-        title: Time
+        title: "Time"
         periods: "4-5"
         lessons:
-          - Telling Time
-          - Time Intervals
-          - A.M. and P.M.
-          - Practice
+          - "Telling Time"
+          - "Time Intervals"
+          - "A.M. and P.M."
+          - "Practice"
       - n: 13
-        title: Capacity
+        title: "Capacity"
         periods: "3-4"
         lessons:
-          - Comparing Capacity
-          - Units of Capacity
-          - Practice
+          - "Comparing Capacity"
+          - "Units of Capacity"
+          - "Practice"
       - n: 14
-        title: Graphs
+        title: "Graphs"
         periods: "3-4"
         lessons:
-          - Picture Graphs
-          - Bar Graphs
-          - Practice
+          - "Picture Graphs"
+          - "Bar Graphs"
+          - "Practice"
       - n: 15
-        title: Shapes
+        title: "Shapes"
         periods: "8-9"
         lessons:
-          - Straight and Curved Sides
-          - Polygons
-          - Semicircles and Quarter-circles
-          - Patterns
-          - Solid Shapes
-          - Practice
+          - "Straight and Curved Sides"
+          - "Polygons"
+          - "Semicircles and Quarter-circles"
+          - "Patterns"
+          - "Solid Shapes"
+          - "Practice"
   - level: "3A"
     grade: 3
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Numbers to 10,000"
+        periods: "11-12"
+        lessons:
+          - "Numbers to 10,000"
+          - "Place Value, Part 1"
+          - "Place Value, Part 2"
+          - "Comparing Numbers"
+          - "The Number Line"
+          - "Practice A"
+          - "Number Patterns"
+          - "Rounding to the Nearest Thousand"
+          - "Rounding to the Nearest Hundred"
+          - "Rounding to the Nearest Ten"
+          - "Practice B"
+      - n: 2
+        title: "Addition and Subtraction, Part 1"
+        periods: "12-13"
+        lessons:
+          - "Mental Addition, Part 1"
+          - "Mental Addition, Part 2"
+          - "Mental Subtraction, Part 1"
+          - "Mental Subtraction, Part 2"
+          - "Making 100 and 1,000"
+          - "Strategies for Numbers Close to Hundreds"
+          - "Practice A"
+          - "Sum and Difference"
+          - "Word Problems, Part 1"
+          - "Word Problems, Part 2"
+          - "2-Step Word Problems"
+          - "Practice B"
+      - n: 3
+        title: "Addition and Subtraction, Part 2"
+        periods: "7-8"
+        lessons:
+          - "Addition with Regrouping"
+          - "Subtraction with Regrouping, Part 1"
+          - "Subtraction with Regrouping, Part 2"
+          - "Estimating Sums and Differences, Part 1"
+          - "Estimating Sums and Differences, Part 2"
+          - "Word Problems"
+          - "Practice"
+      - n: 4
+        title: "Multiplication and Division"
+        periods: "11-12"
+        lessons:
+          - "Looking Back at Multiplication"
+          - "Strategies for Finding the Product"
+          - "Looking Back at Division"
+          - "Multiplying and Dividing with 0 and 1"
+          - "Division with Remainders"
+          - "Odd and Even Numbers"
+          - "Word Problems, Part 1"
+          - "Word Problems, Part 2"
+          - "2-Step Word Problems"
+          - "Practice"
+      - n: 5
+        title: "Multiplication"
+        periods: "9-10"
+        lessons:
+          - "Multiplying Ones, Tens, and Hundreds"
+          - "Multiplication Without Regrouping"
+          - "Multiplication with Regrouping Tens"
+          - "Multiplication with Regrouping Ones"
+          - "Multiplication with Regrouping Ones and Tens"
+          - "Practice A"
+          - "Multiplying a 3-Digit Number with Regrouping Once"
+          - "Multiplication with Regrouping More Than Once"
+          - "Practice B"
+      - n: 6
+        title: "Division"
+        periods: "9-10"
+        lessons:
+          - "Dividing Tens and Hundreds"
+          - "Dividing a 2-Digit Number by 2 Part 1"
+          - "Dividing a 2-Digit Number by 2 Part 2"
+          - "Dividing a 2-Digit Number by 3,4, and 5"
+          - "Practice A"
+          - "Dividing a 3-Digit Number by 2"
+          - "Dividing a 3-Digit Number by 3,4, and 5"
+          - "Dividing a 3-Digit Number, Quotient is 2 Digits"
+          - "Practice B"
+      - n: 7
+        title: "Graphs and Tables"
+        periods: "4-5"
+        lessons:
+          - "Picture Graphs and Bar Graphs"
+          - "Bar Graphs and Tables"
+          - "Practice"
   - level: "3B"
     grade: 3
-    status: pending
+    status: lessons
+    chapters:
+      - n: 8
+        title: "Multiplying and Dividing with 6, 7, 8, and 9"
+        periods: "10-11"
+        lessons:
+          - "The Multiplication Table of 6"
+          - "The Multiplication Table of 7"
+          - "Multiplying by 6and 7"
+          - "Dividing by 6and 7"
+          - "Practice A"
+          - "The Multiplication Table of 8"
+          - "The Multiplication Table of 9"
+          - "Multiplying by 8and 9"
+          - "Dividing by 8and 9"
+          - "Practice B"
+      - n: 9
+        title: "Fractions, Part 1"
+        periods: "5-6"
+        lessons:
+          - "Fractions of a Whole"
+          - "Fractions on a Number Line"
+          - "Comparing Fractions with Like Denominators"
+          - "Comparing Fractions with Like Numerators"
+          - "Practice"
+      - n: 10
+        title: "Fractions, Part 2"
+        periods: "9-10"
+        lessons:
+          - "Equivalent Fractions"
+          - "Finding Equivalent Fractions"
+          - "Simplifying Fractions"
+          - "Comparing Fractions, Part 1"
+          - "Comparing Fractions, Part 2"
+          - "Practice A"
+          - "Adding and Subtracting Fractions, Part 1"
+          - "Adding and Subtracting Fractions, Part 2"
+          - "Practice B"
+      - n: 11
+        title: "Measurement"
+        periods: "9-10"
+        lessons:
+          - "Meters and Centimeters"
+          - "Subtracting from Meters"
+          - "Kilometers"
+          - "Subtracting from Kilometers"
+          - "Liters and Milliliters"
+          - "Kilograms and Grams"
+          - "Word Problems"
+          - "Practice"
+      - n: 12
+        title: "Geometry"
+        periods: "7-8"
+        lessons:
+          - "Circles"
+          - "Angles"
+          - "Right Angles"
+          - "Triangles"
+          - "Properties of Triangles"
+          - "Properties of Quadrilaterals"
+          - "Using a Compass"
+          - "Practice"
+      - n: 13
+        title: "Area and Perimeter"
+        periods: "9-10"
+        lessons:
+          - "Area"
+          - "Units of Area"
+          - "Area of Rectangles"
+          - "Area of Composite Figures"
+          - "Practice A"
+          - "Perimeter"
+          - "Perimeter of Rectangles"
+          - "Area and Perimeter"
+          - "Practice B"
+      - n: 14
+        title: "Time"
+        periods: "7-8"
+        lessons:
+          - "Units of Time"
+          - "Calculating Time, Part 1"
+          - "Practice A"
+          - "Calculating Time, Part 2"
+          - "Calculating Time, Part 3"
+          - "Calculating Time, Part 4"
+          - "Practice B"
+      - n: 15
+        title: "Money"
+        periods: "8-9"
+        lessons:
+          - "Dollars and Cents"
+          - "Making$10"
+          - "Adding Money"
+          - "Subtracting Money"
+          - "Word Problems"
+          - "Practice"
   - level: "4A"
     grade: 4
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Numbers to One Million"
+        periods: "8-9"
+        lessons:
+          - "Numbers to 100,000"
+          - "Numbers to 1,000,000"
+          - "Number Patterns"
+          - "Comparing and Ordering Numbers"
+          - "Rounding 5-digit Numbers"
+          - "Rounding 6-digit Numbers"
+          - "Calculations and Place Value"
+          - "Practice"
+      - n: 2
+        title: "Addition and Subtraction"
+        periods: "6-7"
+        lessons:
+          - "Addition"
+          - "Subtraction"
+          - "Other Ways to Add and Subtract, Part 1"
+          - "Other Ways to Add and Subtract, Part 2"
+          - "Word Problems"
+          - "Practice"
+      - n: 3
+        title: "Multiples and Factors"
+        periods: "6-7"
+        lessons:
+          - "Multiples"
+          - "Common Multiples"
+          - "Factors"
+          - "Prime Numbers and Composite Numbers"
+          - "Common Factors"
+          - "Practice"
+      - n: 4
+        title: "Multiplication"
+        periods: "8-9"
+        lessons:
+          - "Mental Math for Multiplication"
+          - "Multiplying by a 1-Digit Number, Part 1"
+          - "Multiplying by a 1-Digit Number, Part 2"
+          - "Practice A"
+          - "Multiplying by a Multiple of 10"
+          - "Multiplying by a 2-Digit Number, Part 1"
+          - "Multiplying by a 2-Digit Number, Part 2"
+          - "Practice B"
+      - n: 5
+        title: "Division"
+        periods: "8-9"
+        lessons:
+          - "Mental Math for Division"
+          - "Estimation and Division"
+          - "Dividing 4-Digit Numbers"
+          - "Practice A"
+          - "Word Problems"
+          - "Challenging Word Problems"
+          - "Practice B"
+      - n: 6
+        title: "Fractions"
+        periods: "8-9"
+        lessons:
+          - "Equivalent Fractions"
+          - "Comparing and Ordering Fractions"
+          - "Improper Fractions and Mixed Numbers"
+          - "Practice A"
+          - "Expressing an Improper Fraction as a Mixed Number"
+          - "Expressing a Mixed Number as an Improper Fraction"
+          - "Fractions and Division"
+          - "Practice B"
+      - n: 7
+        title: "Adding and Subtracting Fractions"
+        periods: "7-8"
+        lessons:
+          - "Adding and Subtracting Fractions, Part 1"
+          - "Adding and Subtracting Fractions, Part 2"
+          - "Adding a Mixed Number and a Fraction"
+          - "Adding Mixed Numbers"
+          - "Subtracting a Fraction from a Mixed Number"
+          - "Subtracting Mixed Numbers"
+          - "Practice"
+      - n: 8
+        title: "Multiplying a Fraction and a Whole Number"
+        periods: "9-10"
+        lessons:
+          - "Multiplying a Unit Fraction by a Whole Number"
+          - "Multiplying a Fraction by a Whole Number, Part 1"
+          - "Multiplying a Fraction by a Whole Number, Part 2"
+          - "Fraction of a Set"
+          - "Multiplying a Whole Number by a Fraction, Part 1"
+          - "Multiplying a Whole Number by a Fraction, Part 2"
+          - "Word Problems, Part 1"
+          - "Word Problems, Part 2"
+          - "Practice"
+      - n: 9
+        title: "Line Graphs and Line Plots"
+        periods: "5-6"
+        lessons:
+          - "Line Graphs"
+          - "Drawing Line Graphs"
+          - "Line Plots"
+          - "Practice"
   - level: "4B"
     grade: 4
-    status: pending
+    status: lessons
+    chapters:
+      - n: 10
+        title: "Measurement"
+        periods: "9-10"
+        lessons:
+          - "Metric Units of Measurement"
+          - "Customary Units of Length"
+          - "Customary Units of Weight"
+          - "Customary Units of Capacity"
+          - "Units of Time"
+          - "Practice A"
+          - "Fractions and Measurement, Part 1"
+          - "Fractions and Measurement, Part 2"
+          - "Practice B"
+      - n: 11
+        title: "Area and Perimeter"
+        periods: "6-7"
+        lessons:
+          - "Area of Rectangles, Part 1"
+          - "Area of Rectangles, Part 2"
+          - "Area of Composite Figures"
+          - "Perimeter, Part 1"
+          - "Perimeter, Part 2"
+          - "Practice"
+      - n: 12
+        title: "Decimals"
+        periods: "10-11"
+        lessons:
+          - "Tenths, Part 1"
+          - "Tenths, Part 2"
+          - "Hundredths, Part 1"
+          - "Hundredths, Part 2"
+          - "Expressing Decimals as Fractions in Simplest Form"
+          - "Expressing Fractions as Decimals"
+          - "Practice A"
+          - "Comparing and Ordering Decimals"
+          - "Rounding Decimals"
+          - "Practice B"
+      - n: 13
+        title: "Addition and Subtraction of Decimals"
+        periods: "10-11"
+        lessons:
+          - "Adding and Subtracting Tenths"
+          - "Adding Tenths with Regrouping"
+          - "Subtracting Tenths with Regrouping"
+          - "Practice A"
+          - "Adding Hundredths"
+          - "Subtracting from 1 and 0.1"
+          - "Subtracting Hundredths"
+          - "Money, Decimals, and Fractions"
+          - "Practice B"
+      - n: 14
+        title: "Multiplication and Division of Decimals"
+        periods: "9-10"
+        lessons:
+          - "Multiplying Tenths and Hundredths"
+          - "Multiplying Decimals by a Whole Number, Part 1"
+          - "Multiplying Decimals by a Whole Number, Part 2"
+          - "Practice A"
+          - "Dividing Tenths and Hundredths"
+          - "Dividing Decimals by a Whole Number, Part 1"
+          - "Dividing Decimals by a Whole Number, Part 2"
+          - "Dividing Decimals by a Whole Number, Part 3"
+          - "Practice B"
+      - n: 15
+        title: "Angles"
+        periods: "6-7"
+        lessons:
+          - "The Size of Angles"
+          - "Measuring Angles"
+          - "Drawing Angles"
+          - "Adding and Subtracting Angles"
+          - "Reflex Angles"
+          - "Practice"
+      - n: 16
+        title: "Lines and Shapes"
+        periods: "7-8"
+        lessons:
+          - "Perpendicular Lines"
+          - "Parallel Lines"
+          - "Drawing Perpendicular and Parallel Lines"
+          - "Quadrilaterals"
+          - "Lines of Symmetry"
+          - "Symmetrical Figures and Patterns"
+          - "Practice"
+      - n: 17
+        title: "Properties of Cuboids"
+        periods: "6-7"
+        lessons:
+          - "Cuboids"
+          - "Nets of Cuboids"
+          - "Faces and Edges of Cuboids"
+          - "Practice"
   - level: "5A"
     grade: 5
-    status: pending
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Whole Numbers"
+        periods: "6-7"
+        lessons:
+          - "Numbers to One Billion"
+          - "Multiplying by 10,100, and 1,000"
+          - "Dividing by 10,100, and 1,000"
+          - "Multiplying by Tens, Hundreds, and Thousands"
+          - "Dividing by Tens, Hundreds, and Thousands"
+          - "Practice"
+      - n: 2
+        title: "Writing and Evaluating Expressions"
+        periods: "7-8"
+        lessons:
+          - "Expressions with Parentheses"
+          - "Order of Operations, Part 1"
+          - "Order of Operations, Part 2"
+          - "Other Ways to Write and Evaluate Expressions"
+          - "Word Problems, Part 1"
+          - "Word Problems, Part 2"
+          - "Practice"
+      - n: 3
+        title: "Multiplication and Division"
+        periods: "9-10"
+        lessons:
+          - "Multiplying by a 2-digit Number, Part 1"
+          - "Multiplying by a 2-digit Number, Part 2"
+          - "Practice A"
+          - "Dividing by a Multiple of Ten"
+          - "Divide a 2-digit Number by a 2-digit Number"
+          - "Divide a 3-digit Number by a 2-digit Number, Part 1"
+          - "Divide a 3-digit Number by a 2-digit Number, Part 2"
+          - "Divide a 4-digit Number by a 2-digit Number"
+          - "Practice B"
+      - n: 4
+        title: "Addition and Subtraction of Fractions"
+        periods: "10-11"
+        lessons:
+          - "Fractions and Division"
+          - "Adding Unlike Fractions"
+          - "Subtracting Unlike Fractions"
+          - "Practice A"
+          - "Adding Mixed Numbers, Part 1"
+          - "Adding Mixed Numbers, Part 2"
+          - "Subtracting Mixed Numbers, Part 1"
+          - "Subtracting Mixed Numbers, Part 2"
+          - "Practice B"
+      - n: 5
+        title: "Multiplication of Fractions"
+        periods: "11-12"
+        lessons:
+          - "Multiplying a Fraction by a Whole Number"
+          - "Multiplying a Whole Number by a Fraction"
+          - "Word Problems, Part 1"
+          - "Practice A"
+          - "Multiplying a Fraction by a Unit Fraction"
+          - "Multiplying a Fraction by a Fraction, Part 1"
+          - "Multiplying a Fraction by a Fraction, Part 2"
+          - "Multiplying Mixed Numbers"
+          - "Word Problems, Part 2"
+          - "Fractions and Reciprocals"
+          - "Practice B"
+      - n: 6
+        title: "Division of Fractions"
+        periods: "7-8"
+        lessons:
+          - "Dividing a Unit Fraction by a Whole Number"
+          - "Dividing a Fraction by a Whole Number"
+          - "Practice A"
+          - "Dividing a Whole Number by a Unit Fraction"
+          - "Dividing a Whole Number by a Fraction"
+          - "Word Problems"
+          - "Practice B"
+      - n: 7
+        title: "Measurement"
+        periods: "7-8"
+        lessons:
+          - "Fractions and Measurement Conversions"
+          - "Fractions and Area"
+          - "Practice A"
+          - "Area of a Triangle, Part 1"
+          - "Area of a Triangle, Part 2"
+          - "Area of Complex Figures"
+          - "Practice B"
+      - n: 8
+        title: "Volume of Solid Figures"
+        periods: "9-10"
+        lessons:
+          - "Cubic Units"
+          - "Volume of Cuboids"
+          - "Finding the Length of an Edge"
+          - "Practice A"
+          - "Volume of Complex Shapes"
+          - "Volume and Capacity, Part 1"
+          - "Volume and Capacity, Part 2"
+          - "Practice B"
   - level: "5B"
     grade: 5
-    status: pending
+    status: lessons
+    chapters:
+      - n: 9
+        title: "Decimals"
+        periods: "10-11"
+        lessons:
+          - "Thousandths"
+          - "Place Value to Thousandths"
+          - "Comparing Decimals"
+          - "Rounding Decimals"
+          - "Practice A"
+          - "Multiply Decimals by 10,100, and 1,000"
+          - "Divide Decimals by 10,100, and 1,000"
+          - "Conversion of Measures"
+          - "Mental Calculation"
+          - "Practice B"
+      - n: 10
+        title: "The Four Operations of Decimals"
+        periods: "10-11"
+        lessons:
+          - "Adding Decimals to Thousandths"
+          - "Subtracting Decimals"
+          - "Multiplying by 0.1 or 0.01"
+          - "Multiplying by a Decimal"
+          - "Practice A"
+          - "Dividing by a Whole Number, Part 1"
+          - "Dividing by a Whole Number, Part 2"
+          - "Dividing a Whole Number by 0.1 and 0.01"
+          - "Dividing a Whole Number by a Decimal"
+          - "Practice B"
+      - n: 11
+        title: "Geometry"
+        periods: "10-11"
+        lessons:
+          - "Measuring Angles"
+          - "Angles and Lines"
+          - "Classifying Triangles"
+          - "The Sum of the Angles in a Triangle"
+          - "The Exterior Angle of a Triangle"
+          - "Classifying Quadrilaterals"
+          - "Angles of Quadrilaterals, Part 1"
+          - "Angles of Quadrilaterals, Part 2"
+          - "Drawing Triangles and Quadrilaterals"
+          - "Practice"
+      - n: 12
+        title: "Data Analysis and Graphs"
+        periods: "7-8"
+        lessons:
+          - "Average, Part 1"
+          - "Average, Part 2"
+          - "Line Plots"
+          - "Coordinate Graphs"
+          - "Straight Line Graphs"
+          - "Practice"
+      - n: 13
+        title: "Ratio"
+        lessons:
+          - "Finding the Ratio"
+          - "Equivalent Ratios"
+          - "Finding a Quantity"
+          - "Comparing Three Quantities"
+          - "Word Problems"
+          - "Practice"
+      - n: 14
+        title: "Rate"
+        lessons:
+          - "Finding the Rate"
+          - "Rate Problems, Part 1"
+          - "Rate Problems, Part 2"
+          - "Word Problems"
+          - "Practice"
+      - n: 15
+        title: "Percentage"
+        periods: "10-11"
+        lessons:
+          - "Meaning of Percentage"
+          - "Expressing Percentages as Fractions"
+          - "Percentages and Decimals"
+          - "Expressing Fractions as Percentages"
+          - "Practice A"
+          - "Percentage of a Quantity"
+          - "Word Problems"
+          - "Practice B"
   - level: "6A"
     grade: 6
-    status: chapters
+    status: lessons
     chapters:
       - n: 1
-        title: Whole Numbers
+        title: "Whole Numbers"
+        lessons:
+          - "Order of Operations"
+          - "Factors and Multiples"
+          - "Multiplication"
+          - "Division"
       - n: 2
-        title: Fractions
+        title: "Fractions"
+        lessons:
+          - "Multiplication of Fractions"
+          - "Division of Fractions"
       - n: 3
-        title: Decimals
+        title: "Decimals"
+        lessons:
+          - "Addition and Subtraction of Decimals"
+          - "Multiplication of Decimals"
+          - "Division of Decimals"
       - n: 4
-        title: Metric Measurements and Decimals
+        title: "Negative Numbers"
+        lessons:
+          - "Positive and Negative Numbers"
+          - "Comparing Positive and Negative Numbers"
       - n: 5
-        title: Ratios
+        title: "Ratios"
+        lessons:
+          - "Ratios and Equivalent Ratios"
+          - "Ratios and Fractions"
       - n: 6
-        title: Rate
+        title: "Rate"
+        lessons:
+          - "Average and Rate"
+          - "Unit Rate"
+          - "Speed"
       - n: 7
-        title: Percent
+        title: "Percent"
+        lessons:
+          - "Meaning of Percent"
+          - "Percentage of a Quantity"
   - level: "6B"
     grade: 6
-    status: chapters
+    status: lessons
     chapters:
       - n: 8
-        title: Algebraic Expressions
+        title: "Algebraic Expressions"
+        lessons:
+          - "Writing and Evaluating Algebraic Expressions"
+          - "Simplifying Algebraic Expressions"
       - n: 9
-        title: Equations and Inequalities
+        title: "Equations and Inequalities"
+        lessons:
+          - "Equations"
+          - "Inequalities"
       - n: 10
-        title: Coordinates and Graphs
+        title: "Coordinates and Graphs"
+        lessons:
+          - "The Coordinate Plane"
+          - "Distance between Coordinate Pairs"
+          - "Changes in Quantities"
       - n: 11
-        title: Area of Plane Figures
+        title: "Area of Plane Figures"
+        lessons:
+          - "Area of Rectangles and Parallelograms"
+          - "Area of Triangles"
+          - "Area of Trapezoids"
       - n: 12
-        title: Volume and Surface Area of Solids
+        title: "Volume and Surface Area of Solids"
+        lessons:
+          - "Volume of Rectangular Prisms"
+          - "Surface Area of Prisms"
       - n: 13
-        title: Displaying and Comparing Data
+        title: "Displaying and Comparing Data"
+        lessons:
+          - "Statistical Variability"
+          - "Displaying Numerical Data"
+          - "Measures of Variability and Box Plots"
   - level: "7A"
     grade: 7
-    status: chapters
+    status: lessons
     chapters:
       - n: 1
-        title: Factors and Multiples
+        title: "Factors and Multiples"
+        lessons:
+          - "Factors and Multiples"
+          - "Prime Factorization and Exponential Notation"
+          - "Greatest Common Factor (GCF)"
+          - "Least Common Multiple (LCM)"
+          - "Square Roots and Cube Roots"
       - n: 2
-        title: Addition and Additive Inverse
+        title: "Real Numbers"
+        lessons:
+          - "Idea of Negative Numbers and the Number Line"
+          - "Addition and Additive Inverse"
+          - "Subtraction and Absolute Value of the Difference"
+          - "Multiplication, Division, and Combined Operations of Integers"
+          - "Rational Numbers"
+          - "Real Numbers and Use of Calculators"
+          - "Rounding Numbers to Decimal Places"
       - n: 3
-        title: Subtraction and Absolute Value of the Difference
+        title: "Introduction to Algebra"
+        lessons:
+          - "The Use of Letters in Algebra"
+          - "Evaluation of Algebraic Expressions and Formulas"
+          - "Writing Algebraic Expressions to Represent Real-world Situations"
       - n: 4
-        title: Multiplication, Division, and Combined Operations of Integers
+        title: "Algebraic Manipulation"
+        lessons:
+          - "Like Terms and Unlike Terms"
+          - "Distributive Law, Addition, and Subtraction of Linear Algebraic Expressions"
+          - "Simplification of Linear Algebraic Expressions"
+          - "Factorization by Extracting Common Factors"
+          - "Factorization by Grouping Terms"
       - n: 5
-        title: Rational Numbers
+        title: "Simple Equations in One Variable"
+        lessons:
+          - "Simple Linear Equations in One Variable"
+          - "Equations Involving Parentheses"
+          - "Simple Fractional Equations"
+          - "Forming Linear Equations to Solve Problems"
       - n: 6
-        title: Real Numbers and Use of Calculators
+        title: "Ratio, Rate, and Speed"
+        lessons:
+          - "Ratios Involving Rational Numbers"
+          - "Average Rate"
+          - "Speed"
       - n: 7
-        title: Rounding Numbers to Decimal Places
+        title: "Percentage"
+        lessons:
+          - "Meaning of Percentage"
+          - "Reverse Percentages"
+          - "Percentage Increase and Decrease"
+          - "Discount and Sales Tax"
       - n: 8
-        title: Angles, Triangles, and Quadrilaterals
+        title: "Angles, Triangles, and Quadrilaterals"
+        lessons:
+          - "Points, Lines, and Planes"
+          - "Angles"
+          - "Perpendicular Bisectors and Angle Bisectors"
+          - "Triangles"
+          - "Quadrilaterals"
   - level: "7B"
     grade: 7
-    status: chapters
+    status: lessons
     chapters:
       - n: 9
-        title: Number Patterns
+        title: "Number Patterns"
+        lessons:
+          - "Number Patterns and Sequences"
+          - "General Term of a Sequence"
       - n: 10
-        title: Coordinates and Linear Graphs
+        title: "Coordinates and Linear Graphs"
+        lessons:
+          - "Cartesian Coordinate System"
+          - "Linear Graphs"
+          - "Slopes of Linear Graphs"
       - n: 11
-        title: Inequalities
+        title: "Inequalities"
+        lessons:
+          - "Solving Simple Inequalities"
+          - "More Properties of Inequalities"
+          - "Simple Linear Inequalities"
+          - "Applications of Simple Inequalities"
       - n: 12
-        title: Perimeters and Areas of Plane Figures
+        title: "Perimeters and Areas of Plane Figures"
+        lessons:
+          - "Perimeters and Areas of a Square, a Rectangles, and a Triangle"
+          - "Circumference and Area of a Circle"
+          - "Area of a Parallelogram"
+          - "Area of a Trapezoid"
+          - "Perimeters and Areas of Composite Plane Figures"
       - n: 13
-        title: Volumes and Surface Areas of Solids
+        title: "Volumes and Surface Areas of Solids"
+        lessons:
+          - "Volumes and Total Surface Areas of a Cube and a Cuboid"
+          - "Volume and Total Surface Area of a Prism"
+          - "Volumes and Surface Areas of Composite Solids"
       - n: 14
-        title: Proportions
+        title: "Proportions"
+        lessons:
+          - "Scale Drawings"
+          - "Map Scale and Calculation of Area"
+          - "Direct Proportion"
       - n: 15
-        title: Data Handling
+        title: "Data Handling"
+        lessons:
+          - "Collection of Data"
+          - "Dot Plots"
+          - "Measure of Center: Mean"
+          - "Measure of Center: Median"
+          - "Mode"
       - n: 16
-        title: Probability of Simple Events
+        title: "Probability of Simple Events"
+        lessons:
+          - "Set Notation"
+          - "The Meaning of Probability"
       - n: 17
-        title: Probability of Combined Events
+        title: "Probability of Combined Events"
+        lessons:
+          - "Probabilities of Simple Combined Events"
+          - "Mutually Exclusive Events"
+          - "Independent Events"
+          - "Further Probabilities"
   - level: "8A"
     grade: 8
-    status: chapters
+    status: lessons
     chapters:
       - n: 1
-        title: Exponents and Scientific Notation
+        title: "Exponents and Scientific Notation"
+        lessons:
+          - "Positive Exponents and the Laws of Exponents"
+          - "Zero and Negative Integral Exponents"
+          - "Fractional Exponents"
+          - "Comparing Exponents"
+          - "Scientific Notation"
+          - "Rounding Numbers to a Specified Number of Significant Figures"
+          - "Estimations and Accuracy of Calculators"
       - n: 2
-        title: Linear Equations in Two Variables
+        title: "Linear Equations in Two Variables"
+        lessons:
+          - "Linear Equations in Two Variables"
+          - "Solving Simultaneous Linear Equations in Two Variables using the Graphical Method"
+          - "Solving Simultaneous Linear Equations in Two Variables using the Substitution Method"
+          - "Solving Simultaneous Linear Equations in Two Variables using the Elimination Method"
+          - "Solving Problems using Simultaneous Equations"
       - n: 3
-        title: Expansion and Factorization of Algebraic Expressions
+        title: "Expansion and Factorization of Algebraic Expressions"
+        lessons:
+          - "Expansion of the Products of Algebraic Expressions"
+          - "Special Products of Algebraic Expressions"
       - n: 4
-        title: Quadratic Factorization and Equations
+        title: "Quadratic Factorization and Equations"
+        lessons:
+          - "Factorization of ax 2+bx+c"
+          - "Solving Quadratic Equations by Factorization"
       - n: 5
-        title: Simple Algebraic Fractions
+        title: "Simple Algebraic Fractions"
+        lessons:
+          - "Simplifying Simple Algebraic Fractions"
+          - "Multiplication and Division of Algebraic Fractions"
+          - "Addition and Subtraction of Algebraic Fractions"
+          - "Fractional Equations"
+          - "More about Formulas"
       - n: 6
-        title: Congruence and Similarity
+        title: "Congruence and Similarity"
+        lessons:
+          - "Congruence and Reflections"
+          - "Translations, Rotations, and Combining Transformations"
+          - "Similarity"
+          - "Enlargements and Similarity"
       - n: 7
-        title: Parallel Lines and Angles in Triangles and Polygons
+        title: "Parallel Lines and Angles in Triangles and Polygons"
+        lessons:
+          - "Angles formed by Parallel Lines and Transversals"
+          - "Interior and Exterior Angles of a Triangle"
+          - "Angle Properties of Special Quadrilaterals"
+          - "Polygons"
   - level: "8B"
     grade: 8
-    status: chapters
+    status: lessons
     chapters:
       - n: 8
-        title: Graphs of Linear and Quadratic Functions
+        title: "Graphs of Linear and Quadratic Functions"
+        lessons:
+          - "Linear Function"
+          - "Graphs of Quadratic Functions"
       - n: 9
-        title: Graphs in Practical Situations
+        title: "Graphs in Practical Situations"
+        lessons:
+          - "Tables, Charts and Graphs"
+          - "Distance-Time Graphs"
       - n: 10
-        title: Pythagorean Theorem
+        title: "Pythagorean Theorem"
+        lessons:
+          - "Pythagorean Theorem"
+          - "The Converse of Pythagorean Theorem"
+          - "Applications of Pythagoras Theorem"
       - n: 11
-        title: Coordinate Geometry
+        title: "Coordinate Geometry"
+        lessons:
+          - "Distance Between Two Points"
+          - "Slope of a Straight Line"
+          - "Equation of a Straight Line"
       - n: 12
-        title: Mensuration of Pyramids, Cylinders, Cones, and Spheres
+        title: "Mensuration of Pyramids, Cylinders, Cones and Spheres"
+        lessons:
+          - "Pyramids"
+          - "Cylinders"
+          - "Cones"
+          - "Spheres"
       - n: 13
-        title: Data Analysis
+        title: "Data Analysis"
+        lessons:
+          - "Organizing Data in Frequency Tables"
+          - "Bar Graphs and Histograms"
+          - "Line Graphs and Scatter Plots"
       - n: 14
-        title: More About Quadratic Equations
+        title: "More About Quadratic Equations"
+        lessons:
+          - "Solving Quadratic Equations by Factorization"
+          - "Completing the Square Method"
+          - "Quadratic Formula"
+          - "Graphical Method"
+          - "Applications of Quadratic Equations"

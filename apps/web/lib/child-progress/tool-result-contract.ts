@@ -52,6 +52,7 @@ export const progressResultSourceSchema = z.enum([
   "recheck",
   "onboarding_walk",
   "legacy",
+  "lesson_listen",
 ]);
 
 const nestedProgressUpdateSchema = z.strictObject({

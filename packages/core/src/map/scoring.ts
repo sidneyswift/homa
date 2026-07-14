@@ -1,5 +1,6 @@
 import { aheadCapForAge } from "./bands";
 import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem } from "./bank";
+import { domainForBankItem } from "./item-domains";
 
 /**
  * The deterministic map scorer. Pure functions, no I/O, no model calls:
@@ -96,6 +97,16 @@ export interface SubjectScore {
    * growing subject can be named concretely instead of generically.
    */
   frontierStatement: string | null;
+  /**
+   * The frontier item's id and its taxonomy domain (age-aware knowledge
+   * plan, KC-1). This is the specific skill line the child is working,
+   * so the fleet demand queue and the corpus matcher can key research by
+   * domain (math.multiplication-division) instead of the whole subject.
+   * Both null when no frontier item was identified (mirrors
+   * frontierStatement) or the item carries no domain assignment.
+   */
+  frontierItemId: string | null;
+  frontierDomain: string | null;
   exposureBased: boolean;
 }
 
@@ -144,6 +155,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         strongestObservedStatement: null,
         strongestObservedMonths: null,
         frontierStatement: null,
+        frontierItemId: null,
+        frontierDomain: null,
         exposureBased: subject.exposureBased,
       };
     }
@@ -153,6 +166,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     let strongestAnchor: number | null = null;
     let sawNotYet = false;
     let frontierStatement: string | null = null;
+    let frontierItemId: string | null = null;
     let frontierAnchor: number | null = null;
     let topOfBankConfirmed = false;
     const bankTop = Math.max(...subject.items.map((item) => item.typicalMonths));
@@ -182,6 +196,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         if (frontierAnchor === null || anchor < frontierAnchor) {
           frontierAnchor = anchor;
           frontierStatement = found.item.statement;
+          frontierItemId = found.item.id;
         }
       } else if (entry.answer === "not_yet") {
         sawNotYet = true;
@@ -189,6 +204,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         if (frontierAnchor === null || anchor < frontierAnchor) {
           frontierAnchor = anchor;
           frontierStatement = found.item.statement;
+          frontierItemId = found.item.id;
         }
       }
     }
@@ -208,6 +224,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         strongestObservedStatement: strongestStatement,
         strongestObservedMonths: strongestAnchor,
         frontierStatement,
+        frontierItemId,
+        frontierDomain: frontierItemId ? domainForBankItem(frontierItemId) : null,
         exposureBased: true,
       };
     }
@@ -227,6 +245,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
         strongestObservedStatement: null,
         strongestObservedMonths: null,
         frontierStatement,
+        frontierItemId,
+        frontierDomain: frontierItemId ? domainForBankItem(frontierItemId) : null,
         exposureBased: false,
       };
     }
@@ -263,6 +283,8 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
       strongestObservedStatement: strongestStatement,
       strongestObservedMonths: strongestAnchor,
       frontierStatement,
+      frontierItemId,
+      frontierDomain: frontierItemId ? domainForBankItem(frontierItemId) : null,
       exposureBased: false,
     };
   });

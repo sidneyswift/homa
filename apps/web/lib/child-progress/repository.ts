@@ -95,7 +95,10 @@ export interface AppendChildObservationInput {
   familyId: string;
   memberUserId: string | null;
   quote: string;
-  channel: Extract<ProgressCheckInChannel, "web" | "sms" | "email">;
+  channel: Extract<
+    ProgressCheckInChannel,
+    "web" | "sms" | "email" | "lesson"
+  >;
   messageId: string | null;
   classification: ChildObservationClassification;
   candidates: readonly ChildObservationCandidate[];

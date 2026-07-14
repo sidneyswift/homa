@@ -3,7 +3,11 @@ import { z } from "zod";
 import { parseOffsetIsoTimestampEpochNanoseconds } from "./timestamp";
 import type { ChildProgressView } from "./types";
 
-export const CHILD_PROGRESS_PROJECTION_VERSION = "2";
+// Bumped to 3 when the map scorer added frontierItemId/frontierDomain to
+// every SubjectScore (age-aware knowledge plan, KC-1): the projection
+// shape changed, so any projection stored under 2 is recomputed cleanly
+// on the version check instead of failing a strict parse at the same key.
+export const CHILD_PROGRESS_PROJECTION_VERSION = "3";
 
 const offsetTimestampSchema = z.string().refine((value) => {
   try {
@@ -42,6 +46,7 @@ const progressSourceSchema = z.enum([
   "recheck",
   "onboarding_walk",
   "legacy",
+  "lesson_listen",
 ]);
 const evidenceSourceViewSchema = z
   .object({
@@ -174,6 +179,8 @@ const subjectScoreSchema = z
     strongestObservedStatement: z.string().nullable(),
     strongestObservedMonths: z.number().int().nullable(),
     frontierStatement: z.string().nullable(),
+    frontierItemId: z.string().nullable(),
+    frontierDomain: z.string().nullable(),
     exposureBased: z.boolean(),
   })
   .strict();

@@ -48,9 +48,9 @@ catchphrase and thesis), is the brand.
 ## Reputation and rankings
 
 - Reviewer sentiment across homeschool blogs is uniformly affectionate:
-  the recurring themes are "art finally happens at our house," genuine
-  multi-age usability (preschool through teens at one table), and the
-  supply-list relief ([Proverbial Homemaker](https://www.proverbialhomemaker.com/you-are-an-artist.html),
+  the recurring themes are that art finally happens at their house,
+  genuine multi-age usability (preschool through teens at one table),
+  and the supply-list relief ([Proverbial Homemaker](https://www.proverbialhomemaker.com/you-are-an-artist.html),
   [Humility and Doxology](https://www.humilityanddoxology.com/homeschool-art-chalk-pastels/),
   [The Curriculum Choice](https://thecurriculumchoice.com/you-are-an-artist-clubhouse-membership-review/)).
 - Community-native touches drive loyalty: members who post finished
@@ -111,8 +111,8 @@ the video, distribute paper, vacuum chalk dust later.
 
 The family pulls out pastels and paper, plays a video, and draws along:
 Nana greets the kids, names the two or three colors needed, then builds
-the picture stroke by stroke ("now pull that blue across your sky...
-see? You ARE an artist") while everyone works on their own sheet. A
+the picture stroke by stroke, narrating each pull of color and pausing
+to reassure, while everyone works on their own sheet. A
 five-year-old's hummingbird and a thirteen-year-old's hummingbird come
 out recognizably different in control but equally finished, which is the
 multi-age trick. Ten to twenty minutes later every child holds a

@@ -73,6 +73,7 @@ const SOURCE_DETAILS: Record<ProgressSourceKind, string> = {
   recheck: "Recorded in a follow-up check.",
   onboarding_walk: "Recorded during onboarding.",
   legacy: "Recorded in an earlier progress answer.",
+  lesson_listen: "Heard in a recorded lesson.",
 };
 
 function compareAsciiIds(left: string, right: string): number {

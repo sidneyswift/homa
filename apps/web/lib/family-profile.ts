@@ -101,6 +101,23 @@ export async function setChildPhotoConsent(familyId: string, userId: string): Pr
 }
 
 /**
+ * setLessonAudioConsent(familyId, userId): stamps the lesson listen
+ * consent moment (ruling lesson-listen-child-audio, plan
+ * 2026-07-13-lesson-listen.md LL-0): this adult agreed, on the
+ * dedicated consent screen, to lesson recordings that include their
+ * child's voice. Stamped once; a second agree keeps the first record,
+ * exactly like the D4 photo stamp above.
+ */
+export async function setLessonAudioConsent(familyId: string, userId: string): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.families
+    set lesson_audio_consent_at = now(), lesson_audio_consent_by = ${userId}
+    where id = ${familyId} and lesson_audio_consent_at is null
+  `;
+}
+
+/**
  * setMemberAvatarUrl(familyId, userId, avatarUrl): this adult's own
  * photo (migration #74). The caller validates the URL points at our
  * avatars bucket before it gets here; null clears the photo.

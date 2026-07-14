@@ -45,9 +45,9 @@ Classical Academic Press (CAP) is the subject-by-subject publisher of the
 classical homeschool movement: not a boxed curriculum but a family of
 award-winning lines in Latin, Greek, Spanish, French, English grammar,
 writing, logic, rhetoric, history, Bible, and (since acquiring Novare in
-2020) science. Founded in 2001 in Camp Hill, Pennsylvania by Dr.
-Christopher Perrin and partners, its motto is "Classical Subjects
-Creatively Taught," and the house style is exactly that: full-color pages,
+2020) science. Founded in 2001 by Dr. Christopher Perrin and
+partners and headquartered in Camp Hill, Pennsylvania, its motto is
+"Classical Subjects Creatively Taught," and the house style is exactly that: full-color pages,
 songs and chants, video instruction, and gentle humor wrapped around
 rigorous trivium content. Where [Memoria Press](memoria-press.md) sells a
 finished all-subject plan and [Classical Conversations](classical-conversations.md)
@@ -89,10 +89,10 @@ co-op network.
   and review compared to the Latin flagship; some families find Writing &
   Rhetoric's early books slow; the colorful pages read as busy to kids
   who prefer plain layouts.
-- Trajectory: rising with the broader classical surge. The company moved
-  to larger headquarters in April 2025, and the Novare acquisition plus
-  The Curious Historian rollout mark deliberate expansion from languages
-  toward full-stack coverage (still no math).
+- Trajectory: rising with the broader classical surge. The Novare
+  acquisition (January 2020) and The Curious Historian rollout mark
+  deliberate expansion from languages toward full-stack coverage
+  (still no math).
 
 ## Pedagogy and method
 
@@ -157,10 +157,10 @@ several:
 - Early years: A Year of Playing Skillfully (preschool/K play-based
   guide).
 - Services: Scholé Academy (live online sections capped around 15
-  students, a la carte, unaccredited, founded 2014), ClassicalU
-  (subscription teacher training, 100+ self-paced courses), Scholé
-  Communities (co-op network), plus free placement and "recommendation"
-  flows on the site.
+  students, a la carte, unaccredited, founded 2014), ClassicalU (a
+  subscription teacher-training platform with a large self-paced
+  course library), Scholé Communities (co-op network), plus free
+  placement and recommendation flows on the site.
 
 A per-level language program bundle contains student edition, teacher's
 edition, activity book (Latin), answer key, streaming or DVD video, chant

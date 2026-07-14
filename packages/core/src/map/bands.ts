@@ -74,3 +74,32 @@ export function ageLabel(months: number): string {
   const rest = months % 12;
   return rest === 0 ? `${years}y` : `${years}y ${rest}m`;
 }
+
+/**
+ * Developmental stage bands for the research corpus (age-aware knowledge
+ * plan, KC-1). Coarser than the annual taxonomy clusters on purpose: a
+ * research cell is (domain, stage), and five bands are where teaching
+ * content meaningfully shifts. Shared by the map, the fleet demand
+ * queue, and the corpus read query so the boundaries never drift.
+ */
+export const RESEARCH_STAGES = [
+  "early_years",
+  "early_elem",
+  "upper_elem",
+  "middle",
+  "high",
+] as const;
+export type ResearchStage = (typeof RESEARCH_STAGES)[number];
+
+/**
+ * The stage band containing this age in months. Ages below the scored
+ * floor fall in early_years; ages at or past the ceiling fall in high,
+ * so the function is total for any non-negative age.
+ */
+export function stageForAgeMonths(months: number): ResearchStage {
+  if (months < 60) return "early_years";
+  if (months < 96) return "early_elem";
+  if (months < 132) return "upper_elem";
+  if (months < 168) return "middle";
+  return "high";
+}

@@ -62,12 +62,28 @@ async function briefMessage(
   ].join("\n");
 }
 
-function customMessage(task: DueFamilyTask, trigger: TaskRunTrigger): string {
+/**
+ * A custom task's prompt reads as research when it asks Homa to look into
+ * a topic or skill (the Gomes-style per-kid research tasks). Those runs
+ * get the same corpus context and query hygiene the built-in brief gets
+ * (KC-4 / the multi-kid doc's option 8), so a parent-authored research
+ * task stops paying for full web research and stops carrying child names
+ * into open searches. A reminder ("pack the co-op bag") matches nothing
+ * here and stays a plain verbatim run.
+ */
+const RESEARCH_SIGNAL =
+  /\b(research|study|studies|finding|findings|learn|learning|development|developmental|milestones?|skills?|literacy|numeracy)\b/i;
+
+async function customMessage(
+  task: DueFamilyTask,
+  trigger: TaskRunTrigger,
+  loadContext: typeof loadBriefContext,
+): Promise<string> {
   const deliveryLine =
     task.deliveryPref === "none"
       ? "Your reply is saved to the family's Homa's tasks page exactly as written: write only the result itself."
       : "Your reply is delivered to her EXACTLY as written, as a text message or short email: write only the message itself, no preamble, no quotes, no sign-off.";
-  return [
+  const lines = [
     trigger === "manual"
       ? `The parent just asked, from the Homa's tasks page, to run a task they set up themselves once right now: "${task.label ?? "their task"}".`
       : `It is time for a task this family set up themselves: "${task.label ?? "their task"}".`,
@@ -75,8 +91,18 @@ function customMessage(task: DueFamilyTask, trigger: TaskRunTrigger): string {
     "",
     task.prompt ?? "(no instructions were saved; say so briefly and suggest recreating the task)",
     "",
-    deliveryLine,
-  ].join("\n");
+  ];
+  if (task.prompt && RESEARCH_SIGNAL.test(task.prompt)) {
+    const context = await loadContext(task.familyId);
+    lines.push(
+      "This task involves research. Draw on the fleet's shared knowledge below FIRST, matched to this family's kids and their stage. If you must search the web, keep every query about the TOPIC and the child's stage, never a child's name or any private detail.",
+      "",
+      renderBriefContext(context),
+      "",
+    );
+  }
+  lines.push(deliveryLine);
+  return lines.join("\n");
 }
 
 /** The full model message for one run. The brief's context load is
@@ -92,7 +118,7 @@ export async function buildTaskMessage(
     case "morning_brief":
       return await briefMessage(task, trigger, loadContext);
     case "custom":
-      return customMessage(task, trigger);
+      return await customMessage(task, trigger, loadContext);
     default: {
       const exhaustive: never = task.kind;
       throw new Error(`unhandled task kind: ${String(exhaustive)}`);

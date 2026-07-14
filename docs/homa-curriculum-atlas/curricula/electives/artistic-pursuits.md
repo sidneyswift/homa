@@ -46,8 +46,9 @@ with technique instruction in professional-grade media (charcoal,
 pastels, gouache, clay, watercolor). It is the perennial "real art, not
 crafts" answer: Cathy Duffy Top Picks (101 and 102 editions), and first
 places in Practical Homeschooling's fine arts categories plus the
-Excellence in Education art award across 2006-2020. The publisher
-self-reports over one hundred thousand users.
+Excellence in Education art award across 2006-2020. Reviewer coverage
+credits it with over a hundred thousand users (a publisher-derived
+figure, unverified independently).
 
 ## Reputation and rankings
 
@@ -165,9 +166,9 @@ As of Jul 2026, from publisher product pages (linked; bundles shift):
 
 ## Why families choose it
 
-- "Real art, not crafts": parents who want drawing, composition, and
-  media technique taught as a subject buy the category's most
-  credentialed option.
+- Real art rather than crafts (the reviewers' recurring phrase):
+  parents who want drawing, composition, and media technique taught as
+  a subject buy the category's most credentialed option.
 - Open-and-go for the art-intimidated parent: the book and video carry
   the instruction; no Pinterest prep.
 - Integrated art history: one purchase covers appreciation and studio

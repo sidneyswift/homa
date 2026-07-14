@@ -1,0 +1,421 @@
+# Generated from publisher scope-and-sequence documents; see README.md in
+# this folder for schema, protocol, and copyright policy. Lesson and module
+# titles are facts about the curriculum's organization; publisher em dashes
+# in titles are normalized to commas per repo law.
+id: apologia
+name: Apologia (Exploring Creation science)
+extracted: 2026-07-13
+sources:
+  - https://www.apologia.com/elementary-science-for-homeschool/
+  - https://www.apologia.com/shop/astronomy-course-set/
+  - https://www.apologia.com/shop/botany-course-set/
+  - https://www.apologia.com/shop/zoology-1-course-set/
+  - https://www.apologia.com/shop/zoology-2-course-set/
+  - https://www.apologia.com/shop/zoology-3-course-set/
+  - https://www.apologia.com/shop/anatomy-course-set/
+  - https://www.apologia.com/shop/chemistry-and-physics-course-set/
+  - https://www.apologia.com/shop/earth-science-course-set/
+  - http://images.salsify.com/image/upload/s--OqDJ8jSF--/wp8mxrtgnhczc9stk9n5.pdf
+  - https://www.apologia.com/shop/general-science-3rd-edition-student-textbook/
+  - https://www.shopchristianliberty.com/content/samples/69215.pdf
+  - https://www.apologia.com/shop/physical-science-textbook/
+  - https://www.apologia.com/blog/choosing-the-best-physical-science-course-for-homeschool/
+  - https://www.shopchristianliberty.com/content/samples/69330.pdf
+  - https://www.shopchristianliberty.com/content/samples/69245.pdf
+  - https://apologia.com/download/audiobooks/Physics_MP3AudioList.pdf
+  - https://www.homesciencetools.com/content/reference/mar_biol_toc.pdf
+notes: >
+  Two product lines. The eight elementary Young Explorer courses (multi-age,
+  publisher-recommended grades K to 6) each hold 14 numbered lessons and no
+  chapter layer, so they use structure flat; the suggested pace is about two
+  weeks per lesson, roughly 28 weeks per course. Elementary lesson titles are
+  taken from the current second-edition course-set pages on apologia.com and
+  are published at lesson level. The publisher's Young Explorer scope PDF on
+  salsify corroborates the 14-lesson, two-week structure for seven of the
+  eight courses, but it reflects first-edition lesson ordering and titles
+  (for example it splits the older Astronomy planet lessons differently and
+  lists Zoology 1 birds before insects), so where the salsify PDF and the
+  current product page disagree the product page wins as the current edition.
+  Earth Science (Rachael Yunis, second edition) is absent from the salsify
+  PDF and was cross-checked against Christianbook and Classical Education
+  Books, which list an identical 14-lesson sequence. The six middle and high
+  school courses carry module-level titles only (status chapters); their
+  numbered On Your Own sections and study guides are not itemized. General
+  Science module titles come from the Christian Liberty sample table of
+  contents and match multiple published reviews. Physical Science is the
+  fourth edition, 15 modules, from Apologia's own course blog and product
+  page. Biology (third edition, 16 modules) and Chemistry (third edition, 16
+  modules) module titles come from the Christian Liberty sample tables of
+  contents. Physics (second edition, 16 numbered modules plus an unnumbered
+  preliminary module on measurement and units) is reconciled across three
+  independent sources that agree on numbering: Apologia's own audiobook
+  module list, the Milestone Books table of contents, and The Curriculum
+  Choice course outline. Marine Biology (second edition, 16 modules) comes
+  from the Home Science Tools table of contents and matches an independent
+  review. Ellipsis punctuation in Zoology 3 lesson 11 is written as three
+  periods. Advanced and elective courses (Advanced Biology, Advanced
+  Chemistry, Advanced Physics, Health and Nutrition, High School Astronomy)
+  are not extracted yet.
+levels:
+  - level: "Astronomy"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "What is Astronomy?"
+      - "The Sun"
+      - "Mercury"
+      - "Venus"
+      - "Earth"
+      - "The Moon"
+      - "Mars"
+      - "Space Rocks"
+      - "Jupiter"
+      - "Saturn"
+      - "Uranus"
+      - "Neptune"
+      - "The Kuiper Belt and Dwarf Planets"
+      - "Stars, Galaxies, and Space Travel"
+  - level: "Botany"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Why Botany Matters"
+      - "Seeds"
+      - "Angiosperms"
+      - "Pollination"
+      - "Fruit"
+      - "Leaves"
+      - "Roots"
+      - "Stems"
+      - "Gardening"
+      - "Trees"
+      - "Gymnosperms"
+      - "Seedless Vascular Plants"
+      - "Nonvascular Plants"
+      - "Mycology"
+  - level: "Zoology 1: Flying Creatures of the Fifth Day"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "What is Zoology?"
+      - "Entomology"
+      - "Butterflies and Friends"
+      - "Supremely Social"
+      - "Bee Happy"
+      - "Battling Beetles, Filthy Flies, and Bona Fide Bugs"
+      - "Interesting Insects"
+      - "Tyrannical Pterosaurs"
+      - "Birds in Abundance"
+      - "Fascinating Feathers"
+      - "Fabricated for Flying"
+      - "Nature's Nifty Nests"
+      - "Matching and Hatching"
+      - "Beloved Bats"
+  - level: "Zoology 2: Swimming Creatures of the Fifth Day"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Amazing Aquatic Animals"
+      - "Habits and Habitats"
+      - "Cetaceans of the Sea Part 1"
+      - "Cetaceans of the Sea Part 2"
+      - "Sweet Sirenians & Playful Pinnipeds"
+      - "Fishing for Bones"
+      - "Super Sharks and Racing Rays"
+      - "Stupendous Turtles of the Sea"
+      - "Ancient Aquatic Animals"
+      - "Armored Arthropods"
+      - "Mighty Mollusks"
+      - "Sensational Cephalopods"
+      - "Notable Cnidarians"
+      - "Enchanting Echinoderms and Purposeful Porifera"
+  - level: "Zoology 3: Land Animals of the Sixth Day"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Introduction to the Animals of Day Six"
+      - "Carnivorous Mammals"
+      - "Caniforms Continued"
+      - "Feliform Carnivores"
+      - "Marsupials"
+      - "Primarily Primates"
+      - "Rodentia and the Rest"
+      - "Ungulates"
+      - "Order Artiodactyla"
+      - "Orders Squamata and Rhynchocephalia"
+      - "The Rest of the Reptiles...and Amphibians"
+      - "Dinosaurs"
+      - "Arthropods of the Land"
+      - "Gastropods and Worms"
+  - level: "Human Anatomy and Physiology"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Introduction to Anatomy and Physiology"
+      - "The Skeletal System"
+      - "The Muscular System"
+      - "The Digestive and Renal Systems"
+      - "Health and Nutrition"
+      - "The Respiratory System"
+      - "Life in the Blood"
+      - "The Cardiovascular System"
+      - "The Nervous and Endocrine System"
+      - "The Nervous System Extended"
+      - "Your Senses"
+      - "The Integumentary System"
+      - "The Lymphatic and Immune Systems"
+      - "Growth and Development"
+  - level: "Chemistry and Physics"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Chemistry and Physics Matter"
+      - "Moving Matter"
+      - "Building Blocks of Creation"
+      - "Compound Chemistry"
+      - "Multitude of Mixtures"
+      - "Mechanics in Motion"
+      - "Dynamics of Motion"
+      - "Work in the World"
+      - "Sound of Energy"
+      - "Light of the World"
+      - "Thermal Energy"
+      - "Electrifying Our World"
+      - "Mysterious Magnetism"
+      - "Simple Machines"
+  - level: "Earth Science"
+    grade: "K-6"
+    status: lessons
+    structure: flat
+    lessons:
+      - "The Observable Universe"
+      - "Life in the Habitable Zone"
+      - "Spheres of the Earth"
+      - "Mapping Your World"
+      - "The Geosphere"
+      - "Making and Shaping the Land"
+      - "The Hydrosphere"
+      - "The Atmosphere"
+      - "Climate and Weather"
+      - "Weather Forecasting"
+      - "The Biosphere"
+      - "Cycles of Life"
+      - "Unique Places on Earth"
+      - "God in Creation"
+  - level: "General Science (3rd edition)"
+    grade: 7
+    status: chapters
+    chapters:
+      - n: 1
+        title: "The History of Science, Search for the Truth"
+      - n: 2
+        title: "Scientific Inquiry and the Scientific Method"
+      - n: 3
+        title: "Documenting and Interpreting Experimental Results"
+      - n: 4
+        title: "Scientific Analysis and History"
+      - n: 5
+        title: "Earth Science, Astronomy"
+      - n: 6
+        title: "Earth Science, Geology and Paleontology"
+      - n: 7
+        title: "Earth Science, Meteorology and Oceanography"
+      - n: 8
+        title: "General Chemistry"
+      - n: 9
+        title: "General Physics"
+      - n: 10
+        title: "Life Science"
+      - n: 11
+        title: "General Biology"
+      - n: 12
+        title: "Marine Science"
+      - n: 13
+        title: "Environmental Science"
+      - n: 14
+        title: "Science and Creation"
+  - level: "Physical Science (4th edition)"
+    grade: 8
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Science, The Basics"
+      - n: 2
+        title: "Chemistry, Properties and States of Matter"
+      - n: 3
+        title: "Chemistry, Atomic Structure and the Periodic Table"
+      - n: 4
+        title: "Chemistry, Chemical Bonds"
+      - n: 5
+        title: "Chemistry, Reactions and Energy"
+      - n: 6
+        title: "Physics, Motion"
+      - n: 7
+        title: "Physics, Forces"
+      - n: 8
+        title: "Physics, Energy"
+      - n: 9
+        title: "Physics, Waves and Sound"
+      - n: 10
+        title: "Physics, Light"
+      - n: 11
+        title: "Physics, Electricity and Magnetism"
+      - n: 12
+        title: "Earth Science, Our Earth"
+      - n: 13
+        title: "Earth Science, Our Atmosphere and Beyond"
+      - n: 14
+        title: "Chemistry and Physics in the Life Sciences"
+      - n: 15
+        title: "Physical Science Research"
+  - level: "Biology (3rd edition)"
+    grade: 9
+    status: chapters
+    chapters:
+      - n: 1
+        title: "The Science of Life"
+      - n: 2
+        title: "The Chemistry of Life"
+      - n: 3
+        title: "Ecology"
+      - n: 4
+        title: "Cell Structure and Function"
+      - n: 5
+        title: "Cellular Energy"
+      - n: 6
+        title: "DNA, Proteins, and the Cell Cycle"
+      - n: 7
+        title: "Genetics"
+      - n: 8
+        title: "Evolution"
+      - n: 9
+        title: "Prokaryotes and Viruses"
+      - n: 10
+        title: "Protists and Fungi"
+      - n: 11
+        title: "Plant Diversity and Reproduction"
+      - n: 12
+        title: "Plant Structure and Function"
+      - n: 13
+        title: "Animals, Invertebrates Part 1"
+      - n: 14
+        title: "Animals, Invertebrates Part 2"
+      - n: 15
+        title: "Animals, Chordates Part 1"
+      - n: 16
+        title: "Animals, Chordates Part 2"
+  - level: "Chemistry (3rd edition)"
+    grade: 10
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Measurement, Units, and the Scientific Method"
+      - n: 2
+        title: "Atoms and Molecules"
+      - n: 3
+        title: "Atomic Structure"
+      - n: 4
+        title: "Molecular Structure"
+      - n: 5
+        title: "Polyatomic Ions and Molecular Geometry"
+      - n: 6
+        title: "Changes in Matter and Chemical Reactions"
+      - n: 7
+        title: "Describing Chemical Reactions"
+      - n: 8
+        title: "Stoichiometry"
+      - n: 9
+        title: "Acid-Base Chemistry"
+      - n: 10
+        title: "The Chemistry of Solutions"
+      - n: 11
+        title: "The Gas Phase"
+      - n: 12
+        title: "Energy, Heat and Temperature"
+      - n: 13
+        title: "Thermodynamics"
+      - n: 14
+        title: "Kinetics"
+      - n: 15
+        title: "Chemical Equilibrium"
+      - n: 16
+        title: "Reduction-Oxidation Reactions"
+  - level: "Physics (2nd edition)"
+    grade: 11
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Motion in One Dimension"
+      - n: 2
+        title: "One-Dimensional Motion Equations and Free Fall"
+      - n: 3
+        title: "Two-Dimensional Vectors"
+      - n: 4
+        title: "Motion in Two Dimensions"
+      - n: 5
+        title: "Newton's Laws"
+      - n: 6
+        title: "Applications of Newton's Second Law"
+      - n: 7
+        title: "Uniform Circular Motion and Gravity"
+      - n: 8
+        title: "Work and Energy"
+      - n: 9
+        title: "Momentum"
+      - n: 10
+        title: "Periodic Motion"
+      - n: 11
+        title: "Waves"
+      - n: 12
+        title: "Geometric Optics"
+      - n: 13
+        title: "Coulomb's Law and the Electric Field"
+      - n: 14
+        title: "Electric Potential"
+      - n: 15
+        title: "Electric Circuits"
+      - n: 16
+        title: "Magnetism"
+  - level: "Marine Biology (2nd edition)"
+    grade: "9-12"
+    status: chapters
+    chapters:
+      - n: 1
+        title: "The Oceans of Our Planet"
+      - n: 2
+        title: "Life in the Sea"
+      - n: 3
+        title: "The First Four Kingdoms"
+      - n: 4
+        title: "Marine Invertebrates I"
+      - n: 5
+        title: "Marine Invertebrates II"
+      - n: 6
+        title: "Marine Vertebrates I"
+      - n: 7
+        title: "Marine Vertebrates II"
+      - n: 8
+        title: "Marine Ecology"
+      - n: 9
+        title: "The Intertidal Zone"
+      - n: 10
+        title: "Estuary Communities"
+      - n: 11
+        title: "Coral Reefs"
+      - n: 12
+        title: "Continental Shelf Communities"
+      - n: 13
+        title: "The Epipelagic Zone"
+      - n: 14
+        title: "The Deep Ocean"
+      - n: 15
+        title: "Ocean Resources"
+      - n: 16
+        title: "Effects of Humans on the Sea"

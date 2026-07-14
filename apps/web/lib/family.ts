@@ -26,6 +26,10 @@ export interface FamilyRecord {
    * consent screen (migration #75); null means the screen has not been
    * agreed to and no child photo can be added yet. */
   child_photo_consent_at: string | null;
+  /** When an adult agreed to lesson recordings that include the
+   * child's voice (ruling lesson-listen-child-audio); null means no
+   * lesson can be recorded or uploaded yet. */
+  lesson_audio_consent_at: string | null;
 }
 
 export interface ChildRecord {
@@ -59,7 +63,7 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
     .select(
-      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at",
+      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at, lesson_audio_consent_at",
     )
     .limit(1)
     .maybeSingle();

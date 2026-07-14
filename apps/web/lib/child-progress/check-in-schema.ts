@@ -49,6 +49,7 @@ const progressSourceSchema = z.enum([
   "recheck",
   "onboarding_walk",
   "legacy",
+  "lesson_listen",
 ]);
 const scopeSchema = z
   .object({

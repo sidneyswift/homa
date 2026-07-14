@@ -211,14 +211,37 @@ const STATE_TIME_ZONES: Record<string, string> = {
   WV: "America/New_York", WI: "America/Chicago", WY: "America/Denver",
 };
 
+export type SaveFamilyBasicsResult =
+  | { saved: true }
+  | { saved: false; reason: "family-has-accounts" };
+
 /** Family basics over text: name and state; address never asked on SMS
  * (schema-optional by design). Family display name defaults from the
  * parent's first name; the state seeds a coarse time zone when none is
- * set yet. */
+ * set yet.
+ *
+ * Text signup owns only the memberless family it created itself (the
+ * smsSignupCandidate condition in lib/family-phone.ts). Once any adult
+ * holds a membership row, the parent identity fields belong to that
+ * account's own onboarding, and a model misfire here must not rename
+ * the thank-you card's recipient or re-stamp profile_completed_at
+ * (founder ruling card-per-family-primary-parent, 2026-07-14). The
+ * channel instructions already steer the model away; this is the
+ * server-side belt. Mid-signup corrections keep working because a
+ * text-signup family stays memberless until it is claimed on the web. */
 export async function saveFamilyBasicsFromSms(
   familyId: string,
   input: { parentName: string; familyName?: string | null; usState?: string | null },
-): Promise<void> {
+): Promise<SaveFamilyBasicsResult> {
+  const sql = mapDb();
+  const members = await sql<{ n: number }[]>`
+    select count(*)::int as n from public.family_members
+    where family_id = ${familyId}
+  `;
+  if ((members[0]?.n ?? 0) > 0) {
+    return { saved: false, reason: "family-has-accounts" };
+  }
+
   const [firstName, ...rest] = input.parentName.trim().split(/\s+/u);
   const usState = input.usState?.trim().toUpperCase() || undefined;
   await saveFamilySetup(familyId, {
@@ -229,12 +252,12 @@ export async function saveFamilyBasicsFromSms(
   });
   const zone = usState ? STATE_TIME_ZONES[usState] : undefined;
   if (zone) {
-    const sql = mapDb();
     await sql`
       update public.families set time_zone = ${zone}
       where id = ${familyId} and time_zone is null
     `;
   }
+  return { saved: true };
 }
 
 /** Adds a child through the shared store write; returns range info so

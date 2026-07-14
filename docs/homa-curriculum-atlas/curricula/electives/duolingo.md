@@ -33,8 +33,8 @@ sources:
 ## Snapshot
 
 Duolingo is the dominant consumer language app (40+ languages, publicly
-traded, founded 2012's consumer wave) and, in homeschool practice, the
-single most common answer to "what do you do for foreign language."
+traded, launched 2012) and, in homeschool practice, the single most
+common answer to "what do you do for foreign language."
 This profile covers how homeschoolers actually use it, not the company:
 as a free, gamified daily habit (streaks, XP, leaderboards, the Birdbrain
 adaptive algorithm) that delivers vocabulary and listening exposure with
@@ -124,8 +124,8 @@ letters, sounding out words, and tapping through a read-along story,
 with the same reward-loop energy tuned gentler. The contrast with every
 print program in this atlas is the point: zero prep and zero friction,
 but also zero artifacts and zero parent visibility, which is why
-families describe discovering "weeks of motion without progress" only
-when the streak dies.
+reviewers describe families discovering weeks of motion without real
+progress only when the streak dies.
 
 ## Materials and visual design
 
@@ -166,7 +166,7 @@ As of Jul 2026 ([homeschoolfox](https://homeschoolfox.com/curriculum/duolingo)):
 - Duolingo ABC gives the preschooler a trusted free literacy app while
   older kids do languages.
 
-## Why families leave it (or demote it)
+## Why families leave it
 
 - The proficiency reckoning: after months of streaks the child still
   cannot hold a conversation, and the family realizes exposure is not

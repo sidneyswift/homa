@@ -157,8 +157,9 @@ outline, and demo videos (linked below).
 
 ## Materials and visual design
 
-Deliberately clinical. Tutor manuals are utilitarian spiral-bound
-workhorses; student pages are black and white, list-driven, and
+Deliberately clinical. Tutor manuals are utilitarian workhorses built
+around the two-column script; student pages are black and white,
+list-driven, and
 low-stimulation, closer to a therapy protocol than a curriculum with a
 brand personality. The color in the system is functional: letter tiles are
 color-coded by phonogram category, and tile organization on the whiteboard

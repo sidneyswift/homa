@@ -32,12 +32,13 @@ const evidenceSchema = z
       "recheck",
       "onboarding_walk",
       "legacy",
+      "lesson_listen",
     ]),
     memberUserId: z.string().nullable(),
     adultDisplayName: z.string().nullable(),
     quote: z.string().nullable(),
     channel: z
-      .enum(["web", "sms", "email", "dispatch", "voice"])
+      .enum(["web", "sms", "email", "dispatch", "voice", "lesson"])
       .nullable(),
     messageId: z.string().uuid().nullable(),
     checkInId: z.string().nullable(),

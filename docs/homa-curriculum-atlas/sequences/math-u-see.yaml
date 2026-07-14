@@ -1,0 +1,423 @@
+# Generated from publisher scope-and-sequence documents; see README.md in
+# this folder for schema, protocol, and copyright policy. Lesson titles
+# are facts about the curriculum's organization; publisher em dashes in
+# titles are normalized to commas per repo law, and en dashes used as
+# minus signs become ASCII hyphens (see notes).
+id: math-u-see
+name: Math-U-See
+extracted: 2026-07-13
+sources:
+  - https://mathusee.com/products/math-u-see-curriculum/ (curriculum sequence, per-level skill focus naming)
+  - https://mathusee.com/products/math-u-see-curriculum/primer/ (and sibling per-level pages through algebra-1 and algebra-1-psm; each page's scope and sequence section lists the numbered lesson titles)
+  - https://store.demmelearning.com/collections/alpha/products/alpha-student-workbooks-and-tests (and sibling per-level Student Workbook and Tests product pages; lesson titles cross-check)
+  - https://kateshomeschoolmath.com/math-u-see-review-buying-guide/ (community grade mapping only, not a publisher claim)
+notes: >
+  Lesson titles for all ten levels come from the publisher's per-level
+  scope and sequence lists on mathusee.com, cross-checked against the
+  lesson titles lists on the publisher's store product pages at
+  store.demmelearning.com; the two documents matched exactly for every
+  level. Both are publisher properties (no third party publishes full
+  lesson lists), so verify against a printed table of contents before
+  any product use. Math-U-See publishes no grade labels; placement is
+  by skill readiness. The grade anchors here are the common community
+  mapping from Kate Snow's buying guide (Primer = K through Zeta = 6,
+  then one level per year), approximate by design. Per the math
+  crosswalk (docs/homa-benchmarks/13-curriculum-crosswalk-math.md
+  section 3), MUS ladder ORDER diverges from grade-labeled programs:
+  multi-digit multiplication arrives early (Gamma) and decimals arrive
+  late (Zeta) because Epsilon is fractions only, so map levels by
+  items, never by grade. Publisher skill focus naming per level, from
+  the curriculum sequence page: Primer "An Introduction to
+  Mathematics"; Alpha "Single-Digit Addition & Subtraction"; Beta
+  "Multiple-Digit Addition & Subtraction"; Gamma "Single &
+  Multiple-Digit Multiplication"; Delta "Single & Multiple-Digit
+  Division"; Epsilon "Fractions"; Zeta "Decimals & Percents";
+  Pre-Algebra "Negative Numbers, Order of Operations, and Solving for
+  the Unknown"; Algebra 1 "Graphing, Simultaneous Equations,
+  Exponents, Polynomials, and Unit Multipliers". Each elementary level
+  has 30 numbered lessons and one core mastery topic; the program is
+  unscheduled (mastery paced, commonly one lesson per week). Algebra 1
+  currently ships in two editions and both are included: Legacy
+  Edition (traditional flat lesson structure, 35 lessons; the edition
+  the curriculum sequence page links as Algebra 1) and Principles of
+  Secondary Mathematics (unit structured, 30 lessons in 5 units; 3
+  further extension lessons live only in the publisher's Digital
+  Toolbox and are omitted here). PSM lesson titles "Scope and Linear
+  Functions" and "More Graphic Quadratics" appear exactly that way in
+  both publisher documents. Geometry, Algebra 2, PreCalculus, and
+  Calculus levels exist and are not extracted in this pass.
+  Normalization: publisher em dashes in titles became commas; en
+  dashes used as minus signs in subtraction lesson titles became ASCII
+  hyphens (for example "Subtraction: -1"), preserving the math; curly
+  quotes straightened; cent signs kept; one non-breaking space
+  removed.
+levels:
+  - level: "Primer"
+    grade: K
+    status: lessons
+    structure: flat
+    lessons:
+      - "Number Recognition"
+      - "Writing Numerals"
+      - "Number Recognition and Writing Numerals"
+      - "Geometric Shapes: Rectangles"
+      - "Number Recognition and Writing Numerals"
+      - "Geometric Shapes: Circles"
+      - "Number Recognition and Writing Numerals"
+      - "Geometric Shapes: Triangles"
+      - "Place Value: Units and Tens"
+      - "Place Value: Hundreds"
+      - "Unit Bars"
+      - "Addition: Introduction and Symbol"
+      - "Addition: +1"
+      - "Counting to 20"
+      - "Addition: 2 + 2 and 3 + 3; Vertical Addition"
+      - "Shapes: Squares; Addition: 4 + 4 and 5 + 5"
+      - "Skip Counting by Two"
+      - "Addition of Tens"
+      - "Skip Counting by 10"
+      - "Addition of Hundreds"
+      - "Solving for an Unknown"
+      - "Skip Counting by Five"
+      - "Tally Marks"
+      - "Addition: Making 10"
+      - "Skip Count to Find Area"
+      - "Telling Time with Minutes"
+      - "Telling Time with Hours"
+      - "Telling Time with Minutes and Hours"
+      - "Subtraction: Introduction and Symbol"
+      - "Subtraction: -1"
+  - level: "Alpha"
+    grade: 1
+    status: lessons
+    structure: flat
+    lessons:
+      - "Place Value and the Manipulatives"
+      - "Counting to 20"
+      - "Unit Bars"
+      - "Addition: Symbols, +0"
+      - "Addition: +1, Commutative Property"
+      - "Counting to 100, Skip Counting by 10"
+      - "Addition: +2"
+      - "Solve for an Unknown"
+      - "Addition: +9, Mental Math"
+      - "Addition: +8"
+      - "Shapes: Circles and Triangles; Skip Counting by 2"
+      - "Addition: Doubles"
+      - "Rectangles, Squares; Skip Counting by 5"
+      - "Addition: Doubles +1; Associative Property"
+      - "Addition: Making 10"
+      - "Addition: Making 9"
+      - "Addition of the Extras: 3 + 5, 4 + 7, 5 + 7"
+      - "Introduction to Subtraction"
+      - "Subtraction: -1 and -0"
+      - "Subtraction: -2"
+      - "Subtraction: -9"
+      - "Subtraction: -8"
+      - "Subtraction: Doubles"
+      - "Subtraction: Making 10"
+      - "Subtraction: Making 9"
+      - "Subtraction: Extras"
+      - "Subtraction by 7, or Adding Up by 3"
+      - "Subtraction by 6, or Adding Up by 4"
+      - "Subtraction by 5, or Adding Up by 5"
+      - "Subtraction by 3 and 4"
+  - level: "Beta"
+    grade: 2
+    status: lessons
+    structure: flat
+    lessons:
+      - "Place Value and the Manipulatives"
+      - "Sequencing; Word Problem Tips"
+      - "Inequalities"
+      - "Rounding to 10 and Estimation"
+      - "Multiple-Digit Addition and Place Value Notation"
+      - "Skip Count by 2"
+      - "Addition with Regrouping (Carrying)"
+      - "Skip Count by 10; 1 Penny = 1¢, 1 Dime = 10¢"
+      - "Skip Count by 5; 5¢ = 1 Nickel"
+      - "Money: Decimal Point and Dollars"
+      - "Rounding to Hundreds; Multiple-Digit Addition with Regrouping"
+      - "Adding Money; Mental Math"
+      - "Column Addition"
+      - "Measurement: 12 Inches = 1 Foot"
+      - "Perimeter"
+      - "Thousands and Place-Value Notation"
+      - "Rounding to Thousands; Estimation"
+      - "Multiple-Digit Column Addition; Mental Math"
+      - "More Multiple-Digit Column Addition"
+      - "Multiple-Digit Subtraction"
+      - "Telling Time: Minutes; Mental Math"
+      - "Subtraction with Regrouping (Borrowing)"
+      - "Telling Time: Hours"
+      - "Subtraction: Three-Digit Numbers; Mental Math"
+      - "Ordinal Numbers; Tally Marks; Days and Months"
+      - "Subtraction: Four-Digit Numbers"
+      - "Subtraction: Money; Mental Math"
+      - "Subtraction: Multiple-Digit Numbers"
+      - "Reading Gauges and Thermometers"
+      - "Bar Graphs and Line Graphs"
+  - level: "Gamma"
+    grade: 3
+    status: lessons
+    structure: flat
+    lessons:
+      - "Rectangles, Factors, and Products"
+      - "Multiply by 1 and 0; Commutative Property"
+      - "Skip Count by 2, 5, and 10"
+      - "Multiply by 2; 1 Quart = 2 Pints"
+      - "Multiply by 10; 10¢ = 1 Dime"
+      - "Multiply by 5; 5¢ = 1 Nickel"
+      - "Area of a Rectangle and a Square"
+      - "Solve for an Unknown"
+      - "Skip Count by 9; Equivalent Fractions"
+      - "Multiply by 9"
+      - "Skip Count by 3"
+      - "Multiply by 3; 3 Feet = 1 Yard, 1 Tablespoon = 3 Teaspoons"
+      - "Skip Count by 6; Equivalent Fractions"
+      - "Multiply by 6"
+      - "Skip Count by 4; 4 Quarts = 1 Gallon"
+      - "Multiply by 4; 4 Quarters = 1 Dollar"
+      - "Skip Count by 7; Multiples of 10"
+      - "Multiply by 7 and by Multiples of 100"
+      - "Skip Count by 8; 8 Pints = 1 Gallon"
+      - "Multiply by 8"
+      - "Multiple-Digit Multiplication; Place-Value Notation; Distributive Property"
+      - "Rounding to 10, 100, and 1,000; Estimation"
+      - "Double-Digit Times Double-Digit; Multiplication by 11"
+      - "Double-Digit with Regrouping; Associative Property; Mental Math"
+      - "Multiple-Digit Multiplication; Regrouping"
+      - "Finding Factors; 25¢ = 1 Quarter"
+      - "Place Value Through Millions; 16 Ounces = 1 Pound"
+      - "More Multiple-Digit Multiplication"
+      - "Prime and Composite Numbers; Multiply by 12"
+      - "5,280 Feet = 1 Mile; 2000 Pounds = 1 Ton"
+  - level: "Delta"
+    grade: 4
+    status: lessons
+    structure: flat
+    lessons:
+      - "Rectangles, Factors, and Product; Solving for an Unknown"
+      - "Division by 1 and 2; Symbols for Division"
+      - "Division by 10; Third Symbol for Division"
+      - "Division by 5 and 3"
+      - "Parallel and Perpendicular Lines; Angles"
+      - "Division by 9"
+      - "Finding the Area of a Parallelogram"
+      - "Division by 6"
+      - "Finding the Area of a Triangle"
+      - "Division by 4"
+      - "Finding the Average"
+      - "Division by 7 and 8"
+      - "Finding the Area of a Trapezoid"
+      - "Thousands, Millions, and Place-Value Notation"
+      - "Billions, Trillions, and Expanded Notation; Multi-Step Word Problems"
+      - "Division by a Single Digit with Remainder"
+      - "\"Upside-Down\" Multiplication"
+      - "Division with Double-Digit Factors"
+      - "Division, Three Digit by One Digit"
+      - "Division, Three Digit by One Digit (Cont.); Using Fractions to Divide Remainders"
+      - "Rounding to 10, 100, 1,000, and Estimation"
+      - "Division, Three Digit by Two Digit"
+      - "Division, Four Digit by One Digit"
+      - "Division, Four Digit by Two Digit"
+      - "Division, Multiple Digit by Multiple Digit"
+      - "Volume"
+      - "Fraction of a Number"
+      - "Roman Numerals: I, V, X, L, and C"
+      - "Fraction of One"
+      - "Roman Numerals: D, M, Multiples of 1,000"
+  - level: "Epsilon"
+    grade: 5
+    status: lessons
+    structure: flat
+    lessons:
+      - "Fraction of a Number; Word Problem Tips"
+      - "Fraction of One"
+      - "Add and Subtract Fractions; Common Denominator; Mental Math"
+      - "Equivalent Fractions"
+      - "Addition and Subtraction; Unequal Denominators"
+      - "The Rule of Four; Multi-Step Word Problems"
+      - "Comparing Fractions with the Rule of Four"
+      - "Adding Multiple Fractions"
+      - "Multiplying Fractions; Fraction of a Fraction; Mental Math"
+      - "Dividing Fractions with the Rule of Four; Multi-Step Word Problems"
+      - "Finding Common Factors and Divisibility"
+      - "Reducing Fractions, Common Factors; Word Problems"
+      - "Reducing Fractions, Prime Factors"
+      - "Linear Measure"
+      - "Mixed Numbers and Improper Fractions; Mental Math"
+      - "Linear Measure with Mixed Numbers"
+      - "Addition and Subtraction of Mixed Numbers"
+      - "Addition of Mixed Numbers with Regrouping; Word Problems"
+      - "Subtraction of Mixed Numbers with Regrouping"
+      - "Subtraction of Mixed Numbers Using the \"Same-Difference Theorem\""
+      - "Adding Mixed Numbers, Regrouping and Unequal Denominators; Mental Math"
+      - "Subtracting Mixed Numbers, Regrouping and Unequal Denominators"
+      - "Dividing Fractions and Mixed Numbers Using the Reciprocal"
+      - "Solving for an Unknown Using the Multiplicative Inverse; Word Problems"
+      - "Multiplying Mixed Numbers; Three Fractions; Canceling"
+      - "Solving for an Unknown, Addition and Subtraction"
+      - "Area and Circumference of a Circle"
+      - "Solving for an Unknown, Fractional Coefficients"
+      - "Fractions to Decimals to Percents"
+      - "More Solving for an Unknown"
+  - level: "Zeta"
+    grade: 6
+    status: lessons
+    structure: flat
+    lessons:
+      - "Exponents; Word Problem Tips"
+      - "Place Value with Expanded and Exponential Notation"
+      - "Decimal Numbers with Expanded Notation"
+      - "Add Decimal Numbers"
+      - "Subtract Decimal Numbers"
+      - "Metric System Origin, Meter, Liter, Gram and Greek Prefixes; Multi-Step Word Problems"
+      - "Metric System, Latin Prefixes"
+      - "Metric System Conversion, Part 1"
+      - "Multiply by 1/10 or 0.1"
+      - "Multiply Decimals by 1/100 or 0.01"
+      - "Finding a Percentage"
+      - "Finding a Percentage > 100%; Word Problems"
+      - "Reading Percentages in a Pie Graph"
+      - "Multiply All Decimals"
+      - "Metric System Conversions, Part 2"
+      - "Computing Area and Circumference of a Circle"
+      - "Dividing a Decimal by a Whole Number"
+      - "Dividing a Whole Number by a Decimal; Word Problems"
+      - "Solving for an Unknown"
+      - "Dividing a Decimal by a Decimal"
+      - "Decimal Remainders"
+      - "More Solving for an Unknown"
+      - "Convert Any Fraction to a Decimal and a Percentage"
+      - "Decimals as Rational Numbers; Word Problems"
+      - "Mean, Median, and Mode"
+      - "Probability"
+      - "Points, Lines, Rays, and Line Segments"
+      - "Planes and Symbols"
+      - "Angles"
+      - "Types of Angles"
+  - level: "Pre-Algebra"
+    grade: 7
+    status: lessons
+    structure: flat
+    lessons:
+      - "Negative Numbers: Addition"
+      - "Negative Numbers: Subtraction"
+      - "Negative Numbers: Multiplication"
+      - "Negative Numbers: Division"
+      - "Exponents"
+      - "Place Value with Expanded and Exponential Notation"
+      - "Negative Numbers with Exponents"
+      - "Roots and Radicals"
+      - "Solve for an Unknown with Additive Inverse"
+      - "Pythagorean Theorem"
+      - "Associative and Commutative Properties"
+      - "Distributive Property"
+      - "Solve for an Unknown with Multiplicative Inverse"
+      - "Solve for an Unknown with Order of Operations"
+      - "Surface Area of Solids"
+      - "Convert Celsius to Fahrenheit"
+      - "Convert Fahrenheit to Celsius"
+      - "Absolute Value"
+      - "Ratio and Proportion"
+      - "Similar Polygons"
+      - "Least Common Multiple and Prime Factorization"
+      - "Greatest Common Factor"
+      - "Polynomials: Addition"
+      - "Volume of a Cylinder"
+      - "Polynomials: Multiplication"
+      - "Adding and Subtracting Time, and the Same-Difference Theorem"
+      - "Volume of a Pyramid and a Cone"
+      - "Military Time: Addition and Subtraction"
+      - "Measurement: Addition and Subtraction"
+      - "Irrational Numbers, and the Square Root Formula, Real Numbers"
+  - level: "Algebra 1: Legacy Edition"
+    grade: "8-9"
+    status: lessons
+    structure: flat
+    lessons:
+      - "Commutative and Associative Properties"
+      - "Order of Operations and Absolute Value"
+      - "Solving for an Unknown with One Variable"
+      - "Distributive Property"
+      - "Number Lines and Cartesian Coordinates"
+      - "Graphing a Line"
+      - "Slope-Intercept Formula"
+      - "Graphing a Line from the Slope-Intercept Formula"
+      - "Graphing Parallel Lines and the Standard Equation of a Line"
+      - "Graphing Perpendicular Lines"
+      - "Finding the Slope-Intercept Formula with Different Givens"
+      - "Graphing Inequalities"
+      - "Solving Simultaneous Equations by Graphing"
+      - "Solving Simultaneous Equations by Substitution"
+      - "Solving Simultaneous Equations by Elimination"
+      - "Coin Problems"
+      - "Consecutive Integers"
+      - "Multiplication and Division with Exponents"
+      - "Negative Exponents and Raising Exponents to a Power"
+      - "Addition and Multiplication of Polynomials"
+      - "Factor Polynomials"
+      - "Factor Trinomials with Coefficients"
+      - "Factor Trinomials with Negative Numbers"
+      - "Square Roots and Dividing Polynomials"
+      - "Difference of Two Squares and Oriental Squares"
+      - "Repeated Factoring of Polynomials"
+      - "Solving Equations with Factoring"
+      - "Unit Multipliers"
+      - "Square Unit Multipliers"
+      - "Metric Conversions"
+      - "Fractional Exponents"
+      - "Significant Digits and Scientific Notation"
+      - "Bases Other Than Ten"
+      - "Graphing a Circle and an Ellipse"
+      - "Graphing a Parabola and a Hyperbola"
+  - level: "Algebra 1: Principles of Secondary Mathematics"
+    grade: "8-9"
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Foundations of Algebra"
+        lessons:
+          - "The Language of Algebra"
+          - "Solving Equations"
+          - "Solving Absolute Value Equations"
+          - "Solving Inequalities"
+          - "Ratios, Proportions, and Rates"
+          - "Understanding Data"
+      - n: 2
+        title: "Linear Equations and Functions"
+        lessons:
+          - "Functions"
+          - "Using Graphs"
+          - "Scope and Linear Functions"
+          - "Writing Linear Equations"
+          - "More Forms of Lines"
+          - "Parallel and Perpendicular Lines"
+          - "Scatter Plots"
+          - "Types of Functions and Arithmetic Sequences"
+      - n: 3
+        title: "Systems of Equations and Inequalities"
+        lessons:
+          - "Graphing Systems"
+          - "Solving Systems Algebraically"
+          - "Applications of Linear Systems"
+          - "More Applications of Linear Systems"
+      - n: 4
+        title: "Polynomial Expressions and Equations"
+        lessons:
+          - "Product and Power Rules for Exponents"
+          - "Polynomial Expressions"
+          - "Introduction to Factoring Polynomials"
+          - "Patterns in Factoring"
+          - "Factoring Polynomials"
+          - "More Factoring"
+          - "Applications of Quadratics"
+      - n: 5
+        title: "Quadratics, Exponentials, Radicals"
+        lessons:
+          - "Graphing Quadratics"
+          - "More Graphic Quadratics"
+          - "More Exponent Rules"
+          - "Radical Expressions and Equations"
+          - "Exponential Functions"

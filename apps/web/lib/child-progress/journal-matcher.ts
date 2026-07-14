@@ -164,7 +164,13 @@ function escapeRegularExpression(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
-function normalizeMeaningfulTokens(value: string): Set<string> {
+/**
+ * The matcher's tokenizer, exported for lesson listen's clause guard
+ * (plan 2026-07-13-lesson-listen.md §4.5): the same normalization that
+ * scores bank items also checks that a normalized clause stays close
+ * to its verbatim transcript excerpt.
+ */
+export function normalizeMeaningfulTokens(value: string): Set<string> {
   const normalized = value
     .normalize("NFKD")
     .replace(/\p{Mark}/gu, "")

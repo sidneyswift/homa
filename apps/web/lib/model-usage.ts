@@ -31,6 +31,8 @@ export const USAGE_SURFACES = [
   "curriculum",
   "memory_extraction",
   "embedding",
+  "lesson_tone",
+  "lesson_synthesis",
 ] as const;
 export type UsageSurface = (typeof USAGE_SURFACES)[number];
 

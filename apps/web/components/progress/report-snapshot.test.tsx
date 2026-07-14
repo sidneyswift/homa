@@ -23,6 +23,8 @@ function scoresWithMath(monthsAhead: number): MapScores {
         strongestObservedStatement: "Counts past 20 without getting stuck",
         strongestObservedMonths: 54,
         frontierStatement: null,
+        frontierItemId: null,
+        frontierDomain: null,
         exposureBased: false,
       },
     ],

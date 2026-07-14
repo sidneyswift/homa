@@ -31,9 +31,9 @@ Equipping Minds is a cognitive development program, not an academic
 curriculum: daily one-on-one exercises and games meant to strengthen the
 underlying machinery (working memory, processing speed, visual and
 auditory processing, attention, reasoning) so that academics become
-learnable. Founder Carol Brown, a former Christian school administrator
-in Danville, Kentucky with an Ed.D. from The Southern Baptist Theological
-Seminary, built it on Reuven Feuerstein's theories of structural
+learnable. Founder Carol Brown, a former private school leader in
+Danville, Kentucky whose doctorate is from The Southern Baptist
+Theological Seminary, built it on Reuven Feuerstein's theories of structural
 cognitive modifiability and mediated learning, layered with
 neurodevelopmental elements (primitive reflex exercises, vision
 exercises, optional sound therapy). The recommended dose is 30 to 60

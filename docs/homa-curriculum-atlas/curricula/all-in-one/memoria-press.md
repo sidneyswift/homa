@@ -259,7 +259,11 @@ layer exists unless the family adds Memoria Academy.
 - First grade manual sample PDF (the week-grid anatomy): https://www.memoriapress.com/wp-content/uploads/1stGradeCurriculum_Sample-2_0.pdf
 - Latin catalog with per-course samples: https://www.memoriapress.com/latin/
 - Simply Classical (special needs) line: https://www.memoriapress.com/simply-classical/
-- Memoria Academy online classes: https://www.memoriapress.com/online-school/
+- Memoria Academy online classes: https://www.memoriaacademy.com (the
+  academy moved off memoriapress.com/online-school, which now 404s;
+  verified 2026-07-13. Academy specifics: founded 2006, grades 3-12,
+  CLSA accreditation, 28-credit diploma program, College Board AP
+  provider, per the online-academies comparison doc.)
 
 ## Sources
 

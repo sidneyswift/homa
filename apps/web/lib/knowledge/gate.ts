@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { RESEARCH_STAGES } from "@homa/core";
 import { z } from "zod";
 
 import { mapDb } from "../map/db";
@@ -35,11 +36,55 @@ export const KNOWLEDGE_TOPIC_TYPES = [
 ] as const;
 export type KnowledgeTopicType = (typeof KNOWLEDGE_TOPIC_TYPES)[number];
 
+/**
+ * The research purpose a row was gathered for (age-aware knowledge plan,
+ * KC-2). Supersedes topic_type as the addressing axis; topic_type stays
+ * for dual-read. Crossed with topic_key (a taxonomy domain for subjects)
+ * and stage, a row's cell is (lens, topic_key, stage).
+ */
+export const KNOWLEDGE_LENSES = [
+  "develops_when",
+  "how_to_teach",
+  "current_study",
+  "method",
+  "curriculum",
+  "red_flags",
+] as const;
+export type KnowledgeLens = (typeof KNOWLEDGE_LENSES)[number];
+
+/**
+ * The freshness ceiling per lens, in days, set in code because the model
+ * does not honor its own `freshnessTtlDays` argument (prod evidence
+ * 2026-07-14: study rows carried 273-day TTLs, not the intended 14). A
+ * row may shorten its TTL below the lens ceiling but never lengthen it
+ * past it (D-kc-4). Lensless legacy rows fall back to the old 180 default.
+ */
+const LENS_TTL_DAYS: Record<KnowledgeLens, number> = {
+  develops_when: 365,
+  how_to_teach: 90,
+  current_study: 14,
+  method: 180,
+  curriculum: 120,
+  red_flags: 365,
+};
+
+/** The gated TTL for a row: the lens ceiling, shortened by the model's
+ * request when it asked for less, never lengthened past the ceiling. */
+export function ttlForRow(
+  lens: KnowledgeLens | undefined,
+  requested: number | undefined,
+): number {
+  const ceiling = lens ? LENS_TTL_DAYS[lens] : 180;
+  return requested ? Math.min(requested, ceiling) : ceiling;
+}
+
 export const knowledgeRowInputSchema = z.object({
   topicType: z.enum(KNOWLEDGE_TOPIC_TYPES),
   topicKey: z
     .string()
     .regex(/^[a-z0-9_-]{2,60}$/, "kebab or snake case, 2 to 60 chars"),
+  lens: z.enum(KNOWLEDGE_LENSES).optional(),
+  stage: z.enum(RESEARCH_STAGES).optional(),
   title: z.string().trim().min(4).max(120),
   summary: z.string().trim().min(20).max(500),
   content: z.string().trim().min(40).max(8000),
@@ -149,18 +194,23 @@ export async function mergeKnowledgeRow(
     claim: sanitizeKnowledgeText(citation.claim),
   }));
 
+  const ttlDays = ttlForRow(input.lens, input.freshnessTtlDays);
+  const lens = input.lens ?? null;
+  const stage = input.stage ?? null;
+
   const sql = mapDb();
   const flag = async (reason: string): Promise<MergeResult> => {
     await sql`
       insert into public.knowledge_bank
-        (topic_type, topic_key, title, summary, content, source_tier,
+        (topic_type, topic_key, lens, stage, title, summary, content, source_tier,
          citations, confidence, contributed_by, status, flagged_reason,
          run_id, freshness_ttl_days)
       values
-        (${input.topicType}, ${input.topicKey}, ${title}, ${summary}, ${content},
+        (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
+         ${title}, ${summary}, ${content},
          ${input.sourceTier ?? null}, ${sql.json(citations as never)},
          ${input.confidence}, ${options.contributedBy}, 'flagged', ${reason},
-         ${options.runId ?? null}, ${input.freshnessTtlDays ?? 180})
+         ${options.runId ?? null}, ${ttlDays})
     `;
     await emitMapEvent("knowledge.row_merged", {
       topic_type: input.topicType,
@@ -187,6 +237,8 @@ export async function mergeKnowledgeRow(
   const existing = await sql<{ id: string }[]>`
     select id from public.knowledge_bank
     where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
+      and lens is not distinct from ${lens}
+      and stage is not distinct from ${stage}
       and status = 'active' and content_hash = ${contentHash}
     limit 1
   `;
@@ -206,24 +258,30 @@ export async function mergeKnowledgeRow(
 
   const inserted = await sql<{ id: string }[]>`
     insert into public.knowledge_bank
-      (topic_type, topic_key, title, summary, content, source_tier,
+      (topic_type, topic_key, lens, stage, title, summary, content, source_tier,
        citations, confidence, contributed_by, status, content_hash,
        run_id, freshness_ttl_days)
     values
-      (${input.topicType}, ${input.topicKey}, ${title}, ${summary}, ${content},
+      (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
+       ${title}, ${summary}, ${content},
        ${input.sourceTier ?? null}, ${sql.json(citations as never)},
        ${input.confidence}, ${options.contributedBy}, 'active', ${contentHash},
-       ${options.runId ?? null}, ${input.freshnessTtlDays ?? 180})
+       ${options.runId ?? null}, ${ttlDays})
     returning id
   `;
   const rowId = inserted[0].id;
 
-  // The new row supersedes older actives for the same topic; history
-  // stays queryable and the revert script can restore it by run.
+  // The new row supersedes older actives for the SAME cell (topic +
+  // lens + stage), never across lenses or stages: a how_to_teach row for
+  // multiplication must not retire the develops_when row beside it, and
+  // an early-elementary row must not retire the middle-stage one.
+  // is-not-distinct-from keeps lensless legacy rows superseding cleanly.
   await sql`
     update public.knowledge_bank
     set status = 'superseded', superseded_by = ${rowId}, updated_at = now()
     where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
+      and lens is not distinct from ${lens}
+      and stage is not distinct from ${stage}
       and status = 'active' and id != ${rowId}
   `;
 
@@ -238,6 +296,8 @@ export interface KnowledgeRow {
   id: string;
   topicType: KnowledgeTopicType;
   topicKey: string;
+  lens: KnowledgeLens | null;
+  stage: string | null;
   title: string;
   summary: string;
   content: string;
@@ -245,12 +305,25 @@ export interface KnowledgeRow {
   lastVerifiedAt: string;
 }
 
-/** Fresh active rows relevant to one family's styles and subjects, for
- * the morning brief composer. Read-only, server-side; family data goes
- * IN to the filter, never into the bank. */
+/**
+ * Fresh active rows relevant to one family's styles, subject frontiers,
+ * and its kids' developmental stages, for the morning brief composer and
+ * custom research tasks (age-aware knowledge plan, KC-4). Read-only,
+ * server-side; family data goes IN to the filter, never into the bank.
+ *
+ * `subjectKeys` carries both taxonomy DOMAIN slugs (a child's frontier
+ * domain, the new grain) and bare subject ids (legacy rows keyed before
+ * KC-1), so a domain-keyed row and a legacy subject row both match.
+ * `stages` is the set of the family's kids' stage bands; a row matches
+ * when its stage is in that set OR is null (stage-agnostic and legacy
+ * rows stay visible under dual-read). This is what stops a preschool
+ * study from reaching an 11-year-old's family: the old query handed
+ * every `study` row to everyone.
+ */
 export async function freshKnowledgeForTopics(topics: {
   styleKeys: string[];
   subjectKeys: string[];
+  stages: string[];
   limit: number;
 }): Promise<KnowledgeRow[]> {
   const sql = mapDb();
@@ -259,6 +332,8 @@ export async function freshKnowledgeForTopics(topics: {
       id: string;
       topic_type: KnowledgeTopicType;
       topic_key: string;
+      lens: KnowledgeLens | null;
+      stage: string | null;
       title: string;
       summary: string;
       content: string;
@@ -266,10 +341,11 @@ export async function freshKnowledgeForTopics(topics: {
       last_verified_at: string;
     }[]
   >`
-    select id, topic_type, topic_key, title, summary, content, citations,
-           last_verified_at::text as last_verified_at
+    select id, topic_type, topic_key, lens, stage, title, summary, content,
+           citations, last_verified_at::text as last_verified_at
     from public.knowledge_bank
     where status = 'active'
+      and (stage is null or stage = any(${sql.array(topics.stages)}))
       and (
         (topic_type in ('method_philosophy', 'method_format')
           and topic_key = any(${sql.array(topics.styleKeys)}))
@@ -283,6 +359,8 @@ export async function freshKnowledgeForTopics(topics: {
     id: row.id,
     topicType: row.topic_type,
     topicKey: row.topic_key,
+    lens: row.lens,
+    stage: row.stage,
     title: row.title,
     summary: row.summary,
     content: row.content,

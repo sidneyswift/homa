@@ -32,11 +32,10 @@ LiPS (the Lindamood Phoneme Sequencing Program for Reading, Spelling, and
 Speech, formerly Auditory Discrimination in Depth) is the clinic-grade
 program beneath the programs: where OG systems assume a child can hear and
 compare speech sounds, LiPS builds that ability from the mouth up.
-Students learn the physical, articulatory identity of each phoneme (the
-program's famous "lip poppers" and "tip tappers" mouth-picture labels,
-its "brothers and cousins" sound groupings, and a vowel circle), then
-track sounds in syllables with colored blocks and mouth pictures before
-letters enter at all. Written by Patricia and Phyllis Lindamood and now in
+Students learn the physical, articulatory identity of each phoneme
+(mouth pictures, the program's "brothers and cousins" sound groupings,
+and its vowel circle), then track sounds in syllables with colored
+blocks and mouth pictures before letters enter at all. Written by Patricia and Phyllis Lindamood and now in
 its fourth edition from Gander Publishing ($515.95 for the kit), it is
 the engine of Lindamood-Bell's intensive clinics and a speech-language
 pathology staple. Homes buy it in two situations: a child fails the

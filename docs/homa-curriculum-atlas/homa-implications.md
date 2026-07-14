@@ -5,7 +5,9 @@ comparisons, the market overview, and the TPT marketplace profile,
 researched by parallel agents against live sources and validated against
 the methodology. This file is the product-facing summary; every claim
 below traces to a profile or comparison doc, and category evidence lives
-in `comparisons/`.
+in `comparisons/`. The wave 2 addendum at the end extends this with the
+preschool, special-needs, high-school, Catholic, and electives lanes
+(same day, 42 more profiles).
 
 This is dated strategy input, not policy. The PRD and founder rulings
 still govern; where this file suggests product direction it feeds those
@@ -183,9 +185,71 @@ data, and the category patterns:
 - A review-scores site: Cathy Duffy and the award circuits own ranking
   authority; Homa's authority is fit-for-this-family, not stars.
 
+## Wave 2 addendum (2026-07-13, evening)
+
+Five more lanes (preschool, special needs and intervention, high school,
+Catholic publishers, languages and electives) sharpened the wave 1 thesis
+rather than changing it. What they add:
+
+1. The records thesis got its strongest evidence yet, from three
+   directions at once. Above grade 9, every curriculum is partly a
+   records product (publishers ship credit-claim documentation because
+   mom is the registrar), and dual enrollment (2.8M students,
+   state-funded, 71% at community colleges) makes multi-provider
+   coordination the default senior-high shape. The Catholic market
+   inverts wave 1's accreditation model entirely: its default product IS
+   the enrollment school (Seton ~14,000 students, MODG 6,300+), and its
+   quarterly submission packets (grades plus scanned work samples) are
+   exactly the artifact Homa's evidence log produces. And preschool has
+   the mirror-image gap: no product keeps any record of the child at
+   all. Registrar-grade records that survive the stack are the atlas's
+   single most repeated unclaimed job.
+2. De-graded levels are the special-needs segment's universal design
+   pattern (Barton levels, Nessy islands, Simply Classical readiness
+   levels), direct external validation of Homa's no-grade-labels map
+   philosophy, with one added requirement: translate between level
+   systems without ever rendering any of them as grades.
+3. Scripted parent-delivery of expert protocols is a proven paid
+   pattern: the Orton-Gillingham economy prices credentials (about $560
+   per month for certified tutoring) and Barton's $400-per-level scripts
+   are arbitrage on that. Generalizing "expert protocol, parent
+   delivery, zero prep" is Homa-shaped territory, and this segment's
+   trust rituals (free screenings that talk you out of wrong purchases,
+   guarantees) set the bar for how Homa should sell to families in
+   crisis.
+4. The credit cliff at grades 8-9 is a scheduled re-decision moment no
+   product owns: apps and memberships carry K-8 exposure (Duolingo,
+   Hoffman), then transcript rules (2+ years of one language, documented
+   hours, fine-arts credits) force a records-shaped transition. Same
+   pattern as wave 1's program dead-ends, one level up.
+5. Free content plus paid orchestration is the electives business model
+   (Hoffman gives away 400+ lessons and sells practice plans; TypingClub
+   gives away curriculum and sells dashboards). The monetized layer is
+   scheduling, oversight, and records: Homa's exact surface, impossible
+   for single-subject publishers to build across the stack.
+6. Trust transfers through named humans (Shormann inherited Saxon's
+   trust by teaching it for 20 years; Owens grades the work himself),
+   and the Catholic market's trust axis is magisterium fidelity with
+   sacramental-prep years (grades 2 and 7) as planner-sacred territory.
+   Worldview configuration must handle doctrine axes, not just the
+   creation-science axis.
+7. The clipboard boundary now has an in-market precedent: Homeschool
+   Connections, the Catholic segment's largest course platform, publicly
+   tells families to use AI for planning while warning against tools
+   that do the child's thinking. The market is converging on Homa's
+   line on its own.
+8. Preschool specifics for Homa's youngest band: the price ceiling is
+   about $70 (the market itself tells buyers they need very little),
+   kindergarten-readiness anxiety is the universal purchase trigger, and
+   co-ops are first-class stack elements ("we do art at co-op Thursdays"
+   is a complete answer, so the stack model needs institutions, not just
+   products).
+
 ## Where the evidence lives
 
-- Category mechanics and switching paths: `comparisons/` (8 docs)
+- Materials pattern library (the materials-studio quality bar, expanded
+  into 16 specified patterns): `materials-patterns.md`
+- Category mechanics and switching paths: `comparisons/` (13 docs)
 - Lesson-level anatomy exemplar: `curricula/math/dimensions-math.md`
 - Marketplace competitor: `marketplaces/teachers-pay-teachers.md`
 - Rankings and discovery: `market-overview.md`

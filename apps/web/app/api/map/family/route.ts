@@ -33,6 +33,17 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
+  // The step runs once per FAMILY, never per account (founder ruling
+  // card-per-family-primary-parent, 2026-07-14). Once the primary parent
+  // completed it, a replayed POST (a retry after a lost response, or any
+  // later adult's session) must not rename the parent identity, rewrite
+  // the address, or re-stamp profile_completed_at: the thank-you card's
+  // recipient snapshot and its 48-hour clock read those fields. Quiet
+  // success keeps a same-sitting retry from stranding the step's UI.
+  if (family.profile_completed_at) {
+    return Response.json({ ok: true, phoneTaken: false });
+  }
+
   let body: unknown;
   try {
     body = await request.json();

@@ -1,7 +1,9 @@
+import { RESEARCH_STAGES } from "@homa/core";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import {
+  KNOWLEDGE_LENSES,
   KNOWLEDGE_TOPIC_TYPES,
   mergeKnowledgeRow,
 } from "../../lib/knowledge/gate";
@@ -25,7 +27,19 @@ export default defineTool({
       .string()
       .regex(/^[a-z0-9_-]{2,60}$/)
       .describe(
-        "The stable topic slug, e.g. 'montessori', 'phonics', 'early-childhood-recent-studies'. Reuse the key you were given; never invent variants.",
+        "The stable topic slug you were given for this cell, e.g. a taxonomy domain like 'multiplication-division', a style like 'montessori', or 'early-childhood-recent-studies'. Reuse the key exactly; never invent variants.",
+      ),
+    lens: z
+      .enum(KNOWLEDGE_LENSES)
+      .optional()
+      .describe(
+        "The research purpose of this cell, from your assignment: develops_when, how_to_teach, current_study, method, curriculum, or red_flags.",
+      ),
+    stage: z
+      .enum(RESEARCH_STAGES)
+      .optional()
+      .describe(
+        "The developmental band this row serves, from your assignment: early_years, early_elem, upper_elem, middle, or high. Omit only for stage-agnostic philosophy.",
       ),
     title: z.string().min(4).max(120),
     summary: z
@@ -64,7 +78,9 @@ export default defineTool({
       .min(1)
       .max(3650)
       .optional()
-      .describe("When this should be researched again. Studies ~14, subjects ~60, methods ~180."),
+      .describe(
+        "Optional. Homa sets the default from the lens (current_study ~14, how_to_teach ~90, curriculum ~120, method ~180, develops_when ~365). You may only SHORTEN it; a longer value is clamped to the lens ceiling.",
+      ),
   }),
   async execute(input, ctx) {
     const attributes = (ctx.session.auth.current?.attributes ?? {}) as {

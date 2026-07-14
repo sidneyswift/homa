@@ -546,6 +546,7 @@ JOURNAL_PROMPT_ENABLED and MORNING_BRIEF_ENABLED, flags otherwise from .env.loca
   specific skills") over a fully scored report. Note the flag is now on in the shared
   env file: if that ships to prod before the ChildProgress backfill, every family's
   progress page goes empty. Treat as a pre-deploy checklist item.
+  RESOLVED OPERATIONALLY later the same evening, see Phase 10.
 - **Corrections do not move scores (new, BUG-P9-1).** "Update Emma's report: she's
   writing multi-paragraph pieces easily now" produced a thoughtful placement question
   and two record_journal_evidence calls, but both classified no_match into
@@ -558,6 +559,48 @@ JOURNAL_PROMPT_ENABLED and MORNING_BRIEF_ENABLED, flags otherwise from .env.loca
   report-correction path with a confirmation card instead of the journal matcher.
 - **BUG-P8-1 unchanged**: no background-work machinery yet (the directions doc is in
   flight); the A-to-Z promise would still strand.
+
+## Phase 10 · Closing the BUG-P4-2 exposure (founder-directed, 2026-07-14 ~01:35Z)
+
+The founder asked for the live-progress exposure to be handled first. Three findings
+and one action, following the BUILD.md ChildProgress rollout order exactly.
+
+**Finding 1: production was never exposed.** `vercel env pull --environment
+production` shows `HOMA_LIVE_PROGRESS_ENABLED=""` (empty string) in the Production
+environment; the gate requires the exact string "true", so the live view is dark in
+prod. The risky state was local-only (.env.local carries true) plus the standing
+hazard that anyone filling that prod var before the backfill would empty every
+family's progress page.
+
+**Finding 2: the fleet was only partly reconciled.** Before the action:
+child_progress_evidence 296 rows, child_progress_live 3 rows, while 11 children hold
+child_answers. The Vega family's 72 answers had no projection at all, which is what
+Phase 4 and Phase 9 observed as the empty page.
+
+**Action taken: the documented reconciliation, dry-run first.**
+`pnpm progress:reconcile -- --dry-run` reported inserted_count=72, status
+rolled_back (the dry-run contract), then the real run committed: mode=commit,
+inserted_count=72, superseded_count=0, status=reconciled,
+safe_to_continue_rollout=true. The 72 inserted rows are exactly the Vega family's
+answers; the other families were already reconciled (their 296 rows predate this).
+Additive only, via the repo's own `private.reconcile_child_answers_to_progress()`
+function, advisory-locked, idempotent.
+
+**Verified live afterward.** Emma's progress page now renders the real thing: an
+"Updated today" snapshot chart, one line per subject, the legend-as-subject-list
+from the afternoon redesign, and the subject door works (tapping "Social studies
++11" opens the detail panel: "Ahead, +11 mo, 2 observations, Progress checklist,
+Jul 13 2026" with growth framing and a close control). The empty-state class of
+BUG-P4-2 is cured for this database; the code-level gap (no report-backed fallback
+when evidence is absent, R5) remains worth building for the next un-backfilled
+environment.
+
+**Remaining pre-flip checklist for production** (per BUILD.md, now mostly done):
+migration applied (evidence tables exist and hold data), reconciliation run and
+clean (this phase), flag still dark in prod (correct final step pending founder
+timing), then post-flip probes: authenticated Progress (verified locally), token
+reports (BUG-P1-1 fixed 2026-07-14 in 7bf394c, unblocked), corrections
+(BUG-P9-1 / R17 still open), linked SMS.
 
 ---
 
@@ -681,6 +724,14 @@ subject grouping, which also starts R7) shipped in the founder's afternoon batch
 verified live. R1 (narrative SQL), R5 (live-flag fallback, now urgent because the flag
 sits enabled in .env.local), R6b (background work), and the rest remain open. New
 addition below: R17.
+
+Phase 10 update: the R5 operational exposure is closed. Production's flag was
+verified empty (dark), the fleet reconciliation has been run clean
+(safe_to_continue_rollout=true), and the live progress page is verified working with
+real data. R5's code-level fallback remains a worthwhile guard for future
+environments, at reduced priority. The production flag flip is now unblocked on the
+data side and waits only on founder timing plus the post-flip probes (and ideally R1
+first, so "Open the full report" is not a dead end).
 
 ### P0 · trust floor (the product currently breaks its own promises)
 

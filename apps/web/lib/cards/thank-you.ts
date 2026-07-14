@@ -15,6 +15,17 @@ import { THANK_YOU_CARD_WISHES, thankYouCardMessage } from "./message";
  * One real handwritten thank-you card per family, ever
  * (plans/2026-07-11-thank-you-cards.md). Runs inside /api/map/cron.
  *
+ * Cards key on FAMILIES, never accounts (founder ruling
+ * card-per-family-primary-parent, 2026-07-14): eligibility is the
+ * family's own completed web onboarding, the unique family_id row is
+ * the once-ever guarantee, and a later adult's signup or join only adds
+ * a family_members row, which can never mint a card. The recipient
+ * snapshot (first_name / parent_display_name) is the PRIMARY parent,
+ * the adult whose signup created the family, because those fields are
+ * write-once after onboarding completes: the /api/map/family route
+ * refuses replays and saveFamilyBasicsFromSms refuses membered
+ * families.
+ *
  * Three passes, all idempotent:
  *   1. enqueue: families that finished web onboarding 48+ hours ago with a
  *      complete address get a queued row (unique family_id absorbs re-runs).

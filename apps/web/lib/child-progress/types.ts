@@ -16,7 +16,8 @@ export type ProgressSourceKind =
   | "report_probe"
   | "recheck"
   | "onboarding_walk"
-  | "legacy";
+  | "legacy"
+  | "lesson_listen";
 
 export interface ProgressSelectionAnswer {
   selectionId: string;
@@ -53,12 +54,17 @@ export type ProgressCheckInPauseReason =
   | "conflict"
   | "member_removed";
 
+/** Where progress provenance can point. Check-ins use the first five;
+ * "lesson" exists only on evidence and observation rows written by the
+ * lesson listen pipeline (plan 2026-07-13-lesson-listen.md), never on
+ * a check-in. */
 export type ProgressCheckInChannel =
   | "web"
   | "sms"
   | "email"
   | "dispatch"
-  | "voice";
+  | "voice"
+  | "lesson";
 
 export interface ProgressCheckInScope {
   subjectIds?: string[];

@@ -21,6 +21,8 @@ export const PROGRESS_FIXTURE_SCORES: MapScores = {
       strongestObservedStatement: "Counts five objects accurately",
       strongestObservedMonths: 48,
       frontierStatement: null,
+      frontierItemId: null,
+      frontierDomain: null,
       exposureBased: false,
     },
     {
@@ -34,6 +36,8 @@ export const PROGRESS_FIXTURE_SCORES: MapScores = {
       strongestObservedStatement: "Reads a short early reader",
       strongestObservedMonths: 72,
       frontierStatement: null,
+      frontierItemId: null,
+      frontierDomain: null,
       exposureBased: false,
     },
   ],

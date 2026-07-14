@@ -1,4 +1,4 @@
-import { HOMESCHOOL_STYLES, MAP_SUBJECTS } from "@homa/core";
+import { HOMESCHOOL_STYLES, MAP_SUBJECTS, ageInMonths, stageForAgeMonths } from "@homa/core";
 
 import { freshKnowledgeForTopics, type KnowledgeRow } from "../knowledge/gate";
 import { mapDb } from "../map/db";
@@ -19,6 +19,10 @@ interface SubjectScoreEntry {
   monthsAhead?: number | null;
   strongestObservedStatement?: string | null;
   frontierStatement?: string | null;
+  /** The frontier's taxonomy domain (scorer, KC-1). Present on reports
+   * generated after the scorer change; absent on older ones, where the
+   * subject id is the dual-read fallback. */
+  frontierDomain?: string | null;
 }
 
 export interface BriefObservation {
@@ -31,6 +35,9 @@ export interface BriefObservation {
 export interface BriefContext {
   styleKeys: string[];
   positionLines: string[];
+  /** The distinct stage bands of this family's kids, so the corpus read
+   * only returns stage-matched rows (KC-4). */
+  stages: string[];
   knowledge: KnowledgeRow[];
   observations: BriefObservation[];
 }
@@ -59,8 +66,16 @@ export async function loadBriefContext(familyId: string): Promise<BriefContext> 
     sql<{ context: { styles?: string[]; style?: string } | null }[]>`
       select context from public.families where id = ${familyId}
     `,
-    sql<{ child_name: string; scores: { subjects?: SubjectScoreEntry[] } | null }[]>`
-      select c.name as child_name, r.scores
+    sql<
+      {
+        child_name: string;
+        scores: { subjects?: SubjectScoreEntry[] } | null;
+        scored_age_months: number | null;
+        birth_month: string | null;
+      }[]
+    >`
+      select c.name as child_name, r.scores,
+             r.scored_age_months, c.birth_month::text as birth_month
       from public.child_reports r
       join public.children c on c.id = r.child_id
       where c.family_id = ${familyId}
@@ -114,15 +129,34 @@ export async function loadBriefContext(familyId: string): Promise<BriefContext> 
 
   const positionLines: string[] = [];
   const subjectKeys = new Set<string>();
+  const stages = new Set<string>();
   for (const report of reportRows) {
+    // The child's stage band, so the corpus read (KC-4) only returns
+    // rows for their developmental range. scored_age_months is the
+    // cheapest source; birth_month is the fallback for reports scored
+    // before that column existed.
+    const ageMonths =
+      typeof report.scored_age_months === "number"
+        ? report.scored_age_months
+        : report.birth_month
+          ? ageInMonths(report.birth_month)
+          : null;
+    if (ageMonths !== null) stages.add(stageForAgeMonths(ageMonths));
+
     const subjects = report.scores?.subjects ?? [];
     const mapped = subjects.filter(
       (entry) => entry.subjectId && entry.position && entry.position !== "not_mapped",
     );
     if (mapped.length === 0) continue;
     for (const entry of mapped) {
+      // The frontier DOMAIN is the new corpus grain (KC-3/KC-4); the
+      // subject id stays in the set as the dual-read fallback for rows
+      // keyed before the domain migration.
       if (entry.subjectId && SUBJECT_IDS.has(entry.subjectId)) {
         subjectKeys.add(entry.subjectId);
+      }
+      if (entry.frontierDomain && /^[a-z0-9_-]{2,60}$/.test(entry.frontierDomain)) {
+        subjectKeys.add(entry.frontierDomain);
       }
     }
     const summary = mapped
@@ -144,10 +178,11 @@ export async function loadBriefContext(familyId: string): Promise<BriefContext> 
   const knowledge = await freshKnowledgeForTopics({
     styleKeys,
     subjectKeys: [...subjectKeys],
+    stages: [...stages],
     limit: 8,
   });
 
-  return { styleKeys, positionLines, knowledge, observations };
+  return { styleKeys, positionLines, stages: [...stages], knowledge, observations };
 }
 
 /** Renders the bundle as the dispatcher's message block. Knowledge rows

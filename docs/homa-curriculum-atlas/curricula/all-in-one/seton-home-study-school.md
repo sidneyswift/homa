@@ -54,13 +54,13 @@ the founding both 1980 and 1982), and Dr. Mary Kay Clark ran it as
 director from 1983 until becoming director emeritus in 2024. The product
 is a full enrollment school, not just a box: books, day-by-day lesson
 plans, professional grading of key assignments, academic counselors for
-every subject, transcripts, and an accredited diploma. Seton is also one
-of the largest publishers of Catholic textbooks in the United States (the
-"for Young Catholics" series), runs the IHM National Catholic Homeschool
+every subject, transcripts, and an accredited diploma. Seton also calls
+itself one of the largest publishers of Catholic textbooks in the United
+States (the "for Young Catholics" series), runs the IHM National Catholic Homeschool
 Conference, and operates Seton Testing Services, which sells standardized
 tests to the whole homeschool market, not just Catholics (the repo's
 assessment research prices its CAT, Iowa, and Stanford offerings in
-`docs/homa-benchmarks/10-assessment-norms.md`).
+`../../../homa-benchmarks/10-assessment-norms.md`).
 
 ## Reputation and rankings
 
@@ -134,11 +134,11 @@ school that backs them. Distinctives:
   Textbooks pre-algebra course (see `../math/teaching-textbooks.md`); high
   school math offers Seton's own texts, Saxon Geometry (see
   `../math/saxon-math.md`), and Teaching Textbooks options.
-- High school: about 60 courses across theology, English (including
-  honors tracks and Shakespeare), Latin and Spanish to level III, math
-  through calculus, sciences through physics, social studies, and
-  business electives; four diploma types (Basic, Vocational, General,
-  Academic).
+- High school: a catalog of one-credit and half-credit courses across
+  theology, English (including honors tracks and Shakespeare), Latin and
+  Spanish to level III, math through calculus, sciences through physics,
+  social studies, and business electives; four diploma types (Basic,
+  Vocational, General, Academic).
 - Sacramental preparation is built into the sequence: grade 2 religion is
   First Penance and First Communion preparation (Religion 2 for Young
   Catholics plus the New Saint Joseph First Communion Catechism), and
@@ -150,12 +150,13 @@ school that backs them. Distinctives:
 ## A lesson up close
 
 The parent's tool is the lesson plan book for each subject: a week of
-plans is a two-page spread of Day 1 through Day 4 or 5 boxes, each a short
+plans is a spread of Day 1 through Day 4 or 5 boxes, each a short
 paragraph of instructions. Seton's public Religion 2 sample shows the
-anatomy: "Read and discuss the lesson, then complete the sentences,"
-followed by a prayer intention tied to the day's doctrine, a pointer into
-the First Communion Catechism pages, and a Day 4 instruction to memorize
-the week's catechism answers. The parent reads with the child, discusses,
+anatomy: each day pairs a read-and-discuss direction for the text lesson
+with the matching workbook exercise, adds a prayer intention tied to the
+day's doctrine, points into the First Communion Catechism pages during
+sacramental-prep quarters, and ends the week with memorization of the
+catechism answers. The parent reads with the child, discusses,
 supervises the workbook page, and records a weekly memory-work grade that
 will be reported to Seton on the quarter form.
 

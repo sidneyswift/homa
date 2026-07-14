@@ -176,6 +176,7 @@ export const EVENT_SCHEMAS = {
         "recheck",
         "onboarding_walk",
         "legacy",
+        "lesson_listen",
       ]),
       items: z.number().int().min(1),
       supersedes: z.boolean(),
@@ -630,6 +631,41 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     child_id: z.uuid(),
     action: z.enum(["set", "removed"]),
+  }),
+  // Lesson listen (plan 2026-07-13-lesson-listen.md, ruling
+  // lesson-listen-child-audio): the dedicated consent screen's agree
+  // moment, then the pipeline's lifecycle. Ids, counts, and
+  // classifications only; transcripts, tone notes, quotes, and URLs
+  // never ride events (MJ-08).
+  "family.lesson_audio_consented": z.object({
+    family_id: z.uuid(),
+  }),
+  "lesson.recorded": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    source: z.enum(["recorder", "upload"]),
+    segment_count: z.number().int().min(0),
+    duration_seconds: z.number().int().min(0).nullable(),
+  }),
+  "lesson.review_ready": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    evidence_count: z.number().int().min(0),
+    observation_count: z.number().int().min(0),
+    moment_count: z.number().int().min(0),
+    // Segments with tone notes over total: the PMF read's "was the
+    // tone lane deaf" signal (plan §4.7).
+    tone_coverage: z.number().min(0).max(1),
+  }),
+  "lesson.media_attached": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    when: z.enum(["during", "finish", "after_ready"]),
+  }),
+  "lesson.failed": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    stage: z.enum(["transcription", "synthesis"]),
   }),
   // A research row entered (or was refused by) the knowledge bank's
   // automated gate (HT-2, D-ht-5). Topic type only, never content.

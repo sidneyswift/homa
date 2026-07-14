@@ -53,6 +53,13 @@ is mailable today with zero product changes.
 - **D-tyc-6 · no address appends, ever**: if Homa does not have the
   address, Homa asks her. Data-broker lookups are a hard no for a
   family product.
+- **D-tyc-7 · primary parent only (founder ruling 2026-07-14,
+  `card-per-family-primary-parent`)**: the card keys on the family,
+  never the account. One per family ever, addressed to the primary
+  parent whose signup created the family. A later adult's account
+  (join link, SMS invite, or any other membership) never mints,
+  renames, or re-times one; the family identity fields the recipient
+  snapshot reads are write-once after onboarding completes.
 
 ## How it works
 

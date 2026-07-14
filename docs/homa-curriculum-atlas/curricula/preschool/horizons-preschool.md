@@ -46,8 +46,9 @@ mainstream.
 
 ## Reputation and rankings
 
-Horizons as a line is best known for its award-cited K-8 math and its
-bright spiral workbooks; the preschool level rides that reputation.
+Horizons as a line is best known for its K-8 math (which AOP markets
+as award-winning) and its bright spiral workbooks; the preschool level
+rides that reputation.
 Old Schoolhouse crew reviews and Christian homeschool blogs describe
 30-40 minute days, colorful and genuinely fun workbook pages, and
 strong kindergarten preparation; the standing reservations mirror the

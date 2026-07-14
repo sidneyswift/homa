@@ -66,6 +66,7 @@ means for Homa's materials and positioning.
 | `comparisons/` | Cross-curriculum comparison and switching-path notes per category |
 | `sequences/` | Structured scope-and-sequence data (YAML) extracted from publisher documents; schema in its README |
 | `catalog.json` | Generated front matter index (never hand-edit; rebuild with `pnpm atlas:index`) |
+| `materials-patterns.md` | The materials pattern library: 16 structural patterns publisher-grade materials use, with atlas evidence and Homa specs |
 | `homa-implications.md` | What the atlas means for Homa's product and materials strategy |
 | `backlog.md` | Curricula and categories not yet profiled, and the acquisition roadmap |
 
@@ -86,26 +87,34 @@ Every profile declares a tier in front matter:
 
 ## Status board
 
-Wave 1 completed 2026-07-13: 87 profiles (about 15,200 lines), 8 comparison
-docs, market overview, flagship deep dive, and the TPT marketplace profile.
-Front matter validated atlas-wide (schema, enums, unique ids, links) with
-zero style-law violations on the same date.
+Waves 1, 2, and 2b completed 2026-07-13: 155 profiles, 18 comparison
+docs, market overview, flagship deep dive, 6 marketplace profiles,
+catalog tooling, the materials pattern library, 11 structured sequence
+extractions (109 levels, 5,171 lesson entries), and the first
+sequence-to-taxonomy crosswalk seed. Front matter validated atlas-wide
+(schema, enums, unique ids, links, dash law) after each wave; rerun
+`pnpm atlas:index` for live counts.
 
-| Category | Profiles | Flagship | Deep | Standard | Stub | Comparisons |
-|---|---|---|---|---|---|---|
-| `curricula/math/` | 13 | 1 (Dimensions Math) | 4 | 6 | 2 | `comparisons/math.md` |
-| `curricula/language-arts/` | 12 | 0 | 3 | 6 | 3 | `comparisons/language-arts.md` |
-| `curricula/science/` | 10 | 0 | 2 | 5 | 3 | `comparisons/science.md` |
-| `curricula/history-geography/` | 9 | 0 | 2 | 4 | 3 | `comparisons/history-geography.md` |
-| `curricula/all-in-one/` | 31 | 0 | 9 | 15 | 7 | `all-in-one-traditional-christian.md`, `classical-charlotte-mason.md`, `secular-literature-based.md` |
-| `curricula/online-digital/` | 11 | 0 | 2 | 6 | 3 | `comparisons/online-digital.md` |
-| `marketplaces/` | 1 | 0 | 1 (TPT) | 0 | 0 | covered in `homa-implications.md` |
+| Category | Profiles | Flagship | Deep | Standard | Stub |
+|---|---|---|---|---|---|
+| `curricula/math/` | 18 | 1 (Dimensions Math) | 5 | 9 | 3 |
+| `curricula/language-arts/` | 14 | 0 | 4 | 6 | 4 |
+| `curricula/science/` | 11 | 0 | 2 | 6 | 3 |
+| `curricula/history-geography/` | 9 | 0 | 2 | 4 | 3 |
+| `curricula/all-in-one/` | 50 | 0 | 12 | 22 | 16 |
+| `curricula/online-digital/` | 24 | 0 | 3 | 14 | 7 |
+| `curricula/preschool/` | 7 | 0 | 1 | 3 | 3 |
+| `curricula/electives/` | 16 | 0 | 0 | 11 | 5 |
+| `marketplaces/` | 6 | 0 | 2 (TPT, Etsy) | 1 | 3 |
+
+Comparison docs in `comparisons/`: per-folder lenses (math,
+language-arts, science, history-geography, online-digital, preschool,
+languages-electives) plus cross-cutting lenses (all-in-one-traditional-
+christian, classical-charlotte-mason, secular-literature-based, catholic,
+high-school, special-needs-intervention, online-academies-unit-studies,
+international, coding-accessibility, marketplaces).
 
 The synthesis of what all of it means for the product is
-`homa-implications.md`. What is not yet covered is `backlog.md`.
-
-Wave 2 launched 2026-07-13 (afternoon): preschool, special needs and
-intervention, high school and upper grades, Catholic publishers, and
-languages and electives, plus the `sequences/` seed and the catalog
-tooling. Status board totals above describe wave 1; rerun
-`pnpm atlas:index` for live counts.
+`homa-implications.md` (wave 2 addendum at the end). The materials
+pattern library is `materials-patterns.md`. What is not yet covered is
+`backlog.md`.

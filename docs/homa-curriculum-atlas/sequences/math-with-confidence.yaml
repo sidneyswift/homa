@@ -1,0 +1,495 @@
+# Generated from publisher scope-and-sequence documents; see README.md in
+# this folder for schema, protocol, and copyright policy. Unit, week, and
+# activity titles are facts about the curriculum's organization; unicode
+# minus signs in fact week titles are written as ASCII hyphens (see notes).
+id: math-with-confidence
+name: Math with Confidence
+extracted: 2026-07-13
+sources:
+  - https://support.welltrainedmind.com/hc/en-us/articles/360056157554-Tell-me-about-the-Math-With-Confidence-series (series structure, eight-level count)
+  - https://docs.google.com/document/d/1nUuKY5gQsyhhaNhG_K0CVkIdraqvQe7sNiGZlePwP_8/ (publisher series scope and sequence, revision May 2026; per-grade unit lists)
+  - https://kateshomeschoolmath.com/kindergarten-math-with-confidence/ (and sibling grade pages through sixth-grade-math-with-confidence; structure statements and lesson counts)
+  - https://kateshomeschoolmath.com/wp-content/uploads/2020/04/KMwC_Instructor_Sample.pdf (instructor guide sample with full table of contents; siblings for first 2021/04, second 2022/05, third 2023/05, fourth 2024/05, fifth 2025/05, sixth 2026/05 are linked from each grade page)
+  - https://welltrainedmind.com/p/preschool-math-at-home/ (Preschool Math at Home product page and its PSM_Sample.pdf table of contents)
+notes: >
+  The publisher's support center counts eight levels, Preschool plus
+  Kindergarten through Sixth Grade; the series scope and sequence
+  document covers K to 6 and lists Preschool Math at Home as the
+  preschool title. The preschool entry here is Preschool Math at Home:
+  its chapters hold numbered activity sequences (59 activities, taught
+  in order at roughly five minutes a day several times per week), not
+  scripted lessons, and each chapter ends with an unnumbered readiness
+  checkpoint that is not itemized. Kindergarten through second grade
+  run 32 numbered weeks organized in units; entries beneath each unit
+  are the publisher's week titles, written "Week N: Title", because
+  weeks are the finest granularity the publisher publishes in full.
+  Each K to 2 week holds 4 core lessons, and first and second grade
+  add one optional enrichment lesson per week (kindergarten lists
+  optional picture book and activity suggestions instead). Daily
+  lesson titles for K to 2 are not published in full. Grades three
+  through six are status chapters: the publisher's tables of contents
+  list only the 16 units per grade, and the author confirms lesson
+  titles appear only in unit introductions inside the printed books.
+  Published lesson counts: third, fourth, and fifth grade have 144
+  lessons each (128 regular plus 16 optional enrichment, one
+  enrichment lesson closing each unit); sixth grade has 139 (123
+  regular plus 16 enrichment). Grades three and up split the student
+  workbook into parts A and B (fifth grade: A covers units 1 to 7, B
+  covers units 8 to 16). Unit titles are cross-checked between the
+  series scope document and each instructor guide sample table of
+  contents; K to 2 week titles come from the sample tables of contents
+  (a single publisher document per grade, mirrored by the unit
+  overview pages inside each book), so verify against a printed table
+  of contents before any product use. Sixth grade unit 15 is "Multiply
+  and Divide Decimals" in the printed table of contents and "Multiply
+  and Divide Decimals by Decimals" in both scope and sequence
+  documents; the fuller name is used here. Preschool chapter titles
+  are additionally corroborated by retailer and library listings;
+  activity titles come from the publisher sample tables of contents.
+  The series completed with Sixth Grade Math with Confidence in June
+  2026. Normalization: curly quotes straightened; unicode minus signs
+  in fact week titles written as ASCII hyphens (they are minus signs,
+  for example "-9 and -8 Facts"); no publisher em or en dashes
+  appeared in unit, week, or activity titles.
+levels:
+  - level: "Preschool (Preschool Math at Home)"
+    grade: PK
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Counting to Five"
+        lessons:
+          - "Count Five Toys in a Line"
+          - "Count Toys in Different Arrangements"
+          - "Count with Fingers to Five"
+          - "Introduce Zero with Fingers"
+          - "Count Around the House"
+          - "Match My Mat"
+          - "Set the Table for a Tea Party (Optional)"
+          - "Feed the Stuffed Animal"
+          - "Count Hops"
+          - "Match Claps to Counters"
+          - "Count Claps"
+      - n: 2
+        title: "Counting to Ten"
+        lessons:
+          - "Hide and Seek to Ten"
+          - "Count Ten Toys in a Line"
+          - "Count with Fingers to Ten"
+          - "Count Scattered Objects"
+          - "Don't Move the Counters!"
+          - "Count Pictures"
+          - "Play Store with Pennies"
+          - "Tens Treasure Hunt (Optional)"
+      - n: 3
+        title: "Numbers from Zero to Five"
+        lessons:
+          - "I Spy Numbers"
+          - "Hide the Toys"
+          - "Peek-A-Boo Fingers"
+          - "Fingers Up, Fingers Down"
+          - "Counters on the Five-Frame"
+          - "Peek-a-Boo Counters on the Five-Frame"
+          - "Missing Counters on the Five-Frame"
+          - "Hidden Handfuls"
+      - n: 4
+        title: "Numbers from Six to Ten"
+        lessons:
+          - "Five Fingers and Some More"
+          - "Peek-A-Boo Fingers with Two Hands"
+          - "Race to Ten Game"
+          - "Hidden Counters on the Ten-Frame"
+          - "Nickels and Pennies (Optional)"
+          - "Fingers Up, Fingers Down to Ten"
+          - "Missing Counters on the Ten-Frame"
+      - n: 5
+        title: "Written Numerals from 0 to 10"
+        lessons:
+          - "Number Snack"
+          - "Making Number Pictures"
+          - "Number Race Game"
+          - "Number Jump"
+          - "Mixed-Up Number Jump"
+          - "Number Card Matching"
+          - "Number Card Line-Up"
+          - "Number Memory Game"
+          - "Go Fish Game"
+          - "Number Scavenger Hunt (Optional)"
+      - n: 6
+        title: "Comparing Quantities and Numbers"
+        lessons:
+          - "Compare Cookies, Part One"
+          - "Compare Cookies, Part Two"
+          - "Equal Fish in the Pond"
+          - "More and Fewer Fish in the Pond"
+          - "Who Has More?"
+          - "Dice War"
+          - "Ten-Frame War"
+          - "War Card Game (Optional)"
+      - n: 7
+        title: "Addition and Subtraction Stories"
+        lessons:
+          - "Penny Addition Stories, Part One"
+          - "Penny Addition Stories, Part Two"
+          - "Add Handfuls"
+          - "Fish Pond Addition Stories"
+          - "Penny Subtraction Stories"
+          - "Subtraction Snack"
+          - "Balloon Subtraction Stories"
+  - level: "Kindergarten"
+    grade: K
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Numbers to 10"
+        lessons:
+          - "Week 1: Numbers 1-4"
+          - "Week 2: Numbers 0 and 5"
+          - "Week 3: Numbers 6-9"
+          - "Week 4: Combinations that Make 10"
+      - n: 2
+        title: "Shapes"
+        lessons:
+          - "Week 5: Sorting and Classifying"
+          - "Week 6: Shapes"
+          - "Week 7: Pattern Blocks"
+          - "Week 8: Symmetry"
+      - n: 3
+        title: "Directions and Patterns"
+        lessons:
+          - "Week 9: Directions"
+          - "Week 10: Patterns"
+      - n: 4
+        title: "Comparing Numbers to 10"
+        lessons:
+          - "Week 11: Compare Without Numbers"
+          - "Week 12: Compare Numbers to 10"
+          - "Week 13: Sequence Numbers to 10"
+          - "Week 14: 1 or 2 More, 1 or 2 Less"
+      - n: 5
+        title: "Addition"
+        lessons:
+          - "Week 15: Addition"
+          - "Week 16: Many Ways to Show Addition"
+          - "Week 17: Addition Practice"
+      - n: 6
+        title: "Numbers to 20"
+        lessons:
+          - "Week 18: Count to 20"
+          - "Week 19: Combinations of \"10 and Some More\""
+          - "Week 20: Read and Write Numbers to 20"
+      - n: 7
+        title: "Measurement"
+        lessons:
+          - "Week 21: Length"
+          - "Week 22: Weight and Capacity"
+      - n: 8
+        title: "Subtraction"
+        lessons:
+          - "Week 23: Take-Away Subtraction"
+          - "Week 24: Take-Apart Subtraction"
+          - "Week 25: Subtraction Practice"
+      - n: 9
+        title: "Numbers to 100"
+        lessons:
+          - "Week 26: Numbers to 30"
+          - "Week 27: Numbers to 50"
+          - "Week 28: Numbers to 100"
+      - n: 10
+        title: "Time"
+        lessons:
+          - "Week 29: Months and Days of the Week"
+          - "Week 30: Time of Day"
+          - "Week 31: Read Clocks to the Hour"
+          - "Week 32: Review and Celebrate"
+  - level: "First Grade"
+    grade: 1
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Numbers to 10"
+        lessons:
+          - "Week 1: Review"
+          - "Week 2: Combinations of \"5 and Some More\""
+          - "Week 3: Split and Join Numbers to 10"
+      - n: 2
+        title: "Addition to 10"
+        lessons:
+          - "Week 4: +1 and +2 Addition Facts"
+          - "Week 5: +3 and +4 Addition Facts"
+          - "Week 6: Sums That Equal 10"
+      - n: 3
+        title: "Shapes"
+        lessons:
+          - "Week 7: Shapes"
+          - "Week 8: Equal Parts and Congruent Shapes"
+      - n: 4
+        title: "Subtraction to 10"
+        lessons:
+          - "Week 9: -1 and -2 Subtraction Facts"
+          - "Week 10: -3 and -4 Subtraction Facts"
+          - "Week 11: Subtraction Facts to 10"
+      - n: 5
+        title: "Numbers to 20"
+        lessons:
+          - "Week 12: Place Value with Numbers to 20"
+          - "Week 13: Compare Numbers to 20"
+          - "Week 14: Tally Charts and Bar Graphs"
+      - n: 6
+        title: "Numbers to 100"
+        lessons:
+          - "Week 15: Place Value, Part 1"
+          - "Week 16: Place Value, Part 2"
+          - "Week 17: Compare Numbers to 100"
+      - n: 7
+        title: "Length"
+        lessons:
+          - "Week 18: Measure in Inches (or Centimeters)"
+          - "Week 19: Measure in Feet (or Meters)"
+      - n: 8
+        title: "Addition Facts to 20"
+        lessons:
+          - "Week 20: +9 Addition Facts"
+          - "Week 21: +8 Addition Facts"
+          - "Week 22: +6 and +7 Addition Facts"
+      - n: 9
+        title: "Time and Money"
+        lessons:
+          - "Week 23: Calendars and Clocks"
+          - "Week 24: Paper Bills"
+          - "Week 25: Coins"
+      - n: 10
+        title: "Subtraction Facts in the Teens"
+        lessons:
+          - "Week 26: -2, -3, -4, and -5 Facts"
+          - "Week 27: -8 and -9 Subtraction Facts"
+          - "Week 28: -6 and -7 Subtraction Facts"
+      - n: 11
+        title: "Mental Math with Two-Digit Numbers"
+        lessons:
+          - "Week 29: Mental Math with Numbers to 25"
+          - "Week 30: Mental Addition with Numbers to 100"
+          - "Week 31: Mental Subtraction with Numbers to 100"
+          - "Week 32: Review and Celebrate"
+  - level: "Second Grade"
+    grade: 2
+    status: lessons
+    chapters:
+      - n: 1
+        title: "Review"
+        lessons:
+          - "Week 1: Review Addition and Subtraction"
+          - "Week 2: Review Comparing and Introduce the Number Line"
+          - "Week 3: Review Place Value and Numbers to 100"
+      - n: 2
+        title: "Addition Facts and Word Problems"
+        lessons:
+          - "Week 4: +9 and +8 Facts"
+          - "Week 5: +7 and +6 Facts"
+      - n: 3
+        title: "Numbers to 200"
+        lessons:
+          - "Week 6: Equal Groups"
+          - "Week 7: Numbers to 200"
+          - "Week 8: Money"
+      - n: 4
+        title: "Subtraction Facts and Word Problems"
+        lessons:
+          - "Week 9: -9 and -8 Facts"
+          - "Week 10: -7 and -6 Facts"
+          - "Week 11: -2, -3, -4, and -5 Facts"
+      - n: 5
+        title: "Graphs"
+        lessons:
+          - "Week 12: Bar Graphs"
+          - "Week 13: Pictographs and Line Graphs"
+      - n: 6
+        title: "Mental Addition to 100"
+        lessons:
+          - "Week 14: Mental Addition, Part 1"
+          - "Week 15: Mental Addition, Part 2"
+      - n: 7
+        title: "Time"
+        lessons:
+          - "Week 16: Tell Time to the Hour"
+          - "Week 17: Tell Time to the Minute"
+      - n: 8
+        title: "Mental Subtraction to 100"
+        lessons:
+          - "Week 18: Mental Subtraction, Part 1"
+          - "Week 19: Mental Subtraction, Part 2"
+      - n: 9
+        title: "Length"
+        lessons:
+          - "Week 20: Inches, Feet, Yards, and Miles"
+          - "Week 21: Centimeters, Meters, and Kilometers"
+      - n: 10
+        title: "Written Addition to 200"
+        lessons:
+          - "Week 22: Understand the Steps in Written Addition"
+          - "Week 23: Build Fluency with Written Addition"
+      - n: 11
+        title: "Geometry and Fractions"
+        lessons:
+          - "Week 24: Polygons and 3-D Solids"
+          - "Week 25: Fractions"
+      - n: 12
+        title: "Written Subtraction to 200"
+        lessons:
+          - "Week 26: Understand the Steps in Written Subtraction"
+          - "Week 27: Build Fluency with Written Subtraction"
+      - n: 13
+        title: "Numbers to 1000"
+        lessons:
+          - "Week 28: Numbers to 1000"
+          - "Week 29: Mental Math with Numbers to 1000"
+      - n: 14
+        title: "Addition and Subtraction to 1000"
+        lessons:
+          - "Week 30: Add Numbers to 1000"
+          - "Week 31: Subtract Numbers to 1000"
+          - "Week 32: Review and Celebrate"
+  - level: "Third Grade"
+    grade: 3
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Review Addition and Subtraction"
+      - n: 2
+        title: "Multiplication, Part 1"
+      - n: 3
+        title: "Mental Math and Word Problems"
+      - n: 4
+        title: "Multiplication, Part 2"
+      - n: 5
+        title: "Numbers to 1,000"
+      - n: 6
+        title: "Fractions"
+      - n: 7
+        title: "Money"
+      - n: 8
+        title: "Multiplication, Part 3"
+      - n: 9
+        title: "Length, Perimeter, and Area"
+      - n: 10
+        title: "Division, Part 1"
+      - n: 11
+        title: "Numbers to 10,000"
+      - n: 12
+        title: "Division, Part 2"
+      - n: 13
+        title: "Geometry"
+      - n: 14
+        title: "Elapsed Time"
+      - n: 15
+        title: "Division, Part 3"
+      - n: 16
+        title: "Weight and Capacity"
+  - level: "Fourth Grade"
+    grade: 4
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Review Multiplication and Division"
+      - n: 2
+        title: "Place Value and Large Numbers"
+      - n: 3
+        title: "Mental Multiplication"
+      - n: 4
+        title: "Fractions and Mixed Numbers"
+      - n: 5
+        title: "Mental Division"
+      - n: 6
+        title: "Area and Perimeter"
+      - n: 7
+        title: "Written Multiplication, Part 1"
+      - n: 8
+        title: "Angles"
+      - n: 9
+        title: "Length"
+      - n: 10
+        title: "Long Division"
+      - n: 11
+        title: "Geometry"
+      - n: 12
+        title: "Equivalent Fractions"
+      - n: 13
+        title: "Written Multiplication, Part 2"
+      - n: 14
+        title: "Decimals"
+      - n: 15
+        title: "Time, Weight, and Capacity"
+      - n: 16
+        title: "Line Plots and Averages"
+  - level: "Fifth Grade"
+    grade: 5
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Review and Order of Operations"
+      - n: 2
+        title: "Place Value and Decimals"
+      - n: 3
+        title: "Whole Number Multiplication"
+      - n: 4
+        title: "Volume"
+      - n: 5
+        title: "Add and Subtract Fractions and Mixed Numbers with Different Denominators"
+      - n: 6
+        title: "Mental Division"
+      - n: 7
+        title: "Long Division"
+      - n: 8
+        title: "Fractions of Sets and Simplest Form"
+      - n: 9
+        title: "The Coordinate Plane and Line Graphs"
+      - n: 10
+        title: "Multiply Fractions"
+      - n: 11
+        title: "Multiply Mixed Numbers"
+      - n: 12
+        title: "Geometry"
+      - n: 13
+        title: "Divide Fractions"
+      - n: 14
+        title: "Multiply Whole Numbers by Decimals"
+      - n: 15
+        title: "Divide Decimals by Whole Numbers"
+      - n: 16
+        title: "Data"
+  - level: "Sixth Grade"
+    grade: 6
+    status: chapters
+    chapters:
+      - n: 1
+        title: "Order of Operations, Exponents, and Prime Factors"
+      - n: 2
+        title: "Review Fractions"
+      - n: 3
+        title: "Area of Parallelograms and Triangles"
+      - n: 4
+        title: "Ratios"
+      - n: 5
+        title: "Multiply Fractions and Mixed Numbers"
+      - n: 6
+        title: "Positive and Negative Numbers on the Number Line and Coordinate Plane"
+      - n: 7
+        title: "Divide Fractions and Mixed Numbers"
+      - n: 8
+        title: "Review Decimals"
+      - n: 9
+        title: "Expressions"
+      - n: 10
+        title: "Percentages"
+      - n: 11
+        title: "Equations"
+      - n: 12
+        title: "Volume"
+      - n: 13
+        title: "Surface Area"
+      - n: 14
+        title: "Rate and Speed"
+      - n: 15
+        title: "Multiply and Divide Decimals by Decimals"
+      - n: 16
+        title: "Data and Statistics"

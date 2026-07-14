@@ -2212,6 +2212,19 @@ for (const table of [
 ]) {
   await expectAnonymousNoRowsOrDenied(table);
 }
+// Lesson listen (plan 2026-07-13-lesson-listen.md): same posture as the
+// ChildProgress tables. Members read their own family's rows, every
+// write rides the server-only connection, anon sees and writes nothing.
+// NoRowsOrDenied keeps this check honest before AND after the additive
+// migration applies.
+for (const table of [
+  "lesson_recordings",
+  "lesson_segments",
+  "lesson_media",
+  "lesson_reviews",
+]) {
+  await expectAnonymousNoRowsOrDenied(table);
+}
 // "Call Homa" curriculum feature (migration #24): same is_child_family_member
 // posture. Only the server-only connection ever writes a curriculum, so a
 // signed-in member can start a call (their own insert policy) but never
@@ -2534,6 +2547,25 @@ await expectInsertDenied(
     observed_at: new Date().toISOString(),
   },
   "anon cannot forge child observations",
+);
+await expectInsertDenied(
+  "lesson_recordings",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    child_id: "00000000-0000-0000-0000-000000000000",
+  },
+  "anon cannot forge lesson recordings",
+);
+await expectInsertDenied(
+  "lesson_reviews",
+  {
+    lesson_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    child_id: "00000000-0000-0000-0000-000000000000",
+    summary: "Anon-forged review should be denied.",
+    insights: {},
+  },
+  "anon cannot forge lesson reviews",
 );
 await expectInsertDenied(
   "child_curriculum_calls",

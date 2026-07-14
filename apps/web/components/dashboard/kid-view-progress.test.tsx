@@ -97,6 +97,7 @@ describe("KidView progress action", () => {
           wins={[]}
           curriculum={null}
           curriculumPending={false}
+          lessonListen={null}
         />
       </AppRouterContext.Provider>,
     );

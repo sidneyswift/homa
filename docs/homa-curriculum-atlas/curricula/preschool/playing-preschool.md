@@ -71,9 +71,9 @@ is a Cathy Duffy Top Pick.
   adult by day seven; and while prep is light, it is not zero, so
   parents expecting pure open-and-go are surprised by the gathering
   and library-hold routine.
-- Trajectory: stable-to-rising. The 2024-2026 launch of Offshoots (see
-  Structure) extended the brand into elementary, which keeps Playing
-  Preschool alumni in the ecosystem.
+- Trajectory: stable-to-rising. The recent launch of Offshoots (16
+  units as of May 2026; see Structure) extended the brand into
+  elementary, which keeps Playing Preschool alumni in the ecosystem.
 
 ## Pedagogy and method
 

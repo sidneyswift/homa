@@ -338,6 +338,9 @@ for (const row of ROWS) {
     {
       topicType: row.topicType,
       topicKey: row.topicKey,
+      // Both seed topic types are the method lens (stage-agnostic), so
+      // seeded rows land in the same cell the demand queue looks in.
+      lens: "method",
       title: row.title,
       summary: row.summary,
       content: row.content,

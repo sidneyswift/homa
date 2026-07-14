@@ -27,7 +27,14 @@ export default defineTool({
     if (!session.familyId) {
       return { saved: false, note: "No signup is open for this number. Call begin_text_signup first." };
     }
-    await saveFamilyBasicsFromSms(session.familyId, input);
+    const result = await saveFamilyBasicsFromSms(session.familyId, input);
+    if (!result.saved) {
+      return {
+        saved: false,
+        note:
+          "This number belongs to a family that already has a signed-in account, so there is no text signup to run and nothing was changed. Just keep helping them normally.",
+      };
+    }
     return {
       saved: true,
       note: "Saved. Next: her kids, one at a time (name and full birthday).",

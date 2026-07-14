@@ -172,10 +172,10 @@ Free trials are offered on the product pages.
 ## Competitive notes for Homa
 
 - Vocabulary to know: islands, targets, the Nessy Challenge (placement),
-  nuggets, Dyslexia Quest (their screener), Hairy Letters and the app
-  family for younger sibs. "She is on island 6" is a rough skill
-  position, not a grade; the report screen is the parent's source of
-  truth.
+  nuggets, Dyslexia Quest (their screener), and the phonics program with
+  decodable books for younger sibs. "She is on island 6" is a rough
+  skill position, not a grade; the report screen is the parent's source
+  of truth.
 - The strategy-video pattern (one rule, one memorable character, ninety
   seconds, infinitely rewatchable) is the best-in-category example of
   making explicit instruction child-consumable without an adult. Worth

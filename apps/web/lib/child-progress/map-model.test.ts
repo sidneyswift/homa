@@ -44,6 +44,8 @@ function scores(
       strongestObservedStatement: null,
       strongestObservedMonths: null,
       frontierStatement: null,
+      frontierItemId: null,
+      frontierDomain: null,
       exposureBased: false,
       ...subject,
     })),

@@ -53,6 +53,9 @@ export async function captionSmsImage(input: {
   image: Uint8Array | URL;
   mediaType: string;
   familyId: string | null;
+  /** Usage-ledger channel. Defaults to "sms", the original caller;
+   *  lesson media captions ride the same brain from web. */
+  channel?: "sms" | "web";
 }): Promise<string | null> {
   if (!captionsEnabled()) return null;
 
@@ -92,7 +95,7 @@ export async function captionSmsImage(input: {
     await recordModelUsage({
       familyId: input.familyId,
       surface: "media_caption",
-      channel: "sms",
+      channel: input.channel ?? "sms",
       model,
       modality: "text",
       inputTokens: result.usage.inputTokens,

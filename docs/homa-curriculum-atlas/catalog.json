@@ -1,20 +1,22 @@
 {
   "generated_by": "scripts/curriculum-atlas-index.mts (do not hand-edit)",
-  "generated_at": "2026-07-13",
-  "profile_count": 87,
+  "generated_at": "2026-07-14",
+  "profile_count": 155,
   "by_category": {
-    "all-in-one": 31,
+    "all-in-one": 50,
+    "electives": 16,
     "history-geography": 9,
-    "language-arts": 12,
-    "math": 13,
-    "online-digital": 11,
-    "science": 10,
-    "marketplace": 1
+    "language-arts": 14,
+    "math": 18,
+    "online-digital": 24,
+    "preschool": 7,
+    "science": 11,
+    "marketplace": 6
   },
   "by_tier": {
-    "stub": 21,
-    "deep": 23,
-    "standard": 42,
+    "stub": 49,
+    "deep": 31,
+    "standard": 74,
     "flagship": 1
   },
   "profiles": [
@@ -57,6 +59,47 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/a-gentle-feast.md",
       "lines": 73
+    },
+    {
+      "id": "abcjesuslovesme",
+      "name": "ABCJesusLovesMe",
+      "publisher": "ABCJesusLovesMe (Heidi Franz)",
+      "category": "preschool",
+      "subjects": [
+        "preschool",
+        "bible"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "hands-on",
+        "teacher-led",
+        "unit-study"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Non-denominational evangelical ministry; chronological Bible stories, memory verses, Bible songs, and character training are the spine of every level, not an add-on",
+      "format": [
+        "print",
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "free",
+      "price_notes": "Basic curriculum (1st edition) free online for family use as of Jul 2026; 3rd edition Complete bundles $95 per level (curriculum guide $55, workbook $30, digital extras $5-10); group licenses from $156 first year",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://abcjesuslovesme.com",
+      "sources": [
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/early-learning-preschool/early-learning-preschool/abcjesuslovesme",
+        "https://abcjesuslovesme.com/preschool-curriculum/",
+        "https://abcjesuslovesme.com/free-online-three-year-curriculum/",
+        "https://www.abcjesuslovesme.com/pricing/",
+        "https://www.abcjesuslovesme.com/about/",
+        "https://parentingtoimpress.com/2018/04/10th-birthday.html",
+        "http://www.successful-homeschooling.com/abc-jesus-loves-me-review.html"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/abcjesuslovesme.md",
+      "lines": 228
     },
     {
       "id": "abcmouse",
@@ -257,6 +300,47 @@
       "lines": 208
     },
     {
+      "id": "amanda-bennett-unit-studies",
+      "name": "Amanda Bennett Unit Studies (UnitStudy.com)",
+      "publisher": "Unit Study by Amanda Bennett, LLC",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "unit-study",
+        "open-and-go",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Christian author and audience; faith content is woven into some studies (holiday and character themes especially) while many topical units read wholesome-general rather than devotional",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "single studies about $13-19 each (Download N Go units observed at $12.95, four-week Adventures at $18.95), with seasonal sets and bundles discounting further; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://unitstudy.com",
+      "sources": [
+        "https://unitstudy.com/about-author-amanda-bennett/",
+        "https://unitstudy.com/take-the-tour-learn-about-unit-studies/",
+        "https://unitstudy.com/download-n-go-a-homeschool-parents-guide/",
+        "https://unitstudy.com/unit-study-adventure-series-for-homeschool-learning/",
+        "https://unitstudy.com/products/thanksgiving-download-n-go-unit-study/",
+        "https://unitstudy.com/products/christmas-unit-study-adventure/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/unit-studies-all-in-one-programs/unit-studies/limited-unit-studies/amanda-bennetts-unit-studies",
+        "https://techiehomeschoolmom.com/amanda-bennett-unit-studies-review/",
+        "https://www.benandme.com/review-download-n-go-davy-crockett/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/amanda-bennett-unit-studies.md",
+      "lines": 87
+    },
+    {
       "id": "ambleside-online",
       "name": "AmblesideOnline",
       "publisher": "AmblesideOnline Advisory (volunteer, nonprofit-spirit, unincorporated)",
@@ -359,6 +443,97 @@
       "lines": 159
     },
     {
+      "id": "artistic-pursuits",
+      "name": "ARTistic Pursuits",
+      "publisher": "Artistic Pursuits Inc.",
+      "category": "electives",
+      "subjects": [
+        "art"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "video-taught",
+        "teacher-led",
+        "open-and-go",
+        "hands-on"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Christian author; K-8 content reads neutral, an explicit Christian worldview surfaces in upper-level artist and culture articles (per Cathy Duffy), light enough that many secular families use it",
+      "format": [
+        "print",
+        "video",
+        "kit"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "about $59 per volume (hardcover with DVD and Blu-ray) or $79 with lifetime streaming, online-only $59; two K-3 volumes make a year; supply packs about $86-104 per volume; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://artisticpursuits.com",
+      "sources": [
+        "https://artisticpursuits.com/",
+        "https://artisticpursuits.com/awards",
+        "https://cathyduffyreviews.com/index.php?catid=10%3Aart&id=263%3Aartistic-pursuits&option=com_content&view=article",
+        "https://homeschooltools.net/offering/artistic-pursuits",
+        "https://teachbesideme.com/artistic-pursuits-review/",
+        "https://www.rainbowresource.com/artistic-pursuits",
+        "https://www.modulo.app/all-resources/artistic-pursuits",
+        "https://artisticpursuits.com/k-3rd-vol-2",
+        "https://artisticpursuits.com/k-3rd-vol-8"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/artistic-pursuits.md",
+      "lines": 240
+    },
+    {
+      "id": "barton-reading-and-spelling",
+      "name": "Barton Reading & Spelling System",
+      "publisher": "Bright Solutions for Dyslexia",
+      "category": "language-arts",
+      "subjects": [
+        "reading",
+        "phonics",
+        "spelling"
+      ],
+      "grade_range": "K-adult",
+      "approach_tags": [
+        "orton-gillingham",
+        "mastery",
+        "scripted",
+        "teacher-led",
+        "hands-on"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "No religious content; used across secular and Christian homeschool communities alike",
+      "format": [
+        "print",
+        "video",
+        "app"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$$",
+      "price_notes": "$350 per level for Levels 1-2, $400 per level for Levels 3-10, $50 off per level when buying two or more; a typical year covers one to three levels; resale is famously strong, as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://bartonreading.com",
+      "sources": [
+        "https://bartonreading.com/price-3/",
+        "https://bartonreading.com/levels/",
+        "https://bartonreading.com/students/",
+        "https://bartonreading.com/tutors/",
+        "https://bartonreading.com/susan-barton/",
+        "https://ies.ed.gov/ncee/wwc/Docs/InterventionReports/wwc_barton_070110.pdf",
+        "https://homeschoolingwithdyslexia.com/homeschool-reading-curriculum-dyslexia/",
+        "https://www.momsplans.com/using-the-barton-reading-spelling-system-for-dyslexia-blogging-through-the-alphabet/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/language-arts/barton-reading-and-spelling.md",
+      "lines": 294
+    },
+    {
       "id": "beast-academy",
       "name": "Beast Academy",
       "publisher": "Art of Problem Solving (AoPS Incorporated)",
@@ -436,6 +611,47 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/history-geography/beautiful-feet-books.md",
       "lines": 190
+    },
+    {
+      "id": "before-five-in-a-row",
+      "name": "Before Five in a Row",
+      "publisher": "Five in a Row Publishing (Jane Claire Lambert)",
+      "category": "preschool",
+      "subjects": [
+        "preschool",
+        "literature"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "literature-based",
+        "unit-study",
+        "charlotte-mason",
+        "teacher-led"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "Each lesson opens with a brief Bible connection (often just a verse reference in Before; expanded devotional material in More Before); Cathy Duffy counts both Before volumes as containing Christian content, while secular families routinely use them and skip those items. The elementary FIAR volumes are content-neutral.",
+      "format": [
+        "print",
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "$49 per guide (Before or More Before, print or digital, 2nd edition) as of Jul 2026; the 24 picture books are library-sourceable or about $10-20 each; Rainbow Resource guide-plus-books packages run about $200-265",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://fiveinarow.com",
+      "sources": [
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/unit-studies-all-in-one-programs/unit-studies/comprehensive-unit-studies/five-in-a-row",
+        "https://fiveinarow.com/pages/preschool-kindergarten",
+        "https://www.rainbowresource.com/017719.html",
+        "https://www.rainbowresource.com/bfr2gl.html",
+        "https://rootedchildhood.com/what-is-before-five-in-a-row/",
+        "https://blogshewrote.org/before-five-in-a-row/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/before-five-in-a-row.md",
+      "lines": 215
     },
     {
       "id": "berean-builders",
@@ -644,6 +860,46 @@
       "lines": 195
     },
     {
+      "id": "bookshare",
+      "name": "Bookshare",
+      "publisher": "Benetech",
+      "category": "online-digital",
+      "subjects": [
+        "reading",
+        "literature"
+      ],
+      "grade_range": "K-adult",
+      "approach_tags": [
+        "self-directed"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "app",
+        "audio"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "free",
+      "price_notes": "free for qualifying US students of any age, including homeschoolers, via a US Department of Education OSEP award; non-student adults $79.99/yr ($59.99 hardship rate); eligibility certification required; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.bookshare.org",
+      "sources": [
+        "https://www.bookshare.org/help-and-learning-articles/who-qualifies-for-bookshare",
+        "https://www.bookshare.org/campaigns/learn-your-way-free-audiobooks-for-school",
+        "https://www.bookshare.org/bookshare-library",
+        "https://www.bookshare.org/help-and-learning-articles/adult-members",
+        "https://www.bookshare.org/legal",
+        "https://en.wikipedia.org/wiki/Bookshare",
+        "https://www.perkins.org/resource/all-about-bookshare/",
+        "https://afb.org/aw/4/1/14875"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/bookshare.md",
+      "lines": 245
+    },
+    {
       "id": "bookshark",
       "name": "BookShark",
       "publisher": "BookShark (Sonlight's secular sister company)",
@@ -776,6 +1032,86 @@
       "lines": 199
     },
     {
+      "id": "campfire-curriculums",
+      "name": "Campfire Curriculums",
+      "publisher": "Campfire Curriculums",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "unit-study",
+        "charlotte-mason",
+        "literature-based",
+        "hands-on",
+        "open-and-go",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Non-denominational Christian; every lesson includes a Faith Talk section, with Christian content varying by topic (per Cathy Duffy's review)",
+      "format": [
+        "pdf",
+        "print"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "$25-47 per digital unit covering the whole family (Flexible $25-32, Classic $37, Signature $47); about 8 Signature units make a credit-bearing year, so a family-year runs roughly $200-380 plus optional print editions; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://campfirecurriculums.com",
+      "sources": [
+        "https://campfirecurriculums.com/",
+        "https://campfirecurriculums.com/2026-catalog/",
+        "https://campfirecurriculums.com/product/camper/",
+        "https://campfirecurriculums.com/all-products/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/unit-studies-all-in-one-programs/unit-studies/limited-unit-studies/campfire-curriculums",
+        "https://www.homeschool.com/back-to-homeschool-curriculum-awards/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/campfire-curriculums.md",
+      "lines": 90
+    },
+    {
+      "id": "catholic-heritage-curricula",
+      "name": "Catholic Heritage Curricula (CHC)",
+      "publisher": "Catholic Heritage Curricula",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "charlotte-mason",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; gentle, devotional tone; faith woven naturally through academics; not a school and deliberately unaccredited; publishes hands-on religion and sacramental prep supplements alongside academics",
+      "format": [
+        "print"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "no tuition or enrollment fees; grade-level lesson plans $34.95, full core kits roughly $250-650 per grade with math purchased separately from discount retailers; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://chcweb.com",
+      "sources": [
+        "https://chcweb.com/about-us/",
+        "https://chcweb.com/faq/",
+        "https://chcweb.com/product/chc-lesson-plans-kindergarten/",
+        "https://chcweb.com/shop-by-subject/",
+        "http://cathyduffyreviews.com/homeschool-reviews-core-curricula/grade-level-packages-and-courses/preschool-through-grade-8/catholic-heritage-curricula-complete-grade-level-programs",
+        "https://homeschooltools.net/offering/catholic-heritage-curricula"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/catholic-heritage-curricula.md",
+      "lines": 224
+    },
+    {
       "id": "christian-light-education",
       "name": "Christian Light Education (CLE)",
       "publisher": "Christian Light Publications",
@@ -811,6 +1147,97 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/christian-light-education.md",
       "lines": 202
+    },
+    {
+      "id": "classful",
+      "name": "Classful",
+      "publisher": "Classful (independent)",
+      "category": "marketplace",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "open-and-go"
+      ],
+      "religious_orientation": "varies",
+      "religious_notes": "Multi-author marketplace open to any educational content; no worldview vetting",
+      "format": [
+        "pdf",
+        "online-course"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "per-item digital resources at seller-set prices, typically a few dollars; self-paced courses priced separately, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://classful.com",
+      "sources": [
+        "https://classful.com/",
+        "https://classful.com/sell-products/",
+        "https://classful.com/for-merchants/",
+        "https://classful.com/teach-on-classful"
+      ],
+      "path": "docs/homa-curriculum-atlas/marketplaces/classful.md",
+      "lines": 78
+    },
+    {
+      "id": "classical-academic-press",
+      "name": "Classical Academic Press",
+      "publisher": "Classical Academic Press",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "classical",
+        "teacher-led",
+        "video-taught",
+        "open-and-go",
+        "mastery"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Ecumenical Christian (serves Protestant, Catholic, and Orthodox families); most subject lines read academically neutral rather than devotional; Novare Science is explicitly Christian with a secular twin imprint (Centripetal Press)",
+      "format": [
+        "print",
+        "video",
+        "audio",
+        "online-course",
+        "live-class"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "banded per subject line: full programs about $100-165 per level (Song School Latin 1 from $102.95, Latin for Children Primer A from $132.95); a family running Latin, grammar, and writing together spends roughly $250-400 a year; as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://classicalacademicpress.com",
+      "sources": [
+        "https://classicalacademicpress.com/",
+        "https://classicalacademicpress.com/blogs/cap-news/award-winning-excellence-classical-academic-press-recognized-for-outstanding-curriculum",
+        "https://en.wikipedia.org/wiki/Classical_Academic_Press",
+        "https://classicalacademicpress.com/pages/lower-grammar",
+        "https://classicalacademicpress.com/collections/latin-for-children",
+        "https://classicalacademicpress.com/collections/song-school-latin",
+        "https://classicalacademicpress.com/pages/subject-grammar",
+        "https://classicalacademicpress.com/pages/writing",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/foreign-language/latin/song-school-latin",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/composition-and-grammar/ungraded-multi-level-resources-grammar/well-ordered-language-the-curious-child-s-guide-to-grammar",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/composition-and-grammar/ungraded-multi-level-resources-composition/writing-rhetoric-series",
+        "https://homeschoolpicks.com/curriculum-reviews/latin-for-children-review/",
+        "https://boldlyeducated.com/classical-academic-press-latin-review-an-honest-look-at-latin-for-children-and-latin-alive/",
+        "https://everyhomeschool.com/comparisons/classical-academic-press-vs-memoria-press-latin",
+        "https://veritaspress.com/blog/veritas-press-vs-classical-academic-press",
+        "https://www.scholeacademy.com/about-schole-academy/",
+        "https://homeschooltools.net/offering/schole-academy"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/classical-academic-press.md",
+      "lines": 320
     },
     {
       "id": "classical-conversations",
@@ -866,6 +1293,127 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/classical-conversations.md",
       "lines": 302
+    },
+    {
+      "id": "codakid",
+      "name": "CodaKid",
+      "publisher": "CodaKid",
+      "category": "electives",
+      "subjects": [
+        "computer-science"
+      ],
+      "grade_range": "1-12",
+      "approach_tags": [
+        "project-based",
+        "video-taught",
+        "self-directed"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course",
+        "video",
+        "live-class"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "self-paced $29/mo or $199/yr, family plan up to 3 kids $45/mo or $270/yr, 14-day free trial; private 1:1 lessons from $249/mo (4 sessions) or $450/mo (8); week-long virtual camps about $299; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://codakid.com",
+      "sources": [
+        "https://codakid.com",
+        "https://codakid.com/self-paced-online-coding-classes/",
+        "https://codakid.com/blog/coding-for-kids/best-online-coding-classes-kids/",
+        "https://codakid.com/blog/coding-for-kids/best-kids-coding-subscriptions/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/codakid.md",
+      "lines": 78
+    },
+    {
+      "id": "codecombat",
+      "name": "CodeCombat",
+      "publisher": "CodeCombat Inc.",
+      "category": "electives",
+      "subjects": [
+        "computer-science"
+      ],
+      "grade_range": "4-12",
+      "approach_tags": [
+        "game-based",
+        "self-directed",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "first world of levels free; premium about $9.99/mo or $99/yr per student; live 1:1 online classes about $219-399/mo; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://codecombat.com",
+      "sources": [
+        "https://codecombat.com",
+        "https://homeschoolbuyersclub.com/products/codecombat",
+        "https://homeschooltools.net/offering/codecombat",
+        "https://smarterlearningguide.com/codecombat-review/",
+        "https://joinmodulo.com/products/codecombat",
+        "https://www.myengineeringbuddy.com/blog/codecombat-reviews-alternatives-pricing-offerings/",
+        "https://screenwiseapp.com/media/codecombat-website",
+        "https://blog.codecombat.com/codecombat-junior-a-new-dynamic-approach-to-k-5-coding/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/codecombat.md",
+      "lines": 223
+    },
+    {
+      "id": "critical-thinking-co",
+      "name": "The Critical Thinking Co.",
+      "publisher": "The Critical Thinking Co.",
+      "category": "electives",
+      "subjects": [
+        "logic"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "self-directed",
+        "open-and-go",
+        "conceptual"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Secular content; widely used and trusted across both Christian and secular homes",
+      "format": [
+        "print",
+        "pdf"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "single workbooks about $10-45 (Building Thinking Skills Level 2 $42.99, Level 1 about $34.99, Mind Benders about $11-15 each); most families buy 1-3 books a year; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.criticalthinking.com",
+      "sources": [
+        "https://www.criticalthinking.com/company",
+        "https://www.criticalthinking.com/",
+        "https://www.criticalthinking.com/building-thinking-skills-level-2-color.html",
+        "https://www.criticalthinking.com/building-thinking-skills-primary-complete-set.html",
+        "https://www.cathyduffyreviews.com/homeschool-extras/critical-thinking-logic/critical-thinking-company",
+        "https://homeschooltools.net/offering/building-thinking-skills",
+        "https://schoolhousereviewcrew.com/critical-thinking-co/",
+        "https://schoolhousereviewcrew.com/critical-thinking-co-reviews/",
+        "http://www.astablebeginning.com/2022/06/building-thinking-skills-level-1-with.html"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/critical-thinking-co.md",
+      "lines": 246
     },
     {
       "id": "ctcmath",
@@ -945,6 +1493,45 @@
       "lines": 202
     },
     {
+      "id": "derek-owens",
+      "name": "Derek Owens (Lucid Education)",
+      "publisher": "Lucid Education, LLC (Derek Owens)",
+      "category": "math",
+      "subjects": [
+        "math",
+        "science",
+        "computer-science"
+      ],
+      "grade_range": "7-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "Math and physics content with no religious framing either way",
+      "format": [
+        "online-course",
+        "video",
+        "live-class"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "online courses $65 per month with teacher grading (9-month maximum, $15 enrollment), $32.50 per month parent-graded, $10 per course multi-enrollment discount, Atlanta live classes $85 to $95 per month, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.derekowens.com",
+      "sources": [
+        "https://derekowens.com/prices.php",
+        "https://www.derekowens.com/HowItWorks.php",
+        "https://www.derekowens.com/faq.php",
+        "https://homeschooltools.net/offering/derek-owens"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/math/derek-owens.md",
+      "lines": 78
+    },
+    {
       "id": "dimensions-math",
       "name": "Dimensions Math",
       "publisher": "Singapore Math Inc.",
@@ -988,7 +1575,7 @@
         "https://homeschooltools.net/offering/singapore-math-dimensions-math"
       ],
       "path": "docs/homa-curriculum-atlas/curricula/math/dimensions-math.md",
-      "lines": 401
+      "lines": 403
     },
     {
       "id": "drive-thru-history",
@@ -1026,6 +1613,48 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/history-geography/drive-thru-history.md",
       "lines": 73
+    },
+    {
+      "id": "duolingo",
+      "name": "Duolingo (in homeschool practice)",
+      "publisher": "Duolingo, Inc.",
+      "category": "electives",
+      "subjects": [
+        "spanish",
+        "french",
+        "latin"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "game-based",
+        "self-directed",
+        "spiral"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Secular app; some conservative Christian families object to occasional LGBT-themed example sentences, a documented churn factor in reviews",
+      "format": [
+        "app"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "spiral",
+      "price_band": "free",
+      "price_notes": "free tier with ads and hearts; Super Duolingo $14.99/mo or $83.88/yr; Family Plan $119.99/yr for up to 6; Max (AI features) $30/mo or $167.88/yr; Duolingo ABC fully free; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.duolingo.com",
+      "sources": [
+        "https://homeschoolfox.com/curriculum/duolingo",
+        "https://homeschooltools.net/offering/duolingo",
+        "https://numaschool.com/learn/glossary/duolingo",
+        "https://languagelearningathome.com/blog/why-duolingo-not-homeschool-foreign-language-curriculum",
+        "https://www.homeschoollanguages.com/blogs/blog/language-learning-apps-how-s-duolingo-for-homeschoolers",
+        "https://schools.duolingo.com/",
+        "https://apps.apple.com/us/app/learn-to-read-duolingo-abc/id1440502568",
+        "https://homeschoolpicks.com/curriculum-reviews/best-homeschool-foreign-language-curriculum-complete-guide/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/duolingo.md",
+      "lines": 236
     },
     {
       "id": "easy-peasy",
@@ -1112,6 +1741,205 @@
       "lines": 119
     },
     {
+      "id": "equipping-minds",
+      "name": "Equipping Minds",
+      "publisher": "Equipping Minds (Carol Brown)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "hands-on",
+        "game-based",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Explicitly Christian founder framing and venues (Homeschooling Special Needs EXPO, biblical view of human development talks); the exercises themselves are content-neutral",
+      "format": [
+        "print",
+        "video",
+        "live-class"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "teacher workbook $149, student workbook $29, card decks $30 each, recommended games about $100, optional sound therapy $399; parent-led ROSES packages with therapist sessions run about $1,000-1,500, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://equippingminds.com",
+      "sources": [
+        "https://equippingminds.com/equipping-minds-workbook/",
+        "https://equippingminds.com/what-we-do/",
+        "https://equippingminds.com/homeschool-parents/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/equipping-minds.md",
+      "lines": 83
+    },
+    {
+      "id": "etsy-printables",
+      "name": "Etsy (homeschool printables economy)",
+      "publisher": "Etsy, Inc.",
+      "category": "marketplace",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "open-and-go",
+        "hands-on"
+      ],
+      "religious_orientation": "varies",
+      "religious_notes": "Scripture morning menus and Bible copywork sit beside secular Montessori shops; no worldview vetting anywhere on the platform",
+      "format": [
+        "pdf",
+        "print"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "typical digital items $2-15 after perpetual 40-75% anchor discounts, digital mega bundles $50-100, assembled physical binders $40-70, as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.etsy.com",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1370637/000137063726000019/etsy-20251231.htm",
+        "https://investors.etsy.com/news-events/press-releases/detail/218/etsy-inc-reports-fourth-quarter-and-full-year-2025-results",
+        "https://www.etsy.com/legal/fees/",
+        "https://www.etsy.com/legal/creativity",
+        "https://www.etsy.com/news/protecting-and-strengthening-etsys-brand-mission",
+        "https://techcrunch.com/2024/07/09/etsy-new-seller-policy-2024-generative-ai/",
+        "https://anlyzo.com/blog/etsy-fees-digital-products-what-you-pay",
+        "https://www.lessoncraftstudio.com/en/blog/tpt-vs-etsy-worksheets-comparison",
+        "https://findskill.ai/blog/etsy-sellers-ai-listings-flood-3-question-audit/",
+        "https://www.etsy.com/market/toddler_busy_binder"
+      ],
+      "path": "docs/homa-curriculum-atlas/marketplaces/etsy-printables.md",
+      "lines": 294
+    },
+    {
+      "id": "euka",
+      "name": "Euka Future Learning",
+      "publisher": "Euka Future Learning",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "self-directed",
+        "open-and-go"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Fully secular; Australian Curriculum content",
+      "format": [
+        "online-course",
+        "pdf"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "full year paid upfront: 697 AUD for Foundation-Grade 6, 829 AUD for Grades 7-10 (roughly 460-550 USD); single term 279 AUD; Government Registration Service 199 AUD and Premium Reporting 249 AUD extra, 349 AUD bundled; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://euka.edu.au",
+      "sources": [
+        "https://euka.edu.au/",
+        "https://help.euka.edu.au/en/articles/11936661-upgrade-your-single-term-enrolment-to-a-full-year-and-save",
+        "https://euka.edu.au/all-courses/grade-10-nsw/",
+        "https://www.productreview.com.au/listings/euka-future-learning",
+        "https://howdoihomeschool.com/euka-homeschool-curriculum/",
+        "https://homeschoolstartguide.com/blog/alternatives-to-euka-homeschool-australia"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/euka.md",
+      "lines": 221
+    },
+    {
+      "id": "excelsior-classes",
+      "name": "Excelsior Classes",
+      "publisher": "Excelsior Classes, LLC (teacher consortium)",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "5-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Ecumenical evangelical; all teachers are practicing Christians and courses are taught from a Christian worldview, with chapel and prayer in the culture but college-prep academics as the pitch",
+      "format": [
+        "live-class",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "most full-year live courses about $596 (range roughly $300-825 by length and level) plus a $60 annual family registration fee; ESA and state-fund friendly; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://excelsiorclasses.com",
+      "sources": [
+        "https://excelsiorclasses.com/",
+        "https://excelsiorclasses.com/who-and-what-is-excelsior-classes/",
+        "https://excelsiorclasses.com/accreditation/",
+        "https://excelsiorclasses.com/live-online-homeschool-classes/",
+        "https://excelsiorclasses.com/courses/",
+        "https://onlineschoolmom.com/excelsior-classes-review/",
+        "https://onlinecurriculumdirectory.com/listing/excelsior-classes/",
+        "https://www.youtube.com/watch?v=0PfDULlhW_8"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/excelsior-classes.md",
+      "lines": 87
+    },
+    {
+      "id": "experience-early-learning",
+      "name": "Experience Early Learning (Mother Goose Time)",
+      "publisher": "Experience Early Learning Co. (a brightwheel company)",
+      "category": "preschool",
+      "subjects": [
+        "preschool"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "unit-study",
+        "hands-on",
+        "teacher-led",
+        "open-and-go"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Core curriculum is secular; an optional Experience God supplement adds Bible stories, memory verses, and songs for Christian homes and preschools",
+      "format": [
+        "kit",
+        "print"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "Quote-based as of Jul 2026; the last published chart (2023-24 school year) listed the small kit (1-4 children) at $109.99 per month plus $19.99 shipping with 10-15% prepay discounts, roughly $1,000-1,200 per school year; a homeschool directory lists $70.99 per month per child (directional)",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.mothergoosetime.com",
+      "sources": [
+        "https://www.mothergoosetime.com/experience-early-learning-curriculum-homeschool/",
+        "https://www.mothergoosetime.com/whats-included/",
+        "https://www.mothergoosetime.com/experience-curriculum-pricing/",
+        "https://www.mothergoosetime.com/wp-content/uploads/2023/06/EEL_PricingChart-2023-24-1.pdf",
+        "https://blog.experienceearlylearning.com/what-is-experience-preschool-curriculum/",
+        "https://help.experienceearlylearning.com/en/articles/8597728-unboxing-success-navigating-your-experience-preschool-kit",
+        "https://onlypassionatecuriosity.com/best-preschool-program-for-homeschoolers-mother-goose-time/",
+        "https://www.homeschool.com/resource-guide/mother-goose-time/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/experience-early-learning.md",
+      "lines": 230
+    },
+    {
       "id": "explode-the-code",
       "name": "Explode the Code",
       "publisher": "EPS Learning (Educators Publishing Service)",
@@ -1149,6 +1977,82 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/language-arts/explode-the-code.md",
       "lines": 175
+    },
+    {
+      "id": "fallacy-detective",
+      "name": "The Fallacy Detective",
+      "publisher": "Christian Logic (Trivium Pursuit family)",
+      "category": "electives",
+      "subjects": [
+        "logic"
+      ],
+      "grade_range": "7-12",
+      "approach_tags": [
+        "classical",
+        "traditional-textbook",
+        "self-directed",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Written from the authors' conservative Christian homeschool perspective with occasional Scripture; the informal-logic content itself is broadly usable and many secular families use it, though forums flag some dated or politically slanted example sentences",
+      "format": [
+        "print"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "$32 list for the 264-page workbook edition (about $22-26 street), $9.99 ebook, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.fallacydetective.com",
+      "sources": [
+        "https://www.fallacydetective.com/products/item/the-fallacy-detective/",
+        "https://cathyduffyreviews.com/homeschool-extras/critical-thinking-logic/the-fallacy-detective",
+        "https://homeschooltools.net/offering/the-fallacy-detective",
+        "https://www.sonlight.com/products/fallacy-detective",
+        "https://apronstringsotherthings.com/fallacy-detective-a-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/fallacy-detective.md",
+      "lines": 79
+    },
+    {
+      "id": "fascinating-education",
+      "name": "Fascinating Education",
+      "publisher": "Fascinating Education (Dr. Sheldon Margulies)",
+      "category": "science",
+      "subjects": [
+        "science"
+      ],
+      "grade_range": "7-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed",
+        "conceptual"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Reviewers describe it as evolution-inclusive standard science; a common recommendation for secular families avoiding Apologia",
+      "format": [
+        "online-course",
+        "video"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "current storefront: first lessons free, remaining high school Chemistry or Biology lessons $45, Physics $45, Anatomy and Physiology $45, Logic of Medicine $20; legacy channels list $99 per course per year; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://fascinatingeducation.net",
+      "sources": [
+        "https://fascinatingeducation.net/about",
+        "https://fascinatingeducation.net/courses",
+        "https://www.homeschool.com/productreviews/fascinating-education/",
+        "https://schoolhousereviewcrew.com/biology-chemistry-physics-fascinating-education-reviews/",
+        "https://onlypassionatecuriosity.com/fascinating-education-schoolhouse-crew-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/science/fascinating-education.md",
+      "lines": 211
     },
     {
       "id": "five-in-a-row",
@@ -1225,6 +2129,45 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/language-arts/fix-it-grammar.md",
       "lines": 70
+    },
+    {
+      "id": "foundations-in-personal-finance",
+      "name": "Foundations in Personal Finance (Homeschool Edition)",
+      "publisher": "Ramsey Solutions (Dave Ramsey)",
+      "category": "electives",
+      "subjects": [
+        "life-skills"
+      ],
+      "grade_range": "9-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Evangelical brand; the homeschool student text adds scripture references and optional devotionals, but the finance content is standard and some non-religious families use it anyway",
+      "format": [
+        "print",
+        "video",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "$89.99 print plus one-year streaming (street about $77), $84.99 fully digital, $29.99 per additional sibling workbook with streaming, middle school edition sold separately, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://store.ramseysolutions.com/Youth/Education/Foundations-In-Personal-Finance-Homeschool-Edition-Print-Streaming/",
+      "sources": [
+        "https://store.ramseysolutions.com/Youth/Education/Foundations-In-Personal-Finance-Homeschool-Edition-Print-Streaming/",
+        "https://store.ramseysolutions.com/youth/foundations-curriculum/foundations-in-personal-finance-homeschool-edition-fully-digital/",
+        "https://www.rainbowresource.com/034426.html",
+        "https://homeschooltools.net/offering/dave-ramsey-foundations-in-personal-finance",
+        "https://www.howtohomeschool.com/curriculum-reviews/financial-literacy/dave-ramseys-foundations-in-personal-finance-homeschool-high-school-edition"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/foundations-in-personal-finance.md",
+      "lines": 200
     },
     {
       "id": "gather-round",
@@ -1309,6 +2252,49 @@
       "lines": 54
     },
     {
+      "id": "getting-started-with-languages",
+      "name": "Getting Started with Latin, Spanish, and French (series)",
+      "publisher": "Armfield Academic Press",
+      "category": "electives",
+      "subjects": [
+        "latin",
+        "spanish",
+        "french"
+      ],
+      "grade_range": "4-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "self-directed",
+        "open-and-go",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "No religious content; widely used in both Christian and secular homes",
+      "format": [
+        "print",
+        "audio"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$",
+      "price_notes": "one paperback per language, about $15-24 street price, free audio downloads included, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "http://www.gettingstartedwithlatin.com",
+      "sources": [
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/foreign-language/latin/getting-started-with-latin-with-french-or-with-spanish",
+        "https://learnchurchlatin.com/2019/05/15/getting-started-with-latin-by-william-e-linney/",
+        "https://www.rainbowresource.com/041921.html",
+        "https://www.rainbowresource.com/026126.html",
+        "https://finchnwren.wordpress.com/2016/09/12/getting-started-with-french-a-review/",
+        "http://www.gettingstartedwithlatin.com/links.html",
+        "http://www.gettingstartedwithrussian.com/links.html"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/getting-started-with-languages.md",
+      "lines": 223
+    },
+    {
       "id": "global-village-school",
       "name": "Global Village School",
       "publisher": "Global Village School (Ojai, California)",
@@ -1345,6 +2331,42 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/global-village-school.md",
       "lines": 77
+    },
+    {
+      "id": "guest-hollow",
+      "name": "Guest Hollow",
+      "publisher": "Guest Hollow, LLC (the Guest family)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "literature-based",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Christian family company with a light touch; biology ships in a creationist-edited version and a documented secular path using the original CK-12 text, and secular families use the schedules with swaps",
+      "format": [
+        "pdf",
+        "online-course"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "free",
+      "price_notes": "core schedules and online textbooks free; printable and editable schedule versions sold separately (high school biology $35); scheduled books sourced by the family, often from the library; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://guesthollow.com",
+      "sources": [
+        "https://guesthollow.com/",
+        "https://guesthollow.com/store/high-school-biology-curriculum/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/science/topical-areas/biology-and-life-science/guest-hollow-s-high-school-biology",
+        "https://homeschooltools.net/offering/guest-hollow"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/guest-hollow.md",
+      "lines": 75
     },
     {
       "id": "handwriting-without-tears",
@@ -1463,6 +2485,92 @@
       "lines": 209
     },
     {
+      "id": "hoffman-academy",
+      "name": "Hoffman Academy",
+      "publisher": "Hoffman Academy",
+      "category": "electives",
+      "subjects": [
+        "music"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed",
+        "open-and-go",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "No religious content; marketed as child-friendly and G-rated, which reads as safe to faith-based buyers",
+      "format": [
+        "video",
+        "online-course",
+        "print"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "free",
+      "price_notes": "all 400+ core video lessons free; Premium $24/mo or $239/yr ($20/mo effective), additional family members $12/mo or $119/yr, occasional lifetime deals; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.hoffmanacademy.com",
+      "sources": [
+        "https://www.hoffmanacademy.com/premium",
+        "https://www.hoffmanacademy.com/homeschool",
+        "https://homeschoolpicks.com/electives/hoffman-academy-review-free-piano-lessons/",
+        "https://www.topconsumerreviews.com/best-piano-lessons/reviews/hoffman-academy.php",
+        "https://homeschooltools.net/offering/hoffman-academy",
+        "https://eatlearngo.family/hoffman-academy-online-piano-lessons-for-children-review",
+        "https://www.weirdunsocializedhomeschoolers.com/free-online-piano-lessons-a-hoffman-academy-review/",
+        "https://www.proverbialhomemaker.com/hoffman-academy-piano-lessons.html",
+        "https://cornerstoneconfessions.com/hoffman-academy-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/hoffman-academy.md",
+      "lines": 219
+    },
+    {
+      "id": "homeschool-connections",
+      "name": "Homeschool Connections",
+      "publisher": "Homeschool Connections",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "3-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; all teaching pledged loyal to the Magisterium; deliberately not a school and unaccredited on principle; students of all faiths welcome",
+      "format": [
+        "online-course",
+        "video",
+        "live-class"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "Unlimited Access to 500-700+ recorded courses $39.97/month or $429.97/year for up to 5 students in a family; Single Access $21.97/month per course; live courses $89-250 per semester course (about $200 typical, $20 early-bird discount); as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://homeschoolconnections.com",
+      "sources": [
+        "https://homeschoolconnections.com/about-homeschool-connections/",
+        "https://homeschoolconnections.com/faqs/",
+        "https://homeschoolconnections.com/unlimited-access/",
+        "https://homeschoolconnections.com/live/",
+        "https://homeschoolconnections.com/how-to-get-started-homeschooling/",
+        "https://homeschoolconnections.com/catholic-homeschool-academy/",
+        "https://homeschoolconnections.com/online-classical-education-courses/",
+        "https://caravel.homeschoolconnections.com/catalog/1377612744"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/homeschool-connections.md",
+      "lines": 234
+    },
+    {
       "id": "horizons-math",
       "name": "Horizons Math",
       "publisher": "Alpha Omega Publications",
@@ -1497,6 +2605,44 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/math/horizons-math.md",
       "lines": 169
+    },
+    {
+      "id": "horizons-preschool",
+      "name": "Horizons Preschool",
+      "publisher": "Alpha Omega Publications",
+      "category": "preschool",
+      "subjects": [
+        "preschool",
+        "bible"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "traditional-textbook",
+        "spiral",
+        "teacher-led",
+        "hands-on"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Every lesson opens with Scripture and flows from a biblical theme, in AOP's non-denominational evangelical register",
+      "format": [
+        "print"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "spiral",
+      "price_band": "$$",
+      "price_notes": "Complete grade set $180 (two workbooks, two teacher guides, resource packet, music CD); Preschool for 3s set $120; multimedia bundles $276-396; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://aop.com/pages/horizons",
+      "sources": [
+        "https://aop.com/products/horizons-preschool-curriculum-complete-grade-set-prs100",
+        "https://aop.com/collections/horizons",
+        "https://aop.com/pages/horizons",
+        "http://thehappyhomeschoolmom.blogspot.com/2015/08/schoolhouse-crew-review-horizons.html"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/horizons-preschool.md",
+      "lines": 82
     },
     {
       "id": "iew",
@@ -1626,6 +2772,213 @@
       "lines": 224
     },
     {
+      "id": "kings-interhigh",
+      "name": "King's InterHigh",
+      "publisher": "Inspired Education Group",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "2-12",
+      "approach_tags": [
+        "traditional-textbook"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "live-class",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "annual fees by key stage: KS2 3,450 GBP core, KS3 4,700 GBP, KS4 5,700 GBP, A levels 7,585 GBP for three subjects (2026/27 annual contract), IB Diploma 9,250 GBP (very roughly 4,700-12,500 USD); UK families pay partial VAT passthrough; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://kingsinterhigh.co.uk",
+      "sources": [
+        "https://kingsinterhigh.co.uk/",
+        "https://kingsinterhigh.co.uk/a-levels-online/",
+        "https://whichschooladvisor.com/uk/school-review/kings-interhigh",
+        "https://kingsinterhigh.co.uk/wp-content/uploads/2026/01/OEAS-Report-Kings-InterHigh.pdf"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/kings-interhigh.md",
+      "lines": 84
+    },
+    {
+      "id": "kodable",
+      "name": "Kodable",
+      "publisher": "Kodable (SurfScore, Inc.)",
+      "category": "electives",
+      "subjects": [
+        "computer-science",
+        "typing"
+      ],
+      "grade_range": "K-5",
+      "approach_tags": [
+        "game-based",
+        "self-directed",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "app",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "home Pro covers up to 4 kids: $24.99/mo, yearly about $99.99-119.99 (sources differ; site shows $9.99/mo billed $119.99/yr), or $199.99 lifetime, 7-day trial; school plans gate free student access to weekday school hours; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.kodable.com",
+      "sources": [
+        "https://www.kodable.com/parents",
+        "https://www.kodable.com/about",
+        "http://support.kodable.com/en/articles/2484843-why-am-i-seeing-an-upgrade-to-pro-screen",
+        "https://apps.apple.com/us/app/kodable/id577673067",
+        "https://en.amazingtalker.com/blog/en/other/116759/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/kodable.md",
+      "lines": 83
+    },
+    {
+      "id": "kolbe-academy",
+      "name": "Kolbe Academy (home school)",
+      "publisher": "Kolbe Academy",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "classical",
+        "traditional-textbook",
+        "teacher-led",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; Ignatian method, classical content, explicit fidelity to the Magisterium; Newman Guide Recommended curriculum provider; mainstream (not traditionalist)",
+      "format": [
+        "print",
+        "pdf",
+        "online-course",
+        "live-class",
+        "video"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "mixed",
+      "price_band": "$$$",
+      "price_notes": "Full-Time Flex $195-535 and Full-Time Standard $335-995 per student (Standard includes a $200 bookstore credit; other books extra); Full-Time Online with live classes $1,795-6,995; Part-Time from $199; rates effective Feb 2026, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.kolbe.org",
+      "sources": [
+        "https://www.kolbe.org/our-history",
+        "https://www.kolbe.org/why-kolbe",
+        "https://www.kolbe.org/curriculum/overview",
+        "https://www.kolbe.org/admissions/enrollment-options",
+        "https://www.kolbe.org/admissions/tuition",
+        "https://www.kolbe.org/blog/your-guide-to-kolbes-homeschool-course-plans-confidence-flexibility-and-support",
+        "https://help.kolbe.org/kb/article/48-faq-homeschool-courses/",
+        "https://help.kolbe.org/kb/article/192-k-8-curriculum-information/",
+        "https://help.kolbe.org/kb/article/69-full-time-standard-and-flex/",
+        "https://handbook.kolbe.org/parent/latest/Public/academic-records",
+        "https://academic-records.s3.us-west-1.amazonaws.com/WelcomePacketForms-Booklets/KolbeProgramGuide.pdf",
+        "https://napcis.org/member-schools/kolbe-academy-home-school/",
+        "https://kolbetrinity.org/history",
+        "https://homeschooltools.net/offering/kolbe-academy",
+        "http://jenniferfitz.com/kolbe-reviews-thoughts-on-math/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/kolbe-academy.md",
+      "lines": 275
+    },
+    {
+      "id": "konos",
+      "name": "KONOS Character Curriculum",
+      "publisher": "KONOS, Inc. (Jessica Hulcy and Carole Thaxton)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "unit-study",
+        "hands-on",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Evangelical; units are organized around biblical character traits and integrate Bible throughout, on the stated premise that true Christian education transforms behavior",
+      "format": [
+        "print",
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "K-8 volumes $110 each (each holds about 2-3 years of units for all children), timeline sets $59.95, In-A-Box semester kits $225; History of the World high school years $99-180 complete; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://konos.com",
+      "sources": [
+        "https://konos.com/",
+        "https://konos.com/product-list/",
+        "https://konos.com/high-school/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/unit-studies-all-in-one-programs/unit-studies/comprehensive-unit-studies/konos-character-curriculum",
+        "https://www.learn4good.com/homeschools/christian_homeschooling_curriculum.htm",
+        "https://homeschooltools.net/offering/konos",
+        "https://www.thecurriculumcompass.com/curriculum/konos",
+        "https://www.design-your-homeschool.com/konos.html",
+        "https://simplycharlottemason.com/scmforum/topic/konos-history-vs-scm-history/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/konos.md",
+      "lines": 222
+    },
+    {
+      "id": "learning-ally",
+      "name": "Learning Ally Audiobook Solution",
+      "publisher": "Learning Ally",
+      "category": "online-digital",
+      "subjects": [
+        "reading",
+        "literature"
+      ],
+      "grade_range": "K-adult",
+      "approach_tags": [
+        "self-directed"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "audio",
+        "app"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "$135 per year household membership covering up to 4 children, periodic promos (recently $99); fee waivers for documented hardship; eligibility documentation required; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://learningally.org",
+      "sources": [
+        "https://learningally.org/solutions-for-home/overview",
+        "https://learningally.org/eligibility-criteria",
+        "https://learningally.org/help",
+        "https://learningally.org/about-us/who-we-are",
+        "https://en.wikipedia.org/wiki/Learning_Ally",
+        "https://learningally.org/resource/learning-ally-audiobook-solution-receives-prestigious-endorsement-from-the-council-of-administrators-of-special-education-case",
+        "https://www.learningally.org/Portals/6/Docs/Collateral/LA_FactSheet.pdf"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/learning-ally.md",
+      "lines": 246
+    },
+    {
       "id": "life-of-fred",
       "name": "Life of Fred",
       "publisher": "Polka Dot Publishing (author Stanley F. Schmidt)",
@@ -1659,6 +3012,45 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/math/life-of-fred.md",
       "lines": 61
+    },
+    {
+      "id": "lips",
+      "name": "Lindamood Phoneme Sequencing (LiPS)",
+      "publisher": "Gander Publishing",
+      "category": "language-arts",
+      "subjects": [
+        "reading",
+        "phonics",
+        "spelling"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "mastery",
+        "teacher-led",
+        "hands-on"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "print",
+        "kit"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$$$",
+      "price_notes": "LiPS Kit $515.95; optional LiPS Stick (digital manipulatives and reproducibles) $248.95, or $678.95 as a combo; Lindamood-Bell clinic delivery reportedly runs about $90-167 per hour plus a $495-1,150 evaluation, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://ganderpublishing.com/pages/program/lips",
+      "sources": [
+        "https://ganderpublishing.com/products/lips-kit",
+        "https://cdn.lindamoodbell.com/wp-content/uploads/2024/09/LB4S-0824-FL-LiPS-Fact-Sheet-digital.pdf",
+        "https://bartonreading.com/students/",
+        "https://brighterly.com/blog/lindamood-bell-reviews/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/language-arts/lips.md",
+      "lines": 82
     },
     {
       "id": "logic-of-english",
@@ -1705,6 +3097,77 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/language-arts/logic-of-english.md",
       "lines": 188
+    },
+    {
+      "id": "lovevery",
+      "name": "Lovevery Play Kits",
+      "publisher": "Lovevery",
+      "category": "preschool",
+      "subjects": [
+        "preschool"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "montessori",
+        "hands-on"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "kit"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "$80 per kit every 2 months for ages 0-12 months; $120 per kit every 3 months for ages 1-5 (about $480 per year), as of Jul 2026; prepay discounts of 5-10%; kits also sold individually",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://lovevery.com",
+      "sources": [
+        "https://lovevery.com/products/the-play-kits",
+        "https://en.wikipedia.org/wiki/Lovevery",
+        "https://www.cnbc.com/2024/07/25/lovevery-baby-toys-how-startup-brings-in-millions.html",
+        "https://www.alifewellconsumed.com/lovevery-play-kit-review/",
+        "https://www.farmhousemama.com/how-we-use-lovevery-in-our-homeschool/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/lovevery.md",
+      "lines": 85
+    },
+    {
+      "id": "made-by-teachers",
+      "name": "Made By Teachers",
+      "publisher": "Made By Teachers (independent)",
+      "category": "marketplace",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "open-and-go"
+      ],
+      "religious_orientation": "varies",
+      "religious_notes": "Multi-author marketplace with a Religion browse category alongside secular classroom content; no worldview vetting",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "typical single resources $3-10 with free items alongside, mirroring TPT price norms, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.madebyteachers.com",
+      "sources": [
+        "https://www.madebyteachers.com/",
+        "https://www.madebyteachers.com/seller-faq/",
+        "https://www.scamadviser.com/check-website/madebyteachers.com",
+        "https://ladybossincome.com/sell-digital-resources-on-made-by-teachers/"
+      ],
+      "path": "docs/homa-curriculum-atlas/marketplaces/made-by-teachers.md",
+      "lines": 78
     },
     {
       "id": "master-books",
@@ -1906,7 +3369,7 @@
         "https://www.rainbowresource.com/mpc1pk.html"
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/memoria-press.md",
-      "lines": 280
+      "lines": 284
     },
     {
       "id": "miacademy",
@@ -1983,6 +3446,56 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/math/miquon-math.md",
       "lines": 65
+    },
+    {
+      "id": "mother-of-divine-grace",
+      "name": "Mother of Divine Grace School (MODG)",
+      "publisher": "Mother of Divine Grace School",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "classical",
+        "literature-based",
+        "teacher-led",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; mainstream and magisterium-focused, classical (trivium) method per Laura Berquist's Designing Your Own Classical Curriculum; Baltimore Catechism and scripture study in the religion strand",
+      "format": [
+        "print",
+        "pdf",
+        "online-course",
+        "live-class"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "mixed",
+      "price_band": "$$$",
+      "price_notes": "family-based tuition by highest enrolled grade: $368 (PreK) to $1,678 (grades 8-12) per family plus $100 registration, books extra; syllabi purchasable without enrollment at $30-35 per grade; teacher-led classes extra; as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://modg.org",
+      "sources": [
+        "https://modg.org/aboutus/overviewandservices",
+        "https://modg.org/enrollment",
+        "https://modg.org/enrollment.pricingbreakdown",
+        "https://modg.org/curriculum/",
+        "https://modg.org/curriculum/syllabus/10",
+        "https://modg.org/curriculum/syllabi",
+        "https://modg.org/resources/links",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/unit-studies-all-in-one-programs/all-in-one-programs/mother-of-divine-grace-school-syllabi-for-grades-k8",
+        "https://catholicallyear.com/blog/homeschooling-multiple-grades-modg/",
+        "https://www.elizabethclareblog.com/a-review-of-mother-of-divine-grace/",
+        "https://homeschooltools.net/offering/mother-of-divine-grace-school",
+        "https://numaschool.com/learn/glossary/mother-divine-grace",
+        "https://www.niche.com/k12/mother-of-divine-grace-school-ojai-ca/reviews/",
+        "https://www.modgnews.com/12866/features/interview-with-a-modg-consultant/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/mother-of-divine-grace.md",
+      "lines": 296
     },
     {
       "id": "moving-beyond-the-page",
@@ -2107,6 +3620,47 @@
       "lines": 198
     },
     {
+      "id": "my-homeschool",
+      "name": "My Homeschool",
+      "publisher": "My Homeschool (Australia)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-10",
+      "approach_tags": [
+        "charlotte-mason",
+        "literature-based",
+        "teacher-led",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Christian foundation and values woven gently through a Charlotte Mason program; explicitly used and adapted by families of other faiths; not denominational",
+      "format": [
+        "online-course",
+        "print",
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "full-year program about 560-660 AUD per year level (roughly 370-435 USD), math sold separately for Years 3-10 (partner discounts offered); courses reusable within the family while membership stays active; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://myhomeschool.com",
+      "sources": [
+        "https://myhomeschool.com/",
+        "https://myhomeschool.com/about/",
+        "https://myhomeschool.com/homeschooling/programs/year-five-curriculum/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/grade-level-packages-and-courses/grade-level-packages-and-courses/my-homeschool",
+        "https://thishomeschoolhouse.com/my-homeschool/",
+        "https://homeschoolstartguide.com/blog/my-homeschool-nt-registration-support"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/my-homeschool.md",
+      "lines": 218
+    },
+    {
       "id": "mystery-of-history",
       "name": "The Mystery of History",
       "publisher": "Bright Ideas Press",
@@ -2196,6 +3750,46 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/science/mystery-science.md",
       "lines": 143
+    },
+    {
+      "id": "nessy",
+      "name": "Nessy Reading and Spelling",
+      "publisher": "Nessy Learning",
+      "category": "online-digital",
+      "subjects": [
+        "reading",
+        "phonics",
+        "spelling"
+      ],
+      "grade_range": "1-6",
+      "approach_tags": [
+        "orton-gillingham",
+        "game-based",
+        "self-directed",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "$15.50 per month or $126 per year for one child, sibling rates down to about $112.50 each; the Dyslexia Home Education Pack bundle starts at $195.50 per year, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.nessy.com",
+      "sources": [
+        "https://www.nessy.com/en-us/product/nessy-reading-and-spelling-home",
+        "https://shop.nessy.com/us/product/nessy-reading-and-spelling/",
+        "https://www.nessy.com/en-gb/about-us/about-nessy",
+        "https://homeschoolingwithdyslexia.com/nessy-reading-and-spelling-review/",
+        "https://en.wikipedia.org/wiki/Nessy_Learning"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/nessy.md",
+      "lines": 219
     },
     {
       "id": "night-zookeeper",
@@ -2372,6 +3966,42 @@
       "lines": 289
     },
     {
+      "id": "our-lady-of-victory-school",
+      "name": "Our Lady of Victory School (OLVS)",
+      "publisher": "Our Lady of Victory School (Lepanto Press)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "teacher-led"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic, traditionalist: curriculum adapted from pre-1960 Catholic schooling, Baltimore Catechism era religion texts, self-described as the only major fully Traditional Catholic homeschool program",
+      "format": [
+        "print"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "full enrollment $525 (K-6) or $575 (7-12) per student plus textbooks (roughly $150-500, kept by the family) and $10-25 registration, 10% off additional students; single courses $125-200; 2025-26 rates, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://olvs.org",
+      "sources": [
+        "https://olvs.org/",
+        "https://olvs.org/about/our-story/",
+        "https://olvs.org/wp-content/uploads/2025/05/Student-Handbook-2025-2026.pdf",
+        "https://olvs.org/wp-content/uploads/2023/04/OLVS-2022-23-Catalog-web.pdf",
+        "https://olvs.org/2025/04/21/tuition-update-for-2025-2026-school-year/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/our-lady-of-victory-school.md",
+      "lines": 87
+    },
+    {
       "id": "outschool",
       "name": "Outschool",
       "publisher": "Outschool, Inc.",
@@ -2416,6 +4046,43 @@
       "lines": 263
     },
     {
+      "id": "oxford-home-schooling",
+      "name": "Oxford Home Schooling",
+      "publisher": "Oxford Open Learning Trust",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "6-12",
+      "approach_tags": [
+        "self-directed",
+        "traditional-textbook"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course",
+        "print"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "current model: from 14.99 GBP per month per subject (roughly 20 USD), six-month minimum, optional printed packs and pay-as-you-go tutor marking; legacy fee tables list 325 GBP per KS3 course and from 395 GBP per GCSE with tutor support included; exam fees separate; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.oxfordhomeschooling.co.uk",
+      "sources": [
+        "https://www.oxfordhomeschooling.co.uk/",
+        "https://www.oxfordhomeschooling.co.uk/course/gcse/",
+        "https://existingcustomers.oxfordhomeschooling.co.uk/pricing/",
+        "https://www.ool.co.uk/oxford-home-schooling-and-oxford-open-learning/",
+        "https://www.trustpilot.com/review/oxfordhomeschooling.co.uk"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/oxford-home-schooling.md",
+      "lines": 82
+    },
+    {
       "id": "peaceful-press",
       "name": "The Peaceful Press",
       "publisher": "The Peaceful Press (founder Jennifer Pepito)",
@@ -2453,6 +4120,91 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/peaceful-press.md",
       "lines": 74
+    },
+    {
+      "id": "playing-preschool",
+      "name": "Playing Preschool",
+      "publisher": "Busy Toddler (Susie Allison)",
+      "category": "preschool",
+      "subjects": [
+        "preschool"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "unit-study",
+        "hands-on",
+        "teacher-led"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Fully secular content; Cathy Duffy classifies it as secular but Christian friendly, and it is the default recommendation in both secular and Christian preschool threads",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "$39.90 per year as a PDF, $69.80 for the two-year bundle, as of Jul 2026; supplies are household items and library books",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://playingpreschool.com",
+      "sources": [
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/early-learning-preschool/early-learning-preschool/playing-preschool-homeschool-curriculum",
+        "https://busytoddler.com/playing-preschool-homeschool-preschool/",
+        "https://busytoddler.com/playing-preschool-faq/",
+        "https://busytoddler.com/the-reason-i-wrote-playing-preschool/",
+        "https://busytoddler.com/about/",
+        "https://playingpreschool.com/samples/",
+        "https://www.suchalittlewhile.com/playing-preschool-review/",
+        "https://lisasoddthoughts.com/2021/02/10/playing-preschool-review/",
+        "https://offshootslearning.com/faq/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/playing-preschool.md",
+      "lines": 290
+    },
+    {
+      "id": "potters-school",
+      "name": "The Potter's School (TPS)",
+      "publisher": "The Potter's School (non-profit)",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "4-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Evangelical Protestant with a formal statement of faith; 'biblical worldview' integrated across all subjects; positions itself against what it calls the commercialization and politicization of homeschooling",
+      "format": [
+        "live-class",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "roughly $500-700 per full-year course (tuition listed per course in the catalog) plus a $75 annual family registration fee, books, and resource fees on some courses; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://at-tps.org",
+      "sources": [
+        "https://at-tps.org/about-tps/school-profile/",
+        "https://at-tps.org/about-tps/accreditation-certifications/",
+        "https://at-tps.org/about-tps/distinctives/",
+        "https://at-tps.org/about-tps/history/",
+        "https://at-tps.org/enrollment/how-tps-courses-work/",
+        "https://at-tps.org/enrollment/tuition-fees/",
+        "https://www.homeschool.com/resource-guide/the-potters-school-online/",
+        "https://worldfamilyeducation.com/toolbox/the-potters-school/",
+        "https://forums.welltrainedmind.com/topic/331019-potters-adv-composition-vs-veritas-composition/",
+        "https://forums.welltrainedmind.com/topic/716997-be-careful-with-the-potters-school-tps/",
+        "https://simplycharlottemason.com/scmforum/topic/the-potters-school/",
+        "http://atgrannyshouse.blogspot.com/2007/04/as-promised.html"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/potters-school.md",
+      "lines": 229
     },
     {
       "id": "power-homeschool-acellus",
@@ -2532,6 +4284,43 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/online-digital/prodigy.md",
       "lines": 74
+    },
+    {
+      "id": "reading-the-alphabet",
+      "name": "Reading the Alphabet",
+      "publisher": "This Reading Mama (Becky Spence)",
+      "category": "preschool",
+      "subjects": [
+        "preschool",
+        "phonics",
+        "reading"
+      ],
+      "grade_range": "PK",
+      "approach_tags": [
+        "hands-on",
+        "teacher-led"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Program content is secular; the author is openly Christian and hosts separate Bible printables elsewhere on the site",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "free",
+      "price_notes": "All lessons free as individual downloads as of Jul 2026; updated and expanded all-in-one bundle $35",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://thisreadingmama.com/free-reading-curriculum/reading-the-alphabet-prek-curriculum/",
+      "sources": [
+        "https://thisreadingmama.com/free-reading-curriculum/reading-the-alphabet-prek-curriculum/",
+        "https://thisreadingmama.com/reading-the-alphabet-updated-expanded/",
+        "https://thisreadingmama.com/reading-the-alphabet-letter-tt/",
+        "https://thisreadingmama.com/welcome/about-me/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/preschool/reading-the-alphabet.md",
+      "lines": 87
     },
     {
       "id": "real-science-4-kids",
@@ -2652,6 +4441,85 @@
       "lines": 79
     },
     {
+      "id": "ronit-bird",
+      "name": "Ronit Bird dyscalculia materials",
+      "publisher": "Ronit Bird (ebooks); Sage/Corwin (print books)",
+      "category": "math",
+      "subjects": [
+        "math"
+      ],
+      "grade_range": "K-9",
+      "approach_tags": [
+        "conceptual",
+        "game-based",
+        "hands-on",
+        "teacher-led"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "print",
+        "pdf",
+        "video"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "print books about £39-49 ($50-65) each, reusable; self-published ebooks £8.49 or less each with embedded video; two free games ebooks; Cuisenaire rods, dice, dominoes, and counters bought separately, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.ronitbird.com",
+      "sources": [
+        "https://www.ronitbird.com/books/",
+        "https://www.ronitbird.com/ebooks-for-learners-with-dyscalculia/",
+        "https://www.ronitbird.com/about/",
+        "https://uk.sagepub.com/en-gb/eur/the-dyscalculia-toolkit/book275474",
+        "https://dulcarnon.com/using-ronit-birds-books-to-help-a-child-with-dyscalculia-a-parents-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/math/ronit-bird.md",
+      "lines": 223
+    },
+    {
+      "id": "rosetta-stone",
+      "name": "Rosetta Stone Homeschool",
+      "publisher": "Rosetta Stone (IXL Learning)",
+      "category": "electives",
+      "subjects": [
+        "spanish",
+        "french",
+        "latin"
+      ],
+      "grade_range": "3-12",
+      "approach_tags": [
+        "self-directed",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "app",
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "consumer: $35.97/3mo, $95.88/12mo, lifetime often promoted at $149-179 (list $399); Homeschool Edition lifetime about $179-219 per student through homeschool retailers; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.rosettastone.com",
+      "sources": [
+        "https://homeschoolfox.com/curriculum/rosetta-stone",
+        "https://www.prnewswire.com/news-releases/ixl-learning-acquires-rosetta-stone-301249004.html",
+        "https://homeschooltools.net/offering/rosetta-stone-homeschool",
+        "https://homeschoolpicks.com/curriculum-reviews/rosetta-stone-homeschool-review-worth/",
+        "https://jeather.wordpress.com/reviews/miscellaneous-resources/rosetta-stone-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/rosetta-stone.md",
+      "lines": 81
+    },
+    {
       "id": "sassafras-science",
       "name": "The Sassafras Science Adventures",
       "publisher": "Elemental Science",
@@ -2728,6 +4596,125 @@
       "lines": 203
     },
     {
+      "id": "schole-academy",
+      "name": "Scholé Academy",
+      "publisher": "Classical Academic Press",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "classical",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Ecumenical Christian summarized by the Nicene Creed; the shared Great Hall is broadly Christian while Houses of Studies serve specific traditions (St. Raphael School is Orthodox, with Canterbury and Aquinas houses for Anglican and Catholic families)",
+      "format": [
+        "live-class"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "most standard full-year courses $625-775 (full range roughly $300-850 including shorter courses and tutoring), each with a $75 non-refundable deposit built in; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.scholeacademy.com",
+      "sources": [
+        "https://www.scholeacademy.com/",
+        "https://www.scholeacademy.com/faq/",
+        "https://www.scholeacademy.com/courses/",
+        "https://scholeacademy.com/wp-content/uploads/2026/02/SA-Student-Parent-Handbook-2026_27.pdf",
+        "https://homeschooltools.net/offering/schole-academy"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/schole-academy.md",
+      "lines": 84
+    },
+    {
+      "id": "schoolhouseteachers",
+      "name": "SchoolhouseTeachers.com",
+      "publisher": "The Old Schoolhouse (Suarez family)",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "self-directed",
+        "video-taught"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Overtly Christian worldview across the platform; courses come from many contributing authors, so devotional intensity varies course to course",
+      "format": [
+        "online-course",
+        "pdf",
+        "video"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "Ultimate membership $389/year or $129/quarter covering every child in the family PK-12; $1,850 lifetime; launched 2012 at $5.95/month with early members grandfathered; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://schoolhouseteachers.com",
+      "sources": [
+        "https://schoolhouseteachers.com/membership-benefits/join-now/",
+        "https://schoolhouseteachers.com/about-us/",
+        "https://howdoihomeschool.com/schoolhouse-teachers-curriculum-review/",
+        "https://www.homeschoolcurriculum101.com/blog/schoolhouse-teachers-review-the-best-all-in-one-curriculum",
+        "https://homegrownmotherhood.com/schoolhouse-teachers/",
+        "https://homeschooltools.net/offering/schoolhouseteachers-com",
+        "https://theoldschoolhouse.com/homeschool-help/homeschool-curriculum-awards-2025-curriculum-recommendations-and-family-favorites/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/schoolhouseteachers.md",
+      "lines": 209
+    },
+    {
+      "id": "scratch",
+      "name": "Scratch (and ScratchJr)",
+      "publisher": "Scratch Foundation (originated at MIT Media Lab)",
+      "category": "electives",
+      "subjects": [
+        "computer-science"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "project-based",
+        "interest-led",
+        "self-directed"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "app"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "free",
+      "price_notes": "entirely free, donation-funded nonprofit; optional third-party books and wrapper curricula run $10-30; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://scratch.mit.edu",
+      "sources": [
+        "https://scratch.mit.edu",
+        "https://www.scratchfoundation.org/",
+        "https://annualreport.scratchfoundation.org/",
+        "https://sites.bc.edu/devtech/research/scratchjr-around-the-world-2/",
+        "https://homeschoolpicks.com/electives/scratch-programming-kids-homeschool-guide/",
+        "https://www.howtohomeschool.com/homeschool-curriculum/homeschool-coding-curriculum-scratch-lesson-activity",
+        "https://scratched.gse.harvard.edu/guide/curriculum.html",
+        "https://support.google.com/csfirst/answer/15848549",
+        "https://www.raspberrypi.org/blog/experience-cs-a-free-integrated-curriculum-for-computer-science/",
+        "https://www.the74million.org/article/with-an-online-community-summer-camp-scratch-brings-coding-to-42-million-kids/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/scratch.md",
+      "lines": 239
+    },
+    {
       "id": "sequential-spelling",
       "name": "Sequential Spelling",
       "publisher": "AVKO Educational Research Foundation (Wave 3 Learning)",
@@ -2762,6 +4749,134 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/language-arts/sequential-spelling.md",
       "lines": 73
+    },
+    {
+      "id": "seton-home-study-school",
+      "name": "Seton Home Study School",
+      "publisher": "Seton Home Study School (Seton Press)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "teacher-led",
+        "procedural"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; conservative-mainstream (not traditionalist): Baltimore Catechism lineage, imprimatur-bearing religion texts, located in and recognized by the Diocese of Arlington; faith woven into every subject",
+      "format": [
+        "print",
+        "online-course",
+        "video"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "mixed",
+      "price_band": "$$$$",
+      "price_notes": "full enrollment about $250 (PreK and K), $600-800 (grades 1-8, books included), and about $985 plus a $240 high school fee (grades 9-12); multi-student discounts of $70-200; single courses $40-230; as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.setonhome.org",
+      "sources": [
+        "https://www.setonhome.org/about/",
+        "https://www.setonhome.org/our-story/",
+        "https://www.setonhome.org/cost/",
+        "https://www.setonhome.org/pdf/admissions.pdf",
+        "https://www.setonhome.org/pdf/enrollment-checklist.pdf",
+        "https://www.setonhome.org/wp-content/uploads/2025/12/Mini-CatalogFinal-2025-online.pdf",
+        "https://www.setonhome.org/elementary/grade-2/",
+        "https://www.setonhome.org/pdf/2%20Religion.pdf",
+        "https://www.setonhome.org/seton-home-study-school-announces-change-in-leadership/",
+        "https://www.catholicherald.com/article/local/schools/mary-kay-clark-concludes-40-year-run-as-director-of-seton-home-study-school/",
+        "https://www.setonmagazine.com/dad/preparing-young-catholics-for-the-sacraments",
+        "https://www.setonmagazine.com/homeschool/general-homeschooling/flexible-schedules-seton-2-tips-success-experience",
+        "https://www.setonmagazine.com/latest-articles/homeschooling-tips-i-should-have-known-sooner",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/bible-religion/curricula-and-scripture-memory/seton-religion-for-young-catholics",
+        "https://homeschooltools.net/offering/seton-home-study-school",
+        "https://homeschoolstartguide.com/blog/seton-homeschool",
+        "https://howdoihomeschool.com/seton-home-study-curriculum-review/",
+        "https://numaschool.com/learn/glossary/seton-home-study",
+        "https://www.niche.com/k12/seton-home-study-school-front-royal-va/reviews/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/seton-home-study-school.md",
+      "lines": 311
+    },
+    {
+      "id": "seven-sisters",
+      "name": "7Sisters Homeschool",
+      "publisher": "7Sisters Homeschool (a team of veteran homeschool moms)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "6-12",
+      "approach_tags": [
+        "literature-based",
+        "self-directed",
+        "open-and-go"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Christian authors with an explicit no-preachy design goal; many guides read close to neutral and are used across worldview lines",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$",
+      "price_notes": "individual literature study guides $4.99 to $6.99, full-year literature courses $39.99, larger ELA bundles about $84.99, all downloadable ebooks with a 10-day guarantee, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.7sistershomeschool.com",
+      "sources": [
+        "https://www.7sistershomeschool.com/how-to-use-7sisters-literature-study-guides/",
+        "https://www.7sistershomeschool.com/product/american-literature/",
+        "https://thecurriculumchoice.com/american-literature-by-7-sisters-my-review/",
+        "https://ichoosejoy.org/no-busywork-literature-guides/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/seven-sisters.md",
+      "lines": 78
+    },
+    {
+      "id": "shormann-math",
+      "name": "Shormann Math",
+      "publisher": "DIVE Interactive Education (Dr. David Shormann)",
+      "category": "math",
+      "subjects": [
+        "math"
+      ],
+      "grade_range": "7-12",
+      "approach_tags": [
+        "spiral",
+        "procedural",
+        "video-taught",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Deeply integrated biblical worldview: math taught as the language of science for understanding God's creation, scripture and math history woven into lessons, not removable",
+      "format": [
+        "online-course",
+        "video"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "spiral",
+      "price_band": "$$",
+      "price_notes": "Pre-Algebra $119.99 (12-month access), Algebra 1 through Calculus $154.99 each (24-month access), sibling subscriptions $45.99, sale prices as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://diveintomath.com/shormann/",
+      "sources": [
+        "https://diveintomath.com/shormann/",
+        "https://diveintomath.com/shormann-algebra-1-with-integrated-geometry-self-paced-elearning-course/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/math/math-grades-9-12/shormann-interactive-math-prealgebra-1-through-calculus",
+        "https://smarterlearningguide.com/shormann-math-review/",
+        "https://diveintomath.zendesk.com/hc/en-us/articles/7093808764813-Why-Did-Dr-Shormann-write-a-new-curriculum"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/math/shormann-math.md",
+      "lines": 241
     },
     {
       "id": "simply-charlotte-mason",
@@ -2808,6 +4923,46 @@
       "lines": 186
     },
     {
+      "id": "simply-classical",
+      "name": "Simply Classical",
+      "publisher": "Memoria Press",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "classical",
+        "traditional-textbook",
+        "scripted",
+        "open-and-go",
+        "teacher-led",
+        "mastery"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Broadly Christian like parent line Memoria Press: scripture memory, Christian studies strand, Bible story editions of core resources",
+      "format": [
+        "print",
+        "online-course"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$$",
+      "price_notes": "curriculum manuals about $30 each; core packages roughly $270 to $400 per level plus optional read-aloud, supply, and enrichment sets; combined levels 5&6 and up offer one-year or two-year pacing, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.memoriapress.com/simply-classical/",
+      "sources": [
+        "https://www.memoriapress.com/curriculum/special-needs/",
+        "https://www.memoriapress.com/curriculum/special-needs-about/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/grade-level-packages-and-courses/preschool-through-grade-8/memoria-press-simply-classical-core-curriculum",
+        "https://www.rainbowresource.com/simply-classical-curriculum-for-special-needs"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/simply-classical.md",
+      "lines": 234
+    },
+    {
       "id": "simply-good-and-beautiful-math",
       "name": "Simply Good and Beautiful Math",
       "publisher": "The Good and the Beautiful",
@@ -2847,6 +5002,44 @@
       "lines": 163
     },
     {
+      "id": "social-thinking",
+      "name": "Social Thinking",
+      "publisher": "Think Social Publishing",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "teacher-led",
+        "scripted",
+        "hands-on"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "print",
+        "pdf",
+        "online-course"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "We Thinkers! Volume 1 deluxe package $136.99 (volumes 1 and 2 bundle $300.99); Superflex 2nd edition kit $81.99; single books $20-50; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.socialthinking.com",
+      "sources": [
+        "https://www.socialthinking.com/homeschool-resources",
+        "https://www.socialthinking.com/products/we-thinkers-volume-1-deluxe-package",
+        "https://www.socialthinking.com/products/superflex-curriculum-storybook-visuals",
+        "https://therapistndc.org/nothing-about-social-skills-training-is-neurodivergence-affirming/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/social-thinking.md",
+      "lines": 85
+    },
+    {
       "id": "sonlight",
       "name": "Sonlight",
       "publisher": "Sonlight Curriculum, Ltd.",
@@ -2884,6 +5077,84 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/sonlight.md",
       "lines": 263
+    },
+    {
+      "id": "sophia-institute-spirit-of-truth",
+      "name": "Spirit of Truth Home Edition (Sophia Institute)",
+      "publisher": "Sophia Institute Press (Sophia Institute for Teachers)",
+      "category": "all-in-one",
+      "subjects": [
+        "bible"
+      ],
+      "grade_range": "K-8",
+      "approach_tags": [
+        "traditional-textbook",
+        "teacher-led",
+        "hands-on"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; catechism-based religion curriculum adapted from a parish and Catholic-school program into a parent-led home edition; sacred art and saints as core pedagogy",
+      "format": [
+        "print"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "spiral",
+      "price_band": "$",
+      "price_notes": "about $40 per grade for the parent guide plus $17-19 for the consumable student workbook; separate sacramental prep programs; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://sophiateachers.org/promo/spirit-of-truth-k-8-home-edition/",
+      "sources": [
+        "https://sophiateachers.org/promo/spirit-of-truth-k-8-home-edition/",
+        "https://sophiateachers.org/promo/spirit-of-truth-k-8-home-edition/order-spirit-of-truth-home-edition/",
+        "https://en.wikipedia.org/wiki/Sophia_Institute_Press",
+        "https://blog.holyheroes.com/who-would-have-imagined-i-found-a-new-religious-ed-program-for-this-year/",
+        "https://www.raisingwildsaints.com/catholic-homeschooling-catechesis/",
+        "https://olvs.org/2024/03/19/trustworthy-resources-catholic-homeschooling-parents/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/sophia-institute-spirit-of-truth.md",
+      "lines": 88
+    },
+    {
+      "id": "squilt",
+      "name": "SQUILT Music Appreciation",
+      "publisher": "SQUILT Music (Mary Prather)",
+      "category": "electives",
+      "subjects": [
+        "music"
+      ],
+      "grade_range": "PK-8",
+      "approach_tags": [
+        "charlotte-mason",
+        "open-and-go",
+        "video-taught",
+        "teacher-led"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "No worldview content; holiday and hymn-adjacent selections appear in seasonal guides, comfortable for both Christian and secular homes",
+      "format": [
+        "pdf",
+        "live-class",
+        "online-course"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "DIY PDF guides a la carte (complete bundle over $200); SQUILT LIVE membership $22/mo (about $220/yr with annual discount), calendar-only tier about $65/yr, Plus tier about $33/mo; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.squiltmusic.com",
+      "sources": [
+        "https://www.squiltmusic.com/",
+        "https://www.squiltlive.com/learn-more-about-squilt-live",
+        "https://smarterlearningguide.com/squilt-music-review/",
+        "https://www.modulo.app/all-resources/squilt-live-music-review",
+        "https://www.humilityanddoxology.com/squilt-music-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/squilt.md",
+      "lines": 82
     },
     {
       "id": "story-of-the-world",
@@ -2928,6 +5199,85 @@
       "lines": 252
     },
     {
+      "id": "structured-home-learning",
+      "name": "Structured Home Learning",
+      "publisher": "Structured Home Learning Ltd",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-10",
+      "approach_tags": [
+        "traditional-textbook",
+        "teacher-led",
+        "open-and-go"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Packs cover the National Curriculum for England except religious education",
+      "format": [
+        "print",
+        "kit"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "per year-level box: Essential (English, maths, science) from 309 GBP, Complete (adds history, geography, art) 449-499 GBP, KS3 Complete 569 GBP (roughly 420-770 USD); one-time purchase, reusable books; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.structuredhomelearning.com",
+      "sources": [
+        "https://www.structuredhomelearning.com/about-us",
+        "https://www.structuredhomelearning.com/why-choose-shl",
+        "https://www.structuredhomelearning.com/faqs",
+        "https://www.structuredhomelearning.com/primary/year-1"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/structured-home-learning.md",
+      "lines": 86
+    },
+    {
+      "id": "tan-academy",
+      "name": "TAN Academy (TAN Books homeschool line)",
+      "publisher": "TAN Books (Saint Benedict Press / Good Will Publishers)",
+      "category": "all-in-one",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "literature-based",
+        "video-taught"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Catholic; publisher rooted in traditionalist Catholic reprints (Douay-Rheims, pre-conciliar classics) but the homeschool line is mainstream-usable; 'faithful to the Magisterium' is the line's own framing",
+      "format": [
+        "print",
+        "video",
+        "audio"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "per subject-line, not a full box: Story of Civilization complete sets about $119-170 per volume-year (textbook, activity book, teacher manual, tests, audio, streamed lectures); individual items $13-40; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://tanacademy.com",
+      "sources": [
+        "https://tanacademy.com/",
+        "https://tanacademy.com/curriculum/story-of-series/",
+        "https://tanbooks.com/tan-academy/catholic-homeschool-books/shop-by-product-line/",
+        "https://tanbooks.com/about-us/",
+        "https://en.wikipedia.org/wiki/TAN_Books",
+        "https://www.ncregister.com/features/keeping-the-riches-of-church-tradition-in-print",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/history-and-geography/world-history-core-curricula/the-story-of-civilization",
+        "https://www.catholicsistas.com/review-the-story-of-civilization/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/all-in-one/tan-academy.md",
+      "lines": 93
+    },
+    {
       "id": "tapestry-of-grace",
       "name": "Tapestry of Grace",
       "publisher": "Lampstand Press",
@@ -2968,6 +5318,43 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/tapestry-of-grace.md",
       "lines": 204
+    },
+    {
+      "id": "teach-simple",
+      "name": "Teach Simple",
+      "publisher": "Teach Simple (independent)",
+      "category": "marketplace",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "open-and-go"
+      ],
+      "religious_orientation": "varies",
+      "religious_notes": "Multi-author library with quality review but no worldview vetting; content skews secular classroom material",
+      "format": [
+        "pdf"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "flat subscription for unlimited downloads, about $10 per month per third-party citations, price shown at signup; some Trustpilot complaints reference $19.99 charges, as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://teachsimple.com",
+      "sources": [
+        "https://teachsimple.com/about",
+        "https://teachsimple.com/signup/plan",
+        "https://teachsimple.com/blog/contributors/understanding-subscriber-share/",
+        "https://teachsimple.com/blog/contributors/new-contributor-onboarding/",
+        "https://teachsimple.com/blog/teach-simple-school-accounts/",
+        "https://uk.trustpilot.com/review/teachsimple.com"
+      ],
+      "path": "docs/homa-curriculum-atlas/marketplaces/teach-simple.md",
+      "lines": 87
     },
     {
       "id": "teach-your-child-to-read-in-100-easy-lessons",
@@ -3216,6 +5603,45 @@
       "lines": 118
     },
     {
+      "id": "thinkwell",
+      "name": "Thinkwell",
+      "publisher": "Thinkwell (Thinkwell Homeschool)",
+      "category": "online-digital",
+      "subjects": [
+        "math",
+        "science"
+      ],
+      "grade_range": "6-12",
+      "approach_tags": [
+        "video-taught",
+        "self-directed",
+        "conceptual"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Standard academic content; evolution taught in biology",
+      "format": [
+        "online-course",
+        "video"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "core math courses $169, Precalculus, Calculus, and AP-compatible courses $199, per student for a 12-month subscription; extensions $19.95 per month; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.thinkwellhomeschool.com",
+      "sources": [
+        "https://www.thinkwellhomeschool.com/",
+        "https://www.thinkwellhomeschool.com/products/algebra-1",
+        "https://www.thinkwellhomeschool.com/products/precalculus",
+        "https://www.thinkwellhomeschool.com/products/calculus",
+        "https://smarterlearningguide.com/thinkwell-math-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/thinkwell.md",
+      "lines": 209
+    },
+    {
       "id": "timberdoodle",
       "name": "Timberdoodle",
       "publisher": "Timberdoodle Co.",
@@ -3340,6 +5766,46 @@
       "lines": 206
     },
     {
+      "id": "touchmath",
+      "name": "TouchMath",
+      "publisher": "TouchMath (Innovative Learning Concepts)",
+      "category": "math",
+      "subjects": [
+        "math"
+      ],
+      "grade_range": "PK-8",
+      "approach_tags": [
+        "procedural",
+        "hands-on",
+        "teacher-led",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "print",
+        "online-course",
+        "kit"
+      ],
+      "parent_involvement": "high",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$$$",
+      "price_notes": "now sold as classroom solutions: $1,082 (PreK print) to $9,365+ (K-upper grades print); manipulatives a la carte $29 to $205; the old homeschool download editions (about $60 per unit, $200 per grade) are discontinued, as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://touchmath.com",
+      "sources": [
+        "https://touchmath.com/our-history/",
+        "https://touchmath.com/program-introduction/",
+        "https://shop.touchmath.com/curriculum/",
+        "https://eric.ed.gov/?id=EJ1166663",
+        "https://schoolhousereviewcrew.com/touchmath-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/math/touchmath.md",
+      "lines": 226
+    },
+    {
       "id": "truthquest-history",
       "name": "TruthQuest History",
       "publisher": "TruthQuest History",
@@ -3375,6 +5841,121 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/history-geography/truthquest-history.md",
       "lines": 79
+    },
+    {
+      "id": "twinkl",
+      "name": "Twinkl",
+      "publisher": "Twinkl Educational Publishing",
+      "category": "marketplace",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "traditional-textbook",
+        "open-and-go"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Secular publisher; religious education materials exist as curriculum-subject content (UK RE, world religions), not worldview instruction",
+      "format": [
+        "pdf",
+        "app"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "subscription, not per-item: US individual plans roughly 5-15 USD per month by tier (annual about 90 USD); UK from about 5-15 GBP per month; free tier with limited resources; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.twinkl.com",
+      "sources": [
+        "https://www.twinkl.com/premium/choose",
+        "https://twinkl.zendesk.com/hc/en-gb/articles/6267167521181-What-Memberships-Are-Available-for-Home-Educators",
+        "https://en.wikipedia.org/wiki/Twinkl",
+        "https://schoolsweek.co.uk/twinkl-from-little-star-to-master-of-the-edtech-universe/",
+        "https://uk.trustpilot.com/review/twinkl.co.uk",
+        "https://eduhacking.com/twinkl-brilliant-teaching-resources-that-make-life-easier/"
+      ],
+      "path": "docs/homa-curriculum-atlas/marketplaces/twinkl.md",
+      "lines": 174
+    },
+    {
+      "id": "tynker",
+      "name": "Tynker",
+      "publisher": "Tynker (owned by CodeHS since 2025; BYJU'S 2021-2025)",
+      "category": "electives",
+      "subjects": [
+        "computer-science"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "game-based",
+        "self-directed",
+        "project-based"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course",
+        "app"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$",
+      "price_notes": "promo-heavy: about $54 quarterly, $180 yearly, or $468 lifetime at the running 40 percent discount, each covering up to 3 children; list prices roughly double; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.tynker.com",
+      "sources": [
+        "https://www.tynker.com/parents/pricing/",
+        "https://www.tynker.com/parents/",
+        "https://www.tynker.com/about/press/",
+        "https://marketbrief.edweek.org/strategy-operations/coding-provider-tynker-sold-for-2-1m-as-byjus-bankruptcy-plays-out/2025/06",
+        "https://n4gm.com/tynker-review-for-parents/",
+        "https://getpulsesignal.com/pricing/tynker",
+        "https://www.myengineeringbuddy.com/blog/tynker-reviews-alternatives-pricing-offerings/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/tynker.md",
+      "lines": 225
+    },
+    {
+      "id": "typing-platforms",
+      "name": "TypingClub and Typing.com",
+      "publisher": "EdClub (TypingClub) and Teaching.com (Typing.com)",
+      "category": "electives",
+      "subjects": [
+        "typing"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "game-based",
+        "self-directed",
+        "mastery"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "",
+      "format": [
+        "online-course"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "mastery",
+      "price_band": "free",
+      "price_notes": "both free with ads; Typing.com ad-free upgrade about $8 per student; TypingClub premium school edition from about $100/yr, but its free School Edition unlocks parent tracking at no cost; as of Jul 2026",
+      "homa_tier": "stub",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.typingclub.com",
+      "sources": [
+        "https://www.typinglounge.com/homeschool-typing-programs",
+        "https://numaschool.com/learn/glossary/typingclub",
+        "https://numaschool.com/learn/glossary/typing-com",
+        "https://theslowchildhood.com/blog/best-typing-curriculum-kids-homeschool",
+        "https://www.ourlittlesliceofheaven.com/typing-programs-for-homeschool/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/typing-platforms.md",
+      "lines": 82
     },
     {
       "id": "veritas-press",
@@ -3423,6 +6004,46 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/all-in-one/veritas-press.md",
       "lines": 223
+    },
+    {
+      "id": "videotext",
+      "name": "VideoText Interactive",
+      "publisher": "VideoText Interactive (Tom Clark; a Memoria Press company)",
+      "category": "math",
+      "subjects": [
+        "math"
+      ],
+      "grade_range": "7-12",
+      "approach_tags": [
+        "mastery",
+        "conceptual",
+        "video-taught",
+        "self-directed"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "No religious content in the math itself; owned and distributed by Memoria Press, a Christian classical publisher",
+      "format": [
+        "online-course",
+        "video",
+        "print"
+      ],
+      "parent_involvement": "medium",
+      "mastery_or_spiral": "mastery",
+      "price_band": "$$",
+      "price_notes": "Algebra or Geometry online $299 covering two students (3-year license each, extra students $49); with printed books $399; with books and DVDs $450; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://videotext.com",
+      "sources": [
+        "https://videotext.com/algebra-a-complete-course/",
+        "https://videotext.com/geometry-a-complete-course/",
+        "https://videotext.com/shop-videotext/",
+        "https://cathyduffyreviews.com/homeschool-reviews-core-curricula/math/math-grades-9-12/videotext-algebra-a-complete-course",
+        "https://homeschoolpicks.com/curriculum-reviews/math-curriculum/videotext-algebra-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/math/videotext.md",
+      "lines": 221
     },
     {
       "id": "well-trained-mind",
@@ -3544,6 +6165,87 @@
       "lines": 71
     },
     {
+      "id": "wilson-hill-academy",
+      "name": "Wilson Hill Academy",
+      "publisher": "Wilson Hill Academy",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "classical",
+        "self-directed"
+      ],
+      "religious_orientation": "faith-based-christian",
+      "religious_notes": "Classical Christian, evangelical and Reformed-leaning (founders are PCA; member of ACCS and the Society for Classical Learning); Great Books taught through a biblical worldview",
+      "format": [
+        "live-class"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "$750-1,200 per full-year course, each meeting live twice weekly for 90 minutes; Forma (K-2 parent cohorts) priced separately; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://www.wilsonhillacademy.com",
+      "sources": [
+        "https://www.wilsonhillacademy.com/",
+        "https://www.wilsonhillacademy.com/admissions/",
+        "https://www.wilsonhillacademy.com/wp-content/uploads/2025/10/Your-Guide-to-Wilson-Hill-Academy.pdf",
+        "https://www.wilsonhillacademy.com/recommended-courses-of-study/grammar-school/",
+        "https://www.wilsonhillacademy.com/forma/",
+        "https://www.wilsonhillacademy.com/2019/12/a-most-precious-and-unexpected-gift/",
+        "https://veritaspress.com/blog/veritas-press-vs-wilson-hill-academy",
+        "https://homeschooltools.net/offering/wilson-hill-academy",
+        "https://classically-homeschooled.com/why-i-chose-wilson-hill/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/wilson-hill-academy.md",
+      "lines": 219
+    },
+    {
+      "id": "wolsey-hall-oxford",
+      "name": "Wolsey Hall Oxford",
+      "publisher": "Wolsey Hall Oxford (Faria Education Group)",
+      "category": "online-digital",
+      "subjects": [
+        "multi"
+      ],
+      "grade_range": "K-12",
+      "approach_tags": [
+        "self-directed",
+        "traditional-textbook"
+      ],
+      "religious_orientation": "secular",
+      "religious_notes": "Inter and non-denominational; standard UK academic content",
+      "format": [
+        "online-course",
+        "print",
+        "video"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$$",
+      "price_notes": "per course, paid in full: most IGCSE subjects 700-900 GBP for the two-year course (roughly 950-1,215 USD), languages and Art 1,250-1,400 GBP; primary courses from 475 GBP per year; 95 GBP registration per student; exam fees paid separately to the exam centre; as of Jul 2026",
+      "homa_tier": "deep",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://wolseyhalloxford.org.uk",
+      "sources": [
+        "https://wolseyhalloxford.org.uk/",
+        "https://wolseyhalloxford.org.uk/our-school/our-history",
+        "https://wolseyhalloxford.org.uk/admissions-and-fees/fees",
+        "https://wolseyhalloxford.org.uk/faqs",
+        "https://www.goodschoolsguide.co.uk/uk-schools/review/wolsey-hall-oxford",
+        "https://www.trustpilot.com/review/wolseyhalloxford.org.uk",
+        "https://en.wikipedia.org/wiki/Wolsey_Hall,_Oxford",
+        "https://faria.org/about-us/faria-news/wolsey-hall-oxford-the-international-homeschooling-college-joins-faria/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/online-digital/wolsey-hall-oxford.md",
+      "lines": 294
+    },
+    {
       "id": "writeshop",
       "name": "WriteShop",
       "publisher": "WriteShop (distributed by Demme Learning)",
@@ -3579,6 +6281,48 @@
       ],
       "path": "docs/homa-curriculum-atlas/curricula/language-arts/writeshop.md",
       "lines": 73
+    },
+    {
+      "id": "you-are-an-artist",
+      "name": "You ARE an Artist (Chalk Pastels with Nana)",
+      "publisher": "You ARE an ARTiST (chalkpastel.com)",
+      "category": "electives",
+      "subjects": [
+        "art"
+      ],
+      "grade_range": "PK-12",
+      "approach_tags": [
+        "video-taught",
+        "charlotte-mason",
+        "open-and-go",
+        "unit-study"
+      ],
+      "religious_orientation": "neutral",
+      "religious_notes": "Not a worldview publisher; lesson library includes Bible-themed art strands alongside secular topics, so both Christian and secular CM families use it comfortably",
+      "format": [
+        "video",
+        "online-course",
+        "pdf"
+      ],
+      "parent_involvement": "low",
+      "mastery_or_spiral": "n/a",
+      "price_band": "$$$",
+      "price_notes": "Clubhouse Complete family membership from $40/mo (about $480/yr); Fine Arts tier $50/mo, everything $60/mo; a partial Simple Start tier exists; one family per membership, co-op pricing separate; as of Jul 2026",
+      "homa_tier": "standard",
+      "status": "active",
+      "last_reviewed": "2026-07-13",
+      "official_site": "https://chalkpastel.com",
+      "sources": [
+        "https://chalkpastel.com/",
+        "https://chalkpastel.com/product/you-are-an-artist-clubhouse-membership/",
+        "https://chalkpastel.com/chalk-pastel-homeschool-arts-program/",
+        "https://chalkpastel.com/you-are-an-artist-homeschool-lesson-index/",
+        "https://www.proverbialhomemaker.com/you-are-an-artist.html",
+        "https://www.humilityanddoxology.com/homeschool-art-chalk-pastels/",
+        "https://thecurriculumchoice.com/you-are-an-artist-clubhouse-membership-review/"
+      ],
+      "path": "docs/homa-curriculum-atlas/curricula/electives/you-are-an-artist.md",
+      "lines": 225
     }
   ]
 }

@@ -22,6 +22,11 @@ import {
   syncCallTranscripts,
   type TranscriptSyncResult,
 } from "../../../../lib/voice/transcript-sync";
+import { lessonListenEnabled } from "../../../../lib/lessons/flag";
+import {
+  sweepLessons,
+  type LessonSweepResult,
+} from "../../../../lib/lessons/worker";
 
 /**
  * GET /api/map/cron  (Vercel cron, hourly)
@@ -43,6 +48,10 @@ import {
  *   7. The founder digest (lib/admin/digest.ts): one internal email per
  *      day at HOMA_ADMIN_DIGEST_HOUR_UTC. DARK unless
  *      HOMA_ADMIN_DIGEST_EMAIL is set.
+ *   8. The lesson sweep (lib/lessons/worker.ts): re-kicks stalled
+ *      lesson analyses (bounded attempts), fails the exhausted with
+ *      honest state, and enforces the 30-day raw-audio TTL. DARK
+ *      unless HOMA_LESSON_LISTEN_ENABLED.
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -77,6 +86,11 @@ export async function GET(request: Request): Promise<Response> {
     failed: 0,
   };
   let digest: DigestOutcome = { skipped: true, sent: false };
+  let lessons: LessonSweepResult = {
+    analysesRun: 0,
+    lessonsFailed: 0,
+    audioDeleted: 0,
+  };
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -132,17 +146,20 @@ export async function GET(request: Request): Promise<Response> {
     transcripts = await syncCallTranscripts();
     cards = await sweepThankYouCards();
     digest = await maybeSendAdminDigest();
+    if (lessonListenEnabled()) {
+      lessons = await sweepLessons();
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     console.error("map/cron failed:", message);
     await recordCronRun(
       "map_cron",
       false,
-      { reminders, bandReady, retests, purged, transcripts, cards, digest },
+      { reminders, bandReady, retests, purged, transcripts, cards, digest, lessons },
       message,
     );
     return Response.json(
-      { ok: false, reminders, bandReady, retests, purged, transcripts, cards, digest },
+      { ok: false, reminders, bandReady, retests, purged, transcripts, cards, digest, lessons },
       { status: 500 },
     );
   }
@@ -155,6 +172,7 @@ export async function GET(request: Request): Promise<Response> {
     transcripts,
     cards,
     digest,
+    lessons,
   });
-  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards, digest });
+  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards, digest, lessons });
 }

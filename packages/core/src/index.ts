@@ -30,8 +30,11 @@ export {
   isInScoredRange,
   isValidBirthDate,
   MONTHS_AHEAD_CAP,
+  RESEARCH_STAGES,
   SCORED_MAX_MONTHS,
   SCORED_MIN_MONTHS,
+  stageForAgeMonths,
+  type ResearchStage,
 } from "./map/bands";
 
 export {

@@ -132,3 +132,48 @@ export async function transcribeSmsMedia(
   if (!media) return null;
   return transcribeAudio(media, contentType);
 }
+
+/**
+ * transcribeAudioUrl(fileUrl): Promise<string | null>
+ * Lesson listen's fallback lane (plan 2026-07-13-lesson-listen.md
+ * §4.2): a 30 to 60MB Voice Memos file never passes through a Vercel
+ * function. Telnyx STT downloads the public URL itself (file_url,
+ * 100MB cap, 15s download budget on their side, verified against
+ * their REST docs 2026-07-13). Additive on purpose: transcribeAudio
+ * and its SMS and dictation callers are untouched. Same fail-soft
+ * contract: null on any failure, never throws.
+ */
+export async function transcribeAudioUrl(
+  fileUrl: string,
+): Promise<string | null> {
+  const apiKey = process.env.TELNYX_API_KEY;
+  if (!apiKey || fileUrl.length === 0) return null;
+
+  try {
+    const form = new FormData();
+    form.append("model", TELNYX_STT_MODEL);
+    form.append("file_url", fileUrl);
+
+    const response = await fetch(TELNYX_STT_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: form,
+    });
+    if (!response.ok) {
+      console.error(
+        `audio url transcription failed: HTTP ${response.status}`,
+      );
+      return null;
+    }
+
+    const payload = (await response.json()) as { text?: string };
+    const transcript = payload.text?.trim() ?? "";
+    return transcript.length > 0 ? transcript : null;
+  } catch (error) {
+    console.error(
+      "audio url transcription failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return null;
+  }
+}
