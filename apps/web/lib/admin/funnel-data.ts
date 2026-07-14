@@ -60,18 +60,26 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
   const interval = `${windowDays} days`;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
+  // Founder test families (families.sandbox) are fenced out of every
+  // funnel read: the founder rehearsing the product must never read as
+  // era health (founder ask 2026-07-14).
   const eventCounts = await sql<{ name: string; n: number }[]>`
-    select name, count(distinct family_id)::int as n
-    from public.events
-    where created_at >= now() - ${interval}::interval
-      and name in ('map.started', 'map.account_created', 'map.family_setup',
+    select e.name, count(distinct e.family_id)::int as n
+    from public.events e
+    where e.created_at >= now() - ${interval}::interval
+      and e.name in ('map.started', 'map.account_created', 'map.family_setup',
                    'map.child_added', 'map.report_generated', 'billing.trial_started')
-    group by name
+      and not exists (
+        select 1 from public.families f
+        where f.id = e.family_id and (f.sandbox or coalesce(f.status, 'open') = 'deleted')
+      )
+    group by e.name
   `;
   const accountNoSetup = await sql<{ id: string; name: string; created_at: string }[]>`
     select f.id, f.name, f.created_at::text as created_at
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
+      and not f.sandbox
       and exists (select 1 from public.family_members m where m.family_id = f.id)
       and f.profile_completed_at is null
     order by f.created_at desc
@@ -81,6 +89,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     select f.id, f.name, f.created_at::text as created_at
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
+      and not f.sandbox
       and exists (select 1 from public.family_members m where m.family_id = f.id)
       and f.profile_completed_at is not null
       and exists (select 1 from public.children c where c.family_id = f.id)
@@ -111,6 +120,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     from public.families f
     where f.created_at >= date_trunc('week', now()) - interval '35 days'
       and coalesce(f.status, 'open') <> 'deleted'
+      and not f.sandbox
       and exists (select 1 from public.family_members m where m.family_id = f.id)
   `;
   const cohortActivity = await sql<{ family_id: string; week: string }[]>`

@@ -36,6 +36,8 @@ export interface FamilySnapshot {
   trialStartedAt: string | null;
   billingExempt: boolean;
   subscriptionStatus: string | null;
+  /** Founder test family (reserved +homatest alias or console action). */
+  sandbox: boolean;
   kidCount: number;
   kidNames: string[];
   hasReport: boolean;
@@ -63,6 +65,7 @@ interface FamilyRow {
   trial_started_at: string | null;
   billing_exempt: boolean;
   stripe_subscription_status: string | null;
+  sandbox: boolean;
 }
 
 export async function getFamilySnapshots(now: Date = new Date()): Promise<FamilySnapshot[]> {
@@ -77,7 +80,8 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
            f.journal_opt_out_at::text as journal_opt_out_at,
            f.trial_started_at::text as trial_started_at,
            f.billing_exempt,
-           f.stripe_subscription_status
+           f.stripe_subscription_status,
+           f.sandbox
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
       and exists (select 1 from public.family_members m where m.family_id = f.id)
@@ -211,6 +215,7 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
       trialStartedAt: family.trial_started_at,
       billingExempt: family.billing_exempt,
       subscriptionStatus: family.stripe_subscription_status,
+      sandbox: family.sandbox,
       kidCount: kidRow?.n ?? 0,
       kidNames: kidRow ? (JSON.parse(kidRow.names) as string[]) : [],
       hasReport: (reportRow?.n ?? 0) > 0,

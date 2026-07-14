@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { after } from "next/server";
 
 import {
@@ -216,4 +217,65 @@ export async function buildChildReportAction(
 
   revalidatePath(`/admin/families/${familyId}`);
   return { error: null };
+}
+
+export interface TestFamilyState {
+  error: string | null;
+}
+
+/**
+ * Marks or unmarks a family as a founder test family (founder ask
+ * 2026-07-14). Signups on the reserved +homatest alias mark themselves;
+ * this action covers hand-made test families and mistakes. The flag
+ * fences the family out of funnels, the digest, and physical mail.
+ */
+export async function setFamilySandboxAction(
+  familyId: string,
+  sandbox: boolean,
+): Promise<TestFamilyState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+  if (!UUID_PATTERN.test(familyId)) {
+    return { error: "That family could not be identified. Reload and try again." };
+  }
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.families
+    set sandbox = ${sandbox}, updated_at = now()
+    where id = ${familyId} and status <> 'deleted'
+    returning id
+  `;
+  if (rows.length === 0) return { error: "That family's row is gone. Reload the page." };
+  revalidatePath(`/admin/families/${familyId}`);
+  revalidatePath("/admin/families");
+  return { error: null };
+}
+
+/**
+ * Retires a TEST family: the same soft delete every reader already
+ * filters (status = 'deleted'), refused for real families so a misclick
+ * can never disappear a customer. The reserved alias stays reusable:
+ * attachAuthUser skips deleted families when it picks a fold target, so
+ * signing in again with the same email starts a fresh family.
+ */
+export async function deleteSandboxFamilyAction(
+  familyId: string,
+): Promise<TestFamilyState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+  if (!UUID_PATTERN.test(familyId)) {
+    return { error: "That family could not be identified. Reload and try again." };
+  }
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.families
+    set status = 'deleted', updated_at = now()
+    where id = ${familyId} and sandbox and status <> 'deleted'
+    returning id
+  `;
+  if (rows.length === 0) {
+    return { error: "Only a family marked as a test family can be deleted here." };
+  }
+  revalidatePath("/admin/families");
+  redirect("/admin/families");
 }

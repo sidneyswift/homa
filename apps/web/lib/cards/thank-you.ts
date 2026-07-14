@@ -102,6 +102,8 @@ async function enqueueEligibleFamilies(): Promise<number> {
       f.address_line, f.address_city, f.us_state, f.address_zip
     from public.families f
     where f.status <> 'deleted'
+      -- Never mail a physical card to a founder test family.
+      and not f.sandbox
       and exists (select 1 from public.family_members m where m.family_id = f.id)
       and f.email is not null
       and f.profile_completed_at is not null

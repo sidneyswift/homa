@@ -38,6 +38,7 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
     select name, created_at::text as created_at from public.families
     where created_at >= now() - interval '24 hours'
       and coalesce(status, 'open') <> 'deleted'
+      and not sandbox
     order by created_at desc limit 20
   `;
   const failures = await sql<{ name: string; channel: string; error: string | null }[]>`
@@ -69,6 +70,7 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
   const quiet = await sql<{ n: string }[]>`
     select count(*)::text as n from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
+      and not f.sandbox
       and f.profile_completed_at is not null
       and f.created_at < now() - interval '14 days'
       and exists (select 1 from public.children c where c.family_id = f.id)

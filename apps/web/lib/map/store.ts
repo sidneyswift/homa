@@ -159,6 +159,18 @@ interface AttachAuthUserInput {
 }
 
 /**
+ * Reserved founder rehearsal alias (founder ask 2026-07-14): a signup
+ * whose email carries "+homatest" before the @ (sidney+homatest3@...)
+ * marks its family sandbox at the account moment. Sandbox families are
+ * labeled in the console, fenced out of funnels and physical mail, and
+ * deletable from the family file; product emails still send (they land
+ * in the founder's own inbox via the alias, which is the point).
+ */
+export function isSandboxSignupEmail(email: string): boolean {
+  return /\+homatest[^@]*@/i.test(email);
+}
+
+/**
  * The account moment: attaches a real Supabase Auth user to a family with
  * ONE membership insert (this is the entire former "bridge"). Mirrors
  * claimFamily's fold-together behavior: if the auth user or email already
@@ -177,9 +189,14 @@ export async function attachAuthUser(
   // (unknowns pass 2026-07-10, U4).
   const email = input.email.trim().toLowerCase();
 
+  // A deleted family is never a fold target: without the status filter,
+  // an email whose old family was deleted (a burned test family, a
+  // delete-my-data household re-signing up) would fold this sitting's
+  // kids into the invisible husk and the parent would see nothing.
   const existing = await sql<{ id: string }[]>`
     select f.id from public.families f
     where f.id <> ${input.familyId}
+      and f.status <> 'deleted'
       and (f.email = ${email}
            or exists (select 1 from public.family_members m
                       where m.family_id = f.id and m.user_id = ${input.authUserId}))
@@ -200,6 +217,7 @@ export async function attachAuthUser(
       us_state = coalesce(${input.usState ?? null}, us_state),
       parent_display_name = coalesce(parent_display_name, ${input.firstName ?? null}),
       status = 'claimed',
+      sandbox = sandbox or ${isSandboxSignupEmail(email)},
       resume_token_hash = ${tokenHash},
       updated_at = now()
     where id = ${familyId}

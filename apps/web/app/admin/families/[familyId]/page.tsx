@@ -10,6 +10,7 @@ import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone, type PillTone } from "../../ui";
 import { BuildReportButton } from "./build-report-button";
 import { FamilyTabs } from "./family-tabs";
+import { TestFamilyControls } from "./test-family-controls";
 
 /**
  * /admin/families/[familyId]: one family's whole story (the lab drawer,
@@ -90,6 +91,7 @@ export default async function AdminFamilyDetailPage({
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-2xl font-bold text-strong">{detail.name}</h1>
         <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
+        {detail.sandbox ? <Pill tone="outline">Test family</Pill> : null}
         {detail.billingExempt ? <Pill tone="stone">Comped</Pill> : null}
         {detail.trialStartedAt && !detail.billingExempt ? <Pill tone="clay">Trial</Pill> : null}
         {detail.subscriptionStatus ? (
@@ -102,6 +104,9 @@ export default async function AdminFamilyDetailPage({
         {detail.email ?? "no email"} · {detail.phone ?? "no phone"} ·{" "}
         {detail.timeZone ?? "no time zone"}
       </p>
+      <div className="mt-2">
+        <TestFamilyControls familyId={detail.id} sandbox={detail.sandbox} />
+      </div>
       <FamilyTabs familyId={detail.id} />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">

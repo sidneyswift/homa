@@ -61,6 +61,8 @@ export interface FamilyDetail {
   subscriptionStatus: string | null;
   subscriptionPeriodEnd: string | null;
   journalOptOutAt: string | null;
+  /** Founder test family (reserved +homatest alias or console action). */
+  sandbox: boolean;
   stage: FamilyStage;
   members: { email: string | null; role: string; displayName: string | null; lastSignInAt: string | null }[];
   kids: FamilyDetailKid[];
@@ -99,6 +101,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
       stripe_subscription_status: string | null;
       stripe_current_period_end: string | null;
       journal_opt_out_at: string | null;
+      sandbox: boolean;
     }[]
   >`
     select id, name, parent_display_name, email, phone_e164, us_state, time_zone,
@@ -108,7 +111,8 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
            billing_exempt,
            stripe_subscription_status,
            stripe_current_period_end::text as stripe_current_period_end,
-           journal_opt_out_at::text as journal_opt_out_at
+           journal_opt_out_at::text as journal_opt_out_at,
+           sandbox
     from public.families
     where id = ${familyId} and coalesce(status, 'open') <> 'deleted'
   `;
@@ -285,6 +289,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     subscriptionStatus: family.stripe_subscription_status,
     subscriptionPeriodEnd: family.stripe_current_period_end,
     journalOptOutAt: family.journal_opt_out_at,
+    sandbox: family.sandbox,
     stage,
     members: members.map((m) => ({
       email: m.email,

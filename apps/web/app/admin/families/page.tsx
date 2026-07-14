@@ -160,8 +160,9 @@ export default async function AdminFamiliesPage({
                         {timeAgo(s.createdAt)}
                       </span>
                     </span>
-                    <span>
+                    <span className="flex flex-wrap gap-1">
                       <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
+                      {s.sandbox ? <Pill tone="outline">Test</Pill> : null}
                     </span>
                     <span className="font-mono text-xs text-muted">
                       <span className="md:hidden">kids </span>
