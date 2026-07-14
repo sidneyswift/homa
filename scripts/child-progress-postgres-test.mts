@@ -221,6 +221,8 @@ const prerequisiteSql = `
     parent_display_name text,
     context jsonb not null default '{}'::jsonb,
     time_zone text,
+    -- Mirrors migration #85: attachAuthUser writes it.
+    sandbox boolean not null default false,
     updated_at timestamptz not null default now()
   );
   create table public.children (
