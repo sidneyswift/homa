@@ -3,6 +3,31 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-14 · Regression fixed: the linked-number contact card is back (91337b9)
+
+Found while grounding the channel-introduction lab
+(plans/2026-07-14-channel-introduction-directions.html), escalated to
+the founder in-session, fixed on their "fix this" go-ahead. The
+2026-07-10 founder ask sent Homa's vCard at two moments; multi-parent
+v0 (997bda9, 2026-07-11) rewrote lib/family-phone.ts from a stale base
+and sendLinkNotificationSms silently lost its card, so between then
+and today no account holder ever received it and
+sms.contact_card_sent (trigger: linked) could never fire. The fix
+restores the shipped 2026-07-10 behavior verbatim: the link text
+routes through sendHomaContactCard, keeps the STOP escape hatch and
+the dark-channel skip (checked before the event emit so a dark
+deployment writes no misleading row), and emits the linked trigger
+again. Guards run: web typecheck, web lint (one pre-existing warning
+in an unrelated file), check:events, eve build. Deploy 91337b9 went
+READY on production and the live probe confirmed /homa.vcf serves
+text/vcard with the correct card bytes (21,045 bytes, number + email
++ socials rows present). End-to-end MMS delivery was verified live
+when the path first shipped (2026-07-10 late-night entry); the
+restored code is that same path. Worth auditing later: whether the
+link-text WORDING changes with the winning channel-introduction
+direction (the lab's question 1); the persona walk read the current
+shape as a confirmation robot.
+
 ## 2026-07-14 · Founder ruling: her data points are "answers", one word from onboarding onward
 
 Founder ask (2026-07-14 afternoon, registered as `answers-vocabulary` in
