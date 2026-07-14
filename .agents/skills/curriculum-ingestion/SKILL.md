@@ -360,6 +360,17 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 | Knowledge bank gate | `apps/web/lib/knowledge/gate.ts` |
 | Knowledge bank schema | `supabase/migrations/20260711031000_knowledge_bank.sql` |
 
+## Post-ingestion verification
+
+After completing all steps above and confirming the curriculum was fully ingested:
+
+1. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji.
+2. This signals to Sid (and the dropper) that the curriculum has been fully ingested through the curriculum-ingestion skill.
+3. Only react AFTER verifying all analysis steps completed successfully.
+4. If any step failed or was skipped, do NOT react with 🚢 — fix the issue first.
+
+The 🚢 emoji is a **verified ingestion marker**. Its presence on a message means "this drop was fully processed through the correct ingestion skill." Its absence means it wasn't.
+
 ## Notes
 
 - This skill modifies product files directly: materials-studio SKILL.md, activity-formats.md, taxonomy data, knowledge bank, and curriculum-writer methodology notes. Every curriculum ingested makes Homa smarter across lesson planning, material generation, and knowledge delivery.

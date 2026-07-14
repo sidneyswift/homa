@@ -341,6 +341,21 @@ Keep it warm, concrete, and jargon-light. These are homeschool moms, not designe
 | Taxonomy topics | `packages/taxonomy/data/topics.json` |
 | Taxonomy manifest | `packages/taxonomy/data/manifest.json` |
 
+## Post-ingestion verification
+
+After completing all steps above and confirming the ref JSON was written correctly:
+
+1. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji.
+2. This signals to Sid (and the dropper) that the material has been fully ingested through the reference-ingestion skill.
+3. Only react AFTER verifying:
+   - The ref JSON exists at `.cosmo/references/<id>.json` with all 5 dimensions
+   - The index.json was updated
+   - The taste model was updated
+   - The teach-me-explainer reply was sent
+4. If any step failed or was skipped, do NOT react with 🚢 — fix the issue first.
+
+The 🚢 emoji is a **verified ingestion marker**. Its presence on a message means "this drop was fully processed through the reference-ingestion skill." Its absence means it wasn't.
+
 ## Notes
 
 - This skill modifies product files directly: materials-studio SKILL.md, activity-formats.md, taxonomy data, and subject decision rules. Every write makes Homa smarter for the next family that asks for a material or curriculum.
