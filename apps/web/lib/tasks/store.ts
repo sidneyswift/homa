@@ -490,22 +490,30 @@ export async function finishTaskRun(
       | "skipped";
     error?: string;
     sessionId?: string;
+    /** Lab cancellation races a durable session finishing. When true,
+     * only the transition from running succeeds; a prior cancellation
+     * receipt can never be overwritten by the late session. */
+    onlyIfRunning?: boolean;
   },
-): Promise<void> {
+): Promise<boolean> {
   const sql = mapDb();
-  await sql`
+  const rows = await sql<Array<{ id: string }>>`
     update public.homa_task_runs
     set status = ${outcome.status},
         error = coalesce(${outcome.error ?? null}, error),
         session_id = coalesce(${outcome.sessionId ?? null}, session_id),
         finished_at = now()
     where id = ${runId}
+      and (${!outcome.onlyIfRunning} or status = 'running')
+    returning id
   `;
+  if (rows.length === 0) return false;
   await emitMapEvent("tasks.run_completed", {
     ...(outcome.familyId ? { family_id: outcome.familyId } : {}),
     kind: outcome.kind,
     status: outcome.status,
   });
+  return true;
 }
 
 /**

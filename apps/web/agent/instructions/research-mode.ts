@@ -61,7 +61,9 @@ children.
 - One save_knowledge call per cell, using the exact topicKey, lens, and
   stage you were given. Homa sets the freshness TTL from the lens; do not
   fight it. If the sources are too weak to meet the bar, save nothing and
-  say so plainly in your reply; an honest gap beats a padded row.
+  end your reply with the exact token NO_NEW_DELTA; the run ledger uses
+  that token to distinguish an honest exhausted cell from a failed save.
+  An honest gap beats a padded row.
 - Fleet rows are read by every family's Homa. NEVER include any
   family's or child's name, data, or anything from a private
   conversation; this session has none loaded, keep it that way.

@@ -337,9 +337,11 @@ that later runs do not follow the same article/finding path.
 - One shared runner (`lib/knowledge/research-run.ts`) owns scheduled,
   manual, and lab starts. A partial unique index on
   `homa_task_runs.research_cell_key` while status is `running` is the
-  cross-process lock: a cron and manual trigger may race, but only one
-  can spend against the cell. `research_trigger` records scheduled,
-  manual, or lab provenance.
+  cross-process lock. The key is topic-wide, not cell-wide, because
+  prior-source dedup also spans every lens and stage for a topic: a cron
+  and manual trigger may race on different Dimensions Math cells, but
+  only one can spend against that topic. `research_trigger` records
+  scheduled, manual, or lab provenance.
 - Before a session starts, `loadPriorResearch(topicKey)` loads prior
   active, superseded, and flagged rows across every lens and stage. The
   prompt names prior findings and canonical article URLs as exhausted.
@@ -357,7 +359,10 @@ that later runs do not follow the same article/finding path.
   runs sequential rounds, polls durable run rows, writes Markdown and
   JSON reports under `.tmp-research-lab`, audits source hosts,
   canonical-page overlap, near-claim overlap and gate flags, and can
-  revert its rows by run id with `--revert`.
+  revert its rows by run id with `--revert`. Cleanup is transactional and
+  newest-first so a predecessor restored by round B is subsequently
+  flagged when round A is cleaned. A timed-out lab marks still-running
+  runs failed; the save gate refuses their late output.
 - Acceptance: two sequential explicit runs of one topic use different
   canonical pages and materially different claims, or the second run
   honestly saves nothing; two simultaneous triggers of one cell produce

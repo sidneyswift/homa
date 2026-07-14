@@ -7,7 +7,7 @@ import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import {
   findResearchDuplicates,
-  loadPriorResearch,
+  loadPriorResearchWithDatabase,
 } from "./research-dedup";
 
 /**
@@ -203,119 +203,171 @@ export async function mergeKnowledgeRow(
   const stage = input.stage ?? null;
 
   const sql = mapDb();
-  const flag = async (reason: string): Promise<MergeResult> => {
-    await sql`
-      insert into public.knowledge_bank
-        (topic_type, topic_key, lens, stage, title, summary, content, source_tier,
-         citations, confidence, contributed_by, status, flagged_reason,
-         run_id, freshness_ttl_days)
-      values
-        (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
-         ${title}, ${summary}, ${content},
-         ${input.sourceTier ?? null}, ${sql.json(citations as never)},
-         ${input.confidence}, ${options.contributedBy}, 'flagged', ${reason},
-         ${options.runId ?? null}, ${ttlDays})
-    `;
-    await emitMapEvent("knowledge.row_merged", {
-      topic_type: input.topicType,
-      gate: "flagged",
-    });
-    return {
-      merged: false,
-      note: `Gate flagged this row: ${reason}. It is recorded for audit but no family will see it. Do not retry with the same citations.`,
-    };
-  };
-
-  // Prompt guidance keeps the model on a new path; this gate makes the
-  // promise deterministic. Same host is fine, but the same canonical
-  // article URL or a materially identical claim for this topic is not.
-  // All prior statuses and lenses count, so a superseded/flagged row
-  // cannot become a loophole. Exclude this run so the model may correct
-  // a flagged first attempt with fresh citations in the same session.
-  const prior = await loadPriorResearch(input.topicKey, {
-    excludeRunId: options.runId ?? null,
-  });
-  const duplicates = findResearchDuplicates(citations, prior);
-  if (duplicates.urls.length > 0 || duplicates.claims.length > 0) {
-    const details = [
-      duplicates.urls.length > 0
-        ? `pages already used: ${duplicates.urls.slice(0, 3).join(", ")}`
-        : null,
-      duplicates.claims.length > 0
-        ? `claims already covered: ${duplicates.claims.slice(0, 3).join(" | ")}`
-        : null,
-    ].filter((detail): detail is string => detail !== null);
-    return flag(`research duplicates prior work (${details.join("; ")})`);
-  }
-
   const resolutions = await Promise.all(
     citations.map((citation) => citationResolves(citation.url)),
   );
   const dead = citations.filter((_, index) => !resolutions[index]);
-  if (dead.length > 0) {
-    return flag(`citations did not resolve: ${dead.map((c) => c.url).join(", ")}`);
-  }
-
   const contentHash = createHash("sha256")
     .update(`${title}\n${summary}\n${content}`)
     .digest("hex");
+  type DatabaseOutcome =
+    | { kind: "inactive" }
+    | { kind: "flagged"; reason: string }
+    | { kind: "refreshed"; rowId: string }
+    | { kind: "inserted"; rowId: string };
 
-  const existing = await sql<{ id: string }[]>`
-    select id from public.knowledge_bank
-    where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
-      and lens is not distinct from ${lens}
-      and stage is not distinct from ${stage}
-      and status = 'active' and content_hash = ${contentHash}
-    limit 1
-  `;
-  if (existing[0]) {
-    await sql`
-      update public.knowledge_bank
-      set last_verified_at = now(), updated_at = now()
-      where id = ${existing[0].id}
+  const outcome = await sql.begin<DatabaseOutcome>(async (transaction) => {
+    // Serialize every write for one topic, including morning-brief
+    // top-ups that do not use the fleet runner. This closes the
+    // check-then-insert race where two lenses could choose the same new
+    // article from the same prior snapshot.
+    await transaction`
+      select pg_advisory_xact_lock(hashtextextended(${input.topicKey}, 0))
     `;
-    return {
-      merged: true,
-      refreshed: true,
-      rowId: existing[0].id,
-      note: "An identical active entry already existed; its freshness clock was reset.",
-    };
-  }
 
-  const inserted = await sql<{ id: string }[]>`
-    insert into public.knowledge_bank
-      (topic_type, topic_key, lens, stage, title, summary, content, source_tier,
-       citations, confidence, contributed_by, status, content_hash,
-       run_id, freshness_ttl_days)
-    values
-      (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
-       ${title}, ${summary}, ${content},
-       ${input.sourceTier ?? null}, ${sql.json(citations as never)},
-       ${input.confidence}, ${options.contributedBy}, 'active', ${contentHash},
-       ${options.runId ?? null}, ${ttlDays})
-    returning id
-  `;
-  const rowId = inserted[0].id;
+    // Lock the run row until this transaction commits. Lab cancellation
+    // updates the same row, so either cancellation wins first and this
+    // write refuses, or this write commits first and cancellation waits,
+    // then cleanup sees and flags the row. Dispatch top-up runs are valid
+    // too; the requirement is status=running, not fleet_research kind.
+    if (options.contributedBy === "agent_research" && options.runId) {
+      const runs = await transaction<Array<{ status: string }>>`
+        select status
+        from public.homa_task_runs
+        where id = ${options.runId}
+        for update
+      `;
+      if (runs[0]?.status !== "running") return { kind: "inactive" };
+    }
 
-  // The new row supersedes older actives for the SAME cell (topic +
-  // lens + stage), never across lenses or stages: a how_to_teach row for
-  // multiplication must not retire the develops_when row beside it, and
-  // an early-elementary row must not retire the middle-stage one.
-  // is-not-distinct-from keeps lensless legacy rows superseding cleanly.
-  await sql`
-    update public.knowledge_bank
-    set status = 'superseded', superseded_by = ${rowId}, updated_at = now()
-    where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
-      and lens is not distinct from ${lens}
-      and stage is not distinct from ${stage}
-      and status = 'active' and id != ${rowId}
-  `;
+    let flagReason =
+      dead.length > 0
+        ? `citations did not resolve: ${dead.map((citation) => citation.url).join(", ")}`
+        : null;
 
-  await emitMapEvent("knowledge.row_merged", {
-    topic_type: input.topicType,
-    gate: "passed",
+    // Prompt guidance keeps the model on a new path; this transaction
+    // makes the promise deterministic. Seeds and founder-authored rows
+    // retain their content-hash refresh path.
+    if (!flagReason && options.contributedBy === "agent_research") {
+      const prior = await loadPriorResearchWithDatabase(
+        transaction,
+        input.topicKey,
+        { excludeRunId: options.runId ?? null },
+      );
+      const duplicates = findResearchDuplicates(citations, prior);
+      if (duplicates.urls.length > 0 || duplicates.claims.length > 0) {
+        const details = [
+          duplicates.urls.length > 0
+            ? `pages already used: ${duplicates.urls.slice(0, 3).join(", ")}`
+            : null,
+          duplicates.claims.length > 0
+            ? `claims already covered: ${duplicates.claims.slice(0, 3).join(" | ")}`
+            : null,
+        ].filter((detail): detail is string => detail !== null);
+        flagReason = `research duplicates prior work (${details.join("; ")})`;
+      }
+    }
+
+    if (flagReason) {
+      await transaction`
+        insert into public.knowledge_bank
+          (topic_type, topic_key, lens, stage, title, summary, content,
+           source_tier, citations, confidence, contributed_by, status,
+           flagged_reason, run_id, freshness_ttl_days)
+        values
+          (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
+           ${title}, ${summary}, ${content}, ${input.sourceTier ?? null},
+           ${transaction.json(citations as never)}, ${input.confidence},
+           ${options.contributedBy}, 'flagged', ${flagReason},
+           ${options.runId ?? null}, ${ttlDays})
+      `;
+      return { kind: "flagged", reason: flagReason };
+    }
+
+    const existing = await transaction<Array<{ id: string }>>`
+      select id from public.knowledge_bank
+      where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
+        and lens is not distinct from ${lens}
+        and stage is not distinct from ${stage}
+        and status = 'active' and content_hash = ${contentHash}
+      limit 1
+    `;
+    if (existing[0]) {
+      await transaction`
+        update public.knowledge_bank
+        set last_verified_at = now(), updated_at = now()
+        where id = ${existing[0].id}
+      `;
+      return { kind: "refreshed", rowId: existing[0].id };
+    }
+
+    const inserted = await transaction<Array<{ id: string }>>`
+      insert into public.knowledge_bank
+        (topic_type, topic_key, lens, stage, title, summary, content,
+         source_tier, citations, confidence, contributed_by, status,
+         content_hash, run_id, freshness_ttl_days)
+      values
+        (${input.topicType}, ${input.topicKey}, ${lens}, ${stage},
+         ${title}, ${summary}, ${content}, ${input.sourceTier ?? null},
+         ${transaction.json(citations as never)}, ${input.confidence},
+         ${options.contributedBy}, 'active', ${contentHash},
+         ${options.runId ?? null}, ${ttlDays})
+      returning id
+    `;
+    const rowId = inserted[0].id;
+
+    // Supersede only the same cell. Topic-wide advisory locking prevents
+    // cross-lens source races without collapsing distinct lens/stage rows.
+    await transaction`
+      update public.knowledge_bank
+      set status = 'superseded', superseded_by = ${rowId}, updated_at = now()
+      where topic_type = ${input.topicType} and topic_key = ${input.topicKey}
+        and lens is not distinct from ${lens}
+        and stage is not distinct from ${stage}
+        and status = 'active' and id != ${rowId}
+    `;
+    return { kind: "inserted", rowId };
   });
-  return { merged: true, rowId, note: "Merged into the shared knowledge bank." };
+
+  switch (outcome.kind) {
+    case "inactive":
+      return {
+        merged: false,
+        note:
+          "This research run is no longer active, so its late result was not saved.",
+      };
+    case "flagged":
+      await emitMapEvent("knowledge.row_merged", {
+        topic_type: input.topicType,
+        gate: "flagged",
+      });
+      return {
+        merged: false,
+        note: `Gate flagged this row: ${outcome.reason}. It is recorded for audit but no family will see it. Do not retry with the same citations.`,
+      };
+    case "refreshed":
+      return {
+        merged: true,
+        refreshed: true,
+        rowId: outcome.rowId,
+        note:
+          "An identical active entry already existed; its freshness clock was reset.",
+      };
+    case "inserted":
+      await emitMapEvent("knowledge.row_merged", {
+        topic_type: input.topicType,
+        gate: "passed",
+      });
+      return {
+        merged: true,
+        rowId: outcome.rowId,
+        note: "Merged into the shared knowledge bank.",
+      };
+    default: {
+      const exhaustive: never = outcome;
+      throw new Error(`Unhandled knowledge DB outcome: ${String(exhaustive)}`);
+    }
+  }
 }
 
 export interface KnowledgeRow {

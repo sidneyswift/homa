@@ -63,6 +63,9 @@ jobs:
       - name: Morning research brief format
         run: pnpm check:research-brief
 
+      - name: Fleet research controls (dedup, manual request, runner)
+        run: pnpm check:research
+
       - name: Photo search (token signing, result normalization)
         run: pnpm check:photo-search
 

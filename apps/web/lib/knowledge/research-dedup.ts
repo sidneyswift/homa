@@ -1,3 +1,5 @@
+import type { Sql, TransactionSql } from "postgres";
+
 import { mapDb } from "../map/db";
 
 export interface ResearchCitation {
@@ -53,15 +55,100 @@ function claimTokens(claim: string): Set<string> {
     claim
       .normalize("NFKD")
       .toLowerCase()
+      .replace(
+        /\b(?:isn|aren|wasn|weren|doesn|don|didn|hasn|haven|hadn|couldn|wouldn|shouldn)[’']t\b/gu,
+        " not ",
+      )
+      .replace(/\bcan[’']t\b/gu, " cannot ")
+      .replace(/\bwon[’']t\b/gu, " will not ")
       .replace(/[^\p{L}\p{N}\s]/gu, " ")
       .split(/\s+/u)
       .filter((token) => token.length > 1),
   );
 }
 
+const NEGATION_TOKENS = new Set([
+  "cannot",
+  "doesnt",
+  "dont",
+  "lacks",
+  "never",
+  "no",
+  "not",
+  "without",
+]);
+
+const QUANTITY_WORDS = new Set([
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+  "thirty",
+  "forty",
+  "fifty",
+  "sixty",
+  "seventy",
+  "eighty",
+  "ninety",
+  "hundred",
+  "thousand",
+  "million",
+  "billion",
+  "dozen",
+  "half",
+  "quarter",
+]);
+
 function claimsOverlap(left: string, right: string): boolean {
   const leftTokens = claimTokens(left);
   const rightTokens = claimTokens(right);
+  const leftNormalized = [...leftTokens].join(" ");
+  const rightNormalized = [...rightTokens].join(" ");
+  if (leftNormalized === rightNormalized) return true;
+
+  // High token overlap is not sameness when one claim negates the
+  // other. This keeps a correction ("does not use") from being blocked
+  // by the earlier positive claim ("uses").
+  const leftNegated = [...leftTokens].some((token) =>
+    NEGATION_TOKENS.has(token),
+  );
+  const rightNegated = [...rightTokens].some((token) =>
+    NEGATION_TOKENS.has(token),
+  );
+  if (leftNegated !== rightNegated) return false;
+  const leftNumbers = [...leftTokens]
+    .filter((token) => /^\d+$/u.test(token))
+    .sort();
+  const rightNumbers = [...rightTokens]
+    .filter((token) => /^\d+$/u.test(token))
+    .sort();
+  if (leftNumbers.join(",") !== rightNumbers.join(",")) return false;
+  const leftQuantityWords = [...leftTokens]
+    .filter((token) => QUANTITY_WORDS.has(token))
+    .sort();
+  const rightQuantityWords = [...rightTokens]
+    .filter((token) => QUANTITY_WORDS.has(token))
+    .sort();
+  if (leftQuantityWords.join(",") !== rightQuantityWords.join(",")) {
+    return false;
+  }
   if (leftTokens.size < 5 || rightTokens.size < 5) return false;
 
   let intersection = 0;
@@ -105,14 +192,24 @@ export function findResearchDuplicates(
  * every lens, stage, and status on purpose: once Homa has paid to read a
  * specific article for Dimensions Math, another Dimensions Math run
  * should advance to a different page even if the first row was later
- * superseded or flagged. The current run is excluded so a corrected
- * save_knowledge retry is not blocked by its own earlier flagged row.
+ * superseded or flagged. Enforcement intentionally has no row limit:
+ * prompt rendering is capped later, but an old article must not become
+ * reusable merely because the dossier grew. The current run is excluded
+ * so a corrected save_knowledge retry is not blocked by its own earlier
+ * flagged row.
  */
 export async function loadPriorResearch(
   topicKey: string,
   options: { excludeRunId?: string | null } = {},
 ): Promise<PriorResearchDossier> {
-  const sql = mapDb();
+  return await loadPriorResearchWithDatabase(mapDb(), topicKey, options);
+}
+
+export async function loadPriorResearchWithDatabase(
+  sql: Sql | TransactionSql,
+  topicKey: string,
+  options: { excludeRunId?: string | null } = {},
+): Promise<PriorResearchDossier> {
   const excludeRunId = options.excludeRunId ?? null;
   const rows = await sql<
     Array<{
@@ -126,7 +223,6 @@ export async function loadPriorResearch(
     where topic_key = ${topicKey}
       and (${excludeRunId === null} or run_id is distinct from ${excludeRunId})
     order by created_at desc
-    limit 24
   `;
   return {
     topicKey,

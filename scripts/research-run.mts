@@ -16,6 +16,7 @@ import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { supabaseProjectRef } from "../apps/web/lib/knowledge/research-run";
 import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -28,6 +29,7 @@ try {
 // Dynamic after env load on purpose: research-operations loads mapDb
 // when --wait is used, and mapDb reads the database password at runtime.
 const {
+  assertResearchTargetsCompatible,
   closeResearchDatabase,
   triggerResearch,
   waitForResearchRuns,
@@ -99,10 +101,22 @@ async function main(): Promise<void> {
   const secret = process.env.CRON_SECRET;
   if (!secret) throw new Error("CRON_SECRET is required.");
 
+  // Confirm the HTTP destination itself, not only Supabase. The route is
+  // the write target even when this command does not wait on the DB.
   assertConfirmedProdWrite({
-    scriptName: "research-run",
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    scriptName: "research-run trigger",
+    supabaseUrl: baseUrl,
   });
+  if (process.argv.includes("--wait")) {
+    assertResearchTargetsCompatible(
+      baseUrl,
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+    );
+    assertConfirmedProdWrite({
+      scriptName: "research-run database",
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    });
+  }
 
   const body =
     cellValues.length > 0
@@ -113,8 +127,21 @@ async function main(): Promise<void> {
     secret,
     body,
     trigger: "manual",
+    expectedProjectRef: supabaseProjectRef(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+    ),
   });
   console.log(JSON.stringify(response, null, 2));
+  if (!response.ok || response.failed.length > 0) {
+    throw new Error(
+      `Research trigger reported ${response.failed.length} startup failure(s).`,
+    );
+  }
+  if (response.started.length === 0) {
+    throw new Error(
+      `Research trigger started no runs (${response.skipped.length} skipped).`,
+    );
+  }
 
   const runIds = response.started.map((run) => run.runId);
   if (!process.argv.includes("--wait") || runIds.length === 0) return;
@@ -148,6 +175,12 @@ async function main(): Promise<void> {
       2,
     ),
   );
+  const failedRuns = runs.filter((run) => run.status === "failed");
+  if (failedRuns.length > 0) {
+    throw new Error(
+      `${failedRuns.length} research run(s) failed: ${failedRuns.map((run) => run.cellKey ?? run.id).join(", ")}.`,
+    );
+  }
 }
 
 try {

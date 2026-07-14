@@ -38,7 +38,25 @@ export function topicTypeForLens(
 }
 
 export function researchCellKey(cell: DemandCell): string {
-  return `${cell.lens}:${cell.stage ?? "all"}:${cell.topicKey}`;
+  // Prior-source dedup spans every lens and stage for one topic, so the
+  // concurrency lock must use that same scope. Two simultaneous lenses
+  // for Dimensions Math would otherwise read the same prior snapshot and
+  // could both choose the same new article.
+  return `topic:${cell.topicKey}`;
+}
+
+/** Public project identity returned by the internal trigger so operator
+ * scripts can prove their polling DB is the same Supabase project. */
+export function supabaseProjectRef(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    const match = /^([a-z0-9]+)\.supabase\.co$/u.exec(
+      new URL(url).hostname.toLowerCase(),
+    );
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 const LENS_GUIDANCE: Record<KnowledgeLens, string> = {
@@ -148,6 +166,7 @@ interface ResearchRunDependencies {
   ): Promise<{ id: string }>;
   markSession(runId: string, sessionId: string): Promise<void>;
   failRun(runId: string, message: string): Promise<void>;
+  onSessionRecordError?: (error: unknown) => void;
 }
 
 export type StartResearchCellResult =
@@ -181,26 +200,70 @@ export async function startResearchCell(
     return { started: false, cellKey, reason: "already_running" };
   }
 
+  let session: { id: string };
   try {
     const prior = await dependencies.loadPrior(cell.topicKey, {
       excludeRunId: runId,
     });
-    const session = await dependencies.startSession(
+    session = await dependencies.startSession(
       buildResearchSessionInput(cell, runId, prior),
     );
-    await dependencies.markSession(runId, session.id);
-    return {
-      started: true,
-      runId,
-      sessionId: session.id,
-      cellKey,
-    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message.slice(0, 500) : "session startup failed";
     await dependencies.failRun(runId, message);
     throw error;
   }
+
+  // The session is already durable at this point. A bookkeeping failure
+  // must not mark the run failed, because that would release the unique
+  // topic lock while the model continues working and permit a duplicate
+  // retry. The channel still finishes the run; the stale-run reaper is
+  // the fallback if the channel never completes.
+  try {
+    await dependencies.markSession(runId, session.id);
+  } catch (error) {
+    dependencies.onSessionRecordError?.(error);
+  }
+  return {
+    started: true,
+    runId,
+    sessionId: session.id,
+    cellKey,
+  };
+}
+
+export function researchCompletionOutcome(input: {
+  active: number;
+  flagged: number;
+  message: string | null | undefined;
+}): {
+  status: "done" | "failed" | "skipped";
+  summary: string;
+  error: string | undefined;
+} {
+  if (input.active > 0) {
+    return {
+      status: "done",
+      summary: `${input.active} row${input.active === 1 ? "" : "s"} merged${input.flagged > 0 ? `, ${input.flagged} flagged by the gate` : ""}.`,
+      error: undefined,
+    };
+  }
+  if (
+    input.flagged === 0 &&
+    /\bNO_NEW_DELTA\s*$/u.test(input.message ?? "")
+  ) {
+    return {
+      status: "skipped",
+      summary: "No new research delta found.",
+      error: undefined,
+    };
+  }
+  return {
+    status: "failed",
+    summary: `0 rows merged${input.flagged > 0 ? `, ${input.flagged} flagged by the gate` : ""}.`,
+    error: "no active row merged",
+  };
 }
 
 const manualCellSchema = z.object({
@@ -213,6 +276,10 @@ const manualRequestSchema = z
   .object({
     count: z.number().int().min(1).max(20).optional(),
     cells: z.array(manualCellSchema).min(1).max(20).optional(),
+    expectedProjectRef: z
+      .string()
+      .regex(/^[a-z0-9]{10,40}$/u)
+      .optional(),
   })
   .strict();
 

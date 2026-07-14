@@ -54,6 +54,12 @@ export default defineSchedule({
                   error: message,
                 });
               },
+              onSessionRecordError: (error) => {
+                console.error(
+                  `fleet research session receipt failed for ${topic.topicKey}:`,
+                  error instanceof Error ? error.message : "unknown",
+                );
+              },
             });
           } catch (error) {
             console.error(

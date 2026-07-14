@@ -1,9 +1,11 @@
--- Research run control: one durable owner per research cell.
+-- Research run control: one durable owner per research topic.
 --
 -- Scheduled backfills, manual runs, and condensed labs all enter through
 -- the same runner. A partial unique index on the active cell key is the
 -- cross-process lock: two triggers may race, but only one can own the
--- running row and spend model/search budget. Completed and failed runs
+-- running row and spend model/search budget. The application keys this
+-- topic-wide (across lens/stage) because prior-source dedup has the same
+-- scope. Completed and failed runs
 -- fall out of the index, so a later refresh of the cell remains possible.
 --
 -- Additive only. Existing fleet runs keep null metadata and current RLS

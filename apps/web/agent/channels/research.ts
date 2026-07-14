@@ -5,7 +5,9 @@ import { fetchDemandQueue } from "../../lib/knowledge/demand";
 import { loadPriorResearch } from "../../lib/knowledge/research-dedup";
 import {
   parseManualResearchRequest,
+  researchCompletionOutcome,
   startResearchCell,
+  supabaseProjectRef,
   type ResearchTrigger,
 } from "../../lib/knowledge/research-run";
 import { mapDb } from "../../lib/map/db";
@@ -67,7 +69,10 @@ export default defineChannel({
 
   events: {
     async "message.completed"(eventData, channel) {
-      const data = eventData as { finishReason?: string };
+      const data = eventData as {
+        finishReason?: string;
+        message?: string | null;
+      };
       if (data.finishReason !== "stop") return;
       const { runId, finished } = channel.state;
       if (!runId || finished) return;
@@ -75,23 +80,38 @@ export default defineChannel({
 
       try {
         const sql = mapDb();
-        const saved = await sql<{ active: string; flagged: string }[]>`
+        const saved = await sql<
+          Array<{
+            active: string;
+            flagged: string;
+            run_status: string | null;
+          }>
+        >`
           select
             count(*) filter (where status = 'active')::text as active,
-            count(*) filter (where status = 'flagged')::text as flagged
+            count(*) filter (where status = 'flagged')::text as flagged,
+            (select status from public.homa_task_runs where id = ${runId})
+              as run_status
           from public.knowledge_bank where run_id = ${runId}
         `;
+        // A timed-out lab marks the run failed before cleanup. The model
+        // session may finish afterward; never overwrite that cancellation
+        // receipt or turn the failed row back into done/skipped.
+        if (saved[0]?.run_status !== "running") return;
         const active = Number(saved[0]?.active ?? 0);
         const flagged = Number(saved[0]?.flagged ?? 0);
-        await updateFleetRunSummary(
-          runId,
-          `${active} row${active === 1 ? "" : "s"} merged${flagged > 0 ? `, ${flagged} flagged by the gate` : ""}.`,
-        );
+        const outcome = researchCompletionOutcome({
+          active,
+          flagged,
+          message: data.message,
+        });
+        await updateFleetRunSummary(runId, outcome.summary);
         await finishTaskRun(runId, {
           familyId: null,
           kind: "fleet_research",
-          status: active > 0 ? "done" : "failed",
-          ...(active > 0 ? {} : { error: "no active row merged" }),
+          status: outcome.status,
+          ...(outcome.error ? { error: outcome.error } : {}),
+          onlyIfRunning: true,
         });
       } catch (error) {
         console.error(
@@ -127,8 +147,15 @@ export default defineChannel({
       }
 
       let request;
+      let expectedProjectRef: string | null = null;
       try {
-        const body = await req.json().catch(() => ({}));
+        const body = (await req.json()) as {
+          expectedProjectRef?: unknown;
+        };
+        expectedProjectRef =
+          typeof body.expectedProjectRef === "string"
+            ? body.expectedProjectRef
+            : null;
         request = parseManualResearchRequest(body);
       } catch (error) {
         return Response.json(
@@ -140,6 +167,23 @@ export default defineChannel({
                 : "Invalid research request.",
           },
           { status: 400 },
+        );
+      }
+
+      const projectRef = supabaseProjectRef(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+      );
+      if (
+        expectedProjectRef !== null &&
+        expectedProjectRef !== projectRef
+      ) {
+        return Response.json(
+          {
+            ok: false,
+            note: `Research target mismatch: expected ${expectedProjectRef}, runtime is ${projectRef ?? "unknown"}.`,
+            projectRef,
+          },
+          { status: 409 },
         );
       }
 
@@ -178,6 +222,12 @@ export default defineChannel({
                 error: message,
               });
             },
+            onSessionRecordError: (error) => {
+              console.error(
+                `manual research session receipt failed for ${cell.topicKey}:`,
+                error instanceof Error ? error.message : "unknown",
+              );
+            },
           });
           if (result.started) {
             started.push({
@@ -205,6 +255,7 @@ export default defineChannel({
       return Response.json({
         ok: failed.length === 0,
         trigger,
+        projectRef,
         requested: cells.length,
         started,
         skipped,

@@ -5,6 +5,7 @@ interface TriggerResearchInput {
   secret: string;
   body: object;
   trigger: "manual" | "lab";
+  expectedProjectRef?: string | null;
 }
 
 export interface TriggeredResearchRun {
@@ -16,6 +17,7 @@ export interface TriggeredResearchRun {
 export interface ResearchTriggerResponse {
   ok: boolean;
   trigger: "manual" | "lab";
+  projectRef: string | null;
   requested: number;
   started: TriggeredResearchRun[];
   skipped: Array<{ cellKey: string; reason: string }>;
@@ -50,6 +52,37 @@ export interface ResearchRunSnapshot {
 
 let databasePromise: Promise<Sql> | null = null;
 
+function isLocalServiceUrl(value: string): boolean {
+  const hostname = new URL(value).hostname;
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".local")
+  );
+}
+
+/**
+ * Polling/revert must inspect the same environment the HTTP trigger
+ * started. A local app pointed at hosted Supabase (or the reverse) would
+ * otherwise run work in one environment and report/clean another.
+ */
+export function assertResearchTargetsCompatible(
+  baseUrl: string,
+  databaseUrl: string | undefined,
+): void {
+  if (!databaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_URL is required when polling or reverting research.",
+    );
+  }
+  if (isLocalServiceUrl(baseUrl) !== isLocalServiceUrl(databaseUrl)) {
+    throw new Error(
+      `Research target mismatch: trigger=${baseUrl} database=${databaseUrl}.`,
+    );
+  }
+}
+
 async function database(): Promise<Sql> {
   databasePromise ??= import("../apps/web/lib/map/db").then(({ mapDb }) =>
     mapDb(),
@@ -69,7 +102,12 @@ export async function triggerResearch(
         "content-type": "application/json",
         "x-homa-research-trigger": input.trigger,
       },
-      body: JSON.stringify(input.body),
+      body: JSON.stringify({
+        ...input.body,
+        ...(input.expectedProjectRef
+          ? { expectedProjectRef: input.expectedProjectRef }
+          : {}),
+      }),
     },
   );
   const body = (await response.json()) as ResearchTriggerResponse & {
@@ -78,6 +116,14 @@ export async function triggerResearch(
   if (!response.ok) {
     throw new Error(
       `Research trigger failed (${response.status}): ${body.note ?? "unknown"}`,
+    );
+  }
+  if (
+    input.expectedProjectRef &&
+    body.projectRef !== input.expectedProjectRef
+  ) {
+    throw new Error(
+      `Research target mismatch: trigger project=${body.projectRef ?? "unknown"} database project=${input.expectedProjectRef}.`,
     );
   }
   return body;
@@ -186,6 +232,30 @@ export async function waitForResearchRuns(
 }
 
 /**
+ * Stop accepting output from timed-out lab sessions. The model runtime
+ * may still finish later, so the save gate also checks that its run row
+ * is still running before it writes. Marking the row failed is therefore
+ * the durable cancellation signal, not merely display bookkeeping.
+ */
+export async function cancelResearchRuns(
+  runIds: string[],
+  reason: string,
+): Promise<number> {
+  if (runIds.length === 0) return 0;
+  const sql = await database();
+  const rows = await sql<Array<{ id: string }>>`
+    update public.homa_task_runs
+    set status = 'failed',
+        error = ${reason},
+        finished_at = now()
+    where id = any(${sql.array(runIds)}::uuid[])
+      and status = 'running'
+    returning id
+  `;
+  return rows.length;
+}
+
+/**
  * Lab cleanup mirrors knowledge-revert.mts: flag rows produced by the
  * run and restore the predecessors they superseded. Runs stay as audit
  * records, which lets the lab report remain inspectable after cleanup.
@@ -194,34 +264,48 @@ export async function revertResearchRuns(
   runIds: string[],
   reason: string,
 ): Promise<{ flagged: number; restored: number }> {
+  if (runIds.length === 0) return { flagged: 0, restored: 0 };
   const sql = await database();
-  let flaggedCount = 0;
-  let restoredCount = 0;
-  for (const runId of runIds) {
-    const flagged = await sql<Array<{ id: string }>>`
-      update public.knowledge_bank
-      set status = 'flagged',
-          flagged_reason = ${reason},
-          updated_at = now()
-      where run_id = ${runId}
-        and status = 'active'
-      returning id
-    `;
-    flaggedCount += flagged.length;
-    for (const row of flagged) {
-      const restored = await sql<Array<{ id: string }>>`
-        update public.knowledge_bank
-        set status = 'active',
-            superseded_by = null,
-            updated_at = now()
-        where superseded_by = ${row.id}
-          and status = 'superseded'
-        returning id
-      `;
-      restoredCount += restored.length;
+  return await sql.begin(async (transaction) => {
+    let flaggedCount = 0;
+    let restoredCount = 0;
+
+    // Newest first is load-bearing. If round B superseded round A,
+    // reverting B restores A; the next iteration must then flag A too.
+    // Oldest-first would leave A active after a supposedly clean lab.
+    for (const runId of [...runIds].reverse()) {
+      // A model is instructed to save once, but a corrected retry may
+      // create a same-run supersession chain. Keep walking until this run
+      // owns no active row; one pass would restore and strand its own
+      // predecessor.
+      for (;;) {
+        const flagged = await transaction<Array<{ id: string }>>`
+          update public.knowledge_bank
+          set status = 'flagged',
+              flagged_reason = ${reason},
+              updated_at = now()
+          where run_id = ${runId}
+            and status = 'active'
+          returning id
+        `;
+        if (flagged.length === 0) break;
+        flaggedCount += flagged.length;
+        for (const row of flagged) {
+          const restored = await transaction<Array<{ id: string }>>`
+            update public.knowledge_bank
+            set status = 'active',
+                superseded_by = null,
+                updated_at = now()
+            where superseded_by = ${row.id}
+              and status = 'superseded'
+            returning id
+          `;
+          restoredCount += restored.length;
+        }
+      }
     }
-  }
-  return { flagged: flaggedCount, restored: restoredCount };
+    return { flagged: flaggedCount, restored: restoredCount };
+  });
 }
 
 export async function closeResearchDatabase(): Promise<void> {

@@ -7,7 +7,9 @@ import {
   buildResearchMessage,
   buildResearchSessionInput,
   parseManualResearchRequest,
+  researchCompletionOutcome,
   researchCellKey,
+  supabaseProjectRef,
   startResearchCell,
   topicTypeForLens,
 } from "./research-run";
@@ -41,8 +43,16 @@ describe("research cell identity", () => {
   it("uses one stable key for scheduled and manual runs", () => {
     assert.equal(
       researchCellKey(CELL),
-      "curriculum:all:dimensions-math",
+      "topic:dimensions-math",
     );
+  });
+
+  it("extracts the hosted Supabase project ref for target verification", () => {
+    assert.equal(
+      supabaseProjectRef("https://kzplntcdtsvdowntvlza.supabase.co"),
+      "kzplntcdtsvdowntvlza",
+    );
+    assert.equal(supabaseProjectRef("http://localhost:54321"), null);
   });
 
   it("derives the legacy topic type from the lens", () => {
@@ -140,7 +150,7 @@ describe("startResearchCell", () => {
 
     assert.deepEqual(result, {
       started: false,
-      cellKey: "curriculum:all:dimensions-math",
+      cellKey: "topic:dimensions-math",
       reason: "already_running",
     });
     assert.equal(sessionsStarted, 0);
@@ -150,7 +160,7 @@ describe("startResearchCell", () => {
     let startedMessage = "";
     const result = await startResearchCell(CELL, "lab", {
       beginRun: async (_title, options) => {
-        assert.equal(options.cellKey, "curriculum:all:dimensions-math");
+        assert.equal(options.cellKey, "topic:dimensions-math");
         assert.equal(options.trigger, "lab");
         return "run-1";
       },
@@ -170,8 +180,67 @@ describe("startResearchCell", () => {
       started: true,
       runId: "run-1",
       sessionId: "session-1",
-      cellKey: "curriculum:all:dimensions-math",
+      cellKey: "topic:dimensions-math",
     });
     assert.match(startedMessage, /dimensions-math-editions/u);
+  });
+
+  it("keeps the run locked when session-id bookkeeping fails after start", async () => {
+    let failedRun = false;
+    const result = await startResearchCell(CELL, "manual", {
+      beginRun: async () => "run-1",
+      loadPrior: async () => PRIOR,
+      startSession: async () => ({ id: "session-1" }),
+      markSession: async () => {
+        throw new Error("ledger temporarily unavailable");
+      },
+      failRun: async () => {
+        failedRun = true;
+      },
+    });
+
+    assert.equal(result.started, true);
+    assert.equal(failedRun, false);
+  });
+});
+
+describe("researchCompletionOutcome", () => {
+  it("distinguishes an honest no-delta result from a failed save", () => {
+    assert.deepEqual(
+      researchCompletionOutcome({
+        active: 0,
+        flagged: 0,
+        message: "NO_NEW_DELTA",
+      }),
+      {
+        status: "skipped",
+        summary: "No new research delta found.",
+        error: undefined,
+      },
+    );
+    assert.deepEqual(
+      researchCompletionOutcome({
+        active: 0,
+        flagged: 1,
+        message: "I tried to save a duplicate.",
+      }),
+      {
+        status: "failed",
+        summary: "0 rows merged, 1 flagged by the gate.",
+        error: "no active row merged",
+      },
+    );
+    assert.deepEqual(
+      researchCompletionOutcome({
+        active: 0,
+        flagged: 0,
+        message: "NO_NEW_DELTA but then I kept talking",
+      }),
+      {
+        status: "failed",
+        summary: "0 rows merged.",
+        error: "no active row merged",
+      },
+    );
   });
 });
