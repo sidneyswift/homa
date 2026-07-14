@@ -151,7 +151,7 @@ export async function loadResearchRuns(
       select id, title, research_cell_key, research_trigger, status,
              error, summary, started_at::text, finished_at::text
       from public.homa_task_runs
-      where id = any(${sql.array(runIds)}::uuid[])
+      where id in ${sql(runIds)}
       order by started_at
     `,
     sql<
@@ -171,7 +171,7 @@ export async function loadResearchRuns(
       select id, run_id, topic_key, lens, stage, title, summary, status,
              flagged_reason, citations
       from public.knowledge_bank
-      where run_id = any(${sql.array(runIds)}::uuid[])
+      where run_id in ${sql(runIds)}
       order by created_at
     `,
   ]);
@@ -248,7 +248,7 @@ export async function cancelResearchRuns(
     set status = 'failed',
         error = ${reason},
         finished_at = now()
-    where id = any(${sql.array(runIds)}::uuid[])
+    where id in ${sql(runIds)}
       and status = 'running'
     returning id
   `;

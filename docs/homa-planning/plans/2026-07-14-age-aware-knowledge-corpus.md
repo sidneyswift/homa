@@ -25,15 +25,26 @@
 > custom-task research context is gated by a RESEARCH_SIGNAL keyword match
 > (KC-4) so reminders stay plain.
 >
-> Backfill (KC-5) ARMED, not yet run: RESEARCH_TOPICS_PER_NIGHT=10 set in
-> prod and baked into the live deployment. FLEET_RESEARCH_ENABLED was
-> already true (9 fleet runs over the prior 3 nights). The nightly
-> fleet-research cron (47 6 UTC, about 2:47am ET) is the only trigger,
-> prod exposes no manual fire, so the first stage+domain-tagged rows land
-> on the next cron. At 10 cells/night the reachable grid (~a couple dozen
-> cells now, hundreds as the fleet's ages spread) fills over roughly two
-> to three weeks; drop RESEARCH_TOPICS_PER_NIGHT back to 3 after, or the
+> Backfill (KC-5) ARMED: RESEARCH_TOPICS_PER_NIGHT=10 is set in prod and
+> FLEET_RESEARCH_ENABLED is true. The nightly cron remains 47 6 UTC, but
+> KC-6 now exposes the CRON_SECRET-authenticated manual route and repo
+> commands, so operators can run due cells immediately instead of waiting
+> for the cron. At 10 cells/night the reachable grid fills over roughly
+> two to three weeks; drop RESEARCH_TOPICS_PER_NIGHT back to 3 after, or
 > nightly spend stays at the backfill rate.
+>
+> KC-6 SHIPPED and live-validated 2026-07-14 (commit 24a3f29). Route
+> checks: health 200, no-auth 401, malformed JSON 400, wrong Supabase
+> project ref 409 before any run. Condensed explicit lab: two sequential
+> Dimensions Math rounds finished in 100s and 78s, saved two different
+> angles with 10 unique canonical pages across six hosts, zero repeated
+> pages, zero near-repeat claims, zero gate flags; `--revert` flagged both
+> lab rows and left zero active Dimensions Math rows. Topic-lock race:
+> two simultaneous Beast Academy requests produced one session and one
+> `already_running` skip; its single row was reverted afterward. The lab
+> also caught and safely cancelled one operator-side UUID polling bug
+> before these passing runs; the one-line poll fix is recorded in the
+> follow-up commit.
 
 ## Why now (measured, not assumed)
 
