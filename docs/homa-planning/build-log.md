@@ -3,6 +3,30 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-14 · Founder ruling: prod bugs get fixed, not stored
+
+At 23:41 a user photo showed a family's report page stuck on the
+writing beat in production. The cause (BUG-P1-1, an untypeable
+"$n is null" parameter in both narrative source queries in
+narrative-store.ts) had been fully diagnosed about ten hours earlier
+by the season-simulation field study and stored as recommendation R1,
+labeled launch-blocker, while production stayed broken. The fix that
+shipped tonight (7bf394c, two ::uuid casts) took minutes once it was
+treated as an outage instead of a finding; the seven stuck reports
+were regenerated through the product's own self-heal and verified
+live.
+
+Founder ruling (2026-07-14, "prod bugs must get fixed not stored",
+registered as `prod-bugs-fixed-not-stored` in
+journeys/10-reconciliation.md §5): a confirmed live production bug
+gets fixed, deployed, and verified live in the session that finds it,
+or escalated to the founder in that session's reply as a live
+production failure. Storing it as a suggestion, recommendation, or
+backlog row is prohibited. Findings documents carry per-bug status:
+FIXED with the commit hash, or an escalation timestamp. Enforced in
+AGENTS.md (new "Production bugs" section) and BUILD.md non-negotiable
+law 11; the field study's BUG-P1-1 rows now carry FIXED markers.
+
 ## 2026-07-13 · Curriculum atlas wave 1 (founder ask)
 
 Founder ask: deep research on top homeschool curricula, organized as the

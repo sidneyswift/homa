@@ -71,6 +71,7 @@ If a capability is absent from the current repository or lacks production eviden
 8. eve version changes require `node scripts/eve-upgrade-check.mjs` and the procedure in `docs/homa-planning/runbooks/eve-version-bump.md`. Agent-module changes also require `pnpm --filter web exec eve build`.
 9. Production schema and production code ship together. Breaking migrations never lead the code that reads them. Use code-first deployment or expand-contract; additive migrations may lead.
 10. Imports remain at the top of the file. Do not add inline imports.
+11. A production-breaking bug gets fixed, deployed, and verified live in the session that finds it, or escalated to the founder in that session's reply as a live production failure. Recording it as a suggestion, recommendation, or backlog row without a shipped fix or an explicit founder-accepted delay is prohibited (founder ruling 2026-07-14, `prod-bugs-fixed-not-stored`).
 
 ## ChildProgress rollout order
 

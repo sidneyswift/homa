@@ -37,6 +37,12 @@ Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo mon
   authenticated Progress, token reports, corrections, and linked SMS.
   Rollback turns the flag off first and leaves the additive ledger intact.
 
+## Production bugs
+
+- Fixed, not stored (founder ruling 2026-07-14, `prod-bugs-fixed-not-stored`): a bug that is confirmed or strongly suspected live in production, whether found by a user report, a probe, logs, a simulation, or a field study, gets fixed, deployed, and verified live in the same session that finds it. Writing it into a study, plan, backlog, or ticket records a shipped fix; it is never a substitute for one.
+- If the fix truly cannot ship now (missing access, correct behavior needs a founder ruling, change too large to be safe), drop other work and put the failure in front of the founder in your reply, plainly labeled as a live production failure with the user-facing symptom. A "recommendation" or "suggested fix" row is not an escalation.
+- Findings documents carry status on every production bug: FIXED plus the commit hash, or an explicit escalation timestamp. Cause: BUG-P1-1 (2026-07-13) sat fully diagnosed in a field study as recommendation R1 for hours while every new family's report page and emailed link hung in production; the shipped fix was two ::uuid casts (7bf394c) that took minutes once treated as an outage instead of a finding.
+
 ## Code style & voice
 
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.

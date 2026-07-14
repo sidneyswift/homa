@@ -97,7 +97,7 @@ because the report was stuck, which is not how this was supposed to go.
 
 **Bugs found**
 
-1. **BUG-P1-1, narrative generation fails every time and the report page spins forever.** Symptom: every POST /api/map/score background phase and every narrative-status poll logs "could not determine data type of parameter $2"; all three kids sit on "Homa is writing ... report" indefinitely; narrative_meta is null for all three, zero map.narrative_* events, zero report_narrative model_usage rows. Root cause: `apps/web/lib/map/narrative-store.ts` line 76 (report source) and line 259 (plan source) filter with `(${familyId ?? null} is null or f.id = ${familyId ?? null})`; postgres.js sends both interpolations as untyped parameters, and `$2 is null` gives Postgres no context to infer a type, so the server rejects the query before running it (reproduced read-only with PREPARE against the live database; the plan query fails the same way at $3). Introduced in commit 1a9b13e, the 2026-07-11 hardening pass. Because getReportNarrativeSource throws before claimReportNarrative, status never reaches "failed", so the template fallback never engages and each 2.5 second poll kicks another failing self-heal. Severity: launch-blocker while REPORT_NARRATIVE_ENABLED is true. Would it happen in prod: yes, identically; the bug is in the SQL text itself, same driver and pooler, every live caller passes familyId, and only the env flag gates the path. Suggested fix: append the family filter as a conditional sql fragment only when familyId is present (or cast the parameter to uuid), in both source queries.
+1. **BUG-P1-1, narrative generation fails every time and the report page spins forever.** Symptom: every POST /api/map/score background phase and every narrative-status poll logs "could not determine data type of parameter $2"; all three kids sit on "Homa is writing ... report" indefinitely; narrative_meta is null for all three, zero map.narrative_* events, zero report_narrative model_usage rows. Root cause: `apps/web/lib/map/narrative-store.ts` line 76 (report source) and line 259 (plan source) filter with `(${familyId ?? null} is null or f.id = ${familyId ?? null})`; postgres.js sends both interpolations as untyped parameters, and `$2 is null` gives Postgres no context to infer a type, so the server rejects the query before running it (reproduced read-only with PREPARE against the live database; the plan query fails the same way at $3). Introduced in commit 1a9b13e, the 2026-07-11 hardening pass. Because getReportNarrativeSource throws before claimReportNarrative, status never reaches "failed", so the template fallback never engages and each 2.5 second poll kicks another failing self-heal. Severity: launch-blocker while REPORT_NARRATIVE_ENABLED is true. Would it happen in prod: yes, identically; the bug is in the SQL text itself, same driver and pooler, every live caller passes familyId, and only the env flag gates the path. Suggested fix: append the family filter as a conditional sql fragment only when familyId is present (or cast the parameter to uuid), in both source queries. FIXED 2026-07-14, commit 7bf394c: ::uuid casts on both queries, deployed and verified live; the seven stuck reports were regenerated through the self-heal path.
 
 2. **BUG-P1-2, every kid was scored twice and the mom got two report emails per kid.** Symptom: six map.report_generated events and six delivered report_link email_sends for three kids, duplicate pairs about 300ms apart; each report also carries a spurious history snapshot (history length 1 on a first-ever scoring). Root cause: the scoring loop in `apps/web/app/onboarding/scoring-step.tsx` (effect at line 65) is not single-flight; dev StrictMode mounts the effect twice and cleanup only flips a UI flag without aborting the first loop; the server dedup reportAlreadyEmailed (`apps/web/app/api/map/score/route.ts` line 61) is check-then-act, reading emailed_at at request start while markReportEmailed runs after the send, so both requests pass the check. Severity: minor. Would it happen in prod: the StrictMode trigger is dev-only, but the email dedup race is reachable in production with any two overlapping score calls (double tap, retry, second tab). Suggested fix: claim emailed_at atomically before sending (update where emailed_at is null, returning) and make the client scoring loop abortable.
 
@@ -540,6 +540,7 @@ JOURNAL_PROMPT_ENABLED and MORNING_BRIEF_ENABLED, flags otherwise from .env.loca
 - **BUG-P1-1 unchanged**: the narrative SQL (`narrative-store.ts` lines 76 and 259)
   still carries the untypeable "familyId ?? null is null or f.id = familyId ?? null"
   interpolation; reports and emailed links still spin on the writing beat.
+  Update 2026-07-14: FIXED in 7bf394c, no longer open.
 - **BUG-P4-2 unchanged**: with the live flag on (now set in .env.local), Emma's
   progress page still shows the confident empty state ("You have not shared any
   specific skills") over a fully scored report. Note the flag is now on in the shared
@@ -574,6 +575,7 @@ surfacing gap: the work gets made and then disappears.
 
 1. **The report never renders (BUG-P1-1).** A single SQL type bug freezes the one payoff
    of onboarding for every family and every emailed link. Launch-blocker, ships to prod.
+   FIXED 2026-07-14 (7bf394c).
 2. **The first worksheet is invisible (BUG-P2-1 plus draft invisibility).** A dead stream
    discards a finished turn's card, and drafts live on no screen, so the wow moment
    produces nothing the mom can hold. Launch-blocker for activation.
@@ -685,7 +687,9 @@ addition below: R17.
 - **R1. Fix the report narrative SQL (BUG-P1-1).** One-line type fix in
   `narrative-store.ts` (conditional family filter or `::uuid` cast), both report and plan
   queries. Unfreezes onboarding, emailed links, and every plan narrative. Highest
-  leverage single change in the study.
+  leverage single change in the study. DONE 2026-07-14 (7bf394c); this row sat
+  stored for hours while production was down, the trigger for founder ruling
+  `prod-bugs-fixed-not-stored`.
 - **R2. Never discard a finished turn (BUG-P2-1).** On any stream end without a boundary
   event, keep the session cursor and run the durable replay that error recovery already
   does. Add an NDJSON heartbeat so half-open streams are detectable.
