@@ -95,8 +95,6 @@ export function progressSourceLabel(
       return "Onboarding";
     case "legacy":
       return "Earlier progress answer";
-    case "lesson_listen":
-      return "Lesson recording";
     default:
       return unsupportedProgressCopyState(source);
   }
