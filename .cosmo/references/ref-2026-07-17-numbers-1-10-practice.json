@@ -1,0 +1,90 @@
+{
+  "id": "ref-2026-07-17-numbers-1-10-practice",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-17T18:05:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784325938.584009",
+  "format": "worksheet-packet",
+  "title": "Numbers 1-10 Practice Pages",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "activity-area-dominant",
+    "whiteSpaceRatio": 0.45,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "counting-cardinality",
+    "topics": [
+      {
+        "id": "mt_oAK9GXSfqV",
+        "name": "Writing digits 0-9",
+        "kind": "procedural",
+        "mapped": true
+      },
+      {
+        "id": "mt_yqAL6O5i_v",
+        "name": "Counting objects to 20",
+        "kind": "procedural",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "slug": "math.number-word-recognition-1-10",
+        "description": "Recognize and color/identify the written word for numbers 1-10 (one, two, three...)"
+      },
+      {
+        "slug": "math.ten-frame-representation",
+        "description": "Represent a given number by filling in circles on a ten frame"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 72],
+    "ageBandGrades": "Pre-K to 1",
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "number-recognition-1-10",
+      "rote-counting-1-10"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-minimal",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["coloring activity embedded", "star counting (kid-friendly icon)", "multiple activity types per page"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "number-practice-page: single-number focus page with 4-5 activities on one sheet — tracing/writing, ten frame fill-in, number word coloring, object counting (color N stars). Repeatable template across numbers 1-10 (or 1-20)."
+    ]
+  },
+  "components": [
+    {
+      "name": "Number Practice Page (one per number, 1-10)",
+      "description": "Each page focuses on a single number and includes 4 activities: (1) Trace and write — large dotted number to trace plus a writing line with repeated practice, (2) Show on ten frame — empty 2x5 grid where student fills in the correct number of circles, (3) Color the number word — the word (e.g. 'one', 'two') printed in outline/bubble letters for coloring, (4) Color N stars — row of stars where student colors the correct quantity. Header: 'Numbers Practice' with Name/Date fields.",
+      "designPatterns": [
+        "Single-number focus: one page per number prevents overwhelm. Deep practice on one concept.",
+        "Multi-activity page: 4 different activities for one number = 4 representations (digit, word, ten frame, quantity). Builds number sense from multiple angles.",
+        "Tracing as scaffolding: dotted numbers provide the motor path before independent writing.",
+        "Ten frame as representation tool: builds toward mental math fluency later.",
+        "Coloring as engagement: the number word coloring and star coloring are low-pressure activities that keep attention.",
+        "Consistent template: same layout for every number. Reduces cognitive load — kid knows what to do by page 3.",
+        "B&W, light ink, generous spacing: perfect for home printers and developing fine motor skills."
+      ]
+    }
+  ],
+  "notes": "Clean, no-frills number practice pages. The strength is the multi-representational approach: same number shown as digit (writing), word (coloring), quantity (stars), and structured model (ten frame). This is how number sense is built — not just rote writing. The consistent template across 1-10 means a child learns the format once and can work independently. Very young learner focused (Pre-K to K). This is the youngest-targeted drop so far."
+}

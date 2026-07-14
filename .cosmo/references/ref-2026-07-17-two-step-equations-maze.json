@@ -1,0 +1,84 @@
+{
+  "id": "ref-2026-07-17-two-step-equations-maze",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-17T08:55:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784292903.011949",
+  "format": "worksheet-bundle",
+  "title": "Two-Step Equations Notes + Maze Activity (All Things Algebra)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "instruction-dominant",
+    "whiteSpaceRatio": 0.2,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "algebra",
+    "topics": [
+      {
+        "id": "mt_QhFEDyIwSO",
+        "name": "Solving Linear Equations",
+        "kind": "procedural",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [132, 168],
+    "ageBandGrades": "6-8",
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "one-step-equations-all-operations",
+      "fraction-operations",
+      "integer-operations"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["maze gamification", "progressive difficulty", "structured note-taking"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "maze-activity: navigational puzzle where correct answers determine the path — requires procedural maze generation tied to problem solutions",
+      "guided-notes: two-column notes page with main-ideas/questions column on left and notes/examples column on right, progressive scaffolding from review to new concept"
+    ]
+  },
+  "components": [
+    {
+      "name": "Guided Notes (pages 1-2)",
+      "description": "Cornell-style two-column layout. Left column: topic labels (One-Step Equations, Fractions, Two-Step Equations, Watch Out!). Right column: worked examples with blank spaces for student work. Progressive difficulty: one-step → fractions → two-step → special cases (coefficient before variable). 22 problems total.",
+      "designPatterns": [
+        "Progressive scaffolding: starts with review (one-step) before introducing new concept (two-step)",
+        "Fill-in-the-blank strategy cues: 'To get rid of a fraction, multiply by the ___'",
+        "Watch Out! section for common traps (division before subtraction)",
+        "Student header block: Name, Class, Date, Topic"
+      ]
+    },
+    {
+      "name": "Maze Activity (page 3)",
+      "description": "Grid-based maze where students solve two-step equations and follow the correct answer to navigate from START to END. 13 problems embedded in maze cells. Wrong answers lead to dead ends. Multiple-choice format via maze paths (each cell connects to 2-3 numbered exits).",
+      "designPatterns": [
+        "Gamification: transforms drill practice into navigation challenge",
+        "Self-checking: wrong answer = dead end = immediate feedback",
+        "Show-all-steps requirement enforces process over guessing",
+        "Answer options visible on paths create low-stakes multiple-choice feel"
+      ]
+    }
+  ],
+  "notes": "Three-page bundle from All Things Algebra (Gina Wilson). Strong pedagogical structure — the notes page teaches the concept with graduated difficulty, then the maze provides gamified practice. The maze format is the standout: it's essentially self-checking drill practice disguised as a puzzle. This is a new format type for Homa — neither pure worksheet nor pure game."
+}

@@ -94,6 +94,66 @@ A cut-and-paste word work activity for short 'a' CVC words (cab, mad, bag, ham, 
 
 **Status:** applied-to-full-flywheel
 
+### 2026-07-17 | Sid | TPT Free Download
+**Source:** "When I Get Frustrated — Social Story" by Allison Fors (2016)
+**What's valuable:** format-innovation | SEL-content | inclusive-design | mini-book-format
+**Summary:**
+A 10-page PDF containing a foldable social narrative mini book about managing frustration. Three versions included:
+
+1. *Color mini book* — single page, 4×2 panel grid. Folds into 8-page story.
+2. *B&W mini book* — same layout, line art only. Doubles as coloring activity.
+3. *Large B&W pages* — same story as individual full-page spreads (2 panels per page) for group reading.
+
+*Story structure (social narrative pattern):*
+1. Cover: "When I Get Frustrated... Social Story"
+2. Normalize: "Everyone feels frustrated sometimes. Frustration is a normal feeling."
+3. Body signals: "My body might get tight, my face might feel hot, my heart might beat fast."
+4. Goal: "I want to make safe choices."
+5-7. Coping strategies (one per page): use words ("I'm frustrated right now"), count to 10, walk away / ask for break, squeeze something soft, take deep breaths
+8. Affirmation + open question: "I am learning new ways to handle frustration every day! What else helps me?"
+
+*Key design patterns:*
+- *One-page foldable mini book:* the signature format. Single sheet → fold along lines → fold in half → cut center dotted line → fold lengthwise → push in ends → fold closed = 8-page book. Instructions included with diagrams.
+- *Social narrative structure:* normalize → body signals → safe choices goal → strategies (one per page) → affirmation + personalization prompt. Therapeutic format widely used in special ed.
+- *First-person "I can..." statements:* empowering, not prescriptive. "I can take deep breaths" vs "You should take deep breaths."
+- *One strategy per page:* no overwhelm. Child can absorb and try each one.
+- *Diverse representation:* different child on each page (skin tones, hair types, body types).
+- *Dual-version:* color for ready-to-use, B&W for engagement (coloring while learning).
+- *Open-ended question:* last page asks "What else helps me?" — invites personalization and parent-child conversation.
+- *Illustration-dominant:* large friendly cartoon characters, short simple text. Accessible to pre-readers when read aloud.
+
+*New format types for Homa:*
+- *One-page foldable mini book* — we don't have this. The fold geometry is specific (panels must be in correct positions for reading order after folding). A recipe would need to handle panel placement math.
+- *Social narrative* — therapeutic content format. Template-able: pick an emotion/situation → normalize → body signals → strategies → affirmation. Homa could generate personalized social stories.
+
+*First non-academic reference.* Opens up SEL (social-emotional learning) as a content category for Homa materials.
+
+**Status:** applied-to-taste-model
+
+### 2026-07-17 | Sid | Unknown Source
+**Source:** "Numbers 1-10 Practice Pages" (creator unknown from PDF extract)
+**What's valuable:** multi-representational | consistent-template | youngest-learner | number-sense
+**Summary:**
+A 10-page packet (one page per number, 1 through 10). Each page has the same four activities:
+
+1. *Trace and write* — large dotted number for tracing, followed by a line of practice writing
+2. *Show on ten frame* — empty 2×5 grid, student fills in the correct number of circles
+3. *Color the number word* — outline/bubble letters of the word ("one", "two") for coloring
+4. *Color N stars* — row of stars, color the correct quantity
+
+*Key design patterns:*
+- *Multi-representational:* digit + word + quantity + structured model (ten frame). Four representations of one number on one page. This is how number sense is built — not just "write 3 ten times."
+- *Consistent template:* identical layout for every number. By page 3, the child works independently — they know the format. Reduces cognitive load so attention goes to the math, not figuring out instructions.
+- *Single-concept focus:* one number per page. Deep over broad. No overwhelm.
+- *Coloring as engagement hook:* the number word and stars add low-pressure, fun activities alongside the motor-skill work.
+- *Ten frame introduction:* embeds the ten frame tool early. This pays off later when kids use ten frames for addition/subtraction mental math.
+- *B&W, light ink, generous spacing* — home-printer perfect, fine-motor friendly.
+
+*Potential new recipe for Homa:*
+- *Number practice page* — templated single-number focus page with 4+ activity zones. We could generate these from the taxonomy for any number range (1-10, 11-20, etc.).
+
+**Status:** applied-to-taste-model
+
 ### 2026-07-17 | Sid | TPT Product
 **Source:** "Two-Step Equations Notes & Maze Activity" by Gina Wilson / All Things Algebra (2012-2016)
 **What's valuable:** format-innovation | scaffolding | gamification | self-checking

@@ -1,0 +1,40 @@
+{
+  "references": [
+    {
+      "id": "ref-2026-07-17-two-step-equations-maze",
+      "title": "Two-Step Equations Notes + Maze Activity (All Things Algebra)",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-17T08:55:00-04:00",
+      "subject": "math",
+      "domain": "algebra",
+      "format": "worksheet-bundle"
+    },
+    {
+      "id": "ref-2026-07-17-short-a-cvc-cut-paste",
+      "title": "Short A CVC Words — Write, Cut & Paste Activity (Adapting for Autism)",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-17T16:52:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "worksheet"
+    },
+    {
+      "id": "ref-2026-07-17-numbers-1-10-practice",
+      "title": "Numbers 1-10 Practice Pages",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-17T18:05:00-04:00",
+      "subject": "math",
+      "domain": "counting-cardinality",
+      "format": "worksheet-packet"
+    },
+    {
+      "id": "ref-2026-07-17-social-story-frustrated",
+      "title": "When I Get Frustrated — Social Story (Allison Fors)",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-17T21:52:00-04:00",
+      "subject": "personal-social-development",
+      "domain": "emotional-literacy",
+      "format": "mini-book"
+    }
+  ]
+}

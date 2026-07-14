@@ -1,0 +1,119 @@
+{
+  "id": "ref-2026-07-17-social-story-frustrated",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-17T21:52:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784339551.032979",
+  "format": "mini-book",
+  "title": "When I Get Frustrated — Social Story (Allison Fors)",
+  "layout": {
+    "structure": "panel-grid-foldable",
+    "spacing": "airy",
+    "visualHierarchy": "illustration-dominant",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "sequential-numbered"
+  },
+  "skillTargeting": {
+    "subject": "personal-social-development",
+    "domain": "emotional-literacy",
+    "topics": [
+      {
+        "id": "mt_kvrvpQris4",
+        "name": "Expressing Feelings with Words",
+        "kind": "procedural",
+        "mapped": true
+      },
+      {
+        "id": "mt_ggcamLzXAy",
+        "name": "Feelings Change and Differ",
+        "kind": "conceptual",
+        "mapped": true
+      },
+      {
+        "id": "mt_9Y5-GjF2B0",
+        "name": "Triggers and Causes of Feelings",
+        "kind": "conceptual",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "slug": "psd.emotional-regulation-strategies",
+        "description": "Identify and use calming strategies (deep breaths, counting to 10, walking away, squeezing a stress ball) when experiencing strong emotions like frustration"
+      },
+      {
+        "slug": "psd.social-narrative-comprehension",
+        "description": "Engage with first-person social stories that normalize emotions, describe body signals, and model coping strategies"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 96],
+    "ageBandGrades": "Pre-K to 3",
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": ["diverse cartoon children (multiple skin tones, hair types)"],
+    "visualStyle": "cartoon-round-friendly",
+    "colorPalette": "dual-version",
+    "colorVersions": ["full-color", "black-and-white-coloring"],
+    "appealDrivers": ["diverse representation", "child-relatable scenarios", "friendly round art style", "coloring option"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "color optional — B&W version included for coloring",
+    "foldInstructions": "included — single page folds into 8-page mini book"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "one-page-mini-book: single letter-size page with 8-panel grid that folds (fold all lines → fold in half → cut center dotted line → fold lengthwise → push in ends → fold closed) into an 8-page mini book. Requires precise panel placement so pages read in correct order after folding.",
+      "social-narrative: first-person story format with illustration + text per page, following a pattern: normalize the emotion → describe body signals → state the goal → list coping strategies → end with positive affirmation + open-ended question"
+    ]
+  },
+  "components": [
+    {
+      "name": "Fold Instructions Page",
+      "description": "Step-by-step visual guide for folding: (1) fold along all lines, (2) fold in half and cut center dotted line, (3) open and fold lengthwise, (4) push in both ends, (5) fold and close. Shows finished mini book photo.",
+      "designPatterns": [
+        "Visual fold instructions with numbered steps and diagrams",
+        "Photo of finished product sets expectations"
+      ]
+    },
+    {
+      "name": "Mini Book — Color Version (8 panels on one page)",
+      "description": "Single page, 4x2 grid. When folded, creates an 8-page story: Cover ('When I Get Frustrated... Social Story') → Page 2 (frustration is normal, body signals: tight body, hot face, fast heart) → Page 3 (I want to make safe choices, here are things I can do) → Page 4 (count to 10 slowly with fingers) → Page 5 (walk away, ask for a break, say 'I need space') → Page 6 (squeeze something soft — pillow, stuffed animal, stress ball) → Page 7 (take deep breaths to calm down) → Page 8 (positive affirmation + open question: 'What else helps me when I get frustrated?'). Full color with diverse cartoon children.",
+      "designPatterns": [
+        "Social narrative structure: normalize → describe → model strategies → affirm",
+        "First-person voice: 'I can...' statements empower the child",
+        "One strategy per page: no overwhelm",
+        "Diverse representation: different children on each page (skin tones, hair, clothing)",
+        "Open-ended question on last page: invites personalization and conversation",
+        "Illustration-dominant: large character art, short text"
+      ]
+    },
+    {
+      "name": "Mini Book — B&W Version",
+      "description": "Same content and layout as color version but in black and white line art. Doubles as a coloring activity.",
+      "designPatterns": [
+        "Dual-version approach: color for quick use, B&W for engagement (coloring while reading)",
+        "No-print option noted: can view on device"
+      ]
+    },
+    {
+      "name": "Large B&W Version (individual pages)",
+      "description": "Same story broken into individual full-page spreads (2 panels per page). Larger text and illustrations for younger readers or group reading.",
+      "designPatterns": [
+        "Size differentiation: mini book for individual, large pages for group/circle time",
+        "Same content, different delivery format"
+      ]
+    }
+  ],
+  "notes": "First non-academic reference. This is SEL (social-emotional learning) — a subject Homa's taxonomy has some coverage on (Emotional Literacy domain) but no material recipes for. The mini-book format is fascinating: one page becomes an 8-page book via folding. That's a printable format Homa could own — generate personalized social stories as single-page foldable mini books. The social narrative structure (normalize → body signals → coping strategies → affirmation) is a therapeutic format used widely in special ed and early childhood. Sid dropping this alongside the Adapting for Autism CVC worksheets suggests interest in inclusive/therapeutic educational formats, not just academic drill."
+}
