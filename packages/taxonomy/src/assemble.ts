@@ -1,4 +1,7 @@
-import { createRequire } from "node:module";
+import topicsJson from "../data/topics.json";
+import dependenciesJson from "../data/dependencies.json";
+import clustersJson from "../data/clusters.json";
+import slugMapJson from "../data/homa-slug-map.json";
 
 import type {
   MarbleClustersFile,
@@ -28,13 +31,19 @@ import {
  * transitive dependents, hard and soft edges alike): Marble's shipped
  * numbers describe their graph's shape, and ours diverges the moment
  * authored topics and edges land.
+ *
+ * Static JSON imports on purpose (2026-07-10 incident: the createRequire
+ * corpus loader does not resolve under the eve channel build, which sank
+ * the deploy; the walk routes worked only because Next bundles its own
+ * route graph). Static imports inline the data in every bundler and load
+ * fine under Node/tsx, so the same module now works in Next routes, the
+ * eve agent build, and scripts alike.
  */
 
-const require = createRequire(import.meta.url);
-const topicsFile = require("../data/topics.json") as MarbleTopicsFile;
-const dependenciesFile = require("../data/dependencies.json") as MarbleDependenciesFile;
-const clustersFile = require("../data/clusters.json") as MarbleClustersFile;
-const slugMap = require("../data/homa-slug-map.json") as SlugMapFile;
+const topicsFile = topicsJson as unknown as MarbleTopicsFile;
+const dependenciesFile = dependenciesJson as unknown as MarbleDependenciesFile;
+const clustersFile = clustersJson as unknown as MarbleClustersFile;
+const slugMap = slugMapJson as unknown as SlugMapFile;
 
 export interface AssembledTaxonomy {
   topics: TaxonomyTopic[];

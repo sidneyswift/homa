@@ -48,6 +48,44 @@ Decisions made alone, choices a review should see:
   it); its profile goes to lesson and workbook-page depth as the
   template ceiling for future flagship promotions.
 
+Continuation, same day (founder: "Continue"): wave 2 launched as five
+more parallel agents (preschool, special needs and intervention, high
+school and upper grades, Catholic publishers, languages and electives;
+`preschool` and `electives` added to the category enum), and two wave 3
+seeds shipped. Wave 2 completed the same evening: 42 new profiles and 5
+comparison docs (atlas total 129 profiles, 13 comparisons), validator
+clean, catalog regenerated, wave 2 addendum appended to
+homa-implications.md, fragile facts recorded in backlog.md. Note for
+auditors: commit 04eddce (a parallel founder session) swept in the
+atlas files that existed mid-wave; later agent output remains in the
+working tree for the next commit.
+
+Second continuation, same evening (founder: "Continue"): the flagship
+sequence extraction was completed. `sequences/dimensions-math.yaml` now
+covers all 20 levels PK-8 at lesson level (152 chapters, 971 numbered
+lessons, publisher-suggested pacing where published), built from the
+publisher's scope charts plus all 14 per-level overview PDFs via
+Firecrawl. Two extraction hazards were caught and corrected, worth
+recording as protocol precedent: the multi-column PK-5 scope chart
+scrambles chapter-lesson association in plain-text extraction (fixed by
+using per-level overview PDFs as the lesson source and the chart only
+for chapter numbering, with grade 1 titles verified against independent
+tables of contents), and the 6-8 scope tables shift column meaning
+mid-table at chapter transitions (an earlier chapter-level extraction
+had promoted 7A section titles to chapter titles; corrected against two
+independent tables of contents and the publisher's grade 7 pacing
+guide). Merged-table pacing is omitted rather than guessed. First, `scripts/curriculum-atlas-index.mts` with
+`pnpm check:atlas` (mechanical schema/enum/id/link/dash validation) and
+`pnpm atlas:index` (regenerates the atlas's `catalog.json`, a generated
+file, never hand-edited). Second, `sequences/` structured
+scope-and-sequence data: `dimensions-math.yaml` extracted from the
+publisher's own scope PDFs via Firecrawl (grade 2 at lesson level
+cross-checked against two publisher documents, 6-8 at chapter level,
+scrambled-extraction levels marked pending rather than published wrong;
+protocol in `sequences/README.md`). Also fixed a 404 scope-and-sequence
+link in the flagship profile discovered during extraction
+(`/pages/scopes-sequences` is the live URL).
+
 Founder ask (afternoon chat, verbatim intent): "i want to be more agentic
 and not worry about prompt inject atm. should we use firecrawl to scrape
 curriculums and teachers pay teachers and workbooks etc online?", with a
@@ -95,6 +133,46 @@ Verified: `pnpm check:web-fetch` (8 normalization tests, wired into CI),
 live smoke `scripts/firecrawl-smoke.mts` against a Khan Academy grade
 page and a TPT search listing (both returned capped markdown), eve
 build, web typecheck, lint.
+
+## 2026-07-13 (night) · explore_child_map ships: the agent can traverse the skill graph (founder "IMPLEMENT!")
+
+Founder direction (evening chat): asked how Homa traverses where a child
+is versus what's missing versus what's next, heard that she cannot (the
+staged taxonomy graph API had zero product consumers and the agent only
+reads bounded projections), then asked for the most-agentic design one
+abstraction up and said "IMPLEMENT!". The direction is written down in
+plans/2026-07-13-agentic-capability-planes.md (invariants versus
+scaffolding, five planes, phase order); phase 1 shipped tonight.
+
+What shipped: the explore_child_map agent tool, read-only, family-scoped.
+Six queries join one child's own evidence with the anchored bank ladder
+and the taxonomy teaching graph: subject_map (every rung with the child's
+answer, the frontier, the same chart figure the parent sees, skill-line
+domain summaries), topic (prerequisites with edge reasons and the child's
+standing on each, unlocks, evidence criteria, a name-personalized
+try-at-home prompt), ready_next (hard-prerequisite readiness from the
+family's own confirmed evidence, assessment domains only, receipts on
+every entry), bottleneck (deepest unconfirmed hard prerequisite),
+teaching_order (topological), search_topics (id discovery). Pure engine
+in lib/map/explore-child-map.ts (deterministic, bounded ≤ 8k chars per
+result), thin tool with the manage_child_progress schema pattern, both
+access modes, childId re-verified in-family on each. No writes: evidence
+stays with manage_child_progress. Instructions gained the table row and
+a depth-behind-the-snapshot paragraph.
+
+Decisions made alone, consistent with existing rulings: (1) the
+@homa/taxonomy corpus loader moved from createRequire to static JSON
+imports, the shape the 2026-07-10 eve-build incident already proved
+necessary; verified the corpus is literally inside the compiled eve
+bundle now. (2) Teaching windows RANK ready_next but never gate it (the
+imported windows floor at 48 months; a younger child gets entry points
+labeled "usually_later" instead of an empty answer), consistent with
+windows-are-not-norms. (3) Readiness excludes content-cluster domains
+(materials hooks, per the taxonomy plan) while search includes them.
+(4) Exposure subjects stay number-free in subject_map. Verified:
+16 new engine tests wired into check:map (CI-run), check:taxonomy,
+check:agent-context, check:isolation, full typecheck, lint, next build,
+and eve build all green.
 
 ## 2026-07-13 · The agent now sees every chart figure the parent sees (founder ask)
 

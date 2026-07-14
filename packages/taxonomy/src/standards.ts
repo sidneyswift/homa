@@ -1,4 +1,4 @@
-import { createRequire } from "node:module";
+import standardsJson from "../data/curriculum-standards.json";
 
 import type { Curriculum, CurriculumStandard, CurriculumStandardsFile } from "./types";
 import { getTopic } from "./topics";
@@ -8,10 +8,13 @@ import { getTopic } from "./topics";
  * ccss-ela, ccss-math, ngss-k5, ngss-ms, c3-social-studies, ib-pyp-pspe).
  * Topics reference standards through their `refs` array; the `marble:`
  * namespace is lineage, everything else resolves here.
+ *
+ * Static JSON imports on purpose (2026-07-10 incident: the createRequire
+ * corpus loader does not resolve under the eve channel build, which sank
+ * the deploy). Bundlers inline these; Node runs them through tsx.
  */
 
-const require = createRequire(import.meta.url);
-const standardsFile = require("../data/curriculum-standards.json") as CurriculumStandardsFile;
+const standardsFile = standardsJson as unknown as CurriculumStandardsFile;
 
 let standardIndex: Map<string, CurriculumStandard> | null = null;
 
