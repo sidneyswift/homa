@@ -250,7 +250,10 @@ async function ProgressTab({
     <div>
       <ProgressView
         view={{ ...kidDeep.view, conflicts: [] }}
-        reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
+        // The admin report mirror, never the token URL: opening her
+        // tokenized page founder-side would stamp viewed_at and forge
+        // the "did she open it" receipt.
+        reportHref={report ? `/admin/families/${familyId}/report/${kid.id}` : null}
         report={report}
         eras={kidDeep.eras}
         kids={[{ id: kid.id, name: kid.name, avatarUrl: kid.avatar_url }]}

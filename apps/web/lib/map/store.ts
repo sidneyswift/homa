@@ -1136,8 +1136,14 @@ export async function getReportEventIdsByToken(
   return row ? { familyId: row.family_id, childId: row.child_id } : null;
 }
 
-/** Loads a report by URL token and stamps first view. Null when revoked/unknown. */
-export async function getReportByToken(token: string): Promise<ReportView | null> {
+/** Loads a report by URL token and stamps first view. Null when
+ * revoked/unknown. The founder's admin mirror passes stampFirstView
+ * false: "did she open it" is a receipt about HER, and a founder look
+ * must never forge it. */
+export async function getReportByToken(
+  token: string,
+  options: { stampFirstView?: boolean } = {},
+): Promise<ReportView | null> {
   const sql = mapDb();
   const rows = await sql<
     {
@@ -1172,7 +1178,7 @@ export async function getReportByToken(token: string): Promise<ReportView | null
   if (!row) return null;
 
   const firstView = row.viewed_at === null;
-  if (firstView) {
+  if (firstView && (options.stampFirstView ?? true)) {
     await sql`update public.child_reports set viewed_at = now() where token = ${token}`;
   }
 

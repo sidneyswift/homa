@@ -144,6 +144,7 @@ function movementFor(
 export function ReportView({
   data,
   sample = false,
+  mirror = false,
   context = "standalone",
   narrativeView = null,
   stateRequirements = null,
@@ -151,6 +152,11 @@ export function ReportView({
 }: {
   data: ReportViewData;
   sample?: boolean;
+  /** The founder's read-only mirror (/admin/families/.../report/...):
+   * real data, zero reach into the family. No corrections, no plan or
+   * call buttons, no flow CTAs, and, critically, no ReportActions
+   * beacon, so a founder look never stamps her viewed receipt. */
+  mirror?: boolean;
   /** "standalone" is the tokenized/emailed page with its own chrome;
    * "app" renders inside the /app frame, which already owns the nav,
    * the background, and the way back, so none of those repeat here. */
@@ -173,7 +179,7 @@ export function ReportView({
     narrativeView && text && !rejectedPieces.has(key) ? text : null;
   const noteText = generatedPiece("note", narrativeView?.narrative.note);
   const months = ageInMonths(report.birthMonth);
-  const editable = !sample;
+  const editable = !sample && !mirror;
   const staleness = reportStaleness(report.birthMonth, report.generatedAt);
   const scores = report.scores.subjects;
   const byId = new Map(scores.map((score) => [score.subjectId, score]));
@@ -505,8 +511,9 @@ export function ReportView({
                 })}
               </ul>
 
-              {/* 5. The two places to take it. */}
-              {!score.exposureBased && score.position !== "not_mapped" ? (
+              {/* 5. The two places to take it. The mirror renders
+                  neither: both walk the FAMILY's flow, not the founder's. */}
+              {!mirror && !score.exposureBased && score.position !== "not_mapped" ? (
                 <div className="mt-6 flex flex-wrap gap-2 print:hidden">
                   {sample ? (
                     <Link
@@ -643,7 +650,7 @@ export function ReportView({
   // link open the other kid's report. In-app is session-scoped, so
   // each sibling's own report page links directly.
   const siblingsCard =
-    !sample && readyKids.length > 0 ? (
+    !sample && !mirror && readyKids.length > 0 ? (
       <div className={`rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
         <p className="font-display text-lg font-semibold text-strong">
           {readyKids.length === 1
@@ -687,7 +694,7 @@ export function ReportView({
 
   // Next kid handoff.
   const nextKidCard =
-    !sample && nextKid ? (
+    !sample && !mirror && nextKid ? (
       <div className={`rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
         <p className="font-display text-lg font-semibold text-strong">
           {nextKid.name} is next.
@@ -710,16 +717,18 @@ export function ReportView({
   const footerContent = (
     <>
       <span>Made with Homa for {report.childName}</span>
-      {!sample ? (
+      {/* ReportActions carries the report-viewed beacon; the mirror
+          must never fire it (a founder look is not her look). */}
+      {!sample && !mirror ? (
         <ReportActions
           childName={report.childName}
           token={report.token}
         />
-      ) : (
+      ) : sample ? (
         <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
           Get your own
         </Link>
-      )}
+      ) : null}
     </>
   );
 
@@ -771,8 +780,10 @@ export function ReportView({
   return (
     <div className="min-h-screen bg-page pb-16">
       {/* The way out (founder ask 2026-07-08: the report page had no
-          path to the app or settings). The sample keeps its own CTAs. */}
-      {!sample ? <ReportNav /> : null}
+          path to the app or settings). The sample keeps its own CTAs;
+          the mirror sits inside the admin frame, which owns the way
+          back. */}
+      {!sample && !mirror ? <ReportNav /> : null}
 
       <main className="mx-auto w-full max-w-2xl px-4 pt-6">
         {sample ? (
@@ -814,45 +825,48 @@ export function ReportView({
             {nextKidCard}
 
             {/* CTA band: the token page's door into the app; the in-app
-                dashboard renders none (the frame is already home). */}
-            <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
-              <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
-                This report is where {report.childName} starts, not where {report.childName} stays.
-              </h3>
-              <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
-                Homa builds a plan for whatever is growing, makes materials for exactly those
-                skills, and re-draws this report as {report.childName} grows, so you watch the
-                numbers move.
-              </p>
-              {sample ? (
-                <>
+                dashboard renders none (the frame is already home), and
+                the mirror renders none (both doors are hers). */}
+            {!mirror ? (
+              <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
+                <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
+                  This report is where {report.childName} starts, not where {report.childName} stays.
+                </h3>
+                <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
+                  Homa builds a plan for whatever is growing, makes materials for exactly those
+                  skills, and re-draws this report as {report.childName} grows, so you watch the
+                  numbers move.
+                </p>
+                {sample ? (
+                  <>
+                    <Link
+                      href="/onboarding"
+                      className={reportButtonClass(
+                        "primary",
+                        "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
+                      )}
+                    >
+                      Get your child&apos;s free report
+                    </Link>
+                    <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
+                      Five minutes of questions, benchmarked against national standards.
+                    </p>
+                  </>
+                ) : (
+                  // This report lives in the app now (founder ask
+                  // 2026-07-10): the token page's job ends at the door.
                   <Link
-                    href="/onboarding"
+                    href={`/app/${report.childId}/report`}
                     className={reportButtonClass(
                       "primary",
                       "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
                     )}
                   >
-                    Get your child&apos;s free report
+                    Open this report in Homa
                   </Link>
-                  <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
-                    Five minutes of questions, benchmarked against national standards.
-                  </p>
-                </>
-              ) : (
-                // This report lives in the app now (founder ask
-                // 2026-07-10): the token page's job ends at the door.
-                <Link
-                  href={`/app/${report.childId}/report`}
-                  className={reportButtonClass(
-                    "primary",
-                    "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
-                  )}
-                >
-                  Open this report in Homa
-                </Link>
-              )}
-            </div>
+                )}
+              </div>
+            ) : null}
           </div>
 
           {/* Footer */}
@@ -861,20 +875,22 @@ export function ReportView({
           </div>
         </div>
 
-        <p className="mt-4 text-center text-sm text-subtle print:hidden">
-          {sample ? (
-            <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
-              back to your family
-            </Link>
-          ) : (
-            <Link
-              href={`/app/${report.childId}/report`}
-              className="text-brand underline-offset-2 hover:underline"
-            >
-              open this report in Homa
-            </Link>
-          )}
-        </p>
+        {!mirror ? (
+          <p className="mt-4 text-center text-sm text-subtle print:hidden">
+            {sample ? (
+              <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
+                back to your family
+              </Link>
+            ) : (
+              <Link
+                href={`/app/${report.childId}/report`}
+                className="text-brand underline-offset-2 hover:underline"
+              >
+                open this report in Homa
+              </Link>
+            )}
+          </p>
+        ) : null}
       </main>
     </div>
   );

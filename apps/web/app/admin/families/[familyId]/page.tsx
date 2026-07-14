@@ -136,6 +136,14 @@ export default async function AdminFamilyDetailPage({
                       <span className="font-bold text-strong">{kid.name}</span>
                       <span className="text-subtle">{ageYears(kid.birthDate)} yrs</span>
                       <Pill tone={state.tone}>{state.pill}</Pill>
+                      {kid.hasReport ? (
+                        <Link
+                          href={`/admin/families/${detail.id}/report/${kid.id}`}
+                          className="text-xs font-semibold text-[var(--clay-600)] hover:underline"
+                        >
+                          view report
+                        </Link>
+                      ) : null}
                       {kid.readyToScore ? (
                         <BuildReportButton
                           familyId={detail.id}
