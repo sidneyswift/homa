@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 1 Instruction Guide — The Mixed-Up Chameleon</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: portrait;
+    margin: 0.4in;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #faf7f2;
+    color: #3d3832;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .guide {
+    width: 7.7in;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0.3in;
+  }
+
+  /* ─── HEADER ─── */
+  .day-banner {
+    background: linear-gradient(135deg, #c4704b 0%, #d08060 100%);
+    color: white;
+    padding: 16px 22px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(196,112,75,0.25);
+  }
+  .day-banner-left { display: flex; align-items: center; gap: 14px; }
+  .day-number {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(255,255,255,0.2); display: flex;
+    align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif; font-weight: 700;
+    font-size: 24px; backdrop-filter: blur(4px);
+  }
+  .day-title {
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 22px;
+  }
+  .day-subtitle {
+    font-size: 13px; opacity: 0.9; margin-top: 2px;
+  }
+  .day-meta {
+    text-align: right; font-size: 12px; opacity: 0.85;
+    line-height: 1.6;
+  }
+
+  /* ─── BLOCKS ─── */
+  .block {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1.5px solid #ede6d8;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    page-break-inside: avoid;
+  }
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .block-title {
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 15px; color: #3d3832;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .block-time {
+    font-size: 12px; color: #8a7e72;
+    background: #f5f0e8; padding: 3px 10px;
+    border-radius: 20px; font-weight: 500;
+  }
+
+  .steps { padding: 0; margin: 0 0 10px 0; list-style: none; }
+  .steps li {
+    position: relative;
+    padding: 4px 0 4px 28px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #4a443e;
+  }
+  .steps li::before {
+    content: attr(data-step);
+    position: absolute; left: 0; top: 4px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #f5f0e8; color: #8a7e72;
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 11px; display: flex; align-items: center;
+    justify-content: center;
+  }
+
+  .diff-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .diff-card {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+  .diff-ahead {
+    background: #f3f8f3; border: 1px solid #d2e4d4;
+  }
+  .diff-support {
+    background: #fdf8ed; border: 1px solid #f0e4c4;
+  }
+  .diff-label {
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 10.5px; margin-bottom: 3px; display: block;
+  }
+  .diff-ahead .diff-label { color: #5a8a5e; }
+  .diff-support .diff-label { color: #b89530; }
+
+  .block-materials {
+    font-size: 11.5px; color: #8a7e72;
+    padding-top: 6px; border-top: 1px dashed #ede6d8;
+  }
+  .block-materials strong {
+    font-weight: 600; color: #6b6259;
+  }
+
+  /* Note block (spelling) */
+  .note-callout {
+    background: #fdf5f0;
+    border: 1px solid #f0ddd2;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    color: #9e6d4a;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+
+  /* ─── FOOTER ─── */
+  .today-materials {
+    background: #f5f0e8;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1.5px solid #d9cfc0;
+    margin-top: 4px;
+  }
+  .today-materials-title {
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 14px; color: #6b6259; margin-bottom: 8px;
+  }
+  .today-materials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
+    font-size: 12px;
+    color: #6b6259;
+    line-height: 1.6;
+  }
+  .mat-item::before { content: "✦ "; color: #c4704b; }
+
+  @media print {
+    body { background: white; }
+    .guide { padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="guide">
+
+  <!-- DAY BANNER -->
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">1</div>
+      <div>
+        <div class="day-title">Day 1 — Introduce</div>
+        <div class="day-subtitle">"The Mixed-Up Chameleon" · Week of July 21</div>
+      </div>
+    </div>
+    <div class="day-meta">
+      Total time: ~2 hours<br>
+      7 activity blocks
+    </div>
+  </div>
+
+  <!-- BLOCK 1: Read-Aloud -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">📖 Read-Aloud</div>
+      <div class="block-time">15 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Read "Only a Toad" aloud together. Use different voices for the characters — make the toad grumpy and the other animals proud.</li>
+      <li data-step="2">After reading, ask: "What was the toad's problem? How did he solve it?"</li>
+      <li data-step="3">Talk about a time she wanted to be something different. "Have you ever wished you could be like someone else?"</li>
+    </ol>
+    <div class="diff-box">
+      <div class="diff-card diff-ahead">
+        <span class="diff-label">🚀 If she breezes through</span>
+        Ask her to retell the story in her own words. Then connect: "How is the toad like a chameleon? We'll find out this week!"
+      </div>
+      <div class="diff-card diff-support">
+        <span class="diff-label">🌱 If she needs more support</span>
+        Focus on the pictures first. Ask "what's happening here?" for each page before reading the words together.
+      </div>
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> "Only a Toad" story (or read online)</div>
+  </div>
+
+  <!-- BLOCK 2: Phonics -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">🔤 Phonics</div>
+      <div class="block-time">15 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Write these word pairs on a whiteboard: <strong>hid / hide</strong>, <strong>rid / ride</strong>, <strong>slid / slide</strong>. Read them together.</li>
+      <li data-step="2">Ask: "What do you notice about these words? What's the same? What's different?" Guide her to see the silent e pattern.</li>
+      <li data-step="3">Sort word cards into two columns: <strong>-id</strong> words and <strong>-ide</strong> words. She places each card and reads it aloud.</li>
+    </ol>
+    <div class="diff-box">
+      <div class="diff-card diff-ahead">
+        <span class="diff-label">🚀 If she breezes through</span>
+        Add blends: <em>grid, pride, bride</em>. Can she hear the pattern in longer words? Try making up silly -ide words.
+      </div>
+      <div class="diff-card diff-support">
+        <span class="diff-label">🌱 If she needs more support</span>
+        Start with just 3 words total. Sound out each one together slowly. Use fingers to tap each sound.
+      </div>
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> Whiteboard + markers, word cards (print or write on index cards)</div>
+  </div>
+
+  <!-- BLOCK 3: Spelling Pretest -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">✏️ Spelling Pretest</div>
+      <div class="block-time">10 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Say each word clearly. Use it in a sentence. Say the word again. She writes it.</li>
+      <li data-step="2">Words: <strong>hid, rid, kid, lid, slid, hide, ride, side, wide, slide</strong></li>
+      <li data-step="3">Check together. Circle any she missed — those are her focus words this week.</li>
+    </ol>
+    <div class="note-callout">
+      💡 This is diagnostic, not graded. Celebrate what she already knows! The words she misses become her personal focus list for the week.
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> Lined paper, pencil</div>
+  </div>
+
+  <!-- BLOCK 4: Reading -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">📚 Reading</div>
+      <div class="block-time">20 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Read the decodable books together: "Sid the Salamander" and "Ben and Sid." These are practice books with lots of -id words.</li>
+      <li data-step="2">Let her read as much as she can. Help with tricky words by pointing to the sounds — don't just say the word for her.</li>
+      <li data-step="3">After each book, ask one question: "What happened in this story?" Listen for her to retell the beginning, middle, and end.</li>
+    </ol>
+    <div class="diff-box">
+      <div class="diff-card diff-ahead">
+        <span class="diff-label">🚀 If she breezes through</span>
+        Have her read one book independently, then tell you about it. Ask: "Which character did you like? Why?"
+      </div>
+      <div class="diff-card diff-support">
+        <span class="diff-label">🌱 If she needs more support</span>
+        Echo-read: you read a sentence, she reads the same sentence right after you. Build confidence before independent reading.
+      </div>
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> Decodable readers (or similar books with short -id / -ide words)</div>
+  </div>
+
+  <!-- BLOCK 5: Writing -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">✍️ Writing</div>
+      <div class="block-time">15 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Ask: "What's your favorite topic to read about? Dinosaurs? Space? Animals? Princesses?"</li>
+      <li data-step="2">Help her write 2–3 sentences about her favorite topic. She can draw a picture alongside her writing.</li>
+      <li data-step="3">Read her sentences back to her. Point out what she did well: "You started with a capital letter!" Celebrate the writing.</li>
+    </ol>
+    <div class="diff-box">
+      <div class="diff-card diff-ahead">
+        <span class="diff-label">🚀 If she breezes through</span>
+        Ask her to add one detail: "What's the coolest thing about [topic]?" Push for a third or fourth sentence.
+      </div>
+      <div class="diff-card diff-support">
+        <span class="diff-label">🌱 If she needs more support</span>
+        She dictates, you write. Then she copies one sentence below yours. The goal is ideas first, handwriting second.
+      </div>
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> Lined paper, pencils, crayons</div>
+  </div>
+
+  <!-- BLOCK 6: Grammar -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">📝 Grammar</div>
+      <div class="block-time">10 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Write on the whiteboard: <strong>"The chameleon"</strong> — ask: "Is this a sentence? Why not?"</li>
+      <li data-step="2">Now write: <strong>"The chameleon changed colors."</strong> — ask: "Is THIS a sentence? What makes it different?"</li>
+      <li data-step="3">Together, discover the rule: a sentence needs a <strong>naming part</strong> (who or what) and a <strong>telling part</strong> (what happened).</li>
+    </ol>
+    <div class="diff-box">
+      <div class="diff-card diff-ahead">
+        <span class="diff-label">🚀 If she breezes through</span>
+        Give her 3 word groups and ask her to sort: sentence or not a sentence? Let her explain WHY for each.
+      </div>
+      <div class="diff-card diff-support">
+        <span class="diff-label">🌱 If she needs more support</span>
+        Act it out! "I am the naming part" (stand up). "Now YOU be the telling part" (do an action). Make it physical.
+      </div>
+    </div>
+    <div class="block-materials"><strong>Materials:</strong> Whiteboard + markers</div>
+  </div>
+
+  <!-- BLOCK 7: Science Center -->
+  <div class="block">
+    <div class="block-header">
+      <div class="block-title">🔬 Science Center — Chameleon Habitat</div>
+      <div class="block-time">30 min</div>
+    </div>
+    <ol class="steps">
+      <li data-step="1">Talk about where chameleons live. Look at pictures online or in a book together. What do they see? Trees, leaves, warm weather.</li>
+      <li data-step="2">Build a mini habitat in a shoe box: use real leaves, twigs, and sand for the ground. Add flowers from construction paper.</li>
+      <li data-step="3">Cut out a chameleon from green construction paper. Place it in the habitat. Can she make it blend in?</li>
+      <li data-step="4">Discuss: "Why do chameleons change color? How does blending in help them stay safe?"</li>
+    </ol>
+    <div class="block-materials"><strong>Materials:</strong> Shoe box, real leaves + twigs, sand, construction paper, scissors, glue, crayons</div>
+  </div>
+
+  <!-- TODAY'S MATERIALS -->
+  <div class="today-materials">
+    <div class="today-materials-title">🛒 Everything You Need for Day 1</div>
+    <div class="today-materials-grid">
+      <span class="mat-item">"Only a Toad" story</span>
+      <span class="mat-item">Whiteboard + dry erase markers</span>
+      <span class="mat-item">Decodable readers (-id/-ide words)</span>
+      <span class="mat-item">Lined paper</span>
+      <span class="mat-item">Pencils + crayons</span>
+      <span class="mat-item">Index cards (word sort)</span>
+      <span class="mat-item">Shoe box</span>
+      <span class="mat-item">Real leaves, twigs, sand</span>
+      <span class="mat-item">Construction paper</span>
+      <span class="mat-item">Scissors + glue</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

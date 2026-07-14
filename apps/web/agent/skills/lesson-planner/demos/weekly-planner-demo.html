@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Lesson Planner — The Mixed-Up Chameleon</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { size: portrait; margin: 0.4in; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #faf7f2; color: #3d3832;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page {
+    width: 7.5in; max-width: 100%; margin: 0 auto 0.3in;
+    padding: 0.2in;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: linear-gradient(135deg,#f5f0e8,#ede6d8);
+    border-radius: 12px; margin-bottom: 10px; border: 1.5px solid #d9cfc0;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-icon {
+    width: 40px; height: 40px; border-radius: 10px; background: #7a9e7e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: white; box-shadow: 0 2px 6px rgba(122,158,126,.3);
+  }
+  .header-title { font-family: 'Fredoka'; font-weight: 600; font-size: 17px; }
+  .header-sub { font-size: 11px; color: #8a7e72; margin-top: 1px; }
+  .header-right { text-align: right; }
+  .header-week { font-family: 'Fredoka'; font-weight: 500; font-size: 12px; color: #8a7e72; }
+
+  /* ── FOCUS BOX ── */
+  .focus-box {
+    display: flex; gap: 16px; padding: 8px 14px;
+    background: #fff; border: 1.5px solid #d9cfc0; border-radius: 10px;
+    margin-bottom: 10px; font-size: 11px;
+  }
+  .focus-item { display: flex; align-items: center; gap: 6px; }
+  .focus-badge {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 10px;
+    padding: 2px 8px; border-radius: 6px; color: #fff;
+  }
+  .focus-badge.skill { background: #c4704b; }
+  .focus-badge.phonics { background: #7a9eb8; }
+  .focus-words { color: #6b6259; line-height: 1.4; }
+  .focus-words strong { color: #3d3832; font-weight: 600; }
+
+  /* ── DAY COLUMNS LAYOUT ── */
+  .spread {
+    display: flex; gap: 6px;
+  }
+
+  /* Left sidebar */
+  .sidebar {
+    width: 120px; flex-shrink: 0; padding-top: 36px;
+  }
+  .strand-group { margin-bottom: 2px; }
+  .strand-group-label {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 9.5px;
+    color: #fff; padding: 3px 8px; border-radius: 5px;
+    margin-bottom: 2px; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .sgl-oral { background: #c4704b; }
+  .sgl-word { background: #7a9eb8; }
+  .sgl-read { background: #c4704b; }
+  .sgl-routines { background: #3d3832; }
+  .sgl-la { background: #7a9e7e; }
+  .strand-sub {
+    font-size: 9.5px; color: #6b6259; padding: 3px 0 3px 10px;
+    line-height: 1.3; position: relative;
+  }
+  .strand-sub::before {
+    content: "•"; position: absolute; left: 3px; color: #b3a492;
+  }
+  .strand-spacer { height: 4px; }
+
+  /* Day columns */
+  .days { display: flex; flex: 1; gap: 4px; }
+  .day-col { flex: 1; min-width: 0; }
+  .day-head {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 13px;
+    color: #fff; text-align: center; padding: 6px 0;
+    border-radius: 8px 8px 0 0;
+  }
+  .dh-1 { background: #c4704b; }
+  .dh-2 { background: #d4a843; }
+  .dh-3 { background: #7a9e7e; }
+  .dh-4 { background: #7a9eb8; }
+  .dh-5 { background: #c4868e; }
+  .day-arc {
+    text-align: center; font-family: 'Fredoka'; font-weight: 500;
+    font-size: 8px; color: #8a7e72; padding: 2px 0;
+    background: #f5f0e8; border-bottom: 1px solid #ede6d8;
+    letter-spacing: .3px;
+  }
+  .day-body {
+    background: #fff; border: 1px solid #ede6d8;
+    border-top: none; padding: 0 6px;
+    font-size: 9.5px; line-height: 1.4;
+  }
+
+  /* Cells within day body */
+  .cell {
+    padding: 4px 0; border-bottom: 1px solid #f0ebe4;
+  }
+  .cell:last-child { border-bottom: none; }
+  .cell-title {
+    font-weight: 600; font-size: 9.5px; color: #3d3832;
+    margin-bottom: 1px;
+  }
+  .cell-detail { color: #6b6259; font-size: 8.5px; }
+  .cell-detail em { font-style: italic; color: #8a7e72; }
+  .T {
+    display: inline-block; font-weight: 700; color: #c4704b;
+    font-size: 10px; margin-left: 3px;
+  }
+  .vocab-highlight {
+    background: #fdf8ed; border: 1px solid #f0e4c4;
+    border-radius: 4px; padding: 2px 4px; margin-top: 2px;
+    font-size: 8px; color: #9e7a30; font-style: italic;
+    display: inline-block;
+  }
+
+  /* DLP example sentences */
+  .dlp-error { color: #3d3832; }
+  .dlp-correct { color: #c4704b; font-style: italic; }
+
+  /* Center row */
+  .cell-center {
+    padding: 5px 0; border-top: 2px solid #ede6d8;
+  }
+  .center-icon { font-size: 11px; margin-right: 3px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 10px; padding: 10px 14px; background: #f5f0e8;
+    border-radius: 10px; border: 1.5px solid #d9cfc0;
+  }
+  .footer-title { font-family: 'Fredoka'; font-weight: 600; font-size: 11px; color: #6b6259; margin-bottom: 4px; }
+  .footer-items { font-size: 9px; color: #6b6259; line-height: 1.6; columns: 2; column-gap: 20px; }
+  .footer-note { margin-top: 6px; font-size: 8px; color: #a89e92; font-style: italic; }
+
+  /* Page break for 2-page spread */
+  .page-break { page-break-before: always; }
+
+  @media print { body { background: white; } .page { padding: 0; margin: 0 auto; } }
+</style>
+</head>
+<body>
+
+<!-- ════════════ PAGE 1: Days 1-2 ════════════ -->
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon">🦎</div>
+      <div>
+        <div class="header-title">"The Mixed-Up Chameleon" by Eric Carle</div>
+        <div class="header-sub">Weekly Lesson Planner · Grade 2 · Theme: Being Me</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-week">Week of July 21 – 25, 2026</div>
+    </div>
+  </div>
+
+  <div class="focus-box">
+    <div class="focus-item">
+      <span class="focus-badge skill">Focus Skill</span>
+      <span>Main Idea</span>
+    </div>
+    <div class="focus-item">
+      <span class="focus-badge phonics">Phonics</span>
+      <span>Phonograms -id, -ide</span>
+    </div>
+    <div class="focus-words">
+      <strong>Vocabulary:</strong> dull, exciting, handsome, hardly, sideways, sparkling, spotted<br>
+      <strong>High-Frequency Words:</strong> big, brown, eat, no, people ·
+      <strong>Writer's Craft:</strong> Developing Ideas and Topics
+    </div>
+  </div>
+
+  <div class="spread">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="strand-group">
+        <div class="strand-group-label sgl-oral">Oral Language</div>
+        <div class="strand-sub">Sharing Literature</div>
+      </div>
+      <div class="strand-group">
+        <div class="strand-group-label sgl-word">Word Work</div>
+        <div class="strand-sub">Phonics</div>
+        <div class="strand-sub">Spelling</div>
+        <div class="strand-sub">Vocabulary</div>
+        <div class="strand-sub">High-Frequency Words</div>
+      </div>
+      <div class="strand-group">
+        <div class="strand-group-label sgl-read">Reading</div>
+        <div class="strand-sub">Comprehension</div>
+        <div class="strand-sub">Fluency</div>
+      </div>
+      <div class="strand-group">
+        <div class="strand-group-label sgl-routines">Daily Routines</div>
+        <div class="strand-sub">Morning Message</div>
+        <div class="strand-sub">Daily Language Practice</div>
+        <div class="strand-sub">Writing Prompt</div>
+      </div>
+      <div class="strand-spacer"></div>
+      <div class="strand-group">
+        <div class="strand-sub">Independent Reading</div>
+      </div>
+      <div class="strand-group">
+        <div class="strand-group-label sgl-la">Language Arts</div>
+        <div class="strand-sub">Writing</div>
+        <div class="strand-sub">Grammar</div>
+      </div>
+      <div class="strand-spacer"></div>
+      <div class="strand-group">
+        <div class="strand-sub" style="font-weight:600;">Daily Language Practice</div>
+        <div style="font-size:8px;color:#8a7e72;padding-left:10px;">Spiral Review</div>
+      </div>
+    </div>
+
+    <!-- DAY COLUMNS -->
+    <div class="days">
+      <!-- DAY 1 -->
+      <div class="day-col">
+        <div class="day-head dh-1">Day 1</div>
+        <div class="day-arc">Introduce</div>
+        <div class="day-body">
+          <div class="cell">
+            <div class="cell-title">Sharing Literature</div>
+            <div class="cell-detail">Story: "Only a Toad"</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Phonics</div>
+            <div class="cell-detail">Introduce: Phonograms -id, -ide<br>Word family sort activity</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Spelling</div>
+            <div class="cell-detail">Pretest; Word Sort <span class="T">T</span></div>
+            <div class="cell-detail"><em>hid, rid, kid, lid, slid, hide, ride, side, wide, slide</em></div>
+          </div>
+          <div class="cell" style="min-height:18px;">
+            <div class="cell-detail" style="color:#b3a492;font-style:italic;">—</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Read</div>
+            <div class="cell-detail"><strong>Decodable Book 1</strong><br>
+            "Sid the Salamander"<br>
+            "Ben and Sid"<br>
+            "A Pig with Pride"<br>
+            "Molly Rafferty Rides"</div>
+          </div>
+          <div class="cell">
+            <div class="cell-detail">📖 Independent Reading<br><em>Books for All Learners</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Writer's Craft</div>
+            <div class="cell-detail">Developing Ideas and Topics</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Writing Prompt</strong><br>
+            <em>Have children write about their favorite topics to read about.</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Grammar</div>
+            <div class="cell-detail">Sentences (Introduce) <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Daily Language Practice</div>
+            <div class="cell-detail">
+              <span class="dlp-error">chameleons are special animals?</span><br>
+              <span class="dlp-correct">Chameleons are special animals.</span><br>
+              <span class="dlp-error">Thay change colors</span><br>
+              <span class="dlp-correct">They change colors.</span>
+            </div>
+          </div>
+          <div class="cell cell-center">
+            <div class="cell-title"><span class="center-icon">🔬</span> Science Center</div>
+            <div class="cell-detail">Build a chameleon habitat diorama<br><em>30 min</em></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY 2 -->
+      <div class="day-col">
+        <div class="day-head dh-2">Day 2</div>
+        <div class="day-arc">Practice</div>
+        <div class="day-body">
+          <div class="cell">
+            <div class="cell-title">Sharing Literature</div>
+            <div class="cell-detail">Poem: "I Am Tired of Being Little"</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Phonics</div>
+            <div class="cell-detail">Review: Phonograms -id, -ide<br>Word building with letter tiles</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Spelling</div>
+            <div class="cell-detail">Building Words <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Vocabulary</div>
+            <div class="vocab-highlight">dull, exciting, handsome, hardly, sideways, sparkling, spotted</div>
+            <div class="cell-detail" style="margin-top:2px;">High-Frequency Words</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Read the Selection</div>
+            <div class="cell-detail"><strong>"The Mixed-Up Chameleon"</strong><br>pp. 16–47</div>
+            <div class="cell-detail" style="margin-top:2px;">
+              <strong>Comprehension</strong><br>
+              Main Idea <span class="T">T</span><br>
+              Use Decoding/Phonics
+            </div>
+          </div>
+          <div class="cell">
+            <div class="cell-detail">📖 Independent Reading<br><em>Books for All Learners</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Writer's Craft</div>
+            <div class="cell-detail">Developing Ideas and Topics</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Writing Prompt</strong><br>
+            <em>Have children write about a topic they would like to learn more about.</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Grammar</div>
+            <div class="cell-detail">Sentences (Review) <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Daily Language Practice</div>
+            <div class="cell-detail">
+              <span class="dlp-error">Is we going to the zoo</span><br>
+              <span class="dlp-correct">Are we going to the zoo?</span><br>
+              <span class="dlp-error">come to the zoo with us</span><br>
+              <span class="dlp-correct">Come to the zoo with us.</span>
+            </div>
+          </div>
+          <div class="cell cell-center">
+            <div class="cell-title"><span class="center-icon">📚</span> Literacy Center</div>
+            <div class="cell-detail">Changing Words — build -id/-ide words with letter tiles<br><em>15 min</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">Being Me &nbsp;&nbsp;&nbsp;&nbsp; <strong>T</strong> = tested skill</div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE 2: Days 3-5 ════════════ -->
+<div class="page page-break">
+
+  <div class="focus-box">
+    <div class="focus-item">
+      <span class="focus-badge skill">Focus Skill</span>
+      <span>Main Idea</span>
+    </div>
+    <div class="focus-item">
+      <span class="focus-badge phonics">Phonics</span>
+      <span>Phonograms -id, -ide</span>
+    </div>
+    <div class="focus-words">
+      <strong>Vocabulary:</strong> dull, exciting, handsome, hardly, sideways, sparkling, spotted ·
+      <strong>High-Frequency Words:</strong> big, brown, eat, no, people ·
+      <strong>Writer's Craft:</strong> Developing Ideas and Topics
+    </div>
+  </div>
+
+  <div class="spread">
+    <div class="days">
+      <!-- DAY 3 -->
+      <div class="day-col">
+        <div class="day-head dh-3">Day 3</div>
+        <div class="day-arc">Deepen</div>
+        <div class="day-body">
+          <div class="cell">
+            <div class="cell-title">Sharing Literature</div>
+            <div class="cell-detail">Story: "Only a Toad"<br><em>Re-read, compare with Day 1</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Phonics</div>
+            <div class="cell-detail">Review: Phonograms -id, -ide</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Spelling</div>
+            <div class="cell-detail">State the Generalization <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Vocabulary</div>
+            <div class="vocab-highlight">dull, exciting, handsome, hardly, sideways, sparkling, spotted</div>
+            <div class="cell-detail" style="margin-top:2px;">High-Frequency Words</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Read</div>
+            <div class="cell-detail">Rereading for Fluency</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>"Fun Animal Facts: Chameleons"</strong><br>Nonfiction connection<br>Making Connections</div>
+          </div>
+          <div class="cell">
+            <div class="cell-detail">📖 Independent Reading<br><em>Books for All Learners</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Writer's Craft</div>
+            <div class="cell-detail">Developing Ideas and Topics</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Writing Prompt</strong><br>
+            <em>Tell children to write in their journals about what they have learned.</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Grammar</div>
+            <div class="cell-detail">Sentences (Review) <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Daily Language Practice</div>
+            <div class="cell-detail">
+              <span class="dlp-error">what did you see at the zoo</span><br>
+              <span class="dlp-correct">What did you see at the zoo?</span><br>
+              <span class="dlp-error">I seen some monkeys</span><br>
+              <span class="dlp-correct">I saw some monkeys.</span>
+            </div>
+          </div>
+          <div class="cell cell-center">
+            <div class="cell-title"><span class="center-icon">💻</span> Technology Center</div>
+            <div class="cell-detail">Chameleon Composing — compare/contrast story vs. real chameleon<br><em>15 min</em></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY 4 -->
+      <div class="day-col">
+        <div class="day-head dh-4">Day 4</div>
+        <div class="day-arc">Apply</div>
+        <div class="day-body">
+          <div class="cell">
+            <div class="cell-title">Sharing Literature</div>
+            <div class="cell-detail">Poem: "I Am Tired of Being Little"</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Phonics</div>
+            <div class="cell-detail">Syllables<br><em>Count syllables in vocabulary words</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Spelling</div>
+            <div class="cell-detail">Review <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Vocabulary</div>
+            <div class="vocab-highlight">dull, exciting, handsome, hardly, sideways, sparkling, spotted</div>
+            <div class="cell-detail" style="margin-top:2px;">High-Frequency Words</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Read</div>
+            <div class="cell-detail"><strong>Comprehension</strong><br>
+            Main Idea <span class="T">T</span><br>
+            Locate Information <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-detail">📖 Independent Reading<br><em>Books for All Learners</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Writer's Craft</div>
+            <div class="cell-detail">Developing Ideas and Topics</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Writing Prompt</strong><br>
+            <em>Suggest that children write about how sharing their writing makes them feel.</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Grammar</div>
+            <div class="cell-detail">Sentences (Review) <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Daily Language Practice</div>
+            <div class="cell-detail">
+              <span class="dlp-error">Chameleons eet flies</span><br>
+              <span class="dlp-correct">Chameleons eat flies.</span><br>
+              <span class="dlp-error">will they catch one now</span><br>
+              <span class="dlp-correct">Will they catch one now?</span>
+            </div>
+          </div>
+          <div class="cell cell-center">
+            <div class="cell-title"><span class="center-icon">🗺️</span> Social Studies Center</div>
+            <div class="cell-detail">Zoo Map — draw a map with letter-number grid<br><em>30 min</em></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY 5 -->
+      <div class="day-col">
+        <div class="day-head dh-5">Day 5</div>
+        <div class="day-arc">Assess &amp; Celebrate</div>
+        <div class="day-body">
+          <div class="cell">
+            <div class="cell-title">Sharing Literature</div>
+            <div class="cell-detail">Compare Story to Main Selection</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Phonics</div>
+            <div class="cell-detail">Review Syllables</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Spelling</div>
+            <div class="cell-detail">Post-Test; Writing Application <span class="T">T</span><br><em>Use spelling words in a paragraph</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Vocabulary</div>
+            <div class="vocab-highlight">dull, exciting, handsome, hardly, sideways, sparkling, spotted</div>
+            <div class="cell-detail" style="margin-top:2px;">High-Frequency Words</div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Read</div>
+            <div class="cell-detail">Rereading for Fluency</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Self-Selected Reading</strong><br><em>Pick any book!</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-detail">📖 Independent Reading<br><em>Books for All Learners</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Writer's Craft</div>
+            <div class="cell-detail">Developing Ideas and Topics</div>
+            <div class="cell-detail" style="margin-top:2px;"><strong>Self-Selected Writing</strong><br>
+            <em>Invite children to write about a topic of their choosing.</em></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Grammar</div>
+            <div class="cell-detail">Sentences (Test) <span class="T">T</span></div>
+          </div>
+          <div class="cell">
+            <div class="cell-title">Daily Language Practice</div>
+            <div class="cell-detail">
+              <span class="dlp-error">where is Miss rogers?</span><br>
+              <span class="dlp-correct">Where is Miss Rogers?</span><br>
+              <span class="dlp-error">She is buy the seals</span><br>
+              <span class="dlp-correct">She is by the seals.</span>
+            </div>
+          </div>
+          <div class="cell cell-center">
+            <div class="cell-title"><span class="center-icon">🎭</span> Drama Center</div>
+            <div class="cell-detail">"A Day in the Life of a Chameleon" — act it out with props!<br><em>15 min</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-title">📦 Materials for the Week</div>
+    <div class="footer-items">
+      ✦ "The Mixed-Up Chameleon" by Eric Carle<br>
+      ✦ Decodable readers (-id/-ide words)<br>
+      ✦ Whiteboard + dry erase markers<br>
+      ✦ Lined paper + pencils + crayons/markers<br>
+      ✦ Letter tiles or magnetic letters<br>
+      ✦ Index cards (for word sorts)<br>
+      ✦ Word Building journal / notebook<br>
+      ✦ Shoe box (habitat diorama)<br>
+      ✦ Real leaves, twigs, sand<br>
+      ✦ Construction paper + scissors + glue<br>
+      ✦ Computer or tablet (Wed center)<br>
+      ✦ Party blowouts + paper fly cutouts (Fri)<br>
+      ✦ Ruler (optional, zoo map grid)
+    </div>
+    <div class="footer-note">The Mixed-Up Chameleon &nbsp;&nbsp; <strong>T</strong> = tested skill &nbsp;&nbsp; Generated by Homa</div>
+  </div>
+</div>
+
+</body>
+</html>

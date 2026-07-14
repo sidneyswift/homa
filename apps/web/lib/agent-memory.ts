@@ -11,6 +11,9 @@
  *   3. one shape + formatter so context and tool results stay consistent.
  */
 
+export const MODALITIES = ["visual", "auditory", "kinesthetic", "reading_writing"] as const;
+export type Modality = (typeof MODALITIES)[number];
+
 export const MEMORY_KINDS = ["fact", "what_works"] as const;
 export type MemoryKind = (typeof MEMORY_KINDS)[number];
 
@@ -21,6 +24,7 @@ export interface MemoryRow {
   content: string;
   source: string;
   created_at: string;
+  modality: string | null;
 }
 
 /** Total budget across a family's long-term rows (facts + what-works). When

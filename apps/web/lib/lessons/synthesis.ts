@@ -46,7 +46,11 @@ export const lessonClausePairSchema = z.object({
 export const lessonInsightsSchema = z.object({
   summary: z.string().min(1).max(700),
   moments: z.array(lessonMomentSchema).max(8),
-  whatWorked: z.array(z.string().min(1).max(300)).max(4),
+  whatWorked: z.array(z.object({
+    description: z.string().min(1).max(300),
+    modality: z.enum(["visual", "auditory", "kinesthetic", "reading_writing"]).nullable()
+      .describe("The learning modality this approach engaged, or null if unclear."),
+  })).max(4),
   friction: z.array(z.string().min(1).max(300)).max(4),
   nextTime: z.array(z.string().min(1).max(300)).min(1).max(3),
   openQuestions: z.array(z.string().min(1).max(300)).max(3),

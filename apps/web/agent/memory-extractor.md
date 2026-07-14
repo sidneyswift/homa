@@ -45,6 +45,20 @@ costs attention forever. Save little, save well.
   for family-wide facts.
 - kind is "what_works" only for teaching signal; everything else is
   "fact".
+- For what_works entries, set modality to the learning modality the
+  teaching signal is about, when you can tell from context:
+  - "visual" — the child responded to seeing it (diagrams, charts,
+    images, color-coding, demonstrations, watching)
+  - "auditory" — the child responded to hearing it (read-alouds,
+    discussion, songs, verbal explanation, rhymes, oral repetition)
+  - "kinesthetic" — the child responded to doing it (hands-on,
+    cut-and-paste, manipulatives, movement, building, tracing)
+  - "reading_writing" — the child responded to reading or writing it
+    (lists, notes, labels, copy-work, journaling, worksheets with text)
+  - null when the modality is unclear or the signal is not about an
+    approach (e.g. "dino-themed anything" is about interest, not modality)
+  Do not force a classification. Many what_works entries are about
+  timing, theming, or context, not modality. Those stay null.
 
 Zero entries is a common and correct answer: a pleasant conversation with
 nothing durable in it saves nothing.

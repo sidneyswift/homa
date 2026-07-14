@@ -96,6 +96,25 @@ function describeChild(child: ChildRow, now: Date): string {
   if (profile.focus && !isProfileNonAnswer(profile.focus)) {
     details.push(`working on ${profile.focus}`);
   }
+  // Modality tendencies from synthesized profile (lives in profile JSONB).
+  const mp = (profile as Record<string, unknown>).modality_profile as
+    | { global?: Record<string, { weight: number; signal_count: number }> }
+    | undefined;
+  if (mp?.global) {
+    const top = Object.entries(mp.global)
+      .filter(([, v]) => v.signal_count >= 3)
+      .sort(([, a], [, b]) => b.weight - a.weight)
+      .slice(0, 2);
+    if (top.length > 0) {
+      const tendencies = top
+        .map(
+          ([mod, v]) =>
+            `${mod.replace("_", "-")} (${v.weight >= 0.7 ? "strong" : "moderate"})`,
+        )
+        .join(", ");
+      details.push(`learning tendencies: ${tendencies}`);
+    }
+  }
   const detail = details.length > 0 ? ` · ${details.join(" · ")}` : "";
   return `- ${child.name} (${formatChildAge(months)}, ${months} months; child id ${child.id})${detail}`;
 }
@@ -231,7 +250,7 @@ export async function loadFamilyContextPinned(
       order by created_at
     `,
     sql<MemoryRow[]>`
-      select id, child_id, kind, content, source, created_at::text as created_at
+      select id, child_id, kind, content, source, created_at::text as created_at, modality
       from public.family_memories
       where family_id = ${familyId} and kind in ('fact', 'what_works')
         and superseded_at is null

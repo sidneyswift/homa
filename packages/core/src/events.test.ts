@@ -418,3 +418,41 @@ test("delegated session event accepts only its PII-free lineage shape", () => {
     );
   }
 });
+
+// ── learner modality events ───────────────────────────────────────────
+
+test("learner.modality_signal_recorded accepts valid shape", () => {
+  assert.equal(
+    EVENT_SCHEMAS["learner.modality_signal_recorded"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      modality: "kinesthetic",
+      signal_type: "parent_stated",
+      subject: "math",
+    }).success,
+    true,
+  );
+});
+
+test("learner.modality_signal_recorded rejects unknown modality", () => {
+  assert.equal(
+    EVENT_SCHEMAS["learner.modality_signal_recorded"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      modality: "telepathic",
+      signal_type: "parent_stated",
+    }).success,
+    false,
+  );
+});
+
+test("learner.profile_synthesized accepts valid shape", () => {
+  assert.equal(
+    EVENT_SCHEMAS["learner.profile_synthesized"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      modalities_surfaced: 2,
+    }).success,
+    true,
+  );
+});

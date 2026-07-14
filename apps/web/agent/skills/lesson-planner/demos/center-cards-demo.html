@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross-Curricular Centers — The Mixed-Up Chameleon</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { size: portrait; margin: 0.35in; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #faf7f2; color: #3d3832;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 7.8in; max-width: 100%; margin: 0 auto; padding: 0.2in; }
+
+  /* ── BANNER ── */
+  .banner {
+    text-align: center; padding: 10px 0 6px;
+    border-bottom: 3px solid #d4a843;
+    margin-bottom: 8px;
+  }
+  .banner h1 {
+    font-family: 'Fredoka'; font-weight: 700; font-size: 24px;
+    color: #3d3832; font-style: italic;
+  }
+
+  /* ── ICON STRIP ── */
+  .icon-strip {
+    display: flex; justify-content: center; gap: 24px;
+    margin-bottom: 10px; padding: 6px 0;
+    background: linear-gradient(180deg, #faf7f2 0%, #f5f0e8 100%);
+    border-bottom: 2px solid #ede6d8;
+  }
+  .icon-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+  }
+  .icon-circle.science { background: #7a9e7e; }
+  .icon-circle.literacy { background: #c4704b; }
+  .icon-circle.tech { background: #7a9eb8; }
+  .icon-circle.social { background: #d4a843; }
+  .icon-circle.drama { background: #c4868e; }
+  .icon-label {
+    font-family: 'Fredoka'; font-size: 8px; font-weight: 500;
+    color: #8a7e72; text-align: center; margin-top: 2px;
+    text-transform: uppercase; letter-spacing: .3px;
+  }
+  .icon-wrap { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── CENTER BAND ── */
+  .center-band {
+    margin-bottom: 8px; border-radius: 10px; overflow: hidden;
+    border: 1.5px solid #ede6d8; background: #fff;
+    page-break-inside: avoid;
+  }
+  .center-header {
+    padding: 5px 12px; color: white;
+    font-family: 'Fredoka'; font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .5px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .center-header .ch-left { display: flex; align-items: center; gap: 6px; }
+  .ch-icon { font-size: 14px; }
+  .ch-time {
+    font-size: 10px; font-weight: 500; opacity: .9;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .ch-science { background: #7a9e7e; }
+  .ch-literacy { background: #c4704b; }
+  .ch-tech { background: #7a9eb8; }
+  .ch-social { background: #d4a843; }
+  .ch-drama { background: #c4868e; }
+
+  .center-body {
+    display: flex; gap: 12px; padding: 10px 12px;
+  }
+  .center-text { flex: 1; }
+  .center-title {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 15px;
+    color: #3d3832; margin-bottom: 4px;
+  }
+  .center-desc {
+    font-size: 12px; line-height: 1.55; color: #4a443e;
+  }
+
+  /* Illustration placeholder */
+  .center-illustration {
+    width: 140px; height: 100px; flex-shrink: 0; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; overflow: hidden;
+  }
+  .illust-science { background: linear-gradient(135deg, #1a3a2a, #2d5a3d); }
+  .illust-literacy { background: #f8e8e0; }
+  .illust-tech { background: #e8f0f8; }
+  .illust-social { background: #e8f0e4; }
+  .illust-drama { background: #f8ece8; }
+
+  /* Materials sidebar */
+  .center-materials {
+    width: 150px; flex-shrink: 0; background: #f5f0e8;
+    border-radius: 8px; padding: 8px 10px;
+  }
+  .mat-title {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 10px;
+    color: #6b6259; text-transform: uppercase; letter-spacing: .3px;
+    margin-bottom: 4px;
+  }
+  .mat-list { font-size: 10px; color: #4a443e; line-height: 1.5; }
+  .mat-list span { display: block; }
+  .mat-list span::before { content: "■ "; color: #b3a492; font-size: 7px; vertical-align: middle; }
+
+  /* Story connection */
+  .center-connection {
+    padding: 4px 12px 8px; font-size: 10px; color: #a89e92;
+    font-style: italic; border-top: 1px solid #f0ebe4;
+    line-height: 1.4;
+  }
+  .center-connection strong { font-style: normal; color: #8a7e72; }
+
+  /* ── SCHOOL-HOME CONNECTION ── */
+  .shc-box {
+    margin-top: 6px; padding: 10px 14px;
+    background: #fff; border: 2px solid #7a9eb8; border-radius: 10px;
+    display: flex; gap: 12px;
+  }
+  .shc-left { flex: 1; }
+  .shc-title {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 12px;
+    color: #3d3832; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .shc-desc { font-size: 11px; color: #4a443e; line-height: 1.5; }
+  .shc-vocab {
+    width: 160px; flex-shrink: 0; background: #f5f0e8;
+    border-radius: 8px; padding: 8px 10px;
+  }
+  .shc-vocab-title {
+    font-family: 'Fredoka'; font-weight: 600; font-size: 10px;
+    color: #6b6259; margin-bottom: 4px;
+  }
+  .shc-word {
+    display: inline-block; font-size: 10px; color: #3d3832;
+    background: #fff; border: 1px solid #d9cfc0; border-radius: 4px;
+    padding: 1px 6px; margin: 1px;
+  }
+
+  .page-footer {
+    text-align: right; font-size: 8px; color: #b3a492;
+    margin-top: 8px; font-style: italic;
+  }
+
+  .page-break { page-break-before: always; }
+  @media print { body { background: white; } .page { padding: 0; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- BANNER -->
+  <div class="banner">
+    <h1>Cross-Curricular Centers</h1>
+  </div>
+
+  <!-- ICON STRIP -->
+  <div class="icon-strip">
+    <div class="icon-wrap">
+      <div class="icon-circle science">🔬</div>
+      <div class="icon-label">Science</div>
+    </div>
+    <div class="icon-wrap">
+      <div class="icon-circle literacy">📚</div>
+      <div class="icon-label">Literacy</div>
+    </div>
+    <div class="icon-wrap">
+      <div class="icon-circle tech">💻</div>
+      <div class="icon-label">Technology</div>
+    </div>
+    <div class="icon-wrap">
+      <div class="icon-circle social">🗺️</div>
+      <div class="icon-label">Social Studies</div>
+    </div>
+    <div class="icon-wrap">
+      <div class="icon-circle drama">🎭</div>
+      <div class="icon-label">Drama</div>
+    </div>
+  </div>
+
+  <!-- SCIENCE CENTER -->
+  <div class="center-band">
+    <div class="center-header ch-science">
+      <div class="ch-left"><span class="ch-icon">🔬</span> Science Center</div>
+      <div class="ch-time">⏱ 30 min</div>
+    </div>
+    <div class="center-body">
+      <div class="center-text">
+        <div class="center-title">Chameleon Habitat</div>
+        <div class="center-desc">
+          Tell children to review the chameleon's habitat. Then have them use the natural materials to assemble a mock habitat for a chameleon. Suggest that they cut out flowers and trees from construction paper and cut out a chameleon for the habitat as well, showing how the chameleon blends in with its surroundings. Talk about how blending in with its surroundings might help the chameleon survive.
+        </div>
+      </div>
+      <div class="center-illustration illust-science">🦎🌿</div>
+      <div class="center-materials">
+        <div class="mat-title">Materials</div>
+        <div class="mat-list">
+          <span>Pupil Edition</span>
+          <span>shoe boxes (one per child)</span>
+          <span>real leaves and twigs</span>
+          <span>sand</span>
+          <span>construction paper</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LITERACY CENTER -->
+  <div class="center-band">
+    <div class="center-header ch-literacy">
+      <div class="ch-left"><span class="ch-icon">📚</span> Literacy Center</div>
+      <div class="ch-time">⏱ 15 min</div>
+    </div>
+    <div class="center-body">
+      <div class="center-text">
+        <div class="center-title">Changing Words</div>
+        <div class="center-desc">
+          Write several initial consonants and blends on different colors of construction paper. Cut out two chameleon shapes from colored acetate. On one cutout write the phonogram -ide. On the other, write -id. Have children place the cutouts on the construction paper with consonants, blends, and digraphs to try different combinations to build and read words. Have children record some of the words they build in their journals.
+        </div>
+      </div>
+      <div class="center-illustration illust-literacy" style="font-size:28px;">🦎✏️📝</div>
+      <div class="center-materials">
+        <div class="mat-title">Materials</div>
+        <div class="mat-list">
+          <span>chameleon cutouts from colored acetate</span>
+          <span>poster with initial consonants and blends</span>
+          <span>Word Building journals</span>
+          <span>pencils</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPUTER/TECHNOLOGY CENTER -->
+  <div class="center-band">
+    <div class="center-header ch-tech">
+      <div class="ch-left"><span class="ch-icon">💻</span> Technology Center</div>
+      <div class="ch-time">⏱ 15 min</div>
+    </div>
+    <div class="center-body">
+      <div class="center-text">
+        <div class="center-title">Chameleon Composing</div>
+        <div class="center-desc">
+          Have children use word processing software to compose sentences at the computer. Encourage them to write sentences to compare how the chameleon in the story is different from a real chameleon. Have children use the spell-check feature of the software.
+        </div>
+      </div>
+      <div class="center-illustration illust-tech" style="font-size:28px;">💻📝</div>
+      <div class="center-materials">
+        <div class="mat-title">Materials</div>
+        <div class="mat-list">
+          <span>computer or tablet</span>
+          <span>word processing software</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL STUDIES CENTER -->
+  <div class="center-band">
+    <div class="center-header ch-social">
+      <div class="ch-left"><span class="ch-icon">🗺️</span> Social Studies Center</div>
+      <div class="ch-time">⏱ 30 min</div>
+    </div>
+    <div class="center-body">
+      <div class="center-text">
+        <div class="center-title">Zoo Map</div>
+        <div class="center-desc">
+          Tell children to review all the animals the chameleon saw at the zoo. Have each child draw a map for an imaginary zoo like the one in the story. Make sure children format their maps on letter and number grids so someone could use the map to find the flamingo pond or the elephant area.
+        </div>
+      </div>
+      <div class="center-illustration illust-social" style="font-size:28px;">🗺️🦩🐘</div>
+      <div class="center-materials">
+        <div class="mat-title">Materials</div>
+        <div class="mat-list">
+          <span>construction paper</span>
+          <span>crayons or markers</span>
+          <span>Pupil Edition</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAMA CENTER -->
+  <div class="center-band">
+    <div class="center-header ch-drama">
+      <div class="ch-left"><span class="ch-icon">🎭</span> Drama Center</div>
+      <div class="ch-time">⏱ 15 min</div>
+    </div>
+    <div class="center-body">
+      <div class="center-text">
+        <div class="center-title">A Day in the Life of a Chameleon</div>
+        <div class="center-desc">
+          Give children party blowouts and fly cutouts. Have them use the party blowouts as tongues as they pretend to be chameleons trying to catch flies. Encourage them to engage in dialogue and act out other chameleon behaviors also, such as changing colors.
+        </div>
+      </div>
+      <div class="center-illustration illust-drama" style="font-size:28px;">🎭🦎</div>
+      <div class="center-materials">
+        <div class="mat-title">Materials</div>
+        <div class="mat-list">
+          <span>party blowouts (one per child)</span>
+          <span>fly cutouts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHOOL-HOME CONNECTION -->
+  <div class="shc-box">
+    <div class="shc-left">
+      <div class="shc-title">🏠 School–Home Connection</div>
+      <div class="shc-desc">
+        Your child is reading "The Mixed-Up Chameleon" by Eric Carle. Ask your child to tell you about the story. Then have your child use each vocabulary word in a sentence about the story. You can also ask your child to draw a picture of a chameleon and label it with descriptive words from the story.
+      </div>
+    </div>
+    <div class="shc-vocab">
+      <div class="shc-vocab-title">This Week's Words</div>
+      <span class="shc-word">dull</span>
+      <span class="shc-word">exciting</span>
+      <span class="shc-word">handsome</span>
+      <span class="shc-word">hardly</span>
+      <span class="shc-word">sparkling</span>
+      <span class="shc-word">spotted</span>
+      <span class="shc-word">sideways</span>
+    </div>
+  </div>
+
+  <div class="page-footer">Being Me &nbsp;·&nbsp; The Mixed-Up Chameleon &nbsp;·&nbsp; Generated by Homa</div>
+
+</div>
+
+</body>
+</html>

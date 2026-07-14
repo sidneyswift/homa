@@ -819,6 +819,29 @@ export const EVENT_SCHEMAS = {
     skill: z.string().min(2).max(60),
     stage_number: z.number().int().min(1).max(200),
   }),
+
+  // ── learner modality profile ──────────────────────────────────────
+
+  "learner.modality_signal_recorded": z.object({
+    family_id: z.string().uuid(),
+    child_id: z.string().uuid(),
+    modality: z.enum(["visual", "auditory", "kinesthetic", "reading_writing"]),
+    signal_type: z.enum([
+      "parent_stated",
+      "lesson_what_worked",
+      "memory_classified",
+      "material_finalized",
+      "reteach_signal",
+      "agent_observed",
+    ]),
+    subject: z.string().optional(),
+  }).strict(),
+
+  "learner.profile_synthesized": z.object({
+    family_id: z.string().uuid(),
+    child_id: z.string().uuid(),
+    modalities_surfaced: z.number().int().min(0),
+  }).strict(),
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;

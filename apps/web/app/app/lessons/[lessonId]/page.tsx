@@ -50,7 +50,12 @@ const storedProgressNoteSchema = z.object({
 const storedInsightsSchema = z
   .object({
     moments: z.array(lessonMomentSchema).catch([]),
-    whatWorked: z.array(z.string()).catch([]),
+    whatWorked: z.array(
+      z.union([
+        z.string(),
+        z.object({ description: z.string(), modality: z.string().nullable().optional() }),
+      ]),
+    ).catch([]),
     friction: z.array(z.string()).catch([]),
     nextTime: z.array(z.string()).catch([]),
     openQuestions: z.array(z.string()).catch([]),
@@ -225,14 +230,17 @@ export default async function LessonReviewPage({
               What worked
             </h2>
             <ul className="mt-2 space-y-1.5 text-sm text-body">
-              {insights.whatWorked.map((line) => (
-                <li key={line} className="flex gap-2">
+              {insights.whatWorked.map((entry) => {
+                const text = typeof entry === "string" ? entry : entry.description;
+                return (
+                <li key={text} className="flex gap-2">
                   <span aria-hidden="true" className="text-sage-700">
                     {"\u2022"}
                   </span>
-                  {line}
+                  {text}
                 </li>
-              ))}
+              );
+              })}
             </ul>
           </section>
         ) : null}

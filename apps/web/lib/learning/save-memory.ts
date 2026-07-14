@@ -1,6 +1,7 @@
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
   MEMORY_CONFLICT_MAX_DISTANCE,
+  type Modality,
   memoryUsageChars,
   scanMemoryContent,
 } from "../agent-memory";
@@ -37,6 +38,9 @@ export interface SaveMemoryInput {
   /** The eve session that taught this (provenance for the founder deep
    * view). Null on paths with no session, e.g. voice call extraction. */
   sessionId?: string | null;
+  /** Learning modality for what_works entries (visual, auditory, kinesthetic,
+   * reading_writing). Null for facts and unclassified entries. */
+  modality?: Modality | null;
 }
 
 export type SaveMemoryResult =
@@ -113,12 +117,28 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
     conflicts = close.map((row) => row.content);
   }
 
-  await sql`
+  const modality = input.kind === "what_works" ? (input.modality ?? null) : null;
+
+  const [inserted] = await sql<{ id: string }[]>`
     insert into public.family_memories
-      (family_id, child_id, kind, content, source, embedding, session_id)
+      (family_id, child_id, kind, content, source, embedding, session_id, modality)
     values
       (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
-       ${embedding}, ${input.sessionId ?? null})
+       ${embedding}, ${input.sessionId ?? null}, ${modality})
+    returning id
   `;
+
+  // Write a modality signal when we have one (what_works + classified + child).
+  if (modality && childId && inserted) {
+    await sql`
+      insert into public.learner_modality_signals
+        (family_id, child_id, modality, signal_type, valence, content,
+         source_session_id, source_memory_id)
+      values
+        (${input.familyId}, ${childId}, ${modality}, 'memory_classified', 1,
+         ${content.slice(0, 300)}, ${input.sessionId ?? null}, ${inserted.id})
+    `;
+  }
+
   return { saved: true, childId, conflicts };
 }

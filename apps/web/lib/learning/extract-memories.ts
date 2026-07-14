@@ -59,6 +59,15 @@ const extractionSchema = z.object({
           .max(60)
           .optional()
           .describe("Exactly one child's name from the family context, only when the fact is about that child."),
+        modality: z
+          .enum(["visual", "auditory", "kinesthetic", "reading_writing"])
+          .nullable()
+          .optional()
+          .describe(
+            "For what_works entries only: the learning modality this teaching signal is about " +
+            "(visual = diagrams/images, auditory = read-alouds/songs, kinesthetic = hands-on/movement, " +
+            "reading_writing = lists/notes/journaling). Null when the modality is unclear.",
+          ),
       }),
     )
     .max(MAX_MEMORIES_PER_EXTRACTION)
@@ -151,6 +160,7 @@ export async function extractMemoriesFromText(input: {
       source: input.source,
       childName: entry.childName ?? null,
       sessionId: input.sessionId ?? null,
+      modality: entry.modality ?? null,
     });
     if (saved.saved) {
       outcome.saved.push({

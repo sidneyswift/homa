@@ -104,6 +104,37 @@ page.
 - Process metadata reinforces writing-as-process: include name, date, topic/title, and draft-due fields. The outline is not a one-shot assignment.
 - No visual decoration for writing scaffolds. Clean B&W, structure-only. The absence of visual noise signals "this is serious work."
 
+**Elementary math practice** (roughly ages 6 to 9):
+
+- Interactivity is built INTO the page, not bolted on. The default math
+  worksheet is a list of problems with blanks. The better page wraps
+  the same drill in a puzzle (color-by-answer where a pattern emerges),
+  a game (printable spinner + score table), or a drawing task (dot-grid
+  pattern continuation). The child doesn't notice they're drilling.
+  Always prefer interactive page formats over plain problem lists.
+- Every page gets a Challenge extension at the bottom. The Challenge
+  should NOT be "more of the same but harder." It should teach a
+  STRATEGY — a mental math shortcut, a pattern to notice, a "why does
+  this work?" question. Example: after addition-facts-to-10 drill, the
+  Challenge teaches "7+5 = (5+5)+2 = 12" as a general strategy.
+  Challenge sections serve dual purpose: enrichment for fast finishers
+  AND embedded diagnostic (reveals where the child's understanding
+  actually is).
+- Cooperative/social math when appropriate. Two-player games (spinners,
+  board games, card games) make practice social. Needs: clear rules,
+  simple materials (paper clip + pencil for spinner), and a score table.
+- Manipulative activities AND no-manipulative activities are both
+  needed. When manipulatives are called for, suggest household items
+  (beans, buttons, coins, cut paper shapes). But also generate
+  activities that are inherently interactive without ANY objects — the
+  page itself provides the engagement through puzzles, games, or
+  drawing.
+- ELA-math crossover: include a "Math Log" or "Math Story" prompt on
+  story-problem pages. Instead of only solving given problems, the child
+  CREATES a story that uses the target operation. "Make up a story about
+  children who start with 18 shells. Make 2 funny things happen so they
+  end up with 8 shells." This bridges writing instruction to math.
+
 **Math operations and algebra** (roughly ages 9 to 14):
 
 - Color-coded step sequences aid memorization for multi-step processes (PEMDAS, equation-solving algorithms). Each operation or step gets its own accent color.
@@ -112,6 +143,132 @@ page.
 - Progressive on-ramp within a single material: review prerequisites before the new concept, build to standard problems, end with "Watch Out" edge cases that break the default algorithm.
 - Self-checking formats (mazes, puzzles) replace answer keys for drill. Wrong answers = dead ends = instant feedback without red-pen anxiety.
 - Practice embedded in reference materials: foldables that contain practice problems alongside definitions are more engaging than separate drill sheets.
+
+**English grammar** (roughly ages 8 to 14):
+
+- Follow the Form → Meaning → Use pattern. Every grammar page starts
+  with a REFERENCE CHART (bordered box, accent color) showing the FORM:
+  labeled example sentences where each word's role is identified
+  (NOUN + ARE + NOUN). Right column or sidebar explains the MEANING:
+  what the pattern does, rules, exceptions, edge cases. THEN exercises
+  practice the USE, progressing from controlled to communicative.
+- The reference chart is both instruction AND permanent reference. The
+  student should be able to look back at it when stuck on an exercise
+  without asking the parent. This makes grammar self-service.
+- Vary exercise types within one grammar point. Don't give 20 identical
+  fill-in-the-blank items. Mix: transformation ("change singular to
+  plural"), completion with word bank (choose the right form),
+  completion from context (two blanks — grammar + content), and oral or
+  discussion prompts ("complete with your own words"). Modality shifts
+  (written → oral) keep attention fresh.
+- Model answer on first item, always. The student sees the completed
+  pattern before attempting. Reduces parent explanation needed.
+- One grammar point per page or section. Don't mix "contractions with
+  be" and "negative with be" on the same exercise set — introduce one,
+  practice it, then introduce the next. Cumulative review can come
+  later.
+- Use real-world sentence contexts, not abstract examples. "Sara is a
+  student. She's in my class" beats "The subject agrees with the verb."
+  Multicultural names and daily-life scenarios make grammar feel
+  relevant.
+- Progression from controlled → guided → free:
+  controlled = one right answer (transformation, is/are choice);
+  guided = word bank or sentence stems;
+  free = student's own words (oral production, creative completion).
+
+**Reading comprehension** (roughly ages 6 to 12):
+
+- Magazine-style presentation for reading passages. Real photographs (or
+  high-quality AI-generated images), vocabulary sidebars in colored boxes
+  alongside the text, full-bleed imagery where possible. The reading
+  page should feel like a magazine article, not a worksheet. "Visually
+  captivating" is the bar.
+- Vocabulary sidebars inline, not separate. Key terms get defined in
+  colored boxes RIGHT WHERE the child encounters them in the passage.
+  Don't make them flip to a glossary. Bold the term, give a brief
+  definition, move on.
+- Explicit skill instruction: name the reading skill being practiced
+  (sequence, main idea, cause and effect, facts vs. details, inference,
+  compare/contrast). Define it in plain language. Then provide a graphic
+  organizer (sequence chart, Venn diagram, detail web) to practice it.
+- Skill transfer via related passage. After teaching a skill on one
+  text, provide a SECOND shorter passage on a related topic (butterfly
+  life cycle → rabbit life cycle). The student applies the same skill
+  to new content. This proves comprehension, not memorization.
+- Spiral across units: each new reading passage introduces ONE new
+  reading skill while the content reinforces previous skills. Skills
+  accumulate; topics change. A butterfly article teaches sequence; the
+  next unit's magnet article teaches cause/effect but the questions also
+  touch sequence.
+- "Do This" prompts embedded IN the reading, not just after it. Mid-text
+  comprehension checks and writing prompts keep the child actively
+  reading, not passively scanning.
+
+**Nature study and science observation** (roughly ages 4-12):
+
+- Real images over cartoon for nature identification. Montessori families
+  and Charlotte Mason families both prefer realistic watercolor or
+  photographic representations for animal/plant identification. Cartoon
+  animals teach the wrong shapes.
+- Cross-curricular integration is the natural state. A beach unit isn't
+  "science" — it's science (animal ID, wave anatomy), math (counting
+  shells, measuring tides), language arts (poetry, copy work), art
+  (picture study), and social studies (beach geography, shell culture).
+  When a parent asks for a unit study, span all five subjects.
+- Observation before naming. Nature journal prompts should ask "what do
+  you see?" before "what is it called?" Drawing precedes labeling.
+  The child's own observation builds deeper understanding than
+  memorizing names.
+- 3-part nomenclature cards for vocabulary. For any set of 6+ specimens
+  the child needs to identify, Montessori 3-part cards (control, picture,
+  label) are more effective than flash cards because they scaffold from
+  supported recall to independent recall.
+- Morning basket inclusion for multi-age families. When building a unit
+  study for ages 4-12, always include a "Morning Basket" section of
+  Pre-K activities (letter tracing, counting, sorting, mazes) themed to
+  the same topic. The youngest learner participates in the family unit
+  study without the parent needing separate materials.
+- Outdoor observation completes the learning loop. For any nature/animal
+  topic, include a guided outdoor observation activity with measurement
+  tools. The worm observation report pattern (date, find, measure,
+  describe, compare) works for any organism the child can safely observe
+  outdoors. Field science makes abstract concepts concrete.
+- Taxonomy at any age via fill-in-the-blank. Even young children (age 7+)
+  can engage with taxonomy classification if presented as a scaffolded
+  fill-in: completed reference poster alongside a blank version with
+  word bank. Advanced content in a simple format.
+- Parent customization hooks increase unit study value. Include at least
+  one blank/customizable worksheet (e.g. blank question template) that
+  the teaching parent can fill with their own questions tailored to
+  their child's level. Respects the parent as co-teacher.
+
+## Before designing: consult the child's learning tendencies
+
+If the child's family context or saved memories include modality
+tendencies (visual, auditory, kinesthetic, reading-writing), let those
+guide your format choice, not override it:
+
+- A child with a strong kinesthetic signal for math? Prefer
+  cut-and-paste, foldables, counting clip cards, ten-frame mats, or
+  manipulative-based activities over plain worksheets. But always
+  mention the alternative: "I made this as a hands-on counting mat
+  since that tends to land well for her. Want a visual version instead?"
+- A child with a strong auditory signal for reading? Suggest read-aloud
+  activities, rhyming games, songs, and discussion prompts alongside
+  any printed material.
+- A child with a strong visual signal? Prefer posters, color-coded
+  charts, illustrated worksheets, and diagrams.
+- No modality signal, or weak signal? Choose the format that fits the
+  subject rules below, and note what the parent says about how it went
+  (that feedback becomes future modality signal).
+
+Never say "your child is a kinesthetic learner." Say "she tends to
+respond well to hands-on approaches for math, based on what you have
+told me." Tendencies, not labels. Per-subject, not global.
+
+When a parent corrects your format choice ("she actually prefers
+worksheets to hands-on"), honor it immediately and remember it as a
+what_works entry with the appropriate modality.
 
 ## Before designing: check the library
 
@@ -882,6 +1039,404 @@ Path choice: html for both pages, always. Text precision, table
 alignment, and cheap surgical revision matter on both the notes and
 the practice page. Use the packet recipe to combine both pages into
 one PDF via create_printable's `pages` input.
+
+## Unit study packet (cross-curricular)
+
+Reference image: `references/homa-unit-study-reference.png`
+This Homa-style unit study example shows a theme-based multi-page
+packet spanning 5+ subjects (science, math, social studies, language
+arts, art) with a teacher guide section, reading/video lists, supply
+list, and 20-30+ activity pages.
+
+A unit study packet is a complete thematic learning bundle: one topic
+("Forest Animals", "Ancient Egypt", "Ocean Life") explored through
+every subject lens. The parent prints the whole packet and works
+through it over 1-4 weeks. This is the format when the parent asks
+for a unit study, thematic unit, cross-curricular packet, or
+"everything about [topic] in one bundle."
+
+Uses the packet recipe via create_printable's `pages` input. Each
+page is one entry (html or pageImageUrl). Cap at 12 pages per
+volume; larger units ship as volumes.
+
+Design patterns (all binding for unit study packets):
+
+- **Teacher guide pages** (html): overview of the unit, suggested
+  schedule (daily or weekly), reading list, video list, supply list.
+  Two-column layout: left = category label, right = items. Clean,
+  no decoration. These pages are for the parent, not the child.
+- **Activity pages**: mix of formats from the registry — naturalist
+  identification posters (image-direct), 3-part nomenclature cards
+  (html), copy-work pages (html), art appreciation cards
+  (image-direct or hybrid), nature journal prompts (html), counting
+  mats, coloring pages, etc. Each activity page is one `pages` entry.
+- **Cross-curricular threading**: every activity page carries a
+  small subject icon or label in the top corner (🔬 Science,
+  🔢 Math, 📖 Language Arts, 🎨 Art, 🌍 Social Studies) so the
+  parent can see the subject coverage at a glance.
+- **Consistent theming**: all activity pages share the same visual
+  theme (color palette, illustration style, decorative elements).
+  The theme comes from the unit topic, not from individual activities.
+- **Difficulty banding**: include activities spanning the age range
+  the family needs. Label each page with a suggested age band or
+  grade range in small text near the subject icon.
+- **Cover page**: first `pages` entry is always an html cover with
+  the unit title in large Fredoka lettering, a themed illustration
+  (via hybrid path), and the child's name if known.
+
+Path choice: the packet itself is always multi-page via `pages`.
+Individual pages within the packet follow normal path-choice rules
+(image-direct for posters/coloring, html for worksheets/cards,
+hybrid for themed activities with art).
+
+## Naturalist identification poster
+
+A single-page watercolor-style poster showing 10-20 specimens
+(animals, plants, shells, rocks) with numbered labels and a word
+bank at the bottom. Montessori-aligned: real-looking illustrations,
+not cartoon. The child matches numbers to names.
+
+Design patterns:
+
+- **Watercolor illustration style**: soft, realistic, nature-guide
+  aesthetic. Each specimen clearly distinct and labeled with a number.
+- **Word bank**: bottom strip with all specimen names in alphabetical
+  order. The child writes the correct number next to each name.
+- **White background**: specimens float on white, no busy backgrounds.
+- **Title**: top center, Fredoka bold, e.g. "Seashore Animals."
+
+Path choice: image-direct (the whole page is illustration). Include
+all specimen names and numbers in the prompt for text accuracy.
+
+## 3-part nomenclature cards (Montessori)
+
+Montessori-style vocabulary cards printed 3-up per item: (1) image +
+label, (2) image only, (3) label only. The child matches image-only
+to label-only cards after studying the complete card.
+
+Design patterns:
+
+- **Grid layout**: 3 columns × N rows. Column headers: "Control
+  Card", "Picture Card", "Label Card."
+- **Dashed cut lines**: `border: 2px dashed #b3a492;` on all cells.
+- **Image cells**: small realistic or watercolor illustration
+  centered in the cell. Use generate_image for a sheet of small
+  illustrations or search_photos for real images.
+- **Label cells**: specimen name in large clear Andika or Fredoka
+  font, centered.
+- **6-9 items per page** (18-27 total cards). More items = smaller
+  cells.
+
+Path choice: hybrid (generate_image for the illustration strip,
+html for the grid and labels) or html with kept photos.
+
+## Art appreciation cards
+
+Classic artwork reproductions with artist bio panel. For art
+history integration in unit studies. Each card shows: the painting
+(via search_photos or public domain image), artist name, dates,
+art movement/style label, and 1-2 sentence bio.
+
+Design patterns:
+
+- **Card layout**: artwork image takes 60% of card height, info
+  panel below with artist name (bold), dates, style label (italic),
+  and one-line bio.
+- **4 cards per page** in a 2×2 grid with dashed cut borders.
+- **Clean, museum-card aesthetic**: cream background (#f5f0e8),
+  serif font for artist names (Instrument Serif or similar).
+
+Path choice: html with search_photos for the artwork images.
+
+## Copy-work pages
+
+Handwriting practice using curated quotes, poems, or passages.
+The model text is printed at the top; below it are blank writing
+lines (three-line guide or letter boxes per family curriculum) for
+the child to copy. Combines handwriting practice with literature
+exposure.
+
+Design patterns:
+
+- **Model text block**: the passage printed in clear Andika font
+  at the top of the page, with generous line spacing.
+- **Writing lines below**: match the family's handwriting style
+  (three-line guide or letter boxes). 4-8 lines depending on age.
+- **Small illustration**: optional themed watercolor vignette in
+  the top corner (hybrid path) to connect to the unit theme.
+- **Attribution**: author name in small italic below the model text.
+- **Print and cursive variants**: offer both if the child is
+  learning cursive. Model text switches font accordingly.
+
+Path choice: html (writing lines need precision). Hybrid if adding
+a themed illustration.
+
+## Nature journal prompts
+
+Guided observation and recording templates for outdoor field work.
+The child draws what they observe, labels parts, and answers
+prompts. Combines science observation with art and writing.
+
+Design patterns:
+
+- **Large drawing box**: 50-60% of the page, bordered with a thin
+  solid line. Label: "Draw what you observe."
+- **Observation prompts**: 3-4 guided questions below the drawing
+  box ("What colors do you see?", "How does it feel?", "Where
+  did you find it?"). Each with a blank line for the answer.
+- **Label section**: a small box or line for "Date:",
+  "Location:", "Weather:" at the top.
+- **Minimal decoration**: this is a field notebook page. Clean,
+  functional, no cute characters.
+
+Path choice: html (precise layout, blank lines, drawing box borders).
+
+## Visual schedule cards
+
+Reference image: `references/homa-visual-schedule-reference.png`
+This Homa-style visual schedule card sheet shows a 3×4 grid of
+watercolor-illustrated cards for structuring a homeschool day. Each
+card has a soft watercolor illustration (instantly recognizable by a
+pre-reader) and a clear activity label below. Study it for grid
+spacing, illustration style, and label placement.
+Original structural patterns drawn from a printable daily rhythm card
+system (200+ cards covering routines, subjects, chores, outings,
+weather, and time concepts), re-expressed in Homa's design language.
+
+Visual schedule cards are the format when the parent asks for daily
+rhythm cards, visual schedule, routine cards, daily planner cards,
+or any system of printable cards the child uses to structure their
+day. These are learning INFRASTRUCTURE, not learning materials — they
+teach independence, time concepts, routine building, and executive
+function.
+
+Great for: daily routines, homeschool subject scheduling, chore
+charts, weather/calendar routines, activity planning, transition
+support (especially neurodivergent children who benefit from visual
+schedules). Ages 3-8 primarily.
+
+A card set is personalized to the family: the parent specifies their
+subjects (Homa knows these from the taxonomy), routines, activities,
+and methodology vocabulary (Charlotte Mason families get "morning
+basket" and "nature study"; classical families get "Latin" and
+"dictation"; eclectic families get whatever they actually do).
+
+Design patterns (all binding for visual schedule cards):
+
+- **Grid layout**: 3 columns × 4 rows = 12 cards per page. Dense
+  spacing — minimal gaps between cards because they are meant to be
+  cut out. This is one format where density is correct, not a flaw.
+- **Card structure**: each card contains two zones stacked vertically:
+  (1) watercolor illustration filling ~75% of the card (the visual
+  recognition zone — a pre-reader identifies the activity from the
+  image alone), (2) activity label in clear sans-serif text below
+  (`font-size: 14px; font-weight: 600; text-align: center;`).
+- **Illustration style**: soft watercolor children's book illustration.
+  Warm earthy palette (cream, sage green, soft coral, warm gold,
+  lavender). Each illustration should be immediately identifiable
+  without reading the label. "Brush teeth" shows a toothbrush and
+  paste; "Nature walk" shows children on a trail with trees.
+- **Cut lines**: thin dashed borders between cards
+  (`border: 1.5px dashed #b3a492;`). Outer edges solid.
+- **No branding, no characters**: the cards are functional tools.
+  Clean, beautiful, but not character-driven.
+- **Color-coded categories** (optional): cards can be grouped by
+  category with a subtle background tint — routines (warm cream),
+  academics (soft blue), activities (sage green), chores (lavender).
+  The tint is barely there; the watercolor illustration dominates.
+- **Multi-page sets**: a full visual schedule system spans multiple
+  pages. Use the packet recipe via create_printable's `pages` input.
+  Organize pages by category: page 1 = morning/evening routines,
+  page 2 = academic subjects, page 3 = activities/outings, etc.
+- **Calendar/time cards**: days of the week get distinct bold
+  watercolor color squares. Months progress through a rainbow.
+  Time-of-day cards (morning, afternoon, evening, night) show
+  watercolor sky scenes.
+- **Weather cards**: each weather condition (sunny, cloudy, rainy,
+  snowy, foggy, etc.) gets a watercolor weather illustration. Used
+  for daily calendar routines.
+
+```html
+<style>
+  .schedule-grid { display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; width: 100%; }
+  .schedule-card { border: 1.5px dashed #b3a492; padding: 8px;
+    text-align: center; aspect-ratio: 3/4;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end; }
+  .schedule-card img { width: 85%; height: auto; flex: 1;
+    object-fit: contain; margin-bottom: 6px; }
+  .schedule-label { font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px; font-weight: 600; color: #221e1a;
+    padding: 4px 0; }
+</style>
+
+<div class="schedule-grid">
+  <div class="schedule-card">
+    <img src="{generated_card_image_url}" alt="Morning Circle" />
+    <div class="schedule-label">Morning Circle</div>
+  </div>
+  <div class="schedule-card">
+    <img src="{generated_card_image_url}" alt="Breakfast" />
+    <div class="schedule-label">Breakfast</div>
+  </div>
+  <!-- repeat for remaining cards, 12 per page -->
+</div>
+```
+
+Path choice: hybrid is strongly preferred. Use generate_image for
+each card's watercolor illustration (or generate a full grid of 12
+cards as one image-direct page if individual card generation is too
+costly). For a full card set, image-direct is the pragmatic choice:
+prompt gpt-image-2 to render the entire 3×4 grid with all 12
+illustrations and labels in one shot (the reference image proves
+this works). Use html only if the parent needs to iterate on
+specific card labels without re-generating art.
+
+For multi-page sets, generate each page as a separate image-direct
+call and combine via the packet recipe. Group cards by category
+across pages for logical organization.
+
+## Lifecycle diagram
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** A circular diagram showing the stages of a lifecycle
+(e.g. earthworm: mating → egg/cocoon → embryo → hatchling → adult)
+with arrows connecting each stage. Accompanied by a fill-in or
+cut-and-paste version where the child arranges the stages.
+
+**Design patterns:**
+- Circular layout with clockwise arrows between stages
+- Each stage gets an illustration + label
+- Center of the circle holds the title ("Lifecycle of a...")
+- Paired pages: page 1 = completed reference poster, page 2 = blank
+  template + cut-out stage images for the child to arrange
+
+**Creation path:** hybrid (generate_image for the circular diagram
+illustration, html for the cut-and-paste template with dotted cut
+lines) or image-direct for the poster version alone.
+
+**Example activity:** `[lifecycle-diagram] Lifecycle of an earthworm
+poster + cut-and-paste ordering activity`
+
+## Reading comprehension with story
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** A short fiction story (8-12 sentences) themed to the
+unit topic, followed by a drawing challenge and comprehension
+questions on the same or next page.
+
+**Design patterns:**
+- Story text in a bordered panel with themed header illustration
+- Drawing challenge below the story ("Draw [character] doing...")
+  with a large blank box
+- Comprehension questions on the facing page: 3-5 questions mixing
+  factual recall, inference, and personal response
+- Story is age-appropriate fiction, not informational text
+
+**Creation path:** html (text precision matters for the story and
+questions). Hybrid if adding a themed illustration header.
+
+**Example activity:** `[reading-comprehension-story] "Wiggly the Worm"
+short story with drawing challenge and 5 comprehension questions`
+
+## Taxonomy classification card
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** A labeled taxonomy hierarchy poster (Kingdom → Phylum
+→ Class → Order → Family → Genus → Species) for a specific organism,
+paired with a blank fill-in version.
+
+**Design patterns:**
+- Vertical hierarchy layout with labeled boxes connected by lines
+- Each level shows the label ("Kingdom:") and the value ("Animalia")
+- Paired pages: completed reference card + blank version where child
+  fills in each level from a word bank or from memory
+- Word bank at bottom of the blank version for scaffolding
+
+**Creation path:** html (text precision and surgical revision for
+the fill-in-blank version).
+
+**Example activity:** `[taxonomy-card] Taxonomic classification of an
+earthworm — completed poster + fill-in-the-blank activity`
+
+## Outdoor observation report
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** A guided field study template the child takes
+outdoors. Structured fields for date, location, specimen found,
+measurements, description, and comparison to previous finds.
+
+**Design patterns:**
+- Header with title, child's name line, date, location
+- Drawing box (large, ~40% of page) for sketching the specimen
+- Measurement fields: "Length: ___ cm" "Width: ___ cm"
+- Observation prompts: "Describe what you see:", "How does it move?",
+  "Was it bigger than the one before?"
+- Comparison table for multiple specimens (if multi-page)
+- Ink-light, B&W-friendly — meant to go outdoors
+
+**Creation path:** html (structured fields, writing lines, clean
+layout for outdoor use).
+
+**Example activity:** `[outdoor-observation] Worm observation report —
+find, measure, draw, and compare earthworms in the garden`
+
+## Morning basket bundle
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** A collection of Pre-K/K activities (typically 8-18
+pages) all themed to the same unit topic. Designed for the youngest
+learner in the family to participate in the same unit study as older
+siblings. Activities are simple, tactile, and visually engaging.
+
+**Design patterns:**
+- Letter tracing (upper + lower for the topic's initial letter)
+- Letter recognition (circle the target letter in a field of letters)
+- Loose parts letter formation guide
+- Themed sorting (cut-and-paste into categories)
+- Simple mazes and puzzles themed to the topic
+- Size sorting cards (small/medium/large)
+- Uppercase/lowercase matching
+- Counting clip cards (how many [topic items]?)
+- Each page is standalone — no required sequence
+- Big, chunky, high contrast for small hands
+
+**Creation path:** packet (multi-page via `pages` input). Individual
+pages follow normal path-choice rules: letter tracing = html,
+mazes/puzzles = image-direct, sorting = hybrid.
+
+**Example activity:** `[morning-basket] Worm-themed Pre-K morning
+basket: letter W tracing, garden sorting, worm counting clip cards,
+worm maze, size sorting`
+
+## Counting clip cards
+
+Reference: Earthworm Unit Study Pack (ref-2026-07-18-worm-unit-study)
+
+**What it is:** Cards showing N themed objects; the child clips a
+clothespin to the correct number. Laminate-and-reuse format. 2 cards
+per page (landscape orientation) or 4 per page (portrait).
+
+**Design patterns:**
+- Each card has: themed illustration of N objects, 3-4 number options
+  arranged vertically along one edge
+- Child clips (clothespin) the correct number — kinesthetic + visual
+- Designed for lamination: solid borders, no dotted cut lines
+- Objects should be clearly countable (separated, not overlapping)
+- Number options include the correct answer + close distractors
+
+**Creation path:** hybrid (generate_image for themed objects, html
+for number options and card borders) or image-direct for simpler
+versions.
+
+**Example activity:** `[counting-clip-cards] How many worms? Clip
+cards for numbers 1-10 with garden-themed illustrations`
 
 ## Design rules (binding)
 
