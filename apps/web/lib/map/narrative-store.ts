@@ -23,6 +23,11 @@ import {
  * child_plans), server-only via mapDb like everything family-scoped. The
  * childId always arrives pre-scoped by the caller's cookie-resolved
  * family or by report token, exactly as before the unification.
+ *
+ * The ::uuid cast on the optional family filter is load-bearing: postgres.js
+ * sends parameters untyped, and a bare `$n is null` gives Postgres no
+ * context to infer a type, so the whole query fails at parse time (the
+ * 2026-07-13 stuck writing beat, BUG-P1-1 in the season field study).
  */
 
 export interface ReportNarrativeSource {
@@ -73,7 +78,7 @@ export async function getReportNarrativeSource(
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
     where r.child_id = ${childId} and f.status <> 'deleted'
-      and (${familyId ?? null} is null or f.id = ${familyId ?? null})
+      and (${familyId ?? null}::uuid is null or f.id = ${familyId ?? null})
   `;
   const row = rows[0];
   if (!row) return null;
@@ -256,7 +261,7 @@ export async function getPlanNarrativeSource(
     join public.families f on f.id = c.family_id
     where p.child_id = ${childId} and p.subject_id = ${subjectId}
       and f.status <> 'deleted'
-      and (${familyId ?? null} is null or f.id = ${familyId ?? null})
+      and (${familyId ?? null}::uuid is null or f.id = ${familyId ?? null})
   `;
   const row = rows[0];
   if (!row) return null;
