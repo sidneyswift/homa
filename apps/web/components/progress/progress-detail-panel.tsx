@@ -23,11 +23,15 @@ import { requestConflictResolution } from "./resolve-conflict-request";
  * trap, mobile-nav's scrim and edge entrance, Escape and scrim tap to
  * close, transform-only motion with a reduced-motion opt-out.
  *
- * When the subject can take one (tile.deeperCheck) and the surface
- * allows it, the footer carries the double-check door (founder ask
- * 2026-07-14: a scary number's first question is "is that right?"):
- * the deep dive flow at /onboarding?dd, which re-asks harder or easier
- * questions, rescores, and rewrites the report around what changed.
+ * When the subject can take one (tile.deeperCheck), the footer carries
+ * the double-check door (founder ask 2026-07-14: a scary number's first
+ * question is "is that right?"): the deep dive flow at /onboarding?dd,
+ * which re-asks harder or easier questions, rescores, and rewrites the
+ * report around what changed. On read-only mirrors the card still
+ * renders, faithful to her screen, with the button inert: tappable
+ * only in the family's own session (founder ask 2026-07-14 afternoon,
+ * "I still see this in my admin": a mirror that hides her doors reads
+ * as the feature not existing).
  */
 export function ProgressDetailPanel({
   childId,
@@ -43,8 +47,9 @@ export function ProgressDetailPanel({
   tile: ProgressTileModel | null;
   conflicts: readonly OpenProgressConflictView[];
   timeZone: string;
-  /** False on read-only mirrors (the founder console): the deep dive
-   * walks the FAMILY's flow, so only her own session gets the door. */
+  /** False on read-only mirrors (the founder console): the card still
+   * shows, but the button goes inert, because the deep dive walks the
+   * FAMILY's flow and only her own session may start it. */
   allowDeeperCheck: boolean;
   onClose: () => void;
 }) {
@@ -201,18 +206,30 @@ export function ProgressDetailPanel({
         </div>
 
         <div className="border-t border-border-subtle px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {allowDeeperCheck && tile?.deeperCheck ? (
+          {tile?.deeperCheck ? (
             <div className="mb-3 rounded-md border border-sage/30 bg-[var(--accent-sage-soft)] p-3.5">
               <p className="text-sm text-body">
                 This number comes from the answers above. Eight questions at most sharpen it
                 and update the progress report, in about two minutes.
               </p>
-              <Link
-                href={`/onboarding?dd=${childId}.${subject.subjectId}`}
-                className="mt-2.5 inline-flex min-h-10 items-center rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand hover:bg-brand-hover"
-              >
-                Answer a few deeper questions
-              </Link>
+              {allowDeeperCheck ? (
+                <Link
+                  href={`/onboarding?dd=${childId}.${subject.subjectId}`}
+                  className="mt-2.5 inline-flex min-h-10 items-center rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+                >
+                  Answer a few deeper questions
+                </Link>
+              ) : (
+                <span className="mt-2.5 inline-flex items-center gap-2.5">
+                  <span
+                    aria-disabled="true"
+                    className="inline-flex min-h-10 cursor-default items-center rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand opacity-60"
+                  >
+                    Answer a few deeper questions
+                  </span>
+                  <span className="text-xs text-subtle">hers to tap</span>
+                </span>
+              )}
             </div>
           ) : null}
           <ProgressChatDoor childId={childId} variant="link">

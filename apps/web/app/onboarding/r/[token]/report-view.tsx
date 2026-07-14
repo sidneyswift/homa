@@ -511,11 +511,35 @@ export function ReportView({
                 })}
               </ul>
 
-              {/* 5. The two places to take it. The mirror renders
-                  neither: both walk the FAMILY's flow, not the founder's. */}
-              {!mirror && !score.exposureBased && score.position !== "not_mapped" ? (
-                <div className="mt-6 flex flex-wrap gap-2 print:hidden">
-                  {sample ? (
+              {/* 5. The two places to take it. The mirror shows both
+                  inert, faithful to her screen (founder ask 2026-07-14
+                  afternoon): they walk the FAMILY's flow, so only her
+                  own session gets live buttons. */}
+              {!score.exposureBased && score.position !== "not_mapped" ? (
+                <div className="mt-6 flex flex-wrap items-center gap-2 print:hidden">
+                  {mirror ? (
+                    <>
+                      <span
+                        aria-disabled="true"
+                        className={reportButtonClass(
+                          score.position === "growing" ? "primary" : "secondary",
+                          "inline-flex min-h-10 cursor-default items-center px-4 py-2 text-xs font-semibold opacity-60",
+                        )}
+                      >
+                        Build the 4-week plan
+                      </span>
+                      <span
+                        aria-disabled="true"
+                        className={reportButtonClass(
+                          "secondary",
+                          "inline-flex min-h-10 cursor-default items-center px-4 py-2 text-xs font-semibold opacity-60",
+                        )}
+                      >
+                        Answer a few deeper questions
+                      </span>
+                      <span className="text-xs text-subtle">hers to tap</span>
+                    </>
+                  ) : sample ? (
                     <Link
                       href="/onboarding"
                       className={reportButtonClass(

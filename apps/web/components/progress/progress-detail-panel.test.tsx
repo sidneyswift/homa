@@ -129,11 +129,34 @@ describe("ProgressDetailPanel", () => {
       </AppRouterContext.Provider>,
     );
 
+    // No tile means no deeper-check eligibility, so no card at all.
     assert.doesNotMatch(html, /Answer a few deeper questions/);
 
     assert.match(html, /aria-labelledby="progress-panel-literacy"/);
     assert.doesNotMatch(html, /Confirm (?:Elena|Jordan)/);
     assert.doesNotMatch(html, /tap the answer that fits today/);
     assert.match(html, /Tell HOMA something looks wrong/);
+  });
+
+  it("mirrors show the deeper-check card with the button inert", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressDetailPanel
+          childId="child-1"
+          subject={MATH}
+          tile={TILE}
+          conflicts={[]}
+          timeZone={PROGRESS_FIXTURE_VIEW.timeZone}
+          allowDeeperCheck={false}
+          onClose={() => {}}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    // The founder's mirror stays faithful to her screen (2026-07-14):
+    // the card and label render, but there is no live door.
+    assert.match(html, /Answer a few deeper questions/);
+    assert.match(html, /hers to tap/);
+    assert.doesNotMatch(html, /href="\/onboarding\?dd=/);
   });
 });
