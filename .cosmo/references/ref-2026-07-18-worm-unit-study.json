@@ -1,0 +1,152 @@
+{
+  "id": "ref-2026-07-18-worm-unit-study",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T01:16:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784351761.090789",
+  "format": "unit-study-packet",
+  "title": "Earthworm Unit Study Pack (unknown creator)",
+  "dropperComment": "Elementary and early middle grade. love the art and activities. inclusion of multiple disciplines such as art, reading comprehension, report, math - lovely example of a unit study that can be adapted to multiple age levels and grades",
+  "layout": {
+    "structure": "multi-page-packet",
+    "spacing": "mixed",
+    "visualHierarchy": "mixed",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "modular-pages"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domains": [
+      "science",
+      "math",
+      "language-arts",
+      "art"
+    ],
+    "topics": [
+      {
+        "id": "mt_ClDl1OgeMN",
+        "kind": "conceptual",
+        "mapped": true
+      },
+      {
+        "id": "mt_FvI4o-A6nj",
+        "kind": "conceptual",
+        "mapped": true
+      },
+      {
+        "id": "mt_svxMiEw_bd",
+        "kind": "conceptual",
+        "mapped": true
+      },
+      {
+        "id": "mt_Ac68amOdF1",
+        "kind": "conceptual",
+        "mapped": true
+      },
+      {
+        "id": "mt_2HKTDKk0hL",
+        "kind": "procedural",
+        "mapped": true
+      },
+      {
+        "id": "mt_2tniUQneYi",
+        "kind": "procedural",
+        "mapped": true
+      },
+      {
+        "id": "mt_5hCA_R9fQg",
+        "kind": "procedural",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      48,
+      144
+    ],
+    "ageBandGrades": "Pre-K to 6 (ages 4-12)",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "multiAgeDesign": true,
+    "multiAgeNotes": "Explicitly designed for mixed ages 4-12. Pages 1-23: science content + activities for elementary/middle. Pages 24-41: 'Morning Basket' early learning pages for Pre-K/K. Pages 42-44: outdoor observation activity for all ages."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [
+      "Wiggly the worm (story character)",
+      "Willy the worm (maze character)"
+    ],
+    "visualStyle": "mixed",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "real-world creature study",
+      "hands-on outdoor activity",
+      "story-based engagement",
+      "morning basket inclusion for littles"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "A4",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "color preferred"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "lifecycle-diagram",
+      "reading-comprehension-story",
+      "taxonomy-card",
+      "outdoor-observation",
+      "morning-basket",
+      "counting-clip-cards"
+    ],
+    "gaps": []
+  },
+  "components": [
+    {
+      "name": "Guide & Contents (p1-2)",
+      "description": "Overview of 40-page pack with contents list and printing instructions."
+    },
+    {
+      "name": "Taxonomy Cards (p3-4)",
+      "description": "Taxonomic classification of earthworm (Kingdom \u2192 Species) \u2014 filled version + blank fill-in-the-blank version."
+    },
+    {
+      "name": "Anatomy Poster + Activity (p5-6)",
+      "description": "Labeled worm anatomy (clitellum, segments, mouth, anus) + blank version for student labeling."
+    },
+    {
+      "name": "Lifecycle Poster + Cut-and-Paste (p7-8)",
+      "description": "Circular lifecycle diagram (mating \u2192 egg \u2192 embryo \u2192 hatchling \u2192 adult) + cut-out images to arrange in correct order on blank template."
+    },
+    {
+      "name": "Reading Comprehension (p9-10)",
+      "description": "Short story about 'Wiggly the worm' + drawing challenge ('draw Wiggly making tunnels')."
+    },
+    {
+      "name": "Acrostic Poem (p11)",
+      "description": "WORMS acrostic poem template with drawing space."
+    },
+    {
+      "name": "Information Sheets + Question Worksheets (p12-23)",
+      "description": "5 detailed info pages covering earthworm biology (lifespan, movement, breathing, reproduction, importance to gardens, lifecycle stages) each followed by reflection question worksheets. Blank question worksheet included for parent customization."
+    },
+    {
+      "name": "Morning Basket Pages (p24-41)",
+      "description": "18 pages of Pre-K/K activities: letter W tracing (upper + lower), letter recognition (circle the W), loose parts letter formation, garden sorting (cut-and-paste), maze, jigsaw puzzles (3 sets), size sorting cards, uppercase/lowercase letter matching with garden baskets, counting clip cards (how many worms? \u2014 8 cards across 4 pages)."
+    },
+    {
+      "name": "Lifecycle Flashcards (p42)",
+      "description": "Cut-out lifecycle stage images for flashcards or memory match game."
+    },
+    {
+      "name": "Outdoor Observation Activity (p43-44)",
+      "description": "Guided outdoor activity: dig in garden, find worms, measure with ruler. Observation report template: date, size, description, comparison ('was it bigger than the one before?')."
+    }
+  ],
+  "notes": "44 pages. Different creator than Stephanie Hathaway (no watercolor style \u2014 more digital/graphic illustration). Carolyng explicitly called out: art, reading comprehension, report, math, multiple disciplines, adaptable to multiple ages. The 'Morning Basket' section (18 pages!) is distinctive \u2014 it's a dedicated block of Pre-K activities themed to the same topic, so youngest children participate in the unit study alongside older siblings. The outdoor observation report is the first field-study activity we've seen \u2014 takes learning outside with measurement tools. The taxonomy card (Kingdom through Species) is surprisingly advanced content presented in a simple fill-in format. The blank question worksheet for parent customization is a UX insight \u2014 parents want to write their own questions tailored to their child."
+}

@@ -1,0 +1,68 @@
+{
+  "id": "ref-2026-07-17-dm-W3B",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 3B Workbook \u2014 Division by 8-9, Fractions on Number Lines",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice) > numbered problems",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Fractions",
+    "topics": [
+      "division by 8 and 9",
+      "long division",
+      "fractions on number line",
+      "fraction of a whole",
+      "word problems"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      108
+    ],
+    "complexity": "intermediate-to-advanced",
+    "prerequisites": [
+      "multiplication facts to 10",
+      "basic fraction concepts"
+    ],
+    "scaffolding": "moderate \u2014 step-by-step long division, number line scaffolds, check-your-work prompts"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale, number lines, division algorithms",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "procedural mastery",
+      "real-world word problems"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline",
+      "notes-and-practice-bundle"
+    ],
+    "gaps": [
+      "no visual/creative activities"
+    ]
+  },
+  "notes": "Grade 3B. Grayscale. Combines division mastery with fraction introduction via number lines \u2014 CPA approach."
+}

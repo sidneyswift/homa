@@ -1,0 +1,76 @@
+{
+  "id": "ref-2026-07-17-ba-4cmazeescape",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Maze Escape (Grade 4C)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "grid",
+    "spacing": "dense",
+    "visualHierarchy": "grid of fractions forming maze paths",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Fractions",
+    "topics": [
+      {
+        "id": "comparing-fractions",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "mixed-numbers",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "fraction-maze",
+        "suggestedSlug": "fraction-maze-escape"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "fraction-basics",
+      "fraction-comparison"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "maze-practice"
+    ],
+    "gaps": [
+      "fraction-maze-escape"
+    ]
+  },
+  "notes": "Navigate grid by comparing fractions"
+}

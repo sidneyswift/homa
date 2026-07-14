@@ -1,0 +1,70 @@
+{
+  "id": "ref-2026-07-17-ba-4ccrossnumberpuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Cross-Number Puzzles with Negatives (Grade 4C)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "grid",
+    "spacing": "airy",
+    "visualHierarchy": "numbered grid with mixed operations",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Addition & Subtraction",
+    "topics": [
+      {
+        "id": "integer-addition",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "integer-subtraction",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "negative-numbers"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": [
+      "cross-number-puzzle"
+    ]
+  },
+  "notes": "Cross-number puzzles with negative integers"
+}

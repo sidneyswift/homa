@@ -1,0 +1,75 @@
+{
+  "id": "ref-2026-07-17-ba-5ahivepuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Hive Puzzles with Negative Products (Grade 5A)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "airy",
+    "visualHierarchy": "hexagonal grid with negative numbers",
+    "whiteSpaceRatio": 0.5,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      {
+        "id": "integer-multiplication",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "logical-reasoning",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "product-path-puzzle",
+        "suggestedSlug": "product-path-hive"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      120,
+      132
+    ],
+    "complexity": "layered",
+    "prerequisites": [
+      "negative-numbers",
+      "multiplication-facts"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "product-path-hive",
+      "hexagonal-grid-puzzle"
+    ]
+  },
+  "notes": "Trace path of increasing products through hex grid"
+}

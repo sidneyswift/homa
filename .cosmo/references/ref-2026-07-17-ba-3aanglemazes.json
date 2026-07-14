@@ -1,0 +1,70 @@
+{
+  "id": "ref-2026-07-17-ba-3aanglemazes",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Angle Mazes (Grade 3A)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "airy",
+    "visualHierarchy": "maze paths with angular intersections",
+    "whiteSpaceRatio": 0.5,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Geometry",
+    "topics": [
+      {
+        "id": "angle-types",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "maze-angle-tracing",
+        "suggestedSlug": "maze-angle-tracing"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      108
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "angle-classification"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "maze-practice"
+    ],
+    "gaps": [
+      "angle-maze"
+    ]
+  },
+  "notes": "Trace path with only acute/obtuse angles"
+}

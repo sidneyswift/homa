@@ -1,0 +1,56 @@
+{
+  "id": "ref-2026-07-17-bs-ahb-2022-sample",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-17T22:07:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "curriculum-sample",
+  "title": "BookShark Ahb 2022 Sample",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "instruction-dominant",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "integrated-curriculum",
+    "topics": [],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      60,
+      72
+    ],
+    "ageBandGrades": "K",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "limited-palette",
+    "appealDrivers": [
+      "structured lessons",
+      "professional layout",
+      "clear progression"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 16 pages"
+    ]
+  },
+  "notes": "16-page curriculum-sample from atlas-scrape. Content preview: \u00a92022 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Intro to the World: Cultures\u2002 |\u2002 Section One\u2002 |\u2002 3\u2002 The BookShark\u2122 Instructor\u2019s Guide (IG) is ..."
+}

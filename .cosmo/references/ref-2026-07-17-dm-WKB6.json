@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-dm-WKB6",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Kindergarten B Workbook \u2014 Number Bonds & Putting Together",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "chapter > exercise > task",
+    "whiteSpaceRatio": 0.45,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Addition & Subtraction",
+    "topics": [
+      "number bonds",
+      "putting together",
+      "composing numbers",
+      "linking cubes representation"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      60,
+      72
+    ],
+    "complexity": "introductory-to-basic",
+    "prerequisites": [
+      "counting to 10",
+      "numeral writing"
+    ],
+    "scaffolding": "heavy \u2014 linking cube manipulatives, teacher directions, color-coded parts"
+  },
+  "theming": {
+    "themeType": "manipulative-based",
+    "characters": [],
+    "visualStyle": "clean flat illustration, full color, linking cube diagrams",
+    "colorPalette": "bright \u2014 teal, pink, yellow header",
+    "appealDrivers": [
+      "hands-on cube matching",
+      "color coding",
+      "flower counting"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "medium",
+    "colorRequirement": "full-color"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "counting-mat",
+      "cut-and-paste"
+    ],
+    "gaps": [
+      "no tracing",
+      "no maze"
+    ]
+  },
+  "notes": "Kindergarten B workbook introducing number bonds via linking cubes. Full color. Teacher notes specify physical manipulatives to distribute before each page."
+}

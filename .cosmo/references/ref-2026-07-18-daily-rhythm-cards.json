@@ -1,0 +1,154 @@
+{
+  "id": "ref-2026-07-18-daily-rhythm-cards",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T01:18:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784351923.234229",
+  "format": "card-system",
+  "title": "Printable Daily Rhythm Cards \u2014 Editable (unknown creator)",
+  "dropperComment": "love layout, art and breadth. Not much negative space because cards meant for printing. great for early elementary and under for scheduling, routine building and recognition.",
+  "layout": {
+    "structure": "grid",
+    "spacing": "dense",
+    "visualHierarchy": "illustration-dominant",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "grid-3x4"
+  },
+  "skillTargeting": {
+    "subject": "life-skills",
+    "domain": "Daily Living",
+    "topics": [
+      {
+        "id": "mt_TZ6weMcIsN",
+        "kind": "procedural",
+        "mapped": true,
+        "name": "Daily Routine Building"
+      },
+      {
+        "id": "mt_Pvw2Ck6yHU",
+        "kind": "conceptual",
+        "mapped": true,
+        "name": "Time Concepts"
+      },
+      {
+        "id": "mt_HWwQBQWRS_",
+        "kind": "conceptual",
+        "mapped": true,
+        "name": "Weather Recognition"
+      },
+      {
+        "id": "mt_k1u-rddlMM",
+        "kind": "procedural",
+        "mapped": true,
+        "name": "Self-Care Routines"
+      },
+      {
+        "id": "mt_fJNgOr_ike",
+        "kind": "procedural",
+        "mapped": true,
+        "name": "Chore Responsibility"
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      36,
+      96
+    ],
+    "ageBandGrades": "Pre-K to 3",
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "watercolor-illustration",
+    "colorPalette": "full-color-watercolor",
+    "appealDrivers": [
+      "watercolor art on every card",
+      "comprehensive breadth (200+ cards)",
+      "homeschool-specific subject cards",
+      "Charlotte Mason terminology (morning basket, nature study, copy work)"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "minimal",
+    "inkDensity": "high",
+    "colorRequirement": "needs color",
+    "printNotes": "Designed to be printed on cardstock, cut out. Hole punch for ring, or Velcro for chart."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "visual-schedule-cards"
+    ],
+    "gaps": [
+      "weather-cards: subset of visual-schedule-cards \u2014 weather-specific card grid",
+      "time-period-cards: subset of visual-schedule-cards \u2014 calendar/time-of-day specific card grid"
+    ]
+  },
+  "components": [
+    {
+      "name": "Morning / Self-Care Routine Cards (p2-4)",
+      "description": "36 cards: Wake up, Make your bed, Wash your face, Comb your hair, Brush your teeth, Use the restroom, Get dressed, Eat breakfast, Wash your hands, Put on shoes/jacket, Pack lunch, Read books, Eat lunch, Snack time, Quiet time, Naptime, Screen time, Homework, Puzzles, Cook/eat dinner, Take medicine, Pick up toys, Bath/shower, Pajamas, Bedtime, etc.",
+      "designPatterns": [
+        "Every routine activity a young child might do in a day",
+        "Watercolor illustration fills the card \u2014 instant visual recognition even for pre-readers"
+      ]
+    },
+    {
+      "name": "Activities / Outings Cards (p5-7)",
+      "description": "36+ cards: Bike ride, Birthday party, Hike, Dance class, Dentist, Doctor, Camping, Craft time, Walk, Grocery shopping, Church, Library, Park, Swimming, Play date, Music lessons, Petting zoo, Tutoring, Visit grandparents, Zoo, Sports (baseball, basketball, soccer), Pet care (walk dog, feed pet, clean litter box), etc.",
+      "designPatterns": [
+        "Covers both educational and recreational activities",
+        "Pet care and chores included \u2014 responsibility teaching"
+      ]
+    },
+    {
+      "name": "Chores Cards (p8-9)",
+      "description": "24+ cards: Shovel snow, Rake leaves, Mow lawn, Weed/water garden, Wash car, Get mail, Dishwasher, Wash dishes, Clean kitchen, Laundry (unload dryer, fold, put away), Clean bathroom/toilet/livingroom, Dust, Mop, Vacuum, Sweep, Wash windows.",
+      "designPatterns": [
+        "Comprehensive household chores",
+        "Age-appropriate for elementary"
+      ]
+    },
+    {
+      "name": "Special Activities / Homeschool Subject Cards (p10-12)",
+      "description": "36 cards: Farmers market, Vacation, Road trip, Occupational therapy, Collect eggs, Airplane, Games, Gardening, Movie night, Gymnastics, Field trip, Number work, Letter work, Museum, Science experiment, Sky gazing, Therapy, History, Artist study, Copy work, Nature study, Math, Morning basket, Geography, Social Studies, Reading, Nature journal, Nature walk, Yoga, Music, Foreign language, Language Arts, Cooking/baking, Read aloud.",
+      "designPatterns": [
+        "Charlotte Mason homeschool terminology: morning basket, nature study, copy work, artist study, nature journal",
+        "Covers every homeschool subject as a schedulable card",
+        "Therapy/OT cards = inclusive, acknowledges neurodivergent needs"
+      ]
+    },
+    {
+      "name": "Holiday Cards (p13)",
+      "description": "12 cards: Valentine's Day, Easter, Mother's Day, Father's Day, Memorial Day, Christmas Eve, Independence Day, New Year's Eve, Christmas, St. Patrick's Day, Thanksgiving, Poetry tea time.",
+      "designPatterns": [
+        "Seasonal/holiday schedule markers",
+        "Poetry tea time = Charlotte Mason tradition"
+      ]
+    },
+    {
+      "name": "Weather Cards (p14-15)",
+      "description": "24+ weather condition cards: cold, cloudy, drought, flood, foggy, forest fire, freezing rain, hail, hot, hurricane, ice, partly cloudy, rainy, snowy, sunny, thunderstorm, tornado, warm, windy, etc. Each card has watercolor weather illustration.",
+      "designPatterns": [
+        "Daily calendar/weather routine",
+        "Comprehensive weather vocabulary beyond basics"
+      ]
+    },
+    {
+      "name": "Time / Calendar Cards (p16-17)",
+      "description": "Morning, Afternoon, Evening, Night time (watercolor sky scenes). Today. Days of the week (Monday-Sunday, each a different bold watercolor color). Months of the year (January-December, color-coded watercolor squares progressing through the rainbow).",
+      "designPatterns": [
+        "Color-coded time concepts",
+        "Beautiful watercolor backgrounds \u2014 each day/month is a distinct color",
+        "Daily calendar board material"
+      ]
+    }
+  ],
+  "notes": "23 pages, 200+ cards. This is NOT a worksheet or unit study \u2014 it's a visual schedule system for structuring the homeschool day. The breadth is staggering: every routine activity, chore, outing, subject, holiday, weather condition, day, and month a homeschool family could need. Carolyng called out 'scheduling, routine building and recognition' \u2014 this is about the daily rhythm of homeschool life, not academic content. The Charlotte Mason vocabulary is everywhere: morning basket, nature study, copy work, artist study, nature journal, poetry tea time. This confirms Carolyng follows Charlotte Mason / eclectic methodology. The inclusion of therapy/OT cards and the 'editable' option signal awareness of neurodivergent needs and family customization. This is a product category Homa hasn't considered: not learning materials, but learning INFRASTRUCTURE \u2014 the tools that structure the homeschool day."
+}

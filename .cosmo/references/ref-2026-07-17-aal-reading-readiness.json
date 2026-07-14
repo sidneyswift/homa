@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-17-aal-reading-readiness",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "worksheet",
+  "title": "Reading Readiness Checklist",
+  "publisher": "All About Learning",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "bold-purple section headers with checkbox items beneath, clear category groupings",
+    "whiteSpaceRatio": 0.55,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "English",
+    "domain": "phonics/reading readiness",
+    "topics": ["letter knowledge", "print awareness", "listening comprehension", "phonological awareness", "motivation to read"],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 72],
+    "complexity": "assessment/checklist - parent-administered",
+    "prerequisites": ["none - this is a readiness assessment"],
+    "scaffolding": "parent-guided checklist with clear yes/no checkboxes per skill"
+  },
+  "theming": {
+    "themeType": "educational/informational",
+    "characters": [],
+    "visualStyle": "clean, professional, parent-facing with purple/blue accent colors",
+    "colorPalette": "purple, blue, beige, white",
+    "appealDrivers": ["parent confidence", "clear actionable checklist", "authoritative guidance"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "low",
+    "colorRequirement": "color-optional (works in grayscale)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["themed-worksheet"],
+    "gaps": ["No existing 'checklist' or 'assessment' recipe; closest is themed-worksheet but checklist format is distinct"]
+  },
+  "notes": "5-page parent-facing e-book/checklist. Cover page + intro letter + checklist pages. Big Five Skills framework. Very clean sectioned layout with checkboxes - could inspire a 'readiness-checklist' recipe template."
+}

@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-ba-5asolvingequations",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "practice-worksheet",
+  "title": "Solving Equations (Grade 5A)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "linear",
+    "spacing": "airy",
+    "visualHierarchy": "equation solving with blanks",
+    "whiteSpaceRatio": 0.5,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Algebra",
+    "topics": [
+      {
+        "id": "one-step-equations",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "multi-step-equations",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      120,
+      132
+    ],
+    "complexity": "layered",
+    "prerequisites": [
+      "order-of-operations",
+      "fraction-basics"
+    ],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": []
+  },
+  "notes": "Multi-step equation solving practice, 4 pages"
+}

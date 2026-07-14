@@ -1,0 +1,1391 @@
+{
+  "classifiedAt": "2026-07-17T22:55:00-04:00",
+  "totalPdfs": 98,
+  "totalPages": 2843,
+  "summary": {
+    "worksheet": 25,
+    "puzzle": 7,
+    "coursebook": 34,
+    "lesson-plan": 8,
+    "curriculum": 24
+  },
+  "routing": {
+    "reference-ingestion": 32,
+    "sample-pages-only": 34,
+    "curriculum-ingestion": 32
+  },
+  "items": [
+    {
+      "filename": "atlas-all-about-learning-reading-readiness.pdf",
+      "pageCount": 5,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": true
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-2acrossnumberpuzzles.pdf",
+      "pageCount": 3,
+      "category": "puzzle",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 2,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-2dadditionsubtractionpractice.pdf",
+      "pageCount": 7,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-3aanglemazes.pdf",
+      "pageCount": 2,
+      "category": "puzzle",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 2,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-3bblanktimestable.pdf",
+      "pageCount": 2,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-3dfractionlink.pdf",
+      "pageCount": 2,
+      "category": "puzzle",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 2,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-3dfragmentpuzzles.pdf",
+      "pageCount": 1,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 1,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4amultiplicationpractice.pdf",
+      "pageCount": 6,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4bhivepuzzles.pdf",
+      "pageCount": 4,
+      "category": "puzzle",
+      "confidence": "high",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 3,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4blongdivisionpuzzles.pdf",
+      "pageCount": 7,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4ccrossnumberpuzzles.pdf",
+      "pageCount": 3,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 1,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4cmazeescape.pdf",
+      "pageCount": 2,
+      "category": "puzzle",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 2,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4ddecimalpathpuzzles.pdf",
+      "pageCount": 3,
+      "category": "puzzle",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 2,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-4dfractiondecimalconversion.pdf",
+      "pageCount": 5,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-5ahivepuzzles.pdf",
+      "pageCount": 2,
+      "category": "puzzle",
+      "confidence": "high",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 3,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-5asolvingequations.pdf",
+      "pageCount": 4,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 1,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-5baveratilespuzzles.pdf",
+      "pageCount": 3,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 1,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-beast-academy-5dpythagoreantheorem.pdf",
+      "pageCount": 1,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-ahb-2022-sample.pdf",
+      "pageCount": 16,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 5,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-bhb-2026-3-week-sample.pdf",
+      "pageCount": 17,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 6,
+        "worksheet": 5,
+        "puzzle": 1,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-chb-2026-3-week-sample.pdf",
+      "pageCount": 20,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 6,
+        "worksheet": 5,
+        "puzzle": 0,
+        "lessonPlan": 3,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-dhb-2026-3-week-sample.pdf",
+      "pageCount": 22,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 5,
+        "worksheet": 5,
+        "puzzle": 0,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-ehb-2026-3-week-sample.pdf",
+      "pageCount": 23,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 5,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-fhb-2025-3-week-sample.pdf",
+      "pageCount": 22,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 4,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-ghb-2024-3-week-sample.pdf",
+      "pageCount": 28,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 4,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 2,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-bookshark-phb-2026-3-week-sample.pdf",
+      "pageCount": 14,
+      "category": "lesson-plan",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 4,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-T2A.pdf",
+      "pageCount": 12,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-T3A.pdf",
+      "pageCount": 15,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-T4A.pdf",
+      "pageCount": 16,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-T5A.pdf",
+      "pageCount": 15,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W1A.pdf",
+      "pageCount": 15,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W1B.pdf",
+      "pageCount": 19,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W2A.pdf",
+      "pageCount": 16,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W2B.pdf",
+      "pageCount": 16,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W3A.pdf",
+      "pageCount": 14,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W3B.pdf",
+      "pageCount": 14,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W4A.pdf",
+      "pageCount": 15,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-W5A.pdf",
+      "pageCount": 13,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-WKA2.pdf",
+      "pageCount": 20,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-WKB6.pdf",
+      "pageCount": 14,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 6,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-dimensions-math-WPKA.pdf",
+      "pageCount": 13,
+      "category": "worksheet",
+      "confidence": "medium",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-1_beginning_recorder_sample-lesson-2020-1.pdf",
+      "pageCount": 14,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-2_intermediate_recorder_sample-lesson-2020.pdf",
+      "pageCount": 14,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-3_advanced_recorder_sample-lesson.pdf",
+      "pageCount": 10,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-3rd-grade-coursebook-curriculum-sample.pdf",
+      "pageCount": 99,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-4_recorder_duets_sample-lesson.pdf",
+      "pageCount": 7,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 0,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-algebra-1-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 32,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-algebra-2-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 26,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-american-literature-classics-2nd-edition-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 29,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-american-literature-the-westward-journey-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 21,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-british-literature-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 24,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-chemistry-matters-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 55,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-composition-1-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 21,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-composition-2-coursebook-high-school.pdf",
+      "pageCount": 42,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-crafts-for-the-early-grades-curriculum-sample.pdf",
+      "pageCount": 18,
+      "category": "coursebook",
+      "confidence": "low",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-critical-media-literacy-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 34,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-drawing-and-design-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 18,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-economics-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 28,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-environmental-science-coursebook-2nd-edition-curriculum-sample-hs.pdf",
+      "pageCount": 55,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-foodways-sustainable-food-systems-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 21,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-forensic-science-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 37,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-french-1-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 34,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-fundamentals-of-physics-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 96,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-geometry-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 32,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-global-climate-change-coursebook-high-school.pdf",
+      "pageCount": 72,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-1-coursebook-curriculum-sample.pdf",
+      "pageCount": 93,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-1-resource-book-curriculum-sample.pdf",
+      "pageCount": 68,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-2-coursebook-curriculum-sample.pdf",
+      "pageCount": 96,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-2-resource-book-curriculum-sample.pdf",
+      "pageCount": 40,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-3-resource-book-curriculum-sample.pdf",
+      "pageCount": 49,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 3,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-4-coursebook-curriculum-sample.pdf",
+      "pageCount": 98,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-4-math-coursebook-curriculum-sample.pdf",
+      "pageCount": 60,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 2,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-6-ancient-civilizations-coursebook-curriculum-sample.pdf",
+      "pageCount": 60,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 4,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-6-basic-life-science-coursebook-curriculum-sample.pdf",
+      "pageCount": 54,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-6-english-coursebook-curriculum-sample.pdf",
+      "pageCount": 54,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-6-math-coursebook-curriculum-sample-july-2021.pdf",
+      "pageCount": 37,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-7-earth-science-coursebook-curriculum-sample.pdf",
+      "pageCount": 49,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-7-math-coursebook-curriculum-sample-july-2021.pdf",
+      "pageCount": 50,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-7-world-history-coursebook-curriculum-sample.pdf",
+      "pageCount": 46,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade-8-physical-science-coursebook-curriculum-sample.pdf",
+      "pageCount": 70,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-grade_5_math_coursebook_curriculum_sample_july_2021.pdf",
+      "pageCount": 33,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-heros-journey-literature-composition-coursebook-2nd-edition-curriculum-sample-hs.pdf",
+      "pageCount": 42,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-integrated-drawing-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 11,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 4,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-kindergarten-coursebook-curriculum-sample-june-2021.pdf",
+      "pageCount": 81,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-kindergarten-resource-book-curriculum-sample.pdf",
+      "pageCount": 48,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 3,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 1,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-latin-american-literature-borders-identity-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 38,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-math-connections-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 43,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 1,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-painting-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 14,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-photography-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 18,
+      "category": "worksheet",
+      "confidence": "low",
+      "route": "reference-ingestion",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 1,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-preschool-play-seasons-of-wonder-curriculum-sample.pdf",
+      "pageCount": 62,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-race-and-ethnic-studies-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 26,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-spanish-1-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 30,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-spanish-2-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 26,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-spanish-3-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 24,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-us-government-by-the-people-for-the-people-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 26,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-word-the-poets-voice-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 25,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-world-geography-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 57,
+      "category": "curriculum",
+      "confidence": "medium",
+      "route": "curriculum-ingestion",
+      "signals": {
+        "curriculum": 2,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    },
+    {
+      "filename": "atlas-oak-meadow-world-literature-africa-and-beyond-coursebook-curriculum-sample-hs.pdf",
+      "pageCount": 25,
+      "category": "coursebook",
+      "confidence": "medium",
+      "route": "sample-pages-only",
+      "signals": {
+        "curriculum": 1,
+        "worksheet": 0,
+        "puzzle": 0,
+        "lessonPlan": 0,
+        "imageHeavy": false
+      }
+    }
+  ]
+}

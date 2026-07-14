@@ -1,0 +1,45 @@
+{
+  "id": "ref-2026-07-13-beast-academy-printables",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-13T22:05:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "worksheet",
+  "title": "Beast Academy — Free Printable Math Worksheets & Puzzles (Grades 1-5)",
+  "sourceUrl": "https://beastacademy.com/resources/printables",
+  "fileCount": 17,
+  "files": [
+    "atlas-beast-academy-3aanglemazes.pdf",
+    "atlas-beast-academy-3bblanktimestable.pdf",
+    "atlas-beast-academy-3dfractionlink.pdf",
+    "atlas-beast-academy-3dfragmentpuzzles.pdf",
+    "atlas-beast-academy-4amultiplicationpractice.pdf",
+    "atlas-beast-academy-4blongdivisionpuzzles.pdf",
+    "atlas-beast-academy-4bhivepuzzles.pdf",
+    "atlas-beast-academy-4ccrossnumberpuzzles.pdf",
+    "atlas-beast-academy-4cmazeescape.pdf",
+    "atlas-beast-academy-4ddecimalpathpuzzles.pdf",
+    "atlas-beast-academy-4dfractiondecimalconversion.pdf",
+    "atlas-beast-academy-5asolvingequations.pdf",
+    "atlas-beast-academy-5ahivepuzzles.pdf",
+    "atlas-beast-academy-5baveratilespuzzles.pdf",
+    "atlas-beast-academy-5dpythagoreantheorem.pdf",
+    "atlas-beast-academy-2dadditionsubtractionpractice.pdf",
+    "atlas-beast-academy-2acrossnumberpuzzles.pdf"
+  ],
+  "layout": {
+    "style": "puzzle-worksheet",
+    "colorMode": "bw",
+    "density": "medium",
+    "illustration": "comic-style-monsters"
+  },
+  "skillTargeting": {
+    "subjects": ["math"],
+    "skills": ["arithmetic", "fractions", "multiplication", "division", "equations", "geometry", "number-sense"],
+    "gradeRange": "1-5"
+  },
+  "difficulty": {
+    "range": "grade1-grade5",
+    "scaffolding": "progressive-by-level"
+  },
+  "notes": "132 total free printables available. Downloaded 17 curated worksheet-style PDFs. Unique format: puzzle-based learning (mazes, hive puzzles, cross-number puzzles). Comic-book aesthetic with monster characters. Note: 'printables' are supplements to the main curriculum, not standalone worksheets."
+}

@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-ba-4bhivepuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Hive Puzzles (Grade 4B)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "airy",
+    "visualHierarchy": "hexagonal grid puzzles",
+    "whiteSpaceRatio": 0.55,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Mathematical Thinking",
+    "topics": [
+      {
+        "id": "logical-reasoning",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "hive-constraint-puzzle",
+        "suggestedSlug": "hive-puzzle"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "layered",
+    "prerequisites": [
+      "number-sense"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "hive-puzzle",
+      "hexagonal-grid-puzzle"
+    ]
+  },
+  "notes": "Fill hexagons 1-7 with adjacency constraints"
+}

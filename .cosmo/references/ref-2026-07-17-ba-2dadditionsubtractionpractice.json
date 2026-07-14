@@ -1,0 +1,68 @@
+{
+  "id": "ref-2026-07-17-ba-2dadditionsubtractionpractice",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "practice-worksheet",
+  "title": "Addition & Subtraction Practice (Grade 2D)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "linear",
+    "spacing": "dense",
+    "visualHierarchy": "columnar arithmetic problems",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Addition & Subtraction",
+    "topics": [
+      {
+        "id": "addition-multi-digit",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "subtraction-multi-digit",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      84,
+      96
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "addition-basics"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": []
+  },
+  "notes": "Standard vertical addition/subtraction drill, 7 pages"
+}

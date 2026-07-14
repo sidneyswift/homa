@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-17-om-integrated-drawing",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "coursebook",
+  "title": "Integrated Drawing Coursebook",
+  "publisher": "Oak Meadow",
+  "layout": {
+    "structure": "linear",
+    "spacing": "airy",
+    "visualHierarchy": "lesson numbers > lesson titles, clean TOC, no unit groupings (flat lesson list)",
+    "whiteSpaceRatio": 0.55,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "Art",
+    "domain": "integrated drawing",
+    "topics": ["perceptual skills", "lines", "brain research (left-right brain)", "contour drawing", "negative space", "perspective", "proportion", "portrait drawing", "self-portrait", "cross-hatching", "color basics", "landscape", "creative problem-solving"],
+    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+  },
+  "difficulty": {
+    "ageBandMonths": [168, 216],
+    "complexity": "high - 36 sequential lessons integrating cognitive science with drawing practice",
+    "prerequisites": ["none explicitly stated - includes left-right brain survey"],
+    "scaffolding": "perception → technique → portrait → color → self-reflection"
+  },
+  "theming": {
+    "themeType": "academic/cognitive-art",
+    "characters": [],
+    "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
+    "colorPalette": "dark red, brown, green, white",
+    "appealDrivers": ["brain science integration", "self-discovery through art", "progressive skill building"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low",
+    "colorRequirement": "minimal"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["structured-outline", "notes-and-practice-bundle"],
+    "gaps": ["No 'art-lesson' or 'cognitive-drawing' recipe; brain-research integration is unique"]
+  },
+  "notes": "36-lesson coursebook incorporating cognitive science (left-right brain research). Unique blend of perceptual training and drawing technique. Includes left-right brain survey + answer key. Flat lesson structure (no units) unlike Drawing & Design."
+}

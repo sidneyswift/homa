@@ -1,0 +1,65 @@
+{
+  "id": "ref-2026-07-17-ba-2acrossnumberpuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Cross-Number Puzzles (Grade 2A)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "grid",
+    "spacing": "airy",
+    "visualHierarchy": "numbered grid with operators",
+    "whiteSpaceRatio": 0.45,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Addition & Subtraction",
+    "topics": [
+      {
+        "id": "addition-multi-digit",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      84,
+      96
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "addition-basics"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": [
+      "cross-number-puzzle"
+    ]
+  },
+  "notes": "Cross-number addition grids requiring row+column sums"
+}

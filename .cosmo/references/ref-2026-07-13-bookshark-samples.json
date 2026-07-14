@@ -1,0 +1,26 @@
+{
+  "id": "ref-2026-07-13-bookshark-samples",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-13T22:07:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "lesson-plan",
+  "title": "BookShark — 3-Week Instructor Guide Samples (History, Science, LA)",
+  "sourceUrl": "https://www.bookshark.com/instructors-guide-samples",
+  "fileCount": 8,
+  "layout": {
+    "style": "instructor-guide",
+    "colorMode": "mixed",
+    "density": "high",
+    "illustration": "minimal"
+  },
+  "skillTargeting": {
+    "subjects": ["history", "science", "language-arts"],
+    "skills": ["reading-comprehension", "discussion", "mapping", "timeline"],
+    "gradeRange": "K-8"
+  },
+  "difficulty": {
+    "range": "kindergarten-grade8",
+    "scaffolding": "literature-based"
+  },
+  "notes": "3-week lesson plan samples from multiple levels. Literature-based curriculum with discussion questions, vocabulary, mapping, and timeline activities. Good reference for lesson plan structure and scheduling (4-day/36-week model)."
+}

@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-17-om-painting",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "coursebook",
+  "title": "Painting Coursebook",
+  "publisher": "Oak Meadow",
+  "layout": {
+    "structure": "linear",
+    "spacing": "airy",
+    "visualHierarchy": "lesson numbers > descriptive lesson titles, clean TOC with dotted leaders",
+    "whiteSpaceRatio": 0.55,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "Art",
+    "domain": "painting",
+    "topics": ["color wheel", "primary/secondary colors", "still life", "portrait", "self-portrait", "texture", "patterns", "landscape composition", "abstract art", "canvas stretching", "light effects", "impressionism"],
+    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+  },
+  "difficulty": {
+    "ageBandMonths": [168, 216],
+    "complexity": "high - 36 lessons progressing from color theory to final independent project",
+    "prerequisites": ["basic drawing skills recommended"],
+    "scaffolding": "color theory → still life → portrait → landscape → abstract → final project"
+  },
+  "theming": {
+    "themeType": "academic/studio art",
+    "characters": [],
+    "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
+    "colorPalette": "dark red, brown, green, white",
+    "appealDrivers": ["creative expression", "master study", "progressive mastery", "portfolio development"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low",
+    "colorRequirement": "minimal (coursebook text; actual painting is hands-on)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["structured-outline", "notes-and-practice-bundle"],
+    "gaps": ["No 'painting-lesson' or 'studio-project' recipe"]
+  },
+  "notes": "36-lesson painting coursebook. Strong progression from fundamentals to independent final project (lessons 33-36). Includes canvas stretching (lesson 22) - practical craft skills. Multi-lesson series format (e.g., 3-lesson still life painting sequence)."
+}

@@ -1,0 +1,26 @@
+{
+  "id": "ref-2026-07-13-dimensions-math-samples",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-13T22:06:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "worksheet",
+  "title": "Dimensions Math (Singapore Math) — Official Sample Workbook & Textbook Pages (PK-5)",
+  "sourceUrl": "https://www.singaporemath.com/pages/sample-pages",
+  "fileCount": 15,
+  "layout": {
+    "style": "singapore-math-workbook",
+    "colorMode": "full-color",
+    "density": "medium-high",
+    "illustration": "clean-educational"
+  },
+  "skillTargeting": {
+    "subjects": ["math"],
+    "skills": ["number-bonds", "place-value", "bar-models", "word-problems", "arithmetic", "fractions", "geometry"],
+    "gradeRange": "PK-5"
+  },
+  "difficulty": {
+    "range": "preK-grade5",
+    "scaffolding": "mastery-based"
+  },
+  "notes": "Flagship curriculum in the atlas. Sample pages include both textbook (T) and workbook (W) pages. Singapore math approach with bar models and number bonds. Full-color, high production value. This is the gold standard for Homa's math worksheet design."
+}

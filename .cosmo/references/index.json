@@ -2,7 +2,7 @@
   "references": [
     {
       "id": "ref-2026-07-17-two-step-equations-maze",
-      "title": "Two-Step Equations Notes + Maze Activity (All Things Algebra)",
+      "title": "Two-Step Equations Notes + Maze Activity",
       "droppedBy": "sid",
       "droppedAt": "2026-07-17T08:55:00-04:00",
       "subject": "math",
@@ -11,7 +11,7 @@
     },
     {
       "id": "ref-2026-07-17-short-a-cvc-cut-paste",
-      "title": "Short A CVC Words — Write, Cut & Paste Activity (Adapting for Autism)",
+      "title": "Short A CVC Words \u2014 Write, Cut & Paste Activity",
       "droppedBy": "sid",
       "droppedAt": "2026-07-17T16:52:00-04:00",
       "subject": "ela",
@@ -29,12 +29,660 @@
     },
     {
       "id": "ref-2026-07-17-social-story-frustrated",
-      "title": "When I Get Frustrated — Social Story (Allison Fors)",
+      "title": "When I Get Frustrated \u2014 Social Story",
       "droppedBy": "sid",
       "droppedAt": "2026-07-17T21:52:00-04:00",
       "subject": "personal-social-development",
       "domain": "emotional-literacy",
       "format": "mini-book"
+    },
+    {
+      "id": "ref-2026-07-17-human-heart-unit-study",
+      "title": "Human Heart Mini Unit Study",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T01:11:00-04:00",
+      "subject": "science",
+      "domain": "human-body",
+      "format": "unit-study-packet"
+    },
+    {
+      "id": "ref-2026-07-18-beach-unit-study",
+      "title": "At the Beach Unit Study Parts 1 & 2",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T01:13:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "nature-science",
+      "format": "unit-study-packet"
+    },
+    {
+      "id": "ref-2026-07-18-worm-unit-study",
+      "title": "Earthworm Unit Study Pack",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T01:16:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "nature-science",
+      "format": "unit-study-packet"
+    },
+    {
+      "id": "ref-2026-07-18-minibeast-pack",
+      "title": "Minibeast Pack (Fiddlesticks Kids)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T01:17:00-04:00",
+      "subject": "science",
+      "domain": "nature-study",
+      "format": "activity-pack"
+    },
+    {
+      "id": "ref-2026-07-18-daily-rhythm-cards",
+      "title": "Printable Daily Rhythm Cards",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T01:18:00-04:00",
+      "subject": "life-skills",
+      "domain": "daily-living",
+      "format": "card-system"
+    },
+    {
+      "id": "ref-2026-07-12-pemdas-foldable",
+      "title": "PEMDAS Foldable (Order of Operations)",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "worksheet",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-12T22:00:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-12-five-paragraph-essay-outline",
+      "title": "Five Paragraph Essay Outline",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "worksheet",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-12T22:05:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-dm-T2A",
+      "title": "Dimensions Math Textbook 2A",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "textbook-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:06:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-dm-T3A",
+      "title": "Dimensions Math Textbook 3A",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "textbook-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:06:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-dm-T4A",
+      "title": "Dimensions Math Textbook 4A",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "textbook-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:06:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-dm-T5A",
+      "title": "Dimensions Math Textbook 5A",
+      "subject": "math",
+      "domain": "operations-algebraic-thinking",
+      "format": "textbook-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:06:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-ahb-2022-sample",
+      "title": "BookShark Ahb 2022 Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-bhb-2026-3-week-sample",
+      "title": "BookShark Bhb 2026 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-chb-2026-3-week-sample",
+      "title": "BookShark Chb 2026 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-dhb-2026-3-week-sample",
+      "title": "BookShark Dhb 2026 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-ehb-2026-3-week-sample",
+      "title": "BookShark Ehb 2026 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-fhb-2025-3-week-sample",
+      "title": "BookShark Fhb 2025 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-ghb-2024-3-week-sample",
+      "title": "BookShark Ghb 2024 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-bs-phb-2026-3-week-sample",
+      "title": "BookShark Phb 2026 3 Week Sample",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:07:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-1_beginning_recorder_sample-lesson-2020-1",
+      "title": "Oak Meadow 1 Beginning Recorder Sample Lesson 2020 1",
+      "subject": "music",
+      "domain": "instrumental",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-2_intermediate_recorder_sample-lesson-2020",
+      "title": "Oak Meadow 2 Intermediate Recorder Sample Lesson 2020",
+      "subject": "music",
+      "domain": "instrumental",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-3_advanced_recorder_sample-lesson",
+      "title": "Oak Meadow 3 Advanced Recorder Sample Lesson",
+      "subject": "music",
+      "domain": "instrumental",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-3rd-grade-coursebook-curriculum-sample",
+      "title": "Oak Meadow 3Rd Grade Coursebook Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-4_recorder_duets_sample-lesson",
+      "title": "Oak Meadow 4 Recorder Duets Sample Lesson",
+      "subject": "music",
+      "domain": "instrumental",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-algebra-1-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Algebra 1 Coursebook Curriculum Sample HS",
+      "subject": "math",
+      "domain": "algebra",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-algebra-2-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Algebra 2 Coursebook Curriculum Sample HS",
+      "subject": "math",
+      "domain": "algebra",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-american-literature-classics-2nd-edition-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow American Literature Classics 2Nd Edition Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "literature",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-american-literature-the-westward-journey-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow American Literature The Westward Journey Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "literature",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-british-literature-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow British Literature Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "literature",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-chemistry-matters-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Chemistry Matters Coursebook Curriculum Sample HS",
+      "subject": "science",
+      "domain": "chemistry",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-composition-1-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Composition 1 Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "writing",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-composition-2-coursebook-high-school",
+      "title": "Oak Meadow Composition 2 Coursebook High School",
+      "subject": "ela",
+      "domain": "writing",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-crafts-for-the-early-grades-curriculum-sample",
+      "title": "Oak Meadow Crafts For The Early Grades Curriculum Sample",
+      "subject": "art",
+      "domain": "visual-arts",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-critical-media-literacy-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Critical Media Literacy Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "media-literacy",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-economics-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Economics Coursebook Curriculum Sample HS",
+      "subject": "social-studies",
+      "domain": "economics",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-environmental-science-coursebook-2nd-edition-curriculum-sample-hs",
+      "title": "Oak Meadow Environmental Science Coursebook 2Nd Edition Curriculum Sample HS",
+      "subject": "science",
+      "domain": "environmental-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-foodways-sustainable-food-systems-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Foodways Sustainable Food Systems Coursebook Curriculum Sample HS",
+      "subject": "science",
+      "domain": "environmental-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-forensic-science-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Forensic Science Coursebook Curriculum Sample HS",
+      "subject": "science",
+      "domain": "forensic-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-french-1-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow French 1 Coursebook Curriculum Sample HS",
+      "subject": "world-languages",
+      "domain": "french",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-fundamentals-of-physics-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Fundamentals Of Physics Coursebook Curriculum Sample HS",
+      "subject": "science",
+      "domain": "physics",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-geometry-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Geometry Coursebook Curriculum Sample HS",
+      "subject": "math",
+      "domain": "geometry",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-global-climate-change-coursebook-high-school",
+      "title": "Oak Meadow Global Climate Change Coursebook High School",
+      "subject": "science",
+      "domain": "environmental-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-1-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 1 Coursebook Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-1-resource-book-curriculum-sample",
+      "title": "Oak Meadow Grade 1 Resource Book Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-2-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 2 Coursebook Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-2-resource-book-curriculum-sample",
+      "title": "Oak Meadow Grade 2 Resource Book Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-3-resource-book-curriculum-sample",
+      "title": "Oak Meadow Grade 3 Resource Book Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-4-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 4 Coursebook Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-4-math-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 4 Math Coursebook Curriculum Sample",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-6-ancient-civilizations-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 6 Ancient Civilizations Coursebook Curriculum Sample",
+      "subject": "social-studies",
+      "domain": "ancient-civilizations",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-6-basic-life-science-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 6 Basic Life Science Coursebook Curriculum Sample",
+      "subject": "science",
+      "domain": "life-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-6-english-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 6 English Coursebook Curriculum Sample",
+      "subject": "ela",
+      "domain": "english-language-arts",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-6-math-coursebook-curriculum-sample-july-2021",
+      "title": "Oak Meadow Grade 6 Math Coursebook Curriculum Sample July 2021",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-7-earth-science-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 7 Earth Science Coursebook Curriculum Sample",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-7-math-coursebook-curriculum-sample-july-2021",
+      "title": "Oak Meadow Grade 7 Math Coursebook Curriculum Sample July 2021",
+      "subject": "math",
+      "domain": "operations-algebraic-thinking",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-7-world-history-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 7 World History Coursebook Curriculum Sample",
+      "subject": "social-studies",
+      "domain": "world-history",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade-8-physical-science-coursebook-curriculum-sample",
+      "title": "Oak Meadow Grade 8 Physical Science Coursebook Curriculum Sample",
+      "subject": "science",
+      "domain": "physical-science",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-grade_5_math_coursebook_curriculum_sample_july_2021",
+      "title": "Oak Meadow Grade 5 Math Coursebook Curriculum Sample July 2021",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-heros-journey-literature-composition-coursebook-2nd-edition-curriculum-sample-hs",
+      "title": "Oak Meadow Heros Journey Literature Composition Coursebook 2Nd Edition Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "writing",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-kindergarten-coursebook-curriculum-sample-june-2021",
+      "title": "Oak Meadow Kindergarten Coursebook Curriculum Sample June 2021",
+      "subject": "art",
+      "domain": "visual-arts",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-kindergarten-resource-book-curriculum-sample",
+      "title": "Oak Meadow Kindergarten Resource Book Curriculum Sample",
+      "subject": "art",
+      "domain": "visual-arts",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-latin-american-literature-borders-identity-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Latin American Literature Borders Identity Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "literature",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-math-connections-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Math Connections Coursebook Curriculum Sample HS",
+      "subject": "math",
+      "domain": "general-math",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-preschool-play-seasons-of-wonder-curriculum-sample",
+      "title": "Oak Meadow Preschool Play Seasons Of Wonder Curriculum Sample",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-race-and-ethnic-studies-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Race And Ethnic Studies Coursebook Curriculum Sample HS",
+      "subject": "social-studies",
+      "domain": "ethnic-studies",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-spanish-1-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Spanish 1 Coursebook Curriculum Sample HS",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-spanish-2-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Spanish 2 Coursebook Curriculum Sample HS",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-spanish-3-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Spanish 3 Coursebook Curriculum Sample HS",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-us-government-by-the-people-for-the-people-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Us Government By The People For The People Coursebook Curriculum Sample HS",
+      "subject": "social-studies",
+      "domain": "civics",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-word-the-poets-voice-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow Word The Poets Voice Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "writing",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-world-geography-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow World Geography Coursebook Curriculum Sample HS",
+      "subject": "social-studies",
+      "domain": "world-geography",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-17-om-world-literature-africa-and-beyond-coursebook-curriculum-sample-hs",
+      "title": "Oak Meadow World Literature Africa And Beyond Coursebook Curriculum Sample HS",
+      "subject": "ela",
+      "domain": "literature",
+      "format": "curriculum-sample",
+      "droppedBy": "cosmo-atlas-scrape",
+      "droppedAt": "2026-07-17T22:08:00-04:00"
     }
   ]
 }

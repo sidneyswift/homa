@@ -1,0 +1,53 @@
+{
+  "id": "ref-2026-07-12-five-paragraph-essay-outline",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-12T22:05:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "format": "worksheet",
+  "title": "Five Paragraph Essay Outline",
+  "layout": {
+    "structure": "linear-top-to-bottom",
+    "spacing": "mixed",
+    "visualHierarchy": "activity-area-dominant",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "integrated-curriculum",
+    "topics": [],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      168
+    ],
+    "ageBandGrades": "3-9",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "structured format",
+      "clear instructions"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "8-page worksheet from homa-inspo. Content preview: Thank you for purchasing this resource. Please read the terms of use before distributing these materials.  This purchase is good for a single-teacher/classroom license for use in one  classroom. If yo..."
+}

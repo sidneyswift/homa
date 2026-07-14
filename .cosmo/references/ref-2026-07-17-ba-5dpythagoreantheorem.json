@@ -1,0 +1,66 @@
+{
+  "id": "ref-2026-07-17-ba-5dpythagoreantheorem",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "manipulative-cutout",
+  "title": "Pythagorean Theorem Cut-Out Activity (Grade 5D)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "airy",
+    "visualHierarchy": "cut-out shapes for hands-on proof",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Geometry",
+    "topics": [
+      {
+        "id": "pythagorean-theorem",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      120,
+      132
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "area",
+      "right-triangles"
+    ],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "cut-and-paste"
+    ],
+    "gaps": [
+      "manipulative-cutout"
+    ]
+  },
+  "notes": "Cut-out triangles and square for Pythagorean theorem activity"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "ref-2026-07-17-om-composition-2-coursebook-high-school",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-17T22:08:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "curriculum-sample",
+  "title": "Oak Meadow Composition 2 Coursebook High School",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "instruction-dominant",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "writing",
+    "topics": [],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      168,
+      216
+    ],
+    "ageBandGrades": "9-12",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "limited-palette",
+    "appealDrivers": [
+      "structured lessons",
+      "professional layout",
+      "clear progression"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 42 pages"
+    ]
+  },
+  "notes": "42-page curriculum-sample from atlas-scrape. Content preview: Composition 2:  Creative Writing  and Nonfiction Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t \t iii Table of Contents Introduction....................."
+}

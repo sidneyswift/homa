@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-17-om-drawing-design",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "coursebook",
+  "title": "Drawing and Design Coursebook",
+  "publisher": "Oak Meadow",
+  "layout": {
+    "structure": "linear",
+    "spacing": "airy",
+    "visualHierarchy": "unit headers > lesson titles, clean TOC with dotted leaders, minimal decoration",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "Art",
+    "domain": "drawing and design",
+    "topics": ["gestural drawing", "contour line", "form and value", "cross-hatching", "charcoal", "colored pencils", "pastels", "self-portrait", "perspective", "mosaics"],
+    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+  },
+  "difficulty": {
+    "ageBandMonths": [168, 216],
+    "complexity": "high - sequential skill-building across 30+ lessons with midterm/final projects",
+    "prerequisites": ["basic drawing experience helpful but not required"],
+    "scaffolding": "progressive unit structure: gestural → contour → form → advanced media"
+  },
+  "theming": {
+    "themeType": "academic/studio art",
+    "characters": [],
+    "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
+    "colorPalette": "dark red, brown, green, white",
+    "appealDrivers": ["self-directed learning", "progressive mastery", "portfolio development"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low",
+    "colorRequirement": "minimal (mostly text, color not essential)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["structured-outline", "notes-and-practice-bundle"],
+    "gaps": ["No 'studio-project' or 'art-lesson' recipe; coursebook format with progressive lessons not covered by existing recipes"]
+  },
+  "notes": "Two-part coursebook (Part I: Lessons 1-18 with midterm, Part II: Lessons 19-30+). Covers drawing fundamentals through advanced techniques. Strong sequential scaffolding. Sample pages are mostly TOC/title - content pages would be text-instruction heavy."
+}

@@ -1,0 +1,63 @@
+{
+  "id": "ref-2026-07-17-ba-3bblanktimestable",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "practice-worksheet",
+  "title": "Blank Times Table (Grade 3B)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "grid",
+    "spacing": "airy",
+    "visualHierarchy": "11x11 multiplication grid",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "left-to-right"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      {
+        "id": "multiplication-facts",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      108
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "skip-counting"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": []
+  },
+  "notes": "Blank times table grid for memorization"
+}

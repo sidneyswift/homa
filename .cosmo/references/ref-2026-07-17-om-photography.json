@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-17-om-photography",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "coursebook",
+  "title": "The Eye, the Shutter, the Light, the Color: An Introduction to Photography",
+  "publisher": "Oak Meadow",
+  "layout": {
+    "structure": "linear",
+    "spacing": "airy",
+    "visualHierarchy": "lesson numbers > single-word/phrase titles, compact TOC",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "Art",
+    "domain": "photography",
+    "topics": ["light", "composition", "framing", "color", "complementary colors", "black and white", "natural vs artificial light", "portraits", "patterns and textures", "motion", "documentary", "mood", "depth of field", "focus", "landscape", "narrative"],
+    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+  },
+  "difficulty": {
+    "ageBandMonths": [168, 216],
+    "complexity": "moderate - 18 lessons (shorter than other Oak Meadow art courses)",
+    "prerequisites": ["access to camera (digital or film)"],
+    "scaffolding": "technical fundamentals → genres → advanced techniques"
+  },
+  "theming": {
+    "themeType": "academic/creative technology",
+    "characters": [],
+    "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
+    "colorPalette": "dark red, brown, green, white",
+    "appealDrivers": ["creative expression through technology", "visual literacy", "real-world application"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low",
+    "colorRequirement": "minimal (instruction text; actual photography is hands-on)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["structured-outline"],
+    "gaps": ["No 'photography-lesson' or 'digital-art' recipe; technology-dependent art form not covered"]
+  },
+  "notes": "18-lesson photography course - notably shorter than other Oak Meadow art coursebooks (36 lessons). Poetic title. Includes journal-based learning and 'shooting' assignments. Technology troubleshooting section included. Covers both technical (depth of field, focus) and artistic (mood, narrative) aspects."
+}

@@ -1,0 +1,53 @@
+{
+  "id": "ref-2026-07-12-pemdas-foldable",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-12T22:00:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "format": "worksheet",
+  "title": "PEMDAS Foldable (Order of Operations)",
+  "layout": {
+    "structure": "linear-top-to-bottom",
+    "spacing": "mixed",
+    "visualHierarchy": "activity-area-dominant",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "integrated-curriculum",
+    "topics": [],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      168
+    ],
+    "ageBandGrades": "3-9",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "structured format",
+      "clear instructions"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "25-page worksheet from homa-inspo. Content preview: Thank You for downloading this FREE Math Doodles Foldable!   This Order of Operations foldable is also found in these bundles:   The PowerPoint file is found in the main file download.  Play the Power..."
+}

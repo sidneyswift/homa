@@ -1,0 +1,66 @@
+{
+  "id": "ref-2026-07-17-dm-W2A",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 2A Workbook \u2014 Numbers to 1000, Addition & Subtraction Strategies",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice/Challenge) > numbered problems",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Number Representation & Place Value",
+    "topics": [
+      "counting by ones/tens/hundreds",
+      "numbers to 1000",
+      "addition strategies (making 10)",
+      "number bonds"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      84,
+      96
+    ],
+    "complexity": "intermediate",
+    "prerequisites": [
+      "place value to 100",
+      "addition to 40"
+    ],
+    "scaffolding": "moderate \u2014 visual circle-to-make-10, number bond diagrams"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale, number lines and number bonds",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "structured progression",
+      "mental math strategies"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low-medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline"
+    ],
+    "gaps": [
+      "no visual/creative activities"
+    ]
+  },
+  "notes": "Grade 2A. Grayscale. Extends place value to 1000 and continues Singapore Math mental math strategies."
+}

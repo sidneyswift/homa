@@ -1,0 +1,74 @@
+{
+  "id": "ref-2026-07-17-ba-4ddecimalpathpuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Decimal Path Puzzles (Grade 4D)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "dense",
+    "visualHierarchy": "hexagonal grid with decimals",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Number Representation & Place Value",
+    "topics": [
+      {
+        "id": "decimal-comparison",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "decimal-ordering",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "decimal-path-tracing",
+        "suggestedSlug": "decimal-path-puzzle"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "decimal-basics"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "decimal-path-puzzle",
+      "hexagonal-ordering-puzzle"
+    ]
+  },
+  "notes": "Trace path through hex grid least-to-greatest"
+}

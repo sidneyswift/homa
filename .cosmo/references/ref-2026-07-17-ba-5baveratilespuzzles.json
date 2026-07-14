@@ -1,0 +1,75 @@
+{
+  "id": "ref-2026-07-17-ba-5baveratilespuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Averatile Puzzles (Grade 5B)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "mixed",
+    "visualHierarchy": "tessellated squares and triangles",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Mathematical Thinking",
+    "topics": [
+      {
+        "id": "averages",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "logical-reasoning",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "averatile-constraint-puzzle",
+        "suggestedSlug": "averatile-puzzle"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      120,
+      132
+    ],
+    "complexity": "layered",
+    "prerequisites": [
+      "averages",
+      "number-sense"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "averatile-puzzle",
+      "tessellation-puzzle"
+    ]
+  },
+  "notes": "Fill shapes where squares = average of adjacent triangles"
+}

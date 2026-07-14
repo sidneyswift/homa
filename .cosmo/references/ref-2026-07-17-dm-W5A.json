@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-dm-W5A",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 5A Workbook \u2014 Expressions with Parentheses, Order of Operations",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "chapter > exercise (Basics/Practice/Challenge) > numbered problems",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Algebra",
+    "topics": [
+      "parentheses in expressions",
+      "order of operations",
+      "writing expressions",
+      "evaluating expressions",
+      "word problems with expressions"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      120,
+      132
+    ],
+    "complexity": "advanced",
+    "prerequisites": [
+      "four operations fluency",
+      "multi-step word problems"
+    ],
+    "scaffolding": "light \u2014 rule statement then practice, Challenge section with open-ended puzzles"
+  },
+  "theming": {
+    "themeType": "abstract-mathematical",
+    "characters": [],
+    "visualStyle": "grayscale, equation-heavy, minimal illustration",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "puzzle-like number challenges",
+      "real-world word problems"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline",
+      "notes-and-practice-bundle",
+      "flash-cards"
+    ],
+    "gaps": [
+      "no visual/creative activities"
+    ]
+  },
+  "notes": "Grade 5A. Grayscale. Pre-algebra focus. Challenge problems use number puzzles. Most abstract of the series."
+}

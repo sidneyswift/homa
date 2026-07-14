@@ -1,0 +1,67 @@
+{
+  "id": "ref-2026-07-17-dm-W3A",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 3A Workbook \u2014 Place Value to 10,000",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice/Challenge) > numbered problems",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Number Representation & Place Value",
+    "topics": [
+      "place value to 10000",
+      "thousands",
+      "expanded form",
+      "value of digits",
+      "number words"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      108
+    ],
+    "complexity": "intermediate",
+    "prerequisites": [
+      "place value to 1000",
+      "addition/subtraction within 1000"
+    ],
+    "scaffolding": "moderate \u2014 base-10 block illustrations, place-value charts, arrow diagrams"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale, base-10 block diagrams, place-value charts",
+    "colorPalette": "black and white / grayscale",
+    "appealDrivers": [
+      "visual manipulative diagrams",
+      "mystery number puzzles"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline"
+    ],
+    "gaps": [
+      "no hands-on activities"
+    ]
+  },
+  "notes": "Grade 3A. Grayscale. Uses base-10 block illustrations extensively. Challenge section includes logic/mystery-number puzzles."
+}

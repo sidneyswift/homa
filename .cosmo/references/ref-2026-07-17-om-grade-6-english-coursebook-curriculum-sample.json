@@ -1,0 +1,56 @@
+{
+  "id": "ref-2026-07-17-om-grade-6-english-coursebook-curriculum-sample",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-17T22:08:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "curriculum-sample",
+  "title": "Oak Meadow Grade 6 English Coursebook Curriculum Sample",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "instruction-dominant",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "english-language-arts",
+    "topics": [],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      132,
+      144
+    ],
+    "ageBandGrades": "6",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-textbook",
+    "colorPalette": "limited-palette",
+    "appealDrivers": [
+      "structured lessons",
+      "professional layout",
+      "clear progression"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 54 pages"
+    ]
+  },
+  "notes": "54-page curriculum-sample from atlas-scrape. Content preview: Sixth  Grade  English  Overview English First  Semester Second  Semester Note-taking  and  citations The  writing  process Direct  and  indirect  quotations Writng  and  research  report Short-story  ..."
+}

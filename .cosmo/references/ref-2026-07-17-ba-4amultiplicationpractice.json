@@ -1,0 +1,63 @@
+{
+  "id": "ref-2026-07-17-ba-4amultiplicationpractice",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "practice-worksheet",
+  "title": "Multiplication Practice (Grade 4A)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "linear",
+    "spacing": "mixed",
+    "visualHierarchy": "vertical multiplication algorithm",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      {
+        "id": "multi-digit-multiplication",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "multiplication-facts"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": []
+  },
+  "notes": "Standard multiplication algorithm practice, 6 pages"
+}

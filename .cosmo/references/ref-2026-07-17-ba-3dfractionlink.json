@@ -1,0 +1,73 @@
+{
+  "id": "ref-2026-07-17-ba-3dfractionlink",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "puzzle-worksheet",
+  "title": "Fraction Link Puzzles (Grade 3D)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "freeform",
+    "spacing": "mixed",
+    "visualHierarchy": "linked chain of fraction equivalences",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "freeform"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Fractions",
+    "topics": [
+      {
+        "id": "equivalent-fractions",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "simplifying-fractions",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "skill": "fraction-link-chain",
+        "suggestedSlug": "fraction-link-puzzle"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      96,
+      108
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "fraction-basics"
+    ],
+    "scaffolding": "low"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "fraction-link-puzzle"
+    ]
+  },
+  "notes": "Chain puzzle connecting equivalent fractions"
+}

@@ -1,0 +1,68 @@
+{
+  "id": "ref-2026-07-17-dm-W4A",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 4A Workbook \u2014 Factors, Multiples, Prime Numbers",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "chapter > exercise (Basics/Practice/Challenge) > numbered problems",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      "factors",
+      "multiples",
+      "factor pairs",
+      "divisibility rules",
+      "prime and composite numbers"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "advanced",
+    "prerequisites": [
+      "multiplication facts",
+      "division with remainders"
+    ],
+    "scaffolding": "light \u2014 minimal visual aids, more text-based, yes/no classification tasks"
+  },
+  "theming": {
+    "themeType": "abstract-mathematical",
+    "characters": [],
+    "visualStyle": "grayscale, tables and classification exercises",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "systematic exploration",
+      "divisibility patterns"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline",
+      "notes-and-practice-bundle"
+    ],
+    "gaps": [
+      "no visual/creative activities"
+    ]
+  },
+  "notes": "Grade 4A. Grayscale. More abstract and text-heavy. Systematic factor-finding exercises."
+}

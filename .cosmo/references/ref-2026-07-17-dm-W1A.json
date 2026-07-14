@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-dm-W1A",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 1A Workbook \u2014 Numbers to 20, Addition to 20",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice/Challenge) > numbered problems",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Number Representation & Place Value",
+    "topics": [
+      "numbers to 20",
+      "place value with tens and ones",
+      "number bonds",
+      "addition to 20",
+      "making 10 strategy"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      72,
+      84
+    ],
+    "complexity": "basic",
+    "prerequisites": [
+      "counting to 10",
+      "numeral recognition"
+    ],
+    "scaffolding": "moderate \u2014 visual counters (objects to circle), fill-in boxes, Basics>Practice>Challenge progression"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale line art with object illustrations (shells, flowers, pomegranates)",
+    "colorPalette": "black and white / grayscale",
+    "appealDrivers": [
+      "structured progression",
+      "visual counting aids"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low-medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline"
+    ],
+    "gaps": [
+      "no hands-on cutting/pasting",
+      "no coloring",
+      "no maze"
+    ]
+  },
+  "notes": "Grade 1A workbook. Grayscale. Clear 3-tier scaffolding: Basics (guided) > Practice (independent) > Challenge. Object illustrations support counting but are not decorative."
+}

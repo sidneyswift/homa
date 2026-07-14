@@ -1,0 +1,67 @@
+{
+  "id": "ref-2026-07-17-dm-W1B",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 1B Workbook \u2014 Addition & Subtraction to 40, Making Next Ten",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice) > numbered problems",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Addition & Subtraction",
+    "topics": [
+      "making next ten",
+      "addition within 40",
+      "number bonds to 30",
+      "mental math strategies"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      72,
+      84
+    ],
+    "complexity": "basic-to-intermediate",
+    "prerequisites": [
+      "addition to 20",
+      "making 10"
+    ],
+    "scaffolding": "moderate \u2014 number bond diagrams, step-by-step decomposition shown"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale, number bonds and equations, minimal illustration",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "structured practice",
+      "incremental difficulty"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low-medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "structured-outline",
+      "flash-cards"
+    ],
+    "gaps": [
+      "no visual/hands-on activities"
+    ]
+  },
+  "notes": "Grade 1B. Grayscale. Heavier on computation than 1A. Number bond diagrams are a signature Singapore Math scaffold."
+}

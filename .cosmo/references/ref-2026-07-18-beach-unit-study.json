@@ -1,0 +1,79 @@
+{
+  "id": "ref-2026-07-18-beach-unit-study",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T01:13:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784351584.568579",
+  "format": "unit-study-packet",
+  "title": "At the Beach Unit Study Parts 1 & 2 (Stephanie Hathaway Designs)",
+  "dropperComment": "love art work and involvement of different disciplines and subjects through one theme. Lots of information and activities. Grade level elementary and below.",
+  "layout": {
+    "structure": "multi-page-packet",
+    "spacing": "airy",
+    "visualHierarchy": "illustration-dominant",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "modular-pages"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domains": ["science", "math", "social-studies", "language-arts", "art"],
+    "topics": [],
+    "unmappedSkills": [
+      {"slug": "science.seashore-animals", "description": "Identify and classify seashore animals (seahorse, crabs, jellyfish, starfish, lobster, clam, sea urchin, etc.)"},
+      {"slug": "science.wave-anatomy", "description": "Identify parts of a wave (peak, crest, lip, spray, barrel, wall, shoulder)"},
+      {"slug": "science.jellyfish-anatomy", "description": "Identify parts of a jellyfish (bell, gonads, oral arms, lappets, mouth)"},
+      {"slug": "science.sand-composition", "description": "Understand what sand is made of and how erosion creates it"},
+      {"slug": "science.tide-pools", "description": "Understand tide pool ecosystems"},
+      {"slug": "social-studies.beaches-around-world", "description": "Locate beaches on a globe/map, explore beach geography"},
+      {"slug": "social-studies.seashells-culture", "description": "Cultural significance of seashells throughout history"},
+      {"slug": "ela.poetry-appreciation", "description": "Read, recite, and appreciate classic poetry (Robert Louis Stevenson)"},
+      {"slug": "art.art-appreciation", "description": "Study classic paintings by theme (Van Gogh, Mary Cassatt, Hokusai, Munch)"}
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 120],
+    "ageBandGrades": "Pre-K to 5",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "multiAgeDesign": true
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [],
+    "visualStyle": "watercolor-illustration",
+    "colorPalette": "full-color-watercolor",
+    "appealDrivers": ["museum-quality watercolor naturalist art", "real-world theme (beach)", "cross-curricular integration", "art history cards"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "mixed",
+    "margins": "generous",
+    "inkDensity": "varies",
+    "colorRequirement": "many pages need color for full impact"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      "cross-curricular-unit-study: theme-based study spanning 5+ disciplines (science, math, social studies, language arts, art) with teacher guide, reading list, video list, supply list, and 30+ activity pages",
+      "naturalist-identification-poster: watercolor illustration of 15+ species with numbered labels and word bank",
+      "3-part-nomenclature-cards: Montessori-style matching cards (image + label, image only, label only) for vocabulary building",
+      "art-appreciation-cards: classic artwork reproduction with artist bio, dates, style label — for art history integration",
+      "copy-work-pages: handwriting practice using curated quotes/poems with illustration — print and cursive versions",
+      "nature-journal-prompts: guided observation and recording templates for field work"
+    ]
+  },
+  "components": [
+    {"name": "Teacher/Parent Guide (6+ pages)", "description": "Comprehensive guide covering: unit study goals, reading list (10+ books with ISBNs), documentary/video list, supply list, and discipline-specific activity suggestions for science, math, social studies, language arts, and art."},
+    {"name": "Seashore Animals Poster", "description": "17 watercolor-illustrated species with numbered labels and word bank. Museum-quality naturalist art."},
+    {"name": "Species Detail Cards (4-up)", "description": "Individual species illustrations in 2x2 grid with common name + Latin scientific name. Watercolor art."},
+    {"name": "3-Part Nomenclature Cards", "description": "Montessori-style matching cards: watercolor illustration + label (printed in pairs for cutting). Multiple sets covering crabs, shells, jellyfish, sea creatures."},
+    {"name": "Anatomy Diagrams", "description": "Labeled anatomy illustrations (wave anatomy, jellyfish anatomy) with word bank versions for fill-in labeling activities. Watercolor style."},
+    {"name": "Letter Pages", "description": "Full-page uppercase B and lowercase b outlines with beach scene illustration. Cross-curricular Pre-K inclusion."},
+    {"name": "Copy Work / Handwriting", "description": "Dotted-line tracing pages with beach vocabulary (tide pool, etc.) and full-sentence copy work. Three-line handwriting guide."},
+    {"name": "Poetry Page", "description": "'At the Sea-Side' by Robert Louis Stevenson — full poem with watercolor shell illustration."},
+    {"name": "Art Study Cards", "description": "4 classic paintings: Van Gogh 'Dunes' (1882, Realism), Mary Cassatt 'Children Playing On The Beach' (1885, Impressionism), plus Hokusai and Munch. Each card has artwork reproduction + artist bio + style label."},
+    {"name": "Various Activity Pages", "description": "Sensory play suggestions, shell measuring math activity, world map for geography, and more."}
+  ],
+  "notes": "70 pages across two PDFs. Same creator as the Heart study (Stephanie Hathaway Designs). This is the cross-curricular model — one theme (the beach) woven through science, math, social studies, language arts, and art. Carolyng's comment specifically calls out 'involvement of different disciplines and subjects through one theme' — that's the unit study methodology she values. The art history cards are a distinctive feature: classic paintings (Van Gogh, Cassatt, Hokusai, Munch) connected to the beach theme with artist bios. The Montessori 3-part nomenclature cards signal Charlotte Mason / Montessori methodology overlap. The watercolor naturalist illustration style is consistent with the Heart study — Carolyng clearly gravitates toward this creator's aesthetic."
+}

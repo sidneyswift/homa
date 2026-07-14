@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-ba-4blongdivisionpuzzles",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "practice-worksheet",
+  "title": "Long Division Problems (Grade 4B)",
+  "publisher": "Beast Academy (Art of Problem Solving)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "division workspace with estimation",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      {
+        "id": "long-division",
+        "kind": "skill",
+        "mapped": true
+      },
+      {
+        "id": "estimation",
+        "kind": "skill",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      108,
+      120
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "division-basics",
+      "multiplication-facts"
+    ],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": [
+      "puzzle-challenge",
+      "clean-design"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "none"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
+    "gaps": []
+  },
+  "notes": "Long division with estimation component, 7 pages"
+}

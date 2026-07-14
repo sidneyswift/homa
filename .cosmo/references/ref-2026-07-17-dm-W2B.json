@@ -1,0 +1,68 @@
+{
+  "id": "ref-2026-07-17-dm-W2B",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math Grade 2B Workbook \u2014 Multiplication & Division of 3 and 4",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "chapter > exercise (Basics/Practice) > numbered problems",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Multiplication & Division",
+    "topics": [
+      "multiplication table of 3",
+      "multiplication facts of 3",
+      "multiplication table of 4",
+      "word problems",
+      "skip counting"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      84,
+      96
+    ],
+    "complexity": "intermediate",
+    "prerequisites": [
+      "addition within 100",
+      "concept of equal groups"
+    ],
+    "scaffolding": "moderate \u2014 skip counting visual, digit-sum pattern discovery, word problems with illustrations"
+  },
+  "theming": {
+    "themeType": "minimal-illustration",
+    "characters": [],
+    "visualStyle": "grayscale, multiplication tables and equations",
+    "colorPalette": "black and white",
+    "appealDrivers": [
+      "pattern discovery",
+      "structured drill"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "low-medium",
+    "colorRequirement": "black-and-white"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "flash-cards",
+      "structured-outline"
+    ],
+    "gaps": [
+      "no games or puzzles"
+    ]
+  },
+  "notes": "Grade 2B. Grayscale. Introduces multiplication through skip counting and pattern recognition."
+}

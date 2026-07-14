@@ -1,0 +1,26 @@
+{
+  "id": "ref-2026-07-13-oak-meadow-samples",
+  "droppedBy": "cosmo-atlas-scrape",
+  "droppedAt": "2026-07-13T22:08:00-04:00",
+  "sourceChannel": "atlas-scrape",
+  "format": "coursebook",
+  "title": "Oak Meadow — Curriculum Sample Coursebooks (PK-12, All Subjects)",
+  "sourceUrl": "https://www.oakmeadow.com/curriculum-samples/",
+  "fileCount": 57,
+  "layout": {
+    "style": "waldorf-inspired-coursebook",
+    "colorMode": "mixed",
+    "density": "medium",
+    "illustration": "artistic-nature-inspired"
+  },
+  "skillTargeting": {
+    "subjects": ["math", "science", "language-arts", "history", "art", "music", "foreign-language"],
+    "skills": ["creative-writing", "drawing", "observation", "hands-on-experiments", "critical-thinking"],
+    "gradeRange": "PK-12"
+  },
+  "difficulty": {
+    "range": "preK-grade12",
+    "scaffolding": "developmental-waldorf"
+  },
+  "notes": "Massive collection of 57 coursebook samples spanning PK through high school across all subjects. Waldorf-inspired, child-centered approach. Each sample includes first 2 weeks of lessons plus selections from later. Excellent reference for holistic curriculum design, creative/artistic integration, and developmental staging. Includes unique subjects: drawing & design, photography, painting, forensic science, foodways, global climate change."
+}

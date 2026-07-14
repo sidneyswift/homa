@@ -1,0 +1,69 @@
+{
+  "id": "ref-2026-07-17-dm-WPKA",
+  "droppedBy": "atlas-scrape",
+  "droppedAt": "2026-07-17T00:00:00-04:00",
+  "sourceChannel": "atlas-bulk-ingest",
+  "format": "workbook",
+  "title": "Dimensions Math PreK A Workbook \u2014 Compare Objects, Sorting, Patterns",
+  "publisher": "Dimensions Math (Singapore Math Inc.)",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "chapter > exercise > task",
+    "whiteSpaceRatio": 0.55,
+    "flowDirection": "top-to-bottom"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "Mathematical Thinking",
+    "topics": [
+      "comparing size",
+      "comparing weight",
+      "comparing length",
+      "sorting",
+      "patterns"
+    ],
+    "unmappedSkills": [
+      "comparing attributes"
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      48,
+      60
+    ],
+    "complexity": "introductory",
+    "prerequisites": [],
+    "scaffolding": "heavy \u2014 teacher directions on every page, visual-only tasks, no reading required"
+  },
+  "theming": {
+    "themeType": "everyday-objects",
+    "characters": [],
+    "visualStyle": "clean flat illustration, full color, large simple objects",
+    "colorPalette": "bright primary \u2014 yellow, blue, red, green, orange",
+    "appealDrivers": [
+      "large colorful images",
+      "familiar objects",
+      "simple circling tasks"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "medium",
+    "colorRequirement": "full-color"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "themed-worksheet",
+      "counting-mat"
+    ],
+    "gaps": [
+      "no tracing",
+      "no cutting",
+      "no coloring-page style"
+    ]
+  },
+  "notes": "PreK workbook focused on pre-math concepts (comparison, sorting). Full color with teacher instructions at bottom of each page. No numerals or equations \u2014 purely visual/conceptual."
+}
