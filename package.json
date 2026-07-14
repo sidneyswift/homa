@@ -37,6 +37,8 @@
     "gen:socials": "tsx scripts/socials-starter-pack-assets.mts",
     "knowledge:revert": "tsx scripts/knowledge-revert.mts",
     "knowledge:seed": "tsx scripts/knowledge-seed.mts",
+    "research:run": "tsx scripts/research-run.mts",
+    "research:lab": "tsx scripts/research-lab.mts",
     "lint": "turbo run lint",
     "map:narrative-fixtures": "tsx scripts/map-narrative-fixtures.mts",
     "materials:calibrate": "tsx scripts/materials-calibration.mts",

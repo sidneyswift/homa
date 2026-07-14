@@ -1,7 +1,19 @@
-import { defineChannel, GET } from "eve/channels";
+import { defineChannel, GET, POST } from "eve/channels";
 
+import { setTaskRunRuntimeSession } from "../../lib/conversation-continuity/delivery-ledger";
+import { fetchDemandQueue } from "../../lib/knowledge/demand";
+import { loadPriorResearch } from "../../lib/knowledge/research-dedup";
+import {
+  parseManualResearchRequest,
+  startResearchCell,
+  type ResearchTrigger,
+} from "../../lib/knowledge/research-run";
 import { mapDb } from "../../lib/map/db";
-import { finishTaskRun, updateFleetRunSummary } from "../../lib/tasks/store";
+import {
+  beginFleetRun,
+  finishTaskRun,
+  updateFleetRunSummary,
+} from "../../lib/tasks/store";
 
 /**
  * The fleet research channel (HT-3): where the nightly corpus-building
@@ -25,6 +37,15 @@ interface ResearchState {
   finished: boolean;
 }
 
+function researchSendOptions(target: { runId?: string }) {
+  return {
+    // One session per run: research sessions never continue each other.
+    continuationToken: `research:${target.runId ?? "adhoc"}`,
+    state: { runId: target.runId ?? null, finished: false },
+    title: `fleet research ${target.runId ?? ""}`.trim(),
+  };
+}
+
 export default defineChannel({
   state: { runId: null, finished: false } as ResearchState,
 
@@ -40,10 +61,7 @@ export default defineChannel({
     const target = (input.target ?? {}) as { runId?: string };
     return await send(input.message, {
       auth: input.auth ?? null,
-      // One session per run: research sessions never continue each other.
-      continuationToken: `research:${target.runId ?? "adhoc"}`,
-      state: { runId: target.runId ?? null, finished: false },
-      title: `fleet research ${target.runId ?? ""}`.trim(),
+      ...researchSendOptions(target),
     });
   },
 
@@ -84,5 +102,114 @@ export default defineChannel({
     },
   },
 
-  routes: [GET("/eve/v1/research/health", async () => Response.json({ ok: true }))],
+  routes: [
+    GET("/eve/v1/research/health", async () => Response.json({ ok: true })),
+
+    /**
+     * Manual/condensed research trigger. The caller may ask for the next
+     * N due cells (`{ count: 10 }`) or explicit cells for a focused lab
+     * (`{ cells: [{ lens, topicKey, stage }] }`). CRON_SECRET keeps this
+     * on the same internal trust boundary as task run-now and Vercel
+     * cron. Every cell still enters through startResearchCell, so the
+     * running-cell DB lock, prior-source dossier, gate, run ledger, and
+     * reaper are identical to the nightly path.
+     */
+    POST<ResearchState>("/eve/v1/research/run", async (req, { send }) => {
+      const secret = process.env.CRON_SECRET;
+      if (!secret) {
+        return Response.json(
+          { ok: false, note: "The research trigger is not configured." },
+          { status: 503 },
+        );
+      }
+      if (req.headers.get("authorization") !== `Bearer ${secret}`) {
+        return Response.json({ ok: false }, { status: 401 });
+      }
+
+      let request;
+      try {
+        const body = await req.json().catch(() => ({}));
+        request = parseManualResearchRequest(body);
+      } catch (error) {
+        return Response.json(
+          {
+            ok: false,
+            note:
+              error instanceof Error
+                ? error.message.slice(0, 300)
+                : "Invalid research request.",
+          },
+          { status: 400 },
+        );
+      }
+
+      const trigger: ResearchTrigger =
+        req.headers.get("x-homa-research-trigger") === "lab" ? "lab" : "manual";
+      const cells =
+        request.kind === "queue"
+          ? await fetchDemandQueue(request.count)
+          : request.cells;
+      const started: Array<{
+        runId: string;
+        sessionId: string;
+        cellKey: string;
+      }> = [];
+      const skipped: Array<{ cellKey: string; reason: string }> = [];
+      const failed: Array<{ cellKey: string; error: string }> = [];
+
+      for (const cell of cells) {
+        try {
+          const result = await startResearchCell(cell, trigger, {
+            beginRun: beginFleetRun,
+            loadPrior: loadPriorResearch,
+            startSession: async (input) => {
+              const target = input.target as { runId?: string };
+              return await send(input.message, {
+                auth: input.auth,
+                ...researchSendOptions(target),
+              });
+            },
+            markSession: setTaskRunRuntimeSession,
+            failRun: async (runId, message) => {
+              await finishTaskRun(runId, {
+                familyId: null,
+                kind: "fleet_research",
+                status: "failed",
+                error: message,
+              });
+            },
+          });
+          if (result.started) {
+            started.push({
+              runId: result.runId,
+              sessionId: result.sessionId,
+              cellKey: result.cellKey,
+            });
+          } else {
+            skipped.push({
+              cellKey: result.cellKey,
+              reason: result.reason,
+            });
+          }
+        } catch (error) {
+          failed.push({
+            cellKey: `${cell.lens}:${cell.stage ?? "all"}:${cell.topicKey}`,
+            error:
+              error instanceof Error
+                ? error.message.slice(0, 300)
+                : "session startup failed",
+          });
+        }
+      }
+
+      return Response.json({
+        ok: failed.length === 0,
+        trigger,
+        requested: cells.length,
+        started,
+        skipped,
+        failed,
+      });
+    }),
+  ],
 });

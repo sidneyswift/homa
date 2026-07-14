@@ -587,16 +587,36 @@ export async function releaseTaskSchedule(task: DueFamilyTask): Promise<void> {
   `;
 }
 
-/** A fleet run has no schedule row and no family; the run record is its
- * audit trail and the revert script's handle. */
-export async function beginFleetRun(title: string): Promise<string> {
+/**
+ * A fleet run has no schedule row and no family; the run record is its
+ * audit trail, its revert handle, and now the durable lock for one
+ * research cell. Returns null when another scheduled/manual/lab trigger
+ * already owns that cell. The partial unique index only covers running
+ * rows, so a later refresh remains possible after completion.
+ */
+export async function beginFleetRun(
+  title: string,
+  options: {
+    cellKey: string;
+    trigger: "scheduled" | "manual" | "lab";
+  },
+): Promise<string | null> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    insert into public.homa_task_runs (family_id, schedule_id, kind, status, title)
-    values (null, null, 'fleet_research', 'running', ${title.slice(0, 120)})
-    returning id
-  `;
-  return rows[0].id;
+  try {
+    const rows = await sql<{ id: string }[]>`
+      insert into public.homa_task_runs
+        (family_id, schedule_id, kind, status, title,
+         research_cell_key, research_trigger)
+      values
+        (null, null, 'fleet_research', 'running', ${title.slice(0, 120)},
+         ${options.cellKey}, ${options.trigger})
+      returning id
+    `;
+    return rows[0]?.id ?? null;
+  } catch (error) {
+    if ((error as { code?: string }).code === "23505") return null;
+    throw error;
+  }
 }
 
 export async function updateFleetRunSummary(runId: string, summary: string): Promise<void> {

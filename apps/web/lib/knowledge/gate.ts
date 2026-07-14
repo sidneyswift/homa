@@ -5,6 +5,10 @@ import { z } from "zod";
 
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import {
+  findResearchDuplicates,
+  loadPriorResearch,
+} from "./research-dedup";
 
 /**
  * The knowledge bank's one write path (D-ht-5: auto-merge behind an
@@ -221,6 +225,28 @@ export async function mergeKnowledgeRow(
       note: `Gate flagged this row: ${reason}. It is recorded for audit but no family will see it. Do not retry with the same citations.`,
     };
   };
+
+  // Prompt guidance keeps the model on a new path; this gate makes the
+  // promise deterministic. Same host is fine, but the same canonical
+  // article URL or a materially identical claim for this topic is not.
+  // All prior statuses and lenses count, so a superseded/flagged row
+  // cannot become a loophole. Exclude this run so the model may correct
+  // a flagged first attempt with fresh citations in the same session.
+  const prior = await loadPriorResearch(input.topicKey, {
+    excludeRunId: options.runId ?? null,
+  });
+  const duplicates = findResearchDuplicates(citations, prior);
+  if (duplicates.urls.length > 0 || duplicates.claims.length > 0) {
+    const details = [
+      duplicates.urls.length > 0
+        ? `pages already used: ${duplicates.urls.slice(0, 3).join(", ")}`
+        : null,
+      duplicates.claims.length > 0
+        ? `claims already covered: ${duplicates.claims.slice(0, 3).join(" | ")}`
+        : null,
+    ].filter((detail): detail is string => detail !== null);
+    return flag(`research duplicates prior work (${details.join("; ")})`);
+  }
 
   const resolutions = await Promise.all(
     citations.map((citation) => citationResolves(citation.url)),

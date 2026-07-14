@@ -63,6 +63,9 @@ export interface FamilyDetail {
   journalOptOutAt: string | null;
   /** Founder test family (reserved +homatest alias or console action). */
   sandbox: boolean;
+  /** Numbers routing to this family (family_phones, the texting truth;
+   * families.phone_e164 above is just the signup form's copy). */
+  linkedPhones: string[];
   stage: FamilyStage;
   members: { email: string | null; role: string; displayName: string | null; lastSignInAt: string | null }[];
   kids: FamilyDetailKid[];
@@ -120,6 +123,11 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
   if (!family) return null;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
+  const linkedPhones = await sql<{ phone_e164: string }[]>`
+    select phone_e164 from public.family_phones
+    where family_id = ${familyId}
+    order by created_at
+  `;
   const members = await sql<{ email: string | null; role: string; display_name: string | null; last_sign_in_at: string | null }[]>`
     select u.email, m.role, m.display_name, u.last_sign_in_at::text as last_sign_in_at
     from public.family_members m
@@ -290,6 +298,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     subscriptionPeriodEnd: family.stripe_current_period_end,
     journalOptOutAt: family.journal_opt_out_at,
     sandbox: family.sandbox,
+    linkedPhones: linkedPhones.map((row) => row.phone_e164),
     stage,
     members: members.map((m) => ({
       email: m.email,

@@ -102,6 +102,94 @@ export async function removeFamilyPhone(familyId: string, phoneE164: string): Pr
 }
 
 /**
+ * Moves a number to another family: the founder's lend-and-return lever
+ * between their real family and test families (founder ask 2026-07-14
+ * evening). Same mechanics as the verified claim's move: the old row
+ * dies and a NEW row is born, so the SMS session epoch rotates and no
+ * chat context follows the number across families. No notification
+ * text: the founder is the one moving it. Callers own authorization;
+ * this only moves.
+ */
+export async function moveFamilyPhone(input: {
+  phoneE164: string;
+  toFamilyId: string;
+  memberUserId: string | null;
+}): Promise<{ ok: true; fromFamilyId: string | null }> {
+  const sql = mapDb();
+  let fromFamilyId: string | null = null;
+  await sql.begin(async (tx) => {
+    const holder = await tx<{ family_id: string }[]>`
+      select family_id from public.family_phones
+      where phone_e164 = ${input.phoneE164}
+      for update
+    `;
+    fromFamilyId = holder[0]?.family_id ?? null;
+    if (fromFamilyId === input.toFamilyId) return;
+    if (fromFamilyId) {
+      await tx`
+        delete from public.family_phones
+        where family_id = ${fromFamilyId} and phone_e164 = ${input.phoneE164}
+      `;
+    }
+    await tx`
+      insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
+      values (${input.toFamilyId}, ${input.phoneE164}, ${input.memberUserId}, ${input.memberUserId}, 'home')
+    `;
+  });
+  return { ok: true, fromFamilyId };
+}
+
+export interface FounderPhoneHome {
+  familyId: string;
+  familyName: string;
+  phoneNumbers: string[];
+}
+
+/**
+ * The founder's REAL family: the oldest non-sandbox, non-deleted family
+ * their auth user is a member of, with its linked numbers. This is the
+ * destination "send my number home" restores to, and the prefill for
+ * lending. Null when the founder's account has no real family.
+ */
+export async function founderPhoneHome(
+  founderUserId: string,
+): Promise<FounderPhoneHome | null> {
+  const sql = mapDb();
+  const families = await sql<{ id: string; name: string }[]>`
+    select f.id, f.name
+    from public.family_members m
+    join public.families f on f.id = m.family_id
+    where m.user_id = ${founderUserId}
+      and not f.sandbox
+      and f.status <> 'deleted'
+    order by m.created_at
+    limit 1
+  `;
+  const home = families[0];
+  if (!home) return null;
+  const phones = await getFamilyPhones(home.id);
+  return {
+    familyId: home.id,
+    familyName: home.name,
+    phoneNumbers: phones.map((row) => row.phone_e164),
+  };
+}
+
+/** True when this auth user holds a membership row in the family. */
+export async function isFamilyMemberUser(
+  familyId: string,
+  userId: string,
+): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ one: number }[]>`
+    select 1 as one from public.family_members
+    where family_id = ${familyId} and user_id = ${userId}
+    limit 1
+  `;
+  return rows.length > 0;
+}
+
+/**
  * Resolves an inbound text's sender to its family. This lookup IS the SMS
  * channel's auth step: the mapping was written by the signed-in parent,
  * so possession of the number routes to (only) that family's context.

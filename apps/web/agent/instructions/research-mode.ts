@@ -47,6 +47,13 @@ children.
 - Search about the TOPIC and stage, never about a child: phrase queries
   like "scissor skills progression ages 3 to 5 research", never a name or
   anything family-specific.
+- Your dispatch message includes a PRIOR RESEARCH dossier when this topic
+  has been researched before. Treat every listed canonical URL as
+  exhausted: do not fetch it, cite it, or follow a search-result path back
+  to it. The same website is fine when you use a DIFFERENT specific page.
+  Treat the listed findings as covered too: find a materially new claim,
+  not a paraphrase. The save gate independently rejects repeated pages
+  and near-repeat claims, so skipping the dossier only wastes the run.
 - Write the DELTA, not the 101: what changed recently, what is commonly
   mixed up, what a strong model would not already know. Label lines
   FACT / INFERENCE / CAUTION the way the planning corpus does, and give

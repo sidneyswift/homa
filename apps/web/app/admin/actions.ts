@@ -22,6 +22,13 @@ import {
   type AlertSource,
 } from "../../lib/admin/alert-acks";
 import { getFounderSession } from "../../lib/admin/gate";
+import {
+  founderPhoneHome,
+  getFamilyPhones,
+  isFamilyMemberUser,
+  moveFamilyPhone,
+  removeFamilyPhone,
+} from "../../lib/family-phone";
 import { mapDb } from "../../lib/map/db";
 import { sendReportEmail } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
@@ -258,12 +265,13 @@ export async function setFamilySandboxAction(
  * attachAuthUser skips deleted families when it picks a fold target, so
  * signing in again with the same email starts a fresh family.
  *
- * Two rows must die WITH the family or it keeps living (founder "what
- * if my real phone" question, 2026-07-14 evening): its family_phones
- * row (or inbound texts from that number keep routing into the deleted
- * family's context, and the number stays stolen from its real home)
- * and its agent_schedules rows (or the dispatcher keeps texting the
- * morning brief from beyond the grave).
+ * Rows that must not outlive the family (founder "what if my real
+ * phone" question, 2026-07-14 evening): agent_schedules (or the
+ * dispatcher keeps texting from beyond the grave) and family_phones.
+ * A lent or claimed number (source 'home') goes HOME to the founder's
+ * real family automatically; a number typed at test signup (source
+ * 'signup') is released instead, because it might not be the
+ * founder's to keep.
  */
 export async function deleteSandboxFamilyAction(
   familyId: string,
@@ -274,6 +282,7 @@ export async function deleteSandboxFamilyAction(
     return { error: "That family could not be identified. Reload and try again." };
   }
   const sql = mapDb();
+  const phones = await getFamilyPhones(familyId);
   const deleted = await sql.begin(async (tx) => {
     const rows = await tx<{ id: string }[]>`
       update public.families
@@ -282,13 +291,107 @@ export async function deleteSandboxFamilyAction(
       returning id
     `;
     if (rows.length === 0) return false;
-    await tx`delete from public.family_phones where family_id = ${familyId}`;
     await tx`delete from public.agent_schedules where family_id = ${familyId}`;
     return true;
   });
   if (!deleted) {
     return { error: "Only a family marked as a test family can be deleted here." };
   }
+  const home = await founderPhoneHome(founder.userId);
+  for (const phone of phones) {
+    if (phone.source === "home" && home) {
+      await moveFamilyPhone({
+        phoneE164: phone.phone_e164,
+        toFamilyId: home.familyId,
+        memberUserId: founder.userId,
+      });
+    } else {
+      await removeFamilyPhone(familyId, phone.phone_e164);
+    }
+  }
   revalidatePath("/admin/families");
   redirect("/admin/families");
+}
+
+const E164_PATTERN = /^\+1\d{10}$/;
+
+export interface PhoneLendState {
+  error: string | null;
+}
+
+/**
+ * Lends a number to a TEST family (founder ask 2026-07-14 evening: "use
+ * my number on test accounts, then turn it back on for my real
+ * account"). One number routes to one family, so this MOVES it. Guards,
+ * server-side: the destination must be a sandbox family, and the number
+ * must be unlinked, on a sandbox family, or on a family the founder is
+ * a member of. A customer's number can never be pulled into a test
+ * family through this door.
+ */
+export async function lendFounderPhoneAction(
+  familyId: string,
+  phoneE164: string,
+): Promise<PhoneLendState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+  if (!UUID_PATTERN.test(familyId) || !E164_PATTERN.test(phoneE164)) {
+    return { error: "That didn't parse. Reload and try again." };
+  }
+  const sql = mapDb();
+  const target = await sql<{ sandbox: boolean }[]>`
+    select sandbox from public.families
+    where id = ${familyId} and status <> 'deleted'
+  `;
+  if (!target[0]?.sandbox) {
+    return { error: "Numbers can only be lent to a test family." };
+  }
+  const holder = await sql<{ family_id: string; sandbox: boolean }[]>`
+    select p.family_id, f.sandbox
+    from public.family_phones p
+    join public.families f on f.id = p.family_id
+    where p.phone_e164 = ${phoneE164}
+  `;
+  if (holder[0] && !holder[0].sandbox) {
+    const founderOwns = await isFamilyMemberUser(holder[0].family_id, founder.userId);
+    if (!founderOwns) {
+      return { error: "That number belongs to a real family that isn't yours; it stays put." };
+    }
+  }
+  await moveFamilyPhone({ phoneE164, toFamilyId: familyId, memberUserId: null });
+  revalidatePath(`/admin/families/${familyId}`);
+  return { error: null };
+}
+
+/** Sends a number held by this TEST family home to the founder's real
+ * family, one tap, the "turn my number back on" half of the lever. */
+export async function returnFounderPhoneAction(
+  familyId: string,
+  phoneE164: string,
+): Promise<PhoneLendState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+  if (!UUID_PATTERN.test(familyId) || !E164_PATTERN.test(phoneE164)) {
+    return { error: "That didn't parse. Reload and try again." };
+  }
+  const sql = mapDb();
+  const holder = await sql<{ family_id: string; sandbox: boolean }[]>`
+    select p.family_id, f.sandbox
+    from public.family_phones p
+    join public.families f on f.id = p.family_id
+    where p.phone_e164 = ${phoneE164}
+  `;
+  if (holder[0]?.family_id !== familyId || !holder[0].sandbox) {
+    return { error: "That number isn't on this test family anymore. Reload the page." };
+  }
+  const home = await founderPhoneHome(founder.userId);
+  if (!home) {
+    return { error: "No real family found on your founder account to send it to." };
+  }
+  await moveFamilyPhone({
+    phoneE164,
+    toFamilyId: home.familyId,
+    memberUserId: founder.userId,
+  });
+  revalidatePath(`/admin/families/${familyId}`);
+  return { error: null };
 }

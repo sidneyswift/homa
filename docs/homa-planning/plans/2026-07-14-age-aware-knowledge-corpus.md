@@ -327,6 +327,43 @@ marginal cost, because demand-weighting gates coverage.
   `(domain, stage)` for the top lenses; nightly count returns to
   maintenance.
 
+### KC-6 · Manual control, duplicate-work prevention, condensed lab
+
+Founder direction 2026-07-14: an operator or repo-aware agent must be
+able to trigger due or explicit research cells immediately, run several
+sequential rounds inside an hour, inspect how rows organize, and prove
+that later runs do not follow the same article/finding path.
+
+- One shared runner (`lib/knowledge/research-run.ts`) owns scheduled,
+  manual, and lab starts. A partial unique index on
+  `homa_task_runs.research_cell_key` while status is `running` is the
+  cross-process lock: a cron and manual trigger may race, but only one
+  can spend against the cell. `research_trigger` records scheduled,
+  manual, or lab provenance.
+- Before a session starts, `loadPriorResearch(topicKey)` loads prior
+  active, superseded, and flagged rows across every lens and stage. The
+  prompt names prior findings and canonical article URLs as exhausted.
+  Same website with a different specific page is explicitly allowed.
+- The gate independently canonicalizes URLs (removing fragments,
+  `www`, trailing slashes, and tracking parameters) and rejects any
+  previously used specific page for that topic. It also rejects a
+  near-repeat citation claim using deterministic token overlap. This
+  makes the no-repeat rule enforceable even when the model ignores the
+  dossier.
+- Internal route `POST /eve/v1/research/run`, authenticated with
+  `CRON_SECRET`, accepts `{ count: N }` for due queue cells or explicit
+  `{ cells: [{ lens, topicKey, stage }] }` for focused re-research.
+- `pnpm research:run` is the operator command. `pnpm research:lab`
+  runs sequential rounds, polls durable run rows, writes Markdown and
+  JSON reports under `.tmp-research-lab`, audits source hosts,
+  canonical-page overlap, near-claim overlap and gate flags, and can
+  revert its rows by run id with `--revert`.
+- Acceptance: two sequential explicit runs of one topic use different
+  canonical pages and materially different claims, or the second run
+  honestly saves nothing; two simultaneous triggers of one cell produce
+  one running session; an unauthorized trigger is 401; a lab report
+  shows organization, sources, overlaps and cleanup receipts.
+
 ## Sequencing
 
 1. **KC-1** (schema + enum; nothing parent-visible, zero risk while
@@ -336,6 +373,8 @@ marginal cost, because demand-weighting gates coverage.
 3. **KC-4** (readers switch to stage-scoped once enough cells exist;
    this is the parent-visible flip).
 4. **KC-5** (backfill, then idle).
+5. **KC-6** (manual trigger and condensed validation; no new research
+   semantics, all paths reuse the KC-1 through KC-4 runner and gate).
 
 ## Cost posture
 
@@ -371,3 +410,9 @@ context load (KC-4) reduces per-family spend.
 - Whether methods need stage splits (montessori-for-3s vs
   montessori-for-9s) or stay stage-agnostic; the four styles in use are
   too thin to tell yet.
+- Whether the deterministic near-claim threshold is too strict or too
+  loose on real research prose. The condensed lab measures gate flags
+  and claim overlap before the threshold is tuned.
+- How quickly explicit repeated research exhausts credible new sources
+  for a narrow curriculum topic. The correct terminal result is
+  "no new delta," not a forced row; the condensed lab makes that visible.

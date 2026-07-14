@@ -5,11 +5,13 @@ import { notFound } from "next/navigation";
 import { getFamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
 import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
+import { founderPhoneHome } from "../../../../lib/family-phone";
 import { formatUsd } from "../../../../lib/model-pricing";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone, type PillTone } from "../../ui";
 import { BuildReportButton } from "./build-report-button";
 import { FamilyTabs } from "./family-tabs";
+import { PhoneLendControls } from "./phone-lend-controls";
 import { TestFamilyControls } from "./test-family-controls";
 
 /**
@@ -68,11 +70,14 @@ export default async function AdminFamilyDetailPage({
 }: {
   params: Promise<{ familyId: string }>;
 }) {
-  await requireFounder();
+  const founder = await requireFounder();
   const { familyId } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(familyId)) notFound();
   const detail = await getFamilyDetail(familyId);
   if (!detail) notFound();
+  // The lend-and-return switch needs the founder's real family (source
+  // and home for their number); loaded only where it can render.
+  const phoneHome = detail.sandbox ? await founderPhoneHome(founder.userId) : null;
 
   const stage = STAGE_COPY[detail.stage];
   const timeZone = adminTimeZone();
@@ -104,8 +109,16 @@ export default async function AdminFamilyDetailPage({
         {detail.email ?? "no email"} · {detail.phone ?? "no phone"} ·{" "}
         {detail.timeZone ?? "no time zone"}
       </p>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <TestFamilyControls familyId={detail.id} sandbox={detail.sandbox} />
+        {detail.sandbox ? (
+          <PhoneLendControls
+            familyId={detail.id}
+            linkedPhones={detail.linkedPhones}
+            homeFamilyName={phoneHome?.familyName ?? null}
+            homePhones={phoneHome?.phoneNumbers ?? []}
+          />
+        ) : null}
       </div>
       <FamilyTabs familyId={detail.id} />
 
