@@ -34,12 +34,15 @@ export function ProgressMap({
   subjects,
   conflicts,
   timeZone,
+  deeperChecks,
 }: {
   childId: string;
   tiles: ProgressTileModel[];
   subjects: ProgressSubjectView[];
   conflicts: readonly OpenProgressConflictView[];
   timeZone: string;
+  /** False on read-only mirrors: hides the panel's deep-dive door. */
+  deeperChecks: boolean;
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -130,6 +133,7 @@ export function ProgressMap({
           tile={openTile}
           conflicts={conflicts}
           timeZone={timeZone}
+          allowDeeperCheck={deeperChecks}
           onClose={closePanel}
         />
       ) : null}

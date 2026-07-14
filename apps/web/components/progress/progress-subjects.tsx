@@ -24,6 +24,7 @@ export function ProgressSubjects({
   tiles,
   conflicts,
   timeZone,
+  deeperChecks,
   children,
 }: {
   childId: string;
@@ -32,6 +33,8 @@ export function ProgressSubjects({
   tiles: ProgressTileModel[];
   conflicts: readonly OpenProgressConflictView[];
   timeZone: string;
+  /** False on read-only mirrors: hides the panel's deep-dive door. */
+  deeperChecks: boolean;
   children: ReactNode;
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
@@ -87,6 +90,7 @@ export function ProgressSubjects({
           tile={openTile}
           conflicts={conflicts}
           timeZone={timeZone}
+          allowDeeperCheck={deeperChecks}
           onClose={closePanel}
         />
       ) : null}

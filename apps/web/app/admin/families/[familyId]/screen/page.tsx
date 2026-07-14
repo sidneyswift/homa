@@ -257,6 +257,9 @@ async function ProgressTab({
         report={report}
         eras={kidDeep.eras}
         kids={[{ id: kid.id, name: kid.name, avatarUrl: kid.avatar_url }]}
+        // The deep-dive door walks the FAMILY's onboarding flow; in the
+        // founder's browser it would open the founder's own session.
+        deeperChecks={false}
       />
       {xray ? (
         <XrayCard title="Where this page comes from">

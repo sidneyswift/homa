@@ -30,6 +30,17 @@ import {
  * 2026-07-13 stuck writing beat, BUG-P1-1 in the season field study).
  */
 
+export interface ChangedAnswerSinceScoring {
+  itemId: string;
+  answer: MapAnswer;
+  /** The answer this one replaced (superseded chain), null when the
+   * item was newly answered. */
+  previousAnswer: MapAnswer | null;
+  /** The evidence ledger's source for the new answer: deep_dive,
+   * report_correction, recheck, check_in, conversation, checklist... */
+  source: string;
+}
+
 export interface ReportNarrativeSource {
   familyId: string;
   childId: string;
@@ -47,6 +58,12 @@ export interface ReportNarrativeSource {
   priorLetter: { generatedAt: string; note: string } | null;
   /** Synced plan check-offs, one row per subject with any progress. */
   practice: Array<{ subjectName: string; done: number; total: number }>;
+  /** Every answer that landed or changed between the previous scoring
+   * and this one, straight from the evidence ledger with its source, so
+   * the writer can say WHY this rewrite exists ("you took a deeper look
+   * at language") and what moved. Empty on a first report and on
+   * rescores where nothing actually changed. */
+  changedSinceLastScoring: ChangedAnswerSinceScoring[];
 }
 
 export async function getReportNarrativeSource(
@@ -90,6 +107,31 @@ export async function getReportNarrativeSource(
     select c2.name from public.children c2
     where c2.family_id = ${row.family_id} and c2.id <> ${childId}
   `;
+
+  // What changed between the previous scoring and this one, from the
+  // evidence ledger: the active reading per item that landed after the
+  // archived scoring (history head), joined to the answer it superseded.
+  // First reports (no history) have no "since" and skip the read.
+  const previousScoredAt = row.history?.[0]?.generated_at ?? null;
+  const changedRows = previousScoredAt
+    ? await sql<
+        {
+          item_id: string;
+          answer: MapAnswer;
+          previous_answer: MapAnswer | null;
+          source: string;
+        }[]
+      >`
+        select e.item_id, e.answer, prev.answer as previous_answer, e.source
+        from public.child_progress_evidence e
+        left join public.child_progress_evidence prev on prev.id = e.supersedes_id
+        where e.child_id = ${childId} and e.family_id = ${row.family_id}
+          and e.superseded_at is null
+          and e.created_at > ${previousScoredAt}::timestamptz
+        order by e.observed_at asc, e.created_at asc
+        limit 80
+      `
+    : [];
   const planRows = await sql<{ subject_id: string; plan: FourWeekPlan; progress: Record<string, boolean> }[]>`
     select subject_id, plan, progress from public.child_plans
     where child_id = ${childId}
@@ -146,6 +188,14 @@ export async function getReportNarrativeSource(
     siblingNames: siblings.map((sibling) => sibling.name),
     priorLetter,
     practice,
+    changedSinceLastScoring: changedRows
+      .filter((entry) => entry.answer !== entry.previous_answer)
+      .map((entry) => ({
+        itemId: entry.item_id,
+        answer: entry.answer,
+        previousAnswer: entry.previous_answer,
+        source: entry.source,
+      })),
   };
 }
 

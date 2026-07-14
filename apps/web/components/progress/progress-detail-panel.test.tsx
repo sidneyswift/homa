@@ -28,6 +28,7 @@ const TILE = {
   },
   freshness: { kind: "today" as const, label: "Updated today" },
   needsConfirm: true,
+  deeperCheck: true,
 };
 
 describe("ProgressDetailPanel", () => {
@@ -40,6 +41,7 @@ describe("ProgressDetailPanel", () => {
           tile={TILE}
           conflicts={PROGRESS_FIXTURE_VIEW.conflicts}
           timeZone={PROGRESS_FIXTURE_VIEW.timeZone}
+          allowDeeperCheck
           onClose={() => {}}
         />
       </AppRouterContext.Provider>,
@@ -50,6 +52,10 @@ describe("ProgressDetailPanel", () => {
     assert.match(html, /aria-labelledby="progress-panel-math"/);
     assert.match(html, /<h2 id="progress-panel-math"/);
     assert.match(html, /Ahead \u00b7 \+8 mo/);
+    // The validate-the-reading door (founder ask 2026-07-14): the deep
+    // dive link for this child and subject.
+    assert.match(html, /Answer a few deeper questions/);
+    assert.match(html, /\/onboarding\?dd=child-1\.math/);
     // The dated movement chip retired from this surface (2026-07-13).
     assert.doesNotMatch(html, /since Jun 10/);
     assert.match(
@@ -117,10 +123,13 @@ describe("ProgressDetailPanel", () => {
           tile={null}
           conflicts={[]}
           timeZone={PROGRESS_FIXTURE_VIEW.timeZone}
+          allowDeeperCheck={false}
           onClose={() => {}}
         />
       </AppRouterContext.Provider>,
     );
+
+    assert.doesNotMatch(html, /Answer a few deeper questions/);
 
     assert.match(html, /aria-labelledby="progress-panel-literacy"/);
     assert.doesNotMatch(html, /Confirm (?:Elena|Jordan)/);

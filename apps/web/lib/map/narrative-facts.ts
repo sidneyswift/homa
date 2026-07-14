@@ -3,6 +3,7 @@ import {
   ageLabel,
   subjectLine,
   GENDERED_PRONOUNS,
+  getMapItem,
   getMapSubject,
   growingActivityFor,
   type MapAnswer,
@@ -42,6 +43,40 @@ export interface SubjectFacts {
   growingActivity: { title: string; description: string } | null;
 }
 
+/** One answer that changed between the previous scoring and this one
+ * (shape mirrors narrative-store's evidence read; kept local so this
+ * module stays pure and import-cycle-free). */
+export interface ChangedAnswerFactInput {
+  itemId: string;
+  answer: MapAnswer;
+  previousAnswer: MapAnswer | null;
+  source: string;
+}
+
+/**
+ * Why this report was rewritten and what moved, computed by code so the
+ * writer can acknowledge the recalibration instead of writing a
+ * stateless letter (founder ask 2026-07-14: after a deeper look, the
+ * report says "we read language again from your deeper answers" and
+ * names the before and after in the report's own vocabulary).
+ */
+export interface RescoreFacts {
+  /** One quotable sentence naming why the rewrite exists. */
+  reasonLine: string;
+  /** The specific answers that changed, capped, report vocabulary. */
+  changedAnswers: Array<{
+    subjectName: string;
+    question: string;
+    was: string | null;
+    now: string;
+  }>;
+  /** Before and after reading for each subject whose answers changed,
+   * in the report's own badge vocabulary ("Growing right now",
+   * "On track", "Ahead · +9 mo"). A lower after is a sharper starting
+   * line, never a loss; the writer's instructions carry that framing. */
+  subjectShifts: Array<{ subjectName: string; was: string; now: string }>;
+}
+
 export interface ReportFacts {
   childName: string;
   childAge: string;
@@ -68,6 +103,9 @@ export interface ReportFacts {
    * archive), so each rescore writes chapter N of a correspondence, not a
    * stateless first letter. Null on a first report. */
   lastLetter: { date: string; note: string } | null;
+  /** Why this rewrite exists and what moved; null on a first report and
+   * on rescores where no answer actually changed. */
+  rescore: RescoreFacts | null;
   subjects: SubjectFacts[];
 }
 
@@ -119,6 +157,9 @@ export interface ReportFactsInput {
   priorLetter?: { generatedAt: string; note: string } | null;
   /** Synced plan check-off counts, one row per subject with any checks. */
   practice?: Array<{ subjectName: string; done: number; total: number }>;
+  /** Answers that landed or changed since the previous scoring, from
+   * the evidence ledger (narrative-store reads it). */
+  changedSinceLastScoring?: ChangedAnswerFactInput[];
 }
 
 /** Movement lines, same math as the report UI's movement chips: dated,
@@ -149,6 +190,112 @@ function movementLines(scores: MapScores, history: ReportFactsInput["history"]):
     }
   }
   return lines;
+}
+
+const CHANGED_ANSWER_CAP = 12;
+
+/** One label per subject reading, the report's own vocabulary: the
+ * badge, plus the months number when the badge carries one. */
+function subjectReadingLabel(
+  scores: MapScores,
+  subjectId: string,
+  childName: string,
+): string | null {
+  const score = scores.subjects.find((entry) => entry.subjectId === subjectId);
+  if (!score) return null;
+  const line = subjectLine(score, childName);
+  return line.numberLabel ? `${line.badge} (${line.numberLabel})` : line.badge;
+}
+
+function rescoreReasonLine(
+  dominantSource: string,
+  subjectNames: string[],
+  changedCount: number,
+): string {
+  const subjects =
+    subjectNames.length > 0
+      ? listWords(subjectNames.slice(0, 3).map((name) => name.toLowerCase()))
+      : "a few subjects";
+  const answers = changedCount === 1 ? "1 answer" : `${changedCount} answers`;
+  switch (dominantSource) {
+    case "deep_dive":
+      return `The parent chose a deeper ${subjects} check and gave ${answers}; this rewrite reads those in.`;
+    case "report_correction":
+    case "correction":
+    case "report_probe":
+      return `The parent corrected ${answers} on the report; this rewrite reads the corrections in.`;
+    case "recheck":
+      return `A re-check brought ${answers}; this rewrite reads them in.`;
+    case "check_in":
+    case "journal":
+    case "conversation":
+      return `${answers} arrived from check-ins and conversation since the last scoring; this rewrite reads them in.`;
+    case "checklist":
+      return `${answers} landed on the checklist since the last scoring; this rewrite reads them in.`;
+    default:
+      return `${answers} changed since the last scoring; this rewrite reads them in.`;
+  }
+}
+
+function listWords(words: string[]): string {
+  if (words.length <= 1) return words[0] ?? "";
+  return `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+}
+
+/**
+ * buildRescoreFacts(changed, currentScores, priorScores, childName)
+ * Null on a first report (no prior scoring) and when nothing bank-known
+ * actually changed, so a plain rescore still writes a plain letter.
+ */
+export function buildRescoreFacts(
+  changed: ChangedAnswerFactInput[],
+  currentScores: MapScores,
+  priorScores: MapScores | null,
+  childName: string,
+): RescoreFacts | null {
+  if (!priorScores) return null;
+  const bankChanges = changed
+    .map((change) => ({ change, found: getMapItem(change.itemId) }))
+    .filter(
+      (entry): entry is { change: ChangedAnswerFactInput; found: NonNullable<ReturnType<typeof getMapItem>> } =>
+        Boolean(entry.found),
+    );
+  if (bankChanges.length === 0) return null;
+
+  const sourceCounts = new Map<string, number>();
+  for (const { change } of bankChanges) {
+    sourceCounts.set(change.source, (sourceCounts.get(change.source) ?? 0) + 1);
+  }
+  const dominantSource = [...sourceCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+
+  const subjectNames: string[] = [];
+  const subjectIds: string[] = [];
+  for (const { found } of bankChanges) {
+    if (subjectIds.includes(found.subject.id)) continue;
+    subjectIds.push(found.subject.id);
+    subjectNames.push(found.subject.displayName);
+  }
+
+  const changedAnswers = bankChanges.slice(0, CHANGED_ANSWER_CAP).map(({ change, found }) => ({
+    subjectName: found.subject.displayName,
+    question: found.item.statement,
+    was: change.previousAnswer ? ANSWER_LABELS[change.previousAnswer] : null,
+    now: ANSWER_LABELS[change.answer],
+  }));
+
+  const subjectShifts = subjectIds.flatMap((subjectId) => {
+    const now = subjectReadingLabel(currentScores, subjectId, childName);
+    if (!now) return [];
+    const was = subjectReadingLabel(priorScores, subjectId, childName) ?? "not read yet";
+    const subjectName = getMapSubject(subjectId)?.displayName ?? subjectId;
+    return [{ subjectName, was, now }];
+  });
+
+  return {
+    reasonLine: rescoreReasonLine(dominantSource, subjectNames, bankChanges.length),
+    changedAnswers,
+    subjectShifts,
+  };
 }
 
 export function buildReportFacts(input: ReportFactsInput): ReportFacts {
@@ -234,6 +381,12 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
     movement: movementLines(input.scores, input.history),
     practice,
     lastLetter,
+    rescore: buildRescoreFacts(
+      input.changedSinceLastScoring ?? [],
+      input.scores,
+      input.history[0]?.scores ?? null,
+      input.childName,
+    ),
     subjects,
   };
 }

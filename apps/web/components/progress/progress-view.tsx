@@ -106,6 +106,7 @@ export function ProgressView({
   report,
   eras,
   kids,
+  deeperChecks = true,
 }: {
   view: ChildProgressView;
   /**
@@ -122,6 +123,10 @@ export function ProgressView({
   eras: TrajectoryEra[];
   /** The family's kids in family order (drives the switcher's tones). */
   kids: ProgressViewKid[];
+  /** False on read-only mirrors (the founder console): the subject
+   * panel's deep-dive door walks the family's own flow, so only her
+   * session offers it. */
+  deeperChecks?: boolean;
 }) {
   const updatedLine = progressUpdatedLine(view);
   const tiles = buildProgressTiles(view, new Date());
@@ -196,6 +201,7 @@ export function ProgressView({
               tiles={tiles}
               conflicts={view.conflicts}
               timeZone={view.timeZone}
+              deeperChecks={deeperChecks}
             >
               <ReportSnapshot
                 childName={view.childName}
@@ -219,6 +225,7 @@ export function ProgressView({
                 subjects={view.subjects}
                 conflicts={view.conflicts}
                 timeZone={view.timeZone}
+                deeperChecks={deeperChecks}
               />
             </div>
           </div>

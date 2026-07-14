@@ -505,6 +505,11 @@ export function TrajectoryChart({
           visible at rest, movers badged. Rows are the focus controls; in
           door mode they are the subject-by-subject list and each row
           opens that subject's detail panel. */}
+      {door ? (
+        <p className="mt-2.5 text-sm text-muted">
+          Every number here comes from your answers. Tap a subject to see them.
+        </p>
+      ) : null}
       <div className="mt-2 grid grid-cols-1 gap-x-2 rounded-md border border-border-subtle bg-card p-1.5 sm:grid-cols-2">
         {story.subjects.map((subject) => {
           const doorRow = doorRowById.get(subject.subjectId);
@@ -563,6 +568,11 @@ export function TrajectoryChart({
               >
                 {subject.display}
               </span>
+              {opensPanel ? (
+                <span aria-hidden="true" className="flex-shrink-0 text-subtle">
+                  {"\u203A"}
+                </span>
+              ) : null}
             </button>
           );
         })}
@@ -590,6 +600,9 @@ export function TrajectoryChart({
                 {progressSubjectHeadline("conflict")}
               </span>
             ) : null}
+            <span aria-hidden="true" className="flex-shrink-0 text-subtle">
+              {"\u203A"}
+            </span>
           </button>
         ))}
       </div>

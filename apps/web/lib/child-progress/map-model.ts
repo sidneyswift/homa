@@ -33,6 +33,11 @@ export interface ProgressTileModel {
   badge: ProgressTileBadge | null;
   freshness: ProgressTileFreshness | null;
   needsConfirm: boolean;
+  /** True when the subject can take the deeper check (a scored,
+   * age-normed subject): the detail panel's validate-the-reading door
+   * (founder ask 2026-07-14). Exposure subjects and unscored subjects
+   * have no deeper ladder to walk. */
+  deeperCheck: boolean;
 }
 
 /** Tones per core badge string, matching kidPill's reassurance palette. */
@@ -113,13 +118,21 @@ export function buildProgressTiles(
     if (bySubjectId.has(subject.subjectId)) ordered.push(subject);
   }
 
-  return ordered.map((subject) => ({
-    subjectId: subject.subjectId,
-    displayName: subject.displayName,
-    badge: tileBadge(view.scores, subject.subjectId, view.childName),
-    freshness: tileFreshness(subject, view.timeZone, now),
-    needsConfirm: subject.state === "conflict",
-  }));
+  return ordered.map((subject) => {
+    const score = view.scores.subjects.find(
+      (entry) => entry.subjectId === subject.subjectId,
+    );
+    return {
+      subjectId: subject.subjectId,
+      displayName: subject.displayName,
+      badge: tileBadge(view.scores, subject.subjectId, view.childName),
+      freshness: tileFreshness(subject, view.timeZone, now),
+      needsConfirm: subject.state === "conflict",
+      deeperCheck: Boolean(
+        score && score.position !== "not_mapped" && !score.exposureBased,
+      ),
+    };
+  });
 }
 
 export interface ProgressUpdatedLine {

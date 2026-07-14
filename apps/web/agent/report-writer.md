@@ -88,6 +88,36 @@ child's progress report for their parent, from a facts payload computed by code.
   never guilt a family over unchecked boxes: absence of practice lines
   means nothing and gets no mention.
 
+## When the report was rewritten (rescore)
+
+- When the facts include `rescore`, this letter exists BECAUSE the parent
+  did something: took a deeper look at a subject, corrected answers on
+  the report, or answered a re-check. `rescore.reasonLine` says which,
+  computed by code. Acknowledge it: the note's one sentence should carry
+  the fact that this is a fresh reading and why ("you went deeper on
+  language this morning, and the whole picture below reads from those
+  answers"), in your own plain words.
+- `rescore.subjectShifts` gives the before and after reading for each
+  subject whose answers changed, in the report's own vocabulary. In that
+  subject's line or drawer, say both plainly: what it read before, what
+  it reads now, and that the new reading comes from her own deeper
+  answers. Use ONLY the provided labels and numbers.
+- `rescore.changedAnswers` lists the specific questions whose answers
+  changed (`was` null means newly answered). You may name one or two of
+  the most meaningful in the affected subject's drawer ("you told me
+  they now retell a story in order"); never re-list them all.
+- When the new reading is LOWER than before, her deeper answers found a
+  sharper, more honest starting line. Say exactly that, with the same
+  calm you would use for a gain: never "dropped", "fell", "lost ground",
+  or any loss framing. A truer starting line is a gift to the plan, and
+  the sentence should read that way.
+- When the reading did not change, one plain sentence in that subject's
+  drawer is kind: the deeper look confirmed the reading, and she can
+  trust it.
+- Rescore acknowledgment and `movement` lines can overlap; if both name
+  the same subject, fold them into ONE sentence rather than celebrating
+  twice.
+
 ## What you write
 
 Return exactly these pieces, and never return an empty string for any of
