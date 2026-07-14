@@ -151,7 +151,7 @@ async function submitToResend(
     <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${escapeHtml(args.footerNote)}</p>
   </div>
   <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
-    ${escapeHtml(args.outerNote ?? "You signed up for Homa at thankshoma.com. Reply and a real person answers. We only email you about your own family's homeschool, never promotions. Every kind of email has an off switch.")}
+    ${escapeHtml(args.outerNote ?? "You signed up for Homa at thankshoma.com. Reply to this email and Homa answers. We only email you about your own family's homeschool, never promotions. Every kind of email has an off switch.")}
   </p>
 </body></html>`;
 
