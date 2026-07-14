@@ -8,6 +8,7 @@ import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../..
 import { formatUsd } from "../../../../lib/model-pricing";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone, type PillTone } from "../../ui";
+import { BuildReportButton } from "./build-report-button";
 import { FamilyTabs } from "./family-tabs";
 
 /**
@@ -17,6 +18,11 @@ import { FamilyTabs } from "./family-tabs";
  */
 
 export const metadata: Metadata = { title: "Family" };
+
+// The build-report action's background phase holds an uncapped narrative
+// model call plus the report email (the same work /api/map/score does,
+// same 300s room); server actions run under their page's segment config.
+export const maxDuration = 300;
 
 /**
  * One pill + one small line per kid, answering the stuck-family
@@ -130,6 +136,13 @@ export default async function AdminFamilyDetailPage({
                       <span className="font-bold text-strong">{kid.name}</span>
                       <span className="text-subtle">{ageYears(kid.birthDate)} yrs</span>
                       <Pill tone={state.tone}>{state.pill}</Pill>
+                      {kid.readyToScore ? (
+                        <BuildReportButton
+                          familyId={detail.id}
+                          childId={kid.id}
+                          childName={kid.name}
+                        />
+                      ) : null}
                     </div>
                     <p className="mt-0.5 text-xs text-subtle">{state.line}</p>
                   </li>
