@@ -7,9 +7,18 @@
     "icon": "./assets/images/icon.png",
     "scheme": "homa",
     "userInterfaceStyle": "light",
+    "updates": {
+      "url": "https://u.expo.dev/916ce7cf-5c57-4036-a9a9-af8651f1624a"
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.thankshoma.homa"
+      "bundleIdentifier": "com.thankshoma.homa",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.thankshoma.homa",
@@ -38,6 +47,13 @@
     ],
     "experiments": {
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "916ce7cf-5c57-4036-a9a9-af8651f1624a"
+      }
+    },
+    "owner": "sidneyswift"
   }
 }

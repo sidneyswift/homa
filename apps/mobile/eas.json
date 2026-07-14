@@ -1,0 +1,20 @@
+{
+  "cli": {
+    "version": ">= 21.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "autoIncrement": true,
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://kzplntcdtsvdowntvlza.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_kyZ2i5JaCUaJFwHUcxHDgQ_KvrNShEQ",
+        "EXPO_PUBLIC_API_URL": "https://thankshoma.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

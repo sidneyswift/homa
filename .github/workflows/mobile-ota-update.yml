@@ -1,0 +1,61 @@
+name: Mobile OTA update
+
+# Keeps installed phone apps in sync with main. When mobile code (or the
+# shared core package it imports) changes, this publishes an EAS Update:
+# installed builds download the new JavaScript on next launch, no App
+# Store release needed. Native changes (a new package with native code,
+# an Expo SDK upgrade) do NOT ship this way; they need a new store build:
+#   cd apps/mobile
+#   eas build --platform ios --profile production
+#   eas submit --platform ios --latest
+# The update only applies to builds with a matching native fingerprint,
+# so an out-of-date binary can never receive incompatible JavaScript.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/core/**"
+  workflow_dispatch: {}
+
+concurrency:
+  group: mobile-ota-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-update:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck mobile
+        run: pnpm --filter mobile typecheck
+
+      # EXPO_PUBLIC_ values are inlined into the JavaScript bundle at
+      # publish time. Read them from eas.json so OTA updates and store
+      # builds always ship the exact same public config.
+      - name: Load public app config from eas.json
+        working-directory: apps/mobile
+        run: jq -r '.build.production.env | to_entries[] | "\(.key)=\(.value)"' eas.json >> "$GITHUB_ENV"
+
+      - name: Publish EAS Update to the production channel
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          MSG="$(printf '%s\n' "${COMMIT_MESSAGE:-Manual OTA update}" | head -n 1 | cut -c 1-200)"
+          npx eas-cli@latest update --channel production --environment production --platform ios --non-interactive --message "$MSG"

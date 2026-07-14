@@ -17,6 +17,28 @@ Local agent testing: run `pnpm --filter web dev` and point
 `EXPO_PUBLIC_API_URL` at it (`http://localhost:3000` in the iOS
 simulator; your Mac's LAN IP from a real phone).
 
+## Ship it
+
+Two release paths, both from `apps/mobile` (EAS project:
+`@sidneyswift/homa`, bundle `com.thankshoma.homa`):
+
+- JavaScript-only changes ship over the air. A push to `main` touching
+  `apps/mobile/` or `packages/core/` runs
+  `.github/workflows/mobile-ota-update.yml`, which publishes an EAS
+  Update to the `production` channel. Installed apps download it on
+  their next launch and run it the launch after. Manual equivalent:
+  `eas update --channel production --environment production --platform ios --message "..."`.
+- Native changes (a package with native code, an Expo SDK upgrade,
+  native `app.json` config) need a new store build:
+  `eas build --platform ios --profile production`, then
+  `eas submit --platform ios --latest`. Updates only apply to builds
+  with a matching native fingerprint, so a stale binary never receives
+  incompatible JavaScript.
+
+CI authenticates with the `EXPO_TOKEN` repo secret. Updates publish iOS
+only for now: `--platform all` would also run the web static export,
+which currently fails under expo-router server rendering.
+
 ## How it hangs together
 
 | Piece | Where | Notes |
@@ -36,6 +58,6 @@ owns design-system integration, not general mobile parity.
 ## Current native boundaries
 
 - Authentication is email and password. No Google OAuth flow is present in this package.
-- No push-notification or EAS build and submit configuration is present.
+- No push-notification configuration is present.
 - Printable artifacts render in chat and open their PDF URL in the system viewer, which can offer platform print or share actions. There is no native in-app print control.
 - New and unfinished families open the web `/onboarding` flow. Native onboarding is not present.
