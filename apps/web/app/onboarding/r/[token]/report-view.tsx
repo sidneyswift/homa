@@ -361,6 +361,21 @@ export function ReportView({
             <CallHomaPs childId={report.childId} childName={report.childName} wall={wall} />
           </div>
         ) : null}
+        {/* Learner profile section (Phase 4): rendered only when the
+            narrative includes a learnerProfile piece with enough signals. */}
+        {generatedPiece("learnerProfile", narrativeView?.narrative.learnerProfile) ? (
+          <div className="mt-4 rounded-lg bg-sage-50 p-4" style={{ border: "1px solid var(--sage-200)" }}>
+            <p
+              className="font-mono text-[0.6rem] uppercase tracking-widest"
+              style={{ color: "var(--sage-600)" }}
+            >
+              How {report.childName} learns
+            </p>
+            <p className="mt-1.5 text-sm text-body">
+              {generatedPiece("learnerProfile", narrativeView?.narrative.learnerProfile)}
+            </p>
+          </div>
+        ) : null}
         {/* text-lg matches the greeting: the letter's two serif
             bookends read as one voice at one size. */}
         <p className="mt-3 font-serif text-lg italic text-strong">

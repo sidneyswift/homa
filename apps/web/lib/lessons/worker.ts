@@ -1,5 +1,6 @@
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import { writeReteachSignal } from "../learning/reteach-signal";
 import { transcribeAudio, transcribeAudioUrl } from "../voice/transcribe";
 import { liveProgressEnabled } from "../child-progress/flag";
 import { recordJournalProgressEvidence } from "../child-progress/runtime";
@@ -202,6 +203,45 @@ export async function runLessonAnalysis(
       transcript,
       pairs: insights.clausePairs,
     });
+
+    // Phase 4: when the lesson has friction AND whatWorked entries with
+    // modality, the friction implies the OTHER modalities didn't work as
+    // well. Write negative signals for modalities that weren't in whatWorked.
+    if (insights.friction.length > 0 && insights.whatWorked.length > 0) {
+      const workedModalities = new Set(
+        insights.whatWorked
+          .filter((w) => w.modality !== null)
+          .map((w) => w.modality),
+      );
+      // If we know what worked (e.g., kinesthetic), and there's friction,
+      // look at recent materials to find the modality that didn't work.
+      // This is best-effort — we write reteach signals for friction only
+      // when we have a clear picture.
+      if (workedModalities.size > 0 && lesson.childId) {
+        const sql = mapDb();
+        const recentSignals = await sql<{ modality: string }[]>`
+          SELECT DISTINCT modality FROM public.learner_modality_signals
+          WHERE child_id = ${lesson.childId}
+            AND family_id = ${familyId}
+            AND signal_type = 'material_finalized'
+            AND valence = 1
+            AND created_at > now() - interval '7 days'
+          ORDER BY modality
+        `;
+        for (const signal of recentSignals) {
+          if (!workedModalities.has(signal.modality as never)) {
+            await writeReteachSignal({
+              familyId,
+              childId: lesson.childId,
+              modality: signal.modality as never,
+              subjectId: null,
+              content: `Lesson friction while using ${signal.modality} approach; ${[...workedModalities].join(", ")} worked better`,
+              sourceLessonId: lessonId,
+            });
+          }
+        }
+      }
+    }
 
     await saveLessonReview({
       lessonId,

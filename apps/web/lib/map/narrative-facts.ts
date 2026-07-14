@@ -77,6 +77,15 @@ export interface RescoreFacts {
   subjectShifts: Array<{ subjectName: string; was: string; now: string }>;
 }
 
+/** Tendencies summary from the synthesized modality profile, included
+ * in report facts only when the child has enough signals (3+). */
+export interface LearnerProfileFacts {
+  /** e.g. "tends to respond well to kinesthetic approaches for math, auditory for reading" */
+  summary: string;
+  /** Per-subject top modality, only subjects with 3+ signals. */
+  bySubject: Record<string, { preferred: string; strength: string }>;
+}
+
 export interface ReportFacts {
   childName: string;
   childAge: string;
@@ -107,6 +116,9 @@ export interface ReportFacts {
    * on rescores where no answer actually changed. */
   rescore: RescoreFacts | null;
   subjects: SubjectFacts[];
+  /** Learner modality profile, present only when the child has enough
+   * signals (3+ per modality) to surface meaningful tendencies. */
+  learnerProfile: LearnerProfileFacts | null;
 }
 
 export interface PlanFacts {
@@ -160,6 +172,16 @@ export interface ReportFactsInput {
   /** Answers that landed or changed since the previous scoring, from
    * the evidence ledger (narrative-store reads it). */
   changedSinceLastScoring?: ChangedAnswerFactInput[];
+  /** Synthesized modality profile from children.profile JSONB. */
+  modalityProfile?: ModalityProfileData | null;
+}
+
+/** Raw modality profile data as stored in children.profile.modality_profile.
+ * Fields are optional since the data comes from JSONB and may be partial. */
+export interface ModalityProfileData {
+  global?: Record<string, { weight: number; signal_count: number; last_signal: string }>;
+  by_subject?: Record<string, Record<string, { weight: number; signal_count: number; last_signal: string }>>;
+  updated_at?: string;
 }
 
 /** Movement lines, same math as the report UI's movement chips: dated,
@@ -388,6 +410,67 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
       input.childName,
     ),
     subjects,
+    learnerProfile: buildLearnerProfileFacts(input.modalityProfile ?? null),
+  };
+}
+
+/** Minimum signals per modality before it surfaces in report facts. */
+const MIN_SIGNALS_FOR_REPORT = 3;
+
+const MODALITY_LABELS: Record<string, string> = {
+  visual: "visual",
+  auditory: "auditory",
+  kinesthetic: "hands-on",
+  reading_writing: "reading and writing",
+};
+
+function buildLearnerProfileFacts(
+  profile: ModalityProfileData | null,
+): LearnerProfileFacts | null {
+  if (!profile?.global) return null;
+
+  // Build per-subject summaries with enough signals.
+  const bySubject: Record<string, { preferred: string; strength: string }> = {};
+  for (const [subjectId, modalities] of Object.entries(profile.by_subject ?? {})) {
+    const eligible = Object.entries(modalities)
+      .filter(([_, v]) => v.signal_count >= MIN_SIGNALS_FOR_REPORT)
+      .sort(([_, a], [__, b]) => b.weight - a.weight);
+    if (eligible.length > 0) {
+      const [mod, data] = eligible[0];
+      bySubject[subjectId] = {
+        preferred: MODALITY_LABELS[mod] ?? mod,
+        strength: data.weight >= 0.7 ? "strong" : "moderate",
+      };
+    }
+  }
+
+  // Build global summary from subjects with enough data.
+  const summaryParts: string[] = [];
+  for (const [subjectId, pref] of Object.entries(bySubject)) {
+    const subjectName = getMapSubject(subjectId)?.displayName ?? subjectId;
+    summaryParts.push(
+      `tends to respond well to ${pref.preferred} approaches for ${subjectName.toLowerCase()} (${pref.strength} signal)`,
+    );
+  }
+
+  // Also check global modalities (subject-agnostic signals).
+  if (summaryParts.length === 0) {
+    const globalEligible = Object.entries(profile.global)
+      .filter(([_, v]) => v.signal_count >= MIN_SIGNALS_FOR_REPORT)
+      .sort(([_, a], [__, b]) => b.weight - a.weight)
+      .slice(0, 2);
+    for (const [mod, data] of globalEligible) {
+      summaryParts.push(
+        `tends to respond well to ${MODALITY_LABELS[mod] ?? mod} approaches (${data.weight >= 0.7 ? "strong" : "moderate"} signal)`,
+      );
+    }
+  }
+
+  if (summaryParts.length === 0) return null;
+
+  return {
+    summary: summaryParts.join("; "),
+    bySubject,
   };
 }
 

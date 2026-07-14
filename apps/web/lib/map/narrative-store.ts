@@ -18,6 +18,14 @@ import {
   uniqueStrings,
 } from "./profile-context";
 
+/** Shape of children.profile.modality_profile from JSONB, loosely typed
+ * since it arrives from the database unvalidated. */
+interface ModalityProfileInput {
+  global?: Record<string, { weight: number; signal_count: number; last_signal: string }>;
+  by_subject?: Record<string, Record<string, { weight: number; signal_count: number; last_signal: string }>>;
+  updated_at?: string;
+}
+
 /**
  * Narrative reads and writes against the ONE-WORLD tables (child_reports,
  * child_plans), server-only via mapDb like everything family-scoped. The
@@ -64,6 +72,9 @@ export interface ReportNarrativeSource {
    * at language") and what moved. Empty on a first report and on
    * rescores where nothing actually changed. */
   changedSinceLastScoring: ChangedAnswerSinceScoring[];
+  /** Synthesized modality profile from children.profile.modality_profile JSONB.
+   * Typed loosely since it comes from JSONB; buildReportFacts handles validation. */
+  modalityProfile: ModalityProfileInput | null;
 }
 
 export async function getReportNarrativeSource(
@@ -196,6 +207,8 @@ export async function getReportNarrativeSource(
         previousAnswer: entry.previous_answer,
         source: entry.source,
       })),
+    modalityProfile:
+      (profile.modality_profile as ModalityProfileInput | undefined) ?? null,
   };
 }
 

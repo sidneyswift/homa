@@ -446,6 +446,31 @@ test("learner.modality_signal_recorded rejects unknown modality", () => {
   );
 });
 
+test("learner.modality_signal_recorded accepts material_finalized signal", () => {
+  assert.equal(
+    EVENT_SCHEMAS["learner.modality_signal_recorded"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      modality: "visual",
+      signal_type: "material_finalized",
+      subject: "literacy",
+    }).success,
+    true,
+  );
+});
+
+test("learner.modality_signal_recorded accepts reteach_signal", () => {
+  assert.equal(
+    EVENT_SCHEMAS["learner.modality_signal_recorded"].safeParse({
+      family_id: FAMILY_ID,
+      child_id: CHILD_ID,
+      modality: "kinesthetic",
+      signal_type: "reteach_signal",
+    }).success,
+    true,
+  );
+});
+
 test("learner.profile_synthesized accepts valid shape", () => {
   assert.equal(
     EVENT_SCHEMAS["learner.profile_synthesized"].safeParse({

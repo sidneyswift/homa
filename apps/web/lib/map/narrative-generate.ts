@@ -63,11 +63,18 @@ export async function generateReportNarrative(
   // line is a schema failure at generation time, not a surprise at render
   // (synthesis and keepsake retired round 2, founder ask 2026-07-09: the
   // report no longer renders either piece).
-  const schema = z.object({
+  //
+  // learnerProfile is optional: only present when the child has enough
+  // modality signals (Phase 4). The model sees it in the facts and the
+  // prompt tells it when to include vs omit the piece.
+  const baseSchema = {
     note: z.string(),
     subjects: requiredStrings(subjectIds),
     drawers: requiredStrings(drawerIds),
-  });
+  };
+  const schema = facts.learnerProfile
+    ? z.object({ ...baseSchema, learnerProfile: z.string().optional() })
+    : z.object(baseSchema);
 
   const started = Date.now();
   const result = await generateObject({

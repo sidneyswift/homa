@@ -158,6 +158,18 @@ them (an empty piece is a failed piece):
   subject. Never summarize or re-list her answers (the card shows
   every question and answer verbatim above your text), and never
   repeat the subject line you already wrote.
+- `learnerProfile` (optional): when the facts include a `learnerProfile`
+  object, write 1 to 3 sentences describing how this child tends to learn.
+  This renders as a standalone section on the report page. Ground it in
+  the data: "So far, hands-on activities seem to click for math, and
+  reading responds well to auditory approaches like read-alouds."
+  CRITICAL: these are tendencies from observed patterns, NEVER labels.
+  Never say "is a kinesthetic learner" or "is a visual learner." Always
+  use language like "tends to respond well to" or "seems to click with."
+  Per-subject when the data supports it. When the `learnerProfile` field
+  is absent from the facts (not enough signals yet), omit this piece
+  entirely (do not return it). The page hides the section when the piece
+  is missing, so omitting it is clean.
 
 ## Craft rules
 

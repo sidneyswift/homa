@@ -14,6 +14,10 @@ export interface ReportNarrative {
   subjects: Record<string, string>;
   /** Per-subject drawer explainer, keyed by subjectId, scored subjects only. */
   drawers: Record<string, string>;
+  /** Optional "How [Child] Learns" section, present only when the child
+   * has enough modality signals (3+) to surface meaningful tendencies.
+   * 1-3 sentences, tendencies not labels. */
+  learnerProfile?: string;
 }
 
 export interface PlanNarrative {

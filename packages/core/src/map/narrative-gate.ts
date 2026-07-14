@@ -47,6 +47,7 @@ export const NARRATIVE_LENGTH_CAPS = {
   note: 520,
   subject: 340,
   drawer: 360,
+  learnerProfile: 500,
   planIntro: 450,
   planWeek: 300,
   planClosing: 400,
@@ -122,6 +123,16 @@ export function validateNarrative(
       context,
     );
     if (problem) rejected[`drawer.${subjectId}`] = problem;
+  }
+
+  // Learner profile is optional; validate only when present.
+  if (narrative.learnerProfile) {
+    const lpProblem = pieceProblem(
+      narrative.learnerProfile,
+      NARRATIVE_LENGTH_CAPS.learnerProfile,
+      context,
+    );
+    if (lpProblem) rejected.learnerProfile = lpProblem;
   }
 
   // A report that is half fallback reads worse than a clean template

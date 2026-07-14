@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS public.learner_modality_signals (
     CHECK (content IS NULL OR length(content) <= 300),
   source_session_id text,
   source_memory_id uuid REFERENCES public.family_memories(id) ON DELETE SET NULL,
+  source_material_id uuid,
+  source_lesson_id uuid,
   created_at timestamptz DEFAULT now() NOT NULL
 );
 

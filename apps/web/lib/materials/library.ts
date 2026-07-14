@@ -312,6 +312,9 @@ interface ChainRow {
   pdf_url: string;
   preview_url: string;
   title: string;
+  kind: MaterialKind;
+  child_id: string | null;
+  subject: string | null;
 }
 
 /** The whole revision chain containing `materialId` (ancestors via
@@ -345,6 +348,12 @@ export interface FinalizeResult {
   note: string;
   title?: string;
   versionsSuperseded?: number;
+  /** The finalized material's kind, for downstream modality signaling. */
+  kind?: MaterialKind;
+  /** The child this material was made for (null = no child). */
+  childId?: string | null;
+  /** The subject this material covers (null = unspecified). */
+  subject?: string | null;
 }
 
 /** Best-effort blob deletion for superseded draft bytes. */
@@ -367,7 +376,7 @@ export async function finalizeMaterialPinned(
 ): Promise<FinalizeResult> {
   const sql = mapDb();
   const rows = await sql<ChainRow[]>`
-    select id, status, revises, pdf_url, preview_url, title
+    select id, status, revises, pdf_url, preview_url, title, kind, child_id, subject
     from public.materials where family_id = ${familyId}
   `;
   const target = rows.find((row) => row.id === materialId);
@@ -402,6 +411,9 @@ export async function finalizeMaterialPinned(
     finalized: true,
     title: target.title,
     versionsSuperseded: superseded.length,
+    kind: target.kind,
+    childId: target.child_id,
+    subject: target.subject,
     note: "Final version kept; earlier drafts tidied away.",
   };
 }
@@ -413,7 +425,7 @@ export async function finalizeMaterialCaller(
 ): Promise<FinalizeResult> {
   const { data } = await db
     .from("materials")
-    .select("id, status, revises, pdf_url, preview_url, title")
+    .select("id, status, revises, pdf_url, preview_url, title, kind, child_id, subject")
     .eq("family_id", familyId);
   const rows = (data ?? []) as ChainRow[];
   const target = rows.find((row) => row.id === materialId);
@@ -453,6 +465,9 @@ export async function finalizeMaterialCaller(
     finalized: true,
     title: target.title,
     versionsSuperseded: superseded.length,
+    kind: target.kind,
+    childId: target.child_id,
+    subject: target.subject,
     note: "Final version kept; earlier drafts tidied away.",
   };
 }

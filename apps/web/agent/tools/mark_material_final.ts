@@ -2,6 +2,9 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { modalityForMaterialKind } from "../../lib/learning/format-modality-map";
+import { synthesizeModalityProfile } from "../../lib/learning/synthesize-modality-profile";
+import { mapDb } from "../../lib/map/db";
 import { emitMapEvent } from "../../lib/map/events";
 import {
   finalizeMaterialCaller,
@@ -45,6 +48,39 @@ export default defineTool({
       channel: usageChannelFromAttributes(ctx.session.auth.current?.attributes),
       versions_superseded: result.versionsSuperseded ?? 0,
     });
+
+    // Phase 4: write a modality signal when the finalized material has a
+    // classifiable kind and is tied to a child (implicit learning signal).
+    if (result.kind && result.childId) {
+      const modality = modalityForMaterialKind(result.kind);
+      if (modality) {
+        try {
+          const sql = mapDb();
+          await sql`
+            INSERT INTO public.learner_modality_signals
+              (family_id, child_id, modality, subject_id, signal_type, valence, content, source_material_id)
+            VALUES
+              (${access.familyId}, ${result.childId}, ${modality}, ${result.subject ?? null},
+               'material_finalized', 1, ${`Finalized ${result.kind}: ${result.title ?? "untitled"}`.slice(0, 300)},
+               ${input.materialId})
+          `;
+          await synthesizeModalityProfile(access.familyId, result.childId);
+          await emitMapEvent("learner.modality_signal_recorded", {
+            family_id: access.familyId,
+            child_id: result.childId,
+            modality,
+            signal_type: "material_finalized",
+            subject: result.subject ?? undefined,
+          });
+        } catch (error) {
+          // Best-effort: don't fail finalization over a signal write.
+          console.error(
+            "finalize: modality signal write failed:",
+            error instanceof Error ? error.message : "unknown",
+          );
+        }
+      }
+    }
 
     return {
       ...result,
