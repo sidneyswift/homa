@@ -1,7 +1,7 @@
+import { sendHomaContactCard } from "./contact-card";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { markLeadConverted } from "./phone-leads";
-import { sendHomaSms } from "./voice/telnyx-api";
 
 /**
  * The family texting lines (migration #22, one per family; migrations
@@ -198,12 +198,28 @@ export async function findPhoneAccessEpoch(
  * The typo safety net for skipping code verification (founder call
  * 2026-07-07): whoever actually owns a freshly linked number gets one
  * text saying so, with the STOP escape hatch (Telnyx enforces opt-outs
- * at the platform level). Best-effort: linking never fails over it.
+ * at the platform level). The text carries Homa's contact card as MMS
+ * media (founder ask 2026-07-10) so the owner can save who is texting;
+ * the multi-parent v0 rewrite dropped the card by accident and this
+ * restores it (regression found 2026-07-14). Best-effort: linking
+ * never fails over it.
  */
 async function sendLinkNotificationSms(phoneE164: string): Promise<void> {
-  await sendHomaSms(
-    phoneE164,
-    "Hi, it's Homa. This number is now set up to text with me. " +
-      "Say hi anytime. Not you? Reply STOP and I won't text again.",
-  );
+  // Dark-channel posture: a deployment without a live texting line
+  // skips silently, no send attempt, no misleading event row.
+  if (process.env.TELNYX_SMS_ENABLED !== "true") return;
+  try {
+    const sent = await sendHomaContactCard(
+      phoneE164,
+      "Hi, it's Homa. This number is now set up to text with me. " +
+        "Here's my contact card so you can save me. Say hi anytime. " +
+        "Not you? Reply STOP and I won't text again.",
+    );
+    await emitMapEvent("sms.contact_card_sent", { trigger: "linked", sent });
+  } catch (error) {
+    console.error(
+      "link notification SMS failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+  }
 }
