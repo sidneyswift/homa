@@ -114,6 +114,8 @@ export interface ProgressCheckInContext {
   channel: ProgressCheckInChannel;
   providerMessageId: string | null;
   repliedDeliveryId: string | null;
+  /** Server-resolved active workflow for an authenticated SMS destination. */
+  activeProgressCheckInId?: string | null;
   episodeId: string | null;
   runtimeSessionId: string;
   turnId: string;

@@ -24,6 +24,12 @@ const CHECK_IN_ID = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const CONFLICT_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 const EVIDENCE_ID = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const MESSAGE_ID = "11111111-1111-4111-8111-111111111111";
+const ACTIVE_DELIVERY_ID =
+  "22222222-2222-4222-8222-222222222222";
+const CLARIFICATION_DELIVERY_ID =
+  "33333333-3333-4333-8333-333333333333";
+const OTHER_CHECK_IN_ID =
+  "44444444-4444-4444-8444-444444444444";
 const NOW = new Date("2026-07-11T23:55:00.000Z");
 
 function throwingOperations(
@@ -190,6 +196,7 @@ describe("trusted progress runtime context", () => {
       channel: "sms",
       providerMessageId: "provider-1",
       repliedDeliveryId: null,
+      activeProgressCheckInId: null,
       episodeId: "episode-1",
       runtimeSessionId: "session-1",
       turnId: "turn-1",
@@ -199,6 +206,48 @@ describe("trusted progress runtime context", () => {
       taskRunId: null,
       now: NOW.toISOString(),
     });
+  });
+
+  it("uses the active SMS progress pair instead of a clarification delivery", () => {
+    const context = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        memberUserId: MEMBER_ID,
+        channel: "sms",
+        repliedDeliveryId: CLARIFICATION_DELIVERY_ID,
+        activeProgressCheckInId: CHECK_IN_ID,
+        activeProgressDeliveryId: ACTIVE_DELIVERY_ID,
+        canonicalInboundText: "Up to 2",
+        canonicalInboundMessageId: MESSAGE_ID,
+      },
+      sessionId: "session-1",
+      turnId: "turn-1",
+      now: NOW,
+    });
+
+    assert.equal(
+      context.activeProgressCheckInId,
+      CHECK_IN_ID,
+    );
+    assert.equal(context.repliedDeliveryId, ACTIVE_DELIVERY_ID);
+  });
+
+  it("drops an incomplete active SMS progress pair", () => {
+    const context = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        memberUserId: MEMBER_ID,
+        channel: "sms",
+        repliedDeliveryId: CLARIFICATION_DELIVERY_ID,
+        activeProgressCheckInId: CHECK_IN_ID,
+      },
+      sessionId: "session-1",
+      turnId: "turn-1",
+      now: NOW,
+    });
+
+    assert.equal(context.activeProgressCheckInId, null);
+    assert.equal(context.repliedDeliveryId, null);
   });
 
   it("derives stable operation keys from trusted provenance", () => {
@@ -371,6 +420,199 @@ describe("trusted progress adapter", () => {
       JSON.stringify(captured).includes("parentQuote"),
       false,
     );
+  });
+
+  it("lets the matching active SMS check-in reach the service", async () => {
+    const context = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        memberUserId: MEMBER_ID,
+        channel: "sms",
+        providerMessageId: "provider-progress-answer",
+        activeProgressCheckInId: CHECK_IN_ID,
+        activeProgressDeliveryId: ACTIVE_DELIVERY_ID,
+        canonicalInboundText: "Up to 2",
+        canonicalInboundMessageId: MESSAGE_ID,
+      },
+      sessionId: "session-1",
+      turnId: "turn-1",
+      now: NOW,
+    });
+    let captured: unknown;
+
+    await executeChildProgressCommand(
+      {
+        action: "respond_check_in",
+        checkInId: CHECK_IN_ID,
+        answer: "getting_there",
+      },
+      context,
+      throwingOperations({
+        respondCheckIn: async (receivedContext, input) => {
+          captured = { context: receivedContext, input };
+          return { status: "no_active_check_in" };
+        },
+      }),
+    );
+
+    assert.deepEqual(captured, {
+      context,
+      input: {
+        action: "respond_check_in",
+        checkInId: CHECK_IN_ID,
+        answer: "getting_there",
+        idempotencyKey: progressOperationIdempotencyKey(
+          context,
+          "respond_check_in",
+        ),
+      },
+    });
+  });
+
+  it("refuses missing or mismatched active SMS check-ins before service", async () => {
+    let calls = 0;
+    const operations = throwingOperations({
+      respondCheckIn: async () => {
+        calls += 1;
+        return { status: "no_active_check_in" };
+      },
+    });
+    const baseAttributes = {
+      memberUserId: MEMBER_ID,
+      channel: "sms",
+      providerMessageId: "provider-progress-answer",
+      canonicalInboundText: "Up to 2",
+      canonicalInboundMessageId: MESSAGE_ID,
+    };
+    const commands = [
+      {
+        context: createProgressToolContext({
+          access: { familyId: FAMILY_ID },
+          attributes: baseAttributes,
+          sessionId: "session-1",
+          turnId: "turn-1",
+          now: NOW,
+        }),
+        checkInId: CHECK_IN_ID,
+      },
+      {
+        context: createProgressToolContext({
+          access: { familyId: FAMILY_ID },
+          attributes: {
+            ...baseAttributes,
+            activeProgressCheckInId: CHECK_IN_ID,
+            activeProgressDeliveryId: ACTIVE_DELIVERY_ID,
+          },
+          sessionId: "session-1",
+          turnId: "turn-1",
+          now: NOW,
+        }),
+        checkInId: OTHER_CHECK_IN_ID,
+      },
+    ];
+
+    for (const command of commands) {
+      const result = await executeChildProgressCommand(
+        {
+          action: "respond_check_in",
+          checkInId: command.checkInId,
+          answer: "getting_there",
+        },
+        command.context,
+        operations,
+      );
+      assert.equal(result.kind, "refused");
+    }
+    assert.equal(calls, 0);
+  });
+
+  it("lets the matching active SMS check-in pause for a topic change", async () => {
+    const context = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        memberUserId: MEMBER_ID,
+        channel: "sms",
+        providerMessageId: "provider-topic-change",
+        activeProgressCheckInId: CHECK_IN_ID,
+        activeProgressDeliveryId: ACTIVE_DELIVERY_ID,
+      },
+      sessionId: "session-1",
+      turnId: "turn-1",
+      now: NOW,
+    });
+    let captured: unknown;
+
+    await executeChildProgressCommand(
+      {
+        action: "pause_check_in",
+        checkInId: CHECK_IN_ID,
+        reason: "topic_change",
+      },
+      context,
+      throwingOperations({
+        pauseCheckIn: async (receivedContext, input) => {
+          captured = { context: receivedContext, input };
+          return { status: "no_active_check_in" };
+        },
+      }),
+    );
+
+    assert.deepEqual(captured, {
+      context,
+      input: {
+        checkInId: CHECK_IN_ID,
+        reason: "topic_change",
+      },
+    });
+  });
+
+  it("refuses untrusted SMS topic-change pauses before service", async () => {
+    let calls = 0;
+    const operations = throwingOperations({
+      pauseCheckIn: async () => {
+        calls += 1;
+        return { status: "no_active_check_in" };
+      },
+    });
+    const contexts = [
+      createProgressToolContext({
+        access: { familyId: FAMILY_ID },
+        attributes: {
+          memberUserId: MEMBER_ID,
+          channel: "sms",
+        },
+        sessionId: "session-1",
+        turnId: "turn-1",
+        now: NOW,
+      }),
+      createProgressToolContext({
+        access: { familyId: FAMILY_ID },
+        attributes: {
+          memberUserId: MEMBER_ID,
+          channel: "sms",
+          activeProgressCheckInId: CHECK_IN_ID,
+          activeProgressDeliveryId: ACTIVE_DELIVERY_ID,
+        },
+        sessionId: "session-1",
+        turnId: "turn-1",
+        now: NOW,
+      }),
+    ];
+
+    for (const [index, context] of contexts.entries()) {
+      const result = await executeChildProgressCommand(
+        {
+          action: "pause_check_in",
+          checkInId:
+            index === 0 ? CHECK_IN_ID : OTHER_CHECK_IN_ID,
+          reason: "topic_change",
+        },
+        context,
+        operations,
+      );
+      assert.equal(result.kind, "refused");
+    }
+    assert.equal(calls, 0);
   });
 
   it("refuses interactive writes from dispatch without calling services", async () => {

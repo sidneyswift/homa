@@ -56,6 +56,31 @@ describe("trusted SMS inbound identity", () => {
     assert.equal(reclaimed, first);
   });
 
+  it("stamps the active progress identity as one trusted pair", () => {
+    assert.deepEqual(
+      trustedSmsInboundIdentityAttributes({
+        providerMessageId: "telnyx-message-1",
+        inboundReceiptId:
+          "11111111-1111-4111-8111-111111111111",
+        activeProgressContext: {
+          checkInId:
+            "22222222-2222-4222-8222-222222222222",
+          deliveryId:
+            "33333333-3333-4333-8333-333333333333",
+        },
+      }),
+      {
+        providerMessageId: "telnyx-message-1",
+        inboundReceiptId:
+          "11111111-1111-4111-8111-111111111111",
+        activeProgressCheckInId:
+          "22222222-2222-4222-8222-222222222222",
+        activeProgressDeliveryId:
+          "33333333-3333-4333-8333-333333333333",
+      },
+    );
+  });
+
   it("passes trusted SMS provenance into signup evidence", async () => {
     const source = await readFile(
       new URL("../agent/tools/signup_record_answer.ts", import.meta.url),

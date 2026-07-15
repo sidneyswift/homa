@@ -76,6 +76,16 @@ export async function executeChildProgressCommand(
   ) {
     return refusedProgressResult();
   }
+  if (
+    (
+      command.action === "respond_check_in" ||
+      command.action === "pause_check_in"
+    ) &&
+    context.channel === "sms" &&
+    context.activeProgressCheckInId !== command.checkInId
+  ) {
+    return refusedProgressResult();
+  }
   const idempotencyKey = progressOperationIdempotencyKey(
     context,
     command.action,
