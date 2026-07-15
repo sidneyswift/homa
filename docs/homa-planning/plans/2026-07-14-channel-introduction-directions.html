@@ -200,26 +200,35 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
 <div class="wrap">
 
   <header class="lab-head">
-    <h1>Meeting Homa · four directions for teaching the channels</h1>
-    <p class="sub">The problem: Homa is one assistant reachable by web chat, text, email, and phone call, and she remembers across all of them. No family is ever told this. Most people have only ever chatted with an AI inside a web app, so nothing in their head expects a text back, a replyable email, or a callable number. This lab holds one family and one goal constant, and varies WHERE and HOW the product teaches it: by Friday of week one, Maria knows she can text Homa, has saved Homa's contact so texts say a name instead of a number, and knows what arrives on which surface.</p>
-    <p class="notice">Everything below uses fake fixture data: Maria Rivera and her kids Emma (4) and Mateo (7) are invented, the numbers shown are placeholders, and no real family, lead, or production record was loaded. No product code or route was changed by this file.</p>
-    <p class="regression"><b>Live production regression, found while grounding this lab:</b> the founder ask of 2026-07-10 sent Homa's vCard contact card at TWO moments, a stranger's first inbound text and the link text when a number connects to a family. The second was silently dropped on 2026-07-11: commit <code>997bda9</code> (multi-parent v0) rewrote <code>apps/web/lib/family-phone.ts</code> from a stale base, and <code>sendLinkNotificationSms</code> lost the card. Today no account holder ever receives the card, the header comment in <code>apps/web/lib/contact-card.ts</code> claims otherwise, and <code>sms.contact_card_sent</code> with trigger <code>linked</code> can never fire. Every direction below assumes this is restored; question 1 asks how.</p>
+    <h1>Meeting Homa · five directions for teaching the channels</h1>
+    <p class="sub">The problem: Homa is one assistant reachable by web chat, text, email, and phone call, and she remembers across all of them. The product teaches this weakly, in three quiet corners, and one surface used to teach it falsely. Most people have only ever chatted with an AI inside a web app, so nothing in their head expects a text back, a replyable email, or a callable number. This lab holds one family constant and varies WHERE and HOW the product teaches the channels. The goal, restated in events the product can actually observe (a vCard save is invisible to us): by Friday of week one, the family has sent Homa at least one text or reply on a proactive channel, and knows what arrives on which surface.</p>
+    <p class="notice">Everything below uses fake fixture data: Maria Rivera and her kids Emma (4) and Mateo (7) are invented, the numbers shown are placeholders, and no real family, lead, or production record was loaded. No product code or route was changed by this file. Fixes named as shipped were separate commits, not edits to this lab.</p>
+    <p class="regression"><b>Fixed in this session (both live and probed):</b> the linked-number contact card regression, commit <code>91337b9</code> (the 2026-07-10 founder ask sent the vCard on the link text; multi-parent v0 <code>997bda9</code> silently dropped it; restored verbatim, <code>sms.contact_card_sent</code> trigger <code>linked</code> fires again). And the false email footer, commit <code>ed768d7</code>: every Homa email's fine print claimed "Reply and a real person answers", which has been false since replies started routing to the agent; it now reads "Reply to this email and Homa answers", the pattern already shipped in the research-brief footer.</p>
+    <p class="regression"><b>Live production failure, found by the council's SMS-first persona walk, verified in code, ESCALATED here because the fix needs a founder ruling:</b> on the tokenized report page, the two action buttons dead-end forever for a text-born family. "Have me call you now" posts to a signed-in-only route (<code>api/voice/curriculum/start</code> returns 401 without a Supabase user, and a text-signup family is memberless with no password), and "Open the month" needs a resume cookie or session the tokenized page never sets (<code>api/map/plan/consent</code> → <code>requireFamily</code>). Both then show "Open your email link on this device once, then try again", which is circular: the report email links straight back to this same sessionless page. User-facing symptom: the SMS-first mom taps the two most action-shaped things on her wow page, gets blamed twice in device-speak, and gives up feeling stupid. The fix is not a silent patch because the report token is shareable by design: honoring it as a credential would let any forwarded-link holder ring the family's phone or build months. Options for the ruling: (a) channel-aware fallback copy ("text me 'call me' and I'll call you") for sessionless viewers, (b) suppress the two buttons when no session exists, (c) accept the token as credential for the month but never for calls, or (d) a one-tap sign-in hint for text-born families ("use the same email you gave me by text"). Until ruled, every text-born family's report page stays partially broken.</p>
 
     <div class="verdicts">
       <div class="verdict">
         <div class="q">What exists today</div>
         <div class="a">The pipes are built. The introduction is not.</div>
-        <p>SMS, email, and voice all route into the one agent with family context (<code>agent/channels/telnyx.ts</code>, <code>agent/channels/email.ts</code>, <code>api/voice/context</code>). The vCard is served at <code>/homa.vcf</code>. Strangers who text first get the card and a concierge. Account holders get one bare link text and silence about everything else.</p>
+        <p>SMS, email, and voice all route into the one agent with family context (<code>agent/channels/telnyx.ts</code>, <code>agent/channels/email.ts</code>, <code>api/voice/context</code>). The vCard is served at <code>/homa.vcf</code>. Strangers who text first get the card and a concierge. Since <code>91337b9</code> account holders get the card on the link text too; what nobody gets is a reason to reply or a map of the doors.</p>
       </div>
       <div class="verdict">
         <div class="q">Where the product teaches channels today</div>
-        <div class="a">Three quiet corners, zero moments.</div>
-        <p>A form label ("Cell number, so you can text Homa"), a pill buried in Settings ("Text Homa · number"), and the task editor's delivery choices. The landing page, FAQ, report, report email, and chat home never mention that text, email, or calls exist. One email footer even claims "a real person answers", which is false: Homa answers.</p>
+        <div class="a">Three quiet corners, no deliberate moment.</div>
+        <p>A form label ("Cell number, so you can text Homa"), a pill buried in Settings ("Text Homa · number"), and the task editor's delivery choices. The landing page, FAQ, and chat home never mention that text, email, or calls exist. The report page mentions one door (the call offer) and the report email mentions replying only to teach deletion; neither TEACHES the channel map. The footer that falsely promised "a real person answers" is fixed as of <code>ed768d7</code>.</p>
       </div>
       <div class="verdict">
         <div class="q">The asymmetry to fix</div>
         <div class="a">Reports go by email. Research goes by text. Nobody is told why.</div>
-        <p>Kid reports send email-only (<code>lib/map/email.ts sendReportEmail</code>). Morning research briefs send text-first with email fallback (<code>lib/tasks</code> delivery, on by default). The same assistant shows up on two surfaces in her first 24 hours with no thread connecting them, from an unsaved number and an unfamiliar address.</p>
+        <p>Kid reports send email-only (<code>lib/map/email.ts sendReportEmail</code>; the one exception is the agent texting the link during SMS signup). Morning research briefs send text-first with email fallback (<code>lib/conversation-continuity/task-delivery.ts</code>, on by default behind <code>MORNING_BRIEF_ENABLED</code>). The same assistant shows up on two surfaces in her first 24 hours with no thread connecting them.</p>
+      </div>
+    </div>
+
+    <div class="verdicts">
+      <div class="verdict">
+        <div class="q">Council pass · 2026-07-14 evening</div>
+        <div class="a">Five experts reviewed this lab. Three reversals survived scrutiny.</div>
+        <p><b>1.</b> The four-way winner pick was a fake choice: directions 1, 2, and 4 are one mechanic (a contact block with a save button) in three placements, and every "what it cannot do" cell names a sibling as the fix. The frame below is now sequencing: pick the day-0 moment, take the beats and the reference surface as the spine. <b>2.</b> The lab never drew the strongest mechanic: SHE texts first (prefilled sms: links and QR), now direction 5, endorsed independently by the compliance and design reviews. <b>3.</b> The goal was unmeasurable (a vCard save is invisible to the product); it is restated above in observable events. Full reviews live in the session transcript; the binding compliance items and measurement plan are new sections below.</p>
       </div>
     </div>
   </header>
@@ -236,27 +245,28 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
       </div>
       <div class="moment">
         <span class="when">Tue 9:43am</span><span class="chan sms">text</span>
-        <b>The link text arrives mid-checklist</b>
-        "Hi, it's Homa. This number is now set up to text with me. Say hi anytime. Not you? Reply STOP..."
-        <div class="gap">No card, no photo, arrives while she is heads-down on the website. Easily never seen again.</div>
+        <b>The link text arrives mid-form</b>
+        "Hi, it's Homa. This number is now set up to text with me. Here's my contact card so you can save me..." (card restored, 91337b9)
+        <div class="gap">The persona walk filed this exact shape under "confirmation robot" and swiped it away. The card helps only if the text itself gets a second look.</div>
       </div>
       <div class="moment">
         <span class="when">Tue 9:55am</span><span class="chan email">email</span>
         <b>The report email</b>
         "Emma's progress report is ready" with the link. Fine print teaches replying 'delete', not replying to talk.
-        <div class="gap">Says "Reply and a real person answers", which is stale and false. The one channel lesson it teaches is deletion.</div>
+        <div class="gap">The false "real person" line is fixed (ed768d7), but reply-to-talk still hides in basement fine print under a line that teaches deletion. Sends once per child, ever.</div>
       </div>
       <div class="moment">
         <span class="when">Tue 9:56am</span><span class="chan web">web</span>
         <b>The report's letter offers a call</b>
         "If you'd rather talk through the report, have me call you now."
-        <div class="ok">A real channel moment, attached to value. The only one in the journey.</div>
+        <div class="ok">A real channel moment, attached to value.</div>
+        <div class="gap">Dead forever for text-born families (signed-in-only route), with a circular device hint. See the escalation above.</div>
       </div>
       <div class="moment">
         <span class="when">Wed 9:04am</span><span class="chan sms">text</span>
         <b>The research brief texts her</b>
-        "🔬 Last night I researched..." from the same unsaved number, no name, no reminder of who this is.
-        <div class="gap">Proactive value lands from a stranger's number. If she missed Tuesday's text, this reads as spam.</div>
+        "🔬 Last night I researched..." with no warning this recurring program existed.
+        <div class="gap">If she never saved the card, the inbox preview reads "+1 (346)... 🔬 Last night I researched", a spam pattern. She never agreed to a daily 9am text and nothing disclosed one was coming.</div>
       </div>
       <div class="moment">
         <span class="when">Wed 8:10pm</span><span class="chan web">web</span>
@@ -274,20 +284,51 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
         <span class="when">Fri</span><span class="chan mail">mail</span>
         <b>The handwritten card</b>
         "Whenever you want a hand, text Homa at (346) 758-8011."
-        <div class="ok">The strongest channel teacher ships on paper, 3 days late, after the digital moments went silent.</div>
+        <div class="ok">The strongest channel teacher (per both persona walks) ships on paper, 3 days late.</div>
+        <div class="gap">It asks her to hand-type the number, and text-born families never receive it at all: SMS signup never collects an address.</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:28px" id="journey-sms-h">And the SMS-first week, the journey this lab underweighted</h2>
+    <p class="hint">From the council's phone-only persona walk, verified against the code. This family's problem is the inverse: they know texting works; email, the web app, and the call are the unknown doors.</p>
+    <div class="moments" aria-labelledby="journey-sms-h">
+      <div class="moment">
+        <span class="when">Day 0</span><span class="chan sms">text</span>
+        <b>She texts the sticky-note number</b>
+        Card #1 arrives with a real answer. Homa offers the whole signup right here, "no website needed."
+        <div class="ok">The concierge answers her actual question first. Resume-where-you-stopped earns the trust a welcome screen never could.</div>
+      </div>
+      <div class="moment">
+        <span class="when">Day 0, mid-signup</span><span class="chan sms">text</span>
+        <b>Card #2 fires mid-conversation</b>
+        "This number is now set up to text with me... Not you? Reply STOP" lands while she is actively texting Homa (the signup link path calls the same notifier).
+        <div class="gap">A robot beat inside a human conversation, and a duplicate card. The link notifier needs a suppress-when-mid-signup guard.</div>
+      </div>
+      <div class="moment">
+        <span class="when">Day 0, later</span><span class="chan web">web</span>
+        <b>The texted report link is her ONE web surface</b>
+        signup_finish texts the link; she opens it on her phone. Strengths first, receipts, share and print all work.
+        <div class="gap">The two action buttons (call, month) dead-end with a circular device hint, and nothing on this page tells her what email or the website are for.</div>
+      </div>
+      <div class="moment">
+        <span class="when">Week 1+</span><span class="chan email">email</span>
+        <b>Email and the app stay unknown doors</b>
+        Report emails read as duplicates of the texts. The sign-in page never says "use the same email you gave me by text" (Google with that email would fold her in).
+        <div class="gap">No moment ever gives her a REASON to open the web app (the binder at evaluation season is the natural one). And no address means no thank-you card, ever.</div>
       </div>
     </div>
   </section>
 
   <section class="directions" aria-labelledby="dir-h">
-    <h2 id="dir-h">Four directions</h2>
-    <p class="hint">Same family, same week, same goal in every frame; only the structure changes. Each direction is a different bet on WHO introduces the channels (the interface or Homa herself), WHEN (one moment, the wow, a drip, or always), and WHERE the contact gets saved. Pick a winner, steal details from the others.</p>
+    <h2 id="dir-h">Five directions, re-cut as a sequence</h2>
+    <p class="hint">Same family, same week in every frame. The council's re-cut: directions 1, 2, and 4 are one mechanic (a contact block with a save button) in three placements, and direction 3's beats plus a direction-4-lite reference surface belong to every plausible answer. So the live decision is the day-0 moment and the firing order, not a single winner. The winner button below now means "lead the sequence with this"; steal freely from the rest. One copy rule the council pulled from both persona walks applies everywhere: question-first. A beat that ends in an answerable, kid-specific question taught; announcements got swiped.</p>
 
     <div class="dir-tabs" role="tablist" aria-label="Directions">
       <button class="dir-tab" role="tab" id="tab-d1" aria-selected="true" aria-controls="panel-d1">1 · The introduction step</button>
       <button class="dir-tab" role="tab" id="tab-d2" aria-selected="false" aria-controls="panel-d2">2 · The report hands you her card</button>
       <button class="dir-tab" role="tab" id="tab-d3" aria-selected="false" aria-controls="panel-d3">3 · She introduces herself</button>
       <button class="dir-tab" role="tab" id="tab-d4" aria-selected="false" aria-controls="panel-d4">4 · One place that never moves</button>
+      <button class="dir-tab" role="tab" id="tab-d5" aria-selected="false" aria-controls="panel-d5">5 · She texts first</button>
     </div>
 
     <!-- D1 -->
@@ -333,16 +374,17 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
 
       <div class="crit">
         <div class="cell"><b>What it fixes</b>The mid-onboarding link text stops being an orphan: the screen she is looking at explains the text the moment it lands, and the save action happens while both are in hand.</div>
-        <div class="cell"><b>What it costs</b>One more step between her and the report, at the exact stretch of onboarding where every added tap costs finishes. Skippers learn nothing and there is no second chance built in.</div>
-        <div class="cell"><b>What it cannot do</b>Nothing here helps the SMS-first family (they never see web onboarding) or the family that added a phone later from Settings.</div>
+        <div class="cell"><b>What it costs (council-sharpened)</b>Not just a tap: the step deliberately engineers an app-switch mid-onboarding (browser to Messages and back), the top-severity failure mode in the activation journey's own friction audit. And two of its sentences can lie: "I just texted you my contact card" rides a fire-and-forget send that silently skips on dark channels, taken numbers, and prior STOPs, and "I saved it" is unverifiable (no web API can detect a contact save).</div>
+        <div class="cell"><b>What it cannot do</b>Nothing here helps the SMS-first family (they never see web onboarding), the family that added a phone later from Settings, or any family that finished onboarding before it ships (the step is gated behind profile completion).</div>
+        <div class="cell"><b>PM verdict</b>Dead for now: no new onboarding step while the first real cohort flows through the funnel. Its CONTENT survives: the four-doors grid moves to direction 4's surface, and the save reason moves into the link text. Earns a test only if baseline data shows linked-but-silent families dominating despite the beats.</div>
       </div>
       <div class="chips" data-dir="The introduction step">
         <button class="chip" aria-pressed="false">Steal: send the card DURING the step so screen and phone explain each other</button>
         <button class="chip" aria-pressed="false">Steal: "my texts will say Homa instead of a number" as the reason to save</button>
         <button class="chip" aria-pressed="false">Steal: the four-doors grid as the one canonical channel explainer</button>
-        <span class="chip skip">Skip if: onboarding completion is sacred; this adds a step before the report</span>
+        <span class="chip skip">Skip if: onboarding completion is sacred; this adds an app-switch and a step before the report, and its payoff cannot be measured</span>
       </div>
-      <button class="winner" data-dir="The introduction step" aria-pressed="false">This is the direction</button>
+      <button class="winner" data-dir="The introduction step" aria-pressed="false">Lead the sequence with this</button>
     </div>
 
     <!-- D2 -->
@@ -387,17 +429,17 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
       </div>
 
       <div class="crit">
-        <div class="cell"><b>What it fixes</b>The lesson arrives at peak trust, seconds after the product proved itself, on both carriers of the same moment. The false "a real person answers" line gets replaced by the true, better claim.</div>
-        <div class="cell"><b>What it costs</b>The report page is already long and she is report-focused; a contact block at the bottom competes with the call offer sitting one paragraph above it.</div>
-        <div class="cell"><b>What it cannot do</b>One-time surface: a family that skims past it has no second chance, and nothing teaches the channels BEFORE the report (the Tuesday link text stays an orphan unless question 1 restores its card).</div>
+        <div class="cell"><b>What it fixes</b>The lesson arrives at peak trust, seconds after the product proved itself, on both carriers of the same moment. (The false footer is already fixed, ed768d7; what remains for D2 is the P.S. and the contact block.)</div>
+        <div class="cell"><b>What it costs</b>The report page is already long and she is report-focused; a passive block below the letter's emotional payload risks being furniture (both persona walks: only a question taught). The email sends once per child, ever, so the moment never repeats. And the P.S. line "I already sent you my contact card" is only true for phone-linked families; the copy must be conditional on real link state.</div>
+        <div class="cell"><b>Council correction (the old skip chip was backwards)</b>SMS-first families are the cohort MOST guaranteed to see this page: signup_finish texts them the link and they open it on their phones. So the block must be viewer-aware: web-first viewers get the texting door; SMS-first viewers get the doors they lack (replyable email, the app, the call). And because the token is shareable by design, the block must never leak linkage state ("your number ending 4477") to a forwarded-link relative. Sharpest known issue on this page: the call and month buttons dead-end for text-born families (see the escalation at top); decorate around dead buttons and the block teaches distrust.</div>
       </div>
       <div class="chips" data-dir="The report hands you her card">
-        <button class="chip" aria-pressed="false">Steal: the report email P.S. that teaches reply-to-talk in one line</button>
-        <button class="chip" aria-pressed="false">Steal: fixing the false "a real person answers" footer everywhere it appears</button>
+        <button class="chip" aria-pressed="false">Steal: the report email P.S. that teaches reply-to-talk in one line (conditional on link state)</button>
+        <button class="chip" aria-pressed="false">Steal: viewer-aware contact block (teach the doors THIS viewer lacks)</button>
         <button class="chip" aria-pressed="false">Steal: contact block pattern (face, number, save button) reusable on any surface</button>
-        <span class="chip skip">Skip if: most families need the mental model BEFORE the report (SMS-first families never see this page)</span>
+        <span class="chip skip">Skip if: the report page's dead buttons stay unfixed; teaching channels beside broken channels reads as a lie</span>
       </div>
-      <button class="winner" data-dir="The report hands you her card" aria-pressed="false">This is the direction</button>
+      <button class="winner" data-dir="The report hands you her card" aria-pressed="false">Lead the sequence with this</button>
     </div>
 
     <!-- D3 -->
@@ -421,17 +463,18 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
       </div>
 
       <div class="crit">
-        <div class="cell"><b>What it fixes</b>Every family gets taught, including SMS-first signups, invited co-parents, and late phone-adders, because the teacher is the message stream itself, not a page they might visit.</div>
-        <div class="cell"><b>What it costs</b>Intro lines spend characters inside hard limits (the brief caps near 600 characters to stay one text), and per-channel intro state is new machinery: flags that must survive access-epoch rotations and multi-adult families.</div>
-        <div class="cell"><b>What it cannot do</b>Invisible until a channel fires. A family that never links a phone learns nothing about texting, and there is still no place to RE-learn a forgotten number later (that is direction 4's job).</div>
+        <div class="cell"><b>What it fixes</b>Every family gets taught, including SMS-first signups, invited co-parents, and late phone-adders, because the teacher is the message stream itself, not a page they might visit. The council's consensus spine.</div>
+        <div class="cell"><b>What it costs (engineer-verified, this is the L build)</b>Intro state has exactly one shape that satisfies "never repeats, survives epochs": a new channel_intros table keyed family + member + channel. Phone-row flags die (unlink is a DELETE, relink a fresh INSERT), family columns break multi-adult (Sidney's intro would burn Alessa's), and session state is memory-only by design. That means an additive migration, the isolation guard, and a backfill ruling for existing live families. The preamble mock also hides a transport decision: every delivery path today sends exactly ONE ledgered message per moment, so a second bubble is new machinery and a merged line raids the brief's 600-character budget (the 🔬 emoji already forces UCS-2: 9 segments for a full brief, ceiling 670 UTF-16 units).</div>
+        <div class="cell"><b>Suppression set (bigger than the mock admits)</b>SMS-first families already got the card TWICE today (first stranger text, then the link notifier firing mid-signup, a live duplicate worth fixing regardless). Add invited co-parents fresh from an invite conversation, claim-movers, and six different link call sites. The welcome beat also collides with the one-reply-per-text law in sms-mode, and the email beat has no wiring named anywhere.</div>
       </div>
       <div class="chips" data-dir="She introduces herself">
-        <button class="chip" aria-pressed="false">Steal: per-channel one-time intro state (never repeats, survives epochs)</button>
-        <button class="chip" aria-pressed="false">Steal: the first linked inbound text gets a welcome beat before the answer</button>
+        <button class="chip" aria-pressed="false">Steal: per-channel one-time intro state (a channel_intros table; nothing lighter survives)</button>
         <button class="chip" aria-pressed="false">Steal: first morning brief names who is texting before the 🔬 block</button>
-        <span class="chip skip">Skip if: message length is precious; every intro line competes with content inside carrier segment caps</span>
+        <button class="chip" aria-pressed="false">Steal: first-line discipline: every proactive text opens "It's Homa" until her first reply, then stops</button>
+        <button class="chip" aria-pressed="false">Steal: suppress the link-notifier text when that number is mid-SMS-signup (kills today's double card)</button>
+        <span class="chip skip">Skip if: this quarter has no room for a migration plus a delivery-transport decision; the beats without the state table WILL re-fire</span>
       </div>
-      <button class="winner" data-dir="She introduces herself" aria-pressed="false">This is the direction</button>
+      <button class="winner" data-dir="She introduces herself" aria-pressed="false">Lead the sequence with this</button>
     </div>
 
     <!-- D4 -->
@@ -480,88 +523,184 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
       </div>
 
       <div class="crit">
-        <div class="cell"><b>What it fixes</b>The forgotten-number problem: three weeks in, when she finally wants to text a photo, there is a findable place with the number, the save button, and the honest per-channel status. Also becomes the link target every other surface points at.</div>
-        <div class="cell"><b>What it costs</b>A new nav entry competes for a calm sidebar, and a place teaches nobody by itself: without a moment pointing at it (direction 1, 2, or 3), it is furniture.</div>
-        <div class="cell"><b>What it cannot do</b>Does nothing for the family's FIRST hours, and nothing for SMS-first families who rarely open the app at all.</div>
+        <div class="cell"><b>What it fixes</b>The forgotten-number problem: three weeks in, when she finally wants to text a photo, there is a findable place with the number, the save button, and honest per-channel status. Also the natural home for the SMS program terms lines that compliance requires (program description, frequency, msg &amp; data rates, STOP/HELP), which turns this from furniture into the compliance anchor every other surface cites.</div>
+        <div class="cell"><b>What it costs (council-corrected)</b>Status must be truthful or absent: "Works" and "Ready" as static labels are instrumentation theater. The what-arrives-where table must render from the live task rows (delivery is per-task, per-family) or it drifts. Two mock details were wrong: Settings lives in the account menu, not the sidebar (so "top of Settings" means inside a menu, then a page), and the sidebar is shared with the marketing nav, so a new entry ships to both. QR generation is a new dependency.</div>
+        <div class="cell"><b>What it cannot do</b>Does nothing for the family's FIRST hours, and the phone-only family never opens the app at all: their "place that never moves" is the text thread itself, so this surface's content must also travel as one text (the signup-end beat) and onto the report page.</div>
       </div>
       <div class="chips" data-dir="One place that never moves">
-        <button class="chip" aria-pressed="false">Steal: live per-channel status rows (linked / works / ready) instead of generic marketing</button>
-        <button class="chip" aria-pressed="false">Steal: the what-arrives-where table, stated once, linked from task cards</button>
-        <button class="chip" aria-pressed="false">Steal: QR + save-contact for the desktop-to-phone hop</button>
-        <span class="chip skip">Skip if: nobody visits reference pages; without an entry moment this is furniture</span>
+        <button class="chip" aria-pressed="false">Steal: live per-channel status rows, shown only where truthful (linked / not linked)</button>
+        <button class="chip" aria-pressed="false">Steal: the what-arrives-where table, rendered from live task rows, linked from task cards</button>
+        <button class="chip" aria-pressed="false">Steal: this surface doubles as the SMS program terms page compliance needs</button>
+        <span class="chip skip">Skip if: no moment points here; a place teaches nobody by itself, and phone-only families never arrive</span>
       </div>
-      <button class="winner" data-dir="One place that never moves" aria-pressed="false">This is the direction</button>
+      <button class="winner" data-dir="One place that never moves" aria-pressed="false">Lead the sequence with this</button>
+    </div>
+
+    <!-- D5 (council addition) -->
+    <div class="dir-panel" role="tabpanel" id="panel-d5" aria-labelledby="tab-d5">
+      <div class="dir-meta"><span class="bet">Council addition · consumer-initiated · every surface texting starts</span></div>
+      <h3 style="margin-top:10px">Direction 5 · She texts first</h3>
+      <p class="philosophy" style="margin-top:8px"><b>Bet: a thread she starts cannot read as spam, and her tap is the only save-adjacent signal the product can actually observe.</b> Everywhere texting should begin (the onboarding moment, the report block, the Settings pill, the thank-you card's back, all via prefilled sms: links on phones and QR codes on desktop and paper), SHE sends the first message. Homa's card and warmth ride her REPLY, which is structurally warmer than a cold send, exempt from iOS unknown-sender screening, and the safest consent tier (conversational). The mechanic was already hiding in this lab as unexamined "Text her a hi" buttons; the compliance and design reviews surfaced it independently. Today's Settings pill opens an EMPTY compose box to an unknown number, the "what do I even say?" dead end a prefilled body cures.</p>
+
+      <div class="stage">
+        <div class="stage-note">Concept mock · toggle who sends the first message</div>
+        <div class="variant" style="margin-top:0">
+          <button class="vbtn" data-d5who="her" aria-pressed="true">She texts first (this direction)</button>
+          <button class="vbtn" data-d5who="homa" aria-pressed="false">Homa texts first (today)</button>
+        </div>
+        <div class="phone">
+          <div class="p-head"><div class="num" id="d5-num">+1 (346) 758-8011</div><div class="sub2" id="d5-sub">Text Message · Today 9:41 AM</div></div>
+          <div class="p-body" id="d5-body"></div>
+        </div>
+      </div>
+
+      <div class="crit">
+        <div class="cell"><b>What it fixes</b>The thread lives in her Recents, created by her, above her real conversations; it cannot be swiped away half-read the way the link text was in the persona walk. Homa's first words become an answer instead of an announcement. And the sms: tap is a client-observable event, unlike a vCard save, so this is the only direction whose success the product can measure directly.</div>
+        <div class="cell"><b>What it costs</b>She has to act: a family that never taps never starts, so the auto-send link text stays as the fallback, which means both paths need copy and the intro state must count either as "SMS taught". The sms:?body= syntax needs cross-platform care (iOS and Android disagreed historically on the separator; test both before shipping any button). Desktop needs the QR fallback everywhere.</div>
+        <div class="cell"><b>What it cannot do</b>Her side of the thread still shows a raw number until a save or a branded sender lands, so the card still rides Homa's reply. And a scripted prefill can feel canned; the body should be short and hers to edit ("Hi Homa, it's Maria").</div>
+      </div>
+      <div class="chips" data-dir="She texts first">
+        <button class="chip" aria-pressed="false">Steal: prefilled body on every sms: link, starting with today's empty Settings pill</button>
+        <button class="chip" aria-pressed="false">Steal: QR with the same prefilled sms: link on the thank-you card's back and desktop surfaces</button>
+        <button class="chip" aria-pressed="false">Steal: "text me a photo of her latest work" as the prefill on the report page (teach the channel through its killer use)</button>
+        <span class="chip skip">Skip if: proactive reach matters more than warmth this quarter; her-initiated only reaches families who tap</span>
+      </div>
+      <button class="winner" data-dir="She texts first" aria-pressed="false">Lead the sequence with this</button>
+    </div>
+  </section>
+
+  <section class="journey" aria-labelledby="bind-h">
+    <h2 id="bind-h">Bindings and budgets (true whichever direction leads)</h2>
+    <p class="hint">From the compliance and deliverability review. MUST items are carrier or TCPA-exposure bindings; the rest are the cheapest capacity and trust moves in the plan.</p>
+    <div class="moments">
+      <div class="moment">
+        <span class="when">MUST · consent</span><span class="chan web">web</span>
+        <b>The onboarding form needs the disclosure block</b>
+        The phone field enrolls a required number into a default-ON weekday texting program with zero frequency, rates, or opt-out language at the point of collection (no "msg &amp; data rates" string exists anywhere in the product). Under the label: one block naming what Homa texts, that weekday research texts recur, msg &amp; data rates, STOP/HELP, and links to SMS terms and privacy. This also cures the scope gap ("so you can text Homa" describes her texting Homa, not a recurring program) and doubles as the opt-in evidence campaign registration wants. Consider making the field optional; conditioning weakens the consent story.
+      </div>
+      <div class="moment">
+        <span class="when">MUST · confirmation</span><span class="chan sms">text</span>
+        <b>The link text becomes a complete program confirmation</b>
+        Whatever copy question 1 picks, the enrollment confirmation must carry, once: recurrence ("I'll also text one research idea on weekday mornings"), msg &amp; data rates, HELP, and STOP. Today it has STOP only.
+      </div>
+      <div class="moment">
+        <span class="when">MUST · registration</span><span class="chan sms">text</span>
+        <b>Audit the 10DLC campaign before adding sends</b>
+        Confirm the Telnyx brand and campaign exist, are vetted, and declare what actually sends (recurring briefs, vCard welcome, MMS worksheets, codes, conversational replies, report links if question 5 ships). Nothing in the repo records this; misregistered scheduled bulk waves are a filtering and fine magnet.
+      </div>
+      <div class="moment">
+        <span class="when">MUST · wrong numbers</span><span class="chan sms">text</span>
+        <b>Gate recurring sends on one engagement signal</b>
+        Signup skips code verification by ruling, so a typo enrolls a stranger into daily 9am texts, the highest-frequency TCPA suit pattern. Cheap fix that keeps the no-OTP posture: conversational replies stay instant, but the scheduled program (briefs, future report texts) waits for any one proof of a real expecting human (a reply, a delivered-unSTOPped welcome plus a few days), and new numbers get checked against the FCC reassigned-numbers database before the first scheduled send.
+      </div>
+      <div class="moment">
+        <span class="when">Budget · segments</span><span class="chan sms">text</span>
+        <b>The 🔬 emoji costs half the fleet's daily capacity</b>
+        The leading emoji forces UCS-2: a full 600-character brief is 9 segments instead of 4, and T-Mobile caps daily volume per brand tier in segments (about 220 briefs per day at the unvetted tier, dropped silently past the cap). Moving the emoji out (or paying for standard vetting) is the cheapest capacity in messaging. Also start consuming per-carrier delivery receipts; today the product only knows Telnyx accepted a message, so silent filtering is invisible.
+      </div>
+      <div class="moment">
+        <span class="when">Budget · trust</span><span class="chan sms">text</span>
+        <b>One proactive text per day in week one, and clamp the clock</b>
+        Question-first beats, briefs, and report texts stack: three proactive texts in 24 hours to an unsaved number reads as a list blast and collides with "offers never commands". Week-one budget: one per day. And the evening check-in's 3-hour delivery window lets an 8pm send land at 11pm local, past the 9pm quiet-hours line; clamp it before the check-in ever defaults on.
+      </div>
+    </div>
+
+    <h2 style="margin-top:28px" id="measure-h">Measurement (the missing question the PM asked)</h2>
+    <p class="hint">No direction ships blind. Baseline this week, before any beat: the events already exist.</p>
+    <div class="moments" aria-labelledby="measure-h">
+      <div class="moment">
+        <span class="when">Outcome metric</span><span class="chan sms">text</span>
+        <b>Linked inbound-text rate</b>
+        Share of families with sms.family_linked that log at least one sms.message_received with linked_family true within 7 days of linking. The project's outcome variable, and it comes with a free natural experiment: families linked during the regression window (7-11 to 7-14) never got the card, families after 91337b9 do. That is a clean read on whether the card moves inbound texting before anything else is built.
+      </div>
+      <div class="moment">
+        <span class="when">Conversion + guardrail</span><span class="chan sms">text</span>
+        <b>Brief-to-reply share, beside STOPs</b>
+        Of research.brief_sent, the share followed by an inbound linked text within 24 hours, shown next to opt-outs in the same window. If the STOP path does not emit a countable event today, adding one is part of week one. This gates question 5's second proactive text.
+      </div>
+      <div class="moment">
+        <span class="when">Email signal</span><span class="chan email">email</span>
+        <b>Email replies arriving</b>
+        Weekly email.message_received with linked_family true, before and after the footer fix (ed768d7) and the report P.S. Near zero today by construction (the fine print taught deletion); any movement is attributable to the copy changes.
+      </div>
     </div>
   </section>
 
   <section class="questions" aria-labelledby="q-h">
-    <h2 id="q-h">Five build-changing questions</h2>
+    <h2 id="q-h">Five build-changing questions (re-cut by the council)</h2>
 
     <div class="q-item">
-      <h3>1 · The regression: what does the link text carry, starting now?</h3>
-      <p class="why">The 2026-07-10 founder ask sent the vCard on the link text; multi-parent v0 dropped it silently. Restoring is a small change to <code>lib/family-phone.ts</code>. The question is whether to restore verbatim today or hold for this lab's winning copy. This decides whether a fix ships this session.</p>
-      <div class="q-opts" data-q="Link text contact card">
-        <label class="q-opt"><input type="radio" name="q1" value="Restore now, verbatim 2026-07-10 behavior; refine copy later"><span>Restore now with the shipped 2026-07-10 copy and card, refine wording when a direction wins.<span class="rec">Recommended</span> A founder ruling already covers it; waiting couples a live regression to a design debate.</span></label>
-        <label class="q-opt"><input type="radio" name="q1" value="Restore now with the winning direction's intro copy"><span>Restore in the same change that adopts the winning direction's intro copy. One deploy, but the regression lives until the copy debate ends.</span></label>
-        <label class="q-opt"><input type="radio" name="q1" value="Hold; the redesign may replace this moment entirely"><span>Hold. If the winning direction moves the introduction elsewhere, the link text may shrink instead of grow.</span></label>
+      <h3>1 · The first text: what speech act is it, and who sends it?</h3>
+      <p class="why">The card is restored (91337b9) with the founder-approved 2026-07-10 wording, but both persona walks filed that announcement shape under "confirmation robot", and both walks learned texting was real only when a text asked a question worth answering. This decides the link text's copy AND whether her-initiated texting (direction 5) becomes the primary path with the auto-send as fallback.</p>
+      <div class="q-opts" data-q="First text speech act">
+        <label class="q-opt"><input type="radio" name="q1" value="Her-initiated primary (text-me-hi prefill); question-first auto-send with card as the skip fallback"><span>Her-initiated primary: the onboarding moment offers "text me hi" with a prefilled body, Homa replies with warmth, the card, and one kid-specific question. The auto-send link text (rewritten question-first, card attached) fires only for families who skip.<span class="rec">Recommended</span> Matches the persona evidence, the compliance review's safest tier, and gives the product its only observable signal.</span></label>
+        <label class="q-opt"><input type="radio" name="q1" value="Question-first auto-send with card (no her-initiated path yet)"><span>Keep Homa-initiated, rewrite the copy to end in one answerable kid-specific question, card attached. Smaller build, no sms:?body= cross-platform work yet.</span></label>
+        <label class="q-opt"><input type="radio" name="q1" value="Keep the restored 2026-07-10 announcement wording as is"><span>Keep the restored wording. Founder-approved, short, and the card now does the identity work.</span></label>
       </div>
     </div>
 
     <div class="q-item">
       <h3>2 · First inbound text from a linked number: silent context, or a one-time welcome?</h3>
-      <p class="why">Today a linked parent's first-ever text drops straight into the family-context conversation with no acknowledgment that this is new. A welcome beat ("It's really me, you're all set to text with me") needs per-channel intro state in the session or a flag on the phone row, and it must not fire for SMS-first families who already spent a whole signup here.</p>
+      <p class="why">Today a linked parent's first-ever text drops straight into the family-context conversation with no acknowledgment that this is new. The engineer's audit hardened the cost side: the only state shape that survives is a new channel_intros table (phone-row flags die on unlink/relink, family columns break multi-adult, session state is memory-only), the suppression set spans SMS-first families, invited co-parents, claim-movers, and six link call sites, and a pre-answer beat collides with the one-reply-per-text law unless question 3 settles the transport.</p>
       <div class="q-opts" data-q="First linked inbound text">
-        <label class="q-opt"><input type="radio" name="q2" value="One-time welcome beat before the answer"><span>One-time welcome beat, then the answer.<span class="rec">Recommended</span> The cost is one sentence once; the payoff is certainty she texted the right number.</span></label>
-        <label class="q-opt"><input type="radio" name="q2" value="Keep it silent; the answer itself is the proof"><span>Keep today's behavior: her question answered with her kids' names IS the welcome. No new state.</span></label>
+        <label class="q-opt"><input type="radio" name="q2" value="One-time welcome beat, built on the channel_intros table"><span>One-time welcome beat, then the answer, gated on the intro-state table and its suppression rules.<span class="rec">Recommended</span> The payoff is certainty she texted the right number; the cost is real but shared with every other beat.</span></label>
+        <label class="q-opt"><input type="radio" name="q2" value="Keep it silent; the answer itself is the proof"><span>Keep today's behavior: her question answered with her kids' names IS the welcome. No new state, no transport change.</span></label>
       </div>
     </div>
 
     <div class="q-item">
-      <h3>3 · Where do kids' reports travel?</h3>
-      <p class="why">Reports are email-only today (<code>sendReportEmail</code>). Research briefs are text-first. If texting is Homa's front door, the report link not being textable is the loudest silence. Adding a text send touches the delivery ledger and the report-email dedupe (<code>reportAlreadyEmailed</code>).</p>
-      <div class="q-opts" data-q="Report delivery">
-        <label class="q-opt"><input type="radio" name="q3" value="Email stays the carrier; text a short link too when a phone is linked"><span>Email stays the permanent carrier; a linked family ALSO gets one short text with the link.<span class="rec">Recommended</span> The email remains the archival home; the text meets her where Homa already talks.</span></label>
-        <label class="q-opt"><input type="radio" name="q3" value="Email only, as today"><span>Email only. Reports are documents; documents live in inboxes. No change.</span></label>
-        <label class="q-opt"><input type="radio" name="q3" value="Parent chooses per family, like task delivery"><span>A delivery preference on the family, like the tasks page's per-task choice. Most control, most machinery.</span></label>
+      <h3>3 · Intro beats and extra sends: inside the one message, or a second ledgered send?</h3>
+      <p class="why">The engineer's missing question, binding for questions 1 and 2 and direction 3. Every proactive path today delivers exactly ONE ledgered message per recipient per moment (one conversation_deliveries attempt, one composed text persisted verbatim, one reply loop), and the inbound side has a one-reply law. The mocks quietly break this three ways: the preamble drawn as a second bubble, the welcome beat before the answer, and a report text that lives in neither existing ledger. Merging into one message instead runs into the 670-UTF-16-unit ceiling and the "delivered EXACTLY as written" contract.</p>
+      <div class="q-opts" data-q="Intro beat transport">
+        <label class="q-opt"><input type="radio" name="q3" value="Fold intro lines into the one message; no second send"><span>Fold intro lines into the single message and pay for them out of the segment budget (drop the leading emoji to fund it, see bindings below).<span class="rec">Recommended</span> No new delivery machinery, no double-text spam pattern; the cost is squeezing brief #1's content.</span></label>
+        <label class="q-opt"><input type="radio" name="q3" value="Build the second ledgered send (idempotent, own delivery row)"><span>Extend the delivery layer with a second, idempotent, ledgered send for intro beats and report texts. More machinery, but beats never raid content budgets and report-by-text gets its once-only key for free.</span></label>
       </div>
     </div>
 
     <div class="q-item">
       <h3>4 · Does "how to reach Homa" get a permanent home in the app?</h3>
-      <p class="why">Direction 4 as a question: even if a moment-based direction wins, a findable reference may still be worth a route or card. This changes IA (a nav entry or settings section) and gives every other surface a place to link.</p>
+      <p class="why">Even with moment-based teaching, a findable reference gives every other surface a link target, and compliance wants a linkable SMS program terms artifact (program description, frequency, msg &amp; data rates, STOP/HELP). Correction from the audit: Settings lives in the account menu, so "top of Settings" means inside a menu, then the top of that page; a sidebar entry ships to the marketing nav too.</p>
       <div class="q-opts" data-q="Permanent reach-Homa surface">
-        <label class="q-opt"><input type="radio" name="q4" value="Yes, top of Settings (no new nav entry)"><span>Yes, as the top section of Settings, where the Text Homa pill already lives. Findable without new nav.<span class="rec">Recommended</span></span></label>
-        <label class="q-opt"><input type="radio" name="q4" value="Yes, its own sidebar entry"><span>Yes, its own sidebar entry. Maximum findability, one more item in a calm shell.</span></label>
-        <label class="q-opt"><input type="radio" name="q4" value="No, moments only"><span>No. The winning moment-based direction carries the whole load; Settings stays as is.</span></label>
+        <label class="q-opt"><input type="radio" name="q4" value="Yes, top of Settings, doubling as the SMS program terms page"><span>Yes, the top section of Settings, where the Text Homa pill already lives, with the five compliance lines at the bottom.<span class="rec">Recommended</span> Findable without new nav, and it does double duty as the compliance anchor.</span></label>
+        <label class="q-opt"><input type="radio" name="q4" value="Yes, its own sidebar entry"><span>Yes, its own sidebar entry. Maximum findability; one more item in a calm shell that also ships to the marketing nav.</span></label>
+        <label class="q-opt"><input type="radio" name="q4" value="No, moments only"><span>No. The beats and the report block carry the whole load; Settings stays as is. (Compliance still needs the program terms somewhere public.)</span></label>
       </div>
     </div>
 
     <div class="q-item">
-      <h3>5 · Who writes the introduction copy: code or the agent?</h3>
-      <p class="why">Every proactive email today wraps agent text in a code-controlled shell, and the link text is fully fixed copy. Intro beats could stay fixed (predictable, copy-gated once, testable) or be composed by Homa in-session (warmer, personal, but every send is a fresh copy risk on a surface with no reviewer).</p>
-      <div class="q-opts" data-q="Intro copy ownership">
-        <label class="q-opt"><input type="radio" name="q5" value="Fixed code-controlled templates, copy-gated once"><span>Fixed templates in code, run through the reader and editor gates once, shipped everywhere.<span class="rec">Recommended</span> Matches every existing shell; intro moments are too load-bearing for improvisation.</span></label>
-        <label class="q-opt"><input type="radio" name="q5" value="Agent-composed with guardrails"><span>Agent-composed inside instruction guardrails, so the intro references her actual kids and moment.</span></label>
+      <h3>5 · Where do kids' reports travel?</h3>
+      <p class="why">Reports are email-only today; the one exception is the agent texting the link during SMS signup. The council split honestly here. The phone-only persona: email-only reports means unread reports for text-born families, whose inbox is a junk drawer. The PM: premature to add a second proactive text before the first STOP-rate baseline exists, and "email plus sometimes a text" muddies the clean what-arrives-where story. The engineer: a report text lives in neither existing ledger and needs a once-only key per child per channel, plus a decision for the third sender path (the founder console resend).</p>
+      <div class="q-opts" data-q="Reports by text">
+        <label class="q-opt"><input type="radio" name="q5" value="Yes for linked families, sequenced after the week-one baseline, inside the SMS budget"><span>Email stays the archival carrier; a linked family also gets one short text with the link, shipped AFTER the baseline week and inside the one-proactive-text-per-day budget.<span class="rec">Recommended</span> Honors both the phone-only reality and the PM's measurement gate.</span></label>
+        <label class="q-opt"><input type="radio" name="q5" value="Email only, as today"><span>Email only. Reports are documents; documents live in inboxes. Text-born families keep the agent-texted link at signup and nothing after.</span></label>
+        <label class="q-opt"><input type="radio" name="q5" value="Parent chooses per family, like task delivery"><span>A delivery preference on the family, like the tasks page's per-task choice. Most control, most machinery.</span></label>
       </div>
+    </div>
+
+    <div class="q-item">
+      <h3>Settled by the council, not asked</h3>
+      <p class="why" style="margin-bottom:0">Three former questions closed with clear defaults. <b>Intro copy ownership:</b> fixed code-controlled templates with typed kid-specific slots (name, one interest), gated once; a slot-holding template is the middle path that makes question-first beats possible without per-send copy risk. <b>Link-text wording:</b> whatever question 1 picks goes through the reader gate then the editor gate as normal copy chores, not a founder fork. <b>Branded sender (RCS business messaging, Apple business messages):</b> a later bet. It would dissolve the save-a-contact ceremony on supporting devices, which is exactly why heavy ceremony UI should stay light now, but coverage is partial, Telnyx RBM lead time is unverified, and verified-business chrome may cut against Homa-as-someone. Revisit when the baseline says contact identity is still the blocker.</p>
     </div>
   </section>
 
   <section class="assemble" aria-labelledby="a-h">
     <h2 id="a-h">Assemble your reply</h2>
-    <p class="hint">Pick a winner above, steal freely from the losers, answer what you can, and add anything the chips missed. The box below writes your reply for you; copy it back into chat.</p>
+    <p class="hint">Pick the sequence lead above, steal freely from every direction, answer what you can, and add anything the chips missed. The box below writes your reply for you; copy it back into chat.</p>
     <textarea id="notes" placeholder="Anything else: copy reactions, moments I missed, gut feelings, disagreements with the gaps I flagged..."></textarea>
     <div class="reply" id="reply" aria-live="polite"></div>
     <button class="copybtn" id="copy">Copy reply</button>
   </section>
 
   <div class="wiring">
-    <b>Wiring note (no application code was touched by this lab).</b><br>
-    The regression fix is <code>apps/web/lib/family-phone.ts</code> (<code>sendLinkNotificationSms</code> back through <code>sendHomaContactCard</code> from <code>apps/web/lib/contact-card.ts</code>, whose header comment currently overstates reality) plus the stale-event check in <code>pnpm check:events</code> for <code>sms.contact_card_sent</code> trigger <code>linked</code>.
-    Direction 1 lands in <code>apps/web/app/onboarding/map-flow.tsx</code> as a new step component beside <code>family-step.tsx</code>, reusing the card send that <code>addFamilyPhone</code> already triggers.
-    Direction 2 lands in <code>apps/web/app/onboarding/r/[token]/report-view.tsx</code> beside <code>call-homa-ps.tsx</code>, and in <code>sendReportEmail</code> in <code>apps/web/lib/map/email.ts</code>, which is also where the false "Reply and a real person answers" outer note lives (one string, every email).
-    Direction 3 touches <code>apps/web/agent/channels/telnyx.ts</code> (linked welcome beat), <code>apps/web/lib/tasks/dispatch-input.ts</code> and <code>apps/web/agent/skills/research-brief/SKILL.md</code> (first-brief line), and needs new per-channel intro state: either columns on <code>family_phones</code> / <code>families</code> or a small <code>channel_intros</code> table; additive migration, isolation guard before schema work (<code>pnpm check:isolation</code>), events registered for MJ-08 parity.
-    Direction 4 lands in <code>apps/web/app/app/settings/parents-section.tsx</code> (settings placement) or a new route under <code>apps/web/app/app/</code> (sidebar placement, IA decision), reusing the <code>sms:</code> pill and <code>/homa.vcf</code> (<code>apps/web/app/homa.vcf/route.ts</code>, already public).
-    Report-by-text (question 3) extends the send path in <code>apps/web/lib/sms-onboarding.ts</code> / <code>apps/web/app/api/map/score</code> paths that call <code>sendReportEmail</code>, and must respect the delivery ledger posture in <code>apps/web/lib/conversation-continuity/</code>.
+    <b>Wiring note (no application code was touched by this lab; the two shipped fixes were separate commits, audited by the council's engineer).</b><br>
+    Shipped: <code>91337b9</code> restored <code>sendLinkNotificationSms</code> in <code>apps/web/lib/family-phone.ts</code> through <code>sendHomaContactCard</code> (the <code>apps/web/lib/contact-card.ts</code> header comment is accurate again), and <code>ed768d7</code> fixed the default outer note in <code>apps/web/lib/map/email.ts</code>. Guard honesty: <code>pnpm check:events</code> is name-level parity only and stayed green through the whole regression (the <code>first_text</code> trigger kept the event name alive); a trigger-level guard would be NEW work if wanted.
+    Direction 1 lands in <code>apps/web/app/onboarding/map-flow.tsx</code> as a new step beside <code>family-step.tsx</code>; making its copy truthful means threading a card-send outcome through <code>addFamilyPhone</code>'s return type and <code>/api/map/family</code>.
+    Direction 2 lands in <code>apps/web/app/onboarding/r/[token]/report-view.tsx</code> beside <code>call-homa-ps.tsx</code> and in <code>sendReportEmail</code>; its P.S. needs a phone-state read, and the viewer-aware block must not leak linkage state on the shareable token page. The dead call/month buttons for text-born families live in <code>call-homa-ps.tsx</code> + <code>api/voice/curriculum/start</code> (Supabase-session-only) and <code>month-button.tsx</code> + <code>api/map/plan/consent</code> (<code>requireFamily</code>: resume cookie or session), with the circular hint copy in both components.
+    Direction 3 touches <code>apps/web/agent/channels/telnyx.ts</code> (welcome beat, idempotency against webhook retries, the one-reply law in <code>agent/instructions/sms-mode.ts</code>), <code>apps/web/lib/family-phone.ts</code> (the day-0 beat and the mid-signup suppression that kills today's double card), <code>apps/web/lib/tasks/dispatch-input.ts</code> + <code>apps/web/agent/skills/research-brief/SKILL.md</code> (first-brief line and budget), <code>apps/web/lib/map/email.ts</code> + <code>apps/web/agent/channels/email.ts</code> (the email beat, previously unwired), and the intro state itself: a <code>channel_intros</code> table keyed family + member (nullable) + channel; additive migration, <code>pnpm check:isolation</code> first, MJ-08 event registration, and a backfill ruling for live families.
+    Direction 4 lands in <code>apps/web/app/app/settings/parents-section.tsx</code> (Settings is reached via the account menu in <code>components/dashboard/account-menu.tsx</code>, not the sidebar) or a new route under <code>apps/web/app/app/</code>; the sidebar (<code>components/dashboard/sidebar-nav.tsx</code>) is shared with the marketing nav. QR generation is a new dependency. Status rows read <code>getFamilyPhones</code> + member attribution; the what-arrives-where table renders from live task rows.
+    Direction 5 touches every <code>sms:</code> href (today only <code>parents-section.tsx</code>, body-less) plus the report block, the onboarding moment, and <code>lib/cards/message.ts</code> for the thank-you card's QR side; test <code>sms:?body=</code> and <code>sms:?&amp;body=</code> variants cross-platform.
+    Reports-by-text (question 5) has THREE email callers to reconcile, <code>apps/web/app/api/map/score/route.ts</code>, <code>apps/web/lib/sms-onboarding.ts</code>, and the founder-console resend in <code>apps/web/app/admin/actions.ts</code>, and needs a once-only key per child per channel (the email side uses <code>child_reports.emailed_at</code> + the <code>email_sends</code> ledger; the SMS side has neither) under the transport decision in question 3.
+    Compliance bindings land in <code>apps/web/app/onboarding/family-step.tsx</code> (disclosure block), <code>sendLinkNotificationSms</code> (confirmation completeness), <code>apps/web/lib/tasks/kinds.ts</code> (quiet-hours clamp on the journal window), and the Telnyx campaign registration (outside the repo).
     All copy on these surfaces goes through the homa-copy-writer rulebook with the reader gate before the editor gate.
   </div>
 </div>
@@ -619,11 +758,11 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
 
   function render(){
     var lines = ["UI direction feedback", ""];
-    lines.push("Winning direction: " + (state.winner || "(none picked yet)"));
+    lines.push("Sequence lead: " + (state.winner || "(none picked yet)"));
     lines.push("Details to steal: " + (state.steals.length ? "" : "none"));
     state.steals.forEach(function(s){ lines.push("  - " + s); });
     lines.push("");
-    var qs = ["Link text contact card","First linked inbound text","Report delivery","Permanent reach-Homa surface","Intro copy ownership"];
+    var qs = ["First text speech act","First linked inbound text","Intro beat transport","Permanent reach-Homa surface","Reports by text"];
     qs.forEach(function(q){
       lines.push("- " + q + ": " + (state.answers[q] || "(no answer)"));
     });
@@ -686,7 +825,7 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
       html: '<div class="p-time">Wednesday 9:04 AM</div>'
         + '<div class="bubble in">Morning, it\u2019s Homa. Weekday mornings I\u2019ll text you one thing I looked into overnight for your kids. Here\u2019s the first:</div>'
         + '<div class="bubble in">🔬 Last night I researched counting board games for early math\n\nWhat I learned: A large early-math review found that games where kids move a piece while counting spaces build number sense faster than flashcards.\n\nWhy it\u2019s interesting: Emma is right at the edge of counting past ten, and she already loves game night.\n\nWant me to make Emma a printable counting board game for counting to twenty?</div>'
-        + '<div class="p-time" style="margin-top:6px">The preamble bubble fires once, ever, then briefs arrive bare.</div>'
+        + '<div class="p-time" style="margin-top:6px">The preamble fires once, ever. Drawn here as a second bubble, which is question 3\u2019s transport decision; folded into one message it pays from the 600-character budget.</div>'
     },
     d2: {
       sub: "Homa · Wednesday 8:14 PM",
@@ -720,6 +859,43 @@ code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background
     });
   });
   setD3("d0");
+
+  /* ---------- D5 who-sends-first toggle ---------- */
+  var d5views = {
+    her: {
+      sub: "Text Message · Today 9:41 AM",
+      num: "+1 (346) 758-8011",
+      html: '<div class="p-time">Today 9:41 AM</div>'
+        + '<div class="bubble out">Hi Homa, it\u2019s Maria</div>'
+        + '<div class="p-time" style="margin-top:2px">She tapped "text me hi"; the prefilled body sent from HER side.</div>'
+        + '<div class="bubble in">Maria! You found me. Save my card below and my texts will say Homa instead of a number.</div>'
+        + '<div class="vcardrow"><div class="ava">h</div><div><div class="who">Homa</div><div class="what">Contact card</div></div><div class="chev">\u203a</div></div>'
+        + '<div class="bubble in">One question while you\u2019re here: should Emma\u2019s first counting game be dinosaurs or ocean animals?</div>'
+        + '<div class="p-time" style="margin-top:6px">Her thread, her Recents, no unknown-sender screening. The card and the question ride a REPLY.</div>'
+    },
+    homa: {
+      sub: "Text Message · Today 9:41 AM",
+      num: "+1 (346) 758-8011",
+      html: '<div class="p-time">Today 9:41 AM</div>'
+        + '<div class="vcardrow"><div class="ava">h</div><div><div class="who">Homa</div><div class="what">Contact card</div></div><div class="chev">\u203a</div></div>'
+        + '<div class="bubble in">Hi, it\u2019s Homa. This number is set up to text with me now, and here\u2019s my card so you can save me. Say hi anytime. Not you? Reply STOP and I won\u2019t text again.</div>'
+        + '<div class="p-time" style="margin-top:6px">Today\u2019s order: a cold business-initiated MMS to an unsaved number, exactly the profile unknown-sender screening exists for. Both walks filed this shape under "confirmation robot".</div>'
+    }
+  };
+  var d5btns = Array.prototype.slice.call(document.querySelectorAll("[data-d5who]"));
+  var d5body = document.getElementById("d5-body");
+  var d5sub = document.getElementById("d5-sub");
+  function setD5(who){
+    d5body.innerHTML = d5views[who].html;
+    d5sub.textContent = d5views[who].sub;
+  }
+  d5btns.forEach(function(b){
+    b.addEventListener("click", function(){
+      d5btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      setD5(b.getAttribute("data-d5who"));
+    });
+  });
+  if (d5body) setD5("her");
 
   /* ---------- D4 placement toggle ---------- */
   var d4btns = Array.prototype.slice.call(document.querySelectorAll("[data-d4pos]"));
