@@ -22,12 +22,10 @@ the latent-vs-deterministic split:
 
 **In this section, "build a skill" means design a fleet skill, not a family
 skill.** Coding agents building Homa create shared capabilities that can help
-the whole fleet, optionally targeted to relevant families. `family_skills`
-are family-owned product data created at runtime when one parent teaches Homa
-a family-specific procedure through `save_skill`. They are not a place for a
-coding agent to implement a product feature. Agents may improve the
-`family_skills` infrastructure, but they must not seed, copy, or use
-family-scoped rows as the delivery mechanism for fleet behavior.
+the whole fleet, never a per-family product feature. `family_skills` is
+dormant historical product data (2026-07-15, see Skill authoring rules
+below); it is not a place a coding agent implements anything, live or
+otherwise.
 
 Read `docs/homa-planning/15-agentic-architecture.md` §2 for the binding
 placement ruling. `docs/homa-planning/plans/2026-07-13-agent-frontier-review.md`
@@ -65,23 +63,24 @@ records the research comparison behind this rule.
 
 ### Skill authoring rules
 
-- Fleet skills have two deliberate implementation forms. Choose between them
-  based on distribution and release needs:
-  - **Repo-authored fleet skill:** Homa-wide craft that ships with code,
-    lives at `apps/web/agent/skills/<name>/SKILL.md`, is versioned in git,
-    and loads at runtime through eve. Use this for stable product craft,
-    especially when the skill has supporting references, assets, or scripts.
-  - **Fleet skill-bank skill:** founder-curated shared craft in `skill_bank`
-    that loads at runtime through `agent/skills/skill-library.ts`, can target
-    families by age/capability tags, and can be unpublished fleet-wide
-    without a deploy. Use this when targeted runtime distribution is the
-    product requirement. Publishing requires founder review, provenance,
-    targeting, and a fleet-wide rollback path.
-- `family_skills` is not a third implementation choice for builders. It
-  contains parent-taught, family-specific procedures written by Homa through
-  `save_skill`. A repeated family pattern may become a candidate fleet skill
-  only after it is generalized, stripped of family details, reviewed by the
-  founder, and placed in one of the two fleet forms above.
+- Filesystem-first (founder ruling `filesystem-first-fleet-skills`,
+  2026-07-15): `apps/web/agent/skills/<name>/SKILL.md` is the only active
+  fleet-skill home. It ships with code, is versioned in git, and loads at
+  runtime through eve's built-in discovery. Use it for all fleet craft,
+  including craft that would once have been a targeted skill-bank row: with
+  four or fewer active skills, advertising every description to every family
+  and letting the loaded skill branch on the family's actual children is
+  cheaper and more reliable than a second targeting system.
+- `skill_bank` and `family_skills` are dormant historical data, not a build
+  surface. There is no `save_skill`, no `forget_skill`, and no runtime
+  resolver reading either table. Do not add code that reads or writes them;
+  do not treat a row in either table as a live product behavior. Reopen
+  dynamic distribution only when one of the plan's triggers fires (roughly
+  25-40 active skills, measured routing failures a static description can't
+  fix, real families repeatedly requesting the same durable procedure, a
+  genuine need for canary/A-B skill releases, or deploy cadence becoming the
+  bottleneck), and only via a new plan, not by resurrecting the old tools.
+  See `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`.
 - Start repo-authored skills with markdown. Use `defineSkill` only when typed
   or generated sibling files require it.
 - A skill description is a routing instruction, not a label. Write
@@ -94,9 +93,13 @@ records the research comparison behind this rule.
 - Prefer improving an existing overlapping skill over creating a duplicate.
   Do not codify a one-off before the procedure has proved repeatable.
 - Shared production skills are tested bundles, not prose dropped into the
-  library. Update `pnpm check:skills-targeting` for targeting and merge
-  behavior, add positive and adversarial-negative routing fixtures, and add
-  an eve behavioral eval when correctness depends on model judgment.
+  library. Run `pnpm check:fleet-skills` (package hygiene: frontmatter,
+  size limits, path safety, slash-menu parity) and add positive and
+  adversarial-negative routing fixtures plus an eve behavioral eval when
+  correctness depends on model judgment. `pnpm check:skills-targeting`
+  still runs in CI as a regression guard on the retired
+  targeting/merge logic through the dormant window; it is not a live
+  product check.
 
 ### Tool authoring rules
 

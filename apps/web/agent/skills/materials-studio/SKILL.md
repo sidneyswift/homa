@@ -42,6 +42,53 @@ real basis, plainly: data is data ("your checklist has him counting to
 aimed mid-range for 3"). Never dress a guess up as knowledge; she can
 tell, and it costs trust.
 
+## Subject decision rules: what the page asks for, not how it renders
+
+Evidence above sets the level; these rules set the content once you know the
+subject. Folded in here (2026-07-15) from what were two separate database
+skills, generalized in 2026-07-06 from Homa's founding-family patterns, now
+retired as a database system: this craft belongs with the rest of materials
+production, not in a second skill you would load separately for the same
+page.
+
+**Letters and letter sounds** (roughly ages 2.5 to 7):
+
+- Sounds before letter names. "What sound does M make?" beats "name this
+  letter" for reading readiness. If the child already knows letter names,
+  shift the whole page toward sounds.
+- Start from THEIR letters: the first letter of the child's name, then
+  letters from their current obsessions (D for dinosaur). Familiar beats
+  alphabetical order.
+- One or two target letters per page, never more. Add one review letter from
+  a previous page if you know one.
+- Pair uppercase and lowercase together (M m) so they register as one letter.
+- Vary the exercise types across the page: trace the letter, circle the
+  letter hiding in a short row of letters, circle the picture-word that
+  starts with the sound, find the letter inside one short word.
+- Solid on single letter sounds? Step up gently: word families (at, an) and
+  blending two sounds, not sight-word drills.
+- Keep it winnable: end with the child's name to trace, a guaranteed success.
+- A family whose curriculum boxes letters instead of using a three-line
+  guide (Handwriting Without Tears, for one) still gets these same rules;
+  see "Letter boxes" above for the exact box geometry.
+
+**Counting and early number** (roughly ages 2 to 6):
+
+- Count things they love. Ten dinosaurs beat ten dots, every time.
+- One number skill per page: counting objects OR recognizing numerals OR
+  writing numerals. Never all three at once.
+- Aim just past their edge: if they count to 10 comfortably, practice 8 to
+  12. Inside their range is boring; far past it is discouraging.
+- Always include one "how many altogether?" moment after counting
+  (cardinality: the last number said IS the amount).
+- For younger kids, include one small-group moment (1 to 4 things) they can
+  recognize at a glance without counting.
+- Mix count-and-circle, count-and-write-the-number, and "circle the group
+  that has more" for comparison.
+- Keep number formation practice separate unless writing numerals IS the
+  focus.
+- End with something guaranteed: counting something they can always count.
+
 ## Before designing: check the library
 
 Call find_materials first when the request sounds like something this
@@ -294,9 +341,10 @@ metadata means find_materials cannot find it next month, and the
    mark_material_final with that version's id. The final joins the
    library; drafts are tidied away. Never finalize on your own judgment,
    and never nag her to approve.
-4. When a style clearly lands and she agrees, save the how-to with
-   save_skill (e.g. "paw-patrol-worksheet": what made it work, the
-   prompt pattern, the layout).
+4. When a style clearly lands and she agrees, remember the how-to as a
+   durable preference (what made it work, the prompt pattern, the layout),
+   e.g. "Maya's worksheets use Paw Patrol characters, soft watercolor
+   style."
 5. "Can you send it again?" is show_material with that version's id:
    the card or picture message comes back exactly as made. Never
    re-render a page just to re-show it.

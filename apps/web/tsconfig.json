@@ -9,6 +9,13 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    // noEmit is already true, so this only relaxes tsc's specifier
+    // diagnostic; runtime resolution (tsx/esbuild, Next's bundler) already
+    // accepts explicit .mts/.ts specifiers regardless of this flag. Needed
+    // for scripts/skill-archive-*.mts, which import a sibling .mts module
+    // with an explicit extension because tsx's ESM resolver requires one
+    // for .mts entry files (unlike extensionless .ts-to-.ts imports).
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",

@@ -1,10 +1,11 @@
 /**
- * Shared invariants for the family skill library (the runtime "save this as
- * a skill" loop). Rows live in public.family_skills behind RLS; the dynamic
- * resolver (agent/skills/skill-library.ts) advertises them per turn and the
- * save_skill / forget_skill tools write them. Skills are procedures the
- * model re-reads later, a stronger surface than memory, so writes go
- * through the same injection scan (lib/agent-memory.ts) plus these caps.
+ * Historical targeting/merge invariants for the retired family-skill
+ * library (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md).
+ * public.family_skills and public.skill_bank are preserved as dormant data;
+ * no runtime code reads or writes them anymore. This file stays, unused by
+ * product code, only so scripts/skills-targeting-check.mjs keeps exercising
+ * the merge/targeting logic as a regression guard through Phase C; both
+ * are retired together once the dormant window closes.
  */
 
 export interface FamilySkillRow {
