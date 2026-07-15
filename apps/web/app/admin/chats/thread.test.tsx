@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import type { ThreadMessage } from "../../../lib/admin/chats-data";
+import type { ThreadMaterial, ThreadMessage } from "../../../lib/admin/chats-data";
 import { ChatThread } from "./thread";
 
 /**
@@ -25,6 +25,23 @@ function message(overrides: Partial<ThreadMessage>): ThreadMessage {
     taskRunId: null,
     memberName: null,
     createdAt: "2026-07-13T17:11:00Z",
+    materials: [],
+    ...overrides,
+  };
+}
+
+function material(overrides: Partial<ThreadMaterial>): ThreadMaterial {
+  return {
+    id: "material-1",
+    title: "Burhanuddin's Space Ninja Journal",
+    status: "draft",
+    previewUrl: "https://blob.example/preview.jpg",
+    pdfUrl: "https://blob.example/page.pdf",
+    skill: "writing a few neat sentences in a row",
+    childName: "Burhanuddin",
+    reviewPass: true,
+    reviewIssues: [],
+    createdAt: "2026-07-13T17:10:00Z",
     ...overrides,
   };
 }
@@ -95,5 +112,54 @@ describe("ChatThread markdown rendering", () => {
     assert.match(html, /She wrote \*\*one\*\* paragraph\./u);
     assert.match(html, /Compose the \*\*morning brief\*\* for this family\./u);
     assert.doesNotMatch(html, /<strong/u);
+  });
+});
+
+describe("ChatThread material delivery", () => {
+  it("shows the real material card under a turn that saved one, so founder text isn't the only signal", () => {
+    const html = renderToStaticMarkup(
+      <ChatThread
+        timeZone={TIME_ZONE}
+        messages={[
+          message({
+            content: "Burhanuddin's Space Ninja Journal is ready.",
+            materials: [material({})],
+          }),
+        ]}
+      />,
+    );
+    assert.match(html, /Burhanuddin&#x27;s Space Ninja Journal/u);
+    assert.match(html, /Open PDF/u);
+    assert.match(html, /review passed/u);
+  });
+
+  it("flags a failed review without hiding the card, since a flagged draft still rendered for her", () => {
+    const html = renderToStaticMarkup(
+      <ChatThread
+        timeZone={TIME_ZONE}
+        messages={[
+          message({
+            materials: [
+              material({
+                reviewPass: false,
+                reviewIssues: ["The child's name is missing from the page."],
+              }),
+            ],
+          }),
+        ]}
+      />,
+    );
+    assert.match(html, /review flagged/u);
+    assert.match(html, /The child&#x27;s name is missing from the page\./u);
+  });
+
+  it("renders no material card when a turn made none, leaving the gap visible", () => {
+    const html = renderToStaticMarkup(
+      <ChatThread
+        timeZone={TIME_ZONE}
+        messages={[message({ content: "It's ready.", materials: [] })]}
+      />,
+    );
+    assert.doesNotMatch(html, /Open PDF/u);
   });
 });
