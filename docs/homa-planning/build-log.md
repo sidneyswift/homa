@@ -97,6 +97,31 @@ policies (`members add/update/delete skills`) on `family_skills` via an
 additive-but-behavior-restricting migration; `members read their skills`
 stays through Phase C per the plan.
 
+**Deploy evidence.** `main` turned out to be 7 commits behind
+`fix/agent-trust-and-skills`, not the 1 it first looked like: cherry-picking
+just the fleet-skills commit failed because it edits a section of
+`AGENTS.md` (`b1d1399`, "Teach builders to lead with fleet skills") that
+`main` never had. Merged the whole branch into `main` instead
+(`50da735`, `--no-ff`), bringing over three unrelated pending commits
+(admin overview/alerts, chat-thread material rendering, silent-failure and
+egress hardening) along with the fleet-skills work; the merge was clean, no
+manual conflict resolution, `docs/homa-planning/build-log.md` auto-merged.
+Re-ran every required check against the merged tree before pushing
+(`typecheck`, `lint`, `check:fleet-skills`, `check:skills-targeting`,
+`check:isolation`, `check:continuity`, `check:chat-ui`, `check:admin`,
+`eve build`), all green. Pushed `main` (`a1d251c..50da735`), Vercel deploy
+`dpl_Djr5pESDqQZxrq5aCGQ3D22UYn5b` went READY in about two minutes. Probed
+live: `/` 200, `/onboarding` 200, `/app` 307 (expected, unauthenticated),
+`/eve/v1/health` `{"ok":true,"status":"ready"}`. Applied the
+`pause_family_skill_writes` migration after READY, per the deploy-ordering
+law; verified via `pg_policies` that only `members read their skills`
+remains on `public.family_skills` (the three write policies are gone).
+
+An unrelated in-progress edit already sitting in the `main` working tree
+(`apps/web/lib/conversation-continuity/reply-policy.ts` +
+`.test.ts`, not part of this plan, not touched or committed) was stashed
+before the merge and restored after, untouched.
+
 **Open: Phase C.** The seven-day dormant-window observation (zero product
 reads/writes, ten-plus authenticated routing probes, cross-channel parity)
 cannot complete inside one session. Tracking it here; do not treat Phase B's
