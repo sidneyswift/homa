@@ -29,6 +29,14 @@ describe("linked SMS progress guidance", () => {
     );
     assert.match(
       LINKED_SMS_PROGRESS_GUIDANCE,
+      /bounded partial answer/u,
+    );
+    assert.match(
+      LINKED_SMS_PROGRESS_GUIDANCE,
+      /getting_there/u,
+    );
+    assert.match(
+      LINKED_SMS_PROGRESS_GUIDANCE,
       /one or two sentences/u,
     );
     assert.match(

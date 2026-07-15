@@ -10,6 +10,10 @@ import {
   CONTACT_CARD_FIRST_TEXT,
   sendHomaContactCard,
 } from "../../lib/contact-card";
+import {
+  resolveActiveSmsProgressContext,
+  type ActiveSmsProgressContext,
+} from "../../lib/child-progress/active-sms-progress-context";
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
 import {
   claimInboundReceipt,
@@ -520,6 +524,23 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
     }
   }
 
+  let activeProgressContext: ActiveSmsProgressContext | null = null;
+  if (familyId) {
+    try {
+      activeProgressContext = await resolveActiveSmsProgressContext({
+        familyId,
+        memberUserId,
+        phoneNumber: senderNumber,
+      });
+    } catch (error) {
+      // Fail closed for progress writes without dropping the parent's text.
+      console.error(
+        "telnyx channel: active progress lookup failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+  }
+
   let startedSession;
   try {
     startedSession = await send(
@@ -540,6 +561,7 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
             ...trustedSmsInboundIdentityAttributes({
               providerMessageId: message.id,
               inboundReceiptId: inboundReceipt.id,
+              activeProgressContext,
             }),
             ...(familyId ? { familyId } : {}),
             ...continuityAttributes,

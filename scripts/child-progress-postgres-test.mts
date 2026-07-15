@@ -11,6 +11,9 @@ import postgres from "postgres";
 
 import type { MapAnswer } from "../packages/core/src/index";
 
+import {
+  resolveActiveSmsProgressContextWithDatabase,
+} from "../apps/web/lib/child-progress/active-sms-progress-context";
 import { ProgressCheckInService } from "../apps/web/lib/child-progress/check-in-service";
 import { CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY } from "../apps/web/lib/child-progress/postgres-repository-helpers";
 import {
@@ -20,6 +23,7 @@ import {
 import { buildChildProgressView } from "../apps/web/lib/child-progress/projection";
 import { PostgresChildProgressRepository } from "../apps/web/lib/child-progress/postgres-repository";
 import { ChildProgressService } from "../apps/web/lib/child-progress/progress-service";
+import { hashContinuityKey } from "../apps/web/lib/conversation-continuity/continuity-service";
 import { openReplyLoopWithDatabase } from "../apps/web/lib/conversation-continuity/delivery-ledger";
 import { replyContractForProgressCheckIn } from "../apps/web/lib/conversation-continuity/delivery-policy";
 import { foldStubFamilyIntoTx } from "../apps/web/lib/family-fold";
@@ -313,6 +317,8 @@ const prerequisiteSql = `
     family_id uuid not null,
     episode_id uuid,
     recipient_member_user_id uuid,
+    channel text not null default 'sms',
+    destination_hash text not null default '',
     status text not null default 'sent',
     replied_at timestamptz
   );
@@ -3873,11 +3879,18 @@ async function runAdapterAssertions(input: {
     `;
     await sql`
       insert into public.conversation_deliveries (
-        id, family_id, episode_id, recipient_member_user_id
+        id, family_id, episode_id, recipient_member_user_id,
+        channel, destination_hash
       )
       values
-        (${task5DeliveryId}, ${familyId}, ${task5EpisodeId}, ${adultA}),
-        (${task5WrongDeliveryId}, ${familyId}, ${task5EpisodeId}, ${adultB})
+        (
+          ${task5DeliveryId}, ${familyId}, ${task5EpisodeId}, ${adultA},
+          'sms', ${hashContinuityKey("sms:+15550000001")}
+        ),
+        (
+          ${task5WrongDeliveryId}, ${familyId}, ${task5EpisodeId}, ${adultB},
+          'sms', ${hashContinuityKey("sms:+15550000002")}
+        )
     `;
     const task5Context = (input: {
       memberUserId: string;
@@ -4248,6 +4261,156 @@ async function runAdapterAssertions(input: {
       throw new Error("Task 5 delivery binding was refused");
     }
     assert.equal(bound.checkIn.currentDeliveryId, task5DeliveryId);
+    const activeSmsProgress =
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      });
+    assert.deepEqual(activeSmsProgress, {
+      checkInId: firstStarted.checkIn.id,
+      deliveryId: task5DeliveryId,
+    });
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000099",
+      }),
+      null,
+    );
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultB,
+        phoneNumber: "+15550000001",
+      }),
+      null,
+    );
+    await sql`
+      update public.conversation_deliveries
+      set channel = 'email'
+      where id = ${task5DeliveryId}
+    `;
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      }),
+      null,
+    );
+    await sql`
+      update public.conversation_deliveries
+      set channel = 'sms', status = 'failed'
+      where id = ${task5DeliveryId}
+    `;
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      }),
+      null,
+    );
+    await sql`
+      update public.conversation_deliveries
+      set status = 'sent'
+      where id = ${task5DeliveryId}
+    `;
+    await sql`
+      update public.progress_check_ins
+      set current_delivery_id = ${task5WrongDeliveryId}
+      where id = ${firstStarted.checkIn.id}
+    `;
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      }),
+      null,
+    );
+    await sql`
+      update public.progress_check_ins
+      set current_delivery_id = ${task5DeliveryId}
+      where id = ${firstStarted.checkIn.id}
+    `;
+    await sql`
+      update public.conversation_deliveries
+      set replied_at = '2026-07-11T18:31:35.000000Z'
+      where id = ${task5DeliveryId}
+    `;
+    assert.deepEqual(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      }),
+      activeSmsProgress,
+    );
+    await sql`
+      update public.conversation_deliveries
+      set replied_at = null
+      where id = ${task5DeliveryId}
+    `;
+    const siblingChildId = randomUUID();
+    const siblingCheckInId = randomUUID();
+    const siblingDeliveryId = randomUUID();
+    await sql`
+      insert into public.children (
+        id, family_id, name, birth_month
+      )
+      values (
+        ${siblingChildId}, ${familyId}, 'Sibling', '2020-01-01'
+      )
+    `;
+    await sql`
+      insert into public.conversation_deliveries (
+        id, family_id, episode_id, recipient_member_user_id,
+        channel, destination_hash
+      )
+      values (
+        ${siblingDeliveryId}, ${familyId}, ${task5EpisodeId}, ${adultA},
+        'sms', ${hashContinuityKey("sms:+15550000001")}
+      )
+    `;
+    await sql`
+      insert into public.progress_check_ins (
+        id, child_id, family_id, idempotency_key, purpose, scope,
+        state, active_member_user_id,
+        prompt_recipient_member_user_id, revision,
+        current_item_id, current_delivery_id, episode_id,
+        pending_runtime_session_id, pending_turn_id
+      )
+      values (
+        ${siblingCheckInId}, ${siblingChildId}, ${familyId},
+        'active-sms-context-sibling', 'whole_map_refresh',
+        '{"kind":"whole_map"}'::jsonb, 'active', ${adultA}, ${adultA},
+        1, 'math.counts-to-5', ${siblingDeliveryId}, ${task5EpisodeId},
+        'sibling-runtime', 'sibling-turn'
+      )
+    `;
+    assert.equal(
+      await resolveActiveSmsProgressContextWithDatabase(sql, {
+        familyId,
+        memberUserId: adultA,
+        phoneNumber: "+15550000001",
+      }),
+      null,
+    );
+    await sql`
+      delete from public.progress_check_ins
+      where id = ${siblingCheckInId}
+    `;
+    await sql`
+      delete from public.conversation_deliveries
+      where id = ${siblingDeliveryId}
+    `;
+    await sql`
+      delete from public.children
+      where id = ${siblingChildId}
+    `;
     await assert.rejects(
       repository.withTransaction((transaction) =>
         transaction.insertCheckInResponse({

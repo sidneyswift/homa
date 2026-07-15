@@ -175,6 +175,8 @@ interface ProgressToolAuthAttributes {
   channel?: unknown;
   providerMessageId?: unknown;
   repliedDeliveryId?: unknown;
+  activeProgressCheckInId?: unknown;
+  activeProgressDeliveryId?: unknown;
   episodeId?: unknown;
   canonicalInboundText?: unknown;
   canonicalInboundMessageId?: unknown;
@@ -242,12 +244,31 @@ export function createProgressToolContext(input: {
       "Progress tool requires trusted session and turn identity",
     );
   }
+  const channel = progressChannelFromAttributes(attributes.channel);
+  const activeProgressCheckInId = optionalUuidAttribute(
+    attributes.activeProgressCheckInId,
+  );
+  const activeProgressDeliveryId = optionalUuidAttribute(
+    attributes.activeProgressDeliveryId,
+  );
+  const hasActiveProgressPair =
+    channel === "sms" &&
+    activeProgressCheckInId !== null &&
+    activeProgressDeliveryId !== null;
   return {
     familyId: input.access.familyId,
     memberUserId: optionalAttribute(attributes.memberUserId),
-    channel: progressChannelFromAttributes(attributes.channel),
+    channel,
     providerMessageId: optionalAttribute(attributes.providerMessageId),
-    repliedDeliveryId: optionalAttribute(attributes.repliedDeliveryId),
+    repliedDeliveryId:
+      channel === "sms"
+        ? hasActiveProgressPair
+          ? activeProgressDeliveryId
+          : null
+        : optionalAttribute(attributes.repliedDeliveryId),
+    activeProgressCheckInId: hasActiveProgressPair
+      ? activeProgressCheckInId
+      : null,
     episodeId: optionalAttribute(attributes.episodeId),
     runtimeSessionId: input.sessionId,
     turnId: input.turnId,

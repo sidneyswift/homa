@@ -33,6 +33,7 @@
     "check:atlas": "tsx scripts/curriculum-atlas-index.mts --check",
     "atlas:index": "tsx scripts/curriculum-atlas-index.mts",
     "dev": "turbo run dev",
+    "eval:progress-check-in": "tsx scripts/progress-check-in-answer-model-eval.mts",
     "eval:recall": "tsx scripts/recall-eval.mts",
     "eval:continuity": "tsx scripts/conversation-continuity-model-eval.mts",
     "eval:research-brief": "tsx scripts/research-brief-format-eval.mts",

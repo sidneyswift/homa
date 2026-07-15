@@ -19,7 +19,9 @@ export const LINKED_SMS_PROGRESS_GUIDANCE = `
   fine. Rewording the statement keeps her answer from saving. Translate
   her answer conservatively to easily, getting_there, not_yet, not_sure, or
   skip. Plain "No," "Nope," and "No, not yet" mean not_yet. A generic yes
-  needs clarification. Never invent a score, item, revision, or operation key.
+  needs clarification. A bounded partial answer, such as "up to 2" for a
+  "1 to 3" question, means getting_there and does not need another
+  clarification. Never invent a score, item, revision, or operation key.
 - If the tool refuses because no live delivered question matches, call
   start_check_in for the child again, send the returned statement
   word for word, and wait for her next reply.

@@ -209,6 +209,42 @@ describe("conversation reply resolution", () => {
     }
   });
 
+  it("uses the newest revision when repeated progress prompts are still open", () => {
+    const result = resolveReplyIntent({
+      text: "The Maya small group question.",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          deliveryId: "delivery-revision-4",
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:check-in-1:revision:4",
+          messageContent:
+            "Does Maya tell you how many things are in a small group of 1 to 3 without counting them?",
+          sentAt: new Date("2026-07-11T13:19:30.000Z"),
+        }),
+        candidate({
+          deliveryId: "delivery-revision-3",
+          replyKind: "choice",
+          promptKey:
+            "progress-check-in:check-in-1:revision:3",
+          messageContent:
+            "Does Maya tell you how many things are in a small group of 1 to 3 without counting them?",
+          sentAt: new Date("2026-07-11T13:18:30.000Z"),
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "matched");
+    if (result.kind === "matched") {
+      assert.equal(result.candidate.deliveryId, "delivery-revision-4");
+    }
+  });
+
   it("does not let a choice loop capture an unrelated statement", () => {
     const result = resolveReplyIntent({
       text: "We switched to science and built a paper bridge.",

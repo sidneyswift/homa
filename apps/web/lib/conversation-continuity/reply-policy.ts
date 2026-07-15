@@ -45,6 +45,8 @@ const PROGRESS_NEGATIVE_REPLY =
   /^(?:no|nope|no,?\s+not\s+yet)$/iu;
 const PROGRESS_NATURAL_REPLY =
   /^(?:(?:he|she|they)\s+)?(?:can(?:not|['’]t)(?:\s+do\s+(?:it|that))?(?:\s+yet)?|can\s+do\s+(?:it|that)\s+easily|does\s+(?:it|that)\s+easily|is\s+getting\s+there|needs?\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|can\s+do\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|does\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help)$/iu;
+const PROGRESS_PROMPT_KEY =
+  /^progress-check-in:([^:]+):revision:(\d+)$/u;
 
 function isProgressChoiceReply(text: string): boolean {
   const normalized = text
@@ -81,6 +83,33 @@ function activeCandidates(
     )
     .filter((candidate) => candidate.expiresAt.getTime() > input.now.getTime())
     .sort((left, right) => right.sentAt.getTime() - left.sentAt.getTime());
+}
+
+/**
+ * A reissued check-in creates a newer revision, so only that revision is
+ * causally current for text heuristics. Provider-native reply metadata still
+ * checks every active delivery before this filter runs.
+ */
+function withoutSupersededProgressCandidates(
+  candidates: PendingDeliveryCandidate[],
+): PendingDeliveryCandidate[] {
+  const newestRevisionByCheckIn = new Map<string, number>();
+  for (const candidate of candidates) {
+    const parsed = PROGRESS_PROMPT_KEY.exec(candidate.promptKey ?? "");
+    if (!parsed) continue;
+    const revision = Number(parsed[2]);
+    newestRevisionByCheckIn.set(
+      parsed[1],
+      Math.max(newestRevisionByCheckIn.get(parsed[1]) ?? 0, revision),
+    );
+  }
+  return candidates.filter((candidate) => {
+    const parsed = PROGRESS_PROMPT_KEY.exec(candidate.promptKey ?? "");
+    return (
+      !parsed ||
+      Number(parsed[2]) === newestRevisionByCheckIn.get(parsed[1])
+    );
+  });
 }
 
 function promptKeyMatches(text: string, promptKey: string | null | undefined) {
@@ -161,15 +190,17 @@ export function resolveReplyIntent(
     if (exact.length > 1) return { kind: "ambiguous", candidates: exact };
   }
 
+  const heuristicCandidates =
+    withoutSupersededProgressCandidates(active);
   const currentAsksQuestion = /\?\s*$/u.test(input.text.trim());
   const contentMatch = currentAsksQuestion
     ? null
-    : contentClarification(input.text, active);
+    : contentClarification(input.text, heuristicCandidates);
   if (contentMatch) return { kind: "matched", candidate: contentMatch };
 
   const clarified = currentAsksQuestion
     ? []
-    : active.filter((candidate) =>
+    : heuristicCandidates.filter((candidate) =>
         promptKeyMatches(input.text, candidate.promptKey),
       );
   if (clarified.length === 1) {
@@ -187,7 +218,7 @@ export function resolveReplyIntent(
     trimmedText.replace(/[.!]+$/u, ""),
   );
   const progressChoiceReply = isProgressChoiceReply(input.text);
-  const eligible = active.filter(
+  const eligible = heuristicCandidates.filter(
     (candidate) =>
       (
         candidate.replyKind === "free_text" &&
@@ -214,7 +245,7 @@ export function resolveReplyIntent(
       ),
   );
   if (eligible.length === 0) {
-    return { kind: "none", nearbyCandidates: active };
+    return { kind: "none", nearbyCandidates: heuristicCandidates };
   }
 
   if (eligible.length === 1) {
