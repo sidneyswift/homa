@@ -166,10 +166,16 @@ them (an empty piece is a failed piece):
   CRITICAL: these are tendencies from observed patterns, NEVER labels.
   Never say "is a kinesthetic learner" or "is a visual learner." Always
   use language like "tends to respond well to" or "seems to click with."
-  Per-subject when the data supports it. When the `learnerProfile` field
-  is absent from the facts (not enough signals yet), omit this piece
-  entirely (do not return it). The page hides the section when the piece
-  is missing, so omitting it is clean.
+  Per-subject when the data supports it.
+  CITE THE EVIDENCE: the facts carry an `evidenceBasis` field (e.g.,
+  "Based on 5 lessons and your feedback"). Weave it naturally into your
+  sentences so the parent can trace how Homa knows this: "From your
+  feedback and 5 lessons together, hands-on activities seem to click
+  for math." The parent should never wonder where this came from.
+  When the `learnerProfile` field is absent from the facts (not enough
+  diverse evidence yet), omit this piece entirely (do not return it).
+  The page hides the section when the piece is missing, so omitting
+  it is clean.
 
 ## Craft rules
 

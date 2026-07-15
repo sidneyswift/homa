@@ -78,12 +78,15 @@ export interface RescoreFacts {
 }
 
 /** Tendencies summary from the synthesized modality profile, included
- * in report facts only when the child has enough signals (3+). */
+ * in report facts only when the child has enough diverse signals. */
 export interface LearnerProfileFacts {
   /** e.g. "tends to respond well to kinesthetic approaches for math, auditory for reading" */
   summary: string;
-  /** Per-subject top modality, only subjects with 3+ signals. */
+  /** Per-subject top modality, only subjects that pass the trust threshold. */
   bySubject: Record<string, { preferred: string; strength: string }>;
+  /** Human-readable evidence basis so the writer can cite sources.
+   * e.g. "Based on 5 lessons and your feedback" */
+  evidenceBasis: string;
 }
 
 export interface ReportFacts {
@@ -174,6 +177,8 @@ export interface ReportFactsInput {
   changedSinceLastScoring?: ChangedAnswerFactInput[];
   /** Synthesized modality profile from children.profile JSONB. */
   modalityProfile?: ModalityProfileData | null;
+  /** Per-modality signal type breakdown for trust thresholds. */
+  modalitySignalTypes?: Array<{ modality: string; signal_type: string; count: number }>;
 }
 
 /** Raw modality profile data as stored in children.profile.modality_profile.
@@ -410,12 +415,38 @@ export function buildReportFacts(input: ReportFactsInput): ReportFacts {
       input.childName,
     ),
     subjects,
-    learnerProfile: buildLearnerProfileFacts(input.modalityProfile ?? null),
+    learnerProfile: buildLearnerProfileFacts(
+      input.modalityProfile ?? null,
+      input.modalitySignalTypes ?? [],
+    ),
   };
 }
 
-/** Minimum signals per modality before it surfaces in report facts. */
-const MIN_SIGNALS_FOR_REPORT = 3;
+/**
+ * Trust thresholds for the report's "How [Child] Learns" section.
+ *
+ * The bar is intentionally high: if the parent can't trace HOW Homa
+ * knows this, the section undermines trust instead of building it.
+ *
+ * Rules:
+ *  1. At least 5 positive signals per modality (not 3 — too easy to hit
+ *     by just finalizing a few worksheets).
+ *  2. At least 2 DIFFERENT signal types contributed (e.g., parent_stated +
+ *     lesson_what_worked). material_finalized alone is not enough — that's
+ *     just what was available, not evidence of a real preference.
+ *  3. The evidence basis is cited in the report so the parent can trace it.
+ */
+const MIN_SIGNALS_FOR_REPORT = 5;
+const MIN_SIGNAL_TYPES_FOR_REPORT = 2;
+
+/** Signal types that count as "strong" evidence (explicit signal, not
+ * just implicit material finalization). */
+const EXPLICIT_SIGNAL_TYPES = new Set([
+  "parent_stated",
+  "lesson_what_worked",
+  "memory_classified",
+  "agent_observed",
+]);
 
 const MODALITY_LABELS: Record<string, string> = {
   visual: "visual",
@@ -424,16 +455,61 @@ const MODALITY_LABELS: Record<string, string> = {
   reading_writing: "reading and writing",
 };
 
+/** Human-readable names for signal type evidence citations. */
+const SIGNAL_TYPE_EVIDENCE_LABELS: Record<string, string> = {
+  parent_stated: "your feedback",
+  lesson_what_worked: "lessons",
+  memory_classified: "your observations",
+  material_finalized: "completed materials",
+  agent_observed: "conversations",
+};
+
+interface SignalTypeCounts {
+  modality: string;
+  signal_type: string;
+  count: number;
+}
+
 function buildLearnerProfileFacts(
   profile: ModalityProfileData | null,
+  signalTypeCounts: SignalTypeCounts[],
 ): LearnerProfileFacts | null {
   if (!profile?.global) return null;
 
-  // Build per-subject summaries with enough signals.
+  // Index signal type counts by modality for diversity checks.
+  const typesByModality = new Map<string, Map<string, number>>();
+  for (const row of signalTypeCounts) {
+    let types = typesByModality.get(row.modality);
+    if (!types) {
+      types = new Map();
+      typesByModality.set(row.modality, types);
+    }
+    types.set(row.signal_type, row.count);
+  }
+
+  /** Check whether a modality passes the trust threshold. */
+  function passesThreshold(modality: string, signalCount: number): boolean {
+    if (signalCount < MIN_SIGNALS_FOR_REPORT) return false;
+    const types = typesByModality.get(modality);
+    if (!types) return false;
+    // Must have at least 2 different signal types.
+    if (types.size < MIN_SIGNAL_TYPES_FOR_REPORT) return false;
+    // At least one must be an explicit signal (not just material_finalized).
+    let hasExplicit = false;
+    for (const signalType of types.keys()) {
+      if (EXPLICIT_SIGNAL_TYPES.has(signalType)) {
+        hasExplicit = true;
+        break;
+      }
+    }
+    return hasExplicit;
+  }
+
+  // Build per-subject summaries with enough diverse signals.
   const bySubject: Record<string, { preferred: string; strength: string }> = {};
   for (const [subjectId, modalities] of Object.entries(profile.by_subject ?? {})) {
     const eligible = Object.entries(modalities)
-      .filter(([_, v]) => v.signal_count >= MIN_SIGNALS_FOR_REPORT)
+      .filter(([mod, v]) => passesThreshold(mod, v.signal_count))
       .sort(([_, a], [__, b]) => b.weight - a.weight);
     if (eligible.length > 0) {
       const [mod, data] = eligible[0];
@@ -456,7 +532,7 @@ function buildLearnerProfileFacts(
   // Also check global modalities (subject-agnostic signals).
   if (summaryParts.length === 0) {
     const globalEligible = Object.entries(profile.global)
-      .filter(([_, v]) => v.signal_count >= MIN_SIGNALS_FOR_REPORT)
+      .filter(([mod, v]) => passesThreshold(mod, v.signal_count))
       .sort(([_, a], [__, b]) => b.weight - a.weight)
       .slice(0, 2);
     for (const [mod, data] of globalEligible) {
@@ -468,9 +544,33 @@ function buildLearnerProfileFacts(
 
   if (summaryParts.length === 0) return null;
 
+  // Build evidence basis citation from all signal types that contributed.
+  const evidenceSources: string[] = [];
+  const allTypes = new Map<string, number>();
+  for (const row of signalTypeCounts) {
+    allTypes.set(row.signal_type, (allTypes.get(row.signal_type) ?? 0) + row.count);
+  }
+  // Order by count descending, use human-readable labels.
+  const sorted = [...allTypes.entries()].sort((a, b) => b[1] - a[1]);
+  for (const [signalType, count] of sorted) {
+    const label = SIGNAL_TYPE_EVIDENCE_LABELS[signalType];
+    if (label) {
+      if (signalType === "lesson_what_worked") {
+        evidenceSources.push(`${count} ${count === 1 ? "lesson" : "lessons"}`);
+      } else {
+        evidenceSources.push(label);
+      }
+    }
+  }
+  const evidenceBasis =
+    evidenceSources.length > 0
+      ? `Based on ${evidenceSources.join(" and ")}`
+      : "Based on observed patterns";
+
   return {
     summary: summaryParts.join("; "),
     bySubject,
+    evidenceBasis,
   };
 }
 

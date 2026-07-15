@@ -75,6 +75,16 @@ export interface ReportNarrativeSource {
   /** Synthesized modality profile from children.profile.modality_profile JSONB.
    * Typed loosely since it comes from JSONB; buildReportFacts handles validation. */
   modalityProfile: ModalityProfileInput | null;
+  /** Per-modality signal type breakdown for trust thresholds: how many of
+   * each signal type contributed to each modality. Queried directly from
+   * learner_modality_signals so the report can require diverse evidence. */
+  modalitySignalTypes: ModalitySignalTypeCounts[];
+}
+
+export interface ModalitySignalTypeCounts {
+  modality: string;
+  signal_type: string;
+  count: number;
 }
 
 export async function getReportNarrativeSource(
@@ -209,7 +219,27 @@ export async function getReportNarrativeSource(
       })),
     modalityProfile:
       (profile.modality_profile as ModalityProfileInput | undefined) ?? null,
+    modalitySignalTypes: await loadModalitySignalTypes(childId, row.family_id),
   };
+}
+
+/** Load per-modality signal type counts for trust thresholds. */
+async function loadModalitySignalTypes(
+  childId: string,
+  familyId: string,
+): Promise<ModalitySignalTypeCounts[]> {
+  const sql = mapDb();
+  const rows = await sql<{ modality: string; signal_type: string; count: string }[]>`
+    SELECT modality, signal_type, COUNT(*)::text as count
+    FROM public.learner_modality_signals
+    WHERE child_id = ${childId} AND family_id = ${familyId} AND valence = 1
+    GROUP BY modality, signal_type
+  `;
+  return rows.map((r) => ({
+    modality: r.modality,
+    signal_type: r.signal_type,
+    count: parseInt(r.count, 10),
+  }));
 }
 
 /**

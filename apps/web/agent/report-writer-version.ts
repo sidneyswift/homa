@@ -5,4 +5,4 @@
  * the committed fixtures lag it, forcing a regenerate and a founder
  * re-read before the change ships.
  */
-export const REPORT_PROMPT_VERSION = "2026.07.21";
+export const REPORT_PROMPT_VERSION = "2026.07.22";
