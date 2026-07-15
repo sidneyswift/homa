@@ -20,20 +20,28 @@ live in the research-brief footer. The privacy page's "A real person
 confirms within a few days" was left alone: it describes the human
 data-deletion mailbox and remains plausibly true.
 
-ESCALATED (2026-07-14 ~7:00pm, in-session, awaiting founder ruling):
-the tokenized report page's two action buttons dead-end forever for a
-text-born family. "Have me call you now" posts to a signed-in-only
-route (api/voice/curriculum/start, 401 with no Supabase user; text
-signup mints no account and no password) and "Open the month" needs a
-resume cookie or session the tokenized page never sets
-(api/map/plan/consent via requireFamily). Both then hint "Open your
-email link on this device once", which is circular: the report email
-links back to the same sessionless page. Not silently patched because
-the report token is shareable by design; honoring it as a credential
-would let any forwarded-link holder ring the family's phone or build
-months. Ruling options are listed in the lab's escalation block
-(channel-aware fallback, suppress when sessionless, token honors month
-but never calls, or a text-born sign-in hint).
+ESCALATED (2026-07-14 ~7:00pm) then FIXED same day (~11pm, founder
+ruled option b): the tokenized report page's two action buttons
+dead-ended forever for a text-born family. "Have me call you now"
+posts to a signed-in-only route (api/voice/curriculum/start, 401 with
+no Supabase user; text signup mints no account and no password) and
+"Open the month" needs a resume cookie or session the tokenized page
+never sets (api/map/plan/consent via requireFamily). Both then hinted
+"Open your email link on this device once", circular because the
+report email links back to the same sessionless page. Not silently
+patched because the report token is shareable by design; honoring it
+as a credential would let any forwarded-link holder ring the family's
+phone. The founder ruled suppression: the fix (commit c15838a on
+main, cherry-picked from f95cb8a on fix/agent-trust-and-skills where
+the session was working; deploy READY, live probes green) resolves
+viewer capability once in the token page (requireFamilyWithActor) and
+passes viewerActions into ReportView: the call offer renders only for
+a signed-in member of the report's family, the month BUILD button
+only for a session matching that family, and an already-built month
+stays a plain tokenized link for every viewer. The components'
+no-session hints remain as the expired-session fallback only. The
+/app report route, sample, and admin mirror keep their prior behavior
+via the prop default.
 
 Also verified during the pass, for the record: SMS-first signups
 currently receive the contact card twice (first stranger text, then
