@@ -80,10 +80,10 @@ export async function downloadTelnyxMedia(
  * the journal loop can fall back to email. Telnyx handles STOP/HELP
  * opt-outs at the platform level for this number.
  *
- * mediaUrls upgrades the send to MMS (the worksheet studio texts the
- * rendered preview + PDF this way). Media must be publicly fetchable;
- * Blob's random-suffix URLs qualify. Keep the combined payload small,
- * carriers get unreliable past about 1MB.
+ * mediaUrls upgrades the send to MMS. Printable PDFs are moved into the
+ * message text as direct links so the worksheet preview stays below carrier
+ * media limits. Media must be publicly fetchable; Blob's random-suffix URLs
+ * qualify.
  */
 export type HomaSmsSubmission =
   | { status: "submitted"; messageId: string }
@@ -96,6 +96,41 @@ export function classifyTelnyxHttpFailure(
   return status === 408 || status === 429 || status >= 500
     ? "unknown"
     : "rejected";
+}
+
+/**
+ * Keeps printable PDFs out of the MMS media payload and preserves them as
+ * direct links in the message text. Carrier document limits are much smaller
+ * than Homa's print-quality PDFs, while the preview JPEG remains MMS-safe.
+ */
+function normalizePrintablePdfMediaAsLinks(
+  text: string,
+  mediaUrls?: string[],
+): { text: string; mediaUrls?: string[] } {
+  const printablePdfUrls: string[] = [];
+  const mmsMediaUrls: string[] = [];
+
+  for (const mediaUrl of mediaUrls ?? []) {
+    const pathWithoutQueryOrFragment = mediaUrl.split(/[?#]/, 1)[0]?.toLowerCase() ?? "";
+    if (pathWithoutQueryOrFragment.endsWith(".pdf")) {
+      printablePdfUrls.push(mediaUrl);
+    } else {
+      mmsMediaUrls.push(mediaUrl);
+    }
+  }
+
+  const missingPdfLinks = printablePdfUrls.filter(
+    (printablePdfUrl) => !text.includes(printablePdfUrl),
+  );
+  const normalizedText =
+    missingPdfLinks.length === 0
+      ? text
+      : [text.trim(), ...missingPdfLinks].filter(Boolean).join(" ");
+
+  return {
+    text: normalizedText,
+    ...(mmsMediaUrls.length > 0 ? { mediaUrls: mmsMediaUrls } : {}),
+  };
 }
 
 /** Pulls Telnyx's own error codes and titles out of a failure body so
@@ -135,11 +170,16 @@ export async function submitHomaSms(
     return { status: "rejected", reason: "SMS channel not configured" };
   }
 
+  const normalizedPayload = normalizePrintablePdfMediaAsLinks(text, mediaUrls);
+
   // Telnyx hard-rejects texts over the carrier segment cap (HTTP 400,
   // error 40302); refusing here keeps the reason precise and skips a
   // doomed API call. MMS payloads size by media, not segments.
-  if ((!mediaUrls || mediaUrls.length === 0) && !fitsInOneSms(text)) {
-    const reason = `SMS over the carrier size limit (${smsSegmentCount(text)} segments, max 10)`;
+  if (
+    (!normalizedPayload.mediaUrls || normalizedPayload.mediaUrls.length === 0) &&
+    !fitsInOneSms(normalizedPayload.text)
+  ) {
+    const reason = `SMS over the carrier size limit (${smsSegmentCount(normalizedPayload.text)} segments, max 10)`;
     console.error(`sendHomaSms refused: ${reason}`);
     return { status: "rejected", reason };
   }
@@ -154,8 +194,10 @@ export async function submitHomaSms(
       body: JSON.stringify({
         from: fromNumber,
         to: toE164,
-        text,
-        ...(mediaUrls && mediaUrls.length > 0 ? { media_urls: mediaUrls } : {}),
+        text: normalizedPayload.text,
+        ...(normalizedPayload.mediaUrls
+          ? { media_urls: normalizedPayload.mediaUrls }
+          : {}),
       }),
       signal,
     });

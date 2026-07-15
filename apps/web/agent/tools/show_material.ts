@@ -15,12 +15,12 @@ import { sendHomaSms } from "../../lib/voice/telnyx-api";
  * conversation dead-ended into email). This tool shows an EXISTING
  * material where the parent is: on web the result renders the same
  * card create_printable renders; on SMS it re-texts the preview and
- * PDF. No re-render, no new row; the review gate on SMS delivery is
+ * direct PDF link. No re-render, no new row; the review gate on SMS delivery is
  * the same one create_printable enforces.
  */
 export default defineTool({
   description:
-    "Show the parent an already-made material again, exactly as it is: the card reappears in this chat on web, or the preview picture and printable PDF get re-texted on SMS. Use it when she asks to see, print, or re-send something that exists (\"can you send it again?\", \"I don't see it\", \"print that one from last week\"), with the id from find_materials or an earlier create result. Never rebuild a page just to show it again.",
+    "Show the parent an already-made material again, exactly as it is: the card reappears in this chat on web, or the preview picture and direct printable PDF link get re-texted on SMS. Use it when she asks to see, print, or re-send something that exists (\"can you send it again?\", \"I don't see it\", \"print that one from last week\"), with the id from find_materials or an earlier create result. Never rebuild a page just to show it again.",
   inputSchema: z.object({
     materialId: z
       .uuid()
@@ -63,6 +63,7 @@ export default defineTool({
     // flagged page never lands on her phone. The number comes from
     // channel auth, never the model (anti-relay law).
     let sentByText = false;
+    let previewSentByText = false;
     if (channel === "sms" && attributes?.phoneNumber) {
       if (!material.reviewPassed) {
         return {
@@ -70,22 +71,28 @@ export default defineTool({
           note: "This version was flagged by the quality check, so it is not textable. Revise it with create_printable (revisesId set to this id); the passing version sends on its own.",
         };
       }
-      sentByText = await sendHomaSms(attributes.phoneNumber, "", [
-        material.previewUrl,
-        material.pdfUrl,
-      ]);
+      const materialSmsIntro = `${material.title} is ready to print:`;
+      previewSentByText = await sendHomaSms(
+        attributes.phoneNumber,
+        materialSmsIntro,
+        [material.previewUrl, material.pdfUrl],
+      );
+      sentByText = previewSentByText;
       if (!sentByText) {
-        sentByText = await sendHomaSms(attributes.phoneNumber, "", [
-          material.previewUrl,
-        ]);
+        sentByText = await sendHomaSms(
+          attributes.phoneNumber,
+          `${materialSmsIntro} ${material.pdfUrl}`,
+        );
       }
     }
 
     const deliveryNote =
       channel === "sms"
         ? sentByText
-          ? "The picture and printable PDF just landed on her phone again. Follow with ONE short text naming the child and the skill."
-          : "The picture message failed to send. Tell her the page is ready in her Homa chat on the web, and offer to tweak anything."
+          ? previewSentByText
+            ? "The preview and printable link were submitted by text again. Follow with ONE short text naming the child and the skill."
+            : "The printable link was submitted by text again. Follow with ONE short text naming the child and the skill."
+          : "Text delivery failed. Tell her the page is ready in her Homa chat on the web, and offer to tweak anything."
         : "The card with the preview and print button is back in the chat, in this reply. Tell her in one warm sentence; never paste the links.";
 
     return {

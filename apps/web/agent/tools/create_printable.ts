@@ -357,10 +357,20 @@ export default defineTool({
     // channel auth, never the model (anti-relay law).
     const reviewPassed = review === null || review.pass;
     let sentByText = false;
+    let previewSentByText = false;
     if (channel === "sms" && reviewPassed && attributes?.phoneNumber) {
-      sentByText = await sendHomaSms(attributes.phoneNumber, "", [previewUrl, pdfUrl]);
+      const materialSmsIntro = `${input.title} is ready to print:`;
+      previewSentByText = await sendHomaSms(
+        attributes.phoneNumber,
+        materialSmsIntro,
+        [previewUrl, pdfUrl],
+      );
+      sentByText = previewSentByText;
       if (!sentByText) {
-        sentByText = await sendHomaSms(attributes.phoneNumber, "", [previewUrl]);
+        sentByText = await sendHomaSms(
+          attributes.phoneNumber,
+          `${materialSmsIntro} ${pdfUrl}`,
+        );
       }
     }
 
@@ -380,8 +390,10 @@ export default defineTool({
       channel === "sms"
         ? reviewPassed
           ? sentByText
-            ? "The preview and printable PDF just arrived on her phone. Follow with ONE short text naming the child and the skill, and invite tweaks."
-            : "The material is made and saved, but the picture message failed to send. Tell her it's ready in her Homa chat on the web, and offer to tweak anything."
+            ? previewSentByText
+              ? "The preview and printable link were submitted by text. Follow with ONE short text naming the child and the skill, and invite tweaks."
+              : "The printable link was submitted by text. Follow with ONE short text naming the child and the skill, and invite tweaks."
+            : "The material is made and saved, but text delivery failed. Tell her it's ready in her Homa chat on the web, and offer to tweak anything."
           : "NOT texted to her yet: fix the issues below (call again with revisesId set to this id), then the passing version sends."
         : "The card with the preview and print button is already visible in chat. Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.";
     const reviewNote =

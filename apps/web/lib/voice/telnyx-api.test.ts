@@ -111,11 +111,41 @@ describe("Telnyx SMS oversized-message handling", () => {
     };
 
     const result = await submitHomaSms("+15555550100", oversizedEmojiText, [
-      "https://example.com/worksheet.pdf",
+      "https://example.com/worksheet.jpg",
     ]);
 
     assert.equal(fetchCalls, 1);
     assert.deepEqual(result, { status: "submitted", messageId: "message-2" });
+  });
+
+  it("sends a printable PDF as a link instead of oversized MMS media", async (t) => {
+    stubSmsEnvironment(t);
+    const previewUrl = "https://example.com/counting-practice.jpg";
+    const pdfUrl = "https://example.com/counting-practice.pdf";
+    let requestBody: unknown;
+    globalThis.fetch = async (_input, init) => {
+      const body = init?.body;
+      assert.equal(typeof body, "string");
+      requestBody = JSON.parse(body as string);
+      return Response.json({ data: { id: "message-material" } });
+    };
+
+    const result = await submitHomaSms(
+      "+15555550100",
+      "Counting practice is ready to print:",
+      [previewUrl, pdfUrl],
+    );
+
+    assert.deepEqual(result, {
+      status: "submitted",
+      messageId: "message-material",
+    });
+    assert.deepEqual(requestBody, {
+      from: "+15555550199",
+      to: "+15555550100",
+      text: `Counting practice is ready to print: ${pdfUrl}`,
+      media_urls: [previewUrl],
+    });
   });
 
   it("surfaces Telnyx's own error code when a send is rejected", async (t) => {
