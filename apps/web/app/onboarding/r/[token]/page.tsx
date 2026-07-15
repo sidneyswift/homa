@@ -5,7 +5,7 @@ import { Logo } from "../../../../components/brand/Logo";
 import { Doodle } from "../../../../components/marketing/Doodle";
 import { familyWallCheckout, wallEnabled } from "../../../../lib/billing/wall";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
-import { requireFamily } from "../../../../lib/map/session";
+import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../lib/map/store";
 import { NarrativeBeat } from "./narrative-beat";
@@ -107,15 +107,36 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
       : null;
 
+  // Session-aware action gating (founder ruling 2026-07-14, report-page
+  // dead ends, option b): the letter's call offer and the month BUILD
+  // button render only for a viewer whose session can complete the tap.
+  // A text-born family opening its texted link has no session (no
+  // Supabase account, no resume cookie), and the shareable token must
+  // never become a credential for ringing the family's phone, so the
+  // buttons are suppressed instead of dead-ending in a device hint.
+  // The call needs a signed-in member of THIS family (the voice route
+  // is Supabase-session-only); the month build accepts the resume
+  // cookie too (matching /api/map/plan/consent). An already-built
+  // month stays a plain tokenized link for every viewer.
+  let viewerIsReportFamily = false;
+  let viewerIsSignedInMember = false;
+  try {
+    const actor = await requireFamilyWithActor();
+    if (actor && actor.family.id === report.familyId) {
+      viewerIsReportFamily = true;
+      viewerIsSignedInMember = actor.memberUserId !== null;
+    }
+  } catch {
+    // Auth lookup unavailable: render the report, keep actions hidden.
+  }
+
   // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
   // (the instant no-query path), and for exempt or trialing families.
   // Owner-only on this shareable URL: a signed-in visitor from another
   // family must never see this family's checkout (her payment would
-  // carry the wrong client_reference_id and unlock nothing). Her door
-  // taps already no-op through the existing session checks.
-  const viewer = wallEnabled() ? await requireFamily() : null;
+  // carry the wrong client_reference_id and unlock nothing).
   const wall =
-    viewer && viewer.id === report.familyId
+    wallEnabled() && viewerIsReportFamily
       ? await familyWallCheckout(report.familyId)
       : null;
 
@@ -125,6 +146,10 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
       wall={wall}
+      viewerActions={{
+        call: viewerIsSignedInMember,
+        month: viewerIsReportFamily,
+      }}
     />
   );
 }
