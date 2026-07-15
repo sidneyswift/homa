@@ -132,6 +132,14 @@ _No explicit anti-signals yet. Inferring from the positive signals:_
 - *Confirmed Aless pedagogical blend:* Charlotte Mason (nature study, living books, whole-child) + Montessori (self-correcting materials, three-period lesson, nomenclature cards) + structured academics when needed (CKLA). This is classic eclectic homeschooling.
 - *Realistic imagery preference:* The Montessori cards use NASA photographs, not cartoons. Montessori principle: respect the child's intelligence with real images. Compare to Habitat Schoolhouse's watercolor art — both 'real' in different ways. Aless seems to want accurate representation (scientific realism for science, artistic beauty for nature).
 
+- Dropped "Your Health" by Harcourt Brace (2026-07-15) — full 1st-grade health textbook. First full curriculum drop from Aless (not a single worksheet). Signal: health education is a priority subject. She scanned 114 pages via CamScanner and uploaded the whole thing.
+- Signal: interested in *whole-child health* as a cohesive subject — emotional wellness, physical health, nutrition, safety, and substance awareness all under one umbrella, not siloed.
+- Signal: values *question-based lesson framing* — every lesson in this book is a question the child can answer ("How can I show my feelings?", "Why do I need sleep?").
+- Signal: values *Life Skills integration* — this book pairs each chapter with a transferable social skill (Manage Stress, Resolve Conflicts, Say No, etc.) taught through 4-step scenario comics.
+- Signal: wants *family connection activities* — the book has "At Home" activities that bridge school and family ("Make a list of foods with caffeine", "List ways you help your family").
+- Signal: values *vocabulary-forward* content — key health terms are highlighted inline and reviewed in chapter assessments.
+- Pattern: this complements her role as primary user. She's building a complete homeschool program, not just collecting worksheets. Health was a gap in Homa's coverage and she filled it.
+
 ### Carolyng
 - First drop: Human Heart Mini Unit Study (2026-07-18) — explicitly said she loves the "art styles" (plural) and "array of activities."
 - *Signal: art quality matters.* She's responding to the watercolor illustration style — beautiful, hand-painted, museum-quality. Not clipart, not doodles.

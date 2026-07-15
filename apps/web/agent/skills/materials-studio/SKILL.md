@@ -188,6 +188,27 @@ page.
 - Cross-curricular centers extend the story theme. The week's reading selection drives science, social studies, art, and drama activities, not just ELA.
 - Spiral review through Daily Language Practice. Sentence-level error correction that reviews ALL previous skills, not just the current week's focus.
 
+**Math puzzles and logic games** (roughly ages 7 to 12):
+
+- Self-checking through structure. Puzzle formats (cross-number, hive, maze escape) where wrong answers create dead ends or contradictions provide instant feedback without answer keys. Prefer these over drill-and-check worksheets for operations practice.
+- Multiple puzzles per page, graded in difficulty. First 3 puzzles have more given values (higher scaffolding), last 3 have fewer. Students build confidence before hitting hard ones.
+- Game framing over drill framing. "Escape the maze" or "Solve the puzzle" is more engaging than "Practice these 20 problems." Same math, different motivation.
+- Constraint-based puzzles (hive, cross-number) develop reasoning beyond computation. They require students to think backwards, test hypotheses, and use elimination — higher-order math thinking.
+- For fraction/decimal puzzles: use visual fraction models alongside the abstract notation when targeting grades 3-4. By grade 5, abstract notation alone is fine.
+
+**Social-emotional learning** (roughly ages 3 to 8):
+
+- First-person narratives normalize emotions. Social stories use "I" language ("When I feel frustrated...") so the child practices self-identification, not third-person observation.
+- Body awareness before strategy. Teach children to notice physical signals (tight fists, fast heartbeat, hot face) before teaching coping strategies. The body signal is the trigger for using the strategy.
+- Mini-book format for social narratives. Foldable mini-books the child can keep and re-read independently are more effective than single worksheets. They become a personal coping tool, not a one-time activity.
+- Avoid abstract emotion vocabulary for under-5s. Use concrete, observable descriptions: "my hands squeeze tight" instead of "I feel tense." Build vocabulary gradually.
+
+**Unit studies and thematic packs** (all ages):
+
+- Multi-activity variety within one theme. A good unit study page includes 3-4 different activity types (count, label, draw, write, true/false) covering different subjects through one topic. This mirrors how homeschool families actually use unit studies — as cross-curricular explorations.
+- Layer complexity, not breadth. Better to have 6 activities at increasing difficulty on one topic than 12 surface-level activities. Depth > breadth for unit studies.
+- Include a hands-on extension suggestion. At least one activity per unit study page should prompt the child to do something physical (observe a real worm, make a heart model from play-dough, visit a tide pool). The printable supports the experience, not replaces it.
+
 ## Before designing: check the library
 
 Call find_materials first when the request sounds like something this
@@ -1671,6 +1692,185 @@ Design patterns (all binding for reading-comprehension-mini-unit):
   contexts (cloze-story rules apply).
 - **Comprehension questions mix recognition and expression**: a few
   multiple-choice plus one short written response, never all bubbles.
+
+## Hive puzzle
+
+Hexagonal grid logic puzzle where students fill empty hexagons
+following a constraint rule (e.g., "each hexagon contains the smallest
+number not appearing in any adjacent hexagon"). Derived from Beast
+Academy's Hive Puzzles.
+
+Reference image: `references/homa-hive-puzzle-reference.png`
+
+Great for: grades 2-5, logical reasoning, spatial thinking, number
+sense, constraint-based problem solving.
+
+Always image-direct path. Hexagonal geometry is impossible in pure
+HTML/CSS at the precision needed.
+
+Design patterns (all binding for hive-puzzle):
+
+- **Hexagonal clusters**: 7-19 hexagons per puzzle, tessellated.
+  Some filled with given numbers, rest blank for student.
+- **Multiple puzzles per page**: 6-9 puzzles in a grid (3×2 or 3×3).
+  Numbered labels for each.
+- **Rule statement**: Clear instruction box at top explaining the
+  constraint rule.
+- **Difficulty progression**: early puzzles have more given numbers,
+  later puzzles fewer.
+- **Homa style**: sage green (#7a9e7e) hexagon outlines, amber
+  (#d4a843) fill for given-number cells, cream (#f5f0e8) for blank
+  cells. Small bee/honeycomb doodles in margins.
+
+## Fraction link puzzle
+
+Grid-based puzzle where cells contain fractions or whole numbers,
+and students must find relationships (simplification, equivalence)
+between adjacent cells to complete the grid. Derived from Beast
+Academy's Fraction Link.
+
+Reference image: `references/homa-fraction-link-reference.png`
+
+Great for: grades 3-5, fraction equivalence, simplification,
+multiplication/division relationships.
+
+Always image-direct path. Grid with fraction notation needs precise
+layout control.
+
+Design patterns (all binding for fraction-link-puzzle):
+
+- **Grid structure**: 4×5 or 5×5 grids. Some cells have fractions
+  (numerator/denominator with bar), some have whole numbers, some
+  blank.
+- **Multiple puzzles**: 4-6 per page in 2×2 or 3×2 layout.
+- **Fraction notation**: horizontal bar between numerator and
+  denominator, centered in cell.
+- **Homa style**: sage (#7a9e7e) grid lines, amber (#d4a843) for
+  given-value cells, rose (#c4868e) for fraction bars. Pizza/pie
+  doodles in margins.
+
+## Fraction maze escape
+
+Grid navigation puzzle where each cell contains a fraction and
+students trace a path from start to finish following a mathematical
+rule (e.g., decreasing value, only proper fractions). Derived from
+Beast Academy's Maze Escape.
+
+Reference image: `references/homa-fraction-maze-reference.png`
+
+Great for: grades 3-5, fraction comparison, ordering, number sense.
+
+Always image-direct path. Dense fraction grids need precise spacing.
+
+Design patterns (all binding for fraction-maze-escape):
+
+- **Grid size**: 5×5 or 5×6. Every cell has a fraction.
+- **Start/end markers**: top-left start (amber highlight), bottom-right
+  exit (hatched or blue highlight).
+- **Multiple grids**: 4-6 per page.
+- **Rule clarity**: instruction at top states the navigation rule
+  clearly.
+- **Homa style**: sage (#7a9e7e) grid, amber (#d4a843) start cell,
+  blue (#7a9eb8) exit cell. Maze/compass doodles.
+
+## Decimal path puzzle
+
+Path-tracing puzzle with connected nodes containing decimal numbers.
+Students follow a rule (increasing order, sums to target) to trace
+the correct path from Start to End.
+
+Reference image: `references/homa-decimal-path-reference.png`
+
+Great for: grades 4-6, decimal comparison, ordering, place value.
+
+Image-direct path preferred. Node/path geometry is complex.
+
+Design patterns (all binding for decimal-path-puzzle):
+
+- **Node layout**: 10-15 circles per puzzle connected by lines,
+  forming a network with multiple possible paths.
+- **Multiple puzzles**: 4 per page in 2×2 layout.
+- **Start/End flags**: clearly labeled with small flag icons.
+- **Homa style**: sage (#7a9e7e) path lines, amber (#d4a843) node
+  circles, blue (#7a9eb8) start/end nodes. Cream background.
+
+## Daily rhythm cards
+
+Printable cards for building a visual daily schedule. Each card
+represents one activity block with an icon and label. Designed to
+be cut apart and arranged on a schedule board.
+
+Reference image: `references/homa-daily-rhythm-cards-reference.png`
+
+Great for: ages 3-8, routine building, time management, transitions,
+executive function.
+
+Html path preferred. Cards are text + simple icons, need clean
+alignment for cutting.
+
+Design patterns (all binding for daily-rhythm-cards):
+
+- **Card grid**: 12-16 cards in 3×4 or 4×4 grid on one page.
+- **Card contents**: simple icon at top, activity name in bold below,
+  optional time slot "___:___" at bottom.
+- **Dotted cut lines**: between every card. Scissors icon in corner.
+- **Color coding by category**: academic (sage green), creative
+  (amber), active (blue), breaks (rose).
+- **Editable feel**: time slots left blank for parent to fill in.
+- **Homa style**: rounded card corners, warm palette, hand-drawn icons.
+
+## Activity pack
+
+Single page with 4 mini-activities in quadrants, covering different
+skill types (counting, labeling, creative, knowledge) around one
+theme. Can be cut apart into 4 separate activities.
+
+Reference image: `references/homa-activity-pack-reference.png`
+
+Great for: ages 3-7, unit studies, multi-skill reinforcement,
+choice boards.
+
+Hybrid path. Mix of illustration-heavy (image) and text-heavy (html)
+quadrants.
+
+Design patterns (all binding for activity-pack):
+
+- **Quadrant layout**: page divided into 4 equal sections by dotted
+  lines.
+- **Activity variety**: each quadrant is a different activity type
+  (count, label, draw, true/false). Keeps engagement high.
+- **Theme header**: one title at top spanning full width.
+- **Self-contained**: each quadrant works as a standalone mini-worksheet.
+- **Homa style**: sage borders, amber accents, hand-drawn theme
+  illustrations in each quadrant.
+
+## Singapore math workbook page
+
+Visual-manipulative math page using ten-frames, bar models, and
+concrete-pictorial-abstract (CPA) progression. Modeled after
+Dimensions Math / Singapore Math approach.
+
+Reference image: `references/homa-singapore-workbook-reference.png`
+
+Great for: grades K-3, addition/subtraction, number bonds, place
+value, making ten.
+
+Hybrid path. Ten-frames and manipulatives need image quality;
+number sentences need text precision.
+
+Design patterns (all binding for singapore-workbook-page):
+
+- **CPA structure**: concrete (illustrations of objects) → pictorial
+  (ten-frame dots) → abstract (number sentence with blank answer box).
+- **Ten-frames**: 2×5 grid of circles. Filled circles = quantity,
+  empty circles = remaining space. Show regrouping with arrows.
+- **Word problem context**: simple scenario ("There are 8 apples.
+  There are 5 oranges. How many fruits in all?") with illustrations.
+- **Basics → Practice flow**: guided example first, then independent
+  practice problems below.
+- **Homa style**: amber (#d4a843) filled dots, cream (#f5f0e8) empty
+  dots, sage (#7a9e7e) frame outlines, terracotta section headers.
+  Hand-drawn object illustrations (fruits, animals).
 
 ## Design rules (binding)
 
