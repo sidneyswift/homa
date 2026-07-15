@@ -49,7 +49,18 @@ export default defineDynamic({
           ]),
         );
       } catch (error) {
+        // No family this turn (research channel, unfinished setup) is
+        // expected and stays silent.
         if (error instanceof MissingFamilyContextError) return null;
+        // Any other failure drops every skill for the turn (BUG-P5-3). Keep
+        // the fail-open posture so the turn still runs, but never silently:
+        // a distinctive line makes a resolver outage greppable and alertable
+        // instead of quietly reverting the agent to its non-skill defaults
+        // (e.g. a letter page losing the family's saved HWT tracing rule).
+        console.error(
+          "skill-library resolver failed, skills absent this turn:",
+          error instanceof Error ? error.message : "unknown",
+        );
         return null;
       }
     },

@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser } from "puppeteer-core";
 
+import { isAllowedPrintableSubresourceUrl } from "./page-shell";
+
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
  * rendering seam; D-print-4 contract from the send-to-printer plan).
@@ -96,6 +98,38 @@ export async function renderPrintableHtml(html: string): Promise<RenderedPrintab
   const page = await browser.newPage();
   try {
     await page.setViewport({ ...LETTER_PX, deviceScaleFactor: 2 });
+
+    // The egress wall (F11 / render-path exfiltration). The page HTML is
+    // model-authored, so an injected model could point an <img>/<link>/CSS
+    // url() at an attacker host and beacon family data out at render time,
+    // from inside the trusted app runtime. Intercept every request and drop
+    // anything off the printable subresource allowlist. This is the real
+    // boundary: it catches the request however the URL was expressed, where
+    // a static HTML scan cannot. A blocked host is logged (never the URL's
+    // query, which could carry the exfiltrated data) as a security signal.
+    const blockedHosts = new Set<string>();
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      const url = request.url();
+      const allowed =
+        request.resourceType() === "document" ||
+        isAllowedPrintableSubresourceUrl(url);
+      if (allowed) {
+        request.continue().catch(() => {
+          // Race: the request was already handled or the page is closing.
+        });
+        return;
+      }
+      try {
+        blockedHosts.add(new URL(url).hostname.toLowerCase());
+      } catch {
+        blockedHosts.add("(unparseable)");
+      }
+      request.abort().catch(() => {
+        // Same race; aborting a settled request is a no-op we can ignore.
+      });
+    });
+
     // "load" waits for subresources (illustrations, stylesheets); the two
     // evaluates below cover late font swaps and image decode, which is
     // everything a static page needs painted before capture.
@@ -103,6 +137,11 @@ export async function renderPrintableHtml(html: string): Promise<RenderedPrintab
       waitUntil: "load",
       timeout: RENDER_TIMEOUT_MS,
     });
+    if (blockedHosts.size > 0) {
+      console.warn(
+        `printable render blocked off-allowlist subresource hosts: ${[...blockedHosts].join(", ")}`,
+      );
+    }
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() =>
       Promise.all(

@@ -39,6 +39,46 @@ export function validatePrintableHtml(html: string, extraText: string): string |
   return null;
 }
 
+/**
+ * The only hosts a printable may fetch a subresource from at render time.
+ * Family art lives on Vercel Blob; the studio's fonts come from Google
+ * Fonts (materials-studio SKILL.md). Everything else is refused so an
+ * injected page cannot beacon family data out through an `<img>`, `<link>`,
+ * `srcset`, CSS `url(...)`, or `@import` pointed at an attacker host.
+ *
+ * This list is the single source of truth; the real wall is the render-time
+ * request interceptor in render-page.ts, which drops every off-list network
+ * request regardless of how the URL was expressed. A static HTML scan cannot
+ * be the wall (CSS and srcset hide URLs, and worksheet text legitimately
+ * contains URLs), so enforcement lives at the network boundary, not here.
+ */
+const PRINTABLE_SUBRESOURCE_HOSTS = [
+  "public.blob.vercel-storage.com",
+  "fonts.googleapis.com",
+  "fonts.gstatic.com",
+] as const;
+
+/**
+ * True when a subresource URL is safe for the renderer to fetch. `data:` and
+ * `blob:` carry no network egress; `about:` covers the renderer's own blank
+ * document; http(s) is allowed only for the exact hosts above (or their
+ * subdomains). Anything unparseable or off-list is refused.
+ */
+export function isAllowedPrintableSubresourceUrl(rawUrl: string): boolean {
+  if (/^(data|blob|about):/iu.test(rawUrl)) return true;
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+  const host = parsed.hostname.toLowerCase();
+  return PRINTABLE_SUBRESOURCE_HOSTS.some(
+    (allowed) => host === allowed || host.endsWith(`.${allowed}`),
+  );
+}
+
 /** The footer's house mark, inlined as raw SVG (same art as the Logo). */
 const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="#8A7D6C" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="#8A7D6C"/><circle cx="30.6" cy="26" r="2.7" fill="#8A7D6C"/></svg>`;
 
