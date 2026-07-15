@@ -18,6 +18,7 @@ supabase/.temp/
 
 # ── Junk ────────────────────────────────────────────────────────────────────
 .DS_Store
+.worktrees/
 node_modules/
 .vercel
 .eve/
