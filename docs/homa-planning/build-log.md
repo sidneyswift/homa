@@ -3,6 +3,51 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
+
+Set up so the seven-day dormant-window observation
+(docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md §6
+Phase C) is actually running, not just planned:
+
+- **Window:** starts at the policy migration (`pause_family_skill_writes`,
+  applied 2026-07-15 ~19:0x UTC, see the merge/deploy entry above). Earliest
+  Phase C close: 2026-07-22.
+- **Owner:** unassigned; the founder should name one before Phase C is
+  declared complete, per the plan's own bullet. Flagging here rather than
+  guessing a name.
+- **Source/build guard (bullet 1), done and in CI:** added
+  `scripts/fleet-skills-dormant-guard.mts` (`pnpm check:fleet-skills-dormant`,
+  wired into `.github/workflows/ci.yml`). Proves the four retired files stay
+  deleted and that no `apps/web` source file outside an explicit, documented
+  allowlist (`family-fold.ts`'s account-merge remap, the skill-archive
+  scripts) issues a live query against `public.family_skills` or
+  `public.skill_bank`. Passes today.
+- **Read/write counter (bullets 2-3), started, needs rerunning:** added
+  `apps/web/scripts/fleet-skills-dormant-snapshot.mts`. Captures row count,
+  newest `updated_at`, and `pg_stat_user_tables` scan counters for both
+  tables, writes a timestamped snapshot under
+  `supabase/.temp/fleet-skills-dormant-evidence/` (gitignored, local
+  evidence only), and diffs against the most recent prior snapshot when one
+  exists. First baseline captured 2026-07-15T21:11:36.275Z:
+  `skill_bank` 2 rows (unchanged since the 2026-07-15 archive), `family_skills`
+  0 rows (unchanged). Scan counters are cumulative since Postgres's last
+  stats reset, not zeroed at the cutover, so the evidence is the diff between
+  runs, not this first run's absolute numbers. Whoever owns Phase C should
+  rerun this command at least once more before day 7 and paste the diff
+  here.
+- **Routing probes (bullet 4), not started:** the plan wants at least ten
+  authenticated synthetic routing probes across web and one pinned channel.
+  Not run this session: no authenticated test family session or pinned-channel
+  test credentials were available in this sandbox. Needs a session with
+  those credentials.
+- **Personalization and family-row bullets (5-6):** memories/profile
+  personalization is unchanged by this migration (it never touched
+  `family_memories` or `children.profile`); the "preserved family row"
+  bullet is moot, per the earlier entry, the one observed row was already
+  gone (cascaded by an unrelated family deletion) before the archive ran.
+- **Cross-channel parity (bullet 7):** not verified this session; needs the
+  same authenticated probes as bullet 4.
+
 ## 2026-07-15 · Fleet skills move to the filesystem, family skills retired
 
 Implemented `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`

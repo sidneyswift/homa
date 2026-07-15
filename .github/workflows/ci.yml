@@ -55,6 +55,9 @@ jobs:
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
 
+      - name: Fleet-skill dormant-window guard (retired files, no live queries)
+        run: pnpm check:fleet-skills-dormant
+
       - name: Skills-bank targeting checks (retired-system regression guard)
         run: pnpm check:skills-targeting
 
