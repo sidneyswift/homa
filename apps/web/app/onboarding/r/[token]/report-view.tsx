@@ -149,6 +149,7 @@ export function ReportView({
   narrativeView = null,
   stateRequirements = null,
   wall = null,
+  viewerActions = { call: true, month: true },
 }: {
   data: ReportViewData;
   sample?: boolean;
@@ -170,6 +171,15 @@ export function ReportView({
    * family is walled, null when every door is open (the default, and
    * always the case while HOMA_WALL_ENABLED is off). */
   wall?: WallCheckout | null;
+  /** Which of the letter's two actions THIS viewer's session can
+   * actually complete (founder ruling 2026-07-14, report-page dead
+   * ends, option b): the call needs a signed-in family member, the
+   * month BUILD needs a resume cookie or membership. Suppressed
+   * buttons beat dead ones: a text-born family has neither and used
+   * to get a circular device hint. Defaults keep the signed-in /app
+   * route unchanged; an already-built month renders as a plain
+   * tokenized link for every viewer regardless. */
+  viewerActions?: { call: boolean; month: boolean };
 }) {
   const report = data;
   const inApp = context === "app";
@@ -222,7 +232,11 @@ export function ReportView({
       !ELECTIVES.has(score.subjectId) &&
       (score.position === "growing" || score.position === "on_track"),
   );
-  const monthOffered = editable && (monthBuilt || monthBuildable);
+  // A built month is a plain tokenized link (viewable by anyone with
+  // the report link, no session); only the BUILD tap needs a session,
+  // so an unbuildable-for-this-viewer month offer is suppressed.
+  const monthOffered =
+    editable && (monthBuilt || (monthBuildable && viewerActions.month));
   /** Names the month the plan starts (the letter's plan sentence, not
    * the report's generation date: a re-opened report should still read
    * as "this month's plan"). */
@@ -331,7 +345,7 @@ export function ReportView({
         {monthOffered ? (
           <p className="mt-2 text-body">{notePlanSentence(report.childName, monthName)}</p>
         ) : null}
-        {editable ? (
+        {editable && viewerActions.call ? (
           <div className="mt-2">
             <CallHomaPs childId={report.childId} childName={report.childName} wall={wall} />
           </div>

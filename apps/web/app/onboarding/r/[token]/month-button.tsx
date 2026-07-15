@@ -18,8 +18,11 @@ import { reportButtonClass } from "./report-button";
  * month is already built this is a plain link; before that, the tap IS
  * the consent that builds the unified month and arms the 28-day
  * re-check email (email doctrine intact), then navigates straight to
- * it. Session-gated: a shared-link viewer gets the device hint, never a
- * plan built on someone else's family.
+ * it. The build variant only renders for a viewer whose session
+ * belongs to this family (founder ruling 2026-07-14, option b:
+ * suppressed beats dead; text-born families used to hit a circular
+ * device hint here). The no-session state below remains as the
+ * fallback for a session expiring between render and tap.
  *
  * The wall (plans/2026-07-11-the-wall.md, DARK behind
  * HOMA_WALL_ENABLED): building a NEW month is a door. A walled family's

@@ -19,6 +19,12 @@ import type { WallCheckout } from "../../../../lib/billing/wall-types";
  * real call and builds the curriculum from the conversation (it lands
  * on the kid's page, /app/kids/[childId], when ready).
  *
+ * Only renders for a signed-in member of this family (report-view's
+ * viewerActions gate, founder ruling 2026-07-14 option b): the start
+ * route is Supabase-session-only, and a text-born family or shared
+ * -link viewer used to dead-end here on a circular device hint. The
+ * no-session state below remains as the expired-session fallback.
+ *
  * The wall (plans/2026-07-11-the-wall.md, DARK behind
  * HOMA_WALL_ENABLED): the call is a door. A walled family's tap opens
  * the offer instead of dialing. Every tap beacons report.action_tapped,
