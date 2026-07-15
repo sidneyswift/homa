@@ -115,21 +115,36 @@ async function sendMode(): Promise<void> {
 
 /**
  * One-time account setup probe: saves a sender (return) address through
- * the API and prints its id, to test whether that satisfies the
- * "physical address on file" requirement without a dashboard visit.
+ * the API and prints its id. Set HANDWRYTTEN_RETURN_ADDRESS_ID in .env.local
+ * to the printed id so cards use "Homa" as the sender instead of the
+ * account owner's personal info.
+ *
+ *   pnpm --filter web exec tsx scripts/handwrytten-smoke.mts --setup-sender
+ *   pnpm --filter web exec tsx scripts/handwrytten-smoke.mts --setup-sender --first Homa --last "" --street "" --city "" --state "" --zip ""
+ *   pnpm --filter web exec tsx scripts/handwrytten-smoke.mts --list-senders
  */
 async function setupSenderMode(): Promise<void> {
   const senderId = await client.addressBook.addSender({
-    firstName: argValue("--first") ?? "Sidney",
-    lastName: argValue("--last") ?? "Swift",
-    company: "Homa",
+    firstName: argValue("--first") ?? "Homa",
+    lastName: argValue("--last") ?? "",
     street1: argValue("--street") ?? "",
     city: argValue("--city") ?? "",
     state: argValue("--state") ?? "",
     zip: argValue("--zip") ?? "",
   });
   console.log(`sender saved, id: ${JSON.stringify(senderId)}`);
+  console.log(`\nSet this in .env.local (and Vercel env vars):`);
+  console.log(`  HANDWRYTTEN_RETURN_ADDRESS_ID=${JSON.stringify(senderId)}`);
+  console.log(`\nAll saved senders:`);
   const senders = await client.addressBook.listSenders();
+  for (const sender of senders) {
+    console.log(`  [${sender.id}] ${sender.firstName ?? ""} ${sender.lastName ?? ""}, ${sender.street1 ?? ""}`);
+  }
+}
+
+async function listSendersMode(): Promise<void> {
+  const senders = await client.addressBook.listSenders();
+  console.log(`Saved senders (${senders.length}):`);
   for (const sender of senders) {
     console.log(`  [${sender.id}] ${sender.firstName ?? ""} ${sender.lastName ?? ""}, ${sender.street1 ?? ""}`);
   }
@@ -137,6 +152,8 @@ async function setupSenderMode(): Promise<void> {
 
 if (process.argv.includes("--setup-sender")) {
   await setupSenderMode();
+} else if (process.argv.includes("--list-senders")) {
+  await listSendersMode();
 } else if (process.argv.includes("--send")) {
   await sendMode();
 } else {
