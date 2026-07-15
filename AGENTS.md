@@ -6,6 +6,124 @@ Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo mon
 
 **Read next, in order:** [`BUILD.md`](BUILD.md) (the engineering entry point: reading order, build phases, non-negotiable laws) → [`docs/homa-planning/13-mr-prd.md`](docs/homa-planning/13-mr-prd.md) (the product contract). For the repo's file-by-file layout, see [`README.md`](README.md)'s Repo map.
 
+## Agent capabilities: fat skills over narrow tools
+
+When changing what Homa can do for families, **start at the skill layer, not
+the tool layer**. Homa follows the thin-harness/fat-skills architecture and
+the latent-vs-deterministic split:
+
+- Push judgment, process, examples, decision trees, tool sequencing, and
+  quality criteria **up into load-on-demand skills**.
+- Push exact retrieval, computation, authentication, validation, durable
+  writes, rendering, and delivery **down into narrow deterministic tools**.
+- Keep the eve harness and always-on instructions generic. A tool is an
+  ability; a skill teaches Homa how and when to combine abilities into a
+  useful parent-facing capability.
+
+**In this section, "build a skill" means design a fleet skill, not a family
+skill.** Coding agents building Homa create shared capabilities that can help
+the whole fleet, never a per-family product feature. `family_skills` is
+dormant historical product data (2026-07-15, see Skill authoring rules
+below); it is not a place a coding agent implements anything, live or
+otherwise.
+
+Read `docs/homa-planning/15-agentic-architecture.md` §2 for the binding
+placement ruling. `docs/homa-planning/plans/2026-07-13-agent-frontier-review.md`
+records the research comparison behind this rule.
+
+### Choose the right layer
+
+| Put it in | Use it for | Homa examples |
+|---|---|---|
+| **Fleet Eve skill** | The hard part is judgment or a reusable procedure: how to reason, choose an approach, sequence existing tools, judge quality, handle variants, or know when to stop. A better model should improve the result without changing code. | `materials-studio` decides difficulty, chooses image/HTML/hybrid, calls the material tools, reviews, revises, and finalizes. `research-brief` selects one family-relevant angle and sequences research, recall, and progress tools. |
+| **Eve tool / deterministic code** | The result or effect must be exact, typed, authenticated, tenant-scoped, idempotent, rate-limited, auditable, or impossible to hallucinate. The model needs an ability it does not currently have. | `manage_child_progress`, `create_printable`, `remember`, `send_followup_email`, database queries, scoring, date math, Blob writes, provider calls. |
+| **Skill + tool** | The capability needs both judgment and a missing exact effect. The skill owns the complete workflow; the tool is the smallest reusable deterministic leaf. | A curriculum-fit skill may use existing recall/web tools plus one narrow catalog lookup tool. Do not turn the whole curriculum-fit workflow into one god tool. |
+| **Always-on or dynamic instructions** | The rule must apply before any skill can load, or the data must be fresh every turn. Keep capability-specific procedures out. | Homa's identity, voice, tenancy and tool-honesty laws stay in `agent/instructions.md`; SMS-only behavior stays in `agent/instructions/sms-mode.ts`; family/progress context is rebuilt on `turn.started`. |
+| **Postgres / Blob / `defineState`** | Durable product truth / durable artifacts / session-only working state. | Family facts and skills in Postgres, PDFs in Blob, a session counter in `defineState`. Never use a skill body, conversation history, or sandbox file as load-bearing state. |
+| **Channel / schedule / UI / subagent** | Transport authentication and delivery / clock-driven activation / parent-visible interaction / genuinely isolated context or privileges. | A new messaging surface is a channel, not a tool. A weekday wake-up is a schedule. Use a subagent only when it needs a different prompt, model, context window, or restricted tool surface; use a skill when optional procedure is enough. |
+
+### Required decision sequence
+
+1. Write the fleet-wide parent-facing capability as a procedure first.
+   Identify the
+   choices Homa must make, the evidence she should use, the quality bar, the
+   tools she needs, and the honest stop/failure conditions.
+2. Inventory the existing tools. If they can already perform every required
+   effect, implement or improve a **fleet skill only**. Do not add a tool
+   merely to make a workflow feel more concrete.
+3. If one exact effect is missing, add the **smallest general-purpose tool**
+   that supplies it, then keep the workflow and judgment in the skill.
+4. Place state separately: Postgres for durable facts and records, Blob for
+   artifacts, dynamic instructions for fresh bounded context, `defineState`
+   for session working memory, and the sandbox for scratch only.
+5. Test each layer where it can fail: unit/integration tests for deterministic
+   code, behavioral evals for skill output, positive and adversarial-negative
+   routing cases for whether the skill loads, and an end-to-end journey when
+   the capability crosses tools or channels.
+
+### Skill authoring rules
+
+- Filesystem-first (founder ruling `filesystem-first-fleet-skills`,
+  2026-07-15): `apps/web/agent/skills/<name>/SKILL.md` is the only active
+  fleet-skill home. It ships with code, is versioned in git, and loads at
+  runtime through eve's built-in discovery. Use it for all fleet craft,
+  including craft that would once have been a targeted skill-bank row: with
+  four or fewer active skills, advertising every description to every family
+  and letting the loaded skill branch on the family's actual children is
+  cheaper and more reliable than a second targeting system.
+- `skill_bank` and `family_skills` are dormant historical data, not a build
+  surface. There is no `save_skill`, no `forget_skill`, and no runtime
+  resolver reading either table. Do not add code that reads or writes them;
+  do not treat a row in either table as a live product behavior. Reopen
+  dynamic distribution only when one of the plan's triggers fires (roughly
+  25-40 active skills, measured routing failures a static description can't
+  fix, real families repeatedly requesting the same durable procedure, a
+  genuine need for canary/A-B skill releases, or deploy cadence becoming the
+  bottleneck), and only via a new plan, not by resurrecting the old tools.
+  See `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`.
+- Start repo-authored skills with markdown. Use `defineSkill` only when typed
+  or generated sibling files require it.
+- A skill description is a routing instruction, not a label. Write
+  `Use when...` and name the intent that should load it. Keep the body
+  self-contained for future Homa with no memory of the originating session.
+- Put the full procedure in the skill: inputs/evidence, decision rules,
+  ordered tool calls, examples, quality checks, stop conditions, and what not
+  to do. Skills may call existing tools; loading a skill never grants a new
+  execution ability.
+- Prefer improving an existing overlapping skill over creating a duplicate.
+  Do not codify a one-off before the procedure has proved repeatable.
+- Shared production skills are tested bundles, not prose dropped into the
+  library. Run `pnpm check:fleet-skills` (package hygiene: frontmatter,
+  size limits, path safety, slash-menu parity) and add positive and
+  adversarial-negative routing fixtures plus an eve behavioral eval when
+  correctness depends on model judgment. `pnpm check:skills-targeting`
+  still runs in CI as a regression guard on the retired
+  targeting/merge logic through the dormant window; it is not a live
+  product check.
+
+### Tool authoring rules
+
+- A tool owns the exact effect and nothing more: typed schema, authenticated
+  context, tenant re-scoping, validation, idempotency, rate limits, provider
+  calls, durable writes, and a truthful result. The skill owns the workflow.
+- Design narrow reusable primitives, not a tool per prompt, screen, skill, or
+  REST endpoint. Avoid god tools that hide a whole user journey inside code.
+  One tool should be usable by more than one skill when the underlying effect
+  is genuinely shared.
+- `familyId` never comes from the model or client. Every model-supplied record
+  ID is re-scoped inside the authenticated family. The tool result is the
+  only truth about whether an action happened.
+- Exact work stays exact even when a skill asks for it: scoring, arithmetic,
+  scheduling, consent classification, policy enforcement, database lookup,
+  and security boundaries never move into prose.
+
+Before finalizing an agent capability, ask: **Could existing tools perform the
+effect if Homa knew the right procedure?** If yes, build the fleet skill.
+**Would a plausible model answer be dangerous because there is one correct
+result or one authorized side effect?** If yes, build or reuse deterministic
+code. Most substantial capabilities should be a fat fleet skill orchestrating
+a small set of narrow tools, not a growing pile of workflow-shaped tools.
+
 ## Commands
 
 - Install: `pnpm install`

@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Channel introduction directions · how does a family learn they can text Homa?</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fredoka:wght@600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Schibsted+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<title>Meeting Homa · the plan we picked</title>
 <style>
 :root{
   --stone-50:#FBF7F0;--stone-100:#F3ECE1;--stone-200:#E7DDCE;--stone-300:#D6C8B4;--stone-400:#B3A492;--stone-500:#8A7D6C;--stone-600:#6B6259;--stone-700:#4E463E;--stone-800:#332E29;--stone-900:#221E1A;
@@ -14,733 +11,382 @@
   --sage-50:#EAF6EC;--sage-100:#D2ECD6;--sage-300:#7CC689;--sage-500:#3D9A50;--sage-700:#275F34;
   --gold-100:#FFF3C2;--gold-400:#FFD43B;--gold-ink:#8A6410;
   --sky-100:#DDF3F9;--sky-500:#4FB4D6;--sky-600:#3A8FA9;
-  --bg-page:var(--stone-50);--card:#FFFFFF;
-  --text-strong:var(--stone-900);--text-body:var(--stone-800);--text-muted:var(--stone-600);--text-subtle:var(--stone-500);
-  --brand:var(--clay-500);--border-subtle:var(--stone-200);--border:var(--stone-300);
-  --r-sm:10px;--r-md:16px;--r-lg:22px;--r-pill:999px;
-  --sh-sm:0 1px 3px rgba(51,42,33,.08),0 1px 2px rgba(51,42,33,.04);
-  --sh-md:0 4px 12px rgba(51,42,33,.08),0 2px 4px rgba(51,42,33,.05);
-  --f-display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
-  --f-sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,monospace;
-  --f-hand:"Caveat",cursive;
+  --page:var(--stone-50);--card:#fff;--strong:var(--stone-900);--body:var(--stone-800);--muted:var(--stone-600);--subtle:var(--stone-500);--border:var(--stone-300);--border-soft:var(--stone-200);--brand:var(--clay-500);
+  --r-sm:10px;--r-md:16px;--r-lg:22px;--pill:999px;
+  --shadow-sm:0 1px 3px rgba(51,42,33,.08),0 1px 2px rgba(51,42,33,.04);
+  --shadow-md:0 4px 12px rgba(51,42,33,.08),0 2px 4px rgba(51,42,33,.05);
+  --display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --hand:"Caveat",cursive;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg-page);color:var(--text-body);font-family:var(--f-sans);-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{font-family:var(--f-display);margin:0;color:var(--text-strong)}
-button{font-family:var(--f-sans);cursor:pointer}
-code{font-family:var(--f-mono);font-size:.78em;color:var(--text-body);background:var(--stone-100);border-radius:4px;padding:1px 5px;word-break:break-word}
-.wrap{max-width:1100px;margin:0 auto;padding:32px 20px 90px}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--page);color:var(--body);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;color:var(--strong);font-family:var(--display);letter-spacing:-.012em}
+p{margin:0}
+button{font-family:var(--sans);cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:34px 20px 90px}
+.eyebrow{font:700 .66rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--subtle)}
+.hero h1{margin-top:8px;font-size:2rem;line-height:1.12}
+.hero .lead{margin-top:12px;max-width:760px;font-size:1.04rem;line-height:1.65}
+.notice{margin-top:15px;max-width:800px;border:1px dashed var(--border);border-radius:var(--r-md);background:var(--gold-100);color:var(--gold-ink);padding:10px 14px;font-size:.82rem;font-weight:600;line-height:1.5}
+.decision{margin-top:22px;background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-sm)}
+.decision h2{font-size:1.2rem}
+.decision .one-line{margin-top:8px;max-width:800px;font-size:1rem;font-weight:600;line-height:1.6;color:var(--strong)}
+.decision-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:16px}
+.decision-item{background:var(--page);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px;font-size:.84rem;line-height:1.5}
+.decision-item b{display:block;margin-bottom:4px;color:var(--strong)}
 
-.lab-head h1{font-size:1.85rem;font-weight:700;letter-spacing:-.015em}
-.lab-head .sub{margin:10px 0 0;max-width:78ch;line-height:1.55}
-.notice{margin-top:14px;display:inline-flex;gap:8px;align-items:flex-start;border:1px dashed var(--border);border-radius:var(--r-md);background:var(--gold-100);color:var(--gold-ink);padding:10px 14px;font-size:.82rem;font-weight:600;max-width:82ch;line-height:1.5}
-.regression{margin-top:14px;border:1px solid var(--clay-300);border-left:5px solid var(--clay-500);border-radius:var(--r-md);background:var(--clay-50);padding:12px 16px;max-width:82ch;font-size:.86rem;line-height:1.55}
-.regression b{color:var(--clay-700)}
-
-.verdicts{margin-top:20px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-.verdict{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-sm)}
-.verdict .q{font-family:var(--f-mono);font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-subtle)}
-.verdict .a{margin:6px 0 6px;font-size:1.02rem;font-weight:700;color:var(--text-strong);font-family:var(--f-display)}
-.verdict p{margin:0;font-size:.85rem;line-height:1.5}
-
-/* today's journey strip */
-.journey{margin-top:44px}
-.journey h2{font-size:1.2rem}
-.journey .hint{margin:6px 0 0;font-size:.85rem;color:var(--text-muted);max-width:80ch;line-height:1.5}
-.moments{margin-top:14px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
-.moment{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:12px 14px;font-size:.8rem;line-height:1.5}
-.moment .when{font-family:var(--f-mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-subtle)}
-.moment .chan{display:inline-block;font-family:var(--f-mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r-pill);padding:2px 8px;margin-left:6px;vertical-align:1px}
-.chan.sms{background:var(--sage-50);color:var(--sage-700)}
-.chan.email{background:var(--sky-100);color:var(--sky-600)}
-.chan.web{background:var(--stone-100);color:var(--stone-600)}
-.chan.mail{background:var(--gold-100);color:var(--gold-ink)}
-.moment b{display:block;color:var(--text-strong);margin:5px 0 3px;font-size:.85rem}
-.moment .gap{margin-top:7px;background:var(--clay-50);color:var(--clay-700);border-radius:var(--r-sm);padding:6px 9px;font-size:.75rem;font-weight:600;line-height:1.45}
-.moment .ok{margin-top:7px;background:var(--sage-50);color:var(--sage-700);border-radius:var(--r-sm);padding:6px 9px;font-size:.75rem;font-weight:600;line-height:1.45}
-
-/* directions */
-.directions{margin-top:52px}
-.directions h2{font-size:1.25rem}
-.directions .hint{margin:6px 0 0;font-size:.85rem;color:var(--text-muted);max-width:80ch;line-height:1.5}
-.dir-tabs{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
-.dir-tab{border:1px solid var(--border);background:var(--card);color:var(--text-body);border-radius:var(--r-pill);padding:9px 18px;font-size:.88rem;font-weight:600}
-.dir-tab[aria-selected="true"]{background:var(--stone-900);border-color:var(--stone-900);color:var(--stone-50)}
-.dir-panel{display:none;margin-top:18px;background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-lg);box-shadow:var(--sh-md);padding:20px}
-.dir-panel.active{display:block}
-.dir-panel .philosophy{font-size:1rem;line-height:1.55;max-width:80ch}
-.dir-panel .philosophy b{color:var(--text-strong)}
-.dir-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
-.bet{font-family:var(--f-mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--stone-100);color:var(--stone-600);border-radius:var(--r-pill);padding:3px 10px}
-
-.stage{margin-top:16px;background:var(--bg-page);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:18px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
-.stage-note{width:100%;text-align:center;font-size:.72rem;color:var(--text-subtle);font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
-
-/* phone mock */
-.phone{width:300px;background:#fff;border:1px solid var(--stone-300);border-radius:34px;box-shadow:var(--sh-md);overflow:hidden;flex-shrink:0}
-.phone .p-head{background:var(--stone-100);padding:12px 14px 10px;text-align:center;border-bottom:1px solid var(--border-subtle)}
-.phone .p-head .num{font-size:.8rem;font-weight:600;color:var(--text-strong)}
-.phone .p-head .sub2{font-size:.62rem;color:var(--text-subtle);margin-top:2px}
-.phone .p-body{padding:12px 12px 16px;display:flex;flex-direction:column;gap:8px;min-height:230px}
-.p-time{align-self:center;font-size:.62rem;color:var(--text-subtle);margin:2px 0}
-.bubble{max-width:82%;border-radius:18px;padding:8px 12px;font-size:.8rem;line-height:1.45;white-space:pre-wrap}
-.bubble.in{background:#E9E9EB;color:#111;align-self:flex-start;border-bottom-left-radius:5px}
-.bubble.out{background:#3B82F6;color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
-.vcardrow{align-self:flex-start;display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--stone-200);border-radius:14px;padding:9px 12px;box-shadow:var(--sh-sm);max-width:82%}
-.vcardrow .ava{width:34px;height:34px;border-radius:50%;background:var(--clay-500);display:flex;align-items:center;justify-content:center;color:#fff;font-family:"Fredoka",var(--f-sans);font-weight:600;font-size:1rem}
-.vcardrow .who{font-size:.8rem;font-weight:600;color:#111}
-.vcardrow .what{font-size:.62rem;color:var(--text-subtle)}
-.vcardrow .chev{margin-left:auto;color:var(--stone-400);font-size:.9rem}
-
-/* email mock */
-.email{width:340px;background:var(--stone-50);border:1px solid var(--stone-300);border-radius:var(--r-md);box-shadow:var(--sh-md);overflow:hidden;flex-shrink:0}
-.email .e-head{background:#fff;border-bottom:1px solid var(--border-subtle);padding:10px 14px;font-size:.74rem;line-height:1.5}
-.email .e-head b{color:var(--text-strong)}
-.email .e-card{margin:14px;background:#fff;border:1px solid var(--stone-200);border-radius:var(--r-lg);padding:18px}
-.email .e-logo{font-family:"Fredoka",var(--f-sans);font-weight:600;color:var(--clay-500);font-size:1rem;margin-bottom:10px}
-.email .e-h1{font-family:var(--f-display);font-weight:700;font-size:1.05rem;color:var(--text-strong);margin-bottom:8px}
-.email p{margin:0 0 10px;font-size:.8rem;line-height:1.55}
-.email .cta{display:inline-block;background:var(--clay-500);color:#fff;border-radius:var(--r-pill);padding:8px 18px;font-weight:700;font-size:.8rem;margin:2px 0 10px}
-.email .foot{font-size:.68rem;color:var(--text-subtle);line-height:1.5}
-.email .outer{margin:0 14px 14px;font-size:.64rem;color:var(--text-subtle);text-align:center;line-height:1.5}
-
-/* web app mock */
-.appmock{width:520px;max-width:100%;background:var(--stone-50);border:1px solid var(--stone-300);border-radius:var(--r-md);box-shadow:var(--sh-md);overflow:hidden;display:flex;flex-shrink:0}
-.appmock .side{width:130px;background:#fff;border-right:1px solid var(--border-subtle);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
-.appmock .side .wordmark{font-family:"Fredoka",var(--f-sans);font-weight:600;color:var(--clay-500);font-size:.95rem;padding:2px 8px 10px}
-.appmock .side a{font-size:.72rem;color:var(--text-body);text-decoration:none;padding:6px 8px;border-radius:8px;font-weight:500}
-.appmock .side a.on{background:var(--clay-50);color:var(--clay-700);font-weight:700}
-.appmock .side a.newitem{background:var(--gold-100);color:var(--gold-ink);font-weight:700}
-.appmock .main{flex:1;padding:14px;min-height:250px}
-.appmock .main h3{font-size:.95rem;margin-bottom:8px}
-.appmock .card2{background:#fff;border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:12px;margin-bottom:10px;font-size:.76rem;line-height:1.5}
-.chanrow{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--stone-100)}
-.chanrow:last-child{border-bottom:none}
-.chanrow .ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
-.chanrow .ic.sms{background:var(--sage-50)}
-.chanrow .ic.email{background:var(--sky-100)}
-.chanrow .ic.call{background:var(--gold-100)}
-.chanrow .ic.web{background:var(--stone-100)}
-.chanrow b{display:block;font-size:.78rem;color:var(--text-strong)}
-.chanrow .d{font-size:.72rem;color:var(--text-muted);line-height:1.45}
-.chanrow .st{margin-left:auto;font-family:var(--f-mono);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:var(--r-pill);padding:2px 8px;flex-shrink:0}
-.st.on{background:var(--sage-50);color:var(--sage-700)}
-.st.off{background:var(--stone-100);color:var(--stone-500)}
-.minibtn{display:inline-block;border:1px solid var(--border);background:#fff;border-radius:var(--r-pill);padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--text-strong);margin:4px 6px 0 0}
-.minibtn.primary{background:var(--clay-500);border-color:var(--clay-500);color:#fff}
-
-/* onboarding step mock */
-.obmock{width:400px;max-width:100%;background:#fff;border:1px solid var(--stone-300);border-radius:var(--r-md);box-shadow:var(--sh-md);padding:18px;flex-shrink:0}
-.steps{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
-.step{font-family:var(--f-mono);font-size:.56rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:var(--r-pill);padding:3px 8px;background:var(--stone-100);color:var(--stone-500)}
+section{margin-top:52px}
+section>h2{font-size:1.3rem}
+.section-lead{margin-top:7px;max-width:780px;color:var(--muted);font-size:.9rem;line-height:1.6}
+.device-tabs,.view-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.tab{border:1px solid var(--border);border-radius:var(--pill);background:var(--card);padding:8px 16px;color:var(--body);font-size:.84rem;font-weight:600}
+.tab[aria-pressed="true"]{border-color:var(--sky-500);background:var(--sky-100);color:var(--sky-600)}
+.stage{margin-top:14px;display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-sm)}
+.stage-note{width:100%;text-align:center;font:700 .62rem/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--subtle)}
+.signup{width:430px;max-width:100%;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--card);padding:19px;box-shadow:var(--shadow-md)}
+.steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.step{border-radius:var(--pill);background:var(--stone-100);padding:3px 8px;font:700 .55rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--subtle)}
 .step.done{background:var(--sage-50);color:var(--sage-700)}
 .step.now{background:var(--clay-500);color:#fff}
-.obmock h3{font-size:1.1rem;margin-bottom:6px}
-.obmock p{font-size:.8rem;line-height:1.55;margin:0 0 10px}
-.doorgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
-.door{border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px;font-size:.72rem;line-height:1.4}
-.door b{display:block;font-size:.78rem;color:var(--text-strong);margin-bottom:2px}
-.handnote{font-family:var(--f-hand);color:var(--sage-700);font-size:1.05rem;line-height:1.2;margin-top:8px}
+.signup h3{font-size:1.15rem}
+.signup p{margin-top:7px;font-size:.84rem;line-height:1.55}
+.field{margin-top:13px}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--strong)}
+.input{margin-top:6px;border:1px solid var(--border);border-radius:var(--r-md);padding:11px 12px;color:var(--strong);font-size:.86rem}
+.fine{margin-top:7px!important;color:var(--muted);font-size:.7rem!important;line-height:1.45!important}
+.intro-card{margin-top:14px;border:1px solid var(--sage-300);border-radius:var(--r-md);background:var(--sage-50);padding:13px}
+.intro-card h3{font-size:.95rem}
+.intro-card p{font-size:.8rem}
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.way{border:1px solid var(--border-soft);border-radius:var(--r-sm);background:var(--card);padding:9px 10px}
+.way b{display:block;color:var(--strong);font-size:.76rem}
+.way span{display:block;margin-top:2px;color:var(--muted);font-size:.69rem;line-height:1.4}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;margin-top:10px;border-radius:var(--pill);padding:8px 16px;font-size:.82rem;font-weight:700;text-decoration:none}
+.primary{border:1px solid var(--brand);background:var(--brand);color:#fff}
+.secondary{border:1px solid var(--border);background:#fff;color:var(--strong)}
+.primary+.secondary{margin-left:6px}
+.qr-row{display:flex;gap:14px;align-items:center;margin-top:10px}
+.qr{width:92px;height:92px;flex:none;border:8px solid #fff;outline:1px solid var(--stone-300);background:
+linear-gradient(90deg,#221E1A 11px,transparent 11px) 0 0/22px 22px,
+linear-gradient(#221E1A 11px,transparent 11px) 0 0/22px 22px,
+linear-gradient(90deg,transparent 11px,#221E1A 11px) 0 0/22px 22px,
+linear-gradient(transparent 11px,#221E1A 11px) 0 0/22px 22px}
+.qr-copy{font-size:.78rem;line-height:1.5;color:var(--body)}
+.skip-line{margin-top:10px!important;color:var(--muted)}
+.device-copy{display:none}
+.device-copy.active{display:block}
 
-/* report letter mock */
-.lettermock{width:420px;max-width:100%;background:#fff;border:1px solid var(--stone-300);border-radius:var(--r-md);box-shadow:var(--sh-md);padding:20px;flex-shrink:0}
-.lettermock .lh{font-family:var(--f-mono);font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:8px}
-.lettermock p{font-size:.82rem;line-height:1.6;margin:0 0 10px}
-.contactblock{margin-top:12px;border:1px solid var(--border-subtle);border-radius:var(--r-md);background:var(--stone-50);padding:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.contactblock .ava{width:44px;height:44px;border-radius:50%;background:var(--clay-500);display:flex;align-items:center;justify-content:center;color:#fff;font-family:"Fredoka",var(--f-sans);font-weight:600;font-size:1.3rem;flex-shrink:0}
-.contactblock .cinfo b{display:block;font-size:.86rem;color:var(--text-strong)}
-.contactblock .cinfo .n{font-family:var(--f-mono);font-size:.74rem;color:var(--text-muted)}
-.contactblock .cbtns{width:100%;display:flex;gap:8px;flex-wrap:wrap}
+.phone{width:300px;background:#fff;border:1px solid var(--stone-300);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;flex:none}
+.phone-head{background:var(--stone-100);padding:12px 14px 10px;text-align:center;border-bottom:1px solid var(--border-soft)}
+.phone-head b{display:block;font-size:.8rem;color:var(--strong)}
+.phone-head span{font-size:.62rem;color:var(--subtle)}
+.phone-body{min-height:285px;padding:13px;display:flex;flex-direction:column;gap:8px}
+.time{align-self:center;font-size:.62rem;color:var(--subtle)}
+.bubble{max-width:84%;border-radius:18px;padding:8px 12px;font-size:.79rem;line-height:1.45;white-space:pre-wrap}
+.bubble.in{align-self:flex-start;border-bottom-left-radius:5px;background:#E9E9EB;color:#111}
+.bubble.out{align-self:flex-end;border-bottom-right-radius:5px;background:#3B82F6;color:#fff}
+.contact{align-self:flex-start;display:flex;align-items:center;gap:9px;max-width:84%;border:1px solid var(--stone-200);border-radius:14px;background:#fff;padding:9px 12px;box-shadow:var(--shadow-sm)}
+.avatar{display:flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--clay-500);color:#fff;font-family:"Fredoka",var(--sans);font-weight:600}
+.contact b{display:block;font-size:.8rem;color:#111}
+.contact span{font-size:.62rem;color:var(--subtle)}
 
-/* toggles inside stages */
-.variant{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;width:100%}
-.variant .vlabel{font-size:.72rem;color:var(--text-subtle);font-weight:600}
-.vbtn{border:1px solid var(--border);background:#fff;border-radius:var(--r-pill);padding:6px 14px;font-size:.76rem;font-weight:600;color:var(--text-body)}
-.vbtn[aria-pressed="true"]{background:var(--sky-100);border-color:var(--sky-500);color:var(--sky-600)}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:11px;margin-top:16px}
+.day{background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:15px;box-shadow:var(--shadow-sm)}
+.day .when{font:700 .62rem/1 var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--subtle)}
+.day h3{margin-top:7px;font-size:.98rem}
+.day p{margin-top:7px;font-size:.84rem;line-height:1.55}
+.day .why{margin-top:9px;border-radius:var(--r-sm);background:var(--sage-50);padding:8px 10px;color:var(--sage-700);font-size:.78rem;font-weight:600;line-height:1.45}
 
-/* critique rows */
-.crit{margin-top:16px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-.crit .cell{background:var(--bg-page);border:1px solid var(--border-subtle);border-radius:var(--r-sm);padding:10px 12px;font-size:.8rem;line-height:1.5}
-.crit .cell b{display:block;color:var(--text-strong);margin-bottom:3px;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-family:var(--f-mono)}
-.chips{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--border);background:#fff;border-radius:var(--r-pill);padding:7px 14px;font-size:.8rem;font-weight:600;color:var(--text-body)}
-.chip[aria-pressed="true"]{background:var(--sage-500);border-color:var(--sage-500);color:#fff}
-.chip.skip{border-style:dashed;color:var(--text-muted);cursor:default}
-.winner{margin-top:14px;display:inline-flex;align-items:center;gap:8px;border:2px solid var(--clay-500);border-radius:var(--r-pill);padding:9px 20px;font-size:.88rem;font-weight:700;background:#fff;color:var(--clay-600)}
-.winner[aria-pressed="true"]{background:var(--clay-500);color:#fff}
+.report-stage{margin-top:15px;background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-sm)}
+.report{max-width:540px;margin:16px auto 0;border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;background:#fff}
+.report .from{font:700 .62rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--subtle)}
+.report h3{margin-top:8px;font-size:1.05rem}
+.report p{margin-top:8px;font-size:.82rem;line-height:1.55}
+.contact-block{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-top:14px;border:1px solid var(--sage-300);border-radius:var(--r-md);background:var(--sage-50);padding:12px}
+.contact-block .copy{flex:1;min-width:190px}
+.contact-block .copy b{display:block;color:var(--strong);font-size:.84rem}
+.contact-block .copy span{display:block;margin-top:3px;color:var(--body);font-size:.75rem;line-height:1.45}
+.report-view{display:none}
+.report-view.active{display:block}
 
-/* questions */
-.questions{margin-top:52px}
-.questions h2{font-size:1.25rem}
-.q-item{background:var(--card);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;margin-top:14px}
-.q-item h3{font-size:.98rem}
-.q-item .why{margin:6px 0 10px;font-size:.82rem;color:var(--text-muted);line-height:1.5}
-.q-opts{display:flex;flex-direction:column;gap:8px}
-.q-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border-subtle);border-radius:var(--r-sm);padding:10px 12px;font-size:.84rem;line-height:1.5;cursor:pointer}
-.q-opt:has(input:checked){border-color:var(--sage-500);background:var(--sage-50)}
-.q-opt input{margin-top:3px;accent-color:var(--sage-500)}
-.q-opt .rec{font-family:var(--f-mono);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--gold-100);color:var(--gold-ink);border-radius:var(--r-pill);padding:2px 8px;margin-left:6px}
+.settings{max-width:620px;margin:15px auto 0;background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow-sm)}
+.reach-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--stone-100)}
+.reach-row:last-child{border-bottom:none}
+.reach-row .mark{display:flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:9px;background:var(--stone-100);font-size:.72rem;font-weight:700;color:var(--strong)}
+.reach-row .copy{flex:1}
+.reach-row b{display:block;color:var(--strong);font-size:.84rem}
+.reach-row p{margin-top:3px;font-size:.76rem;line-height:1.45;color:var(--muted)}
+.status{border-radius:var(--pill);background:var(--sage-50);padding:3px 8px;color:var(--sage-700);font:700 .56rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em}
 
-/* assembler */
-.assemble{margin-top:52px}
-.assemble h2{font-size:1.2rem}
-.assemble .hint{margin:6px 0 0;font-size:.84rem;color:var(--text-muted)}
-.assemble textarea{width:100%;min-height:64px;border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;font-family:var(--f-sans);font-size:.88rem;margin-top:12px;background:var(--card);color:var(--text-body)}
-.reply{margin-top:14px;background:var(--stone-900);color:var(--stone-50);border-radius:var(--r-md);padding:16px;font-family:var(--f-mono);font-size:.76rem;white-space:pre-wrap;line-height:1.55}
-.copybtn{margin-top:10px;border:none;background:var(--brand);color:#fff;border-radius:var(--r-pill);padding:10px 22px;font-size:.9rem;font-weight:600}
-.copybtn[data-ok="true"]{background:var(--sage-500)}
-.wiring{margin-top:44px;font-size:.8rem;color:var(--text-muted);line-height:1.65;border-top:1px solid var(--border-subtle);padding-top:16px}
-.wiring b{color:var(--text-body)}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
-@media (max-width:720px){.appmock{flex-direction:column}.appmock .side{width:100%;flex-direction:row;flex-wrap:wrap}}
+.memory{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:15px}
+.memory-card{background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:13px;font-size:.82rem;line-height:1.5}
+.memory-card b{display:block;margin-bottom:4px;color:var(--strong)}
+
+.order{counter-reset:item;margin:15px 0 0;padding:0;list-style:none}
+.order li{position:relative;margin-top:10px;border:1px solid var(--border-soft);border-radius:var(--r-md);background:var(--card);padding:13px 14px 13px 48px;font-size:.84rem;line-height:1.55}
+.order li:before{counter-increment:item;content:counter(item);position:absolute;left:13px;top:13px;display:flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:50%;background:var(--clay-50);color:var(--clay-700);font:700 .7rem/1 var(--mono)}
+.order b{color:var(--strong)}
+
+.not-building{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:15px}
+.not-card{background:var(--stone-100);border-radius:var(--r-md);padding:13px;font-size:.82rem;line-height:1.5}
+.not-card b{display:block;color:var(--strong);margin-bottom:4px}
+.metric{margin-top:15px;border:1px solid var(--gold-400);border-radius:var(--r-lg);background:var(--gold-100);padding:17px;color:var(--gold-ink)}
+.metric b{display:block;font-family:var(--display);font-size:1.05rem;color:var(--strong)}
+.metric p{margin-top:6px;max-width:760px;font-size:.86rem;line-height:1.55}
+.more{margin-top:34px;border:1px solid var(--border-soft);border-radius:var(--r-lg);background:var(--card);box-shadow:var(--shadow-sm)}
+.more summary{padding:15px 17px;color:var(--strong);font-weight:700;cursor:pointer}
+.more[open] summary{border-bottom:1px solid var(--border-soft)}
+.more>section{margin:0;padding:22px}
+.more>section+section{border-top:1px solid var(--border-soft)}
+.closing{margin-top:52px;border-radius:var(--r-lg);background:var(--stone-900);padding:22px;color:var(--stone-50)}
+.closing h2{color:#fff;font-size:1.25rem}
+.closing p{margin-top:9px;max-width:790px;line-height:1.6}
+.hand{margin-top:13px;color:var(--sage-300);font:600 1.18rem/1.25 var(--hand)}
+@media(max-width:700px){
+  .wrap{padding:24px 14px 70px}
+  .hero h1{font-size:1.65rem}
+  .signup,.phone{width:100%}
+  .device-tabs,.view-tabs{display:grid;grid-template-columns:1fr 1fr}
+  .tab{padding:8px 10px}
+  .ways{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <header class="lab-head">
-    <h1>Meeting Homa · four directions for teaching the channels</h1>
-    <p class="sub">The problem: Homa is one assistant reachable by web chat, text, email, and phone call, and she remembers across all of them. No family is ever told this. Most people have only ever chatted with an AI inside a web app, so nothing in their head expects a text back, a replyable email, or a callable number. This lab holds one family and one goal constant, and varies WHERE and HOW the product teaches it: by Friday of week one, Maria knows she can text Homa, has saved Homa's contact so texts say a name instead of a number, and knows what arrives on which surface.</p>
-    <p class="notice">Everything below uses fake fixture data: Maria Rivera and her kids Emma (4) and Mateo (7) are invented, the numbers shown are placeholders, and no real family, lead, or production record was loaded. No product code or route was changed by this file.</p>
-    <p class="regression"><b>Live production regression, found while grounding this lab:</b> the founder ask of 2026-07-10 sent Homa's vCard contact card at TWO moments, a stranger's first inbound text and the link text when a number connects to a family. The second was silently dropped on 2026-07-11: commit <code>997bda9</code> (multi-parent v0) rewrote <code>apps/web/lib/family-phone.ts</code> from a stale base, and <code>sendLinkNotificationSms</code> lost the card. Today no account holder ever receives the card, the header comment in <code>apps/web/lib/contact-card.ts</code> claims otherwise, and <code>sms.contact_card_sent</code> with trigger <code>linked</code> can never fire. Every direction below assumes this is restored; question 1 asks how.</p>
-
-    <div class="verdicts">
-      <div class="verdict">
-        <div class="q">What exists today</div>
-        <div class="a">The pipes are built. The introduction is not.</div>
-        <p>SMS, email, and voice all route into the one agent with family context (<code>agent/channels/telnyx.ts</code>, <code>agent/channels/email.ts</code>, <code>api/voice/context</code>). The vCard is served at <code>/homa.vcf</code>. Strangers who text first get the card and a concierge. Account holders get one bare link text and silence about everything else.</p>
-      </div>
-      <div class="verdict">
-        <div class="q">Where the product teaches channels today</div>
-        <div class="a">Three quiet corners, zero moments.</div>
-        <p>A form label ("Cell number, so you can text Homa"), a pill buried in Settings ("Text Homa · number"), and the task editor's delivery choices. The landing page, FAQ, report, report email, and chat home never mention that text, email, or calls exist. One email footer even claims "a real person answers", which is false: Homa answers.</p>
-      </div>
-      <div class="verdict">
-        <div class="q">The asymmetry to fix</div>
-        <div class="a">Reports go by email. Research goes by text. Nobody is told why.</div>
-        <p>Kid reports send email-only (<code>lib/map/email.ts sendReportEmail</code>). Morning research briefs send text-first with email fallback (<code>lib/tasks</code> delivery, on by default). The same assistant shows up on two surfaces in her first 24 hours with no thread connecting them, from an unsaved number and an unfamiliar address.</p>
-      </div>
-    </div>
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Internal plan · parent-facing examples are inside the mockups</div>
+    <h1>Homa's first ten days with a family</h1>
+    <p class="lead">During signup, the parent can start a text with one tap or scan. If they keep going, Homa sends one welcome. Homa explains texting, email, the website, and calls at the first useful moment. Each explanation appears once.</p>
+    <p class="notice">Maria, Emma, and Mateo are made-up examples. No real family information appears on this page.</p>
   </header>
 
-  <section class="journey" aria-labelledby="journey-h">
-    <h2 id="journey-h">Week one today, as Maria lives it</h2>
-    <p class="hint">Verified against the code paths named above. Green marks a moment that already works for the goal; clay marks the gap the directions must close.</p>
-    <div class="moments">
-      <div class="moment">
-        <span class="when">Tue 9:40am</span><span class="chan web">web</span>
-        <b>Onboarding asks for her cell</b>
-        Label: "Cell number (so you can text Homa)". Required, mid-flow, before the kids step.
-        <div class="ok">The only place texting is named. It plants the idea, barely.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Tue 9:43am</span><span class="chan sms">text</span>
-        <b>The link text arrives mid-checklist</b>
-        "Hi, it's Homa. This number is now set up to text with me. Say hi anytime. Not you? Reply STOP..."
-        <div class="gap">No card, no photo, arrives while she is heads-down on the website. Easily never seen again.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Tue 9:55am</span><span class="chan email">email</span>
-        <b>The report email</b>
-        "Emma's progress report is ready" with the link. Fine print teaches replying 'delete', not replying to talk.
-        <div class="gap">Says "Reply and a real person answers", which is stale and false. The one channel lesson it teaches is deletion.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Tue 9:56am</span><span class="chan web">web</span>
-        <b>The report's letter offers a call</b>
-        "If you'd rather talk through the report, have me call you now."
-        <div class="ok">A real channel moment, attached to value. The only one in the journey.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Wed 9:04am</span><span class="chan sms">text</span>
-        <b>The research brief texts her</b>
-        "🔬 Last night I researched..." from the same unsaved number, no name, no reminder of who this is.
-        <div class="gap">Proactive value lands from a stranger's number. If she missed Tuesday's text, this reads as spam.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Wed 8:10pm</span><span class="chan web">web</span>
-        <b>Tasks page delivery choices</b>
-        "Text me." / "Email me." / save-only, per task.
-        <div class="ok">Honest per-task control exists. It teaches only people who wander in.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Wed 8:12pm</span><span class="chan web">web</span>
-        <b>Settings has the only Text Homa button</b>
-        "Text Homa · (346) 758-8011" plus "Only texts from the numbers above reach her."
-        <div class="gap">The product's one texting door is two levels deep, below the fold, in Settings.</div>
-      </div>
-      <div class="moment">
-        <span class="when">Fri</span><span class="chan mail">mail</span>
-        <b>The handwritten card</b>
-        "Whenever you want a hand, text Homa at (346) 758-8011."
-        <div class="ok">The strongest channel teacher ships on paper, 3 days late, after the digital moments went silent.</div>
-      </div>
+  <div class="decision">
+    <h2>The decisions you made</h2>
+    <p class="one-line">After the Family screen, show one simple card before Kids. It names four ways to reach Homa and offers the text-or-scan choice. Continue to your kids remains available.</p>
+    <div class="decision-grid">
+      <div class="decision-item"><b>The first text</b>Let the parent text first. If they keep going without sending it, Homa sends the welcome.</div>
+      <div class="decision-item"><b>Homa's introductions</b>Every text Homa starts says "It's Homa" until that parent replies once. Then the words stop. No other introduction repeats.</div>
+      <div class="decision-item"><b>First parent question after signup</b>Homa gives one quick hello and answers the question in the same message.</div>
+      <div class="decision-item"><b>Contact options in Settings</b>Put "How to reach HOMA" at the top of Settings.</div>
+      <div class="decision-item"><b>Reports by text</b>Wait seven days. Review replies, later parent-started conversations, and STOP requests before adding the extra text.</div>
     </div>
-  </section>
-
-  <section class="directions" aria-labelledby="dir-h">
-    <h2 id="dir-h">Four directions</h2>
-    <p class="hint">Same family, same week, same goal in every frame; only the structure changes. Each direction is a different bet on WHO introduces the channels (the interface or Homa herself), WHEN (one moment, the wow, a drip, or always), and WHERE the contact gets saved. Pick a winner, steal details from the others.</p>
-
-    <div class="dir-tabs" role="tablist" aria-label="Directions">
-      <button class="dir-tab" role="tab" id="tab-d1" aria-selected="true" aria-controls="panel-d1">1 · The introduction step</button>
-      <button class="dir-tab" role="tab" id="tab-d2" aria-selected="false" aria-controls="panel-d2">2 · The report hands you her card</button>
-      <button class="dir-tab" role="tab" id="tab-d3" aria-selected="false" aria-controls="panel-d3">3 · She introduces herself</button>
-      <button class="dir-tab" role="tab" id="tab-d4" aria-selected="false" aria-controls="panel-d4">4 · One place that never moves</button>
-    </div>
-
-    <!-- D1 -->
-    <div class="dir-panel active" role="tabpanel" id="panel-d1" aria-labelledby="tab-d1">
-      <div class="dir-meta"><span class="bet">UI-led · one explicit moment · during onboarding</span></div>
-      <h3 style="margin-top:10px">Direction 1 · The introduction step</h3>
-      <p class="philosophy" style="margin-top:8px"><b>Bet: attention is highest inside onboarding, so spend thirty deliberate seconds there introducing Homa as a person with four doors, and get the contact saved before the report ever renders.</b> A new step right after she types her cell number. It names all four channels once, texts her the contact card while she watches, and asks her to save it now. Education happens exactly once, explicitly, and everything later builds on it.</p>
-
-      <div class="stage">
-        <div class="stage-note">Concept mock · a new onboarding step (left) and what lands on her phone during it (right)</div>
-        <div class="obmock" id="d1-ob">
-          <div class="steps" id="d1-steps">
-            <span class="step done">Account</span><span class="step done">Family</span><span class="step now">Meet Homa</span><span class="step">Homeschool</span><span class="step">Kids</span><span class="step">Checklist</span><span class="step">Report</span>
-          </div>
-          <h3>One Homa, four doors</h3>
-          <p>Homa is one assistant, and she remembers your family everywhere. Reach her whichever way fits the moment.</p>
-          <div class="doorgrid">
-            <div class="door"><b>💬 Text her</b>Like a friend. A question, a photo of Emma's work, how the day went.</div>
-            <div class="door"><b>✉️ Reply to her emails</b>Every email from Homa is answerable. Replies go to her, not a robot inbox.</div>
-            <div class="door"><b>📞 Have her call you</b>Talk through anything out loud. She calls you, you never wait on hold.</div>
-            <div class="door"><b>🖥️ Chat here</b>The web app, with everything saved in one place.</div>
-          </div>
-          <p style="font-weight:600;color:var(--text-strong)">I just texted you my contact card. Save it, and my texts will say Homa instead of a number.</p>
-          <span class="minibtn primary">I saved it, continue</span>
-          <span class="minibtn">Skip for now</span>
-          <div class="handnote">no quiz later, promise. · Homa</div>
-        </div>
-        <div class="phone">
-          <div class="p-head"><div class="num">+1 (346) 758-8011</div><div class="sub2">Text Message · Today 9:41 AM</div></div>
-          <div class="p-body">
-            <div class="p-time">Today 9:41 AM</div>
-            <div class="vcardrow"><div class="ava">h</div><div><div class="who">Homa</div><div class="what">Contact card</div></div><div class="chev">›</div></div>
-            <div class="bubble in">It's Homa. Here's my contact card so you can save me to your phone. This is the number I'll text you from.</div>
-            <div class="p-time" style="margin-top:8px">If she saves it, every later text arrives as "Homa" with her face.</div>
-          </div>
-        </div>
-        <div class="variant">
-          <span class="vlabel">Where does the step sit?</span>
-          <button class="vbtn" data-d1pos="early" aria-pressed="true">Right after her number (before kids)</button>
-          <button class="vbtn" data-d1pos="late" aria-pressed="false">After the report (part of the win screen)</button>
-        </div>
-      </div>
-
-      <div class="crit">
-        <div class="cell"><b>What it fixes</b>The mid-onboarding link text stops being an orphan: the screen she is looking at explains the text the moment it lands, and the save action happens while both are in hand.</div>
-        <div class="cell"><b>What it costs</b>One more step between her and the report, at the exact stretch of onboarding where every added tap costs finishes. Skippers learn nothing and there is no second chance built in.</div>
-        <div class="cell"><b>What it cannot do</b>Nothing here helps the SMS-first family (they never see web onboarding) or the family that added a phone later from Settings.</div>
-      </div>
-      <div class="chips" data-dir="The introduction step">
-        <button class="chip" aria-pressed="false">Steal: send the card DURING the step so screen and phone explain each other</button>
-        <button class="chip" aria-pressed="false">Steal: "my texts will say Homa instead of a number" as the reason to save</button>
-        <button class="chip" aria-pressed="false">Steal: the four-doors grid as the one canonical channel explainer</button>
-        <span class="chip skip">Skip if: onboarding completion is sacred; this adds a step before the report</span>
-      </div>
-      <button class="winner" data-dir="The introduction step" aria-pressed="false">This is the direction</button>
-    </div>
-
-    <!-- D2 -->
-    <div class="dir-panel" role="tabpanel" id="panel-d2" aria-labelledby="tab-d2">
-      <div class="dir-meta"><span class="bet">UI-led · wow-moment attach · report page + report email</span></div>
-      <h3 style="margin-top:10px">Direction 2 · The report hands you her card</h3>
-      <p class="philosophy" style="margin-top:8px"><b>Bet: teach nothing until you have proven something.</b> No new onboarding step. The report, the first real value Homa delivers, ends by introducing her: the letter from Homa closes with her contact block (face, number, save button, one line per channel), and the report EMAIL carries the same block, so both carriers of the wow teach the same lesson. The call offer that already lives in the letter grows into the full set of doors.</p>
-
-      <div class="stage">
-        <div class="stage-note">Concept mock · toggle the two carriers of the same moment</div>
-        <div class="variant" style="margin-top:0">
-          <button class="vbtn" data-d2view="page" aria-pressed="true">The report page's letter</button>
-          <button class="vbtn" data-d2view="email" aria-pressed="false">The report email</button>
-        </div>
-        <div class="lettermock" id="d2-page">
-          <div class="lh">The end of Emma's report · a letter from Homa</div>
-          <p>...and that's the honest picture: a kid who is curious, counting everything in sight, and right on the edge of taking off. You are doing more right than you think.</p>
-          <p>If you'd rather talk through the report, <span style="color:var(--clay-600);font-weight:700;text-decoration:underline">have me call you now</span>.</p>
-          <p style="margin-bottom:4px">And I'm not just this page. Text me a photo of her work, or ask me anything, whenever it comes up:</p>
-          <div class="contactblock">
-            <div class="ava">h</div>
-            <div class="cinfo"><b>Homa</b><span class="n">(346) 758-8011 · hello@thankshoma.com</span></div>
-            <div class="cbtns">
-              <span class="minibtn primary">Save Homa's contact</span>
-              <span class="minibtn">Text her a hi</span>
-            </div>
-          </div>
-        </div>
-        <div class="email" id="d2-email" style="display:none">
-          <div class="e-head">From: <b>Homa</b> &lt;hello@mail.thankshoma.com&gt;<br>Subject: <b>Emma's progress report is ready</b></div>
-          <div class="e-card">
-            <div class="e-logo">homa</div>
-            <div class="e-h1">Emma's progress report is ready</div>
-            <p>Emma's progress report is ready: what you've seen, checked against national benchmarks for their age.</p>
-            <p>It opens with strengths, because that's the truest place to start.</p>
-            <span class="cta">Open Emma's report</span>
-            <p style="border-top:1px solid var(--stone-100);padding-top:10px;margin-top:4px"><b>P.S. You can answer me.</b> Reply to this email and I answer, same as chat. Or text me at (346) 758-8011, I already sent you my contact card.</p>
-            <div class="foot">This link is yours to keep. Want it gone instead? Reply 'delete' and we'll remove your family's answers.</div>
-          </div>
-          <div class="outer">You signed up for Homa at thankshoma.com. Reply to any email and Homa answers. We only email you about your own family's homeschool, never promotions. Every kind of email has an off switch.</div>
-        </div>
-      </div>
-
-      <div class="crit">
-        <div class="cell"><b>What it fixes</b>The lesson arrives at peak trust, seconds after the product proved itself, on both carriers of the same moment. The false "a real person answers" line gets replaced by the true, better claim.</div>
-        <div class="cell"><b>What it costs</b>The report page is already long and she is report-focused; a contact block at the bottom competes with the call offer sitting one paragraph above it.</div>
-        <div class="cell"><b>What it cannot do</b>One-time surface: a family that skims past it has no second chance, and nothing teaches the channels BEFORE the report (the Tuesday link text stays an orphan unless question 1 restores its card).</div>
-      </div>
-      <div class="chips" data-dir="The report hands you her card">
-        <button class="chip" aria-pressed="false">Steal: the report email P.S. that teaches reply-to-talk in one line</button>
-        <button class="chip" aria-pressed="false">Steal: fixing the false "a real person answers" footer everywhere it appears</button>
-        <button class="chip" aria-pressed="false">Steal: contact block pattern (face, number, save button) reusable on any surface</button>
-        <span class="chip skip">Skip if: most families need the mental model BEFORE the report (SMS-first families never see this page)</span>
-      </div>
-      <button class="winner" data-dir="The report hands you her card" aria-pressed="false">This is the direction</button>
-    </div>
-
-    <!-- D3 -->
-    <div class="dir-panel" role="tabpanel" id="panel-d3" aria-labelledby="tab-d3">
-      <div class="dir-meta"><span class="bet">Agent-led · first-use drip · zero new web UI</span></div>
-      <h3 style="margin-top:10px">Direction 3 · She introduces herself, channel by channel</h3>
-      <p class="philosophy" style="margin-top:8px"><b>Bet: channel education belongs IN the channel, in Homa's own voice, on first use, and nowhere else.</b> No new screens. Each surface's first touch carries a one-time introduction beat, tracked per channel so it never repeats: the link text becomes a real introduction with the card, the first morning brief opens with one line saying who is texting, the first email reply teaches that replying works, and the first inbound text from a linked number gets a one-time welcome before the answer. Web UI stays exactly as it is.</p>
-
-      <div class="stage">
-        <div class="stage-note">Concept mock · scrub her week; intro beats appear once, then never again</div>
-        <div class="variant" style="margin-top:0">
-          <button class="vbtn" data-d3day="d0" aria-pressed="true">Tue · link moment</button>
-          <button class="vbtn" data-d3day="d1" aria-pressed="false">Wed 9am · first brief</button>
-          <button class="vbtn" data-d3day="d2" aria-pressed="false">Wed 8pm · she texts first</button>
-          <button class="vbtn" data-d3day="d7" aria-pressed="false">Week 2 · intros gone</button>
-        </div>
-        <div class="phone">
-          <div class="p-head"><div class="num" id="d3-num">+1 (346) 758-8011</div><div class="sub2" id="d3-sub">Text Message</div></div>
-          <div class="p-body" id="d3-body"></div>
-        </div>
-      </div>
-
-      <div class="crit">
-        <div class="cell"><b>What it fixes</b>Every family gets taught, including SMS-first signups, invited co-parents, and late phone-adders, because the teacher is the message stream itself, not a page they might visit.</div>
-        <div class="cell"><b>What it costs</b>Intro lines spend characters inside hard limits (the brief caps near 600 characters to stay one text), and per-channel intro state is new machinery: flags that must survive access-epoch rotations and multi-adult families.</div>
-        <div class="cell"><b>What it cannot do</b>Invisible until a channel fires. A family that never links a phone learns nothing about texting, and there is still no place to RE-learn a forgotten number later (that is direction 4's job).</div>
-      </div>
-      <div class="chips" data-dir="She introduces herself">
-        <button class="chip" aria-pressed="false">Steal: per-channel one-time intro state (never repeats, survives epochs)</button>
-        <button class="chip" aria-pressed="false">Steal: the first linked inbound text gets a welcome beat before the answer</button>
-        <button class="chip" aria-pressed="false">Steal: first morning brief names who is texting before the 🔬 block</button>
-        <span class="chip skip">Skip if: message length is precious; every intro line competes with content inside carrier segment caps</span>
-      </div>
-      <button class="winner" data-dir="She introduces herself" aria-pressed="false">This is the direction</button>
-    </div>
-
-    <!-- D4 -->
-    <div class="dir-panel" role="tabpanel" id="panel-d4" aria-labelledby="tab-d4">
-      <div class="dir-meta"><span class="bet">UI-led · persistent surface · the app shell</span></div>
-      <h3 style="margin-top:10px">Direction 4 · One place that never moves</h3>
-      <p class="philosophy" style="margin-top:8px"><b>Bet: moments get missed; a place can be found twice.</b> A permanent "How to reach Homa" surface in the app: one row per channel with its live status for THIS family (texting linked or not, which email she watches, call), the save-contact button and a QR for the desktop-to-phone hop, and the what-goes-where table (reports by email, research by text) stated plainly. Onboarding and the report just LINK here instead of teaching anything themselves.</p>
-
-      <div class="stage">
-        <div class="stage-note">Concept mock · toggle where the surface lives in the shell</div>
-        <div class="variant" style="margin-top:0">
-          <button class="vbtn" data-d4pos="side" aria-pressed="true">Own sidebar entry</button>
-          <button class="vbtn" data-d4pos="settings" aria-pressed="false">Top of Settings</button>
-          <button class="vbtn" data-d4pos="home" aria-pressed="false">Card on the chat home</button>
-        </div>
-        <div class="appmock">
-          <div class="side" id="d4-side">
-            <div class="wordmark">HOMA</div>
-            <a>Chat</a><a>Progress</a><a>Planner</a><a>Binder</a><a>Homa's tasks</a>
-            <a class="newitem" id="d4-navitem">Reach Homa</a>
-            <a id="d4-settingsitem">Settings</a>
-          </div>
-          <div class="main">
-            <h3 id="d4-title">How to reach me</h3>
-            <div class="card2" id="d4-homecard" style="display:none;border-color:var(--gold-400);background:var(--gold-100)">
-              <b>New here?</b> I'm not just this chat box. Text me, reply to my emails, or have me call you. <u>See every way to reach me</u>.
-            </div>
-            <div class="card2" id="d4-channels">
-              <div class="chanrow"><div class="ic sms">💬</div><div><b>Text me · (346) 758-8011</b><div class="d">Your number ends in 4477 and is linked. A question, a photo of the kids' work, anything.</div><span class="minibtn primary">Save my contact</span><span class="minibtn">Text me hi</span></div><span class="st on">Linked</span></div>
-              <div class="chanrow"><div class="ic email">✉️</div><div><b>Reply to my emails</b><div class="d">Every email I send is answerable. Replies from maria@example.com reach me, same as chat.</div></div><span class="st on">Works</span></div>
-              <div class="chanrow"><div class="ic call">📞</div><div><b>Have me call you</b><div class="d">From any report, or ask me in chat. I call you; you never dial a menu.</div></div><span class="st on">Ready</span></div>
-              <div class="chanrow"><div class="ic web">🖥️</div><div><b>This app</b><div class="d">Everything lands here too: every chat, material, and report, whichever door you used.</div></div><span class="st on">You're here</span></div>
-            </div>
-            <div class="card2">
-              <b style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-family:var(--f-mono);color:var(--text-subtle)">What arrives where</b>
-              <div style="margin-top:6px;line-height:1.7">
-                Kids' reports · <b>email</b>, with the link that always works<br>
-                Morning research · <b>text</b> (email until texting is set up)<br>
-                Evening check-in · <b>off until you turn it on</b>, then text or email<br>
-                Materials you ask for by text · <b>texted back</b> as a picture and PDF
-              </div>
-              <div style="margin-top:8px;font-size:.7rem;color:var(--text-subtle)">Change any of these on Homa's tasks.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="crit">
-        <div class="cell"><b>What it fixes</b>The forgotten-number problem: three weeks in, when she finally wants to text a photo, there is a findable place with the number, the save button, and the honest per-channel status. Also becomes the link target every other surface points at.</div>
-        <div class="cell"><b>What it costs</b>A new nav entry competes for a calm sidebar, and a place teaches nobody by itself: without a moment pointing at it (direction 1, 2, or 3), it is furniture.</div>
-        <div class="cell"><b>What it cannot do</b>Does nothing for the family's FIRST hours, and nothing for SMS-first families who rarely open the app at all.</div>
-      </div>
-      <div class="chips" data-dir="One place that never moves">
-        <button class="chip" aria-pressed="false">Steal: live per-channel status rows (linked / works / ready) instead of generic marketing</button>
-        <button class="chip" aria-pressed="false">Steal: the what-arrives-where table, stated once, linked from task cards</button>
-        <button class="chip" aria-pressed="false">Steal: QR + save-contact for the desktop-to-phone hop</button>
-        <span class="chip skip">Skip if: nobody visits reference pages; without an entry moment this is furniture</span>
-      </div>
-      <button class="winner" data-dir="One place that never moves" aria-pressed="false">This is the direction</button>
-    </div>
-  </section>
-
-  <section class="questions" aria-labelledby="q-h">
-    <h2 id="q-h">Five build-changing questions</h2>
-
-    <div class="q-item">
-      <h3>1 · The regression: what does the link text carry, starting now?</h3>
-      <p class="why">The 2026-07-10 founder ask sent the vCard on the link text; multi-parent v0 dropped it silently. Restoring is a small change to <code>lib/family-phone.ts</code>. The question is whether to restore verbatim today or hold for this lab's winning copy. This decides whether a fix ships this session.</p>
-      <div class="q-opts" data-q="Link text contact card">
-        <label class="q-opt"><input type="radio" name="q1" value="Restore now, verbatim 2026-07-10 behavior; refine copy later"><span>Restore now with the shipped 2026-07-10 copy and card, refine wording when a direction wins.<span class="rec">Recommended</span> A founder ruling already covers it; waiting couples a live regression to a design debate.</span></label>
-        <label class="q-opt"><input type="radio" name="q1" value="Restore now with the winning direction's intro copy"><span>Restore in the same change that adopts the winning direction's intro copy. One deploy, but the regression lives until the copy debate ends.</span></label>
-        <label class="q-opt"><input type="radio" name="q1" value="Hold; the redesign may replace this moment entirely"><span>Hold. If the winning direction moves the introduction elsewhere, the link text may shrink instead of grow.</span></label>
-      </div>
-    </div>
-
-    <div class="q-item">
-      <h3>2 · First inbound text from a linked number: silent context, or a one-time welcome?</h3>
-      <p class="why">Today a linked parent's first-ever text drops straight into the family-context conversation with no acknowledgment that this is new. A welcome beat ("It's really me, you're all set to text with me") needs per-channel intro state in the session or a flag on the phone row, and it must not fire for SMS-first families who already spent a whole signup here.</p>
-      <div class="q-opts" data-q="First linked inbound text">
-        <label class="q-opt"><input type="radio" name="q2" value="One-time welcome beat before the answer"><span>One-time welcome beat, then the answer.<span class="rec">Recommended</span> The cost is one sentence once; the payoff is certainty she texted the right number.</span></label>
-        <label class="q-opt"><input type="radio" name="q2" value="Keep it silent; the answer itself is the proof"><span>Keep today's behavior: her question answered with her kids' names IS the welcome. No new state.</span></label>
-      </div>
-    </div>
-
-    <div class="q-item">
-      <h3>3 · Where do kids' reports travel?</h3>
-      <p class="why">Reports are email-only today (<code>sendReportEmail</code>). Research briefs are text-first. If texting is Homa's front door, the report link not being textable is the loudest silence. Adding a text send touches the delivery ledger and the report-email dedupe (<code>reportAlreadyEmailed</code>).</p>
-      <div class="q-opts" data-q="Report delivery">
-        <label class="q-opt"><input type="radio" name="q3" value="Email stays the carrier; text a short link too when a phone is linked"><span>Email stays the permanent carrier; a linked family ALSO gets one short text with the link.<span class="rec">Recommended</span> The email remains the archival home; the text meets her where Homa already talks.</span></label>
-        <label class="q-opt"><input type="radio" name="q3" value="Email only, as today"><span>Email only. Reports are documents; documents live in inboxes. No change.</span></label>
-        <label class="q-opt"><input type="radio" name="q3" value="Parent chooses per family, like task delivery"><span>A delivery preference on the family, like the tasks page's per-task choice. Most control, most machinery.</span></label>
-      </div>
-    </div>
-
-    <div class="q-item">
-      <h3>4 · Does "how to reach Homa" get a permanent home in the app?</h3>
-      <p class="why">Direction 4 as a question: even if a moment-based direction wins, a findable reference may still be worth a route or card. This changes IA (a nav entry or settings section) and gives every other surface a place to link.</p>
-      <div class="q-opts" data-q="Permanent reach-Homa surface">
-        <label class="q-opt"><input type="radio" name="q4" value="Yes, top of Settings (no new nav entry)"><span>Yes, as the top section of Settings, where the Text Homa pill already lives. Findable without new nav.<span class="rec">Recommended</span></span></label>
-        <label class="q-opt"><input type="radio" name="q4" value="Yes, its own sidebar entry"><span>Yes, its own sidebar entry. Maximum findability, one more item in a calm shell.</span></label>
-        <label class="q-opt"><input type="radio" name="q4" value="No, moments only"><span>No. The winning moment-based direction carries the whole load; Settings stays as is.</span></label>
-      </div>
-    </div>
-
-    <div class="q-item">
-      <h3>5 · Who writes the introduction copy: code or the agent?</h3>
-      <p class="why">Every proactive email today wraps agent text in a code-controlled shell, and the link text is fully fixed copy. Intro beats could stay fixed (predictable, copy-gated once, testable) or be composed by Homa in-session (warmer, personal, but every send is a fresh copy risk on a surface with no reviewer).</p>
-      <div class="q-opts" data-q="Intro copy ownership">
-        <label class="q-opt"><input type="radio" name="q5" value="Fixed code-controlled templates, copy-gated once"><span>Fixed templates in code, run through the reader and editor gates once, shipped everywhere.<span class="rec">Recommended</span> Matches every existing shell; intro moments are too load-bearing for improvisation.</span></label>
-        <label class="q-opt"><input type="radio" name="q5" value="Agent-composed with guardrails"><span>Agent-composed inside instruction guardrails, so the intro references her actual kids and moment.</span></label>
-      </div>
-    </div>
-  </section>
-
-  <section class="assemble" aria-labelledby="a-h">
-    <h2 id="a-h">Assemble your reply</h2>
-    <p class="hint">Pick a winner above, steal freely from the losers, answer what you can, and add anything the chips missed. The box below writes your reply for you; copy it back into chat.</p>
-    <textarea id="notes" placeholder="Anything else: copy reactions, moments I missed, gut feelings, disagreements with the gaps I flagged..."></textarea>
-    <div class="reply" id="reply" aria-live="polite"></div>
-    <button class="copybtn" id="copy">Copy reply</button>
-  </section>
-
-  <div class="wiring">
-    <b>Wiring note (no application code was touched by this lab).</b><br>
-    The regression fix is <code>apps/web/lib/family-phone.ts</code> (<code>sendLinkNotificationSms</code> back through <code>sendHomaContactCard</code> from <code>apps/web/lib/contact-card.ts</code>, whose header comment currently overstates reality) plus the stale-event check in <code>pnpm check:events</code> for <code>sms.contact_card_sent</code> trigger <code>linked</code>.
-    Direction 1 lands in <code>apps/web/app/onboarding/map-flow.tsx</code> as a new step component beside <code>family-step.tsx</code>, reusing the card send that <code>addFamilyPhone</code> already triggers.
-    Direction 2 lands in <code>apps/web/app/onboarding/r/[token]/report-view.tsx</code> beside <code>call-homa-ps.tsx</code>, and in <code>sendReportEmail</code> in <code>apps/web/lib/map/email.ts</code>, which is also where the false "Reply and a real person answers" outer note lives (one string, every email).
-    Direction 3 touches <code>apps/web/agent/channels/telnyx.ts</code> (linked welcome beat), <code>apps/web/lib/tasks/dispatch-input.ts</code> and <code>apps/web/agent/skills/research-brief/SKILL.md</code> (first-brief line), and needs new per-channel intro state: either columns on <code>family_phones</code> / <code>families</code> or a small <code>channel_intros</code> table; additive migration, isolation guard before schema work (<code>pnpm check:isolation</code>), events registered for MJ-08 parity.
-    Direction 4 lands in <code>apps/web/app/app/settings/parents-section.tsx</code> (settings placement) or a new route under <code>apps/web/app/app/</code> (sidebar placement, IA decision), reusing the <code>sms:</code> pill and <code>/homa.vcf</code> (<code>apps/web/app/homa.vcf/route.ts</code>, already public).
-    Report-by-text (question 3) extends the send path in <code>apps/web/lib/sms-onboarding.ts</code> / <code>apps/web/app/api/map/score</code> paths that call <code>sendReportEmail</code>, and must respect the delivery ledger posture in <code>apps/web/lib/conversation-continuity/</code>.
-    All copy on these surfaces goes through the homa-copy-writer rulebook with the reader gate before the editor gate.
   </div>
-</div>
+
+  <section aria-labelledby="device-title">
+    <h2 id="device-title">The four-way card works on a phone and a computer</h2>
+    <p class="section-lead">The card appears after Family and before Kids. A phone opens Messages. A computer shows a code the parent scans with their phone.</p>
+    <div class="device-tabs" aria-label="Choose a device">
+      <button class="tab device-tab" data-device="phone" aria-pressed="true">Signup on a phone</button>
+      <button class="tab device-tab" data-device="computer" aria-pressed="false">Signup on a computer</button>
+    </div>
+    <div class="stage">
+      <div class="stage-note">The Family screen just saved the phone number and showed the texting details · the code below is a placeholder</div>
+      <div class="signup">
+        <div class="steps">
+          <span class="step done">Account</span><span class="step done">Family</span><span class="step now">HOMA</span><span class="step">Kids</span><span class="step">Questions</span><span class="step">Report</span>
+        </div>
+        <h3>Four ways to reach HOMA</h3>
+        <p>You can use whichever fits the moment. HOMA remembers your family in all four.</p>
+        <div class="ways">
+          <div class="way"><b>Text HOMA</b><span>You can ask a quick question, send a photo, or share how the day went.</span></div>
+          <div class="way"><b>Reply by email</b><span>Any HOMA email can become a conversation.</span></div>
+          <div class="way"><b>Chat on the website</b><span>The website keeps your conversations, reports, printables, and plans together.</span></div>
+          <div class="way"><b>Have HOMA call</b><span>When speaking is easier, a report can offer "Have me call you now." HOMA calls your number.</span></div>
+        </div>
+        <div class="intro-card">
+          <div class="device-copy active" data-copy="phone">
+            <h3>Want to start a text now?</h3>
+            <p>The button opens a ready-to-send text. Nothing sends until you tap Send in Messages.</p>
+            <a class="primary" href="#phone-thread">Open a text to HOMA</a>
+            <a class="secondary" href="#timeline">Continue and receive HOMA's welcome</a>
+          </div>
+          <div class="device-copy" data-copy="computer">
+            <h3>Want to start a text from your phone?</h3>
+            <div class="qr-row">
+              <div class="qr" role="img" aria-label="Mock QR code placement"></div>
+              <div class="qr-copy">Your phone's camera can scan this code. It opens a ready-to-send "Hi Homa" text. The code contains no family information.</div>
+            </div>
+            <a class="secondary" href="#timeline">Continue and receive HOMA's welcome</a>
+          </div>
+          <p class="skip-line">If you send "Hi Homa," HOMA replies with the welcome. If you continue without sending, HOMA sends the welcome. Only one welcome is sent.</p>
+        </div>
+      </div>
+
+      <div class="phone" id="phone-thread">
+        <div class="phone-head"><b>Homa</b><span>Text Message · Today 9:41 AM</span></div>
+        <div class="phone-body">
+          <div class="time">Today 9:41 AM</div>
+          <div class="bubble out">Hi Homa</div>
+          <div class="bubble in">Hi Maria, it's Homa. You can save my phone contact so my texts say Homa instead of a number.</div>
+          <div class="contact"><div class="avatar">h</div><div><b>Homa</b><span>Phone contact</span></div></div>
+          <div class="time">After Maria finishes adding all her kids</div>
+          <div class="bubble in">Should Emma's first counting game be dinosaurs or ocean animals?</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline" aria-labelledby="timeline-title">
+    <h2 id="timeline-title">The first ten days</h2>
+    <p class="section-lead">The short version. Each moment explains one new way to use Homa, once.</p>
+    <div class="timeline">
+      <article class="day">
+        <div class="when">Day 0 · signup</div>
+        <h3>Start the text thread</h3>
+        <p>After Family, one card names the four ways to reach Homa. On a phone, the button opens a ready-to-send text. On a computer, the code opens the same draft. After the parent taps Send, Homa replies with a phone contact to save.</p>
+        <div class="why">After all children are added, Homa asks one question about one child. A parent who skipped the text receives Homa's automatic welcome after continuing. Only one welcome is sent.</div>
+      </article>
+      <article class="day">
+        <div class="when">Day 0 · report</div>
+        <h3>Connect email, text, and the website</h3>
+        <p>The report email says, "Reply to this email and Homa answers, just like chat." Website signups learn they can text Homa. Text signups learn what email and the website keep.</p>
+      </article>
+      <article class="day">
+        <div class="when">Day 1 · morning</div>
+        <h3>Explain the first weekday-morning idea</h3>
+        <p>The first weekday-morning idea says Homa will send one useful idea each weekday morning. Homa shares the idea for this child. Then she asks one easy question. That opening line never appears again.</p>
+        <div class="why">Homa starts no more than one new topic a day during the first week. Replies continue normally.</div>
+      </article>
+      <article class="day">
+        <div class="when">Day 2 · mailbox</div>
+        <h3>Put Homa on the fridge</h3>
+        <p>A handwritten note arrives in the mail. A small code on the back opens a ready-to-send text. Homa asks text signups whether they want the note mailed.</p>
+        <div class="why">If they say yes, Homa asks for their mailing address in the next text.</div>
+      </article>
+      <article class="day">
+        <div class="when">Around day 7 · one text</div>
+        <h3>Explain what email and the website keep</h3>
+        <p>"You can also find your reports in email. Each weekday morning I text one useful idea about your kids. The website keeps everything I make for you."</p>
+        <div class="why">One message explains what email and the website keep. It never repeats.</div>
+      </article>
+      <article class="day">
+        <div class="when">Later · when the parent needs it</div>
+        <h3>Invite the parent when the website solves a real need</h3>
+        <p>Near evaluation season: "Everything Emma did this year is in her binder. You can sign in with the same Gmail you gave me. The binder lets you print it all at once."</p>
+        <div class="why">The website invitation waits until the parent needs the binder.</div>
+      </article>
+    </div>
+  </section>
+
+  <details class="more">
+    <summary>Show more details for the team</summary>
+
+  <section aria-labelledby="report-title">
+    <h2 id="report-title">The report explains the next useful way to reach Homa</h2>
+    <p class="section-lead">The report link can be shared. It never shows private account details. It only changes the short explanation based on how this family first met Homa.</p>
+    <div class="view-tabs" aria-label="Choose how the family met Homa">
+      <button class="tab report-tab" data-report="web" aria-pressed="true">They signed up on the website</button>
+      <button class="tab report-tab" data-report="text" aria-pressed="false">They signed up by text</button>
+    </div>
+    <div class="report-stage">
+      <div class="report">
+        <div class="from">The end of Emma's report</div>
+        <h3>A note from HOMA</h3>
+        <p>Emma counts everything in sight. More practice can help her count past ten. You are noticing the right things.</p>
+        <p>If you would rather talk through the report, have me call you now.</p>
+        <div class="report-view active" data-report-view="web">
+          <div class="contact-block">
+            <div class="avatar">h</div>
+            <div class="copy"><b>Text HOMA anytime.</b><span>Text me a photo of Emma's work, or ask me anything when it comes up.</span></div>
+            <a class="primary" href="#phone-thread">Text HOMA</a>
+          </div>
+        </div>
+        <div class="report-view" data-report-view="text">
+          <div class="contact-block">
+            <div class="avatar">h</div>
+            <div class="copy"><b>You can also find your reports in email.</b><span>Reply to any Homa email and I answer. The website keeps everything I make for you.</span></div>
+            <a class="primary" href="#settings">Open HOMA Settings</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">One place to find every way to reach Homa</h2>
+    <p class="section-lead">This sits at the top of Settings. It shows only things that are true for this family. It also holds the small print required for texting, so every other screen has one place to point.</p>
+    <div class="settings">
+      <h3>How to reach HOMA</h3>
+      <div class="reach-row"><div class="mark">TXT</div><div class="copy"><b>Text HOMA · (346) 758-8011</b><p>Ask a question, send a photo of schoolwork, or share how the day went.</p></div><span class="status">Text ready</span></div>
+      <div class="reach-row"><div class="mark">@</div><div class="copy"><b>Reply to HOMA emails</b><p>Every Homa email can become a conversation. Replies from maria@example.com reach the same Homa.</p></div><span class="status">Email ready</span></div>
+      <div class="reach-row"><div class="mark">WEB</div><div class="copy"><b>Open the website</b><p>Reports, printables, plans, and conversations are saved here.</p></div><span class="status">Website ready</span></div>
+      <div class="reach-row"><div class="mark">CALL</div><div class="copy"><b>Have HOMA call you</b><p>Available from a report when you are signed in.</p></div><span class="status">Calls ready</span></div>
+      <p class="fine">Homa may text about your family's homeschool, including one useful idea about your kids each weekday morning. Message and data rates may apply. Reply STOP to stop or HELP for help.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="memory-title">
+    <h2 id="memory-title">What Homa remembers so introductions never repeat</h2>
+    <p class="section-lead">This stores nothing about the kids. It is a tiny checklist of which adult has already learned about texting, email, the website, and calls.</p>
+    <div class="memory">
+      <div class="memory-card"><b>Introductions tracked per parent</b>One parent's welcome does not mark the other parent's welcome as sent.</div>
+      <div class="memory-card"><b>Introductions tracked per contact method</b>Text, email, the website, and calls each get one introduction at the right moment.</div>
+      <div class="memory-card"><b>Text signup needs no texting introduction</b>Someone who signed up by text never gets told, "You can text me."</div>
+      <div class="memory-card"><b>Re-adding a number does not resend introductions</b>Adding the same number later does not trigger another introduction.</div>
+      <div class="memory-card"><b>Send the phone contact once</b>Text signup sends one welcome and one phone contact.</div>
+      <div class="memory-card"><b>One message, not two bubbles</b>A quick hello and the real answer stay together.</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="order-title">
+    <h2 id="order-title">Build order</h2>
+    <p class="section-lead">Build the pieces in this order so we can measure each change before adding more texts.</p>
+    <ol class="order">
+      <li><b>Measure today.</b> Among families who connect a phone, how many text Homa within seven days? Compare the three days when the phone contact was broken with the days after it was fixed.</li>
+      <li><b>Add the signup explanation.</b> Add the plain texting details under the phone field. Add the phone button and computer code. Add the one-time introduction checklist. Remove the duplicate phone contact during text signup.</li>
+      <li><b>Connect the report to the other ways to reach Homa.</b> Add the email P.S. Show a different short block based on whether this family started on the website or by text.</li>
+      <li><b>Explain the first weekday-morning idea.</b> Add the one-time opening line to the first weekday-morning idea. Keep it in the same message.</li>
+      <li><b>Put Homa on the fridge.</b> Put the ready-to-text code on the back of the handwritten note. Ask text-first families whether they want one mailed, then ask for their address if they say yes.</li>
+      <li><b>Explain what email and the website keep.</b> Send one message around day seven. Mention the website again only when it solves a real need.</li>
+      <li><b>Review one week of real numbers.</b> Look separately at families who answered Homa's question and families who later started a new conversation themselves. Then decide whether connected families should also get report links by text. Email remains the permanent copy.</li>
+    </ol>
+  </section>
+  </details>
+
+  <section aria-labelledby="skip-title">
+    <h2 id="skip-title">What we are not building</h2>
+    <div class="not-building">
+      <div class="not-card"><b>No long HOMA tour</b>One simple card appears after Family and before Kids. It has four short explanations and one Continue button.</div>
+      <div class="not-card"><b>Nothing to add to Apple Wallet or Google Wallet</b>It does not make a Messages thread say "Homa." Saving Homa as a phone contact does.</div>
+      <div class="not-card"><b>No report texts before the first week's numbers</b>We will not add another Homa-started text until families show us the morning texts are welcome.</div>
+    </div>
+    <div class="metric">
+      <b>Three numbers tell us whether this worked</b>
+      <p>Early sign: how many families with a phone number answer Homa's first question? Main success: how many later start a new conversation themselves? Safety check: how many reply STOP? Starting a new conversation is the strongest proof that the parent understood and wanted to use texting.</p>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2>The plan</h2>
+    <p>Homa gives the parent something useful first. She asks one question after she knows the child. Each way to reach Homa gets one plain explanation. After that, Homa stays available without repeating herself.</p>
+  </section>
+</main>
 
 <script>
 (function(){
   "use strict";
-
-  /* ---------- direction tabs ---------- */
-  var tabs = Array.prototype.slice.call(document.querySelectorAll(".dir-tab"));
-  var panels = Array.prototype.slice.call(document.querySelectorAll(".dir-panel"));
-  tabs.forEach(function(tab){
-    tab.addEventListener("click", function(){
-      tabs.forEach(function(t){ t.setAttribute("aria-selected", t === tab ? "true" : "false"); });
-      panels.forEach(function(p){ p.classList.toggle("active", p.id === tab.getAttribute("aria-controls")); });
+  var deviceTabs = Array.prototype.slice.call(document.querySelectorAll(".device-tab"));
+  var deviceCopies = Array.prototype.slice.call(document.querySelectorAll(".device-copy"));
+  deviceTabs.forEach(function(tab){
+    tab.addEventListener("click",function(){
+      var device = tab.getAttribute("data-device");
+      deviceTabs.forEach(function(item){item.setAttribute("aria-pressed",item===tab?"true":"false");});
+      deviceCopies.forEach(function(copy){copy.classList.toggle("active",copy.getAttribute("data-copy")===device);});
     });
   });
 
-  /* ---------- winner + steals state ---------- */
-  var state = { winner: null, steals: [], answers: {}, notes: "" };
-
-  var winners = Array.prototype.slice.call(document.querySelectorAll(".winner"));
-  winners.forEach(function(btn){
-    btn.addEventListener("click", function(){
-      var dir = btn.getAttribute("data-dir");
-      state.winner = (state.winner === dir) ? null : dir;
-      winners.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-dir") === state.winner ? "true" : "false"); });
-      render();
-    });
-  });
-
-  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip:not(.skip)"));
-  chips.forEach(function(chip){
-    chip.addEventListener("click", function(){
-      var dir = chip.parentElement.getAttribute("data-dir");
-      var label = dir + " · " + chip.textContent.replace(/^Steal:\s*/, "");
-      var i = state.steals.indexOf(label);
-      if (i === -1) { state.steals.push(label); chip.setAttribute("aria-pressed","true"); }
-      else { state.steals.splice(i,1); chip.setAttribute("aria-pressed","false"); }
-      render();
-    });
-  });
-
-  var radios = Array.prototype.slice.call(document.querySelectorAll(".q-opts input[type=radio]"));
-  radios.forEach(function(r){
-    r.addEventListener("change", function(){
-      var q = r.closest(".q-opts").getAttribute("data-q");
-      state.answers[q] = r.value;
-      render();
-    });
-  });
-
-  var notes = document.getElementById("notes");
-  notes.addEventListener("input", function(){ state.notes = notes.value; render(); });
-
-  function render(){
-    var lines = ["UI direction feedback", ""];
-    lines.push("Winning direction: " + (state.winner || "(none picked yet)"));
-    lines.push("Details to steal: " + (state.steals.length ? "" : "none"));
-    state.steals.forEach(function(s){ lines.push("  - " + s); });
-    lines.push("");
-    var qs = ["Link text contact card","First linked inbound text","Report delivery","Permanent reach-Homa surface","Intro copy ownership"];
-    qs.forEach(function(q){
-      lines.push("- " + q + ": " + (state.answers[q] || "(no answer)"));
-    });
-    if (state.notes.trim()) { lines.push(""); lines.push("Notes: " + state.notes.trim()); }
-    document.getElementById("reply").textContent = lines.join("\n");
-  }
-  render();
-
-  var copyBtn = document.getElementById("copy");
-  copyBtn.addEventListener("click", function(){
-    var text = document.getElementById("reply").textContent;
-    function ok(){ copyBtn.setAttribute("data-ok","true"); copyBtn.textContent = "Copied"; setTimeout(function(){ copyBtn.removeAttribute("data-ok"); copyBtn.textContent = "Copy reply"; }, 1600); }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(ok, function(){ fallback(); });
-    } else { fallback(); }
-    function fallback(){
-      var ta = document.createElement("textarea");
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); ok(); } catch(e) {}
-      document.body.removeChild(ta);
-    }
-  });
-
-  /* ---------- D1 placement toggle ---------- */
-  var d1btns = Array.prototype.slice.call(document.querySelectorAll("[data-d1pos]"));
-  var d1steps = document.getElementById("d1-steps");
-  d1btns.forEach(function(b){
-    b.addEventListener("click", function(){
-      d1btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-      if (b.getAttribute("data-d1pos") === "early") {
-        d1steps.innerHTML = '<span class="step done">Account</span><span class="step done">Family</span><span class="step now">Meet Homa</span><span class="step">Homeschool</span><span class="step">Kids</span><span class="step">Checklist</span><span class="step">Report</span>';
-      } else {
-        d1steps.innerHTML = '<span class="step done">Account</span><span class="step done">Family</span><span class="step done">Homeschool</span><span class="step done">Kids</span><span class="step done">Checklist</span><span class="step done">Report</span><span class="step now">Meet Homa</span>';
-      }
-    });
-  });
-
-  /* ---------- D2 view toggle ---------- */
-  var d2btns = Array.prototype.slice.call(document.querySelectorAll("[data-d2view]"));
-  d2btns.forEach(function(b){
-    b.addEventListener("click", function(){
-      d2btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-      var page = b.getAttribute("data-d2view") === "page";
-      document.getElementById("d2-page").style.display = page ? "block" : "none";
-      document.getElementById("d2-email").style.display = page ? "none" : "block";
-    });
-  });
-
-  /* ---------- D3 day scrubber ---------- */
-  var d3days = {
-    d0: {
-      sub: "Text Message · Tuesday 9:43 AM",
-      html: '<div class="p-time">Tuesday 9:43 AM</div>'
-        + '<div class="vcardrow"><div class="ava">h</div><div><div class="who">Homa</div><div class="what">Contact card</div></div><div class="chev">›</div></div>'
-        + '<div class="bubble in">Hi, it\u2019s Homa. This number is set up to text with me now, and here\u2019s my card so you can save me. Text me anytime: a question, a photo of the kids\u2019 work, how the day went. Not you? Reply STOP and I won\u2019t text again.</div>'
-        + '<div class="p-time" style="margin-top:6px">One-time beat: intro + card together. The STOP line stays.</div>'
-    },
-    d1: {
-      sub: "Homa · Wednesday 9:04 AM",
-      html: '<div class="p-time">Wednesday 9:04 AM</div>'
-        + '<div class="bubble in">Morning, it\u2019s Homa. Weekday mornings I\u2019ll text you one thing I looked into overnight for your kids. Here\u2019s the first:</div>'
-        + '<div class="bubble in">🔬 Last night I researched counting board games for early math\n\nWhat I learned: A large early-math review found that games where kids move a piece while counting spaces build number sense faster than flashcards.\n\nWhy it\u2019s interesting: Emma is right at the edge of counting past ten, and she already loves game night.\n\nWant me to make Emma a printable counting board game for counting to twenty?</div>'
-        + '<div class="p-time" style="margin-top:6px">The preamble bubble fires once, ever, then briefs arrive bare.</div>'
-    },
-    d2: {
-      sub: "Homa · Wednesday 8:14 PM",
-      html: '<div class="p-time">Wednesday 8:14 PM</div>'
-        + '<div class="bubble out">hi! is this really the same homa from the website?</div>'
-        + '<div class="bubble in">It\u2019s really me, and you\u2019re all set: your texts here reach the same Homa who built Emma\u2019s report. Ask me anything, or send a photo of what the kids are working on.</div>'
-        + '<div class="p-time" style="margin-top:6px">First linked inbound text gets one welcome beat, then normal answers.</div>'
-    },
-    d7: {
-      sub: "Homa · two weeks later",
-      html: '<div class="p-time">Tuesday 9:02 AM</div>'
-        + '<div class="bubble in">🔬 Last night I researched read-aloud stamina for early readers\n\nWhat I learned: A children\u2019s literacy review found kids hold attention longer when they choose between two books, even when both were pre-picked by a parent.\n\nWhy it\u2019s interesting: Mateo finishes one chapter and drifts. A two-book choice puts him in charge without losing the plan.\n\nWant me to set a reminder for a two-book choice at tomorrow\u2019s read-aloud?</div>'
-        + '<div class="bubble out">yes please. also can you make emma another counting game, she loved the last one</div>'
-        + '<div class="bubble in">Done, reminder set for tomorrow morning. And on it: making Emma\u2019s next counting game now. I\u2019ll text you when it\u2019s ready.</div>'
-        + '<div class="p-time" style="margin-top:6px">All intro beats spent; the thread is just the relationship.</div>'
-    }
-  };
-  var d3btns = Array.prototype.slice.call(document.querySelectorAll("[data-d3day]"));
-  var d3body = document.getElementById("d3-body");
-  var d3sub = document.getElementById("d3-sub");
-  var d3num = document.getElementById("d3-num");
-  function setD3(day){
-    d3body.innerHTML = d3days[day].html;
-    d3sub.textContent = d3days[day].sub;
-    d3num.textContent = day === "d0" ? "+1 (346) 758-8011" : "Homa";
-  }
-  d3btns.forEach(function(b){
-    b.addEventListener("click", function(){
-      d3btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-      setD3(b.getAttribute("data-d3day"));
-    });
-  });
-  setD3("d0");
-
-  /* ---------- D4 placement toggle ---------- */
-  var d4btns = Array.prototype.slice.call(document.querySelectorAll("[data-d4pos]"));
-  d4btns.forEach(function(b){
-    b.addEventListener("click", function(){
-      d4btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-      var pos = b.getAttribute("data-d4pos");
-      var nav = document.getElementById("d4-navitem");
-      var title = document.getElementById("d4-title");
-      var homecard = document.getElementById("d4-homecard");
-      var settings = document.getElementById("d4-settingsitem");
-      if (pos === "side") {
-        nav.style.display = "block"; homecard.style.display = "none";
-        title.textContent = "How to reach me"; settings.classList.remove("newitem");
-      } else if (pos === "settings") {
-        nav.style.display = "none"; homecard.style.display = "none";
-        title.textContent = "Settings · How to reach Homa"; settings.classList.add("newitem");
-      } else {
-        nav.style.display = "none"; homecard.style.display = "block";
-        title.textContent = "Chat home"; settings.classList.remove("newitem");
-      }
+  var reportTabs = Array.prototype.slice.call(document.querySelectorAll(".report-tab"));
+  var reportViews = Array.prototype.slice.call(document.querySelectorAll(".report-view"));
+  reportTabs.forEach(function(tab){
+    tab.addEventListener("click",function(){
+      var view = tab.getAttribute("data-report");
+      reportTabs.forEach(function(item){item.setAttribute("aria-pressed",item===tab?"true":"false");});
+      reportViews.forEach(function(panel){panel.classList.toggle("active",panel.getAttribute("data-report-view")===view);});
     });
   });
 })();

@@ -14,13 +14,17 @@ import { adminDb } from "./db";
  * failures, and the page says how many alerts are hidden.
  */
 
-export type AlertSource = "task_run" | "delivery" | "email_send";
+export type AlertSource =
+  | "task_run"
+  | "delivery"
+  | "email_send"
+  | "inbound_receipt";
 
 export interface HandledAlert {
   source: AlertSource;
   sourceId: string;
   familyName: string | null;
-  /** Task kind, delivery channel, or email kind, per source. */
+  /** Task kind, delivery channel, email kind, or inbound channel, per source. */
   descriptor: string;
   status: string;
   error: string | null;
@@ -29,7 +33,10 @@ export interface HandledAlert {
 }
 
 export function parseAlertSource(value: string): AlertSource | null {
-  return value === "task_run" || value === "delivery" || value === "email_send"
+  return value === "task_run" ||
+    value === "delivery" ||
+    value === "email_send" ||
+    value === "inbound_receipt"
     ? value
     : null;
 }
@@ -54,6 +61,13 @@ async function alertSourceRowExists(source: AlertSource, sourceId: string): Prom
     case "email_send": {
       const rows = await sql<{ one: number }[]>`
         select 1 as one from public.email_sends where id = ${sourceId} limit 1
+      `;
+      return rows.length > 0;
+    }
+    case "inbound_receipt": {
+      const rows = await sql<{ one: number }[]>`
+        select 1 as one from public.conversation_inbound_receipts
+        where id = ${sourceId} limit 1
       `;
       return rows.length > 0;
     }
@@ -142,6 +156,24 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
     order by a.created_at desc
     limit 12
   `;
+  // A stalled inbound receipt (season-sim BUG-P3-2), hidden while still
+  // claimed and while the ack is newer than the current claim, exactly
+  // mirroring overview-data.ts. A reclaim resets claimed_at and resurfaces.
+  const inboundRows = await sql<
+    { source_id: string; family_name: string | null; channel: string; at: string; handled_at: string }[]
+  >`
+    select ir.id as source_id, f.name as family_name, ir.channel,
+           ir.claimed_at::text as at, a.created_at::text as handled_at
+    from public.admin_alert_acknowledgments a
+    join public.conversation_inbound_receipts ir on ir.id = a.source_id
+    left join public.families f on f.id = ir.family_id
+    where a.source = 'inbound_receipt'
+      and ir.status = 'claimed'
+      and ir.claimed_at >= now() - ${interval}::interval
+      and a.created_at >= ir.claimed_at
+    order by a.created_at desc
+    limit 12
+  `;
 
   const handled: HandledAlert[] = [
     ...runRows.map((row) => ({
@@ -171,6 +203,16 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
       descriptor: row.kind,
       status: row.status,
       error: row.error,
+      at: row.at,
+      handledAt: row.handled_at,
+    })),
+    ...inboundRows.map((row) => ({
+      source: "inbound_receipt" as const,
+      sourceId: row.source_id,
+      familyName: row.family_name,
+      descriptor: row.channel,
+      status: "stalled",
+      error: null,
       at: row.at,
       handledAt: row.handled_at,
     })),

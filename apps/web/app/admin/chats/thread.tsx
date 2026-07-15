@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { ThreadMessage } from "../../../lib/admin/chats-data";
+import type { ThreadMaterial, ThreadMessage } from "../../../lib/admin/chats-data";
 import { dayKey, dayLabel, timeLabel } from "../../../lib/admin/format";
 import { MarkdownText } from "../../app/markdown-text";
 
@@ -16,6 +16,13 @@ import { MarkdownText } from "../../app/markdown-text";
  * render through the same markdown component as the parent's chat;
  * texts, emails, the parent's own messages, and internal prompts are
  * delivered as raw text, so they stay verbatim.
+ *
+ * "Ready" in Homa's copy is not proof of anything: a turn's real
+ * public.materials rows (attached by getFamilyThread) render below the
+ * bubble as small delivery cards, one per material that turn actually
+ * produced, oldest first, review status included. No card under a
+ * reply that talks about a worksheet is itself the answer: this turn
+ * made nothing that saved.
  */
 
 const CHANNEL_LABEL: Record<string, string> = {
@@ -24,6 +31,60 @@ const CHANNEL_LABEL: Record<string, string> = {
   email: "email",
   dispatch: "task",
 };
+
+/** One material that turn actually saved, shown the way she saw it
+ * (thumbnail + open-PDF link) plus what she couldn't see: status and
+ * the quality check's verdict. A failed review still rendered for her
+ * on web (MaterialCard has no status gate), so "review flagged" here
+ * does not mean she didn't get a card, only that it may be worth a
+ * second look. */
+function ThreadMaterialCard({ material }: { material: ThreadMaterial }) {
+  const reviewLabel =
+    material.reviewPass === null
+      ? null
+      : material.reviewPass
+        ? "review passed"
+        : "review flagged";
+  return (
+    <div className="flex max-w-[360px] items-start gap-2.5 rounded-lg border border-border-subtle bg-page px-2.5 py-2">
+      <a
+        href={material.previewUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="shrink-0"
+        aria-label={`Open the preview for ${material.title}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- founder
+            tool rendering a Blob URL, not a Next image route */}
+        <img
+          src={material.previewUrl}
+          alt=""
+          className="h-14 w-11 rounded-sm border border-border-subtle object-cover"
+        />
+      </a>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-bold text-strong">{material.title}</p>
+        <p className="mt-0.5 font-mono text-[0.6rem] uppercase tracking-[0.06em] text-subtle">
+          {material.status}
+          {reviewLabel ? ` · ${reviewLabel}` : ""}
+        </p>
+        {material.reviewPass === false && material.reviewIssues.length > 0 ? (
+          <p className="mt-1 text-[0.68rem] text-[var(--gold-ink-strong)]">
+            {material.reviewIssues[0]}
+          </p>
+        ) : null}
+        <a
+          href={material.pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-block text-[0.68rem] font-semibold text-[var(--clay-600)] hover:underline"
+        >
+          Open PDF
+        </a>
+      </div>
+    </div>
+  );
+}
 
 export function ChatThread({
   messages,
@@ -104,6 +165,13 @@ export function ChatThread({
                       {mine && message.memberName ? ` · ${message.memberName}` : ""}
                       {!mine && !internal ? " · Homa" : ""}
                     </p>
+                    {message.materials.length > 0 ? (
+                      <div className="mt-2 flex flex-col gap-1.5">
+                        {message.materials.map((material) => (
+                          <ThreadMaterialCard key={material.id} material={material} />
+                        ))}
+                      </div>
+                    ) : null}
                     {xray ? (
                       <p className="mt-1">
                         <Link

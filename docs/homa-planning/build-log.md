@@ -3,6 +3,106 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-15 · Fleet skills move to the filesystem, family skills retired
+
+Implemented `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`
+end to end (Phases A and B; Phase C's seven-day dormant-window observation is
+still open, see below). Founder-confirmed in-session before any production
+change: bank-row disposition (deepen `materials-studio`, zero new packages),
+family-row disposition (preserve dormant, no distillation), session scope
+(Phases A and B plus the RLS write-policy migration, all in one session), and
+the `disableTool()` substitution below.
+
+**Authority gate.** Registered `filesystem-first-fleet-skills` in
+`docs/homa-planning/journeys/10-reconciliation.md` §5, superseding the "two
+homes, both correct" statement in `docs/homa-planning/15-agentic-architecture.md`
+§2 (marked inline, not deleted). Family-skill creation is paused as of this
+entry; disabling the one existing row's runtime effect required the second
+explicit disposition recorded below, which the founder gave in-session.
+
+**Inventory (verified live 2026-07-15, read-only, via Supabase MCP against
+`homa-prod`).** Exactly 2 published `skill_bank` rows
+(`letter-sounds-worksheets`, `counting-worksheets`, both generic ~130-150-word
+subject pedagogy bullet lists with zero family-identifying content). Matched
+the plan's 2026-07-14 observation exactly at first read (also confirmed 1
+`family_skills` row, `hwt-letter-tracing`, generic Handwriting Without Tears
+box-tracing guidance, no names or PII), but by the time the rollback archive
+ran minutes later the row was gone: `family_skills.family_id` cascades on
+`families` deletion, and that family's row no longer exists either
+(`select ... where id = '81e2193b-...'` returned zero rows). Unrelated to this
+session; exactly the "that is evidence, not a permanent assumption" case the
+plan's inventory step warns about. The family-row disposition question is
+therefore moot: there is nothing left to preserve or distill. The rollback
+archive still captures the zero-row state faithfully (empty JSONL, hash of
+the empty string, `rowCount: 0`) so a future audit can see the table was
+checked, not skipped.
+
+**Dispositions.** All three rows were thin subsets of craft
+`materials-studio/SKILL.md` already owns or already contains near-verbatim:
+its existing "Letter boxes" section (added before this session) already
+describes HWT box tracing by name, making the family row's content redundant
+with shipped fleet craft. Rather than create 2 new near-empty packages, both
+bank rows were folded into two new sections of `materials-studio/SKILL.md`
+("Subject decision rules: letters and letter sounds" /
+"...counting and early number"), so the export step's "zero new packages" YAGNI
+outcome applied. Both tables are left byte-for-byte unchanged (no unpublish,
+no delete); the app simply stops reading them.
+
+**Rollback archive.** Full raw rows (all columns) exported to Vercel Blob
+under `internal/skill-archives/<timestamp>/`, one SHA-256 per file plus a
+manifest (schema, row counts, project ref, exporter commit, export
+timestamp). Restored into a disposable local PostgreSQL cluster against the
+real migration files and verified row counts and content hashes match before
+any code cutover. Scripts: `apps/web/scripts/skill-archive-export.mts`
+(export) and `apps/web/scripts/skill-archive-restore-verify.mts`
+(restore/verify); shared canonical serialization in
+`apps/web/scripts/skill-archive-format.mts`.
+
+Second technical correction: the plan called for `access: "private"`. This
+project's Blob store rejects private access ("Cannot use private access on a
+public store"); it is provisioned public-only, the same store every other
+blob write in this codebase already uses (`access: "public"`) for materials
+and child photos, where an unguessable pathname is the actual security
+boundary, not store-level access control. Used `access: "public"` with the
+same unguessable-path posture; the archived content itself has no PII (2
+generic worksheet skills, and the family_skills export turned out empty, see
+below).
+
+**Technical correction to the plan.** Section 6 Phase B step 1 called for
+converting `save_skill.ts`/`forget_skill.ts` to `disableTool()` sentinels.
+Verified against the installed eve 0.19 runtime
+(`resolve-agent-graph.js`) and its docs (`concepts/default-harness.md`):
+`disableTool()` only removes a *framework default* tool whose name matches
+the containing file's slug, and throws a build error for any other name.
+`save_skill`/`forget_skill` are custom authored tools, not framework
+defaults, so the literal instruction would have broken the build. Founder
+approved the substitution: deleted both tool files outright. No collision
+risk, `save_skill`/`forget_skill` will never become eve framework tool names.
+
+**Code cutover.** One deploy-sized change: removed
+`agent/skills/skill-library.ts` (the dynamic resolver), deleted
+`agent/tools/save_skill.ts` and `agent/tools/forget_skill.ts`, removed the
+save/forget routing section from `agent/instructions.md`, simplified
+`lib/slash-skills.ts` to a static list, and removed
+`lib/agent-skills-store.ts` / narrowed `lib/agent-skills.ts` to what
+`scripts/skills-targeting-check.mjs` still needs until that check is retired
+with the dynamic system. `apps/web/app/app/message-parts.tsx` and
+`worked-for.tsx`'s `save_skill`/`forget_skill` render mappings were
+deliberately left alone: past conversation history already contains those
+tool-call parts, and removing the mapping would break rendering old messages
+even though the tools can no longer be called going forward.
+
+**Policy migration.** After code verification, revoked the three write
+policies (`members add/update/delete skills`) on `family_skills` via an
+additive-but-behavior-restricting migration; `members read their skills`
+stays through Phase C per the plan.
+
+**Open: Phase C.** The seven-day dormant-window observation (zero product
+reads/writes, ten-plus authenticated routing probes, cross-channel parity)
+cannot complete inside one session. Tracking it here; do not treat Phase B's
+completion as Phase C's completion. Phase D (dropping the tables) remains
+unauthorized.
+
 ## 2026-07-14 (evening) · Council pass on the channel lab: one more fix shipped, one failure escalated
 
 A five-expert council (skeptical PM, SMS-first phone-only persona, staff

@@ -44,6 +44,22 @@ export interface EmailTrouble {
   at: string;
 }
 
+/** An inbound SMS or email whose webhook was claimed but never completed:
+ * the season-sim BUG-P3-2 silent stall, where a family keeps texting into a
+ * thread that has quietly stopped answering. A receipt still 'claimed' this
+ * long after the claim is a lost turn, not one in flight. */
+export interface InboundTrouble {
+  id: string;
+  familyName: string | null;
+  channel: string;
+  at: string;
+}
+
+/** A claimed inbound receipt older than this never finished; the longest
+ * legitimate turn seen in the field study was about five minutes, so this
+ * is comfortably past in-flight and short enough to notice same-morning. */
+const INBOUND_STALL_MINUTES = 15;
+
 export interface FleetOverview {
   rangeDays: OverviewRange;
   snapshots: FamilySnapshot[];
@@ -60,6 +76,7 @@ export interface FleetOverview {
   hoursMinutes: number;
   emailCounts: Record<string, number>;
   emailTrouble: EmailTrouble[];
+  inboundTrouble: InboundTrouble[];
   cronLastAt: string | null;
   cronLastOk: boolean | null;
   /** True when the newest heartbeat is over two hours old (the cron is
@@ -162,6 +179,24 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     order by e.updated_at desc
     limit 12
   `;
+  // Inbound turns claimed but never completed (a lost SMS/email turn looks
+  // identical to one in flight, so nothing surfaced it before). Bounded by
+  // the range like every other trouble list, hidden once marked handled.
+  const inboundTroubleRows = await sql<{ id: string; family_name: string | null; channel: string; at: string }[]>`
+    select ir.id, f.name as family_name, ir.channel, ir.claimed_at::text as at
+    from public.conversation_inbound_receipts ir
+    left join public.families f on f.id = ir.family_id
+    where ir.status = 'claimed'
+      and ir.claimed_at < now() - ${`${INBOUND_STALL_MINUTES} minutes`}::interval
+      and ir.claimed_at >= now() - ${interval}::interval
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'inbound_receipt' and a.source_id = ir.id
+          and a.created_at >= ir.claimed_at
+      )
+    order by ir.claimed_at desc
+    limit 12
+  `;
   const cronRows = await sql<{ ran_at: string; ok: boolean }[]>`
     select ran_at::text as ran_at, ok from public.cron_runs
     where job = 'map_cron'
@@ -236,6 +271,12 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       kind: row.kind,
       status: row.status,
       error: row.error,
+      at: row.at,
+    })),
+    inboundTrouble: inboundTroubleRows.map((row) => ({
+      id: row.id,
+      familyName: row.family_name,
+      channel: row.channel,
       at: row.at,
     })),
     cronLastAt: cronRows[0]?.ran_at ?? null,

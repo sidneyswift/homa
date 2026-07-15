@@ -35,6 +35,8 @@ function handledAlertText(item: HandledAlert): string {
       return `${status} ${descriptor} send · ${item.familyName}`;
     case "email_send":
       return `Email ${status} · ${descriptor}`;
+    case "inbound_receipt":
+      return `${descriptor} turn never answered · ${item.familyName ?? "unlinked"}`;
     default: {
       const exhausted: never = item.source;
       return String(exhausted);
@@ -106,7 +108,7 @@ export default async function AdminOverviewPage({
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 ? (
+        {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
           <AlertRow tone="sky">
             <b>Deliveries look clean {rangeLabel}.</b>{" "}
             {data.handledAlerts.length > 0
@@ -158,6 +160,20 @@ export default async function AdminOverviewPage({
               >
                 <b>Email {t.status}</b> · {t.kind.replace(/_/g, " ")} · {t.error ?? "provider receipt"} ·{" "}
                 {timeAgo(t.at)}
+              </AlertRow>
+            ))}
+            {data.inboundTrouble.slice(0, 3).map((t) => (
+              <AlertRow
+                key={`i-${t.id}`}
+                tone="rose"
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AlertAckButton source="inbound_receipt" sourceId={t.id} />
+                  </span>
+                }
+              >
+                <b>{t.channel} turn never answered</b> · {t.familyName ?? "unlinked"} · claimed{" "}
+                {timeAgo(t.at)}, still not delivered
               </AlertRow>
             ))}
           </>
@@ -309,7 +325,7 @@ export default async function AdminOverviewPage({
         title="Trouble, line by line"
         sub="Failed and uncertain sends with the family they belong to. Uncertain means the provider never confirmed; it is its own bucket on purpose."
       />
-      {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 ? (
+      {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
         <EmptyNote>
           Nothing failed or went uncertain {rangeLabel}
           {data.handledAlerts.length > 0
@@ -364,6 +380,21 @@ export default async function AdminOverviewPage({
               </span>
             </li>
           ))}
+          {data.inboundTrouble.map((t) => (
+            <li
+              key={`it-${t.id}`}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
+            >
+              <span className="font-bold text-strong">{t.familyName ?? "Unlinked"}</span>
+              <Pill tone="rose">stalled</Pill>
+              <span className="text-muted">
+                {t.channel} turn claimed {timeAgo(t.at)}, never answered
+              </span>
+              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                <AlertAckButton source="inbound_receipt" sourceId={t.id} />
+              </span>
+            </li>
+          ))}
         </ul>
       )}
       {showHandled && data.handledAlerts.length > 0 ? (
@@ -384,7 +415,9 @@ export default async function AdminOverviewPage({
                   {timeAgo(item.handledAt)}
                 </span>
                 <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                  <AgentPromptButton source={item.source} sourceId={item.sourceId} />
+                  {item.source !== "inbound_receipt" ? (
+                    <AgentPromptButton source={item.source} sourceId={item.sourceId} />
+                  ) : null}
                   <AlertAckButton source={item.source} sourceId={item.sourceId} mode="undo" />
                 </span>
               </li>

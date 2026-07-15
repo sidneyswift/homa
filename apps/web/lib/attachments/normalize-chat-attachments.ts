@@ -1,4 +1,4 @@
-import type { FilePart, ImagePart } from "ai";
+import type { FilePart } from "ai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
@@ -55,8 +55,13 @@ export interface NormalizedChatAttachment {
   block: string | null;
   /** The durable marker line for the turn text. */
   marker: string;
-  /** Model-consumable part (images and PDFs, by URL). */
-  part: ImagePart | FilePart | null;
+  /**
+   * Model-consumable part (images and PDFs, by URL). Always a `file` part:
+   * eve's /eve/v1/session parser accepts only `text` and `file`, so the AI
+   * SDK image-part shape would 400 (BUG-P3-1). An image is a file part with
+   * an image mediaType; eve lowers it to model vision content downstream.
+   */
+  part: FilePart | null;
 }
 
 const MODEL_IMAGE_TYPES = new Set([
@@ -178,7 +183,16 @@ async function processImage(
     caption,
     block: null,
     marker: composePhotoMarker({ caption, url: input.url }),
-    part: { type: "image", image: input.url, mediaType },
+    // A `file` part with an image mediaType, not the AI SDK `image` part:
+    // eve's session parser rejects `image` (BUG-P3-1) and lowers a file part
+    // with an image mediaType to model vision content, exactly like the PDF
+    // lane above.
+    part: {
+      type: "file",
+      data: input.url,
+      mediaType,
+      ...(input.name ? { filename: input.name } : {}),
+    },
   };
 }
 

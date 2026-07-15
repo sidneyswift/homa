@@ -52,9 +52,9 @@ export default async function ChatPage({
       ? (app?.children ?? []).find((child) => child.id === viewContext.childId) ?? null
       : null;
 
-  // The composer's "/" menu: kids to mention, plus the same advertised
-  // skill set the agent sees (built-ins + saved + targeted bank rows).
-  const slashSkills = await getSlashMenuSkills(app?.family.id ?? null);
+  // The composer's "/" menu: kids to mention, plus the same repo skill
+  // packages the agent sees (filesystem-first fleet skills, 2026-07-15).
+  const slashSkills = await getSlashMenuSkills();
 
   // The wall (plans/2026-07-11-the-wall.md): the first chat message is a
   // door. Null while the flag is off (the instant no-query path), and

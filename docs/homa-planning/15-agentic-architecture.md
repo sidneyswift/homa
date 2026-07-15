@@ -56,20 +56,25 @@ means finishing the third one, not merging them back into files.
   dynamic-instructions + tools + Postgres shape).
 - **eve skills** are know-how, not abilities: markdown procedures advertised
   by description; the model calls the framework `load_skill` tool when a
-  request matches. Two homes, both correct:
-  - `agent/skills/*` (repo-authored): Homa-wide craft that ships with deploys
-    and is versioned in git. Packaged skills' sibling files auto-seed into
-    `/workspace/skills/` for the file tools to read.
-  - `family_skills` + `skill_bank` rows served by the dynamic resolver
-    (`agent/skills/skill-library.ts`): per-family and founder-curated skills
-    that change at runtime without a deploy. This is eve's documented
-    dynamic-skills pattern, not a workaround.
+  request matches. **`agent/skills/*` (repo-authored) is the only active
+  home:** Homa-wide craft that ships with deploys and is versioned in git.
+  Packaged skills' sibling files auto-seed into `/workspace/skills/` for the
+  file tools to read.
+  **[Superseded 2026-07-15, founder ruling `filesystem-first-fleet-skills`:**
+  the "two homes, both correct" statement below described the system before
+  the cutover. `family_skills` + `skill_bank` rows served by a dynamic
+  resolver (`agent/skills/skill-library.ts`, now removed) were a second,
+  per-family and founder-curated home that changed at runtime without a
+  deploy. That system is retired: `save_skill` and `forget_skill` no longer
+  exist, the dynamic resolver is gone, and both tables are preserved as
+  dormant historical data rather than an active delivery path. See
+  `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md` for
+  the full rationale and the triggers that would reopen dynamic
+  distribution.]**
 - **eve tools** are typed abilities that run in the app runtime with
   `process.env` and the caller's session auth. Tools and skills are different
   layers on purpose: a skill can only add instructions (progressive
-  disclosure); behavior still comes from tools. The Mac mini blurred this
-  because "skills" were files the agent edited with file tools; in cloud the
-  same loop exists as rows the agent edits with save_skill/forget_skill.
+  disclosure); behavior still comes from tools.
 - **The sandbox** (`/workspace`) is per-session scratch and a tool surface,
   never storage (law #2; session sandbox names are deployment-scoped, every
   deploy orphans them). Seed scripts, fonts, and templates via
@@ -84,12 +89,14 @@ means finishing the third one, not merging them back into files.
 
 **Answer to "the model uses skills via trigger, but we are building tools":**
 both are live today and both are needed. The trigger loading works exactly as
-on the Mac mini: descriptions are advertised every turn, the model calls
-`load_skill` on match, and save_skill grows the library (the skillify loop,
-cloud edition). Recall is now a typed, family-scoped tool over stored transcripts,
-conversations, and memories. The remaining distinction is substrate: cloud recall
-queries guarded product records rather than granting a model unrestricted access to
-a persistent local filesystem.
+on the Mac mini: descriptions are advertised every turn and the model calls
+`load_skill` on match. (The rest of this sentence historically continued
+"...and save_skill grows the library, the skillify loop, cloud edition" —
+superseded 2026-07-15 per the ruling above; there is no runtime skill-growing
+loop now, only repo packages.) Recall is now a typed, family-scoped tool over
+stored transcripts, conversations, and memories. The remaining distinction is
+substrate: cloud recall queries guarded product records rather than granting a
+model unrestricted access to a persistent local filesystem.
 
 ## 3. Historical framework probe and current repository posture
 
