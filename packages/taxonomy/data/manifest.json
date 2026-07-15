@@ -9,16 +9,16 @@
     "ngss-ms"
   ],
   "counts": {
-    "topics": 1593,
+    "topics": 1636,
     "topicsBySubject": {
       "Computing": 21,
-      "English": 288,
-      "History": 90,
+      "English": 299,
+      "History": 92,
       "Learning to Learn": 18,
-      "Life Skills": 37,
-      "Mathematics": 504,
-      "Personal & Social Development": 88,
-      "Science": 547
+      "Life Skills": 42,
+      "Mathematics": 507,
+      "Personal & Social Development": 90,
+      "Science": 567
     },
     "dependencies": 3221,
     "curricula": 7,
@@ -28,8 +28,8 @@
   },
   "files": {
     "topics.json": {
-      "bytes": 1670722,
-      "sha256": "54eae72f5e7ebe492180d3a97a325564c36fefaf716192b84400f3e243ed54b7"
+      "bytes": 1705442,
+      "sha256": "fc77091aa84881f771e6ec0752eedd463db62cb0dd674ed95869149492fbf00a"
     },
     "dependencies.json": {
       "bytes": 696944,
