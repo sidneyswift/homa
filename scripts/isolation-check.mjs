@@ -2296,6 +2296,16 @@ await expectReadDenied("session_context_snapshots");
 // rows; anon has explicit revokes; only the server-side attachment
 // routes write.
 await expectReadDenied("chat_attachments");
+// Self-improving system tables (Layer 1-5): all admin-only, no client policies.
+await expectReadDenied("conversation_signals");
+await expectReadDenied("system_policies");
+await expectReadDenied("policy_proposals");
+await expectReadDenied("eval_results");
+await expectReadDenied("fix_effectiveness");
+await expectReadDenied("signal_patterns");
+await expectReadDenied("skill_evolution_log");
+await expectReadDenied("response_engagement");
+await expectReadDenied("knowledge_gaps");
 
 await expectInsertDenied(
   "families",
