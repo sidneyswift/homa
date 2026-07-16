@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, FileText } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
 
@@ -160,9 +160,9 @@ export function HeroProductDemo() {
             }}
           />
 
-          {/* Status bar: the island forces this vertical space, so time,
-              signal, and battery ride along nearly free. No wifi arc, it
-              reads badly this small. */}
+          {/* Status bar: time left; bars, 5G, and a battery with a fill
+              and charge nub right, matching a real iPhone. The island
+              forces this vertical space, so it rides along nearly free. */}
           <div
             aria-hidden="true"
             style={{
@@ -170,14 +170,14 @@ export function HeroProductDemo() {
               alignItems: "center",
               justifyContent: "space-between",
               minHeight: 28,
-              padding: "8px 16px 0",
+              padding: "8px 15px 0 19px",
               color: "var(--text-strong)",
               fontSize: "0.68rem",
               fontWeight: 700,
             }}
           >
-            <span>9:41</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span style={{ letterSpacing: "0.01em" }}>9:41</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
               <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 1.5, height: 9 }}>
                 {[3.5, 5.5, 7.5, 9].map((h) => (
                   <span
@@ -191,48 +191,100 @@ export function HeroProductDemo() {
                   />
                 ))}
               </span>
-              <span
-                style={{
-                  width: 17,
-                  height: 9,
-                  border: "1.5px solid currentColor",
-                  borderRadius: 2.5,
-                  position: "relative",
-                  opacity: 0.9,
-                }}
-              >
+              <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.02em" }}>5G</span>
+              {/* Battery: faint outline, solid fill, faint nub, like iOS. */}
+              <span style={{ position: "relative", width: 21, height: 10, display: "inline-block" }}>
                 <span
+                  aria-hidden="true"
                   style={{
                     position: "absolute",
-                    inset: 1.5,
-                    width: "62%",
+                    left: 0,
+                    top: 0,
+                    width: 18,
+                    height: 10,
+                    border: "1px solid currentColor",
+                    borderRadius: 3,
+                    opacity: 0.4,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: 2,
+                    top: 2,
+                    width: 11,
+                    height: 6,
+                    borderRadius: 1.5,
                     background: "currentColor",
-                    borderRadius: 1,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: 3.25,
+                    width: 1.5,
+                    height: 3.5,
+                    borderRadius: "0 2px 2px 0",
+                    background: "currentColor",
+                    opacity: 0.4,
                   }}
                 />
               </span>
             </span>
           </div>
 
-          {/* Slim contact row: identity once, inline, like a scrolled
-              Messages header. The stacked avatar-over-name card is
-              navigation UI and wastes hero height. */}
+          {/* Messages contact header: back chevron with unread pill on the
+              left, centered avatar with the name and a tiny chevron below,
+              matching the real iOS anatomy while staying compact. */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              padding: "3px 12px 7px",
+              position: "relative",
+              display: "grid",
+              justifyItems: "center",
+              gap: 2,
+              padding: "2px 12px 6px",
               borderBottom: "1px solid rgba(214,200,180,0.65)",
               background: "rgba(251,247,240,0.94)",
             }}
           >
             <span
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: 8,
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                color: "var(--clay-600)",
+              }}
+            >
+              <ChevronLeft size={17} strokeWidth={2.6} aria-hidden="true" />
+              <span
+                style={{
+                  minWidth: 17,
+                  padding: "1px 5px",
+                  borderRadius: "var(--radius-pill)",
+                  background: "var(--stone-200)",
+                  color: "var(--stone-700)",
+                  fontSize: "0.56rem",
+                  fontWeight: 700,
+                  textAlign: "center",
+                  lineHeight: 1.5,
+                }}
+              >
+                3
+              </span>
+            </span>
+            <span
               style={{
                 display: "inline-flex",
-                width: 22,
-                height: 22,
+                width: 30,
+                height: 30,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -240,19 +292,23 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Logo size={14} variant="mark" />
+              <Logo size={18} variant="mark" />
             </span>
             <p
               style={{
                 margin: 0,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
                 color: "var(--text-strong)",
                 fontFamily: "var(--font-wordmark)",
-                fontSize: "0.88rem",
+                fontSize: "0.7rem",
                 fontWeight: 600,
-                letterSpacing: "-0.01em",
+                letterSpacing: "-0.005em",
               }}
             >
               Homa
+              <ChevronRight size={9} color="var(--text-subtle)" strokeWidth={2.6} aria-hidden="true" />
             </p>
           </div>
 
@@ -395,7 +451,7 @@ export function HeroProductDemo() {
                 fontSize: "0.74rem",
               }}
             >
-              Text Message
+              Text Message · SMS
             </span>
             <span
               style={{
