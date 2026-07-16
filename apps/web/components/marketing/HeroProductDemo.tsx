@@ -71,9 +71,10 @@ function ReceivedBubble({ children }: { children: ReactNode }) {
  * Fixture-safe proof shaped like a phone text thread. HTML rather than a
  * screenshot so the example stays legible, responsive, and accessible.
  * Sent bubbles use Homa clay (not Apple blue) so the demo stays on brand
- * while still reading as Messages: contact header, left/right bubbles,
- * MMS attachment, and a slim composer. Keep the thread short: the hero
- * value is the quick exchange plus the worksheet, not a long scroll.
+ * while still reading as Messages: slim inline contact row, left/right
+ * bubbles, MMS attachment, and a slim composer. Keep it short: the hero
+ * value is the quick exchange plus the worksheet, so every pixel of
+ * chrome that is not a texting signifier gets cut or condensed.
  */
 export function HeroProductDemo() {
   return (
@@ -159,24 +160,26 @@ export function HeroProductDemo() {
             }}
           />
 
-          {/* Status bar */}
+          {/* Status bar: the island forces this vertical space, so time,
+              signal, and battery ride along nearly free. No wifi arc, it
+              reads badly this small. */}
           <div
             aria-hidden="true"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              minHeight: 34,
-              padding: "10px 16px 0",
+              minHeight: 28,
+              padding: "8px 16px 0",
               color: "var(--text-strong)",
-              fontSize: "0.7rem",
+              fontSize: "0.68rem",
               fontWeight: 700,
             }}
           >
             <span>9:41</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 1.5, height: 10 }}>
-                {[4, 6, 8, 10].map((h) => (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 1.5, height: 9 }}>
+                {[3.5, 5.5, 7.5, 9].map((h) => (
                   <span
                     key={h}
                     style={{
@@ -190,20 +193,8 @@ export function HeroProductDemo() {
               </span>
               <span
                 style={{
-                  width: 12,
-                  height: 12,
-                  border: "1.5px solid currentColor",
-                  borderRadius: "50%",
-                  borderTopColor: "transparent",
-                  borderRightColor: "transparent",
-                  transform: "rotate(45deg)",
-                  opacity: 0.9,
-                }}
-              />
-              <span
-                style={{
-                  width: 18,
-                  height: 10,
+                  width: 17,
+                  height: 9,
                   border: "1.5px solid currentColor",
                   borderRadius: 2.5,
                   position: "relative",
@@ -223,13 +214,16 @@ export function HeroProductDemo() {
             </span>
           </div>
 
-          {/* Messages contact header */}
+          {/* Slim contact row: identity once, inline, like a scrolled
+              Messages header. The stacked avatar-over-name card is
+              navigation UI and wastes hero height. */}
           <div
             style={{
-              display: "grid",
-              justifyItems: "center",
-              gap: 1,
-              padding: "2px 12px 8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              padding: "3px 12px 7px",
               borderBottom: "1px solid rgba(214,200,180,0.65)",
               background: "rgba(251,247,240,0.94)",
             }}
@@ -237,8 +231,8 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 34,
-                height: 34,
+                width: 22,
+                height: 22,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -246,14 +240,14 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Logo size={20} variant="mark" />
+              <Logo size={14} variant="mark" />
             </span>
             <p
               style={{
                 margin: 0,
                 color: "var(--text-strong)",
                 fontFamily: "var(--font-wordmark)",
-                fontSize: "0.92rem",
+                fontSize: "0.88rem",
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
               }}
@@ -425,7 +419,7 @@ export function HeroProductDemo() {
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "4px 0 6px",
+              padding: "2px 0 5px",
               background: "rgba(251,247,240,0.97)",
             }}
           >
