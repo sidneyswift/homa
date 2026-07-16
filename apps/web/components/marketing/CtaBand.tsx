@@ -35,34 +35,25 @@ export function CtaBand() {
           margin: "18px 0 12px",
         }}
       >
-        Ready for a calm Monday?
+        Start with the free progress report.
       </h2>
       <p
         data-reveal=""
         className="rv-d1"
         style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "1.3rem", color: "var(--stone-700)", margin: "0 0 32px" }}
       >
-        The free report takes about five minutes. Setting up Homa for your whole family takes an afternoon.
+        No card is needed. The questionnaire takes about five minutes per child.
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
         {openPopup ? (
           <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-            See where your child stands
+            Get your free report
           </Button>
         ) : (
           <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-            See where your child stands
+            Get your free report
           </Button>
         )}
-        <Button variant="ghost" size="lg" href="/onboarding/method" style={{ background: "var(--surface-card)" }}>
-          How the report works
-        </Button>
-      </div>
-      <div data-reveal="" className="rv-d2" style={{ marginTop: 16, fontSize: "0.88rem", fontWeight: 600, color: "var(--stone-700)" }}>
-        No card needed &middot;{" "}
-        <a href="/onboarding/sample" style={{ color: "var(--stone-700)", textDecoration: "underline", textUnderlineOffset: 3 }}>
-          See a sample report first
-        </a>
       </div>
     </section>
   );

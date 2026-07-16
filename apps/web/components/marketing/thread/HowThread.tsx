@@ -1,10 +1,8 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowRight } from "lucide-react";
 
 import { Logo } from "../../brand/Logo";
-import { Button } from "../ds/Button";
 import { Eyebrow } from "../dividers";
 import { CheckVignette, KidsVignette, ProofVignette, WeekVignette } from "./vignettes";
 
@@ -33,34 +31,29 @@ type ThreadState = {
   wpx: number[];
 };
 
-const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: ReactNode; action?: ReactNode }> = [
+const STEPS: ReadonlyArray<{ n: string; title: string; body: string; vignette: ReactNode }> = [
   {
     n: "01",
-    title: "Tell Homa about your kids",
-    body: "Ages, grades, goals, and how your days actually flow.",
+    title: "Your family setup",
+    body: "Ages, grades, goals, and a typical week give Homa the starting point.",
     vignette: <KidsVignette />,
   },
   {
     n: "02",
-    title: "Sunday night, the week is waiting",
-    body: "A plan for every child, shaped by your input and Homa\u2019s timeline, not a textbook.",
+    title: "Your weekly plan",
+    body: "Your curriculum and schedule shape the plan for each child. Homa can revise later lessons after a sick day, field trip, or lighter morning.",
     vignette: <WeekVignette />,
-    action: (
-      <Button variant="secondary" href="/onboarding" iconRight={<ArrowRight size={16} aria-hidden="true" />}>
-        Get your free progress report
-      </Button>
-    ),
   },
   {
     n: "03",
-    title: "Teach, tap, snap, done",
-    body: "Snap a photo of the work, a few words about how it went. That\u2019s the whole habit. Check off lessons as you go. A light day still counts.",
+    title: "Your lesson record",
+    body: "After a lesson, you can check it off, send a few words, or snap a photo. Homa keeps what you share in the record. A lighter day is still part of the week.",
     vignette: <CheckVignette />,
   },
   {
     n: "04",
-    title: "Watch the needle move",
-    body: "You answer a five-minute questionnaire about each child. Homa checks your answers against national standards. The report shows what looks solid in each subject and what\u2019s next. Then she builds practice aimed at exactly that.",
+    title: "Your progress report",
+    body: "The first report begins with the five-minute questionnaire. Later notes and check-ins add new answers. The report shows what looks solid and what comes next. Homa can use that next step in a new practice page.",
     vignette: <ProofVignette />,
   },
 ];
@@ -181,12 +174,10 @@ export function HowThread() {
               lineHeight: 1.08,
             }}
           >
-            From Sunday night
-            <br />
-            to <span style={{ color: "var(--clay-600)" }}>proof</span>.
+            How Homa keeps <span style={{ color: "var(--clay-600)" }}>plans and records</span> together.
           </h2>
           <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", lineHeight: 1.6, margin: "18px auto 0", maxWidth: 460 }}>
-            Plan Sunday. Teach the week. See the proof. Repeat.
+            After you share what the week needs, Homa builds the plan. You can send a few words or a photo after a lesson. Homa keeps the plan and record together.
           </p>
         </div>
 
@@ -300,7 +291,6 @@ export function HowThread() {
                     {s.title}
                   </h3>
                   <p style={{ color: "var(--text-muted)", lineHeight: 1.62, fontSize: "1.05rem", margin: 0, maxWidth: 470 }}>{s.body}</p>
-                  {s.action && <div style={{ marginTop: 24 }}>{s.action}</div>}
                 </div>
                 <div className="ht-vig" style={{ display: "flex", justifyContent: "center", marginTop: 34 }}>
                   {s.vignette}

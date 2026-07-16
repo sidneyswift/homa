@@ -321,7 +321,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* With the bar actually pinning now, in-page anchors need to land their
-   heading below it, not behind it. */
+   heading below it rather than under the frosted surface. */
 #how, #features, #stories {
   scroll-margin-top: calc(var(--lp-nav-height) + 8px);
 }
@@ -343,7 +343,7 @@ h1, h2, h3, h4, h5, h6 {
    breakpoint (the media block below shows them). Menu entrance per the
    emil-design-eng rules: opacity + transform, ease-out, from scale(0.98)
    never scale(0), origin at the trigger edge; React unmounts it instantly
-   on close, same as ScrollCta and the signup popup. */
+   on close, the same behavior as the signup popup. */
 .lp-nav-toggle {
   display: none;
   /* Above the menu's tap-catch backdrop, so the X itself stays pressable
@@ -433,6 +433,32 @@ h1, h2, h3, h4, h5, h6 {
   .lp-3col { grid-template-columns: 1fr !important; }
   .lp-4col { grid-template-columns: 1fr 1fr !important; }
   .lp-pad { padding-left: 20px !important; padding-right: 20px !important; }
+  .lp-hero-shell {
+    gap: 28px !important;
+    padding-top: 56px !important;
+    padding-bottom: 48px !important;
+  }
+  /* Keep the fixture phone starting inside the first phone screen so a cold
+     visitor sees product proof before they scroll. */
+  .lp-hero-shell .lp-hero-actions {
+    margin-top: 20px !important;
+  }
+  .lp-product-demo-phone {
+    max-width: 390px !important;
+  }
+  .lp-pain-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .lp-capability-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .lp-pain-grid {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
 }
 
 html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
@@ -445,72 +471,15 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 .rv-d1 { transition-delay: 80ms !important; }
 .rv-d2 { transition-delay: 160ms !important; }
 
-/* Peek-under-the-hood accordion: grid-rows expand (the one deliberate
-   layout-property animation on the page, accordions inherently move layout;
-   the alternative is no motion, which feels broken on a hand-opened panel). */
-.lp-peek {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition: grid-template-rows var(--dur-slow) var(--ease-out), opacity var(--dur-base) var(--ease-out);
-}
-.lp-peek[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
-.lp-peek > div { overflow: hidden; }
-
 @media (prefers-reduced-motion: reduce), print {
   html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .lp-peek { transition: opacity var(--dur-base) var(--ease-out); }
-}
-
-/* Scroll-triggered nudge card (ScrollCta.tsx): bottom-right on desktop,
-   full-width bottom bar on phones so it never blocks a thumb's reach. */
-.scroll-cta {
-  position: fixed;
-  z-index: 40;
-  right: 24px;
-  bottom: 24px;
-  width: 336px;
-  max-width: calc(100vw - 32px);
-  background: var(--surface-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  padding: 20px 20px 18px;
-  transform: translateY(24px);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
-}
-.scroll-cta[data-visible="true"] { transform: translateY(0); opacity: 1; pointer-events: auto; }
-.scroll-cta-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--text-subtle);
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
-}
-.scroll-cta-close:hover { background: var(--stone-100); color: var(--text-body); }
-@media (max-width: 640px) {
-  .scroll-cta { left: 16px; right: 16px; bottom: 16px; width: auto; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .scroll-cta { transition: opacity var(--dur-base) ease; transform: none; }
 }
 
 /* Landing-page signup popup (SignupPopupModal.tsx): reuses the onboarding
    flow's own entry step inside a wide centered dialog, warm blurred scrim
    matching the design system's Dialog component. @starting-style drives
    the entrance (same pattern as .rail-check below), no mount-then-flip
-   effect needed; React unmounts the whole thing instantly on close, same
-   as ScrollCta's own dismissal. */
+   effect needed; React unmounts the whole thing instantly on close. */
 .signup-popup-overlay {
   position: fixed;
   inset: 0;
