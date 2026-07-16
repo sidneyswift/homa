@@ -84,7 +84,10 @@ async function assertBuiltOutputWhenPresent() {
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
       throw new Error(
-        `VERCEL=1 build must emit ${path.relative(repoRoot, builtConfigPath)}`,
+        `VERCEL=1 build must emit ${path.relative(repoRoot, builtConfigPath)}. ` +
+          "Standalone eve build skips that path unless a co-deployed " +
+          "Next+Eve experimentalServices config is present (CI seeds " +
+          "apps/web/.vercel/output/config.json before eve build).",
       );
     }
     throw error;
