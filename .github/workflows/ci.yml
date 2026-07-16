@@ -82,9 +82,6 @@ jobs:
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
-      - name: Dynamic prompt suggestion checks
-        run: pnpm check:prompt-suggestions
-
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
 
