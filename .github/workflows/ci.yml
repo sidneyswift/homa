@@ -113,8 +113,44 @@ jobs:
       # tool modules outside Next's bundler, so imports that Next tolerates
       # can still sink the deploy (2026-07-10 incident: next/server + a JSON
       # corpus loader in a tool module). Run it here so CI fails first.
+      #
+      # Standalone `eve build` skips normalizeEveVercelFunctionOutput unless it
+      # sees a co-deployed Next+Eve experimentalServices config (the shape
+      # Vercel production writes). Seed that signal so CI exercises the same
+      # eve/__server.func + maxDuration path production ships.
       - name: Eve channel build (agent tool modules)
-        run: VERCEL=1 pnpm --filter web exec eve build
+        run: |
+          mkdir -p apps/web/.vercel/output
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const configPath = path.join(
+            "apps",
+            "web",
+            ".vercel",
+            "output",
+            "config.json",
+          );
+          fs.writeFileSync(
+            configPath,
+            `${JSON.stringify(
+              {
+                version: 3,
+                experimentalServices: {
+                  next: { framework: "nextjs", entrypoint: "." },
+                  eve: {
+                    framework: "eve",
+                    entrypoint: ".",
+                    routePrefix: "/eve",
+                  },
+                },
+              },
+              null,
+              2,
+            )}\n`,
+          );
+          NODE
+          VERCEL=1 pnpm --filter web exec eve build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
