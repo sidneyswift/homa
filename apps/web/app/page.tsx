@@ -5,10 +5,10 @@ import { Faq } from "../components/marketing/Faq";
 import { Features } from "../components/marketing/Features";
 import { Footer } from "../components/marketing/Footer";
 import { Hero } from "../components/marketing/Hero";
-import { HowHomaWorksCard } from "../components/marketing/HowHomaWorksCard";
 import { Nav } from "../components/marketing/Nav";
+import { PainBridge } from "../components/marketing/PainBridge";
 import { RevealObserver } from "../components/marketing/RevealObserver";
-import { ScrollCta } from "../components/marketing/ScrollCta";
+import { SampleReportProof } from "../components/marketing/SampleReportProof";
 import { SignupPopupProvider } from "../components/marketing/SignupPopupProvider";
 import { Stories } from "../components/marketing/Stories";
 import { HowThread } from "../components/marketing/thread/HowThread";
@@ -65,15 +65,15 @@ const faqJsonLd = {
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
  * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
  * the claims pass applied: no fabricated social proof (C2), no pricing
- * (T2), and every CTA routes to /onboarding, the child's-map flow that
- * replaced the bare waitlist. Section seams are the kit's waves/ribbons (a
+ * (T2), and signup CTAs open the onboarding entry flow. Sample-report links
+ * route to the public demonstration report. Section seams are the kit's waves/ribbons (a
  * ribbon IS the seam; never stack a wave at the same boundary). Motion
  * follows the emil-design-eng / review-animations skills: brand ease-out +
  * duration tokens, transform/opacity reveals armed by JS with
  * reduced-motion fallbacks, press scale on every pressable. Invite-only
- * framing was retired from this page (founder call 2026-07-07): ScrollCta
- * replaces the old InviteBand section with a scroll-triggered nudge back
- * to /onboarding instead. The Community section ("Find your people") and
+ * framing was retired from this page (founder call 2026-07-07). The
+ * automatic scroll nudge was removed in the 2026-07-15 category pass so
+ * the sample report can be read before an explicit signup action. The Community section ("Find your people") and
  * its "you don't have to do this alone" ribbon were removed the same day
  * (founder screenshot 2026-07-07): community is roadmap-only (journeys/07
  * open question 7), so the page no longer sells it.
@@ -127,13 +127,14 @@ export default function LandingPage() {
           <Hero />
         </div>
         <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />
+        <PainBridge />
         <Features />
-        <ScrollCta />
+        <SampleReportProof />
         <Wave color="var(--bg-page-warm)" flip />
         <HowThread />
-        <Wave color="var(--bg-page-warm)" />
-        <HowHomaWorksCard />
-        <Wave color="var(--band-blush)" flip />
+        <div style={{ background: "var(--bg-page-warm)" }}>
+          <Wave color="var(--band-blush)" flip />
+        </div>
         <Stories />
         <Wave color="var(--band-blush)" />
         <Faq />

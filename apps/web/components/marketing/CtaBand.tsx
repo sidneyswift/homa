@@ -35,31 +35,25 @@ export function CtaBand() {
           margin: "18px 0 12px",
         }}
       >
-        Ready for a calm Monday?
+        Start with the free progress report.
       </h2>
       <p
         data-reveal=""
         className="rv-d1"
         style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "1.3rem", color: "var(--stone-700)", margin: "0 0 32px" }}
       >
-        Set-up takes an afternoon. The calm shows up the same week.
+        No card is needed. The questionnaire takes about five minutes per child.
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
         {openPopup ? (
           <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-            See where your child stands
+            Get your free report
           </Button>
         ) : (
           <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-            See where your child stands
+            Get your free report
           </Button>
         )}
-        <Button variant="ghost" size="lg" href="/onboarding/method" style={{ background: "var(--surface-card)" }}>
-          How the report works
-        </Button>
-      </div>
-      <div data-reveal="" className="rv-d2" style={{ marginTop: 16, fontSize: "0.88rem", fontWeight: 600, color: "var(--stone-700)" }}>
-        Free &middot; about five minutes
       </div>
     </section>
   );
