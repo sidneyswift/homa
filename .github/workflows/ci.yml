@@ -114,11 +114,18 @@ jobs:
       # can still sink the deploy (2026-07-10 incident: next/server + a JSON
       # corpus loader in a tool module). Run it here so CI fails first.
       - name: Eve channel build (agent tool modules)
-        run: pnpm --filter web exec eve build
+        run: VERCEL=1 pnpm --filter web exec eve build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # Eve's shared /eve/__server.func hosts the long-lived NDJSON stream.
+      # Without maxDuration it inherits Fluid Compute's 300s default and
+      # production kills in-progress chat streams (2026-07-11 through 2026-07-16).
+      # Must run after a VERCEL=1 eve build so the shared function config is rewritten.
+      - name: Eve stream maxDuration guard
+        run: VERCEL=1 pnpm check:eve-stream-duration
 
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation

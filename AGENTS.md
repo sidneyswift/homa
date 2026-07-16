@@ -147,7 +147,7 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 ## Deploys & migrations
 
 - Prod schema and prod code ship together. Never apply a breaking migration (a rename, a drop, a tightened constraint) ahead of the deploy that reads it: push the code, watch the Vercel deploy go READY, then apply the migration, or use expand-contract (add the new shape, dual-read, drop the old later). Additive-only migrations may lead. Cause: the 2026-07-10 /app outage (build-log entry) was the previous deploy reading a renamed column.
-- A green `pnpm build` is not a green deploy. Vercel also runs `eve build`, which compiles agent tool modules outside Next's bundler, so imports Next tolerates (`next/server`, JSON loaders) can still sink the deploy. CI runs it now; before pushing changes under `apps/web/agent/`, run `pnpm --filter web exec eve build` locally.
+- A green `pnpm build` is not a green deploy. Vercel also runs `eve build`, which compiles agent tool modules outside Next's bundler, so imports Next tolerates (`next/server`, JSON loaders) can still sink the deploy. CI runs it now under `VERCEL=1`; before pushing changes under `apps/web/agent/`, run `VERCEL=1 pnpm --filter web exec eve build` locally, then `VERCEL=1 pnpm check:eve-stream-duration` so the shared `/eve/__server` stream function keeps `maxDuration: "max"`.
 - After any push that touches schema or the deploy pipeline, stay until the Vercel deployment is READY and probe the live site before calling it done.
 - ChildProgress rollout starts with `HOMA_LIVE_PROGRESS_ENABLED` false. Deploy
   code and verify READY plus legacy paths first. Then apply the additive
