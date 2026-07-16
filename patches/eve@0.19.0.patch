@@ -7,3 +7,15 @@ index 4ce60b0097e49f5fee42a641333bac2132eb8687..595e390e66cf1b35022cea5dbc3becff
 +function isStreamDisconnectError(e){if(e instanceof DOMException)return e.name===`AbortError`;if(!(e instanceof Error))return!1;let t=`code`in e&&typeof e.code==`string`?e.code:void 0;return e.name===`AbortError`||e.message===`terminated`||t===`UND_ERR_SOCKET`||/abort|cancel|disconnect|premature close|socket|terminated|load failed|failed to fetch|network/i.test(e.message)}async function*readNdjsonStream(e){let t=e.getReader(),n=new TextDecoder,r=``,i=!1;try{for(;;){let e=await t.read();if(e.done){i=!0,r+=n.decode();break}e.value&&(r+=n.decode(e.value,{stream:!0}));let a=r.indexOf(`
  `);for(;a!==-1;){let e=r.slice(0,a).trim();r=r.slice(a+1),e.length>0&&(yield JSON.parse(e)),a=r.indexOf(`
  `)}}let e=r.trim();e.length>0&&(yield JSON.parse(e))}finally{i||await t.cancel().catch(()=>{}),t.releaseLock()}}export{isStreamDisconnectError,readNdjsonStream};
+\ No newline at end of file
+diff --git a/dist/src/internal/workflow-bundle/eve-service-route-output.js b/dist/src/internal/workflow-bundle/eve-service-route-output.js
+index 07a103ed673fd8e2370e381974e7ed93f6da5f81..e5f9dfc5bc20e4b13c81af399e0a51a8aeff440b 100644
+--- a/dist/src/internal/workflow-bundle/eve-service-route-output.js
++++ b/dist/src/internal/workflow-bundle/eve-service-route-output.js
+@@ -51,4 +51,4 @@ export const handleUpgrade = originalModule.handleUpgrade
+   : undefined;
+ 
+ export default entrypoint;
+-`.trimStart()}function normalizeServiceRoutePrefix(e){let t=(e.startsWith(`/`)?e:`/${e}`).replace(/\/+$/,``);return t.length===0?`/`:t}export{EVE_SHARED_SERVER_FUNCTION_PATH,applyEveServiceRoutePrefixWrapper,isEveVercelFunctionPath,normalizeEveVercelRoutes};
+\ No newline at end of file
++`.trimStart()}function normalizeServiceRoutePrefix(e){let t=(e.startsWith(`/`)?e:`/${e}`).replace(/\/+$/,``);return t.length===0?`/`:t}async function applyEveServiceRoutePrefixWrapperWithMaxDuration(e,t){await applyEveServiceRoutePrefixWrapper(e,t);let n=join(e,`.vc-config.json`),r=JSON.parse(await readFile(n,`utf8`)),i=isRecord(r)?r:{};await writeFile(n,`${JSON.stringify({...i,maxDuration:`max`},null,2)}\n`)}export{EVE_SHARED_SERVER_FUNCTION_PATH,applyEveServiceRoutePrefixWrapperWithMaxDuration as applyEveServiceRoutePrefixWrapper,isEveVercelFunctionPath,normalizeEveVercelRoutes};

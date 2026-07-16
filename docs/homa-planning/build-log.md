@@ -3,6 +3,30 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-16 · Production Eve stream 300s timeout fixed, not stored
+
+Live production failure flagged from Vercel `get_runtime_errors`: recurring
+`Task timed out after 300 seconds` on aggregated route `/eve/__server`, first
+seen 2026-07-11T13:00:18Z, last seen 2026-07-16T03:02:14Z on deployment
+`dpl_9jVmrGZSQmtuc5zAJaLTwuG3ohwA`. Concrete request was
+`GET /eve/v1/session/wrun_01KXMDJGVG2JW2WNY5PRZ4AYH5/stream` (HTTP 200 then
+platform kill). A fresh stream to the same session opened ~50s later.
+
+Root cause: Eve 0.19.0 mounts all `/eve/v1/*` traffic, including the long-lived
+NDJSON event stream, on shared function `eve/__server.func`. That function's
+`.vc-config.json` had no `maxDuration`, so Fluid Compute kept the Pro default
+of 300s. Workflow functions already request `maxDuration: "max"`. The durable
+turn kept running after the HTTP stream died; this was a stream-lifetime bug,
+not a hung model call.
+
+Fix chosen alone: extend `patches/eve@0.19.0.patch` so
+`applyEveServiceRoutePrefixWrapper` also writes `maxDuration: "max"` onto
+`eve/__server.func`, matching Eve's own workflow-function posture and the Pro
+plan ceiling (800s). Did not bump Eve (runbook blocks unproven pin changes)
+and did not invent an app-level stream rotator in this session. Added
+`pnpm check:eve-stream-duration` (`scripts/eve-stream-max-duration-check.mjs`)
+and wired it into CI after `eve build`.
+
 ## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
 
 Set up so the seven-day dormant-window observation

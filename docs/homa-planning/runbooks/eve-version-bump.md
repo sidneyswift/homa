@@ -36,9 +36,19 @@ restore the original pin and lockfile, run `pnpm install`, and verify the diff
 before doing anything else.
 
 Eve also has a version-specific pnpm patch. Inspect
-`pnpm-workspace.yaml` and `patches/eve@0.19.0.patch`. The candidate regression
-run is unpatched. Before accepting a new pin, prove that each patch hunk is
-upstream or port it to a patch named for the candidate version.
+`pnpm-workspace.yaml` and `patches/eve@0.19.0.patch`. The current patch keeps
+two load-bearing hunks until upstream absorbs them:
+
+1. Client `isStreamDisconnectError` treats WebKit/Chromium "Load failed" /
+   "Failed to fetch" as reconnectable stream deaths.
+2. Shared Vercel function `eve/__server.func` writes `maxDuration: "max"` so
+   long chat streams use the plan ceiling (Pro: 800s) instead of the Fluid
+   Compute default of 300s.
+
+The candidate regression run is unpatched. Before accepting a new pin, prove
+that each patch hunk is upstream or port it to a patch named for the candidate
+version. Also run `pnpm check:eve-stream-duration` against the candidate
+install so the stream-function duration hunk cannot silently disappear.
 
 ```bash
 node scripts/eve-upgrade-check.mjs --to <candidate-version>
