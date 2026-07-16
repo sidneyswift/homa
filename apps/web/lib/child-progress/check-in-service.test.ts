@@ -77,11 +77,20 @@ interface FakeSnapshot {
   projection: ChildProgressView;
 }
 
+interface FakeProgressReplyLoop {
+  familyId: string;
+  checkInId: string;
+  deliveryId: string;
+  revision: number;
+  state: "open" | "cancelled";
+}
+
 interface FakeState {
   projectionInputs: Map<string, ChildProgressProjectionInput>;
   checkIns: Map<string, ProgressCheckInRecord>;
   responses: Map<string, FakeResponse>;
   snapshots: Map<string, FakeSnapshot>;
+  progressReplyLoops: Map<string, FakeProgressReplyLoop>;
   operationReceipts: Map<string, ChildProgressOperationReceipt>;
   savedDerivedProgress: SaveDerivedChildProgressInput[];
   checkInSequence: number;
@@ -490,6 +499,33 @@ class FakeChildProgressTransaction
     return structuredClone(updated);
   }
 
+  async cancelProgressReplyLoops(input: {
+    familyId: string;
+    checkInId: string;
+    keepDeliveryId: string | null;
+    keepRevision: number | null;
+  }): Promise<number> {
+    let cancelled = 0;
+    for (const loop of this.draft.progressReplyLoops.values()) {
+      if (
+        loop.familyId !== input.familyId ||
+        loop.checkInId !== input.checkInId ||
+        loop.state !== "open"
+      ) {
+        continue;
+      }
+      const keepCurrent =
+        input.keepDeliveryId !== null &&
+        input.keepRevision !== null &&
+        loop.deliveryId === input.keepDeliveryId &&
+        loop.revision === input.keepRevision;
+      if (keepCurrent) continue;
+      loop.state = "cancelled";
+      cancelled += 1;
+    }
+    return cancelled;
+  }
+
   async findCheckInResponseReplay(
     input: Parameters<
       ProgressCheckInTransaction["findCheckInResponseReplay"]
@@ -809,6 +845,7 @@ class FakeChildProgressRepository
     checkIns: new Map(),
     responses: new Map(),
     snapshots: new Map(),
+    progressReplyLoops: new Map(),
     operationReceipts: new Map(),
     savedDerivedProgress: [],
     checkInSequence: 0,
@@ -840,6 +877,12 @@ class FakeChildProgressRepository
 
   get snapshots(): FakeSnapshot[] {
     return [...this.state.snapshots.values()];
+  }
+
+  progressReplyLoop(deliveryId: string): FakeProgressReplyLoop {
+    const loop = this.state.progressReplyLoops.get(deliveryId);
+    assert.ok(loop);
+    return loop;
   }
 
   get savedDerivedProgress(): SaveDerivedChildProgressInput[] {
@@ -1021,6 +1064,22 @@ class FakeChildProgressRepository
     }
   }
 
+  openProgressReplyLoop(input: {
+    checkInId: string;
+    deliveryId: string;
+    revision: number;
+  }): void {
+    const checkIn = this.state.checkIns.get(input.checkInId);
+    assert.ok(checkIn);
+    this.state.progressReplyLoops.set(input.deliveryId, {
+      familyId: checkIn.familyId,
+      checkInId: input.checkInId,
+      deliveryId: input.deliveryId,
+      revision: input.revision,
+      state: "open",
+    });
+  }
+
   seedEvidence(input: {
     childId?: string;
     itemId: string;
@@ -1111,6 +1170,29 @@ async function startArtCheckIn(
     subjectIds: ["art"],
     idempotencyKey: "start-art",
   });
+}
+
+async function startBoundArtCheckInWithReplyLoop(
+  fixture: ReturnType<typeof createFixture>,
+  deliveryId = "delivery-1",
+) {
+  const started = await startArtCheckIn(fixture.service);
+  assert.equal(started.status, "started");
+  if (started.status !== "started") {
+    throw new Error("Bound-loop fixture did not start");
+  }
+  const bound = await fixture.service.bindCurrentDelivery(context(), {
+    checkInId: started.checkIn.id,
+    expectedRevision: started.checkIn.revision,
+    deliveryId,
+  });
+  assert.equal(bound.status, "bound");
+  fixture.repository.openProgressReplyLoop({
+    checkInId: started.checkIn.id,
+    deliveryId,
+    revision: started.checkIn.revision,
+  });
+  return started;
 }
 
 describe("durable progress check-in workflow", () => {
@@ -1249,6 +1331,114 @@ describe("durable progress check-in workflow", () => {
     }
     assert.equal(repository.checkIns.length, 2);
     assert.equal(repository.snapshots.length, 2);
+  });
+
+  it("retires the delivered revision when reissuing a prompt", async () => {
+    const reissue = createFixture();
+    const firstIssue =
+      await startBoundArtCheckInWithReplyLoop(reissue);
+    const reissued = await reissue.service.startCheckIn(
+      context({
+        providerMessageId: "provider-reissue",
+        runtimeSessionId: "runtime-reissue",
+        turnId: "turn-reissue",
+      }),
+      {
+        childId: CHILD_ID,
+        purpose: "subject_deep_dive",
+        subjectIds: ["art"],
+        idempotencyKey: "start-art-reissue",
+      },
+    );
+    assert.equal(reissued.status, "existing");
+    if (reissued.status !== "existing") return;
+    assert.equal(reissued.checkIn.revision, 2);
+    assert.equal(reissued.checkIn.currentDeliveryId, null);
+    const oldRevisionLoop =
+      reissue.repository.progressReplyLoop("delivery-1");
+    assert.equal(oldRevisionLoop.state, "cancelled");
+
+    assert.equal(
+      (
+        await reissue.service.bindCurrentDelivery(
+          context({
+            providerMessageId: "provider-reissue-bind",
+            runtimeSessionId: "runtime-reissue",
+            turnId: "turn-reissue",
+          }),
+          {
+            checkInId: reissued.checkIn.id,
+            expectedRevision: reissued.checkIn.revision,
+            deliveryId: "delivery-2",
+          },
+        )
+      ).status,
+      "bound",
+    );
+    reissue.repository.openProgressReplyLoop({
+      checkInId: reissued.checkIn.id,
+      deliveryId: "delivery-2",
+      revision: reissued.checkIn.revision,
+    });
+    const currentRevisionLoop =
+      reissue.repository.progressReplyLoop("delivery-2");
+    assert.equal(currentRevisionLoop.state, "open");
+  });
+
+  it("clears the delivered reply loop when pausing", async () => {
+    const pause = createFixture();
+    const pauseStarted =
+      await startBoundArtCheckInWithReplyLoop(pause);
+    const paused = await pause.service.pauseCheckIn(context(), {
+      checkInId: pauseStarted.checkIn.id,
+      reason: "explicit_pause",
+    });
+    assert.equal(paused.status, "paused");
+    if (paused.status !== "paused") return;
+    assert.equal(paused.checkIn.currentDeliveryId, null);
+    const pausedLoop = pause.repository.progressReplyLoop("delivery-1");
+    assert.equal(pausedLoop.state, "cancelled");
+  });
+
+  it("clears the delivered reply loop when stopping", async () => {
+    const stop = createFixture();
+    const stopStarted =
+      await startBoundArtCheckInWithReplyLoop(stop);
+    assert.equal(
+      (
+        await stop.service.stopCheckIn(context(), {
+          checkInId: stopStarted.checkIn.id,
+        })
+      ).status,
+      "stopped",
+    );
+    const stoppedLoop = stop.repository.progressReplyLoop("delivery-1");
+    assert.equal(stoppedLoop.state, "cancelled");
+  });
+
+  it("clears the delivered reply loop when completing", async () => {
+    const complete = createFixture();
+    const completeStarted =
+      await startBoundArtCheckInWithReplyLoop(complete);
+    assert.equal(
+      (
+        await complete.service.respondCheckIn(
+          context({
+            providerMessageId: "provider-complete-loop",
+            repliedDeliveryId: "delivery-1",
+          }),
+          {
+            checkInId: completeStarted.checkIn.id,
+            answer: "skip",
+            idempotencyKey: "complete-loop",
+          },
+        )
+      ).status,
+      "completed",
+    );
+    const completedLoop =
+      complete.repository.progressReplyLoop("delivery-1");
+    assert.equal(completedLoop.state, "cancelled");
   });
 
   it("enforces family, state, recipient, and bound delivery", async () => {

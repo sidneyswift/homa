@@ -49,6 +49,10 @@ const observationsMigrationPath = path.join(
   repoRoot,
   "supabase/migrations/20260713134500_child_observations.sql",
 );
+const progressLoopCleanupMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260716041217_conversation_progress_loop_cleanup.sql",
+);
 const familyId = "00000000-0000-0000-0000-000000000001";
 const childId = "00000000-0000-0000-0000-000000000002";
 const adultA = "00000000-0000-0000-0000-000000000003";
@@ -4975,6 +4979,24 @@ async function runAdapterAssertions(input: {
     };
     const memberRemovalEventsBefore =
       await memberRemovedPauseEventState(sql);
+    const memberRemovalMessageId = randomUUID();
+    const memberRemovalDeliveryId = randomUUID();
+    await sql`
+      insert into public.conversation_messages (id, family_id)
+      values (${memberRemovalMessageId}, ${familyId})
+    `;
+    await sql`
+      insert into public.conversation_deliveries (
+        id, family_id, episode_id, recipient_member_user_id,
+        channel, destination_hash, status
+      )
+      values (
+        ${memberRemovalDeliveryId}, ${familyId}, ${task5EpisodeId},
+        ${adultA}, 'sms',
+        ${hashContinuityKey("sms:+15550000001")},
+        'sent'
+      )
+    `;
     const memberRemovalStart = await checkInService.startCheckIn(
       task5Context({
         memberUserId: adultA,
@@ -5006,10 +5028,38 @@ async function runAdapterAssertions(input: {
         {
           checkInId: memberRemovalStart.checkIn.id,
           expectedRevision: 1,
-          deliveryId: task5DeliveryId,
+          deliveryId: memberRemovalDeliveryId,
         },
       );
     assert.equal(memberRemovalBound.status, "bound");
+    await openReplyLoopWithDatabase(sql, {
+      attempt: {
+        id: memberRemovalDeliveryId,
+        familyId,
+        episodeId: task5EpisodeId,
+        messageId: memberRemovalMessageId,
+        taskRunId: null,
+        memberUserId: adultA,
+        channel: "sms",
+        destination: "+15550000001",
+        providerThreadKey: "member-removal-thread",
+        existingStatus: "sent",
+        shouldSend: false,
+      },
+      contract: replyContractForProgressCheckIn(
+        memberRemovalStart.checkIn.id,
+        memberRemovalStart.checkIn.revision,
+      ),
+      now: new Date("2026-07-11T18:39:10.000Z"),
+    });
+    const [memberRemovalLoopBefore] = await sql<
+      { state: string }[]
+    >`
+      select state
+      from public.conversation_open_loops
+      where delivery_id = ${memberRemovalDeliveryId}
+    `;
+    assert.deepEqual(memberRemovalLoopBefore, { state: "open" });
     await sql`
       update public.family_members
       set user_id = user_id
@@ -5026,6 +5076,16 @@ async function runAdapterAssertions(input: {
     assert.deepEqual(await memberRemovedPauseEventState(sql), {
       count: memberRemovalEventsBefore.count + 1,
       exact_props: true,
+    });
+    const [memberRemovalLoopAfter] = await sql<
+      { state: string }[]
+    >`
+      select state
+      from public.conversation_open_loops
+      where delivery_id = ${memberRemovalDeliveryId}
+    `;
+    assert.deepEqual(memberRemovalLoopAfter, {
+      state: "cancelled",
     });
     const [memberRemoved] = await sql<
       {
@@ -5891,6 +5951,25 @@ async function main(): Promise<void> {
         database,
         "-f",
         observationsMigrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "--single-transaction",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        progressLoopCleanupMigrationPath,
       ],
       env,
     );
