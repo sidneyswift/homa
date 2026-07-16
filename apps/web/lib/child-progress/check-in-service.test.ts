@@ -1335,8 +1335,7 @@ describe("durable progress check-in workflow", () => {
 
   it("retires the delivered revision when reissuing a prompt", async () => {
     const reissue = createFixture();
-    const firstIssue =
-      await startBoundArtCheckInWithReplyLoop(reissue);
+    await startBoundArtCheckInWithReplyLoop(reissue);
     const reissued = await reissue.service.startCheckIn(
       context({
         providerMessageId: "provider-reissue",
@@ -1385,10 +1384,70 @@ describe("durable progress check-in workflow", () => {
     assert.equal(currentRevisionLoop.state, "open");
   });
 
+  it("clears the delivered reply loop when advancing", async () => {
+    const advance = createFixture();
+    const started = await advance.service.startCheckIn(context(), {
+      childId: CHILD_ID,
+      purpose: "subject_deep_dive",
+      subjectIds: ["art", "music"],
+      idempotencyKey: "start-advance-loop",
+    });
+    assert.equal(started.status, "started");
+    if (started.status !== "started") return;
+    assert.equal(
+      (
+        await advance.service.bindCurrentDelivery(context(), {
+          checkInId: started.checkIn.id,
+          expectedRevision: started.checkIn.revision,
+          deliveryId: "delivery-1",
+        })
+      ).status,
+      "bound",
+    );
+    advance.repository.openProgressReplyLoop({
+      checkInId: started.checkIn.id,
+      deliveryId: "delivery-1",
+      revision: started.checkIn.revision,
+    });
+
+    const advanced = await advance.service.respondCheckIn(
+      context({
+        providerMessageId: "provider-advance-loop",
+        repliedDeliveryId: "delivery-1",
+      }),
+      {
+        checkInId: started.checkIn.id,
+        answer: "skip",
+        idempotencyKey: "advance-loop",
+      },
+    );
+
+    assert.equal(advanced.status, "advanced");
+    const advancedLoop =
+      advance.repository.progressReplyLoop("delivery-1");
+    assert.equal(advancedLoop.state, "cancelled");
+  });
+
   it("clears the delivered reply loop when pausing", async () => {
     const pause = createFixture();
     const pauseStarted =
       await startBoundArtCheckInWithReplyLoop(pause);
+    const sibling = await pause.service.startCheckIn(
+      context({ providerMessageId: "provider-sibling-loop" }),
+      {
+        childId: SIBLING_ID,
+        purpose: "subject_deep_dive",
+        subjectIds: ["art"],
+        idempotencyKey: "start-sibling-loop",
+      },
+    );
+    assert.equal(sibling.status, "started");
+    if (sibling.status !== "started") return;
+    pause.repository.openProgressReplyLoop({
+      checkInId: sibling.checkIn.id,
+      deliveryId: "sibling-loop",
+      revision: sibling.checkIn.revision,
+    });
     const paused = await pause.service.pauseCheckIn(context(), {
       checkInId: pauseStarted.checkIn.id,
       reason: "explicit_pause",
@@ -1398,6 +1457,8 @@ describe("durable progress check-in workflow", () => {
     assert.equal(paused.checkIn.currentDeliveryId, null);
     const pausedLoop = pause.repository.progressReplyLoop("delivery-1");
     assert.equal(pausedLoop.state, "cancelled");
+    const siblingLoop = pause.repository.progressReplyLoop("sibling-loop");
+    assert.equal(siblingLoop.state, "open");
   });
 
   it("clears the delivered reply loop when stopping", async () => {
@@ -2043,6 +2104,11 @@ describe("durable progress check-in workflow", () => {
       ),
       { status: "wrong_recipient" },
     );
+    repository.openProgressReplyLoop({
+      checkInId: firstAnswer.checkIn.id,
+      deliveryId: "takeover-loop",
+      revision: firstAnswer.checkIn.revision,
+    });
 
     const takeover = await service.takeoverCheckIn(
       context({
@@ -2061,6 +2127,10 @@ describe("durable progress check-in workflow", () => {
     assert.equal(takeover.prompt.itemId, firstAnswer.prompt.itemId);
     assert.equal(takeover.prompt.revision, 3);
     assert.equal(repository.responses.length, 1);
+    assert.equal(
+      repository.progressReplyLoop("takeover-loop").state,
+      "cancelled",
+    );
 
     assert.deepEqual(
       await service.respondCheckIn(
@@ -2257,6 +2327,11 @@ describe("durable progress check-in workflow", () => {
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
     const itemId = started.checkIn.currentItemId;
+    repository.openProgressReplyLoop({
+      checkInId: started.checkIn.id,
+      deliveryId: "delivery-pause-loop",
+      revision: started.checkIn.revision,
+    });
 
     const paused = await service.pauseCheckInForDeliveryOutcome(
       context(),
@@ -2274,6 +2349,10 @@ describe("durable progress check-in workflow", () => {
     assert.equal(paused.checkIn.currentDeliveryId, null);
     assert.equal(paused.checkIn.pendingRuntimeSessionId, null);
     assert.equal(paused.checkIn.pendingTurnId, null);
+    assert.equal(
+      repository.progressReplyLoop("delivery-pause-loop").state,
+      "cancelled",
+    );
     assert.equal(repository.responses.length, 0);
     assert.deepEqual(
       await service.respondCheckIn(
@@ -2290,6 +2369,11 @@ describe("durable progress check-in workflow", () => {
       ),
       { status: "no_active_check_in" },
     );
+    repository.openProgressReplyLoop({
+      checkInId: paused.checkIn.id,
+      deliveryId: "resume-loop",
+      revision: paused.checkIn.revision,
+    });
 
     const resumed = await service.resumeCheckIn(
       context({
@@ -2307,6 +2391,10 @@ describe("durable progress check-in workflow", () => {
       assert.equal(resumed.checkIn.pendingTurnId, "turn-resume");
       assert.equal(resumed.checkIn.currentItemId, itemId);
     }
+    assert.equal(
+      repository.progressReplyLoop("resume-loop").state,
+      "cancelled",
+    );
   });
 
   it("stops without another report write and frees the child slot", async () => {
@@ -2391,11 +2479,33 @@ describe("durable progress check-in workflow", () => {
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
     assert.equal(started.prompt.itemId, literacyItem.item.id);
+    assert.equal(
+      (
+        await service.bindCurrentDelivery(
+          context({
+            memberUserId: ADULT_B,
+            providerMessageId: "provider-conflict-bind",
+          }),
+          {
+            checkInId: started.checkIn.id,
+            expectedRevision: started.checkIn.revision,
+            deliveryId: "delivery-adult-2",
+          },
+        )
+      ).status,
+      "bound",
+    );
+    repository.openProgressReplyLoop({
+      checkInId: started.checkIn.id,
+      deliveryId: "delivery-adult-2",
+      revision: started.checkIn.revision,
+    });
 
     const opened = await service.respondCheckIn(
       context({
         memberUserId: ADULT_B,
         providerMessageId: "provider-conflict-answer",
+        repliedDeliveryId: "delivery-adult-2",
       }),
       {
         checkInId: started.checkIn.id,
@@ -2408,6 +2518,10 @@ describe("durable progress check-in workflow", () => {
     if (opened.status !== "conflict_open") return;
     assert.equal(opened.checkIn.state, "paused");
     assert.equal(opened.checkIn.pauseReason, "conflict");
+    assert.equal(
+      repository.progressReplyLoop("delivery-adult-2").state,
+      "cancelled",
+    );
     assert.equal(
       opened.checkIn.currentItemId,
       literacyItem.item.id,
@@ -2453,6 +2567,7 @@ describe("durable progress check-in workflow", () => {
         context({
           memberUserId: ADULT_B,
           providerMessageId: "provider-conflict-answer",
+          repliedDeliveryId: "delivery-adult-2",
         }),
         {
           checkInId: started.checkIn.id,
@@ -2513,6 +2628,11 @@ describe("durable progress check-in workflow", () => {
       },
     );
 
+    repository.openProgressReplyLoop({
+      checkInId: opened.checkIn.id,
+      deliveryId: "conflict-resolution-loop",
+      revision: opened.checkIn.revision,
+    });
     const resolved = await service.resolveProgressConflict(
       context({
         memberUserId: ADULT_C,
@@ -2532,6 +2652,10 @@ describe("durable progress check-in workflow", () => {
     assert.equal(resolved.checkIn?.episodeId, "episode-1");
     assert.equal(resolved.prompt?.revision, 3);
     assert.equal(repository.projectionInput().evidence.length, 2);
+    assert.equal(
+      repository.progressReplyLoop("conflict-resolution-loop").state,
+      "cancelled",
+    );
     assert.deepEqual(committedResolutions, [{
       familyId: FAMILY_ID,
       childId: CHILD_ID,

@@ -4050,7 +4050,7 @@ async function runAdapterAssertions(input: {
       kind: "choice",
       prompt_key:
         `progress-check-in:${firstStarted.checkIn.id}:revision:${firstStarted.checkIn.revision}`,
-      state: "open",
+      state: "cancelled",
     });
     await sql`
       update public.conversation_open_loops
@@ -4100,6 +4100,10 @@ async function runAdapterAssertions(input: {
         `progress-check-in:${firstStarted.checkIn.id}:revision:${firstStarted.checkIn.revision}`,
       state: "resolved",
     });
+    await sql`
+      delete from public.conversation_open_loops
+      where delivery_id = ${task5DeliveryId}
+    `;
 
     await assert.rejects(
       repository.withTransaction((transaction) =>
@@ -4269,6 +4273,106 @@ async function runAdapterAssertions(input: {
       throw new Error("Task 5 delivery binding was refused");
     }
     assert.equal(bound.checkIn.currentDeliveryId, task5DeliveryId);
+    const progressLoopDecoyFamilyId = randomUUID();
+    const progressLoopWrongDeliveryId = randomUUID();
+    await sql`
+      insert into public.families (id)
+      values (${progressLoopDecoyFamilyId})
+    `;
+    await sql`
+      insert into public.conversation_deliveries (
+        id, family_id, episode_id, recipient_member_user_id,
+        channel, destination_hash
+      )
+      values (
+        ${progressLoopWrongDeliveryId}, ${familyId},
+        ${task5EpisodeId}, ${adultA}, 'sms',
+        ${hashContinuityKey("sms:+15550000003")}
+      )
+    `;
+    const assertInsertedProgressLoopState = async (input: {
+      label: string;
+      loopFamilyId: string;
+      deliveryId: string;
+      promptKey: string;
+      expectedState: "open" | "cancelled";
+    }) => {
+      await sql`
+        delete from public.conversation_open_loops
+        where delivery_id = ${input.deliveryId}
+      `;
+      await sql`
+        insert into public.conversation_open_loops (
+          family_id, episode_id, message_id, delivery_id,
+          kind, state, prompt_key, expires_at
+        )
+        values (
+          ${input.loopFamilyId}, ${task5EpisodeId}, ${task6MessageId},
+          ${input.deliveryId}, 'choice', 'open', ${input.promptKey},
+          '2026-07-12T18:31:30.000000Z'
+        )
+      `;
+      const [loop] = await sql<{ state: string }[]>`
+        select state
+        from public.conversation_open_loops
+        where delivery_id = ${input.deliveryId}
+      `;
+      assert.deepEqual(
+        loop,
+        { state: input.expectedState },
+        input.label,
+      );
+    };
+    const currentProgressPrompt =
+      `progress-check-in:${bound.checkIn.id}:revision:${bound.checkIn.revision}`;
+    await assertInsertedProgressLoopState({
+      label: "generic loop remains open",
+      loopFamilyId: familyId,
+      deliveryId: task5WrongDeliveryId,
+      promptKey: "reactive-question",
+      expectedState: "open",
+    });
+    await assertInsertedProgressLoopState({
+      label: "wrong delivery progress loop is cancelled",
+      loopFamilyId: familyId,
+      deliveryId: progressLoopWrongDeliveryId,
+      promptKey: currentProgressPrompt,
+      expectedState: "cancelled",
+    });
+    await assertInsertedProgressLoopState({
+      label: "wrong revision progress loop is cancelled",
+      loopFamilyId: familyId,
+      deliveryId: task5DeliveryId,
+      promptKey:
+        `progress-check-in:${bound.checkIn.id}:revision:${bound.checkIn.revision + 1}`,
+      expectedState: "cancelled",
+    });
+    await assertInsertedProgressLoopState({
+      label: "wrong check-in progress loop is cancelled",
+      loopFamilyId: familyId,
+      deliveryId: task5DeliveryId,
+      promptKey:
+        `progress-check-in:${randomUUID()}:revision:${bound.checkIn.revision}`,
+      expectedState: "cancelled",
+    });
+    await assertInsertedProgressLoopState({
+      label: "wrong family progress loop is cancelled",
+      loopFamilyId: progressLoopDecoyFamilyId,
+      deliveryId: task5DeliveryId,
+      promptKey: currentProgressPrompt,
+      expectedState: "cancelled",
+    });
+    await assertInsertedProgressLoopState({
+      label: "current progress loop remains open",
+      loopFamilyId: familyId,
+      deliveryId: task5DeliveryId,
+      promptKey: currentProgressPrompt,
+      expectedState: "open",
+    });
+    await sql`
+      delete from public.families
+      where id = ${progressLoopDecoyFamilyId}
+    `;
     const activeSmsProgress =
       await resolveActiveSmsProgressContextWithDatabase(sql, {
         familyId,
@@ -4468,14 +4572,72 @@ async function runAdapterAssertions(input: {
         },
       },
     ];
-    const racingResponses = await Promise.all(
+    await sql`
+      delete from public.conversation_open_loops
+      where delivery_id = ${task5DeliveryId}
+    `;
+    let signalProgressLoopInserted = () => {};
+    let releaseProgressLoopInsert = () => {};
+    const progressLoopInserted = new Promise<void>((resolve) => {
+      signalProgressLoopInserted = resolve;
+    });
+    const holdProgressLoopInsert = new Promise<void>((resolve) => {
+      releaseProgressLoopInsert = resolve;
+    });
+    const progressLoopInsertRun = blockerSql.begin(
+      async (transactionSql) => {
+        await transactionSql`
+          insert into public.conversation_open_loops (
+            family_id, episode_id, message_id, delivery_id,
+            kind, state, prompt_key, expires_at
+          )
+          values (
+            ${familyId}, ${task5EpisodeId}, ${task6MessageId},
+            ${task5DeliveryId}, 'choice', 'open',
+            ${currentProgressPrompt},
+            '2026-07-12T18:31:40.000000Z'
+          )
+        `;
+        signalProgressLoopInserted();
+        await holdProgressLoopInsert;
+      },
+    );
+    await progressLoopInserted;
+    let racingResponsesSettled = false;
+    const racingResponsesPromise = Promise.all(
       responseCandidates.map((candidate) =>
         checkInService.respondCheckIn(
           candidate.context,
           candidate.input,
         )
       ),
-    );
+    ).then((responses) => {
+      racingResponsesSettled = true;
+      return responses;
+    });
+    let responseWaitedForLoopGuard = false;
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      const [activity] = await writerSql<{ blocked: boolean }[]>`
+        select exists (
+          select 1
+          from pg_stat_activity
+          where pid <> pg_backend_pid()
+            and wait_event_type = 'Lock'
+            and query not like '%pg_stat_activity%'
+        ) as blocked
+      `;
+      if (activity.blocked && !racingResponsesSettled) {
+        responseWaitedForLoopGuard = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    releaseProgressLoopInsert();
+    const [racingResponses] = await Promise.all([
+      racingResponsesPromise,
+      progressLoopInsertRun,
+    ]);
+    assert.equal(responseWaitedForLoopGuard, true);
     assert.deepEqual(
       racingResponses.map((result) => result.status).sort(),
       ["advanced", "wrong_delivery"],
@@ -4490,6 +4652,32 @@ async function runAdapterAssertions(input: {
       throw new Error("Task 5 response did not advance");
     }
     assert.ok(advancedResponse.progressUpdate);
+    const guardedLoopStates = await sql<
+      { delivery_id: string; state: string }[]
+    >`
+      select delivery_id, state
+      from public.conversation_open_loops
+      where delivery_id in (
+        ${task5DeliveryId},
+        ${task5WrongDeliveryId}
+      )
+      order by delivery_id
+    `;
+    assert.deepEqual(
+      new Map(
+        guardedLoopStates.map((loop) => [
+          loop.delivery_id,
+          loop.state,
+        ]),
+      ),
+      new Map([
+        [task5DeliveryId, "cancelled"],
+        [task5WrongDeliveryId, "open"],
+      ]),
+    );
+    console.log(
+      "PASS  child-progress-e2e guarded-progress-loop-insertion-race",
+    );
     const winner = responseCandidates[winnerIndex];
     const idempotencyDuplicate =
       await checkInService.respondCheckIn(
@@ -5087,6 +5275,39 @@ async function runAdapterAssertions(input: {
     assert.deepEqual(memberRemovalLoopAfter, {
       state: "cancelled",
     });
+    await openReplyLoopWithDatabase(sql, {
+      attempt: {
+        id: memberRemovalDeliveryId,
+        familyId,
+        episodeId: task5EpisodeId,
+        messageId: memberRemovalMessageId,
+        taskRunId: null,
+        memberUserId: adultA,
+        channel: "sms",
+        destination: "+15550000001",
+        providerThreadKey: "member-removal-thread",
+        existingStatus: "sent",
+        shouldSend: false,
+      },
+      contract: replyContractForProgressCheckIn(
+        memberRemovalStart.checkIn.id,
+        memberRemovalStart.checkIn.revision,
+      ),
+      now: new Date("2026-07-11T18:39:11.000Z"),
+    });
+    const [lateMemberRemovalLoop] = await sql<
+      { state: string }[]
+    >`
+      select state
+      from public.conversation_open_loops
+      where delivery_id = ${memberRemovalDeliveryId}
+    `;
+    assert.deepEqual(lateMemberRemovalLoop, {
+      state: "cancelled",
+    });
+    console.log(
+      "PASS  child-progress-e2e late-member-removal-loop-cancelled",
+    );
     const [memberRemoved] = await sql<
       {
         state: string;
