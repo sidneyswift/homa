@@ -169,8 +169,9 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             </span>
           </h1>
           <p className="mt-4 max-w-[28rem] text-pretty text-body">
-            Answer a five-minute questionnaire to get your child&apos;s free progress report. To get
-            started, create your free account.
+            Answer a five-minute questionnaire to get your child&apos;s free progress report.
+            Strengths come first. Anything still growing comes with a next step. A free account
+            saves the report.
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,
@@ -289,7 +290,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
 
           <div className="mt-10">
             <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-subtle">
-              Benchmarked against national standards
+              Checked against national standards and research
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-4">
               {/* Plain <img>, not next/image: these are already-optimized static

@@ -42,7 +42,7 @@ export function CtaBand() {
         className="rv-d1"
         style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "1.3rem", color: "var(--stone-700)", margin: "0 0 32px" }}
       >
-        Set-up takes an afternoon. The calm shows up the same week.
+        The free report takes about five minutes. Setting up Homa for your whole family takes an afternoon.
       </p>
       <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
         {openPopup ? (
@@ -59,7 +59,10 @@ export function CtaBand() {
         </Button>
       </div>
       <div data-reveal="" className="rv-d2" style={{ marginTop: 16, fontSize: "0.88rem", fontWeight: 600, color: "var(--stone-700)" }}>
-        Free &middot; about five minutes
+        No card needed &middot;{" "}
+        <a href="/onboarding/sample" style={{ color: "var(--stone-700)", textDecoration: "underline", textUnderlineOffset: 3 }}>
+          See a sample report first
+        </a>
       </div>
     </section>
   );

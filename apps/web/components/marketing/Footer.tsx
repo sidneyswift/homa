@@ -19,7 +19,7 @@ export function Footer() {
         <div>
           <Logo size={28} tone="dark" />
           <p style={{ marginTop: 14, maxWidth: 260, lineHeight: 1.55, fontSize: "0.92rem", color: "var(--stone-400)" }}>
-            The calm, capable co-pilot for homeschooling families.
+            The calm assistant for homeschooling families.
           </p>
         </div>
         {COLUMNS.map(([heading, links]) => (
