@@ -13,6 +13,7 @@ import {
 test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "The homeschool assistant that does the prep.");
   assert.equal(HERO_COPY.primaryAction, "Get your free report");
+  assert.equal(HERO_COPY.eyebrow, "Made for homeschool parents, kids never use a screen");
 });
 
 test("the platform strip states only verified access modes", () => {

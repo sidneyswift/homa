@@ -1,6 +1,71 @@
+import type { ReactNode } from "react";
 import { Check, FileText } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
+
+function SentBubble({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ alignSelf: "flex-end", position: "relative", maxWidth: "86%" }}>
+      <div
+        style={{
+          padding: "8px 11px",
+          borderRadius: "18px 18px 4px 18px",
+          background: "var(--clay-500)",
+          color: "#fff",
+          fontSize: "0.84rem",
+          lineHeight: 1.35,
+          boxShadow: "var(--shadow-sm)",
+        }}
+      >
+        {children}
+      </div>
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          right: -1,
+          bottom: 1,
+          width: 10,
+          height: 12,
+          background: "var(--clay-500)",
+          clipPath: "polygon(0 0, 0 100%, 100% 100%)",
+        }}
+      />
+    </div>
+  );
+}
+
+function ReceivedBubble({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ alignSelf: "flex-start", position: "relative", maxWidth: "88%" }}>
+      <div
+        style={{
+          padding: "8px 11px",
+          borderRadius: "18px 18px 18px 4px",
+          background: "var(--surface-raised)",
+          color: "var(--text-strong)",
+          fontSize: "0.84rem",
+          lineHeight: 1.35,
+          boxShadow: "var(--shadow-sm)",
+        }}
+      >
+        {children}
+      </div>
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: -1,
+          bottom: 1,
+          width: 10,
+          height: 12,
+          background: "var(--surface-raised)",
+          clipPath: "polygon(100% 0, 0 100%, 100% 100%)",
+        }}
+      />
+    </div>
+  );
+}
 
 /**
  * Fixture-safe proof shaped like a phone text thread. HTML rather than a
@@ -15,7 +80,7 @@ export function HeroProductDemo() {
       <div
         className="lp-product-demo-phone"
         role="img"
-        aria-label="Example text thread: a parent asks Homa for butterfly letter B practice, and Homa replies with a printable page saved to the binder"
+        aria-label="Text thread: a parent says Maya likes butterflies, Homa offers a butterfly-themed math worksheet, the parent says yes, and Homa sends a count-and-graph printable saved to the binder"
         style={{
           position: "relative",
           width: "100%",
@@ -181,7 +246,7 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Logo size={24} />
+              <Logo size={24} variant="mark" />
             </span>
             <p
               style={{
@@ -196,25 +261,25 @@ export function HeroProductDemo() {
               Homa
             </p>
             <p style={{ margin: 0, color: "var(--text-subtle)", fontSize: "0.66rem", fontWeight: 650 }}>
-              Text Message · Example
+              Text Message
             </p>
           </div>
 
-          {/* Thread */}
+          {/* Thread: interest → offer → yes → printable */}
           <div
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              gap: 6,
-              padding: "12px 10px 8px",
+              gap: 5,
+              padding: "10px 10px 6px",
               background: "linear-gradient(180deg, #f4ede3 0%, #ebe2d4 55%, #f4ede3 100%)",
             }}
           >
             <p
               aria-hidden="true"
               style={{
-                margin: "0 0 4px",
+                margin: "0 0 2px",
                 textAlign: "center",
                 color: "var(--text-subtle)",
                 fontSize: "0.66rem",
@@ -224,39 +289,16 @@ export function HeroProductDemo() {
               Today 7:12 AM
             </p>
 
-            {/* Parent sent bubble */}
-            <div style={{ alignSelf: "flex-end", position: "relative", maxWidth: "86%" }}>
-              <div
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: "18px 18px 4px 18px",
-                  background: "var(--clay-500)",
-                  color: "#fff",
-                  fontSize: "0.88rem",
-                  lineHeight: 1.38,
-                  boxShadow: "var(--shadow-sm)",
-                }}
-              >
-                Maya is into butterflies right now. Can you make letter B practice for tomorrow?
-              </div>
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: -1,
-                  bottom: 1,
-                  width: 10,
-                  height: 12,
-                  background: "var(--clay-500)",
-                  clipPath: "polygon(0 0, 0 100%, 100% 100%)",
-                }}
-              />
-            </div>
+            <SentBubble>Maya is into butterflies right now.</SentBubble>
+
+            <ReceivedBubble>Great! I&apos;ll make today&apos;s math worksheet butterfly-themed.</ReceivedBubble>
+
+            <SentBubble>Yes!</SentBubble>
             <p
               aria-hidden="true"
               style={{
                 alignSelf: "flex-end",
-                margin: "0 6px 6px 0",
+                margin: "0 6px 2px 0",
                 color: "var(--text-subtle)",
                 fontSize: "0.62rem",
                 fontWeight: 650,
@@ -265,96 +307,41 @@ export function HeroProductDemo() {
               Delivered
             </p>
 
-            {/* Homa received bubble */}
-            <div style={{ alignSelf: "flex-start", position: "relative", maxWidth: "88%" }}>
-              <div
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: "18px 18px 18px 4px",
-                  background: "var(--surface-raised)",
-                  color: "var(--text-strong)",
-                  fontSize: "0.88rem",
-                  lineHeight: 1.38,
-                  boxShadow: "var(--shadow-sm)",
-                }}
-              >
-                Done. I made a butterfly letter B page. I saved it in your binder. It is ready to
-                print.
-              </div>
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  left: -1,
-                  bottom: 1,
-                  width: 10,
-                  height: 12,
-                  background: "var(--surface-raised)",
-                  clipPath: "polygon(100% 0, 0 100%, 100% 100%)",
-                }}
-              />
-            </div>
+            <ReceivedBubble>Here you go. Ready to print.</ReceivedBubble>
 
-            {/* MMS-style attachment */}
+            {/* MMS-style attachment: generated count-and-graph preview */}
             <div
               style={{
                 alignSelf: "flex-start",
                 width: "86%",
                 overflow: "hidden",
-                marginTop: 2,
+                marginTop: 1,
                 borderRadius: 18,
                 background: "var(--surface-raised)",
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <div
+              <img
+                src="/images/hero-butterfly-math.png"
+                alt=""
+                width={640}
+                height={853}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "0.7fr 1.3fr",
-                  gap: 7,
-                  padding: 9,
-                  background: "var(--gold-100)",
+                  display: "block",
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: 168,
+                  objectFit: "cover",
+                  objectPosition: "top center",
+                  background: "#fff",
                 }}
-              >
-                <div
-                  style={{
-                    display: "grid",
-                    placeItems: "center",
-                    minHeight: 70,
-                    borderRadius: 12,
-                    background: "rgba(255,255,255,0.82)",
-                    color: "var(--gold-ink-strong)",
-                    fontFamily: "var(--font-display)",
-                    fontSize: "1.7rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  B b
-                </div>
-                <div style={{ display: "grid", alignContent: "center", gap: 4 }}>
-                  {["B B B B", "b b b b", "butterfly"].map((line) => (
-                    <span
-                      key={line}
-                      style={{
-                        paddingBottom: 2,
-                        borderBottom: "1px dashed rgba(64,46,5,0.28)",
-                        color: "var(--gold-ink-strong)",
-                        fontFamily: "var(--font-hand)",
-                        fontSize: "0.74rem",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {line}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              />
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  padding: "8px 10px",
+                  padding: "7px 10px",
                   borderTop: "1px solid var(--border-subtle)",
                 }}
               >
@@ -383,7 +370,7 @@ export function HeroProductDemo() {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    Butterfly letter B.pdf
+                    Butterfly math.pdf
                   </p>
                   <p
                     style={{
@@ -489,11 +476,6 @@ export function HeroProductDemo() {
           </div>
         </div>
       </div>
-      <figcaption
-        style={{ marginTop: 14, color: "var(--text-subtle)", fontSize: "0.78rem", textAlign: "center" }}
-      >
-        Maya is a demonstration child. No real family details appear here.
-      </figcaption>
     </figure>
   );
 }

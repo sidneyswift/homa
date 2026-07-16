@@ -51,9 +51,10 @@ export function Hero() {
               fontWeight: 700,
               fontSize: "0.85rem",
               boxShadow: "var(--shadow-sm)",
+              maxWidth: "100%",
             }}
           >
-            <Sparkles size={15} aria-hidden="true" /> {HERO_COPY.eyebrow}
+            <Sparkles size={15} aria-hidden="true" style={{ flexShrink: 0 }} /> {HERO_COPY.eyebrow}
           </span>
           <h1
             style={{
@@ -69,20 +70,6 @@ export function Hero() {
             The homeschool <span style={{ color: "var(--clay-600)" }}>assistant</span> that does the
             prep.
           </h1>
-          <p
-            style={{
-              display: "inline-flex",
-              margin: "16px 0 0",
-              padding: "9px 12px",
-              borderRadius: "var(--radius-md)",
-              background: "var(--sage-50)",
-              color: "var(--sage-700)",
-              fontSize: "0.86rem",
-              fontWeight: 650,
-            }}
-          >
-            {HERO_COPY.trustLine}
-          </p>
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "18px 0 0", maxWidth: 500 }}>
             {HERO_COPY.body}
           </p>

@@ -1,10 +1,9 @@
 export const HERO_COPY = {
-  eyebrow: "For homeschool parents",
+  eyebrow: "Made for homeschool parents, kids never use a screen",
   headline: "The homeschool assistant that does the prep.",
   body:
     "Homa is an AI assistant for parents. She plans each week. She makes practice pages for each child. She records the hours you share. Her progress reports show what looks solid and what comes next.",
   primaryAction: "Get your free report",
-  trustLine: "You are the user. Your child never chats with AI.",
 } as const;
 
 export type PlatformKind = "message" | "web" | "phone";
