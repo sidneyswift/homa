@@ -109,6 +109,8 @@ pnpm --filter web exec eve build
 pnpm check:isolation
 pnpm check:map
 pnpm check:events
+pnpm check:fleet-skills
+pnpm check:fleet-skills-dormant
 pnpm check:skills-targeting
 pnpm check:taxonomy
 pnpm check:continuity

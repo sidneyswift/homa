@@ -56,21 +56,20 @@ means finishing the third one, not merging them back into files.
   dynamic-instructions + tools + Postgres shape).
 - **eve skills** are know-how, not abilities: markdown procedures advertised
   by description; the model calls the framework `load_skill` tool when a
-  request matches. **`agent/skills/*` (repo-authored) is the only active
-  home:** Homa-wide craft that ships with deploys and is versioned in git.
-  Packaged skills' sibling files auto-seed into `/workspace/skills/` for the
-  file tools to read.
-  **[Superseded 2026-07-15, founder ruling `filesystem-first-fleet-skills`:**
-  the "two homes, both correct" statement below described the system before
-  the cutover. `family_skills` + `skill_bank` rows served by a dynamic
-  resolver (`agent/skills/skill-library.ts`, now removed) were a second,
-  per-family and founder-curated home that changed at runtime without a
-  deploy. That system is retired: `save_skill` and `forget_skill` no longer
-  exist, the dynamic resolver is gone, and both tables are preserved as
-  dormant historical data rather than an active delivery path. See
-  `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md` for
-  the full rationale and the triggers that would reopen dynamic
-  distribution.]**
+  request matches. `agent/skills/<name>/SKILL.md` (repo-authored) is the
+  only active home: Homa-wide craft that ships with deploys and is
+  versioned in git. Packaged skills' sibling files auto-seed into
+  `/workspace/skills/` for the file tools to read.
+  (**Superseded 2026-07-15, founder ruling `filesystem-first-fleet-skills`:**
+  this section originally described "two homes, both correct." The second
+  home, `family_skills` + `skill_bank` rows served by a dynamic resolver
+  at `agent/skills/skill-library.ts`, per-family and founder-curated craft
+  that changed at runtime without a deploy, is retired. `save_skill` and
+  `forget_skill` no longer exist, the dynamic resolver is gone, and both
+  tables are preserved as dormant historical data, not an active delivery
+  path. `docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`
+  has the full rationale, the dormant-window evidence plan, and the
+  triggers that would reopen dynamic distribution: none have fired.)
 - **eve tools** are typed abilities that run in the app runtime with
   `process.env` and the caller's session auth. Tools and skills are different
   layers on purpose: a skill can only add instructions (progressive
@@ -153,9 +152,11 @@ Structural, not fixable by building:
    (durable memory + recall + a seeded workspace), not the substrate.
 2. **Self-modifying harness.** OpenClaw edits its own instruction files and
    gains new abilities at runtime. eve compiles instructions and tools at
-   deploy. Our dynamic instructions/skills from Postgres give runtime-editable
-   knowledge, but new TOOLS ship only with deploys (a safety feature under
-   tenancy, honestly).
+   deploy. Our dynamic instructions from Postgres (family/progress context,
+   rebuilt every `turn.started`) give runtime-fresh knowledge, but skills and
+   TOOLS both ship only with deploys now (filesystem-first fleet skills,
+   2026-07-15, superseded the runtime skill-growing loop this line used to
+   describe): a safety and simplicity trade under tenancy, honestly.
 3. **Local peripherals and personal accounts.** Wifi printing, the founder's
    Gmail, desktop Slack. Browser and system PDF actions are the current print
    boundary. Direct printer integration remains an open founder decision and is

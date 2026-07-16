@@ -137,11 +137,12 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
   focused route and card tests; and `pnpm child-progress:e2e` for the
   disposable local PostgreSQL harness. The E2E command creates and removes its
   own cluster and needs no remote credentials.
-- Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
+- Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
+- Temporary through the fleet-skills dormant window only (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md Phase C, opens 2026-07-15, earliest close 2026-07-22): `pnpm check:fleet-skills-dormant` proves the retired dynamic-skill files stay deleted and nothing outside an explicit allowlist queries `family_skills`/`skill_bank`. Retire this check together with `check:skills-targeting` once Phase C closes and a founder reviews the evidence; do not treat either as a permanent fixture of "how skills work here."
 - Documentation reconciliation: `pnpm check:docs -- --allow-open` during the audit and `pnpm check:docs` for the zero-open completion gate
 - Conversation continuity tests: `pnpm check:continuity` when changing the continuity module or a channel adapter
 - Before ANY eve version bump, no exceptions: `node scripts/eve-upgrade-check.mjs` (procedure: `docs/homa-planning/runbooks/eve-version-bump.md`)
-- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, the five required guards, the Next build, and the eve build. It also runs ChildProgress, Progress UI, and the disposable ChildProgress PostgreSQL E2E. Confirm the actual workflow result before describing CI as green.
+- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, the required guards above (including the temporary dormant-window guard while Phase C is open), the Next build, and the eve build. It also runs ChildProgress, Progress UI, and the disposable ChildProgress PostgreSQL E2E. Confirm the actual workflow result before describing CI as green.
 
 ## Deploys & migrations
 
