@@ -27,6 +27,14 @@ and did not invent an app-level stream rotator in this session. Added
 `pnpm check:eve-stream-duration` (`scripts/eve-stream-max-duration-check.mjs`)
 and wired it into CI after `eve build`.
 
+**FIXED:** `f37fa8dae5b3a9a4379dc8f6538abf824b838761` (PR #5), production
+deployment `dpl_Cenw5aLDP1Hm9rF71ai7ZupFQimW` READY at ~2026-07-16T05:27Z
+and aliased to `thankshoma.com`. Post-deploy probes: site and `/eve/v1/health`
+returned HTTP 200; `get_runtime_errors` for `/eve/__server` showed no
+timeouts in the first hour after READY. Historical cluster entries from
+before this deploy remain in Vercel until they age out; new 300s kills on
+that route are the signal to reopen.
+
 ## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
 
 Set up so the seven-day dormant-window observation
