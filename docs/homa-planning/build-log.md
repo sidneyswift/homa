@@ -550,6 +550,17 @@ timeouts in the first hour after READY. Historical cluster entries from
 before this deploy remain in Vercel until they age out; new 300s kills on
 that route are the signal to reopen.
 
+## 2026-07-15 · Material generation is durable from the start
+
+- Material generation is a durable background job from enqueue.
+- Sixty seconds changes only the inline-to-persistent UI presentation.
+- An in-flight turn is never migrated or restarted.
+- One honest thread is the selected parent UX.
+- V1 stages the background lane for materials and uses active-only polling.
+- Background execution is not a separate billable capability. Existing model,
+  image, review, render, and material telemetry remains cost truth.
+- D7 remains binding.
+
 ## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
 
 Set up so the seven-day dormant-window observation

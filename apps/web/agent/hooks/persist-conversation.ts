@@ -1,7 +1,12 @@
 import { defineHook } from "eve/hooks";
 
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
+import {
+  delegatedSessionLineage,
+  isParentedEveSession,
+} from "../../lib/conversation-continuity/session-lineage";
 import { persistConversationMessage } from "../../lib/conversation-log";
+import { emitMapEvent } from "../../lib/map/events";
 import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/research-brief-delivery";
 
 /**
@@ -27,6 +32,26 @@ export default defineHook({
   events: {
     async "message.received"(event, ctx) {
       try {
+        const familyId = (
+          ctx.session.auth.current?.attributes as
+            | { familyId?: string }
+            | undefined
+        )?.familyId;
+        if (ctx.session.parent && familyId) {
+          const lineage = delegatedSessionLineage({
+            childSessionId: ctx.session.id,
+            parent: ctx.session.parent,
+          });
+          await emitMapEvent("conversation.session_delegated", {
+            family_id: familyId,
+            child_session_hash: lineage.childSessionHash,
+            parent_session_hash: lineage.parentSessionHash,
+            root_session_hash: lineage.rootSessionHash,
+          });
+          return;
+        }
+        if (ctx.session.parent) return;
+
         const persisted = await persistConversationMessage({
           attributes: ctx.session.auth.current?.attributes,
           sessionId: ctx.session.id,
@@ -55,6 +80,10 @@ export default defineHook({
       }
     },
     async "message.completed"(event, ctx) {
+      if (isParentedEveSession(ctx.session.parent)) {
+        return;
+      }
+
       try {
         if (!event.data.message) return;
         // V2 dispatch validates and substitutes the staged draft before any

@@ -26,6 +26,7 @@ const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
   .min(1)
   .max(80)
   .regex(/^[a-z][a-z0-9_-]*$/u);
+const SESSION_HASH_SCHEMA = z.string().regex(/^[a-f0-9]{64}$/u);
 
 const PROMPT_SUGGESTION_EVENT_FIELDS = {
   suggestion_set_id: z.uuid(),
@@ -637,6 +638,16 @@ export const EVENT_SCHEMAS = {
       family_id: z.uuid(),
       source: z.literal("morning_brief"),
       fulfillment_kind: z.enum(["material", "task"]),
+    })
+    .strict(),
+  // A child Eve session was delegated by a parent-facing session. Only
+  // one-way hashes enter analytics, never raw session identifiers or content.
+  "conversation.session_delegated": z
+    .object({
+      family_id: z.uuid(),
+      child_session_hash: SESSION_HASH_SCHEMA,
+      parent_session_hash: SESSION_HASH_SCHEMA,
+      root_session_hash: SESSION_HASH_SCHEMA,
     })
     .strict(),
   // The task framework (HT-1/HT-7). One event per finished proactive
