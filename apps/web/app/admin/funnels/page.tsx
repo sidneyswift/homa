@@ -35,6 +35,11 @@ export default async function AdminFunnelsPage() {
       </p>
 
       <SectionHead eyebrow="Humans" title="Signup to trial" />
+      <p className="mt-1 max-w-2xl text-sm text-muted">
+        &quot;Signup screen opened&quot; includes people who never finished Google or
+        email/password. &quot;Signed up&quot; is a completed account. &quot;Setup done&quot; is
+        create-your-family finished.
+      </p>
       <div className="mt-3 flex flex-col gap-1.5">
         {data.stages.map((stage, index) => {
           const previous = index > 0 ? data.stages[index - 1].count : null;
@@ -74,8 +79,8 @@ export default async function AdminFunnelsPage() {
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {(
           [
-            ["Account, no family setup", data.stuck.accountNoSetup],
-            ["Setup and kids, no report", data.stuck.setupNoReport],
+            ["Signed up, setup not finished", data.stuck.accountNoSetup],
+            ["Setup done, no report yet", data.stuck.setupNoReport],
           ] as const
         ).map(([label, families]) => (
           <div key={label} className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">

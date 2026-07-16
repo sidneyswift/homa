@@ -7,6 +7,7 @@ import { requireFounder } from "../../../../lib/admin/gate";
 import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
 import { founderPhoneHome } from "../../../../lib/family-phone";
 import { formatUsd } from "../../../../lib/model-pricing";
+import { accountStatusCopy } from "../../../../lib/admin/account-status-copy";
 import { STAGE_COPY } from "../../../../lib/admin/stage";
 import { EmptyNote, Pill, SectionHead, Spark, statusTone, type PillTone } from "../../ui";
 import { BuildReportButton } from "./build-report-button";
@@ -80,10 +81,14 @@ export default async function AdminFamilyDetailPage({
   const phoneHome = detail.sandbox ? await founderPhoneHome(founder.userId) : null;
 
   const stage = STAGE_COPY[detail.stage];
+  const account = accountStatusCopy({
+    status: detail.status,
+    profileCompletedAt: detail.profileCompletedAt,
+  });
   const timeZone = adminTimeZone();
   const journey: { label: string; at: string | null }[] = [
     { label: "Signed up", at: detail.createdAt },
-    { label: "Family setup", at: detail.profileCompletedAt },
+    { label: "Setup done", at: detail.profileCompletedAt },
     { label: "First report", at: detail.kids.map((k) => k.reportAt).filter(Boolean).sort()[0] ?? null },
     { label: "Trial started", at: detail.trialStartedAt },
   ];
@@ -95,6 +100,7 @@ export default async function AdminFamilyDetailPage({
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-2xl font-bold text-strong">{detail.name}</h1>
+        <Pill tone={account.tone} title={account.hint}>{account.label}</Pill>
         <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
         {detail.sandbox ? <Pill tone="outline">Test family</Pill> : null}
         {detail.billingExempt ? <Pill tone="stone">Comped</Pill> : null}

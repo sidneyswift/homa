@@ -4,6 +4,7 @@ import Link from "next/link";
 import { requireFounder } from "../../../lib/admin/gate";
 import { timeAgo } from "../../../lib/admin/format";
 import { getFamilySnapshots, type FamilySnapshot } from "../../../lib/admin/roster-data";
+import { accountStatusCopy } from "../../../lib/admin/account-status-copy";
 import { STAGE_COPY, STAGE_ORDER } from "../../../lib/admin/stage";
 import { Pill, SectionHead, Spark, statusTone, EmptyNote } from "../ui";
 
@@ -138,7 +139,7 @@ export default async function AdminFamiliesPage({
         <div className="mt-4 overflow-hidden rounded-lg border border-border-subtle bg-card shadow-sm">
           <div className="hidden grid-cols-[minmax(160px,1.5fr)_110px_60px_minmax(100px,1fr)_110px_110px] gap-3 border-b border-border-subtle bg-[var(--surface-sunken)] px-4 py-2 font-mono text-[0.6rem] font-bold uppercase tracking-[0.1em] text-subtle md:grid">
             <span>Family</span>
-            <span>Stage</span>
+            <span>Account / stage</span>
             <span>Kids</span>
             <span>7-day rhythm</span>
             <span>Last active</span>
@@ -147,11 +148,15 @@ export default async function AdminFamiliesPage({
           <ul>
             {rows.map((s) => {
               const stage = STAGE_COPY[s.stage];
+              const account = accountStatusCopy({
+                status: s.status,
+                profileCompletedAt: s.profileCompletedAt,
+              });
               return (
                 <li key={s.id} className="border-b border-border-subtle last:border-b-0">
                   <Link
                     href={`/admin/families/${s.id}`}
-                    className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 px-4 py-3 text-sm hover:bg-page md:grid-cols-[minmax(160px,1.5fr)_110px_60px_minmax(100px,1fr)_110px_110px]"
+                    className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 px-4 py-3 text-sm hover:bg-page md:grid-cols-[minmax(160px,1.5fr)_140px_60px_minmax(100px,1fr)_110px_110px]"
                   >
                     <span className="col-span-2 md:col-span-1">
                       <span className="font-bold text-strong">{s.name}</span>
@@ -161,6 +166,7 @@ export default async function AdminFamiliesPage({
                       </span>
                     </span>
                     <span className="flex flex-wrap gap-1">
+                      <Pill tone={account.tone} title={account.hint}>{account.label}</Pill>
                       <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
                       {s.sandbox ? <Pill tone="outline">Test</Pill> : null}
                     </span>

@@ -10,8 +10,8 @@ import { getModelPriceBook } from "../model-pricing-live";
  * internal fleet view, gated by requireFounder() at every entry point.
  *
  * "Has an account" means a family_members row exists: one-world families
- * are created at the first anonymous tap, so the raw table also holds
- * funnel visitors, which belong to /admin/funnels, not the roster.
+ * also get a row when the signup screen opens, so status=open husks
+ * (signup not finished) stay on /admin/funnels, not this roster.
  */
 
 export type RunOutcome = "done" | "partial" | "partial_uncertain" | "uncertain" | "failed" | "skipped" | "running";
@@ -38,6 +38,8 @@ export interface FamilySnapshot {
   subscriptionStatus: string | null;
   /** Founder test family (reserved +homatest alias or console action). */
   sandbox: boolean;
+  /** families.status: open | claimed | complete | deleted. */
+  status: string;
   kidCount: number;
   kidNames: string[];
   hasReport: boolean;
@@ -66,6 +68,7 @@ interface FamilyRow {
   billing_exempt: boolean;
   stripe_subscription_status: string | null;
   sandbox: boolean;
+  status: string;
 }
 
 export async function getFamilySnapshots(now: Date = new Date()): Promise<FamilySnapshot[]> {
@@ -81,7 +84,8 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
            f.trial_started_at::text as trial_started_at,
            f.billing_exempt,
            f.stripe_subscription_status,
-           f.sandbox
+           f.sandbox,
+           coalesce(f.status, 'open') as status
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
       and exists (select 1 from public.family_members m where m.family_id = f.id)
@@ -216,6 +220,7 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
       billingExempt: family.billing_exempt,
       subscriptionStatus: family.stripe_subscription_status,
       sandbox: family.sandbox,
+      status: family.status,
       kidCount: kidRow?.n ?? 0,
       kidNames: kidRow ? (JSON.parse(kidRow.names) as string[]) : [],
       hasReport: (reportRow?.n ?? 0) > 0,

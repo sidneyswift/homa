@@ -50,15 +50,31 @@ export const STAGE_COPY: Record<
   FamilyStage,
   { label: string; tone: "sky" | "gold" | "sage" | "stone" | "outline"; hint: string }
 > = {
-  new: { label: "New", tone: "sky", hint: "Signed up; family setup or kids not finished yet" },
+  new: {
+    label: "New",
+    tone: "sky",
+    hint: "Signed up; family setup or kids not finished yet. Account pill shows Signed up vs Setup done.",
+  },
   onboarding: {
     label: "Onboarding",
     tone: "gold",
     hint: "Setup and kids done; no report generated yet. The kid rows below show how far the questions got.",
   },
-  activated: { label: "Activated", tone: "sage", hint: "First report generated within 21 days of signup" },
-  steady: { label: "Steady", tone: "stone", hint: "Has a report; more than 21 days since signup" },
-  quiet: { label: "Quiet 14d+", tone: "outline", hint: "Nothing heard from the family in 14+ days" },
+  activated: {
+    label: "Activated",
+    tone: "sage",
+    hint: "First report generated within 21 days of signup",
+  },
+  steady: {
+    label: "Steady",
+    tone: "stone",
+    hint: "Has a report; more than 21 days since signup",
+  },
+  quiet: {
+    label: "Quiet 14d+",
+    tone: "outline",
+    hint: "Nothing heard from the family in 14+ days",
+  },
 };
 
 export const STAGE_ORDER: FamilyStage[] = ["new", "onboarding", "quiet", "activated", "steady"];

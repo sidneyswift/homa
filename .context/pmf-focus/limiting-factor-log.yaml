@@ -1,0 +1,137 @@
+product: Homa
+pmf_definition: >-
+  Target homeschool parents repeatedly get Homa's core value (help running
+  their homeschool with less chaos and more confidence), stick, and would be
+  meaningfully disappointed if it disappeared. Observable proxies: activation
+  through the core loop, return usage, and willingness to pay or strongly
+  recommend. Replace this paragraph when the founder tightens the definition.
+updated_at: "2026-07-16T11:05:00Z"
+
+# Denominator glossary (see also pmf-focus/references/reality-checks.md):
+# - signup-screen abandon = status=open (opened Google/email signup, never finished)
+# - signed-up family = status=claimed (completed ParentStep)
+# - family setup done = claimed + profile_completed_at
+# - test family = sandbox=true (exclude from funnels)
+# Never say "real families" for sandbox=false alone.
+
+current:
+  id: lf-2026-07-16-core-loop-activation
+  title: Core-loop activation after family setup
+  statement: >-
+    Among signed-up families who finish family setup, almost nobody reaches
+    or repeats the make-and-keep loop: 43 signed-up (claimed) accounts, 34
+    finished family setup, 29 got a report, 8 ever created a material, 3 ever
+    kept one; 76% of setup-done families never returned for a second day;
+    0 trials / 0 paid. Separate leak: hundreds of signup-screen abandons
+    (status=open) are not signups and must not be counted as acquisition.
+  status: identified
+  why_bottleneck: >-
+    The load-bearing cohort is signed-up families who finished setup, not
+    every families row. That cohort still collapses after the report into
+    materials/keep/return. Signup-screen abandons are a large earlier drop
+    (landing → Google/email signup incomplete); do not call them signups.
+  success_criteria:
+    - Of families who finish family setup, ≥50% generate ≥1 material and ≥40% keep ≥1 (materials.status=final) within 48h (now 8/34 made, 3/34 kept).
+    - ≥40% of setup-done families active on ≥2 distinct days within 7 days on a non-censored cohort (now 8/34 = 24%).
+    - Absolute core-loop reach grows from 8 materials-families / 3 keepers to ≥30 / ≥15 among signed-up families.
+    - First signed-up non-sandbox trial_started_at > 0 after value is reached.
+  verification_plan: >-
+    Always split status=open (signup-screen abandon) vs status=claimed
+    (signed-up). Weekly on claimed cohort: report → materials.created →
+    materials.status=final, active-days on setup-done, trials. Never cite
+    non-sandbox row count or map.started alone as signups.
+  evidence:
+    - claim: "sandbox=false is not signed-up parents"
+      source: "homa-prod families status + sandbox + members"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "non-sandbox≈280; signup-screen abandon (open)≈237 with 0 email; signed-up (claimed)≈43; family setup done≈34"
+      kind: verified
+    - claim: "Open rows are signup-screen abandons, not leads with contact info"
+      source: "homa-prod open rows + /api/map/start + ParentStep"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "Parent funnel is landing→Google/email signup; /api/map/start only bootstraps session; open rows have null email/phone, default name My family, usually only map.started"
+      kind: verified
+    - claim: "Signed-up cohort still collapses after report"
+      source: "homa-prod events distinct family_id where status=claimed non-sandbox"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "map.started=40 → question_answered=30 → report=29 → materials.created=8 → chat=6 → materials.finalized event=1; materials.status=final families=3"
+      kind: verified
+    - claim: "Signup-screen abandons never reach report"
+      source: "homa-prod events joined to families.status=open"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "open map.started≈232, report=0, materials=0"
+      kind: verified
+    - claim: "Setup-done retention still one-and-done heavy"
+      source: "homa-prod distinct event days for profile_completed claimed"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "one_day=26, multi_day=8, n=34 (76% one day)"
+      kind: verified
+    - claim: "Zero trials / paid among signed-up"
+      source: "homa-prod families billing columns"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "trial_started=0, stripe_subscription_id=0"
+      kind: verified
+    - claim: "Jul 14-16 volume spike was mostly signup-screen abandons"
+      source: "homa-prod families.created_at by status"
+      checked_at: "2026-07-16T10:55:00Z"
+      result: "Jul14 open=61 claimed=6; Jul15 open=113 claimed=18; Jul16 open=55 claimed=13"
+      kind: verified
+    - claim: "Headline '263 real families' was invalid language"
+      source: "prior log at 2026-07-16T05:45:00Z; corrected 2026-07-16T11:05:00Z"
+      checked_at: "2026-07-16T11:05:00Z"
+      result: "Was count(*) where sandbox=false; mostly signup-screen abandons. Do not reuse."
+      kind: verified
+  not_doing:
+    - item: Portfolio / efficacy export
+      reason: Pointless while only ~8 signed-up families ever reach a worksheet
+    - item: Materials depth / age-aware corpus / lesson-listen
+      reason: Field study says model quality is already strong; not the bottleneck
+    - item: Monetization polish (wall, Stripe, LLC)
+      reason: 0 trials because value reach is tiny, not because checkout is wrong
+    - item: Docs reconciliation, fleet-skills refactor, night-manager, founder dashboard
+      reason: Internal, off the user value chain
+  blocker: null
+  started_at: null
+  completed_at: null
+  completion_evidence: null
+
+history: []
+
+research_notes:
+  - at: "2026-07-16T11:05:00Z"
+    surface: "onboarding | acquisition | language"
+    finding: >-
+      Locked denominator language for Homa: signup-screen abandon (open),
+      signed-up family (claimed), family setup done (profile_completed_at),
+      test family (sandbox). Parent funnel is landing → Google/email signup
+      → family setup. /api/map/start is silent session bootstrap, not a
+      funnel step. Written into reality-checks.md and this log header.
+    source: "founder correction in pmf-focus session 2026-07-16"
+    implication_for_pmf: >-
+      Any future WTF/PMF pass that says "real families" or blends open+claimed
+      into "signups" is wrong on arrival; fix language before locking a factor.
+  - at: "2026-07-16T10:55:00Z"
+    surface: "onboarding | acquisition"
+    finding: >-
+      VALIDATION FAIL on "263 real families." Most non-sandbox rows were
+      signup-screen abandons (open, no email). Only ~43 signed-up. Jul 14-16
+      spike mostly abandons. Signed-up funnel still weak after report.
+    source: "homa-prod SQL re-check + store.ts + ParentStep"
+    implication_for_pmf: >-
+      Acquisition claims need claimed counts. Core-loop factor still holds on
+      the signed-up / setup-done cohort.
+  - at: "2026-07-16T05:45:00Z"
+    surface: "onboarding | chat | materials | billing"
+    finding: >-
+      First lock of core-loop factor after WTF subagent; used invalid
+      "real families" denominator (later corrected).
+    source: "homa-prod SQL + thankshoma.com live probe + WTF subagent b7e44ad4"
+    implication_for_pmf: "Superseded on language; direction on signed-up cohort kept."
+
+say_no_queue:
+  - at: "2026-07-16T11:05:00Z"
+    proposal: "Call status=open rows 'real families', 'signups', or 'started onboarding'"
+    said_no_because: "They are signup-screen abandons (no email/phone); see reality-checks denominators"
+  - at: "2026-07-16T10:55:00Z"
+    proposal: "Cite non-sandbox families.count as acquisition proof"
+    said_no_because: "INVALID denominator; mostly signup-screen abandons"

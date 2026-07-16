@@ -6,7 +6,8 @@ import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-d
 import type { HandledAlert } from "../../lib/admin/alert-acks";
 import { formatInt, formatTokens, medianExact, percent, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
-import { QUIET_AFTER_DAYS } from "../../lib/admin/stage";
+import { accountStatusCopy } from "../../lib/admin/account-status-copy";
+import { QUIET_AFTER_DAYS, STAGE_COPY } from "../../lib/admin/stage";
 import { AgentPromptButton } from "./agent-prompt-button";
 import { AlertAckButton } from "./alert-ack-button";
 import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
@@ -438,17 +439,27 @@ export default async function AdminOverviewPage({
             <p className="mt-2 text-sm text-subtle">No new families {rangeLabel}.</p>
           ) : (
             <ul className="mt-2 flex flex-col gap-1.5 text-sm">
-              {data.newSignups.map((s) => (
-                <li key={s.id} className="flex flex-wrap items-center gap-2">
-                  <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
-                    {s.name}
-                  </Link>
-                  <Pill tone={s.stage === "new" ? "sky" : s.stage === "onboarding" ? "gold" : "sage"}>
-                    {s.stage}
-                  </Pill>
-                  <span className="text-subtle">joined {timeAgo(s.createdAt)}</span>
-                </li>
-              ))}
+              {data.newSignups.map((s) => {
+                const account = accountStatusCopy({
+                  status: s.status,
+                  profileCompletedAt: s.profileCompletedAt,
+                });
+                const stage = STAGE_COPY[s.stage];
+                return (
+                  <li key={s.id} className="flex flex-wrap items-center gap-2">
+                    <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
+                      {s.name}
+                    </Link>
+                    <Pill tone={account.tone} title={account.hint}>
+                      {account.label}
+                    </Pill>
+                    <Pill tone={stage.tone} title={stage.hint}>
+                      {stage.label}
+                    </Pill>
+                    <span className="text-subtle">joined {timeAgo(s.createdAt)}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

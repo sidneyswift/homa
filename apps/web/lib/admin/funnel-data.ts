@@ -47,9 +47,11 @@ export interface FunnelData {
 }
 
 const FUNNEL_EVENTS: { key: string; name: string; event: string }[] = [
-  { key: "started", name: "Map started", event: "map.started" },
-  { key: "account", name: "Account created", event: "map.account_created" },
-  { key: "setup", name: "Family setup", event: "map.family_setup" },
+  // map.started often fires when the signup screen opens (session bootstrap),
+  // not when a parent finishes Google/email signup. Prefer "Signed up" below.
+  { key: "started", name: "Signup screen opened", event: "map.started" },
+  { key: "account", name: "Signed up", event: "map.account_created" },
+  { key: "setup", name: "Setup done", event: "map.family_setup" },
   { key: "kids", name: "Kids added", event: "map.child_added" },
   { key: "report", name: "Report generated", event: "map.report_generated" },
   { key: "trial", name: "Trial started", event: "billing.trial_started" },
@@ -194,13 +196,13 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
         id: row.id,
         name: row.name,
         createdAt: row.created_at,
-        note: "account exists, family setup not finished",
+        note: "signed up; setup not finished",
       })),
       setupNoReport: setupNoReport.map((row) => ({
         id: row.id,
         name: row.name,
         createdAt: row.created_at,
-        note: "setup and kids done, no report yet",
+        note: "setup done and kids exist; no report yet",
       })),
     },
     pipeline,
