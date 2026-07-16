@@ -229,6 +229,7 @@ try {
     familyId,
     messageId: earlyAssistant.id,
     embedding: progressEmbedding,
+    sourceContent: progressText,
     replaceExisting: false,
   });
   const progressRows = await sql<{ created_at: string }[]>`
@@ -283,7 +284,25 @@ try {
   await updateConversationMessageEmbedding({
     familyId,
     messageId: terminalAssistant.id,
+    embedding: progressEmbedding,
+    sourceContent: progressText,
+    replaceExisting: false,
+  });
+  const staleReplayVectorRows = await sql<{ embedding: string | null }[]>`
+    select embedding::text as embedding
+    from public.conversation_messages
+    where id = ${terminalAssistant.id} and family_id = ${familyId}
+  `;
+  report(
+    "replayed progress vector cannot attach to terminal text",
+    staleReplayVectorRows[0]?.embedding === null,
+  );
+
+  await updateConversationMessageEmbedding({
+    familyId,
+    messageId: terminalAssistant.id,
     embedding: terminalEmbedding,
+    sourceContent: terminalText,
     replaceExisting: true,
   });
   const terminalVectorRows = await sql<{ embedding: string | null }[]>`

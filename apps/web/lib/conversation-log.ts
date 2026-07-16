@@ -37,13 +37,18 @@ export interface PersistConversationMessageDependencies {
     input: PersistCanonicalMessageInput,
   ): ReturnType<typeof persistCanonicalMessage>;
   embed(text: string, attribution: { familyId: string }): Promise<string | null>;
-  /** replaceExisting is true only for a terminal assistant stop: a draft's
-   *  embedding is stale the moment the terminal text replaces its content,
-   *  so the terminal write must overwrite it instead of leaving the draft
-   *  vector behind a canonical row it no longer matches. */
+  /** sourceContent guards a replayed/delayed embedding write: the row's
+   *  content may have moved on (a later terminal replacement) by the time
+   *  this resolves, and a vector for text the row no longer holds must
+   *  never attach. replaceExisting is true only for a terminal assistant
+   *  stop: a draft's embedding is stale the moment the terminal text
+   *  replaces its content, so the terminal write must overwrite it
+   *  instead of leaving the draft vector behind a canonical row it no
+   *  longer matches. */
   saveEmbedding(
     messageId: string,
     embedding: string,
+    sourceContent: string,
     replaceExisting: boolean,
   ): Promise<void>;
 }
@@ -62,16 +67,19 @@ function channelLabel(
 }
 
 /** Re-scoped by family_id (every model/caller-supplied id is re-scoped
- * inside the authenticated family, the tenancy law). replaceExisting is
- * true only for a terminal assistant stop: a draft's embedding is stale
- * the moment the terminal text replaces its content, so the terminal
- * write must overwrite it instead of leaving the draft vector behind a
+ * inside the authenticated family, the tenancy law). sourceContent rejects
+ * a replayed or delayed embedding whose text no longer matches the row
+ * (a later terminal write already replaced it). replaceExisting is true
+ * only for a terminal assistant stop: a draft's embedding is stale the
+ * moment the terminal text replaces its content, so the terminal write
+ * must overwrite it instead of leaving the draft vector behind a
  * canonical row it no longer matches. Exported so continuity e2e
  * fixtures can seed a specific embedding directly. */
 export async function updateConversationMessageEmbedding(input: {
   familyId: string;
   messageId: string;
   embedding: string;
+  sourceContent: string;
   replaceExisting: boolean;
 }): Promise<void> {
   const sql = mapDb();
@@ -80,6 +88,7 @@ export async function updateConversationMessageEmbedding(input: {
     set embedding = ${input.embedding}
     where id = ${input.messageId}
       and family_id = ${input.familyId}
+      and content = ${input.sourceContent}
       and (${input.replaceExisting} or embedding is null)
   `;
 }
@@ -98,12 +107,13 @@ export async function persistConversationMessage(
       resolveInbound: resolveInboundContinuity,
       persistCanonical: persistCanonicalMessage,
       embed: embedText,
-      async saveEmbedding(messageId, embedding, replaceExisting) {
+      async saveEmbedding(messageId, embedding, sourceContent, replaceExisting) {
         if (!familyId) return;
         await updateConversationMessageEmbedding({
           familyId,
           messageId,
           embedding,
+          sourceContent,
           replaceExisting,
         });
       },
@@ -187,6 +197,7 @@ async function persistConversationMessageWithDependencies(
     await dependencies.saveEmbedding(
       persisted.id,
       embedding,
+      content,
       isTerminalAssistantStop,
     );
   }
