@@ -639,6 +639,8 @@ export default defineTool({
         pageCount: rendered.pageCount,
         ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
         status: "draft",
+        revisesId: input.revisesId ?? null,
+        reviewPassed: review === null ? null : review.pass,
       },
       review,
       sentByText,
