@@ -72,7 +72,8 @@ function ReceivedBubble({ children }: { children: ReactNode }) {
  * screenshot so the example stays legible, responsive, and accessible.
  * Sent bubbles use Homa clay (not Apple blue) so the demo stays on brand
  * while still reading as Messages: contact header, left/right bubbles,
- * MMS attachment, and a composer.
+ * MMS attachment, and a slim composer. Keep the thread short: the hero
+ * value is the quick exchange plus the worksheet, not a long scroll.
  */
 export function HeroProductDemo() {
   return (
@@ -80,14 +81,14 @@ export function HeroProductDemo() {
       <div
         className="lp-product-demo-phone"
         role="img"
-        aria-label="Text thread: a parent says Maya likes butterflies, Homa offers a butterfly-themed math worksheet, the parent says yes, and Homa sends a count-and-graph printable saved to the binder"
+        aria-label="Text thread: a parent says Maya likes butterflies, and Homa replies with a butterfly-themed count-and-graph worksheet saved to the binder"
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: 300,
+          maxWidth: 280,
           margin: "0 auto",
-          padding: "11px",
-          borderRadius: 44,
+          padding: "10px",
+          borderRadius: 40,
           background: "linear-gradient(165deg, #3f3831 0%, var(--stone-900) 42%, #14110f 100%)",
           boxShadow: "var(--shadow-xl), inset 0 0 0 1px rgba(255,255,255,0.1)",
         }}
@@ -136,8 +137,7 @@ export function HeroProductDemo() {
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
-            minHeight: 600,
-            borderRadius: 36,
+            borderRadius: 32,
             background: "#f2ebe0",
             boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.4)",
           }}
@@ -147,13 +147,13 @@ export function HeroProductDemo() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: 11,
+              top: 8,
               left: "50%",
               zIndex: 3,
-              width: 92,
-              height: 26,
+              width: 78,
+              height: 22,
               transform: "translateX(-50%)",
-              borderRadius: 18,
+              borderRadius: 16,
               background: "var(--stone-900)",
               boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
             }}
@@ -166,10 +166,10 @@ export function HeroProductDemo() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              minHeight: 46,
-              padding: "14px 20px 0",
+              minHeight: 34,
+              padding: "10px 16px 0",
               color: "var(--text-strong)",
-              fontSize: "0.76rem",
+              fontSize: "0.7rem",
               fontWeight: 700,
             }}
           >
@@ -228,8 +228,8 @@ export function HeroProductDemo() {
             style={{
               display: "grid",
               justifyItems: "center",
-              gap: 3,
-              padding: "4px 14px 11px",
+              gap: 1,
+              padding: "2px 12px 8px",
               borderBottom: "1px solid rgba(214,200,180,0.65)",
               background: "rgba(251,247,240,0.94)",
             }}
@@ -237,8 +237,8 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 42,
-                height: 42,
+                width: 34,
+                height: 34,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -246,77 +246,43 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Logo size={24} variant="mark" />
+              <Logo size={20} variant="mark" />
             </span>
             <p
               style={{
                 margin: 0,
                 color: "var(--text-strong)",
                 fontFamily: "var(--font-wordmark)",
-                fontSize: "1rem",
+                fontSize: "0.92rem",
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
               }}
             >
               Homa
             </p>
-            <p style={{ margin: 0, color: "var(--text-subtle)", fontSize: "0.66rem", fontWeight: 650 }}>
-              Text Message
-            </p>
           </div>
 
-          {/* Thread: interest → offer → yes → printable */}
+          {/* Thread: one ask, one reply, one printable */}
           <div
             style={{
-              flex: 1,
               display: "flex",
               flexDirection: "column",
-              gap: 5,
-              padding: "10px 10px 6px",
+              gap: 6,
+              padding: "8px 10px 8px",
               background: "linear-gradient(180deg, #f4ede3 0%, #ebe2d4 55%, #f4ede3 100%)",
             }}
           >
-            <p
-              aria-hidden="true"
-              style={{
-                margin: "0 0 2px",
-                textAlign: "center",
-                color: "var(--text-subtle)",
-                fontSize: "0.66rem",
-                fontWeight: 650,
-              }}
-            >
-              Today 7:12 AM
-            </p>
-
             <SentBubble>Maya is into butterflies right now.</SentBubble>
 
             <ReceivedBubble>Great! I&apos;ll make today&apos;s math worksheet butterfly-themed.</ReceivedBubble>
-
-            <SentBubble>Yes!</SentBubble>
-            <p
-              aria-hidden="true"
-              style={{
-                alignSelf: "flex-end",
-                margin: "0 6px 2px 0",
-                color: "var(--text-subtle)",
-                fontSize: "0.62rem",
-                fontWeight: 650,
-              }}
-            >
-              Delivered
-            </p>
-
-            <ReceivedBubble>Here you go. Ready to print.</ReceivedBubble>
 
             {/* MMS-style attachment: generated count-and-graph preview */}
             <div
               style={{
                 alignSelf: "flex-start",
-                width: "86%",
+                width: "88%",
                 overflow: "hidden",
-                marginTop: 1,
-                borderRadius: 18,
+                borderRadius: 16,
                 background: "var(--surface-raised)",
                 boxShadow: "var(--shadow-sm)",
               }}
@@ -330,7 +296,7 @@ export function HeroProductDemo() {
                   display: "block",
                   width: "100%",
                   height: "auto",
-                  maxHeight: 168,
+                  maxHeight: 148,
                   objectFit: "cover",
                   objectPosition: "top center",
                   background: "#fff",
@@ -340,30 +306,31 @@ export function HeroProductDemo() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  padding: "7px 10px",
+                  gap: 7,
+                  padding: "6px 9px",
                   borderTop: "1px solid var(--border-subtle)",
                 }}
               >
                 <span
                   style={{
                     display: "inline-flex",
-                    width: 26,
-                    height: 26,
+                    width: 24,
+                    height: 24,
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRadius: 7,
+                    borderRadius: 6,
                     background: "var(--sky-100)",
+                    flexShrink: 0,
                   }}
                 >
-                  <FileText size={14} color="var(--sky-600)" aria-hidden="true" />
+                  <FileText size={13} color="var(--sky-600)" aria-hidden="true" />
                 </span>
                 <div style={{ minWidth: 0 }}>
                   <p
                     style={{
                       margin: 0,
                       color: "var(--text-strong)",
-                      fontSize: "0.74rem",
+                      fontSize: "0.72rem",
                       fontWeight: 700,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -379,11 +346,11 @@ export function HeroProductDemo() {
                       alignItems: "center",
                       gap: 3,
                       color: "var(--sage-700)",
-                      fontSize: "0.64rem",
+                      fontSize: "0.62rem",
                       fontWeight: 700,
                     }}
                   >
-                    <Check size={11} aria-hidden="true" />
+                    <Check size={10} aria-hidden="true" />
                     Saved to the binder
                   </p>
                 </div>
@@ -391,14 +358,14 @@ export function HeroProductDemo() {
             </div>
           </div>
 
-          {/* Composer */}
+          {/* Slim composer + home indicator */}
           <div
             aria-hidden="true"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 7,
-              padding: "8px 10px 6px",
+              gap: 6,
+              padding: "6px 10px 4px",
               borderTop: "1px solid rgba(214,200,180,0.6)",
               background: "rgba(251,247,240,0.97)",
             }}
@@ -406,14 +373,14 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 28,
-                height: 28,
+                width: 24,
+                height: 24,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
                 background: "var(--stone-200)",
                 color: "var(--stone-700)",
-                fontSize: "1.1rem",
+                fontSize: "1rem",
                 fontWeight: 500,
                 lineHeight: 1,
               }}
@@ -423,15 +390,15 @@ export function HeroProductDemo() {
             <span
               style={{
                 flex: 1,
-                minHeight: 32,
+                minHeight: 28,
                 display: "flex",
                 alignItems: "center",
-                padding: "0 12px",
+                padding: "0 11px",
                 border: "1px solid var(--border-subtle)",
                 borderRadius: "var(--radius-pill)",
                 background: "var(--surface-raised)",
                 color: "var(--text-subtle)",
-                fontSize: "0.8rem",
+                fontSize: "0.74rem",
               }}
             >
               Text Message
@@ -439,36 +406,34 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
                 background: "var(--clay-500)",
                 color: "#fff",
-                fontSize: "0.9rem",
+                fontSize: "0.82rem",
                 fontWeight: 700,
               }}
             >
               ↑
             </span>
           </div>
-
-          {/* Home indicator */}
           <div
             aria-hidden="true"
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "6px 0 8px",
+              padding: "4px 0 6px",
               background: "rgba(251,247,240,0.97)",
             }}
           >
             <span
               style={{
-                width: 104,
-                height: 4,
-                borderRadius: 4,
+                width: 88,
+                height: 3,
+                borderRadius: 3,
                 background: "var(--stone-800)",
                 opacity: 0.32,
               }}
