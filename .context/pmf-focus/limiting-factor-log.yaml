@@ -5,7 +5,7 @@ pmf_definition: >-
   meaningfully disappointed if it disappeared. Observable proxies: activation
   through the core loop, return usage, and willingness to pay or strongly
   recommend. Replace this paragraph when the founder tightens the definition.
-updated_at: "2026-07-16T11:05:00Z"
+updated_at: "2026-07-16T16:20:00Z"
 
 # Denominator glossary (see also pmf-focus/references/reality-checks.md):
 # - signup-screen abandon = status=open (opened Google/email signup, never finished)
@@ -24,7 +24,7 @@ current:
     kept one; 76% of setup-done families never returned for a second day;
     0 trials / 0 paid. Separate leak: hundreds of signup-screen abandons
     (status=open) are not signups and must not be counted as acquisition.
-  status: identified
+  status: in_progress
   why_bottleneck: >-
     The load-bearing cohort is signed-up families who finished setup, not
     every families row. That cohort still collapses after the report into
@@ -38,8 +38,11 @@ current:
   verification_plan: >-
     Always split status=open (signup-screen abandon) vs status=claimed
     (signed-up). Weekly on claimed cohort: report → materials.created →
-    materials.status=final, active-days on setup-done, trials. Never cite
-    non-sandbox row count or map.started alone as signups.
+    materials.status=final, active-days on setup-done, trials. Return metric
+    is parent-authored message days (organic vs brief-reply split), never raw
+    event days. Never cite non-sandbox row count or map.started alone as
+    signups. Full backlog, waves, and falsifiers:
+    docs/homa-planning/plans/2026-07-16-pmf-retention-master-plan.md
   evidence:
     - claim: "sandbox=false is not signed-up parents"
       source: "homa-prod families status + sandbox + members"
@@ -91,13 +94,34 @@ current:
     - item: Docs reconciliation, fleet-skills refactor, night-manager, founder dashboard
       reason: Internal, off the user value chain
   blocker: null
-  started_at: null
+  started_at: "2026-07-16T16:20:00Z"
   completed_at: null
   completion_evidence: null
 
 history: []
 
 research_notes:
+  - at: "2026-07-16T16:20:00Z"
+    surface: "retention | tasks | measurement"
+    finding: >-
+      Master plan written (docs/homa-planning/plans/2026-07-16-pmf-retention-master-plan.md)
+      after fresh prod pull + two councils. New facts: (1) 100% of setup-done
+      families already have a linked phone, so brief ENROLLMENT is the gap,
+      not phone linkage; seedKind requires 20h family age + a report, so
+      day-one families wait 1-3 days for the first proactive touch. (2) Brief
+      reach correlates with return (9/16 reached are multi-day vs 0/18
+      unreached) but is confounded; PMF-201 backfill of the 18 unreached is
+      the causal test. (3) Honest return metric = parent-authored message
+      days: 18/34 setup-done never messaged, 9/34 multi-day. (4) Jul 7-13
+      cohort n=5 went 5/5 multi-day and 5/5 created, so the loop retains when
+      it completes. Factor moved to in_progress: subject-lesson bridge
+      (PMF-101) is being built by the lessons agent.
+    source: "homa-prod SQL 2026-07-16 ~16:00Z + expert council d9ddc6e8 + customer council 27451bb3"
+    implication_for_pmf: >-
+      Wave 1 = PMF-101 lesson bridge, PMF-104 quality gate, PMF-201 brief
+      enrollment + backfill experiment, PMF-401 measurement truth, PMF-301
+      unopened-report follow-up. Journal ask at session one is killed; wall
+      stays off until keep and return bars hit.
   - at: "2026-07-16T11:05:00Z"
     surface: "onboarding | acquisition | language"
     finding: >-
