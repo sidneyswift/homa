@@ -19,6 +19,7 @@ export interface ResearchBriefSemanticFixtureContext {
   selectedKnowledgeId: string;
   selectedChild: string;
   evidenceAnchors: readonly string[];
+  quotationRequiredEvidenceAnchors: readonly string[];
   siblingNames: readonly string[];
   allowedChildPronouns: readonly string[];
   recentTraces: readonly ResearchBriefFixtureTrace[];
@@ -40,6 +41,9 @@ export type ResearchBriefSemanticRejection =
   | "imperative_research_example"
   | "unsupported_pronoun"
   | "missing_child_anchor"
+  | "missing_quoted_child_anchor"
+  | "causal_child_connection"
+  | "missing_child_attempt"
   | "sibling_reference"
   | "recent_repetition"
   | "cta_mismatch";
@@ -71,6 +75,10 @@ const CHILD_PRONOUNS = [
 ] as const;
 const IMPERATIVE_EXAMPLE =
   /^(?:for\s+[^,]+,\s*)?(?:hold|add|keep|say|make|move|run|stretch|blend|put|start|try)\b/iu;
+const CAUSAL_CHILD_OUTCOME =
+  /\b(?:could|may|might|will|can)\s+(?:smooth|improve|fix|strengthen|cause|produce|create|ensure|guarantee|lead\s+to)\b/iu;
+const DIRECT_CHILD_ATTEMPT =
+  /\b(?:can\s+try|can\s+practice|has\s+(?:a\s+)?chance\s+to\s+try)\b/iu;
 
 function normalizeText(value: string): string {
   return value
@@ -92,6 +100,16 @@ function containsWholePhrase(text: string, phrase: string): boolean {
   if (!normalizedPhrase) return false;
   return new RegExp(
     `(?<![\\p{L}\\p{N}])${escapedRegularExpression(normalizedPhrase)}(?![\\p{L}\\p{N}])`,
+    "u",
+  ).test(normalizedText);
+}
+
+function containsQuotedWholePhrase(text: string, phrase: string): boolean {
+  const normalizedText = normalizeText(text);
+  const normalizedPhrase = normalizeText(phrase);
+  if (!normalizedPhrase) return false;
+  return new RegExp(
+    `["\u201C](?<![\\p{L}\\p{N}])${escapedRegularExpression(normalizedPhrase)}(?![\\p{L}\\p{N}])["\u201D]`,
     "u",
   ).test(normalizedText);
 }
@@ -208,6 +226,18 @@ export function evaluateResearchBriefFixture(
   );
   if (!hasSelectedChild || !hasEvidenceAnchor) {
     reasons.push("missing_child_anchor");
+  }
+  if (
+    context.quotationRequiredEvidenceAnchors.some(
+      (anchor) => !containsQuotedWholePhrase(interesting, anchor),
+    )
+  ) {
+    reasons.push("missing_quoted_child_anchor");
+  }
+  if (CAUSAL_CHILD_OUTCOME.test(interesting)) {
+    reasons.push("causal_child_connection");
+  } else if (!DIRECT_CHILD_ATTEMPT.test(interesting)) {
+    reasons.push("missing_child_attempt");
   }
   if (
     context.siblingNames.some((siblingName) =>

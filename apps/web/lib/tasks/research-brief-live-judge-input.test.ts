@@ -9,7 +9,7 @@ const BASE_RUBRIC = {
 };
 
 describe("research brief live judge input", () => {
-  it("requires quotation only for an evidence anchor marked as quoted", () => {
+  it("requires a marked anchor to appear quoted once in Why", () => {
     const input = buildResearchBriefLiveJudgeInput({
       draft: "Story said \"ship\" sounds choppy.",
       evidence: {
@@ -23,7 +23,7 @@ describe("research brief live judge input", () => {
 
     assert.match(
       input.rubric.usesExactChildAnchor,
-      /The marked word or phrase "ship" must remain quoted/u,
+      /The marked word or phrase "ship" must appear quoted at least once in Why/u,
     );
   });
 
