@@ -1,4 +1,13 @@
-import { loadBriefContext, renderBriefContext } from "./brief-context";
+import {
+  loadBriefContext,
+  loadBriefV2Context,
+  renderBriefContext,
+  renderBriefV2Context,
+} from "./brief-context";
+import {
+  usesResearchBriefV2Delivery,
+  type TaskDeliveryVersion,
+} from "./delivery-version";
 import type { DueFamilyTask } from "./store";
 
 /**
@@ -44,17 +53,24 @@ async function briefMessage(
   task: DueFamilyTask,
   trigger: TaskRunTrigger,
   loadContext: typeof loadBriefContext,
+  loadV2Context: typeof loadBriefV2Context,
+  deliveryVersion: TaskDeliveryVersion,
 ): Promise<string> {
-  const context = await loadContext(task.familyId);
+  const v2 = usesResearchBriefV2Delivery(deliveryVersion);
+  const context = v2
+    ? renderBriefV2Context(await loadV2Context(task.familyId, task.timeZone))
+    : renderBriefContext(await loadContext(task.familyId));
   return [
     trigger === "manual"
       ? "The parent just asked, from the Homa's tasks page, to run the morning research brief once right now."
       : "It is this family's weekday morning research brief moment.",
     "Load the research-brief skill FIRST and follow it exactly; it holds the selection rules, required format, and guardrails.",
     "",
-    renderBriefContext(context),
+    context,
     "",
-    "Follow the skill's exact four-block format: research headline, What I learned, Why it's interesting, and one executable Want me to CTA. Preserve the blank lines. Do not add a preamble, sign-off, saved-note line, or URL.",
+    v2
+      ? "Choose exactly one child and one eligible candidate. Draft first, call prepare_research_brief with that child and candidate, then output only the accepted stored draft. Do not call recall for routine novelty. Never render citation URLs."
+      : "Follow the skill's exact four-block format: research headline, What I learned, Why it's interesting, and one executable Want me to CTA. Preserve the blank lines. Do not add a preamble, sign-off, saved-note line, or URL.",
     `Compose ${trigger === "manual" ? "today's" : "this morning's"} brief to ${task.parentFirstName ?? "the parent"} about ${task.kidPhrase}.`,
     task.deliveryPref === "none"
       ? saveOnlyLine()
@@ -111,12 +127,25 @@ export async function buildTaskMessage(
   task: DueFamilyTask,
   trigger: TaskRunTrigger,
   loadContext: typeof loadBriefContext = loadBriefContext,
+  dependencies: {
+    deliveryVersion?: TaskDeliveryVersion;
+    loadV2Context?: typeof loadBriefV2Context;
+    /** Ignored. Kept temporarily so flag-flip regression tests can prove the
+     * persisted version, not current process state, owns this decision. */
+    environment?: Record<string, string | undefined>;
+  } = {},
 ): Promise<string> {
   switch (task.kind) {
     case "journal_prompt":
       return journalMessage(task, trigger);
     case "morning_brief":
-      return await briefMessage(task, trigger, loadContext);
+      return await briefMessage(
+        task,
+        trigger,
+        loadContext,
+        dependencies.loadV2Context ?? loadBriefV2Context,
+        dependencies.deliveryVersion ?? "legacy",
+      );
     case "custom":
       return await customMessage(task, trigger, loadContext);
     default: {
@@ -132,6 +161,7 @@ export function buildDispatchTarget(
   task: DueFamilyTask,
   runId: string,
   episodeId: string,
+  deliveryVersion: TaskDeliveryVersion = "legacy",
 ) {
   return {
     familyId: task.familyId,
@@ -143,6 +173,7 @@ export function buildDispatchTarget(
     label: task.label,
     episodeId,
     recipientMemberUserId: task.recipientMemberUserId,
+    deliveryVersion,
   };
 }
 
@@ -153,6 +184,7 @@ export function buildDispatchAuth(
   task: DueFamilyTask,
   runId: string,
   episodeId: string,
+  deliveryVersion: TaskDeliveryVersion = "legacy",
 ) {
   return {
     authenticator: "dispatcher",
@@ -164,6 +196,7 @@ export function buildDispatchAuth(
       taskRunId: runId,
       taskKind: task.kind,
       episodeId,
+      deliveryVersion,
     },
   };
 }

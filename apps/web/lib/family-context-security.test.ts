@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { resolveFamilyContextInstructionMarkdown } from "../agent/instructions/family-context";
 import {
   renderFamilyContext,
   type FamilyContextRows,
@@ -94,5 +95,128 @@ describe("family context serialization", () => {
     assert.ok(parsed.family.name.length <= 240);
     assert.ok(parsed.family.memberNames.length <= 12);
     assert.ok(parsed.children[0].interests.length <= 8);
+  });
+});
+
+describe("slim morning brief dynamic context", () => {
+  it("skips family and progress hydration while retaining continuity", async () => {
+    let familyLoads = 0;
+    let progressLoads = 0;
+    let continuityLoads = 0;
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: {
+          channel: "dispatch",
+          familyId: "family-1",
+          taskKind: "morning_brief",
+          episodeId: "episode-1",
+          deliveryVersion: "research_brief_v2",
+        },
+        environment: {
+          HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED: "true",
+          HOMA_RESEARCH_BRIEF_V2_ENABLED: "false",
+        },
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        loadCallerFamilyContext: async () => {
+          familyLoads += 1;
+          throw new Error("caller family context must not load");
+        },
+        loadPinnedFamilyContext: async () => {
+          familyLoads += 1;
+          throw new Error("pinned family context must not load");
+        },
+        renderFamilyContext: () => {
+          familyLoads += 1;
+          return "generic family context";
+        },
+        loadProgressContext: async () => {
+          progressLoads += 1;
+          return "generic progress context";
+        },
+        loadContinuityContext: async (input) => {
+          continuityLoads += 1;
+          assert.deepEqual(input, {
+            familyId: "family-1",
+            episodeId: "episode-1",
+            runtimeSessionId: "session-1",
+          });
+          return "Established continuity context";
+        },
+        recordContextSnapshot: async () => {},
+      },
+    );
+
+    assert.equal(familyLoads, 0);
+    assert.equal(progressLoads, 0);
+    assert.equal(continuityLoads, 1);
+    assert.match(
+      markdown ?? "",
+      /^## Authenticated morning research brief dispatch/u,
+    );
+    assert.match(
+      markdown ?? "",
+      /\n\nEstablished continuity context$/u,
+    );
+  });
+
+  it("keeps a slim continuity failure fail-soft", async () => {
+    const originalConsoleError = console.error;
+    const logged: unknown[][] = [];
+    console.error = (...args: unknown[]) => {
+      logged.push(args);
+    };
+
+    try {
+      const markdown = await resolveFamilyContextInstructionMarkdown(
+        {
+          attributes: {
+            channel: "dispatch",
+            familyId: "family-1",
+            taskKind: "morning_brief",
+            deliveryVersion: "research_brief_v2",
+          },
+          environment: {
+            HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED: "true",
+            HOMA_RESEARCH_BRIEF_V2_ENABLED: "false",
+          },
+          sessionId: "session-1",
+          turnId: null,
+        },
+        {
+          loadCallerFamilyContext: async () => {
+            throw new Error("caller family context must not load");
+          },
+          loadPinnedFamilyContext: async () => {
+            throw new Error("pinned family context must not load");
+          },
+          renderFamilyContext: () => {
+            throw new Error("generic family context must not render");
+          },
+          loadProgressContext: async () => {
+            throw new Error("generic progress context must not load");
+          },
+          loadContinuityContext: async () => {
+            throw new Error("continuity unavailable");
+          },
+          recordContextSnapshot: async () => {},
+        },
+      );
+
+      assert.match(
+        markdown ?? "",
+        /^## Authenticated morning research brief dispatch/u,
+      );
+      assert.deepEqual(logged, [
+        [
+          "family context: continuity load failed:",
+          "continuity unavailable",
+        ],
+      ]);
+    } finally {
+      console.error = originalConsoleError;
+    }
   });
 });

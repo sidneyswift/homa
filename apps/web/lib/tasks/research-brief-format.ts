@@ -1,8 +1,8 @@
-import { fitsInOneSms } from "../sms-segments";
+import { MAX_SMS_SEGMENTS, smsSegmentCount } from "../sms-segments";
 
 const EXACT_LINE_COUNT = 7;
 const HEADLINE =
-  /^🔬 (Last night|This morning) I researched (\S(?:.*\S)?)$/u;
+  /^(Last night|This morning) I researched (\S(?:.*\S)?)$/u;
 const LEARNED_BLOCK = /^What I learned: (\S(?:.*\S)?)$/u;
 const INTERESTING_BLOCK = /^Why it's interesting: (\S(?:.*\S)?)$/u;
 const CTA_BLOCK = /^Want me to (\S(?:.*\S)?)\?$/u;
@@ -61,11 +61,7 @@ function hasOneApprovedCapability(ctaBody: string): boolean {
   return Boolean(creativePurpose || reminderPurpose);
 }
 
-export type ResearchBriefExpectedTense = "overnight" | "top-up";
-
-export interface ResearchBriefValidationOptions {
-  expectedTense?: ResearchBriefExpectedTense;
-}
+export const RESEARCH_BRIEF_MAX_VISIBLE_CHARS = 900;
 
 export type ResearchBriefValidation =
   | { ok: true }
@@ -73,7 +69,6 @@ export type ResearchBriefValidation =
 
 export function validateResearchBriefFormat(
   text: string,
-  options: ResearchBriefValidationOptions = {},
 ): ResearchBriefValidation {
   const errors: string[] = [];
   const normalized = text.replace(/\r\n/gu, "\n");
@@ -91,14 +86,7 @@ export function validateResearchBriefFormat(
   if (!(headlineMatch?.[2] ?? "").match(/\p{L}/u)) {
     errors.push("headline topic");
   }
-
-  const expectedHeadline =
-    options.expectedTense === "overnight"
-      ? "Last night"
-      : options.expectedTense === "top-up"
-        ? "This morning"
-        : null;
-  if (expectedHeadline && headlineMatch?.[1] !== expectedHeadline) {
+  if (headlineMatch && headlineMatch[1] !== "Last night") {
     errors.push("headline tense");
   }
 
@@ -127,16 +115,14 @@ export function validateResearchBriefFormat(
     errors.push("saved link");
   }
   if (MARKDOWN.test(text)) errors.push("markdown");
-  if ((text.match(EMOJI) ?? []).length !== 1) errors.push("emoji count");
+  if ((text.match(EMOJI) ?? []).length > 0) errors.push("emoji");
   if (CALENDAR_REFERENCE.test(cta)) errors.push("calendar promise");
   if (INTERNAL_VOCABULARY.test(text)) errors.push("internal vocabulary");
   if (text.includes("\u2014")) errors.push("em dash");
-  // The required emoji forces UCS-2 encoding, so carriers count 67
-  // characters per segment and reject anything over 10 segments
-  // (about 670 characters). The old flat 1,600-character cap let the
-  // 2026-07-13 briefs through at 755 to 830 characters, and Telnyx
-  // rejected all three texts with error 40302.
-  if (!fitsInOneSms(text)) errors.push("length");
+  if (Array.from(text).length > RESEARCH_BRIEF_MAX_VISIBLE_CHARS) {
+    errors.push("visible characters");
+  }
+  if (smsSegmentCount(text) > MAX_SMS_SEGMENTS) errors.push("SMS segments");
 
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
 }

@@ -18,6 +18,39 @@ export interface DeliveryAggregate {
   failedCount: number;
 }
 
+export interface DurableDeliveryAttempt {
+  recipientKey: string;
+  channel: "sms" | "email";
+  status: "pending" | "sent" | "failed" | "uncertain";
+}
+
+export function aggregateDurableDeliveryAttempts(
+  attempts: readonly DurableDeliveryAttempt[],
+): DeliveryAggregate {
+  const attemptsByRecipient = new Map<string, DurableDeliveryAttempt[]>();
+  for (const attempt of attempts) {
+    const recipientAttempts = attemptsByRecipient.get(attempt.recipientKey) ?? [];
+    recipientAttempts.push(attempt);
+    attemptsByRecipient.set(attempt.recipientKey, recipientAttempts);
+  }
+  return aggregateDeliveryOutcomes(
+    [...attemptsByRecipient.values()].map((recipientAttempts) => {
+      const sent = recipientAttempts.find((attempt) => attempt.status === "sent");
+      if (sent) {
+        return { channel: sent.channel, delivered: true };
+      }
+      return {
+        channel: "none",
+        delivered: false,
+        uncertain: recipientAttempts.some(
+          (attempt) =>
+            attempt.status === "pending" || attempt.status === "uncertain",
+        ),
+      };
+    }),
+  );
+}
+
 export function aggregateDeliveryOutcomes(
   outcomes: DeliveryOutcome[],
 ): DeliveryAggregate {
@@ -82,13 +115,14 @@ export function replyContractForProgressCheckIn(
 export function replyContractForTask(
   kind: FamilyTaskKind,
   text: string,
+  taskRunId: string | null = null,
 ): TaskReplyContract | null {
   switch (kind) {
     case "morning_brief":
       if (!/\?\s*$/u.test(text)) return null;
       return {
         kind: "yes_no",
-        promptKey: "morning-brief-offer",
+        promptKey: `morning-brief:${taskRunId ?? "legacy"}`,
         expiresAfterMs: 24 * 60 * 60_000,
       };
     case "journal_prompt":

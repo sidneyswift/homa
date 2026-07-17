@@ -6,9 +6,16 @@ import { z } from "zod";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import {
+  citationSourceName,
+  verifiedCitationSourceName,
+  type ResearchCitation,
+} from "./citation-source";
+import {
   findResearchDuplicates,
   loadPriorResearchWithDatabase,
 } from "./research-dedup";
+
+export type { ResearchCitation } from "./citation-source";
 
 /**
  * The knowledge bank's one write path (D-ht-5: auto-merge behind an
@@ -98,6 +105,7 @@ export const knowledgeRowInputSchema = z.object({
         url: z.string().url().max(500),
         accessedAt: z.string().max(20).optional(),
         claim: z.string().trim().min(4).max(200),
+        sourceName: z.string().trim().min(2).max(120).optional(),
       }),
     )
     .min(1)
@@ -188,14 +196,43 @@ export async function mergeKnowledgeRow(
     };
   }
   const input = parsed.data;
+  if (
+    options.contributedBy === "agent_research" &&
+    (!input.lens ||
+      (input.lens !== "method" && !input.stage) ||
+      !input.sourceTier ||
+      input.confidence === "low")
+  ) {
+    return {
+      merged: false,
+      note:
+        "Research rows need a lens, matching stage unless they are method rows, source tier, medium or high confidence, and named citations.",
+    };
+  }
+  const verifiedSourceNames =
+    options.contributedBy === "agent_research"
+      ? await Promise.all(
+          input.citations.map((citation) =>
+            verifiedCitationSourceName(citation),
+          ),
+        )
+      : input.citations.map((citation) => citationSourceName(citation));
+  if (verifiedSourceNames.some((sourceName) => sourceName === null)) {
+    return {
+      merged: false,
+      note:
+        "Research citation source names must match bounded page text or an allowlisted publication host.",
+    };
+  }
 
   const title = sanitizeKnowledgeText(input.title);
   const summary = sanitizeKnowledgeText(input.summary);
   const content = sanitizeKnowledgeText(input.content);
-  const citations = input.citations.map((citation) => ({
+  const citations = input.citations.map((citation, index) => ({
     url: citation.url,
     accessedAt: citation.accessedAt ?? new Date().toISOString().slice(0, 10),
     claim: sanitizeKnowledgeText(citation.claim),
+    sourceName: verifiedSourceNames[index] ?? undefined,
   }));
 
   const ttlDays = ttlForRow(input.lens, input.freshnessTtlDays);
@@ -217,8 +254,7 @@ export async function mergeKnowledgeRow(
     | { kind: "inserted"; rowId: string };
 
   const outcome = await sql.begin<DatabaseOutcome>(async (transaction) => {
-    // Serialize every write for one topic, including morning-brief
-    // top-ups that do not use the fleet runner. This closes the
+    // Serialize every fleet-research write for one topic. This closes the
     // check-then-insert race where two lenses could choose the same new
     // article from the same prior snapshot.
     await transaction`
@@ -228,8 +264,8 @@ export async function mergeKnowledgeRow(
     // Lock the run row until this transaction commits. Lab cancellation
     // updates the same row, so either cancellation wins first and this
     // write refuses, or this write commits first and cancellation waits,
-    // then cleanup sees and flags the row. Dispatch top-up runs are valid
-    // too; the requirement is status=running, not fleet_research kind.
+    // then cleanup sees and flags the row. The channel guard keeps dispatches
+    // out of this fleet corpus path, so the requirement is status=running.
     if (options.contributedBy === "agent_research" && options.runId) {
       const runs = await transaction<Array<{ status: string }>>`
         select status
@@ -379,7 +415,7 @@ export interface KnowledgeRow {
   title: string;
   summary: string;
   content: string;
-  citations: Array<{ url: string; accessedAt?: string; claim: string }>;
+  citations: ResearchCitation[];
   lastVerifiedAt: string;
 }
 

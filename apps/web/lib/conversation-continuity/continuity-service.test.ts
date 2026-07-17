@@ -122,6 +122,7 @@ describe("conversation continuity service", () => {
     assert.equal(result.replyToMessageId, "message-brief");
     assert.equal(result.repliedDeliveryId, "delivery-sidney");
     assert.equal(result.resolution, "matched");
+    assert.equal(result.resolvedOutcome, "accepted");
     assert.match(result.contextMarkdown, /Want a quick stop-and-go game/u);
     assert.doesNotMatch(result.contextMarkdown, /Compose the morning brief/u);
   });

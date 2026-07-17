@@ -47,6 +47,7 @@ export interface TaskRunView {
   summary: string | null;
   deliveredChannel: "sms" | "email" | "none" | null;
   startedAt: string;
+  feedbackSignal?: "helpful" | "not_for_us" | null;
 }
 
 export function hourLabel(hour: number): string {

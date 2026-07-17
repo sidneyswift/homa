@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Bell, FlaskConical, Moon } from "lucide-react";
 
+import { isResearchBriefFeedbackEligible } from "../../../lib/tasks/research-brief-feedback-contract";
+import { recordResearchBriefFeedbackAction } from "./actions";
 import { HISTORY_RUN_LIMIT } from "./task-copy";
+import { runBriefFeedbackInteraction } from "./task-feedback-interaction";
 import type { TaskRunView } from "./tasks-view";
 
 /**
@@ -32,13 +37,10 @@ function runIcon(kind: TaskRunView["kind"]) {
   }
 }
 
-/** Status copy passed both gates 2026-07-10; the done lines shortened
- * 2026-07-13 when the Ask Homa link took over naming the on-page door
- * (reader gate: the offer in a brief had no on-page way to say yes).
- * The failed line matches the dispatcher's real behavior: a released
- * schedule is retried by the next hourly tick, so "soon" is the truth
- * the Next chip also tells; a retry that misses the delivery window
- * records its own skipped row with the next-scheduled-time story. */
+/** The done lines pair delivery truth with the on-page Ask Homa door.
+ * Uncertain and failed rows stay factual: uncertainty does not prove the
+ * canonical brief became visible, and a completed failed run does not imply
+ * another attempt before the schedule's next planned time. */
 function statusNote(run: TaskRunView): string | null {
   switch (run.status) {
     case "done":
@@ -50,19 +52,19 @@ function statusNote(run: TaskRunView): string | null {
             ? "Saved to this page."
             : null;
     case "skipped":
-      return "Skipped: the moment for this one had already passed. It runs at the next scheduled time.";
+      return "Skipped: this task's scheduled time had passed. It is scheduled again at its next time.";
     case "partial":
       // No counts: the string can't know how many deliveries failed
       // (editor gate 2026-07-13, no invented numbers).
-      return "Sent to part of the family. Whoever missed it can read it here.";
+      return "It reached at least one family member. It is available on this page.";
     case "partial_uncertain":
-      return "Sent to part of the family. Homa can't tell yet whether the rest arrived. It's saved here either way.";
+      return "It reached at least one family member. Homa can't tell yet whether other deliveries arrived. It is available on this page.";
     case "uncertain":
-      return "Homa sent this, but can't tell yet whether it arrived. It's saved here either way.";
+      return "Homa couldn't confirm delivery. Nothing else needs your attention right now.";
     case "failed":
-      return "Didn't send. Homa tries again soon.";
+      return "This task did not send.";
     case "running":
-      return "Working on it now.";
+      return "Homa is preparing this task now.";
     default: {
       const exhaustive: never = run.status;
       throw new Error(`unhandled run status: ${String(exhaustive)}`);
@@ -77,6 +79,86 @@ function statusNote(run: TaskRunView): string | null {
  * it would compete with texting back, which also works. */
 function showsAskHoma(run: TaskRunView): boolean {
   return run.status === "done";
+}
+
+function showsBriefFeedback(run: TaskRunView): boolean {
+  return isResearchBriefFeedbackEligible(run);
+}
+
+export function briefFeedbackControlState(
+  selectedSignal: TaskRunView["feedbackSignal"],
+  signal: "helpful" | "not_for_us",
+  pending: boolean,
+): { ariaPressed: boolean; disabled: boolean } {
+  return {
+    ariaPressed: selectedSignal === signal,
+    disabled: pending,
+  };
+}
+
+function BriefFeedbackControls({ run }: { run: TaskRunView }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const promptId = `brief-feedback-label-${run.id}`;
+
+  return (
+    <div className="mt-3">
+      <p id={promptId} className="text-xs font-semibold text-muted">
+        Was this helpful?
+      </p>
+      <div
+        className="mt-1.5 flex flex-wrap gap-2"
+        role="group"
+        aria-labelledby={promptId}
+      >
+        {(["helpful", "not_for_us"] as const).map((signal) => {
+          const state = briefFeedbackControlState(run.feedbackSignal, signal, pending);
+          const label = signal === "helpful" ? "Helpful" : "Not for us";
+          const ariaPressedProps: {
+            "aria-pressed": "true" | "false";
+          } = state.ariaPressed
+            ? { "aria-pressed": "true" }
+            : { "aria-pressed": "false" };
+          return (
+            <button
+              key={signal}
+              type="button"
+              aria-label={`Mark this brief ${signal === "helpful" ? "helpful" : "not for us"}`}
+              {...ariaPressedProps}
+              disabled={state.disabled}
+              onClick={() => {
+                startTransition(async () => {
+                  await runBriefFeedbackInteraction(
+                    { taskRunId: run.id, signal },
+                    {
+                      action: recordResearchBriefFeedbackAction,
+                      setError,
+                      refresh: () => router.refresh(),
+                    },
+                  );
+                });
+              }}
+              className={
+                state.ariaPressed
+                  ? "min-h-11 min-w-11 rounded-pill border-2 border-[var(--clay-700)] bg-brand-soft px-3 py-2 text-xs font-semibold text-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-60"
+                  : "min-h-11 min-w-11 rounded-pill border border-border-subtle bg-card px-3 py-2 text-xs font-semibold text-muted disabled:cursor-not-allowed disabled:opacity-60"
+              }
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <p
+        className="mt-1.5 min-h-4 text-xs font-semibold text-muted"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {error ?? ""}
+      </p>
+    </div>
+  );
 }
 
 function dayKey(date: Date, timeZone: string): string {
@@ -147,12 +229,12 @@ export function TaskHistory({
 }) {
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">History</h2>
+      <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">Task history</h2>
       {runs.length === 0 ? (
         <div className="mt-3 rounded-lg border border-border-subtle bg-card p-6 text-center shadow-sm">
           <p className="font-display text-lg font-semibold text-strong">Nothing here yet.</p>
           <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
-            The first time a task above runs, its work shows up here.
+            When Homa finishes one of your tasks, it shows up here.
           </p>
         </div>
       ) : (
@@ -166,6 +248,7 @@ export function TaskHistory({
                 {group.runs.map((run) => {
                   const note = statusNote(run);
                   const askable = showsAskHoma(run);
+                  const feedbackable = showsBriefFeedback(run);
                   return (
                     <li
                       key={run.id}
@@ -200,6 +283,7 @@ export function TaskHistory({
                           ) : null}
                         </div>
                       ) : null}
+                      {feedbackable ? <BriefFeedbackControls run={run} /> : null}
                     </li>
                   );
                 })}
@@ -211,7 +295,7 @@ export function TaskHistory({
               2026-07-13 flagged the soft version as trust-costing). */}
           <p className="text-center text-xs font-semibold text-subtle">
             {runs.length >= HISTORY_RUN_LIMIT
-              ? "This list shows the newest 30. Older runs are kept, just not shown here."
+              ? "This page shows your newest 30 task updates. Older ones are kept, just not shown here."
               : "That's everything so far."}
           </p>
         </div>

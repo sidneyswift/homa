@@ -93,13 +93,15 @@ describe("conversation reply resolution", () => {
       now: NOW,
       memberUserId: "sidney",
       explicitDeliveryId: null,
-      providerReplyTo: "provider-outbound-42",
+      providerReplyTo: " provider-outbound-42@example.com ",
       candidates: [
-        candidate({ providerMessageId: "provider-outbound-42" }),
+        candidate({
+          providerMessageId: "<provider-outbound-42@example.com>",
+        }),
         candidate({
           deliveryId: "delivery-newer",
           messageId: "message-newer",
-          providerMessageId: "provider-outbound-99",
+          providerMessageId: "<provider-outbound-99@example.com>",
           sentAt: new Date("2026-07-11T13:19:30.000Z"),
         }),
       ],
@@ -107,7 +109,84 @@ describe("conversation reply resolution", () => {
 
     assert.equal(result.kind, "matched");
     if (result.kind === "matched") {
-      assert.equal(result.candidate.providerMessageId, "provider-outbound-42");
+      assert.equal(
+        result.candidate.providerMessageId,
+        "<provider-outbound-42@example.com>",
+      );
+      assert.equal(result.outcome, "answered");
+    }
+  });
+
+  it("does not let a long worksheet request close a yes or no offer by shared words", () => {
+    const result = resolveReplyIntent({
+      text: "Please make a long worksheet about fractions for Story.",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "yes_no",
+          promptKey: "morning-brief:run-1",
+          messageContent: "Want me to make a fractions worksheet?",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "none");
+  });
+
+  it("classifies short yes or no replies to one yes or no offer", () => {
+    const input = {
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms" as const,
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [candidate({ promptKey: "morning-brief:run-1" })],
+    };
+
+    for (const text of [
+      "Yes",
+      "Yes please",
+      "Yes, please",
+      "  YES,\tPLEASE!!  ",
+    ]) {
+      const result = resolveReplyIntent({ ...input, text });
+      assert.equal(result.kind, "matched", text);
+      if (result.kind === "matched") {
+        assert.equal(result.outcome, "accepted", text);
+      }
+    }
+    for (const text of [
+      "No",
+      "Not now",
+      "No, thanks",
+      "Nope",
+      "  nO,\nThAnKs.  ",
+    ]) {
+      const result = resolveReplyIntent({ ...input, text });
+      assert.equal(result.kind, "matched", text);
+      if (result.kind === "matched") {
+        assert.equal(result.outcome, "declined", text);
+      }
+    }
+  });
+
+  it("does not treat non-polarity text as a yes or no reply", () => {
+    for (const text of ["Why?", "Tell me more"]) {
+      const result = resolveReplyIntent({
+        text,
+        now: NOW,
+        memberUserId: "sidney",
+        currentChannel: "sms",
+        explicitDeliveryId: null,
+        providerReplyTo: null,
+        candidates: [candidate({ promptKey: "morning-brief:run-1" })],
+      });
+
+      assert.equal(result.kind, "none", text);
     }
   });
 
@@ -183,6 +262,9 @@ describe("conversation reply resolution", () => {
     });
 
     assert.equal(result.kind, "matched");
+    if (result.kind === "matched") {
+      assert.equal(result.outcome, "answered");
+    }
   });
 
   it("matches a natural check-in answer to one same-channel choice loop", () => {
@@ -206,6 +288,7 @@ describe("conversation reply resolution", () => {
     assert.equal(result.kind, "matched");
     if (result.kind === "matched") {
       assert.equal(result.candidate.deliveryId, "delivery-1");
+      assert.equal(result.outcome, "answered");
     }
   });
 
@@ -450,7 +533,7 @@ describe("conversation reply resolution", () => {
     assert.equal(result.kind, "ambiguous");
   });
 
-  it("uses a parent's clarification to select one previously ambiguous loop", () => {
+  it("does not resolve a yes or no loop from prompt-key word overlap", () => {
     const result = resolveReplyIntent({
       text: "The morning brief",
       now: NOW,
@@ -472,10 +555,27 @@ describe("conversation reply resolution", () => {
       ],
     });
 
-    assert.equal(result.kind, "matched");
-    if (result.kind === "matched") {
-      assert.equal(result.candidate.promptKey, "morning-brief-offer");
-    }
+    assert.equal(result.kind, "none");
+  });
+
+  it("does not resolve an approval loop from content-word overlap", () => {
+    const result = resolveReplyIntent({
+      text: "The fractions worksheet",
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          replyKind: "approval",
+          messageContent: "Approve the fractions worksheet?",
+          promptKey: "worksheet-approval",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "none");
   });
 
   it("does not let a free-text loop on another channel capture a new topic", () => {

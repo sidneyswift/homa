@@ -1,3 +1,6 @@
+import type { EventProps } from "@homa/core";
+import type { TransactionSql } from "postgres";
+
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import {
@@ -6,7 +9,10 @@ import {
   type ContinuityChannel,
 } from "./continuity-service";
 import { PostgresContinuityRepository } from "./postgres-repository";
-import { renderContinuityContext } from "./reply-policy";
+import {
+  renderContinuityContext,
+  type ReplyOutcome,
+} from "./reply-policy";
 
 export interface ContinuityAuthAttributes {
   familyId?: string;
@@ -15,7 +21,10 @@ export interface ContinuityAuthAttributes {
   taskRunId?: string;
   replyToMessageId?: string;
   repliedDeliveryId?: string;
+  resolvedOutcome?: ReplyOutcome;
   providerMessageId?: string;
+  providerReplyTo?: string;
+  replySourceChannel?: "web" | "sms" | "email" | "dispatch";
   continuityThreadHash?: string;
   continuityContext?: string;
   channel?: string;
@@ -35,6 +44,85 @@ export interface InboundContinuityInput {
   now?: Date;
 }
 
+export async function claimReplyResolutionWithTransaction(
+  tx: TransactionSql,
+  input: {
+    familyId: string;
+    deliveryId: string;
+    messageId: string;
+    replyToMessageId: string | null;
+    outcome: ReplyOutcome | undefined;
+  },
+): Promise<boolean> {
+  const claimedLoop = await tx<{ id: string }[]>`
+    update public.conversation_open_loops
+    set state = 'resolved', resolved_at = now(),
+        resolved_by_message_id = ${input.messageId},
+        resolved_outcome = ${input.outcome ?? null}
+    where delivery_id = ${input.deliveryId}
+      and family_id = ${input.familyId} and state = 'open'
+    returning id
+  `;
+  if (!claimedLoop[0]) return false;
+
+  await tx`
+    update public.conversation_deliveries
+    set status = 'sent', sent_at = coalesce(sent_at, now()),
+        replied_at = now(), reply_message_id = ${input.messageId},
+        updated_at = now()
+    where id = ${input.deliveryId} and family_id = ${input.familyId}
+      and replied_at is null
+  `;
+  await tx`
+    update public.conversation_messages
+    set reply_to_message_id = ${input.replyToMessageId},
+        replied_delivery_id = ${input.deliveryId}
+    where id = ${input.messageId} and family_id = ${input.familyId}
+  `;
+  if (input.replyToMessageId) {
+    await tx`
+      update public.conversation_messages
+      set visibility = 'family'
+      where id = ${input.replyToMessageId}
+        and family_id = ${input.familyId}
+        and role = 'assistant'
+    `;
+  }
+  return true;
+}
+
+type ReplyResolvedEventEmitter = (
+  name: "conversation.reply_resolved",
+  props: EventProps<"conversation.reply_resolved">,
+) => Promise<void>;
+
+export async function emitClaimedReplyResolvedEvent(
+  input: {
+    replyClaimed: boolean;
+    familyId: string;
+    channel: "web" | "sms" | "email";
+    resolvedOutcome: ReplyOutcome | undefined;
+    replySourceChannel: "web" | "sms" | "email" | "dispatch" | undefined;
+  },
+  emit?: ReplyResolvedEventEmitter,
+): Promise<void> {
+  if (!input.replyClaimed || !input.resolvedOutcome) return;
+  const props: EventProps<"conversation.reply_resolved"> = {
+    family_id: input.familyId,
+    channel: input.channel,
+    resolution: "matched",
+    resolved_outcome: input.resolvedOutcome,
+    cross_channel:
+      input.replySourceChannel !== undefined &&
+      input.replySourceChannel !== input.channel,
+  };
+  if (emit) {
+    await emit("conversation.reply_resolved", props);
+    return;
+  }
+  await emitMapEvent("conversation.reply_resolved", props);
+}
+
 export async function resolveInboundContinuity(
   input: InboundContinuityInput,
 ) {
@@ -50,22 +138,14 @@ export async function resolveInboundContinuity(
     text: input.text,
     now: input.now ?? new Date(),
   });
-  if (result.resolution !== "none") {
-    await emitMapEvent("conversation.reply_resolved", {
-      family_id: input.familyId,
-      channel: input.channel,
-      resolution: result.resolution,
-      cross_channel:
-        result.replySourceChannel !== null &&
-        result.replySourceChannel !== input.channel,
-    });
-  }
   return result;
 }
 
 export function resolvedContinuityAttributes(
   result: Awaited<ReturnType<typeof resolveInboundContinuity>>,
-  input: Pick<InboundContinuityInput, "memberUserId" | "providerMessageId">,
+  input: Pick<InboundContinuityInput, "memberUserId" | "providerMessageId"> & {
+    providerReplyTo?: string | null;
+  },
 ): Record<string, string> {
   return {
     episodeId: result.episodeId,
@@ -77,11 +157,20 @@ export function resolvedContinuityAttributes(
     ...(input.providerMessageId
       ? { providerMessageId: input.providerMessageId }
       : {}),
+    ...(input.providerReplyTo
+      ? { providerReplyTo: input.providerReplyTo }
+      : {}),
     ...(result.replyToMessageId
       ? { replyToMessageId: result.replyToMessageId }
       : {}),
     ...(result.repliedDeliveryId
       ? { repliedDeliveryId: result.repliedDeliveryId }
+      : {}),
+    ...(result.resolvedOutcome
+      ? { resolvedOutcome: result.resolvedOutcome }
+      : {}),
+    ...(result.replySourceChannel
+      ? { replySourceChannel: result.replySourceChannel }
       : {}),
   };
 }
@@ -215,7 +304,7 @@ export async function persistCanonicalMessage(
       (input.channel === "sms" || input.channel === "email"))
       ? "internal"
       : "family";
-  return await sql.begin(async (tx) => {
+  const persisted = await sql.begin(async (tx) => {
     const duplicate = providerMessageId
       ? (
           await tx<{ id: string; episode_id: string | null }[]>`
@@ -282,40 +371,13 @@ export async function persistCanonicalMessage(
     let replyClaimed = false;
     const repliedDeliveryId = attrs.repliedDeliveryId;
     if (repliedDeliveryId && input.role === "user") {
-      const claimedLoop = await tx<{ id: string }[]>`
-        update public.conversation_open_loops
-        set state = 'resolved', resolved_at = now(),
-            resolved_by_message_id = ${messageId}
-        where delivery_id = ${repliedDeliveryId}
-          and family_id = ${familyId} and state = 'open'
-        returning id
-      `;
-      if (claimedLoop[0]) {
-        replyClaimed = true;
-        await tx`
-          update public.conversation_deliveries
-          set status = 'sent', sent_at = coalesce(sent_at, now()),
-              replied_at = now(), reply_message_id = ${messageId},
-              updated_at = now()
-          where id = ${repliedDeliveryId} and family_id = ${familyId}
-            and replied_at is null
-        `;
-        await tx`
-          update public.conversation_messages
-          set reply_to_message_id = ${attrs.replyToMessageId ?? null},
-              replied_delivery_id = ${repliedDeliveryId}
-          where id = ${messageId} and family_id = ${familyId}
-        `;
-        if (attrs.replyToMessageId) {
-          await tx`
-            update public.conversation_messages
-            set visibility = 'family'
-            where id = ${attrs.replyToMessageId}
-              and family_id = ${familyId}
-              and role = 'assistant'
-          `;
-        }
-      }
+      replyClaimed = await claimReplyResolutionWithTransaction(tx, {
+        familyId,
+        deliveryId: repliedDeliveryId,
+        messageId,
+        replyToMessageId: attrs.replyToMessageId ?? null,
+        outcome: attrs.resolvedOutcome,
+      });
     }
 
     return {
@@ -324,6 +386,16 @@ export async function persistCanonicalMessage(
       replyClaimed,
     };
   });
+  if (input.channel !== "dispatch") {
+    await emitClaimedReplyResolvedEvent({
+      replyClaimed: persisted.replyClaimed,
+      familyId,
+      channel: input.channel,
+      resolvedOutcome: attrs.resolvedOutcome,
+      replySourceChannel: attrs.replySourceChannel,
+    });
+  }
+  return persisted;
 }
 
 export async function markCanonicalMessageDelivered(input: {

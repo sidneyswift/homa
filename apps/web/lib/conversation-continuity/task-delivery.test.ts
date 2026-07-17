@@ -6,6 +6,7 @@ import {
   type TaskDeliveryLedger,
   type TaskDeliveryTransports,
 } from "./task-delivery";
+import type { TaskReplyContract } from "./delivery-policy";
 import type {
   DeliveryAttempt,
   FamilyDeliveryRecipient,
@@ -16,6 +17,7 @@ class FakeLedger implements TaskDeliveryLedger {
   finished: Array<{ id: string; delivered: boolean; error?: string | null }> =
     [];
   openedLoops: string[] = [];
+  openedContracts: TaskReplyContract[] = [];
   reuseSentAttempt = false;
   reusePendingAttempt = false;
 
@@ -51,8 +53,12 @@ class FakeLedger implements TaskDeliveryLedger {
     }
   }
 
-  async openLoop(attempt: DeliveryAttempt): Promise<void> {
+  async openLoop(
+    attempt: DeliveryAttempt,
+    contract: TaskReplyContract,
+  ): Promise<void> {
     this.openedLoops.push(attempt.id);
+    this.openedContracts.push(contract);
   }
 }
 
@@ -117,6 +123,35 @@ describe("per-recipient task delivery", () => {
       ],
     );
     assert.deepEqual(ledger.openedLoops, ["attempt-1", "attempt-3"]);
+    assert.deepEqual(
+      ledger.openedContracts.map((contract) => contract.promptKey),
+      [
+        "morning-brief:run-1",
+        "morning-brief:run-1",
+        "morning-brief:run-1",
+      ],
+    );
+  });
+
+  it("uses a safe legacy prompt key when a morning brief has no task run", async () => {
+    const ledger = new FakeLedger();
+
+    await deliverTaskMessage(
+      { ...input(), taskRunId: null, recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return true;
+          },
+          async sendEmail() {
+            throw new Error("not called");
+          },
+        },
+      },
+    );
+
+    assert.equal(ledger.openedContracts[0]?.promptKey, "morning-brief:legacy");
   });
 
   it("reports partial when one adult cannot be reached by either transport", async () => {
@@ -194,6 +229,7 @@ describe("per-recipient task delivery", () => {
   it("records the transport's rejection reason and still falls back to email", async () => {
     const ledger = new FakeLedger();
     const reason = "SMS over the carrier size limit (12 segments, max 10)";
+    const acceptedChannels: string[] = [];
 
     const result = await deliverTaskMessage(
       { ...input(), recipients: [recipients[0]] },
@@ -207,6 +243,9 @@ describe("per-recipient task delivery", () => {
             return true;
           },
         },
+        onTransportAccepted: (channel) => {
+          acceptedChannels.push(channel);
+        },
       },
     );
 
@@ -217,6 +256,7 @@ describe("per-recipient task delivery", () => {
       delivered: false,
       error: reason,
     });
+    assert.deepEqual(acceptedChannels, ["email"]);
   });
 
   it("does not email-fallback or replay when SMS submission is uncertain", async () => {

@@ -4,6 +4,7 @@ import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import {
   beginDeliveryAttempt,
+  enrichDeliveryAttemptProviderMessageId,
   findDeliveryEmailIdentity,
   finishDeliveryAttempt,
   openReplyLoop,
@@ -26,6 +27,7 @@ import {
   resolvedContinuityAttributes,
 } from "../../lib/conversation-continuity/ledger";
 import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
+import { deliverReactiveEmailWithRetry } from "../../lib/conversation-continuity/reactive-email-delivery";
 import {
   findFamilyIdentityByEmail,
   optOutIntent,
@@ -37,10 +39,12 @@ import {
 } from "../../lib/email-inbound";
 import {
   getFamilyEmail,
+  retrieveResendRfcMessageIdForSubmission,
   sendAgentComposedEmail,
   submitAgentComposedEmail,
 } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
+import { operationalDiagnostic } from "../../lib/operational-diagnostics";
 
 /**
  * Email as an adapter on the ONE agent (gateway-plan GW-3): a parent
@@ -256,6 +260,7 @@ export default defineChannel({
         continuityAttributes = resolvedContinuityAttributes(continuity, {
           memberUserId: identity?.memberUserId ?? null,
           providerMessageId,
+          providerReplyTo: email.inReplyTo,
         });
       } catch (error) {
         console.error(
@@ -364,40 +369,45 @@ export default defineChannel({
         turnId?: string;
       };
       if (data.finishReason !== "stop" || !data.message?.trim()) return;
+      const messageText = data.message.trim();
       const to = channel.state.toEmail;
       const familyId = channel.state.familyId;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
         memberUserId?: string;
         inboundReceiptId?: string;
       };
-      if (attributes.inboundReceiptId) {
-        await completeInboundReceipt(attributes.inboundReceiptId);
+      if (!to || !familyId) {
+        throw new Error(
+          operationalDiagnostic(
+            "email_channel",
+            "canonical_persist",
+            "retry_pending",
+          ),
+        );
       }
-      if (!to || !familyId) return;
       const persisted = await persistCanonicalMessage({
         attributes: ctx.session.auth.current?.attributes,
         sessionId: ctx.session.id,
         channel: "email",
         sequence: data.sequence,
         role: "assistant",
-        content: data.message,
+        content: messageText,
         turnId: data.turnId,
       });
-      if (!persisted) return;
-      const attempt = await beginDeliveryAttempt({
-        familyId,
-        episodeId: persisted.episodeId,
-        messageId: persisted.id,
-        taskRunId: null,
-        memberUserId: attributes.memberUserId ?? null,
-        channel: "email",
-        destination: to,
-        providerThreadKey: `email:${to.toLowerCase()}`,
-      });
+      if (!persisted) {
+        throw new Error(
+          operationalDiagnostic(
+            "email_channel",
+            "canonical_persist",
+            "retry_pending",
+          ),
+        );
+      }
       const genericContract = replyContractForReactiveMessage(
-        data.message,
+        messageText,
       );
       const openLoopAfterOutcome = async (
+        attempt: Awaited<ReturnType<typeof beginDeliveryAttempt>>,
         deliveryOutcome: "sent" | "uncertain" | "failed",
       ) => {
         const progress =
@@ -407,7 +417,7 @@ export default defineChannel({
                 deliveryOutcome,
                 runtimeSessionId: ctx.session.id,
                 turnId: data.turnId,
-                deliveredContent: data.message ?? undefined,
+                deliveredContent: messageText,
               })
             : { status: "no_unique_prompt" as const };
         if (
@@ -422,87 +432,68 @@ export default defineChannel({
           });
         }
       };
-      if (!attempt.shouldSend) {
-        if (attempt.existingStatus === "sent") {
-          await markCanonicalMessageDelivered({
-            familyId,
-            messageId: persisted.id,
-          });
-          await openLoopAfterOutcome("sent");
-        } else if (attempt.existingStatus === "uncertain") {
-          await openLoopAfterOutcome("uncertain");
-        }
-        return;
-      }
-      let providerOutcome: "sent" | "uncertain" | null = null;
+
       try {
-        const replySecret = process.env.RESEND_INBOUND_SECRET;
-        const submission = await submitAgentComposedEmail(
-          to,
-          replySubject(channel.state.subject),
-          data.message
-            .split("\n")
-            .map((line) => line.trim())
-            .filter((line) => line.length > 0),
-          replySecret
-            ? buildSignedReplyAddress(attempt.id, replySecret)
-            : undefined,
-        );
-        await finishDeliveryAttempt(attempt, {
-          delivered: submission.status === "submitted",
-          ...(submission.status === "submitted"
-            ? { providerMessageId: submission.messageId }
-            : {
-                error:
-                  submission.status === "unknown"
-                    ? "Resend submission uncertain"
-                    : "Resend send rejected",
-                uncertain: submission.status === "unknown",
-              }),
+        await deliverReactiveEmailWithRetry({
+          beginAttempt: async () =>
+            await beginDeliveryAttempt({
+              familyId,
+              episodeId: persisted.episodeId,
+              messageId: persisted.id,
+              taskRunId: null,
+              memberUserId: attributes.memberUserId ?? null,
+              channel: "email",
+              destination: to,
+              providerThreadKey: `email:${to.toLowerCase()}`,
+            }),
+          sendEmail: async (attempt) => {
+            const replySecret = process.env.RESEND_INBOUND_SECRET;
+            return await submitAgentComposedEmail(
+              to,
+              replySubject(channel.state.subject),
+              messageText
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0),
+              replySecret
+                ? buildSignedReplyAddress(attempt.id, replySecret)
+                : undefined,
+            );
+          },
+          finishAttempt: finishDeliveryAttempt,
+          enrichProviderMessageId:
+            enrichDeliveryAttemptProviderMessageId,
+          retrieveProviderMessageId:
+            retrieveResendRfcMessageIdForSubmission,
+          finalizeOutcome: async (attempt, deliveryOutcome) => {
+            if (deliveryOutcome === "sent") {
+              await markCanonicalMessageDelivered({
+                familyId,
+                messageId: persisted.id,
+              });
+            }
+            await openLoopAfterOutcome(attempt, deliveryOutcome);
+          },
+          completeInboundReceipt: async () => {
+            if (attributes.inboundReceiptId) {
+              await completeInboundReceipt(attributes.inboundReceiptId);
+            }
+          },
         });
-        providerOutcome =
-          submission.status === "submitted"
-            ? "sent"
-            : submission.status === "unknown"
-              ? "uncertain"
-              : null;
-        if (submission.status === "unknown") {
-          await openLoopAfterOutcome("uncertain");
-          if (attributes.inboundReceiptId) {
-            await completeInboundReceipt(attributes.inboundReceiptId);
-          }
-          return;
-        }
-        if (submission.status === "rejected") {
-          await openLoopAfterOutcome("failed");
-          if (attributes.inboundReceiptId) {
-            await completeInboundReceipt(attributes.inboundReceiptId);
-          }
-          return;
-        }
-        await markCanonicalMessageDelivered({
-          familyId,
-          messageId: persisted.id,
-        });
-        await openLoopAfterOutcome("sent");
-        if (attributes.inboundReceiptId) {
-          await completeInboundReceipt(attributes.inboundReceiptId);
-        }
       } catch (error) {
-        if (providerOutcome === null) {
-          await finishDeliveryAttempt(attempt, {
-            delivered: false,
-            error: error instanceof Error ? error.message : "unknown",
-          });
-          await openLoopAfterOutcome("failed");
-        }
         if (attributes.inboundReceiptId) {
-          await completeInboundReceipt(attributes.inboundReceiptId);
+          await failInboundReceipt(
+            attributes.inboundReceiptId,
+            new Error(
+              operationalDiagnostic(
+                "email_channel",
+                "reactive_email_postprocess",
+                "retry_pending",
+              ),
+            ),
+          );
         }
-        console.error(
-          "email channel delivery failed:",
-          error instanceof Error ? error.message : "unknown",
-        );
+        throw error;
       }
     },
   },

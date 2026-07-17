@@ -97,6 +97,94 @@ describe("buildTaskMessage", () => {
     assert.match(message, /Compose this morning's brief to Evie about Nova\./);
   });
 
+  it("uses the isolated legacy path for a pinned legacy run", async () => {
+    let loadedLegacy = false;
+    let loadedV2 = false;
+    const message = await buildTaskMessage(
+      task({ kind: "morning_brief" }),
+      "scheduled",
+      async () => {
+        loadedLegacy = true;
+        return FAKE_BRIEF_CONTEXT;
+      },
+      {
+        deliveryVersion: "legacy",
+        environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "true" },
+        loadV2Context: async () => {
+          loadedV2 = true;
+          throw new Error("v2 tables must not be read while disabled");
+        },
+      },
+    );
+    assert.equal(loadedLegacy, true);
+    assert.equal(loadedV2, false);
+    assert.match(message, /knowledge bank has nothing fresh/);
+  });
+
+  it("uses preparation-first instructions for a pinned v2 run", async () => {
+    const message = await buildTaskMessage(
+      task({ kind: "morning_brief" }),
+      "scheduled",
+      async () => FAKE_BRIEF_CONTEXT,
+      {
+        deliveryVersion: "research_brief_v2",
+        environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "false" },
+        loadV2Context: async () => ({
+          styleKeys: [],
+          children: [],
+          observations: [],
+          recentTraces: [],
+        }),
+      },
+    );
+    assert.match(message, /call prepare_research_brief/);
+    assert.match(message, /output only the accepted stored draft/);
+  });
+
+  it("uses the run's pinned delivery version after flag flips in either direction", async () => {
+    let v2Loads = 0;
+    let legacyLoads = 0;
+    const loadV2Context = async () => {
+      v2Loads += 1;
+      return {
+        styleKeys: [],
+        children: [],
+        observations: [],
+        recentTraces: [],
+      };
+    };
+    const loadLegacyContext = async () => {
+      legacyLoads += 1;
+      return FAKE_BRIEF_CONTEXT;
+    };
+
+    const pinnedV2 = await buildTaskMessage(
+      task({ kind: "morning_brief" }),
+      "scheduled",
+      loadLegacyContext,
+      {
+        deliveryVersion: "research_brief_v2",
+        environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "false" },
+        loadV2Context,
+      },
+    );
+    const pinnedLegacy = await buildTaskMessage(
+      task({ kind: "morning_brief" }),
+      "scheduled",
+      loadLegacyContext,
+      {
+        deliveryVersion: "legacy",
+        environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "true" },
+        loadV2Context,
+      },
+    );
+
+    assert.match(pinnedV2, /call prepare_research_brief/);
+    assert.doesNotMatch(pinnedLegacy, /call prepare_research_brief/);
+    assert.equal(v2Loads, 1);
+    assert.equal(legacyLoads, 1);
+  });
+
   it("carries a custom task's label and verbatim prompt on both triggers", async () => {
     const custom = task({
       kind: "custom",
@@ -146,7 +234,12 @@ describe("buildTaskMessage", () => {
 
 describe("dispatch session identity", () => {
   it("stamps the same dispatcher principal and attributes on both doors", () => {
-    const auth = buildDispatchAuth(task({ kind: "custom" }), "run-1", "episode-1");
+    const auth = buildDispatchAuth(
+      task({ kind: "custom" }),
+      "run-1",
+      "episode-1",
+      "legacy",
+    );
     assert.equal(auth.authenticator, "dispatcher");
     assert.equal(auth.principalId, "dispatch:family-1");
     assert.equal(auth.principalType, "user");
@@ -156,6 +249,7 @@ describe("dispatch session identity", () => {
       taskRunId: "run-1",
       taskKind: "custom",
       episodeId: "episode-1",
+      deliveryVersion: "legacy",
     });
   });
 
@@ -164,6 +258,7 @@ describe("dispatch session identity", () => {
       task({ deliveryPref: "email", label: "Co-op prep", kind: "custom" }),
       "run-1",
       "episode-1",
+      "legacy",
     );
     assert.deepEqual(target, {
       familyId: "family-1",
@@ -175,6 +270,7 @@ describe("dispatch session identity", () => {
       label: "Co-op prep",
       episodeId: "episode-1",
       recipientMemberUserId: "user-1",
+      deliveryVersion: "legacy",
     });
   });
 });

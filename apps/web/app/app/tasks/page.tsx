@@ -7,6 +7,7 @@ import { effectiveTimeZone } from "../../../lib/time-zone";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { HISTORY_RUN_LIMIT } from "./task-copy";
+import { TASK_RUN_HISTORY_SELECT, mapTaskRunViews } from "./task-run-view";
 import { TasksView, type TaskRowView, type TaskRunView } from "./tasks-view";
 
 /**
@@ -39,7 +40,7 @@ export default async function TasksPage() {
       .order("created_at", { ascending: true }),
     supabase
       .from("homa_task_runs")
-      .select("id, kind, status, title, summary, delivered_channel, started_at")
+      .select(TASK_RUN_HISTORY_SELECT)
       .order("started_at", { ascending: false })
       .limit(HISTORY_RUN_LIMIT),
     getFamilyPhones(family.id),
@@ -51,7 +52,6 @@ export default async function TasksPage() {
   if (runsResult.error) {
     throw new Error(`task runs read failed: ${runsResult.error.message}`);
   }
-
   const tasks: TaskRowView[] = (scheduleResult.data ?? []).map((row) => ({
     id: row.id as string,
     kind: row.kind as TaskRowView["kind"],
@@ -65,20 +65,28 @@ export default async function TasksPage() {
     nextRunAt: (row.next_run_at as string | null) ?? null,
   }));
 
-  const runs: TaskRunView[] = (runsResult.data ?? []).map((row) => ({
-    id: row.id as string,
-    kind: row.kind as TaskRunView["kind"],
-    status: row.status as TaskRunView["status"],
-    title: row.title as string,
-    summary: (row.summary as string | null) ?? null,
-    deliveredChannel: (row.delivered_channel as TaskRunView["deliveredChannel"]) ?? null,
-    startedAt: row.started_at as string,
-  }));
-
   // Texting counts as set up for THIS adult when a linked number is
   // theirs or predates per-member attribution (task delivery follows
   // the same rule in selectTaskDeliveryRecipients).
   const callerUserId = userResult.data.user?.id ?? null;
+  const runs: TaskRunView[] = mapTaskRunViews(
+    (runsResult.data ?? []).map((row) => ({
+      id: row.id as string,
+      kind: row.kind as TaskRunView["kind"],
+      status: row.status as TaskRunView["status"],
+      title: row.title as string,
+      summary: (row.summary as string | null) ?? null,
+      delivered_channel: (row.delivered_channel as TaskRunView["deliveredChannel"]) ?? null,
+      started_at: row.started_at as string,
+      research_brief_feedback: Array.isArray(row.research_brief_feedback)
+        ? row.research_brief_feedback.map((feedback) => ({
+            member_user_id: feedback.member_user_id as string,
+            signal: feedback.signal as "helpful" | "not_for_us",
+          }))
+        : [],
+    })),
+    callerUserId,
+  );
   const textingLinked = phones.some(
     (phone) => phone.member_user_id === null || phone.member_user_id === callerUserId,
   );
