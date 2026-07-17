@@ -306,7 +306,7 @@ counters):
 ## Foldable / interactive notebook insert
 
 Reference image: `references/homa-foldable-reference.png`
-— a Homa-style foldable example showing tri-fold layout, fold lines,
+This Homa-style foldable example shows tri-fold layout, fold lines,
 glue tab, color-coded operation symbols, definitions panel, and embedded
 practice panel. Study it for layout, fold geometry, and panel structure.
 Original structural patterns drawn from TPT foldable inspo (Math Doodles
@@ -314,7 +314,7 @@ PEMDAS), re-expressed in Homa's design language.
 
 A foldable is a tactile learning tool the child prints, cuts, folds,
 and glues into a notebook. The reference material and the practice
-live on the same physical object — not a separate worksheet. Foldables
+live on the same physical object, not a separate worksheet. Foldables
 are the format when the parent or inspo asks for interactive notebooks,
 fold-and-glue inserts, or accordion-style reference cards.
 
@@ -337,7 +337,7 @@ On the flap surface: a prompt or question.
 Design patterns (all binding for foldables):
 
 - **Fold lines**: `border-top: 2.5px dashed #b3a492;` between panels.
-  Label faintly: "✂️ cut" on outer edges, "— fold —" on internal
+  Label faintly: "✂️ cut" on outer edges, "fold" on internal
   creases, "glue here ▸" on the attachment tab.
 - **Glue tab**: a narrow strip (~0.75in) on one end with a dotted
   border and "GLUE" in small caps. Background `#f5f0e8` so the child
@@ -352,7 +352,7 @@ Design patterns (all binding for foldables):
   inline-block;`).
 - **Scaffolded versions**: generate the blank (fill-in) version first.
   Offer answer-key and color versions as follow-ups if the parent
-  wants them — same layout, answers in a muted accent color, or full
+  wants them. Keep the same layout, with answers in a muted accent color or full
   color fills on each section.
 - **Mnemonic anchoring**: pair a verbal mnemonic with a small
   illustration (use generate_image for one small character/icon on
@@ -382,7 +382,7 @@ Design patterns (all binding for foldables):
 <div class="foldable">
   <div class="glue-tab">✂️ cut along outer edge · glue this tab into notebook</div>
   <div class="panel">
-    <span class="fold-label">— fold —</span>
+    <span class="fold-label">fold</span>
     <!-- Cover panel: title + mnemonic art -->
     <div style="text-align:center;">
       <span class="concept-letter" style="color:#e25b45;">P</span>
@@ -394,7 +394,7 @@ Design patterns (all binding for foldables):
     </div>
   </div>
   <div class="panel">
-    <span class="fold-label">— fold —</span>
+    <span class="fold-label">fold</span>
     <!-- Reference panel: definitions -->
   </div>
   <div class="panel">
@@ -414,15 +414,15 @@ surgical revision matters more than organic feel.
 ## Structured outline / essay scaffold
 
 Reference image: `references/homa-outline-reference.png`
-— a Homa-style structured outline example showing two-column
+This Homa-style structured outline example shows a two-column
 instruction|work layout, Roman numeral section headers, labeled
 sub-fields with blank writing lines, and clean B&W design. Study it
 for layout proportions, section structure, and field labeling.
 Original structural patterns drawn from TPT essay outline inspo
 (The Daring English Teacher), re-expressed in Homa's design language.
 
-A structured outline breaks a complex task — writing an essay, planning
-a research project, outlining a book report — into a fill-in-the-blank
+A structured outline breaks a complex task, such as writing an essay, planning
+a research project, or outlining a book report, into a fill-in-the-blank
 framework with labeled sections. The structure teaches the process:
 the child learns what goes where by filling it in. This is the format
 when the parent asks for essay outlines, writing scaffolds, planning
@@ -444,7 +444,7 @@ Design patterns (all binding for outlines):
   ("a. topic sentence", "b. supporting evidence", "c. explanation").
   Sub-labels in the left column; blank lines in the right.
 - **Blank lines**: `border-bottom: 1.5px solid #6b6259; min-height:
-  24px;` — generous spacing so the child can write comfortably.
+  24px;`. Use generous spacing so the child can write comfortably.
   3–4 lines per sub-field for younger writers, 2 lines for older.
 - **Difficulty variants**: same layout, different field counts. A
   simpler version has 2 evidence slots per body paragraph; a harder
