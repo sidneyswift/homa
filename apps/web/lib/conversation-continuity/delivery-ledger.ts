@@ -1,4 +1,5 @@
 import { mapDb } from "../map/db";
+import type { Sql } from "postgres";
 import type { FamilyTaskKind } from "../tasks/kinds";
 import { hashContinuityKey } from "./continuity-service";
 import {
@@ -151,6 +152,8 @@ export interface DeliveryAttempt {
   existingStatus: "pending" | "sent" | "failed" | "uncertain";
   shouldSend: boolean;
   sentAtMs?: number | null;
+  providerSubmissionId?: string | null;
+  providerMessageId?: string | null;
 }
 
 export async function beginDeliveryAttempt(input: {
@@ -163,7 +166,22 @@ export async function beginDeliveryAttempt(input: {
   destination: string;
   providerThreadKey?: string | null;
 }): Promise<DeliveryAttempt> {
-  const sql = mapDb();
+  return await beginDeliveryAttemptWithDatabase(mapDb(), input);
+}
+
+export async function beginDeliveryAttemptWithDatabase(
+  sql: Sql,
+  input: {
+    familyId: string;
+    episodeId: string;
+    messageId: string;
+    taskRunId: string | null;
+    memberUserId: string | null;
+    channel: "sms" | "email" | "web";
+    destination: string;
+    providerThreadKey?: string | null;
+  },
+): Promise<DeliveryAttempt> {
   const destinationHash = hashContinuityKey(
     `${input.channel}:${input.destination.toLowerCase()}`,
   );
@@ -175,6 +193,8 @@ export async function beginDeliveryAttempt(input: {
       id: string;
       status: "pending" | "sent" | "failed" | "uncertain";
       sent_at_ms: string | null;
+      provider_submission_id: string | null;
+      provider_message_id: string | null;
     }[]
   >`
     insert into public.conversation_deliveries
@@ -188,10 +208,11 @@ export async function beginDeliveryAttempt(input: {
     on conflict (message_id, channel, destination_hash) do update
     set attempt_count = public.conversation_deliveries.attempt_count + 1,
         status = 'pending', error = null, failed_at = null,
+        provider_submission_id = null, provider_message_id = null,
         updated_at = now()
     where public.conversation_deliveries.status = 'failed'
       and public.conversation_deliveries.attempt_count < 3
-    returning id, status,
+    returning id, status, provider_submission_id, provider_message_id,
       (extract(epoch from sent_at) * 1000)::text as sent_at_ms
   `;
   const row =
@@ -202,9 +223,11 @@ export async function beginDeliveryAttempt(input: {
           id: string;
           status: "pending" | "sent" | "failed" | "uncertain";
           sent_at_ms: string | null;
+          provider_submission_id: string | null;
+          provider_message_id: string | null;
         }[]
       >`
-        select id, status,
+        select id, status, provider_submission_id, provider_message_id,
           (extract(epoch from sent_at) * 1000)::text as sent_at_ms
         from public.conversation_deliveries
         where message_id = ${input.messageId}
@@ -229,21 +252,41 @@ export async function beginDeliveryAttempt(input: {
       row.sent_at_ms === null
         ? null
         : Number(row.sent_at_ms),
+    providerSubmissionId: row.provider_submission_id,
+    providerMessageId: row.provider_message_id,
   };
 }
 
 export async function finishDeliveryAttempt(
   attempt: DeliveryAttempt,
   outcome:
-    | { delivered: true; providerMessageId?: string | null }
+    | {
+        delivered: true;
+        providerSubmissionId?: string | null;
+        providerMessageId?: string | null;
+      }
     | { delivered: false; error?: string | null; uncertain?: boolean },
 ): Promise<void> {
-  const sql = mapDb();
+  await finishDeliveryAttemptWithDatabase(mapDb(), attempt, outcome);
+}
+
+export async function finishDeliveryAttemptWithDatabase(
+  sql: Sql,
+  attempt: DeliveryAttempt,
+  outcome:
+    | {
+        delivered: true;
+        providerSubmissionId?: string | null;
+        providerMessageId?: string | null;
+      }
+    | { delivered: false; error?: string | null; uncertain?: boolean },
+): Promise<void> {
   if (outcome.delivered) {
     await sql`
       update public.conversation_deliveries
       set status = 'sent', sent_at = now(), failed_at = null, error = null,
-          provider_message_id = coalesce(${outcome.providerMessageId ?? null}, provider_message_id),
+          provider_submission_id = ${outcome.providerSubmissionId ?? null},
+          provider_message_id = ${outcome.providerMessageId ?? null},
           updated_at = now()
       where id = ${attempt.id} and family_id = ${attempt.familyId}
     `;
@@ -265,6 +308,37 @@ export async function finishDeliveryAttempt(
       where delivery_id = ${attempt.id} and state = 'open'
     `;
   }
+}
+
+export async function enrichDeliveryAttemptProviderMessageId(
+  attempt: DeliveryAttempt,
+  providerSubmissionId: string,
+  providerMessageId: string,
+): Promise<void> {
+  await enrichDeliveryAttemptProviderMessageIdWithDatabase(
+    mapDb(),
+    attempt,
+    providerSubmissionId,
+    providerMessageId,
+  );
+}
+
+export async function enrichDeliveryAttemptProviderMessageIdWithDatabase(
+  sql: Sql,
+  attempt: DeliveryAttempt,
+  providerSubmissionId: string,
+  providerMessageId: string,
+): Promise<void> {
+  await sql`
+    update public.conversation_deliveries
+    set provider_message_id = ${providerMessageId},
+        updated_at = now()
+    where id = ${attempt.id}
+      and family_id = ${attempt.familyId}
+      and channel = 'email'
+      and status = 'sent'
+      and provider_submission_id = ${providerSubmissionId}
+  `;
 }
 
 export async function openReplyLoop(input: {

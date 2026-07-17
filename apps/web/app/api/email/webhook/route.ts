@@ -1,10 +1,16 @@
-import { classifyResendWebhook, verifySvixSignature } from "../../../../lib/email-webhook";
+import {
+  applyResendWebhookReceiptWithDatabase,
+  classifyResendWebhook,
+  resendWebhookReceiptHttpStatus,
+  verifySvixSignature,
+} from "../../../../lib/email-webhook";
 import { mapDb } from "../../../../lib/map/db";
+import { operationalDiagnostic } from "../../../../lib/operational-diagnostics";
 
 /**
  * POST /api/email/webhook  (Resend webhook endpoint, founder console MJ-14)
  * Delivery receipts for every email Resend sends on our behalf. Two
- * ledgers learn from it, both keyed by the provider message id:
+ * ledgers learn from it, both keyed by Resend's submission id:
  *   1. email_sends (map-flow ledger): submitted rows upgrade to
  *      delivered / bounced / complained.
  *   2. conversation_deliveries (task sends): a hard bounce escalates the
@@ -44,28 +50,23 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const sql = mapDb();
-    // A delivered receipt must never overwrite a bounce that raced it.
-    await sql`
-      update public.email_sends
-      set status = ${action.ledgerStatus},
-          error = ${action.ledgerStatus === "delivered" ? null : type},
-          updated_at = now()
-      where provider_message_id = ${emailId}
-        and (${action.ledgerStatus !== "delivered"} or status = 'submitted')
-    `;
-    if (action.failsDelivery) {
-      await sql`
-        update public.conversation_deliveries
-        set status = 'failed',
-            error = ${type},
-            failed_at = now(),
-            updated_at = now()
-        where provider_message_id = ${emailId}
-          and status in ('pending', 'sent', 'uncertain')
-      `;
+    const result = await applyResendWebhookReceiptWithDatabase(sql, {
+      emailId,
+      eventType: type,
+      ledgerStatus: action.ledgerStatus,
+      failsDelivery: action.failsDelivery,
+    });
+    const status = resendWebhookReceiptHttpStatus(result);
+    if (status !== 200) {
+      return Response.json(
+        { ok: false, reason: "receipt-not-yet-correlated" },
+        { status },
+      );
     }
-  } catch (error) {
-    console.error("email/webhook failed:", error instanceof Error ? error.message : "unknown");
+  } catch {
+    console.error(
+      operationalDiagnostic("email_webhook", "finalization", "failed"),
+    );
     // 500 asks Resend to retry, which both updates tolerate (idempotent).
     return Response.json({ ok: false }, { status: 500 });
   }

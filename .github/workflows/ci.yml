@@ -67,6 +67,12 @@ jobs:
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
 
+      - name: Install PostgreSQL 16 for disposable E2E
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
       - name: Morning research brief format
         run: pnpm check:research-brief
 
@@ -88,15 +94,15 @@ jobs:
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
 
-      - name: Install PostgreSQL 16 for disposable E2E
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-16
-          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
-
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e
+
+      - name: Morning research brief v2 disposable acceptance
+        timeout-minutes: 10
+        run: |
+          pnpm check:morning-research-brief-v2
+          pnpm check:admin
 
       - name: Conversation continuity database E2E (multi-parent causality)
         run: pnpm continuity:e2e

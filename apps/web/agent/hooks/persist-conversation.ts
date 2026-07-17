@@ -2,6 +2,7 @@ import { defineHook } from "eve/hooks";
 
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import { persistConversationMessage } from "../../lib/conversation-log";
+import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/research-brief-delivery";
 
 /**
  * The durable chat record (agentic ladder item 5, an M1-02 slice): every
@@ -56,6 +57,15 @@ export default defineHook({
     async "message.completed"(event, ctx) {
       try {
         if (!event.data.message) return;
+        // V2 dispatch validates and substitutes the staged draft before any
+        // canonical write. The generic hook must never race that exact content.
+        if (
+          preparedResearchBriefOwnsCanonicalPersistence(
+            ctx.session.auth.current?.attributes,
+          )
+        ) {
+          return;
+        }
         await persistConversationMessage({
           attributes: ctx.session.auth.current?.attributes,
           sessionId: ctx.session.id,

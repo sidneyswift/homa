@@ -1,18 +1,19 @@
-import { fitsInOneSms } from "../sms-segments";
+import { MAX_SMS_SEGMENTS, smsSegmentCount } from "../sms-segments";
 
 const EXACT_LINE_COUNT = 7;
 const HEADLINE =
-  /^🔬 (Last night|This morning) I researched (\S(?:.*\S)?)$/u;
+  /^(Last night|This morning) I researched (\S(?:.*\S)?)$/u;
 const LEARNED_BLOCK = /^What I learned: (\S(?:.*\S)?)$/u;
 const INTERESTING_BLOCK = /^Why it's interesting: (\S(?:.*\S)?)$/u;
 const CTA_BLOCK = /^Want me to (\S(?:.*\S)?)\?$/u;
 const CREATIVE_ACTIVITY_CTA =
-  /^(?:make|design|create|build|write)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a|an)\s+(?:(?!for\b)[\p{L}0-9'-]+\s+)*(?:game|activity|printable|worksheet|word strip|practice sheet)\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
+  /^(?:make|design|create|build|write)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a|an)\s+(?:(?!for\b|with\b)[\p{L}0-9'-]+\s+)*(?:game|activity|printable|worksheet|word strip|practice sheet)(?:\s+with\s+[\p{L}0-9'",-]+(?:\s+[\p{L}0-9'",-]+)*)?\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
 const REMINDER_OR_TASK_CTA =
   /^(?:set|create|make|schedule)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a\s+)?(?:(?!for\b)[\p{L}0-9'-]+\s+)*(?:reminder|task)\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
 const FORBIDDEN_CTA_PURPOSE =
   /\b(?:game|activity|printable|worksheet|word strip|practice sheet|reminder|task|make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\b|\s(?:and|or|then)\s/iu;
-const COMPOUND_CTA = /\s(?:and|or|then)\s/iu;
+const COMPOUND_CTA =
+  /\s(?:and|or|then)\s+(?:(?:make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\s+)?(?:a|an)\s+(?:game|activity|printable|worksheet|word strip|practice sheet|reminder|task)\b|\s(?:and|or|then)\s+(?:make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\b/iu;
 const TIMING_LEAD =
   /^(?:after|before|at|on|in|around|by|during|today|tomorrow|tonight|this|next|morning|afternoon|evening|breakfast|lunch|dinner|bedtime|monday|tuesday|wednesday|thursday|friday|saturday|sunday|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d{1,2}(?::\d{2})?)\b/iu;
 const CALENDAR_REFERENCE =
@@ -61,11 +62,7 @@ function hasOneApprovedCapability(ctaBody: string): boolean {
   return Boolean(creativePurpose || reminderPurpose);
 }
 
-export type ResearchBriefExpectedTense = "overnight" | "top-up";
-
-export interface ResearchBriefValidationOptions {
-  expectedTense?: ResearchBriefExpectedTense;
-}
+export const RESEARCH_BRIEF_MAX_VISIBLE_CHARS = 900;
 
 export type ResearchBriefValidation =
   | { ok: true }
@@ -73,7 +70,6 @@ export type ResearchBriefValidation =
 
 export function validateResearchBriefFormat(
   text: string,
-  options: ResearchBriefValidationOptions = {},
 ): ResearchBriefValidation {
   const errors: string[] = [];
   const normalized = text.replace(/\r\n/gu, "\n");
@@ -91,14 +87,7 @@ export function validateResearchBriefFormat(
   if (!(headlineMatch?.[2] ?? "").match(/\p{L}/u)) {
     errors.push("headline topic");
   }
-
-  const expectedHeadline =
-    options.expectedTense === "overnight"
-      ? "Last night"
-      : options.expectedTense === "top-up"
-        ? "This morning"
-        : null;
-  if (expectedHeadline && headlineMatch?.[1] !== expectedHeadline) {
+  if (headlineMatch && headlineMatch[1] !== "Last night") {
     errors.push("headline tense");
   }
 
@@ -127,16 +116,14 @@ export function validateResearchBriefFormat(
     errors.push("saved link");
   }
   if (MARKDOWN.test(text)) errors.push("markdown");
-  if ((text.match(EMOJI) ?? []).length !== 1) errors.push("emoji count");
+  if ((text.match(EMOJI) ?? []).length > 0) errors.push("emoji");
   if (CALENDAR_REFERENCE.test(cta)) errors.push("calendar promise");
   if (INTERNAL_VOCABULARY.test(text)) errors.push("internal vocabulary");
   if (text.includes("\u2014")) errors.push("em dash");
-  // The required emoji forces UCS-2 encoding, so carriers count 67
-  // characters per segment and reject anything over 10 segments
-  // (about 670 characters). The old flat 1,600-character cap let the
-  // 2026-07-13 briefs through at 755 to 830 characters, and Telnyx
-  // rejected all three texts with error 40302.
-  if (!fitsInOneSms(text)) errors.push("length");
+  if (Array.from(text).length > RESEARCH_BRIEF_MAX_VISIBLE_CHARS) {
+    errors.push("visible characters");
+  }
+  if (smsSegmentCount(text) > MAX_SMS_SEGMENTS) errors.push("SMS segments");
 
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
 }

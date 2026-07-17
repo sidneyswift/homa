@@ -5,8 +5,17 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import { TASK_KIND_CONFIG } from "../../../lib/tasks/kinds";
+import {
+  RESEARCH_BRIEF_FEEDBACK_KIND,
+  RESEARCH_BRIEF_FEEDBACK_OUTCOMES,
+  isResearchBriefFeedbackEligible,
+} from "../../../lib/tasks/research-brief-feedback-contract";
+import {
+  BRIEF_FEEDBACK_ERROR_MESSAGE,
+  runBriefFeedbackInteraction,
+} from "./task-feedback-interaction";
 import { TaskEditOverlay } from "./task-edit-overlay";
-import { groupRunsByDay } from "./task-history";
+import { briefFeedbackControlState, groupRunsByDay } from "./task-history";
 import {
   TasksView,
   hourLabel,
@@ -184,9 +193,22 @@ describe("TasksView", () => {
     assert.doesNotMatch(html, /Reply there and Homa answers/);
     assert.match(html, /<a[^>]*href="\/app"[^>]*>Ask Homa about this<\/a>/);
 
-    // A failed run keeps its calm note, telling the same "soon" story
-    // as the card's Next chip, and gets no ask door.
-    assert.match(html, /Didn&#x27;t send\. Homa tries again soon\./);
+    // A failed run states only what happened. The scheduler already advanced,
+    // so History must not promise an unplanned near-term retry.
+    assert.match(html, /This task did not send\./);
+    assert.doesNotMatch(html, /tries again soon|retry soon/iu);
+
+    const uncertainHtml = renderView([BRIEF_TASK], [{
+      ...doneRun,
+      id: "run-uncertain",
+      status: "uncertain",
+      deliveredChannel: null,
+    }]);
+    assert.match(
+      uncertainHtml,
+      /Homa couldn&#x27;t confirm delivery\. Nothing else needs your attention right now\./,
+    );
+    assert.doesNotMatch(uncertainHtml, /saved (?:here|to this page)/iu);
 
     // Under the limit the end line says the list is complete; at the
     // limit it says older runs are kept, plainly.
@@ -198,9 +220,86 @@ describe("TasksView", () => {
     const capped = renderView([BRIEF_TASK], manyRuns);
     assert.match(
       capped,
-      /This list shows the newest 30\. Older runs are kept, just not shown here\./,
+      /This page shows your newest 30 task updates\. Older ones are kept, just not shown here\./,
     );
     assert.doesNotMatch(capped, /That&#x27;s everything so far\./);
+  });
+
+  it("offers accessible feedback for every confirmed delivered morning brief", () => {
+    const deliveredBrief: TaskRunView = {
+      id: "run-delivered-brief",
+      kind: "morning_brief",
+      status: "done",
+      title: "Morning research brief",
+      summary: null,
+      deliveredChannel: "email",
+      startedAt: "2026-07-11T13:00:00.000Z",
+      feedbackSignal: "helpful",
+    };
+    const confirmed = [
+      deliveredBrief,
+      { ...deliveredBrief, id: "run-partial", status: "partial" as const },
+      {
+        ...deliveredBrief,
+        id: "run-partial-uncertain",
+        status: "partial_uncertain" as const,
+      },
+      {
+        ...deliveredBrief,
+        id: "run-save-only",
+        deliveredChannel: "none" as const,
+      },
+    ];
+    const excluded = [
+      { ...deliveredBrief, id: "run-running", status: "running" as const },
+      { ...deliveredBrief, id: "run-uncertain", status: "uncertain" as const },
+      { ...deliveredBrief, id: "run-failed", status: "failed" as const },
+      { ...deliveredBrief, id: "run-skipped", status: "skipped" as const },
+      {
+        ...deliveredBrief,
+        id: "run-partial-save-only",
+        status: "partial" as const,
+        deliveredChannel: "none" as const,
+      },
+      {
+        ...deliveredBrief,
+        id: "run-partial-uncertain-save-only",
+        status: "partial_uncertain" as const,
+        deliveredChannel: "none" as const,
+      },
+      { ...deliveredBrief, id: "run-custom", kind: "custom" as const },
+    ];
+    const html = renderView([BRIEF_TASK], [...confirmed, ...excluded]);
+
+    assert.match(
+      html,
+      /<button[^>]*aria-label="Mark this brief helpful"[^>]*aria-pressed="true"[^>]*>Helpful<\/button>/,
+    );
+    assert.match(
+      html,
+      /<button[^>]*aria-label="Mark this brief not for us"[^>]*aria-pressed="false"[^>]*>Not for us<\/button>/,
+    );
+    assert.equal((html.match(/>Helpful<\/button>/g) ?? []).length, confirmed.length);
+    assert.equal((html.match(/>Not for us<\/button>/g) ?? []).length, confirmed.length);
+    assert.equal(
+      (html.match(/>Was this helpful\?<\/p>/g) ?? []).length,
+      confirmed.length,
+    );
+    assert.equal(
+      (html.match(/role="group" aria-labelledby="brief-feedback-label-[^"]+"/g) ?? [])
+        .length,
+      confirmed.length,
+    );
+    assert.match(
+      html,
+      /id="brief-feedback-label-run-delivered-brief"[^>]*>Was this helpful\?<\/p>/,
+    );
+    assert.match(
+      html,
+      /border-2 border-\[var\(--clay-700\)\][^"]*bg-brand-soft[^"]*text-\[var\(--clay-700\)\]/,
+    );
+    assert.match(html, /aria-live="polite"/);
+    assert.match(html, />Ask Homa about this<\/a>/);
   });
 });
 
@@ -350,6 +449,134 @@ describe("groupRunsByDay", () => {
         ["Fri, Jul 10", ["c", "d"]],
       ],
     );
+  });
+});
+
+describe("brief feedback controls", () => {
+  it("shares one typed eligibility contract containing only real outcomes", () => {
+    assert.equal(RESEARCH_BRIEF_FEEDBACK_KIND, "morning_brief");
+    assert.deepEqual(RESEARCH_BRIEF_FEEDBACK_OUTCOMES, [
+      ["done", "sms"],
+      ["done", "email"],
+      ["done", "none"],
+      ["partial", "sms"],
+      ["partial", "email"],
+      ["partial_uncertain", "sms"],
+      ["partial_uncertain", "email"],
+    ]);
+
+    for (const [status, deliveredChannel] of RESEARCH_BRIEF_FEEDBACK_OUTCOMES) {
+      assert.equal(
+        isResearchBriefFeedbackEligible({
+          kind: RESEARCH_BRIEF_FEEDBACK_KIND,
+          status,
+          deliveredChannel,
+        }),
+        true,
+        `${status}/${deliveredChannel}`,
+      );
+    }
+    for (const [status, deliveredChannel] of [
+      ["partial", "none"],
+      ["partial_uncertain", "none"],
+      ["running", "sms"],
+      ["uncertain", "sms"],
+      ["failed", "sms"],
+      ["skipped", "sms"],
+    ] as const) {
+      assert.equal(
+        isResearchBriefFeedbackEligible({
+          kind: "morning_brief",
+          status,
+          deliveredChannel,
+        }),
+        false,
+        `${status}/${deliveredChannel}`,
+      );
+    }
+  });
+
+  it("exposes selection and pending state to assistive technology", () => {
+    assert.deepEqual(briefFeedbackControlState("helpful", "helpful", false), {
+      ariaPressed: true,
+      disabled: false,
+    });
+    assert.deepEqual(briefFeedbackControlState("helpful", "not_for_us", true), {
+      ariaPressed: false,
+      disabled: true,
+    });
+  });
+
+  it("clears stale errors and refreshes only after successful feedback", async () => {
+    const errors: Array<string | null> = ["old error"];
+    let refreshes = 0;
+
+    await runBriefFeedbackInteraction(
+      {
+        taskRunId: "00000000-0000-4000-8000-000000000010",
+        signal: "helpful",
+      },
+      {
+        action: async () => ({ error: null }),
+        setError: (error) => errors.push(error),
+        refresh: () => {
+          refreshes += 1;
+        },
+      },
+    );
+
+    assert.deepEqual(errors, ["old error", null]);
+    assert.equal(refreshes, 1);
+  });
+
+  it("shows the offer without refreshing when the action returns an error", async () => {
+    const errors: Array<string | null> = [];
+    let refreshes = 0;
+
+    await runBriefFeedbackInteraction(
+      {
+        taskRunId: "00000000-0000-4000-8000-000000000010",
+        signal: "not_for_us",
+      },
+      {
+        action: async () => ({ error: "database rejected the write" }),
+        setError: (error) => errors.push(error),
+        refresh: () => {
+          refreshes += 1;
+        },
+      },
+    );
+
+    assert.deepEqual(errors, [null, BRIEF_FEEDBACK_ERROR_MESSAGE]);
+    assert.equal(
+      BRIEF_FEEDBACK_ERROR_MESSAGE,
+      "That didn't save. Nothing else changed. You can tap your choice again.",
+    );
+    assert.equal(refreshes, 0);
+  });
+
+  it("shows the same offer without refreshing when the action throws", async () => {
+    const errors: Array<string | null> = [];
+    let refreshes = 0;
+
+    await runBriefFeedbackInteraction(
+      {
+        taskRunId: "00000000-0000-4000-8000-000000000010",
+        signal: "helpful",
+      },
+      {
+        action: async () => {
+          throw new Error("network failed");
+        },
+        setError: (error) => errors.push(error),
+        refresh: () => {
+          refreshes += 1;
+        },
+      },
+    );
+
+    assert.deepEqual(errors, [null, BRIEF_FEEDBACK_ERROR_MESSAGE]);
+    assert.equal(refreshes, 0);
   });
 });
 

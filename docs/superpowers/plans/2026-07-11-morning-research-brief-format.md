@@ -53,13 +53,13 @@ import { describe, it } from "node:test";
 
 import { validateResearchBriefFormat } from "./research-brief-format";
 
-const VALID = `🔬 Last night I researched phonics
+const VALID = `Last night I researched keeping sounds together while reading
 
-What I learned: Connected phonation helps early readers hold sounds together while blending. Adding each sound as the word grows works especially well for stop sounds.
+What I learned: Reading Rockets says a stretchy sound stays on into the next sound, so the word reaches the ear as one piece. In mat, mmm runs into a before the quick t closes mat.
 
-Why it's interesting: Story is already reading Bob Books and is ready to make blending smoother. This changes how you model the same words, not what he needs to learn next.
+Why it's interesting: Story said "ship" sounds choppy in Bob Books. Story can try "sh" running into "i" before the quick "p" closes "ship".
 
-Want me to make Story a connected-phonation word strip?`;
+Want me to make Story a mat-and-ship word strip for keeping sounds together while reading?`;
 
 describe("morning research brief format", () => {
   it("accepts the approved four-block shape", () => {
@@ -70,12 +70,12 @@ describe("morning research brief format", () => {
     const invalid = [
       VALID.replace("What I learned:", "Finding:"),
       VALID.replace(
-        "Connected phonation helps early readers hold sounds together while blending.",
+        "Reading Rockets says a stretchy sound stays on into the next sound, so the word reaches the ear as one piece.",
         "One. Two. Three.",
       ),
       `${VALID}\n\nSaved it to: https://thankshoma.com/app/tasks`,
       VALID.replace(
-        "make Story a connected-phonation word strip",
+        "make Story a mat-and-ship word strip for keeping sounds together while reading",
         "add the lesson to your calendar",
       ),
     ];
@@ -177,8 +177,8 @@ Why it's interesting: {1 to 2 sentences connecting it to this child.}
 
 Want me to {one specific action Homa can complete}?
 
-- Use "This morning I researched" only when you performed the allowed top-up
-  search during this run. Otherwise use "Last night".
+- Use `Last night I researched`. Family dispatch never performs live research
+  or writes the fleet corpus.
 - Keep the labels exactly as written. No markdown emphasis, bullets, preamble,
   sign-off, or second emoji.
 - The topic is a parent-facing name, never an internal id.
@@ -196,7 +196,9 @@ Want me to {one specific action Homa can complete}?
 - [ ] **Step 2: Preserve the existing evidence and safety rules**
 
 Keep the one-angle selection, family personalization, citation honesty,
-top-up privacy, no-comparison law, and no-medical-red-flags law unchanged.
+dispatch-to-fleet isolation, no-comparison law, and no-medical-red-flags law
+unchanged. If no eligible candidate exists, produce no brief. Nightly fleet
+research handles the corpus gap.
 
 - [ ] **Step 3: Scan the skill**
 

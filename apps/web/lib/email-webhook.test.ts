@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { test } from "node:test";
 
-import { classifyResendWebhook, verifySvixSignature } from "./email-webhook";
+import {
+  classifyResendWebhook,
+  resendWebhookReceiptHttpStatus,
+  verifySvixSignature,
+} from "./email-webhook";
 
 const KEY = Buffer.from("test-signing-key-32-bytes-long!!").toString("base64");
 const SECRET = `whsec_${KEY}`;
@@ -83,4 +87,25 @@ test("classifies the event types the ledgers care about", () => {
     ledgerStatus: null,
     failsDelivery: false,
   });
+});
+
+test("returns a retryable status until a receipt matches durable provider state", () => {
+  assert.equal(
+    resendWebhookReceiptHttpStatus({
+      matched: false,
+      matchedEmailSends: 0,
+      matchedDeliveries: 0,
+      recomputedTaskRuns: 0,
+    }),
+    503,
+  );
+  assert.equal(
+    resendWebhookReceiptHttpStatus({
+      matched: true,
+      matchedEmailSends: 0,
+      matchedDeliveries: 1,
+      recomputedTaskRuns: 1,
+    }),
+    200,
+  );
 });

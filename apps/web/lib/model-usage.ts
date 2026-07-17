@@ -23,6 +23,7 @@ import { mapDb } from "./map/db";
 export const USAGE_SURFACES = [
   "chat",
   "chat_suggestions",
+  "morning_brief",
   "compaction",
   "materials_image",
   "materials_review",
@@ -113,4 +114,26 @@ export function usageChannelFromAttributes(attributes: unknown): UsageChannel {
   return channel === "sms" || channel === "email" || channel === "dispatch"
     ? channel
     : "web";
+}
+
+/** Authenticated task-kind attribution for Eve model calls. */
+export function usageSurfaceFromAttributes(attributes: unknown): UsageSurface {
+  const auth = attributes as
+    | {
+        channel?: string;
+        familyId?: string;
+        taskKind?: string;
+        taskRunId?: string;
+        deliveryVersion?: string;
+      }
+    | undefined;
+  return auth?.channel === "dispatch" &&
+    auth.taskKind === "morning_brief" &&
+    auth.deliveryVersion === "research_brief_v2" &&
+    typeof auth.familyId === "string" &&
+    auth.familyId.length > 0 &&
+    typeof auth.taskRunId === "string" &&
+    auth.taskRunId.length > 0
+    ? "morning_brief"
+    : "chat";
 }

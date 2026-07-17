@@ -4,6 +4,7 @@ import { HOMA_MODEL } from "../model";
 import {
   recordModelUsage,
   usageChannelFromAttributes,
+  usageSurfaceFromAttributes,
 } from "../../lib/model-usage";
 
 /**
@@ -32,11 +33,17 @@ export default defineHook({
         const usage = event.data.usage;
         if (!usage) return;
         const attributes = ctx.session.auth.current?.attributes as
-          | { familyId?: string }
+          | {
+              channel?: string;
+              familyId?: string;
+              taskKind?: string;
+              taskRunId?: string;
+              deliveryVersion?: string;
+            }
           | undefined;
         await recordModelUsage({
           familyId: attributes?.familyId ?? null,
-          surface: "chat",
+          surface: usageSurfaceFromAttributes(attributes),
           channel: usageChannelFromAttributes(attributes),
           model: HOMA_MODEL,
           modality: "text",

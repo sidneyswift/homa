@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import type { Sql } from "postgres";
+
 /**
  * Resend webhook verification and classification (founder console, MJ-14).
  * Resend signs webhooks with svix: the signed content is
@@ -65,4 +67,169 @@ export function classifyResendWebhook(type: string): ResendWebhookAction {
       // sent/opened/clicked/delivery_delayed: nothing durable to record.
       return { ledgerStatus: null, failsDelivery: false };
   }
+}
+
+export interface ResendWebhookReceiptResult {
+  matched: boolean;
+  matchedEmailSends: number;
+  matchedDeliveries: number;
+  recomputedTaskRuns: number;
+}
+
+export function resendWebhookReceiptHttpStatus(
+  result: ResendWebhookReceiptResult,
+): 200 | 503 {
+  return result.matched ? 200 : 503;
+}
+
+export async function applyResendWebhookReceiptWithDatabase(
+  database: Sql,
+  input: {
+    emailId: string;
+    eventType: string;
+    ledgerStatus: Exclude<ResendWebhookAction["ledgerStatus"], null>;
+    failsDelivery: boolean;
+  },
+): Promise<ResendWebhookReceiptResult> {
+  return await database.begin<ResendWebhookReceiptResult>(
+    async (transaction) => {
+      const emailSends = await transaction<{ id: string }[]>`
+        update public.email_sends
+        set status = ${input.ledgerStatus},
+            error = ${input.ledgerStatus === "delivered"
+              ? null
+              : input.eventType},
+            updated_at = now()
+        where provider_message_id = ${input.emailId}
+          and (${input.ledgerStatus !== "delivered"} or status = 'submitted')
+        returning id
+      `;
+      const matchedEmailSends = emailSends.length > 0
+        ? emailSends
+        : await transaction<{ id: string }[]>`
+            select id
+            from public.email_sends
+            where provider_message_id = ${input.emailId}
+          `;
+      const matchingDeliveries = await transaction<{
+        id: string;
+        task_run_id: string | null;
+      }[]>`
+        select id, task_run_id
+        from public.conversation_deliveries
+        where provider_submission_id = ${input.emailId}
+      `;
+      const taskRunIds = [
+        ...new Set(
+          matchingDeliveries.flatMap((delivery) =>
+            delivery.task_run_id ? [delivery.task_run_id] : []
+          ),
+        ),
+      ].sort();
+      if (input.failsDelivery) {
+        await transaction`
+          update public.conversation_deliveries
+          set status = 'failed',
+              error = ${input.eventType},
+              failed_at = now(),
+              updated_at = now()
+          where provider_submission_id = ${input.emailId}
+            and task_run_id is null
+            and status in ('pending', 'sent', 'uncertain', 'failed')
+        `;
+      }
+      let recomputedTaskRuns = 0;
+      for (const taskRunId of taskRunIds) {
+        const [taskRun] = await transaction<{
+          id: string;
+          status: string;
+        }[]>`
+          select id, status
+          from public.homa_task_runs
+          where id = ${taskRunId}
+          for update
+        `;
+        if (!taskRun) continue;
+        if (input.failsDelivery) {
+          await transaction`
+            update public.conversation_deliveries
+            set status = 'failed',
+                error = ${input.eventType},
+                failed_at = now(),
+                updated_at = now()
+            where provider_submission_id = ${input.emailId}
+              and task_run_id = ${taskRunId}
+              and status in ('pending', 'sent', 'uncertain', 'failed')
+          `;
+        }
+        if (taskRun.status === "running") continue;
+        const updated = await transaction<{ id: string }[]>`
+          with recipient_outcomes as (
+            select
+              coalesce(
+                'member:' || recipient_member_user_id::text,
+                'delivery:' || id::text
+              ) as recipient_key,
+              bool_or(status = 'sent') as delivered,
+              bool_or(status in ('pending', 'uncertain')) as uncertain
+            from public.conversation_deliveries
+            where task_run_id = ${taskRunId}
+            group by recipient_key
+          ),
+          aggregate as (
+            select
+              count(*) filter (where delivered)::integer as delivered_count,
+              count(*) filter (
+                where not delivered and uncertain
+              )::integer as uncertain_count,
+              count(*) filter (
+                where not delivered and not uncertain
+              )::integer as failed_count
+            from recipient_outcomes
+          ),
+          channel as (
+            select d.channel
+            from public.conversation_deliveries d
+            where d.task_run_id = ${taskRunId}
+              and d.status = 'sent'
+            order by d.created_at, d.id
+            limit 1
+          ),
+          resolved as (
+            select
+              case
+                when a.delivered_count = 0 and a.uncertain_count > 0
+                  then 'uncertain'
+                when a.delivered_count = 0 then 'failed'
+                when a.failed_count > 0 then 'partial'
+                when a.uncertain_count > 0 then 'partial_uncertain'
+                else 'done'
+              end as status,
+              (select channel from channel) as delivered_channel
+            from aggregate a
+          )
+          update public.homa_task_runs r
+          set status = resolved.status,
+              delivered_channel = resolved.delivered_channel,
+              error = case
+                when resolved.status in ('failed', 'partial')
+                  then ${input.eventType}
+                else r.error
+              end,
+              finished_at = coalesce(r.finished_at, now())
+          from resolved
+          where r.id = ${taskRunId}
+          returning r.id
+        `;
+        recomputedTaskRuns += updated.length;
+      }
+      return {
+        matched:
+          matchedEmailSends.length > 0 || matchingDeliveries.length > 0,
+        matchedEmailSends: matchedEmailSends.length,
+        matchedDeliveries: matchingDeliveries.length,
+        recomputedTaskRuns,
+      };
+    },
+  );
 }

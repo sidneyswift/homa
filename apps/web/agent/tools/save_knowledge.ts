@@ -6,21 +6,44 @@ import {
   KNOWLEDGE_LENSES,
   KNOWLEDGE_TOPIC_TYPES,
   mergeKnowledgeRow,
+  type MergeResult,
 } from "../../lib/knowledge/gate";
 import { appendTaskRunArtifacts } from "../../lib/tasks/store";
 
+export interface SaveKnowledgeToolResult {
+  saved: boolean;
+  knowledgeId: string | null;
+  note: string;
+}
+
+export function canSaveFleetKnowledge(attributes: {
+  channel?: string;
+}): boolean {
+  return attributes.channel === "research";
+}
+
+export function saveKnowledgeToolResult(
+  result: MergeResult,
+): SaveKnowledgeToolResult {
+  const knowledgeId =
+    result.merged && result.rowId ? result.rowId : null;
+  return {
+    saved: knowledgeId !== null,
+    knowledgeId,
+    note: result.note,
+  };
+}
+
 /**
  * The shared knowledge bank's write tool (HT-3): available ONLY to
- * sessions Homa starts herself (fleet research, and the morning brief's
- * bounded top-up). Chat surfaces never see it succeed: general education
- * knowledge enters the fleet through researched, cited, gated rows, not
- * through whatever a conversation happened to mention. Every write runs
- * the automated gate (citation-resolve, sanitize, caps; D-ht-5); rows
- * that fail land flagged for audit and never reach families.
+ * fleet research sessions. Family-scoped and chat surfaces never see it
+ * succeed: general education knowledge enters the fleet through researched,
+ * cited, gated rows, never through private family context. Every write runs
+ * the automated gate; rows that fail stay unavailable to families.
  */
 export default defineTool({
   description:
-    "Save one researched finding to Homa's shared knowledge bank (general education knowledge only, never anything about a specific family or child). Only research sessions and morning-brief top-ups may use this. Every claim needs a real, resolving citation URL.",
+    "Save one researched finding to Homa's shared knowledge bank (general education knowledge only, never anything about a specific family or child). Only fleet research sessions may use this. Every claim needs a real, resolving citation URL.",
   inputSchema: z.object({
     topicType: z.enum(KNOWLEDGE_TOPIC_TYPES),
     topicKey: z
@@ -60,6 +83,14 @@ export default defineTool({
           url: z.string().url().max(500),
           accessedAt: z.string().max(20).optional().describe("YYYY-MM-DD"),
           claim: z.string().min(4).max(200).describe("The claim this URL backs."),
+          sourceName: z
+            .string()
+            .min(2)
+            .max(120)
+            .optional()
+            .describe(
+              "The actual publication, authoring institution, or named database. Never infer this from a URL.",
+            ),
         }),
       )
       .min(1)
@@ -87,9 +118,10 @@ export default defineTool({
       channel?: string;
       taskRunId?: string;
     };
-    if (attributes.channel !== "research" && attributes.channel !== "dispatch") {
+    if (!canSaveFleetKnowledge(attributes)) {
       return {
         saved: false,
+        knowledgeId: null,
         note: "The shared knowledge bank only accepts writes from Homa's own research runs, never from conversations. If this finding matters for THIS family, use remember instead.",
       };
     }
@@ -105,6 +137,6 @@ export default defineTool({
       ]);
     }
 
-    return { saved: result.merged, note: result.note };
+    return saveKnowledgeToolResult(result);
   },
 });
