@@ -25,6 +25,7 @@ export interface ResearchBriefSemanticFixtureContext {
   recentTraces: readonly ResearchBriefFixtureTrace[];
   expectedParentFacingSkill: string;
   requiredPracticalChangeConcepts: readonly string[];
+  allowedArtifactExamples: readonly string[];
   expectedCtaConcepts: readonly string[];
 }
 
@@ -46,6 +47,7 @@ export type ResearchBriefSemanticRejection =
   | "missing_child_attempt"
   | "sibling_reference"
   | "recent_repetition"
+  | "invented_artifact_example"
   | "cta_mismatch";
 
 export type ResearchBriefSemanticFixtureResult =
@@ -76,9 +78,27 @@ const CHILD_PRONOUNS = [
 const IMPERATIVE_EXAMPLE =
   /^(?:for\s+[^,]+,\s*)?(?:hold|add|keep|say|make|move|run|stretch|blend|put|start|try)\b/iu;
 const CAUSAL_CHILD_OUTCOME =
-  /\b(?:could|may|might|will|can)\s+(?:smooth|improve|fix|strengthen|cause|produce|create|ensure|guarantee|lead\s+to)\b/iu;
+  /\b(?:(?:could|may|might|will|can)\s+(?:smooth|improve|fix|strengthen|cause|produce|create|ensure|guarantee|lead\s+to)|turns?|keeps?|prevents?|gives?|makes?|smooths?|improves?|fixes?|strengthens?|causes?)\b/iu;
 const DIRECT_CHILD_ATTEMPT =
-  /\b(?:can\s+try|can\s+practice|has\s+(?:a\s+)?chance\s+to\s+try)\b/iu;
+  /\b(?:can\s+try|can\s+practice|can\s+listen\s+for|has\s+(?:a\s+)?chance\s+to\s+try)\b/iu;
+const GENERIC_ARTIFACT_CONTENT_WORDS = new Set([
+  "and",
+  "family",
+  "for",
+  "in",
+  "of",
+  "pattern",
+  "practice",
+  "row",
+  "rows",
+  "similar",
+  "sound",
+  "sounds",
+  "the",
+  "to",
+  "word",
+  "words",
+]);
 
 function normalizeText(value: string): string {
   return value
@@ -129,6 +149,19 @@ function sentences(value: string): string[] {
     SENTENCE_SEGMENTER.segment(value),
     ({ segment }) => segment.trim(),
   ).filter(Boolean);
+}
+
+function artifactContentExamples(cta: string): string[] {
+  const contents = /\bwith\s+(.+?)\s+for\b/iu.exec(cta)?.[1] ?? "";
+  return (
+    contents
+      .match(/\p{L}[\p{L}'-]*/gu)
+      ?.flatMap((word) => normalizeText(word).split("-"))
+      .filter(
+        (word) =>
+          word.length > 0 && !GENERIC_ARTIFACT_CONTENT_WORDS.has(word),
+      ) ?? []
+  );
 }
 
 function uniqueReasons(
@@ -290,6 +323,16 @@ export function evaluateResearchBriefFixture(
     )
   ) {
     reasons.push("cta_mismatch");
+  }
+  const allowedArtifactExamples = context.allowedArtifactExamples.map(
+    normalizeText,
+  );
+  if (
+    artifactContentExamples(cta).some(
+      (example) => !allowedArtifactExamples.includes(example),
+    )
+  ) {
+    reasons.push("invented_artifact_example");
   }
 
   const unique = uniqueReasons(reasons);

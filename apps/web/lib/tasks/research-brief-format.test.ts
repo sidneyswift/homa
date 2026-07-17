@@ -161,6 +161,12 @@ describe("morning research brief format", () => {
           "Want me to make Story a worksheet for fractions for tomorrow's lesson?",
         ),
         withCta(
+          "Want me to make Story a word strip with ship-family words for keeping sounds together and reading?",
+        ),
+        withCta(
+          "Want me to make Story a word strip with ship-family words and a game for keeping sounds together while reading?",
+        ),
+        withCta(
           "Want me to set a reminder for blending practice for tomorrow morning?",
         ),
         withCta("Want me to set a reminder for after breakfast?"),
@@ -188,6 +194,7 @@ describe("morning research brief format", () => {
       "Want me to design Story a quick activity for smooth blending?",
       "Want me to make Story a book activity for smooth blending?",
       "Want me to make Story a printable worksheet for smooth blending?",
+      "Want me to make Story a word strip with ship-family words for keeping sounds together while reading?",
       "Want me to set a reminder for blending practice tomorrow at nine?",
       "Want me to create a task for blending practice tomorrow?",
     ];

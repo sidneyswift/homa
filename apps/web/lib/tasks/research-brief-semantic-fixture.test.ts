@@ -46,8 +46,9 @@ const BASE_CONTEXT: ResearchBriefSemanticFixtureContext = {
     "mmm runs into a",
     "quick t closes mat",
   ],
+  allowedArtifactExamples: ["mat", "ship", "sh"],
   expectedCtaConcepts: [
-    "mat-and-ship word strip",
+    "word strip",
     "keeping sounds together while reading",
   ],
 };
@@ -242,6 +243,25 @@ describe("research brief deterministic semantic fixtures", () => {
     );
   });
 
+  it("rejects outcome constructions in the child connection", () => {
+    const outcomeConnections = [
+      'Story turns the choppy sound into one smooth word by running sh into i.',
+      'Story keeps "ship" from breaking apart by holding sh into i.',
+      'The strip gives Story smoother reading with "ship".',
+      'Story makes reading smoother by running sh into i.',
+    ];
+
+    for (const connection of outcomeConnections) {
+      assertOnlyReason(
+        "causal_child_connection",
+        replace(
+          'Story can try "sh" running into "i" before the quick "p" closes "ship".',
+          connection,
+        ),
+      );
+    }
+  });
+
   it("accepts a grounded direct child attempt", () => {
     assert.deepEqual(evaluateResearchBriefFixture(BASE_DRAFT, BASE_CONTEXT), {
       ok: true,
@@ -360,6 +380,24 @@ describe("research brief deterministic semantic fixtures", () => {
         "Want me to make Story a word strip for smoother blending?",
       ),
     );
+  });
+
+  it("accepts a natural CTA contents phrase using supplied examples", () => {
+    const draft = replace(
+      "Want me to make Story a mat-and-ship word strip for keeping sounds together while reading?",
+      "Want me to make Story a word strip with ship and similar words for keeping sounds together while reading?",
+    );
+    assert.deepEqual(evaluateResearchBriefFixture(draft, BASE_CONTEXT), {
+      ok: true,
+    });
+  });
+
+  it("rejects specific CTA examples that the context did not supply", () => {
+    const draft = replace(
+      "Want me to make Story a mat-and-ship word strip for keeping sounds together while reading?",
+      "Want me to make Story a word strip with ship, shop, shed, and slip for keeping sounds together while reading?",
+    );
+    assertOnlyReason("invented_artifact_example", draft);
   });
 
   it("rejects eleven carrier segments for the carrier-overflow reason", () => {

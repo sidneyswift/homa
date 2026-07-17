@@ -135,10 +135,7 @@ const storyEvidence: LiveFixtureEvidence = {
   suppliedClaims: smoothBlendingClaims,
   expectedParentFacingSkill: "keeping sounds together while reading",
   requiredPracticalChangeConcepts: ["ship", "sh stays on into i", "quick p"],
-  expectedArtifactDetails: [
-    "sh-and-ship word strip",
-    "keeping sounds together while reading",
-  ],
+  expectedArtifactDetails: ["word strip", "ship or the supplied sh pattern"],
   selectedChild: "Story",
   exactEvidenceAnchors: [
     'reads Bob Books and says "ship" can sound choppy',
@@ -158,7 +155,7 @@ const storyEvidence: LiveFixtureEvidence = {
     },
   ],
   expectedCtaRelationship:
-    "The offered action makes Story a sh-and-ship word strip for keeping sounds together while reading, so the strip names its contents and what Story can try.",
+    "The offered word strip uses the supplied word ship or supplied sh pattern, so its contents support noticing sounds staying together while reading.",
 };
 const maeEvidence: LiveFixtureEvidence = {
   selectedKnowledgeId: "knowledge-arrays",
@@ -186,7 +183,7 @@ const maeEvidence: LiveFixtureEvidence = {
     },
   ],
   expectedCtaRelationship:
-    "The offered action makes both factors visible and varies one row arrangement at a time.",
+    "The offered array or practice artifact uses rows to make equal groups visible while one row arrangement changes and the column factor stays fixed.",
 };
 
 const fixtures: readonly LiveFixture[] = [
@@ -282,7 +279,7 @@ for (const fixture of fixtures) {
     model: HOMA_MODEL,
     schema: semanticJudgeSchema,
     system:
-      "You are a strict evidence-grounding and parent-comprehension judge. The supplied evidence is exhaustive. Mark a rubric true only when the draft clearly satisfies it. The headline and CTA must use the expected ordinary parent-facing skill. Any technical category must be defined inline once with a concrete sound or word example. The sourced mechanism must be descriptive and must not turn into an unsupported product-style causal promise. The example in What I learned must describe what happens, never direct the parent to teach. A marked quotationRequiredEvidenceAnchor must appear quoted at least once in Why. Later ordinary uses of that word need not remain quoted. Never invent a quotation requirement for an unmarked anchor. Judge child names and pronouns separately from quotation. Use the child's name, or only an explicitly allowed pronoun. The child connection must directly state what the named child can try, or an equivalent neutral attempt. It must not predict that the technique could, may, might, will, smooth, improve, fix, strengthen, or cause progress. The CTA must say what its artifact contains or lets the child try. This is a craft-only evaluation and does not assess Eve tool calls or preparation sequence.",
+      "You are a strict evidence-grounding and parent-comprehension judge. The supplied evidence is exhaustive. Mark a rubric true only when the draft clearly satisfies it. The headline and CTA must use the expected ordinary parent-facing skill. Any technical category must be defined inline once with a concrete sound or word example. The sourced mechanism must be descriptive and must not turn into an unsupported product-style causal promise. The example in What I learned must describe what happens, never direct the parent to teach. A marked quotationRequiredEvidenceAnchor must appear quoted at least once in Why. Later ordinary uses of that word need not remain quoted. Never invent a quotation requirement for an unmarked anchor. Judge child names and pronouns separately from quotation. Use the child's name, or only an explicitly allowed pronoun. The child connection must directly state what the named child can try or listen for, or an equivalent neutral attention move. It must not predict or state that the technique could, may, might, or will smooth, improve, fix, strengthen, cause, turn something into an outcome, keep or prevent a problem, give the child an outcome, or make progress. Judge CTA concepts, never one exact phrase or adjective order. For Story, accept any one word strip that names the supplied word ship or supplied sh pattern and the parent-facing skill. For Mae, accept an array or practice artifact that names rows and the parent-facing skill. Reject map tracing, a CTA missing those concepts, or any specific example word not supplied by the fixture. The CTA must say what its artifact contains or lets the child try. This is a craft-only evaluation and does not assess Eve tool calls or preparation sequence.",
     prompt: JSON.stringify(
       buildResearchBriefLiveJudgeInput({
         draft: brief,
@@ -307,9 +304,9 @@ for (const fixture of fixtures) {
           siblingSafe:
             "The draft does not name, compare, or imply a judgment about any sibling anywhere. If its CTA names a child, that name is the selected child.",
           ctaMatchesNonObviousDetail:
-            "The CTA is one supported Homa action and implements the non-obvious detail according to expectedCtaRelationship.",
+            "The CTA is one supported Homa action that matches expectedCtaRelationship at the source-backed concept level, without requiring a fixed phrase or adjective order.",
           ctaNamesArtifactContentsOrAttempt:
-            "The CTA names what the artifact contains or lets the child try, including expectedArtifactDetails.",
+            "The CTA names what the artifact contains or lets the child try, including expectedArtifactDetails as concepts rather than exact wording. Reject any specific example word not supplied by the fixture.",
           mechanismIsDescriptiveAndSourceGrounded:
             "The mechanism is a descriptive restatement of suppliedClaims, with no unsupported product-style causal language.",
           exampleIsDescriptiveNotImperative:
@@ -317,7 +314,7 @@ for (const fixture of fixtures) {
           childLanguageUsesOnlySupportedNameOrPronoun:
             "Child references use selectedChild or a pronoun listed in allowedChildPronouns. Judge quotation separately under usesExactChildAnchor.",
           childConnectionIsDirectAndNonCausal:
-            "The child connection directly states what selectedChild can try, or an equivalent neutral attempt. It does not predict that the technique could, may, might, or will smooth, improve, fix, strengthen, or cause progress.",
+            "The child connection directly states what selectedChild can try or listen for, or an equivalent neutral attention move. It does not predict or state that the technique could, may, might, or will smooth, improve, fix, strengthen, cause, turn something into an outcome, keep or prevent a problem, give the child an outcome, or make progress.",
         },
       }),
       null,
