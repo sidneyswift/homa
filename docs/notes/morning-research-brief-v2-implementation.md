@@ -295,8 +295,6 @@ was required.
   message, summary, and terminal status are recovered together. A terminal
   replay returns no durable result and emits no duplicate event.
 
-No remote or git mutation occurred.
-
 ## 2026-07-17 · Stale no-output closure
 
 - Stale generic recovery now locks and rechecks the family task run before it
@@ -331,3 +329,34 @@ probes.
 The OIDC-authenticated paid craft evaluation passed all twelve current
 fixtures. Production code is still unmerged and the v2 flags remain absent,
 so this evidence does not claim a production behavior change.
+
+## 2026-07-17 · Plan-confirmed
+
+`HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` now gates new morning-run v2 pinning
+only when its value is exactly `"true"` and the task's `familySandbox` value
+was loaded from `families.sandbox`. The existing exact global v2 flag remains
+an override for all morning families. Journal and custom runs remain legacy.
+Scheduled and manual creation persist the selected version, so later
+environment changes cannot change a started run. The sandbox status remains
+server-only task context and does not enter model instructions, dispatch auth,
+dispatch targets, or client input.
+
+## 2026-07-17 · Discovery
+
+The two original rollout controls,
+`HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED` and
+`HOMA_RESEARCH_BRIEF_V2_ENABLED`, were global process flags. They could not
+safely implement the approved sandbox-only rollout because neither could
+distinguish a sandbox family from every other family at run creation. The
+conservative fix adds no schema, endpoint, token, or model field. It reads the
+existing family sandbox column only in the two server-side task queries and
+pins the result on the existing task-run row.
+
+## 2026-07-17 · What to carry forward
+
+- Sandbox rollout verification must prove one sandbox morning pins v2 and one
+  non-sandbox morning pins legacy while the global v2 flag remains false.
+- Keep the sandbox flag exact. `"TRUE"`, padded values, and absent values are
+  disabled.
+- Do not reuse `familySandbox` outside server-loaded task context or expose it
+  to the model or browser.

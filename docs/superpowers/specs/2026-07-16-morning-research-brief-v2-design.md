@@ -102,24 +102,37 @@ then fleet. Migration-first is required here because reply resolution writes
 both feature flags. A flags-off deployment would still require that additive
 column.
 
+`HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` is an exact `"true"` scoped rollout
+gate. A new morning run uses v2 when the global
+`HOMA_RESEARCH_BRIEF_V2_ENABLED` flag is exactly `"true"`, or when the
+sandbox-only flag is exactly `"true"` and the server-loaded `families.sandbox`
+value is true. The global flag overrides sandbox status. Journal and custom
+runs stay legacy. The task run persists this decision at creation, so later
+environment changes cannot alter an existing run. The sandbox value is
+database-loaded task context only, never model-visible or client-provided.
+
 1. Apply the additive v2 migration, then run the isolation guard against the
    migrated target.
 2. Deploy code with `HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED` and
-   `HOMA_RESEARCH_BRIEF_V2_ENABLED` both false. Wait for Vercel READY and
-   probe the legacy morning-brief, reply, and Tasks paths.
+   `HOMA_RESEARCH_BRIEF_V2_ENABLED` both false, and
+   `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` absent or false. Wait for Vercel
+   READY and probe the legacy morning-brief, reply, and Tasks paths.
 3. Refresh the exact v2 fleet research corpus and verify its eligible rows
    carry the required lens, stage or method exception, source tier where
    required, confidence, and actual named citations.
 4. In the sandbox, enable slim context while v2 remains false. This first flag
    is inert until v2 is enabled. Probe one complete legacy path.
-5. Enable v2 in the sandbox and verify one complete prepared, delivered,
-   finalized, and feedback-capable morning.
+5. Set `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY=true` while the global v2 flag
+   remains false, then verify one complete prepared, delivered, finalized,
+   and feedback-capable sandbox morning. Verify a non-sandbox family still
+   creates a legacy run.
 6. Enable the exact flags for the fleet only after the sandbox evidence is
    reviewed. Verify one complete live morning before calling rollout complete.
 
 Rollback is kill-switch first: set `HOMA_RESEARCH_BRIEF_V2_ENABLED` false,
-wait for READY, then set the slim-context flag false. Leave the additive
-tables and columns in place.
+then set `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` false, wait for READY, then
+set the slim-context flag false. Leave the additive tables and columns in
+place.
 
 ## Verification model
 

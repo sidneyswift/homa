@@ -20,7 +20,10 @@ import {
   runId,
 } from "./research-brief-postgres-harness";
 import { researchBriefSourceLockIdentity } from "./research-brief-preparation";
-import { beginTaskRunWithDatabase } from "./store";
+import {
+  beginManualTaskRunWithDatabase,
+  beginTaskRunWithDatabase,
+} from "./store";
 
 const harness = createDisposableResearchBriefPostgresHarness("schema");
 
@@ -53,6 +56,7 @@ describe("research brief PostgreSQL schema", () => {
       {
         scheduleId: "00000000-0000-4000-8000-000000000201",
         familyId: familyAId,
+        familySandbox: false,
         kind: "morning_brief",
         timeZone: "America/New_York",
         localHour: 9,
@@ -78,6 +82,85 @@ describe("research brief PostgreSQL schema", () => {
       where id = ${started?.id ?? null}
     `;
     assert.equal(stored.delivery_version, "research_brief_v2");
+  });
+
+  it("pins sandbox-only v2 for sandbox scheduled runs, but keeps other families legacy", async () => {
+    const db = harness.database();
+    const environment = { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" };
+    const runAt = new Date("2026-07-16T14:00:00.000Z");
+    const sandboxRun = await beginTaskRunWithDatabase(
+      db,
+      {
+        scheduleId: "00000000-0000-4000-8000-000000000202",
+        familyId: familyAId,
+        familySandbox: true,
+        kind: "morning_brief",
+        timeZone: "America/New_York",
+        localHour: 9,
+        weekdays: [1, 2, 3, 4, 5],
+        deliveryPref: "text",
+        label: null,
+        prompt: null,
+        parentFirstName: "Sandbox parent",
+        kidPhrase: "Child A",
+        phoneNumbers: [],
+        email: "sandbox@example.test",
+        recipientMemberUserId: adultAId,
+      },
+      runAt,
+      { environment },
+    );
+    const regularRun = await beginTaskRunWithDatabase(
+      db,
+      {
+        scheduleId: "00000000-0000-4000-8000-000000000203",
+        familyId: familyAId,
+        familySandbox: false,
+        kind: "morning_brief",
+        timeZone: "America/New_York",
+        localHour: 9,
+        weekdays: [1, 2, 3, 4, 5],
+        deliveryPref: "text",
+        label: null,
+        prompt: null,
+        parentFirstName: "Regular parent",
+        kidPhrase: "Child A",
+        phoneNumbers: [],
+        email: "regular@example.test",
+        recipientMemberUserId: adultAId,
+      },
+      runAt,
+      { environment },
+    );
+
+    assert.equal(sandboxRun?.deliveryVersion, "research_brief_v2");
+    assert.equal(regularRun?.deliveryVersion, "legacy");
+  });
+
+  it("pins a sandbox manual run before its version reaches dispatch", async () => {
+    const started = await beginManualTaskRunWithDatabase(
+      harness.database(),
+      {
+        scheduleId: "00000000-0000-4000-8000-000000000204",
+        familyId: familyAId,
+        familySandbox: true,
+        kind: "morning_brief",
+        timeZone: "America/New_York",
+        localHour: 9,
+        weekdays: [1, 2, 3, 4, 5],
+        deliveryPref: "text",
+        label: null,
+        prompt: null,
+        parentFirstName: "Sandbox parent",
+        kidPhrase: "Child A",
+        phoneNumbers: [],
+        email: "sandbox@example.test",
+        recipientMemberUserId: adultAId,
+      },
+      { environment: { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" } },
+    );
+
+    assert.equal(started.deliveryVersion, "research_brief_v2");
   });
 
   it("correlates Resend webhooks by submission id, never RFC Message-ID", async () => {

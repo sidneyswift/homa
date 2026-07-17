@@ -20,6 +20,7 @@ function task(overrides: Partial<DueFamilyTask> = {}): DueFamilyTask {
   return {
     scheduleId: "schedule-1",
     familyId: "family-1",
+    familySandbox: false,
     kind: "journal_prompt",
     timeZone: "America/New_York",
     localHour: 20,

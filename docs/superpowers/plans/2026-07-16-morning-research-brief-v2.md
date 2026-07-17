@@ -176,20 +176,31 @@ required here because reply resolution writes
 both feature flags. A flags-off deployment still needs that column. With
 explicit external-write authorization:
 
+`HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` is the exact sandbox gate for new
+morning runs. It selects `research_brief_v2` only when its value is exactly
+`"true"` and the server-loaded `families.sandbox` value is true. The global
+`HOMA_RESEARCH_BRIEF_V2_ENABLED === "true"` override remains fleet-wide.
+Every other value, non-sandbox family, journal run, and custom run selects
+legacy. The selected value persists on the task-run row and never changes
+when environment values later change.
+
 1. Apply the additive v2 migration, then run `pnpm check:isolation` against the
    migrated target.
 2. Deploy code with `HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED=false` and
-   `HOMA_RESEARCH_BRIEF_V2_ENABLED=false`. Wait for Vercel READY, then probe
-   the legacy morning-brief, reply, and Tasks paths.
+   `HOMA_RESEARCH_BRIEF_V2_ENABLED=false`, and leave
+   `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY` absent or false. Wait for Vercel
+   READY, then probe the legacy morning-brief, reply, and Tasks paths.
 3. Refresh the exact v2 fleet research corpus and verify required metadata and
    named citations.
 4. In the sandbox, enable slim context while v2 remains false and probe the
    legacy path.
-5. Enable v2 in the sandbox and verify one complete morning from selection
-   through explicit feedback.
+5. Set `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY=true` while the global v2 flag
+   stays false. Verify one sandbox morning from selection through explicit
+   feedback and one non-sandbox family still pinned to legacy.
 6. Enable both exact flags for the fleet only after sandbox evidence is
    reviewed, then verify one complete live morning.
 
 Rollback sets `HOMA_RESEARCH_BRIEF_V2_ENABLED=false` first and waits for
-READY. Then set `HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED=false`. Keep the
-additive schema in place.
+READY. Set `HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY=false`, then set
+`HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED=false`. Keep the additive schema in
+place.
