@@ -42,6 +42,8 @@ import { localDateKey, localHourOf, nextTaskRunInstant } from "./time";
 export interface DueFamilyTask {
   scheduleId: string;
   familyId: string;
+  /** Server-loaded rollout eligibility. Never accepts model or client input. */
+  familySandbox: boolean;
   kind: FamilyTaskKind;
   timeZone: string;
   localHour: number;
@@ -198,6 +200,7 @@ export async function claimDueFamilyTasks(options: {
     {
       schedule_id: string;
       family_id: string;
+      family_sandbox: boolean;
       kind: FamilyTaskKind;
       time_zone: string;
       local_hour: number;
@@ -233,7 +236,7 @@ export async function claimDueFamilyTasks(options: {
     select claimed.id as schedule_id, claimed.kind, claimed.local_hour,
            claimed.weekdays, claimed.delivery_pref, claimed.label,
            claimed.prompt, claimed.recipient_member_user_id,
-           f.id as family_id, f.time_zone,
+           f.id as family_id, f.sandbox as family_sandbox, f.time_zone,
            f.first_name, f.parent_display_name, f.email,
            coalesce(
              (select array_agg(p.phone_e164 order by p.created_at)
@@ -252,6 +255,7 @@ export async function claimDueFamilyTasks(options: {
   return rows.map((row) => ({
     scheduleId: row.schedule_id,
     familyId: row.family_id,
+    familySandbox: row.family_sandbox,
     kind: row.kind,
     timeZone: row.time_zone,
     localHour: row.local_hour,
@@ -307,6 +311,7 @@ export async function loadFamilyTaskForRun(
       prompt: string | null;
       recipient_member_user_id: string | null;
       family_id: string;
+      family_sandbox: boolean;
       first_name: string | null;
       parent_display_name: string | null;
       email: string | null;
@@ -316,7 +321,7 @@ export async function loadFamilyTaskForRun(
   >`
     select s.id as schedule_id, s.kind, s.enabled, s.local_hour, s.weekdays,
            s.delivery_pref, s.label, s.prompt, s.recipient_member_user_id,
-           f.id as family_id, f.time_zone,
+           f.id as family_id, f.sandbox as family_sandbox, f.time_zone,
            f.first_name, f.parent_display_name, f.email,
            coalesce(
              (select array_agg(p.phone_e164 order by p.created_at)
@@ -371,6 +376,7 @@ export async function loadFamilyTaskForRun(
     task: {
       scheduleId: row.schedule_id,
       familyId: row.family_id,
+      familySandbox: row.family_sandbox,
       kind: row.kind,
       timeZone: row.time_zone,
       localHour: row.local_hour,
@@ -432,6 +438,7 @@ export async function beginTaskRunWithDatabase(
   const deliveryVersion = deliveryVersionForNewTaskRun(
     task.kind,
     options.environment,
+    task.familySandbox,
   );
   try {
     const rows = await database<
@@ -473,12 +480,21 @@ export async function beginTaskRun(
  * downstream (delivery, finishTaskRun, the reaper, the History feed)
  * reads the run by id and treats it like any other run.
  */
-export async function beginManualTaskRun(
+export interface BeginManualTaskRunOptions {
+  environment?: Record<string, string | undefined>;
+}
+
+export async function beginManualTaskRunWithDatabase(
+  database: Sql,
   task: DueFamilyTask,
+  options: BeginManualTaskRunOptions = {},
 ): Promise<StartedTaskRun> {
-  const sql = mapDb();
-  const deliveryVersion = deliveryVersionForNewTaskRun(task.kind);
-  const rows = await sql<
+  const deliveryVersion = deliveryVersionForNewTaskRun(
+    task.kind,
+    options.environment,
+    task.familySandbox,
+  );
+  const rows = await database<
     { id: string; delivery_version: TaskDeliveryVersion }[]
   >`
     insert into public.homa_task_runs
@@ -493,6 +509,12 @@ export async function beginManualTaskRun(
     id: rows[0].id,
     deliveryVersion: rows[0].delivery_version,
   };
+}
+
+export async function beginManualTaskRun(
+  task: DueFamilyTask,
+): Promise<StartedTaskRun> {
+  return await beginManualTaskRunWithDatabase(mapDb(), task);
 }
 
 /** The dispatch channel's write: the composed text and where it went. */

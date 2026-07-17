@@ -7,6 +7,7 @@ import type { DueFamilyTask, FinishTaskRunOutcome } from "./store";
 const task: DueFamilyTask = {
   scheduleId: "schedule-1",
   familyId: "family-1",
+  familySandbox: true,
   kind: "morning_brief",
   timeZone: "America/New_York",
   localHour: 9,
@@ -62,7 +63,7 @@ describe("manual task dispatch setup", () => {
     }]);
   });
 
-  it("seeds the pinned version into message, auth, target, and session setup", async () => {
+  it("carries a sandbox task's pinned v2 version into message, auth, target, and session setup", async () => {
     const calls: string[] = [];
     const result = await startManualTaskDispatch(task, {
       beginRun: async () => ({
