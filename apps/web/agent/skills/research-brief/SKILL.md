@@ -87,8 +87,12 @@ Want me to {one specific action whose artifact names its contents or what the ch
 - Never infer a child pronoun. Use the supplied child name. Use "they" only
   when the family context explicitly supplies it.
 - Make the child connection direct and non-causal. State what the named child
-  can try, or an equivalent neutral attempt. Do not predict that the technique
-  could, may, or will smooth, improve, fix, strengthen, or cause progress.
+  can try or listen for, or use an equivalent neutral attention move. Do not
+  state or imply an outcome. In Why, never say the approach turns one sound
+  into another, keeps or prevents something from happening, gives the child
+  an outcome, makes, smooths, improves, fixes, strengthens, or causes
+  progress. Do not predict that the technique could, may, might, or will
+  produce progress. Keep the source-backed mechanism in What I learned.
 - Do not name any nonselected child anywhere in the headline, learned block,
   child block, or CTA. If the CTA names a child, it must name the selected
   child.
@@ -102,9 +106,12 @@ Want me to {one specific action whose artifact names its contents or what the ch
   activity, printable, worksheet, word strip, or practice sheet, or offer one
   reminder or task after collecting missing timing details. Name the
   deliverable, what it contains or lets the child try, and the ordinary skill.
-  "A word strip for smoother blending" is incomplete. "A mat-and-ship word
-  strip for keeping sounds together while reading" names both the contents
-  and the attempt. Use exactly one `for` phrase and no second action.
+  "A word strip for smoother blending" is incomplete. "A word strip with ship
+  and similar words for keeping sounds together while reading" names both the
+  contents and the attempt. Use only words or patterns supplied in the
+  dispatch context. You may say "ship and similar words", but never invent
+  specific examples such as shop, shed, or slip unless the context supplied
+  them. Use exactly one `for` phrase and no second action.
   Use "Want me to make {child} a {deliverable} for {one skill}?" or "Want me
   to set a reminder for {specific practice and timing}?" A task uses "Want me
   to create a task for {specific practice and timing}?"

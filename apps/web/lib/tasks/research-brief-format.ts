@@ -7,12 +7,13 @@ const LEARNED_BLOCK = /^What I learned: (\S(?:.*\S)?)$/u;
 const INTERESTING_BLOCK = /^Why it's interesting: (\S(?:.*\S)?)$/u;
 const CTA_BLOCK = /^Want me to (\S(?:.*\S)?)\?$/u;
 const CREATIVE_ACTIVITY_CTA =
-  /^(?:make|design|create|build|write)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a|an)\s+(?:(?!for\b)[\p{L}0-9'-]+\s+)*(?:game|activity|printable|worksheet|word strip|practice sheet)\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
+  /^(?:make|design|create|build|write)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a|an)\s+(?:(?!for\b|with\b)[\p{L}0-9'-]+\s+)*(?:game|activity|printable|worksheet|word strip|practice sheet)(?:\s+with\s+[\p{L}0-9'",-]+(?:\s+[\p{L}0-9'",-]+)*)?\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
 const REMINDER_OR_TASK_CTA =
   /^(?:set|create|make|schedule)\s+(?:\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*){0,2}\s+)?(?:a\s+)?(?:(?!for\b)[\p{L}0-9'-]+\s+)*(?:reminder|task)\s+for\s+([\p{L}0-9'"-]+(?:\s+[\p{L}0-9'"-]+)+)$/u;
 const FORBIDDEN_CTA_PURPOSE =
   /\b(?:game|activity|printable|worksheet|word strip|practice sheet|reminder|task|make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\b|\s(?:and|or|then)\s/iu;
-const COMPOUND_CTA = /\s(?:and|or|then)\s/iu;
+const COMPOUND_CTA =
+  /\s(?:and|or|then)\s+(?:(?:make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\s+)?(?:a|an)\s+(?:game|activity|printable|worksheet|word strip|practice sheet|reminder|task)\b|\s(?:and|or|then)\s+(?:make|design|create|build|write|turn|set|schedule|add|put|buy|send|email|text|order|purchase|rent|teach)\b/iu;
 const TIMING_LEAD =
   /^(?:after|before|at|on|in|around|by|during|today|tomorrow|tonight|this|next|morning|afternoon|evening|breakfast|lunch|dinner|bedtime|monday|tuesday|wednesday|thursday|friday|saturday|sunday|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d{1,2}(?::\d{2})?)\b/iu;
 const CALENDAR_REFERENCE =
