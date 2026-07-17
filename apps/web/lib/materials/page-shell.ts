@@ -19,6 +19,23 @@ export const SHEET_GATE_NOTE =
 
 const BLOCKED_MARKUP = /<\s*(script|iframe|object|embed)\b|javascript\s*:/i;
 
+/**
+ * Models sometimes deliver the page wrapped in an XML CDATA section
+ * (`<![CDATA[ ... ]]>`). Browsers parse the opening marker as a bogus
+ * comment and drop it, but the closing `]]>` is plain text, so it printed
+ * on real families' pages (found 2026-07-16 on finalized production
+ * materials). Strip complete wrappers at intake; a lone `]]>` inside the
+ * page is left alone because only the full pair is a wrapper.
+ */
+export function stripCdataWrapper(html: string): string {
+  let result = html;
+  for (;;) {
+    const match = /^\s*<!\[CDATA\[([\s\S]*)\]\]>\s*$/.exec(result);
+    if (!match) return result;
+    result = match[1];
+  }
+}
+
 /** Tags stripped to expose the text a child or parent will actually read. */
 function visibleText(html: string): string {
   return html

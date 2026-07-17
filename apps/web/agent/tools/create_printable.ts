@@ -14,6 +14,7 @@ import {
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   printableSlug,
+  stripCdataWrapper,
   validatePrintableHtml,
   wrapImagePage,
   wrapPrintablePage,
@@ -144,7 +145,9 @@ export default defineTool({
       };
     }
 
-    const hasHtml = typeof input.html === "string";
+    const inputHtml =
+      typeof input.html === "string" ? stripCdataWrapper(input.html) : undefined;
+    const hasHtml = typeof inputHtml === "string";
     const hasPageImage = typeof input.pageImageUrl === "string";
     if (hasHtml === hasPageImage) {
       return {
@@ -176,7 +179,7 @@ export default defineTool({
     ]
       .filter(Boolean)
       .join(" ");
-    const gateFailure = validatePrintableHtml(input.html ?? "", metadataText);
+    const gateFailure = validatePrintableHtml(inputHtml ?? "", metadataText);
     if (gateFailure) {
       return { created: false, note: gateFailure };
     }
@@ -200,15 +203,15 @@ export default defineTool({
     const kind = input.kind ?? "worksheet";
     const source: MaterialSource = hasPageImage
       ? "image"
-      : /<img\s/i.test(input.html ?? "")
+      : /<img\s/i.test(inputHtml ?? "")
         ? "hybrid"
         : "html";
     const bodyHtml = hasPageImage
       ? `<img src="${pageImageUrl as string}" style="max-width:100%;max-height:9.5in;display:block;margin:0 auto;" alt="" />`
-      : (input.html as string);
+      : (inputHtml as string);
     const document = hasPageImage
       ? wrapImagePage(pageImageUrl as string, input.childName ?? "")
-      : wrapPrintablePage(input.html as string, input.childName ?? "");
+      : wrapPrintablePage(inputHtml as string, input.childName ?? "");
 
     let rendered;
     try {
