@@ -755,7 +755,7 @@ Path choice: hybrid is preferred. Use generate_image for the maze
 artwork and paths (the organic, hand-drawn feel is the whole point),
 then overlay answer labels at decision points with HTML absolute
 positioning. For very simple mazes (few forks, no theming),
-image-direct works — include the answer text in the image prompt.
+image-direct works. Include the answer text in the image prompt.
 
 ## Notes-and-practice bundle
 
@@ -778,7 +778,7 @@ Uses the packet recipe (two pages, one PDF) via create_printable's
 
 Design patterns (all binding for notes-and-practice bundles):
 
-- **Page 1 — guided notes**:
+- **Page 1: guided notes**:
   - Two-column layout: narrow term column (~120px) on the left,
     wide explanation column on the right.
   - Section dividers: thin horizontal rules between concept groups.
@@ -788,7 +788,7 @@ Design patterns (all binding for notes-and-practice bundles):
     section for the student's own observations.
   - Header: topic title, name field, date field.
 
-- **Page 2 — practice activity**:
+- **Page 2: practice activity**:
   - Numbered problems or matching columns.
   - Problems progress from straightforward application to
     multi-step or tricky edge cases.
