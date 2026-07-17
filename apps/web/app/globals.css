@@ -459,6 +459,16 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr !important;
     gap: 30px !important;
   }
+  /* Stack the practice proof: side-by-side leaves the file info a sliver
+     wide on phones and every line wraps. */
+  .lp-practice-proof {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+    gap: 14px !important;
+  }
+  .lp-practice-proof > div:first-child {
+    width: min(200px, 76%);
+  }
 }
 
 html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }

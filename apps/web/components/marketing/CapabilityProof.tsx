@@ -121,14 +121,18 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
       return (
         <ProofShell>
           {/* The whole page as a portrait thumbnail beside the file info,
-              like a real document preview. A wide top crop showed only the
-              page title, which duplicated the header and sliced the art. */}
+              like a real document preview. The pair centers in the shell so
+              a wide single-column card does not leave a dead field to the
+              right, and the status lines align with the title text. */}
           <div
+            className="lp-practice-proof"
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(112px, 138px) 1fr",
-              gap: 14,
+              gridTemplateColumns: "minmax(112px, 156px) minmax(0, 240px)",
+              gap: 20,
               alignItems: "center",
+              justifyContent: "center",
+              minHeight: 214,
             }}
           >
             <div
@@ -147,7 +151,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 style={{ display: "block", width: "100%", height: "auto" }}
               />
             </div>
-            <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ display: "grid", gap: 11 }}>
               <ProofHeader
                 icon={FileText}
                 title="Butterfly math"
@@ -155,8 +159,13 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 chipBg="var(--gold-100)"
                 chipInk="var(--gold-ink-strong)"
               />
-              <p style={{ display: "flex", alignItems: "center", gap: 6, margin: 0, color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
+              {/* 46 = chip width 36 + header gap 10, so these lines share
+                  the title's left edge instead of a ragged rag. */}
+              <p style={{ display: "flex", alignItems: "center", gap: 6, margin: 0, paddingLeft: 46, color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
                 <Printer size={14} aria-hidden="true" /> Ready to print
+              </p>
+              <p style={{ display: "flex", alignItems: "center", gap: 6, margin: 0, paddingLeft: 46, color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
+                <Check size={14} aria-hidden="true" /> Saved to the binder
               </p>
             </div>
           </div>
