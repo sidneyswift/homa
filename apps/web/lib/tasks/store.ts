@@ -13,7 +13,6 @@ import {
   type TaskRunKind,
 } from "./kinds";
 import {
-  deliveryVersionForNewTaskRun,
   usesResearchBriefV2Delivery,
   type TaskDeliveryVersion,
 } from "./delivery-version";
@@ -423,23 +422,18 @@ export interface StartedTaskRun {
 }
 
 export interface BeginTaskRunOptions {
+  deliveryVersion: TaskDeliveryVersion;
   status?: "running" | "skipped";
   error?: string;
-  environment?: Record<string, string | undefined>;
 }
 
 export async function beginTaskRunWithDatabase(
   database: Sql,
   task: DueFamilyTask,
   now: Date,
-  options: BeginTaskRunOptions = {},
+  options: BeginTaskRunOptions,
 ): Promise<StartedTaskRun | null> {
   const title = taskRunTitle(task);
-  const deliveryVersion = deliveryVersionForNewTaskRun(
-    task.kind,
-    options.environment,
-    task.familySandbox,
-  );
   try {
     const rows = await database<
       { id: string; delivery_version: TaskDeliveryVersion }[]
@@ -451,7 +445,7 @@ export async function beginTaskRunWithDatabase(
         (${task.familyId}, ${task.scheduleId}, ${task.kind},
          ${options?.status ?? "running"},
          ${localDateKey(task.timeZone, now)}, ${title},
-         ${options?.error ?? null}, ${deliveryVersion})
+         ${options?.error ?? null}, ${options.deliveryVersion})
       returning id, delivery_version
     `;
     const row = rows[0];
@@ -468,9 +462,101 @@ export async function beginTaskRunWithDatabase(
 export async function beginTaskRun(
   task: DueFamilyTask,
   now: Date,
-  options: BeginTaskRunOptions = {},
+  options: BeginTaskRunOptions,
 ): Promise<StartedTaskRun | null> {
   return await beginTaskRunWithDatabase(mapDb(), task, now, options);
+}
+
+export interface RecordSkippedScheduledTaskRunInput {
+  task: DueFamilyTask;
+  now: Date;
+  deliveryVersion: TaskDeliveryVersion;
+  reason: "no eligible morning brief candidate";
+}
+
+export type RecordSkippedScheduledTaskRunResult =
+  | { inserted: false }
+  | { inserted: true; runId: string };
+
+type ScheduledSkipCompletionEmitter = (
+  name: "tasks.run_completed",
+  props: Record<string, unknown>,
+) => Promise<void>;
+
+const scheduledSkipCompletionEmitter: ScheduledSkipCompletionEmitter =
+  async (name, props) => {
+    await emitMapEvent(name, props as {
+      family_id: string;
+      kind: FamilyTaskKind;
+      status: "skipped";
+    });
+  };
+
+/**
+ * Inserts a final no-candidate run and advances its still-due schedule under
+ * one transaction. An outbox conflict still clears a due claim without
+ * duplicating the run or completion event.
+ */
+export async function recordSkippedScheduledTaskRunWithDatabase(
+  database: Sql,
+  input: RecordSkippedScheduledTaskRunInput,
+  emit: ScheduledSkipCompletionEmitter = scheduledSkipCompletionEmitter,
+): Promise<RecordSkippedScheduledTaskRunResult> {
+  const result = await database.begin<RecordSkippedScheduledTaskRunResult>(
+    async (transaction) => {
+      const runRows = await transaction<{ id: string }[]>`
+        insert into public.homa_task_runs (
+          family_id, schedule_id, kind, status, scheduled_for, title, error,
+          delivery_version, started_at, finished_at
+        )
+        values (
+          ${input.task.familyId}, ${input.task.scheduleId}, ${input.task.kind},
+          'skipped', ${localDateKey(input.task.timeZone, input.now)},
+          ${taskRunTitle(input.task)}, ${input.reason},
+          ${input.deliveryVersion}, ${input.now.toISOString()},
+          ${input.now.toISOString()}
+        )
+        on conflict do nothing
+        returning id
+      `;
+      const run = runRows[0];
+      const nextRun = nextTaskRunInstant(
+        input.task.timeZone,
+        input.task.localHour,
+        input.task.weekdays,
+        input.now,
+      );
+      const scheduleRows = await transaction<{ id: string }[]>`
+        update public.agent_schedules
+        set next_run_at = ${nextRun.toISOString()},
+            last_run_at = ${input.now.toISOString()},
+            lease_until = null
+        where id = ${input.task.scheduleId}
+          and family_id = ${input.task.familyId}
+          and next_run_at <= ${input.now.toISOString()}
+        returning id
+      `;
+      if (run && scheduleRows.length !== 1) {
+        throw new Error("scheduled task schedule was no longer due");
+      }
+      if (!run) return { inserted: false };
+      return { inserted: true, runId: run.id };
+    },
+  );
+  if (result.inserted) {
+    await emit("tasks.run_completed", {
+      family_id: input.task.familyId,
+      kind: input.task.kind,
+      status: "skipped",
+    });
+  }
+  return result;
+}
+
+export async function recordSkippedScheduledTaskRun(
+  input: RecordSkippedScheduledTaskRunInput,
+): Promise<RecordSkippedScheduledTaskRunResult> {
+  return await recordSkippedScheduledTaskRunWithDatabase(mapDb(), input);
 }
 
 /**
@@ -481,19 +567,14 @@ export async function beginTaskRun(
  * reads the run by id and treats it like any other run.
  */
 export interface BeginManualTaskRunOptions {
-  environment?: Record<string, string | undefined>;
+  deliveryVersion: TaskDeliveryVersion;
 }
 
 export async function beginManualTaskRunWithDatabase(
   database: Sql,
   task: DueFamilyTask,
-  options: BeginManualTaskRunOptions = {},
+  options: BeginManualTaskRunOptions,
 ): Promise<StartedTaskRun> {
-  const deliveryVersion = deliveryVersionForNewTaskRun(
-    task.kind,
-    options.environment,
-    task.familySandbox,
-  );
   const rows = await database<
     { id: string; delivery_version: TaskDeliveryVersion }[]
   >`
@@ -502,7 +583,7 @@ export async function beginManualTaskRunWithDatabase(
        delivery_version)
     values
       (${task.familyId}, ${task.scheduleId}, ${task.kind}, 'running', null,
-       ${taskRunTitle(task)}, ${deliveryVersion})
+       ${taskRunTitle(task)}, ${options.deliveryVersion})
     returning id, delivery_version
   `;
   return {
@@ -513,8 +594,9 @@ export async function beginManualTaskRunWithDatabase(
 
 export async function beginManualTaskRun(
   task: DueFamilyTask,
+  options: BeginManualTaskRunOptions,
 ): Promise<StartedTaskRun> {
-  return await beginManualTaskRunWithDatabase(mapDb(), task);
+  return await beginManualTaskRunWithDatabase(mapDb(), task, options);
 }
 
 /** The dispatch channel's write: the composed text and where it went. */
