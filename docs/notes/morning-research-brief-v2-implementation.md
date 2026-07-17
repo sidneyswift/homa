@@ -64,7 +64,8 @@ one example, and named what the offered strip contains.
 The editor's objections to `What I learned:` and `Why it's interesting:` were
 rejected because those exact labels remain a binding founder format. Accepted
 editor fixes removed imperative teaching directions, unsupported product-style
-causal wording, an invented child pronoun, and an ambiguous unquoted word.
+causal wording, an invented child pronoun, and an unquoted marked evidence
+word.
 
 ## 2026-07-16 · Plan-confirmed
 

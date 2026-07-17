@@ -36,6 +36,7 @@ const BASE_CONTEXT: ResearchBriefSemanticFixtureContext = {
   selectedKnowledgeId: "knowledge-smooth-reading",
   selectedChild: "Story",
   evidenceAnchors: ['"ship" sounds choppy', "reads Bob Books"],
+  quotationRequiredEvidenceAnchors: ["ship"],
   siblingNames: ["Mae"],
   recentTraces: [],
   allowedChildPronouns: [],
@@ -216,6 +217,44 @@ describe("research brief deterministic semantic fixtures", () => {
     assertOnlyReason(
       "missing_child_anchor",
       replace('"ship" sounds choppy', "ship sounds choppy"),
+    );
+  });
+
+  it("requires a marked evidence word to appear quoted once, but allows later ordinary use", () => {
+    const draft = replace(
+      'Story said "ship" sounds choppy in Bob Books. Story can try "sh" running into "i" before the quick "p" closes "ship".',
+      "Story reads Bob Books. Story can try sh running into i before the quick p closes ship.",
+    );
+
+    assertOnlyReason("missing_quoted_child_anchor", draft, {
+      ...BASE_CONTEXT,
+      evidenceAnchors: ["reads Bob Books"],
+    });
+  });
+
+  it("rejects a causal promise instead of a direct child attempt", () => {
+    assertOnlyReason(
+      "causal_child_connection",
+      replace(
+        'Story can try "sh" running into "i" before the quick "p" closes "ship".',
+        'Story could smooth reading by running sh into i before the quick p closes ship.',
+      ),
+    );
+  });
+
+  it("accepts a grounded direct child attempt", () => {
+    assert.deepEqual(evaluateResearchBriefFixture(BASE_DRAFT, BASE_CONTEXT), {
+      ok: true,
+    });
+  });
+
+  it("requires a direct neutral child attempt", () => {
+    assertOnlyReason(
+      "missing_child_attempt",
+      replace(
+        'Story can try "sh" running into "i" before the quick "p" closes "ship".',
+        'Story hears the sounds in "ship" as separate pieces.',
+      ),
     );
   });
 

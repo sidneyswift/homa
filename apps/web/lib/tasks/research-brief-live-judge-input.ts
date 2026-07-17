@@ -20,7 +20,7 @@ export function buildResearchBriefLiveJudgeInput<
       ? input.evidence.quotationRequiredEvidenceAnchors
           .map(
             (anchor) =>
-              `The marked word or phrase "${anchor}" must remain quoted exactly as supplied.`,
+              `The marked word or phrase "${anchor}" must appear quoted at least once in Why. Later ordinary uses of the same word do not need quotation.`,
           )
           .join(" ")
       : "No evidence anchor is marked as requiring quotation. Do not require or invent a quoted word.";

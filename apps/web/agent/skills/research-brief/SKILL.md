@@ -81,12 +81,14 @@ Want me to {one specific action whose artifact names its contents or what the ch
   CTA syntax, character limits, and carrier segments. It does not judge
   teaching quality.
 - Name one child and one exact evidence anchor in Why it's interesting. Do not
-  use a vague claim about the family or a second child. Quote a child word such
-  as "ship" so the sentence cannot be misread.
+  use a vague claim about the family or a second child. When supplied evidence
+  marks a word or phrase for quotation, quote it at least once in Why. Later
+  ordinary uses of that word do not need quotation.
 - Never infer a child pronoun. Use the supplied child name. Use "they" only
   when the family context explicitly supplies it.
 - Make the child connection direct and non-causal. State what the named child
-  can try, not what the brief or artifact will make happen.
+  can try, or an equivalent neutral attempt. Do not predict that the technique
+  could, may, or will smooth, improve, fix, strengthen, or cause progress.
 - Do not name any nonselected child anywhere in the headline, learned block,
   child block, or CTA. If the CTA names a child, it must name the selected
   child.
