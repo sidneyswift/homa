@@ -25,6 +25,12 @@ const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
   .max(80)
   .regex(/^[a-z][a-z0-9_-]*$/u);
 
+const PROMPT_SUGGESTION_EVENT_FIELDS = {
+  suggestion_set_id: z.uuid(),
+  prompt_version: z.string().min(1).max(40),
+  source: z.enum(["model", "fallback"]),
+} as const;
+
 export const EVENT_SCHEMAS = {
   "waitlist.joined": z.object({
     source: z.enum(WAITLIST_SOURCES),
@@ -568,6 +574,21 @@ export const EVENT_SCHEMAS = {
     ]),
     filed_to_child: z.boolean(),
   }),
+  // Webchat prompt suggestions. Correlation, source, position, and timing
+  // only; suggestion text and conversation content never enter events.
+  "chat.prompt_suggestions_shown": z
+    .object({
+      ...PROMPT_SUGGESTION_EVENT_FIELDS,
+      count: z.number().int().min(1).max(2),
+      latency_ms: z.number().int().min(0),
+    })
+    .strict(),
+  "chat.prompt_suggestion_tapped": z
+    .object({
+      ...PROMPT_SUGGESTION_EVENT_FIELDS,
+      position: z.number().int().min(0).max(1),
+    })
+    .strict(),
   // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
   // token and family_id (events policy, migration #13). No message content.
   "chat.turn_completed": z.object({
@@ -577,6 +598,7 @@ export const EVENT_SCHEMAS = {
     latency_ms: z.number().int().min(0),
     model_tier: z.enum(["fast", "mid", "premium"]),
     tool_calls: z.number().int().min(0),
+    suggestion_set_id: z.uuid().optional(),
   }),
   // Canonical conversation continuity attached a short/cross-surface
   // parent reply to one prior Homa message (or refused to guess between

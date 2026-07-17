@@ -18,6 +18,7 @@ import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-conte
  * principal eve carries through the whole durable session:
  *
  *   principalId          the Supabase user id
+ *   attributes.channel   "web", from this authenticated web entry point
  *   attributes.familyId  from family_members, under the caller's RLS
  *   attributes.supabaseAccessToken  the raw JWT, for tools to query the DB
  *                        as the caller (RLS stays the tenancy wall inside
@@ -68,7 +69,10 @@ function supabaseAuth(): AuthFn<Request> {
     }
 
     // attributes only admits string values; absent facts are omitted keys.
-    const attributes: Record<string, string> = { supabaseAccessToken: token };
+    const attributes: Record<string, string> = {
+      channel: "web",
+      supabaseAccessToken: token,
+    };
     if (membership?.family_id) attributes.familyId = membership.family_id;
     attributes.memberUserId = userData.user.id;
     if (membership?.display_name) attributes.memberName = membership.display_name;

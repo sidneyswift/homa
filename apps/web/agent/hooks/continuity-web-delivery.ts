@@ -13,6 +13,10 @@ import { persistCanonicalMessage } from "../../lib/conversation-continuity/ledge
  * in the same per-recipient ledger as SMS/email so a new device or rotated Eve
  * session can resolve the question Homa visibly asked.
  */
+export function isWebDeliveryChannel(channel: unknown): boolean {
+  return channel === undefined || channel === "web";
+}
+
 export default defineHook({
   events: {
     async "message.completed"(event, ctx) {
@@ -24,7 +28,11 @@ export default defineHook({
         familyId?: string;
         memberUserId?: string;
       };
-      if (attributes.channel || !attributes.familyId || !attributes.memberUserId) {
+      if (
+        !isWebDeliveryChannel(attributes.channel) ||
+        !attributes.familyId ||
+        !attributes.memberUserId
+      ) {
         return;
       }
       const persisted = await persistCanonicalMessage({

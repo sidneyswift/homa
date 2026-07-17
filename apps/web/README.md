@@ -87,6 +87,23 @@ pnpm --filter web dev   # http://localhost:3000
 - `vercel.json` registers the hourly `/api/map/cron` request. Registration does
   not prove successful production execution.
 
+## Webchat prompt suggestions
+
+The founder-editable production prompt lives at
+`agent/prompt-suggestions.md`. Live next-message suggestions run only in web
+chat. SMS, email, dispatch, and mobile do not use them. The latest eligible
+rail is stored in local browser chat state so it can return after a route
+change or reload; it is not durable family data.
+
+Run `pnpm check:prompt-suggestions` for the credential-free fixture, contract,
+policy, storage, rail, and client checks that CI uses. Run
+`pnpm eval:prompt-suggestions` manually for the paid 20-case synthetic
+producer-plus-judge eval. The paid eval is intentionally absent from CI. Set
+`HOMA_SUGGESTIONS_MODEL` to override the live producer model and
+`HOMA_SUGGESTIONS_JUDGE_MODEL` to override only the eval judge.
+Run `pnpm eval:prompt-suggestions:judge-gold` to skip producers and calibrate
+that judge against the fake corpus's human-authored gold suggestions.
+
 ## Guards
 
 Use `pnpm check:child-progress` for core events, default ChildProgress modules,

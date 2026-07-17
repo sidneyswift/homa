@@ -22,6 +22,7 @@ import { mapDb } from "./map/db";
 
 export const USAGE_SURFACES = [
   "chat",
+  "chat_suggestions",
   "compaction",
   "materials_image",
   "materials_review",

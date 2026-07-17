@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
   // runtime (founder-editable, versioned); every route that can generate a
   // narrative must ship it in its traced bundle.
   outputFileTracingIncludes: {
+    "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],
     "/onboarding/r/[token]/plan/[subjectId]": ["./agent/report-writer.md"],

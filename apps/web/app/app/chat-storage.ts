@@ -5,6 +5,10 @@ import type {
   SessionState,
 } from "eve/client";
 
+import {
+  parsePromptSuggestionSet,
+  type PromptSuggestionSet,
+} from "../../lib/chat-suggestions/contract";
 import { effectiveTimeZone } from "../../lib/time-zone";
 
 /**
@@ -59,6 +63,7 @@ export interface SavedChat {
   session?: SessionState;
   messageTimes?: Record<string, number>;
   lastActivityAt?: number;
+  promptSuggestions?: PromptSuggestionSet | null;
 }
 
 /** What the chat client mounts with after the rotation decision. */
@@ -68,6 +73,7 @@ export interface PreparedChat {
   initialSession: SessionState | undefined;
   messageTimes: Record<string, number>;
   lastActivityAt: number | undefined;
+  promptSuggestions: PromptSuggestionSet | null;
   /** True when this visit started a fresh session over old history. */
   rotated: boolean;
 }
@@ -111,6 +117,17 @@ export function saveChat(storageKey: string, chat: SavedChat): void {
   } catch {
     // Storage full or blocked: the durable session still lives server-side.
   }
+}
+
+export function updateSavedPromptSuggestionSet(
+  storageKey: string,
+  set: PromptSuggestionSet | null,
+): void {
+  const saved = loadSavedChat(storageKey);
+  saveChat(storageKey, {
+    ...saved,
+    promptSuggestions: set,
+  });
 }
 
 /**
@@ -173,6 +190,7 @@ export function prepareChat(storageKey: string, timeZone?: string | null): Prepa
   const saved = loadSavedChat(storageKey);
   const archived = saved.archived ?? [];
   const times = saved.messageTimes ?? {};
+  const promptSuggestions = parsePromptSuggestionSet(saved.promptSuggestions);
 
   if (!shouldStartFreshSession(saved.lastActivityAt, Date.now(), timeZone)) {
     return {
@@ -181,6 +199,7 @@ export function prepareChat(storageKey: string, timeZone?: string | null): Prepa
       initialSession: saved.session,
       messageTimes: times,
       lastActivityAt: saved.lastActivityAt,
+      promptSuggestions,
       rotated: false,
     };
   }
@@ -194,6 +213,7 @@ export function prepareChat(storageKey: string, timeZone?: string | null): Prepa
     initialSession: undefined,
     messageTimes: {},
     lastActivityAt: saved.lastActivityAt,
+    promptSuggestions: null,
     rotated: true,
   };
 }
