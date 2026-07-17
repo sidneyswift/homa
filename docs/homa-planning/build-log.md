@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-17 · Multi-page packets shipped; the one-PDF false failure fixed at the root
+
+Cause: the Llanes "make it one pdf" incident (2026-07-17, ~04:07 UTC). The
+4-page packet PDF rendered correctly, but the preview and the quality
+reviewer only ever saw a screen screenshot of the first 11 inches (screen
+media ignores print page breaks), so Homa reported working output as broken
+and told the parent to print four files and staple them. Founder directive:
+"always fix the root cause... lets build it."
+
+Shipped in commit a4106e5 (deploy dpl_5LmvjqK5tbwukKbKHdR43HSQNF8Q READY,
+promoted to production, thankshoma.com probed 200, CI run 29587073584 green):
+the page shell boxes every page at an exact 11in so screen and print agree;
+the renderer screenshots each page and reports the true pageCount; the
+reviewer receives every page plus an honest "you are shown page 1 through K
+of N" so it can never mistake its own field of view for a defect;
+create_printable gains a `pages` path (fresh html pages, page images, and
+existing family materials by fromMaterialId, mixed freely); the chat card,
+scrollback, Binder card, and Binder overlay page through real per-page
+previews; kind `packet` landed end to end.
+
+Decisions made alone, flaggable: 12-page cap per document (longer programs
+ship as volumes), 6 per-page preview blobs cap, 4 pages to the reviewer,
+page data stored in the materials `generation` jsonb instead of new columns
+(no breaking migration; the kind constraint widening was additive and was
+applied to homa-prod before the deploy), and page-break CSS in a single-page
+html is now refused with a note pointing at the pages path. Also promoted
+the packet deployment manually: an unattributed automation redeployed the
+PREVIOUS production commit twice right after the push (dpl_2nSod7, dpl_8ZQJ3,
+both commit 0af6826, "action: redeploy"), which would have left the fix dark;
+the alias was re-checked 7 minutes after the promote and still served
+a4106e5. Worth finding what drives those serial redeploys.
+
+Follow-through: `pnpm check:materials` guard added to CI (page-shell and
+binder model tests were previously not run anywhere);
+`scripts/packet-render-smoke.mts` proves the pipeline against local Chrome
+(4 boxes = 4 PDF pages = 4 distinct previews). The packet-experience
+comparison lab for the next product layer is
+`docs/homa-planning/plans/2026-07-17-packet-experience-directions.html`
+(four directions, founder feedback pending; direction 1 is the shipped
+baseline).
+
 ## 2026-07-17 · Morning research brief v2 clears pre-merge rollout gates
 
 The additive `morning_research_brief_v2` migration was applied to `homa-prod`
