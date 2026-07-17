@@ -3,6 +3,58 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-17 · "Emoji only" worksheet report investigated; two prod bugs fixed on the way
+
+Founder relayed a user report that her worksheets were "emoji only" and asked
+whether the fleet-skills migration broke skill loading (A) or changed
+GPT-Image-2 usage (B). Investigated live production materials, model_usage,
+and the 48-hour change window.
+
+**Both hypotheses disproven with production evidence.** (A) materials-studio
+demonstrably still loads post-cutover: last-hours worksheets carry the
+skill's fingerprints in their `generation` jsonb (path choice, revisesId
+chains, review-loop verdicts), and one build followed the skill's counting
+recipe exactly (single generated pup on white, repeated per group). (B)
+`openai/gpt-image-2` calls continue uninterrupted through the deploy window
+(model_usage: Jul 14 x6, Jul 15 x3 including two post-cutover, Jul 16 x4);
+no code in the window touched the image pipeline; the 30/day budget was
+never hit. Aggregate image-rate dips trace to one 82-flashcard catechism
+batch and a 46-page unit-study batch, both text-appropriate.
+
+**Emoji finding, ESCALATED in the same reply (needs a product ruling):**
+emoji never render in the production Chromium PDF renderer (no color emoji
+font in @sparticuz/chromium): confirmed on two real pages whose stored html
+contains emoji decorations that are absent from their rendered previews. So
+screen-html and printed page disagree, and pages whose only decoration is
+emoji print as bare text. Emoji-decorated pages predate the migration
+(Jul 12, Jul 14 examples), so this is a standing gap, not a regression.
+Options put to the founder: a materials-studio skill line banning emoji as
+page art, a deterministic gate in validatePrintableHtml, or adding an emoji
+font to the renderer.
+
+**FIXED, not stored (f2d93a2, deploy dpl_82SFn7R4eXi6A3bnuLpM7S7JD293
+READY, live probes green):** visible `]]>` printed on families' finished
+pages, including a finalized scavenger-hunt material, whenever the model
+wrapped its page html in an XML CDATA section (browsers drop the opening
+marker as a bogus comment but render the closing `]]>` as text; ~7-12
+pages/day all week). create_printable now strips complete CDATA wrappers at
+intake via `stripCdataWrapper` (page-shell.ts, 7 unit tests), before the
+brand gate and before the row is stored.
+
+**FIXED, not stored (38fca6c, migration `revoke_self_improving_tables`
+applied to prod first, CI green after):** main CI had been red since PR #3
+merged (every push from `Make the landing hero demo...` onward failed the
+tenancy isolation smoke check). PR #3's nine self-improving tables shipped
+with RLS enabled but no explicit revokes, so PostgREST answered anon reads
+with an empty 200 where the guard expects a permission error (the migration
+#56 deny-all contract). Revoked anon/authenticated on all nine; verified
+anon is denied via a set-local-role probe; the guard and full CI pass again.
+
+Also for the record: two prior main pushes from the `recoupable` Vercel
+account (`ef7af73` classify-model default, `01be798` .cosmo skills) had
+deploys stuck BLOCKED, so this session's push is what actually took those
+commits live along with the fix.
+
 ## 2026-07-16 · Production Eve stream 300s timeout fixed, not stored
 
 Live production failure flagged from Vercel `get_runtime_errors`: recurring
