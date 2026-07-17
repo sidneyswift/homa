@@ -177,7 +177,15 @@
   .wiring { margin-top: 40px; font-size: 0.8rem; color: var(--muted); background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 16px; }
   .wiring code { background: var(--cream); border-radius: 5px; padding: 1px 5px; font-size: 0.74rem; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-  @media (max-width: 720px) { .device-toggle { display: none; } .frame { min-height: 560px; } }
+  /* A real narrow screen gets the phone frame automatically; the toggle
+     exists so a desktop reviewer can preview it. */
+  @media (max-width: 720px) {
+    .device-toggle { display: none; }
+    .frame { min-height: 560px; }
+    .sidebar { display: none; }
+    .topbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #FFFDF9; border-bottom: 1px solid var(--border-subtle); font-family: "Fredoka", sans-serif; font-weight: 600; color: var(--ink); }
+    .content { padding: 14px; }
+  }
 </style>
 </head>
 <body>
