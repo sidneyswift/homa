@@ -94,6 +94,9 @@ jobs:
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
 
+      - name: Materials checks (page shell pagination, packet bodies, binder model)
+        run: pnpm check:materials
+
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e

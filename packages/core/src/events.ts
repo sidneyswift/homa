@@ -380,9 +380,13 @@ export const EVENT_SCHEMAS = {
       "poster",
       "infographic",
       "game",
+      "packet",
       "other",
     ]),
     source: z.enum(["html", "image", "hybrid"]),
+    // Packets (multi-page builds, 2026-07-17) carry their true PDF page
+    // count; single pages report 1.
+    page_count: z.number().int().min(1).optional(),
     reviewed: z.boolean(),
     review_passed: z.boolean().optional(),
     sent_by_text: z.boolean(),

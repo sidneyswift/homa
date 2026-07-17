@@ -1,11 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 /**
  * Renders a create_printable result as a card around the real artifact:
  * the JPEG preview of the rendered page, with the PDF one tap away (the
  * browser's PDF viewer handles print/download/AirPrint). The page design
  * is the agent's work end to end; this card only frames it, and the
  * headline follows the material's kind.
+ *
+ * Packets (multi-page materials, 2026-07-17) page through their real
+ * per-page previews right on the card, so a parent can see every page
+ * she is about to print without opening the PDF. One file, one print.
  */
 
 export interface MaterialArtifact {
@@ -15,6 +22,10 @@ export interface MaterialArtifact {
   childName: string | null;
   previewUrl: string;
   pdfUrl: string;
+  /** PDF pages; absent or 1 on classic single-page materials. */
+  pageCount?: number;
+  /** Per-page previews (page 1 first) when more than one page exists. */
+  pagePreviewUrls?: string[];
 }
 
 const KIND_HEADLINES: Record<string, string> = {
@@ -25,11 +36,23 @@ const KIND_HEADLINES: Record<string, string> = {
   poster: "Poster ready",
   infographic: "Infographic ready",
   game: "Game ready",
+  packet: "Packet ready",
 };
 
 export function MaterialCard({ material }: { material: MaterialArtifact }) {
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
-  const subtitle = [material.skill, material.childName ? `for ${material.childName}` : null]
+  const pageCount = material.pageCount ?? 1;
+  const pagePreviews =
+    material.pagePreviewUrls && material.pagePreviewUrls.length > 1
+      ? material.pagePreviewUrls
+      : [material.previewUrl];
+  const [pageIndex, setPageIndex] = useState(0);
+  const currentPreview = pagePreviews[Math.min(pageIndex, pagePreviews.length - 1)];
+  const subtitle = [
+    pageCount > 1 ? `${pageCount} pages, one PDF` : null,
+    material.skill,
+    material.childName ? `for ${material.childName}` : null,
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -51,19 +74,51 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
             letter aspect ratio, and never above the fold. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={material.previewUrl}
-          alt={`Preview of ${material.title}`}
+          src={currentPreview}
+          alt={
+            pagePreviews.length > 1
+              ? `Preview of ${material.title}, page ${pageIndex + 1} of ${pageCount}`
+              : `Preview of ${material.title}`
+          }
           className="block aspect-[8.5/11] w-full"
           loading="lazy"
         />
       </a>
+      {pagePreviews.length > 1 ? (
+        <div className="mt-2 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
+            disabled={pageIndex === 0}
+            aria-label="Previous page"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </button>
+          <span aria-live="polite" className="text-xs font-semibold text-muted">
+            Page {pageIndex + 1} of {pageCount}
+            {pageCount > pagePreviews.length ? ` · previews show the first ${pagePreviews.length}` : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              setPageIndex((index) => Math.min(pagePreviews.length - 1, index + 1))
+            }
+            disabled={pageIndex >= pagePreviews.length - 1}
+            aria-label="Next page"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
       <a
         href={material.pdfUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
       >
-        Print it
+        {pageCount > 1 ? `Print all ${pageCount} pages` : "Print it"}
       </a>
     </div>
   );

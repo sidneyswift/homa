@@ -18,6 +18,10 @@ export interface MaterialArtifact {
   childName: string | null;
   previewUrl: string;
   pdfUrl: string;
+  /** PDF pages; absent or 1 on classic single-page materials. */
+  pageCount?: number;
+  /** Per-page previews (page 1 first) when more than one page exists. */
+  pagePreviewUrls?: string[];
 }
 
 const KIND_HEADLINES: Record<string, string> = {
@@ -28,11 +32,17 @@ const KIND_HEADLINES: Record<string, string> = {
   poster: "Poster ready",
   infographic: "Infographic ready",
   game: "Game ready",
+  packet: "Packet ready",
 };
 
 export function MaterialCard({ material }: { material: MaterialArtifact }) {
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
-  const subtitle = [material.skill, material.childName ? `for ${material.childName}` : null]
+  const pageCount = material.pageCount ?? 1;
+  const subtitle = [
+    pageCount > 1 ? `${pageCount} pages, one PDF` : null,
+    material.skill,
+    material.childName ? `for ${material.childName}` : null,
+  ]
     .filter(Boolean)
     .join(" \u00B7 ");
 
@@ -107,7 +117,9 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
             color: colors.onBrand,
           }}
         >
-          Open the printable PDF
+          {pageCount > 1
+            ? `Open the ${pageCount}-page PDF`
+            : "Open the printable PDF"}
         </Text>
       </Pressable>
     </Card>

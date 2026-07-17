@@ -43,6 +43,10 @@ export interface ChatHistoryMaterial {
   childName: string | null;
   previewUrl: string;
   pdfUrl: string;
+  /** PDF pages (1 for classic single-page materials). */
+  pageCount: number;
+  /** Per-page previews for multi-page materials, page 1 first. */
+  pagePreviewUrls: string[] | null;
   /** materials.created_at as epoch ms, for transcript placement. */
   atMs: number;
 }
@@ -58,6 +62,8 @@ export interface ChatHistoryMaterialRow {
   created_at: string;
   session_id: string | null;
   child_name: string | null;
+  page_count?: number | string | null;
+  page_preview_urls?: unknown;
 }
 
 /** Everything the chat page's server read hands the client. */
@@ -126,6 +132,20 @@ export function mergeChatHistoryRows(
   return merged.length > cap ? merged.slice(merged.length - cap) : merged;
 }
 
+/** Rows older than the packet work carry no pageCount; they are one page. */
+function parsePageCount(raw: number | string | null | undefined): number {
+  const parsed = typeof raw === "string" ? Number.parseInt(raw, 10) : raw;
+  return typeof parsed === "number" && Number.isFinite(parsed) && parsed > 1
+    ? parsed
+    : 1;
+}
+
+function parsePagePreviewUrls(raw: unknown): string[] | null {
+  if (!Array.isArray(raw)) return null;
+  const urls = raw.filter((entry): entry is string => typeof entry === "string");
+  return urls.length > 1 ? urls : null;
+}
+
 export function toChatHistoryMaterial(
   row: ChatHistoryMaterialRow,
 ): ChatHistoryMaterial | null {
@@ -143,6 +163,8 @@ export function toChatHistoryMaterial(
     childName: row.child_name,
     previewUrl: row.preview_url,
     pdfUrl: row.pdf_url,
+    pageCount: parsePageCount(row.page_count),
+    pagePreviewUrls: parsePagePreviewUrls(row.page_preview_urls),
     atMs,
   };
 }
@@ -164,6 +186,10 @@ function materialToolPart(material: ChatHistoryMaterial) {
         childName: material.childName,
         previewUrl: material.previewUrl,
         pdfUrl: material.pdfUrl,
+        pageCount: material.pageCount,
+        ...(material.pagePreviewUrls
+          ? { pagePreviewUrls: material.pagePreviewUrls }
+          : {}),
       },
     },
   };

@@ -42,11 +42,13 @@ const MATERIAL_CAP = 80;
 
 const ROW_COLUMNS = "id, session_id, role, channel, content, created_at";
 
-/** materials columns for scrollback cards; the creating session and the
- *  child's display name live inside the generation provenance JSON. */
+/** materials columns for scrollback cards; the creating session, the
+ *  child's display name, and the packet page data live inside the
+ *  generation provenance JSON. */
 const MATERIAL_COLUMNS =
   "id, title, kind, skill, preview_url, pdf_url, created_at, " +
-  "session_id:generation->>sessionId, child_name:generation->input->>childName";
+  "session_id:generation->>sessionId, child_name:generation->input->>childName, " +
+  "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
 
 export type {
   ChatHistoryMessage,

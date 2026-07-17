@@ -203,7 +203,8 @@ async function renderAndSave(
     review = await reviewArtifact({
       familyId: familyId as string,
       channel: "web",
-      previewJpeg: rendered.previewJpeg,
+      previewJpegs: rendered.pageJpegs,
+      pageCount: rendered.pageCount,
       brief: `The brief: ${brief.ask}`,
     });
   }

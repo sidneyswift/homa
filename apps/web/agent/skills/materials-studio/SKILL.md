@@ -1,5 +1,5 @@
 ---
-description: Use when designing any printable or visual material for a child, worksheets, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds. Contains the creation-path guide (image model vs HTML vs both), reference-image discipline, metadata and finalize discipline, and proven recipes.
+description: Use when designing any printable or visual material for a child, worksheets, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds, and multi-page packets ("make it one PDF", weekly lesson bundles, mini books). Contains the creation-path guide (image model vs HTML vs both), the packet recipe, reference-image discipline, metadata and finalize discipline, and proven recipes.
 ---
 
 # The materials studio
@@ -232,8 +232,10 @@ astronaut, a poster of the child beside their favorite character.
 
 - You write the page's inner HTML with its own `<style>` block. The
   platform wraps it in a letter-size (8.5x11in portrait) shell with about
-  0.6in side padding and adds a tiny required footer. One page is the
-  default.
+  0.6in side padding and adds a tiny required footer. `html` is ONE page,
+  exactly: the sheet is an exact-height box and anything past 11in is cut
+  off, never spilled onto a second page. Page-break CSS is refused with a
+  pointer to the pages path below.
 - Never declare `@page`, `position: fixed`, or your own "made with Homa"
   line; the shell owns those.
 - Web fonts are welcome:
@@ -273,6 +275,49 @@ way, draw rows of practice boxes (`border: 3px solid #221e1a;
 width/height: 90px;`) with one model letter in the first box of each
 row, and keep box proportions exact; this is precisely where the html
 path beats the image model.
+
+## Packets: several pages, one PDF
+
+A packet is one material whose PDF carries several pages: a multi-week
+lesson bundle, a unit with a cover page, a mini book, "can you make it
+one PDF". Build it with create_printable's `pages` input, one entry per
+page in print order. Each entry is exactly one of:
+
+- `fromMaterialId`: an existing material of this family, placed exactly
+  as made (the strongest move: zero re-typing, zero drift from what she
+  already approved). A multi-page material contributes all its pages.
+- `html`: a fresh page (a cover, a parent guide, a new lesson), same
+  one-page contract as the html path.
+- `pageImageUrl`: a generate_image page.
+
+Rules that make packets work:
+
+- She asks for one PDF of things that already exist ("put the four
+  weeks together"): pass the four ids as fromMaterialId entries, in
+  order. Never re-compose pages from memory when ids exist; never tell
+  her to print pieces separately and staple. The packet path IS the
+  answer to "one file".
+- Building a fresh multi-lesson set she asked for as one document: one
+  create call, one pages entry per lesson. Building lessons she may
+  want individually too: make each its own material first, then compile
+  the packet from their ids, so the Binder holds both the parts and the
+  whole.
+- A cover page is one more `html` entry at the front (big title, the
+  child's name, week list). Offer it when the packet is a real unit;
+  skip it for a two-page combine.
+- Never page-break CSS anywhere: the shell owns pagination. One pages
+  entry = one printed page, exactly.
+- Cap: 12 pages per document. A 36-week program ships as volumes
+  (weeks 1 to 6, 7 to 12, ...), each volume its own packet.
+- The tool renders a preview of every page (the web card and the Binder
+  page through them; the first preview is what texts on SMS), and the
+  quality check reads the first 4 pages, so trust its verdict page by
+  page. `pageCount` in the result is the PDF's true page count; say it
+  plainly ("all four weeks in one PDF").
+- Metadata: kind lands as `packet` on its own; fill skill/subject/theme
+  from the content so find_materials can find the whole unit later. The
+  packet is a material like any other: revisions chain with revisesId,
+  and approval means mark_material_final.
 
 ## Manipulatives: think past the page (early math especially)
 

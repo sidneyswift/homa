@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser } from "puppeteer-core";
 
-import { isAllowedPrintableSubresourceUrl } from "./page-shell";
+import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell";
 
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
@@ -18,14 +18,24 @@ import { isAllowedPrintableSubresourceUrl } from "./page-shell";
  * function instance, so warm renders skip the ~2s boot. Every render gets
  * a fresh page and closes it; a crashed browser is relaunched once.
  *
- * Frozen seam: renderPrintableHtml(html) -> { pdf, previewJpeg }. The
- * M0-03/M2-05 sandbox pipeline may replace the internals someday without
- * the tool contract moving.
+ * Frozen seam: renderPrintableHtml(html) -> { pdf, previewJpeg,
+ * pageJpegs, pageCount }. The M0-03/M2-05 sandbox pipeline may replace
+ * the internals someday without the tool contract moving.
+ *
+ * Multi-page honesty (the Llanes packet incident, 2026-07-17: a correct
+ * 4-page PDF was reported broken because the only preview was a screen
+ * screenshot of the first 11 inches): the shell renders each page as an
+ * exact 11in box, and this module screenshots each box separately, so
+ * the previews the parent and the quality reviewer see are the same
+ * pages the printer produces.
  */
 
 /** Letter at 96dpi. The preview doubles it via deviceScaleFactor. */
 const LETTER_PX = { width: 816, height: 1056 } as const;
 const RENDER_TIMEOUT_MS = 60_000;
+
+/** Per-page previews are capped; the PDF always carries every page. */
+export const PREVIEW_PAGE_CAP = 6;
 
 const LOCAL_CHROME_PATHS = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -83,14 +93,18 @@ async function getBrowser(): Promise<Browser> {
 
 export interface RenderedPrintable {
   pdf: Buffer;
+  /** Page one, what MMS and the chat card lead with. */
   previewJpeg: Buffer;
+  /** One JPEG per page, in order, capped at PREVIEW_PAGE_CAP. */
+  pageJpegs: Buffer[];
+  /** True page count, from the shell's page boxes (uncapped). */
+  pageCount: number;
 }
 
 /**
  * renderPrintableHtml(html): Promise<RenderedPrintable>
- * One complete HTML document in; a letter-size PDF plus a JPEG of page
- * one out (the JPEG is what MMS and the chat card show). Waits for
- * network quiet AND document.fonts.ready so web fonts and fal
+ * One complete HTML document in; a letter-size PDF plus a JPEG per page
+ * out. Waits for network quiet AND document.fonts.ready so web fonts and
  * illustrations are actually painted before capture.
  */
 export async function renderPrintableHtml(html: string): Promise<RenderedPrintable> {
@@ -151,13 +165,28 @@ export async function renderPrintableHtml(html: string): Promise<RenderedPrintab
       ),
     );
 
-    const previewJpeg = Buffer.from(
-      await page.screenshot({
-        type: "jpeg",
-        quality: 85,
-        clip: { x: 0, y: 0, ...LETTER_PX },
-      }),
+    // Page boxes stack at exact 11in intervals on screen (the shell's
+    // contract), so page N's true preview is the clip at N * 11in. A
+    // document without shell page boxes (a legacy caller) is one page.
+    const pageCount = Math.max(
+      1,
+      await page.evaluate(
+        (pageClass) => document.querySelectorAll(`.${pageClass}`).length,
+        SHEET_PAGE_CLASS,
+      ),
     );
+    const pageJpegs: Buffer[] = [];
+    for (let index = 0; index < Math.min(pageCount, PREVIEW_PAGE_CAP); index += 1) {
+      pageJpegs.push(
+        Buffer.from(
+          await page.screenshot({
+            type: "jpeg",
+            quality: 85,
+            clip: { x: 0, y: index * LETTER_PX.height, ...LETTER_PX },
+          }),
+        ),
+      );
+    }
     const pdf = Buffer.from(
       await page.pdf({
         format: "letter",
@@ -166,7 +195,7 @@ export async function renderPrintableHtml(html: string): Promise<RenderedPrintab
         timeout: RENDER_TIMEOUT_MS,
       }),
     );
-    return { pdf, previewJpeg };
+    return { pdf, previewJpeg: pageJpegs[0], pageJpegs, pageCount };
   } finally {
     await page.close().catch(() => {
       // A page that will not close is abandoned with its browser.

@@ -27,6 +27,10 @@ export interface BinderMaterial {
   previewUrl: string;
   pdfUrl: string;
   createdAt: string;
+  /** PDF pages (1 for classic single-page materials). */
+  pageCount: number;
+  /** Per-page previews for multi-page materials, page 1 first. */
+  pagePreviewUrls: string[] | null;
 }
 
 /**
@@ -52,6 +56,8 @@ export function toBinderMaterials(
     previewUrl: material.previewUrl,
     pdfUrl: material.pdfUrl,
     createdAt: material.createdAt,
+    pageCount: material.pageCount,
+    pagePreviewUrls: material.pagePreviewUrls,
   }));
 }
 
@@ -79,6 +85,7 @@ export const KIND_LABELS: Record<MaterialKind, string> = {
   poster: "Poster",
   infographic: "Infographic",
   game: "Game",
+  packet: "Packet",
   other: "Other",
 };
 

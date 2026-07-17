@@ -13,6 +13,7 @@ export const MATERIAL_KINDS = [
   "poster",
   "infographic",
   "game",
+  "packet",
   "other",
 ] as const;
 export type MaterialKind = (typeof MATERIAL_KINDS)[number];

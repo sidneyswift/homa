@@ -106,6 +106,8 @@ export default defineTool({
         childName: material.childName,
         previewUrl: material.previewUrl,
         pdfUrl: material.pdfUrl,
+        pageCount: material.pageCount,
+        ...(material.pagePreviewUrls ? { pagePreviewUrls: material.pagePreviewUrls } : {}),
         status: material.status,
       },
       sentByText,

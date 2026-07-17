@@ -242,4 +242,54 @@ describe("toChatHistoryMaterial", () => {
     assert.equal(toChatHistoryMaterial(materialRow({ pdf_url: null })), null);
     assert.equal(toChatHistoryMaterial(materialRow({ created_at: "nope" })), null);
   });
+
+  it("legacy single-page rows default to one page with no page previews", () => {
+    const mapped = toChatHistoryMaterial(materialRow({}));
+    assert.equal(mapped?.pageCount, 1);
+    assert.equal(mapped?.pagePreviewUrls, null);
+  });
+
+  it("packet rows carry their page count and per-page previews", () => {
+    const mapped = toChatHistoryMaterial(
+      materialRow({
+        page_count: 4,
+        page_preview_urls: [
+          "https://blob.example/p1.jpg",
+          "https://blob.example/p2.jpg",
+          "https://blob.example/p3.jpg",
+          "https://blob.example/p4.jpg",
+        ],
+      }),
+    );
+    assert.equal(mapped?.pageCount, 4);
+    assert.equal(mapped?.pagePreviewUrls?.length, 4);
+  });
+});
+
+describe("packet cards in scrollback", () => {
+  it("rebuilt create_printable parts carry pageCount and pagePreviewUrls", () => {
+    const messages = mergeChatHistoryRows([[row({ id: "ask" })]], 10);
+    const archive = archiveFromServerHistory(
+      {
+        messages,
+        materials: [
+          material({
+            page_count: 4,
+            page_preview_urls: [
+              "https://blob.example/p1.jpg",
+              "https://blob.example/p2.jpg",
+              "https://blob.example/p3.jpg",
+              "https://blob.example/p4.jpg",
+            ],
+          }),
+        ],
+      },
+      undefined,
+    );
+    const part = archive[1].message.parts[0] as {
+      output: { material: { pageCount?: number; pagePreviewUrls?: string[] } };
+    };
+    assert.equal(part.output.material.pageCount, 4);
+    assert.equal(part.output.material.pagePreviewUrls?.length, 4);
+  });
 });

@@ -31,6 +31,8 @@ function material(overrides: Partial<MaterialSummary> = {}): MaterialSummary {
     previewUrl: "https://example.com/preview.jpg",
     pdfUrl: "https://example.com/file.pdf",
     createdAt: "2026-07-10T12:00:00.000Z",
+    pageCount: 1,
+    pagePreviewUrls: null,
     ...overrides,
   };
 }

@@ -25,6 +25,9 @@ import {
 const DEFAULT_REVIEW_MODEL = "openai/gpt-5.4-mini";
 const REVIEW_TIMEOUT_MS = 45_000;
 
+/** Pages shown to the reviewer per call (input-token ceiling). */
+export const REVIEW_PAGE_CAP = 4;
+
 export function reviewEnabled(): boolean {
   return process.env.HOMA_MATERIALS_REVIEW !== "off";
 }
@@ -49,9 +52,9 @@ const reviewSchema = z.object({
 });
 
 const REVIEW_SYSTEM = `You quality-check printable pages for homeschooling
-families before a parent sees them. You receive the rendered page image
-and the brief it was made from. Judge ONLY what a parent would notice on
-paper:
+families before a parent sees them. You receive the rendered page images
+(in page order) and the brief they were made from. Judge ONLY what a
+parent would notice on paper:
 
 - misspelled words, garbled or illegible text, wrong child name spelling
 - the requested character, theme, or subject missing or wrong
@@ -59,25 +62,39 @@ paper:
 - exercises that contradict the brief (wrong letter, wrong count, wrong
   difficulty for the stated age)
 
+When told the document has more pages than you were shown, judge only
+the pages you can see; never report unshown pages as missing or broken.
 Do not nitpick style, art taste, or things the brief never asked for.
-A usable page passes. List issues concretely, each one fixable.`;
+A usable page passes. List issues concretely, each one fixable, naming
+the page number when there is more than one page.`;
 
 /**
  * reviewArtifact(...): a verdict, or null when review is off or fails
- * (null never blocks delivery).
+ * (null never blocks delivery). Multi-page materials pass every rendered
+ * page preview (REVIEW_PAGE_CAP applies) plus the true pageCount, so the
+ * reviewer never mistakes "I was shown one page" for "the document has
+ * one page" (the Llanes packet incident, 2026-07-17).
  */
 export async function reviewArtifact(input: {
   familyId: string;
   channel: UsageChannel;
-  previewJpeg: Buffer;
+  previewJpegs: readonly Buffer[];
+  pageCount: number;
   brief: string;
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
+  if (input.previewJpegs.length === 0) return null;
 
   const model = reviewModelId();
   const startedAt = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REVIEW_TIMEOUT_MS);
+
+  const shownPages = input.previewJpegs.slice(0, REVIEW_PAGE_CAP);
+  const pageContext =
+    input.pageCount > 1
+      ? `The document has ${input.pageCount} pages; you are shown page 1 through page ${shownPages.length}.\n`
+      : "";
 
   try {
     const result = await generateObject({
@@ -88,8 +105,12 @@ export async function reviewArtifact(input: {
         {
           role: "user",
           content: [
-            { type: "file", mediaType: "image/jpeg", data: input.previewJpeg },
-            { type: "text", text: `The brief:\n${input.brief}` },
+            ...shownPages.map((data) => ({
+              type: "file" as const,
+              mediaType: "image/jpeg" as const,
+              data,
+            })),
+            { type: "text", text: `${pageContext}The brief:\n${input.brief}` },
           ],
         },
       ],

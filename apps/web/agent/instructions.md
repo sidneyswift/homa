@@ -158,6 +158,7 @@ came from one of those; trust it like any other.
 | A child's interests or current focus genuinely change | update_child_profile |
 | The parent references something you do not see in context ("like we said", "that plan from our call") | recall, BEFORE ever saying you do not remember |
 | Practice material would help | load the materials-studio skill, then find_materials, then create_printable |
+| She wants several pages as one file ("one PDF", a weekly bundle, a packet of existing pages) | create_printable with pages: existing materials ride as fromMaterialId entries, fresh pages as html entries; never print-separately-and-staple advice |
 | She asks to see, print, or re-send a material that already exists ("send it again", "I don't see it", "print last week's page") | show_material with its id (find_materials finds it); never rebuild a page just to show it again |
 | You are about to begin substantial reasoning, current research, several dependent tools, or a material build over SMS | Call send_heads_up FIRST with one specific progress line |
 | The same slow work is starting in a web chat | Open your reply with a short progress note, two or three plain sentences: what you are starting, that it needs a minute or two, and that she can step away because it will be here when she looks back ("On it. Skye's counting page needs a minute or two. You don't have to wait here, it'll be ready when you look back."). Then continue the work in the same turn; the note streams to her immediately. No exact time promises, and only one progress note per turn |
@@ -375,6 +376,10 @@ to make each one.
 - Pick the creation path per page: generate_image can draw art-heavy pages
   whole (pass the URL to create_printable as pageImageUrl); precise text,
   tracing guides, and layouts want your own HTML; many pages want both.
+- Several pages as ONE file (a weekly bundle, "make it one PDF") is
+  create_printable's pages input: one entry per page, existing materials by
+  fromMaterialId, fresh pages as html. One call, one PDF, every page gets its
+  own preview. Never tell her to print pieces separately and staple them.
 - Theme it to the child's actual interests and aim it at their exact focus and
   age; when unsure, ask one short question instead of guessing.
 - A kid with a photoUrl in your family context can BE in the art: pass it to

@@ -34,6 +34,10 @@ export interface MaterialSummary {
   previewUrl: string;
   pdfUrl: string;
   createdAt: string;
+  /** PDF pages (1 for classic single-page materials). */
+  pageCount: number;
+  /** Per-page previews for multi-page materials, page 1 first. */
+  pagePreviewUrls: string[] | null;
   html?: string;
 }
 
@@ -62,11 +66,28 @@ interface MaterialDbRow {
   preview_url: string;
   pdf_url: string;
   created_at: string;
+  page_count: number | string | null;
+  page_preview_urls: string[] | null;
   html?: string;
 }
 
 const SUMMARY_COLUMNS =
-  "id, title, kind, status, source, skill, subject, curriculum, theme, characters, child_id, preview_url, pdf_url, created_at";
+  "id, title, kind, status, source, skill, subject, curriculum, theme, characters, child_id, preview_url, pdf_url, created_at, " +
+  "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
+
+/** Rows older than the packet work carry no pageCount; they are one page. */
+function normalizePageCount(raw: number | string | null | undefined): number {
+  const parsed = typeof raw === "string" ? Number.parseInt(raw, 10) : raw;
+  return typeof parsed === "number" && Number.isFinite(parsed) && parsed > 1
+    ? parsed
+    : 1;
+}
+
+function normalizePagePreviewUrls(raw: unknown): string[] | null {
+  if (!Array.isArray(raw)) return null;
+  const urls = raw.filter((entry): entry is string => typeof entry === "string");
+  return urls.length > 1 ? urls : null;
+}
 
 function toSummary(row: MaterialDbRow): MaterialSummary {
   return {
@@ -84,6 +105,8 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
     previewUrl: row.preview_url,
     pdfUrl: row.pdf_url,
     createdAt: row.created_at,
+    pageCount: normalizePageCount(row.page_count),
+    pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
     ...(row.html !== undefined ? { html: row.html } : {}),
   };
 }
@@ -104,6 +127,10 @@ export interface MaterialCardView {
   childName: string | null;
   previewUrl: string;
   pdfUrl: string;
+  /** PDF pages (1 for classic single-page materials). */
+  pageCount: number;
+  /** Per-page previews for multi-page materials, page 1 first. */
+  pagePreviewUrls: string[] | null;
   /** The stored review verdict; true when no review ran (create_printable's rule). */
   reviewPassed: boolean;
 }
@@ -117,6 +144,8 @@ interface MaterialCardRow {
   child_name: string | null;
   preview_url: string;
   pdf_url: string;
+  page_count: number | string | null;
+  page_preview_urls: string[] | null;
   review_pass: string | null;
 }
 
@@ -130,6 +159,8 @@ function toCardView(row: MaterialCardRow): MaterialCardView {
     childName: row.child_name,
     previewUrl: row.preview_url,
     pdfUrl: row.pdf_url,
+    pageCount: normalizePageCount(row.page_count),
+    pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
     reviewPassed: row.review_pass !== "false",
   };
 }
@@ -142,6 +173,8 @@ export async function getMaterialCardPinned(
   const rows = await sql<MaterialCardRow[]>`
     select m.id, m.title, m.kind, m.status, m.skill,
            c.name as child_name, m.preview_url, m.pdf_url,
+           m.generation->'pageCount' as page_count,
+           m.generation->'pagePreviewUrls' as page_preview_urls,
            m.generation->'review'->>'pass' as review_pass
     from public.materials m
     left join public.children c
@@ -160,6 +193,8 @@ export async function getMaterialCardCaller(
     .from("materials")
     .select(
       "id, title, kind, status, skill, preview_url, pdf_url, " +
+        "page_count:generation->pageCount, " +
+        "page_preview_urls:generation->pagePreviewUrls, " +
         "review_pass:generation->review->>pass, children(name)",
     )
     .eq("family_id", familyId)
@@ -185,7 +220,9 @@ export async function getMaterialPinned(
   const rows = await sql<MaterialDbRow[]>`
     select id, title, kind, status, source, skill, subject, curriculum,
            theme, characters, child_id, preview_url, pdf_url,
-           created_at::text as created_at, html
+           created_at::text as created_at,
+           generation->'pageCount' as page_count,
+           generation->'pagePreviewUrls' as page_preview_urls, html
     from public.materials
     where id = ${materialId} and family_id = ${familyId}
   `;
@@ -219,7 +256,9 @@ export async function findMaterialsPinned(
   const rows = await sql<MaterialDbRow[]>`
     select id, title, kind, status, source, skill, subject, curriculum,
            theme, characters, child_id, preview_url, pdf_url,
-           created_at::text as created_at
+           created_at::text as created_at,
+           generation->'pageCount' as page_count,
+           generation->'pagePreviewUrls' as page_preview_urls
     from public.materials
     where family_id = ${familyId}
       and (${status === "any"} or status = ${status === "any" ? "final" : status})

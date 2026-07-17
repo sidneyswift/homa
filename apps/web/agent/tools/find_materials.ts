@@ -78,11 +78,20 @@ export default defineTool({
         ? await findMaterialsPinned(access.familyId, filters)
         : await findMaterialsCaller(access.db, access.familyId, filters);
 
+    // Per-page preview URLs stay out of search results (six long URLs
+    // per packet would drown the useful fields); pageCount stays in so
+    // a packet is recognizable at a glance.
+    const compact = materials.map((material) => {
+      const { pagePreviewUrls, ...rest } = material;
+      void pagePreviewUrls;
+      return rest;
+    });
+
     return {
-      materials,
+      materials: compact,
       note:
         materials.length > 0
-          ? "To show one of these to the parent again, call show_material with its id. A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse."
+          ? "To show one of these to the parent again, call show_material with its id. A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse, or pass its id in create_printable's pages (fromMaterialId) to compile a packet."
           : "Nothing saved matches. Design fresh, and finals you make will be here next time.",
     };
   },

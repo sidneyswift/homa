@@ -57,6 +57,7 @@ export function BinderCard({
           {KIND_LABELS[material.kind]}
         </span>
         <span>{material.childName ?? "Family"}</span>
+        {material.pageCount > 1 ? <span>· {material.pageCount} pages</span> : null}
       </span>
     </button>
   );

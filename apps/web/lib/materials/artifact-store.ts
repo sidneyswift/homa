@@ -47,28 +47,39 @@ export type MaterialSource = "html" | "image" | "hybrid";
 export interface MaterialArtifactUrls {
   pdfUrl: string;
   previewUrl: string;
+  /** One preview per rendered page, in page order (page 1 first). Only
+   * present beyond one entry for multi-page materials. */
+  pagePreviewUrls: string[];
 }
 
 export async function uploadMaterialArtifacts(input: {
   familyId: string;
   slug: string;
   pdf: Buffer;
-  previewJpeg: Buffer;
+  /** Per-page preview JPEGs, page 1 first (render-page's pageJpegs). */
+  pageJpegs: readonly Buffer[];
 }): Promise<MaterialArtifactUrls> {
   const base = `families/${input.familyId}/materials/${input.slug}`;
-  const [pdfBlob, previewBlob] = await Promise.all([
+  const [pdfBlob, ...previewBlobs] = await Promise.all([
     put(`${base}.pdf`, input.pdf, {
       access: "public",
       contentType: "application/pdf",
       addRandomSuffix: true,
     }),
-    put(`${base}.jpg`, input.previewJpeg, {
-      access: "public",
-      contentType: "image/jpeg",
-      addRandomSuffix: true,
-    }),
+    ...input.pageJpegs.map((jpeg, index) =>
+      put(`${base}${index === 0 ? "" : `-p${index + 1}`}.jpg`, jpeg, {
+        access: "public",
+        contentType: "image/jpeg",
+        addRandomSuffix: true,
+      }),
+    ),
   ]);
-  return { pdfUrl: pdfBlob.url, previewUrl: previewBlob.url };
+  const pagePreviewUrls = previewBlobs.map((blob) => blob.url);
+  return {
+    pdfUrl: pdfBlob.url,
+    previewUrl: pagePreviewUrls[0],
+    pagePreviewUrls,
+  };
 }
 
 /**

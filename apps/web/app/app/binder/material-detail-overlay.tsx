@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder";
 
@@ -14,6 +14,8 @@ import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder"
  * One action on purpose: "Print it" reuses material-card.tsx's own
  * wording, since the PDF link is the same reuse-worthy destination
  * (the browser's own viewer handles print, download, and AirPrint).
+ * Packets page through their per-page previews here, same pattern as
+ * the chat card.
  */
 
 function formattedDate(iso: string, timeZone: string): string {
@@ -36,6 +38,12 @@ export function MaterialDetailOverlay({
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const pagePreviews =
+    material.pagePreviewUrls && material.pagePreviewUrls.length > 1
+      ? material.pagePreviewUrls
+      : [material.previewUrl];
+  const [pageIndex, setPageIndex] = useState(0);
+  const currentPreview = pagePreviews[Math.min(pageIndex, pagePreviews.length - 1)];
 
   useEffect(() => {
     const previouslyFocused =
@@ -116,10 +124,41 @@ export function MaterialDetailOverlay({
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={material.previewUrl}
-          alt={`Preview of ${material.title}`}
+          src={currentPreview}
+          alt={
+            pagePreviews.length > 1
+              ? `Preview of ${material.title}, page ${pageIndex + 1} of ${material.pageCount}`
+              : `Preview of ${material.title}`
+          }
           className="mx-auto mt-3 block aspect-[8.5/11] w-2/3 rounded-md border border-border-subtle object-cover shadow-sm"
         />
+        {pagePreviews.length > 1 ? (
+          <div className="mx-auto mt-2 flex w-2/3 items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
+              disabled={pageIndex === 0}
+              aria-label="Previous page"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            >
+              <ChevronLeft size={16} aria-hidden="true" />
+            </button>
+            <span aria-live="polite" className="text-xs font-semibold text-muted">
+              Page {pageIndex + 1} of {material.pageCount}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setPageIndex((index) => Math.min(pagePreviews.length - 1, index + 1))
+              }
+              disabled={pageIndex >= pagePreviews.length - 1}
+              aria-label="Next page"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            >
+              <ChevronRight size={16} aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
 
         <h2 id="binder-detail-title" className="mt-4 font-display text-xl font-semibold text-strong">
           {material.title}
@@ -160,7 +199,7 @@ export function MaterialDetailOverlay({
           rel="noopener noreferrer"
           className="mt-4 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
         >
-          Print it
+          {material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
         </a>
       </div>
     </div>
