@@ -24,7 +24,7 @@ function ProofShell({ children, label }: { children: ReactNode; label: string })
           textTransform: "uppercase",
         }}
       >
-        Example · {label}
+        {label}
       </div>
       {children}
     </div>
