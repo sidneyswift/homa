@@ -1619,6 +1619,51 @@
       "subject": "multi-subject",
       "domain": "preschool-integrated",
       "format": "activity-collection"
+    },
+    {
+      "id": "ref-2026-07-20-beethoven-artists-mislabel",
+      "title": "Getting to Know the World's Greatest Composers: Ludwig van Beethoven (Mike Venezia, ~32 pages) - mislabeled as 'artists'",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:41:34-04:00",
+      "subject": "art",
+      "domain": "music-appreciation",
+      "format": "educational-biography-book"
+    },
+    {
+      "id": "ref-2026-07-20-greatest-artists-series",
+      "title": "Getting to Know the World's Greatest Artists (Mike Venezia series, 109 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T20:36:43-04:00",
+      "subject": "art",
+      "domain": "art-history",
+      "format": "educational-art-book"
+    },
+    {
+      "id": "ref-2026-07-20-inventors-scientists",
+      "title": "Getting to Know the World's Greatest Inventors and Scientists (Mike Venezia series, 33 scanned pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:41:53-04:00",
+      "subject": "science",
+      "domain": "science-history",
+      "format": "educational-biography-book"
+    },
+    {
+      "id": "ref-2026-07-20-one-potato-nursery-rhymes",
+      "title": "One Potato, Two Potato, Three Potato, Four \u2014 Nursery Rhyme Collection (43 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T19:42:42-04:00",
+      "subject": "English",
+      "domain": "Speaking & Listening",
+      "format": "nursery-rhyme-book"
+    },
+    {
+      "id": "ref-2026-07-20-toddler-science-activity-book",
+      "title": "The Toddler's Science Activity Book (Kailan Carr)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T12:18:00-04:00",
+      "subject": "science",
+      "domain": "early-science-exploration",
+      "format": "activity-book"
     }
   ]
 }

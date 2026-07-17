@@ -1,6 +1,16 @@
 {
   "curriculums": [
     {
+      "id": "cur-2026-07-15-harcourt-your-health-1st",
+      "name": "Your Health (Harcourt Brace, 1st Grade)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-15T16:56:00-04:00",
+      "methodology": "Traditional / Standards-Based Health Education",
+      "mappedPct": 31,
+      "gapCount": 5,
+      "decisionsCount": 3
+    },
+    {
       "id": "cur-2026-07-18-good-and-the-beautiful",
       "name": "The Good and the Beautiful \u2014 Language Arts & Reading Curriculum (125MB scan)",
       "droppedBy": "aless",
@@ -81,6 +91,16 @@
       "decisionsCount": 8
     },
     {
+      "id": "cur-2026-07-19-hwt-readiness-writing-prek",
+      "name": "Readiness & Writing Pre-K Teacher's Guide (Get Set for School by Learning Without Tears)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T16:25:00-04:00",
+      "methodology": "Learning Without Tears / Handwriting Without Tears",
+      "mappedPct": 5,
+      "gapCount": 6,
+      "decisionsCount": 11
+    },
+    {
       "id": "cur-2026-07-19-playing-preschool-y1",
       "name": "Playing Preschool Year 1 by Busy Toddler",
       "droppedBy": "aless",
@@ -109,6 +129,16 @@
       "mappedPct": 0,
       "gapCount": 2,
       "decisionsCount": 2
+    },
+    {
+      "id": "cur-2026-07-20-blossom-root-level0",
+      "name": "Blossom & Root Level 0 (Kindergarten) \u2014 Complete Multi-Subject Curriculum",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-20T13:13:00-04:00",
+      "methodology": "Charlotte Mason / Nature-Based / Literature-Rich (Secular)",
+      "mappedPct": 31,
+      "gapCount": 9,
+      "decisionsCount": 8
     }
   ]
 }

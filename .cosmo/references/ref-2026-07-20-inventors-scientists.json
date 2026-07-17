@@ -1,0 +1,137 @@
+{
+  "id": "ref-2026-07-20-inventors-scientists",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T21:41:53-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784598113.867139",
+  "format": "educational-biography-book",
+  "title": "Getting to Know the World's Greatest Inventors and Scientists (Mike Venezia series, 33 scanned pages)",
+  "localPath": ".cosmo/inspo-files/getting-to-know-inventors-scientists.pdf",
+  "blobUrl": null,
+  "analysisQuality": "full",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "illustration-dominant",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "science-history",
+    "topics": [
+      {
+        "id": "science.identify-famous-scientists",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "science.understand-scientific-inventions",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "science.scientific-method-introduction",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "history.historical-figures-contributions",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.reading-comprehension-nonfiction",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "slug": "science.identify-famous-scientists",
+        "description": "Identify famous inventors and scientists by name and associate them with their key discoveries or inventions"
+      },
+      {
+        "slug": "science.understand-scientific-inventions",
+        "description": "Understand how inventions work at a basic level and why they mattered to society"
+      },
+      {
+        "slug": "science.scientific-method-introduction",
+        "description": "Grasp the concept that scientists observe, experiment, and test ideas -- early introduction to scientific thinking"
+      },
+      {
+        "slug": "history.historical-figures-contributions",
+        "description": "Connect historical figures to the time periods they lived in and the problems they solved"
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      60,
+      144
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": [
+      "historical inventors and scientists as characters",
+      "cartoon Venezia-style illustrations alongside real photographs and diagrams of inventions"
+    ],
+    "visualStyle": "mixed -- vivid photographs of inventions and historical portraits + playful cartoon illustrations",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "humor in cartoon illustrations",
+      "real photographs and diagrams of inventions",
+      "narrative storytelling about real people and their discoveries",
+      "bite-sized inventor and scientist biographies"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "mixed",
+    "margins": "standard",
+    "inkDensity": "heavy",
+    "colorRequirement": "needs color"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "slug": "scientist-biography-page",
+        "notes": "Single-page inventor or scientist profile with portrait or invention photograph, key facts sidebar, and cartoon illustration -- a reading + science history format"
+      },
+      {
+        "slug": "invention-exploration-spread",
+        "notes": "Side-by-side layout: diagram or photo of the invention on one side, guided questions on the other (How does it work? What problem did it solve? What came before it?)"
+      },
+      {
+        "slug": "scientist-study-packet",
+        "notes": "Multi-page unit combining biography reading, invention diagram, timeline activity, and hands-on experiment inspired by the scientist's work"
+      }
+    ]
+  },
+  "stages": {
+    "captured": "2026-07-20T21:41:53-04:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pending",
+      "targets": [
+        "references/recipes/scientist-biography-page.md",
+        "references/recipes/invention-exploration-spread.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Same Mike Venezia 'Getting to Know' series as the artists and composers books Aless dropped today. 33-page CamScanner scan, mostly landscape spreads with portrait cover and back pages. The book introduces children to famous inventors and scientists through narrative biographies with Venezia's signature mix of humor, cartoon illustrations, and real photographs or diagrams. No hands-on activities -- pure reading + visual appreciation. Complements the artists and composers books as a trio covering art, music, and science history. The gap here parallels the artists book: Homa has no biography-style reading or scientist study formats. Together these three drops signal strong interest in a 'famous people' study unit format spanning multiple subjects. Blob upload deferred: no BLOB_READ_WRITE_TOKEN available (1Password service account 401). Local copy preserved at .cosmo/inspo-files/."
+}
