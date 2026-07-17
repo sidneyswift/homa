@@ -64,26 +64,6 @@ function ProofHeader({
   );
 }
 
-function WorksheetThumb({ height }: { height: number }) {
-  return (
-    <img
-      src="/images/hero-butterfly-math.png"
-      alt=""
-      width={1024}
-      height={1536}
-      style={{
-        display: "block",
-        width: "100%",
-        height: "auto",
-        maxHeight: height,
-        objectFit: "cover",
-        objectPosition: "top center",
-        background: "#fff",
-      }}
-    />
-  );
-}
-
 export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   switch (capabilityId) {
     case "plan":
@@ -140,27 +120,46 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
     case "practice":
       return (
         <ProofShell>
-          <ProofHeader
-            icon={FileText}
-            title="Butterfly math"
-            note="Made for Maya · PDF"
-            chipBg="var(--gold-100)"
-            chipInk="var(--gold-ink-strong)"
-          />
+          {/* The whole page as a portrait thumbnail beside the file info,
+              like a real document preview. A wide top crop showed only the
+              page title, which duplicated the header and sliced the art. */}
           <div
             style={{
-              marginTop: 13,
-              overflow: "hidden",
-              borderRadius: "var(--radius-md)",
-              background: "#fff",
-              boxShadow: "var(--shadow-sm)",
+              display: "grid",
+              gridTemplateColumns: "minmax(112px, 138px) 1fr",
+              gap: 14,
+              alignItems: "center",
             }}
           >
-            <WorksheetThumb height={132} />
+            <div
+              style={{
+                overflow: "hidden",
+                borderRadius: "var(--radius-md)",
+                background: "#fff",
+                boxShadow: "var(--shadow-md)",
+              }}
+            >
+              <img
+                src="/images/hero-butterfly-math.png"
+                alt=""
+                width={1024}
+                height={1536}
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+            </div>
+            <div style={{ display: "grid", gap: 12 }}>
+              <ProofHeader
+                icon={FileText}
+                title="Butterfly math"
+                note="Made for Maya · PDF"
+                chipBg="var(--gold-100)"
+                chipInk="var(--gold-ink-strong)"
+              />
+              <p style={{ display: "flex", alignItems: "center", gap: 6, margin: 0, color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
+                <Printer size={14} aria-hidden="true" /> Ready to print
+              </p>
+            </div>
           </div>
-          <p style={{ display: "flex", alignItems: "center", gap: 6, margin: "10px 0 0", color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
-            <Printer size={14} aria-hidden="true" /> Ready to print
-          </p>
         </ProofShell>
       );
 
