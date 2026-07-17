@@ -82,7 +82,7 @@ export function HeroProductDemo() {
       <div
         className="lp-product-demo-phone"
         role="img"
-        aria-label="Text thread: a parent says Maya likes butterflies, and Homa replies with a butterfly-themed count-and-graph worksheet saved to the binder"
+        aria-label="Text thread: a parent says Maya likes butterflies, and Homa replies with a butterfly math worksheet saved to the binder"
         style={{
           position: "relative",
           width: "100%",
@@ -340,8 +340,8 @@ export function HeroProductDemo() {
               <img
                 src="/images/hero-butterfly-math.png"
                 alt=""
-                width={640}
-                height={853}
+                width={1024}
+                height={1536}
                 style={{
                   display: "block",
                   width: "100%",
