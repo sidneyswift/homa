@@ -43,6 +43,7 @@ comparison lab for the next product layer is
 `docs/homa-planning/plans/2026-07-17-packet-experience-directions.html`
 (four directions, founder feedback pending; direction 1 is the shipped
 baseline).
+
 ## 2026-07-17 · Morning brief no-candidate dispatch root cause
 
 Production run `b3d85489...` was pinned to research-brief v2 after its family
@@ -63,10 +64,22 @@ no run. Both paths avoid Eve, visibility, delivery, and source-consumption
 side effects. Run creation now persists the delivery version selected once by
 preflight instead of reading rollout flags again.
 
-Production remains intentionally rolled back to sandbox-only while this fix is
-built. This entry records the confirmed root cause and local repair only. No
-deployment, migration, flag change, remote query, commit, push, or other remote
-action occurred.
+**FIXED, not stored.** Commit `1a01d54` merged through PR #18 after CI run
+`29618175589` passed every guard, including disposable v2 acceptance and
+remote isolation. Production deployment `dpl_DKx1iRbLqaUMGbLxihjziJp3GRoE`
+is READY on `thankshoma.com`.
+
+The exact exhausted-candidate replay created run `12ab431d...` as final
+`skipped`, with the bounded reason, no session, no preparation, no message, no
+source use, a cleared lease, and an advanced schedule. Fleet rollout was then
+enabled with slim context true, global v2 true, and sandbox-only false. Final
+save-only run `b3a1396b...` completed `done` with one bounded named-source
+preparation, one finalized source use, and one family-visible message. The
+rollout window contains two finalized v2 preparations across two test
+families, two delivered source-use rows, and one explicit feedback row.
+Landing and sample probes returned 200, dispatch health returned `{"ok":true}`,
+and the final 20-minute Vercel error scan was empty.
+
 ## 2026-07-17 · Morning research brief v2 clears pre-merge rollout gates
 
 The additive `morning_research_brief_v2` migration was applied to `homa-prod`

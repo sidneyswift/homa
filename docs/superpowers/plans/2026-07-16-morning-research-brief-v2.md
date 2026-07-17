@@ -5,12 +5,15 @@ briefs with an auditable delivery trail.
 
 ## As-built reference and boundaries
 
-Tasks 1 through 9 are implemented in the isolated
-`.worktrees/morning-research-brief-v2` worktree. Task 10 records this state.
-Task 11 remains an integration and rollout gate, not a completed operation.
-No commit, merge, push, remote migration, feature-flag enablement, paid model
-execution, deployment, or production verification is represented by this
-plan.
+Tasks 1 through 11 are complete. The main implementation merged through PR
+#14, sandbox-only rollout through PR #15, and no-candidate skip truth through
+PR #18 at commit `1a01d54`. Production migration `20260717125607` is applied.
+Paid craft evaluation passed all twelve fixtures. Global v2 and slim context
+are enabled, sandbox-only is disabled, and production deployment
+`dpl_DKx1iRbLqaUMGbLxihjziJp3GRoE` is READY. Live save-only verification
+proved successful preparation and finalization, explicit feedback, legacy
+control, sandbox-only isolation, global override, and an exhausted-candidate
+skip with no model or delivery side effects.
 
 The implementation preserves `morning-brief-format`'s four blocks, the one to
 two sentence limit for its two content blocks, and one executable offer. V2

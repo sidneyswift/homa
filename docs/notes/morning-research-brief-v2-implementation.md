@@ -408,3 +408,22 @@ existing 503 fallback. Delivery-window misses keep their context-free path but
 persist an explicitly selected version. Focused unit and disposable
 PostgreSQL tests cover ready parity, zero-run manual skip, atomic skip, replay,
 rollback, and one completion event.
+
+## 2026-07-17 · Production rollout complete
+
+PR #18 merged as `1a01d54` after CI run `29618175589` passed. Production
+deployment `dpl_DKx1iRbLqaUMGbLxihjziJp3GRoE` reached READY.
+
+The exhausted-candidate sandbox replay produced one final skipped run with no
+session, preparation, message, source use, or delivery. Its lease cleared and
+schedule advanced. After that proof, fleet configuration moved to slim context
+true, global v2 true, and sandbox-only false. A separate save-only test family,
+temporarily treated as non-sandbox on an unused local date, completed one v2
+run with a bounded named-source draft, atomic finalization, one visible
+message, and one source-use row. Every temporary sandbox, time-zone, schedule,
+and delivery preference change was restored immediately after its run started.
+
+The rollout window ended with two finalized v2 preparations, two delivered
+source-use rows, and one explicit helpful-feedback row across two test
+families. Public landing and sample probes returned 200, dispatch health
+returned `{"ok":true}`, and the final Vercel runtime-error scan was empty.
