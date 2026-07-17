@@ -14,6 +14,7 @@ import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
+import type { PromptSuggestionSet } from "../../lib/chat-suggestions/contract";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
@@ -32,6 +33,7 @@ import {
   pruneMessageTimes,
   saveChat,
   stampMessageTimes,
+  updateSavedPromptSuggestionSet,
   type ArchivedMessage,
 } from "./chat-storage";
 import {
@@ -62,6 +64,20 @@ import {
   latestProgressMessageInteraction,
   type ProgressMessageInteraction,
 } from "./progress-interaction-policy";
+import { requestPromptSuggestionSet } from "./prompt-suggestion-client";
+import {
+  executePromptSuggestionLifecycleAction,
+  promptSuggestionActionForLifecycleEvent,
+  type PromptSuggestionLifecycleHandlers,
+} from "./prompt-suggestion-lifecycle";
+import {
+  promptSuggestionRequestForMessages,
+  restorePromptSuggestionSetForVisibleMessages,
+} from "./prompt-suggestion-policy";
+import {
+  PromptSuggestionRail,
+  type PromptSuggestionPhase,
+} from "./prompt-suggestion-rail";
 import { SlashComposer } from "./slash-composer";
 import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
@@ -121,6 +137,8 @@ import { recoverLostTurn } from "./turn-recovery";
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
+
+const PROMPT_SUGGESTION_LOADING_DELAY_MS = 500;
 
 const SUGGESTIONS = [
   "What should we work on this week?",
@@ -229,6 +247,28 @@ export function ChatClient({
         )
       : prepared.archived,
   );
+  const [restoredPromptSuggestionSet] =
+    useState<PromptSuggestionSet | null>(() =>
+      restorePromptSuggestionSetForVisibleMessages({
+        archivedMessages: archived.map(({ message }) => message),
+        currentMessages: staleSessionlessEvents
+          ? []
+          : foldEventsToMessages(prepared.initialEvents),
+        promptSuggestionSet: prepared.promptSuggestions,
+        staleSessionlessEvents,
+      }),
+    );
+  const [promptSuggestionSet, setPromptSuggestionSet] =
+    useState<PromptSuggestionSet | null>(restoredPromptSuggestionSet);
+  const [promptSuggestionPhase, setPromptSuggestionPhase] =
+    useState<PromptSuggestionPhase>(
+      restoredPromptSuggestionSet ? "ready" : "idle",
+    );
+  const promptSuggestionAbortRef = useRef<AbortController | null>(null);
+  const promptSuggestionLoadingTimerRef =
+    useRef<ReturnType<typeof setTimeout> | null>(null);
+  const promptSuggestionRequestStartedAtRef = useRef<number | null>(null);
+  const suggestionSetIdForTurnRef = useRef<string | null>(null);
   // Message id -> arrival time. State (not a ref) because the transcript
   // grouping reads it during render.
   const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
@@ -310,11 +350,163 @@ export function ChatClient({
    *  because nobody chose it and the durable turn may have finished. */
   const autoStoppedRef = useRef(false);
 
+  const clearPromptSuggestionLoadingTimer = useCallback(() => {
+    if (promptSuggestionLoadingTimerRef.current === null) return;
+    clearTimeout(promptSuggestionLoadingTimerRef.current);
+    promptSuggestionLoadingTimerRef.current = null;
+  }, []);
+
+  const cancelPromptSuggestionRequest = useCallback(() => {
+    const controller = promptSuggestionAbortRef.current;
+    promptSuggestionAbortRef.current = null;
+    controller?.abort();
+    clearPromptSuggestionLoadingTimer();
+    promptSuggestionRequestStartedAtRef.current = null;
+  }, [clearPromptSuggestionLoadingTimer]);
+
+  const clearPromptSuggestionState = useCallback(() => {
+    cancelPromptSuggestionRequest();
+    setPromptSuggestionSet(null);
+    setPromptSuggestionPhase("idle");
+    updateSavedPromptSuggestionSet(storageKey, null);
+  }, [cancelPromptSuggestionRequest, storageKey]);
+
+  const emitPromptSuggestionsShown = useCallback(
+    async (suggestionSet: PromptSuggestionSet, latencyMs: number) => {
+      if (!familyId) return;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (!url || !key) return;
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+      if (!accessToken) return;
+      await emitEvent(
+        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
+        "chat.prompt_suggestions_shown",
+        {
+          suggestion_set_id: suggestionSet.setId,
+          prompt_version: suggestionSet.promptVersion,
+          source: suggestionSet.source,
+          count: suggestionSet.suggestions.length,
+          latency_ms: latencyMs,
+        },
+      );
+    },
+    [familyId, supabase],
+  );
+
+  const emitPromptSuggestionTapped = useCallback(
+    async (suggestionSet: PromptSuggestionSet, position: number) => {
+      if (!familyId) return;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (!url || !key) return;
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+      if (!accessToken) return;
+      await emitEvent(
+        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
+        "chat.prompt_suggestion_tapped",
+        {
+          suggestion_set_id: suggestionSet.setId,
+          prompt_version: suggestionSet.promptVersion,
+          source: suggestionSet.source,
+          position,
+        },
+      );
+    },
+    [familyId, supabase],
+  );
+
+  const requestPromptSuggestionsForMessages = useCallback(
+    async (messages: readonly EveMessage[]): Promise<void> => {
+      clearPromptSuggestionState();
+      const request = promptSuggestionRequestForMessages(messages);
+      if (!request) return;
+
+      const controller = new AbortController();
+      const startedAt = currentTimeMs();
+      promptSuggestionAbortRef.current = controller;
+      promptSuggestionRequestStartedAtRef.current = startedAt;
+      setPromptSuggestionPhase("pending");
+      promptSuggestionLoadingTimerRef.current = setTimeout(() => {
+        if (
+          promptSuggestionAbortRef.current === controller
+          && !controller.signal.aborted
+        ) {
+          setPromptSuggestionPhase("loading");
+        }
+      }, PROMPT_SUGGESTION_LOADING_DELAY_MS);
+
+      try {
+        const suggestionSet = await requestPromptSuggestionSet(request, {
+          signal: controller.signal,
+        });
+        if (
+          promptSuggestionAbortRef.current !== controller
+          || controller.signal.aborted
+        ) {
+          return;
+        }
+
+        const requestStartedAt =
+          promptSuggestionRequestStartedAtRef.current ?? startedAt;
+        clearPromptSuggestionLoadingTimer();
+        promptSuggestionAbortRef.current = null;
+        promptSuggestionRequestStartedAtRef.current = null;
+        setPromptSuggestionSet(suggestionSet);
+        setPromptSuggestionPhase("ready");
+        updateSavedPromptSuggestionSet(storageKey, suggestionSet);
+        void emitPromptSuggestionsShown(
+          suggestionSet,
+          Math.max(0, currentTimeMs() - requestStartedAt),
+        );
+      } catch (error) {
+        if (
+          promptSuggestionAbortRef.current !== controller
+          || controller.signal.aborted
+          || (error instanceof DOMException && error.name === "AbortError")
+        ) {
+          return;
+        }
+        clearPromptSuggestionLoadingTimer();
+        promptSuggestionAbortRef.current = null;
+        promptSuggestionRequestStartedAtRef.current = null;
+        setPromptSuggestionPhase("idle");
+      }
+    },
+    [
+      clearPromptSuggestionLoadingTimer,
+      clearPromptSuggestionState,
+      emitPromptSuggestionsShown,
+      storageKey,
+    ],
+  );
+
+  const promptSuggestionLifecycleHandlers =
+    useMemo<PromptSuggestionLifecycleHandlers<EveMessage>>(
+      () => ({
+        clear: clearPromptSuggestionState,
+        requestMessages: (messages) => {
+          void requestPromptSuggestionsForMessages(messages);
+        },
+        startRecovery: () => {
+          startRecoveryRef.current?.();
+        },
+      }),
+      [
+        clearPromptSuggestionState,
+        requestPromptSuggestionsForMessages,
+      ],
+    );
+
   const emitTurnCompleted = useCallback(
     async (
       status: "ok" | "error",
       errorClass?: "turn_failed" | "send_failed" | "unknown",
     ) => {
+      const suggestionSetId = suggestionSetIdForTurnRef.current;
+      suggestionSetIdForTurnRef.current = null;
       if (!familyId) return;
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -332,6 +524,9 @@ export function ChatClient({
           latency_ms: takeTurnLatencyMs(),
           model_tier: MODEL_TIER,
           tool_calls: countLastTurnToolCalls(messagesRef.current),
+          ...(suggestionSetId
+            ? { suggestion_set_id: suggestionSetId }
+            : {}),
         },
       );
     },
@@ -382,7 +577,23 @@ export function ChatClient({
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
       // "ok" here double-counted every failure (seen live 2026-07-11).
+      // Consume the stall marker before choosing a suggestion action.
+      // A partial auto-stopped reply belongs to recovery, never generation.
+      const autoStopped = autoStoppedRef.current;
+      autoStoppedRef.current = false;
+      const promptSuggestionAction =
+        promptSuggestionActionForLifecycleEvent({
+          type: "turn_finished",
+          hasError: Boolean(snapshot.error),
+          autoStopped,
+          hasQueuedFollowup: queued.length > 0,
+        });
       if (!snapshot.error) void emitTurnCompleted("ok");
+      executePromptSuggestionLifecycleAction(
+        promptSuggestionAction,
+        snapshot.data.messages,
+        promptSuggestionLifecycleHandlers,
+      );
       // The post-turn review trigger (M2-13): fire-and-forget; the server
       // decides whether enough new conversation accumulated to review.
       const sessionId = snapshot.session?.sessionId;
@@ -413,17 +624,6 @@ export function ChatClient({
           void sendRef.current?.({ message });
         }, 0);
       }
-      // A stall auto-stop is nobody's Stop and no error: the stream
-      // died silently while the durable turn kept working server-side
-      // (the Vega worksheet, 2026-07-13: watchdog at 225s, reply and
-      // cards finished fine in Postgres). Replay the session so the
-      // reply still lands. Her queued words keep priority; recovery
-      // stands down the moment she sends (sendMessage aborts it).
-      const autoStopped = autoStoppedRef.current;
-      autoStoppedRef.current = false;
-      if (autoStopped && !snapshot.error && queued.length === 0) {
-        startRecoveryRef.current?.();
-      }
     },
   });
   const agentError = agent.error;
@@ -434,6 +634,24 @@ export function ChatClient({
   useEffect(() => {
     sendRef.current = agentSend;
   }, [agentSend]);
+
+  useEffect(() => {
+    if (
+      prepared.promptSuggestions !== null
+      && restoredPromptSuggestionSet === null
+    ) {
+      updateSavedPromptSuggestionSet(storageKey, null);
+    }
+  }, [prepared.promptSuggestions, restoredPromptSuggestionSet, storageKey]);
+
+  useEffect(() => {
+    return () => {
+      promptSuggestionAbortRef.current?.abort();
+      if (promptSuggestionLoadingTimerRef.current !== null) {
+        clearTimeout(promptSuggestionLoadingTimerRef.current);
+      }
+    };
+  }, []);
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -521,6 +739,13 @@ export function ChatClient({
   const startLostTurnRecovery = useCallback(() => {
     const lastSend = lastSendRef.current;
     if (!lastSend || recoveryRef.current) return;
+    executePromptSuggestionLifecycleAction(
+      promptSuggestionActionForLifecycleEvent({
+        type: "recovery_started",
+      }),
+      null,
+      promptSuggestionLifecycleHandlers,
+    );
     const controller = new AbortController();
     recoveryRef.current = controller;
     const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
@@ -540,6 +765,14 @@ export function ChatClient({
       clearTimeout(deadline);
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
+        executePromptSuggestionLifecycleAction(
+          promptSuggestionActionForLifecycleEvent({
+            type: "recovery_finished",
+            outcome: "aborted",
+          }),
+          null,
+          promptSuggestionLifecycleHandlers,
+        );
         setRecovering(false);
         return;
       }
@@ -566,10 +799,33 @@ export function ChatClient({
         agentReset();
         durableCursorRef.current = 0;
         lastSendRef.current = null;
+        executePromptSuggestionLifecycleAction(
+          promptSuggestionActionForLifecycleEvent({
+            type: "recovery_finished",
+            outcome: "recovered",
+          }),
+          messages,
+          promptSuggestionLifecycleHandlers,
+        );
+      } else {
+        executePromptSuggestionLifecycleAction(
+          promptSuggestionActionForLifecycleEvent({
+            type: "recovery_finished",
+            outcome: "failed",
+          }),
+          null,
+          promptSuggestionLifecycleHandlers,
+        );
       }
       setRecovering(false);
     })();
-  }, [agentReset, liveTimes, storageKey, supabase]);
+  }, [
+    agentReset,
+    liveTimes,
+    promptSuggestionLifecycleHandlers,
+    storageKey,
+    supabase,
+  ]);
 
   useEffect(() => {
     startRecoveryRef.current = startLostTurnRecovery;
@@ -654,6 +910,24 @@ export function ChatClient({
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
   const activeSnap = busy ? null : latestSnapRequest(agent.data.messages);
+  const promptSuggestionRailAllowed =
+    !busy
+    && !recovering
+    && promptSuggestionPhase !== "idle"
+    && progressInteraction === null
+    && activeSnap === null
+    && draft.trim().length === 0
+    && attachments.staged.length === 0
+    && dictation.phase === "idle";
+  const showPromptSuggestionRail =
+    promptSuggestionRailAllowed
+    && (
+      promptSuggestionPhase === "loading"
+      || (
+        promptSuggestionPhase === "ready"
+        && (promptSuggestionSet?.suggestions.length ?? 0) > 0
+      )
+    );
 
   useEffect(() => {
     // First paint lands at the bottom instantly (yesterday above the
@@ -767,6 +1041,7 @@ export function ChatClient({
       setWallOpen(true);
       return "rejected";
     }
+    clearPromptSuggestionState();
     if (plan.resetDraftFromVoice) draftFromVoiceRef.current = false;
     if (plan.clearDraft) setDraft("");
     // Sending mid-turn queues instead of refusing (texting model,
@@ -801,6 +1076,15 @@ export function ChatClient({
     markTurnStarted();
     void agent.send({ message: outgoing });
     return "sent";
+  }
+
+  function sendPromptSuggestion(index: number, suggestion: string): void {
+    const suggestionSet = promptSuggestionSet;
+    if (suggestionSet?.suggestions[index] !== suggestion) return;
+    const result = sendMessage(suggestion);
+    if (result === "rejected") return;
+    suggestionSetIdForTurnRef.current = suggestionSet.setId;
+    void emitPromptSuggestionTapped(suggestionSet, index);
   }
 
   /**
@@ -843,6 +1127,7 @@ export function ChatClient({
           [summary]: prepared.receipts,
         }));
       }
+      clearPromptSuggestionState();
       setDraft("");
       draftFromVoiceRef.current = false;
       attachments.clear();
@@ -1118,21 +1403,33 @@ export function ChatClient({
             ))}
           </div>
         ) : null}
-        <form
-          ref={composerFormRef}
-          className="mx-auto w-full max-w-[780px] rounded-[22px] border border-border-subtle bg-card px-3 pb-2 pt-2.5 shadow-md transition-shadow focus-within:ring-2 focus-within:ring-brand/30"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (attachments.readyCount > 0) {
-              // Enter can submit past a disabled button; the same guard
-              // the button uses holds here.
-              if (busy || attachments.anyUploading || preparingAttachments) return;
-              void sendMessageWithAttachments(draft);
-            } else {
-              sendMessage(draft);
-            }
-          }}
-        >
+        <div className="mx-auto w-full max-w-[780px] rounded-[22px] shadow-md">
+          {showPromptSuggestionRail ? (
+            <PromptSuggestionRail
+              phase={promptSuggestionPhase}
+              suggestions={promptSuggestionSet?.suggestions ?? []}
+              onSelect={sendPromptSuggestion}
+            />
+          ) : null}
+          <form
+            ref={composerFormRef}
+            className={`w-full border border-border-subtle bg-card px-3 pb-2 pt-2.5 transition-shadow focus-within:ring-2 focus-within:ring-brand/30 ${
+              showPromptSuggestionRail
+                ? "-mt-px rounded-b-[22px] rounded-t-none"
+                : "rounded-[22px]"
+            }`}
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (attachments.readyCount > 0) {
+                // Enter can submit past a disabled button; the same guard
+                // the button uses holds here.
+                if (busy || attachments.anyUploading || preparingAttachments) return;
+                void sendMessageWithAttachments(draft);
+              } else {
+                sendMessage(draft);
+              }
+            }}
+          >
           <PendingAttachmentChips
             staged={attachments.staged}
             onRemove={attachments.remove}
@@ -1236,7 +1533,8 @@ export function ChatClient({
               </button>
             )}
           </div>
-        </form>
+          </form>
+        </div>
         {attachError ? (
           <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-danger" role="alert">
             {attachError}

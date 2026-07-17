@@ -15,6 +15,7 @@ homa-research/
 # ── Scratch output from scripts ─────────────────────────────────────────────
 .eve-upgrade-check.log
 supabase/.temp/
+.context/compound-engineering/ce-optimize/prompt-suggestions/iteration-*-diagnostics.json
 
 # ── Junk ────────────────────────────────────────────────────────────────────
 .DS_Store

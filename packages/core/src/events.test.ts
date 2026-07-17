@@ -205,3 +205,100 @@ test("progress events reject PII and operation identifiers", () => {
     }
   }
 });
+
+const SUGGESTION_SET_ID = "00000000-0000-4000-8000-000000000003";
+
+const validPromptSuggestionsShownEvent = {
+  suggestion_set_id: SUGGESTION_SET_ID,
+  prompt_version: "2026.07.15.1",
+  source: "model",
+  count: 2,
+  latency_ms: 1480,
+} as const;
+
+const validPromptSuggestionTappedEvent = {
+  suggestion_set_id: SUGGESTION_SET_ID,
+  prompt_version: "2026.07.15.1",
+  source: "model",
+  position: 1,
+} as const;
+
+test("prompt suggestion measurement accepts exact content-free shapes", () => {
+  assert.deepEqual(
+    EVENT_SCHEMAS["chat.prompt_suggestions_shown"].parse(
+      validPromptSuggestionsShownEvent,
+    ),
+    validPromptSuggestionsShownEvent,
+  );
+  assert.deepEqual(
+    EVENT_SCHEMAS["chat.prompt_suggestion_tapped"].parse(
+      validPromptSuggestionTappedEvent,
+    ),
+    validPromptSuggestionTappedEvent,
+  );
+});
+
+test("prompt suggestion measurement enforces count and position bounds", () => {
+  for (const count of [0, 3]) {
+    assert.equal(
+      EVENT_SCHEMAS["chat.prompt_suggestions_shown"].safeParse({
+        ...validPromptSuggestionsShownEvent,
+        count,
+      }).success,
+      false,
+    );
+  }
+  assert.equal(
+    EVENT_SCHEMAS["chat.prompt_suggestion_tapped"].safeParse({
+      ...validPromptSuggestionTappedEvent,
+      position: 2,
+    }).success,
+    false,
+  );
+});
+
+test("prompt suggestion measurement rejects suggestion and conversation content", () => {
+  assert.equal(
+    EVENT_SCHEMAS["chat.prompt_suggestions_shown"].safeParse({
+      ...validPromptSuggestionsShownEvent,
+      suggestion_text: "Email the worksheet",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["chat.prompt_suggestion_tapped"].safeParse({
+      ...validPromptSuggestionTappedEvent,
+      conversation: "private conversation text",
+    }).success,
+    false,
+  );
+});
+
+test("completed chat turns accept an optional suggestion set correlation", () => {
+  const completedTurn = {
+    status: "ok",
+    modality: "text",
+    latency_ms: 1480,
+    model_tier: "fast",
+    tool_calls: 0,
+  } as const;
+
+  assert.equal(
+    EVENT_SCHEMAS["chat.turn_completed"].safeParse(completedTurn).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["chat.turn_completed"].safeParse({
+      ...completedTurn,
+      suggestion_set_id: SUGGESTION_SET_ID,
+    }).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["chat.turn_completed"].safeParse({
+      ...completedTurn,
+      suggestion_set_id: "not-a-uuid",
+    }).success,
+    false,
+  );
+});
