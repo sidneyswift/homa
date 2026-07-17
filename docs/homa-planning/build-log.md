@@ -3,6 +3,27 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-17 · Morning research brief v2 clears pre-merge rollout gates
+
+The additive `morning_research_brief_v2` migration was applied to `homa-prod`
+and recorded as version `20260717125607`. The three new tables exist with RLS
+enabled, existing task runs default to the legacy delivery version, and the
+new behavior remains dark because neither exact v2 environment flag exists.
+Post-migration security and performance advisors added no unexpected
+feature-specific warning beyond the intended server-only RLS posture.
+
+GitHub CI rerun `29581795980` passed after the schema landed, including the
+remote tenancy isolation smoke check and disposable continuity E2E. The latest
+preview deployment for commit `9f153a3` reached READY. Authenticated preview
+probes returned HTTP 200 for the landing and sample pages, and dispatch health
+returned `{"ok":true}`.
+
+The credentialed craft-only research-brief evaluation passed all 12 current
+fixtures after its judge and prompt were tightened against causal child
+outcomes and unsupported CTA examples. This is pre-merge evidence only.
+Production code has not been merged or deployed, corpus rows have not been
+refreshed for v2, and neither sandbox nor fleet flags have been enabled.
+
 ## 2026-07-17 · "Emoji only" worksheet report investigated; two prod bugs fixed on the way
 
 Founder relayed a user report that her worksheets were "emoji only" and asked

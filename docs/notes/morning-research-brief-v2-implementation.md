@@ -319,3 +319,15 @@ No remote or git mutation occurred.
   Run now throttle.
 
 No remote or git mutation occurred.
+
+## 2026-07-17 · Pre-merge rollout evidence
+
+The feature commit was rebased onto current main without a force push. The
+additive production migration is recorded as `20260717125607`. A CI rerun
+passed after migration, including remote isolation and continuity E2E. Preview
+commit `9f153a3` reached READY and passed landing, sample, and dispatch-health
+probes.
+
+The OIDC-authenticated paid craft evaluation passed all twelve current
+fixtures. Production code is still unmerged and the v2 flags remain absent,
+so this evidence does not claim a production behavior change.
