@@ -50,6 +50,53 @@ export interface ResearchRunSnapshot {
   rows: ResearchKnowledgeRow[];
 }
 
+/**
+ * Identifies the one polling failure that really means the configured
+ * deadline expired. Other exceptions are infrastructure or query failures.
+ */
+export class ResearchRunWaitTimeoutError extends Error {
+  constructor(
+    readonly runCount: number,
+    readonly timeoutMs: number,
+  ) {
+    super(
+      `Timed out waiting for ${runCount} research run(s) after ${timeoutMs}ms.`,
+    );
+    this.name = "ResearchRunWaitTimeoutError";
+  }
+}
+
+export interface ResearchWaitFailureDescription {
+  kind: "timeout" | "polling";
+  cancellationReason: string;
+  reportAction: "timed out" | "polling failed";
+  detail: string;
+}
+
+/**
+ * Converts a caught wait failure into the durable cancellation receipt and
+ * report language. Only the typed deadline error may be called a timeout.
+ */
+export function describeResearchWaitFailure(
+  error: unknown,
+): ResearchWaitFailureDescription {
+  const detail = error instanceof Error ? error.message : "unknown";
+  if (error instanceof ResearchRunWaitTimeoutError) {
+    return {
+      kind: "timeout",
+      cancellationReason: `cancelled by condensed research lab after ${error.timeoutMs / 60_000} minute timeout`,
+      reportAction: "timed out",
+      detail,
+    };
+  }
+  return {
+    kind: "polling",
+    cancellationReason: `cancelled by condensed research lab because polling failed: ${detail}`,
+    reportAction: "polling failed",
+    detail,
+  };
+}
+
 let databasePromise: Promise<Sql> | null = null;
 
 function isLocalServiceUrl(value: string): boolean {
@@ -223,8 +270,9 @@ export async function waitForResearchRuns(
       return runs;
     }
     if (Date.now() >= deadline) {
-      throw new Error(
-        `Timed out waiting for ${runIds.length} research run(s) after ${options.timeoutMs ?? 20 * 60_000}ms.`,
+      throw new ResearchRunWaitTimeoutError(
+        runIds.length,
+        options.timeoutMs ?? 20 * 60_000,
       );
     }
     await new Promise((resolve) => setTimeout(resolve, pollMs));
@@ -232,10 +280,10 @@ export async function waitForResearchRuns(
 }
 
 /**
- * Stop accepting output from timed-out lab sessions. The model runtime
- * may still finish later, so the save gate also checks that its run row
- * is still running before it writes. Marking the row failed is therefore
- * the durable cancellation signal, not merely display bookkeeping.
+ * Stop accepting output when a lab can no longer observe a session, whether
+ * its deadline expired or polling failed. The model runtime may still finish
+ * later, so the save gate also checks that its run row is still running before
+ * it writes. Marking the row failed is the durable cancellation signal.
  */
 export async function cancelResearchRuns(
   runIds: string[],

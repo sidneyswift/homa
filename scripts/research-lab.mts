@@ -40,6 +40,7 @@ const {
   assertResearchTargetsCompatible,
   cancelResearchRuns,
   closeResearchDatabase,
+  describeResearchWaitFailure,
   loadResearchRuns,
   revertResearchRuns,
   triggerResearch,
@@ -415,13 +416,14 @@ async function main(): Promise<void> {
         },
       });
     } catch (error) {
+      const failure = describeResearchWaitFailure(error);
       const cancelled = await cancelResearchRuns(
         runIds,
-        `cancelled by condensed research lab after ${timeoutMinutes} minute timeout`,
+        failure.cancellationReason,
       );
       runs = await loadResearchRuns(runIds);
       executionErrors.push(
-        `round ${round} timed out and cancelled ${cancelled} still-running session(s): ${error instanceof Error ? error.message : "unknown"}`,
+        `round ${round} ${failure.reportAction} and cancelled ${cancelled} still-running session(s): ${failure.detail}`,
       );
       completedRounds.push(runs);
       break roundLoop;
