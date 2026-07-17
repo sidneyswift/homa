@@ -67,7 +67,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
     id: "practice",
     title: "Practice pages",
     body:
-      "Homa makes practice pages for the skill your child is working on. Each page can use what they love and stays in the binder for printing.",
+      "Homa makes practice pages for the lesson your child is working on. Each page can use what they love and stays in the binder for printing.",
   },
   {
     id: "binder",
