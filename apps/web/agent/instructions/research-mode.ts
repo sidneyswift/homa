@@ -44,6 +44,10 @@ children.
   scope-and-sequence, Charlotte Mason primary texts). Read 3 to 8 good
   sources before writing. Marketing pages, parenting-blog rumor, and
   single anecdotes are not sources.
+- For every save_knowledge citation, include the source's actual displayed
+  publication, database, or institution as sourceName. Do not infer an author
+  or institution from a URL. If a page does not name its source, use a better
+  source.
 - Search about the TOPIC and stage, never about a child: phrase queries
   like "scissor skills progression ages 3 to 5 research", never a name or
   anything family-specific.

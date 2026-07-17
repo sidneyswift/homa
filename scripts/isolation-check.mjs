@@ -41,7 +41,9 @@ if (!url || !key) {
 const failures = [];
 const coveredTables = new Set();
 const fixtureFamilyIds = [];
+const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
+let morningResearchBriefV2SchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -386,7 +388,24 @@ async function childProgressSchemaExists() {
   return rows[0]?.table_count === 10;
 }
 
-async function expectPrivilegedSqlRejected(label, operation) {
+async function morningResearchBriefV2SchemaExists() {
+  const rows = await sql`
+    select count(*)::integer as table_count
+    from unnest(array[
+      'public.research_brief_preparations',
+      'public.family_knowledge_use',
+      'public.research_brief_feedback'
+    ]) as expected(table_name)
+    where to_regclass(expected.table_name) is not null
+  `;
+  return rows[0]?.table_count === 3;
+}
+
+async function expectPrivilegedSqlRejected(
+  label,
+  operation,
+  expectedCode = null,
+) {
   const acceptedSentinel = `constraint probe accepted: ${label}`;
   try {
     await sql.begin(async (transaction) => {
@@ -402,10 +421,9 @@ async function expectPrivilegedSqlRejected(label, operation) {
     const code = typeof error === "object" && error !== null && "code" in error
       ? String(error.code)
       : "unknown";
-    const expectedConstraintCode =
-      code === "23503"
-      || code === "23505"
-      || code === "23514";
+    const expectedConstraintCode = expectedCode === null
+      ? code === "23503" || code === "23505" || code === "23514"
+      : code === expectedCode;
     const message =
       error instanceof Error ? error.message.replace(/\s+/gu, " ") : "unknown";
     report(
@@ -427,6 +445,266 @@ async function insertFixtureFamilyMember(familyId, userId, label) {
   if (rows[0]?.user_id !== userId) {
     throw new Error(`${label} returned no member user id`);
   }
+}
+
+async function expectMorningResearchBriefV2Isolation(context) {
+  const [knowledge] = await sql`
+    insert into public.knowledge_bank (
+      topic_type,
+      topic_key,
+      title,
+      summary,
+      content,
+      citations,
+      confidence,
+      contributed_by,
+      status
+    )
+    values (
+      'study',
+      'isolation-morning-brief',
+      'Isolation morning brief source',
+      'A fixture used only to verify morning brief tenant isolation.',
+      'This fixture carries enough content to satisfy the knowledge bank contract.',
+      '[]'::jsonb,
+      'high',
+      'founder',
+      'active'
+    )
+    returning id
+  `;
+  fixtureKnowledgeIds.push(knowledge.id);
+  const taskRuns = await sql`
+    insert into public.homa_task_runs (
+      family_id,
+      kind,
+      status,
+      title
+    )
+    values
+      (
+        ${context.familyBId},
+        'morning_brief',
+        'done',
+        'Isolation morning brief'
+      ),
+      (
+        ${context.familyBId},
+        'morning_brief',
+        'done',
+        'Isolation morning brief write probe'
+      )
+    returning id
+  `;
+  const fixtureTaskRunId = taskRuns[0].id;
+  const writeProbeTaskRunId = taskRuns[1].id;
+  await sql`
+    insert into public.research_brief_preparations (
+      task_run_id,
+      family_id,
+      child_id,
+      knowledge_bank_id,
+      draft,
+      draft_hash,
+      source_snapshot,
+      prepared_at,
+      delivered_at
+    )
+    values (
+      ${fixtureTaskRunId},
+      ${context.familyBId},
+      ${context.childBId},
+      ${knowledge.id},
+      'Isolation prepared brief.',
+      ${"a".repeat(64)},
+      '{"title":"Isolation source"}'::jsonb,
+      now(),
+      now()
+    )
+  `;
+  const [knowledgeUse] = await sql`
+    insert into public.family_knowledge_use (
+      family_id,
+      knowledge_bank_id,
+      task_run_id,
+      used_at
+    )
+    values (
+      ${context.familyBId},
+      ${knowledge.id},
+      ${fixtureTaskRunId},
+      now()
+    )
+    returning id
+  `;
+  const [feedback] = await sql`
+    insert into public.research_brief_feedback (
+      family_id,
+      task_run_id,
+      member_user_id,
+      signal,
+      created_at,
+      updated_at
+    )
+    values (
+      ${context.familyBId},
+      ${fixtureTaskRunId},
+      ${context.familyBUserId},
+      'helpful',
+      now(),
+      now()
+    )
+    returning id
+  `;
+
+  await expectAuthenticatedRead(
+    context.familyBAccessToken,
+    "research_brief_feedback",
+    fixtureTaskRunId,
+    1,
+    "auth member can read own family research brief feedback",
+    "task_run_id",
+  );
+  await expectAuthenticatedRead(
+    context.familyAAccessToken,
+    "research_brief_feedback",
+    fixtureTaskRunId,
+    0,
+    "auth member cannot read another family's research brief feedback",
+    "task_run_id",
+  );
+
+  const writeFixtures = [
+    {
+      table: "research_brief_preparations",
+      label: "research brief preparation",
+      keyColumn: "task_run_id",
+      keyValue: fixtureTaskRunId,
+      insertRow: {
+        task_run_id: writeProbeTaskRunId,
+        family_id: context.familyBId,
+        child_id: context.childBId,
+        knowledge_bank_id: knowledge.id,
+        draft: "Authenticated clients must not prepare briefs.",
+        draft_hash: "b".repeat(64),
+        source_snapshot: { title: "Forged source" },
+        prepared_at: new Date().toISOString(),
+      },
+      updateRow: { draft: "Authenticated clients must not edit briefs." },
+    },
+    {
+      table: "family_knowledge_use",
+      label: "family knowledge use",
+      keyColumn: "id",
+      keyValue: knowledgeUse.id,
+      insertRow: {
+        family_id: context.familyBId,
+        knowledge_bank_id: knowledge.id,
+        task_run_id: writeProbeTaskRunId,
+        used_at: new Date().toISOString(),
+      },
+      updateRow: { used_at: new Date().toISOString() },
+    },
+    {
+      table: "research_brief_feedback",
+      label: "research brief feedback",
+      keyColumn: "id",
+      keyValue: feedback.id,
+      insertRow: {
+        family_id: context.familyBId,
+        task_run_id: writeProbeTaskRunId,
+        member_user_id: context.familyBUserId,
+        signal: "not_for_us",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      updateRow: {
+        signal: "not_for_us",
+        updated_at: new Date().toISOString(),
+      },
+    },
+  ];
+  for (const fixture of writeFixtures) {
+    await expectAuthenticatedWritesDenied(
+      context.familyBAccessToken,
+      fixture.table,
+      fixture,
+      `auth member cannot mutate own ${fixture.label}`,
+    );
+  }
+
+  await expectPrivilegedSqlRejected(
+    "constraint rejects preparation paired with another family's task run",
+    async (transaction) => {
+      await transaction`
+        insert into public.research_brief_preparations (
+          task_run_id,
+          family_id,
+          child_id,
+          knowledge_bank_id,
+          draft,
+          draft_hash,
+          source_snapshot,
+          prepared_at
+        )
+        values (
+          ${writeProbeTaskRunId},
+          ${context.familyAId},
+          ${context.childAId},
+          ${knowledge.id},
+          'Cross-family preparation.',
+          ${"c".repeat(64)},
+          '{}'::jsonb,
+          now()
+        )
+      `;
+    },
+    "23503",
+  );
+  await expectPrivilegedSqlRejected(
+    "constraint rejects knowledge use paired with another family's task run",
+    async (transaction) => {
+      await transaction`
+        insert into public.family_knowledge_use (
+          family_id,
+          knowledge_bank_id,
+          task_run_id,
+          used_at
+        )
+        values (
+          ${context.familyAId},
+          ${knowledge.id},
+          ${writeProbeTaskRunId},
+          now()
+        )
+      `;
+    },
+    "23503",
+  );
+  await expectPrivilegedSqlRejected(
+    "constraint rejects feedback paired with another family's task run",
+    async (transaction) => {
+      await transaction`
+        insert into public.research_brief_feedback (
+          family_id,
+          task_run_id,
+          member_user_id,
+          signal,
+          created_at,
+          updated_at
+        )
+        values (
+          ${context.familyAId},
+          ${writeProbeTaskRunId},
+          ${context.familyAUserId},
+          'helpful',
+          now(),
+          now()
+        )
+      `;
+    },
+    "23503",
+  );
 }
 
 async function insertChildProgressFixtures(
@@ -1615,6 +1893,12 @@ async function cleanupIsolationFixtures() {
     if (fixtureFamilyIds.length > 0) {
       await sql`delete from public.families where id in ${sql(fixtureFamilyIds)}`;
     }
+    if (fixtureKnowledgeIds.length > 0) {
+      await sql`
+        delete from public.knowledge_bank
+        where id in ${sql(fixtureKnowledgeIds)}
+      `;
+    }
     if (fixtureUserIds.length > 0) {
       await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
     }
@@ -1683,12 +1967,30 @@ async function expectAuthenticatedIsolation() {
       "auth member cannot rotate phone access epochs",
     );
 
+    const childAId = await insertFixtureRow(
+      familyAUser,
+      "children",
+      { family_id: familyAId, name: "Isolation A child", birth_month: "2020-01-01" },
+      "create Family A child fixture",
+    );
     const childBId = await insertFixtureRow(
       familyBUser,
       "children",
       { family_id: familyBId, name: "Isolation B child", birth_month: "2020-01-01" },
       "create Family B child fixture",
     );
+    if (morningResearchBriefV2SchemaAvailable) {
+      await expectMorningResearchBriefV2Isolation({
+        childAId,
+        childBId,
+        familyAAccessToken: familyAUser.accessToken,
+        familyAId,
+        familyAUserId: familyAUser.userId,
+        familyBAccessToken: familyBUser.accessToken,
+        familyBId,
+        familyBUserId: familyBUser.userId,
+      });
+    }
     if (!(await childProgressSchemaExists())) {
       throw new Error("ChildProgress migration is not applied to the target");
     }
@@ -2260,6 +2562,16 @@ await expectEmptyRead("homa_task_runs");
 // The fleet research corpus (migration #50): deny-all; only the gate
 // (lib/knowledge/gate.ts) writes, only server code reads.
 await expectReadDenied("knowledge_bank");
+// Morning research brief v2 durable records are server-write-only. Feedback
+// alone is family-readable after authentication; anonymous traffic sees no
+// rows and can never create any of the three records.
+for (const table of [
+  "research_brief_preparations",
+  "family_knowledge_use",
+  "research_brief_feedback",
+]) {
+  await expectAnonymousNoRowsOrDenied(table);
+}
 // Phone-first leads (migration #41): deny-all, server-only.
 await expectReadDenied("phone_leads");
 // Phone-link confirmations (migration #46): deny-all, server-only.
@@ -2382,6 +2694,42 @@ await expectInsertDenied(
     title: "intruder run",
   },
   "anon cannot forge task runs",
+);
+await expectInsertDenied(
+  "research_brief_preparations",
+  {
+    task_run_id: "00000000-0000-0000-0000-000000000000",
+    family_id: "00000000-0000-0000-0000-000000000000",
+    child_id: "00000000-0000-0000-0000-000000000000",
+    knowledge_bank_id: "00000000-0000-0000-0000-000000000000",
+    draft: "Anonymous clients must not prepare research briefs.",
+    draft_hash: "0".repeat(64),
+    source_snapshot: {},
+    prepared_at: new Date().toISOString(),
+  },
+  "anon cannot forge research brief preparations",
+);
+await expectInsertDenied(
+  "family_knowledge_use",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    knowledge_bank_id: "00000000-0000-0000-0000-000000000000",
+    task_run_id: "00000000-0000-0000-0000-000000000000",
+    used_at: new Date().toISOString(),
+  },
+  "anon cannot forge family knowledge use",
+);
+await expectInsertDenied(
+  "research_brief_feedback",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    task_run_id: "00000000-0000-0000-0000-000000000000",
+    member_user_id: "00000000-0000-0000-0000-000000000000",
+    signal: "helpful",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  "anon cannot forge research brief feedback",
 );
 await expectInsertDenied(
   "state_requirements",
@@ -2763,6 +3111,32 @@ await expectInsertDenied(
   { child_id: "00000000-0000-0000-0000-000000000000", subject_id: "math", plan: {}, bank_version: "x" },
   "anon cannot forge product child plans",
 );
+
+if (sql) {
+  try {
+    morningResearchBriefV2SchemaAvailable =
+      await morningResearchBriefV2SchemaExists();
+    report(
+      "morning research brief v2 migration is applied to the isolation target",
+      morningResearchBriefV2SchemaAvailable,
+      morningResearchBriefV2SchemaAvailable
+        ? "all three durable tables exist"
+        : "morning research brief v2 tables are missing",
+    );
+  } catch (error) {
+    report(
+      "morning research brief v2 migration is applied to the isolation target",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+} else {
+  report(
+    "morning research brief v2 migration is applied to the isolation target",
+    false,
+    "missing SUPABASE_DB_PASSWORD",
+  );
+}
 
 await expectAuthenticatedIsolation();
 expectEveryPublicTableCovered();

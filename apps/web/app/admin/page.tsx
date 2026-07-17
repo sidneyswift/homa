@@ -82,6 +82,11 @@ export default async function AdminOverviewPage({
   const emailTroubleCount =
     (data.emailCounts.rejected ?? 0) + (data.emailCounts.bounced ?? 0) + (data.emailCounts.complained ?? 0);
   const cronLate = data.cronLate;
+  const morningPromptOutcomes = data.taskPromptOutcomes.morning_brief;
+  const journalPromptOutcomes = data.taskPromptOutcomes.journal_prompt;
+  const customPromptOutcomes = data.taskPromptOutcomes.custom;
+  const nonBriefPromptsResolved =
+    journalPromptOutcomes.resolvedOffers + customPromptOutcomes.resolvedOffers;
 
   const rangeLabel = rangeDays === 7 ? "this week" : "last 4 weeks";
 
@@ -250,9 +255,37 @@ export default async function AdminOverviewPage({
           subTone={deliveriesFailed > 0 ? "rose" : deliveriesUncertain > 0 ? "gold" : "sage"}
         />
         <Tile
-          label="Replies to sends"
-          value={percent(data.replies, deliveriesSent)}
-          sub={`${data.replies} of ${deliveriesSent} sent`}
+          label="Morning offers sent"
+          value={String(morningPromptOutcomes.sentOffers)}
+          sub="sent deliveries with an offer"
+        />
+        <Tile
+          label="Morning offers resolved"
+          value={String(morningPromptOutcomes.resolvedOffers)}
+          sub={`${morningPromptOutcomes.accepted} accepted · ${morningPromptOutcomes.declined} declined · ${morningPromptOutcomes.answered} answered`}
+        />
+        <Tile
+          label="Morning offer acceptance"
+          value={percent(
+            morningPromptOutcomes.accepted,
+            morningPromptOutcomes.acceptanceDenominator,
+          )}
+          sub={`${morningPromptOutcomes.accepted} accepted of ${morningPromptOutcomes.acceptanceDenominator} accepted or declined`}
+        />
+        <Tile
+          label="Possible interest, not linked"
+          value={String(data.possibleMorningBriefInterest)}
+          sub="same episode, within four hours"
+        />
+        <Tile
+          label="Non-brief task prompts"
+          value={String(nonBriefPromptsResolved)}
+          sub={`${journalPromptOutcomes.resolvedOffers} journal · ${customPromptOutcomes.resolvedOffers} custom`}
+        />
+        <Tile
+          label="Other linked replies"
+          value={String(data.nonTaskReplies)}
+          sub="linked replies without a task run"
         />
         <Tile
           label="Quiet 14d+"

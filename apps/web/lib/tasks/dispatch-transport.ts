@@ -1,0 +1,133 @@
+import {
+  listFamilyDeliveryRecipients,
+  type FamilyDeliveryRecipient,
+} from "../conversation-continuity/delivery-ledger";
+import { buildSignedReplyAddress } from "../conversation-continuity/email-reply-auth";
+import { selectTaskDeliveryRecipients } from "../conversation-continuity/task-recipients";
+import {
+  deliverTaskMessage,
+  postgresTaskDeliveryLedger,
+  type TaskDeliveryLedger,
+  type TaskDeliveryTransports,
+} from "../conversation-continuity/task-delivery";
+import {
+  submitAgentComposedEmail,
+  submitJournalAgentEmail,
+  submitResearchBriefEmail,
+  type HomaEmailSubmission,
+} from "../map/email";
+import { submitHomaSms } from "../voice/telnyx-api";
+import type { TaskDeliveryVersion } from "./delivery-version";
+import type { FamilyTaskKind } from "./kinds";
+
+export interface LiveDispatchTransportInput {
+  familyId: string;
+  episodeId: string;
+  messageId: string;
+  taskRunId: string | null;
+  kind: FamilyTaskKind;
+  text: string;
+  deliveryMode: "text" | "email" | "none";
+  recipientMemberUserId: string | null;
+  label: string | null;
+  deliveryVersion: TaskDeliveryVersion;
+}
+
+export interface DispatchEmailSubmissionInput {
+  kind: FamilyTaskKind;
+  label: string | null;
+  email: string;
+  body: string;
+  replyTo: string | undefined;
+  deliveryVersion: TaskDeliveryVersion;
+}
+
+export interface LiveDispatchTransportDependencies {
+  listRecipients(familyId: string): Promise<FamilyDeliveryRecipient[]>;
+  ledger: TaskDeliveryLedger;
+  sendSms: TaskDeliveryTransports["sendSms"];
+  sendEmail(
+    input: DispatchEmailSubmissionInput,
+  ): ReturnType<TaskDeliveryTransports["sendEmail"]>;
+  inboundSecret: string | undefined;
+}
+
+export async function submitDispatchTaskEmail(
+  input: DispatchEmailSubmissionInput,
+): Promise<HomaEmailSubmission> {
+  switch (input.kind) {
+    case "journal_prompt":
+      return await submitJournalAgentEmail(
+        input.email,
+        input.body,
+        input.replyTo,
+      );
+    case "morning_brief":
+      return await submitResearchBriefEmail(
+        input.email,
+        input.body,
+        input.replyTo,
+        input.deliveryVersion,
+      );
+    case "custom":
+      return await submitAgentComposedEmail(
+        input.email,
+        input.label ?? "From Homa",
+        [input.body],
+        input.replyTo,
+      );
+    default: {
+      const exhaustive: never = input.kind;
+      throw new Error(`unhandled task email kind: ${String(exhaustive)}`);
+    }
+  }
+}
+
+export async function deliverLiveDispatchTask(
+  input: LiveDispatchTransportInput,
+  dependencies: LiveDispatchTransportDependencies = {
+    listRecipients: listFamilyDeliveryRecipients,
+    ledger: postgresTaskDeliveryLedger,
+    sendSms: submitHomaSms,
+    sendEmail: submitDispatchTaskEmail,
+    inboundSecret: process.env.RESEND_INBOUND_SECRET,
+  },
+  onTransportAccepted?: (channel: "sms" | "email" | "none") => void,
+) {
+  const recipients = selectTaskDeliveryRecipients(
+    await dependencies.listRecipients(input.familyId),
+    input.recipientMemberUserId,
+  );
+  return await deliverTaskMessage(
+    {
+      familyId: input.familyId,
+      episodeId: input.episodeId,
+      messageId: input.messageId,
+      taskRunId: input.taskRunId,
+      kind: input.kind,
+      text: input.text,
+      recipients,
+      deliveryMode: input.deliveryMode,
+    },
+    {
+      ledger: dependencies.ledger,
+      transports: {
+        sendSms: dependencies.sendSms,
+        sendEmail: async (email, body, attempt) => {
+          const replyTo = dependencies.inboundSecret
+            ? buildSignedReplyAddress(attempt.id, dependencies.inboundSecret)
+            : undefined;
+          return await dependencies.sendEmail({
+            kind: input.kind,
+            label: input.label,
+            email,
+            body,
+            replyTo,
+            deliveryVersion: input.deliveryVersion,
+          });
+        },
+      },
+      onTransportAccepted,
+    },
+  );
+}

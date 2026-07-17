@@ -1,43 +1,42 @@
 import { defineChannel, GET, POST } from "eve/channels";
 
 import {
-  listFamilyDeliveryRecipients,
   setTaskRunRuntimeSession,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { dispatchContinuationToken } from "../../lib/conversation-continuity/dispatch-session-token";
-import { selectTaskDeliveryRecipients } from "../../lib/conversation-continuity/task-recipients";
-import { buildSignedReplyAddress } from "../../lib/conversation-continuity/email-reply-auth";
 import {
   createProactiveEpisode,
-  markCanonicalMessageDelivered,
   persistCanonicalMessage,
 } from "../../lib/conversation-continuity/ledger";
-import {
-  deliverTaskMessage,
-  postgresTaskDeliveryLedger,
-} from "../../lib/conversation-continuity/task-delivery";
-import {
-  submitAgentComposedEmail,
-  submitJournalAgentEmail,
-  submitResearchBriefEmail,
-  type HomaEmailSubmission,
-} from "../../lib/map/email";
 import { mapDb } from "../../lib/map/db";
-import { emitMapEvent } from "../../lib/map/events";
 import {
-  buildDispatchAuth,
-  buildDispatchTarget,
+  operationalDiagnostic,
+  type OperationalPhase,
+} from "../../lib/operational-diagnostics";
+import {
   buildTaskMessage,
 } from "../../lib/tasks/dispatch-input";
+import { deliverLiveDispatchTask } from "../../lib/tasks/dispatch-transport";
+import { startManualTaskDispatch } from "../../lib/tasks/manual-dispatch";
+import {
+  isPreparedResearchBriefTerminalMessage,
+} from "../../lib/tasks/research-brief-delivery";
 import {
   beginManualTaskRun,
   finishTaskRun,
+  finishTaskRunFromDurableDeliveries,
   hasRunningTaskRun,
   loadFamilyTaskForRun,
   markTaskRunDelivered,
 } from "../../lib/tasks/store";
+import type { TaskDeliveryVersion } from "../../lib/tasks/delivery-version";
 import { type FamilyTaskKind } from "../../lib/tasks/kinds";
-import { submitHomaSms } from "../../lib/voice/telnyx-api";
+import {
+  deliverResearchBriefDispatch,
+  handleResearchBriefDispatchTerminalEvent,
+  usesResearchBriefV2Dispatch,
+  type ResearchBriefDispatchState,
+} from "../research-brief-dispatch";
 
 /**
  * The proactive channel (gateway-plan GW-4, generalized by HT-1): where
@@ -70,21 +69,12 @@ import { submitHomaSms } from "../../lib/voice/telnyx-api";
  * membership, and every query re-scopes taskId by it.
  */
 
-interface DispatchState {
-  familyId: string | null;
+interface DispatchState extends ResearchBriefDispatchState {
   /** Every linked number (multi-parent v0: one per adult). A text task
    * goes to each of them; one landing counts as delivered. */
   phoneNumbers: string[];
   email: string | null;
-  runId: string | null;
-  episodeId: string | null;
-  kind: FamilyTaskKind;
-  deliveryPref: "text" | "email" | "none";
   label: string | null;
-  /** The one adult this task delivers to (founder ruling 2026-07-12);
-   * null falls back to the account owner at delivery time. */
-  recipientMemberUserId: string | null;
-  delivered: boolean;
 }
 
 interface DispatchTargetInput {
@@ -97,6 +87,7 @@ interface DispatchTargetInput {
   deliveryPref?: "text" | "email" | "none";
   label?: string | null;
   recipientMemberUserId?: string | null;
+  deliveryVersion?: TaskDeliveryVersion;
 }
 
 /** One session identity and state per run, shared by the receive hook
@@ -122,36 +113,12 @@ function dispatchSendOptions(target: DispatchTargetInput) {
       deliveryPref: target.deliveryPref ?? "text",
       label: target.label ?? null,
       recipientMemberUserId: target.recipientMemberUserId ?? null,
+      deliveryVersion: target.deliveryVersion ?? "legacy",
+      transportAccepted: false,
       delivered: false,
     } satisfies DispatchState,
     title: `${kind} ${target.familyId ?? ""}`.trim(),
   };
-}
-
-async function sendTaskEmail(
-  kind: FamilyTaskKind,
-  label: string | null,
-  email: string,
-  text: string,
-  replyTo?: string,
-): Promise<HomaEmailSubmission> {
-  switch (kind) {
-    case "journal_prompt":
-      return await submitJournalAgentEmail(email, text, replyTo);
-    case "morning_brief":
-      return await submitResearchBriefEmail(email, text, replyTo);
-    case "custom":
-      return await submitAgentComposedEmail(
-        email,
-        label ?? "From Homa",
-        [text],
-        replyTo,
-      );
-    default: {
-      const exhaustive: never = kind;
-      throw new Error(`unhandled task email kind: ${String(exhaustive)}`);
-    }
-  }
 }
 
 export default defineChannel({
@@ -165,6 +132,8 @@ export default defineChannel({
     deliveryPref: "text",
     label: null,
     recipientMemberUserId: null,
+    deliveryVersion: "legacy",
+    transportAccepted: false,
     delivered: false,
   } as DispatchState,
 
@@ -194,9 +163,16 @@ export default defineChannel({
         sequence: number;
         turnId?: string;
       };
-      if (data.finishReason !== "stop" || !data.message?.trim()) return;
+      const preparedDelivery = usesResearchBriefV2Dispatch(
+        channel.state.kind,
+        channel.state.deliveryVersion,
+      );
+      if (preparedDelivery) {
+        if (!isPreparedResearchBriefTerminalMessage(data)) return;
+      } else if (data.finishReason !== "stop" || !data.message?.trim()) {
+        return;
+      }
       if (channel.state.delivered) return;
-      const text = data.message.trim();
       const {
         familyId,
         runId,
@@ -208,6 +184,19 @@ export default defineChannel({
       } = channel.state;
       if (!familyId) return;
 
+      if (preparedDelivery) {
+        await deliverResearchBriefDispatch({
+          state: channel.state,
+          authAttributes: ctx.session.auth.current?.attributes,
+          sessionId: ctx.session.id,
+          sequence: data.sequence,
+          turnId: data.turnId,
+        });
+        return;
+      }
+      const text = data.message?.trim() ?? "";
+
+      let deliveryPhase: OperationalPhase = "canonical_persist";
       try {
         const message = await persistCanonicalMessage({
           attributes: ctx.session.auth.current?.attributes,
@@ -221,102 +210,83 @@ export default defineChannel({
         if (!message || !episodeId) {
           throw new Error("dispatch message could not enter the continuity ledger");
         }
-        // Task texts reach ONE adult: the task's own recipient, or the
-        // account owner on legacy rows (founder ruling 2026-07-12).
-        // Invited co-parents are never auto-subscribed.
-        const recipients = selectTaskDeliveryRecipients(
-          await listFamilyDeliveryRecipients(familyId),
+        deliveryPhase = "transport";
+        const delivery = await deliverLiveDispatchTask({
+          familyId,
+          episodeId,
+          messageId: message.id,
+          taskRunId: runId,
+          kind,
+          text,
+          deliveryMode: deliveryPref,
           recipientMemberUserId,
-        );
-        const delivery = await deliverTaskMessage(
-          {
-            familyId,
-            episodeId,
-            messageId: message.id,
-            taskRunId: runId,
-            kind,
-            text,
-            recipients,
-            deliveryMode: deliveryPref,
-          },
-          {
-            ledger: postgresTaskDeliveryLedger,
-            transports: {
-              sendSms: submitHomaSms,
-              sendEmail: async (email, body, attempt) => {
-                const secret = process.env.RESEND_INBOUND_SECRET;
-                const replyTo = secret
-                  ? buildSignedReplyAddress(attempt.id, secret)
-                  : undefined;
-                return await sendTaskEmail(
-                  kind,
-                  label,
-                  email,
-                  body,
-                  replyTo,
-                );
-              },
-            },
-          },
-        );
-        channel.state.delivered = delivery.deliveredCount > 0;
-        if (delivery.deliveredCount > 0) {
-          await markCanonicalMessageDelivered({
-            familyId,
-            messageId: message.id,
+          label,
+          deliveryVersion: channel.state.deliveryVersion,
+        });
+        deliveryPhase = "finalization";
+        const saveOnlyAccepted =
+          delivery.deliveredCount > 0 &&
+          delivery.deliveredChannel === "none";
+        if (runId && saveOnlyAccepted) {
+          await markTaskRunDelivered(runId, {
+            summary: text,
+            channel: "none",
           });
         }
-
-        if (runId) {
-          if (delivery.status !== "failed") {
-            await markTaskRunDelivered(runId, {
+        const durableResult = runId
+          ? await finishTaskRunFromDurableDeliveries({
+              runId,
+              familyId,
+              kind,
               summary: text,
-              channel: delivery.deliveredChannel,
-            });
-          }
-          await finishTaskRun(runId, {
-            familyId,
-            kind,
-            status: delivery.status,
-            sessionId: ctx.session.id,
-            ...(delivery.status === "failed"
-              ? { error: "delivery failed for every intended recipient" }
-              : {}),
-          });
-        }
+              sessionId: ctx.session.id,
+              saveOnlyAccepted,
+              canonicalMessageId: message.id,
+            })
+          : { finished: true as const, delivery };
+        if (!durableResult.finished) return;
+        const durableDelivery = durableResult.delivery;
+        channel.state.delivered = durableDelivery.deliveredCount > 0;
 
-        if (kind === "journal_prompt" && delivery.deliveredCount > 0) {
+        if (
+          kind === "journal_prompt" &&
+          durableDelivery.deliveredCount > 0
+        ) {
           const sql = mapDb();
           await sql`
             update public.families set journal_prompt_last_sent_at = now()
             where id = ${familyId}
           `;
-          if (
-            delivery.deliveredChannel === "sms" ||
-            delivery.deliveredChannel === "email"
-          ) {
-            await emitMapEvent("journal.prompt_sent", {
-              family_id: familyId,
-              channel: delivery.deliveredChannel,
-            });
-          }
-        } else if (
-          kind === "morning_brief" &&
-          delivery.deliveredCount > 0 &&
-          (delivery.deliveredChannel === "sms" ||
-            delivery.deliveredChannel === "email")
-        ) {
-          await emitMapEvent("research.brief_sent", {
-            family_id: familyId,
-            channel: delivery.deliveredChannel,
-          });
         }
-      } catch (error) {
+      } catch {
         console.error(
-          "dispatch delivery failed:",
-          error instanceof Error ? error.message : "unknown",
+          operationalDiagnostic(
+            "dispatch",
+            deliveryPhase,
+            "failed",
+          ),
         );
       }
+    },
+    async "turn.completed"(_eventData, channel, ctx) {
+      await handleResearchBriefDispatchTerminalEvent({
+        eventType: "turn.completed",
+        state: channel.state,
+        sessionId: ctx.session.id,
+      });
+    },
+    async "turn.failed"(_eventData, channel, ctx) {
+      await handleResearchBriefDispatchTerminalEvent({
+        eventType: "turn.failed",
+        state: channel.state,
+        sessionId: ctx.session.id,
+      });
+    },
+    async "session.failed"(_eventData, channel) {
+      await handleResearchBriefDispatchTerminalEvent({
+        eventType: "session.failed",
+        state: channel.state,
+      });
     },
   },
 
@@ -368,33 +338,28 @@ export default defineChannel({
         );
       }
 
-      // Build the message before the run row exists so a context-load
-      // failure leaves no orphaned 'running' row behind.
-      const message = await buildTaskMessage(task, "manual");
-      const runId = await beginManualTaskRun(task);
-      const episodeId = await createProactiveEpisode({ familyId: task.familyId });
-      try {
-        const session = await send(message, {
-          auth: buildDispatchAuth(task, runId, episodeId),
-          ...dispatchSendOptions(buildDispatchTarget(task, runId, episodeId)),
-        });
-        await setTaskRunRuntimeSession(runId, session.id);
-        return Response.json({ ok: true, runId });
-      } catch (error) {
-        await finishTaskRun(runId, {
-          familyId: task.familyId,
-          kind: task.kind,
-          status: "failed",
-          error:
-            error instanceof Error
-              ? error.message.slice(0, 500)
-              : "session startup failed",
-        });
-        return Response.json(
-          { ok: false, note: "Homa couldn't start this run. Try again in a bit." },
-          { status: 502 },
-        );
-      }
+      const result = await startManualTaskDispatch(task, {
+        beginRun: beginManualTaskRun,
+        buildMessage: async (manualTask, deliveryVersion) =>
+          await buildTaskMessage(manualTask, "manual", undefined, {
+            deliveryVersion,
+          }),
+        createEpisode: async (manualTask) =>
+          await createProactiveEpisode({ familyId: manualTask.familyId }),
+        sendSession: async ({ message, auth, target }) =>
+          await send(message, {
+            auth,
+            ...dispatchSendOptions(target),
+          }),
+        setRuntimeSession: setTaskRunRuntimeSession,
+        finishRun: finishTaskRun,
+      });
+      return result.ok
+        ? Response.json(result)
+        : Response.json(
+            { ok: false, note: result.note },
+            { status: result.status },
+          );
     }),
   ],
 });

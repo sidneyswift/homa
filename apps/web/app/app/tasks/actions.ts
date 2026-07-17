@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { z } from "zod";
 
 import { getMyFamily } from "../../../lib/family";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -14,6 +15,10 @@ import {
   type CustomTaskInput,
   type TaskScheduleInput,
 } from "../../../lib/tasks/custom";
+import {
+  isResearchBriefFeedbackSignal,
+} from "../../../lib/tasks/research-brief-feedback";
+import { recordResearchBriefFeedback } from "../../../lib/tasks/research-brief-feedback-server";
 
 /**
  * /app/tasks server actions (HT-5/HT-6). Same posture as the settings
@@ -26,6 +31,8 @@ import {
 export interface TaskActionState {
   error: string | null;
 }
+
+const TASK_RUN_ID_SCHEMA = z.uuid();
 
 async function requireFamilyId(): Promise<string | null> {
   const family = await getMyFamily();
@@ -148,6 +155,35 @@ export async function setTaskPausedAction(
 
   const result = await setTaskPaused(familyId, taskId, paused);
   if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
+}
+
+/** Saves one adult's explicit response to a brief confirmed as delivered. */
+export async function recordResearchBriefFeedbackAction(
+  taskRunId: unknown,
+  signal: unknown,
+): Promise<TaskActionState> {
+  const parsedTaskRunId = TASK_RUN_ID_SCHEMA.safeParse(taskRunId);
+  if (!parsedTaskRunId.success) {
+    return { error: "That brief isn't available for feedback." };
+  }
+  if (!isResearchBriefFeedbackSignal(signal)) {
+    return { error: "That feedback choice isn't available." };
+  }
+
+  const familyId = await requireFamilyId();
+  const memberUserId = await callerUserId();
+  if (!familyId || !memberUserId) return { error: "Set up your family first." };
+
+  const result = await recordResearchBriefFeedback({
+    familyId,
+    taskRunId: parsedTaskRunId.data,
+    memberUserId,
+    signal,
+  });
+  if (!result.accepted) return { error: "That brief isn't available for feedback." };
+
   revalidatePath("/app/tasks");
   return { error: null };
 }

@@ -600,15 +600,18 @@ export const EVENT_SCHEMAS = {
     tool_calls: z.number().int().min(0),
     suggestion_set_id: z.uuid().optional(),
   }),
-  // Canonical conversation continuity attached a short/cross-surface
-  // parent reply to one prior Homa message (or refused to guess between
-  // multiple candidates). No content or recipient address enters events.
-  "conversation.reply_resolved": z.object({
-    family_id: z.uuid(),
-    channel: z.enum(["web", "sms", "email"]),
-    resolution: z.enum(["matched", "ambiguous"]),
-    cross_channel: z.boolean(),
-  }),
+  // Canonical persistence successfully claimed one open loop for a parent
+  // reply. Ambiguous candidates never emit. No content, message id, or
+  // recipient address enters events.
+  "conversation.reply_resolved": z
+    .object({
+      family_id: z.uuid(),
+      channel: z.enum(["web", "sms", "email"]),
+      resolution: z.literal("matched"),
+      resolved_outcome: z.enum(["accepted", "declined", "answered"]),
+      cross_channel: z.boolean(),
+    })
+    .strict(),
   // The task framework (HT-1/HT-7). One event per finished proactive
   // run; fleet runs carry no family_id. Kind + status only, no content.
   "tasks.run_completed": z.object({
@@ -628,6 +631,15 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     channel: z.enum(["sms", "email"]),
   }),
+  // One adult's explicit response to a confirmed delivered brief. The
+  // run id is pseudonymous; adult identity and brief content stay out.
+  "research.brief_feedback": z
+    .object({
+      family_id: z.uuid(),
+      task_run_id: z.uuid(),
+      signal: z.enum(["helpful", "not_for_us"]),
+    })
+    .strict(),
   // Family invites (multi-parent plan Phase 3 plus SMS consent flow).
   // Email acceptance creates a family member through /join; SMS
   // acceptance links the recipient's verified phone to the family.

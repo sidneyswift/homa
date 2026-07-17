@@ -54,7 +54,98 @@ Also for the record: two prior main pushes from the `recoupable` Vercel
 account (`ef7af73` classify-model default, `01be798` .cosmo skills) had
 deploys stuck BLOCKED, so this session's push is what actually took those
 commits live along with the fix.
+## 2026-07-16 · Security ruling: family dispatch cannot write the fleet corpus
 
+**Founder-directed security ruling.** A family-scoped dispatch cannot search
+for fleet corpus material and cannot call `save_knowledge`. Family data may
+select among eligible fleet rows, but it never crosses into the shared corpus.
+If deterministic selection returns no eligible candidate, Homa sends no
+morning brief. The nightly fleet-research demand process handles the corpus
+gap without family context.
+
+The v2 headline is therefore always `Last night I researched`. The retired
+same-morning search path and tense are not valid fallbacks. The
+research-channel guard on `save_knowledge`, the skill's no-candidate stop, the
+overnight-only validator, and routing and semantic checks enforce this
+boundary. This is repository-only work in the isolated v2 worktree. It does
+not claim integration, deployment, flag enablement, or production
+verification.
+
+## 2026-07-16 · Morning research brief v2 approved for isolated implementation
+
+**Founder ruling.** The founder approved the v2 control design, now registered
+as `morning-research-brief-v2` in the canonical registry. The brief must name
+an actual supplied source, give the parent an obvious finding plus one
+action-shaping non-obvious detail, stay on one child and one angle, and end in
+one executable offer. It keeps the established four blocks and the one to two
+sentence content-block limit, but replaces the microscope headline with a
+plain headline. App citation links and all-child coverage remain deferred.
+
+**Field evidence and diagnosis.** The prior format allowed generic
+source-type wording and a microscope-led headline, while generated text could
+become delivery truth before its exact content, source use, and transport
+outcome were durably reconciled. That produces a live parent-facing failure:
+the scheduled morning brief can arrive without named provenance or an
+action-shaping reason for its offer, and a source can look consumed before a
+parent actually receives the brief. The approved remedy is not a broader model
+prompt alone: deterministic selection gates active, fresh, cited,
+medium-or-high-confidence rows by relevance and family cooldown; preparation
+stores the exact valid draft; and confirmed delivery finalizes its durable
+effects. Causal acceptance, decline, or answer is separate from four-hour
+same-episode possible interest and from explicit Helpful or Not for us
+feedback.
+
+**Isolated repository status.** Tasks 1 through 9 are implemented only in
+`.worktrees/morning-research-brief-v2`. The local migration adds
+`research_brief_preparations`, `family_knowledge_use`, and
+`research_brief_feedback`, plus a nullable `resolved_outcome` on open
+conversation loops. The selector, citation resolver, bounded dispatch bundle,
+prepared-only recovery, feedback controls, semantic fixtures, and Eve routing
+definitions are present in that worktree. This record does not claim a commit,
+merge, push, deployment, remote migration, feature-flag enablement, paid
+model execution, or production verification.
+
+**Current local evidence.** Fresh Task 10 review runs on 2026-07-16 passed:
+`pnpm check:research-brief` with 113 tests and `pnpm check:continuity` with
+113 tests. Earlier task reports also record focused selector, Tasks UI, agent
+context, admin metrics, events, fleet-skill package, typecheck, and Eve-build
+evidence at their observation times. The paid craft judge remains
+credential-gated and unrun. The remote isolation command was not run because
+this worktree has no Supabase public URL or publishable key. The v2 migration
+has not been applied remotely.
+
+The fresh `pnpm check:docs -- --allow-open` run exited 1 with `Result: FAIL`.
+It saw 620 candidates and 388 ordered manifest rows, with valid manifest
+structure and zero duplicate paths. The original Task 10 omission is fixed:
+the three v2 guidance files have manifest rows. The checker now reports those
+three paths as absent from its immutable first-seen baseline, plus unrelated
+pre-existing baseline, missing-file, migration-count, and claim-ledger drift.
+It reports 246 open manifest rows and 53 open claim-ledger rows. No immutable
+baseline or generated ledger was changed to manufacture a pass.
+
+**Authorized rollout order, not yet executed.** This feature uses the
+repository rule that additive migrations may lead. Migration-first is required
+because reply resolution writes `conversation_open_loops.resolved_outcome` and
+admin analytics read it outside both new flags; a flags-off deployment still
+needs that additive column. First apply the additive v2 migration and run the
+isolation guard against the migrated target. Then deploy code with both
+`HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED` and
+`HOMA_RESEARCH_BRIEF_V2_ENABLED` false, wait for Vercel READY, and probe the
+legacy morning-brief, reply, and Tasks paths. Next refresh the exact v2
+research corpus and verify its named citations. Enable slim context in the
+sandbox while v2 remains false, then enable v2 in the sandbox and verify one
+full morning before any fleet enablement. Fleet rollout enables the exact
+flags only after that evidence. Rollback disables the v2 kill switch first,
+waits for READY, then disables slim context; the additive schema remains.
+
+**Outstanding production failure and authorization boundary.** The exact
+parent-facing production failure above remains awaiting authorized integration:
+production is not authorized to use this worktree's named-source,
+prepared-draft morning-brief path. Do not describe the failure as fixed until
+an authorized integration, additive migration, guarded rollout, and one
+complete live morning verification provide direct evidence. The pre-existing
+local stream-duration guard still needs reconciliation against the integration
+target; this entry makes no claim about its live state.
 ## 2026-07-16 · Production Eve stream 300s timeout fixed, not stored
 
 Live production failure flagged from Vercel `get_runtime_errors`: recurring
@@ -2544,11 +2635,11 @@ saved-note URL is deferred until a dedicated research-note route exists.
 
 The generated-copy producer at
 `apps/web/agent/skills/research-brief/SKILL.md` now owns the exact shape,
-plain-language rules, honest overnight versus top-up tense, and CTA
+plain-language rules, the overnight headline, and CTA
 capability limits. Dispatch repeats the format at the final generation seam.
 A pure validator requires the exact seven-line layout, complete content
-sentences, one supported capability, and the expected overnight or top-up
-tense. It rejects extra questions, links and bare domains, saved-note claims,
+sentences, one supported capability, and the overnight headline. It rejects
+same-morning headlines, extra questions, links and bare domains, saved-note claims,
 calendar references, markdown, extra emoji, internal vocabulary, em dash
 characters, and messages over 1,600 characters. The paid model eval reads the
 real skill and uses Homa's shared gateway model; CI runs only the deterministic
@@ -4436,7 +4527,7 @@ in one pass:
    revert restoring superseded predecessors), and the glossary seed
    (12 method/format rows merged through the gate into homa-prod).
 3. **The morning brief** (HT-4): research-brief SKILL (one angle,
-   two-beat frame, capped top-up, guardrails), brief context bundle
+   two-beat frame, no family-dispatch fleet writes, guardrails), brief context bundle
    (positions + styles + fresh bank rows), 9am-to-noon send window,
    sendResearchBriefEmail shell, research.brief_sent event. Dark:
    MORNING_BRIEF_ENABLED.

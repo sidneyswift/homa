@@ -4,14 +4,28 @@ import { describe, it } from "node:test";
 import { validateResearchBriefFormat } from "./research-brief-format";
 
 const VALID_CTA =
-  "Want me to make Story a connected-phonation word strip for smoother blending?";
-const VALID = `🔬 Last night I researched phonics
+  "Want me to make Story a mat-and-ship word strip for keeping sounds together while reading?";
+const LEARNED_FIRST =
+  "Reading Rockets says a stretchy sound stays on into the next sound, so the word reaches the ear as one piece.";
+const LEARNED =
+  `${LEARNED_FIRST} In mat, mmm runs into a before the quick t closes mat.`;
+const INTERESTING =
+  'Story said "ship" sounds choppy in Bob Books. Story can try "sh" running into "i" before the quick "p" closes "ship".';
+const TOPIC = "keeping sounds together while reading";
+const VALID = `Last night I researched ${TOPIC}
 
-What I learned: Connected phonation helps early readers hold sounds together while blending. Adding each sound as the word grows works especially well for stop sounds.
+What I learned: ${LEARNED}
 
-Why it's interesting: Story is already reading Bob Books and is ready to make blending smoother. This changes how you model the same words, not what Story needs to learn next.
+Why it's interesting: ${INTERESTING}
 
 ${VALID_CTA}`;
+const CARRIER_VALID = `Last night I researched maps
+
+What I learned: ERIC says paths grow. A small step helps.
+
+Why it's interesting: Story likes maps. She can trace a path.
+
+Want me to make Story a map game for map tracing?`;
 
 function withCta(cta: string): string {
   return VALID.replace(VALID_CTA, cta);
@@ -35,21 +49,32 @@ describe("morning research brief format", () => {
     assert.deepEqual(validateResearchBriefFormat(VALID), { ok: true });
   });
 
-  it("accepts the honest top-up headline and enforces expected tense", () => {
-    const topUpBrief = VALID.replace(
+  it("uses the plain headline and a 900 visible-character ceiling", () => {
+    assert.deepEqual(validateResearchBriefFormat(VALID), { ok: true });
+    assertInvalid(
+      [
+        VALID.replace(
+          "Reading Rockets says a stretchy sound",
+          `${"Useful ".repeat(120)}Reading Rockets says a stretchy sound`,
+        ),
+      ],
+      "visible characters",
+    );
+  });
+
+  it("rejects the retired microscope headline", () => {
+    assertInvalid([VALID.replace("Last night", "🔬 Last night")], "headline");
+  });
+
+  it("requires the overnight headline and rejects same-morning research", () => {
+    const sameMorningBrief = VALID.replace(
       "Last night I researched",
       "This morning I researched",
     );
-    assert.deepEqual(
-      validateResearchBriefFormat(topUpBrief, { expectedTense: "top-up" }),
-      { ok: true },
-    );
-    const mismatchedTense = validateResearchBriefFormat(topUpBrief, {
-      expectedTense: "overnight",
-    });
-    assert.equal(mismatchedTense.ok, false);
-    if (!mismatchedTense.ok) {
-      assert.ok(mismatchedTense.errors.includes("headline tense"));
+    const validation = validateResearchBriefFormat(sameMorningBrief);
+    assert.equal(validation.ok, false);
+    if (!validation.ok) {
+      assert.ok(validation.errors.includes("headline tense"));
     }
   });
 
@@ -57,12 +82,15 @@ describe("morning research brief format", () => {
     assertInvalid([
       `\n${VALID}`,
       `${VALID}\n`,
-      VALID.replace("phonics", "phonics\nextra headline line"),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC}\nextra headline line`,
+      ),
       VALID.replace("\n\nWhat I learned:", "\n\n\nWhat I learned:"),
     ], "expected exact seven-line layout");
     assertInvalid([
-      VALID.replace("phonics", "   "),
-      VALID.replace("phonics", "."),
+      VALID.replace(TOPIC, "   "),
+      VALID.replace(TOPIC, "."),
     ], "headline topic");
     assertInvalid([
       VALID.replace("What I learned: ", "What I learned:"),
@@ -73,28 +101,28 @@ describe("morning research brief format", () => {
   it("requires one or two complete sentences in each content block", () => {
     assertInvalid([
       VALID.replace(
-        "Connected phonation helps early readers hold sounds together while blending.",
+        LEARNED_FIRST,
         "One. Two. Three.",
       ),
       VALID.replace(
-        "Connected phonation helps early readers hold sounds together while blending. Adding each sound as the word grows works especially well for stop sounds.",
-        "Connected phonation helps early readers hold sounds together while blending",
+        LEARNED,
+        "Holding one sound into the next helps a child blend smoothly",
       ),
       VALID.replace(
-        "Connected phonation helps early readers hold sounds together while blending. Adding each sound as the word grows works especially well for stop sounds.",
+        LEARNED,
         ".",
       ),
     ], "learned sentence count");
     assertInvalid([
       VALID.replace(
-        "Story is already reading Bob Books and is ready to make blending smoother. This changes how you model the same words, not what Story needs to learn next.",
+        INTERESTING,
         "!",
       ),
     ], "interesting sentence count");
 
     const abbreviationBrief = VALID.replace(
-      "Connected phonation helps early readers hold sounds together while blending. Adding each sound as the word grows works especially well for stop sounds.",
-      "U.S. reading research supports connected phonation. The method keeps sounds together while a child blends.",
+      LEARNED,
+      "U.S. reading research supports smooth sound blending. Holding mmm into a makes the practical change audible.",
     );
     assert.deepEqual(validateResearchBriefFormat(abbreviationBrief), {
       ok: true,
@@ -171,25 +199,37 @@ describe("morning research brief format", () => {
     }
   });
 
-  it("rejects links, saved-note claims, markdown, extra emoji, and internal terms", () => {
+  it("rejects links, saved-note claims, markdown, emoji, and internal terms", () => {
     assertInvalid([
-      VALID.replace("Connected phonation", "*Connected phonation*"),
-      VALID.replace("Connected phonation", "~~Connected phonation~~"),
+      VALID.replace("stretchy sound", "*stretchy sound*"),
+      VALID.replace("stretchy sound", "~~stretchy sound~~"),
       VALID.replace(
-        "Connected phonation",
-        "[Connected phonation](source)",
+        "stretchy sound",
+        "[stretchy sound](source)",
       ),
     ], "markdown");
     assertInvalid([
-      VALID.replace("phonics", "phonics 🇺🇸"),
-      VALID.replace("phonics", "phonics \u{1F1FA}"),
-    ], "emoji count");
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} 🇺🇸`,
+      ),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} \u{1F1FA}`,
+      ),
+    ], "emoji");
     assertInvalid([
-      VALID.replace("phonics", "phonics subjectId"),
-      VALID.replace("phonics", "phonics CVC"),
-      VALID.replace("phonics", "phonics C-V-C"),
-      VALID.replace("phonics", "phonics C.V.C."),
-      VALID.replace("phonics", "phonics at_age"),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} subjectId`,
+      ),
+      VALID.replace(TOPIC, "keeping sounds CVC"),
+      VALID.replace(TOPIC, "keeping sounds C-V-C"),
+      VALID.replace(TOPIC, "keeping sounds C.V.C."),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} at_age`,
+      ),
     ], "internal vocabulary");
     assertInvalid([
       VALID.replace(
@@ -197,49 +237,41 @@ describe("morning research brief format", () => {
         "What I learned: Saved it to Homa.",
       ),
       VALID.replace(
-        "Connected phonation helps early readers hold sounds together while blending.",
+        LEARNED_FIRST,
         "I saved this note in Homa.",
       ),
     ], "saved link");
     assertInvalid([
-      VALID.replace("phonics", "phonics example.com"),
-      VALID.replace("phonics", "phonics example.xyz"),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} example.com`,
+      ),
+      VALID.replace(
+        TOPIC,
+        `${TOPIC} example.xyz`,
+      ),
     ], "saved link");
     assertInvalid([
-      VALID.replace("helps early readers", "helps early readers\u2014quickly"),
+      VALID.replace("reaches the ear", "reaches the ear\u2014quickly"),
     ], "em dash");
   });
 
-  it("rejects messages over the delivery ceiling", () => {
-    assertInvalid([
-      VALID.replace(
-        "Connected phonation helps",
-        `${"Very ".repeat(400)}Connected phonation helps`,
-      ),
-    ], "length");
-  });
-
-  it("rejects briefs the emoji pushes past the carrier segment cap", () => {
-    // The 2026-07-13 incident shape: a well-formed brief in the 700 to
-    // 830 character range. The required emoji makes carriers count 67
-    // characters per segment, so anything past 670 cannot leave as one
-    // SMS (Telnyx error 40302).
-    const incidentLengthBrief = VALID.replace(
-      "Connected phonation helps",
-      `${"Very ".repeat(80)}Connected phonation helps`,
+  it("accepts a GSM-7 brief that uses all ten carrier segments", () => {
+    const nearCapBrief = CARRIER_VALID.replace(
+      "paths grow",
+      `paths${"^".repeat(650)} grow`,
     );
-    assert.ok(incidentLengthBrief.length > 670);
-    assert.ok(incidentLengthBrief.length < 900);
-    assertInvalid([incidentLengthBrief], "length");
-  });
-
-  it("accepts a brief that fills the whole deliverable budget", () => {
-    const nearCapBrief = VALID.replace(
-      "Connected phonation helps",
-      `${"Very ".repeat(40)}Connected phonation helps`,
-    );
-    assert.ok(nearCapBrief.length > 550);
-    assert.ok(nearCapBrief.length <= 669);
+    assert.ok(nearCapBrief.length > 765);
+    assert.ok(nearCapBrief.length <= 900);
     assert.deepEqual(validateResearchBriefFormat(nearCapBrief), { ok: true });
+  });
+
+  it("rejects a GSM-7 brief requiring eleven carrier segments", () => {
+    const elevenSegmentBrief = CARRIER_VALID.replace(
+      "paths grow",
+      `paths${"^".repeat(699)} grow`,
+    );
+    assert.ok(elevenSegmentBrief.length <= 900);
+    assertInvalid([elevenSegmentBrief], "SMS segments");
   });
 });

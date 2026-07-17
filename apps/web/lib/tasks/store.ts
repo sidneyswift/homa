@@ -1,3 +1,9 @@
+import type { Sql, TransactionSql } from "postgres";
+
+import {
+  aggregateDurableDeliveryAttempts,
+  type DeliveryAggregate,
+} from "../conversation-continuity/delivery-policy";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import {
@@ -6,6 +12,12 @@ import {
   type FamilyTaskKind,
   type TaskRunKind,
 } from "./kinds";
+import {
+  deliveryVersionForNewTaskRun,
+  usesResearchBriefV2Delivery,
+  type TaskDeliveryVersion,
+} from "./delivery-version";
+import { recoverPreparedResearchBriefDelivery } from "./research-brief-store";
 import { localDateKey, localHourOf, nextTaskRunInstant } from "./time";
 
 /**
@@ -399,30 +411,59 @@ function taskRunTitle(task: DueFamilyTask): string {
  * Returns the run id, or null when a run for (schedule, day) already
  * exists, which is exactly the at-least-once redelivery case.
  */
-export async function beginTaskRun(
+export interface StartedTaskRun {
+  id: string;
+  deliveryVersion: TaskDeliveryVersion;
+}
+
+export interface BeginTaskRunOptions {
+  status?: "running" | "skipped";
+  error?: string;
+  environment?: Record<string, string | undefined>;
+}
+
+export async function beginTaskRunWithDatabase(
+  database: Sql,
   task: DueFamilyTask,
   now: Date,
-  options?: { status?: "running" | "skipped"; error?: string },
-): Promise<string | null> {
-  const sql = mapDb();
+  options: BeginTaskRunOptions = {},
+): Promise<StartedTaskRun | null> {
   const title = taskRunTitle(task);
+  const deliveryVersion = deliveryVersionForNewTaskRun(
+    task.kind,
+    options.environment,
+  );
   try {
-    const rows = await sql<{ id: string }[]>`
+    const rows = await database<
+      { id: string; delivery_version: TaskDeliveryVersion }[]
+    >`
       insert into public.homa_task_runs
-        (family_id, schedule_id, kind, status, scheduled_for, title, error)
+        (family_id, schedule_id, kind, status, scheduled_for, title, error,
+         delivery_version)
       values
         (${task.familyId}, ${task.scheduleId}, ${task.kind},
          ${options?.status ?? "running"},
          ${localDateKey(task.timeZone, now)}, ${title},
-         ${options?.error ?? null})
-      returning id
+         ${options?.error ?? null}, ${deliveryVersion})
+      returning id, delivery_version
     `;
-    return rows[0]?.id ?? null;
+    const row = rows[0];
+    return row
+      ? { id: row.id, deliveryVersion: row.delivery_version }
+      : null;
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === "23505") return null;
     throw error;
   }
+}
+
+export async function beginTaskRun(
+  task: DueFamilyTask,
+  now: Date,
+  options: BeginTaskRunOptions = {},
+): Promise<StartedTaskRun | null> {
+  return await beginTaskRunWithDatabase(mapDb(), task, now, options);
 }
 
 /**
@@ -432,17 +473,26 @@ export async function beginTaskRun(
  * downstream (delivery, finishTaskRun, the reaper, the History feed)
  * reads the run by id and treats it like any other run.
  */
-export async function beginManualTaskRun(task: DueFamilyTask): Promise<string> {
+export async function beginManualTaskRun(
+  task: DueFamilyTask,
+): Promise<StartedTaskRun> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
+  const deliveryVersion = deliveryVersionForNewTaskRun(task.kind);
+  const rows = await sql<
+    { id: string; delivery_version: TaskDeliveryVersion }[]
+  >`
     insert into public.homa_task_runs
-      (family_id, schedule_id, kind, status, scheduled_for, title)
+      (family_id, schedule_id, kind, status, scheduled_for, title,
+       delivery_version)
     values
       (${task.familyId}, ${task.scheduleId}, ${task.kind}, 'running', null,
-       ${taskRunTitle(task)})
-    returning id
+       ${taskRunTitle(task)}, ${deliveryVersion})
+    returning id, delivery_version
   `;
-  return rows[0].id;
+  return {
+    id: rows[0].id,
+    deliveryVersion: rows[0].delivery_version,
+  };
 }
 
 /** The dispatch channel's write: the composed text and where it went. */
@@ -476,38 +526,53 @@ export async function appendTaskRunArtifacts(
   `;
 }
 
-export async function finishTaskRun(
+export interface FinishTaskRunOutcome {
+  familyId: string | null;
+  kind: TaskRunKind;
+  status:
+    | "done"
+    | "partial"
+    | "partial_uncertain"
+    | "uncertain"
+    | "failed"
+    | "skipped";
+  error?: string;
+  sessionId?: string;
+  /** Clears stale delivery claims when a no-output run is failed. */
+  clearDelivery?: boolean;
+  /** Lab cancellation and stale reaping can race a durable session finish.
+   * When true, only the transition from running succeeds. */
+  onlyIfRunning?: boolean;
+}
+
+export async function finishTaskRunWithDatabase(
+  database: Sql | TransactionSql,
   runId: string,
-  outcome: {
-    familyId: string | null;
-    kind: TaskRunKind;
-    status:
-      | "done"
-      | "partial"
-      | "partial_uncertain"
-      | "uncertain"
-      | "failed"
-      | "skipped";
-    error?: string;
-    sessionId?: string;
-    /** Lab cancellation races a durable session finishing. When true,
-     * only the transition from running succeeds; a prior cancellation
-     * receipt can never be overwritten by the late session. */
-    onlyIfRunning?: boolean;
-  },
+  outcome: FinishTaskRunOutcome,
 ): Promise<boolean> {
-  const sql = mapDb();
-  const rows = await sql<Array<{ id: string }>>`
+  const rows = await database<Array<{ id: string }>>`
     update public.homa_task_runs
     set status = ${outcome.status},
         error = coalesce(${outcome.error ?? null}, error),
         session_id = coalesce(${outcome.sessionId ?? null}, session_id),
+        summary = case when ${outcome.clearDelivery ?? false}
+          then null else summary end,
+        delivered_channel = case when ${outcome.clearDelivery ?? false}
+          then null else delivered_channel end,
         finished_at = now()
     where id = ${runId}
       and (${!outcome.onlyIfRunning} or status = 'running')
     returning id
   `;
-  if (rows.length === 0) return false;
+  return rows.length === 1;
+}
+
+export async function finishTaskRun(
+  runId: string,
+  outcome: FinishTaskRunOutcome,
+): Promise<boolean> {
+  const finished = await finishTaskRunWithDatabase(mapDb(), runId, outcome);
+  if (!finished) return false;
   await emitMapEvent("tasks.run_completed", {
     ...(outcome.familyId ? { family_id: outcome.familyId } : {}),
     kind: outcome.kind,
@@ -516,11 +581,432 @@ export async function finishTaskRun(
   return true;
 }
 
+export interface FinishTaskRunFromDurableDeliveriesInput {
+  runId: string;
+  familyId: string;
+  kind: FamilyTaskKind;
+  summary: string;
+  sessionId: string | null;
+  saveOnlyAccepted: boolean;
+  canonicalMessageId: string;
+}
+
+export type FinishTaskRunFromDurableDeliveriesResult =
+  | { finished: false; delivery: null }
+  | { finished: true; delivery: DeliveryAggregate };
+
+export async function finishTaskRunFromDurableDeliveriesWithDatabase(
+  database: Sql,
+  input: FinishTaskRunFromDurableDeliveriesInput,
+): Promise<FinishTaskRunFromDurableDeliveriesResult> {
+  return await database.begin<FinishTaskRunFromDurableDeliveriesResult>(
+    async (transaction) => {
+      const [run] = await transaction<{
+        id: string;
+        status: string;
+        kind: string;
+      }[]>`
+        select id, status, kind
+        from public.homa_task_runs
+        where id = ${input.runId}
+          and family_id = ${input.familyId}
+        for update
+      `;
+      if (
+        !run ||
+        run.status !== "running" ||
+        run.kind !== input.kind
+      ) {
+        return { finished: false, delivery: null };
+      }
+      const canonicalMessages = await transaction<{ id: string }[]>`
+        select id
+        from public.conversation_messages
+        where id = ${input.canonicalMessageId}
+          and family_id = ${input.familyId}
+          and task_run_id = ${input.runId}
+          and role = 'assistant'
+        for update
+      `;
+      if (canonicalMessages.length !== 1) {
+        return { finished: false, delivery: null };
+      }
+      await transaction`
+        update public.conversation_deliveries
+        set status = 'uncertain',
+            error = coalesce(
+              error,
+              'delivery acceptance unknown at task finalization'
+            ),
+            failed_at = coalesce(failed_at, now()),
+            updated_at = now()
+        where task_run_id = ${input.runId}
+          and family_id = ${input.familyId}
+          and status = 'pending'
+      `;
+      const attempts = await transaction<{
+        id: string;
+        recipient_member_user_id: string | null;
+        destination_hash: string | null;
+        channel: "sms" | "email";
+        status: "sent" | "failed" | "uncertain";
+      }[]>`
+        select id, recipient_member_user_id, destination_hash, channel, status
+        from public.conversation_deliveries
+        where task_run_id = ${input.runId}
+          and family_id = ${input.familyId}
+          and channel in ('sms', 'email')
+        order by created_at, id
+      `;
+      const delivery: DeliveryAggregate =
+        input.saveOnlyAccepted && attempts.length === 0
+          ? {
+              status: "done",
+              deliveredChannel: "none",
+              deliveredCount: 1,
+              failedCount: 0,
+            }
+          : aggregateDurableDeliveryAttempts(
+              attempts.map((attempt) => ({
+                recipientKey: attempt.recipient_member_user_id
+                  ? `member:${attempt.recipient_member_user_id}`
+                  : attempt.destination_hash
+                    ? `destination:${attempt.destination_hash}`
+                    : `delivery:${attempt.id}`,
+                channel: attempt.channel,
+                status: attempt.status,
+              })),
+            );
+      const finished = await transaction<{ id: string }[]>`
+        update public.homa_task_runs
+        set status = ${delivery.status},
+            summary = ${delivery.deliveredCount > 0
+              ? input.summary.slice(0, 4000)
+              : null},
+            delivered_channel = ${delivery.deliveredChannel},
+            session_id = coalesce(${input.sessionId}, session_id),
+            finished_at = now(),
+            error = case
+              when ${delivery.status === "failed"}
+                then coalesce(error, 'delivery failed for every intended recipient')
+              else error
+            end
+        where id = ${input.runId}
+          and family_id = ${input.familyId}
+          and kind = ${input.kind}
+          and status = 'running'
+        returning id
+      `;
+      if (finished.length === 1 && delivery.deliveredCount > 0) {
+        const visible = await transaction<{ id: string }[]>`
+          update public.conversation_messages
+          set visibility = 'family'
+          where id = ${input.canonicalMessageId}
+            and family_id = ${input.familyId}
+            and task_run_id = ${input.runId}
+            and role = 'assistant'
+          returning id
+        `;
+        if (visible.length !== 1) {
+          return { finished: false, delivery: null };
+        }
+      }
+      return finished.length === 1
+        ? { finished: true, delivery }
+        : { finished: false, delivery: null };
+    },
+  );
+}
+
+export interface FinishStaleTaskRunFromDurableDeliveriesInput {
+  runId: string;
+  familyId: string;
+  kind: FamilyTaskKind;
+}
+
+export async function finishStaleTaskRunFromDurableDeliveriesWithDatabase(
+  database: Sql,
+  input: FinishStaleTaskRunFromDurableDeliveriesInput,
+): Promise<FinishTaskRunFromDurableDeliveriesResult> {
+  type StaleTaskRunDecision =
+    | {
+        action: "finalize";
+        canonicalMessage: { id: string; content: string | null };
+        runSummary: string | null;
+        sessionId: string | null;
+        deliveredChannel: "sms" | "email" | "none" | null;
+      }
+    | {
+        action: "return";
+        result: FinishTaskRunFromDurableDeliveriesResult;
+      };
+  const decision = await database.begin<StaleTaskRunDecision>(
+    async (transaction) => {
+      const [run] = await transaction<{
+        status: string;
+        kind: string;
+        summary: string | null;
+        sessionId: string | null;
+        deliveredChannel: "sms" | "email" | "none" | null;
+      }[]>`
+        select status, kind, summary, session_id as "sessionId",
+               delivered_channel as "deliveredChannel"
+        from public.homa_task_runs
+        where id = ${input.runId}
+          and family_id = ${input.familyId}
+        for update
+      `;
+      if (
+        !run ||
+        run.status !== "running" ||
+        run.kind !== input.kind
+      ) {
+        return {
+          action: "return",
+          result: { finished: false, delivery: null },
+        };
+      }
+      const [canonicalMessage] = await transaction<{
+        id: string;
+        content: string | null;
+      }[]>`
+        select id, content
+        from public.conversation_messages
+        where family_id = ${input.familyId}
+          and task_run_id = ${input.runId}
+          and role = 'assistant'
+        order by created_at desc, id desc
+        limit 1
+      `;
+      if (canonicalMessage) {
+        return {
+          action: "finalize",
+          canonicalMessage,
+          runSummary: run.summary,
+          sessionId: run.sessionId,
+          deliveredChannel: run.deliveredChannel,
+        };
+      }
+      const [evidence] = await transaction<{
+        recoverable: number;
+        failed: number;
+      }[]>`
+        select
+          count(*) filter (
+            where status in ('sent', 'uncertain', 'pending')
+          )::integer as recoverable,
+          count(*) filter (where status = 'failed')::integer as failed
+        from public.conversation_deliveries
+        where family_id = ${input.familyId}
+          and task_run_id = ${input.runId}
+      `;
+      const saveOnlyReceipt =
+        run.deliveredChannel === "none" && Boolean(run.summary);
+      if ((evidence?.recoverable ?? 0) > 0 || saveOnlyReceipt) {
+        return {
+          action: "return",
+          result: { finished: false, delivery: null },
+        };
+      }
+      const finished = await finishTaskRunWithDatabase(
+        transaction,
+        input.runId,
+        {
+          familyId: input.familyId,
+          kind: input.kind,
+          status: "failed",
+          error: "stale task produced no canonical output",
+          ...(run.sessionId ? { sessionId: run.sessionId } : {}),
+          clearDelivery: true,
+          onlyIfRunning: true,
+        },
+      );
+      return {
+        action: "return",
+        result: finished
+          ? {
+              finished: true,
+              delivery: {
+                status: "failed",
+                deliveredChannel: null,
+                deliveredCount: 0,
+                failedCount: evidence?.failed ?? 0,
+              },
+            }
+          : { finished: false, delivery: null },
+      };
+    },
+  );
+  if (decision.action === "return") {
+    return decision.result;
+  }
+  return await finishTaskRunFromDurableDeliveriesWithDatabase(database, {
+    runId: input.runId,
+    familyId: input.familyId,
+    kind: input.kind,
+    summary:
+      decision.canonicalMessage.content ??
+      decision.runSummary ??
+      "",
+    sessionId: decision.sessionId,
+    saveOnlyAccepted:
+      decision.deliveredChannel === "none" &&
+      Boolean(decision.runSummary),
+    canonicalMessageId: decision.canonicalMessage.id,
+  });
+}
+
+type DurableTaskCompletionEventName =
+  | "tasks.run_completed"
+  | "journal.prompt_sent"
+  | "research.brief_sent";
+
+type DurableTaskCompletionEmitter = (
+  name: DurableTaskCompletionEventName,
+  props: Record<string, unknown>,
+) => Promise<void>;
+
+const durableTaskCompletionEmitter: DurableTaskCompletionEmitter = async (
+  name,
+  props,
+) => {
+  switch (name) {
+    case "tasks.run_completed":
+      await emitMapEvent("tasks.run_completed", props as {
+        family_id: string;
+        kind: FamilyTaskKind;
+        status: DeliveryAggregate["status"];
+      });
+      return;
+    case "journal.prompt_sent":
+      await emitMapEvent("journal.prompt_sent", props as {
+        family_id: string;
+        channel: "sms" | "email";
+      });
+      return;
+    case "research.brief_sent":
+      await emitMapEvent("research.brief_sent", props as {
+        family_id: string;
+        channel: "sms" | "email";
+      });
+      return;
+    default: {
+      const exhaustive: never = name;
+      throw new Error(
+        `unhandled durable task completion event: ${String(exhaustive)}`,
+      );
+    }
+  }
+};
+
+export async function emitDurableTaskRunCompletion(
+  input: Pick<
+    FinishTaskRunFromDurableDeliveriesInput,
+    "familyId" | "kind"
+  >,
+  result: FinishTaskRunFromDurableDeliveriesResult,
+  emit: DurableTaskCompletionEmitter = durableTaskCompletionEmitter,
+): Promise<void> {
+  if (!result.finished) return;
+  await emit("tasks.run_completed", {
+    family_id: input.familyId,
+    kind: input.kind,
+    status: result.delivery.status,
+  });
+  if (
+    result.delivery.deliveredCount === 0 ||
+    (
+      result.delivery.deliveredChannel !== "sms" &&
+      result.delivery.deliveredChannel !== "email"
+    )
+  ) {
+    return;
+  }
+  switch (input.kind) {
+    case "journal_prompt":
+      await emit("journal.prompt_sent", {
+        family_id: input.familyId,
+        channel: result.delivery.deliveredChannel,
+      });
+      return;
+    case "morning_brief":
+      await emit("research.brief_sent", {
+        family_id: input.familyId,
+        channel: result.delivery.deliveredChannel,
+      });
+      return;
+    case "custom":
+      return;
+    default: {
+      const exhaustive: never = input.kind;
+      throw new Error(
+        `unhandled durable task completion kind: ${String(exhaustive)}`,
+      );
+    }
+  }
+}
+
+export async function finishTaskRunFromDurableDeliveries(
+  input: FinishTaskRunFromDurableDeliveriesInput,
+): Promise<FinishTaskRunFromDurableDeliveriesResult> {
+  const result = await finishTaskRunFromDurableDeliveriesWithDatabase(
+    mapDb(),
+    input,
+  );
+  await emitDurableTaskRunCompletion(input, result);
+  return result;
+}
+
+export async function loadLegacyStaleTaskRunOutcomeWithDatabase(
+  database: Sql,
+  input: {
+    taskRunId: string;
+    deliveredChannel: "sms" | "email" | "none" | null;
+    summary: string | null;
+  },
+): Promise<{
+  status: Exclude<FinishTaskRunOutcome["status"], "skipped">;
+  hasAcceptedOrUncertainDelivery: boolean;
+}> {
+  const deliveries = await database<
+    { sent: number; uncertain: number; unresolved: number }[]
+  >`
+    select
+      count(*) filter (where status = 'sent')::int as sent,
+      count(*) filter (where status = 'uncertain')::int as uncertain,
+      count(*) filter (where status in ('failed', 'pending'))::int
+        as unresolved
+    from public.conversation_deliveries
+    where task_run_id = ${input.taskRunId}
+  `;
+  const sent = deliveries[0]?.sent ?? 0;
+  const uncertain = deliveries[0]?.uncertain ?? 0;
+  const unresolved = deliveries[0]?.unresolved ?? 0;
+  const saveOnlyCompleted =
+    input.deliveredChannel === "none" && Boolean(input.summary);
+  return {
+    status:
+      saveOnlyCompleted
+        ? "done"
+        : sent > 0
+          ? unresolved > 0 || uncertain > 0
+            ? uncertain > 0 && unresolved === 0
+              ? "partial_uncertain"
+              : "partial"
+            : "done"
+          : uncertain > 0
+            ? "uncertain"
+            : "failed",
+    hasAcceptedOrUncertainDelivery:
+      sent > 0 || uncertain > 0 || saveOnlyCompleted,
+  };
+}
+
 /**
  * The safety net for runs whose session never reached a deliverable
  * message (crash, refusal, model outage): receive() resolves at session
- * START, so nobody is waiting on the other end. Any run still 'running'
- * after two hours is failed here, one tick at a time, with its event.
+ * START, so nobody is waiting on the other end. Prepared briefs first recover
+ * their durable aggregate. Other stale runs retain the legacy aggregation.
  */
 export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
   const sql = mapDb();
@@ -532,48 +1018,72 @@ export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
       kind: TaskRunKind;
       delivered_channel: "sms" | "email" | "none" | null;
       summary: string | null;
+      session_id: string | null;
+      delivery_version: TaskDeliveryVersion;
     }[]
   >`
-    select id, family_id, kind, delivered_channel, summary
+    select id, family_id, kind, delivered_channel, summary, session_id,
+           delivery_version
     from public.homa_task_runs
     where status = 'running' and started_at < ${cutoff}
     limit 25
   `;
   for (const run of stale) {
-    const deliveries = await sql<
-      { sent: number; uncertain: number; unresolved: number }[]
-    >`
-      select
-        count(*) filter (where status = 'sent')::int as sent,
-        count(*) filter (where status = 'uncertain')::int as uncertain,
-        count(*) filter (where status in ('failed', 'pending'))::int
-          as unresolved
-      from public.conversation_deliveries
-      where task_run_id = ${run.id}
-    `;
-    const sent = deliveries[0]?.sent ?? 0;
-    const uncertain = deliveries[0]?.uncertain ?? 0;
-    const unresolved = deliveries[0]?.unresolved ?? 0;
-    const saveOnlyCompleted =
-      run.delivered_channel === "none" && Boolean(run.summary);
+    if (
+      run.kind === "morning_brief" &&
+      run.family_id &&
+      usesResearchBriefV2Delivery(run.delivery_version)
+    ) {
+      const recovery = await recoverPreparedResearchBriefDelivery({
+        familyId: run.family_id,
+        taskRunId: run.id,
+      });
+      if (recovery.status !== "not_found") continue;
+    }
+    if (
+      run.family_id &&
+      (
+        run.kind === "journal_prompt" ||
+        run.kind === "morning_brief" ||
+        run.kind === "custom"
+      )
+    ) {
+      const result =
+        await finishStaleTaskRunFromDurableDeliveriesWithDatabase(sql, {
+          runId: run.id,
+          familyId: run.family_id,
+          kind: run.kind,
+        });
+      await emitDurableTaskRunCompletion(
+        { familyId: run.family_id, kind: run.kind },
+        result,
+      );
+      if (
+        result.finished &&
+        run.kind === "journal_prompt" &&
+        result.delivery.deliveredCount > 0
+      ) {
+        await sql`
+          update public.families
+          set journal_prompt_last_sent_at = now()
+          where id = ${run.family_id}
+        `;
+      }
+      continue;
+    }
+    const outcome = await loadLegacyStaleTaskRunOutcomeWithDatabase(sql, {
+      taskRunId: run.id,
+      deliveredChannel: run.delivered_channel,
+      summary: run.summary,
+    });
     await finishTaskRun(run.id, {
       familyId: run.family_id,
       kind: run.kind,
-      status:
-        saveOnlyCompleted
-          ? "done"
-          : sent > 0
-            ? unresolved > 0 || uncertain > 0
-              ? uncertain > 0 && unresolved === 0
-                ? "partial_uncertain"
-                : "partial"
-              : "done"
-            : uncertain > 0
-              ? "uncertain"
-              : "failed",
-      ...(sent > 0 || uncertain > 0 || saveOnlyCompleted
+      status: outcome.status,
+      ...(outcome.hasAcceptedOrUncertainDelivery
         ? {}
         : { error: "run never completed (reaped after 2 hours)" }),
+      onlyIfRunning: true,
     });
   }
 }

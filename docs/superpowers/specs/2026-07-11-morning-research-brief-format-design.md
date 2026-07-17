@@ -1,7 +1,10 @@
 # Morning research brief format design
 
-> Status: approved in chat by the founder on 2026-07-11. This document
-> formalizes the approved words and constraints before implementation.
+> Status: superseded in part by
+> `2026-07-16-morning-research-brief-v2-design.md`. This historical format
+> document records the original four-block decision. The microscope emoji,
+> generic source-type rule, 600-character budget, routine recall, and direct
+> observation-use instruction are no longer valid for v2.
 
 ## Goal
 
@@ -12,7 +15,7 @@ family-specific application, then offer one action Homa can perform.
 ## Exact output contract
 
 ```text
-🔬 Last night I researched {topic}
+Last night I researched {topic}
 
 What I learned: {1 to 2 sentences about the research itself.}
 
@@ -22,12 +25,14 @@ Want me to {one specific action Homa can complete}?
 ```
 
 The labels and blank lines are required. The topic uses a plain parent-facing
-name such as `phonics`, `self-regulation`, or `fine motor skills`.
+name such as `phonics`, `self-regulation`, or `fine motor skills`. V2 also
+requires the actual supplied source name, one exact child evidence anchor, one
+action-shaping non-obvious detail, and a matching CTA.
 
-The headline must remain truthful. The normal fleet-backed brief says `Last
-night`. If the family's one allowed top-up search actually runs that morning,
-the headline says `🔬 This morning I researched {topic}` and every other block
-stays identical.
+The headline is always `Last night I researched {topic}`. Family dispatch
+cannot search the web for corpus material or save to the fleet knowledge bank.
+If no eligible candidate exists, Homa sends no brief. Nightly fleet research
+handles that demand outside family context.
 
 ## Content rules
 
@@ -35,10 +40,9 @@ stays identical.
 
 - One or two sentences.
 - States the finding, not the child's progress.
-- Uses only evidence present in the selected knowledge-bank row or the one
-  allowed top-up search.
-- May name a study, framework, or evidence source when the research context
-  supports it.
+- Uses only evidence present in the selected eligible knowledge-bank row.
+- Names the actual supplied study, framework, or evidence source. A generic
+  source type is not enough in v2.
 - Uses plain language. No internal taxonomy ids or score vocabulary.
 
 ### Why it's interesting
@@ -77,20 +81,17 @@ application, or CTA contract.
 - The same formatted text is sent by SMS or the email fallback.
 - The exact text is stored in `homa_task_runs.summary` and displayed in Homa's
   tasks history with line breaks preserved.
-- The whole message stays deliverable as one SMS. Corrected 2026-07-13: the
-  original 1,600-character ceiling was wrong for this format, because the
-  required emoji switches the message to UCS-2 encoding (67 characters per
-  segment, 10-segment provider cap, so about 670 characters). The skill now
-  instructs a 600-character budget and the format contract enforces the real
-  segment cap. If the draft is too long, Homa cuts detail rather than
-  removing a required section.
+- V2 keeps the whole message at or below 900 visible characters and ten actual
+  carrier segments. The plain headline removes the required emoji, but the
+  actual carrier calculation remains authoritative. If the draft is too long,
+  Homa cuts supporting detail rather than removing a required section.
 - This format replaces the current freeform 2-to-4-sentence brief and its
   optional unlabeled offer.
 
 ## Producer
 
 The root cause is the generated-copy producer, not the delivered artifact.
-Implementation changes:
+Historical implementation changes:
 
 - `apps/web/agent/skills/research-brief/SKILL.md`: binding format, sentence
   limits, CTA capability rules, and no-link rule.
@@ -98,24 +99,25 @@ Implementation changes:
   explicitly requires the skill's four-block output and names the no-preamble
   contract.
 
-No UI layout or database migration is required.
+V2 adds a prepared-draft service and delivery records. The model must call
+`prepare_research_brief` successfully before exact final output. It uses
+prefetched delivered traces rather than routine recall. No candidate means no
+brief; family dispatch never searches or saves fleet knowledge. Nightly
+fleet-research demand handles the missing corpus row. Delivery, not the skill,
+marks an optional observation used.
 
 ## Verification
 
-1. A deterministic format-contract unit test checks all four blocks, order,
-   blank lines, sentence ceilings, one CTA question, and the 1,600-character
-   cap.
-2. A prompt/model eval checks that Homa produces the approved shape from a
-   representative knowledge row and Story fixture context.
-3. A negative fixture rejects:
-   - missing labels;
-   - more than two sentences in either body section;
-   - a calendar-write promise;
-   - a saved-note link;
-   - multiple CTA questions;
-   - internal ids or score terms.
-4. Typecheck, source lint, production build, Eve build, event guard, and the
-   existing conversation-continuity suite remain green.
+1. The deterministic transport validator checks the exact four-block shape,
+   supported CTA syntax, 900 visible characters, and ten carrier segments.
+2. A separate deterministic fixture evaluator consumes explicit sources,
+   claims, child anchors, sibling names, recent traces, and CTA concepts. Each
+   semantic negative must fail for its named reason.
+3. Eve routing evals cover dispatch-positive, parent-chat adjacent-negative,
+   and materials-request adjacent-negative behavior.
+4. The optional paid craft-only eval uses a second model call as an
+   evidence-grounded semantic judge. It does not test tool or preparation
+   sequencing.
 
 ## Out of scope
 

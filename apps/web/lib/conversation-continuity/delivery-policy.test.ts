@@ -115,12 +115,12 @@ describe("progress check-in reply contracts", () => {
 });
 
 describe("scheduled message reply contracts", () => {
-  it("gives every morning-brief recipient an independent yes/no open loop", () => {
+  it("gives every morning-brief recipient an independent run-specific yes/no open loop", () => {
     assert.deepEqual(
-      replyContractForTask("morning_brief", "Want the quick game?"),
+      replyContractForTask("morning_brief", "Want the quick game?", "run-1"),
       {
       kind: "yes_no",
-      promptKey: "morning-brief-offer",
+      promptKey: "morning-brief:run-1",
       expiresAfterMs: 24 * 60 * 60_000,
       },
     );

@@ -2,7 +2,10 @@ import { createHash } from "node:crypto";
 
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
+import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id";
 import { escapeHtml } from "../html-escape";
+import type { TaskDeliveryVersion } from "../tasks/delivery-version";
+import { validateResearchBriefFormat } from "../tasks/research-brief-format";
 import { mapDb } from "./db";
 
 /**
@@ -65,7 +68,14 @@ interface SendArgs {
 }
 
 export type HomaEmailSubmission =
-  | { status: "submitted"; messageId: string }
+  | {
+      status: "submitted";
+      /** Resend's POST receipt, used for provider webhooks. */
+      providerSubmissionId: string;
+      /** Fetches the RFC Message-ID only after the caller made acceptance
+       * durable. Failures and timeout return null without changing acceptance. */
+      retrieveProviderMessageId(): Promise<string | null>;
+    }
   | { status: "rejected" }
   | { status: "unknown" };
 
@@ -75,6 +85,63 @@ export function classifyResendHttpFailure(
   return status === 408 || status === 429 || status >= 500
     ? "unknown"
     : "rejected";
+}
+
+export interface EmailSubmissionOptions {
+  fetch?: typeof globalThis.fetch;
+  rfcMessageIdTimeoutMs?: number;
+}
+
+async function retrieveResendRfcMessageId(
+  apiId: string,
+  apiKey: string,
+  options: EmailSubmissionOptions = {},
+): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    options.rfcMessageIdTimeoutMs ?? 2_000,
+  );
+  try {
+    const response = await (options.fetch ?? globalThis.fetch)(
+      `https://api.resend.com/emails/${encodeURIComponent(apiId)}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${apiKey}` },
+        signal: controller.signal,
+      },
+    );
+    if (!response.ok) {
+      console.error(
+        `map email: RFC Message-ID retrieval failed HTTP ${response.status}`,
+      );
+      return null;
+    }
+    const payload = (await response.json()) as { message_id?: unknown };
+    const messageId = normalizeRfcMessageId(payload.message_id);
+    if (!messageId) {
+      console.error("map email: RFC Message-ID unavailable after acceptance");
+    }
+    return messageId;
+  } catch {
+    console.error("map email: RFC Message-ID retrieval failed");
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function retrieveResendRfcMessageIdForSubmission(
+  providerSubmissionId: string,
+  options: EmailSubmissionOptions = {},
+): Promise<string | null> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  return await retrieveResendRfcMessageId(
+    providerSubmissionId,
+    key,
+    options,
+  );
 }
 
 /** sha256 of the lowercased address, the ledger's PII posture (matches
@@ -104,7 +171,9 @@ async function recordEmailSend(
         ${ledger.kind},
         ${emailHash(to)},
         ${submission.status},
-        ${submission.status === "submitted" ? submission.messageId : null},
+        ${submission.status === "submitted"
+          ? submission.providerSubmissionId
+          : null},
         ${error ?? null}
       )
     `;
@@ -113,17 +182,29 @@ async function recordEmailSend(
   }
 }
 
-async function submit(args: SendArgs): Promise<HomaEmailSubmission> {
-  const submission = await submitToResend(args);
+async function submit(
+  args: SendArgs,
+  options: EmailSubmissionOptions = {},
+): Promise<HomaEmailSubmission> {
+  const submission = await submitToResend(args, options);
   if (args.ledger) {
-    await recordEmailSend(args.ledger, args.to, submission.result, submission.error);
+    await recordEmailSend(
+      args.ledger,
+      args.to,
+      submission.result,
+      submission.error,
+    );
   }
   return submission.result;
 }
 
 async function submitToResend(
   args: SendArgs,
-): Promise<{ result: HomaEmailSubmission; error?: string }> {
+  options: EmailSubmissionOptions = {},
+): Promise<{
+  result: HomaEmailSubmission;
+  error?: string;
+}> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.error("map email: RESEND_API_KEY not set, skipping send");
@@ -158,7 +239,9 @@ async function submitToResend(
   const text = [args.heading, "", ...args.bodyLines.map(stripTags), args.cta ? `${args.cta.label}: ${args.cta.url}` : "", "", stripTags(args.footerNote)].join("\n");
 
   try {
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await (options.fetch ?? globalThis.fetch)(
+      "https://api.resend.com/emails",
+      {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -169,7 +252,8 @@ async function submitToResend(
         html,
         text,
       }),
-    });
+      },
+    );
     if (!response.ok) {
       console.error(`map email: send failed HTTP ${response.status}`);
       return {
@@ -178,9 +262,20 @@ async function submitToResend(
       };
     }
     const payload = (await response.json()) as { id?: unknown };
-    return typeof payload.id === "string" && payload.id
-      ? { result: { status: "submitted", messageId: payload.id } }
-      : { result: { status: "unknown" }, error: "no id in Resend response" };
+    if (typeof payload.id !== "string" || !payload.id) {
+      return {
+        result: { status: "unknown" },
+        error: "no id in Resend response",
+      };
+    }
+    return {
+      result: {
+        status: "submitted",
+        providerSubmissionId: payload.id,
+        retrieveProviderMessageId: async () =>
+          await retrieveResendRfcMessageId(payload.id as string, key, options),
+      },
+    };
   } catch (error) {
     console.error("map email: send failed:", error);
     return {
@@ -358,8 +453,12 @@ export async function submitAgentComposedEmail(
   subject: string,
   bodyLines: string[],
   replyTo?: string,
+  options: EmailSubmissionOptions = {},
 ): Promise<HomaEmailSubmission> {
-  return submit(agentComposedEmailArgs(to, subject, bodyLines, replyTo));
+  return submit(
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo),
+    options,
+  );
 }
 
 /** The family's own registered email, for the agent-composed send path
@@ -428,7 +527,14 @@ function researchBriefEmailArgs(
   to: string,
   agentText: string,
   replyTo?: string,
+  deliveryVersion: TaskDeliveryVersion = "legacy",
 ): SendArgs | null {
+  if (
+    deliveryVersion === "research_brief_v2" &&
+    !validateResearchBriefFormat(agentText).ok
+  ) {
+    return null;
+  }
   const url = `${siteUrl()}/app/tasks`;
   const bodyLines = agentText
     .split("\n")
@@ -452,8 +558,14 @@ export async function sendResearchBriefEmail(
   to: string,
   agentText: string,
   replyTo?: string,
+  deliveryVersion: TaskDeliveryVersion = "legacy",
 ): Promise<boolean> {
-  const args = researchBriefEmailArgs(to, agentText, replyTo);
+  const args = researchBriefEmailArgs(
+    to,
+    agentText,
+    replyTo,
+    deliveryVersion,
+  );
   return args ? send(args) : false;
 }
 
@@ -461,8 +573,14 @@ export async function submitResearchBriefEmail(
   to: string,
   agentText: string,
   replyTo?: string,
+  deliveryVersion: TaskDeliveryVersion = "legacy",
 ): Promise<HomaEmailSubmission> {
-  const args = researchBriefEmailArgs(to, agentText, replyTo);
+  const args = researchBriefEmailArgs(
+    to,
+    agentText,
+    replyTo,
+    deliveryVersion,
+  );
   return args ? submit(args) : { status: "rejected" };
 }
 

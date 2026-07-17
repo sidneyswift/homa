@@ -1,8 +1,10 @@
 import {
+  persistCanonicalMessage,
   resolveInboundContinuity,
   resolvedContinuityAttributes,
+  type InboundContinuityInput,
+  type PersistCanonicalMessageInput,
 } from "./conversation-continuity/ledger";
-import { persistCanonicalMessage } from "./conversation-continuity/ledger";
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
 
@@ -27,6 +29,17 @@ export interface PersistMessageInput {
   finishReason?: string;
 }
 
+export interface PersistConversationMessageDependencies {
+  resolveInbound(
+    input: InboundContinuityInput,
+  ): ReturnType<typeof resolveInboundContinuity>;
+  persistCanonical(
+    input: PersistCanonicalMessageInput,
+  ): ReturnType<typeof persistCanonicalMessage>;
+  embed(text: string, attribution: { familyId: string }): Promise<string | null>;
+  saveEmbedding(messageId: string, embedding: string): Promise<void>;
+}
+
 /** Sessions stamped by an adapter carry their surface in auth attributes
  * (sms, email, dispatch); the chat-sdk kind covers SMS's bridge; the
  * bare eve channel is web. */
@@ -42,6 +55,31 @@ function channelLabel(
 
 export async function persistConversationMessage(
   input: PersistMessageInput,
+  dependencies?: PersistConversationMessageDependencies,
+): Promise<
+  Awaited<ReturnType<typeof persistCanonicalMessage>>
+> {
+  return persistConversationMessageWithDependencies(
+    input,
+    dependencies ?? {
+      resolveInbound: resolveInboundContinuity,
+      persistCanonical: persistCanonicalMessage,
+      embed: embedText,
+      async saveEmbedding(messageId, embedding) {
+        const sql = mapDb();
+        await sql`
+          update public.conversation_messages
+          set embedding = ${embedding}
+          where id = ${messageId} and embedding is null
+        `;
+      },
+    },
+  );
+}
+
+async function persistConversationMessageWithDependencies(
+  input: PersistMessageInput,
+  dependencies: PersistConversationMessageDependencies,
 ): Promise<
   Awaited<ReturnType<typeof persistCanonicalMessage>>
 > {
@@ -50,6 +88,7 @@ export async function persistConversationMessage(
     memberUserId?: string;
     episodeId?: string;
     providerMessageId?: string;
+    providerReplyTo?: string;
     phoneNumber?: string;
     email?: string;
   };
@@ -62,7 +101,7 @@ export async function persistConversationMessage(
   let continuityAttributes: Record<string, string> = {};
   if (input.role === "user" && !attrs.episodeId) {
     try {
-      const continuity = await resolveInboundContinuity({
+      const continuity = await dependencies.resolveInbound({
         familyId,
         memberUserId: attrs.memberUserId ?? null,
         channel: channel === "dispatch" ? "web" : channel,
@@ -72,7 +111,7 @@ export async function persistConversationMessage(
           `${channel}:${input.sessionId}`,
         runtimeSessionId: input.sessionId,
         providerMessageId: attrs.providerMessageId ?? null,
-        providerReplyTo: null,
+        providerReplyTo: attrs.providerReplyTo ?? null,
         destinationKey: attrs.phoneNumber ?? attrs.email ?? null,
         text: content,
       });
@@ -91,9 +130,9 @@ export async function persistConversationMessage(
   // Best-effort semantic index (about 200-400ms per message inside the
   // hook, after the user already has their streamed text). Null means
   // this row is findable by FTS only, never a failed write.
-  const embedding = await embedText(content, { familyId });
+  const embedding = await dependencies.embed(content, { familyId });
 
-  const persisted = await persistCanonicalMessage({
+  const persisted = await dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
     sessionId: input.sessionId,
     channel,
@@ -108,12 +147,7 @@ export async function persistConversationMessage(
         : undefined,
   });
   if (persisted && embedding) {
-    const sql = mapDb();
-    await sql`
-      update public.conversation_messages
-      set embedding = ${embedding}
-      where id = ${persisted.id} and embedding is null
-    `;
+    await dependencies.saveEmbedding(persisted.id, embedding);
   }
   return persisted;
 }

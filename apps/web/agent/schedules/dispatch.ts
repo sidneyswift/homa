@@ -82,22 +82,38 @@ export default defineSchedule({
               continue;
             }
 
-            runId = await beginTaskRun(task, now);
-            if (!runId) {
+            const startedRun = await beginTaskRun(task, now);
+            if (!startedRun) {
               // The outbox already holds a run for this local day: this
               // claim is an at-least-once redelivery. Advance and move on.
               await advanceTaskSchedule(task, now);
               continue;
             }
+            runId = startedRun.id;
             const episodeId = await createProactiveEpisode({
               familyId: task.familyId,
               now,
             });
 
             const session = await receive(dispatchChannel, {
-              message: await buildTaskMessage(task, "scheduled"),
-              target: buildDispatchTarget(task, runId, episodeId),
-              auth: buildDispatchAuth(task, runId, episodeId),
+              message: await buildTaskMessage(
+                task,
+                "scheduled",
+                undefined,
+                { deliveryVersion: startedRun.deliveryVersion },
+              ),
+              target: buildDispatchTarget(
+                task,
+                runId,
+                episodeId,
+                startedRun.deliveryVersion,
+              ),
+              auth: buildDispatchAuth(
+                task,
+                runId,
+                episodeId,
+                startedRun.deliveryVersion,
+              ),
             });
             sessionStarted = true;
             await setTaskRunRuntimeSession(runId, session.id);

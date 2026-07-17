@@ -1,3 +1,5 @@
+import { normalizeRfcMessageId } from "./rfc-message-id";
+
 /**
  * Pure reply-causation policy for the Conversation Continuity module.
  *
@@ -22,8 +24,14 @@ export interface PendingDeliveryCandidate {
   promptKey?: string | null;
 }
 
+export type ReplyOutcome = "accepted" | "declined" | "answered";
+
 export type ReplyResolution =
-  | { kind: "matched"; candidate: PendingDeliveryCandidate }
+  | {
+      kind: "matched";
+      candidate: PendingDeliveryCandidate;
+      outcome: ReplyOutcome;
+    }
   | { kind: "ambiguous"; candidates: PendingDeliveryCandidate[] }
   | { kind: "none"; nearbyCandidates: PendingDeliveryCandidate[] };
 
@@ -37,8 +45,6 @@ export interface ResolveReplyIntentInput {
   candidates: PendingDeliveryCandidate[];
 }
 
-const REFERENTIAL_REPLY =
-  /^(?:yes|yes please|yep|yeah|sure|okay|ok|do it|send it|please|sounds good|tell me more|show me|no|no thanks|not now|why|how)(?:[.!?]*)$/iu;
 const PROGRESS_CHIP_REPLY =
   /^(?:easily|getting there|not yet|not sure|skip|almost|sometimes)$/iu;
 const PROGRESS_NEGATIVE_REPLY =
@@ -47,6 +53,27 @@ const PROGRESS_NATURAL_REPLY =
   /^(?:(?:he|she|they)\s+)?(?:can(?:not|['’]t)(?:\s+do\s+(?:it|that))?(?:\s+yet)?|can\s+do\s+(?:it|that)\s+easily|does\s+(?:it|that)\s+easily|is\s+getting\s+there|needs?\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|can\s+do\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|does\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help)$/iu;
 const PROGRESS_PROMPT_KEY =
   /^progress-check-in:([^:]+):revision:(\d+)$/u;
+const AFFIRMATIVE_REPLY =
+  /^(?:yes(?:,? please)?|yep|yeah|sure|okay|ok|do it|send it|sounds good)$/u;
+const NEGATIVE_REPLY = /^(?:no(?:,? thanks)?|nope|not now)$/u;
+
+function normalizeBoundedPolarityPhrase(text: string): string {
+  return text
+    .normalize("NFKC")
+    .toLowerCase()
+    .trim()
+    .replace(/[.!?]+$/gu, "")
+    .replace(/\s+/gu, " ")
+    .replace(/\s*,\s*/gu, ", ");
+}
+
+function isAffirmativeReply(text: string): boolean {
+  return AFFIRMATIVE_REPLY.test(normalizeBoundedPolarityPhrase(text));
+}
+
+function isNegativeReply(text: string): boolean {
+  return NEGATIVE_REPLY.test(normalizeBoundedPolarityPhrase(text));
+}
 
 function isProgressChoiceReply(text: string): boolean {
   const normalized = text
@@ -170,6 +197,37 @@ function contentClarification(
   return null;
 }
 
+function outcomeForMatch(
+  candidate: PendingDeliveryCandidate,
+  text: string,
+): ReplyOutcome {
+  switch (candidate.replyKind) {
+    case "free_text":
+    case "choice":
+      return "answered";
+    case "yes_no":
+    case "approval":
+      if (isAffirmativeReply(text)) return "accepted";
+      if (isNegativeReply(text)) return "declined";
+      return "answered";
+    default: {
+      const exhaustive: never = candidate.replyKind;
+      return exhaustive;
+    }
+  }
+}
+
+function matchedReply(
+  candidate: PendingDeliveryCandidate,
+  text: string,
+): ReplyResolution {
+  return {
+    kind: "matched",
+    candidate,
+    outcome: outcomeForMatch(candidate, text),
+  };
+}
+
 export function resolveReplyIntent(
   input: ResolveReplyIntentInput,
 ): ReplyResolution {
@@ -179,14 +237,18 @@ export function resolveReplyIntent(
     const exact = active.filter(
       (candidate) => candidate.deliveryId === input.explicitDeliveryId,
     );
-    if (exact.length === 1) return { kind: "matched", candidate: exact[0] };
+    if (exact.length === 1) return matchedReply(exact[0], input.text);
   }
 
   if (input.providerReplyTo) {
+    const replyToMessageId = normalizeRfcMessageId(input.providerReplyTo);
     const exact = active.filter(
-      (candidate) => candidate.providerMessageId === input.providerReplyTo,
+      (candidate) =>
+        replyToMessageId !== null &&
+        normalizeRfcMessageId(candidate.providerMessageId) ===
+          replyToMessageId,
     );
-    if (exact.length === 1) return { kind: "matched", candidate: exact[0] };
+    if (exact.length === 1) return matchedReply(exact[0], input.text);
     if (exact.length > 1) return { kind: "ambiguous", candidates: exact };
   }
 
@@ -195,23 +257,36 @@ export function resolveReplyIntent(
   const currentAsksQuestion = /\?\s*$/u.test(input.text.trim());
   const contentMatch = currentAsksQuestion
     ? null
-    : contentClarification(input.text, heuristicCandidates);
-  if (contentMatch) return { kind: "matched", candidate: contentMatch };
+    : contentClarification(
+        input.text,
+        heuristicCandidates.filter(
+          (candidate) =>
+            candidate.replyKind === "free_text" ||
+            candidate.replyKind === "choice",
+        ),
+      );
+  if (contentMatch) return matchedReply(contentMatch, input.text);
 
   const clarified = currentAsksQuestion
     ? []
-    : heuristicCandidates.filter((candidate) =>
-        promptKeyMatches(input.text, candidate.promptKey),
+    : heuristicCandidates.filter(
+        (candidate) =>
+          (
+            candidate.replyKind === "free_text" ||
+            candidate.replyKind === "choice"
+          ) &&
+          promptKeyMatches(input.text, candidate.promptKey),
       );
   if (clarified.length === 1) {
-    return { kind: "matched", candidate: clarified[0] };
+    return matchedReply(clarified[0], input.text);
   }
   if (clarified.length > 1) {
     return { kind: "ambiguous", candidates: clarified };
   }
 
   const trimmedText = input.text.trim();
-  const genericReferential = REFERENTIAL_REPLY.test(trimmedText);
+  const boundedPolarityReply =
+    isAffirmativeReply(trimmedText) || isNegativeReply(trimmedText);
   const progressChipReply = PROGRESS_CHIP_REPLY.test(
     trimmedText.replace(/[.!]+$/u, "").replaceAll("_", " "),
   ) || PROGRESS_NEGATIVE_REPLY.test(
@@ -241,7 +316,7 @@ export function resolveReplyIntent(
           candidate.replyKind === "yes_no" ||
           candidate.replyKind === "approval"
         ) &&
-        genericReferential
+        boundedPolarityReply
       ),
   );
   if (eligible.length === 0) {
@@ -249,7 +324,7 @@ export function resolveReplyIntent(
   }
 
   if (eligible.length === 1) {
-    return { kind: "matched", candidate: eligible[0] };
+    return matchedReply(eligible[0], input.text);
   }
   if (eligible.length > 1) {
     return { kind: "ambiguous", candidates: eligible };

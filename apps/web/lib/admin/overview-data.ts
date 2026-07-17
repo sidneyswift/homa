@@ -1,8 +1,15 @@
 import { listHandledAlerts, type HandledAlert } from "./alert-acks";
 import { adminDb } from "./db";
 import { getFamilySnapshots, type FamilySnapshot } from "./roster-data";
+import {
+  countPossibleMorningBriefInterest,
+  summarizeTaskPromptOutcomes,
+  type PromptOutcome,
+  type TaskPromptOutcomeSummary,
+} from "./morning-brief-metrics";
 import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
 import { getModelPriceBook, type PriceBookStatus } from "../model-pricing-live";
+import type { FamilyTaskKind } from "../tasks/kinds";
 
 /**
  * Fleet aggregates for the founder console's overview (MJ-14 mission
@@ -69,7 +76,9 @@ export interface FleetOverview {
   runTrouble: RunTrouble[];
   deliveryCounts: Record<string, number>;
   deliveryTrouble: DeliveryTrouble[];
-  replies: number;
+  taskPromptOutcomes: Record<FamilyTaskKind, TaskPromptOutcomeSummary>;
+  possibleMorningBriefInterest: number;
+  nonTaskReplies: number;
   userMessages: number;
   messagesByDay: number[];
   materialsCount: number;
@@ -139,9 +148,69 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     order by d.updated_at desc
     limit 12
   `;
-  const replyRows = await sql<{ n: number }[]>`
+  const sentTaskPromptRows = await sql<{ task_kind: FamilyTaskKind }[]>`
+    select r.kind as task_kind
+    from public.conversation_deliveries d
+    join public.conversation_open_loops l on l.delivery_id = d.id
+    join public.homa_task_runs r
+      on r.id = d.task_run_id
+     and r.family_id = d.family_id
+    where r.kind in ('journal_prompt', 'morning_brief', 'custom')
+      and d.status = 'sent'
+      and d.sent_at >= now() - ${interval}::interval
+  `;
+  const resolvedTaskPromptRows = await sql<
+    {
+      task_kind: FamilyTaskKind;
+      resolved_outcome: PromptOutcome | null;
+    }[]
+  >`
+    select r.kind as task_kind, l.resolved_outcome
+    from public.conversation_open_loops l
+    join public.conversation_deliveries d on d.id = l.delivery_id
+    join public.homa_task_runs r
+      on r.id = d.task_run_id
+     and r.family_id = d.family_id
+    where r.kind in ('journal_prompt', 'morning_brief', 'custom')
+      and l.state = 'resolved'
+      and l.resolved_at >= now() - ${interval}::interval
+  `;
+  const nonTaskReplyRows = await sql<{ n: number }[]>`
     select count(*)::int as n from public.conversation_deliveries
-    where replied_at is not null and replied_at >= now() - ${interval}::interval
+    where replied_at is not null
+      and replied_at >= now() - ${interval}::interval
+      and task_run_id is null
+  `;
+  const possibleInterestRows = await sql<
+    {
+      message_created_at: string;
+      replied_delivery_id: string | null;
+      sent_morning_brief_at: string | null;
+    }[]
+  >`
+    select
+      m.created_at::text as message_created_at,
+      m.replied_delivery_id,
+      brief.sent_at::text as sent_morning_brief_at
+    from public.conversation_messages m
+    join lateral (
+        select d.sent_at::text
+        from public.conversation_deliveries d
+        join public.homa_task_runs r
+          on r.id = d.task_run_id
+         and r.family_id = d.family_id
+        where d.family_id = m.family_id
+          and d.episode_id = m.episode_id
+          and d.status = 'sent'
+          and r.kind = 'morning_brief'
+          and d.sent_at <= m.created_at
+          and m.created_at <= d.sent_at + interval '4 hours'
+        order by d.sent_at desc
+        limit 1
+      ) brief on true
+    where m.role = 'user'
+      and m.replied_delivery_id is null
+      and m.created_at >= now() - ${interval}::interval
   `;
   const messageRows = await sql<{ n: number }[]>`
     select count(*)::int as n from public.conversation_messages
@@ -260,7 +329,32 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       error: row.error,
       at: row.at,
     })),
-    replies: replyRows[0].n,
+    taskPromptOutcomes: summarizeTaskPromptOutcomes(
+      [
+        ...sentTaskPromptRows.map((row) => ({
+          taskKind: row.task_kind,
+          sentInRange: true,
+          resolvedInRange: false,
+          outcome: null,
+        })),
+        ...resolvedTaskPromptRows.map((row) => ({
+          taskKind: row.task_kind,
+          sentInRange: false,
+          resolvedInRange: true,
+          outcome: row.resolved_outcome,
+        })),
+      ],
+    ),
+    possibleMorningBriefInterest: countPossibleMorningBriefInterest(
+      possibleInterestRows.map((row) => ({
+        sentMorningBriefAt: row.sent_morning_brief_at
+          ? new Date(row.sent_morning_brief_at)
+          : null,
+        messageCreatedAt: new Date(row.message_created_at),
+        repliedDeliveryId: row.replied_delivery_id,
+      })),
+    ),
+    nonTaskReplies: nonTaskReplyRows[0].n,
     userMessages: messageRows[0].n,
     messagesByDay: messagesPerDay.map((row) => row.n),
     materialsCount: materialRows[0].n,

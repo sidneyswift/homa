@@ -6,6 +6,7 @@ import { MAP_ANSWERS } from "./map/bank";
 
 const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
 const CHILD_ID = "00000000-0000-4000-8000-000000000002";
+const TASK_RUN_ID = "00000000-0000-4000-8000-000000000003";
 
 const validProgressEvents = {
   "progress.evidence_recorded": {
@@ -299,6 +300,66 @@ test("completed chat turns accept an optional suggestion set correlation", () =>
       ...completedTurn,
       suggestion_set_id: "not-a-uuid",
     }).success,
+    false,
+  );
+});
+
+test("reply resolution events require a causal outcome and reject content", () => {
+  const event = {
+    family_id: FAMILY_ID,
+    channel: "email",
+    resolution: "matched",
+    resolved_outcome: "answered",
+    cross_channel: false,
+  };
+
+  assert.equal(
+    EVENT_SCHEMAS["conversation.reply_resolved"].safeParse(event).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["conversation.reply_resolved"].safeParse({
+      ...event,
+      resolved_outcome: undefined,
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["conversation.reply_resolved"].safeParse({
+      ...event,
+      message: "private reply content",
+    }).success,
+    false,
+  );
+});
+
+test("research brief feedback records only a family and explicit signal", () => {
+  const event = {
+    family_id: FAMILY_ID,
+    task_run_id: TASK_RUN_ID,
+    signal: "helpful",
+  };
+  const schema = EVENT_SCHEMAS["research.brief_feedback"];
+
+  assert.equal(schema.safeParse(event).success, true);
+  assert.equal(
+    schema.safeParse({ ...event, signal: "not_for_us" }).success,
+    true,
+  );
+  assert.equal(
+    schema.safeParse({ ...event, signal: "liked_it" }).success,
+    false,
+  );
+  assert.equal(
+    schema.safeParse({ ...event, message: "private brief content" }).success,
+    false,
+  );
+  assert.equal(
+    schema.safeParse({ ...event, member_user_id: CHILD_ID }).success,
+    false,
+  );
+  assert.equal(
+    schema.safeParse({ family_id: FAMILY_ID, signal: "helpful" }).success,
     false,
   );
 });
