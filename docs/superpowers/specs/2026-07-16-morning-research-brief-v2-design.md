@@ -1,7 +1,8 @@
 # Morning research brief v2 design
 
-Status: approved 2026-07-16. This worktree replay preserves the binding
-decisions from the approved control document.
+Status: approved 2026-07-16 and production-verified 2026-07-17. The shipped
+system preserves the binding decisions from the approved control document,
+including the later sandbox-only and no-candidate skip corrections.
 
 ## Scope and preserved format
 
