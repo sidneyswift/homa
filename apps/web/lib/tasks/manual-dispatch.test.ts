@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import type { TaskDispatchPreflightResult } from "./dispatch-input";
 import { startManualTaskDispatch } from "./manual-dispatch";
 import type { DueFamilyTask, FinishTaskRunOutcome } from "./store";
 
@@ -22,26 +23,125 @@ const task: DueFamilyTask = {
   recipientMemberUserId: "member-1",
 };
 
+const readyPreflight: TaskDispatchPreflightResult = {
+  outcome: "ready",
+  deliveryVersion: "research_brief_v2",
+  message: "prepared model prompt",
+};
+
 describe("manual task dispatch setup", () => {
-  it("finishes a created run with a PII-free error when episode setup fails", async () => {
-    const finished: Array<{
-      runId: string;
-      outcome: FinishTaskRunOutcome;
-    }> = [];
+  it("returns the approved no-candidate note without creating a run or Eve side effect", async () => {
+    const calls: string[] = [];
 
     const result = await startManualTaskDispatch(task, {
-      beginRun: async () => ({
+      preflight: async () => {
+        calls.push("preflight");
+        return {
+          outcome: "skip",
+          deliveryVersion: "research_brief_v2",
+          reason: "no eligible morning brief candidate",
+        };
+      },
+      beginRun: async () => assert.fail("manual skip must create no run"),
+      createEpisode: async () => assert.fail("manual skip has no episode"),
+      sendSession: async () => assert.fail("manual skip has no session"),
+      setRuntimeSession: async () => assert.fail("manual skip has no session"),
+      finishRun: async () => assert.fail("manual skip has no run to finish"),
+    });
+
+    assert.deepEqual(result, {
+      ok: false,
+      status: 409,
+      note: "There isn't new research to share right now. Nothing needs your attention. Homa will check again at your next morning brief.",
+    });
+    assert.deepEqual(calls, ["preflight"]);
+  });
+
+  it("returns the operational fallback when preflight fails before run creation", async () => {
+    const calls: string[] = [];
+    const warnings: string[] = [];
+
+    const result = await startManualTaskDispatch(task, {
+      preflight: async () => {
+        calls.push("preflight");
+        throw new Error("context database unavailable");
+      },
+      beginRun: async () => assert.fail("preflight failure has no run"),
+      createEpisode: async () => assert.fail("preflight failure has no episode"),
+      sendSession: async () => assert.fail("preflight failure has no session"),
+      setRuntimeSession: async () => assert.fail("preflight failure has no session"),
+      finishRun: async () => assert.fail("preflight failure has no run"),
+      logWarning: (warning) => {
+        calls.push("log");
+        warnings.push(warning);
+      },
+    });
+
+    assert.deepEqual(result, {
+      ok: false,
+      status: 503,
+      note: "Homa couldn't start this run. Try again in a bit.",
+    });
+    assert.deepEqual(calls, ["preflight", "log"]);
+    assert.deepEqual(warnings, [
+      "[manual_dispatch] phase=manual_bookkeeping result=setup_failure_unrecorded",
+    ]);
+  });
+
+  it("uses the ready preflight message and explicit version for run, auth, and target", async () => {
+    const calls: string[] = [];
+
+    const result = await startManualTaskDispatch(task, {
+      preflight: async () => {
+        calls.push("preflight");
+        return readyPreflight;
+      },
+      beginRun: async (_task, deliveryVersion) => {
+        calls.push(`begin:${deliveryVersion}`);
+        return { id: "run-1", deliveryVersion };
+      },
+      createEpisode: async () => {
+        calls.push("episode");
+        return "episode-1";
+      },
+      sendSession: async (input) => {
+        calls.push(
+          `send:${input.message}:${input.auth.attributes.deliveryVersion}:${input.target.deliveryVersion}`,
+        );
+        return { id: "session-1" };
+      },
+      setRuntimeSession: async (runId, sessionId) => {
+        calls.push(`runtime:${runId}:${sessionId}`);
+      },
+      finishRun: async () => assert.fail("successful setup stays running"),
+    });
+
+    assert.deepEqual(result, { ok: true, runId: "run-1" });
+    assert.deepEqual(calls, [
+      "preflight",
+      "begin:research_brief_v2",
+      "episode",
+      "send:prepared model prompt:research_brief_v2:research_brief_v2",
+      "runtime:run-1:session-1",
+    ]);
+  });
+
+  it("preserves generic setup failure after the explicit run is created", async () => {
+    const finished: FinishTaskRunOutcome[] = [];
+
+    const result = await startManualTaskDispatch(task, {
+      preflight: async () => readyPreflight,
+      beginRun: async (_task, deliveryVersion) => ({
         id: "run-1",
-        deliveryVersion: "research_brief_v2",
+        deliveryVersion,
       }),
-      buildMessage: async () => "private model prompt",
       createEpisode: async () => {
         throw new Error("parent@example.test appeared in provider error");
       },
       sendSession: async () => assert.fail("session must not start"),
       setRuntimeSession: async () => assert.fail("session must not persist"),
-      finishRun: async (runId, outcome) => {
-        finished.push({ runId, outcome });
+      finishRun: async (_runId, outcome) => {
+        finished.push(outcome);
         return true;
       },
     });
@@ -51,52 +151,9 @@ describe("manual task dispatch setup", () => {
       status: 503,
       note: "Homa couldn't start this run. Try again in a bit.",
     });
-    assert.deepEqual(finished, [{
-      runId: "run-1",
-      outcome: {
-        familyId: "family-1",
-        kind: "morning_brief",
-        status: "failed",
-        error: "manual task session setup failed",
-        onlyIfRunning: true,
-      },
-    }]);
-  });
-
-  it("carries a sandbox task's pinned v2 version into message, auth, target, and session setup", async () => {
-    const calls: string[] = [];
-    const result = await startManualTaskDispatch(task, {
-      beginRun: async () => ({
-        id: "run-1",
-        deliveryVersion: "research_brief_v2",
-      }),
-      buildMessage: async (_task, deliveryVersion) => {
-        calls.push(`message:${deliveryVersion}`);
-        return "prompt";
-      },
-      createEpisode: async () => {
-        calls.push("episode");
-        return "episode-1";
-      },
-      sendSession: async (input) => {
-        calls.push(
-          `send:${input.auth.attributes.deliveryVersion}:${input.target.deliveryVersion}`,
-        );
-        return { id: "session-1" };
-      },
-      setRuntimeSession: async (runId, sessionId) => {
-        calls.push(`runtime:${runId}:${sessionId}`);
-      },
-      finishRun: async () => assert.fail("successful setup must stay running"),
-    });
-
-    assert.deepEqual(result, { ok: true, runId: "run-1" });
-    assert.deepEqual(calls, [
-      "message:research_brief_v2",
-      "episode",
-      "send:research_brief_v2:research_brief_v2",
-      "runtime:run-1:session-1",
-    ]);
+    assert.equal(finished.length, 1);
+    assert.equal(finished[0]?.status, "failed");
+    assert.equal(finished[0]?.error, "manual task session setup failed");
   });
 
   it("returns started after bounded bookkeeping retries once the session exists", async () => {
@@ -105,11 +162,11 @@ describe("manual task dispatch setup", () => {
     const warnings: string[] = [];
 
     const result = await startManualTaskDispatch(task, {
-      beginRun: async () => ({
+      preflight: async () => readyPreflight,
+      beginRun: async (_task, deliveryVersion) => ({
         id: "run-1",
-        deliveryVersion: "research_brief_v2",
+        deliveryVersion,
       }),
-      buildMessage: async () => "prompt",
       createEpisode: async () => "episode-1",
       sendSession: async () => {
         sessionSends += 1;

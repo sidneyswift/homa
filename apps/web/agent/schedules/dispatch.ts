@@ -8,14 +8,17 @@ import { createProactiveEpisode } from "../../lib/conversation-continuity/ledger
 import {
   buildDispatchAuth,
   buildDispatchTarget,
-  buildTaskMessage,
+  preflightTaskDispatch,
 } from "../../lib/tasks/dispatch-input";
+import { deliveryVersionForNewTaskRun } from "../../lib/tasks/delivery-version";
 import { enabledFamilyTaskKinds } from "../../lib/tasks/kinds";
+import { dispatchScheduledTask } from "../../lib/tasks/scheduled-dispatch";
 import {
   advanceTaskSchedule,
   beginTaskRun,
   claimDueFamilyTasks,
   finishTaskRun,
+  recordSkippedScheduledTaskRun,
   reapStaleTaskRuns,
   releaseTaskSchedule,
   seedFamilyTaskSchedules,
@@ -67,79 +70,66 @@ export default defineSchedule({
         });
 
         for (const task of tasks) {
-          let runId: string | null = null;
-          let sessionStarted = false;
-          try {
-            if (!withinDeliveryWindow(task, now)) {
-              // Too late to deliver today (e.g. the 9am brief claimed at
-              // 1pm after downtime). Record the miss, move to the next
-              // scheduled day; never text at the wrong hour.
-              await beginTaskRun(task, now, {
-                status: "skipped",
-                error: "missed the delivery window",
-              });
-              await advanceTaskSchedule(task, now);
-              continue;
-            }
-
-            const startedRun = await beginTaskRun(task, now);
-            if (!startedRun) {
-              // The outbox already holds a run for this local day: this
-              // claim is an at-least-once redelivery. Advance and move on.
-              await advanceTaskSchedule(task, now);
-              continue;
-            }
-            runId = startedRun.id;
-            const episodeId = await createProactiveEpisode({
-              familyId: task.familyId,
-              now,
-            });
-
-            const session = await receive(dispatchChannel, {
-              message: await buildTaskMessage(
-                task,
-                "scheduled",
-                undefined,
-                { deliveryVersion: startedRun.deliveryVersion },
+          await dispatchScheduledTask(task, now, {
+            withinDeliveryWindow,
+            selectDeliveryVersion: (scheduledTask) =>
+              deliveryVersionForNewTaskRun(
+                scheduledTask.kind,
+                process.env,
+                scheduledTask.familySandbox,
               ),
-              target: buildDispatchTarget(
-                task,
-                runId,
-                episodeId,
-                startedRun.deliveryVersion,
-              ),
-              auth: buildDispatchAuth(
-                task,
-                runId,
-                episodeId,
-                startedRun.deliveryVersion,
-              ),
-            });
-            sessionStarted = true;
-            await setTaskRunRuntimeSession(runId, session.id);
-
-            // The session is started and durable; its channel finishes
-            // the run. Advancing here (not after completion) is what
-            // makes redelivery a same-day no-op instead of a double text.
-            await advanceTaskSchedule(task, now);
-          } catch (error) {
-            console.error(
-              `dispatch failed for family ${task.familyId} (${task.kind}):`,
-              error instanceof Error ? error.message : "unknown",
-            );
-            if (runId && !sessionStarted) {
-              await finishTaskRun(runId, {
-                familyId: task.familyId,
-                kind: task.kind,
-                status: "failed",
-                error:
-                  error instanceof Error
-                    ? error.message.slice(0, 500)
-                    : "session startup failed",
-              });
-            }
-            await releaseTaskSchedule(task);
-          }
+            preflight: async (scheduledTask) =>
+              await preflightTaskDispatch(scheduledTask, "scheduled"),
+            beginRun: beginTaskRun,
+            recordSkippedRun: async (
+              scheduledTask,
+              scheduledAt,
+              preflight,
+            ) =>
+              await recordSkippedScheduledTaskRun({
+                task: scheduledTask,
+                now: scheduledAt,
+                deliveryVersion: preflight.deliveryVersion,
+                reason: preflight.reason,
+              }),
+            createEpisode: async (scheduledTask) =>
+              await createProactiveEpisode({
+                familyId: scheduledTask.familyId,
+                now,
+              }),
+            receive: async ({
+              message,
+              task: scheduledTask,
+              run,
+              episodeId,
+              deliveryVersion,
+            }) =>
+              await receive(dispatchChannel, {
+                message,
+                target: buildDispatchTarget(
+                  scheduledTask,
+                  run.id,
+                  episodeId,
+                  deliveryVersion,
+                ),
+                auth: buildDispatchAuth(
+                  scheduledTask,
+                  run.id,
+                  episodeId,
+                  deliveryVersion,
+                ),
+              }),
+            setRuntimeSession: setTaskRunRuntimeSession,
+            finishRun: finishTaskRun,
+            advanceSchedule: advanceTaskSchedule,
+            releaseSchedule: releaseTaskSchedule,
+            logFailure: (error) => {
+              console.error(
+                `dispatch failed for family ${task.familyId} (${task.kind}):`,
+                error instanceof Error ? error.message : "unknown",
+              );
+            },
+          });
         }
       })(),
     );

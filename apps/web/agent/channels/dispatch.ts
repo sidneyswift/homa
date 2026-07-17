@@ -14,7 +14,7 @@ import {
   type OperationalPhase,
 } from "../../lib/operational-diagnostics";
 import {
-  buildTaskMessage,
+  preflightTaskDispatch,
 } from "../../lib/tasks/dispatch-input";
 import { deliverLiveDispatchTask } from "../../lib/tasks/dispatch-transport";
 import { startManualTaskDispatch } from "../../lib/tasks/manual-dispatch";
@@ -339,9 +339,10 @@ export default defineChannel({
       }
 
       const result = await startManualTaskDispatch(task, {
-        beginRun: beginManualTaskRun,
-        buildMessage: async (manualTask, deliveryVersion) =>
-          await buildTaskMessage(manualTask, "manual", undefined, {
+        preflight: async (manualTask) =>
+          await preflightTaskDispatch(manualTask, "manual"),
+        beginRun: async (manualTask, deliveryVersion) =>
+          await beginManualTaskRun(manualTask, {
             deliveryVersion,
           }),
         createEpisode: async (manualTask) =>

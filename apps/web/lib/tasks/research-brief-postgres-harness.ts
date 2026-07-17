@@ -212,10 +212,20 @@ const prerequisiteSql = `
     name text not null,
     unique (id, family_id)
   );
+  create table public.agent_schedules (
+    id uuid primary key,
+    family_id uuid not null references public.families (id) on delete cascade,
+    kind text not null,
+    next_run_at timestamptz not null,
+    lease_until timestamptz,
+    last_run_at timestamptz,
+    local_hour smallint not null,
+    weekdays smallint[] not null
+  );
   create table public.homa_task_runs (
     id uuid primary key default gen_random_uuid(),
     family_id uuid references public.families (id) on delete cascade,
-    schedule_id uuid,
+    schedule_id uuid references public.agent_schedules (id) on delete set null,
     kind text not null,
     status text not null default 'running',
     scheduled_for date,
@@ -228,6 +238,11 @@ const prerequisiteSql = `
     started_at timestamptz not null default now(),
     finished_at timestamptz
   );
+  create unique index homa_task_runs_outbox_idx
+    on public.homa_task_runs (schedule_id, scheduled_for)
+    where schedule_id is not null
+      and scheduled_for is not null
+      and status in ('running', 'done', 'skipped');
   create table public.knowledge_bank (
     id uuid primary key,
     title text not null,

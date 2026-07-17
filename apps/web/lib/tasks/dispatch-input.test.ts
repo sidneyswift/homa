@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import type { BriefV2Context } from "./brief-context";
 import {
   buildDispatchAuth,
   buildDispatchTarget,
   buildTaskMessage,
+  preflightTaskDispatch,
 } from "./dispatch-input";
 import type { DueFamilyTask } from "./store";
 
@@ -43,6 +45,33 @@ const FAKE_BRIEF_CONTEXT = {
   stages: ["early_years"],
   knowledge: [],
   observations: [],
+};
+
+const FAKE_ELIGIBLE_V2_CHILD: BriefV2Context["children"][number] = {
+  id: "child-1",
+  name: "Nova",
+  stage: "early_years",
+  subjectKeys: [],
+  frontierDomains: [],
+  currentWorkFacts: [],
+  frontierFacts: [],
+  candidates: [{
+    id: "knowledge-1",
+    topicType: "subject",
+    topicKey: "phonics",
+    lens: "current_study",
+    stage: "early_years",
+    title: "A named source",
+    summary: "A source-backed finding.",
+    confidence: "high",
+    sourceTier: 1,
+    citations: [{ url: "https://example.test", claim: "A claim." }],
+    sourceNames: ["Example source"],
+    fit: "subject",
+    lastVerifiedAt: "2026-07-17T00:00:00.000Z",
+    freshnessTtlDays: 30,
+    recentDeliveredUseCount: 0,
+  }],
 };
 
 describe("buildTaskMessage", () => {
@@ -132,7 +161,7 @@ describe("buildTaskMessage", () => {
         environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "false" },
         loadV2Context: async () => ({
           styleKeys: [],
-          children: [],
+          children: [FAKE_ELIGIBLE_V2_CHILD],
           observations: [],
           recentTraces: [],
         }),
@@ -142,6 +171,41 @@ describe("buildTaskMessage", () => {
     assert.match(message, /output only the accepted stored draft/);
   });
 
+  it("rejects a pinned v2 run with no eligible candidate before returning a model prompt", async () => {
+    for (const children of [
+      [],
+      [{
+        id: "child-1",
+        name: "Nova",
+        stage: "early_years",
+        subjectKeys: [],
+        frontierDomains: [],
+        currentWorkFacts: [],
+        frontierFacts: [],
+        candidates: [],
+      }],
+    ]) {
+      await assert.rejects(
+        () =>
+          buildTaskMessage(
+            task({ kind: "morning_brief" }),
+            "scheduled",
+            async () => FAKE_BRIEF_CONTEXT,
+            {
+              deliveryVersion: "research_brief_v2",
+              loadV2Context: async () => ({
+                styleKeys: [],
+                children,
+                observations: [],
+                recentTraces: [],
+              }),
+            },
+          ),
+        { name: "NoEligibleResearchBriefCandidateError" },
+      );
+    }
+  });
+
   it("uses the run's pinned delivery version after flag flips in either direction", async () => {
     let v2Loads = 0;
     let legacyLoads = 0;
@@ -149,7 +213,7 @@ describe("buildTaskMessage", () => {
       v2Loads += 1;
       return {
         styleKeys: [],
-        children: [],
+        children: [FAKE_ELIGIBLE_V2_CHILD],
         observations: [],
         recentTraces: [],
       };
@@ -230,6 +294,88 @@ describe("buildTaskMessage", () => {
     assert.match(message, /This task involves research/);
     assert.match(message, /never a child's name or any private detail/);
     assert.match(message, /Their homeschool style: montessori/);
+  });
+});
+
+describe("preflightTaskDispatch", () => {
+  it("returns an explicit skip without a model message when v2 has no candidate", async () => {
+    const result = await preflightTaskDispatch(
+      task({
+        kind: "morning_brief",
+        familySandbox: true,
+      }),
+      "scheduled",
+      async () => FAKE_BRIEF_CONTEXT,
+      {
+        environment: { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" },
+        loadV2Context: async () => ({
+          styleKeys: [],
+          children: [],
+          observations: [],
+          recentTraces: [],
+        }),
+      },
+    );
+
+    assert.deepEqual(result, {
+      outcome: "skip",
+      deliveryVersion: "research_brief_v2",
+      reason: "no eligible morning brief candidate",
+    });
+  });
+
+  it("loads eligible context once and returns one versioned ready message", async () => {
+    let v2ContextLoads = 0;
+    const environment = {
+      HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true",
+    };
+    const result = await preflightTaskDispatch(
+      task({
+        kind: "morning_brief",
+        familySandbox: true,
+      }),
+      "manual",
+      async () => assert.fail("selected v2 must not load legacy context"),
+      {
+        environment,
+        loadV2Context: async () => {
+          v2ContextLoads += 1;
+          return {
+            styleKeys: [],
+            children: [FAKE_ELIGIBLE_V2_CHILD],
+            observations: [],
+            recentTraces: [],
+          };
+        },
+      },
+    );
+    environment.HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY = "false";
+
+    assert.equal(v2ContextLoads, 1);
+    assert.equal(result.outcome, "ready");
+    assert.equal(result.deliveryVersion, "research_brief_v2");
+    if (result.outcome === "ready") {
+      assert.match(result.message, /call prepare_research_brief/);
+      assert.match(result.message, /parent just asked/);
+      assert.equal(
+        buildDispatchAuth(
+          task({ kind: "morning_brief" }),
+          "run-1",
+          "episode-1",
+          result.deliveryVersion,
+        ).attributes.deliveryVersion,
+        "research_brief_v2",
+      );
+      assert.equal(
+        buildDispatchTarget(
+          task({ kind: "morning_brief" }),
+          "run-1",
+          "episode-1",
+          result.deliveryVersion,
+        ).deliveryVersion,
+        "research_brief_v2",
+      );
+    }
   });
 });
 
