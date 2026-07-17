@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
 
+import type { Sql } from "postgres";
+
 import {
   enrichDeliveryAttemptProviderMessageIdWithDatabase,
   finishDeliveryAttemptWithDatabase,
@@ -24,8 +26,25 @@ import {
   beginManualTaskRunWithDatabase,
   beginTaskRunWithDatabase,
 } from "./store";
+import { deliveryVersionForNewTaskRun } from "./delivery-version";
 
 const harness = createDisposableResearchBriefPostgresHarness("schema");
+
+async function insertTaskSchedule(
+  database: Sql,
+  scheduleId: string,
+): Promise<void> {
+  await database`
+    insert into public.agent_schedules (
+      id, family_id, kind, next_run_at, local_hour, weekdays
+    )
+    values (
+      ${scheduleId}, ${familyAId}, 'morning_brief',
+      '2026-07-16T13:00:00.000Z', 9,
+      ${database.array([1, 2, 3, 4, 5])}::smallint[]
+    )
+  `;
+}
 
 describe("research brief PostgreSQL schema", () => {
   before(async () => await harness.start());
@@ -51,6 +70,10 @@ describe("research brief PostgreSQL schema", () => {
 
   it("persists the delivery version selected when a scheduled run begins", async () => {
     const db = harness.database();
+    await insertTaskSchedule(
+      db,
+      "00000000-0000-4000-8000-000000000201",
+    );
     const started = await beginTaskRunWithDatabase(
       db,
       {
@@ -72,7 +95,7 @@ describe("research brief PostgreSQL schema", () => {
       },
       new Date("2026-07-16T13:00:00.000Z"),
       {
-        environment: { HOMA_RESEARCH_BRIEF_V2_ENABLED: "true" },
+        deliveryVersion: "research_brief_v2",
       },
     );
     assert.equal(started?.deliveryVersion, "research_brief_v2");
@@ -88,6 +111,25 @@ describe("research brief PostgreSQL schema", () => {
     const db = harness.database();
     const environment = { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" };
     const runAt = new Date("2026-07-16T14:00:00.000Z");
+    await insertTaskSchedule(
+      db,
+      "00000000-0000-4000-8000-000000000202",
+    );
+    await insertTaskSchedule(
+      db,
+      "00000000-0000-4000-8000-000000000203",
+    );
+    const sandboxVersion = deliveryVersionForNewTaskRun(
+      "morning_brief",
+      environment,
+      true,
+    );
+    const regularVersion = deliveryVersionForNewTaskRun(
+      "morning_brief",
+      environment,
+      false,
+    );
+    environment.HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY = "false";
     const sandboxRun = await beginTaskRunWithDatabase(
       db,
       {
@@ -108,7 +150,7 @@ describe("research brief PostgreSQL schema", () => {
         recipientMemberUserId: adultAId,
       },
       runAt,
-      { environment },
+      { deliveryVersion: sandboxVersion },
     );
     const regularRun = await beginTaskRunWithDatabase(
       db,
@@ -130,7 +172,7 @@ describe("research brief PostgreSQL schema", () => {
         recipientMemberUserId: adultAId,
       },
       runAt,
-      { environment },
+      { deliveryVersion: regularVersion },
     );
 
     assert.equal(sandboxRun?.deliveryVersion, "research_brief_v2");
@@ -138,6 +180,10 @@ describe("research brief PostgreSQL schema", () => {
   });
 
   it("pins a sandbox manual run before its version reaches dispatch", async () => {
+    await insertTaskSchedule(
+      harness.database(),
+      "00000000-0000-4000-8000-000000000204",
+    );
     const started = await beginManualTaskRunWithDatabase(
       harness.database(),
       {
@@ -157,7 +203,7 @@ describe("research brief PostgreSQL schema", () => {
         email: "sandbox@example.test",
         recipientMemberUserId: adultAId,
       },
-      { environment: { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" } },
+      { deliveryVersion: "research_brief_v2" },
     );
 
     assert.equal(started.deliveryVersion, "research_brief_v2");

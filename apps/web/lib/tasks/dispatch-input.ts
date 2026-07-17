@@ -5,6 +5,7 @@ import {
   renderBriefV2Context,
 } from "./brief-context";
 import {
+  deliveryVersionForNewTaskRun,
   usesResearchBriefV2Delivery,
   type TaskDeliveryVersion,
 } from "./delivery-version";
@@ -25,6 +26,17 @@ import type { DueFamilyTask } from "./store";
  */
 
 export type TaskRunTrigger = "scheduled" | "manual";
+
+export const NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR =
+  "no eligible morning brief candidate";
+
+/** The v2 selection query found no family-eligible research to send. */
+export class NoEligibleResearchBriefCandidateError extends Error {
+  constructor() {
+    super(NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR);
+    this.name = "NoEligibleResearchBriefCandidateError";
+  }
+}
 
 /** Built-ins honor the parent's delivery choice too (founder ruling
  * 2026-07-12): "none" means the composed message only lands on the
@@ -57,9 +69,16 @@ async function briefMessage(
   deliveryVersion: TaskDeliveryVersion,
 ): Promise<string> {
   const v2 = usesResearchBriefV2Delivery(deliveryVersion);
-  const context = v2
-    ? renderBriefV2Context(await loadV2Context(task.familyId, task.timeZone))
-    : renderBriefContext(await loadContext(task.familyId));
+  let context: string;
+  if (v2) {
+    const v2Context = await loadV2Context(task.familyId, task.timeZone);
+    if (!v2Context.children.some((child) => child.candidates.length > 0)) {
+      throw new NoEligibleResearchBriefCandidateError();
+    }
+    context = renderBriefV2Context(v2Context);
+  } else {
+    context = renderBriefContext(await loadContext(task.familyId));
+  }
   return [
     trigger === "manual"
       ? "The parent just asked, from the Homa's tasks page, to run the morning research brief once right now."
@@ -152,6 +171,57 @@ export async function buildTaskMessage(
       const exhaustive: never = task.kind;
       throw new Error(`unhandled task kind: ${String(exhaustive)}`);
     }
+  }
+}
+
+export type TaskDispatchPreflightResult =
+  | {
+      outcome: "ready";
+      deliveryVersion: TaskDeliveryVersion;
+      message: string;
+    }
+  | {
+      outcome: "skip";
+      deliveryVersion: TaskDeliveryVersion;
+      reason: typeof NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR;
+    };
+
+/**
+ * Selects one delivery version, then builds or classifies the task before any
+ * run row exists. Callers persist and dispatch only this returned version.
+ */
+export async function preflightTaskDispatch(
+  task: DueFamilyTask,
+  trigger: TaskRunTrigger,
+  loadContext: typeof loadBriefContext = loadBriefContext,
+  dependencies: {
+    environment?: Record<string, string | undefined>;
+    loadV2Context?: typeof loadBriefV2Context;
+  } = {},
+): Promise<TaskDispatchPreflightResult> {
+  const deliveryVersion = deliveryVersionForNewTaskRun(
+    task.kind,
+    dependencies.environment,
+    task.familySandbox,
+  );
+  try {
+    return {
+      outcome: "ready",
+      deliveryVersion,
+      message: await buildTaskMessage(task, trigger, loadContext, {
+        deliveryVersion,
+        loadV2Context: dependencies.loadV2Context,
+      }),
+    };
+  } catch (error) {
+    if (error instanceof NoEligibleResearchBriefCandidateError) {
+      return {
+        outcome: "skip",
+        deliveryVersion,
+        reason: NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR,
+      };
+    }
+    throw error;
   }
 }
 

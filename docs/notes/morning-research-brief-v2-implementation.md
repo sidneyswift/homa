@@ -360,3 +360,51 @@ pins the result on the existing task-run row.
   disabled.
 - Do not reuse `familySandbox` outside server-loaded task context or expose it
   to the model or browser.
+
+## 2026-07-17 · Live no-candidate dispatch classification
+
+### Discovery
+
+Live run `b3d85489...` was pinned to v2 and received a bounded context with no
+eligible candidates after the family's sole source entered the fourteen-day
+cooldown. Eve correctly stopped after loading the skill. No preparation,
+delivery, source use, or visible message occurred. The dispatch terminal path
+then incorrectly marked the running task `failed` with `morning brief delivery
+did not complete`.
+
+### Plan-confirmed
+
+The shared v2 message builder now rejects a no-child or all-empty-candidates
+context with `NoEligibleResearchBriefCandidateError` before an Eve episode or
+session starts. A shared preflight selects the delivery version once, builds
+the real task message, and converts that internal error into an explicit
+`ready` or `skip` result before any running row exists. Scheduled and manual
+run creation persist the preflight's version instead of reading rollout flags.
+
+For an in-window scheduled skip, one store transaction inserts a final
+`skipped` run with `finished_at` and the bounded
+`no eligible morning brief candidate` reason, advances the still-due schedule,
+and clears its lease. An outbox conflict still advances and clears a schedule
+that remains due, including conflicts with running, done, and legacy skipped
+runs. An already-advanced schedule is unchanged. Replay never inserts a second
+row or emits a second completion event. A failed transaction leaves both the
+run and schedule unchanged. Manual Run returns the neutral 409 directly from
+preflight and creates no run, episode, session, message, delivery, or source
+effect.
+
+### Rollback state
+
+Production is intentionally rolled back to sandbox-only while this local fix
+is built. No deployment, remote flag change, migration, query, commit, push,
+or other remote action occurred for this fix.
+
+### Review correction
+
+The intermediate finish-after-running design was removed because a failed
+finish could leave a phantom running row. Preflight failure now creates no
+run: scheduled dispatch logs and releases the lease, while manual dispatch
+logs the bounded `setup_failure_unrecorded` diagnostic and returns the
+existing 503 fallback. Delivery-window misses keep their context-free path but
+persist an explicitly selected version. Focused unit and disposable
+PostgreSQL tests cover ready parity, zero-run manual skip, atomic skip, replay,
+rollback, and one completion event.

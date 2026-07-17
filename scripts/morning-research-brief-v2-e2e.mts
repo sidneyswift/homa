@@ -10,6 +10,7 @@ import { spawn } from "node:child_process";
 const testFiles = [
   "apps/web/lib/knowledge/citation-source.test.ts",
   "apps/web/lib/knowledge/select-brief.test.ts",
+  "apps/web/lib/tasks/delivery-version.test.ts",
   "apps/web/lib/tasks/research-brief-format.test.ts",
   "apps/web/lib/tasks/research-brief-preparation.test.ts",
   "apps/web/lib/tasks/research-brief-delivery.test.ts",
@@ -17,6 +18,7 @@ const testFiles = [
   "apps/web/lib/tasks/durable-task-completion.test.ts",
   "apps/web/lib/tasks/dispatch-transport.test.ts",
   "apps/web/lib/tasks/research-brief-postgres-schema.test.ts",
+  "apps/web/lib/tasks/scheduled-skip-postgres.test.ts",
   "apps/web/lib/tasks/research-brief-postgres-preparation.test.ts",
   "apps/web/lib/tasks/research-brief-postgres-delivery.test.ts",
   "apps/web/lib/tasks/email-delivery-postgres.test.ts",

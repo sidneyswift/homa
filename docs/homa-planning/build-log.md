@@ -3,6 +3,31 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-17 · Morning brief no-candidate dispatch root cause
+
+Production run `b3d85489...` was pinned to research-brief v2 after its family
+had already consumed its sole eligible source. The fourteen-day cooldown
+correctly produced zero candidates. Eve loaded the skill and stopped, with no
+preparation, delivery, source use, or visible message. Dispatch incorrectly
+classified that valid no-op as `failed` with `morning brief delivery did not
+complete`.
+
+The local fix treats no children or all-empty candidate arrays as a typed
+preflight outcome before any running row exists. Scheduled no-candidate work
+uses one transaction to insert a final `skipped` row, advance the still-due
+schedule, and clear its lease. An outbox conflict still performs that guarded
+advance and lease clear when the schedule remains due, but creates no second
+row or completion event. An already-advanced schedule is unchanged, and
+rollback leaves both records unchanged. Manual Run returns a neutral 409 with
+no run. Both paths avoid Eve, visibility, delivery, and source-consumption
+side effects. Run creation now persists the delivery version selected once by
+preflight instead of reading rollout flags again.
+
+Production remains intentionally rolled back to sandbox-only while this fix is
+built. This entry records the confirmed root cause and local repair only. No
+deployment, migration, flag change, remote query, commit, push, or other remote
+action occurred.
+
 ## 2026-07-17 · Morning research brief v2 clears pre-merge rollout gates
 
 The additive `morning_research_brief_v2` migration was applied to `homa-prod`
