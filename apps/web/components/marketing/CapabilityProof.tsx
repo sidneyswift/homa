@@ -1,37 +1,45 @@
-import { Check, Clock3, FileText, FolderOpen, Printer, type LucideIcon } from "lucide-react";
+import { Check, Clock3, FileText, FolderOpen, Leaf, Printer, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { CapabilityId } from "./landing-content";
 
-function ProofShell({ children, label }: { children: ReactNode; label: string }) {
+/**
+ * Fixture-safe UI proof for each capability card. One artifact, the
+ * butterfly math worksheet from the hero thread, travels through the
+ * plan, the practice page, and the binder so the four cards read as one
+ * product instead of four features. Shells are sunken with raised
+ * borderless rows so the mockups do not stack three levels of outline
+ * inside the bento card's own border.
+ */
+
+function ProofShell({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
         minHeight: 214,
         padding: 15,
-        border: "1px solid var(--border-subtle)",
         borderRadius: "var(--radius-lg)",
-        background: "var(--surface-raised)",
+        background: "var(--surface-sunken)",
       }}
     >
-      <div
-        style={{
-          marginBottom: 12,
-          color: "var(--text-subtle)",
-          fontSize: "0.66rem",
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </div>
       {children}
     </div>
   );
 }
 
-function ProofHeader({ icon: Icon, title, note }: { icon: LucideIcon; title: string; note: string }) {
+function ProofHeader({
+  icon: Icon,
+  title,
+  note,
+  chipBg,
+  chipInk,
+}: {
+  icon: LucideIcon;
+  title: string;
+  note: string;
+  chipBg: string;
+  chipInk: string;
+}) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <span
@@ -42,65 +50,86 @@ function ProofHeader({ icon: Icon, title, note }: { icon: LucideIcon; title: str
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 10,
-          background: "var(--sky-100)",
+          background: chipBg,
+          flexShrink: 0,
         }}
       >
-        <Icon size={18} color="var(--sky-600)" aria-hidden="true" />
+        <Icon size={18} color={chipInk} aria-hidden="true" />
       </span>
       <div>
         <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.86rem", fontWeight: 700 }}>{title}</p>
-        <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.7rem" }}>{note}</p>
+        <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.68rem" }}>{note}</p>
       </div>
     </div>
   );
 }
 
+function WorksheetThumb({ height }: { height: number }) {
+  return (
+    <img
+      src="/images/hero-butterfly-math.png"
+      alt=""
+      width={1024}
+      height={1536}
+      style={{
+        display: "block",
+        width: "100%",
+        height: "auto",
+        maxHeight: height,
+        objectFit: "cover",
+        objectPosition: "top center",
+        background: "#fff",
+      }}
+    />
+  );
+}
+
 export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   switch (capabilityId) {
-    case "practice":
-      return (
-        <ProofShell label="practice page">
-          <ProofHeader icon={FileText} title="Butterfly letter B" note="Made for Maya · PDF" />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "0.8fr 1.2fr",
-              gap: 10,
-              marginTop: 13,
-              padding: 12,
-              borderRadius: "var(--radius-md)",
-              background: "var(--gold-100)",
-              color: "var(--gold-ink-strong)",
-            }}
-          >
-            <strong style={{ display: "grid", placeItems: "center", fontFamily: "var(--font-display)", fontSize: "2rem" }}>B b</strong>
-            <span style={{ display: "grid", alignContent: "center", fontFamily: "var(--font-hand)", fontWeight: 600 }}>
-              B B B B
-              <br />
-              b b b b
-              <br />
-              butterfly
-            </span>
-          </div>
-          <p style={{ display: "flex", alignItems: "center", gap: 6, margin: "10px 0 0", color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
-            <Printer size={14} aria-hidden="true" /> Ready to print
-          </p>
-        </ProofShell>
-      );
-
     case "plan":
       return (
-        <ProofShell label="weekly plan">
-          <ProofHeader icon={Check} title="Maya · age 4" note="Tuesday · about 1h 10m" />
+        <ProofShell>
+          <ProofHeader
+            icon={Check}
+            title="Maya · age 4"
+            note="Tuesday · about 1h 10m"
+            chipBg="var(--sage-50)"
+            chipInk="var(--sage-700)"
+          />
           <div style={{ display: "grid", gap: 7, marginTop: 13 }}>
             {[
-              ["Letter B practice", "Done"],
+              ["Butterfly math", "Done"],
               ["Butterfly book", "20m"],
               ["Science walk", "30m"],
             ].map(([title, meta], index) => (
-              <div key={title} style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", borderRadius: 10, background: index === 0 ? "var(--sage-50)" : "var(--surface-card)" }}>
-                <span style={{ width: 15, height: 15, border: `1.5px solid ${index === 0 ? "var(--sage-500)" : "var(--stone-300)"}`, borderRadius: "50%", background: index === 0 ? "var(--sage-500)" : "transparent" }} />
-                <span style={{ flex: 1, color: "var(--text-body)", fontSize: "0.76rem", textDecoration: index === 0 ? "line-through" : "none" }}>{title}</span>
+              <div
+                key={title}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  background: index === 0 ? "var(--sage-50)" : "var(--surface-raised)",
+                  boxShadow: index === 0 ? "none" : "var(--shadow-sm)",
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    width: 15,
+                    height: 15,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: `1.5px solid ${index === 0 ? "var(--sage-500)" : "var(--stone-300)"}`,
+                    borderRadius: "50%",
+                    background: index === 0 ? "var(--sage-500)" : "transparent",
+                    flexShrink: 0,
+                  }}
+                >
+                  {index === 0 ? <Check size={9} color="#fff" strokeWidth={3.4} aria-hidden="true" /> : null}
+                </span>
+                <span style={{ flex: 1, color: "var(--text-body)", fontSize: "0.78rem" }}>{title}</span>
                 <span style={{ color: "var(--text-subtle)", fontSize: "0.68rem" }}>{meta}</span>
               </div>
             ))}
@@ -108,33 +137,113 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
         </ProofShell>
       );
 
+    case "practice":
+      return (
+        <ProofShell>
+          <ProofHeader
+            icon={FileText}
+            title="Butterfly math"
+            note="Made for Maya · PDF"
+            chipBg="var(--gold-100)"
+            chipInk="var(--gold-ink-strong)"
+          />
+          <div
+            style={{
+              marginTop: 13,
+              overflow: "hidden",
+              borderRadius: "var(--radius-md)",
+              background: "#fff",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <WorksheetThumb height={132} />
+          </div>
+          <p style={{ display: "flex", alignItems: "center", gap: 6, margin: "10px 0 0", color: "var(--sage-700)", fontSize: "0.72rem", fontWeight: 700 }}>
+            <Printer size={14} aria-hidden="true" /> Ready to print
+          </p>
+        </ProofShell>
+      );
+
     case "binder":
       return (
-        <ProofShell label="binder">
-          <ProofHeader icon={FolderOpen} title="What you kept this week" note="2 items" />
+        <ProofShell>
+          <ProofHeader
+            icon={FolderOpen}
+            title="What you kept this week"
+            note="2 items"
+            chipBg="var(--clay-100)"
+            chipInk="var(--clay-600)"
+          />
           <div style={{ display: "grid", gap: 9, marginTop: 13 }}>
-            {[
-              ["Butterfly letter B", "Practice page · Tuesday"],
-              ["Our science walk", "Photo and note · Thursday"],
-            ].map(([title, meta], index) => (
-              <div key={title} style={{ display: "grid", gridTemplateColumns: "46px 1fr", gap: 10, alignItems: "center", padding: 9, border: "1px solid var(--border-subtle)", borderRadius: 12, background: "var(--surface-card)" }}>
-                <div style={{ display: "grid", placeItems: "center", height: 48, borderRadius: 9, background: index === 0 ? "var(--gold-100)" : "var(--sage-50)", color: index === 0 ? "var(--gold-ink-strong)" : "var(--sage-700)", fontFamily: "var(--font-display)", fontWeight: 700 }}>
-                  {index === 0 ? "B b" : "Leaf"}
-                </div>
-                <div>
-                  <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.77rem", fontWeight: 700 }}>{title}</p>
-                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.68rem" }}>{meta}</p>
-                </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "46px 1fr",
+                gap: 10,
+                alignItems: "center",
+                padding: 9,
+                borderRadius: 12,
+                background: "var(--surface-raised)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <div style={{ height: 48, overflow: "hidden", borderRadius: 9, background: "#fff" }}>
+                <img
+                  src="/images/hero-butterfly-math.png"
+                  alt=""
+                  width={1024}
+                  height={1536}
+                  style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
+                />
               </div>
-            ))}
+              <div>
+                <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Butterfly math</p>
+                <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.68rem" }}>Practice page · Tuesday</p>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "46px 1fr",
+                gap: 10,
+                alignItems: "center",
+                padding: 9,
+                borderRadius: 12,
+                background: "var(--surface-raised)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  placeItems: "center",
+                  height: 48,
+                  borderRadius: 9,
+                  background: "var(--sage-50)",
+                  color: "var(--sage-700)",
+                }}
+              >
+                <Leaf size={20} aria-hidden="true" />
+              </div>
+              <div>
+                <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Our science walk</p>
+                <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.68rem" }}>Photo and note · Thursday</p>
+              </div>
+            </div>
           </div>
         </ProofShell>
       );
 
     case "records":
       return (
-        <ProofShell label="records">
-          <ProofHeader icon={Clock3} title="This week" note="Hours recorded by subject" />
+        <ProofShell>
+          <ProofHeader
+            icon={Clock3}
+            title="This week"
+            note="Hours recorded by subject"
+            chipBg="var(--sky-100)"
+            chipInk="var(--sky-600)"
+          />
           <div style={{ display: "grid", gap: 9, marginTop: 13 }}>
             {[
               ["Early math", "1h 10m", "48%"],
@@ -142,7 +251,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
               ["Science", "55m", "36%"],
             ].map(([subject, time, width]) => (
               <div key={subject}>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-body)", fontSize: "0.72rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-body)", fontSize: "0.78rem" }}>
                   <span>{subject}</span>
                   <strong>{time}</strong>
                 </div>
@@ -153,7 +262,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
             ))}
           </div>
           <p style={{ margin: "13px 0 0", paddingTop: 10, borderTop: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: "0.68rem" }}>
-            Your state rules · sources shown · last-checked date included
+            State rules are listed with their sources and a last-checked date.
           </p>
         </ProofShell>
       );

@@ -31,10 +31,10 @@ test("the pain bridge stays concise and does not diagnose the parent", () => {
   assert.doesNotMatch(JSON.stringify(PAIN_ITEMS), /you need help/i);
 });
 
-test("the capability section exposes four shipped product nouns", () => {
+test("the capability section exposes four shipped product nouns in parent-day order", () => {
   assert.deepEqual(
     CAPABILITY_ITEMS.map(({ title }) => title),
-    ["Practice pages", "The weekly plan", "The binder", "Hours and state rules"],
+    ["The weekly plan", "Practice pages", "The binder", "Hours and state rules"],
   );
 });
 

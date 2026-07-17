@@ -50,22 +50,24 @@ export const PAIN_CLOSING = "Homa prepares the week. She keeps the record.";
 
 export type CapabilityId = "practice" | "plan" | "binder" | "records";
 
+// Ordered by the parent's day: plan the week, get the pages, keep what
+// happened, prove the hours.
 export const CAPABILITY_ITEMS: ReadonlyArray<{
   id: CapabilityId;
   title: string;
   body: string;
 }> = [
   {
-    id: "practice",
-    title: "Practice pages",
-    body:
-      "Homa makes practice pages for the skill your child is working on. Each page can use what they love and stays in the binder for printing.",
-  },
-  {
     id: "plan",
     title: "The weekly plan",
     body:
       "When a day changes, Homa can revise the rest of the week. Sick days, field trips, and lighter mornings can all stay in the plan.",
+  },
+  {
+    id: "practice",
+    title: "Practice pages",
+    body:
+      "Homa makes practice pages for the skill your child is working on. Each page can use what they love and stays in the binder for printing.",
   },
   {
     id: "binder",
