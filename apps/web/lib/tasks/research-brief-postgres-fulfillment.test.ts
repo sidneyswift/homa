@@ -3,7 +3,9 @@ import { after, before, describe, it } from "node:test";
 
 import {
   acceptedOfferDeliveryIdFromAttributes,
+  completeAcceptedOfferFulfillmentWithDatabase,
   recordAcceptedOfferFulfillmentWithDatabase,
+  reserveAcceptedOfferFulfillmentWithDatabase,
 } from "../conversation-continuity/offer-fulfillment";
 import {
   createDisposableResearchBriefPostgresHarness,
@@ -202,6 +204,95 @@ describe("accepted offer fulfillment", () => {
     });
 
     assert.deepEqual(result, { eligible: true, wrote: true });
+  });
+
+  it("reserves provenance before the target exists and completes afterward", async () => {
+    const db = harness.database();
+    const outboxMessageId = "00000000-0000-4000-a000-000000000086";
+    const outboxDeliveryId = "00000000-0000-4000-b000-000000000086";
+    const outboxEpisodeId = "00000000-0000-4000-9000-000000000086";
+    const outboxMaterialId = "00000000-0000-4000-c000-000000000086";
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, task_run_id, role, content, visibility
+      )
+      values (
+        ${outboxMessageId}, ${familyAId}, ${runId(8)}, 'assistant',
+        'Want me to make a review-passed page?', 'family'
+      )
+    `;
+    await db`
+      insert into public.conversation_deliveries (
+        id, family_id, episode_id, message_id, task_run_id, channel, status,
+        sent_at
+      )
+      values (
+        ${outboxDeliveryId}, ${familyAId}, ${outboxEpisodeId},
+        ${outboxMessageId}, ${runId(8)}, 'sms', 'sent', now()
+      )
+    `;
+    await db`
+      insert into public.conversation_open_loops (
+        family_id, episode_id, message_id, delivery_id, kind, state,
+        expires_at, resolved_at, resolved_outcome
+      )
+      values (
+        ${familyAId}, ${outboxEpisodeId}, ${outboxMessageId},
+        ${outboxDeliveryId}, 'yes_no', 'resolved',
+        now() + interval '24 hours', now(), 'accepted'
+      )
+    `;
+
+    const reservation = await reserveAcceptedOfferFulfillmentWithDatabase(
+      db,
+      {
+        familyId: familyAId,
+        sourceDeliveryId: outboxDeliveryId,
+        kind: "material",
+        referenceId: outboxMaterialId,
+      },
+    );
+    assert.deepEqual(reservation, {
+      eligible: true,
+      wrote: true,
+      referenceId: outboxMaterialId,
+    });
+    const [beforeTarget] = await db<{ fulfilled: boolean }[]>`
+      select exists (
+        select 1
+        from public.conversation_offer_fulfillments fulfillment
+        join public.materials material
+          on material.id = fulfillment.reference_id
+         and material.family_id = fulfillment.family_id
+        where fulfillment.source_delivery_id = ${outboxDeliveryId}
+      ) as fulfilled
+    `;
+    assert.equal(beforeTarget.fulfilled, false);
+
+    await db`
+      insert into public.materials (id, family_id)
+      values (${outboxMaterialId}, ${familyAId})
+    `;
+    assert.deepEqual(
+      await completeAcceptedOfferFulfillmentWithDatabase(db, {
+        familyId: familyAId,
+        sourceDeliveryId: outboxDeliveryId,
+        kind: "material",
+        referenceId: outboxMaterialId,
+      }),
+      { completed: true, wrote: true },
+    );
+    const [afterTarget] = await db<{ fulfilled: boolean }[]>`
+      select exists (
+        select 1
+        from public.conversation_offer_fulfillments fulfillment
+        join public.materials material
+          on material.id = fulfillment.reference_id
+         and material.family_id = fulfillment.family_id
+        where fulfillment.source_delivery_id = ${outboxDeliveryId}
+      ) as fulfilled
+    `;
+    assert.equal(afterTarget.fulfilled, true);
   });
 
   it("uses the exact accepted offer carried through clarification", async () => {

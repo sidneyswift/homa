@@ -105,6 +105,7 @@ export async function createCustomTask(
   // falls back to the account owner at delivery time.
   recipientMemberUserId: string | null = null,
   sourceOfferDeliveryId: string | null = null,
+  taskId: string | null = null,
 ): Promise<{ ok: true; id: string } | { ok: false; note: string }> {
   const parsed = customTaskInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -136,11 +137,12 @@ export async function createCustomTask(
   );
   const rows = await sql<{ id: string }[]>`
     insert into public.agent_schedules
-      (family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
+      (id, family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
        label, prompt, created_by, recipient_member_user_id,
        source_offer_delivery_id)
     values
-      (${familyId}, 'custom', ${nextRun.toISOString()}, ${parsed.data.localHour},
+      (coalesce(${taskId}::uuid, gen_random_uuid()), ${familyId}, 'custom',
+       ${nextRun.toISOString()}, ${parsed.data.localHour},
        ${sql.array(parsed.data.weekdays)}::smallint[], ${parsed.data.deliveryPref},
        ${parsed.data.label}, ${parsed.data.prompt}, ${createdBy},
        ${recipientMemberUserId}, ${sourceOfferDeliveryId})

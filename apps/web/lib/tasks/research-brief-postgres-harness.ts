@@ -20,6 +20,7 @@ const migrationPaths = [
   "20260718010000_morning_offer_funnel.sql",
   "20260718023000_morning_offer_provenance_hardening.sql",
   "20260718030000_offer_provenance_fold_safety.sql",
+  "20260718034500_offer_fulfillment_outbox.sql",
 ].map((file) => path.join(repoRoot, "supabase/migrations", file));
 const processTimeoutMs = 30_000;
 
@@ -195,6 +196,7 @@ const prerequisiteSql = `
   create role anon nologin;
   create role authenticated nologin;
   create schema auth;
+  create schema private;
   create table auth.users (id uuid primary key);
   create table public.families (id uuid primary key);
   create table public.family_members (

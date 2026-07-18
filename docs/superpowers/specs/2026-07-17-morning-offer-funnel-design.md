@@ -53,22 +53,24 @@ remain visibly unclassified.
 ## Fulfillment truth
 
 Fulfillment is a deterministic effect, not an inference from chat prose or
-episode timing. A server-only `conversation_offer_fulfillments` row is written
-only after:
+episode timing. A server-only `conversation_offer_fulfillments` row reserves
+the exact target id before:
 
 - `create_printable` saves a material whose quality review passed, or
 - `create_task` successfully creates the scheduled task.
 
-The write re-scopes the source delivery and result identifier inside the
+The reservation re-scopes the source delivery and result identifier inside the
 authenticated family, requires a resolved accepted morning brief loop, and is
 idempotent per source delivery. The source delivery id comes from trusted
-continuity attributes, never model input.
+continuity attributes, never model input. The funnel counts the reservation
+only after its exact material or task row exists.
 
 When an accepted reminder needs a clarification turn, the exact delivery id
 stays on the authenticated thread binding and is carried forward separately
 from reply-claim state. A completed material or task stores that same delivery
-id on its own durable row before the best-effort event or fulfillment-ledger
-write. The binding clears after the ledger accepts the completion.
+id on its own durable row through a server-only completion write. Authenticated
+clients cannot set material provenance directly. The binding clears after the
+completion is reconciled.
 
 ## Founder interface
 

@@ -116,6 +116,7 @@ export async function deleteFamilyBlobs(familyId: string): Promise<number> {
 }
 
 export interface MaterialRowInput {
+  id: string;
   familyId: string;
   childId: string | null;
   title: string;
@@ -177,11 +178,11 @@ export async function insertMaterialRowPinned(
 
   const rows = await sql<{ id: string }[]>`
     insert into public.materials
-      (family_id, child_id, title, kind, skill, subject, curriculum, theme,
+      (id, family_id, child_id, title, kind, skill, subject, curriculum, theme,
        characters, pdf_url, preview_url, html, source, revises, channel,
        generation, source_offer_delivery_id)
     values
-      (${input.familyId}, ${childId}, ${input.title}, ${input.kind},
+      (${input.id}, ${input.familyId}, ${childId}, ${input.title}, ${input.kind},
        ${input.skill}, ${input.subject}, ${input.curriculum}, ${input.theme},
        ${input.characters}, ${input.pdfUrl}, ${input.previewUrl},
        ${input.html}, ${input.source}, ${input.revises}, ${input.channel},

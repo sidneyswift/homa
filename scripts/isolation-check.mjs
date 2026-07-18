@@ -415,6 +415,19 @@ async function morningOfferFunnelSchemaExists() {
           and table_name = 'conversation_open_loops'
           and column_name in ('resolution_method', 'classifier_version')
       ) = 2 as audit_columns_exist,
+      exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'conversation_offer_fulfillments'
+          and column_name = 'completed_at'
+      ) as outbox_column_exists,
+      exists (
+        select 1
+        from pg_trigger
+        where tgname = 'protect_material_offer_provenance'
+          and not tgisinternal
+      ) as provenance_trigger_exists,
       (
         select count(*)::integer
         from information_schema.columns
@@ -434,6 +447,8 @@ async function morningOfferFunnelSchemaExists() {
   return (
     rows[0]?.table_exists &&
     rows[0]?.audit_columns_exist &&
+    rows[0]?.outbox_column_exists &&
+    rows[0]?.provenance_trigger_exists &&
     rows[0]?.provenance_columns_exist
   );
 }
@@ -2103,6 +2118,32 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B material fixture",
     );
+    await expectAuthenticatedInsertDenied(
+      familyBUser.accessToken,
+      "materials",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        title: "Forged offer provenance",
+        pdf_url: "https://example.com/forged.pdf",
+        preview_url: "https://example.com/forged.jpg",
+        html: "<p>Forged provenance must be denied.</p>",
+        source_offer_delivery_id:
+          "00000000-0000-0000-0000-000000000000",
+      },
+      "auth member cannot forge material offer provenance on insert",
+    );
+    await expectAuthenticatedUpdateDenied(
+      familyBUser.accessToken,
+      "materials",
+      "id",
+      materialBId,
+      {
+        source_offer_delivery_id:
+          "00000000-0000-0000-0000-000000000000",
+      },
+      "auth member cannot forge material offer provenance on update",
+    );
     // Chat attachments are server-write-only, so the fixture goes in
     // through the privileged connection, like the ChildProgress rows.
     const [chatAttachmentB] = await sql`
@@ -3205,7 +3246,7 @@ if (sql) {
       "morning offer funnel migration is applied to the isolation target",
       morningOfferFunnelSchemaAvailable,
       morningOfferFunnelSchemaAvailable
-        ? "fulfillment table, reply audit, and exact provenance columns exist"
+        ? "fulfillment outbox, reply audit, and protected exact provenance exist"
         : "morning offer funnel schema is missing",
     );
   } catch (error) {

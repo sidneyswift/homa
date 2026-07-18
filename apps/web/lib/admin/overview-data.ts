@@ -170,18 +170,27 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
           from public.conversation_offer_fulfillments fulfillment
           where fulfillment.source_delivery_id = d.id
             and fulfillment.family_id = d.family_id
-        )
-        or exists (
-          select 1
-          from public.materials material
-          where material.source_offer_delivery_id = d.id
-            and material.family_id = d.family_id
-        )
-        or exists (
-          select 1
-          from public.agent_schedules schedule
-          where schedule.source_offer_delivery_id = d.id
-            and schedule.family_id = d.family_id
+            and (
+              (
+                fulfillment.kind = 'material'
+                and exists (
+                  select 1
+                  from public.materials material
+                  where material.id = fulfillment.reference_id
+                    and material.family_id = fulfillment.family_id
+                )
+              )
+              or
+              (
+                fulfillment.kind = 'task'
+                and exists (
+                  select 1
+                  from public.agent_schedules schedule
+                  where schedule.id = fulfillment.reference_id
+                    and schedule.family_id = fulfillment.family_id
+                )
+              )
+            )
         )
       ) as fulfilled
     from public.conversation_deliveries d

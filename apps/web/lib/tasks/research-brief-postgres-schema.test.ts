@@ -66,6 +66,23 @@ describe("research brief PostgreSQL schema", () => {
       where table_schema = 'public'
         and table_name = 'conversation_offer_fulfillments'
     `;
+    const [outboxColumn] = await db<{ exists: boolean }[]>`
+      select exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'conversation_offer_fulfillments'
+          and column_name = 'completed_at'
+      ) as exists
+    `;
+    const [provenanceTrigger] = await db<{ exists: boolean }[]>`
+      select exists (
+        select 1
+        from pg_trigger
+        where tgname = 'protect_material_offer_provenance'
+          and not tgisinternal
+      ) as exists
+    `;
     const provenanceColumns = await db<{
       table_name: string;
       column_name: string;
@@ -94,6 +111,8 @@ describe("research brief PostgreSQL schema", () => {
       tables.map((table) => table.table_name),
       ["conversation_offer_fulfillments"],
     );
+    assert.equal(outboxColumn.exists, true);
+    assert.equal(provenanceTrigger.exists, true);
     assert.deepEqual(
       provenanceColumns.map((column) => ({
         table_name: column.table_name,
