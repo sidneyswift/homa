@@ -8,6 +8,7 @@
     "check:eve-stream-duration": "node scripts/eve-stream-max-duration-check.mjs",
     "check:child-progress": "tsx --tsconfig apps/web/tsconfig.json --test \"packages/core/src/events.test.ts\" \"apps/web/lib/child-progress/*.test.ts\" \"apps/web/lib/map/walk-answer-event.test.ts\" \"scripts/reconcile-child-progress.test.ts\"",
     "check:events": "tsx scripts/events-check.mts",
+    "check:jobs": "tsx scripts/jobs-check.mts",
     "check:isolation": "node scripts/isolation-check.mjs",
     "check:morning-research-brief-v2": "pnpm morning-research-brief-v2:e2e && tsx --test scripts/morning-research-brief-v2-report.test.ts",
     "check:map": "tsx scripts/map-check.mts && tsx --test apps/web/lib/map/walk-answer-event.test.ts apps/web/lib/map/trajectory-eras.test.ts apps/web/lib/map/explore-child-map.test.ts apps/web/lib/map/narrative-facts.test.ts",

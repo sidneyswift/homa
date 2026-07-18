@@ -775,6 +775,39 @@ export const EVENT_SCHEMAS = {
   "billing.trial_started": z.object({
     family_id: z.uuid(),
   }),
+  // Agent jobs (the general finite-job primitive). Content-free fleet
+  // analytics: family_id plus the skill and stage counts, never a title,
+  // plan text, or any parent quote (that lives in the job rows). Emitted
+  // server-side through emitMapEvent (the events policy is waitlist-only
+  // for the Data API). job.started and job.cancelled emit from
+  // lib/jobs/store.ts today; the three runner-emitted names are staged in
+  // scripts/events-check.mts until the claim-lease runner lands.
+  "job.started": z.object({
+    family_id: z.uuid(),
+    skill: z.string().min(2).max(60),
+    total_stages: z.number().int().min(1).max(200),
+  }),
+  "job.stage_completed": z.object({
+    family_id: z.uuid(),
+    skill: z.string().min(2).max(60),
+    stage_number: z.number().int().min(1).max(200),
+    total_stages: z.number().int().min(1).max(200),
+  }),
+  "job.completed": z.object({
+    family_id: z.uuid(),
+    skill: z.string().min(2).max(60),
+    total_stages: z.number().int().min(1).max(200),
+  }),
+  "job.cancelled": z.object({
+    family_id: z.uuid(),
+    skill: z.string().min(2).max(60),
+    completed_stages: z.number().int().min(0).max(200),
+  }),
+  "job.failed": z.object({
+    family_id: z.uuid(),
+    skill: z.string().min(2).max(60),
+    stage_number: z.number().int().min(1).max(200),
+  }),
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;
