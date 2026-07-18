@@ -5,13 +5,13 @@ import {
   offerDeliveryIdFromAttributes,
   offerEpisodeIdFromAttributes,
   recordAcceptedOfferFulfillmentWithDatabase,
-} from "./offer-fulfillment";
+} from "../conversation-continuity/offer-fulfillment";
 import {
   createDisposableResearchBriefPostgresHarness,
   familyAId,
   familyBId,
   runId,
-} from "../tasks/research-brief-postgres-harness";
+} from "./research-brief-postgres-harness";
 
 const harness = createDisposableResearchBriefPostgresHarness(
   "offer_fulfillment",

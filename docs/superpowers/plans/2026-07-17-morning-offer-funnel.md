@@ -78,7 +78,7 @@ postgres.js, Supabase Postgres, Tailwind utility classes.
 
 **Files:**
 - Create: `apps/web/lib/conversation-continuity/offer-fulfillment.ts`
-- Create: `apps/web/lib/conversation-continuity/offer-fulfillment.test.ts`
+- Create: `apps/web/lib/tasks/research-brief-postgres-fulfillment.test.ts`
 - Modify: `apps/web/agent/tools/create_printable.ts`
 - Modify: `apps/web/agent/tools/create_task.ts`
 - Modify: `packages/core/src/events.ts`
