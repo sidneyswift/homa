@@ -13,10 +13,12 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * role may insert; see migration 20260704033725.
  */
 
-/** The wall's four doors: the report actions the paywall stands in front
- *  of (plans/2026-07-11-the-wall.md). Shared by the wall.* and
- *  report.action_tapped schemas and the beacon route's request schema. */
-export const WALL_DOORS = ["plan", "month", "call", "chat"] as const;
+/** The wall's doors: the four report actions the paywall stands in
+ *  front of (plans/2026-07-11-the-wall.md), plus "report" for the
+ *  report lock's held-subjects offer (plans/2026-07-18-report-lock.md).
+ *  Shared by the wall.* and report.action_tapped schemas and the beacon
+ *  route's request schema. */
+export const WALL_DOORS = ["plan", "month", "call", "chat", "report"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
 
 const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z

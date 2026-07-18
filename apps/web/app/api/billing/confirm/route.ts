@@ -1,8 +1,10 @@
 import Stripe from "stripe";
+import { cookies } from "next/headers";
 
 import { startFamilyTrial } from "../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { requireFamily } from "../../../../lib/map/session";
+import { childBelongsToFamily } from "../../../../lib/map/store";
 
 /**
  * GET /api/billing/confirm?session_id={CHECKOUT_SESSION_ID}
@@ -16,7 +18,43 @@ import { requireFamily } from "../../../../lib/map/session";
  * trial_started_at and fires billing.trial_started; revisits are no-ops.
  * Every path ends on /app: a verification hiccup strands nobody, the
  * founder reconciles from the Stripe dashboard (n is small by design).
+ *
+ * The welcome landing (plans/2026-07-18-report-lock.md): checkout that
+ * left from a child's report carries that child in a short-lived
+ * cookie (set by ReportLockOffer). A verified confirm re-scopes the
+ * cookie's child to the signed-in family (tenancy law: a pasted or
+ * forged cookie can never land on another family's child) and lands
+ * on that report with ?welcome=1, where the first-subject chooser
+ * turns the fresh trial into one default next step. No cookie, or a
+ * cookie that fails re-scoping, lands on /app exactly as before.
  */
+
+const TRIAL_CHILD_COOKIE = "homa_trial_child";
+
+async function welcomeTarget(requestUrl: URL, familyId: string): Promise<URL | null> {
+  try {
+    const jar = await cookies();
+    const raw = jar.get(TRIAL_CHILD_COOKIE)?.value ?? "";
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) return null;
+    if (!(await childBelongsToFamily(raw, familyId))) return null;
+    return new URL(`/app/${raw}/report?welcome=1`, requestUrl);
+  } catch {
+    // The welcome landing is a nicety; losing it must never lose the
+    // unlock itself.
+    return null;
+  }
+}
+
+/** Redirect that also retires the one-shot child cookie. */
+function redirectClearingCookie(target: URL): Response {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: target.toString(),
+      "Set-Cookie": `${TRIAL_CHILD_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`,
+    },
+  });
+}
 
 export async function GET(request: Request): Promise<Response> {
   const requestUrl = new URL(request.url);
@@ -32,7 +70,9 @@ export async function GET(request: Request): Promise<Response> {
     return Response.redirect(signin, 302);
   }
 
-  const secretKey = process.env.STRIPE_LIVE_SECRET_KEY ?? process.env.STRIPE_TEST_SECRET_KEY;
+  // || not ??: an empty LIVE var (a dev environment shadowing the live
+  // key) must fall through to TEST, matching paymentLinkBases.
+  const secretKey = process.env.STRIPE_LIVE_SECRET_KEY || process.env.STRIPE_TEST_SECRET_KEY;
   if (!secretKey) {
     console.error("billing/confirm: no Stripe secret key configured");
     return Response.redirect(appUrl, 302);
@@ -55,6 +95,12 @@ export async function GET(request: Request): Promise<Response> {
     if (fresh) {
       await emitMapEvent("billing.trial_started", { family_id: family.id });
     }
+
+    // Verified checkout: land on the child's report with the
+    // first-subject chooser when the cookie names one of THIS
+    // family's children, /app otherwise.
+    const target = (await welcomeTarget(requestUrl, family.id)) ?? appUrl;
+    return redirectClearingCookie(target);
   } catch (error) {
     console.error(
       "billing/confirm failed:",

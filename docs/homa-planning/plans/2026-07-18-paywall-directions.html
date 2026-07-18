@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paywall V1 · four directions · comparison lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;600;700&family=Fredoka:wght@600&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#FBF7F0; --bg-warm:#F7EFE2; --card:#FFFFFF; --raised:#FFFDF9; --sunken:#F3ECE1;
+    --ink:#221E1A; --body:#332E29; --muted:#6B6259; --subtle:#8A7D6C;
+    --clay:#E7602F; --clay-h:#C44C22; --clay-a:#9C3B1B; --clay-soft:#FFF0E8; --clay-focus:#F1793F;
+    --sage:#3D9A50; --sage-deep:#2F7C40; --sage-soft:#EAF6EC;
+    --gold:#F0BE00; --gold-tint:#FFD43B; --gold-soft:#FFF3C2; --gold-ink:#8A6410; --gold-ink-strong:#402E05;
+    --sky:#4FB4D6; --sky-soft:#DDF3F9; --sky-ink:#25718C;
+    --border:#E7DDCE; --border-mid:#D6C8B4;
+    --r-xs:6px; --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:28px; --pill:999px;
+    --sh-sm:0 1px 3px rgba(51,42,33,.08),0 1px 2px rgba(51,42,33,.04);
+    --sh-md:0 4px 12px rgba(51,42,33,.08),0 2px 4px rgba(51,42,33,.05);
+    --sh-lg:0 12px 28px rgba(51,42,33,.10),0 4px 10px rgba(51,42,33,.05);
+    --ease:cubic-bezier(0.22,0.8,0.28,1);
+    --disp:"Schibsted Grotesk",system-ui,sans-serif;
+    --sans:"Hanken Grotesk",system-ui,sans-serif;
+    --hand:"Caveat",cursive;
+    --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg-page);color:var(--body);font-family:var(--sans);font-size:16px;line-height:1.55;padding:20px 16px 80px}
+  .wrap{max-width:1060px;margin:0 auto}
+  h1,h2,h3{font-family:var(--disp);color:var(--ink);letter-spacing:-0.015em;line-height:1.2}
+  h1{font-size:1.9rem;font-weight:700}
+  h2{font-size:1.32rem;font-weight:700;margin-bottom:10px}
+  h3{font-size:1.02rem;font-weight:600}
+  p{max-width:72ch}
+  button{font-family:var(--sans);cursor:pointer;border:none;background:none;font-size:0.92rem}
+  button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(241,121,63,0.22),0 0 0 1.5px var(--clay-focus);border-radius:var(--r-xs)}
+  .eyebrow{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:var(--subtle)}
+  .mono{font-family:var(--mono);font-size:0.85em}
+
+  /* ---------- top notice ---------- */
+  .notice{background:var(--gold-soft);color:var(--gold-ink);border:1.5px solid var(--gold-tint);border-radius:var(--r-md);padding:12px 16px;font-size:0.9rem;font-weight:600;margin-bottom:26px}
+  .notice strong{color:var(--gold-ink-strong)}
+
+  header.lab{margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .wordmark{font-family:"Fredoka",var(--sans);font-weight:600;font-size:1.05rem;color:var(--ink);letter-spacing:0.01em}
+  .wordmark .o{color:var(--clay)}
+  header.lab .sub{color:var(--muted);font-size:0.92rem;width:100%}
+
+  /* ---------- findings ---------- */
+  .findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px;margin:18px 0 34px}
+  .finding{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px 16px 14px;box-shadow:var(--sh-sm)}
+  .finding .eyebrow{margin-bottom:6px;display:block}
+  .finding p{font-size:0.88rem;color:var(--body)}
+  .finding.wtf{background:var(--raised);border-color:var(--border-mid)}
+  .finding .num{font-family:var(--mono);font-size:0.82rem;color:var(--muted);display:block;margin-top:8px}
+
+  /* ---------- direction tabs ---------- */
+  .tabs{position:sticky;top:0;z-index:40;background:var(--bg-page);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1.5px solid var(--border);margin-bottom:18px}
+  .tab{border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-weight:700;border-radius:var(--pill);padding:8px 16px;font-size:0.86rem;transition:all 160ms var(--ease)}
+  .tab[aria-pressed="true"]{background:var(--clay);border-color:var(--clay);color:#fff}
+  .tab .won{display:none;margin-left:6px}
+  .tab.winner .won{display:inline}
+
+  .dir-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .dir-head h2{margin:0}
+  .phil{font-size:0.95rem;color:var(--muted);font-style:normal;max-width:76ch;margin-bottom:12px}
+  .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .meta{font-size:0.76rem;font-weight:700;border-radius:var(--pill);padding:5px 12px;border:1.5px solid var(--border);background:var(--raised);color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:700}
+  .meta.risk-low{background:var(--sage-soft);border-color:#bfe3c6;color:var(--sage-deep)}
+  .meta.risk-med{background:var(--gold-soft);border-color:var(--gold-tint);color:var(--gold-ink)}
+  .meta.risk-high{background:var(--clay-soft);border-color:#f3c4ad;color:var(--clay-a)}
+
+  /* ---------- app frame ---------- */
+  .frame{background:var(--bg-warm);border:1.5px solid var(--border-mid);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden;margin-bottom:16px}
+  .frame-bar{display:flex;align-items:center;gap:10px;background:var(--raised);border-bottom:1.5px solid var(--border);padding:10px 16px}
+  .frame-bar .fam{margin-left:auto;font-size:0.78rem;color:var(--subtle);font-weight:600}
+  .shell{display:flex;min-height:430px}
+  .side{width:186px;flex:none;background:var(--raised);border-right:1.5px solid var(--border);padding:14px 10px}
+  .side .nav-item{display:block;width:100%;text-align:left;padding:8px 12px;border-radius:var(--pill);font-weight:700;font-size:0.88rem;color:var(--muted);margin-bottom:2px}
+  .side .nav-item.active{background:var(--clay-soft);color:var(--clay-a)}
+  .main{flex:1;padding:20px 22px 26px;min-width:0}
+
+  .hero-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--sh-sm);margin-bottom:14px}
+  .hero-card h3{font-size:1.2rem;font-weight:700}
+  .hero-card .stats{font-family:var(--mono);font-size:0.8rem;color:var(--muted);margin-top:4px}
+  .hand-note{font-family:var(--hand);color:var(--sage-deep);font-size:1.15rem;margin-top:6px}
+
+  .letter{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px 18px;margin-bottom:14px;box-shadow:var(--sh-sm)}
+  .letter p{font-size:0.9rem;margin-bottom:10px}
+
+  .btn{border-radius:var(--pill);font-weight:700;padding:10px 18px;transition:all 160ms var(--ease)}
+  .btn:active{transform:scale(0.98)}
+  .btn-clay{background:var(--clay);color:#fff;box-shadow:var(--sh-sm)}
+  .btn-clay:hover{background:var(--clay-h)}
+  .btn-ghost{border:1.5px solid var(--border-mid);color:var(--body);background:var(--card)}
+  .btn-ghost:hover{border-color:var(--clay);color:var(--clay-a)}
+  .btn-sm{padding:7px 14px;font-size:0.82rem}
+  .link-quiet{background:none;color:var(--muted);text-decoration:underline;font-weight:600;font-size:0.85rem}
+
+  .subjects{display:flex;flex-direction:column;gap:8px}
+  .subj{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 14px}
+  .subj-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .subj-name{font-weight:700;color:var(--ink);font-size:0.95rem;flex:1;text-align:left}
+  .badge{font-size:0.72rem;font-weight:700;border-radius:var(--pill);padding:3px 10px}
+  .badge.ahead{background:var(--sage-soft);color:var(--sage-deep)}
+  .badge.on_track{background:var(--sky-soft);color:var(--sky-ink)}
+  .badge.growing{background:var(--gold-soft);color:var(--gold-ink)}
+  .badge.not_mapped{background:var(--sunken);color:var(--subtle)}
+  .months{font-family:var(--mono);font-size:0.78rem;color:var(--muted)}
+  .subj .drawer{display:none;border-top:1px dashed var(--border);margin-top:10px;padding-top:10px;font-size:0.85rem;color:var(--muted)}
+  .subj.open .drawer{display:block}
+  .subj.locked{background:var(--raised);border-style:dashed}
+  .subj.locked .subj-name{color:var(--muted)}
+  .lock-line{font-size:0.83rem;color:var(--subtle);width:100%}
+  .lock-glyph{font-size:0.9rem;color:var(--subtle)}
+
+  .offer-card{background:var(--clay-soft);border:1.5px solid #f3c4ad;border-radius:var(--r-lg);padding:16px 18px;margin:6px 0}
+  .offer-card h4{font-family:var(--disp);color:var(--ink);font-size:1rem;margin-bottom:6px}
+  .offer-card p{font-size:0.88rem;margin-bottom:12px}
+  .offer-card.done{background:var(--sage-soft);border-color:#bfe3c6}
+
+  .chat-box{display:flex;gap:8px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--pill);padding:6px 6px 6px 16px;margin-bottom:14px;align-items:center}
+  .chat-box input{border:none;background:none;flex:1;font-family:var(--sans);font-size:0.9rem;color:var(--body);min-width:0}
+  .chat-box input::placeholder{color:var(--subtle)}
+
+  .strip{background:var(--sky-soft);border:1.5px solid #bfe5f2;border-radius:var(--r-md);padding:10px 14px;font-size:0.85rem;color:var(--sky-ink);font-weight:600;margin-bottom:14px}
+  .strip.sage{background:var(--sage-soft);border-color:#bfe3c6;color:var(--sage-deep)}
+  .strip.gold{background:var(--gold-soft);border-color:var(--gold-tint);color:var(--gold-ink)}
+
+  .loop-steps{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .loop-step{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px 14px;flex:1;min-width:160px}
+  .loop-step .eyebrow{display:block;margin-bottom:6px}
+  .loop-step .done-mark{color:var(--sage-deep);font-weight:700;font-size:0.85rem}
+
+  .seg{display:inline-flex;border:1.5px solid var(--border-mid);border-radius:var(--pill);overflow:hidden;background:var(--card)}
+  .seg button{padding:7px 14px;font-size:0.82rem;font-weight:700;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:var(--clay);color:#fff}
+  .toggle-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .toggle-row .lbl{font-size:0.8rem;font-weight:700;color:var(--subtle)}
+  .pill-days{background:var(--gold-soft);color:var(--gold-ink);border:1.5px solid var(--gold-tint);border-radius:var(--pill);padding:4px 12px;font-size:0.78rem;font-weight:700}
+
+  /* ---------- critique ---------- */
+  .critique{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .steal{border:1.5px solid var(--border-mid);background:var(--card);border-radius:var(--pill);padding:7px 14px;font-size:0.82rem;font-weight:600;color:var(--body);transition:all 140ms var(--ease)}
+  .steal[aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage);color:var(--sage-deep)}
+  .steal[aria-pressed="true"]::before{content:"✓ "}
+  .skip-chip{border:1.5px dashed var(--border-mid);background:var(--sunken);border-radius:var(--pill);padding:7px 14px;font-size:0.82rem;font-weight:600;color:var(--muted)}
+  .win-row{display:flex;gap:10px;align-items:center;margin:8px 0 6px;flex-wrap:wrap}
+  .win-btn{border:1.5px solid var(--clay);color:var(--clay-a);background:var(--card);border-radius:var(--pill);padding:9px 18px;font-weight:700}
+  .win-btn[aria-pressed="true"]{background:var(--clay);color:#fff}
+  .win-btn[aria-pressed="true"]::before{content:"★ "}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:40px}
+  .two-roll{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+  .roll{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-sm)}
+  .roll p{font-size:0.88rem}
+
+  .q{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm)}
+  .q h3{margin-bottom:4px}
+  .q .why{font-size:0.85rem;color:var(--muted);margin-bottom:12px}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color 140ms var(--ease)}
+  .opt:hover{border-color:var(--border-mid)}
+  .opt input{margin-top:4px;accent-color:var(--clay)}
+  .opt.sel{border-color:var(--clay);background:var(--clay-soft)}
+  .opt .ot{font-weight:700;color:var(--ink);font-size:0.9rem}
+  .opt .od{font-size:0.83rem;color:var(--muted)}
+  .rec{font-size:0.7rem;font-weight:700;color:var(--sage-deep);background:var(--sage-soft);border-radius:var(--pill);padding:2px 8px;margin-left:6px;white-space:nowrap}
+
+  /* ---------- reply ---------- */
+  .reply-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  textarea{width:100%;min-height:110px;border:1.5px solid var(--border-mid);border-radius:var(--r-md);padding:12px;font-family:var(--sans);font-size:0.9rem;color:var(--body);background:var(--card);resize:vertical}
+  .reply-box{background:var(--sunken);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px;font-family:var(--mono);font-size:0.78rem;white-space:pre-wrap;min-height:110px;color:var(--body)}
+  .copy-row{display:flex;gap:10px;align-items:center;margin-top:10px}
+
+  details.wiring{background:var(--raised);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px 18px}
+  details.wiring summary{font-family:var(--disp);font-weight:700;color:var(--ink);cursor:pointer}
+  details.wiring ul{margin:10px 0 0 18px;font-size:0.86rem;color:var(--body)}
+  details.wiring li{margin-bottom:6px}
+  details.wiring .mono{font-size:0.78rem}
+
+  /* ---------- modal ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(51,42,33,0.42);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+  .scrim.open{display:flex}
+  .modal{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--sh-lg);max-width:430px;width:100%;padding:26px 26px 22px}
+  .modal h3{font-size:1.25rem;font-weight:700;margin-bottom:8px}
+  .modal p{font-size:0.9rem;color:var(--body);margin-bottom:10px}
+  .modal ul{margin:0 0 16px 18px;font-size:0.86rem;color:var(--muted)}
+  .modal .actions{display:flex;flex-direction:column;gap:8px}
+  .modal .fake-tag{font-size:0.7rem;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:var(--pill);padding:2px 10px;display:inline-block;margin-bottom:10px}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#FBF7F0;border-radius:var(--pill);padding:10px 20px;font-size:0.85rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity 200ms var(--ease);z-index:120;max-width:92vw;text-align:center}
+  .toast.show{opacity:1}
+
+  @media (max-width:720px){
+    .shell{flex-direction:column;min-height:0}
+    .side{width:100%;border-right:none;border-bottom:1.5px solid var(--border);display:flex;gap:4px;overflow-x:auto;padding:8px}
+    .side .nav-item{width:auto;white-space:nowrap;font-size:0.8rem;padding:6px 12px}
+    .main{padding:14px}
+    .reply-grid{grid-template-columns:1fr}
+    h1{font-size:1.5rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="notice" role="note">
+    <strong>Everything on this page is fake.</strong> The Rivera family, Milo, every score and number in the frames below are synthetic. No real family or production data is loaded, and no product code or route was changed. This file is a disposable comparison lab.
+  </div>
+
+  <header class="lab">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 L29 13 L29 28 L3 28 L3 13 Z" fill="none" stroke="#E7602F" stroke-width="2.6" stroke-linejoin="round"/><circle cx="11.5" cy="19" r="2.1" fill="#E7602F"/><circle cx="20.5" cy="19" r="2.1" fill="#E7602F"/></svg>
+    <span class="wordmark">H<span class="o">O</span>MA</span>
+    <h1 style="width:100%">Paywall V1 · four directions</h1>
+    <p class="sub">
+      The decision: where does the $19 a month ask sit in the new-family funnel, and what do the ~34 existing families get.
+      Same fake family, same core task in every direction: Jordan signs up, maps Milo (age 7), lands on the report, and meets the payment ask somewhere.
+      Pick a winner, steal details, answer the five questions, copy the reply at the bottom.
+    </p>
+  </header>
+
+  <!-- ================= FINDINGS ================= -->
+  <section aria-labelledby="fh">
+    <h2 id="fh">What the repo and the log already settle</h2>
+    <div class="findings">
+      <div class="finding">
+        <span class="eyebrow">Already built, dark</span>
+        <p>A complete $19/mo card-upfront 30-day-trial wall ships in the repo behind <span class="mono">HOMA_WALL_ENABLED</span>: Stripe Payment Links, trial and exempt columns, confirm and webhook routes, WallModal and WallOffer, wired into four action doors. Flipping it is Stripe dashboard config plus env vars plus a pricing page, not a build.</p>
+      </div>
+      <div class="finding">
+        <span class="eyebrow">Two standing rulings collide</span>
+        <p>Founder ruling 2026-07-11: the report stays free forever, the card prompt appears only at a paid action door. PMF master plan: wall stays off until keep is at least 40% and multi-day return is at least 40%. A top-4-subjects report lock supersedes both, and that supersede must be logged in the reconciliation index.</p>
+      </div>
+      <div class="finding">
+        <span class="eyebrow">Verified funnel, 2026-07-16</span>
+        <p>The report is the step that works. The collapse is after it, which is exactly where a wall's position matters most.</p>
+        <span class="num">43 signed up → 34 setup done → 29 report → 8 created → 3 kept · 76% one-and-done · 0 trials</span>
+      </div>
+      <div class="finding wtf">
+        <span class="eyebrow">WTF subagent verdict</span>
+        <p>"You cannot charge for a loop that 91% of your own activated users never complete." Least-damaging wall if one ships now: report free, gate at or after the second win, $19 only, new signups only, grandfather all 34, pre-committed two-week kill test: off if trials per report-reached family land under ~10% or report-to-material drops below 28%.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DIRECTIONS ================= -->
+  <section aria-labelledby="dh">
+    <h2 id="dh">The four directions</h2>
+    <div class="tabs" role="tablist" aria-label="Direction selector">
+      <button class="tab" id="tab-doors" aria-pressed="true" onclick="setDir('doors')">1 · Doors<span class="won">★</span></button>
+      <button class="tab" id="tab-four" aria-pressed="false" onclick="setDir('four')">2 · Four open subjects<span class="won">★</span></button>
+      <button class="tab" id="tab-second" aria-pressed="false" onclick="setDir('second')">3 · Second win<span class="won">★</span></button>
+      <button class="tab" id="tab-open" aria-pressed="false" onclick="setDir('open')">4 · Open house<span class="won">★</span></button>
+    </div>
+    <div id="dir-panel"></div>
+  </section>
+
+  <!-- ================= EXISTING FAMILIES ================= -->
+  <section aria-labelledby="eh">
+    <h2 id="eh">Two rollouts, one system</h2>
+    <div class="two-roll">
+      <div class="roll">
+        <span class="eyebrow">New families, from flip day</span>
+        <p style="margin-top:6px">Whichever direction wins becomes the only wall new signups ever know. No announcement needed: to them it is simply how Homa works. The pricing page ships in the same deploy as the flip (wall plan requirement), and SMS never mentions payment (standing rule).</p>
+      </div>
+      <div class="roll">
+        <span class="eyebrow">The ~34 existing setup-done families</span>
+        <p style="margin-top:6px">They are the entire live learning cohort for the PMF experiments (brief backfill, lesson bridge), and 3 keepers plus 8 creators are the only humans who ever used the loop. Question 2 below decides their treatment: quiet grandfather, a founding $9 invitation, or the same wall later. Nothing in any direction takes away artifacts they already made.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= QUESTIONS ================= -->
+  <section aria-labelledby="qh">
+    <h2 id="qh">Five build-changing questions</h2>
+    <div id="questions"></div>
+  </section>
+
+  <!-- ================= REPLY ================= -->
+  <section aria-labelledby="rh">
+    <h2 id="rh">Notes and reply</h2>
+    <div class="reply-grid">
+      <div>
+        <label class="eyebrow" for="notes" style="display:block;margin-bottom:6px">Freeform notes</label>
+        <textarea id="notes" placeholder="Anything the chips cannot say."></textarea>
+      </div>
+      <div>
+        <span class="eyebrow" style="display:block;margin-bottom:6px">Your assembled reply</span>
+        <div class="reply-box" id="reply" aria-live="polite"></div>
+        <div class="copy-row">
+          <button class="btn btn-clay btn-sm" onclick="copyReply()">Copy reply</button>
+          <span id="copy-status" style="font-size:0.8rem;color:var(--sage-deep);font-weight:600"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WIRING ================= -->
+  <section>
+    <details class="wiring">
+      <summary>Technical wiring note · verified paths only</summary>
+      <ul>
+        <li><b>No real application code was touched by this exercise.</b> This HTML file is the only artifact.</li>
+        <li><b>Reused as-is by every direction:</b> <span class="mono">apps/web/lib/billing/wall.ts</span> (familyWallCheckout, startFamilyTrial), <span class="mono">apps/web/components/billing/wall-modal.tsx · wall-offer.tsx · wall-copy.ts · door-link.tsx</span>, <span class="mono">apps/web/app/api/billing/confirm · webhook · beacon</span>, billing columns from <span class="mono">supabase/migrations/20260711200000_family_billing.sql</span> and <span class="mono">20260712210000_founder_console.sql</span>.</li>
+        <li><b>Doors:</b> no new code. Stripe dashboard (links, redirect to confirm, webhook secret), six env vars from <span class="mono">apps/web/.env.example</span>, pricing page, and the founder read-aloud HUMAN-TODO in <span class="mono">wall-copy.ts</span>.</li>
+        <li><b>Four open subjects:</b> pure free-four selector plus fixtures in <span class="mono">packages/core/src/map/</span>; a report-lock computation in <span class="mono">apps/web/app/app/[childId]/report/page.tsx</span> and <span class="mono">apps/web/app/onboarding/r/[token]/page.tsx</span> (both already fetch the wall); a locked-row branch and one WallOffer placement in <span class="mono">apps/web/app/onboarding/r/[token]/report-view.tsx</span>; new env flag <span class="mono">HOMA_REPORT_LOCK_ENABLED</span> layered on the wall flag. No schema change.</li>
+        <li><b>Second win:</b> a <span class="mono">wallMomentReached(familyId)</span> predicate in wall.ts (count query on materials, no new column); remove the wall from the first-chat door in <span class="mono">apps/web/app/app/chat-client.tsx</span> and first plan consent in <span class="mono">apps/web/app/api/map/plan/consent/route.ts</span> until the first keep. No schema change.</li>
+        <li><b>Open house:</b> expiry predicate computed from <span class="mono">child_reports</span> creation plus 14 days inside wall.ts; days-left pill; one day-11 email via the existing <span class="mono">apps/web/agent/tools/send_followup_email.ts</span>; two new no-trial Payment Links (env vars). Optional families clock column only if the founder wants an overridable clock (additive migration, run <span class="mono">pnpm check:isolation</span> first).</li>
+        <li><b>Cross-cutting decisions:</b> superseding the report-free ruling or the PMF wall-off gate must be appended to <span class="mono">docs/homa-planning/journeys/10-reconciliation.md</span> §5 and the build log; <span class="mono">STRIPE_WEBHOOK_SECRET</span> must be configured before any flip; re-lock enforcement (question 3) is the only item that may add a route (Stripe customer portal) or column.</li>
+      </ul>
+    </details>
+  </section>
+
+</div>
+
+<!-- modal + toast -->
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" id="modal">
+    <span class="fake-tag">Demo checkout · nothing real happens</span>
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <ul id="modal-bullets"></ul>
+    <div class="actions">
+      <button class="btn btn-clay" id="modal-cta" onclick="modalStart()"></button>
+      <button class="link-quiet" onclick="closeModal()">Not now</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------------- fake data (all synthetic) ---------------- */
+const SUBJECTS = [
+  {name:"Math",            pos:"ahead",     months:4, answers:8},
+  {name:"Literacy",        pos:"on_track",  months:1, answers:7},
+  {name:"Phonics",         pos:"ahead",     months:3, answers:6},
+  {name:"Writing",         pos:"growing",   months:0, answers:5},
+  {name:"Language",        pos:"on_track",  months:1, answers:4},
+  {name:"Science",         pos:"on_track",  months:2, answers:6},
+  {name:"Social studies",  pos:"growing",   months:0, answers:3},
+  {name:"Art & creative",  pos:"ahead",     months:2, answers:4},
+  {name:"Music",           pos:"on_track",  months:1, answers:3},
+  {name:"Gross motor",     pos:"ahead",     months:2, answers:5},
+  {name:"Fine motor",      pos:"on_track",  months:1, answers:4},
+  {name:"Social-emotional",pos:"on_track",  months:1, answers:6},
+  {name:"Self-care",       pos:"on_track",  months:2, answers:3},
+  {name:"Executive function",pos:"growing", months:0, answers:4},
+  {name:"Coding & computers",pos:"not_mapped",months:null,answers:0},
+  {name:"Second language", pos:"not_mapped",months:null,answers:1},
+];
+const POS_LABEL = {ahead:"Ahead", on_track:"On track", growing:"Growing", not_mapped:"Not mapped yet"};
+const FIXED_CORE = ["Math","Literacy","Science","Social-emotional"];
+const STRONGEST = SUBJECTS.slice().filter(s=>s.months!==null)
+  .sort((a,b)=> b.months-a.months || b.answers-a.answers).slice(0,4).map(s=>s.name);
+
+const DIRECTIONS = {
+  doors: {
+    label:"Doors",
+    phil:"Charge at the moment of intent: the full report proves the map is real, the first action tap proves demand, and nothing already shown is ever taken away. This is the wall that already exists in the repo, dark.",
+    meta:[["Wall sits","first paid action tap"],["Report","fully free"],["Trial","card upfront · 30 free days · $19/mo"],["Build","Stripe config only, zero new code"]],
+    risk:["risk-low","Activation risk: low · signal starts this week"],
+    steals:[
+      "Reuse the shipped WallModal, confirm route, and beacon events untouched: the flip is configuration, not code.",
+      "The four-door pattern (plan, month, call, first chat) keeps one shared trigger definition in wall.ts, so a future trigger swap is one function.",
+      "Emit door-tap beacons before flipping anything to get a week of counterfactual data on where families would have hit the wall."
+    ],
+    skip:"Skip: the first chat message is a door, so a curious parent meets the card before Homa has said one useful thing to them."
+  },
+  four: {
+    label:"Four open subjects",
+    phil:"The report itself is the product: four fully scored subjects prove the map is real, and opening the other twelve is the reason to start the trial. This is your proposal, steelmanned: honest locked rows, no blur, no fake numbers.",
+    meta:[["Wall sits","inside the report, after row 4"],["Report","4 of 16 subjects open"],["Trial","card upfront · 30 free days · $19/mo"],["Build","small: selector + locked-row branch + flag"]],
+    risk:["risk-high","Activation risk: high · gates the one step that works"],
+    steals:[
+      "Free-four policy as a pure function in packages/core with fixture tests, swappable without touching ReportView.",
+      "Locked rows show the subject name and the parent's own answer count only: no blurred scores, no dark-pattern teases.",
+      "Its own flag (HOMA_REPORT_LOCK_ENABLED) layered on the wall flag, so the lock can be killed independently of the doors wall."
+    ],
+    skip:"Skip: showing the strongest four quietly implies the hidden twelve are weaker, which brushes the no-behind-framing law even with clean copy. The fixed-core toggle below exists for exactly that reason."
+  },
+  second: {
+    label:"Second win",
+    phil:"Payment follows value: a family that has kept one worksheet has felt Homa work, so the ask lands at the second build. Session one always contains a complete free win. This is the WTF verdict's least-damaging wall.",
+    meta:[["Wall sits","after the first kept material"],["Report","fully free"],["Trial","card upfront · 30 free days · $19/mo"],["Build","one predicate in wall.ts, no schema change"]],
+    risk:["risk-low","Activation risk: lowest · but only 3 of 34 families ever reached this trigger"],
+    steals:[
+      "One server predicate, wallMomentReached(familyId), shared by every door: a count query on materials, no new column.",
+      "Wall copy that names the win they already had: 'That first worksheet is yours to keep. To keep building new ones each week, start your 30 free days.'",
+      "Beacon a has-kept-material flag on door taps while dark, so you know how many families would meet this wall before flipping."
+    ],
+    skip:"Skip: at the current 3-keepers-total activation rate, this wall may not show to a single new family for weeks. It only makes sense paired with the Wave 1 activation work."
+  },
+  open: {
+    label:"Open house",
+    phil:"A generous clock beats a feature gate: everything open for 14 days from the report creates return visits (the thing 76% of families never make), and the deadline turns joining into a real decision.",
+    meta:[["Wall sits","day 15, at the doors"],["Report","free forever, even after expiry"],["Trial","the 14 open days are the trial"],["Build","largest: expiry predicate + new no-trial links + day-11 email"]],
+    risk:["risk-med","Activation risk: medium · the 76% who never return expire without ever feeling value"],
+    steals:[
+      "Compute expiry from the report row's age inside wall.ts: no migration, and the clock starts at the value moment, not at account creation.",
+      "Post-expiry the binder goes read-only, never confiscated: 'Everything here is yours. To add to it, join for $19 a month.'",
+      "A quiet days-left pill only in the final 5 days. Offers, never commands, no countdown theatrics."
+    ],
+    skip:"Skip: card-at-expiry contradicts the T1 ruling (trial = card upfront) as written, so this direction cannot ship without an explicit founder ruling on question 4."
+  }
+};
+
+const QUESTIONS = [
+  {
+    id:"rollout", label:"What ships live first?",
+    why:"This is the load-bearing question. It decides whether ReportView grows a locked-content branch, whether two standing rulings get superseded in the reconciliation index, and whether the flip is an event or an experiment.",
+    options:[
+      {short:"Flip doors wall only, report stays free", text:"Flip the built doors wall, keep the report free",
+       detail:"Matches both standing rulings, zero new code, revenue signal starts this week. The top-4 idea stays unbuilt."},
+      {short:"Flip doors now + build top-4 lock dark, flip later with kill test", text:"Flip doors now, build the top-4 report lock dark, flip it later as a two-week kill test", rec:true,
+       detail:"Signal now, your bet gets built, and each flip is independently killable. Requires writing the kill-test bars down before the lock ever flips: lock comes off if trials per report-reached family are under ~10% or report-to-material drops below 28%."},
+      {short:"Ship top-4 report lock live now", text:"Ship the top-4 report lock live now",
+       detail:"The fastest test of your belief. It supersedes the report-free ruling and the PMF wall-off gate in one move, and it risks the 28% report-to-material rate on the only funnel step that currently works."}
+    ]
+  },
+  {
+    id:"existing", label:"What do the ~34 existing families get?",
+    why:"They are the live learning cohort for the PMF experiments, and the 3 keepers plus 8 creators are the only people who ever completed the loop. Mechanism matters too: billing_exempt backfill is one UPDATE with an existing column; a created-before-cutoff rule is code only; a new grandfathered_until column is a migration.",
+    options:[
+      {short:"Quiet grandfather, free forever (billing_exempt)", text:"Quiet grandfather: free forever via billing_exempt backfill", rec:true,
+       detail:"One UPDATE on an existing column, protects the retention experiments mid-flight, zero rug-pull. Costs future revenue from the most activated families."},
+      {short:"Grandfather + founding $9/mo invitation", text:"Grandfather, plus a founding invitation: $9 a month locked for life, card upfront",
+       detail:"Invited at the kept-material moment plus a personal founder email to the 3 keepers and 8 creators. Real willingness-to-pay signal from real users. $9 sits below the Homeschool Fox price axis, so ruling T3 deserves a read first."},
+      {short:"Same wall as new users after 30-day notice", text:"Same wall as new users, after a 30-day notice email",
+       detail:"Maximum consistency and revenue coverage. It is also the rug-pull case, and it poisons the brief-backfill and lesson-bridge experiments mid-flight."}
+    ]
+  },
+  {
+    id:"expiry", label:"What happens when a trial or subscription lapses?",
+    why:"Today trial_started_at opens every door forever and nothing reads the subscription status the webhook already mirrors. The answer decides whether wall.ts gains a re-lock predicate, whether a Stripe customer portal route must exist, and whether a third render state appears in the report.",
+    options:[
+      {short:"Fail-open V1 (accept the leak)", text:"Fail-open V1: paid once, open forever", rec:true,
+       detail:"Zero new code, matches the shipped fail-open design, Stripe still auto-charges the card at day 30. A canceled trial keeps full access, and churn is invisible in-product. Honest at today's family count."},
+      {short:"Re-lock on canceled/unpaid + portal route", text:"Re-lock on canceled or unpaid, grace on past_due",
+       detail:"Reads the stripe_subscription_status the webhook already writes. Honest enforcement, but it requires a customer portal route so a lapsed family can fix their card: new code, new Stripe config, and it satisfies PRD launch gate 6."},
+      {short:"Grace-window column", text:"Grace window: access until period end plus 7 days",
+       detail:"The gentlest and most Homa-voiced, and the most surface area: an additive migration, date logic, and a third degraded render state."}
+    ]
+  },
+  {
+    id:"card", label:"When is the card taken?",
+    why:"Ruling T1 defines the trial as card upfront and uncapped. The open-house direction takes the card at expiry instead, which is a different set of Stripe objects, different onboarding, and a T1 exception that only you can grant.",
+    options:[
+      {short:"Card upfront at every wall (T1 as ruled)", text:"Card upfront at every wall, 30 free days, then $19", rec:true,
+       detail:"T1 as written. Reuses the built Payment Links and confirm route. Strongest commitment filter, most friction at the ask."},
+      {short:"No card until expiry (T1 exception)", text:"Open window with no card, card only at expiry",
+       detail:"Zero friction inside the funnel, needs new no-trial Payment Links, expiry machinery, and an explicit T1 exception ruling logged in the index."},
+      {short:"Hybrid: 14 open days then the 30-day-trial link", text:"Hybrid: 14 open days, then the existing 30-day-trial link",
+       detail:"Every built Stripe object is reused and nothing new is configured. The free period doubles to 44 days and the first charge lands six weeks after signup."}
+    ]
+  },
+  {
+    id:"prices", label:"Which prices go live at the flip?",
+    why:"Stickers are already ruled: $19/mo, $99/yr, Plus $49. But the wall plan flags that $99/yr lands exactly on Homeschool Fox's price (ruling T3 says never compete on their axis), and the pricing ruling allows annual to begin at first conversion.",
+    options:[
+      {short:"$19 monthly only, annual waits", text:"$19 a month only; annual waits", rec:true,
+       detail:"Ships the decision that is actually made. The $99 sticker collision gets resolved before it is ever shown, and annual can begin at first conversion per the standing ruling."},
+      {short:"$19 monthly + $99 annual as built", text:"$19 a month and $99 a year, as already built",
+       detail:"Both links exist in the wall copy today. Ships the Fox collision unresolved."},
+      {short:"$19 + Plus $49 shown as coming soon", text:"$19 a month, with Homa Plus $49 visible as coming soon",
+       detail:"Anchors the ladder early, but it advertises a tier with no defined features, which the copy rulebook will not love."}
+    ]
+  }
+];
+
+/* ---------------- state ---------------- */
+const state = {
+  dir:"doors",
+  winner:null,
+  steals:{},            // "dir:i" -> true
+  answers:{},           // qid -> option index
+  trial:{doors:false,four:false,second:false,open:false},
+  fourPolicy:"core",    // core | strongest
+  loop:{built:0,kept:0},
+  day:2,                // open house: 2 | 12 | 15
+  cardTiming:"expiry",  // signup | expiry
+  drawers:{},           // subject name -> open
+};
+let modalAction = null;
+let lastFocus = null;
+
+/* ---------------- helpers ---------------- */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600);
+}
+function openModal(title,body,cta,onStart,bullets){
+  lastFocus=document.activeElement;
+  document.getElementById("modal-title").textContent=title;
+  document.getElementById("modal-body").textContent=body;
+  document.getElementById("modal-cta").textContent=cta;
+  const ul=document.getElementById("modal-bullets");
+  ul.innerHTML=(bullets||["Nothing is charged today","Unlimited kids on every plan","Cancel anytime during your free days"]).map(b=>"<li>"+esc(b)+"</li>").join("");
+  modalAction=onStart;
+  document.getElementById("scrim").classList.add("open");
+  document.getElementById("modal-cta").focus();
+}
+function closeModal(){
+  document.getElementById("scrim").classList.remove("open");
+  modalAction=null;
+  if(lastFocus&&lastFocus.focus)lastFocus.focus();
+}
+function modalStart(){ if(modalAction)modalAction(); closeModal(); }
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&document.getElementById("scrim").classList.contains("open"))closeModal();
+});
+function showWall(dir,customTitle,customBody,customCta){
+  openModal(
+    customTitle||"Try Homa free for 30 days",
+    customBody||"Your work is safe and Milo's map is saved. When you are ready, your first 30 days are free.",
+    customCta||"Start your 30 free days · then $19 a month",
+    ()=>{ state.trial[dir]=true; toast("Trial started in this demo · nothing real happened"); renderDir(); }
+  );
+}
+
+/* ---------------- shell + report renderers ---------------- */
+function shellOpen(title){
+  return `
+  <div class="frame">
+    <div class="frame-bar">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 L29 13 L29 28 L3 28 L3 13 Z" fill="none" stroke="#E7602F" stroke-width="2.6" stroke-linejoin="round"/><circle cx="11.5" cy="19" r="1.9" fill="#E7602F"/><circle cx="20.5" cy="19" r="1.9" fill="#E7602F"/></svg>
+      <span class="wordmark" style="font-size:0.9rem">H<span class="o">O</span>MA</span>
+      <span class="fam">The Rivera family · fake data</span>
+    </div>
+    <div class="shell">
+      <nav class="side" aria-label="App navigation (mock)">
+        ${["Chat","Progress","Planner","Binder","Tasks"].map(n=>`<button class="nav-item${n==="Progress"?" active":""}" onclick="toast('Fake navigation · this lab only shows the report surface')">${n}</button>`).join("")}
+      </nav>
+      <div class="main">`;
+}
+const SHELL_CLOSE = `</div></div></div>`;
+
+function heroCard(sub){
+  return `<div class="hero-card">
+    <h3>Milo's progress map</h3>
+    <div class="stats">age 7 · 14 of 16 subjects mapped · 69 answers</div>
+    ${sub?`<div class="hand-note">${esc(sub)}</div>`:""}
+  </div>`;
+}
+
+function subjRow(s, opts){
+  // opts: {locked, doorHandler, drawer}
+  const key=s.name;
+  if(opts.locked){
+    return `<div class="subj locked">
+      <div class="subj-row">
+        <span class="lock-glyph" aria-hidden="true">🔒</span>
+        <span class="subj-name">${esc(s.name)}</span>
+        <span class="badge not_mapped">Scored and saved</span>
+      </div>
+      <span class="lock-line">You answered ${s.answers} question${s.answers===1?"":"s"} about ${esc(s.name.toLowerCase())}. It is scored and ready whenever you are.</span>
+    </div>`;
+  }
+  const open=!!state.drawers[key];
+  const badge=`<span class="badge ${s.pos}">${POS_LABEL[s.pos]}</span>`;
+  const months=s.months?`<span class="months">+${s.months} mo</span>`:"";
+  const door=opts.door?`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();${opts.door}('${esc(s.name)}')">Build the 4-week plan</button>`:"";
+  return `<div class="subj${open?" open":""}">
+    <div class="subj-row">
+      <button class="subj-name" aria-expanded="${open}" onclick="toggleDrawer('${esc(key)}')">${esc(s.name)}</button>
+      ${badge}${months}${door}
+    </div>
+    <div class="drawer">
+      Working at a ${s.pos==="ahead"?"comfortably ahead":"steady"} pace for age 7 · based on ${s.answers} of your answers · benchmark: state scope and sequence, grade 2.
+    </div>
+  </div>`;
+}
+function toggleDrawer(k){ state.drawers[k]=!state.drawers[k]; renderDir(); }
+
+/* ---------------- per-direction frames ---------------- */
+function frameDoors(){
+  const trial=state.trial.doors;
+  let h=shellOpen();
+  h+=trial?`<div class="strip sage">Free days active · every door is open · nothing charges for 30 days</div>`:"";
+  h+=heroCard("All sixteen subjects, fully open from day one.");
+  h+=`<div class="chat-box">
+    <input id="doors-chat" type="text" placeholder="Ask Homa anything about Milo's week" aria-label="Chat with Homa (mock)">
+    <button class="btn btn-clay btn-sm" onclick="doorsChat()">Send</button>
+  </div>`;
+  h+=`<div class="letter">
+    <p><b>A note from Homa.</b> Milo had a strong mapping session. Math and phonics are moving quickly, and writing is growing at its own steady pace. A four-week plan would give his mornings a nice rhythm.</p>
+    <button class="btn btn-clay btn-sm" onclick="doorsDoor('This month')">Build this month's plan</button>
+  </div>`;
+  h+=`<div class="subjects">`+SUBJECTS.map(s=>subjRow(s,{door:"doorsDoor"})).join("")+`</div>`;
+  h+=SHELL_CLOSE;
+  return h;
+}
+function doorsDoor(name){
+  if(state.trial.doors){ toast("The plan builder would open here · fake action"); return; }
+  showWall("doors");
+}
+function doorsChat(){
+  const v=document.getElementById("doors-chat").value;
+  if(state.trial.doors){ toast("Homa would answer here · fake action"); return; }
+  showWall("doors", "Try Homa free for 30 days",
+    "Homa read Milo's map and is ready to talk it through with you. Your first 30 days are free.");
+}
+
+function frameFour(){
+  const trial=state.trial.four;
+  const freeSet=new Set(state.fourPolicy==="core"?FIXED_CORE:STRONGEST);
+  let h=shellOpen();
+  h+=`<div class="toggle-row">
+    <span class="lbl">Free-four policy</span>
+    <div class="seg" role="group" aria-label="Free four policy">
+      <button aria-pressed="${state.fourPolicy==='core'}" onclick="setFourPolicy('core')">Fixed core</button>
+      <button aria-pressed="${state.fourPolicy==='strongest'}" onclick="setFourPolicy('strongest')">Strongest four</button>
+    </div>
+    <span class="lbl" style="font-weight:600">${state.fourPolicy==="core"?"Math, literacy, science, social-emotional for every family: avoids implying the locked twelve are the weak ones.":"Milo's four highest positions: the strongest tease, and the quiet implication that the rest trail."}</span>
+  </div>`;
+  h+=trial?`<div class="strip sage">Free days active · the full map is open</div>`:"";
+  h+=heroCard(trial?"All sixteen subjects, open.":"Milo's map is complete. All sixteen subjects are scored and saved.");
+  const freeRows=SUBJECTS.filter(s=>freeSet.has(s.name));
+  const lockedRows=SUBJECTS.filter(s=>!freeSet.has(s.name));
+  h+=`<div class="subjects">`;
+  h+=freeRows.map(s=>subjRow(s,{door:"fourDoor"})).join("");
+  if(!trial){
+    h+=`<div class="offer-card">
+      <h4>Open the full map</h4>
+      <p>Milo's map is complete. All sixteen subjects are scored and saved. The four above are fully open; the other twelve are ready whenever you are.</p>
+      <button class="btn btn-clay" onclick="showWall('four')">Start your 30 free days · then $19 a month</button>
+    </div>`;
+    h+=lockedRows.map(s=>subjRow(s,{locked:true})).join("");
+  } else {
+    h+=`<div class="offer-card done"><h4>The full map is open</h4><p>Every subject below is unlocked for your free days and beyond.</p></div>`;
+    h+=lockedRows.map(s=>subjRow(s,{door:"fourDoor"})).join("");
+  }
+  h+=`</div>`+SHELL_CLOSE;
+  return h;
+}
+function setFourPolicy(p){ state.fourPolicy=p; renderDir(); }
+function fourDoor(name){
+  if(state.trial.four){ toast("The plan builder would open here · fake action"); return; }
+  showWall("four");
+}
+
+function frameSecond(){
+  const trial=state.trial.second;
+  const {built,kept}=state.loop;
+  let h=shellOpen();
+  h+=`<div class="strip">First win free · the ask arrives at the second build${trial?" · free days active":""}</div>`;
+  h+=heroCard("All sixteen subjects, fully open from day one.");
+  h+=`<div class="loop-steps">
+    <div class="loop-step">
+      <span class="eyebrow">Step 1 · free</span>
+      ${built>0?`<span class="done-mark">✓ Fractions practice built</span>`:`<button class="btn btn-clay btn-sm" onclick="loopBuild()">Build Milo's fractions worksheet</button>`}
+    </div>
+    <div class="loop-step">
+      <span class="eyebrow">Step 2 · free</span>
+      ${kept>0?`<span class="done-mark">✓ Kept in the binder</span>`:built>0?`<button class="btn btn-clay btn-sm" onclick="loopKeep()">Keep it in the binder</button>`:`<span style="font-size:0.83rem;color:var(--subtle)">Build one first</span>`}
+    </div>
+    <div class="loop-step">
+      <span class="eyebrow">Step 3 · the ask</span>
+      ${kept>0?`<button class="btn ${trial?"btn-ghost":"btn-clay"} btn-sm" onclick="loopSecond()">${trial?"Build another (open)":"Build another worksheet"}</button>`:`<span style="font-size:0.83rem;color:var(--subtle)">Keep one first</span>`}
+    </div>
+  </div>`;
+  h+=`<div style="margin-bottom:14px"><button class="link-quiet" onclick="loopReset()">Start the loop over</button></div>`;
+  h+=`<div class="subjects">`+SUBJECTS.slice(0,6).map(s=>subjRow(s,{door:"secondDoor"})).join("")+`<div style="font-size:0.8rem;color:var(--subtle);padding:4px 2px">…and ten more, all open. Doors stay free until the first keep.</div></div>`;
+  h+=SHELL_CLOSE;
+  return h;
+}
+function loopBuild(){ state.loop.built=1; toast("Worksheet generated · fake action"); renderDir(); }
+function loopKeep(){ state.loop.kept=1; toast("Kept · Milo's binder has its first page"); renderDir(); }
+function loopSecond(){
+  if(state.trial.second){ toast("Second worksheet would build here · fake action"); return; }
+  showWall("second","Try Homa free for 30 days",
+    "That first worksheet is yours to keep. To keep building new ones each week, start your 30 free days.");
+}
+function loopReset(){ state.loop={built:0,kept:0}; state.trial.second=false; renderDir(); }
+function secondDoor(name){
+  if(state.loop.kept===0||state.trial.second){ toast("Free while the first win is still in progress · fake action"); return; }
+  loopSecond();
+}
+
+function frameOpen(){
+  const trial=state.trial.open;
+  const day=state.day;
+  const cardAtSignup=state.cardTiming==="signup";
+  const expired=day>=15&&!cardAtSignup&&!trial;
+  let h=shellOpen();
+  h+=`<div class="toggle-row">
+    <span class="lbl">Day</span>
+    <div class="seg" role="group" aria-label="Simulated day">
+      ${[2,12,15].map(d=>`<button aria-pressed="${day===d}" onclick="setDay(${d})">Day ${d}</button>`).join("")}
+    </div>
+    <span class="lbl">Card timing</span>
+    <div class="seg" role="group" aria-label="Card timing">
+      <button aria-pressed="${!cardAtSignup}" onclick="setCardTiming('expiry')">At expiry</button>
+      <button aria-pressed="${cardAtSignup}" onclick="setCardTiming('signup')">At signup</button>
+    </div>
+  </div>`;
+  if(cardAtSignup){
+    h+=`<div class="strip">Card was taken at signup, so the open house is the Stripe trial itself: day 15 passes quietly and the first charge lands on day 30. The wall below never appears.</div>`;
+  } else if(day<15){
+    h+=`<div class="strip sage">Open house · everything is open, no card on file${day>=10?`&nbsp;&nbsp;<span class="pill-days">Open house · ${15-day} day${15-day===1?"":"s"} left</span>`:""}</div>`;
+  } else if(trial){
+    h+=`<div class="strip sage">Membership active · everything is open again</div>`;
+  } else {
+    h+=`<div class="strip gold">The open house has ended. Everything you have made stays yours, and Milo's report stays open.</div>`;
+  }
+  h+=heroCard(expired?"The report stays free, even now.":"All sixteen subjects, fully open.");
+  if(expired){
+    h+=`<div class="offer-card">
+      <h4>Keep building with Homa</h4>
+      <p>Everything in Milo's binder is yours, and his full report stays open. To keep building new materials and plans, join for $19 a month.</p>
+      <button class="btn btn-clay" onclick="openJoin()">Join for $19 a month</button>
+    </div>`;
+    h+=`<div class="letter"><p><b>Binder · read only.</b> Fractions practice, sight-word bingo, and the September month plan are all still here to view and print. New pages wait for membership.</p><button class="btn btn-ghost btn-sm" onclick="toast('Viewing and printing stay free after expiry · fake action')">Open the binder</button></div>`;
+  } else {
+    h+=`<div class="letter"><p><b>A note from Homa.</b> The whole house is open: plans, worksheets, calls, chat. Nothing needs a card${cardAtSignup?" charge until day 30":" until day 15"}.</p><button class="btn btn-clay btn-sm" onclick="openDoor()">Build this month's plan</button></div>`;
+  }
+  h+=`<div class="subjects">`+SUBJECTS.slice(0,5).map(s=>subjRow(s,{door:"openDoorRow"})).join("")+`<div style="font-size:0.8rem;color:var(--subtle);padding:4px 2px">…and eleven more. The report itself never locks in this direction.</div></div>`;
+  h+=SHELL_CLOSE;
+  return h;
+}
+function setDay(d){ state.day=d; renderDir(); }
+function setCardTiming(t){ state.cardTiming=t; renderDir(); }
+function openDoor(){ toast("The plan builder would open here · fake action"); }
+function openDoorRow(name){
+  const expired=state.day>=15&&state.cardTiming!=="signup"&&!state.trial.open;
+  if(expired){ openJoin(); return; }
+  toast("Open during the open house · fake action");
+}
+function openJoin(){
+  openModal("Join Homa","Everything you have made stays yours either way. Membership keeps the building going: plans, worksheets, calls, and chat.",
+    "Join for $19 a month",
+    ()=>{ state.trial.open=true; toast("Joined in this demo · nothing real happened"); renderDir(); },
+    ["Starts today, cancel anytime","Unlimited kids on every plan","Your binder and report never lock"]);
+}
+
+/* ---------------- direction panel ---------------- */
+function setDir(d){ state.dir=d; renderDir();
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed", t.id==="tab-"+d ? "true":"false"));
+}
+function renderDir(){
+  const d=state.dir, D=DIRECTIONS[d];
+  const frames={doors:frameDoors,four:frameFour,second:frameSecond,open:frameOpen};
+  let h=`<div class="dir-head"><h2>${D.label}</h2></div>
+  <p class="phil">${D.phil}</p>
+  <div class="meta-row">
+    ${D.meta.map(m=>`<span class="meta">${m[0]}: <b>${esc(m[1])}</b></span>`).join("")}
+    <span class="meta ${D.risk[0]}">${esc(D.risk[1])}</span>
+  </div>`;
+  h+=frames[d]();
+  h+=`<div class="critique" aria-label="Details to steal">
+    ${D.steals.map((s,i)=>`<button class="steal" aria-pressed="${state.steals[d+":"+i]?"true":"false"}" onclick="toggleSteal('${d}',${i})">${esc(s)}</button>`).join("")}
+    <span class="skip-chip">${esc(D.skip)}</span>
+  </div>
+  <div class="win-row">
+    <button class="win-btn" aria-pressed="${state.winner===d?"true":"false"}" onclick="setWinner('${d}')">${state.winner===d?"Winner: "+D.label:"Choose "+D.label+" as the winner"}</button>
+    ${state.winner&&state.winner!==d?`<span style="font-size:0.83rem;color:var(--subtle)">Current winner: ${DIRECTIONS[state.winner].label}</span>`:""}
+  </div>`;
+  document.getElementById("dir-panel").innerHTML=h;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("winner", t.id==="tab-"+state.winner));
+  buildReply();
+}
+function toggleSteal(d,i){ const k=d+":"+i; state.steals[k]=!state.steals[k]; renderDir(); }
+function setWinner(d){ state.winner=(state.winner===d?null:d); renderDir(); }
+
+/* ---------------- questions ---------------- */
+function renderQuestions(){
+  const el=document.getElementById("questions");
+  el.innerHTML=QUESTIONS.map((q,qi)=>`
+    <div class="q">
+      <h3>${qi+1}. ${esc(q.label)}</h3>
+      <p class="why">${esc(q.why)}</p>
+      ${q.options.map((o,oi)=>`
+        <label class="opt${state.answers[q.id]===oi?" sel":""}">
+          <input type="radio" name="q-${q.id}" ${state.answers[q.id]===oi?"checked":""} onchange="answer('${q.id}',${oi})">
+          <span><span class="ot">${esc(o.text)}</span>${o.rec?'<span class="rec">Recommended</span>':""}<br><span class="od">${esc(o.detail)}</span></span>
+        </label>`).join("")}
+    </div>`).join("");
+}
+function answer(qid,oi){ state.answers[qid]=oi; renderQuestions(); buildReply(); }
+
+/* ---------------- reply assembly ---------------- */
+function buildReply(){
+  const w=state.winner?DIRECTIONS[state.winner].label:"[not chosen yet]";
+  const steals=Object.keys(state.steals).filter(k=>state.steals[k]).map(k=>{
+    const [d,i]=k.split(":");
+    return DIRECTIONS[d].steals[+i]+" ("+DIRECTIONS[d].label+")";
+  });
+  let out="UI direction feedback\n\n";
+  out+="Winning direction: "+w+"\n";
+  out+="Details to steal: "+(steals.length?steals.join("; "):"none")+"\n\n";
+  QUESTIONS.forEach(q=>{
+    const a=state.answers[q.id];
+    out+="- "+q.label+" "+(a===undefined?"[no answer]":q.options[a].short)+"\n";
+  });
+  const notes=document.getElementById("notes").value.trim();
+  if(notes) out+="\nNotes: "+notes;
+  document.getElementById("reply").textContent=out;
+  return out;
+}
+function copyReply(){
+  const txt=buildReply();
+  const done=()=>{ const s=document.getElementById("copy-status"); s.textContent="Copied"; setTimeout(()=>s.textContent="",2000); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+  } else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea");
+  ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ toast("Select the reply text and copy manually"); }
+  document.body.removeChild(ta);
+}
+
+document.getElementById("notes").addEventListener("input",buildReply);
+
+/* ---------------- init ---------------- */
+/* lab-only deep links so screenshots can open a specific state,
+   e.g. #dir=four&policy=strongest · #dir=second&built=1&kept=1 · #dir=open&day=15&card=signup */
+(function(){
+  const h=new URLSearchParams(location.hash.slice(1));
+  const d=h.get("dir");
+  if(d&&DIRECTIONS[d])state.dir=d;
+  if(h.get("policy"))state.fourPolicy=h.get("policy");
+  if(h.get("day"))state.day=+h.get("day")||state.day;
+  if(h.get("card"))state.cardTiming=h.get("card");
+  if(h.get("built"))state.loop.built=1;
+  if(h.get("kept"))state.loop.kept=1;
+  if(h.get("trial"))state.trial[state.dir]=true;
+})();
+renderQuestions();
+setDir(state.dir);
+</script>
+</body>
+</html>

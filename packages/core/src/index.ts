@@ -89,6 +89,13 @@ export {
 } from "./map/question-queue";
 
 export {
+  freeReportSubjects,
+  lockedReportSubjects,
+  REPORT_LOCK_CORE_SUBJECTS,
+  REPORT_LOCK_FREE_COUNT,
+} from "./map/report-lock";
+
+export {
   subjectLine,
   homaNote,
   noteGreeting,

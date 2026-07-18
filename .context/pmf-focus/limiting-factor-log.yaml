@@ -5,7 +5,7 @@ pmf_definition: >-
   meaningfully disappointed if it disappeared. Observable proxies: activation
   through the core loop, return usage, and willingness to pay or strongly
   recommend. Replace this paragraph when the founder tightens the definition.
-updated_at: "2026-07-16T16:20:00Z"
+updated_at: "2026-07-18T06:10:00Z"
 
 # Denominator glossary (see also pmf-focus/references/reality-checks.md):
 # - signup-screen abandon = status=open (opened Google/email signup, never finished)
@@ -101,6 +101,52 @@ current:
 history: []
 
 research_notes:
+  - at: "2026-07-18T06:10:00Z"
+    surface: "billing | paywall"
+    finding: >-
+      Founder ruled (register: report-lock-four-open,
+      paywall-naming-and-price): ship direction 2, the four-open-subjects
+      report lock, built dark 2026-07-18 behind HOMA_REPORT_LOCK_ENABLED
+      with the unlock landing in a first-subject chooser (one default next
+      step at the post-report break). $19 monthly only at flip, annual
+      held for the T3 read. Existing claimed families grandfather via
+      billing_exempt backfill. Kill test pre-committed in
+      docs/homa-planning/plans/2026-07-18-report-lock.md: lock off if
+      trials per report-reached family are under 10% after 14 days or
+      report-to-material drops below 28% in the lock cohort. Wall remains
+      OFF until the founder walks the flip runbook (Stripe dashboard, env
+      vars, backfill, read-aloud, pricing page decision).
+    source: "founder ruling in session 2026-07-18 + build (see build-log entry)"
+    implication_for_pmf: >-
+      Core-loop activation stays the locked factor; the lock experiment
+      rides beside it and the kill test protects the funnel step that
+      works. First trial metrics land only after the founder flips; the
+      concierge probe on the 3 keepers and 8 creators remains open and is
+      still the fastest willingness-to-pay signal.
+  - at: "2026-07-18T04:49:00Z"
+    surface: "billing | paywall"
+    finding: >-
+      Founder requested a paywall V1 design (limited 4-subject report, $19/m
+      trial, plus a plan for existing users). WTF subagent verdict: the wall
+      does not attack core-loop activation, and a report lock sits upstream of
+      the verified collapse (29 report, 8 created, 3 kept, 76% one-and-done,
+      0 trials, all 2026-07-16 data). Grounding found the wall already built
+      dark behind HOMA_WALL_ENABLED (Payment Links, trial columns, confirm and
+      webhook routes, wall components); flipping is Stripe dashboard config
+      plus env vars plus a pricing page. Comparison lab with four directions
+      (Doors, Four open subjects, Second win, Open house) and five ruling
+      questions delivered at
+      docs/homa-planning/plans/2026-07-18-paywall-directions.html.
+      Factor unchanged, wall still off, founder answers pending.
+    source: "WTF subagent + grounding workflow wf_7b045b33, session 2026-07-18"
+    implication_for_pmf: >-
+      Any live flip of a report lock supersedes rulings paywall-door-placement
+      (report free forever) and the master-plan wall-off gate, and must be
+      logged in the reconciliation index with a pre-committed kill test (off
+      if trials per report-reached family are under ~10% or report-to-material
+      drops below 28%). The ~34 setup-done families stay grandfathered to
+      protect PMF-201/PMF-101; the concierge $19 probe on the 3 keepers and
+      8 creators remains the fastest honest pricing signal.
   - at: "2026-07-16T16:20:00Z"
     surface: "retention | tasks | measurement"
     finding: >-

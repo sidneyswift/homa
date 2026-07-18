@@ -50,6 +50,8 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
       return `Your 30 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
     case "chat":
       return `Your 30 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
+    case "report":
+      return `Your 30 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -100,3 +102,47 @@ export const WALL_SIGNIN_BODY =
   "Plans are part of Homa membership. Sign in to see the offer.";
 
 export const WALL_SIGNIN_BUTTON = "Sign in";
+
+/**
+ * The report lock's offer card (plans/2026-07-18-report-lock.md), the
+ * one card between the open four and the held subjects. Same laws as
+ * every wall surface, plus the 2026-07-18 naming ruling: this surface
+ * says "report" or "progress", never "map". Reassurance first: the
+ * whole report already exists and is saved, nothing is unfinished.
+ */
+export function reportLockReadyLine(childName: string | null, mappedCount: number): string {
+  const whose = childName ? `${childName}'s` : "Your child's";
+  return `${whose} full report is ready: ${mappedCount} subjects, scored and saved.`;
+}
+
+export function reportLockHeldLine(
+  childName: string | null,
+  openCount: number,
+  lockedCount: number,
+): string {
+  const kid = childName ?? "your child";
+  const open = openCount === 1 ? "The subject above is" : `The ${NUMBER_WORDS[openCount] ?? openCount} above are`;
+  const held = NUMBER_WORDS[lockedCount] ?? String(lockedCount);
+  return `${open} open in full. Your 30 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+}
+
+/** A held subject's whole row: her own answer count (the one honest
+ *  number that is already hers), never a blurred score or teased badge. */
+export function reportLockRowLine(subjectName: string, observations: number): string {
+  const subject = subjectName.toLowerCase();
+  if (observations < 1) return `Scored and ready whenever you are.`;
+  const count = observations === 1 ? "1 question" : `${observations} questions`;
+  return `You answered ${count} about ${subject}. Scored and ready whenever you are.`;
+}
+
+/** The token link opened without this family's session: rows stay
+ *  held, and the card offers sign-in instead of a checkout that could
+ *  never be attributed to the right family. */
+export const REPORT_LOCK_SIGNIN_HEADLINE = "The rest of the report is part of Homa membership.";
+
+export const REPORT_LOCK_SIGNIN_BODY = "Sign in to see the offer.";
+
+const NUMBER_WORDS: Record<number, string> = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+  7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
+};

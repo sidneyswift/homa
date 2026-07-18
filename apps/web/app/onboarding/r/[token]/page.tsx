@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { freeReportSubjects } from "@homa/core";
+
 import { Logo } from "../../../../components/brand/Logo";
 import { Doodle } from "../../../../components/marketing/Doodle";
-import { familyWallCheckout, wallEnabled } from "../../../../lib/billing/wall";
+import { familyWallCheckout, reportLockEnabled, wallEnabled } from "../../../../lib/billing/wall";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
@@ -132,12 +134,24 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
 
   // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
   // (the instant no-query path), and for exempt or trialing families.
-  // Owner-only on this shareable URL: a signed-in visitor from another
-  // family must never see this family's checkout (her payment would
-  // carry the wrong client_reference_id and unlock nothing).
-  const wall =
-    wallEnabled() && viewerIsReportFamily
+  // With the report lock on, the family's wall state is computed for
+  // EVERY viewer (the held rows must hold on the shareable URL too, or
+  // the emailed link becomes the bypass), but checkout URLs render
+  // owner-only: a signed-in visitor from another family must never see
+  // this family's checkout (her payment would carry the wrong
+  // client_reference_id and unlock nothing). familyId comes from the
+  // report row, server-resolved, never the request.
+  const checkout =
+    wallEnabled() && (viewerIsReportFamily || reportLockEnabled())
       ? await familyWallCheckout(report.familyId)
+      : null;
+  const wall = viewerIsReportFamily ? checkout : null;
+  const reportLock =
+    checkout && reportLockEnabled()
+      ? {
+          freeSubjects: freeReportSubjects(report.scores),
+          checkout: viewerIsReportFamily ? checkout : null,
+        }
       : null;
 
   return (
@@ -146,6 +160,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
       wall={wall}
+      reportLock={reportLock}
       viewerActions={{
         call: viewerIsSignedInMember,
         month: viewerIsReportFamily,
