@@ -3,6 +3,41 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · The daily digest stops re-reporting alerts already marked handled
+
+Cause: the 2026-07-18 07:01 ET digest said "3 delivery problems need a
+look" for the Polizzi and Kennedy oversized-SMS failures and the
+Gonçalves morning-brief run failure, all three marked handled in the
+console about 13 hours before the send. The digest queries in
+`lib/admin/digest.ts` read the raw source tables and never consulted
+`admin_alert_acknowledgments`, so the console and the email disagreed
+about the same rows.
+
+Fix: the digest's trouble queries now carry the console's exact hide
+rules from `lib/admin/alert-acks.ts`. A task-run ack hides forever
+because runs are terminal; delivery and email acks hide only while the
+ack is newer than the row's updated_at, so a re-failure resurfaces in
+the next digest. A flipped mirror of the same queries counts what was
+excluded, and the digest reports that count as one handled line after
+the trouble rows. Code-only change, no migration, safe to lead a
+deploy.
+
+Decisions made alone, flaggable:
+
+- **Exclude and count, not label per row.** Matches the console's
+  "N handled alerts hidden" note: hiding never erases history, and the
+  founder is told how many alerts were already handled instead of
+  seeing them re-reported as open trouble.
+- **An all-handled morning is not "all clear" in the body.** The
+  headline reads "Nothing new needs a look." plus the handled line;
+  "Nothing broke in the last 24 hours." stays reserved for mornings
+  with no alerts at all, because claiming nothing broke would be
+  false. The subject still counts only alerts that need a look, so a
+  fully handled morning gets the "all clear" subject.
+- **Headline copy moved to `digest-format.ts`** so both lines are unit
+  tested without a database (`digest-format.test.ts`, runs in
+  `check:continuity`).
+
 ## 2026-07-18 · 48-hour review: oversized SMS now delivered, reaped morning briefs retried once
 
 Cause: the founder digests for 2026-07-16 and 2026-07-17 showed four
