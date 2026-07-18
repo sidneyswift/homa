@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · The wall and the report lock flip ON in production (founder order)
+
+Founder ordered the flip ("ok switch flags") after local testing. Walked
+per the runbook in `plans/2026-07-18-report-lock.md`:
+
+1. Grandfather backfill ran against prod at **2026-07-18T14:25:44Z** (the
+   flip timestamp): 47 claimed non-sandbox families, 0 previously exempt,
+   47 newly exempted, 0 still walled. Sandbox families deliberately not
+   exempted (they are the lock probes).
+2. Vercel production env: added `NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL`
+   (from the local env, live monthly link only, annual withheld per
+   `paywall-naming-and-price`), `HOMA_WALL_ENABLED=1`,
+   `HOMA_REPORT_LOCK_ENABLED=1`. `HOMA_LIVE_PROGRESS_ENABLED` confirmed
+   empty in production (no Progress-route bypass).
+3. Redeployed production, READY, aliased to thankshoma.com.
+4. Live probes: landing 200; `/onboarding/sample` fully open, zero lock
+   strings; a sandbox family's token report renders 4 open subjects and
+   the held rows with the sign-in offer and NO checkout buttons for a
+   signed-out viewer (owner-only checkout law holds); webhook endpoint
+   returns 400 on unsigned POST (signature verification armed).
+
+Kill test is ARMED, window 2026-07-18 to 2026-08-01, on new signed-up
+(claimed) families only: lock comes off if trials per report-reached
+family are under 10%, or report-reached to materials.created falls below
+28% inside the lock cohort. Earned if ≥25% of report-reached new
+families start trials and trial families create and keep at or above
+current rates.
+
+Open items the flip shipped without, by founder order, flaggable:
+
+- The pricing page (wall plan required it in the same deploy as the
+  flip): not built; landing still shows no pricing.
+- The founder read-aloud gate on wall copy (wall-copy.ts HUMAN-TODO):
+  not separately recorded; founder saw the copy while testing locally.
+- Unverifiable from outside Stripe: the LIVE monthly link's 30-day
+  trial + after-completion redirect to
+  `/api/billing/confirm?session_id={CHECKOUT_SESSION_ID}`, and whether
+  the webhook endpoint is registered in the Stripe dashboard. If BOTH
+  the redirect and the webhook are unconfigured, a paying family would
+  not unlock; founder eyeball in the dashboard is the remaining check.
+
 ## 2026-07-18 · The report lock ships dark: four open subjects, membership for the rest
 
 Founder ruling (recorded in the register as `report-lock-four-open` and

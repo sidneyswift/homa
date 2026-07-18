@@ -5,7 +5,7 @@ pmf_definition: >-
   meaningfully disappointed if it disappeared. Observable proxies: activation
   through the core loop, return usage, and willingness to pay or strongly
   recommend. Replace this paragraph when the founder tightens the definition.
-updated_at: "2026-07-18T06:10:00Z"
+updated_at: "2026-07-18T14:40:00Z"
 
 # Denominator glossary (see also pmf-focus/references/reality-checks.md):
 # - signup-screen abandon = status=open (opened Google/email signup, never finished)
@@ -101,6 +101,26 @@ current:
 history: []
 
 research_notes:
+  - at: "2026-07-18T14:40:00Z"
+    surface: "billing | paywall"
+    finding: >-
+      WALL AND REPORT LOCK ARE ON in production (founder order, flip
+      timestamp 2026-07-18T14:25:44Z). Grandfather backfill: 47 claimed
+      non-sandbox families all billing_exempt, 0 walled from the existing
+      cohort. New signups from the flip forward meet the lock: 4 subjects
+      open, rest held at $19/mo (monthly only, annual withheld). Live
+      probes green (sample open, sandbox token report locked with
+      owner-only checkout). Kill test armed, window to 2026-08-01: lock
+      off if trials per report-reached family < 10% or report-to-material
+      < 28% in the lock cohort. Founder still owes the Stripe dashboard
+      eyeball (live link trial + confirm redirect, webhook registration)
+      and the pricing page.
+    source: "flip session 2026-07-18; build-log entry 'The wall and the report lock flip ON'"
+    implication_for_pmf: >-
+      Core-loop activation remains the locked factor. From today, trial
+      starts and the lock cohort's report-to-material rate are the two
+      numbers the weekly claimed-cohort SQL must add; the kill test's
+      falsifiers are pre-committed and non-negotiable.
   - at: "2026-07-18T06:10:00Z"
     surface: "billing | paywall"
     finding: >-
