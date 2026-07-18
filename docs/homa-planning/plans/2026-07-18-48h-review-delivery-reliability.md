@@ -53,9 +53,9 @@ by later commits the same day.
 
 | ID | Priority | Status | Summary |
 |---|---|---|---|
-| DR-1 | P0 | IN PROGRESS this session | Oversized SMS: transliterate to GSM-7, then split into up to 3 carrier-legal messages, instead of refusing delivery. Refusal remains only for pathological payloads (over 30 segments after adaptation). |
-| DR-2 | P1 | IN PROGRESS this session | Reaped morning-brief runs with zero accepted delivery get exactly one same-morning retry, still gated by the delivery window and the outbox. |
-| DR-3 | P2 | IN PROGRESS this session | Digest signups line separates named signups from signups that stalled before naming their family. |
+| DR-1 | P0 | FIXED · db1cbdb | Oversized SMS: transliterate to GSM-7, then split into up to 3 carrier-legal messages, instead of refusing delivery. Refusal remains only for pathological payloads (over 30 segments after adaptation). |
+| DR-2 | P1 | FIXED · db1cbdb | Reaped morning-brief runs with zero accepted delivery get exactly one same-morning retry, still gated by the delivery window and the outbox. |
+| DR-3 | P2 | FIXED · db1cbdb | Digest signups line separates named signups from signups that stalled before naming their family. |
 | DR-4 | P2 | OPEN | Activation follow-up for stalled signups (the 17-of-20 problem). Needs a founder call on outreach channel, timing, and consent before any send. Not a code defect; not shipped this session. |
 | DR-5 | P3 | OPEN | Extend the DR-2 retry to journal_prompt and custom kinds once morning-brief retries have a week of clean digest evidence. |
 

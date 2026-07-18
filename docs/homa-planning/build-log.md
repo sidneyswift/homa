@@ -3,6 +3,50 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · 48-hour review: oversized SMS now delivered, reaped morning briefs retried once
+
+Cause: the founder digests for 2026-07-16 and 2026-07-17 showed four
+failed SMS sends across named real trial families (Limberger, Riley,
+Noser, one more the next day), all with the same refusal, "SMS over
+the carrier size limit (11 segments, max 10)", plus one morning brief
+that hung until the 2-hour reaper failed it with no retry, losing that
+family's brief for the day. A review of every merge in the same window
+(PR #6 through PR #20) found neither failure addressed. Both are live
+production failures, so both ship this session per
+`prod-bugs-fixed-not-stored`. Plan and tickets:
+docs/homa-planning/plans/2026-07-18-48h-review-delivery-reliability.md.
+
+- DR-1 (FIXED · db1cbdb): `submitHomaSms` no longer refuses oversized
+  texts. It transliterates to GSM-7 first (one smart quote or emoji
+  flips the whole message to UCS-2 and halves capacity; every digest
+  refusal was 11 segments, one over the cap), splits into at most 3
+  carrier-legal messages second, and refuses only past that. Messages
+  that already fit are never rewritten.
+- DR-2 (FIXED · db1cbdb): `reapStaleTaskRuns` reports what it reaped,
+  and the hourly dispatcher gives a reaped morning brief that reached
+  nobody exactly one same-day replacement run. The outbox index always
+  permitted this (failed runs fall out of it by design); no code path
+  ever used it. The delivery window still applies, and a second failure
+  for the same schedule and day is never retried again.
+- DR-3 (FIXED · db1cbdb): the digest signups line separates named
+  signups from the count that stopped before naming their family
+  (2026-07-16: 17 of 20 signups printed as an undifferentiated
+  "My family" list).
+
+Decisions made alone, flaggable: the 3-message split ceiling; dropping
+emoji instead of refusing when a text is over the cap (the brief format
+already bans emoji, and a delivered plain text beats an undelivered
+decorated one); retry limited to morning_brief until a week of digests
+shows clean retries (DR-5); DR-4 (activation follow-up for the stalled
+signups) left open for a founder call on outreach channel and consent.
+
+Verified locally: continuity suite 147 tests (new segment-plan and
+transport cases), task and research-brief suite 181 tests, typecheck,
+lint, `VERCEL=1 eve build`, and the stream-duration guard, all green.
+The isolation guard needs CI secrets (this worktree has no env); the
+new queries are server-side with server-derived IDs only, and CI runs
+the guard on the PR.
+
 ## 2026-07-17 · JWT-expired mid-turn failures fixed: expired web tokens degrade to family-pinned
 
 Cause: production runtime logs showed find_materials failing with "JWT
