@@ -11,8 +11,10 @@ import { SidebarNav } from "./sidebar-nav";
  * card, nav, and the account footer (AccountMenu: the name row opens
  * Settings and Sign out). The kid rows left the desktop rail (founder
  * ruling 2026-07-12: the kid switcher is the top-right avatar,
- * DesktopContextSwitcher, same corner as the phone bar's); the phone
- * drawer still renders them because the drawer is the whole sidebar.
+ * DesktopContextSwitcher, same corner as the phone bar's) and the phone
+ * drawer's switcher rows retired too (2026-07-18), since that avatar
+ * already covers multi-kid switching; the drawer keeps only a single-kid
+ * "My kids" link (see ViewingRows).
  * Rendered once by the /app layout, so it stays mounted while pages
  * change; nav links only to surfaces that exist (the library row joins
  * when that page lands). SidebarContent is the shared inside: the
@@ -78,7 +80,6 @@ export function SidebarContent({
   familyName,
   avatarUrl,
   kids,
-  viewContext,
   withViewingRows,
 }: SidebarProps & {
   /** True in the phone drawer (the drawer is the whole sidebar), false
@@ -90,9 +91,10 @@ export function SidebarContent({
       <SidebarNav />
 
       {withViewingRows ? (
-        // The drawer's kid list: switcher rows for multi-kid families, a
-        // plain kid-page link for single-kid ones (see ViewingRows).
-        <ViewingRows kids={kids} selected={viewContext} />
+        // The drawer's "My kids" link, single-kid families only: multi-kid
+        // families switch from the top-right avatar, so ViewingRows no
+        // longer repeats a switcher here (see ViewingRows).
+        <ViewingRows kids={kids} />
       ) : null}
 
       <AccountMenu parentName={parentName} familyName={familyName} avatarUrl={avatarUrl} />

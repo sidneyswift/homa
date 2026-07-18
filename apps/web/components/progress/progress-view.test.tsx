@@ -137,4 +137,35 @@ describe("ProgressView", () => {
     assert.match(html, /text-on-brand/);
     assert.match(html, /hover:bg-\[var\(--clay-600\)\]/);
   });
+
+  it("offers the first check-in when the child has never been assessed", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={{ ...PROGRESS_FIXTURE_VIEW, subjects: [], conflicts: [] }}
+          reportHref={null}
+          report={null}
+          eras={[]}
+          kids={PROGRESS_FIXTURE_KIDS}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    // No report and nothing shared: the assessment CTA, not the
+    // waiting-for-answers empty state.
+    assert.match(html, /See where Maya is today\./);
+    assert.doesNotMatch(html, /This page is ready for Maya\./);
+
+    // The primary CTA deep-links to this child's onboarding checklist.
+    assert.match(
+      html,
+      /<a[^>]*href="\/onboarding\?start=child-1"[^>]*>Start Maya(?:&#x27;|')s check-in<\/a>/,
+    );
+    // Ask HOMA stays as the quieter second door.
+    assert.match(html, /Ask HOMA about Maya/);
+
+    assert.doesNotMatch(html, /Open the full report/);
+    assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);
+    assert.doesNotMatch(html, /Subject by subject/);
+  });
 });

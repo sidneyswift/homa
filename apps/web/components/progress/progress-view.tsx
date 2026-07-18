@@ -6,7 +6,10 @@ import {
   progressUpdatedLine,
 } from "../../lib/child-progress/map-model";
 import type { ChildProgressView } from "../../lib/child-progress/types";
-import { progressEmptyState } from "../../lib/child-progress/view-copy";
+import {
+  progressAssessmentCta,
+  progressEmptyState,
+} from "../../lib/child-progress/view-copy";
 import type { DashboardReport } from "../../lib/dashboard";
 import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
 import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
@@ -60,6 +63,51 @@ function ProgressEmptyState({
           childId={childId}
           childName={childName}
           variant="primary"
+        />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Never assessed: no report yet and nothing shared. Offer the first
+ * check-in, the onboarding checklist deep-linked to THIS child via
+ * `?start`, so the parent lands straight on their questions (the report's
+ * "map next kid" card uses the same link). Ask HOMA stays as a quieter
+ * second door for parents who would rather talk it through.
+ */
+function AssessmentCta({
+  childId,
+  childName,
+}: {
+  childId: string;
+  childName: string;
+}) {
+  const copy = progressAssessmentCta(childName);
+
+  return (
+    <section
+      aria-labelledby="progress-assessment-heading"
+      className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-6 shadow-sm"
+    >
+      <h2
+        id="progress-assessment-heading"
+        className="font-display text-xl font-semibold text-strong"
+      >
+        {copy.heading}
+      </h2>
+      <p className="mt-2 max-w-2xl text-body">{copy.body}</p>
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <Link
+          href={`/onboarding?start=${childId}`}
+          className="inline-flex min-h-11 items-center rounded-pill bg-[var(--brand-active)] px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-[var(--clay-600)]"
+        >
+          {copy.cta}
+        </Link>
+        <AskHomaAboutChild
+          childId={childId}
+          childName={childName}
+          variant="secondary"
         />
       </div>
     </section>
@@ -188,10 +236,20 @@ export function ProgressView({
 
         {view.subjects.length === 0 ? (
           <div className="mt-7">
-            <ProgressEmptyState
-              childId={view.childId}
-              childName={view.childName}
-            />
+            {report === null ? (
+              // No report and nothing shared: this child has never been
+              // assessed, so offer the first check-in rather than the
+              // waiting-for-answers empty state.
+              <AssessmentCta
+                childId={view.childId}
+                childName={view.childName}
+              />
+            ) : (
+              <ProgressEmptyState
+                childId={view.childId}
+                childName={view.childName}
+              />
+            )}
           </div>
         ) : hasChart && generatedDate ? (
           <div className="mt-6">
