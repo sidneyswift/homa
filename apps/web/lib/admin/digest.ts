@@ -1,6 +1,6 @@
 import { sendAdminDigestEmail } from "../map/email";
 import { adminDb } from "./db";
-import { formatSignupsLine } from "./digest-format";
+import { formatHandledLine, formatSignupsLine, formatTroubleHeadline } from "./digest-format";
 
 /**
  * The founder's daily digest (founder console MJ-14, lab question 3):
@@ -11,6 +11,13 @@ import { formatSignupsLine } from "./digest-format";
  * is 7am Eastern in summer); the email_sends ledger is the once-per-day
  * guard, so a redeployed or double-fired cron never double-sends.
  * DARK until HOMA_ADMIN_DIGEST_EMAIL is set.
+ *
+ * Alerts the founder marked handled in the console drop out of the
+ * trouble rows and the "need a look" count here, and are reported as
+ * one handled line instead. The hide rules mirror the console's
+ * (lib/admin/alert-acks.ts): a task-run ack is forever because runs
+ * are terminal, while delivery and email acks only hide the row while
+ * the ack is newer than it, so a re-failure resurfaces in the digest.
  */
 
 export interface DigestOutcome {
@@ -47,6 +54,11 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
     from public.conversation_deliveries d
     join public.families f on f.id = d.family_id
     where d.status = 'failed' and d.updated_at >= now() - interval '24 hours'
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'delivery' and a.source_id = d.id
+          and a.created_at >= d.updated_at
+      )
     order by d.updated_at desc limit 20
   `;
   const uncertains = await sql<{ name: string; channel: string }[]>`
@@ -54,19 +66,66 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
     from public.conversation_deliveries d
     join public.families f on f.id = d.family_id
     where d.status = 'uncertain' and d.updated_at >= now() - interval '24 hours'
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'delivery' and a.source_id = d.id
+          and a.created_at >= d.updated_at
+      )
     order by d.updated_at desc limit 20
   `;
   const rejected = await sql<{ kind: string; status: string }[]>`
-    select kind, status from public.email_sends
-    where status in ('rejected', 'bounced', 'complained')
-      and updated_at >= now() - interval '24 hours'
-    order by updated_at desc limit 20
+    select e.kind, e.status from public.email_sends e
+    where e.status in ('rejected', 'bounced', 'complained')
+      and e.updated_at >= now() - interval '24 hours'
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'email_send' and a.source_id = e.id
+          and a.created_at >= e.updated_at
+      )
+    order by e.updated_at desc limit 20
   `;
   const taskTrouble = await sql<{ kind: string; status: string; error: string | null }[]>`
-    select kind, status, error from public.homa_task_runs
-    where status in ('failed', 'uncertain', 'partial_uncertain')
-      and created_at >= now() - interval '24 hours'
-    order by created_at desc limit 20
+    select r.kind, r.status, r.error from public.homa_task_runs r
+    where r.status in ('failed', 'uncertain', 'partial_uncertain')
+      and r.created_at >= now() - interval '24 hours'
+      and not exists (
+        select 1 from public.admin_alert_acknowledgments a
+        where a.source = 'task_run' and a.source_id = r.id
+      )
+    order by r.created_at desc limit 20
+  `;
+  // The same three windows with the ack filter flipped, so the handled
+  // line counts exactly the alerts the queries above left out.
+  const handled = await sql<{ n: string }[]>`
+    select (
+      (
+        select count(*) from public.conversation_deliveries d
+        where d.status in ('failed', 'uncertain')
+          and d.updated_at >= now() - interval '24 hours'
+          and exists (
+            select 1 from public.admin_alert_acknowledgments a
+            where a.source = 'delivery' and a.source_id = d.id
+              and a.created_at >= d.updated_at
+          )
+      ) + (
+        select count(*) from public.email_sends e
+        where e.status in ('rejected', 'bounced', 'complained')
+          and e.updated_at >= now() - interval '24 hours'
+          and exists (
+            select 1 from public.admin_alert_acknowledgments a
+            where a.source = 'email_send' and a.source_id = e.id
+              and a.created_at >= e.updated_at
+          )
+      ) + (
+        select count(*) from public.homa_task_runs r
+        where r.status in ('failed', 'uncertain', 'partial_uncertain')
+          and r.created_at >= now() - interval '24 hours'
+          and exists (
+            select 1 from public.admin_alert_acknowledgments a
+            where a.source = 'task_run' and a.source_id = r.id
+          )
+      )
+    )::text as n
   `;
   const quiet = await sql<{ n: string }[]>`
     select count(*)::text as n from public.families f
@@ -84,11 +143,8 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
 
   const lines: string[] = [];
   const trouble = failures.length + rejected.length + taskTrouble.length;
-  lines.push(
-    trouble === 0
-      ? "Nothing broke in the last 24 hours."
-      : `${trouble} delivery ${trouble === 1 ? "problem needs" : "problems need"} a look.`,
-  );
+  const handledCount = Number(handled[0].n);
+  lines.push(formatTroubleHeadline(trouble, handledCount));
   for (const f of failures) {
     lines.push(`Failed ${f.channel} send, ${f.name}: ${f.error ?? "no error recorded"}.`);
   }
@@ -101,6 +157,8 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
   for (const t of taskTrouble) {
     lines.push(`Task run ${t.status}: ${t.kind.replace(/_/g, " ")}${t.error ? ` (${t.error})` : ""}.`);
   }
+  const handledLine = formatHandledLine(handledCount);
+  if (handledLine) lines.push(handledLine);
   lines.push(formatSignupsLine(signups.map((s) => s.name)));
   const quietCount = Number(quiet[0].n);
   if (quietCount > 0) {

@@ -8,6 +8,33 @@
 export const DEFAULT_FAMILY_NAME = "My family";
 
 /**
+ * The digest's first line. Alerts the founder already marked handled in
+ * the console never count toward "need a look" (2026-07-18: the digest
+ * re-alarmed on three alerts handled 13 hours before it was sent), and
+ * an all-handled morning says so instead of claiming nothing broke.
+ */
+export function formatTroubleHeadline(needLook: number, handled: number): string {
+  if (needLook > 0) {
+    return `${needLook} delivery ${needLook === 1 ? "problem needs" : "problems need"} a look.`;
+  }
+  return handled > 0 ? "Nothing new needs a look." : "Nothing broke in the last 24 hours.";
+}
+
+/**
+ * One line, after the trouble rows, for alerts the founder already
+ * marked handled in the console. The digest drops their detail rows but
+ * still says how many were handled, matching the console's "N handled
+ * alerts hidden" note: hiding never erases history. Null when there is
+ * nothing handled to mention.
+ */
+export function formatHandledLine(handled: number): string | null {
+  if (handled === 0) return null;
+  return handled === 1
+    ? "1 alert from the last 24 hours was already marked handled in the console."
+    : `${handled} alerts from the last 24 hours were already marked handled in the console.`;
+}
+
+/**
  * One line for the digest's signup section. Families that never named
  * themselves are collapsed into a stalled count instead of a wall of
  * "My family, My family, ...", because how many stalled is the number
