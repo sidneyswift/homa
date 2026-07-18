@@ -238,6 +238,44 @@ async function expectAuthenticatedUpdateDenied(
   report(label, ok, `HTTP ${response.status}`);
 }
 
+// For tables with a real member-scoped policy (USING/WITH CHECK against the
+// caller's own family, not a hard "no policy at all" deny), a cross-family
+// PATCH is not rejected at the HTTP layer: RLS silently filters the target
+// row out of the update set, so PostgREST returns 200 with zero rows
+// touched rather than 401/403. expectAuthenticatedUpdateDenied is the wrong
+// shape for those tables; this checks the actual row count instead, the
+// same way expectAuthenticatedRead does for SELECT.
+async function expectAuthenticatedUpdateFiltered(
+  accessToken,
+  table,
+  keyColumn,
+  keyValue,
+  changes,
+  expectedCount,
+  label,
+) {
+  coveredTables.add(table);
+  const response = await restAs(accessToken, `${table}?${keyColumn}=eq.${keyValue}`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+    headers: { Prefer: "return=representation" },
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    report(label, false, `HTTP ${response.status}, ${raw.slice(0, 100)}`);
+    return;
+  }
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    report(label, false, `HTTP ${response.status}, non-JSON body ${raw.slice(0, 100)}`);
+    return;
+  }
+  const ok = Array.isArray(body) && body.length === expectedCount;
+  report(label, ok, `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`);
+}
+
 async function expectAuthenticatedDeleteDenied(
   accessToken,
   table,
@@ -2144,6 +2182,20 @@ async function expectAuthenticatedIsolation() {
       },
       "auth member cannot forge material offer provenance on update",
     );
+    // child_plans (migration #26) carries the same is_child_family_member
+    // policy shape as children/family_memories/materials: real member-scoped
+    // read/insert/update/delete policies, not a hard deny.
+    const childPlanBId = await insertFixtureRow(
+      familyBUser,
+      "child_plans",
+      {
+        child_id: childBId,
+        subject_id: "isolation-check",
+        plan: {},
+        bank_version: "isolation",
+      },
+      "create Family B child plan fixture",
+    );
     // Chat attachments are server-write-only, so the fixture goes in
     // through the privileged connection, like the ChildProgress rows.
     const [chatAttachmentB] = await sql`
@@ -2206,6 +2258,20 @@ async function expectAuthenticatedIsolation() {
     );
     await expectAuthenticatedRead(
       familyBUser.accessToken,
+      "child_plans",
+      childPlanBId,
+      1,
+      "auth member can read own child plan",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "child_plans",
+      childPlanBId,
+      0,
+      "auth member cannot read another family's child plan",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
       "chat_attachments",
       chatAttachmentB.id,
       1,
@@ -2240,6 +2306,47 @@ async function expectAuthenticatedIsolation() {
       "chat_attachments",
       chatAttachmentWriteFixture,
       "cross-family token cannot mutate Family B chat attachment",
+    );
+
+    // children and child_plans both resolve their update policy through
+    // is_family_member/is_child_family_member rather than denying
+    // authenticated writers outright, so a cross-family PATCH must be
+    // proven to match zero rows, not merely rejected at the HTTP layer.
+    await expectAuthenticatedUpdateFiltered(
+      familyBUser.accessToken,
+      "children",
+      "id",
+      childBId,
+      { name: "Isolation B child (updated by owner)" },
+      1,
+      "auth member can update own child",
+    );
+    await expectAuthenticatedUpdateFiltered(
+      familyAUser.accessToken,
+      "children",
+      "id",
+      childBId,
+      { name: "Cross-family rename should not apply" },
+      0,
+      "auth member cannot update another family's child",
+    );
+    await expectAuthenticatedUpdateFiltered(
+      familyBUser.accessToken,
+      "child_plans",
+      "id",
+      childPlanBId,
+      { bank_version: "isolation-updated" },
+      1,
+      "auth member can update own child plan",
+    );
+    await expectAuthenticatedUpdateFiltered(
+      familyAUser.accessToken,
+      "child_plans",
+      "id",
+      childPlanBId,
+      { bank_version: "cross-family-should-not-apply" },
+      0,
+      "auth member cannot update another family's child plan",
     );
 
     const childProgressRows = [
@@ -2505,6 +2612,17 @@ async function expectAuthenticatedIsolation() {
         html: "<p>Cross-family material should be denied.</p>",
       },
       "auth member cannot create another family's material",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
+      "child_plans",
+      {
+        child_id: childBId,
+        subject_id: "isolation-cross-family",
+        plan: {},
+        bank_version: "isolation",
+      },
+      "auth member cannot create another family's child plan",
     );
 
     report(
