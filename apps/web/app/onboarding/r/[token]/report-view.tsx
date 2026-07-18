@@ -22,9 +22,11 @@ import {
 
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
 import type { TrajectoryEra } from "../../../../lib/map/trajectory-eras";
-import type { WallCheckout } from "../../../../lib/billing/wall-types";
+import type { ReportLock, WallCheckout } from "../../../../lib/billing/wall-types";
 import { Logo } from "../../../../components/brand/Logo";
 import { DoorLink } from "../../../../components/billing/door-link";
+import { ReportLockOffer } from "../../../../components/billing/report-lock-offer";
+import { reportLockRowLine } from "../../../../components/billing/wall-copy";
 import { CallHomaPs } from "./call-homa-ps";
 import { MonthButton } from "./month-button";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
@@ -149,6 +151,7 @@ export function ReportView({
   narrativeView = null,
   stateRequirements = null,
   wall = null,
+  reportLock = null,
   viewerActions = { call: true, month: true },
 }: {
   data: ReportViewData;
@@ -171,6 +174,14 @@ export function ReportView({
    * family is walled, null when every door is open (the default, and
    * always the case while HOMA_WALL_ENABLED is off). */
   wall?: WallCheckout | null;
+  /** The report lock (plans/2026-07-18-report-lock.md): when present,
+   * only its freeSubjects render as full rows; every other mapped
+   * subject renders held (name and answer count, no scores, no blur)
+   * behind one membership offer card. null means the whole report
+   * renders open, the default and always the case while
+   * HOMA_REPORT_LOCK_ENABLED is off. Never passed by the sample or the
+   * founder mirror. */
+  reportLock?: ReportLock | null;
   /** Which of the letter's two actions THIS viewer's session can
    * actually complete (founder ruling 2026-07-14, report-page dead
    * ends, option b): the call needs a signed-in family member, the
@@ -397,13 +408,48 @@ export function ReportView({
     </>
   );
 
+  // The report lock's partition (plans/2026-07-18-report-lock.md).
+  // Only mapped subjects ever lock: a not-mapped row has no scored
+  // content to hold back, so it stays visible below the held rows.
+  // An empty lockedScores (four or fewer mapped subjects) renders the
+  // report fully open with no offer: walling nothing is theater.
+  const lockFreeSet = reportLock ? new Set(reportLock.freeSubjects) : null;
+  const lockedScores = lockFreeSet
+    ? ordered.filter(
+        (score) => score.position !== "not_mapped" && !lockFreeSet.has(score.subjectId),
+      )
+    : [];
+  const lockActive = reportLock !== null && lockedScores.length > 0;
+  const lockedIds = new Set(lockedScores.map((score) => score.subjectId));
+  const openMapped = ordered.filter(
+    (score) => score.position !== "not_mapped" && !lockedIds.has(score.subjectId),
+  );
+  const openNotMapped = ordered.filter((score) => score.position === "not_mapped");
+
+  // A held subject's whole row: the name and her own answer count.
+  // No badge, no months, no blurred numbers: nothing shown, nothing
+  // teased (the anti-guilt law holds even for locked content, so the
+  // row never implies the hidden subjects are the weak ones).
+  const renderHeldRow = (score: SubjectScore) => {
+    const domain = getMapSubject(score.subjectId);
+    return (
+      <div
+        key={score.subjectId}
+        className="rounded-md border border-dashed border-border-subtle px-4 py-3.5"
+      >
+        <p className="font-semibold text-muted">{domain?.displayName}</p>
+        <p className="mt-0.5 text-sm text-subtle">
+          {reportLockRowLine(domain?.displayName ?? score.subjectId, score.observations)}
+        </p>
+      </div>
+    );
+  };
+
   // Subject by subject: bare rows until opened (progressive
   // disclosure). Open = what the subject is, the questions and
   // answers, why it's interesting, the benchmarks, and the two
   // places to take it.
-  const subjectRows = (
-    <div className="mt-4 flex flex-col gap-2.5">
-      {ordered.map((score) => {
+  const renderSubjectRow = (score: SubjectScore) => {
         const domain = getMapSubject(score.subjectId);
         const line = subjectLine(score, report.childName);
         const subjectText = generatedPiece(
@@ -600,7 +646,30 @@ export function ReportView({
             </div>
           </details>
         );
-      })}
+  };
+
+  const subjectRows = (
+    <div className="mt-4 flex flex-col gap-2.5">
+      {lockActive && reportLock ? (
+        <>
+          {openMapped.map(renderSubjectRow)}
+          <ReportLockOffer
+            childId={report.childId}
+            childName={report.childName}
+            mappedCount={report.scores.mappedCount}
+            openCount={openMapped.length}
+            lockedCount={lockedScores.length}
+            checkout={reportLock.checkout}
+            signinNext={
+              inApp ? `/app/${report.childId}/report` : `/onboarding/r/${report.token}`
+            }
+          />
+          {lockedScores.map(renderHeldRow)}
+          {openNotMapped.map(renderSubjectRow)}
+        </>
+      ) : (
+        ordered.map(renderSubjectRow)
+      )}
     </div>
   );
 

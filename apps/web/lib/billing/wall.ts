@@ -20,18 +20,33 @@ export function wallEnabled(): boolean {
   return value === "1" || value === "true";
 }
 
+/**
+ * The report lock (plans/2026-07-18-report-lock.md), layered ON the
+ * wall: with both flags up, a walled family's report renders the free
+ * four subjects in full and holds the rest for membership. Its own
+ * flag so the founder can kill the lock (the pre-committed kill test)
+ * while the doors wall stays up.
+ */
+export function reportLockEnabled(): boolean {
+  const value = (process.env.HOMA_REPORT_LOCK_ENABLED ?? "").trim().toLowerCase();
+  return (value === "1" || value === "true") && wallEnabled();
+}
+
 /** Live links first (set only in Vercel production), TEST for local dev
- *  and previews. Both plans must exist or the wall stays down: a wall
- *  with a broken checkout door would strand her. */
-function paymentLinkBases(): { monthly: string; annual: string } | null {
+ *  and previews. The monthly link must exist or the wall stays down: a
+ *  wall with a broken checkout door would strand her. Annual is
+ *  optional (founder ruling 2026-07-18: the flip starts $19 monthly
+ *  only; the $99 sticker sits exactly on Homeschool Fox's price and
+ *  waits for that read). */
+function paymentLinkBases(): { monthly: string; annual: string | null } | null {
   const monthly =
     process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL ||
     process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_MONTHLY_URL;
   const annual =
     process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ANNUAL_URL ||
     process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ANNUAL_URL;
-  if (!monthly || !annual) return null;
-  return { monthly, annual };
+  if (!monthly) return null;
+  return { monthly, annual: annual || null };
 }
 
 function checkoutUrl(base: string, familyId: string, email: string | null): string {
@@ -74,7 +89,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
 
     return {
       monthlyUrl: checkoutUrl(links.monthly, familyId, row.email),
-      annualUrl: checkoutUrl(links.annual, familyId, row.email),
+      annualUrl: links.annual ? checkoutUrl(links.annual, familyId, row.email) : null,
     };
   } catch (error) {
     // Fail open, always: a billing read must never take a family's

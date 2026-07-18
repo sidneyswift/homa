@@ -61,19 +61,23 @@ export function WallOffer({
         >
           {WALL_MONTHLY_BUTTON}
         </a>
-        <a
-          href={checkout.annualUrl}
-          onClick={() => sendWallBeacon({ kind: "checkout_started", door, plan: "annual" })}
-          className={reportButtonClass(
-            "secondary",
-            "inline-flex min-h-12 items-center justify-center px-6 py-3 text-sm font-semibold",
-          )}
-        >
-          {WALL_ANNUAL_BUTTON}
-        </a>
+        {checkout.annualUrl ? (
+          <a
+            href={checkout.annualUrl}
+            onClick={() => sendWallBeacon({ kind: "checkout_started", door, plan: "annual" })}
+            className={reportButtonClass(
+              "secondary",
+              "inline-flex min-h-12 items-center justify-center px-6 py-3 text-sm font-semibold",
+            )}
+          >
+            {WALL_ANNUAL_BUTTON}
+          </a>
+        ) : null}
       </div>
       <ul className="mt-4 flex flex-col gap-1">
-        {WALL_BULLETS.map((line) => (
+        {/* The first bullet is the year's math; without an annual link
+            on offer it would explain a price that is not on screen. */}
+        {(checkout.annualUrl ? WALL_BULLETS : WALL_BULLETS.slice(1)).map((line) => (
           <li key={line} className="text-sm text-muted">
             {line}
           </li>

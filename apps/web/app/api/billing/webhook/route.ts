@@ -25,7 +25,9 @@ import { emitMapEvent } from "../../../../lib/map/events";
  */
 export async function POST(request: Request): Promise<Response> {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const secretKey = process.env.STRIPE_LIVE_SECRET_KEY ?? process.env.STRIPE_TEST_SECRET_KEY;
+  // || not ??: an empty LIVE var (a dev environment shadowing the live
+  // key) must fall through to TEST, matching paymentLinkBases.
+  const secretKey = process.env.STRIPE_LIVE_SECRET_KEY || process.env.STRIPE_TEST_SECRET_KEY;
   if (!webhookSecret || !secretKey) {
     return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
   }
