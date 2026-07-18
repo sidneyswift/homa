@@ -95,7 +95,7 @@ export function Hero() {
           <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-xl)" }}>
             <Image
               src="/images/hero-family.png"
-              alt="A mom and her son working through a workbook together at the kitchen table"
+              alt="A mom and her daughter working through a workbook together at the kitchen table"
               width={760}
               height={440}
               priority
