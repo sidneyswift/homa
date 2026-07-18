@@ -35,6 +35,19 @@ timeouts in the first hour after READY. Historical cluster entries from
 before this deploy remain in Vercel until they age out; new 300s kills on
 that route are the signal to reopen.
 
+## 2026-07-15 · Founder ruling: subject cards offer one saved lesson
+
+The founder approved replacing each eligible report subject card's
+subject-specific four-week-plan action with one saved next-skill lesson, one
+practice suggestion, and one automatically generated worksheet. The separate
+whole-child four-week month remains unchanged. The full approved contract is
+`docs/superpowers/specs/2026-07-15-subject-lesson-with-worksheet-design.md`.
+
+Task 1 registers the ruling and extracts the existing deterministic first-target
+walk into `packages/core/src/map/lesson-target.ts`. The legacy
+`buildFourWeekPlan` now calls the shared selector, so its two targets, practice
+patterns, weeks, and month-plan consumers retain their existing behavior.
+
 ## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
 
 Set up so the seven-day dormant-window observation

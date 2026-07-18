@@ -13,10 +13,10 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * role may insert; see migration 20260704033725.
  */
 
-/** The wall's four doors: the report actions the paywall stands in front
+/** The wall's five doors: the report actions the paywall stands in front
  *  of (plans/2026-07-11-the-wall.md). Shared by the wall.* and
  *  report.action_tapped schemas and the beacon route's request schema. */
-export const WALL_DOORS = ["plan", "month", "call", "chat"] as const;
+export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
 
 const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
@@ -24,6 +24,28 @@ const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
   .min(1)
   .max(80)
   .regex(/^[a-z][a-z0-9_-]*$/u);
+
+const SUBJECT_LESSON_EVENT_FIELDS = {
+  family_id: z.uuid(),
+  child_id: z.uuid(),
+  subject: z.string(),
+} as const;
+
+const SUBJECT_LESSON_ATTEMPT_SCHEMA = z.number().int().min(1);
+const SUBJECT_LESSON_ERROR_CODE_SCHEMA = z.string().min(1).max(80);
+const MATERIAL_EVENT_CHANNEL_SCHEMA = z.enum([
+  "web",
+  "sms",
+  "email",
+  "dispatch",
+]);
+const MATERIAL_CREATION_EVENT_CHANNEL_SCHEMA = z.enum([
+  "web",
+  "sms",
+  "email",
+  "dispatch",
+  "subject_lesson",
+]);
 
 export const EVENT_SCHEMAS = {
   "waitlist.joined": z.object({
@@ -147,6 +169,42 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     child_id: z.uuid(),
   }),
+  // A parent requested one next-skill lesson and printable worksheet from
+  // a subject card. Attempts begin when the background builder claims the
+  // durable row. Error details stay in the row; events carry a bounded code.
+  "map.subject_lesson_requested": z
+    .object(SUBJECT_LESSON_EVENT_FIELDS)
+    .strict(),
+  "map.subject_lesson_started": z
+    .object({
+      ...SUBJECT_LESSON_EVENT_FIELDS,
+      attempt: SUBJECT_LESSON_ATTEMPT_SCHEMA,
+    })
+    .strict(),
+  "map.subject_lesson_ready": z
+    .object({
+      ...SUBJECT_LESSON_EVENT_FIELDS,
+      attempt: SUBJECT_LESSON_ATTEMPT_SCHEMA,
+    })
+    .strict(),
+  "map.subject_lesson_failed": z
+    .object({
+      ...SUBJECT_LESSON_EVENT_FIELDS,
+      attempt: SUBJECT_LESSON_ATTEMPT_SCHEMA,
+      error_code: SUBJECT_LESSON_ERROR_CODE_SCHEMA,
+    })
+    .strict(),
+  "map.subject_lesson_retried": z
+    .object({
+      ...SUBJECT_LESSON_EVENT_FIELDS,
+      attempt: SUBJECT_LESSON_ATTEMPT_SCHEMA,
+    })
+    .strict(),
+  // The account owner approved the ready lesson's attached worksheet.
+  // Material identity and worksheet content stay in durable rows.
+  "map.subject_lesson_kept": z
+    .object(SUBJECT_LESSON_EVENT_FIELDS)
+    .strict(),
   // The living record (2026-07-07): answers edited from the report page
   // itself. source separates a tapped receipt correction from the inline
   // sharpening question and the staleness re-check; changes counts the
@@ -365,7 +423,7 @@ export const EVENT_SCHEMAS = {
   "materials.created": z.object({
     family_id: z.uuid(),
     child_id: z.uuid().optional(),
-    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    channel: MATERIAL_CREATION_EVENT_CHANNEL_SCHEMA,
     kind: z.enum([
       "worksheet",
       "coloring",
@@ -387,7 +445,7 @@ export const EVENT_SCHEMAS = {
   // driven generation is the reuse loop working, hence the flag.
   "materials.image_generated": z.object({
     family_id: z.uuid(),
-    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    channel: MATERIAL_EVENT_CHANNEL_SCHEMA,
     duration_ms: z.number().int().min(0),
     has_references: z.boolean(),
   }),
@@ -395,7 +453,7 @@ export const EVENT_SCHEMAS = {
   // family's final and its draft chain was tidied away.
   "materials.finalized": z.object({
     family_id: z.uuid(),
-    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    channel: MATERIAL_EVENT_CHANNEL_SCHEMA,
     versions_superseded: z.number().int().min(0),
   }),
   // The studio's photo desk (SerpAPI Google Images): each search spends
@@ -403,7 +461,7 @@ export const EVENT_SCHEMAS = {
   // the story. Queries never enter props (they can carry topic text).
   "materials.photo_searched": z.object({
     family_id: z.uuid(),
-    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    channel: MATERIAL_EVENT_CHANNEL_SCHEMA,
     results: z.number().int().min(0),
     duration_ms: z.number().int().min(0),
   }),
@@ -411,7 +469,7 @@ export const EVENT_SCHEMAS = {
   // became reusable (printable embeds, generate_image references).
   "materials.photo_imported": z.object({
     family_id: z.uuid(),
-    channel: z.enum(["web", "sms", "email", "dispatch"]),
+    channel: MATERIAL_EVENT_CHANNEL_SCHEMA,
     bytes: z.number().int().min(0),
     duration_ms: z.number().int().min(0),
   }),
@@ -681,7 +739,7 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
   }),
   // The wall (paywall groundwork, built DARK behind HOMA_WALL_ENABLED;
-  // plans/2026-07-11-the-wall.md). A "door" is one of the four report
+  // plans/2026-07-11-the-wall.md). A "door" is one of the five report
   // actions the wall will stand in front of. Door taps fire with the
   // flag OFF too, on purpose: the paywall decision wants baseline
   // tap-through data from the free era, and `walled` says which era a

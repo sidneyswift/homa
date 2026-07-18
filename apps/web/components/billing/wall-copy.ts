@@ -46,6 +46,8 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
       return childName
         ? `Your 30 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
         : `Your 30 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
+    case "lesson":
+      return `Your 30 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "call":
       return `Your 30 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
     case "chat":
@@ -86,6 +88,9 @@ export const WALL_DISMISS = "Not now";
  *  offer card, not the trial itself (editor gate). */
 export const WALL_STALE_MONTH_LINE =
   "The month didn't open. Your report is safe and still free. Refresh this page to see the membership offer.";
+
+export const WALL_STALE_LESSON_LINE =
+  "Your report is safe. Refreshing this page will reopen the lesson option.";
 
 export const WALL_STALE_CALL_LINE =
   "The call didn't start. Your report is safe and still free. Refresh this page to see the membership offer.";

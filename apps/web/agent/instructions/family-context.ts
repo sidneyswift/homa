@@ -3,6 +3,7 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
 import {
   createCallerDbClient,
   MissingFamilyContextError,
+  resolvePinnedFamilyId,
 } from "../../lib/agent-db";
 import { type MemoryRow } from "../../lib/agent-memory";
 import {
@@ -33,11 +34,10 @@ import { recordContextSnapshot } from "../../lib/observability/agent-trace";
  * Two load paths, one wall (rendering + the pinned loader live in
  * lib/family-context, shared with the voice webhook):
  *   web  · the caller's own Supabase token (agent-db), RLS scopes rows.
- *   sms  · no token exists; the channel stamped familyId from the parent's
- *          own family_phones mapping (the SMS auth context), and reads run
- *          on the server connection pinned to that familyId. Interim until
- *          the M1-02 SET LOCAL role lands; familyId never comes from the
- *          model on either path.
+ *   pinned · no token exists; the authenticated server channel stamped
+ *            familyId, and reads run on the server connection pinned to
+ *            that family. Interim until the M1-02 SET LOCAL role lands;
+ *            familyId never comes from the model on either path.
  */
 
 async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRows> {
@@ -125,15 +125,11 @@ export default defineDynamic({
 
       try {
         let rows: FamilyContextRows;
+        const pinnedFamilyId = resolvePinnedFamilyId(attributes);
         if (attributes?.supabaseAccessToken) {
           rows = await loadViaCallerToken(attributes);
-        } else if (
-          attributes?.familyId &&
-          (attributes.channel === "sms" ||
-            attributes.channel === "email" ||
-            attributes.channel === "dispatch")
-        ) {
-          rows = await loadFamilyContextPinned(attributes.familyId);
+        } else if (pinnedFamilyId) {
+          rows = await loadFamilyContextPinned(pinnedFamilyId);
         } else {
           throw new MissingFamilyContextError();
         }

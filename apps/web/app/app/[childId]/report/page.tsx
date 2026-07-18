@@ -6,8 +6,15 @@ import { familyWallCheckout } from "../../../../lib/billing/wall";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
+import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
-import { getReportByToken } from "../../../../lib/map/store";
+import {
+  getReportByToken,
+  listReadySubjectLessonSummariesByReportToken,
+} from "../../../../lib/map/store";
+import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
+import { isFamilyAccountOwner } from "../../../../lib/subject-lessons/owner";
+import { listCurrentSubjectLessonSummaries } from "../../../../lib/subject-lessons/store";
 import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
 import { ReportView } from "../../../onboarding/r/[token]/report-view";
 
@@ -46,6 +53,7 @@ export default async function AppReportPage({
   const report = await getReportByToken(token);
   if (!report) redirect("/onboarding");
 
+  const lessonFlagOn = subjectLessonsEnabled();
   const flagOn = narrativeEnabled();
   const meta = report.narrativeMeta;
   const ready = meta?.status === "ready" && report.narrative !== null;
@@ -88,6 +96,33 @@ export default async function AppReportPage({
   // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
   // (the instant no-query path), and for exempt or trialing families.
   const wall = await familyWallCheckout(data.family.id);
+  let viewerIsAccountOwner = false;
+  if (lessonFlagOn) {
+    try {
+      const actor = await requireFamilyWithActor();
+      if (
+        actor?.family.id === data.family.id
+        && actor.memberUserId
+      ) {
+        viewerIsAccountOwner = await isFamilyAccountOwner(
+          data.family.id,
+          actor.memberUserId,
+        );
+      }
+    } catch {
+      // Keep the lesson action read-only when owner lookup is unavailable.
+    }
+  }
+  const subjectLessons = lessonFlagOn
+    ? viewerIsAccountOwner
+      ? await listCurrentSubjectLessonSummaries(
+          data.family.id,
+          childId,
+        ).catch(() => [])
+      : await listReadySubjectLessonSummariesByReportToken(token).catch(
+          () => [],
+        )
+    : [];
 
   return (
     <ReportView
@@ -96,6 +131,13 @@ export default async function AppReportPage({
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
       wall={wall}
+      subjectLessonsEnabled={lessonFlagOn}
+      subjectLessons={subjectLessons}
+      viewerActions={{
+        call: true,
+        month: true,
+        lesson: viewerIsAccountOwner,
+      }}
     />
   );
 }

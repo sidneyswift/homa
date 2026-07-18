@@ -1,3 +1,5 @@
+import { ACTION_COSTS } from "@homa/core";
+
 import { mapDb } from "./map/db";
 
 /**
@@ -33,10 +35,16 @@ export const USAGE_SURFACES = [
   "embedding",
   "lesson_tone",
   "lesson_synthesis",
+  ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface,
 ] as const;
 export type UsageSurface = (typeof USAGE_SURFACES)[number];
 
-export type UsageChannel = "web" | "sms" | "email" | "dispatch";
+export type UsageChannel =
+  | "web"
+  | "sms"
+  | "email"
+  | "dispatch"
+  | "subject_lesson";
 
 export interface ModelUsageRow {
   familyId: string | null;
@@ -109,7 +117,24 @@ export function gatewayAttribution(
 /** Session-auth attributes -> the ledger's channel value. */
 export function usageChannelFromAttributes(attributes: unknown): UsageChannel {
   const channel = (attributes as { channel?: string } | undefined)?.channel;
-  return channel === "sms" || channel === "email" || channel === "dispatch"
+  return channel === "sms"
+    || channel === "email"
+    || channel === "dispatch"
+    || channel === "subject_lesson"
     ? channel
     : "web";
+}
+
+export function usageSurfaceFromAttributes(attributes: unknown): UsageSurface {
+  const candidate = attributes as
+    | {
+        channel?: unknown;
+        modelUsageSurface?: unknown;
+      }
+    | undefined;
+  return candidate?.channel === "subject_lesson"
+    && candidate.modelUsageSurface
+      === ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface
+    ? ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface
+    : "chat";
 }
