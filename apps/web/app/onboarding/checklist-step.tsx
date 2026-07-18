@@ -413,7 +413,13 @@ export function ChecklistStep({
             </button>
           </>
         ) : (
-          <p className="mt-2 text-body">Saving the last answers{"\u2026"}</p>
+          <p className="mt-2 flex items-center gap-2 text-body" role="status">
+            <span
+              className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+            Saving the last answers{"\u2026"}
+          </p>
         )}
       </div>
     );
