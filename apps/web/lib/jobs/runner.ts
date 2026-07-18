@@ -386,3 +386,67 @@ export async function completeStageFromWorker(
   await recordStageBuilt({ job, materialId: null, metering });
   return { ok: true, status: shouldGateStage(stageNumber) ? "awaiting_input" : "running" };
 }
+
+/** How many times a single stage's build session may run before the job is
+ * parked. The build session must build and report in one turn; the model
+ * usually does, but not every turn (2026-07-18 probe), so a stage that ends
+ * unreported is retried on the next tick a few times before giving up. */
+const MAX_STAGE_ATTEMPTS = 3;
+
+/**
+ * A build session ended without reporting its stage (turn.completed or a
+ * failure with the stage still in_progress). Retry the stage on the next
+ * tick until MAX_STAGE_ATTEMPTS, then park the job as needs-attention. Each
+ * attempt logs one error event, which is also the attempt counter, so no
+ * schema column is needed.
+ */
+export async function handleUnreportedStage(
+  job: ClaimedJob,
+  reason: string,
+): Promise<void> {
+  const sql = mapDb();
+  const rows = await sql<{ count: string }[]>`
+    select count(*)::text as count from public.agent_job_events
+    where job_id = ${job.jobId} and family_id = ${job.familyId}
+      and stage_number = ${job.stageNumber} and kind = 'error'
+  `;
+  const priorErrors = Number(rows[0]?.count ?? 0);
+  const attempt = priorErrors + 1;
+
+  await sql`
+    insert into public.agent_job_events (job_id, family_id, stage_number, kind, payload)
+    values (${job.jobId}, ${job.familyId}, ${job.stageNumber}, 'error',
+            ${sql.json({ message: reason.slice(0, 240), attempt } as unknown as DbJson)})
+  `;
+
+  if (attempt < MAX_STAGE_ATTEMPTS) {
+    // Release the stage so the next tick claims it again and retries.
+    await sql`
+      update public.agent_job_stages set status = 'pending', updated_at = now()
+      where job_id = ${job.jobId} and family_id = ${job.familyId}
+        and stage_number = ${job.stageNumber} and status = 'in_progress'
+    `;
+    await sql`
+      update public.agent_jobs set status = 'queued', updated_at = now()
+      where id = ${job.jobId} and family_id = ${job.familyId} and status = 'running'
+    `;
+    return;
+  }
+
+  // Out of attempts: park as needs-attention (paused), preserving everything.
+  await sql`
+    update public.agent_job_stages
+    set status = 'failed', error = ${reason.slice(0, 500)}, updated_at = now()
+    where job_id = ${job.jobId} and family_id = ${job.familyId}
+      and stage_number = ${job.stageNumber}
+  `;
+  await sql`
+    update public.agent_jobs set status = 'paused', updated_at = now()
+    where id = ${job.jobId} and family_id = ${job.familyId}
+  `;
+  await emitMapEvent(
+    "job.failed",
+    { family_id: job.familyId, skill: job.skill, stage_number: job.stageNumber },
+    { familyId: job.familyId },
+  );
+}
