@@ -339,6 +339,10 @@ const prerequisiteSql = `
     resolved_at timestamptz,
     resolved_by_message_id uuid
   );
+  create table public.conversation_offer_fulfillments (
+    id uuid primary key default gen_random_uuid(),
+    family_id uuid not null
+  );
   create table public.child_answers (
     child_id uuid not null,
     question_id text not null,

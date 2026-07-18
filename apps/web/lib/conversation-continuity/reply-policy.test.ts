@@ -114,6 +114,8 @@ describe("conversation reply resolution", () => {
         "<provider-outbound-42@example.com>",
       );
       assert.equal(result.outcome, "answered");
+      assert.equal(result.method, "provider_reply");
+      assert.equal(result.classifierVersion, "reply-intent-v3");
     }
   });
 
@@ -170,6 +172,32 @@ describe("conversation reply resolution", () => {
       assert.equal(result.kind, "matched", text);
       if (result.kind === "matched") {
         assert.equal(result.outcome, "declined", text);
+      }
+    }
+  });
+
+  it("matches natural yes or no decisions without weakening ambiguity", () => {
+    const input = {
+      now: NOW,
+      memberUserId: "sidney",
+      currentChannel: "sms" as const,
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [candidate({ promptKey: "morning-brief:run-1" })],
+    };
+
+    for (const [text, outcome] of [
+      ["Yes, make it", "accepted"],
+      ["I'd love that", "accepted"],
+      ["Not today", "declined"],
+      ["Maybe later", "declined"],
+    ] as const) {
+      const result = resolveReplyIntent({ ...input, text });
+      assert.equal(result.kind, "matched", text);
+      if (result.kind === "matched") {
+        assert.equal(result.outcome, outcome, text);
+        assert.equal(result.method, "bounded_polarity", text);
+        assert.equal(result.classifierVersion, "reply-intent-v3", text);
       }
     }
   });
@@ -659,6 +687,7 @@ describe("conversation reply resolution", () => {
     assert.equal(result.kind, "matched");
     if (result.kind === "matched") {
       assert.equal(result.candidate.deliveryId, "delivery-2");
+      assert.equal(result.method, "explicit_delivery");
     }
   });
 

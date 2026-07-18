@@ -311,6 +311,8 @@ test("reply resolution events require a causal outcome and reject content", () =
     resolution: "matched",
     resolved_outcome: "answered",
     cross_channel: false,
+    resolution_method: "provider_reply",
+    classifier_version: "reply-intent-v3",
   };
 
   assert.equal(
@@ -328,6 +330,24 @@ test("reply resolution events require a causal outcome and reject content", () =
     EVENT_SCHEMAS["conversation.reply_resolved"].safeParse({
       ...event,
       message: "private reply content",
+    }).success,
+    false,
+  );
+});
+
+test("offer fulfillment events carry only family and deterministic effect kind", () => {
+  const event = {
+    family_id: FAMILY_ID,
+    source: "morning_brief",
+    fulfillment_kind: "material",
+  };
+  const schema = EVENT_SCHEMAS["conversation.offer_fulfilled"];
+
+  assert.equal(schema.safeParse(event).success, true);
+  assert.equal(
+    schema.safeParse({
+      ...event,
+      message: "private offer content",
     }).success,
     false,
   );

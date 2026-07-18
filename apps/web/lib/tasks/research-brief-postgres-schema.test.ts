@@ -50,6 +50,132 @@ describe("research brief PostgreSQL schema", () => {
   before(async () => await harness.start());
   after(async () => await harness.stop());
 
+  it("adds reply audit columns and a server-only offer fulfillment ledger", async () => {
+    const db = harness.database();
+    const columns = await db<{ column_name: string }[]>`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public'
+        and table_name = 'conversation_open_loops'
+        and column_name in ('resolution_method', 'classifier_version')
+      order by column_name
+    `;
+    const tables = await db<{ table_name: string }[]>`
+      select table_name
+      from information_schema.tables
+      where table_schema = 'public'
+        and table_name = 'conversation_offer_fulfillments'
+    `;
+    const [outboxColumn] = await db<{ exists: boolean }[]>`
+      select exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'conversation_offer_fulfillments'
+          and column_name = 'completed_at'
+      ) as exists
+    `;
+    const [provenanceTrigger] = await db<{ exists: boolean }[]>`
+      select exists (
+        select 1
+        from pg_trigger
+        where tgname = 'protect_material_offer_provenance'
+          and not tgisinternal
+      ) as exists
+    `;
+    const provenanceColumns = await db<{
+      table_name: string;
+      column_name: string;
+    }[]>`
+      select table_name, column_name
+      from information_schema.columns
+      where table_schema = 'public'
+        and (
+          (
+            table_name = 'conversation_thread_bindings'
+            and column_name = 'pending_offer_delivery_id'
+          )
+          or (
+            table_name in ('materials', 'agent_schedules')
+            and column_name = 'source_offer_delivery_id'
+          )
+        )
+      order by table_name
+    `;
+
+    assert.deepEqual(
+      columns.map((column) => column.column_name),
+      ["classifier_version", "resolution_method"],
+    );
+    assert.deepEqual(
+      tables.map((table) => table.table_name),
+      ["conversation_offer_fulfillments"],
+    );
+    assert.equal(outboxColumn.exists, true);
+    assert.equal(provenanceTrigger.exists, true);
+    assert.deepEqual(
+      provenanceColumns.map((column) => ({
+        table_name: column.table_name,
+        column_name: column.column_name,
+      })),
+      [
+      {
+        table_name: "agent_schedules",
+        column_name: "source_offer_delivery_id",
+      },
+      {
+        table_name: "conversation_thread_bindings",
+        column_name: "pending_offer_delivery_id",
+      },
+      {
+        table_name: "materials",
+        column_name: "source_offer_delivery_id",
+      },
+      ],
+    );
+    const provenanceConstraints = await db<{
+      conname: string;
+      condeferrable: boolean;
+      condeferred: boolean;
+    }[]>`
+      select conname, condeferrable, condeferred
+      from pg_constraint
+      where conname in (
+        'conversation_offer_fulfillments_delivery_family_fkey',
+        'conversation_thread_bindings_pending_offer_delivery_fkey',
+        'materials_source_offer_delivery_fkey',
+        'agent_schedules_source_offer_delivery_fkey'
+      )
+      order by conname
+    `;
+    assert.equal(provenanceConstraints.length, 4);
+    assert.equal(
+      provenanceConstraints.every(
+        (constraint) =>
+          constraint.condeferrable && constraint.condeferred,
+      ),
+      true,
+    );
+    const [privileges] = await db<{
+      authenticatedInsert: boolean;
+      authenticatedSelect: boolean;
+    }[]>`
+      select
+        has_table_privilege(
+          'authenticated',
+          'public.conversation_offer_fulfillments',
+          'INSERT'
+        ) as "authenticatedInsert",
+        has_table_privilege(
+          'authenticated',
+          'public.conversation_offer_fulfillments',
+          'SELECT'
+        ) as "authenticatedSelect"
+    `;
+    assert.equal(privileges.authenticatedInsert, false);
+    assert.equal(privileges.authenticatedSelect, false);
+  });
+
   it("defaults existing task runs to legacy and constrains delivery versions", async () => {
     const db = harness.database();
     const [stored] = await db<{ delivery_version: string }[]>`

@@ -6,6 +6,7 @@ import {
   type ContinuityContextMessage,
   type PendingDeliveryCandidate,
   type ReplyOutcome,
+  type ReplyResolutionMethod,
 } from "./reply-policy";
 
 export type ContinuityChannel =
@@ -22,6 +23,7 @@ export interface EpisodeBinding {
   threadKeyHash: string;
   runtimeSessionId: string | null;
   episodeId: string;
+  pendingOfferDeliveryId?: string | null;
   lastSeenAt: Date;
 }
 
@@ -78,6 +80,9 @@ export interface ResolvedInboundTurn {
   repliedDeliveryId: string | null;
   resolution: "matched" | "ambiguous" | "none";
   resolvedOutcome: ReplyOutcome | null;
+  resolutionMethod: ReplyResolutionMethod | null;
+  replyClassifierVersion: string | null;
+  acceptedOfferDeliveryId: string | null;
   replySourceChannel: PendingDeliveryCandidate["channel"] | null;
   contextMarkdown: string;
   threadKeyHash: string;
@@ -135,6 +140,10 @@ export async function resolveInboundTurn(
     input.channel,
     threadKeyHash,
   );
+  const acceptedOfferDeliveryId =
+    reply.kind === "matched" && reply.outcome === "accepted"
+      ? reply.candidate.deliveryId
+      : (binding?.pendingOfferDeliveryId ?? null);
 
   let episodeId: string;
   let replyToMessageId: string | null = null;
@@ -167,6 +176,7 @@ export async function resolveInboundTurn(
     threadKeyHash,
     runtimeSessionId: input.runtimeSessionId,
     episodeId,
+    pendingOfferDeliveryId: acceptedOfferDeliveryId,
     lastSeenAt: input.now,
   });
 
@@ -204,6 +214,10 @@ export async function resolveInboundTurn(
     repliedDeliveryId,
     resolution: reply.kind,
     resolvedOutcome: reply.kind === "matched" ? reply.outcome : null,
+    resolutionMethod: reply.kind === "matched" ? reply.method : null,
+    replyClassifierVersion:
+      reply.kind === "matched" ? reply.classifierVersion : null,
+    acceptedOfferDeliveryId,
     replySourceChannel:
       reply.kind === "matched" ? reply.candidate.channel : null,
     contextMarkdown,

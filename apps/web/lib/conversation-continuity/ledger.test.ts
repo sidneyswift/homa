@@ -26,12 +26,18 @@ describe("continuity reply claim", () => {
       messageId: "message-1",
       replyToMessageId: "message-outbound-1",
       outcome: "accepted",
+      resolutionMethod: "bounded_polarity",
+      classifierVersion: "reply-intent-v3",
       },
     );
 
     assert.equal(claimed, true);
     assert.match(calls[0]?.sql ?? "", /resolved_outcome/u);
+    assert.match(calls[0]?.sql ?? "", /resolution_method/u);
+    assert.match(calls[0]?.sql ?? "", /classifier_version/u);
     assert.ok(calls[0]?.values.includes("accepted"));
+    assert.ok(calls[0]?.values.includes("bounded_polarity"));
+    assert.ok(calls[0]?.values.includes("reply-intent-v3"));
     assert.match(calls[1]?.sql ?? "", /replied_at/u);
   });
 
@@ -45,6 +51,8 @@ describe("continuity reply claim", () => {
         channel: "email",
         resolvedOutcome: "answered",
         replySourceChannel: "email",
+        resolutionMethod: "provider_reply",
+        classifierVersion: "reply-intent-v3",
       },
       async () => {
         eventCount += 1;
@@ -64,6 +72,8 @@ describe("continuity reply claim", () => {
       channel: "email" as const,
       resolvedOutcome: "answered" as const,
       replySourceChannel: "sms" as const,
+      resolutionMethod: "provider_reply" as const,
+      classifierVersion: "reply-intent-v3",
     };
 
     await emitClaimedReplyResolvedEvent(
@@ -82,6 +92,8 @@ describe("continuity reply claim", () => {
         resolution: "matched",
         resolved_outcome: "answered",
         cross_channel: true,
+        resolution_method: "provider_reply",
+        classifier_version: "reply-intent-v3",
       },
     ]);
   });

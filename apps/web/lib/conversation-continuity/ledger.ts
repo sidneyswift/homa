@@ -12,6 +12,7 @@ import { PostgresContinuityRepository } from "./postgres-repository";
 import {
   renderContinuityContext,
   type ReplyOutcome,
+  type ReplyResolutionMethod,
 } from "./reply-policy";
 
 export interface ContinuityAuthAttributes {
@@ -22,6 +23,9 @@ export interface ContinuityAuthAttributes {
   replyToMessageId?: string;
   repliedDeliveryId?: string;
   resolvedOutcome?: ReplyOutcome;
+  acceptedOfferDeliveryId?: string;
+  resolutionMethod?: ReplyResolutionMethod;
+  replyClassifierVersion?: string;
   providerMessageId?: string;
   providerReplyTo?: string;
   replySourceChannel?: "web" | "sms" | "email" | "dispatch";
@@ -52,13 +56,17 @@ export async function claimReplyResolutionWithTransaction(
     messageId: string;
     replyToMessageId: string | null;
     outcome: ReplyOutcome | undefined;
+    resolutionMethod: ReplyResolutionMethod | undefined;
+    classifierVersion: string | undefined;
   },
 ): Promise<boolean> {
   const claimedLoop = await tx<{ id: string }[]>`
     update public.conversation_open_loops
     set state = 'resolved', resolved_at = now(),
         resolved_by_message_id = ${input.messageId},
-        resolved_outcome = ${input.outcome ?? null}
+        resolved_outcome = ${input.outcome ?? null},
+        resolution_method = ${input.resolutionMethod ?? null},
+        classifier_version = ${input.classifierVersion ?? null}
     where delivery_id = ${input.deliveryId}
       and family_id = ${input.familyId} and state = 'open'
     returning id
@@ -102,6 +110,8 @@ export async function emitClaimedReplyResolvedEvent(
     familyId: string;
     channel: "web" | "sms" | "email";
     resolvedOutcome: ReplyOutcome | undefined;
+    resolutionMethod: ReplyResolutionMethod | undefined;
+    classifierVersion: string | undefined;
     replySourceChannel: "web" | "sms" | "email" | "dispatch" | undefined;
   },
   emit?: ReplyResolvedEventEmitter,
@@ -115,6 +125,12 @@ export async function emitClaimedReplyResolvedEvent(
     cross_channel:
       input.replySourceChannel !== undefined &&
       input.replySourceChannel !== input.channel,
+    ...(input.resolutionMethod
+      ? { resolution_method: input.resolutionMethod }
+      : {}),
+    ...(input.classifierVersion
+      ? { classifier_version: input.classifierVersion }
+      : {}),
   };
   if (emit) {
     await emit("conversation.reply_resolved", props);
@@ -168,6 +184,15 @@ export function resolvedContinuityAttributes(
       : {}),
     ...(result.resolvedOutcome
       ? { resolvedOutcome: result.resolvedOutcome }
+      : {}),
+    ...(result.acceptedOfferDeliveryId
+      ? { acceptedOfferDeliveryId: result.acceptedOfferDeliveryId }
+      : {}),
+    ...(result.resolutionMethod
+      ? { resolutionMethod: result.resolutionMethod }
+      : {}),
+    ...(result.replyClassifierVersion
+      ? { replyClassifierVersion: result.replyClassifierVersion }
       : {}),
     ...(result.replySourceChannel
       ? { replySourceChannel: result.replySourceChannel }
@@ -377,6 +402,8 @@ export async function persistCanonicalMessage(
         messageId,
         replyToMessageId: attrs.replyToMessageId ?? null,
         outcome: attrs.resolvedOutcome,
+        resolutionMethod: attrs.resolutionMethod,
+        classifierVersion: attrs.replyClassifierVersion,
       });
     }
 
@@ -392,6 +419,8 @@ export async function persistCanonicalMessage(
       familyId,
       channel: input.channel,
       resolvedOutcome: attrs.resolvedOutcome,
+      resolutionMethod: attrs.resolutionMethod,
+      classifierVersion: attrs.replyClassifierVersion,
       replySourceChannel: attrs.replySourceChannel,
     });
   }

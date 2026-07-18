@@ -614,6 +614,27 @@ export const EVENT_SCHEMAS = {
       resolution: z.literal("matched"),
       resolved_outcome: z.enum(["accepted", "declined", "answered"]),
       cross_channel: z.boolean(),
+      resolution_method: z
+        .enum([
+          "explicit_delivery",
+          "provider_reply",
+          "content_clarification",
+          "prompt_key",
+          "bounded_polarity",
+          "same_channel_free_text",
+          "progress_choice",
+        ])
+        .optional(),
+      classifier_version: z.string().min(1).max(40).optional(),
+    })
+    .strict(),
+  // A trusted post-acceptance tool completed one durable effect for a
+  // causally linked morning brief offer. Result ids and content stay out.
+  "conversation.offer_fulfilled": z
+    .object({
+      family_id: z.uuid(),
+      source: z.literal("morning_brief"),
+      fulfillment_kind: z.enum(["material", "task"]),
     })
     .strict(),
   // The task framework (HT-1/HT-7). One event per finished proactive

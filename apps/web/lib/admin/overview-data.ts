@@ -3,7 +3,10 @@ import { adminDb } from "./db";
 import { getFamilySnapshots, type FamilySnapshot } from "./roster-data";
 import {
   countPossibleMorningBriefInterest,
+  summarizeMorningOfferFunnel,
   summarizeTaskPromptOutcomes,
+  type MorningOfferCohortRow,
+  type MorningOfferFunnelSummary,
   type PromptOutcome,
   type TaskPromptOutcomeSummary,
 } from "./morning-brief-metrics";
@@ -76,6 +79,7 @@ export interface FleetOverview {
   runTrouble: RunTrouble[];
   deliveryCounts: Record<string, number>;
   deliveryTrouble: DeliveryTrouble[];
+  morningOfferFunnel: MorningOfferFunnelSummary;
   taskPromptOutcomes: Record<FamilyTaskKind, TaskPromptOutcomeSummary>;
   possibleMorningBriefInterest: number;
   nonTaskReplies: number;
@@ -148,6 +152,60 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     order by d.updated_at desc
     limit 12
   `;
+  const morningOfferRows = await sql<
+    {
+      state: MorningOfferCohortRow["state"];
+      expires_at: string;
+      resolved_outcome: PromptOutcome | null;
+      fulfilled: boolean;
+    }[]
+  >`
+    select
+      l.state,
+      l.expires_at::text as expires_at,
+      l.resolved_outcome,
+      (
+        exists (
+          select 1
+          from public.conversation_offer_fulfillments fulfillment
+          where fulfillment.source_delivery_id = d.id
+            and fulfillment.family_id = d.family_id
+            and (
+              (
+                fulfillment.kind = 'material'
+                and exists (
+                  select 1
+                  from public.materials material
+                  where material.id = fulfillment.reference_id
+                    and material.family_id = fulfillment.family_id
+                )
+              )
+              or
+              (
+                fulfillment.kind = 'task'
+                and exists (
+                  select 1
+                  from public.agent_schedules schedule
+                  where schedule.id = fulfillment.reference_id
+                    and schedule.family_id = fulfillment.family_id
+                )
+              )
+            )
+        )
+      ) as fulfilled
+    from public.conversation_deliveries d
+    join public.conversation_open_loops l
+      on l.delivery_id = d.id
+     and l.family_id = d.family_id
+    join public.homa_task_runs r
+      on r.id = d.task_run_id
+     and r.family_id = d.family_id
+    join public.families f on f.id = d.family_id
+    where r.kind = 'morning_brief'
+      and d.status = 'sent'
+      and d.sent_at >= now() - ${interval}::interval
+      and not f.sandbox
+  `;
   const sentTaskPromptRows = await sql<{ task_kind: FamilyTaskKind }[]>`
     select r.kind as task_kind
     from public.conversation_deliveries d
@@ -155,7 +213,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     join public.homa_task_runs r
       on r.id = d.task_run_id
      and r.family_id = d.family_id
-    where r.kind in ('journal_prompt', 'morning_brief', 'custom')
+    where r.kind in ('journal_prompt', 'custom')
       and d.status = 'sent'
       and d.sent_at >= now() - ${interval}::interval
   `;
@@ -171,7 +229,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     join public.homa_task_runs r
       on r.id = d.task_run_id
      and r.family_id = d.family_id
-    where r.kind in ('journal_prompt', 'morning_brief', 'custom')
+    where r.kind in ('journal_prompt', 'custom')
       and l.state = 'resolved'
       and l.resolved_at >= now() - ${interval}::interval
   `;
@@ -193,6 +251,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       m.replied_delivery_id,
       brief.sent_at::text as sent_morning_brief_at
     from public.conversation_messages m
+    join public.families f on f.id = m.family_id
     join lateral (
         select d.sent_at::text
         from public.conversation_deliveries d
@@ -209,6 +268,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
         limit 1
       ) brief on true
     where m.role = 'user'
+      and not f.sandbox
       and m.replied_delivery_id is null
       and m.created_at >= now() - ${interval}::interval
   `;
@@ -329,6 +389,15 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       error: row.error,
       at: row.at,
     })),
+    morningOfferFunnel: summarizeMorningOfferFunnel(
+      morningOfferRows.map((row) => ({
+        state: row.state,
+        expiresAt: new Date(row.expires_at),
+        outcome: row.resolved_outcome,
+        fulfilled: row.fulfilled,
+      })),
+      new Date(),
+    ),
     taskPromptOutcomes: summarizeTaskPromptOutcomes(
       [
         ...sentTaskPromptRows.map((row) => ({

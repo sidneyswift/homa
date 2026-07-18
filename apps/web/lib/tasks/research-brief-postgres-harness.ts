@@ -15,10 +15,13 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../../..",
 );
-const migrationPath = path.join(
-  repoRoot,
-  "supabase/migrations/20260716115722_morning_research_brief_v2.sql",
-);
+const migrationPaths = [
+  "20260716115722_morning_research_brief_v2.sql",
+  "20260718010000_morning_offer_funnel.sql",
+  "20260718023000_morning_offer_provenance_hardening.sql",
+  "20260718030000_offer_provenance_fold_safety.sql",
+  "20260718034500_offer_fulfillment_outbox.sql",
+].map((file) => path.join(repoRoot, "supabase/migrations", file));
 const processTimeoutMs = 30_000;
 
 export const familyAId = "00000000-0000-4000-8000-000000000001";
@@ -193,6 +196,7 @@ const prerequisiteSql = `
   create role anon nologin;
   create role authenticated nologin;
   create schema auth;
+  create schema private;
   create table auth.users (id uuid primary key);
   create table public.families (id uuid primary key);
   create table public.family_members (
@@ -211,6 +215,10 @@ const prerequisiteSql = `
     family_id uuid not null references public.families (id) on delete cascade,
     name text not null,
     unique (id, family_id)
+  );
+  create table public.materials (
+    id uuid primary key,
+    family_id uuid not null references public.families (id) on delete cascade
   );
   create table public.agent_schedules (
     id uuid primary key,
@@ -271,14 +279,27 @@ const prerequisiteSql = `
     foreign key (child_id, family_id)
       references public.children (id, family_id)
   );
+  create table public.conversation_thread_bindings (
+    family_id uuid not null references public.families (id) on delete cascade,
+    member_user_id uuid,
+    channel text not null,
+    thread_key_hash text not null,
+    runtime_session_id text,
+    episode_id uuid,
+    last_seen_at timestamptz not null default now(),
+    unique (channel, thread_key_hash)
+  );
   create table public.conversation_open_loops (
     id uuid primary key default gen_random_uuid(),
     family_id uuid,
     episode_id uuid,
     message_id uuid,
     delivery_id uuid,
+    kind text not null default 'yes_no',
     state text not null default 'open',
-    resolved_at timestamptz
+    expires_at timestamptz not null default now() + interval '24 hours',
+    resolved_at timestamptz,
+    resolved_by_message_id uuid
   );
   create table public.conversation_messages (
     id uuid primary key,
@@ -313,6 +334,8 @@ const prerequisiteSql = `
     updated_at timestamptz not null default now(),
     unique (message_id, channel, destination_hash)
   );
+  create unique index conversation_deliveries_progress_identity_idx
+    on public.conversation_deliveries (id, family_id);
   create table public.model_usage (
     id bigint generated always as identity primary key,
     surface text not null,
@@ -420,25 +443,27 @@ export function createDisposableResearchBriefPostgresHarness(
         ],
         environment,
       );
-      await run(
-        path.join(postgresBin, "psql"),
-        [
-          "--single-transaction",
-          "-v",
-          "ON_ERROR_STOP=1",
-          "-h",
-          socketDir,
-          "-p",
-          String(port),
-          "-U",
-          username,
-          "-d",
-          databaseName,
-          "-f",
-          migrationPath,
-        ],
-        environment,
-      );
+      for (const migrationPath of migrationPaths) {
+        await run(
+          path.join(postgresBin, "psql"),
+          [
+            "--single-transaction",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-h",
+            socketDir,
+            "-p",
+            String(port),
+            "-U",
+            username,
+            "-d",
+            databaseName,
+            "-f",
+            migrationPath,
+          ],
+          environment,
+        );
+      }
       sql = postgres({
         host: socketDir,
         port,

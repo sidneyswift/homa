@@ -35,6 +35,9 @@ describe("conversation log continuity integration", () => {
             repliedDeliveryId: "delivery-1",
             resolution: "matched",
             resolvedOutcome: "answered",
+            acceptedOfferDeliveryId: null,
+            resolutionMethod: "provider_reply",
+            replyClassifierVersion: "reply-intent-v3",
             replySourceChannel: "email",
             contextMarkdown: "",
             threadKeyHash: "thread-hash",
@@ -64,6 +67,11 @@ describe("conversation log continuity integration", () => {
       "delivery-1",
     );
     assert.equal(canonicalAttributes[0]?.resolvedOutcome, "answered");
+    assert.equal(canonicalAttributes[0]?.resolutionMethod, "provider_reply");
+    assert.equal(
+      canonicalAttributes[0]?.replyClassifierVersion,
+      "reply-intent-v3",
+    );
     assert.equal(persisted?.replyClaimed, true);
   });
 });

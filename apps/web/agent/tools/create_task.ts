@@ -1,7 +1,14 @@
+import { randomUUID } from "node:crypto";
+
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import {
+  acceptedOfferDeliveryIdFromAttributes,
+  completeAcceptedOfferFulfillment,
+  reserveAcceptedOfferFulfillment,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { createCustomTask } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
@@ -63,13 +70,53 @@ export default defineTool({
     // without an account falls back to the account owner.
     const memberUserId = (attributes as { memberUserId?: unknown } | undefined)
       ?.memberUserId;
+    const sourceOfferDeliveryId =
+      acceptedOfferDeliveryIdFromAttributes(attributes);
+    let taskId: string = randomUUID();
+    let reservedSourceDeliveryId: string | null = null;
+    if (sourceOfferDeliveryId) {
+      try {
+        const reservation = await reserveAcceptedOfferFulfillment({
+          familyId,
+          sourceDeliveryId: sourceOfferDeliveryId,
+          kind: "task",
+          referenceId: taskId,
+        });
+        if (reservation.referenceId) {
+          taskId = reservation.referenceId;
+          reservedSourceDeliveryId = sourceOfferDeliveryId;
+        }
+      } catch (error) {
+        console.error(
+          "create_task fulfillment reservation failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     const result = await createCustomTask(
       familyId,
       input,
       "homa",
       typeof memberUserId === "string" ? memberUserId : null,
+      reservedSourceDeliveryId,
+      taskId,
     );
     if (!result.ok) return { created: false, note: result.note };
+    try {
+      if (reservedSourceDeliveryId) {
+        await completeAcceptedOfferFulfillment({
+          familyId,
+          sourceDeliveryId: reservedSourceDeliveryId,
+          kind: "task",
+          referenceId: result.id,
+        });
+      }
+    } catch (error) {
+      console.error(
+        "create_task fulfillment attribution failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return {
       created: true,
       taskId: result.id,

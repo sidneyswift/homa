@@ -1,7 +1,14 @@
+import { randomUUID } from "node:crypto";
+
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import {
+  acceptedOfferDeliveryIdFromAttributes,
+  completeAcceptedOfferFulfillment,
+  reserveAcceptedOfferFulfillment,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { emitMapEvent } from "../../lib/map/events";
 import {
   blobConfigured,
@@ -344,7 +351,11 @@ export default defineTool({
     }
 
     const attributes = ctx.session.auth.current?.attributes as
-      | { channel?: string; phoneNumber?: string }
+      | {
+          channel?: string;
+          phoneNumber?: string;
+          acceptedOfferDeliveryId?: string;
+        }
       | undefined;
     const channel = usageChannelFromAttributes(attributes);
 
@@ -406,6 +417,31 @@ export default defineTool({
       pageCount: rendered.pageCount,
       brief,
     });
+    const sourceOfferDeliveryId =
+      review?.pass === true
+        ? acceptedOfferDeliveryIdFromAttributes(attributes)
+        : null;
+    let materialId: string = randomUUID();
+    let reservedSourceDeliveryId: string | null = null;
+    if (sourceOfferDeliveryId) {
+      try {
+        const reservation = await reserveAcceptedOfferFulfillment({
+          familyId,
+          sourceDeliveryId: sourceOfferDeliveryId,
+          kind: "material",
+          referenceId: materialId,
+        });
+        if (reservation.referenceId) {
+          materialId = reservation.referenceId;
+          reservedSourceDeliveryId = sourceOfferDeliveryId;
+        }
+      } catch (error) {
+        console.error(
+          "create_printable fulfillment reservation failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
 
     const { pdfUrl, previewUrl, pagePreviewUrls } = await uploadMaterialArtifacts({
       familyId,
@@ -444,9 +480,9 @@ export default defineTool({
     // The durable record (Postgres is truth; html is what a future
     // session revises, re-themes, or compiles into a packet instead of
     // re-imagining the pages).
-    let materialId: string;
     if (access.mode === "pinned") {
       const inserted = await insertMaterialRowPinned({
+        id: materialId,
         familyId,
         childId: input.childId ?? null,
         title: input.title,
@@ -461,6 +497,7 @@ export default defineTool({
         html: storedHtml,
         source,
         revises: input.revisesId ?? null,
+        sourceOfferDeliveryId: null,
         channel,
         generation,
       });
@@ -488,6 +525,7 @@ export default defineTool({
       const { data: insertedRow, error: insertError } = await access.db
         .from("materials")
         .insert({
+          id: materialId as ReturnType<typeof randomUUID>,
           family_id: familyId,
           child_id: input.childId ?? null,
           title: input.title,
@@ -520,6 +558,21 @@ export default defineTool({
     // never lands on her phone; revise first. The number comes from
     // channel auth, never the model (anti-relay law).
     const reviewPassed = review === null || review.pass;
+    if (reservedSourceDeliveryId) {
+      try {
+        await completeAcceptedOfferFulfillment({
+          familyId,
+          sourceDeliveryId: reservedSourceDeliveryId,
+          kind: "material",
+          referenceId: materialId,
+        });
+      } catch (error) {
+        console.error(
+          "create_printable fulfillment attribution failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     let sentByText = false;
     let previewSentByText = false;
     if (channel === "sms" && reviewPassed && attributes?.phoneNumber) {

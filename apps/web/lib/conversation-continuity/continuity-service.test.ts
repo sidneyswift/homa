@@ -123,8 +123,42 @@ describe("conversation continuity service", () => {
     assert.equal(result.repliedDeliveryId, "delivery-sidney");
     assert.equal(result.resolution, "matched");
     assert.equal(result.resolvedOutcome, "accepted");
+    assert.equal(result.resolutionMethod, "bounded_polarity");
+    assert.equal(result.replyClassifierVersion, "reply-intent-v3");
+    assert.equal(result.acceptedOfferDeliveryId, "delivery-sidney");
     assert.match(result.contextMarkdown, /Want a quick stop-and-go game/u);
     assert.doesNotMatch(result.contextMarkdown, /Compose the morning brief/u);
+  });
+
+  it("carries the exact accepted delivery through a clarification turn", async () => {
+    const repository = new FakeContinuityRepository();
+    repository.pending = [pendingFor("sidney")];
+    const input = {
+      familyId: "family-1",
+      memberUserId: "sidney",
+      channel: "sms" as const,
+      transportThreadKey: "telnyx:homa:sidney",
+      runtimeSessionId: "runtime-1",
+      providerReplyTo: null,
+      now: NOW,
+    };
+
+    const accepted = await resolveInboundTurn(repository, {
+      ...input,
+      text: "Yes",
+    });
+    const clarification = await resolveInboundTurn(repository, {
+      ...input,
+      text: "Can you make it for tomorrow morning?",
+      now: new Date(NOW.getTime() + 60_000),
+    });
+
+    assert.equal(accepted.acceptedOfferDeliveryId, "delivery-sidney");
+    assert.equal(clarification.repliedDeliveryId, null);
+    assert.equal(
+      clarification.acceptedOfferDeliveryId,
+      "delivery-sidney",
+    );
   });
 
   it("continues an existing transport binding for a substantive message", async () => {

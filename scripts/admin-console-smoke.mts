@@ -55,7 +55,7 @@ try {
   const overview = await getFleetOverview(7);
   pass(
     "fleet overview (7d)",
-    `active ${overview.activeFamilies} · signups ${overview.newSignups.length} · runs ${JSON.stringify(overview.runCounts)} · deliveries ${JSON.stringify(overview.deliveryCounts)} · userMessages ${overview.userMessages} · emailSends ${JSON.stringify(overview.emailCounts)} · handledAlerts ${overview.handledAlerts.length} · cronLastAt ${overview.cronLastAt ?? "none"}`,
+    `active ${overview.activeFamilies} · signups ${overview.newSignups.length} · runs ${JSON.stringify(overview.runCounts)} · deliveries ${JSON.stringify(overview.deliveryCounts)} · morningOffers ${JSON.stringify(overview.morningOfferFunnel)} · userMessages ${overview.userMessages} · emailSends ${JSON.stringify(overview.emailCounts)} · handledAlerts ${overview.handledAlerts.length} · cronLastAt ${overview.cronLastAt ?? "none"}`,
   );
 
   const pulse = await getPulseDays(14);
