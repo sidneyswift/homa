@@ -2848,6 +2848,25 @@ await expectReadDenied("cron_runs");
 // Founder alert acks (migration #81): deny-all, server-only; only the
 // founder-gated /admin action writes.
 await expectReadDenied("admin_alert_acknowledgments");
+// The material studio's run ledger (materials_studio_runs migration):
+// deny-all, server-only, written by the materials-lab channel route and
+// read by the founder console. Arms automatically once the additive
+// migration reaches this target (agent-jobs pattern above).
+{
+  const response = await rest(`materials_studio_runs?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("materials_studio_runs");
+    report(
+      "materials_studio_runs absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("materials_studio_runs");
+  }
+}
 // The agent flight recorder (migration #79): tool calls and injected
 // context snapshots hold family conversation material, deny-all,
 // server-only writes, founder-console reads only.

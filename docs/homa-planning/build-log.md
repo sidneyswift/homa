@@ -3,6 +3,42 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · Founder console gets a Material studio tab (/admin/studio)
+
+Founder ask: "a material studio tab in admin, where I can clearly see
+into, and test, our material studio skill." Ran finding-unknowns plus
+exploring-ui-directions first; the four-direction comparison lab is
+`plans/2026-07-18-material-studio-admin-directions.html` (winner:
+direction 1 "Bench", composer first, runs ledger, skill package below).
+
+Decisions made alone, flaggable:
+
+- Test runs target SANDBOX families only, enforced server-side in the
+  channel route, because create_printable writes real materials rows
+  into the target family's binder. The composer lists sandbox families
+  only; a non-sandbox id is refused with a 409.
+- New `materials-lab` eve channel with a CRON_SECRET run route (the
+  dispatch run-now shape), never a direct tool call from the page: a
+  studio run is a real agent session with the real skill, tools, and
+  quality check, so what the founder tests is what families get.
+- One additive table `materials_studio_runs` (migration
+  20260718170000), deny-all like the other founder ledgers, so a run
+  that dies before create_printable stays visible as failed. Applied to
+  prod ahead of the deploy per the additive-may-lead law; the page
+  degrades to a labeled setup note when the table is absent.
+- The skill package section reads SKILL.md and references/ straight off
+  the deployed filesystem (filesystem-first ruling), traced via
+  next.config.ts; a founder-gated route serves the reference images.
+- Found while wiring the channel: the family-context instruction kept
+  its own hardcoded pinned-channel list (sms, email, dispatch), so
+  `agent-job` build sessions would have hydrated the "parent has not
+  finished setup" fallback instead of family context. Latent, not yet
+  user-visible (0 agent_jobs rows in prod at 2026-07-18T21:05Z, flag on
+  but unexercised). Fixed by exporting `PINNED_AGENT_CHANNELS` from
+  lib/agent-db.ts as the single source both resolveAgentAccess and the
+  instruction hydrate from; regression-pinned in
+  lib/materials/studio-brief.test.ts.
+
 ## 2026-07-18 · The wall and the report lock flip ON in production (founder order)
 
 Founder ordered the flip ("ok switch flags") after local testing. Walked

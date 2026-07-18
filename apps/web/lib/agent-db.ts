@@ -123,7 +123,24 @@ export type AgentAccess =
   | { mode: "caller"; db: SupabaseClient; familyId: string }
   | { mode: "pinned"; familyId: string };
 
-const PINNED_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
+/**
+ * Server-originated channels whose sessions run family-pinned. Exported
+ * as the single source of truth: the family-context instruction hydrates
+ * from this same set, so a channel added here gets tools AND the family
+ * block together. (Before this export the instruction kept its own
+ * hardcoded list and agent-job sessions hydrated the "not set up"
+ * fallback while their tools worked; found 2026-07-18 while adding
+ * materials-lab.)
+ */
+export const PINNED_AGENT_CHANNELS: ReadonlySet<string> = new Set([
+  "sms",
+  "email",
+  "dispatch",
+  "agent-job",
+  "materials-lab",
+]);
+
+const PINNED_CHANNELS = PINNED_AGENT_CHANNELS;
 
 export interface ResolveAgentAccessDependencies {
   /** Does this authenticated user still belong to this family, right now? */

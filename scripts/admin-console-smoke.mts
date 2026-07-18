@@ -29,6 +29,8 @@ const { listSessions, getSessionDetail } = await import("../apps/web/lib/admin/s
 const { getFamilyTasks, getFamilyBrain, getFamilyMaterialsDeep, getFamilyProgressDeep } =
   await import("../apps/web/lib/admin/family-deep-data");
 const { getFamilyScreenData } = await import("../apps/web/lib/admin/screen-data");
+const { listSandboxFamilies, listStudioRuns, listRecentFleetMaterials, readSkillPackage } =
+  await import("../apps/web/lib/admin/studio-data");
 
 let failed = false;
 
@@ -131,6 +133,27 @@ try {
       `kids ${screen.children.length} · reports ${screen.reports.size} · plans ${screen.plans.length} · binder ${screen.binder.length}`,
     );
   }
+  // Material studio tab (2026-07-18): counts only, same privacy posture.
+  const sandboxFamilies = await listSandboxFamilies();
+  pass(
+    "studio sandbox families",
+    `${sandboxFamilies.length} rows · kids ${sandboxFamilies.reduce((sum, family) => sum + family.children.length, 0)}`,
+  );
+  const studioRuns = await listStudioRuns(20);
+  pass(
+    "studio runs",
+    studioRuns === null
+      ? "ledger table not migrated yet (page shows its setup note)"
+      : `${studioRuns.length} rows · materials ${studioRuns.reduce((sum, run) => sum + run.materials.length, 0)}`,
+  );
+  const fleetMaterials = await listRecentFleetMaterials(10);
+  pass("studio fleet materials", `${fleetMaterials.length} rows`);
+  const skillPackage = await readSkillPackage();
+  if (!skillPackage) throw new Error("materials-studio skill package could not be read");
+  pass(
+    "studio skill package",
+    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.referenceImages.length} reference images`,
+  );
 } catch (error) {
   fail("admin console smoke", error);
 }
