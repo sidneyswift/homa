@@ -1,5 +1,6 @@
 import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import { deliverJobMilestone } from "./milestone";
 
 /**
  * The agent-jobs runner spine: the deterministic Postgres transitions that
@@ -230,12 +231,30 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
       update public.agent_jobs set status = 'awaiting_input', updated_at = now()
       where id = ${job.jobId} and family_id = ${job.familyId}
     `;
+    // Tell the parent the first volume is ready to review; she should not
+    // have to ask. Best-effort, never blocks the transition.
+    await deliverJobMilestone({
+      familyId: job.familyId,
+      childId: job.childId,
+      title: job.title,
+      kind: "gate",
+    });
     return;
   }
   if (job.stageNumber >= job.totalStages) {
+    const runId = await deliverJobMilestone({
+      familyId: job.familyId,
+      childId: job.childId,
+      title: job.title,
+      kind: "completed",
+    });
     await sql`
       update public.agent_jobs
-      set status = 'completed', completed_at = now(), updated_at = now()
+      set status = 'completed', completed_at = now(),
+          completion_task_run_id = ${runId},
+          delivered_channel = ${runId ? "none" : null},
+          delivered_at = now(),
+          updated_at = now()
       where id = ${job.jobId} and family_id = ${job.familyId}
     `;
     await sql`
@@ -449,4 +468,10 @@ export async function handleUnreportedStage(
     { family_id: job.familyId, skill: job.skill, stage_number: job.stageNumber },
     { familyId: job.familyId },
   );
+  await deliverJobMilestone({
+    familyId: job.familyId,
+    childId: job.childId,
+    title: job.title,
+    kind: "needs_attention",
+  });
 }
