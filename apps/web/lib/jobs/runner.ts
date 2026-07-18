@@ -66,13 +66,24 @@ export async function claimNextRunnableJob(): Promise<ClaimResult> {
         cancel_requested_at: string | null;
       }[]
     >`
-      select id, family_id, skill, child_id, title, plan_revision,
-             current_stage, total_stages, cancel_requested_at::text as cancel_requested_at
-      from public.agent_jobs
-      where status in ('queued', 'running')
-        and current_stage < total_stages
-      order by updated_at asc
-      for update skip locked
+      select j.id, j.family_id, j.skill, j.child_id, j.title, j.plan_revision,
+             j.current_stage, j.total_stages, j.cancel_requested_at::text as cancel_requested_at
+      from public.agent_jobs j
+      where j.status in ('queued', 'running')
+        and j.current_stage < j.total_stages
+        -- Do NOT re-claim a job whose next stage is already building. The
+        -- skip-locked lock stops CONCURRENT ticks, but within one tick's
+        -- sequential loop the job stays 'running' with current_stage
+        -- unadvanced until the stage completes, so without this guard the
+        -- same stage got claimed (and spawned a session) repeatedly,
+        -- colliding on eve's per-stage hook token (HookConflictError,
+        -- 2026-07-18 probe).
+        and not exists (
+          select 1 from public.agent_job_stages s
+          where s.job_id = j.id and s.status = 'in_progress'
+        )
+      order by j.updated_at asc
+      for update of j skip locked
       limit 1
     `;
     const job = jobs[0];
