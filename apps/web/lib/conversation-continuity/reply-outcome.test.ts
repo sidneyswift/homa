@@ -44,6 +44,9 @@ describe("reply outcome classifier", () => {
       "Yes, but not today",
       "Yes, can you make it for Maya?",
       "Yes I have a question",
+      "Sure?",
+      "Why not?",
+      "No, actually yes, please make it",
       "Not sure",
       "Maybe",
       "Yes and no",
@@ -60,6 +63,6 @@ describe("reply outcome classifier", () => {
   });
 
   it("exports a stable classifier version for durable audit rows", () => {
-    assert.equal(REPLY_CLASSIFIER_VERSION, "reply-intent-v2");
+    assert.equal(REPLY_CLASSIFIER_VERSION, "reply-intent-v3");
   });
 });

@@ -312,7 +312,7 @@ test("reply resolution events require a causal outcome and reject content", () =
     resolved_outcome: "answered",
     cross_channel: false,
     resolution_method: "provider_reply",
-    classifier_version: "reply-intent-v2",
+    classifier_version: "reply-intent-v3",
   };
 
   assert.equal(

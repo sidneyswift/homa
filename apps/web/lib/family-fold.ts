@@ -27,6 +27,7 @@ const SIMPLE_FAMILY_TABLES = [
   "conversation_episodes",
   "conversation_deliveries",
   "conversation_open_loops",
+  "conversation_offer_fulfillments",
   "conversation_inbound_receipts",
   "family_memories",
   "hours_log",

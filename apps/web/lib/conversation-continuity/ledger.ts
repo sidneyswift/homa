@@ -23,6 +23,7 @@ export interface ContinuityAuthAttributes {
   replyToMessageId?: string;
   repliedDeliveryId?: string;
   resolvedOutcome?: ReplyOutcome;
+  acceptedOfferDeliveryId?: string;
   resolutionMethod?: ReplyResolutionMethod;
   replyClassifierVersion?: string;
   providerMessageId?: string;
@@ -183,6 +184,9 @@ export function resolvedContinuityAttributes(
       : {}),
     ...(result.resolvedOutcome
       ? { resolvedOutcome: result.resolvedOutcome }
+      : {}),
+    ...(result.acceptedOfferDeliveryId
+      ? { acceptedOfferDeliveryId: result.acceptedOfferDeliveryId }
       : {}),
     ...(result.resolutionMethod
       ? { resolutionMethod: result.resolutionMethod }

@@ -18,6 +18,8 @@ const repoRoot = path.resolve(
 const migrationPaths = [
   "20260716115722_morning_research_brief_v2.sql",
   "20260718010000_morning_offer_funnel.sql",
+  "20260718023000_morning_offer_provenance_hardening.sql",
+  "20260718030000_offer_provenance_fold_safety.sql",
 ].map((file) => path.join(repoRoot, "supabase/migrations", file));
 const processTimeoutMs = 30_000;
 
@@ -274,6 +276,16 @@ const prerequisiteSql = `
     unique (id, family_id),
     foreign key (child_id, family_id)
       references public.children (id, family_id)
+  );
+  create table public.conversation_thread_bindings (
+    family_id uuid not null references public.families (id) on delete cascade,
+    member_user_id uuid,
+    channel text not null,
+    thread_key_hash text not null,
+    runtime_session_id text,
+    episode_id uuid,
+    last_seen_at timestamptz not null default now(),
+    unique (channel, thread_key_hash)
   );
   create table public.conversation_open_loops (
     id uuid primary key default gen_random_uuid(),

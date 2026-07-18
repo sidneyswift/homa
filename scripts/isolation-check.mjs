@@ -414,9 +414,28 @@ async function morningOfferFunnelSchemaExists() {
         where table_schema = 'public'
           and table_name = 'conversation_open_loops'
           and column_name in ('resolution_method', 'classifier_version')
-      ) = 2 as audit_columns_exist
+      ) = 2 as audit_columns_exist,
+      (
+        select count(*)::integer
+        from information_schema.columns
+        where table_schema = 'public'
+          and (
+            (
+              table_name = 'conversation_thread_bindings'
+              and column_name = 'pending_offer_delivery_id'
+            )
+            or (
+              table_name in ('materials', 'agent_schedules')
+              and column_name = 'source_offer_delivery_id'
+            )
+          )
+      ) = 3 as provenance_columns_exist
   `;
-  return rows[0]?.table_exists && rows[0]?.audit_columns_exist;
+  return (
+    rows[0]?.table_exists &&
+    rows[0]?.audit_columns_exist &&
+    rows[0]?.provenance_columns_exist
+  );
 }
 
 async function expectPrivilegedSqlRejected(
@@ -3186,7 +3205,7 @@ if (sql) {
       "morning offer funnel migration is applied to the isolation target",
       morningOfferFunnelSchemaAvailable,
       morningOfferFunnelSchemaAvailable
-        ? "fulfillment table and reply audit columns exist"
+        ? "fulfillment table, reply audit, and exact provenance columns exist"
         : "morning offer funnel schema is missing",
     );
   } catch (error) {

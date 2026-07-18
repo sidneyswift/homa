@@ -164,11 +164,25 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       l.state,
       l.expires_at::text as expires_at,
       l.resolved_outcome,
-      exists (
-        select 1
-        from public.conversation_offer_fulfillments fulfillment
-        where fulfillment.source_delivery_id = d.id
-          and fulfillment.family_id = d.family_id
+      (
+        exists (
+          select 1
+          from public.conversation_offer_fulfillments fulfillment
+          where fulfillment.source_delivery_id = d.id
+            and fulfillment.family_id = d.family_id
+        )
+        or exists (
+          select 1
+          from public.materials material
+          where material.source_offer_delivery_id = d.id
+            and material.family_id = d.family_id
+        )
+        or exists (
+          select 1
+          from public.agent_schedules schedule
+          where schedule.source_offer_delivery_id = d.id
+            and schedule.family_id = d.family_id
+        )
       ) as fulfilled
     from public.conversation_deliveries d
     join public.conversation_open_loops l

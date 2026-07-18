@@ -99,11 +99,13 @@ export class PostgresContinuityRepository implements ContinuityRepository {
         thread_key_hash: string;
         runtime_session_id: string | null;
         episode_id: string;
+        pending_offer_delivery_id: string | null;
         last_seen_at: string;
       }[]
     >`
       select family_id, member_user_id, channel, thread_key_hash,
-             runtime_session_id, episode_id, last_seen_at::text as last_seen_at
+             runtime_session_id, episode_id, pending_offer_delivery_id,
+             last_seen_at::text as last_seen_at
       from public.conversation_thread_bindings
       where family_id = ${familyId}
         and channel = ${channel} and thread_key_hash = ${threadKeyHash}
@@ -118,6 +120,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
           threadKeyHash: row.thread_key_hash,
           runtimeSessionId: row.runtime_session_id,
           episodeId: row.episode_id,
+          pendingOfferDeliveryId: row.pending_offer_delivery_id,
           lastSeenAt: new Date(row.last_seen_at),
         }
       : null;
@@ -186,16 +189,22 @@ export class PostgresContinuityRepository implements ContinuityRepository {
     await sql`
       insert into public.conversation_thread_bindings
         (family_id, member_user_id, channel, thread_key_hash,
-         runtime_session_id, episode_id, last_seen_at)
+         runtime_session_id, episode_id, pending_offer_delivery_id,
+         last_seen_at)
       values
         (${binding.familyId}, ${binding.memberUserId}, ${binding.channel},
          ${binding.threadKeyHash}, ${binding.runtimeSessionId},
-         ${binding.episodeId}, ${binding.lastSeenAt.toISOString()})
+         ${binding.episodeId}, ${binding.pendingOfferDeliveryId ?? null},
+         ${binding.lastSeenAt.toISOString()})
       on conflict (channel, thread_key_hash) do update
       set family_id = excluded.family_id,
           member_user_id = excluded.member_user_id,
           runtime_session_id = excluded.runtime_session_id,
           episode_id = excluded.episode_id,
+          pending_offer_delivery_id = coalesce(
+            excluded.pending_offer_delivery_id,
+            public.conversation_thread_bindings.pending_offer_delivery_id
+          ),
           last_seen_at = excluded.last_seen_at
     `;
   }

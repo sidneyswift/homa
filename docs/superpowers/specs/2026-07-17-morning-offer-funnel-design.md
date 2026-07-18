@@ -64,6 +64,12 @@ authenticated family, requires a resolved accepted morning brief loop, and is
 idempotent per source delivery. The source delivery id comes from trusted
 continuity attributes, never model input.
 
+When an accepted reminder needs a clarification turn, the exact delivery id
+stays on the authenticated thread binding and is carried forward separately
+from reply-claim state. A completed material or task stores that same delivery
+id on its own durable row before the best-effort event or fulfillment-ledger
+write. The binding clears after the ledger accepts the completion.
+
 ## Founder interface
 
 The overview replaces the three morning-offer tiles and the separate possible

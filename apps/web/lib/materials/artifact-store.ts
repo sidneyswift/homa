@@ -130,6 +130,7 @@ export interface MaterialRowInput {
   html: string;
   source: MaterialSource;
   revises: string | null;
+  sourceOfferDeliveryId: string | null;
   channel: "web" | "sms" | "email" | "dispatch";
   /** How this page came to be (founder deep view): the create tool's
    * input metadata, session, and review verdict, beside the output. */
@@ -178,13 +179,14 @@ export async function insertMaterialRowPinned(
     insert into public.materials
       (family_id, child_id, title, kind, skill, subject, curriculum, theme,
        characters, pdf_url, preview_url, html, source, revises, channel,
-       generation)
+       generation, source_offer_delivery_id)
     values
       (${input.familyId}, ${childId}, ${input.title}, ${input.kind},
        ${input.skill}, ${input.subject}, ${input.curriculum}, ${input.theme},
        ${input.characters}, ${input.pdfUrl}, ${input.previewUrl},
        ${input.html}, ${input.source}, ${input.revises}, ${input.channel},
-       ${input.generation ? sql.json(input.generation as never) : null})
+       ${input.generation ? sql.json(input.generation as never) : null},
+       ${input.sourceOfferDeliveryId})
     returning id
   `;
   return { ok: true, id: rows[0].id };

@@ -1,7 +1,7 @@
 export type ReplyKind = "yes_no" | "free_text" | "choice" | "approval";
 export type ReplyOutcome = "accepted" | "declined" | "answered";
 
-export const REPLY_CLASSIFIER_VERSION = "reply-intent-v2";
+export const REPLY_CLASSIFIER_VERSION = "reply-intent-v3";
 
 const MAX_POLARITY_REPLY_CHARS = 160;
 const AFFIRMATIVE_EMOJI = /^👍[\u{1F3FB}-\u{1F3FF}]?$/u;
@@ -71,18 +71,18 @@ function classifyBoundedPolarity(text: string): ReplyOutcome {
   const normalized = normalizeReplyText(text);
   const phrase = normalized.replace(/[.!?]+$/gu, "");
 
-  if (AFFIRMATIVE_EMOJI.test(normalized) || AFFIRMATIVE_PHRASES.has(phrase)) {
-    return "accepted";
-  }
-  if (NEGATIVE_EMOJI.test(normalized) || DECLINE_PHRASES.has(phrase)) {
-    return "declined";
-  }
   if (
     normalized.length === 0 ||
     normalized.length > MAX_POLARITY_REPLY_CHARS ||
     normalized.includes("?")
   ) {
     return "answered";
+  }
+  if (AFFIRMATIVE_EMOJI.test(normalized) || AFFIRMATIVE_PHRASES.has(phrase)) {
+    return "accepted";
+  }
+  if (NEGATIVE_EMOJI.test(normalized) || DECLINE_PHRASES.has(phrase)) {
+    return "declined";
   }
 
   const affirmativeAction =
@@ -91,17 +91,18 @@ function classifyBoundedPolarity(text: string): ReplyOutcome {
     );
   const hasNegative =
     /\b(?:no|nope|nah|not|never|don't|do not)\b/u.test(phrase);
+  const hasAffirmative =
+    /\b(?:yes|yep|yeah|yup|sure|okay|ok|absolutely|definitely)\b/u.test(
+      phrase,
+    );
   const hasMixedIntent =
     /\b(?:but|however|instead|maybe|unless|not sure)\b/u.test(phrase);
 
+  if ((hasAffirmative && hasNegative) || hasMixedIntent) {
+    return "answered";
+  }
   if (affirmativeAction && !hasNegative && !hasMixedIntent) {
     return "accepted";
-  }
-  if (
-    /^(?:no|nope|nah)\b/u.test(phrase) ||
-    /^(?:not (?:now|today|this time)|maybe later|skip it|pass)\b/u.test(phrase)
-  ) {
-    return "declined";
   }
   return "answered";
 }

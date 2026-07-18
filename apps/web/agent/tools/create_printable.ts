@@ -3,8 +3,7 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
-  offerDeliveryIdFromAttributes,
-  offerEpisodeIdFromAttributes,
+  acceptedOfferDeliveryIdFromAttributes,
   recordAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
 import { emitMapEvent } from "../../lib/map/events";
@@ -352,8 +351,7 @@ export default defineTool({
       | {
           channel?: string;
           phoneNumber?: string;
-          repliedDeliveryId?: string;
-          episodeId?: string;
+          acceptedOfferDeliveryId?: string;
         }
       | undefined;
     const channel = usageChannelFromAttributes(attributes);
@@ -416,6 +414,10 @@ export default defineTool({
       pageCount: rendered.pageCount,
       brief,
     });
+    const sourceOfferDeliveryId =
+      review?.pass === true
+        ? acceptedOfferDeliveryIdFromAttributes(attributes)
+        : null;
 
     const { pdfUrl, previewUrl, pagePreviewUrls } = await uploadMaterialArtifacts({
       familyId,
@@ -471,6 +473,7 @@ export default defineTool({
         html: storedHtml,
         source,
         revises: input.revisesId ?? null,
+        sourceOfferDeliveryId,
         channel,
         generation,
       });
@@ -512,6 +515,7 @@ export default defineTool({
           html: storedHtml,
           source,
           revises: input.revisesId ?? null,
+          source_offer_delivery_id: sourceOfferDeliveryId,
           channel,
           generation,
         })
@@ -530,12 +534,11 @@ export default defineTool({
     // never lands on her phone; revise first. The number comes from
     // channel auth, never the model (anti-relay law).
     const reviewPassed = review === null || review.pass;
-    if (reviewPassed) {
+    if (sourceOfferDeliveryId) {
       try {
         await recordAcceptedOfferFulfillment({
           familyId,
-          sourceDeliveryId: offerDeliveryIdFromAttributes(attributes),
-          episodeId: offerEpisodeIdFromAttributes(attributes),
+          sourceDeliveryId: sourceOfferDeliveryId,
           kind: "material",
           referenceId: materialId,
         });

@@ -3,8 +3,7 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
-  offerDeliveryIdFromAttributes,
-  offerEpisodeIdFromAttributes,
+  acceptedOfferDeliveryIdFromAttributes,
   recordAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
 import { createCustomTask } from "../../lib/tasks/custom";
@@ -68,18 +67,20 @@ export default defineTool({
     // without an account falls back to the account owner.
     const memberUserId = (attributes as { memberUserId?: unknown } | undefined)
       ?.memberUserId;
+    const sourceOfferDeliveryId =
+      acceptedOfferDeliveryIdFromAttributes(attributes);
     const result = await createCustomTask(
       familyId,
       input,
       "homa",
       typeof memberUserId === "string" ? memberUserId : null,
+      sourceOfferDeliveryId,
     );
     if (!result.ok) return { created: false, note: result.note };
     try {
       await recordAcceptedOfferFulfillment({
         familyId,
-        sourceDeliveryId: offerDeliveryIdFromAttributes(attributes),
-        episodeId: offerEpisodeIdFromAttributes(attributes),
+        sourceDeliveryId: sourceOfferDeliveryId,
         kind: "task",
         referenceId: result.id,
       });

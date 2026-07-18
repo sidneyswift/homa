@@ -66,6 +66,25 @@ describe("research brief PostgreSQL schema", () => {
       where table_schema = 'public'
         and table_name = 'conversation_offer_fulfillments'
     `;
+    const provenanceColumns = await db<{
+      table_name: string;
+      column_name: string;
+    }[]>`
+      select table_name, column_name
+      from information_schema.columns
+      where table_schema = 'public'
+        and (
+          (
+            table_name = 'conversation_thread_bindings'
+            and column_name = 'pending_offer_delivery_id'
+          )
+          or (
+            table_name in ('materials', 'agent_schedules')
+            and column_name = 'source_offer_delivery_id'
+          )
+        )
+      order by table_name
+    `;
 
     assert.deepEqual(
       columns.map((column) => column.column_name),
@@ -74,6 +93,49 @@ describe("research brief PostgreSQL schema", () => {
     assert.deepEqual(
       tables.map((table) => table.table_name),
       ["conversation_offer_fulfillments"],
+    );
+    assert.deepEqual(
+      provenanceColumns.map((column) => ({
+        table_name: column.table_name,
+        column_name: column.column_name,
+      })),
+      [
+      {
+        table_name: "agent_schedules",
+        column_name: "source_offer_delivery_id",
+      },
+      {
+        table_name: "conversation_thread_bindings",
+        column_name: "pending_offer_delivery_id",
+      },
+      {
+        table_name: "materials",
+        column_name: "source_offer_delivery_id",
+      },
+      ],
+    );
+    const provenanceConstraints = await db<{
+      conname: string;
+      condeferrable: boolean;
+      condeferred: boolean;
+    }[]>`
+      select conname, condeferrable, condeferred
+      from pg_constraint
+      where conname in (
+        'conversation_offer_fulfillments_delivery_family_fkey',
+        'conversation_thread_bindings_pending_offer_delivery_fkey',
+        'materials_source_offer_delivery_fkey',
+        'agent_schedules_source_offer_delivery_fkey'
+      )
+      order by conname
+    `;
+    assert.equal(provenanceConstraints.length, 4);
+    assert.equal(
+      provenanceConstraints.every(
+        (constraint) =>
+          constraint.condeferrable && constraint.condeferred,
+      ),
+      true,
     );
     const [privileges] = await db<{
       authenticatedInsert: boolean;

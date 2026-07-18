@@ -18,33 +18,21 @@ type OfferFulfillmentEvent = (input: {
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
-function uuidAttributeFromAttributes(
+export function acceptedOfferDeliveryIdFromAttributes(
   attributes: unknown,
-  key: "repliedDeliveryId" | "episodeId",
 ): string | null {
   if (
     !attributes ||
     typeof attributes !== "object" ||
-    !(key in attributes)
+    !("acceptedOfferDeliveryId" in attributes)
   ) {
     return null;
   }
-  const value = (attributes as Record<string, unknown>)[key];
+  const value = (attributes as { acceptedOfferDeliveryId?: unknown })
+    .acceptedOfferDeliveryId;
   return typeof value === "string" && UUID.test(value)
     ? value
     : null;
-}
-
-export function offerDeliveryIdFromAttributes(
-  attributes: unknown,
-): string | null {
-  return uuidAttributeFromAttributes(attributes, "repliedDeliveryId");
-}
-
-export function offerEpisodeIdFromAttributes(
-  attributes: unknown,
-): string | null {
-  return uuidAttributeFromAttributes(attributes, "episodeId");
 }
 
 /**
@@ -57,14 +45,13 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
   input: {
     familyId: string;
     sourceDeliveryId: string | null;
-    episodeId: string | null;
     kind: OfferFulfillmentKind;
     referenceId: string;
     emit: OfferFulfillmentEvent;
   },
 ): Promise<OfferFulfillmentResult> {
   const rows = await database<OfferFulfillmentResult[]>`
-    with candidates as (
+    with eligible as (
       select d.id
       from public.conversation_deliveries d
       join public.conversation_open_loops l
@@ -74,33 +61,12 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
         on r.id = d.task_run_id
        and r.family_id = d.family_id
       where d.id = ${input.sourceDeliveryId}
-        or (
-          ${input.sourceDeliveryId}::uuid is null
-          and ${input.episodeId}::uuid is not null
-          and d.episode_id = ${input.episodeId}
-          and l.resolved_at >= now() - interval '24 hours'
-          and not exists (
-            select 1
-            from public.conversation_offer_fulfillments existing
-            where existing.source_delivery_id = d.id
-          )
-        )
-    ),
-    scoped_candidates as (
-      select candidates.id
-      from candidates
-      join public.conversation_deliveries d on d.id = candidates.id
-      join public.conversation_open_loops l
-        on l.delivery_id = d.id
-       and l.family_id = d.family_id
-      join public.homa_task_runs r
-        on r.id = d.task_run_id
-       and r.family_id = d.family_id
-      where d.family_id = ${input.familyId}
+        and d.family_id = ${input.familyId}
         and d.status = 'sent'
         and r.kind = 'morning_brief'
         and l.state = 'resolved'
         and l.resolved_outcome = 'accepted'
+        and l.resolved_at >= now() - interval '24 hours'
         and (
           (
             ${input.kind}::text = 'material'
@@ -123,12 +89,6 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
           )
         )
     ),
-    eligible as (
-      select id
-      from scoped_candidates
-      where ${input.sourceDeliveryId}::uuid is not null
-         or (select count(*) from scoped_candidates) = 1
-    ),
     written as (
       insert into public.conversation_offer_fulfillments (
         family_id,
@@ -143,13 +103,26 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
         ${input.referenceId}
       from eligible
       on conflict (source_delivery_id) do nothing
-      returning id
+      returning source_delivery_id
+    ),
+    cleared as (
+      update public.conversation_thread_bindings binding
+      set pending_offer_delivery_id = null
+      where binding.family_id = ${input.familyId}
+        and binding.pending_offer_delivery_id in (
+          select source_delivery_id from written
+        )
+      returning binding.thread_key_hash
     )
     select
       exists (select 1 from eligible) as eligible,
-      exists (select 1 from written) as wrote
+      exists (select 1 from written) as wrote,
+      (select count(*) from cleared) as cleared_bindings
   `;
-  const result = rows[0] ?? { eligible: false, wrote: false };
+  const result = {
+    eligible: rows[0]?.eligible ?? false,
+    wrote: rows[0]?.wrote ?? false,
+  };
   if (result.wrote) {
     try {
       await input.emit({ familyId: input.familyId, kind: input.kind });
@@ -163,11 +136,10 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
 export async function recordAcceptedOfferFulfillment(input: {
   familyId: string;
   sourceDeliveryId: string | null;
-  episodeId: string | null;
   kind: OfferFulfillmentKind;
   referenceId: string;
 }): Promise<OfferFulfillmentResult> {
-  if (!input.sourceDeliveryId && !input.episodeId) {
+  if (!input.sourceDeliveryId) {
     return { eligible: false, wrote: false };
   }
   return await recordAcceptedOfferFulfillmentWithDatabase(mapDb(), {

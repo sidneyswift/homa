@@ -115,7 +115,7 @@ describe("conversation reply resolution", () => {
       );
       assert.equal(result.outcome, "answered");
       assert.equal(result.method, "provider_reply");
-      assert.equal(result.classifierVersion, "reply-intent-v2");
+      assert.equal(result.classifierVersion, "reply-intent-v3");
     }
   });
 
@@ -197,7 +197,7 @@ describe("conversation reply resolution", () => {
       if (result.kind === "matched") {
         assert.equal(result.outcome, outcome, text);
         assert.equal(result.method, "bounded_polarity", text);
-        assert.equal(result.classifierVersion, "reply-intent-v2", text);
+        assert.equal(result.classifierVersion, "reply-intent-v3", text);
       }
     }
   });
