@@ -16,14 +16,7 @@ import { join } from "node:path";
 import { EVENT_SCHEMAS } from "../packages/core/src/index";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
-const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
-  // Emitted by the agent-jobs claim-lease runner, which lands after the
-  // tool surface (agent-jobs plan, Section B stage 2 runner). job.started
-  // and job.cancelled already emit from lib/jobs/store.ts.
-  ["job.stage_completed", "agent-jobs runner"],
-  ["job.completed", "agent-jobs runner"],
-  ["job.failed", "agent-jobs runner"],
-];
+const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [];
 
 const failures: string[] = [];
 
