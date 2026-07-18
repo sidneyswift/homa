@@ -13,3 +13,28 @@ export function refuseJobSpawnedSession(attributes: unknown): string | null {
   }
   return null;
 }
+
+/** The inverse, for report_agent_job_stage: only the job runner's own build
+ * session (channel 'agent-job') may report a stage result. A parent chat or
+ * any other surface calling it is refused, so a stage can only be completed
+ * by the worker actually building it. */
+export function refuseNonJobWorkerSession(attributes: unknown): string | null {
+  const channel = ((attributes ?? {}) as { channel?: string }).channel;
+  if (channel !== "agent-job") {
+    return "Only the job runner's own build session can report a stage result.";
+  }
+  return null;
+}
+
+/** The build session carries its job and stage on the auth attributes the
+ * runner stamped (never model input); this reads them back. */
+export function jobWorkerContext(
+  attributes: unknown,
+): { jobId: string; stageNumber: number } | null {
+  const attrs = (attributes ?? {}) as { agentJobId?: unknown; agentJobStageNumber?: unknown };
+  const jobId = typeof attrs.agentJobId === "string" ? attrs.agentJobId : null;
+  const stageNumber =
+    typeof attrs.agentJobStageNumber === "number" ? attrs.agentJobStageNumber : null;
+  if (!jobId || stageNumber === null) return null;
+  return { jobId, stageNumber };
+}

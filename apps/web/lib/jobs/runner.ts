@@ -272,3 +272,86 @@ export async function failStage(
     { familyId: job.familyId },
   );
 }
+
+export interface StageMetering {
+  sandboxCpuSeconds?: number;
+  pageFetchCount?: number;
+  modelTokens?: number;
+}
+
+export type WorkerStageResult =
+  | { ok: true; status: string }
+  | { ok: false; note: string };
+
+/**
+ * The completion path the build session's report_agent_job_stage tool
+ * calls: it names the materials it produced, and this links them and drives
+ * the transition. Keyed by the runner-stamped (familyId, jobId,
+ * stageNumber), never model-chosen identity; the composite FKs then prove
+ * every material belongs to this family. The stage must be the one actually
+ * in flight (status in_progress), so a stray or replayed report cannot
+ * advance a job.
+ */
+export async function completeStageFromWorker(
+  familyId: string,
+  jobId: string,
+  stageNumber: number,
+  materialIds: string[],
+  metering: StageMetering = {},
+): Promise<WorkerStageResult> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      skill: string;
+      child_id: string | null;
+      title: string;
+      plan_revision: number;
+      total_stages: number;
+      current_stage: number;
+      status: string;
+    }[]
+  >`
+    select j.skill, j.child_id, j.title, j.plan_revision, j.total_stages,
+           j.current_stage, s.status
+    from public.agent_jobs j
+    join public.agent_job_stages s
+      on s.job_id = j.id and s.family_id = j.family_id
+    where j.id = ${jobId} and j.family_id = ${familyId}
+      and s.stage_number = ${stageNumber}
+  `;
+  const row = rows[0];
+  if (!row) return { ok: false, note: "That job stage is not in this family." };
+  if (row.status !== "in_progress") {
+    return { ok: false, note: `That stage is ${row.status}, not building; nothing to report.` };
+  }
+
+  // Link every material this stage produced (composite FK proves family +
+  // material ownership); duplicates are ignored so a retried report is safe.
+  for (const materialId of materialIds) {
+    await sql`
+      insert into public.agent_job_stage_artifacts
+        (stage_id, job_id, family_id, kind, material_id)
+      select s.id, ${jobId}, ${familyId}, 'material', ${materialId}
+      from public.agent_job_stages s
+      where s.job_id = ${jobId} and s.family_id = ${familyId}
+        and s.stage_number = ${stageNumber}
+      on conflict do nothing
+    `;
+  }
+
+  const job: ClaimedJob = {
+    jobId,
+    familyId,
+    skill: row.skill,
+    childId: row.child_id,
+    title: row.title,
+    planRevision: row.plan_revision,
+    stageNumber,
+    totalStages: row.total_stages,
+  };
+  // Artifacts are already linked above; recordStageBuilt does the transition
+  // (gate/approve, advance, complete) and the events. Pass materialId null so
+  // it does not re-link.
+  await recordStageBuilt({ job, materialId: null, metering });
+  return { ok: true, status: shouldGateStage(stageNumber) ? "awaiting_input" : "running" };
+}
