@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getFamilyThread, listChatFamilies } from "../../../lib/admin/chats-data";
 import { requireFounder } from "../../../lib/admin/gate";
-import { adminTimeZone, timeAgo } from "../../../lib/admin/format";
+import { adminTimeZone, familyDisplayName, timeAgo } from "../../../lib/admin/format";
 import { EmptyNote, Pill } from "../ui";
 import { ChatThread } from "./thread";
 
@@ -65,7 +65,7 @@ export default async function AdminChatsPage({
                   : "rounded-md border border-border-subtle bg-card px-3 py-2 shadow-sm transition-colors hover:border-[var(--clay-300)]"
               }
             >
-              <p className="truncate text-sm font-bold text-strong">{family.name}</p>
+              <p className="truncate text-sm font-bold text-strong">{familyDisplayName(family.name)}</p>
               <p className="font-mono text-[0.62rem] text-subtle">
                 {family.messagesTotal} messages · {family.messages7d} this week · last{" "}
                 {timeAgo(family.lastMessageAt)}
@@ -77,7 +77,7 @@ export default async function AdminChatsPage({
         <section aria-label="Thread" className="min-w-0">
           {selected ? (
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="font-display text-lg font-bold text-strong">{selected.name}</h2>
+              <h2 className="font-display text-lg font-bold text-strong">{familyDisplayName(selected.name)}</h2>
               <Pill tone="stone">{selected.messagesTotal} messages</Pill>
               <Link
                 href={`/admin/families/${selected.id}/chats`}

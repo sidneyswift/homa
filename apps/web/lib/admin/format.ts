@@ -1,3 +1,5 @@
+import { DEFAULT_FAMILY_NAME } from "./digest-format";
+
 /**
  * Formatting helpers for the founder console (MJ-14). All day grouping
  * and time labels use the founder's own time zone (HOMA_ADMIN_TZ,
@@ -50,6 +52,15 @@ export function timeLabel(value: string | Date, timeZone: string): string {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
+}
+
+/** families.name defaults to DEFAULT_FAMILY_NAME until the parent renames
+ * it during onboarding (see the create_my_family RPC). In the founder
+ * console that default means "never renamed," which for a fresh,
+ * still-empty signup reads as "never finished creating a family" rather
+ * than a real name. */
+export function familyDisplayName(name: string): string {
+  return name === DEFAULT_FAMILY_NAME ? "Family not set up" : name;
 }
 
 export function formatInt(value: number): string {

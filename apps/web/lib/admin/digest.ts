@@ -1,6 +1,7 @@
 import { sendAdminDigestEmail } from "../map/email";
 import { adminDb } from "./db";
 import { formatHandledLine, formatSignupsLine, formatTroubleHeadline } from "./digest-format";
+import { familyDisplayName } from "./format";
 
 /**
  * The founder's daily digest (founder console MJ-14, lab question 3):
@@ -146,10 +147,10 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
   const handledCount = Number(handled[0].n);
   lines.push(formatTroubleHeadline(trouble, handledCount));
   for (const f of failures) {
-    lines.push(`Failed ${f.channel} send, ${f.name}: ${f.error ?? "no error recorded"}.`);
+    lines.push(`Failed ${f.channel} send, ${familyDisplayName(f.name)}: ${f.error ?? "no error recorded"}.`);
   }
   for (const u of uncertains) {
-    lines.push(`Uncertain ${u.channel} send, ${u.name}: no provider receipt.`);
+    lines.push(`Uncertain ${u.channel} send, ${familyDisplayName(u.name)}: no provider receipt.`);
   }
   for (const r of rejected) {
     lines.push(`Email ${r.status}: ${r.kind.replace(/_/g, " ")}.`);

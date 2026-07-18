@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { requireFounder } from "../../../lib/admin/gate";
 import { getFunnelData } from "../../../lib/admin/funnel-data";
-import { percent, timeAgo } from "../../../lib/admin/format";
+import { familyDisplayName, percent, timeAgo } from "../../../lib/admin/format";
 import { EmptyNote, Pill, SectionHead } from "../ui";
 
 /**
@@ -95,7 +95,7 @@ export default async function AdminFunnelsPage() {
                       href={`/admin/families/${family.id}`}
                       className="font-bold text-strong hover:underline"
                     >
-                      {family.name}
+                      {familyDisplayName(family.name)}
                     </Link>
                     <span className="text-subtle">
                       joined {timeAgo(family.createdAt)} · {family.note}

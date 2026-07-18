@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getFamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
-import { ageYears, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
+import { ageYears, familyDisplayName, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
 import { founderPhoneHome } from "../../../../lib/family-phone";
 import { formatUsd } from "../../../../lib/model-pricing";
 import { accountStatusCopy } from "../../../../lib/admin/account-status-copy";
@@ -99,7 +99,7 @@ export default async function AdminFamilyDetailPage({
         Back to families
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-2xl font-bold text-strong">{detail.name}</h1>
+        <h1 className="font-display text-2xl font-bold text-strong">{familyDisplayName(detail.name)}</h1>
         <Pill tone={account.tone} title={account.hint}>{account.label}</Pill>
         <Pill tone={stage.tone} title={stage.hint}>{stage.label}</Pill>
         {detail.sandbox ? <Pill tone="outline">Test family</Pill> : null}

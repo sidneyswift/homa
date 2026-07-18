@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { getFamilyHeader, type FamilyHeader } from "../../../../lib/admin/family-deep-data";
+import { familyDisplayName } from "../../../../lib/admin/format";
 import { FamilyTabs } from "./family-tabs";
 
 /**
@@ -34,7 +35,7 @@ export async function FamilyShell({
         Back to families
       </Link>
       <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 className="font-display text-2xl font-bold text-strong">{header.name}</h1>
+        <h1 className="font-display text-2xl font-bold text-strong">{familyDisplayName(header.name)}</h1>
         <span className="text-sm text-muted">{title}</span>
       </div>
       {sub ? <p className="mt-1 max-w-2xl text-sm text-muted">{sub}</p> : null}

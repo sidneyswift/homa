@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireFounder } from "../../lib/admin/gate";
 import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-data";
 import type { HandledAlert } from "../../lib/admin/alert-acks";
-import { formatInt, formatTokens, medianExact, timeAgo } from "../../lib/admin/format";
+import { familyDisplayName, formatInt, formatTokens, medianExact, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
 import { accountStatusCopy } from "../../lib/admin/account-status-copy";
 import { QUIET_AFTER_DAYS, STAGE_COPY } from "../../lib/admin/stage";
@@ -189,7 +189,7 @@ export default async function AdminOverviewPage({
             <b>
               {quiet.length} {quiet.length === 1 ? "family" : "families"} on the call list
             </b>{" "}
-            ({QUIET_AFTER_DAYS}+ quiet days): {quiet.map((s) => s.name).join(", ")}. A call, not a nudge.
+            ({QUIET_AFTER_DAYS}+ quiet days): {quiet.map((s) => familyDisplayName(s.name)).join(", ")}. A call, not a nudge.
           </AlertRow>
         ) : null}
         {cronLate || data.cronLastOk === false ? (
@@ -233,7 +233,11 @@ export default async function AdminOverviewPage({
         <Tile
           label="New signups"
           value={String(data.newSignups.length)}
-          sub={data.newSignups.length ? data.newSignups.map((s) => s.name).slice(0, 3).join(", ") : `none ${rangeLabel}`}
+          sub={
+            data.newSignups.length
+              ? data.newSignups.map((s) => familyDisplayName(s.name)).slice(0, 3).join(", ")
+              : `none ${rangeLabel}`
+          }
           subTone={data.newSignups.length ? "sage" : "muted"}
         />
         <Tile
@@ -463,7 +467,7 @@ export default async function AdminOverviewPage({
                 return (
                   <li key={s.id} className="flex flex-wrap items-center gap-2">
                     <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
-                      {s.name}
+                      {familyDisplayName(s.name)}
                     </Link>
                     <Pill tone={account.tone} title={account.hint}>
                       {account.label}
@@ -487,7 +491,7 @@ export default async function AdminOverviewPage({
               {quiet.map((s) => (
                 <li key={s.id} className="flex flex-wrap items-center gap-2">
                   <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
-                    {s.name}
+                    {familyDisplayName(s.name)}
                   </Link>
                   <span className="text-subtle">
                     last heard {timeAgo(s.lastUserActivityAt)} · joined {timeAgo(s.createdAt)}

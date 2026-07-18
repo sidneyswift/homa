@@ -12,6 +12,7 @@ import {
   getFamilyTasks,
 } from "../../../../../lib/admin/family-deep-data";
 import { requireFounder } from "../../../../../lib/admin/gate";
+import { familyDisplayName } from "../../../../../lib/admin/format";
 import { getFamilyScreenData } from "../../../../../lib/admin/screen-data";
 import { currentWeekIndex } from "../../../../../lib/dashboard";
 import { scopedToViewContext } from "../../../../../lib/materials/binder";
@@ -94,7 +95,7 @@ export default async function AdminFamilyScreenPage({
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-t-[var(--radius-lg)] bg-[var(--pop-navy)] px-4 py-2.5 text-sm text-white">
         <p>
-          Viewing as <b>{data.family.parentName ?? data.family.name}</b> · read-only · nothing
+          Viewing as <b>{data.family.parentName ?? familyDisplayName(data.family.name)}</b> · read-only · nothing
           here reaches the family
         </p>
         <Link
