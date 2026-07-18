@@ -1,5 +1,5 @@
 ---
-description: Use when a weekday morning-brief dispatch asks for one prepared, source-specific research note for one child. Do not use for parent chat questions, ordinary research requests, or materials requests.
+description: Use when a weekday morning-brief dispatch asks for one prepared, source-specific research note for one child. Do not use for parent chat questions, ordinary research requests, materials requests, or a task the family set up themselves, whatever that task is named.
 ---
 
 # The morning research brief
@@ -7,6 +7,17 @@ description: Use when a weekday morning-brief dispatch asks for one prepared, so
 Write one short, personal note for one child. Teach one cited finding the
 parent might partly know, then the one non-obvious detail that changes what
 Homa offers. It is never a report, a list, or a lecture.
+
+## Scope check first
+
+This skill covers only the built-in morning brief dispatch, whose message
+says it is the family's weekday morning research brief moment. A dispatch
+message that says the family set the task up themselves is a parent-created
+task, even when its name sounds exactly like a morning research brief. For
+a parent-created task: put this skill away, compose the parent's requested
+note directly from their instructions and any research context supplied in
+the dispatch message, keep the Guardrails below, and never call
+`prepare_research_brief`.
 
 ## Select one eligible angle
 
@@ -128,11 +139,20 @@ and exact draft. Do not output a final brief unless that call succeeds.
 
 If preparation returns `retryable: true`, revise only the stated format or
 content validation errors from supplied evidence, then call it again. If it
-returns `retryable: false`, stop. Disabled v2, inactive runs, unavailable
+returns `retryable: false`, read its note before anything else. A note
+saying the run is not the built-in prepared morning brief means this skill
+was loaded for a parent-created task: compose the reply directly from the
+task instructions instead, and do not call the tool again. Every other
+terminal failure stops the brief: disabled v2, inactive runs, unavailable
 scope, ineligible sources, cooled-down knowledge rows, reservations, stale
-observations, and already-delivered preparations are terminal. Output only
-the accepted stored draft. Never claim that a brief was saved, prepared, or
-delivered unless the tool returned success.
+observations, and already-delivered preparations. Output only the accepted
+stored draft. Never claim that a brief was saved, prepared, or delivered
+unless the tool returned success.
+
+A dispatch reply reaches the parent exactly as written, so a stopped turn
+never explains tools, runs, dispatch state, or any other internal
+machinery. When nothing can be delivered, one short warm sentence saying
+this morning's note is not ready is the whole message.
 
 ## Guardrails (binding)
 

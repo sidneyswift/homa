@@ -295,6 +295,47 @@ describe("buildTaskMessage", () => {
     assert.match(message, /never a child's name or any private detail/);
     assert.match(message, /Their homeschool style: montessori/);
   });
+
+  it("tells a research-flavored custom task to compose directly, never the prepared pipeline", async () => {
+    const custom = task({
+      kind: "custom",
+      label: "Amalia's morning research brief",
+      prompt:
+        "Research one concrete finding about early literacy relevant to Amalia and offer an activity.",
+    });
+    const message = await buildTaskMessage(custom, "scheduled", async () => FAKE_BRIEF_CONTEXT);
+    assert.match(
+      message,
+      /This is not the built-in prepared morning brief: do not call prepare_research_brief\./,
+    );
+  });
+
+  it("gives every custom task a family-facing failure voice", async () => {
+    for (const prompt of [
+      "Remind me to pack the co-op bag.",
+      "Research one concrete finding about early literacy relevant to Amalia and offer an activity.",
+    ]) {
+      const message = await buildTaskMessage(
+        task({ kind: "custom", label: "A task", prompt }),
+        "scheduled",
+        async () => FAKE_BRIEF_CONTEXT,
+      );
+      assert.match(
+        message,
+        /If you truly cannot do the task, tell the parent in one short warm sentence/,
+      );
+      assert.match(
+        message,
+        /Never mention tools, dispatch runs, or internal state\./,
+      );
+    }
+    const reminder = await buildTaskMessage(
+      task({ kind: "custom", label: "A task", prompt: "Remind me to pack the co-op bag." }),
+      "scheduled",
+      async () => FAKE_BRIEF_CONTEXT,
+    );
+    assert.doesNotMatch(reminder, /prepare_research_brief/);
+  });
 });
 
 describe("preflightTaskDispatch", () => {

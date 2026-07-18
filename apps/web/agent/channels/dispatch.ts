@@ -18,6 +18,7 @@ import {
 } from "../../lib/tasks/dispatch-input";
 import { deliverLiveDispatchTask } from "../../lib/tasks/dispatch-transport";
 import { startManualTaskDispatch } from "../../lib/tasks/manual-dispatch";
+import { findInternalNarration } from "../../lib/tasks/outbound-guard";
 import {
   isPreparedResearchBriefTerminalMessage,
 } from "../../lib/tasks/research-brief-delivery";
@@ -195,6 +196,26 @@ export default defineChannel({
         return;
       }
       const text = data.message?.trim() ?? "";
+
+      // The composed text is about to reach the family verbatim. A turn
+      // that narrated internal machinery instead of doing the task must
+      // fail visibly, not deliver (2026-07-18 Gomes incident).
+      const narration = findInternalNarration(text);
+      if (narration) {
+        console.error(
+          operationalDiagnostic("dispatch", "content_guard", "blocked"),
+        );
+        if (runId) {
+          await finishTaskRun(runId, {
+            familyId,
+            kind,
+            status: "failed",
+            error: `internal narration blocked: ${narration}`,
+            onlyIfRunning: true,
+          });
+        }
+        return;
+      }
 
       let deliveryPhase: OperationalPhase = "canonical_persist";
       try {

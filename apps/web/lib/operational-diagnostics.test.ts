@@ -10,6 +10,7 @@ describe("PII-free operational diagnostics", () => {
   it("emits every required phase code from bounded static fields", () => {
     assert.deepEqual(OPERATIONAL_PHASES, [
       "preparation_load",
+      "content_guard",
       "canonical_persist",
       "transport",
       "finalization",

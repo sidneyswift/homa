@@ -134,9 +134,14 @@ async function customMessage(
       "",
       renderBriefContext(context),
       "",
+      "Compose the reply yourself from the parent's instructions and this knowledge. This is not the built-in prepared morning brief: do not call prepare_research_brief.",
+      "",
     );
   }
-  lines.push(deliveryLine);
+  lines.push(
+    "If you truly cannot do the task, tell the parent in one short warm sentence what you could not prepare today and offer one easy alternative. Never mention tools, dispatch runs, or internal state.",
+    deliveryLine,
+  );
   return lines.join("\n");
 }
 
