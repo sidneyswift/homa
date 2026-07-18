@@ -18,13 +18,20 @@
  * parse loosely.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ATLAS_ROOT = join(REPO_ROOT, "docs", "homa-curriculum-atlas");
 const CATALOG_PATH = join(ATLAS_ROOT, "catalog.json");
+// A runtime-readable copy bundled into the app, since docs/ is not on the
+// deployed function. find_curriculum_profile reads this. Generated
+// together with the docs catalog so the two never drift.
+const APP_CATALOG_PATH = join(
+  REPO_ROOT,
+  "apps/web/lib/curriculum/atlas-catalog.json",
+);
 
 const REQUIRED_KEYS = [
   "id",
@@ -275,8 +282,12 @@ function main(): void {
     by_tier: byTier,
     profiles,
   };
-  writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2) + "\n");
+  const serialized = JSON.stringify(catalog, null, 2) + "\n";
+  writeFileSync(CATALOG_PATH, serialized);
   console.log(`wrote ${relative(REPO_ROOT, CATALOG_PATH)}`);
+  mkdirSync(dirname(APP_CATALOG_PATH), { recursive: true });
+  writeFileSync(APP_CATALOG_PATH, serialized);
+  console.log(`wrote ${relative(REPO_ROOT, APP_CATALOG_PATH)}`);
 }
 
 main();

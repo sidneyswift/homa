@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Curriculum studio: tweakable implementation plan</title>
+<style>
+  :root {
+    --primary: #E7602F;
+    --primary-hover: #C44C22;
+    --secondary: #3D9A50;
+    --tertiary: #F0BE00;
+    --neutral: #FBF7F0;
+    --surface: #FFFFFF;
+    --on-primary: #FFFFFF;
+    --on-surface: #221E1A;
+    --muted: #6B6259;
+    --subtle: #B3A492;
+    --border: #E4DACB;
+    --info: #4FB4D6;
+    --error: #E2593B;
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --r-full: 999px;
+    --shadow: 0 8px 24px -12px rgba(80, 58, 30, 0.18), 0 2px 8px -2px rgba(80, 58, 30, 0.12);
+    font-family: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--neutral);
+    color: var(--on-surface);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 96px; }
+  h1, h2, h3 { font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.01em; margin: 0 0 8px; }
+  h1 { font-size: 1.9rem; font-weight: 700; }
+  h2 { font-size: 1.35rem; font-weight: 700; margin-top: 0; }
+  h3 { font-size: 1.05rem; font-weight: 600; }
+  p { margin: 0 0 12px; }
+  .fake-notice {
+    background: #FEF6E8;
+    border: 1px solid #F0BE0055;
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .header-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    margin-bottom: 28px;
+  }
+  .stat { text-align: left; }
+  .stat .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--subtle); margin-bottom: 4px; }
+  .stat .value { font-size: 1.05rem; font-weight: 700; }
+  .stat.risk .value { color: var(--primary); }
+  section { margin-bottom: 36px; }
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 12px;
+    border-radius: var(--r-full);
+    margin-bottom: 10px;
+  }
+  .badge-a { background: #FCE7DE; color: var(--primary-hover); }
+  .badge-b { background: #E4F3E7; color: #2C7A3B; }
+  .badge-c { background: #EDEAE3; color: var(--muted); }
+  .card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .decision-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .decision-head .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--info);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .found-note {
+    background: #FFF8EE;
+    border: 1px dashed var(--tertiary);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    font-size: 0.87rem;
+    margin: 10px 0;
+  }
+  .found-note b { color: #8A6400; }
+  .fix-list { margin: 6px 0 0 0; padding-left: 18px; font-size: 0.9rem; }
+  .fix-list li { margin-bottom: 4px; }
+  pre {
+    background: #221E1A;
+    color: #F0EAE0;
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } .header-strip { grid-template-columns: repeat(2, 1fr); } }
+  .alt-box {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    background: #FAF6EF;
+  }
+  .alt-box.picked { border-color: var(--secondary); background: #F1F8F2; }
+  .alt-box .heading { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .alt-box.picked .heading { color: #2C7A3B; }
+  .alt-box:not(.picked) .heading { color: var(--muted); }
+  .cost-chip {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 600;
+    background: #F0E6D8;
+    color: #7A5A2E;
+    padding: 2px 10px;
+    border-radius: var(--r-full);
+    margin-top: 8px;
+  }
+  .reply-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #F5EFE3;
+    border-radius: var(--r-sm);
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    margin-top: 10px;
+  }
+  button.copy-mini {
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: var(--r-full);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button.copy-mini:hover { background: var(--primary-hover); }
+  button.copy-mini:focus-visible, a:focus-visible, .stage-num:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+  .stage-list { list-style: none; margin: 0; padding: 0; counter-reset: stage; }
+  .stage-list li {
+    counter-increment: stage;
+    position: relative;
+    padding: 14px 16px 14px 52px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+  }
+  .stage-list li::before {
+    content: counter(stage);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--r-full);
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stage-list .effort {
+    float: right;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #EDEAE3;
+    color: var(--muted);
+    padding: 3px 10px;
+    border-radius: var(--r-full);
+  }
+  .stage-list .stage-title { font-weight: 700; margin-bottom: 4px; }
+  .stage-list .stage-detail { font-size: 0.87rem; color: var(--muted); }
+  details.mech { background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 14px 18px; }
+  details.mech summary { cursor: pointer; font-weight: 700; }
+  details.mech summary:focus-visible { outline: 3px solid var(--info); outline-offset: 3px; border-radius: 6px; }
+  details.mech ul { margin: 12px 0 0; padding-left: 20px; font-size: 0.9rem; }
+  details.mech li { margin-bottom: 6px; }
+  .tweak-box {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+  .tweak-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tweak-item:last-child { border-bottom: none; }
+  .tweak-item .num {
+    flex: none;
+    width: 24px; height: 24px;
+    border-radius: var(--r-full);
+    background: var(--tertiary);
+    color: #5A4400;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tweak-item .txt { flex: 1; font-size: 0.92rem; }
+  .tweak-item .reply {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    background: #F5EFE3;
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--on-surface);
+    color: white;
+    padding: 10px 18px;
+    border-radius: var(--r-full);
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .cite { font-size: 0.78rem; color: var(--subtle); }
+  a { color: var(--primary-hover); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="fake-notice">
+    This is a disposable planning document, not production code. Every file path and line
+    number below was verified against the actual repository during preparation; two entries
+    are explicitly marked <b>ALREADY ON DISK, UNCOMMITTED</b> where real, unreviewed work was
+    found in the working tree. No migration has been applied and no code has shipped.
+  </div>
+
+  <h1>A general long-running job primitive, first used by curriculum studio</h1>
+  <p class="cite">Sorted by how likely you are to want to change it, not by build order. Read top to bottom; the bottom is mechanical and you can skip it.</p>
+
+  <div class="header-strip">
+    <div class="stat"><div class="label">Effort</div><div class="value">L, ~3-4 weeks</div></div>
+    <div class="stat"><div class="label">Files touched</div><div class="value">~16, 2 migrations</div></div>
+    <div class="stat risk"><div class="label">Risk</div><div class="value">Medium-high</div></div>
+    <div class="stat"><div class="label">Migrations</div><div class="value">1 fix + 1 new</div></div>
+  </div>
+
+  <section>
+    <h2>Why this exists</h2>
+    <p>Alessa asked Homa to research a curriculum, learn everything about it, and build a full
+    36-week program. Homa drafted a 7-block scope, then said she could not build all 36 weeks in
+    one sitting, and called no tool. That is not a model weakness, it is
+    <code>agent/instructions.md</code> lines 191-199 doing exactly what it was written to do:
+    "everything happens this turn, or not at all... set it up as real scheduled work with
+    <code>create_task</code>." <code>create_task</code> only builds recurring reminders
+    (weekdays + hour); it has no idea of a finite job that runs its stages once and stops.</p>
+    <p><b>The curriculum request is the trigger, not the boundary.</b> The Mac mini's real
+    advantage was never "she can build curricula," it was a handful of unrestricted tools
+    (shell, file read/write) plus a library of skills, which let her take on any long job a
+    skill could describe. The first version of this plan built a job primitive that only
+    curriculum-studio could use, named after curriculums in the schema itself. That was
+    scoped too narrowly. This revision generalizes the job/stage tables so any current or future
+    fleet skill (a multi-session research report, a photo-sorting project, a whole unit study,
+    whatever comes next) can start, checkpoint, and resume a long job through the same primitive.
+    Curriculum studio is the first skill that uses it, not the reason it exists.</p>
+  </section>
+
+  <section>
+    <span class="section-badge badge-b">Expert council review · 2026-07-18</span>
+    <h2>Three-expert council verdict, folded into this revision</h2>
+    <div class="card">
+      <p>A council of three experts (Vercel platform July 2026, long-running-agent UX, modular
+      systems architecture) independently reviewed this plan, cross-examined each other's
+      reviews, and a moderator consolidated the verdict. All three ruled
+      <b>ship with changes</b>. Every blocking and important change is already folded into the
+      sections below; this card is the receipt.</p>
+      <div class="found-note">
+        <b>The one blocking factual kill:</b> the original A4 mechanism ("add
+        <code>@workflow/core</code> as an app dependency") collides with eve, verified in eve
+        0.19.0's shipped build output, which claims the <code>.well-known/workflow/</code> route
+        namespace for itself. The app-facing SDK would generate routes into a namespace eve
+        already owns, against the same project-scoped backend, on a mismatched beta protocol.
+        No supported two-runtime story exists. A4 is now a Postgres claim-lease runner reusing
+        the <code>claimDueFamilyTasks</code> idiom; the council chose not even to spend a spike
+        on the old path.</p>
+      </div>
+      <p style="font-size: 0.9rem;"><b>Council consensus adopted throughout:</b> a typed
+      <code>JOB_CONTRACTS</code> registry with <code>pnpm check:jobs</code> (modularity), a
+      frozen four-verb tool surface adding <code>respond_to_agent_job</code> for steering
+      (agent-ux), the <code>agent_job_events</code> timeline table plus <code>job.*</code>
+      analytics events in stage 1 (agent-ux + modularity), the artifacts side table replacing
+      <code>material_id</code> (modularity), server-side one-active-job dedupe returning a
+      success-shaped "already running" result (agent-ux), the hardened
+      <code>WorkerBrief</code>/<code>WorkerResult</code> worker envelope with the crawl bound
+      enforced as a sandbox egress firewall rather than tool-code convention (modularity +
+      vercel), Homa's own awareness of her jobs via family context and checkpoint cards
+      (agent-ux), and gate-first-volume as the approval model (all three, after vercel withdrew
+      gate-every-volume).</p>
+      <p style="font-size: 0.9rem;"><b>Verified platform facts that shaped it:</b> Vercel
+      Workflows is GA with unlimited sleep but only 7-day Pro retention after completion (so our
+      tables are the audit surface either way); Vercel Sandbox has deny-all egress with
+      per-domain allowlists, credential brokering, live policy updates, and sub-second p75
+      snapshot restores; a full 36-stage build costs roughly $0.40-0.80 of sandbox time. The
+      moderator settled one factual dispute by re-reading eve's route-normalization source: the
+      namespace claim is real, though protocol traffic redirects into <code>/eve/__server</code>
+      only for <code>/eve/v1</code> routes.</p>
+      <p style="font-size: 0.9rem;"><b>Council's best net-new ideas, not yet scheduled:</b>
+      a "while you slept" morning-brief section fed by <code>agent_job_events</code> (~1-2
+      days, every future skill inherits it); the Binder filling in live as stages render, so
+      pause/cancel feels safe because nothing built is hostage (~2-3 days); and the
+      between-checkpoint heartbeat line ("drafting week 11, started 20 minutes ago"),
+      deliberately not a token stream, nearly free once the events table exists.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-badge badge-a">Section A · decisions (A0 and A2 now resolved)</span>
+    <h2>A0. How much computer does Homa get, and where does the wall sit? <span style="font-size:0.7em; color:var(--secondary); font-weight:700;">RESOLVED · isolated worker</span></h2>
+    <div class="card">
+      <div class="found-note" style="border-color: var(--secondary); background: #F1F8F2;">
+        <b style="color:#2C7A3B;">Decided 2026-07-18: the isolated worker, not root bash.</b>
+        Homa gets full code-execution capability through a declared, family-context-free worker
+        subagent (detailed below and built in stage 6), and root Homa keeps its
+        <code>bash</code>/<code>write_file</code> sentinels in place. This is the council's
+        unanimous pick, and it is the option that does NOT reverse the 2026-07-09 security
+        ruling, so no founder-ruling-register change is needed; the existing posture stands and
+        the capability arrives beside it. The crawl-scope question below is folded into the same
+        decision: the bound stays, but it moves from tool-code convention into the sandbox egress
+        firewall (per-job allowlist, widenable live on approval), so it is a firewall policy, not
+        a hard-coded ceiling.</div>
+      <p>The original open question, kept for the record: should root Homa get code execution
+      (write files, run a shell) the way Mac-mini Homa does, and should the web-sourced ingestion
+      path (A3 below) drop its same-origin crawl bound along with the per-family daily budget
+      already removed from <code>web_fetch.ts</code>. Both were genuine security tradeoffs. The
+      resolution above answers both.</p>
+      <div class="found-note">
+        <b>The Mac mini and the cloud fleet do not share a trust model.</b>
+        <code>docs/homa-planning/15-agentic-architecture.md</code> §4 says this in as many
+        words: the Mac mini has "no tenancy walls, one family, full trust"; the cloud "pays for
+        multi-tenancy with RLS, scanned writes, budgets, and model mix." <code>bash</code> and
+        <code>write_file</code> are disabled for root Homa today by an explicit founder ruling
+        (2026-07-09, §3 of that doc), re-verified twice since: a live probe showed the model
+        never even attempts <code>bash</code> unprompted, and a separate finding (F11, the
+        <code>create_printable</code> render path, already fixed in commit <code>6c6c380</code>)
+        showed exactly how untrusted content can turn one privileged tool into a leak across
+        every family sharing that runtime. A shell or arbitrary file write on ROOT Homa is not
+        "one family's risk" the way it is on a Mac mini, it is every family's risk at once,
+        because one turn, for one family, runs in the same privileged context that holds every
+        family's live data access.
+      </div>
+      <div class="two-col">
+        <div class="alt-box picked">
+          <div class="heading">Recommended: an isolated worker, not root access</div>
+          <p style="font-size: 0.9rem;">Bring the already-agreed "Stage 4" forward: one declared
+          subagent authored closed, its own <code>tools/</code> (shell, file write, browser,
+          whatever a skill needs), its own deny-all-by-default <code>sandbox.ts</code>, no
+          family context passed in at all, a bounded typed output back to root Homa. Root Homa
+          never runs code directly; a skill hands the worker a scoped, written brief and gets a
+          typed result back. This is a stronger answer to "Homa should be able to write code"
+          than giving root Homa a shell: the worker can genuinely do anything a skill asks
+          (write and run a script, drive a browser, OCR a document) precisely because it never
+          carries a family's database credentials, so a bad turn there cannot reach another
+          family's data even in the worst case.</p>
+          <span class="cost-chip">~1 week, closes the capability gap without the blast radius</span>
+        </div>
+        <div class="alt-box">
+          <div class="heading">Alternative: give root Homa bash/write_file directly</div>
+          <p style="font-size: 0.9rem;">Delete the two sentinel files
+          (<code>agent/tools/bash.ts</code>, <code>agent/tools/write_file.ts</code>) and reverse
+          the 2026-07-09 ruling outright. Fastest path to "just like the Mac mini." Every family's
+          turn now runs with shell and file-write access in the one process that also holds
+          every other family's data through the same session mechanics; an injected prompt from
+          a fetched page or an uploaded file has a materially larger blast radius than today.</p>
+          <span class="cost-chip">~1 day, reverses a named security ruling fleet-wide</span>
+        </div>
+      </div>
+      <p style="margin-top: 12px; font-size: 0.9rem; color: var(--subtle);"><i>The
+      root-bash alternative above was weighed and declined on 2026-07-18 (see the resolved banner
+      at the top of A0). Kept here so the tradeoff that was considered stays legible.</i></p>
+
+      <p style="margin-top: 16px;"><b>Web crawl scope, separately from cost.</b> The per-family
+      daily <code>web_fetch</code> budget is already gone (paywall/credits handle cost, not a
+      hard ceiling). The same-origin, first-page-only crawl bound proposed in A3 is a different
+      thing: not a cost brake, an injection boundary. It exists so a page that tells Homa "now
+      fetch these forty other links, including this one that isn't even on this site" cannot
+      turn one <code>web_fetch</code> call into an unbounded crawl across arbitrary hosts chosen
+      by whatever text was on the page Homa just read.</p>
+      <div class="two-col">
+        <div class="alt-box picked">
+          <div class="heading">Recommended: keep a bound, make it generous</div>
+          <p style="font-size: 0.9rem;">Same-origin by default, but raise the depth from 1 page
+          to a real crawl (e.g. up to 20 pages, following links found on already-fetched pages
+          of the same site) so a real curriculum's scope-and-sequence, spread across several
+          publisher pages, actually gets read. Off-site links found on a page are surfaced to
+          the model as candidates, never auto-followed.</p>
+          <span class="cost-chip">Still no cost cap, only a same-origin fence</span>
+        </div>
+        <div class="alt-box">
+          <div class="heading">Alternative: no bound at all</div>
+          <p style="font-size: 0.9rem;">Any link on any fetched page can be followed, any host.
+          Genuinely closer to what a Mac mini's <code>curl</code>/browser could do. Removes the
+          one structural defense this tool has against a page instructing Homa to go fetch and
+          relay content from somewhere else entirely.</p>
+          <span class="cost-chip">Reopens the exact class of risk F11 closed on the render side</span>
+        </div>
+      </div>
+      <p style="margin-top: 8px; font-size: 0.9rem; color: var(--subtle);"><i>Resolved
+      2026-07-18: keep the bound, enforced as the sandbox egress firewall (per-job allowlist,
+      widenable live on approval), not a hard-coded ceiling. The no-bound alternative was
+      declined.</i></p>
+    </div>
+
+    <h2>A1. The job schema, generalized</h2>
+    <div class="card">
+      <div class="decision-head">
+        <div><b>An untracked migration for a curriculum-only version of this already exists on disk.</b></div>
+        <span class="tag">found, not written by this plan</span>
+      </div>
+      <p><code>supabase/migrations/20260718120000_curriculum_jobs.sql</code> is sitting in your
+      working tree right now, uncommitted and unapplied. It was produced as a side effect of the
+      research workflow that fed the first version of this plan (an agent I asked to design a
+      schema wrote the file instead of only describing it, an overreach I did not intend), so
+      treat it as a strong first draft, not an approved decision. It named everything after
+      curriculums (<code>curriculum_jobs</code>, <code>curriculum_job_weeks</code>,
+      <code>curriculum_key</code>); the schema below generalizes it into a shared job/stage
+      primitive any skill can use, with curriculum-specific detail moved into the skill-owned
+      <code>plan</code>/<code>payload</code> jsonb rather than baked into dedicated columns.
+      Independently, the same "dedicated tables, not an extension of
+      <code>agent_schedules</code>/<code>homa_task_runs</code>" conclusion was reached by a
+      separate research pass reading <code>lib/tasks/store.ts</code> and both migrations for
+      those tables.</p>
+      <div class="found-note">
+        <b>Why not extend agent_schedules or homa_task_runs?</b>
+        agent_schedules is a pure recurrence engine (<code>next_run_at</code>,
+        <code>weekdays</code>, <code>lease_until</code>); its kind check is deliberately closed
+        and its claim/lease/advance loop exists only to compute "when does this fire again,"
+        which a finite job never needs. homa_task_runs is a good one-row-per-send audit/outbox,
+        but its 2-hour stale-run reaper and its <code>(schedule_id, scheduled_for)</code> outbox
+        uniqueness are tuned for a single dispatched turn, not a job that stays "running" for
+        days and needs live pause/cancel. Widening either would force recurrence-shaped or
+        single-shot-shaped code to special-case a row that is neither.
+      </div>
+      <pre>create table if not exists public.agent_jobs (
+  id uuid primary key default gen_random_uuid(),
+  family_id uuid not null references public.families (id) on delete cascade,
+  child_id uuid references public.children (id) on delete set null,
+  requested_by_user_id uuid references auth.users (id) on delete set null,
+  session_id text,                      -- audit pointer only, never load-bearing
+  skill text not null,                  -- closed set, validated against JOB_CONTRACTS
+  title text not null,
+  plan jsonb not null default '{}'::jsonb,   -- shape owned by the skill's zod contract
+  plan_revision smallint not null default 1, -- bumped only by the runner, with plan, in one tx
+  total_stages smallint not null check (total_stages between 1 and 200),
+  current_stage smallint not null default 0,
+  status text not null default 'queued'
+    check (status in ('queued','running','paused','awaiting_input',
+                       'completed','cancelled','failed')),
+  progress_note text,                   -- derived one-liner; agent_job_events is the real feed
+  start_idempotency_key text,           -- verbatim-retry guard only, not the dedupe
+  cancel_requested_at timestamptz,
+  cancelled_at timestamptz,
+  completion_task_run_id uuid,          -- composite FK below, council-confirmed fix
+  ...
+  foreign key (completion_task_run_id, family_id)
+    references public.homa_task_runs (id, family_id)
+);
+
+-- THE dedupe (council: server-side constraint, not the model-supplied key):
+-- at most one live job per family+skill+child. On conflict, start_agent_job
+-- returns a SUCCESS-shaped result carrying the existing job's status and
+-- steering options ("this build is already running, volume 3 of 9").
+create unique index agent_jobs_one_active_idx
+  on public.agent_jobs (family_id, skill, coalesce(child_id, '00000000-...'::uuid))
+  where status in ('queued','running','paused','awaiting_input');
+
+create table if not exists public.agent_job_stages (
+  id uuid primary key default gen_random_uuid(),
+  job_id uuid not null references public.agent_jobs (id) on delete cascade,
+  family_id uuid not null references public.families (id) on delete cascade,
+  stage_number smallint not null,
+  status text not null default 'pending'
+    check (status in ('pending','in_progress','ready_for_review',
+                       'approved','superseded','skipped','failed')),
+  title text,
+  payload jsonb not null default '{}'::jsonb,  -- shape owned by the skill's zod contract
+  -- Billing truth (council tiebreak): typed, SUM-able columns the paywall/credits
+  -- code queries directly, never parsed out of jsonb.
+  sandbox_cpu_seconds numeric,
+  page_fetch_count smallint,
+  model_tokens integer,
+  ...
+  unique (job_id, stage_number),
+  foreign key (job_id, family_id) references public.agent_jobs (id, family_id)
+);
+
+-- Artifacts are a side table, NOT a material_id column on the stage row
+-- (council: many artifacts per stage, provable tenant coherence per kind,
+-- and a new artifact kind later is one additive nullable column here).
+create table if not exists public.agent_job_stage_artifacts (
+  id uuid primary key default gen_random_uuid(),
+  stage_id uuid not null references public.agent_job_stages (id) on delete cascade,
+  job_id uuid not null,
+  family_id uuid not null references public.families (id) on delete cascade,
+  kind text not null check (kind in ('material')),  -- widens additively per kind
+  material_id uuid,
+  created_at timestamptz not null default now(),
+  check ((kind = 'material') = (material_id is not null)),
+  foreign key (job_id, family_id) references public.agent_jobs (id, family_id),
+  foreign key (material_id, family_id) references public.materials (id, family_id)
+);
+
+-- The parent-visible timeline and the runner's own audit trail. Progress UI,
+-- morning brief, ETAs, and actor attribution all read THIS, not progress_note.
+create table if not exists public.agent_job_events (
+  id uuid primary key default gen_random_uuid(),
+  job_id uuid not null,
+  family_id uuid not null references public.families (id) on delete cascade,
+  stage_number smallint,
+  kind text not null check (kind in ('stage_started','stage_completed',
+    'milestone','steering_applied','error','eta_updated')),
+  actor_user_id uuid references auth.users (id) on delete set null,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  foreign key (job_id, family_id) references public.agent_jobs (id, family_id)
+);</pre>
+      <p style="margin-top: 10px;"><b>What makes this general (council-confirmed), and the rules that keep it so:</b></p>
+      <ul class="fix-list">
+        <li><b>JOB_CONTRACTS registry, shipped WITH the first migration:</b> a typed zod
+          contract per skill (<code>plan</code>, <code>stagePayload</code>, respond-arm unions,
+          <code>WorkerBrief</code>/<code>WorkerResult</code>, plus <code>describeStage</code> for
+          generic status rendering), the same pattern as
+          <code>packages/core/src/events.ts</code>. <code>start_agent_job</code> validates the
+          skill against the closed key set and parses the plan before insert; the runner parses
+          every stage payload. A new <code>pnpm check:jobs</code> guard mirrors
+          <code>check:events</code> in CI. This is what makes skills #2 and #3 zero-migration:
+          jsonb alone would be the classic unqueryable-everything trap.</li>
+        <li><b>Plan amendments never rewrite history:</b> a mid-job scope change
+          ("make week 5 about dinosaurs") bumps <code>plan_revision</code>, marks affected
+          <i>pending</i> stages <code>superseded</code>, and re-expands from the revised plan.
+          Approved stages are never silently rebuilt. <code>total_stages</code> is revisable
+          only by the runner's service path, in the same transaction, never below
+          <code>current_stage</code>.</li>
+        <li><b>Jobs cannot breed jobs:</b> extend the <code>refuseScheduleSpawnedSession</code>
+          idiom (<code>lib/tasks/guard.ts</code>) so worker-spawned sessions refuse
+          <code>start_agent_job</code>.</li>
+        <li><b>Both event layers ship in stage 1, not later:</b> the
+          <code>agent_job_events</code> product table above, plus content-free generic
+          <code>job.*</code> analytics events (<code>job.started</code>/<code>stage_completed</code>/
+          <code>completed</code>/<code>cancelled</code>/<code>failed</code>, skill as a prop) in
+          <code>EVENT_SCHEMAS</code>, satisfying the MJ-08 law up front.</li>
+      </ul>
+    </div>
+
+    <h2>A2. Where the parent sees a running build <span style="font-size:0.7em; color:var(--secondary); font-weight:700;">RESOLVED · Another Task</span></h2>
+    <div class="card">
+      <div class="found-note" style="border-color: var(--secondary); background: #F1F8F2;">
+        <b style="color:#2C7A3B;">Decided 2026-07-18: the "Another Task" direction.</b>
+        A running job is a card on the existing <code>/app/tasks</code> page beside the morning
+        brief and journal prompt, family-level scoped, no new nav item, no new route tree. The
+        parent's structural answers in the comparison lab settled it: family-level scope + fold
+        into the Tasks tab + no new nav are, together, exactly this direction. It reuses the most
+        (<code>tasks-view.tsx</code>'s card language, <code>task-history.tsx</code>'s calm status
+        copy, <code>TaskEditOverlay</code>'s dialog shell for the volume list and controls) and
+        adds the least (one new card kind in the status union, one overlay). The three competing
+        shells (Quiet Thread, Curriculum Studio, Text Me) are retired.
+      </div>
+      <p style="font-size: 0.9rem;"><b>One consequence named so it is a choice, not an accident:</b>
+      folding into Tasks is a vote against the dedicated Curriculum Studio surface, which was the
+      only direction with a rich scope-and-sequence review view. The gate-first-volume approval
+      (resolved below) still works here: the approve action is a button inside the card's overlay,
+      the same place the existing task overlay already puts "Run now" and "Delete". The parent
+      gets approval as an overlay button, not a full review surface. Since the job table is
+      generic, this surface reads <i>any</i> skill's active jobs, not only curriculum builds.</p>
+      <p style="font-size: 0.9rem;"><b>Lab open questions, resolved (council-recommended, parent-confirmed):</b>
+      family-level scope; gate the first volume only, then free-run; any signed-in adult can
+      steer, with the acting adult recorded on each steering event and named in milestone copy;
+      partial output visible as each stage completes (polling for v1, Realtime later). The
+      <a href="./2026-07-18-curriculum-job-ui-directions.html">comparison lab</a> now carries
+      these as its recorded decisions; it is a converged artifact, no longer a live comparison.</p>
+    </div>
+
+    <h2>A3. How a build finds its sources <span style="font-size:0.7em; color:var(--secondary); font-weight:700;">RESOLVED · ship both</span></h2>
+    <div class="found-note" style="border-color: var(--secondary); background: #F1F8F2;">
+      <b style="color:#2C7A3B;">Decided 2026-07-18: ship both ingestion paths in v1, not
+      atlas-only-then-defer.</b> Atlas-first is always tried first (fast, free, no injection
+      surface); web-sourced ingestion is the fallback for any curriculum not in the 155-profile
+      atlas or when the parent points at an arbitrary site. Both land in the initial cut. The
+      web path is sequenced after the isolated worker (stage 6), because per A0 the crawl runs
+      inside the sandbox behind its egress firewall, that is where the bound now lives.</div>
+    <div class="two-col">
+      <div class="alt-box picked">
+        <div class="heading">Path 1: atlas-first (always tried first)</div>
+        <p style="font-size: 0.9rem;">A new <code>find_curriculum_profile</code> tool looks up
+        the 155 hand-researched profiles in <code>docs/homa-curriculum-atlas/catalog.json</code>
+        (seeded into a small Postgres table, since docs/ is not runtime-readable) before ever
+        touching the web. Zero injection risk, zero Firecrawl cost, for any curriculum already
+        in the atlas.</p>
+        <span class="cost-chip">~0.5 day, no new risk surface</span>
+      </div>
+      <div class="alt-box picked">
+        <div class="heading">Path 2: web-sourced fallback (also shipping)</div>
+        <p style="font-size: 0.9rem;">When the atlas has no match, or the parent names a specific
+        site, the worker crawls it same-origin (up to ~20 pages) inside the sandbox, with the
+        crawl bound enforced as the egress firewall allowlist (A0), not tool-code convention.
+        Fetched text is quarantined as data-not-instructions the same way the existing
+        <code>web_fetch</code> convention already does. No per-family daily budget; cost rides
+        paywall/credits and the typed metering columns.</p>
+        <span class="cost-chip">Rides the worker + firewall from A0/stage 6</span>
+      </div>
+    </div>
+    <p style="margin-top: 12px; font-size: 0.9rem;"><b>Rejected alternative, for the record:</b>
+    bulk-loading the atlas as <code>method_philosophy</code>/<code>method_format</code> rows
+    through the existing <code>knowledge_bank</code> gate. Deep-tier profiles (13.5KB) blow past
+    the gate's 8000-char content cap, and its read path
+    (<code>freshKnowledgeForTopics</code>) matches on a family's pedagogical style keys, not a
+    product name, so a by-name lookup would never surface. The dedicated
+    <code>find_curriculum_profile</code> tool is the right shape.</p>
+  </section>
+
+  <section>
+    <span class="section-badge badge-a">Section A · continued</span>
+    <h2>A4. How stages actually run (rewritten after the expert council)</h2>
+    <div class="card">
+      <div class="found-note">
+        <b>The council killed this plan's original mechanism with a verified in-repo fact.</b>
+        The first draft said "add <code>@workflow/core</code> as an explicit apps/web dependency
+        and run the stage loop in a new Vercel Workflow." The Vercel-platform expert verified
+        that eve 0.19.0 ships a vendored, compiled copy of <code>@workflow/core</code> and its
+        build output claims the workflow route namespace for itself:
+        <code>EVE_VERCEL_FUNCTION_PREFIXES = ['eve/', '.well-known/workflow/']</code> in
+        <code>eve-service-route-output.js</code> (moderator re-verified in this repo). The
+        app-facing SDK (the <code>workflow</code> package plus <code>withWorkflow()</code>, not
+        <code>@workflow/core</code>, which apps never install) generates its own
+        <code>app/.well-known/workflow/</code> routes at build, into a namespace eve already
+        owns, backed by the same project-scoped managed backend on a different beta protocol
+        version. No supported two-runtimes-in-one-deployment story exists anywhere in Vercel's
+        docs. This is a route-ownership collision, not a version nuisance.
+      </div>
+      <p><b>What the plan does instead (unanimous council consensus):</b> a Postgres-native
+      claim-lease stage runner, the same idiom <code>claimDueFamilyTasks</code> already uses in
+      <code>lib/tasks/store.ts:189</code> (atomic <code>for update skip locked</code> lease on
+      the row). The runner claims the next runnable stage, executes it in one Fluid invocation,
+      upserts the stage row, and repeats, driven by the existing cron cadence (or a Queues topic
+      later). Parent-facing messages fire only at real milestones. Nothing reuses or edits
+      <code>channels/dispatch.ts</code>.</p>
+      <div class="found-note">
+        <b>The dumb-orchestrator invariant (binding, substrate-neutral).</b> Only Postgres holds
+        job or stage content between stage boundaries. The runner transports IDs, re-reads rows
+        at every boundary, and cancel/pause/approve are decided solely by row state. If the
+        orchestration substrate ever changes (a separate-project Vercel Workflow for
+        observability is the documented future upgrade), the state machine does not move.
+      </div>
+      <p style="font-size: 0.9rem;"><b>Multi-day pauses are fine on this substrate:</b> a job
+      in <code>awaiting_input</code> is just a row no claim predicate picks up; it costs
+      nothing and waits indefinitely. The council also verified Vercel Workflow's own numbers
+      (GA, unlimited sleep, suspended runs cost ~$0.02/1K events) for the future
+      separate-project path, but its post-completion retention is only 7 days on Pro, so the
+      product's audit surface must be our own tables either way.</p>
+      <div class="alt-box">
+        <div class="heading">Alternatives considered and rejected</div>
+        <p style="font-size: 0.9rem;"><b>In-app Vercel Workflow:</b> the namespace collision
+        above; council tiebreak was to not even spend a build stage spiking it. Instead,
+        extend <code>scripts/eve-upgrade-check.mjs</code> (~0.5 day) to diff eve's
+        <code>@workflow</code> pins and its route-prefix claim on every eve bump, and fail CI if
+        apps/web ever gains a <code>workflow</code> dependency without a recorded founder
+        decision. <b>Eve-session piggybacking:</b> still blocked on M1-15 (unbuilt session
+        rotation) and the "nothing load-bearing in session history" doctrine.
+        <b>channels/dispatch.ts reuse:</b> still wrong, its <code>message.completed</code>
+        handler would SMS the parent Homa's raw drafting reply after every stage.</p>
+      </div>
+    </div>
+
+    <h2>A5. The instructions.md carve-out</h2>
+    <div class="card">
+      <p>The current binding law (lines 191-199) has one sentence that needs a precise
+      amendment, or the model will keep treating <code>create_task</code> as its only escape
+      hatch:</p>
+      <div class="found-note">
+        <b>Proposed addition</b>, placed right after the existing "set it up as real scheduled
+        work with create_task" sentence, worded generically so any skill can rely on it, not just
+        curriculum-studio:<br /><br />
+        <i>"A large batch with real stages (a multi-week curriculum, a multi-part research
+        project, anything a skill breaks into stages) is different: after she confirms the
+        scope, start it as a real job and tell her the first piece is underway and when to
+        expect the next checkpoint. create_task is for recurring reminders only, never for a
+        one-time batch of many stages, a declared job handles that."</i>
+      </div>
+      <p style="font-size: 0.9rem;">The weakest part of this addition: it adds a second
+      "background work" concept to a soul file that already has one (create_task), and every
+      addition here is read on every single turn. <b>Pick this if</b> you agree the distinction
+      is worth the extra always-on lines; the alternative is folding the whole rule into each
+      skill that needs it (loaded only when relevant) and shortening the soul-file law to just
+      "see the relevant skill for finite batch work," which keeps the soul file smaller at the
+      cost of one more skill-routing dependency per skill that adopts it.</p>
+    </div>
+    <div class="reply-line">
+      <span>reply: "put the carve-out in the skill, not in instructions.md"</span>
+      <button class="copy-mini" data-copy="put the carve-out in the skill, not in instructions.md">copy</button>
+    </div>
+
+    <h2>A6. The skill fleet that rides this primitive <span style="font-size:0.7em; color:var(--secondary); font-weight:700;">add skills</span></h2>
+    <div class="card">
+      <p>This is the payoff of building a <i>general</i> job primitive instead of a curriculum
+      feature: each new long-running capability is one <code>SKILL.md</code> plus one typed
+      <code>JOB_CONTRACTS</code> entry, with <b>no migration and no change to the generic job
+      infra</b>. This is the modularity a Mac mini gets from "a couple tools and a bunch of
+      skills", now delivered inside the tenancy walls. Curriculum-studio is the first consumer
+      and ships with the primitive; the three below are independent follow-on consumers, each
+      provable in isolation.</p>
+      <div class="two-col">
+        <div class="alt-box picked">
+          <div class="heading">curriculum-studio (the anchor, ships in v1)</div>
+          <p style="font-size: 0.9rem;">Build a multi-week curriculum for one child.
+          <code>plan = { curriculumKey?, weeks, scopeAndSequence }</code>;
+          <code>stagePayload =</code> one week's focus + activities. Artifact kind:
+          <code>material</code> (packet). The proving consumer for the whole primitive.</p>
+          <span class="cost-chip">already in the build order</span>
+        </div>
+        <div class="alt-box picked">
+          <div class="heading">unit-study-builder</div>
+          <p style="font-size: 0.9rem;">A themed cross-subject unit over several weeks, for one
+          child or all of them ("a 6-week ocean unit"). <code>plan = { theme, subjects[], weeks,
+          children[] }</code>; <code>stagePayload =</code> one week's cross-subject activities.
+          Artifact kind: <code>material</code>. The cleanest zero-migration proof, it reuses
+          <code>create_printable</code> exactly like curriculum-studio.</p>
+          <span class="cost-chip">~2-3 days, no migration, no new artifact kind</span>
+        </div>
+        <div class="alt-box picked">
+          <div class="heading">portfolio-compiler</div>
+          <p style="font-size: 0.9rem;">Assemble a compliance portfolio from the family's
+          <i>existing</i> stored materials, logged hours, and progress readings, a real legal
+          requirement in portfolio-review states. <code>plan = { child, term, subjects[] }</code>;
+          <code>stagePayload =</code> one subject's evidence gather + layout. Artifact kind:
+          <code>material</code> (packet). No web, no fresh generation, lowest risk, proves the
+          primitive serves a compile-from-stored-data job, not just generation.</p>
+          <span class="cost-chip">~3-4 days, no migration, no web/worker needed</span>
+        </div>
+        <div class="alt-box">
+          <div class="heading">topic-deep-dive</div>
+          <p style="font-size: 0.9rem;">"Learn everything about [X] and give me a teaching plan",
+          literally Alessa's original ask, now a real job. Stages: search → read sources in the
+          worker behind the firewall → synthesize → brief. <code>plan = { topic, angle }</code>;
+          <code>stagePayload =</code> one source read or one synthesis pass. This one adds a new
+          artifact kind (<code>report</code>), the one additive nullable column the plan already
+          flagged as the artifact-table seam. Extends, does not replace, the daily
+          <code>research-brief</code> skill (the long-job sibling of the one-note morning brief).</p>
+          <span class="cost-chip">~4-5 days, +1 nullable artifact-kind column, exercises the worker</span>
+        </div>
+      </div>
+      <div class="found-note">
+        <b>Why this is cheap and safe (the modularity claim, made concrete).</b> Adding a skill
+        touches only <code>apps/web/agent/skills/&lt;name&gt;/SKILL.md</code>, a new zod entry in
+        <code>lib/jobs/contracts.ts</code>, routing fixtures, and <code>pnpm check:fleet-skills</code>.
+        Skills 2 and 3 need <b>zero migration</b>; topic-deep-dive adds one nullable
+        <code>artifact_kind</code> value, exactly the seam A1 named. <b>Count check:</b> active
+        fleet skills go from 2 today (<code>materials-studio</code>, <code>research-brief</code>)
+        to about 6; that is still all-advertised static routing, far below the 25-40 that would
+        reopen dynamic distribution (filesystem-first ruling, 2026-07-15). <b>Sequencing:</b>
+        curriculum-studio ships in v1 to prove the primitive; the other three land after the
+        primitive is stable in production, each independently, so any one can be dropped or
+        reordered without touching the infra (see tweak #3).
+      </div>
+      <p style="font-size: 0.9rem;"><b>One honest caveat:</b> a SKILL.md that calls
+      <code>start_agent_job</code> cannot be written before that tool exists (stage 2). So these
+      are specified now and built once the primitive is real, not scaffolded as dead code today.
+      That is the correct order, not a delay.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-badge badge-b">Section B · sequencing</span>
+    <h2>Build order</h2>
+    <ol class="stage-list">
+      <li><span class="effort">M</span><div class="stage-title">Schema + events + contracts, one bundle</div>
+        <div class="stage-detail">Rework the untracked migration into <code>agent_jobs</code> /
+        <code>agent_job_stages</code> / <code>agent_job_stage_artifacts</code> /
+        <code>agent_job_events</code> (composite FK fix, one-active-job dedupe index,
+        <code>superseded</code> status, <code>plan_revision</code>, metering columns), flag-dark
+        behind <code>HOMA_AGENT_JOBS_ENABLED</code>. Ship the <code>JOB_CONTRACTS</code> zod
+        registry and <code>pnpm check:jobs</code> in the same PR, plus content-free
+        <code>job.*</code> events in <code>EVENT_SCHEMAS</code> (MJ-08 satisfied up front, not
+        deferred). Add <code>expectEveryPublicTableCovered</code> fixtures for all four tables to
+        <code>scripts/isolation-check.mjs</code>; the completeness gate fails without them.</div></li>
+      <li><span class="effort">M</span><div class="stage-title">The four-verb tool contract + the Postgres runner</div>
+        <div class="stage-detail">Frozen surface, shipped together, no fifth verb ever, no skill
+        ships its own lifecycle tool: <code>start_agent_job</code>,
+        <code>get_agent_job_status</code>, <code>respond_to_agent_job</code> (typed discriminated
+        union: generic pause/resume arms plus skill-declared approve_stage / revise_plan /
+        provide_input arms validated via the registry), <code>cancel_agent_job</code>. One
+        respond channel serves web buttons, chat sentences, and SMS replies. The claim-lease
+        runner per A4 (cron-driven, <code>for update skip locked</code>, one stage per Fluid
+        invocation, sub-steps sized under the Fluid ceiling, confirm the exact July 2026 number
+        first). Worker-session guard: <code>agent/tools/agent.ts</code> override refusing the
+        built-in subagent tool, and <code>start_agent_job</code> refusing inside worker-spawned
+        sessions (jobs cannot breed jobs), both via the <code>lib/tasks/guard.ts</code> idiom.</div></li>
+      <li><span class="effort">S</span><div class="stage-title">Homa knows about her own jobs</div>
+        <div class="stage-detail">Council-flagged blocking gap, now its own stage: (1) a bounded
+        active-jobs summary (skill, title, stage x of y, status, last milestone, stored ETA) in
+        the <code>turn.started</code> dynamic family context
+        (<code>agent/instructions/family-context.ts</code>); (2) milestone checkpoint cards in
+        chat via the existing <code>parseSnapCardPart</code> mechanism; (3) milestone delivery
+        consults conversation-continuity, so a job finishing mid-conversation surfaces an open
+        loop instead of double-texting her. ETAs computed server-side from realized stage
+        durations, stored as <code>eta_updated</code> events; Homa quotes the stored ETA or says
+        "I'll know better after the next volume", never invents a date.</div></li>
+      <li><span class="effort">S</span><div class="stage-title">curriculum-studio skill v0 + five-fixture eval</div>
+        <div class="stage-detail">First consumer of the generic layer. SKILL.md follows
+        materials-studio's conventions; instructions.md carve-out per A5. Five deterministic
+        fixtures: (1) positive start; (2) adjacent-negative worksheet; (3) recurring-ask
+        asserting <code>create_task</code> fired and <code>start_agent_job</code> did not; (4)
+        two-turn premature-start (no start before confirmation, exactly one after); (5) a
+        plan-parses assertion against the skill's <code>JOB_CONTRACTS</code> schema on every
+        positive fixture. Catches both refusal and over-triggering.</div></li>
+      <li><span class="effort">M</span><div class="stage-title">find_curriculum_profile + atlas seed</div>
+        <div class="stage-detail">Seed migration loading catalog.json plus per-profile markdown
+        into a new table (docs/ is not runtime-readable today). New narrow tool: query by id,
+        category, subjects, approach tags; full markdown body only for an exact deep-tier match.
+        Curriculum-studio-specific, lives beside the skill, not in the generic job infra.</div></li>
+      <li><span class="effort">M</span><div class="stage-title">The isolated worker, typed envelope + egress firewall</div>
+        <div class="stage-detail">One declared subagent authored closed per A0, hardened per the
+        council: <code>WorkerBrief</code> { capability closed enum, inputs as content-addressed
+        refs or inline text, limits } and <code>WorkerResult</code> { status, output refs, typed
+        metadata, logs }, zod-validated at the seam. The worker never receives family
+        identifiers, credentials, or DB/Blob access beyond a job-scoped write prefix; only the
+        runner resolves family rows into briefs and result blobs into family artifacts; root
+        Homa treats result content as untrusted (the F11 lesson). The brief's limits materialize
+        as the Vercel Sandbox egress firewall (per-job domain allowlist, deny-all default,
+        credential brokering), enforcement in infrastructure, not tool-code convention.
+        Platform facts: iad1-only, 24h Pro ceiling, snapshot-warmed per-stage microVMs (p75
+        restore under 1s), weekly cron touch against 30-day snapshot expiry. A full 36-stage
+        build estimated at roughly $0.40-0.80 of sandbox time.</div></li>
+      <li><span class="effort">M</span><div class="stage-title">Web-sourced ingestion through the firewall (A3, ships in v1)</div>
+        <div class="stage-detail">Resolved 2026-07-18: this is NOT deferred, it ships with
+        atlas-first. New <code>curriculum_job_sources</code> table (family-scoped RLS, composite
+        FK to <code>agent_jobs (id, family_id)</code>). The crawl bound is the sandbox egress
+        allowlist itself, per-job domains, widenable live on approval, no per-family daily
+        budget; cost rides paywall/credits and the typed metering columns. Sequenced after the
+        worker (stage 6) because the crawl runs inside the sandbox.</div></li>
+      <li><span class="effort">S</span><div class="stage-title">Parent-facing surface: the "Another Task" card (A2, resolved)</div>
+        <div class="stage-detail">One new job-card kind in <code>tasks-view.tsx</code>'s status
+        union, reading any family's active jobs (not only curriculum). Card meta line becomes
+        "Volume 3 of 9 · started Jul 14 · saved to Binder"; a progress pill replaces the
+        Next/Off pill; clicking opens a <code>TaskEditOverlay</code>-style dialog with the volume
+        list and the pause / approve-next / cancel controls (approve is the gate-first-volume
+        button). Failure semantics: retry once, then park as needs-attention (paused + error
+        event, artifacts preserved, retry/skip offered); terminal <code>failed</code> only for
+        unrecoverable states. Cheapest of the four directions, which is why it was chosen.</div></li>
+      <li><span class="effort">S</span><div class="stage-title">eve interface guard (replaces the old bundler spike)</div>
+        <div class="stage-detail">Extend <code>scripts/eve-upgrade-check.mjs</code> (~0.5 day):
+        diff eve's pinned <code>@workflow</code> versions and its
+        <code>EVE_VERCEL_FUNCTION_PREFIXES</code> claim on every eve bump; fail CI if apps/web
+        ever gains a <code>workflow</code> dependency without a recorded founder decision. The
+        in-app Workflow spike is deleted; nobody wants that path anymore.</div></li>
+      <li><span class="effort">flag-gated</span><div class="stage-title">Rollout (v1 = primitive + curriculum-studio)</div>
+        <div class="stage-detail">Mirrors ChildProgress exactly: flag dark → deploy code → wait
+        READY → apply the additive migrations → dry-run any reconciliation → enable the flag →
+        probe a real authenticated build start, status check, steering respond, and cancel.
+        v1 ships the generic primitive proven by one skill; the rest of the fleet follows.</div></li>
+      <li><span class="effort">per skill</span><div class="stage-title">Follow-on: the rest of the fleet (A6)</div>
+        <div class="stage-detail">After the primitive is stable in production, add
+        <code>unit-study-builder</code> (~2-3d, no migration), <code>portfolio-compiler</code>
+        (~3-4d, no migration, no web), and <code>topic-deep-dive</code> (~4-5d, one nullable
+        artifact-kind column, exercises the worker). Each is a <code>SKILL.md</code> + a
+        <code>JOB_CONTRACTS</code> entry + routing fixtures, independently shippable, any one
+        droppable without touching the infra.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="section-badge badge-c">Section C · mechanical work (trust me)</span>
+    <details class="mech">
+      <summary>Plumbing with no real judgment calls, collapsed</summary>
+      <ul>
+        <li>Standard zod input schemas for the new tools, following the exact shape of
+          <code>create_task.ts</code>/<code>update_task.ts</code>.</li>
+        <li>RLS boilerplate: SELECT-only policy via <code>is_family_member(family_id)</code>, no
+          write policies, matching every existing task/progress table.</li>
+        <li><code>agent_jobs_family_idx</code>, <code>agent_jobs_active_idx</code>
+          (partial index on live statuses), and the start-idempotency unique index, already
+          drafted correctly in the found migration (renamed from the curriculum-specific draft).</li>
+        <li>eval config wiring: no new judge or reporter needed, these are deterministic
+          <code>t.calledTool</code>/<code>t.notCalledTool</code> checks like every existing
+          fixture under <code>apps/web/evals/</code>.</li>
+        <li><code>pnpm typecheck</code>, <code>pnpm lint</code>, <code>pnpm check:events</code>
+          (MJ-08 registry parity for any new event), <code>pnpm check:fleet-skills</code> for the
+          new skill package.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section>
+    <div class="tweak-box">
+      <h2>Still tweakable (A0, A2, A3, approval model, and the UI direction are now decided)</h2>
+      <p style="font-size: 0.88rem; color: var(--muted); margin: 0 0 6px;">Resolved 2026-07-18:
+      isolated worker (not root bash), crawl bound kept as a firewall policy, "Another Task"
+      surface, gate-first-volume, and both ingestion paths ship in v1 (atlas-first + web-sourced).
+      What remains open:</p>
+      <div class="tweak-item">
+        <div class="num">1</div>
+        <div class="txt">Put the finite-job carve-out in each skill rather than in
+          <code>instructions.md</code> (A5), keeps the always-on soul file smaller.
+          <div class="reply">"put the carve-out in the skill, not in instructions.md"</div>
+        </div>
+      </div>
+      <div class="tweak-item">
+        <div class="num">2</div>
+        <div class="txt">Sequence the isolated worker (stage 6) before the parent-facing surface,
+          so code execution lands before the UI that exposes it.
+          <div class="reply">"build the isolated worker before the parent-facing surface"</div>
+        </div>
+      </div>
+      <div class="tweak-item">
+        <div class="num">3</div>
+        <div class="txt">Cut or reorder any skill in the fleet below (A6): each is an independent
+          consumer, so dropping one changes nothing about the primitive.
+          <div class="reply">"drop [skill-name] from the fleet" or "build [skill-name] second, not curriculum-studio"</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast">Copied</div>
+<script>
+  document.querySelectorAll('.copy-mini').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      function showToast() {
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 1400);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(showToast, function () { fallbackCopy(text, showToast); });
+      } else {
+        fallbackCopy(text, showToast);
+      }
+    });
+  });
+  function fallbackCopy(text, cb) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    cb();
+  }
+</script>
+</body>
+</html>

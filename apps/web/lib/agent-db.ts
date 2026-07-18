@@ -123,7 +123,7 @@ export type AgentAccess =
   | { mode: "caller"; db: SupabaseClient; familyId: string }
   | { mode: "pinned"; familyId: string };
 
-const PINNED_CHANNELS = new Set(["sms", "email", "dispatch"]);
+const PINNED_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
 
 export interface ResolveAgentAccessDependencies {
   /** Does this authenticated user still belong to this family, right now? */
