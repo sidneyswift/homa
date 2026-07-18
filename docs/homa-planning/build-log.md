@@ -37,12 +37,20 @@ Open items the flip shipped without, by founder order, flaggable:
   flip): not built; landing still shows no pricing.
 - The founder read-aloud gate on wall copy (wall-copy.ts HUMAN-TODO):
   not separately recorded; founder saw the copy while testing locally.
-- Unverifiable from outside Stripe: the LIVE monthly link's 30-day
-  trial + after-completion redirect to
-  `/api/billing/confirm?session_id={CHECKOUT_SESSION_ID}`, and whether
-  the webhook endpoint is registered in the Stripe dashboard. If BOTH
-  the redirect and the webhook are unconfigured, a paying family would
-  not unlock; founder eyeball in the dashboard is the remaining check.
+- ~~Unverifiable from outside Stripe: the LIVE monthly link's trial,
+  redirect, and webhook registration.~~ CLOSED same day (~15:00Z) via
+  the Stripe API with the live key: the webhook was already registered
+  and enabled at `thankshoma.com/api/billing/webhook` with exactly the
+  four needed events, but the live monthly link had NO trial (immediate
+  $19 charge, contradicting the shipped "30 free days" copy) and a
+  hosted confirmation instead of the confirm redirect (welcome chooser
+  would never fire). Both fixed by API update on
+  `plink_1TqNM3GnIMAiH0MJshwcaD7D`: `trial_period_days=30`,
+  `after_completion` redirect to
+  `/api/billing/confirm?session_id={CHECKOUT_SESSION_ID}`. Price
+  verified $19.00/month. The TEST monthly link was aligned the same way
+  (30-day trial, localhost confirm redirect) so local testing exercises
+  the full unlock flow. Remaining open item: the pricing page only.
 
 ## 2026-07-18 · The report lock ships dark: four open subjects, membership for the rest
 
