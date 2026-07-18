@@ -1,5 +1,6 @@
 import { sendAdminDigestEmail } from "../map/email";
 import { adminDb } from "./db";
+import { formatSignupsLine } from "./digest-format";
 
 /**
  * The founder's daily digest (founder console MJ-14, lab question 3):
@@ -100,11 +101,7 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
   for (const t of taskTrouble) {
     lines.push(`Task run ${t.status}: ${t.kind.replace(/_/g, " ")}${t.error ? ` (${t.error})` : ""}.`);
   }
-  lines.push(
-    signups.length === 0
-      ? "No new signups in the last 24 hours."
-      : `${signups.length} new ${signups.length === 1 ? "signup" : "signups"}: ${signups.map((s) => s.name).join(", ")}.`,
-  );
+  lines.push(formatSignupsLine(signups.map((s) => s.name)));
   const quietCount = Number(quiet[0].n);
   if (quietCount > 0) {
     lines.push(`${quietCount} ${quietCount === 1 ? "family is" : "families are"} 14+ days quiet. The console has the call list.`);

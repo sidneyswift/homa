@@ -6,7 +6,7 @@
  * deployment without the key degrades to a clean skip, never a crash.
  */
 
-import { fitsInOneSms, smsSegmentCount } from "../sms-segments";
+import { planSmsParts, smsSegmentCount } from "../sms-segments";
 
 const API_BASE = "https://api.telnyx.com/v2";
 
@@ -158,48 +158,28 @@ function describeTelnyxErrorBody(body: string): string | null {
  * provider rejection from a transport failure after Telnyx may have
  * accepted the message.
  */
-export async function submitHomaSms(
-  toE164: string,
-  text: string,
-  mediaUrls?: string[],
-  signal?: AbortSignal,
-): Promise<HomaSmsSubmission> {
-  const apiKey = process.env.TELNYX_API_KEY;
-  const fromNumber = process.env.TELNYX_FROM_NUMBER;
-  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) {
-    return { status: "rejected", reason: "SMS channel not configured" };
-  }
-
-  const normalizedPayload = normalizePrintablePdfMediaAsLinks(text, mediaUrls);
-
-  // Telnyx hard-rejects texts over the carrier segment cap (HTTP 400,
-  // error 40302); refusing here keeps the reason precise and skips a
-  // doomed API call. MMS payloads size by media, not segments.
-  if (
-    (!normalizedPayload.mediaUrls || normalizedPayload.mediaUrls.length === 0) &&
-    !fitsInOneSms(normalizedPayload.text)
-  ) {
-    const reason = `SMS over the carrier size limit (${smsSegmentCount(normalizedPayload.text)} segments, max 10)`;
-    console.error(`sendHomaSms refused: ${reason}`);
-    return { status: "rejected", reason };
-  }
-
+async function submitOneTelnyxMessage(input: {
+  apiKey: string;
+  fromNumber: string;
+  toE164: string;
+  text: string;
+  mediaUrls?: string[];
+  signal?: AbortSignal;
+}): Promise<HomaSmsSubmission> {
   try {
     const response = await fetch("https://api.telnyx.com/v2/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${input.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: fromNumber,
-        to: toE164,
-        text: normalizedPayload.text,
-        ...(normalizedPayload.mediaUrls
-          ? { media_urls: normalizedPayload.mediaUrls }
-          : {}),
+        from: input.fromNumber,
+        to: input.toE164,
+        text: input.text,
+        ...(input.mediaUrls ? { media_urls: input.mediaUrls } : {}),
       }),
-      signal,
+      signal: input.signal,
     });
     if (!response.ok) {
       const detail = describeTelnyxErrorBody(await response.text());
@@ -230,6 +210,70 @@ export async function submitHomaSms(
     );
     return { status: "unknown" };
   }
+}
+
+export async function submitHomaSms(
+  toE164: string,
+  text: string,
+  mediaUrls?: string[],
+  signal?: AbortSignal,
+): Promise<HomaSmsSubmission> {
+  const apiKey = process.env.TELNYX_API_KEY;
+  const fromNumber = process.env.TELNYX_FROM_NUMBER;
+  if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) {
+    return { status: "rejected", reason: "SMS channel not configured" };
+  }
+
+  const normalizedPayload = normalizePrintablePdfMediaAsLinks(text, mediaUrls);
+
+  // Telnyx hard-rejects texts over the carrier segment cap (HTTP 400,
+  // error 40302). Instead of refusing outright (the 2026-07-16/17 digest
+  // failures), oversized texts are transliterated to GSM-7 and, when
+  // still too long, split into a few carrier-legal messages. Only a
+  // pathological payload is refused. MMS sizes by media, not segments.
+  const isMms =
+    Boolean(normalizedPayload.mediaUrls) &&
+    (normalizedPayload.mediaUrls?.length ?? 0) > 0;
+  let bodies = [normalizedPayload.text];
+  if (!isMms) {
+    const plan = planSmsParts(normalizedPayload.text);
+    if (!plan.ok) {
+      console.error(`sendHomaSms refused: ${plan.reason}`);
+      return { status: "rejected", reason: plan.reason };
+    }
+    bodies = plan.parts;
+    if (bodies.length > 1 || bodies[0] !== normalizedPayload.text) {
+      console.error(
+        `sendHomaSms adapted an oversized text: ${smsSegmentCount(normalizedPayload.text)} segments into ${bodies.length} ${bodies.length === 1 ? "message" : "messages"}`,
+      );
+    }
+  }
+
+  let firstMessageId: string | null = null;
+  for (const [index, body] of bodies.entries()) {
+    const result = await submitOneTelnyxMessage({
+      apiKey,
+      fromNumber,
+      toE164,
+      text: body,
+      ...(isMms ? { mediaUrls: normalizedPayload.mediaUrls } : {}),
+      ...(signal ? { signal } : {}),
+    });
+    if (result.status !== "submitted") {
+      // The first part failing is a clean failure; a later part failing
+      // means the family holds a partial message, which only "unknown"
+      // describes truthfully.
+      if (index === 0) return result;
+      console.error(
+        `sendHomaSms part ${index + 1} of ${bodies.length} did not submit`,
+      );
+      return { status: "unknown" };
+    }
+    if (firstMessageId === null) firstMessageId = result.messageId;
+  }
+  return firstMessageId
+    ? { status: "submitted", messageId: firstMessageId }
+    : { status: "unknown" };
 }
 
 export async function sendHomaSms(

@@ -87,13 +87,70 @@ describe("Telnyx SMS oversized-message handling", () => {
   // 755-character text is 12 segments and Telnyx would reject it.
   const oversizedEmojiText = `\u{1F52C}${"a".repeat(754)}`;
 
-  it("refuses a text over the segment cap without calling Telnyx", async (t) => {
+  it("delivers a text over the segment cap by transliterating to GSM-7", async (t) => {
+    // The 2026-07-16/17 digest failures: refusal is no longer the
+    // answer; the emoji is dropped and the message fits again.
+    stubSmsEnvironment(t);
+    const sentBodies: string[] = [];
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { text: string };
+      sentBodies.push(body.text);
+      return Response.json({ data: { id: `message-${sentBodies.length}` } });
+    };
+
+    const result = await submitHomaSms("+15555550100", oversizedEmojiText);
+
+    assert.deepEqual(result, { status: "submitted", messageId: "message-1" });
+    assert.deepEqual(sentBodies, ["a".repeat(754)]);
+  });
+
+  it("splits a genuinely long GSM-7 text into sequential messages", async (t) => {
+    stubSmsEnvironment(t);
+    const sentBodies: string[] = [];
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { text: string };
+      sentBodies.push(body.text);
+      return Response.json({ data: { id: `message-${sentBodies.length}` } });
+    };
+
+    const longText = Array.from(
+      { length: 400 },
+      (_, index) => `word${index}`,
+    ).join(" ");
+    const result = await submitHomaSms("+15555550100", longText);
+
+    assert.deepEqual(result, { status: "submitted", messageId: "message-1" });
+    assert.ok(sentBodies.length >= 2 && sentBodies.length <= 3);
+    assert.equal(sentBodies.join(" "), longText);
+  });
+
+  it("reports unknown when a later part fails after the first submitted", async (t) => {
+    stubSmsEnvironment(t);
+    let fetchCalls = 0;
+    globalThis.fetch = async () => {
+      fetchCalls += 1;
+      return fetchCalls === 1
+        ? Response.json({ data: { id: "message-1" } })
+        : new Response("{}", { status: 500 });
+    };
+
+    const longText = Array.from(
+      { length: 400 },
+      (_, index) => `word${index}`,
+    ).join(" ");
+    const result = await submitHomaSms("+15555550100", longText);
+
+    assert.deepEqual(result, { status: "unknown" });
+    assert.equal(fetchCalls, 2);
+  });
+
+  it("still refuses a pathological payload without calling Telnyx", async (t) => {
     stubSmsEnvironment(t);
     globalThis.fetch = async () => {
       throw new Error("fetch must not be called for a doomed send");
     };
 
-    const result = await submitHomaSms("+15555550100", oversizedEmojiText);
+    const result = await submitHomaSms("+15555550100", "a".repeat(60_000));
 
     assert.equal(result.status, "rejected");
     assert.ok(

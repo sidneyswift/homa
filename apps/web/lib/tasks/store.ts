@@ -1106,33 +1106,61 @@ export async function loadLegacyStaleTaskRunOutcomeWithDatabase(
   };
 }
 
+/** One reaped run, reported back so the dispatcher can decide whether a
+ * clean same-day failure deserves its single retry (ticket DR-2). */
+export interface ReapedTaskRun {
+  runId: string;
+  familyId: string | null;
+  scheduleId: string | null;
+  kind: TaskRunKind;
+  /** Family-local calendar day the run served (half of the outbox key). */
+  scheduledFor: string | null;
+  /** True when any delivery was accepted, is still uncertain, or was
+   * recovered; retrying such a run could double-text the family. */
+  reachedFamily: boolean;
+}
+
 /**
  * The safety net for runs whose session never reached a deliverable
  * message (crash, refusal, model outage): receive() resolves at session
  * START, so nobody is waiting on the other end. Prepared briefs first recover
  * their durable aggregate. Other stale runs retain the legacy aggregation.
+ * Returns what it reaped: a failed run fell out of the outbox index by
+ * design, so the dispatcher may start one same-day replacement.
  */
-export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
+export async function reapStaleTaskRuns(
+  now = new Date(),
+): Promise<ReapedTaskRun[]> {
   const sql = mapDb();
   const cutoff = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
   const stale = await sql<
     {
       id: string;
       family_id: string | null;
+      schedule_id: string | null;
       kind: TaskRunKind;
       delivered_channel: "sms" | "email" | "none" | null;
       summary: string | null;
       session_id: string | null;
       delivery_version: TaskDeliveryVersion;
+      scheduled_for: string | null;
     }[]
   >`
-    select id, family_id, kind, delivered_channel, summary, session_id,
-           delivery_version
+    select id, family_id, schedule_id, kind, delivered_channel, summary,
+           session_id, delivery_version, scheduled_for::text as scheduled_for
     from public.homa_task_runs
     where status = 'running' and started_at < ${cutoff}
     limit 25
   `;
+  const reaped: ReapedTaskRun[] = [];
   for (const run of stale) {
+    const base = {
+      runId: run.id,
+      familyId: run.family_id,
+      scheduleId: run.schedule_id,
+      kind: run.kind,
+      scheduledFor: run.scheduled_for,
+    };
     if (
       run.kind === "morning_brief" &&
       run.family_id &&
@@ -1142,7 +1170,15 @@ export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
         familyId: run.family_id,
         taskRunId: run.id,
       });
-      if (recovery.status !== "not_found") continue;
+      if (recovery.status !== "not_found") {
+        reaped.push({
+          ...base,
+          reachedFamily:
+            recovery.status === "recovery_pending" ||
+            recovery.delivery.status !== "failed",
+        });
+        continue;
+      }
     }
     if (
       run.family_id &&
@@ -1173,6 +1209,12 @@ export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
           where id = ${run.family_id}
         `;
       }
+      reaped.push({
+        ...base,
+        reachedFamily: !(
+          result.finished && result.delivery?.status === "failed"
+        ),
+      });
       continue;
     }
     const outcome = await loadLegacyStaleTaskRunOutcomeWithDatabase(sql, {
@@ -1189,7 +1231,32 @@ export async function reapStaleTaskRuns(now = new Date()): Promise<void> {
         : { error: "run never completed (reaped after 2 hours)" }),
       onlyIfRunning: true,
     });
+    reaped.push({
+      ...base,
+      reachedFamily: outcome.hasAcceptedOrUncertainDelivery,
+    });
   }
+  return reaped;
+}
+
+/**
+ * The retry bound for a reaped run: exactly one failed run for this
+ * schedule and local day means the failure has never been retried. A
+ * retried run that hangs again fails this check forever, so a broken
+ * family can never loop.
+ */
+export async function isFirstFailedRunForScheduleDay(
+  scheduleId: string,
+  scheduledFor: string,
+): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ n: number }[]>`
+    select count(*)::int as n from public.homa_task_runs
+    where schedule_id = ${scheduleId}
+      and scheduled_for = ${scheduledFor}
+      and status = 'failed'
+  `;
+  return (rows[0]?.n ?? 0) === 1;
 }
 
 export async function advanceTaskSchedule(task: DueFamilyTask, now = new Date()): Promise<void> {
