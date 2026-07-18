@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { ArrowUp, Check, ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
 
@@ -252,8 +252,8 @@ export function HeroProductDemo() {
                   minWidth: 17,
                   padding: "1px 5px",
                   borderRadius: "var(--radius-pill)",
-                  background: "var(--stone-200)",
-                  color: "var(--stone-700)",
+                  background: "var(--clay-100)",
+                  color: "var(--clay-600)",
                   fontSize: "0.56rem",
                   fontWeight: 700,
                   textAlign: "center",
@@ -305,7 +305,35 @@ export function HeroProductDemo() {
               background: "linear-gradient(180deg, #f4ede3 0%, #ebe2d4 55%, #f4ede3 100%)",
             }}
           >
+            {/* Real Messages threads open with a tiny centered day marker and
+                show Delivered under your last sent bubble; both signifiers do
+                more to sell the thread than any amount of chrome. */}
+            <p
+              aria-hidden="true"
+              style={{
+                margin: "0 0 1px",
+                alignSelf: "center",
+                color: "var(--text-subtle)",
+                fontSize: "0.6rem",
+                fontWeight: 500,
+              }}
+            >
+              <strong style={{ fontWeight: 700 }}>Today</strong> 9:41
+            </p>
+
             <SentBubble>Maya is into butterflies right now.</SentBubble>
+            <p
+              aria-hidden="true"
+              style={{
+                margin: "-3px 2px 0 0",
+                alignSelf: "flex-end",
+                color: "var(--text-subtle)",
+                fontSize: "0.58rem",
+                fontWeight: 600,
+              }}
+            >
+              Delivered
+            </p>
 
             <ReceivedBubble>Great! I&apos;ll make today&apos;s math worksheet butterfly-themed.</ReceivedBubble>
 
@@ -330,7 +358,7 @@ export function HeroProductDemo() {
                     display: "block",
                     width: "100%",
                     height: "auto",
-                    maxHeight: 148,
+                    maxHeight: 118,
                     objectFit: "cover",
                     objectPosition: "top center",
                     background: "#fff",
@@ -428,12 +456,9 @@ export function HeroProductDemo() {
                 borderRadius: "50%",
                 background: "var(--stone-200)",
                 color: "var(--stone-700)",
-                fontSize: "1rem",
-                fontWeight: 500,
-                lineHeight: 1,
               }}
             >
-              +
+              <Plus size={14} strokeWidth={2.4} aria-hidden="true" />
             </span>
             <span
               style={{
@@ -461,11 +486,9 @@ export function HeroProductDemo() {
                 borderRadius: "50%",
                 background: "var(--clay-500)",
                 color: "#fff",
-                fontSize: "0.82rem",
-                fontWeight: 700,
               }}
             >
-              ↑
+              <ArrowUp size={15} strokeWidth={2.8} aria-hidden="true" />
             </span>
           </div>
           <div
