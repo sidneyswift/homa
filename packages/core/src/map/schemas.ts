@@ -136,6 +136,19 @@ export const mapScoreRequestSchema = z.object({
   childId: z.uuid(),
 });
 
+export const mapSubjectLessonBuildSchema = z
+  .object({
+    childId: z.uuid(),
+    subjectId: z.string().min(1).max(40),
+  })
+  .strict();
+
+export const mapSubjectLessonMutationSchema = z
+  .object({
+    lessonId: z.uuid(),
+  })
+  .strict();
+
 /**
  * The living-record write: one or more answer changes from the report
  * page (a tapped correction in a receipts drawer, the inline sharpening

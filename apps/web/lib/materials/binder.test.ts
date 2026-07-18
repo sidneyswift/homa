@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import type { MaterialSummary } from "./library";
@@ -14,6 +15,11 @@ import {
   subjectOptions,
   toBinderMaterials,
 } from "./binder";
+
+const BINDER_PAGE_SOURCE = readFileSync(
+  new URL("../../app/app/binder/page.tsx", import.meta.url),
+  "utf8",
+);
 
 function material(overrides: Partial<MaterialSummary> = {}): MaterialSummary {
   return {
@@ -59,6 +65,17 @@ describe("toBinderMaterials", () => {
     const [binderMaterial] = toBinderMaterials([material({ childId: null })], [child()]);
     assert.equal(binderMaterial.childId, null);
     assert.equal(binderMaterial.childName, null);
+  });
+});
+
+describe("Binder final-material contract", () => {
+  it("keeps the page read scoped to final materials", () => {
+    assert.match(BINDER_PAGE_SOURCE, /findMaterialsCaller/u);
+    assert.match(
+      BINDER_PAGE_SOURCE,
+      /status: "final",\s+limit: MAX_FINAL_MATERIALS/u,
+    );
+    assert.doesNotMatch(BINDER_PAGE_SOURCE, /status: "draft"/u);
   });
 });
 

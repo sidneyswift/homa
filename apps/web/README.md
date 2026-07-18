@@ -81,6 +81,30 @@ pnpm --filter web dev   # http://localhost:3000
   `lib/agent-db.ts` uses caller JWT plus RLS for web chat and authenticated
   family-pinned access for server-originated channels; M1-02 owns the remaining
   transaction-local role hardening.
+- `app/api/map/subject-lesson/keep/route.ts` and
+  `lib/subject-lessons/keep-route-policy.ts` own the owner-only direct Keep
+  boundary. The lesson page's `lesson-keep-button.tsx` shows the Binder and
+  daily-loop handoff only after an explicit kept response. `lib/family-phone.ts`
+  supplies the server-only boolean used for the optional Parents settings link.
+- `lib/materials/library.ts` shares one first-transition receipt contract
+  between agent approval and subject lesson Keep. Caller-JWT approval uses the
+  atomic `finalize_family_material` RPC from the subject lesson migration;
+  family-pinned approval uses the matching server transaction. The direct
+  lesson finalizer accepts attached `draft` or `final` rows only, while explicit
+  agent approval retains previously-final revision recovery.
+  `lib/materials/finalization.test.ts` protects replay-safe cleanup and event
+  receipts, while the Binder contract remains final-material only.
+- `lib/subject-lessons/content-save.ts`,
+  `lib/subject-lessons/material-validity.ts`, and
+  `lib/subject-lessons/worksheet-effect.ts` own write-once lesson content,
+  the shared ready-material rule, and replay-safe worksheet effect decisions.
+  The subject lesson migration stores server-authenticated material provenance
+  and durable effect receipts before any render, review, or Blob upload.
+  `lib/materials/render-policy.test.ts` protects the subject lesson Chromium
+  no-image request policy, including CSS backgrounds and data-image URLs.
+  `lib/materials/pinned-privacy.test.ts` protects final-only lesson visibility
+  across pinned find, show, and card reads while preserving the exact
+  pre-migration legacy query shape.
 - `components/marketing/` landing sections, ported from
   `docs/homa-design/ui_kits/landing/` (tokens hand-copied into
   `app/globals.css` until `packages/design` lands, ticket M1-17).

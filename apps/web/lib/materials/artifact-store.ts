@@ -1,6 +1,7 @@
 import { del, list, put } from "@vercel/blob";
 
 import { mapDb } from "../map/db";
+import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import { MATERIAL_KINDS, type MaterialKind } from "./kinds";
 
 export { MATERIAL_KINDS, type MaterialKind };
@@ -131,11 +132,50 @@ export interface MaterialRowInput {
   html: string;
   source: MaterialSource;
   revises: string | null;
+  channel: "web" | "sms" | "email" | "dispatch" | "subject_lesson";
+  /** Non-null only for a caller-mode material redeemed against an
+   * accepted offer delivery (conversation-continuity offer fulfillment);
+   * a subject-lesson worksheet is never offer-sourced, so these two
+   * provenance fields are mutually exclusive in practice, never both
+   * non-null on one row. */
   sourceOfferDeliveryId: string | null;
-  channel: "web" | "sms" | "email" | "dispatch";
+  subjectLessonId: string | null;
+  subjectLessonAttempt: number | null;
+  subjectLessonSubjectId: string | null;
+  subjectLessonTargetStatement: string | null;
   /** How this page came to be (founder deep view): the create tool's
    * input metadata, session, and review verdict, beside the output. */
   generation?: unknown;
+}
+
+export function pinnedMaterialRevisionAllowed(input: {
+  channel: MaterialRowInput["channel"];
+  subjectLessonId: string | null;
+  revisionSubjectLessonId: string | null | undefined;
+}): boolean {
+  if (input.revisionSubjectLessonId === undefined) return true;
+  if (input.channel !== "subject_lesson") {
+    return input.revisionSubjectLessonId === null;
+  }
+  return (
+    input.subjectLessonId !== null
+    && input.revisionSubjectLessonId === input.subjectLessonId
+  );
+}
+
+async function materialSubjectLessonProvenanceExists(): Promise<boolean> {
+  if (subjectLessonsEnabled()) return true;
+  const sql = mapDb();
+  const rows = await sql<{ present: boolean }[]>`
+    select exists (
+      select 1
+      from information_schema.columns
+      where table_schema = 'public'
+        and table_name = 'materials'
+        and column_name = 'subject_lesson_id'
+    ) as present
+  `;
+  return rows[0]?.present === true;
 }
 
 /**
@@ -144,9 +184,148 @@ export interface MaterialRowInput {
  * family_id predicates on the child and revision re-checks ARE the wall.
  */
 export async function insertMaterialRowPinned(
-  input: MaterialRowInput,
+  input: MaterialRowInput
 ): Promise<{ ok: true; id: string } | { ok: false; note: string }> {
   const sql = mapDb();
+
+  if (input.revises) {
+    const hasProvenance =
+      input.subjectLessonId !== null
+      || await materialSubjectLessonProvenanceExists();
+    const revisionRows = hasProvenance
+      ? await sql<Array<{ id: string; subject_lesson_id: string | null }>>`
+          select prior.id, prior.subject_lesson_id
+          from public.materials prior
+          where prior.id = ${input.revises}
+            and prior.family_id = ${input.familyId}
+            and (
+              ${input.channel === "subject_lesson"}
+              or prior.subject_lesson_id is null
+            )
+        `
+      : await sql<Array<{ id: string }>>`
+          select id
+          from public.materials
+          where id = ${input.revises}
+            and family_id = ${input.familyId}
+        `;
+    const revision = revisionRows[0];
+    if (
+      !revision
+      || !pinnedMaterialRevisionAllowed({
+        channel: input.channel,
+        subjectLessonId: input.subjectLessonId,
+        revisionSubjectLessonId:
+          "subject_lesson_id" in revision
+            ? revision.subject_lesson_id
+            : undefined,
+      })
+    ) {
+      return {
+        ok: false,
+        note: "That revisesId is not eligible for this material channel and lesson.",
+      };
+    }
+  }
+
+  if (input.subjectLessonId) {
+    if (
+      input.channel !== "subject_lesson" ||
+      input.kind !== "worksheet" ||
+      input.childId === null ||
+      input.subjectLessonAttempt === null ||
+      input.subjectLessonSubjectId === null ||
+      input.subjectLessonTargetStatement === null ||
+      input.subject !== input.subjectLessonSubjectId ||
+      input.skill !== input.subjectLessonTargetStatement ||
+      !Number.isSafeInteger(input.subjectLessonAttempt) ||
+      input.subjectLessonAttempt < 1
+    ) {
+      return {
+        ok: false,
+        note: "Trusted subject lesson material identity is incomplete.",
+      };
+    }
+
+    const materialId = await sql.begin(async (transaction) => {
+      const lessonRows = await transaction<{ id: string }[]>`
+        insert into public.materials
+          (family_id, child_id, title, kind, skill, subject, curriculum, theme,
+           characters, pdf_url, preview_url, html, source, revises, channel,
+           subject_lesson_id, generation)
+        select
+          child.family_id,
+          lesson.child_id,
+          ${input.title},
+          ${input.kind},
+          ${input.skill},
+          ${input.subject},
+          ${input.curriculum},
+          ${input.theme},
+          ${input.characters},
+          ${input.pdfUrl},
+          ${input.previewUrl},
+          ${input.html},
+          ${input.source},
+          ${input.revises},
+          ${input.channel},
+          lesson.id,
+          ${
+            input.generation
+              ? transaction.json(input.generation as never)
+              : null
+          }
+        from public.subject_lessons lesson
+        join public.children child on child.id = lesson.child_id
+        where lesson.id = ${input.subjectLessonId}
+          and child.family_id = ${input.familyId}
+          and lesson.child_id = ${input.childId}
+          and lesson.subject_id = ${input.subjectLessonSubjectId}
+          and lesson.target_statement = ${input.subjectLessonTargetStatement}
+          and lesson.superseded_at is null
+          and lesson.build_status = 'running'
+          and lesson.attempt_count = ${input.subjectLessonAttempt}
+          and (
+            ${input.revises}::uuid is null
+            or exists (
+              select 1
+              from public.materials prior
+              where prior.id = ${input.revises}
+                and prior.family_id = child.family_id
+                and prior.child_id = lesson.child_id
+                and prior.subject_lesson_id = lesson.id
+                and prior.subject = lesson.subject_id
+                and prior.skill = lesson.target_statement
+                and prior.kind = 'worksheet'
+            )
+          )
+        returning id
+      `;
+      const inserted = lessonRows[0];
+      if (!inserted) return null;
+
+      const effectRows = await transaction<{ subject_lesson_id: string }[]>`
+        update public.subject_lesson_effect_receipts
+        set created_material_id = ${inserted.id}
+        where subject_lesson_id = ${input.subjectLessonId}
+          and attempt = ${input.subjectLessonAttempt}
+          and create_key = ${input.revises ?? "initial"}
+          and status = 'in_flight'
+          and created_material_id is null
+        returning subject_lesson_id
+      `;
+      if (!effectRows[0]) {
+        throw new Error("subject lesson worksheet effect lost its claim");
+      }
+      return inserted.id;
+    });
+    return materialId
+      ? { ok: true, id: materialId }
+      : {
+          ok: false,
+          note: "The material no longer matches this trusted lesson attempt.",
+        };
+  }
 
   let childId: string | null = null;
   if (input.childId) {
@@ -159,19 +338,6 @@ export async function insertMaterialRowPinned(
       return {
         ok: false,
         note: "That child id is not in this family. Use an id from the family context block, or leave the child off.",
-      };
-    }
-  }
-
-  if (input.revises) {
-    const rows = await sql<{ id: string }[]>`
-      select id from public.materials
-      where id = ${input.revises} and family_id = ${input.familyId}
-    `;
-    if (!rows[0]) {
-      return {
-        ok: false,
-        note: "That revisesId is not one of this family's materials. Use an id find_materials returned, or leave it off.",
       };
     }
   }

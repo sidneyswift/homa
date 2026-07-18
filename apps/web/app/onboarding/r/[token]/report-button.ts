@@ -12,7 +12,10 @@
  * report's server components too.
  */
 
-export type ReportButtonVariant = "primary" | "secondary";
+export type ReportButtonVariant =
+  | "primary"
+  | "primary-strong"
+  | "secondary";
 
 /** Pill shape plus the motion contract every report button must carry. */
 const REPORT_BUTTON_BASE =
@@ -21,13 +24,17 @@ const REPORT_BUTTON_BASE =
 const REPORT_BUTTON_VARIANT: Record<ReportButtonVariant, string> = {
   /** Solid clay, the main action. */
   primary: "bg-brand text-on-brand hover:bg-brand-hover",
+  /** AA-safe solid clay for new normal-size controls. */
+  "primary-strong":
+    "bg-[var(--clay-700)] text-on-brand hover:bg-[var(--clay-600)]",
   /** Bordered card surface, a secondary or side action. */
   secondary: "border border-border bg-card text-strong hover:border-brand",
 };
 
 /**
  * Build a report pill button's className.
- * @param variant `"primary"` (solid clay) or `"secondary"` (bordered).
+ * @param variant `"primary"` (legacy solid clay), `"primary-strong"`
+ *                (AA-safe solid clay), or `"secondary"` (bordered).
  * @param layout  per-placement classes: size, padding, margins, `inline-flex`,
  *                `items-center`, `font-semibold`, `print:hidden`, and so on.
  */

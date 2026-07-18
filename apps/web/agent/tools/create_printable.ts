@@ -16,6 +16,7 @@ import {
   isFamilyArtifactUrl,
   MATERIAL_KINDS,
   uploadMaterialArtifacts,
+  type MaterialKind,
   type MaterialSource,
 } from "../../lib/materials/artifact-store";
 import {
@@ -37,9 +38,13 @@ import {
 import {
   RendererUnavailableError,
   renderPrintableHtml,
+  SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
+import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispatch-input";
+import { claimSubjectLessonWorksheetEffectPinned } from "../../lib/subject-lessons/store";
+import { resolveSubjectLessonWorksheetEffect } from "../../lib/subject-lessons/worksheet-effect";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
 /**
@@ -96,7 +101,7 @@ const packetPageInput = z.object({
     .describe("Reuse an existing material of this family as this page (id from find_materials or an earlier create result). Its stored page content is placed exactly as made; a multi-page material contributes all its pages."),
 });
 
-const printableInput = z.object({
+export const createPrintableInputSchema = z.object({
   title: z
     .string()
     .trim()
@@ -180,6 +185,89 @@ const printableInput = z.object({
     .describe("One or two sentences of what the parent actually asked for, used by the automatic quality check."),
 });
 
+export type CreatePrintableInput = z.infer<
+  typeof createPrintableInputSchema
+>;
+
+export interface PrintableGenerationInput {
+  title: string;
+  kind: MaterialKind;
+  skill: string | null;
+  subject: string | null;
+  curriculum: string | null;
+  theme: string | null;
+  characters: string[];
+  childName: string | null;
+  requestSummary: string | null;
+  revisesId: string | null;
+  path: "html" | "pageImageUrl" | "pages";
+  lessonId?: string;
+}
+
+export function subjectLessonPrintableRestriction(
+  input: CreatePrintableInput,
+  attributes: unknown,
+): string | null {
+  const trustedLesson = readSubjectLessonTrustedContext(attributes);
+  if (!trustedLesson) return null;
+  const kind = input.kind ?? "worksheet";
+  const hasNavigationMarkup =
+    typeof input.html === "string"
+    && (
+      /<(?:base|iframe|frame|frameset|portal)(?:\s|>)/iu.test(input.html)
+      || /<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?\s*refresh\b)[^>]*>/iu
+        .test(input.html)
+    );
+  const isHtmlOnly =
+    typeof input.html === "string"
+    && input.pageImageUrl === undefined
+    && input.pages === undefined
+    && !hasNavigationMarkup
+    && !/<(?:img|image|picture|source|object|embed|video)(?:\s|>)/iu.test(
+      input.html,
+    )
+    && !/\burl\s*\(/iu.test(input.html)
+    && !/\bdata:image\//iu.test(input.html)
+    && !/\btype\s*=\s*["']image["']/iu.test(input.html)
+    && !/\bposter\s*=\s*["'][^"']+["']/iu.test(input.html);
+  return (
+    kind === "worksheet"
+    && input.childId === trustedLesson.childId
+    && input.childName === trustedLesson.childName
+    && input.subject === trustedLesson.subjectId
+    && input.skill === trustedLesson.targetStatement
+    && isHtmlOnly
+  )
+    ? null
+    : "Use an HTML-only subject lesson worksheet with the exact trusted child, subject, and target using the canonical subject ID, without image, navigation markup, CSS url(...), pageImageUrl, or a multi-page pages packet.";
+}
+
+/**
+ * Produces the durable, HTML-free input receipt. A lesson id may enter only
+ * through a fully validated subject lesson session, never through tool input.
+ */
+export function buildPrintableGenerationInput(
+  input: CreatePrintableInput,
+  path: "html" | "pageImageUrl" | "pages",
+  attributes: unknown,
+): PrintableGenerationInput {
+  const trustedLesson = readSubjectLessonTrustedContext(attributes);
+  return {
+    title: input.title,
+    kind: input.kind ?? "worksheet",
+    skill: input.skill ?? null,
+    subject: input.subject ?? null,
+    curriculum: input.curriculum ?? null,
+    theme: input.theme ?? null,
+    characters: input.characters ?? [],
+    childName: input.childName ?? null,
+    requestSummary: input.requestSummary ?? null,
+    revisesId: input.revisesId ?? null,
+    path,
+    ...(trustedLesson ? { lessonId: trustedLesson.lessonId } : {}),
+  };
+}
+
 interface ResolvedPage {
   body: string;
   source: MaterialSource;
@@ -199,7 +287,7 @@ function htmlPageSource(body: string): MaterialSource {
 export default defineTool({
   description:
     "Render printable material you designed (worksheet, coloring page, flash cards, poster, a multi-page packet, any material) into one real PDF plus per-page previews the parent sees where she is (chat card on web, texted picture on SMS). Three paths: pass your own page HTML, pass a generate_image URL of the whole page, or pass pages to build a multi-page packet (fresh pages and existing materials by id, in any mix, one PDF out). Load the materials-studio skill before your first material of a conversation. For changes, pass revisesId and call again; when the parent approves a version, call mark_material_final.",
-  inputSchema: printableInput,
+  inputSchema: createPrintableInputSchema,
   async execute(input, ctx) {
     let access;
     try {
@@ -211,6 +299,21 @@ export default defineTool({
       throw error;
     }
     const { familyId } = access;
+    const attributes = ctx.session.auth.current?.attributes as
+      | {
+          channel?: string;
+          phoneNumber?: string;
+          acceptedOfferDeliveryId?: string;
+        }
+      | undefined;
+    const trustedLesson = readSubjectLessonTrustedContext(attributes);
+    const subjectLessonRestriction = subjectLessonPrintableRestriction(
+      input,
+      attributes,
+    );
+    if (subjectLessonRestriction) {
+      return { created: false, note: subjectLessonRestriction };
+    }
 
     if (!blobConfigured()) {
       return {
@@ -350,14 +453,43 @@ export default defineTool({
       return { created: false, note: gateFailure };
     }
 
-    const attributes = ctx.session.auth.current?.attributes as
-      | {
-          channel?: string;
-          phoneNumber?: string;
-          acceptedOfferDeliveryId?: string;
-        }
-      | undefined;
     const channel = usageChannelFromAttributes(attributes);
+
+    if (trustedLesson) {
+      const worksheetEffect = resolveSubjectLessonWorksheetEffect(
+        await claimSubjectLessonWorksheetEffectPinned({
+          familyId: trustedLesson.familyId,
+          lessonId: trustedLesson.lessonId,
+          childId: trustedLesson.childId,
+          attempt: trustedLesson.attempt,
+          revisesId: input.revisesId ?? null,
+        }),
+      );
+      switch (worksheetEffect.status) {
+        case "create":
+          break;
+        case "completed":
+          return {
+            created: true,
+            done: true,
+            material: worksheetEffect.material,
+            review: null,
+            sentByText: false,
+            note: "The completed worksheet receipt was reused without another render or provider call.",
+          };
+        case "refused":
+          return {
+            created: false,
+            note: "This worksheet effect is already in flight or uncertain. Do not call create_printable again in this attempt. An explicit parent Retry may start a new attempt.",
+          };
+        default: {
+          const exhaustive: never = worksheetEffect;
+          throw new Error(
+            `Unhandled worksheet effect result: ${String(exhaustive)}`,
+          );
+        }
+      }
+    }
 
     // Render + review + upload is the slow part of an HTML-only build.
     // This fallback shares the progress window with send_heads_up and
@@ -380,7 +512,9 @@ export default defineTool({
 
     let rendered;
     try {
-      rendered = await renderPrintableHtml(document);
+      rendered = trustedLesson
+        ? await renderPrintableHtml(document, SUBJECT_LESSON_RENDER_POLICY)
+        : await renderPrintableHtml(document);
     } catch (error) {
       if (error instanceof RendererUnavailableError) {
         return { created: false, note: error.message };
@@ -461,19 +595,11 @@ export default defineTool({
       channel,
       pageCount: rendered.pageCount,
       ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
-      input: {
-        title: input.title,
-        kind,
-        skill: input.skill ?? null,
-        subject: input.subject ?? null,
-        curriculum: input.curriculum ?? null,
-        theme: input.theme ?? null,
-        characters: input.characters ?? [],
-        childName: input.childName ?? null,
-        requestSummary: input.requestSummary ?? null,
-        revisesId: input.revisesId ?? null,
-        path: input.pages ? "pages" : input.pageImageUrl ? "pageImageUrl" : "html",
-      },
+      input: buildPrintableGenerationInput(
+        input,
+        input.pages ? "pages" : input.pageImageUrl ? "pageImageUrl" : "html",
+        attributes,
+      ),
       review,
     };
 
@@ -499,6 +625,19 @@ export default defineTool({
         revises: input.revisesId ?? null,
         sourceOfferDeliveryId: null,
         channel,
+        ...(trustedLesson
+          ? {
+              subjectLessonId: trustedLesson.lessonId,
+              subjectLessonAttempt: trustedLesson.attempt,
+              subjectLessonSubjectId: trustedLesson.subjectId,
+              subjectLessonTargetStatement: trustedLesson.targetStatement,
+            }
+          : {
+              subjectLessonId: null,
+              subjectLessonAttempt: null,
+              subjectLessonSubjectId: null,
+              subjectLessonTargetStatement: null,
+            }),
         generation,
       });
       if (!inserted.ok) {
@@ -609,7 +748,9 @@ export default defineTool({
         ? ` All ${rendered.pageCount} pages are inside the one PDF; the card pages through the previews.`
         : "";
     const deliveryNote =
-      channel === "sms"
+      channel === "subject_lesson"
+        ? "The worksheet is saved as a draft for this lesson. Read the quality check and attach only when it passed or was unavailable."
+        : channel === "sms"
         ? reviewPassed
           ? sentByText
             ? previewSentByText
@@ -644,7 +785,9 @@ export default defineTool({
       },
       review,
       sentByText,
-      note: `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
+      note: trustedLesson
+        ? `${deliveryNote}${reviewNote}`
+        : `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
     };
   },
 });

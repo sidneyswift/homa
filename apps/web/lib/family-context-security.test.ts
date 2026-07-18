@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { shouldSkipConversationPersistence } from "../agent/hooks/persist-conversation";
 import { resolveFamilyContextInstructionMarkdown } from "../agent/instructions/family-context";
+import {
+  MissingFamilyContextError,
+  resolveAgentAccess,
+  resolvePinnedFamilyId,
+} from "./agent-db";
 import {
   renderFamilyContext,
   type FamilyContextRows,
 } from "./family-context";
+import {
+  usageChannelFromAttributes,
+  usageSurfaceFromAttributes,
+} from "./model-usage";
+import { refuseScheduleSpawnedSession } from "./tasks/guard";
 
 describe("family context serialization", () => {
   it("keeps adversarial family fields inside escaped JSON data", () => {
@@ -95,6 +106,141 @@ describe("family context serialization", () => {
     assert.ok(parsed.family.name.length <= 240);
     assert.ok(parsed.family.memberNames.length <= 12);
     assert.ok(parsed.children[0].interests.length <= 8);
+  });
+});
+
+describe("subject lesson pinned family context", () => {
+  it("pins only the exact internal channel to its trusted family", async () => {
+    const attributes = {
+      channel: "subject_lesson",
+      familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    };
+
+    assert.equal(
+      resolvePinnedFamilyId(attributes),
+      "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    );
+    assert.deepEqual(await resolveAgentAccess(attributes), {
+      mode: "pinned",
+      familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    });
+
+    for (const channel of ["subject-lesson", "subject_lesson_preview"]) {
+      const nearMiss = { ...attributes, channel };
+      assert.equal(resolvePinnedFamilyId(nearMiss), null);
+      await assert.rejects(
+        () => resolveAgentAccess(nearMiss),
+        MissingFamilyContextError,
+      );
+    }
+  });
+
+  it("routes a subject-lesson session through the pinned loader, focused on its own child, via the shared resolver", async () => {
+    let pinnedLoads = 0;
+    let callerLoads = 0;
+    let focusedChildId: string | undefined;
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: {
+          channel: "subject_lesson",
+          familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          childId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+        },
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        loadCallerFamilyContext: async () => {
+          callerLoads += 1;
+          throw new Error("caller family context must not load");
+        },
+        loadPinnedFamilyContext: async (familyId) => {
+          pinnedLoads += 1;
+          assert.equal(familyId, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+          return {
+            family: null,
+            children: [],
+            memories: [],
+            answers: [],
+            members: [],
+          };
+        },
+        renderFamilyContext: (_rows, options) => {
+          focusedChildId = options?.focusChildId;
+          return "family context";
+        },
+        loadProgressContext: async () => "",
+        loadContinuityContext: async () => "",
+        recordContextSnapshot: async () => {},
+      },
+    );
+
+    assert.equal(callerLoads, 0);
+    assert.equal(pinnedLoads, 1);
+    assert.equal(focusedChildId, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+    assert.equal(markdown, "family context");
+  });
+});
+
+describe("subject lesson task-spawn guard", () => {
+  it("blocks task mutations only for the exact internal lesson channel", () => {
+    assert.match(
+      refuseScheduleSpawnedSession({ channel: "subject_lesson" }) ?? "",
+      /cannot create or change scheduled tasks/u,
+    );
+    assert.equal(
+      refuseScheduleSpawnedSession({ channel: "subject-lesson" }),
+      null,
+    );
+  });
+});
+
+describe("subject lesson conversation persistence", () => {
+  it("skips only the exact internal lesson channel", () => {
+    assert.equal(
+      shouldSkipConversationPersistence({ channel: "subject_lesson" }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationPersistence({ channel: "subject-lesson" }),
+      false,
+    );
+    assert.equal(shouldSkipConversationPersistence(undefined), false);
+  });
+});
+
+describe("subject lesson model usage channel", () => {
+  it("maps only the exact internal lesson channel and registered surface", () => {
+    assert.equal(
+      usageChannelFromAttributes({ channel: "subject_lesson" }),
+      "subject_lesson",
+    );
+    assert.equal(
+      usageChannelFromAttributes({ channel: "subject-lesson" }),
+      "web",
+    );
+    assert.equal(
+      usageSurfaceFromAttributes({
+        channel: "subject_lesson",
+        modelUsageSurface: "subject_lesson",
+      }),
+      "subject_lesson",
+    );
+    for (const attributes of [
+      {
+        channel: "subject_lesson",
+        modelUsageSurface: "materials_image",
+      },
+      {
+        channel: "subject-lesson",
+        modelUsageSurface: "subject_lesson",
+      },
+      {
+        channel: "subject_lesson",
+      },
+    ]) {
+      assert.equal(usageSurfaceFromAttributes(attributes), "chat");
+    }
   });
 });
 
