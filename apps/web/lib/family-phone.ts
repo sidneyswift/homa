@@ -41,6 +41,22 @@ export async function getFamilyPhones(familyId: string): Promise<FamilyPhoneRow[
 }
 
 /**
+ * Returns only whether this family has a linked texting row. Parent-facing
+ * handoffs use this instead of loading or serializing phone values.
+ */
+export async function hasFamilyPhone(familyId: string): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ exists: boolean }[]>`
+    select exists (
+      select 1
+      from public.family_phones
+      where family_id = ${familyId}
+    ) as exists
+  `;
+  return rows[0]?.exists ?? false;
+}
+
+/**
  * Links a number to a family. Numbers accumulate (one per adult);
  * re-adding a number the family already holds is a quiet success that
  * updates its member attribution. Fails softly when the number belongs

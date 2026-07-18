@@ -4,8 +4,19 @@ import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuit
 import { persistConversationMessage } from "../../lib/conversation-log";
 
 /**
+ * Internal lesson-builder chatter is durable in Eve and the lesson row, but
+ * is not a parent conversation and must not enter recall.
+ */
+export function shouldSkipConversationPersistence(
+  attributes: unknown,
+): boolean {
+  const channel = (attributes as { channel?: unknown } | undefined)?.channel;
+  return channel === "subject_lesson";
+}
+
+/**
  * The durable chat record (agentic ladder item 5, an M1-02 slice): every
- * user and assistant message, on EVERY channel (web chat and SMS), lands
+ * parent-facing user and assistant message lands
  * in public.conversation_messages the moment its stream event is durably
  * recorded. eve's Workflow storage keeps the live session; Postgres keeps
  * the permanent, searchable record the recall tool greps
@@ -25,9 +36,12 @@ import { persistConversationMessage } from "../../lib/conversation-log";
 export default defineHook({
   events: {
     async "message.received"(event, ctx) {
+      const attributes = ctx.session.auth.current?.attributes;
+      if (shouldSkipConversationPersistence(attributes)) return;
+
       try {
         const persisted = await persistConversationMessage({
-          attributes: ctx.session.auth.current?.attributes,
+          attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
           sequence: event.data.sequence,
@@ -35,7 +49,6 @@ export default defineHook({
           content: event.data.message,
           turnId: event.data.turnId,
         });
-        const attributes = ctx.session.auth.current?.attributes;
         if (persisted && attributes) {
           Object.assign(
             attributes,
@@ -54,10 +67,13 @@ export default defineHook({
       }
     },
     async "message.completed"(event, ctx) {
+      const attributes = ctx.session.auth.current?.attributes;
+      if (shouldSkipConversationPersistence(attributes)) return;
+
       try {
         if (!event.data.message) return;
         await persistConversationMessage({
-          attributes: ctx.session.auth.current?.attributes,
+          attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
           sequence: event.data.sequence,

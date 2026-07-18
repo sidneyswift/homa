@@ -52,7 +52,18 @@ function birthdayDisplay(isoDate: string): string {
   return Number.isNaN(parsed.getTime()) ? "" : `Born ${BIRTHDAY_FORMAT.format(parsed)}`;
 }
 
-export default async function SettingsPage() {
+export function shouldOpenSignedInAdultPhoneEditor(
+  edit: string | readonly string[] | undefined,
+): boolean {
+  return edit === "phone";
+}
+
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string | string[] }>;
+}) {
+  const { edit } = await searchParams;
   const data = await getAppData();
   if (!data) redirect("/onboarding");
   const { family, children } = data;
@@ -156,6 +167,7 @@ export default async function SettingsPage() {
                 }))}
               homaNumberDisplay={homaNumber ? formatUsPhone(homaNumber) : null}
               homaNumberE164={homaNumber}
+              openSignedInAdultPhoneEditor={shouldOpenSignedInAdultPhoneEditor(edit)}
             />
 
             <HomeschoolSection current={homeschool} />

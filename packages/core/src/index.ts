@@ -9,6 +9,8 @@ export {
   type WaitlistSubmission,
 } from "./waitlist";
 
+export { ACTION_COSTS } from "./action-costs";
+
 export {
   EVENT_SCHEMAS,
   WALL_DOORS,
@@ -62,6 +64,12 @@ export {
 export { PERSONALIZATION_EXCEPTION_IDS, personalizeStatement } from "./map/personalize";
 
 export { reportStaleness, type ReportStaleness } from "./map/staleness";
+
+export {
+  selectSubjectLessonTarget,
+  selectSubjectPlanTargets,
+  type SubjectLessonTarget,
+} from "./map/lesson-target";
 
 export {
   buildFourWeekPlan,
@@ -147,6 +155,8 @@ export {
   mapResumeRequestSchema,
   mapScoreRequestSchema,
   mapStartSchema,
+  mapSubjectLessonBuildSchema,
+  mapSubjectLessonMutationSchema,
   type MapAnswerPayload,
   type MapChildExtras,
   type MapChildInput,

@@ -27,7 +27,13 @@ const KIND_HEADLINES: Record<string, string> = {
   game: "Game ready",
 };
 
-export function MaterialCard({ material }: { material: MaterialArtifact }) {
+export function MaterialCard({
+  material,
+  showStatusHeadline = true,
+}: {
+  material: MaterialArtifact;
+  showStatusHeadline?: boolean;
+}) {
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
   const subtitle = [material.skill, material.childName ? `for ${material.childName}` : null]
     .filter(Boolean)
@@ -35,8 +41,12 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
 
   return (
     <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 shadow-sm">
-      <p className="text-sm font-medium text-brand">{headline}</p>
-      <p className="mt-1 font-display text-lg font-semibold text-strong">
+      {showStatusHeadline ? (
+        <p className="text-sm font-medium text-[var(--clay-700)]">{headline}</p>
+      ) : null}
+      <p
+        className={`${showStatusHeadline ? "mt-1 " : ""}font-display text-lg font-semibold text-strong`}
+      >
         {material.title}
       </p>
       {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
@@ -45,7 +55,7 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open the ${material.title} PDF`}
-        className="mt-3 block overflow-hidden rounded-md border border-border-subtle bg-white transition-shadow hover:shadow-md"
+        className="mt-3 block overflow-hidden rounded-md border border-border-subtle bg-white transition-shadow hover:shadow-md focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
       >
         {/* Plain img on purpose: blob previews are remote, sized by the
             letter aspect ratio, and never above the fold. */}
@@ -61,7 +71,7 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
         href={material.pdfUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+        className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-[var(--clay-700)] px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)]"
       >
         Print it
       </a>

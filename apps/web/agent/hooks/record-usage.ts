@@ -4,6 +4,7 @@ import { HOMA_MODEL } from "../model";
 import {
   recordModelUsage,
   usageChannelFromAttributes,
+  usageSurfaceFromAttributes,
 } from "../../lib/model-usage";
 
 /**
@@ -11,8 +12,8 @@ import {
  * call in an agent turn carries usage on eve's step.completed event, and
  * this hook lands it in public.model_usage with the family and channel
  * from session auth, never from model output. Covers web chat, SMS,
- * email, and dispatch automatically because they are all channels on the
- * one agent.
+ * email, dispatch, and the subject lesson lane because they are all
+ * channels on the one agent.
  *
  * The model id is the agent's pinned HOMA_MODEL: step.completed does not
  * carry a model id, and the agent runs exactly one. Compaction summary
@@ -36,7 +37,7 @@ export default defineHook({
           | undefined;
         await recordModelUsage({
           familyId: attributes?.familyId ?? null,
-          surface: "chat",
+          surface: usageSurfaceFromAttributes(attributes),
           channel: usageChannelFromAttributes(attributes),
           model: HOMA_MODEL,
           modality: "text",

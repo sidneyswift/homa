@@ -27,6 +27,9 @@ import {
   sweepLessons,
   type LessonSweepResult,
 } from "../../../../lib/lessons/worker";
+import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
+import { staleSubjectLessonFailureEvent } from "../../../../lib/subject-lessons/stale-reaper";
+import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
 
 /**
  * GET /api/map/cron  (Vercel cron, hourly)
@@ -52,6 +55,8 @@ import {
  *      lesson analyses (bounded attempts), fails the exhausted with
  *      honest state, and enforces the 30-day raw-audio TTL. DARK
  *      unless HOMA_LESSON_LISTEN_ENABLED.
+ *   9. Stale subject lesson runs fail after two hours without an automatic
+ *      retry. DARK unless HOMA_SUBJECT_LESSONS_ENABLED is exactly true.
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -91,6 +96,7 @@ export async function GET(request: Request): Promise<Response> {
     lessonsFailed: 0,
     audioDeleted: 0,
   };
+  let staleSubjectLessons = 0;
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -149,17 +155,48 @@ export async function GET(request: Request): Promise<Response> {
     if (lessonListenEnabled()) {
       lessons = await sweepLessons();
     }
+    if (subjectLessonsEnabled()) {
+      const staleLessonReceipts = await reapStaleSubjectLessons();
+      staleSubjectLessons = staleLessonReceipts.length;
+      for (const receipt of staleLessonReceipts) {
+        await emitMapEvent(
+          "map.subject_lesson_failed",
+          staleSubjectLessonFailureEvent(receipt),
+        );
+      }
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     console.error("map/cron failed:", message);
     await recordCronRun(
       "map_cron",
       false,
-      { reminders, bandReady, retests, purged, transcripts, cards, digest, lessons },
+      {
+        reminders,
+        bandReady,
+        retests,
+        purged,
+        transcripts,
+        cards,
+        digest,
+        lessons,
+        staleSubjectLessons,
+      },
       message,
     );
     return Response.json(
-      { ok: false, reminders, bandReady, retests, purged, transcripts, cards, digest, lessons },
+      {
+        ok: false,
+        reminders,
+        bandReady,
+        retests,
+        purged,
+        transcripts,
+        cards,
+        digest,
+        lessons,
+        staleSubjectLessons,
+      },
       { status: 500 },
     );
   }
@@ -173,6 +210,18 @@ export async function GET(request: Request): Promise<Response> {
     cards,
     digest,
     lessons,
+    staleSubjectLessons,
   });
-  return Response.json({ ok: true, reminders, bandReady, retests, purged, transcripts, cards, digest, lessons });
+  return Response.json({
+    ok: true,
+    reminders,
+    bandReady,
+    retests,
+    purged,
+    transcripts,
+    cards,
+    digest,
+    lessons,
+    staleSubjectLessons,
+  });
 }

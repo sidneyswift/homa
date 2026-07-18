@@ -7,7 +7,13 @@ import { familyWallCheckout, wallEnabled } from "../../../../lib/billing/wall";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
-import { getReportByToken } from "../../../../lib/map/store";
+import {
+  getReportByToken,
+  listReadySubjectLessonSummariesByReportToken,
+} from "../../../../lib/map/store";
+import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
+import { isFamilyAccountOwner } from "../../../../lib/subject-lessons/owner";
+import { listCurrentSubjectLessonSummaries } from "../../../../lib/subject-lessons/store";
 import { NarrativeBeat } from "./narrative-beat";
 import { reportButtonClass } from "./report-button";
 import { ReportView } from "./report-view";
@@ -55,6 +61,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
     );
   }
 
+  const lessonFlagOn = subjectLessonsEnabled();
   const flagOn = narrativeEnabled();
   const meta = report.narrativeMeta;
   const ready = meta?.status === "ready" && report.narrative !== null;
@@ -120,15 +127,33 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
   // month stays a plain tokenized link for every viewer.
   let viewerIsReportFamily = false;
   let viewerIsSignedInMember = false;
+  let viewerIsAccountOwner = false;
   try {
     const actor = await requireFamilyWithActor();
     if (actor && actor.family.id === report.familyId) {
       viewerIsReportFamily = true;
       viewerIsSignedInMember = actor.memberUserId !== null;
+      if (lessonFlagOn && actor.memberUserId) {
+        viewerIsAccountOwner = await isFamilyAccountOwner(
+          report.familyId,
+          actor.memberUserId,
+        );
+      }
     }
   } catch {
     // Auth lookup unavailable: render the report, keep actions hidden.
   }
+
+  const subjectLessons = lessonFlagOn
+    ? viewerIsAccountOwner
+      ? await listCurrentSubjectLessonSummaries(
+          report.familyId,
+          report.childId,
+        ).catch(() => [])
+      : await listReadySubjectLessonSummariesByReportToken(token).catch(
+          () => [],
+        )
+    : [];
 
   // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
   // (the instant no-query path), and for exempt or trialing families.
@@ -146,9 +171,12 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
       narrativeView={narrativeView}
       stateRequirements={stateRequirements}
       wall={wall}
+      subjectLessonsEnabled={lessonFlagOn}
+      subjectLessons={subjectLessons}
       viewerActions={{
         call: viewerIsSignedInMember,
         month: viewerIsReportFamily,
+        lesson: viewerIsAccountOwner,
       }}
     />
   );
