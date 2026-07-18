@@ -1,7 +1,7 @@
 import { defineChannel, GET } from "eve/channels";
 
 import { mapDb } from "../../lib/map/db";
-import { failStage, type ClaimedJob } from "../../lib/jobs/runner";
+import { handleUnreportedStage, type ClaimedJob } from "../../lib/jobs/runner";
 
 /**
  * The job runner's build channel (agent-jobs runner spec). It wakes a
@@ -41,7 +41,7 @@ async function stageStillInProgress(
 
 /** The session ended. If its stage never reached a reported state, the
  * build session failed or stalled without calling report_agent_job_stage;
- * park the stage so nothing is lost and the parent can retry. */
+ * retry it on the next tick a few times, then park it so nothing is lost. */
 async function failIfUnreported(state: AgentJobState, reason: string): Promise<void> {
   const { familyId, jobId, stageNumber, skill, totalStages } = state;
   if (!familyId || !jobId || stageNumber === null) return;
@@ -56,7 +56,7 @@ async function failIfUnreported(state: AgentJobState, reason: string): Promise<v
     stageNumber,
     totalStages: totalStages ?? stageNumber,
   };
-  await failStage(job, reason);
+  await handleUnreportedStage(job, reason);
 }
 
 export default defineChannel({
