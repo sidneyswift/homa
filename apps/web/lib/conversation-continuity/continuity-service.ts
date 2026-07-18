@@ -6,6 +6,7 @@ import {
   type ContinuityContextMessage,
   type PendingDeliveryCandidate,
   type ReplyOutcome,
+  type ReplyResolutionMethod,
 } from "./reply-policy";
 
 export type ContinuityChannel =
@@ -78,6 +79,8 @@ export interface ResolvedInboundTurn {
   repliedDeliveryId: string | null;
   resolution: "matched" | "ambiguous" | "none";
   resolvedOutcome: ReplyOutcome | null;
+  resolutionMethod: ReplyResolutionMethod | null;
+  replyClassifierVersion: string | null;
   replySourceChannel: PendingDeliveryCandidate["channel"] | null;
   contextMarkdown: string;
   threadKeyHash: string;
@@ -204,6 +207,9 @@ export async function resolveInboundTurn(
     repliedDeliveryId,
     resolution: reply.kind,
     resolvedOutcome: reply.kind === "matched" ? reply.outcome : null,
+    resolutionMethod: reply.kind === "matched" ? reply.method : null,
+    replyClassifierVersion:
+      reply.kind === "matched" ? reply.classifierVersion : null,
     replySourceChannel:
       reply.kind === "matched" ? reply.candidate.channel : null,
     contextMarkdown,

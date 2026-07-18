@@ -4,12 +4,13 @@ import Link from "next/link";
 import { requireFounder } from "../../lib/admin/gate";
 import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-data";
 import type { HandledAlert } from "../../lib/admin/alert-acks";
-import { formatInt, formatTokens, medianExact, percent, timeAgo } from "../../lib/admin/format";
+import { formatInt, formatTokens, medianExact, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
 import { accountStatusCopy } from "../../lib/admin/account-status-copy";
 import { QUIET_AFTER_DAYS, STAGE_COPY } from "../../lib/admin/stage";
 import { AgentPromptButton } from "./agent-prompt-button";
 import { AlertAckButton } from "./alert-ack-button";
+import { MorningOfferFunnel } from "./morning-offer-funnel";
 import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
 
 /**
@@ -82,7 +83,6 @@ export default async function AdminOverviewPage({
   const emailTroubleCount =
     (data.emailCounts.rejected ?? 0) + (data.emailCounts.bounced ?? 0) + (data.emailCounts.complained ?? 0);
   const cronLate = data.cronLate;
-  const morningPromptOutcomes = data.taskPromptOutcomes.morning_brief;
   const journalPromptOutcomes = data.taskPromptOutcomes.journal_prompt;
   const customPromptOutcomes = data.taskPromptOutcomes.custom;
   const nonBriefPromptsResolved =
@@ -254,28 +254,10 @@ export default async function AdminOverviewPage({
           sub={`${deliveriesFailed} failed · ${deliveriesUncertain} uncertain`}
           subTone={deliveriesFailed > 0 ? "rose" : deliveriesUncertain > 0 ? "gold" : "sage"}
         />
-        <Tile
-          label="Morning offers sent"
-          value={String(morningPromptOutcomes.sentOffers)}
-          sub="sent deliveries with an offer"
-        />
-        <Tile
-          label="Morning offers resolved"
-          value={String(morningPromptOutcomes.resolvedOffers)}
-          sub={`${morningPromptOutcomes.accepted} accepted · ${morningPromptOutcomes.declined} declined · ${morningPromptOutcomes.answered} answered`}
-        />
-        <Tile
-          label="Morning offer acceptance"
-          value={percent(
-            morningPromptOutcomes.accepted,
-            morningPromptOutcomes.acceptanceDenominator,
-          )}
-          sub={`${morningPromptOutcomes.accepted} accepted of ${morningPromptOutcomes.acceptanceDenominator} accepted or declined`}
-        />
-        <Tile
-          label="Possible interest, not linked"
-          value={String(data.possibleMorningBriefInterest)}
-          sub="same episode, within four hours"
+        <MorningOfferFunnel
+          summary={data.morningOfferFunnel}
+          possibleInterest={data.possibleMorningBriefInterest}
+          rangeLabel={rangeLabel}
         />
         <Tile
           label="Non-brief task prompts"

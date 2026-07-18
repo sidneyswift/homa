@@ -2,6 +2,11 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import {
+  offerDeliveryIdFromAttributes,
+  offerEpisodeIdFromAttributes,
+  recordAcceptedOfferFulfillment,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { emitMapEvent } from "../../lib/map/events";
 import {
   blobConfigured,
@@ -344,7 +349,12 @@ export default defineTool({
     }
 
     const attributes = ctx.session.auth.current?.attributes as
-      | { channel?: string; phoneNumber?: string }
+      | {
+          channel?: string;
+          phoneNumber?: string;
+          repliedDeliveryId?: string;
+          episodeId?: string;
+        }
       | undefined;
     const channel = usageChannelFromAttributes(attributes);
 
@@ -520,6 +530,22 @@ export default defineTool({
     // never lands on her phone; revise first. The number comes from
     // channel auth, never the model (anti-relay law).
     const reviewPassed = review === null || review.pass;
+    if (reviewPassed) {
+      try {
+        await recordAcceptedOfferFulfillment({
+          familyId,
+          sourceDeliveryId: offerDeliveryIdFromAttributes(attributes),
+          episodeId: offerEpisodeIdFromAttributes(attributes),
+          kind: "material",
+          referenceId: materialId,
+        });
+      } catch (error) {
+        console.error(
+          "create_printable fulfillment attribution failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     let sentByText = false;
     let previewSentByText = false;
     if (channel === "sms" && reviewPassed && attributes?.phoneNumber) {

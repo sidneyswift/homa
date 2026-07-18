@@ -1,4 +1,12 @@
 import { normalizeRfcMessageId } from "./rfc-message-id";
+import {
+  REPLY_CLASSIFIER_VERSION,
+  classifyReplyOutcome,
+  type ReplyKind,
+  type ReplyOutcome,
+} from "./reply-outcome";
+
+export type { ReplyOutcome } from "./reply-outcome";
 
 /**
  * Pure reply-causation policy for the Conversation Continuity module.
@@ -18,19 +26,28 @@ export interface PendingDeliveryCandidate {
   providerMessageId: string | null;
   sentAt: Date;
   expiresAt: Date;
-  replyKind: "yes_no" | "free_text" | "choice" | "approval";
+  replyKind: ReplyKind;
   destinationAuthenticated: boolean;
   messageContent?: string;
   promptKey?: string | null;
 }
 
-export type ReplyOutcome = "accepted" | "declined" | "answered";
+export type ReplyResolutionMethod =
+  | "explicit_delivery"
+  | "provider_reply"
+  | "content_clarification"
+  | "prompt_key"
+  | "bounded_polarity"
+  | "same_channel_free_text"
+  | "progress_choice";
 
 export type ReplyResolution =
   | {
       kind: "matched";
       candidate: PendingDeliveryCandidate;
       outcome: ReplyOutcome;
+      method: ReplyResolutionMethod;
+      classifierVersion: typeof REPLY_CLASSIFIER_VERSION;
     }
   | { kind: "ambiguous"; candidates: PendingDeliveryCandidate[] }
   | { kind: "none"; nearbyCandidates: PendingDeliveryCandidate[] };
@@ -53,27 +70,6 @@ const PROGRESS_NATURAL_REPLY =
   /^(?:(?:he|she|they)\s+)?(?:can(?:not|['’]t)(?:\s+do\s+(?:it|that))?(?:\s+yet)?|can\s+do\s+(?:it|that)\s+easily|does\s+(?:it|that)\s+easily|is\s+getting\s+there|needs?\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|can\s+do\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|does\s+(?:it|that)\s+with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help|with\s+(?:(?:a\s+little|some|lots\s+of)\s+)?help)$/iu;
 const PROGRESS_PROMPT_KEY =
   /^progress-check-in:([^:]+):revision:(\d+)$/u;
-const AFFIRMATIVE_REPLY =
-  /^(?:yes(?:,? please)?|yep|yeah|sure|okay|ok|do it|send it|sounds good)$/u;
-const NEGATIVE_REPLY = /^(?:no(?:,? thanks)?|nope|not now)$/u;
-
-function normalizeBoundedPolarityPhrase(text: string): string {
-  return text
-    .normalize("NFKC")
-    .toLowerCase()
-    .trim()
-    .replace(/[.!?]+$/gu, "")
-    .replace(/\s+/gu, " ")
-    .replace(/\s*,\s*/gu, ", ");
-}
-
-function isAffirmativeReply(text: string): boolean {
-  return AFFIRMATIVE_REPLY.test(normalizeBoundedPolarityPhrase(text));
-}
-
-function isNegativeReply(text: string): boolean {
-  return NEGATIVE_REPLY.test(normalizeBoundedPolarityPhrase(text));
-}
 
 function isProgressChoiceReply(text: string): boolean {
   const normalized = text
@@ -197,35 +193,36 @@ function contentClarification(
   return null;
 }
 
-function outcomeForMatch(
+function matchedReply(
   candidate: PendingDeliveryCandidate,
   text: string,
-): ReplyOutcome {
+  method: ReplyResolutionMethod,
+): ReplyResolution {
+  return {
+    kind: "matched",
+    candidate,
+    outcome: classifyReplyOutcome(candidate.replyKind, text),
+    method,
+    classifierVersion: REPLY_CLASSIFIER_VERSION,
+  };
+}
+
+function heuristicMethod(
+  candidate: PendingDeliveryCandidate,
+): ReplyResolutionMethod {
   switch (candidate.replyKind) {
     case "free_text":
+      return "same_channel_free_text";
     case "choice":
-      return "answered";
+      return "progress_choice";
     case "yes_no":
     case "approval":
-      if (isAffirmativeReply(text)) return "accepted";
-      if (isNegativeReply(text)) return "declined";
-      return "answered";
+      return "bounded_polarity";
     default: {
       const exhaustive: never = candidate.replyKind;
       return exhaustive;
     }
   }
-}
-
-function matchedReply(
-  candidate: PendingDeliveryCandidate,
-  text: string,
-): ReplyResolution {
-  return {
-    kind: "matched",
-    candidate,
-    outcome: outcomeForMatch(candidate, text),
-  };
 }
 
 export function resolveReplyIntent(
@@ -237,7 +234,9 @@ export function resolveReplyIntent(
     const exact = active.filter(
       (candidate) => candidate.deliveryId === input.explicitDeliveryId,
     );
-    if (exact.length === 1) return matchedReply(exact[0], input.text);
+    if (exact.length === 1) {
+      return matchedReply(exact[0], input.text, "explicit_delivery");
+    }
   }
 
   if (input.providerReplyTo) {
@@ -248,7 +247,9 @@ export function resolveReplyIntent(
         normalizeRfcMessageId(candidate.providerMessageId) ===
           replyToMessageId,
     );
-    if (exact.length === 1) return matchedReply(exact[0], input.text);
+    if (exact.length === 1) {
+      return matchedReply(exact[0], input.text, "provider_reply");
+    }
     if (exact.length > 1) return { kind: "ambiguous", candidates: exact };
   }
 
@@ -265,7 +266,9 @@ export function resolveReplyIntent(
             candidate.replyKind === "choice",
         ),
       );
-  if (contentMatch) return matchedReply(contentMatch, input.text);
+  if (contentMatch) {
+    return matchedReply(contentMatch, input.text, "content_clarification");
+  }
 
   const clarified = currentAsksQuestion
     ? []
@@ -278,7 +281,7 @@ export function resolveReplyIntent(
           promptKeyMatches(input.text, candidate.promptKey),
       );
   if (clarified.length === 1) {
-    return matchedReply(clarified[0], input.text);
+    return matchedReply(clarified[0], input.text, "prompt_key");
   }
   if (clarified.length > 1) {
     return { kind: "ambiguous", candidates: clarified };
@@ -286,7 +289,7 @@ export function resolveReplyIntent(
 
   const trimmedText = input.text.trim();
   const boundedPolarityReply =
-    isAffirmativeReply(trimmedText) || isNegativeReply(trimmedText);
+    classifyReplyOutcome("yes_no", trimmedText) !== "answered";
   const progressChipReply = PROGRESS_CHIP_REPLY.test(
     trimmedText.replace(/[.!]+$/u, "").replaceAll("_", " "),
   ) || PROGRESS_NEGATIVE_REPLY.test(
@@ -324,7 +327,11 @@ export function resolveReplyIntent(
   }
 
   if (eligible.length === 1) {
-    return matchedReply(eligible[0], input.text);
+    return matchedReply(
+      eligible[0],
+      input.text,
+      heuristicMethod(eligible[0]),
+    );
   }
   if (eligible.length > 1) {
     return { kind: "ambiguous", candidates: eligible };

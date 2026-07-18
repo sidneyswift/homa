@@ -123,6 +123,8 @@ describe("conversation continuity service", () => {
     assert.equal(result.repliedDeliveryId, "delivery-sidney");
     assert.equal(result.resolution, "matched");
     assert.equal(result.resolvedOutcome, "accepted");
+    assert.equal(result.resolutionMethod, "bounded_polarity");
+    assert.equal(result.replyClassifierVersion, "reply-intent-v2");
     assert.match(result.contextMarkdown, /Want a quick stop-and-go game/u);
     assert.doesNotMatch(result.contextMarkdown, /Compose the morning brief/u);
   });

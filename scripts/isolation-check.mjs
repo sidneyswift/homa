@@ -44,6 +44,7 @@ const fixtureFamilyIds = [];
 const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
 let morningResearchBriefV2SchemaAvailable = false;
+let morningOfferFunnelSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -399,6 +400,23 @@ async function morningResearchBriefV2SchemaExists() {
     where to_regclass(expected.table_name) is not null
   `;
   return rows[0]?.table_count === 3;
+}
+
+async function morningOfferFunnelSchemaExists() {
+  const rows = await sql`
+    select
+      to_regclass(
+        'public.conversation_offer_fulfillments'
+      ) is not null as table_exists,
+      (
+        select count(*)::integer
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'conversation_open_loops'
+          and column_name in ('resolution_method', 'classifier_version')
+      ) = 2 as audit_columns_exist
+  `;
+  return rows[0]?.table_exists && rows[0]?.audit_columns_exist;
 }
 
 async function expectPrivilegedSqlRejected(
@@ -1991,6 +2009,24 @@ async function expectAuthenticatedIsolation() {
         familyBUserId: familyBUser.userId,
       });
     }
+    if (morningOfferFunnelSchemaAvailable) {
+      await expectAuthenticatedReadDenied(
+        familyAUser.accessToken,
+        "conversation_offer_fulfillments",
+        "auth member cannot read offer fulfillment attribution",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyAUser.accessToken,
+        "conversation_offer_fulfillments",
+        {
+          family_id: familyAId,
+          source_delivery_id: "00000000-0000-0000-0000-000000000000",
+          kind: "material",
+          reference_id: "00000000-0000-0000-0000-000000000000",
+        },
+        "auth member cannot forge offer fulfillment attribution",
+      );
+    }
     if (!(await childProgressSchemaExists())) {
       throw new Error("ChildProgress migration is not applied to the target");
     }
@@ -2549,6 +2585,9 @@ await expectReadDenied("conversation_thread_bindings");
 await expectReadDenied("conversation_deliveries");
 await expectReadDenied("conversation_open_loops");
 await expectReadDenied("conversation_inbound_receipts");
+// Accepted-offer fulfillment is server-only attribution. Parents see the
+// resulting material or task, never this analytics edge.
+await expectReadDenied("conversation_offer_fulfillments");
 // Post-turn review bookkeeping (migration #35): deny-all, server-only.
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
@@ -2730,6 +2769,16 @@ await expectInsertDenied(
     updated_at: new Date().toISOString(),
   },
   "anon cannot forge research brief feedback",
+);
+await expectInsertDenied(
+  "conversation_offer_fulfillments",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    source_delivery_id: "00000000-0000-0000-0000-000000000000",
+    kind: "material",
+    reference_id: "00000000-0000-0000-0000-000000000000",
+  },
+  "anon cannot forge offer fulfillment attribution",
 );
 await expectInsertDenied(
   "state_requirements",
@@ -3130,9 +3179,31 @@ if (sql) {
       error instanceof Error ? error.message : String(error),
     );
   }
+  try {
+    morningOfferFunnelSchemaAvailable =
+      await morningOfferFunnelSchemaExists();
+    report(
+      "morning offer funnel migration is applied to the isolation target",
+      morningOfferFunnelSchemaAvailable,
+      morningOfferFunnelSchemaAvailable
+        ? "fulfillment table and reply audit columns exist"
+        : "morning offer funnel schema is missing",
+    );
+  } catch (error) {
+    report(
+      "morning offer funnel migration is applied to the isolation target",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 } else {
   report(
     "morning research brief v2 migration is applied to the isolation target",
+    false,
+    "missing SUPABASE_DB_PASSWORD",
+  );
+  report(
+    "morning offer funnel migration is applied to the isolation target",
     false,
     "missing SUPABASE_DB_PASSWORD",
   );

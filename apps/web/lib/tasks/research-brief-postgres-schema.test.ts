@@ -50,6 +50,51 @@ describe("research brief PostgreSQL schema", () => {
   before(async () => await harness.start());
   after(async () => await harness.stop());
 
+  it("adds reply audit columns and a server-only offer fulfillment ledger", async () => {
+    const db = harness.database();
+    const columns = await db<{ column_name: string }[]>`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public'
+        and table_name = 'conversation_open_loops'
+        and column_name in ('resolution_method', 'classifier_version')
+      order by column_name
+    `;
+    const tables = await db<{ table_name: string }[]>`
+      select table_name
+      from information_schema.tables
+      where table_schema = 'public'
+        and table_name = 'conversation_offer_fulfillments'
+    `;
+
+    assert.deepEqual(
+      columns.map((column) => column.column_name),
+      ["classifier_version", "resolution_method"],
+    );
+    assert.deepEqual(
+      tables.map((table) => table.table_name),
+      ["conversation_offer_fulfillments"],
+    );
+    const [privileges] = await db<{
+      authenticatedInsert: boolean;
+      authenticatedSelect: boolean;
+    }[]>`
+      select
+        has_table_privilege(
+          'authenticated',
+          'public.conversation_offer_fulfillments',
+          'INSERT'
+        ) as "authenticatedInsert",
+        has_table_privilege(
+          'authenticated',
+          'public.conversation_offer_fulfillments',
+          'SELECT'
+        ) as "authenticatedSelect"
+    `;
+    assert.equal(privileges.authenticatedInsert, false);
+    assert.equal(privileges.authenticatedSelect, false);
+  });
+
   it("defaults existing task runs to legacy and constrains delivery versions", async () => {
     const db = harness.database();
     const [stored] = await db<{ delivery_version: string }[]>`

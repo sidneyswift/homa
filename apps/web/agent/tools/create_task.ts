@@ -2,6 +2,11 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import {
+  offerDeliveryIdFromAttributes,
+  offerEpisodeIdFromAttributes,
+  recordAcceptedOfferFulfillment,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { createCustomTask } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
@@ -70,6 +75,20 @@ export default defineTool({
       typeof memberUserId === "string" ? memberUserId : null,
     );
     if (!result.ok) return { created: false, note: result.note };
+    try {
+      await recordAcceptedOfferFulfillment({
+        familyId,
+        sourceDeliveryId: offerDeliveryIdFromAttributes(attributes),
+        episodeId: offerEpisodeIdFromAttributes(attributes),
+        kind: "task",
+        referenceId: result.id,
+      });
+    } catch (error) {
+      console.error(
+        "create_task fulfillment attribution failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return {
       created: true,
       taskId: result.id,
