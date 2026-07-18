@@ -93,6 +93,8 @@ export function Hero() {
         </div>
         <div data-reveal="" className="rv-d1 lp-hero-visual" style={{ position: "relative" }}>
           <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-xl)" }}>
+            {/* objectPosition pans the crop left so the daughter sits right
+                of the floating phone instead of hidden behind it. */}
             <Image
               src="/images/hero-family.png"
               alt="A mom and her daughter working through a workbook together at the kitchen table"
@@ -100,18 +102,21 @@ export function Hero() {
               height={440}
               priority
               sizes="(max-width: 880px) 100vw, 540px"
-              style={{ width: "100%", height: 440, objectFit: "cover", display: "block" }}
+              style={{ width: "100%", height: 440, objectFit: "cover", objectPosition: "30% 42%", display: "block" }}
             />
           </div>
+          {/* Slight tilt matches the hand-placed doodle language; the warm
+              drop-shadow separates the device from the busy photo behind it. */}
           <div
             className="lp-hero-phone-float"
             style={{
               position: "absolute",
-              left: -28,
-              bottom: -32,
+              left: -20,
+              bottom: -26,
               width: 280,
-              transform: "scale(0.7)",
+              transform: "rotate(-2.5deg) scale(0.62)",
               transformOrigin: "bottom left",
+              filter: "drop-shadow(0 26px 38px rgba(51,42,33,0.38))",
             }}
           >
             <HeroProductDemo />
