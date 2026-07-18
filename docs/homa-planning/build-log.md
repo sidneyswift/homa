@@ -3,6 +3,36 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · The report lock ships dark: four open subjects, membership for the rest
+
+Founder ruling (recorded in the register as `report-lock-four-open` and
+`paywall-naming-and-price`; dated source
+`plans/2026-07-18-report-lock.md`): paywall V1 is the four-open-subjects
+report lock, chosen from the comparison lab
+(`plans/2026-07-18-paywall-directions.html`) with the WTF verdict's
+activation risk on the record. Built dark behind
+`HOMA_REPORT_LOCK_ENABLED` on top of the existing dark wall. Free-four
+selector in `packages/core/src/map/report-lock.ts` (fixed core, tested);
+held rows show the subject name and the parent's own answer count, no
+blur, no badges; one inline offer card; the token URL holds rows for
+every viewer, checkout renders owner-only; sample and mirror never lock.
+The unlock lands as onboarding: a short-lived child cookie set at
+checkout, re-scoped to the paying family in `/api/billing/confirm`, lands
+on `?welcome=1` where the first-subject chooser offers one default next
+step (the verified funnel break is the five-way choice after the report).
+Annual Payment Link became optional so the flip can start $19-only.
+Existing claimed families grandfather via `billing_exempt` backfill in
+the runbook; kill test pre-committed in the plan.
+
+Decisions made alone, flaggable: the fixed-core-with-fallback free-four
+policy details (core subject unmapped → strengthOrder fills the slot;
+four or fewer mapped subjects → nothing locks); the welcome chooser
+listing only non-exposure mapped subjects; the one-hour cookie TTL; the
+"report" fifth wall door reusing the existing beacon events instead of
+new event names. Checks: typecheck, lint (0 errors), check:events, core
+report-lock tests, Next build all green. check:isolation coverage for the parallel session's curriculum_jobs tables lands in the follow-up guards commit; at build time it failed
+on `curriculum_jobs` tables from a parallel session's in-flight
+migration, unrelated to this change.
 ## 2026-07-18 · The daily digest stops re-reporting alerts already marked handled
 
 Cause: the 2026-07-18 07:01 ET digest said "3 delivery problems need a

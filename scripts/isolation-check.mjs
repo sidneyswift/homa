@@ -2658,6 +2658,33 @@ await expectEmptyRead("agent_schedules");
 // Task run history (migration #49): same member-select posture; fleet
 // rows (family_id null) are invisible to every Data API role.
 await expectEmptyRead("homa_task_runs");
+// Curriculum build jobs (migration 20260718120000, additive, lands via
+// MCP ahead of the repo replay): members read their own family's builds
+// (the progress/cancel UI); no write policies exist, so the Stage-2
+// Workflow's server connection is the only writer. Same posture as
+// homa_task_runs. Until the migration reaches this target, the tables'
+// absence itself exposes nothing (PGRST205), and every check below arms
+// automatically the run after it lands.
+async function curriculumJobTablesPresent() {
+  const response = await rest(`curriculum_jobs?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  if (response.status !== 404) return true;
+  const raw = await response.text();
+  return !raw.includes("PGRST205");
+}
+const curriculumJobSchemaAvailable = await curriculumJobTablesPresent();
+if (curriculumJobSchemaAvailable) {
+  await expectEmptyRead("curriculum_jobs");
+  await expectEmptyRead("curriculum_job_weeks");
+} else {
+  coveredTables.add("curriculum_jobs");
+  coveredTables.add("curriculum_job_weeks");
+  report(
+    "curriculum job tables absent from target (additive migration not applied yet); nothing exposed",
+    true,
+  );
+}
 // The fleet research corpus (migration #50): deny-all; only the gate
 // (lib/knowledge/gate.ts) writes, only server code reads.
 await expectReadDenied("knowledge_bank");
@@ -2794,6 +2821,26 @@ await expectInsertDenied(
   },
   "anon cannot forge task runs",
 );
+if (curriculumJobSchemaAvailable) {
+  await expectInsertDenied(
+    "curriculum_jobs",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      title: "intruder build",
+      total_stages: 1,
+    },
+    "anon cannot forge curriculum jobs",
+  );
+  await expectInsertDenied(
+    "curriculum_job_weeks",
+    {
+      job_id: "00000000-0000-0000-0000-000000000000",
+      family_id: "00000000-0000-0000-0000-000000000000",
+      week_number: 1,
+    },
+    "anon cannot forge curriculum job weeks",
+  );
+}
 await expectInsertDenied(
   "research_brief_preparations",
   {
