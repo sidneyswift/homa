@@ -33,8 +33,15 @@ export function jobWorkerContext(
 ): { jobId: string; stageNumber: number } | null {
   const attrs = (attributes ?? {}) as { agentJobId?: unknown; agentJobStageNumber?: unknown };
   const jobId = typeof attrs.agentJobId === "string" ? attrs.agentJobId : null;
+  // Session auth attributes are strings; the runner stamps the stage number
+  // as a numeric string.
+  const raw = attrs.agentJobStageNumber;
   const stageNumber =
-    typeof attrs.agentJobStageNumber === "number" ? attrs.agentJobStageNumber : null;
-  if (!jobId || stageNumber === null) return null;
+    typeof raw === "number"
+      ? raw
+      : typeof raw === "string" && /^\d+$/.test(raw)
+        ? Number(raw)
+        : null;
+  if (!jobId || stageNumber === null || stageNumber < 1) return null;
   return { jobId, stageNumber };
 }

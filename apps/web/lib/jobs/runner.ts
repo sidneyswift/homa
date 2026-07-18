@@ -273,6 +273,26 @@ export async function failStage(
   );
 }
 
+/** Undo a claim when the build session could not even be started (a
+ * transient spawn error), so the next tick retries this stage cleanly
+ * instead of leaving it wedged in_progress until a reaper. */
+export async function releaseStageClaim(
+  familyId: string,
+  jobId: string,
+  stageNumber: number,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.agent_job_stages set status = 'pending', updated_at = now()
+    where job_id = ${jobId} and family_id = ${familyId}
+      and stage_number = ${stageNumber} and status = 'in_progress'
+  `;
+  await sql`
+    update public.agent_jobs set status = 'queued', updated_at = now()
+    where id = ${jobId} and family_id = ${familyId} and status = 'running'
+  `;
+}
+
 export interface StageMetering {
   sandboxCpuSeconds?: number;
   pageFetchCount?: number;
