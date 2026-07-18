@@ -12,17 +12,23 @@ import {
 } from "../../lib/tasks/dispatch-input";
 import { deliveryVersionForNewTaskRun } from "../../lib/tasks/delivery-version";
 import { enabledFamilyTaskKinds } from "../../lib/tasks/kinds";
-import { dispatchScheduledTask } from "../../lib/tasks/scheduled-dispatch";
+import {
+  dispatchScheduledTask,
+  type ScheduledTaskDispatchDependencies,
+} from "../../lib/tasks/scheduled-dispatch";
 import {
   advanceTaskSchedule,
   beginTaskRun,
   claimDueFamilyTasks,
   finishTaskRun,
+  isFirstFailedRunForScheduleDay,
+  loadFamilyTaskForRun,
   recordSkippedScheduledTaskRun,
   reapStaleTaskRuns,
   releaseTaskSchedule,
   seedFamilyTaskSchedules,
   withinDeliveryWindow,
+  type DueFamilyTask,
 } from "../../lib/tasks/store";
 import dispatchChannel from "../channels/dispatch";
 
@@ -62,74 +68,110 @@ export default defineSchedule({
         const now = new Date();
         await seedFamilyTaskSchedules(now);
         await markStalePendingDeliveriesUncertain(now);
-        await reapStaleTaskRuns(now);
+        const reaped = await reapStaleTaskRuns(now);
         const tasks = await claimDueFamilyTasks({
           now,
           limit: 50,
           leaseForMs: 10 * 60_000,
         });
 
-        for (const task of tasks) {
-          await dispatchScheduledTask(task, now, {
-            withinDeliveryWindow,
-            selectDeliveryVersion: (scheduledTask) =>
-              deliveryVersionForNewTaskRun(
-                scheduledTask.kind,
-                process.env,
-                scheduledTask.familySandbox,
-              ),
-            preflight: async (scheduledTask) =>
-              await preflightTaskDispatch(scheduledTask, "scheduled"),
-            beginRun: beginTaskRun,
-            recordSkippedRun: async (
-              scheduledTask,
-              scheduledAt,
-              preflight,
-            ) =>
-              await recordSkippedScheduledTaskRun({
-                task: scheduledTask,
-                now: scheduledAt,
-                deliveryVersion: preflight.deliveryVersion,
-                reason: preflight.reason,
-              }),
-            createEpisode: async (scheduledTask) =>
-              await createProactiveEpisode({
-                familyId: scheduledTask.familyId,
-                now,
-              }),
-            receive: async ({
-              message,
+        const dependenciesFor = (
+          task: DueFamilyTask,
+        ): ScheduledTaskDispatchDependencies => ({
+          withinDeliveryWindow,
+          selectDeliveryVersion: (scheduledTask) =>
+            deliveryVersionForNewTaskRun(
+              scheduledTask.kind,
+              process.env,
+              scheduledTask.familySandbox,
+            ),
+          preflight: async (scheduledTask) =>
+            await preflightTaskDispatch(scheduledTask, "scheduled"),
+          beginRun: beginTaskRun,
+          recordSkippedRun: async (
+            scheduledTask,
+            scheduledAt,
+            preflight,
+          ) =>
+            await recordSkippedScheduledTaskRun({
               task: scheduledTask,
-              run,
-              episodeId,
-              deliveryVersion,
-            }) =>
-              await receive(dispatchChannel, {
-                message,
-                target: buildDispatchTarget(
-                  scheduledTask,
-                  run.id,
-                  episodeId,
-                  deliveryVersion,
-                ),
-                auth: buildDispatchAuth(
-                  scheduledTask,
-                  run.id,
-                  episodeId,
-                  deliveryVersion,
-                ),
-              }),
-            setRuntimeSession: setTaskRunRuntimeSession,
-            finishRun: finishTaskRun,
-            advanceSchedule: advanceTaskSchedule,
-            releaseSchedule: releaseTaskSchedule,
-            logFailure: (error) => {
-              console.error(
-                `dispatch failed for family ${task.familyId} (${task.kind}):`,
-                error instanceof Error ? error.message : "unknown",
-              );
-            },
-          });
+              now: scheduledAt,
+              deliveryVersion: preflight.deliveryVersion,
+              reason: preflight.reason,
+            }),
+          createEpisode: async (scheduledTask) =>
+            await createProactiveEpisode({
+              familyId: scheduledTask.familyId,
+              now,
+            }),
+          receive: async ({
+            message,
+            task: scheduledTask,
+            run,
+            episodeId,
+            deliveryVersion,
+          }) =>
+            await receive(dispatchChannel, {
+              message,
+              target: buildDispatchTarget(
+                scheduledTask,
+                run.id,
+                episodeId,
+                deliveryVersion,
+              ),
+              auth: buildDispatchAuth(
+                scheduledTask,
+                run.id,
+                episodeId,
+                deliveryVersion,
+              ),
+            }),
+          setRuntimeSession: setTaskRunRuntimeSession,
+          finishRun: finishTaskRun,
+          advanceSchedule: advanceTaskSchedule,
+          releaseSchedule: releaseTaskSchedule,
+          logFailure: (error) => {
+            console.error(
+              `dispatch failed for family ${task.familyId} (${task.kind}):`,
+              error instanceof Error ? error.message : "unknown",
+            );
+          },
+        });
+
+        for (const task of tasks) {
+          await dispatchScheduledTask(task, now, dependenciesFor(task));
+        }
+
+        // DR-2: a reaped morning brief that reached nobody gets exactly
+        // one same-day replacement. The failed run fell out of the
+        // outbox index, so a fresh run for the same schedule and local
+        // day can begin; the delivery window still applies, so a retry
+        // past noon records a skip instead of an afternoon text.
+        for (const run of reaped) {
+          if (run.kind !== "morning_brief" || run.reachedFamily) continue;
+          if (!run.familyId || !run.scheduleId || !run.scheduledFor) continue;
+          if (
+            !(await isFirstFailedRunForScheduleDay(
+              run.scheduleId,
+              run.scheduledFor,
+            ))
+          ) {
+            continue;
+          }
+          const loaded = await loadFamilyTaskForRun(
+            run.familyId,
+            run.scheduleId,
+          );
+          if (!loaded.ok) {
+            console.error(
+              `reaped morning brief not retried for family ${run.familyId}: ${loaded.note}`,
+            );
+            continue;
+          }
+          console.error(
+            `retrying reaped morning brief for family ${run.familyId} (run ${run.runId})`,
+          );
+          await dispatchScheduledTask(loaded.task, now, dependenciesFor(loaded.task));
         }
       })(),
     );
