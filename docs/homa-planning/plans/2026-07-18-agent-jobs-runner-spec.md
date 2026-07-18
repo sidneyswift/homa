@@ -58,6 +58,33 @@ or a dedicated tighter schedule, and each tick:
    `STAGED_EVENTS` (scripts/events-check.mts); the runner un-stages them by
    emitting them via `emitMapEvent`.
 
+## Material capture: the design decision (verified against the code 2026-07-18)
+
+Two facts settled this, both checked in-repo:
+
+- eve exposes **no `tool.completed` event** to a channel. The channel event
+  surface is message.appended/received/completed/metadata,
+  turn.started/completed/failed, step.started/completed/failed, and
+  session.started/completed/waiting/failed. A channel cannot passively grab
+  a specific tool's (create_printable's) result.
+- The `materials` row (`insertMaterialRowPinned`) carries no session_id and
+  no job link, so the runner cannot reliably find "the material this session
+  just made" by querying after the fact.
+
+**Decision: a job-worker report tool, not a create_printable change.** The
+build session finishes a stage by calling a new `report_agent_job_stage`
+tool (job-worker-only, refused outside an agent-job session by the existing
+`refuseJobSpawnedSession` idiom, inverted) with the material id(s) it
+produced. That tool links the `agent_job_stage_artifacts` rows and calls the
+runner's stage transition (`recordStageBuilt`, keyed by jobId + stageNumber +
+the session's resolved familyId). Rationale: it keeps the critical,
+high-traffic create_printable path untouched, and makes stage completion an
+explicit, auditable act rather than an inference. The trade: it depends on
+the build session actually calling the report tool, which is exactly the
+model behavior a behavioral eval and a live preview run must confirm before
+the flag flips. If a turn ends with the stage still `in_progress` (the model
+never reported), the channel's turn.completed handler calls `failStage`.
+
 ## The one genuinely new thing to build: a non-delivering session path
 
 The council's blocking finding (plan §A4): the existing
