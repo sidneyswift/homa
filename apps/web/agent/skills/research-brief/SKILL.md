@@ -140,9 +140,9 @@ and exact draft. Do not output a final brief unless that call succeeds.
 If preparation returns `retryable: true`, revise only the stated format or
 content validation errors from supplied evidence, then call it again. If it
 returns `retryable: false`, read its note before anything else. A note
-saying the run is not the built-in prepared morning brief means this skill
-was loaded for a parent-created task: compose the reply directly from the
-task instructions instead, and do not call the tool again. Every other
+saying the run does not use the prepared pipeline means the tool does not
+apply to this run: compose the reply directly, following the format the
+dispatch message asks for, and do not call the tool again. Every other
 terminal failure stops the brief: disabled v2, inactive runs, unavailable
 scope, ineligible sources, cooled-down knowledge rows, reservations, stale
 observations, and already-delivered preparations. Output only the accepted

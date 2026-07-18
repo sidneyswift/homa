@@ -200,7 +200,9 @@ export default defineChannel({
       // The composed text is about to reach the family verbatim. A turn
       // that narrated internal machinery instead of doing the task must
       // fail visibly, not deliver (2026-07-18 Gomes incident).
-      const narration = findInternalNarration(text);
+      const narration = findInternalNarration(text, {
+        codeAllowed: deliveryPref === "none",
+      });
       if (narration) {
         console.error(
           operationalDiagnostic("dispatch", "content_guard", "blocked"),
@@ -211,6 +213,7 @@ export default defineChannel({
             kind,
             status: "failed",
             error: `internal narration blocked: ${narration}`,
+            sessionId: ctx.session.id,
             onlyIfRunning: true,
           });
         }

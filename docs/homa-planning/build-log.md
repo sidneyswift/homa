@@ -55,11 +55,13 @@ merges (44904db web-token degrade, db1cbdb SMS split) never touched this
 path; 44904db is unreachable from dispatch sessions (they carry no Supabase
 token). Fixed same-session per `prod-bugs-fixed-not-stored`:
 
-- Tool: `prepare_research_brief` now distinguishes a real dispatch run of
-  the wrong kind (new terminal category `parent_task`) and its note tells
-  the model the next step: compose directly, never mention tools or
-  dispatch state. The old dead-end note remains only for non-dispatch
-  contexts.
+- Tool: `prepare_research_brief` now distinguishes a real dispatch run
+  that does not use the prepared v2 pipeline (new terminal category
+  `not_applicable`, correct for parent-created tasks and legacy built-in
+  briefs alike) and its note tells the model the next step: compose
+  directly in the format the dispatch message asks for, never mention
+  tools or dispatch state. The old dead-end note remains only for
+  non-dispatch contexts.
 - Skill: `research-brief` description excludes parent-created tasks; a
   scope-check section sends those runs to direct composition; the terminal
   paragraph now says a stopped dispatch turn never explains internal
@@ -75,11 +77,16 @@ token). Fixed same-session per `prod-bugs-fixed-not-stored`:
 
 Decisions made alone, flaggable: the deny list's exact terms (a custom task
 legitimately about the word "dispatch" would fail visibly instead of
-delivering, accepted); not extending v2 prepared delivery to custom tasks
-(a product call, not made here); the digest re-reporting already-handled
-alerts (observed 2026-07-18 07:01 digest naming items handled 13h earlier)
-left open as a separate small bug.
->>>>>>> 3d0b779 (Custom research tasks compose directly; internal narration never reaches a family)
+delivering, accepted); the snake_case identifier check strips links, bare
+domains, filenames, and email addresses first, skips save-only tasks
+entirely (their output may be code on the tasks page), but a DELIVERED
+custom task whose reply contains real code would still fail visibly every
+run until the task is rephrased; guard-failed runs are excluded from the
+DR-2 same-day retry on purpose (a retry would likely narrate again); not
+extending v2 prepared delivery to custom tasks (a product call, not made
+here); the digest re-reporting already-handled alerts was observed during
+this investigation and fixed separately the same morning (the digest
+entry above).
 
 ## 2026-07-18 · 48-hour review: oversized SMS now delivered, reaped morning briefs retried once
 

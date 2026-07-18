@@ -53,12 +53,45 @@ describe("dispatch outbound guard", () => {
     );
   });
 
-  it("does not trip on a link that contains underscores", () => {
+  it("does not trip on links, filenames, domains, or emails with underscores", () => {
     assert.equal(
       findInternalNarration(
         "Here is the worksheet: https://example.com/files/number_line_v2.pdf and a note about it.",
       ),
       null,
+    );
+    assert.equal(
+      findInternalNarration("I saved it as number_line_v2.pdf for you."),
+      null,
+    );
+    assert.equal(
+      findInternalNarration(
+        "The article on reading_rockets.org covers this nicely.",
+      ),
+      null,
+    );
+    assert.equal(
+      findInternalNarration("You can write to homa_families@example.com."),
+      null,
+    );
+  });
+
+  it("skips the identifier check for save-only tasks but keeps vocabulary checks", () => {
+    const code = "Today's exercise: my_name = 'Ben' then print(my_name).";
+    assert.equal(findInternalNarration(code), "internal identifier");
+    assert.equal(findInternalNarration(code, { codeAllowed: true }), null);
+    assert.equal(
+      findInternalNarration("This dispatch could not start.", {
+        codeAllowed: true,
+      }),
+      "dispatch vocabulary",
+    );
+  });
+
+  it("catches inflected dispatch vocabulary", () => {
+    assert.equal(
+      findInternalNarration("The system dispatched your note late."),
+      "dispatch vocabulary",
     );
   });
 });

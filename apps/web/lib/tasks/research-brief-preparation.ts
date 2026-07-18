@@ -94,7 +94,7 @@ export interface PrepareResearchBriefInput {
 
 export type PrepareResearchBriefFailureCategory =
   | "dispatch_unavailable"
-  | "parent_task"
+  | "not_applicable"
   | "disabled"
   | "scope_unavailable"
   | "inactive_run"

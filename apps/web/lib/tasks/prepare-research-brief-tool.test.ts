@@ -4,8 +4,8 @@ import { describe, it } from "node:test";
 import {
   isAuthenticatedDispatchTaskRun,
   isEnabledMorningResearchBriefDispatch,
+  prepareResearchBriefComposeDirectlyRedirect,
   prepareResearchBriefDispatchFailure,
-  prepareResearchBriefParentTaskRedirect,
 } from "../../agent/tools/prepare_research_brief";
 
 interface DispatchAttributes {
@@ -85,14 +85,15 @@ describe("prepare_research_brief dispatch guard", () => {
     }
   });
 
-  it("redirects a parent-created run to compose directly, with no dead end", () => {
-    const redirect = prepareResearchBriefParentTaskRedirect();
+  it("redirects a non-v2 dispatch run to compose directly, with no dead end", () => {
+    const redirect = prepareResearchBriefComposeDirectlyRedirect();
     assert.equal(redirect.ok, false);
     if (redirect.ok) return;
     assert.equal(redirect.retryable, false);
-    assert.equal(redirect.category, "parent_task");
+    assert.equal(redirect.category, "not_applicable");
     const note = redirect.errors.join(" ");
     assert.match(note, /Compose the reply yourself/);
+    assert.match(note, /keeping whatever format the message asks for/);
     assert.match(note, /do not call this tool again/);
     assert.match(note, /Never mention tools, dispatch runs, or internal state/);
     assert.doesNotMatch(note, /requires enabled v2/);
