@@ -143,7 +143,7 @@ export async function recordHoursPinned(input: {
   familyId: string;
   minutes: number;
   subject: string;
-  source: "sms" | "call" | "email" | "dispatch";
+  source: "chat" | "sms" | "call" | "email" | "dispatch";
   childId?: string | null;
   childName?: string | null;
   happenedOn?: string | null;
@@ -228,7 +228,9 @@ export async function recordHoursPinned(input: {
       {
         subject: input.subject,
         minutes: Math.round(input.minutes),
-        channel: input.source,
+        // hours_log rows say "chat" for web sessions; the event registry
+        // names the same surface "web".
+        channel: input.source === "chat" ? "web" : input.source,
       },
       {
         familyId: input.familyId,

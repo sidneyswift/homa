@@ -167,7 +167,7 @@ export default defineTool({
   async execute(input, ctx) {
     let access: AgentAccess;
     try {
-      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
+      access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { error: "no_family", note: error.message };

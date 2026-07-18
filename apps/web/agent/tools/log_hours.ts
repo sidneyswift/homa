@@ -47,7 +47,7 @@ export default defineTool({
   async execute(input, ctx) {
     let access;
     try {
-      access = resolveAgentAccess(ctx.session.auth.current?.attributes);
+      access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { logged: false, note: error.message };
@@ -62,8 +62,14 @@ export default defineTool({
         familyId: access.familyId,
         minutes: input.minutes,
         subject: input.subject,
+        // A web session that fell back to pinned (expired browser token)
+        // still logs as chat, the same label its caller path writes.
         source:
-          pinnedChannel === "email" || pinnedChannel === "dispatch" ? pinnedChannel : "sms",
+          pinnedChannel === "email" || pinnedChannel === "dispatch"
+            ? pinnedChannel
+            : pinnedChannel === "web"
+              ? "chat"
+              : "sms",
         childId: input.childId ?? null,
         happenedOn: input.happenedOn ?? null,
         note: input.note ?? null,

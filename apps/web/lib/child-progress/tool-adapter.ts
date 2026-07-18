@@ -29,7 +29,8 @@ export type { ChildProgressToolOperations } from "./tool-operations";
  */
 export async function executeChildProgressTool(input: {
   command: ManageChildProgressInput;
-  createContext: () => ProgressCheckInContext;
+  /** May be async: web access resolution awaits a token expiry check. */
+  createContext: () => ProgressCheckInContext | Promise<ProgressCheckInContext>;
   operations: ChildProgressToolOperations;
 }): Promise<ManageChildProgressResult> {
   if (!liveProgressEnabled()) {
@@ -37,7 +38,7 @@ export async function executeChildProgressTool(input: {
   }
   return await executeChildProgressCommand(
     input.command,
-    input.createContext(),
+    await input.createContext(),
     input.operations,
   );
 }

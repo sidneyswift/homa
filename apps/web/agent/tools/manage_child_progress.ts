@@ -99,10 +99,10 @@ export default defineTool({
       const command = manageChildProgressInputSchema.parse(input);
       return await executeChildProgressTool({
         command,
-        createContext: () => {
+        createContext: async () => {
           const attributes =
             ctx.session.auth.current?.attributes;
-          const access = resolveAgentAccess(attributes);
+          const access = await resolveAgentAccess(attributes);
           return createProgressToolContext({
             access,
             attributes,

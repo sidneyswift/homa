@@ -3,6 +3,41 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-17 · JWT-expired mid-turn failures fixed: expired web tokens degrade to family-pinned
+
+Cause: production runtime logs showed find_materials failing with "JWT
+expired" (7 occurrences, 3 users over 5 days, including the Llanes
+session at 02:28 UTC while Homa was building her curriculum). The web
+channel stamps the browser's Supabase access token on the session at
+each inbound request, but the token is a snapshot: a long agent turn
+(a materials build, a curriculum session) outlives it, the browser
+cannot push a refreshed token into a running turn, and Postgres then
+refuses every RLS-scoped read, so tools fail in front of the family
+with misleading notes.
+
+Fix at the one seam every tool shares: `resolveAgentAccess` is now
+expiry-aware. A live token keeps the caller path (RLS the wall, exactly
+as before). An expired token degrades the turn to the family-pinned
+path, but only behind a live server-side re-check that the
+authenticated member still belongs to the family, so an expired token
+never grants more than a valid one (RLS re-checks membership per query
+on the caller path; the fallback re-checks it here). Every tool already
+implements pinned mode (built for SMS), so the fallback is complete
+across the tool surface with no per-tool changes.
+
+Decisions made alone, flaggable: 15-second expiry grace margin (a query
+must not race the boundary mid-flight); undecodable tokens keep the
+caller path (fail at Supabase exactly as today, never silently promoted
+to pinned); the fallback requires the auth-stamped memberUserId and
+refuses without it; log_hours on a fallen-back web session records
+source "chat" (its caller-path label), not "sms", and its event channel
+maps to "web". resolveAgentAccess became async; all 22 tool call sites
+awaited. Red/green proven: the shipped code returned caller mode for an
+expired token (the doomed RLS client), the fix returns pinned; unit
+tests pin the boundary in apps/web/lib/agent-db.test.ts and ride
+`pnpm check:agent-context`. The full cure for revocable, refreshable
+per-request principals remains M1-02's SET LOCAL work, unchanged.
+
 ## 2026-07-17 · Multi-page packets shipped; the one-PDF false failure fixed at the root
 
 Cause: the Llanes "make it one pdf" incident (2026-07-17, ~04:07 UTC). The

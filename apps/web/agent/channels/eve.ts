@@ -25,9 +25,13 @@ import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-conte
  *                        tools too, per BUILD.md law #1)
  *
  * The token in attributes is server-custody session state, never shown to
- * the model. It is refreshed on every inbound turn (auth.current re-runs
- * this walk), so interactive chat always carries a live token. The proper
- * per-request re-scoping pattern (M1-02, SET LOCAL) replaces this at
+ * the model. It is re-verified on every inbound request (this walk runs
+ * again), but it is a SNAPSHOT: a long turn can outlive it, since the
+ * browser cannot push a refreshed token into a turn already running.
+ * lib/agent-db.ts owns that boundary: an expired snapshot degrades the
+ * turn to the family-pinned path behind a live membership re-check (the
+ * Llanes JWT-expired incident, 2026-07-17). The proper per-request
+ * re-scoping pattern (M1-02, SET LOCAL) replaces this at
  * walking-skeleton time.
  *
  * Walk order: our Supabase auth first, then vercelOidc() (Vercel-internal

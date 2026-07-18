@@ -29,7 +29,7 @@ export default defineTool({
 
     let familyId: string;
     try {
-      familyId = resolveAgentAccess(attributes).familyId;
+      familyId = (await resolveAgentAccess(attributes)).familyId;
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
         return { updated: false, note: error.message };

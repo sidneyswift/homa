@@ -40,7 +40,7 @@ export default defineTool({
 
     let budgetKey = "fleet";
     try {
-      budgetKey = resolveAgentAccess(ctx.session.auth.current?.attributes).familyId;
+      budgetKey = (await resolveAgentAccess(ctx.session.auth.current?.attributes)).familyId;
     } catch (error) {
       if (!(error instanceof MissingFamilyContextError)) throw error;
     }
