@@ -25,6 +25,7 @@ import type {
   AppendChildObservationInput,
   AppendProgressEvidenceInput,
   BindProgressCheckInDeliveryInput,
+  CancelProgressReplyLoopsInput,
   ChildObservationClassification,
   ChildProgressProjectionInput,
   ClaimChildProgressOperationInput,
@@ -1498,6 +1499,30 @@ class PostgresChildProgressTransaction
       rows[0].id,
       true,
     );
+  }
+
+  async cancelProgressReplyLoops(
+    input: CancelProgressReplyLoopsInput,
+  ): Promise<number> {
+    const exactCurrentPrompt =
+      input.keepRevision === null
+        ? null
+        : `progress-check-in:${input.checkInId}:revision:${input.keepRevision}`;
+    const rows = await this.sql<{ id: string }[]>`
+      update public.conversation_open_loops loop
+      set state = 'cancelled'
+      where loop.family_id = ${input.familyId}
+        and loop.state = 'open'
+        and loop.prompt_key like
+          ${`progress-check-in:${input.checkInId}:revision:%`}
+        and (
+          ${input.keepDeliveryId}::uuid is null
+          or loop.delivery_id <> ${input.keepDeliveryId}
+          or loop.prompt_key <> ${exactCurrentPrompt}
+        )
+      returning loop.id
+    `;
+    return rows.length;
   }
 
   findCheckInResponseReplay(

@@ -37,6 +37,9 @@ function materialRow(
     created_at: "2026-07-10T12:04:00.000Z",
     session_id: "wrun_a",
     child_name: "Mateo",
+    status: "draft",
+    revises: null,
+    review_pass: "true",
     ...overrides,
   };
 }
@@ -52,7 +55,13 @@ function material(
 /** All create_printable parts of one archive message, output shapes. */
 function materialParts(message: {
   parts: readonly { type: string; [key: string]: unknown }[];
-}): { title?: string; previewUrl?: string }[] {
+}): {
+  id?: string;
+  title?: string;
+  previewUrl?: string;
+  revisesId?: string | null;
+  reviewPassed?: boolean | null;
+}[] {
   return message.parts
     .filter(
       (part) =>
@@ -153,10 +162,9 @@ describe("archiveFromServerHistory", () => {
     assert.equal(part.type === "text" ? part.text : null, "hello");
   });
 
-  it("attaches material cards to the session's reply, cards above text", () => {
-    // The Vega shape (2026-07-13): ask 12:00, two create_printable
-    // versions 12:04 and 12:05, reply text 12:06. Scrollback must show
-    // both cards on the reply, in creation order, like the live turn.
+  it("attaches only the latest passing revision to the session's reply", () => {
+    // The newer attempt failed review, so scrollback keeps the earlier
+    // passing card and still places it above the reply text.
     const messages = mergeChatHistoryRows(
       [
         [
@@ -179,6 +187,8 @@ describe("archiveFromServerHistory", () => {
             id: "10000000-0000-0000-0000-000000000002",
             title: "Mateo's Letter M Tracing v2",
             created_at: "2026-07-10T12:05:00.000Z",
+            revises: "10000000-0000-0000-0000-000000000001",
+            review_pass: "false",
           }),
         ],
       },
@@ -192,12 +202,25 @@ describe("archiveFromServerHistory", () => {
     const reply = archive[1].message;
     assert.deepEqual(
       materialParts(reply).map((entry) => entry.title),
-      ["Mateo's Letter M Tracing", "Mateo's Letter M Tracing v2"],
+      ["Mateo's Letter M Tracing"],
     );
     assert.equal(
       materialParts(reply)[0]?.previewUrl,
       "https://blob.example/preview.jpg",
     );
+    assert.deepEqual(materialParts(reply)[0], {
+      id: "10000000-0000-0000-0000-000000000001",
+      title: "Mateo's Letter M Tracing",
+      previewUrl: "https://blob.example/preview.jpg",
+      revisesId: null,
+      reviewPassed: true,
+      kind: "worksheet",
+      skill: "letter M tracing",
+      childName: "Mateo",
+      pdfUrl: "https://blob.example/page.pdf",
+      pageCount: 1,
+      status: "draft",
+    });
     // Cards render above the reply words, matching live part order.
     assert.equal(reply.parts.at(-1)?.type, "text");
   });
@@ -237,6 +260,18 @@ describe("toChatHistoryMaterial", () => {
     const mapped = toChatHistoryMaterial(materialRow({}));
     assert.equal(mapped?.sessionId, "wrun_a");
     assert.equal(mapped?.childName, "Mateo");
+    assert.equal(mapped?.status, "draft");
+    assert.equal(mapped?.revisesId, null);
+    assert.equal(mapped?.reviewPass, true);
+    assert.equal(
+      toChatHistoryMaterial(materialRow({ review_pass: "false" }))
+        ?.reviewPass,
+      false,
+    );
+    assert.equal(
+      toChatHistoryMaterial(materialRow({ review_pass: null }))?.reviewPass,
+      null,
+    );
     assert.equal(toChatHistoryMaterial(materialRow({ session_id: null })), null);
     assert.equal(toChatHistoryMaterial(materialRow({ preview_url: null })), null);
     assert.equal(toChatHistoryMaterial(materialRow({ pdf_url: null })), null);

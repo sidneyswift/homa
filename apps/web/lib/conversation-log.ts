@@ -37,7 +37,20 @@ export interface PersistConversationMessageDependencies {
     input: PersistCanonicalMessageInput,
   ): ReturnType<typeof persistCanonicalMessage>;
   embed(text: string, attribution: { familyId: string }): Promise<string | null>;
-  saveEmbedding(messageId: string, embedding: string): Promise<void>;
+  /** sourceContent guards a replayed/delayed embedding write: the row's
+   *  content may have moved on (a later terminal replacement) by the time
+   *  this resolves, and a vector for text the row no longer holds must
+   *  never attach. replaceExisting is true only for a terminal assistant
+   *  stop: a draft's embedding is stale the moment the terminal text
+   *  replaces its content, so the terminal write must overwrite it
+   *  instead of leaving the draft vector behind a canonical row it no
+   *  longer matches. */
+  saveEmbedding(
+    messageId: string,
+    embedding: string,
+    sourceContent: string,
+    replaceExisting: boolean,
+  ): Promise<void>;
 }
 
 /** Sessions stamped by an adapter carry their surface in auth attributes
@@ -53,25 +66,56 @@ function channelLabel(
   return "web";
 }
 
+/** Re-scoped by family_id (every model/caller-supplied id is re-scoped
+ * inside the authenticated family, the tenancy law). sourceContent rejects
+ * a replayed or delayed embedding whose text no longer matches the row
+ * (a later terminal write already replaced it). replaceExisting is true
+ * only for a terminal assistant stop: a draft's embedding is stale the
+ * moment the terminal text replaces its content, so the terminal write
+ * must overwrite it instead of leaving the draft vector behind a
+ * canonical row it no longer matches. Exported so continuity e2e
+ * fixtures can seed a specific embedding directly. */
+export async function updateConversationMessageEmbedding(input: {
+  familyId: string;
+  messageId: string;
+  embedding: string;
+  sourceContent: string;
+  replaceExisting: boolean;
+}): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.conversation_messages
+    set embedding = ${input.embedding}
+    where id = ${input.messageId}
+      and family_id = ${input.familyId}
+      and content = ${input.sourceContent}
+      and (${input.replaceExisting} or embedding is null)
+  `;
+}
+
 export async function persistConversationMessage(
   input: PersistMessageInput,
   dependencies?: PersistConversationMessageDependencies,
 ): Promise<
   Awaited<ReturnType<typeof persistCanonicalMessage>>
 > {
+  const familyId = (input.attributes as { familyId?: string } | undefined)
+    ?.familyId;
   return persistConversationMessageWithDependencies(
     input,
     dependencies ?? {
       resolveInbound: resolveInboundContinuity,
       persistCanonical: persistCanonicalMessage,
       embed: embedText,
-      async saveEmbedding(messageId, embedding) {
-        const sql = mapDb();
-        await sql`
-          update public.conversation_messages
-          set embedding = ${embedding}
-          where id = ${messageId} and embedding is null
-        `;
+      async saveEmbedding(messageId, embedding, sourceContent, replaceExisting) {
+        if (!familyId) return;
+        await updateConversationMessageEmbedding({
+          familyId,
+          messageId,
+          embedding,
+          sourceContent,
+          replaceExisting,
+        });
       },
     },
   );
@@ -127,6 +171,9 @@ async function persistConversationMessageWithDependencies(
     }
   }
 
+  const isTerminalAssistantStop =
+    input.role === "assistant" && input.finishReason === "stop";
+
   // Best-effort semantic index (about 200-400ms per message inside the
   // hook, after the user already has their streamed text). Null means
   // this row is findable by FTS only, never a failed write.
@@ -143,11 +190,16 @@ async function persistConversationMessageWithDependencies(
     providerMessageId: attrs.providerMessageId ?? null,
     terminal:
       input.role === "assistant"
-        ? input.finishReason === "stop"
+        ? isTerminalAssistantStop
         : undefined,
   });
   if (persisted && embedding) {
-    await dependencies.saveEmbedding(persisted.id, embedding);
+    await dependencies.saveEmbedding(
+      persisted.id,
+      embedding,
+      content,
+      isTerminalAssistantStop,
+    );
   }
   return persisted;
 }

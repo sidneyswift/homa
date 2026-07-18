@@ -14,6 +14,11 @@
 
 import type { EveMessage } from "eve/client";
 
+import {
+  selectParentVisibleMaterialRevisions,
+  type MaterialRevisionCandidate,
+} from "./materials/parent-visible";
+
 export type ChatHistoryChannel = "web" | "sms" | "email" | "dispatch";
 
 export interface ChatHistoryMessage {
@@ -34,7 +39,7 @@ export interface ChatHistoryMessage {
  * one reload and the worksheet she was told to "take a look" at has no
  * card anywhere (the Vega family incident, 2026-07-13).
  */
-export interface ChatHistoryMaterial {
+export interface ChatHistoryMaterial extends MaterialRevisionCandidate {
   id: string;
   sessionId: string;
   title: string;
@@ -64,6 +69,9 @@ export interface ChatHistoryMaterialRow {
   child_name: string | null;
   page_count?: number | string | null;
   page_preview_urls?: unknown;
+  status: "draft" | "final" | "superseded";
+  revises: string | null;
+  review_pass: string | null;
 }
 
 /** Everything the chat page's server read hands the client. */
@@ -154,8 +162,18 @@ export function toChatHistoryMaterial(
   }
   const atMs = Date.parse(row.created_at);
   if (Number.isNaN(atMs)) return null;
+  const reviewPass =
+    row.review_pass === "true"
+      ? true
+      : row.review_pass === "false"
+        ? false
+        : null;
   return {
     id: row.id,
+    revisesId: row.revises,
+    status: row.status,
+    reviewPass,
+    order: atMs,
     sessionId: row.session_id,
     title: row.title,
     kind: row.kind,
@@ -190,6 +208,9 @@ function materialToolPart(material: ChatHistoryMaterial) {
         ...(material.pagePreviewUrls
           ? { pagePreviewUrls: material.pagePreviewUrls }
           : {}),
+        status: material.status,
+        revisesId: material.revisesId,
+        reviewPassed: material.reviewPass,
       },
     },
   };
@@ -215,8 +236,10 @@ export function archiveFromServerHistory(
   const history = payload.messages.filter(
     (entry) => entry.sessionId !== excludeSessionId,
   );
-  const materials = payload.materials.filter(
-    (material) => material.sessionId !== excludeSessionId,
+  const materials = selectParentVisibleMaterialRevisions(
+    payload.materials.filter(
+      (material) => material.sessionId !== excludeSessionId,
+    ),
   );
 
   const cardsByMessageId = new Map<string, ChatHistoryMaterial[]>();

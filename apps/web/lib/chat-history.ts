@@ -5,10 +5,10 @@ import {
   toChatHistoryMaterial,
   type ChatHistoryMaterial,
   type ChatHistoryMaterialRow,
-  type ChatHistoryMessage,
   type ChatHistoryPayload,
   type ChatHistoryRow,
 } from "./chat-history-model";
+import { selectParentVisibleMaterialRevisions } from "./materials/parent-visible";
 
 /**
  * The per-adult server read behind the synced web transcript (M1-02
@@ -47,6 +47,7 @@ const ROW_COLUMNS = "id, session_id, role, channel, content, created_at";
  *  generation provenance JSON. */
 const MATERIAL_COLUMNS =
   "id, title, kind, skill, preview_url, pdf_url, created_at, " +
+  "status, revises, review_pass:generation->review->>pass, " +
   "session_id:generation->>sessionId, child_name:generation->input->>childName, " +
   "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
 
@@ -173,15 +174,16 @@ export async function fetchChatHistory(input: {
         .limit(MATERIAL_CAP);
       if (!materialQuery.error) {
         const sessionSet = new Set(historySessionIds);
-        materials = (
-          (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
-        )
-          .map(toChatHistoryMaterial)
-          .filter(
-            (material): material is ChatHistoryMaterial =>
-              material !== null && sessionSet.has(material.sessionId),
+        materials = selectParentVisibleMaterialRevisions(
+          (
+            (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
           )
-          .sort((a, b) => a.atMs - b.atMs);
+            .map(toChatHistoryMaterial)
+            .filter(
+              (material): material is ChatHistoryMaterial =>
+                material !== null && sessionSet.has(material.sessionId),
+            ),
+        );
       }
     }
 

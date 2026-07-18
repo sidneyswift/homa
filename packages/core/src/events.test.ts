@@ -383,3 +383,38 @@ test("research brief feedback records only a family and explicit signal", () => 
     false,
   );
 });
+
+test("delegated session event accepts only its PII-free lineage shape", () => {
+  const delegatedSessionEvent = {
+    family_id: FAMILY_ID,
+    child_session_hash: "a".repeat(64),
+    parent_session_hash: "b".repeat(64),
+    root_session_hash: "c".repeat(64),
+  };
+
+  assert.equal(
+    EVENT_SCHEMAS["conversation.session_delegated"].safeParse(
+      delegatedSessionEvent,
+    ).success,
+    true,
+  );
+
+  const forbiddenProperties = [
+    "child_session_id",
+    "parent_session_id",
+    "email",
+    "phone",
+    "message",
+  ] as const;
+
+  for (const property of forbiddenProperties) {
+    assert.equal(
+      EVENT_SCHEMAS["conversation.session_delegated"].safeParse({
+        ...delegatedSessionEvent,
+        [property]: "forbidden",
+      }).success,
+      false,
+      `conversation.session_delegated accepted ${property}`,
+    );
+  }
+});

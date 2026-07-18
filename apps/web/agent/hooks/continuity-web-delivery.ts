@@ -7,6 +7,7 @@ import {
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
 import { persistCanonicalMessage } from "../../lib/conversation-continuity/ledger";
+import { isParentedEveSession } from "../../lib/conversation-continuity/session-lineage";
 
 /**
  * A completed web stream is a real delivery to the signed-in adult. Record it
@@ -20,6 +21,10 @@ export function isWebDeliveryChannel(channel: unknown): boolean {
 export default defineHook({
   events: {
     async "message.completed"(event, ctx) {
+      if (isParentedEveSession(ctx.session.parent)) {
+        return;
+      }
+
       if (event.data.finishReason !== "stop" || !event.data.message?.trim()) {
         return;
       }
