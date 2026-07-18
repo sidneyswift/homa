@@ -11,6 +11,12 @@ export interface ProgressEmptyStateCopy {
   body: string;
 }
 
+export interface ProgressAssessmentCtaCopy {
+  heading: string;
+  body: string;
+  cta: string;
+}
+
 function unsupportedProgressCopyState(value: never): never {
   throw new TypeError(`Unsupported live Progress copy state: ${value}`);
 }
@@ -110,6 +116,26 @@ export function progressEmptyState(
     body:
       `You have not shared any specific skills for ${childName} yet. ` +
       "Journal notes, check-in answers, and corrections will appear here.",
+  };
+}
+
+/**
+ * The never-assessed state: no report and nothing shared yet, so the page
+ * offers the first check-in instead of an empty shell. Warm and plain
+ * (reassure before inform, offer not command): a short, low-stakes ask
+ * that names what it produces.
+ */
+export function progressAssessmentCta(
+  childName: string,
+): ProgressAssessmentCtaCopy {
+  return {
+    heading: `See where ${childName} is today.`,
+    body:
+      `You have not done a check-in for ${childName} yet. A few quick ` +
+      `questions about what ${childName} is doing build their first ` +
+      "progress report. It takes about five minutes, and you can add to " +
+      "it any time.",
+    cta: `Start ${childName}'s check-in`,
   };
 }
 

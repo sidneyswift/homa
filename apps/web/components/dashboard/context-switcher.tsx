@@ -27,9 +27,12 @@ import { type SidebarKid } from "./sidebar";
  *     on desktop (founder ruling 2026-07-12: the kid switcher belongs at
  *     the app's top right like the phone bar, not in the rail), shown
  *     only on pages the selection affects (pageShowsContextSwitcher).
- *   ViewingRows · the switcher rows the phone DRAWER renders (the drawer
- *     is the whole sidebar); the desktop rail dropped them with the same
- *     2026-07-12 ruling.
+ *   ViewingRows · the phone DRAWER's kid link. Multi-kid families switch
+ *     from the top-right avatar (ContextSwitcher), so the drawer no longer
+ *     repeats the switcher rows (2026-07-18: they duplicated that avatar);
+ *     the desktop rail dropped them earlier (2026-07-12). Single-kid
+ *     families, which have no top-right avatar, keep a plain "My kids"
+ *     link here.
  *
  * Picking anyone keeps the parent on her current surface: kid-scoped
  * pages (a report, a kid page) swap to the sibling's same page, and
@@ -259,117 +262,41 @@ export function DesktopContextSwitcher({
 }
 
 /**
- * The phone drawer's kid list (the drawer renders the whole sidebar;
- * the desktop rail dropped these rows, founder ruling 2026-07-12).
- * Multi-kid families get the switcher rows ("Viewing": Whole family +
- * each kid, active highlighted, tap to rescope in place). A single-kid
- * family keeps the old "My kids" link to the kid's page: with nothing
- * to switch, a switcher would be noise.
+ * The phone drawer's single-kid link (the drawer renders the whole
+ * sidebar). The switcher rows retired here (2026-07-18): a multi-kid
+ * family already switches from the top-right avatar (ContextSwitcher),
+ * so repeating "Viewing: Whole family + each kid" in the drawer was one
+ * selector too many. A single-kid family has no top-right avatar, so the
+ * drawer keeps the plain "My kids" link to the kid's page as its one door
+ * there; with nothing to switch, a switcher would be noise.
  */
-export function ViewingRows({
-  kids,
-  selected,
-}: {
-  kids: SidebarKid[];
-  selected: string;
-}) {
-  const { current, pick } = useViewContextPick(selected);
+export function ViewingRows({ kids }: { kids: SidebarKid[] }) {
+  if (kids.length !== 1) return null;
 
-  if (kids.length === 0) return null;
-
-  if (kids.length === 1) {
-    const kid = kids[0];
-    return (
-      <div className="mt-6 px-1">
-        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-subtle">
-          My kids
-        </p>
-        <ul className="mt-2 flex flex-col gap-1">
-          <li>
-            <Link
-              href={`/app/kids/${kid.id}`}
-              className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
-            >
-              <SwitcherKidAvatar kid={kid} index={0} size={30} />
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-semibold text-body">
-                  {kid.name}
-                </span>
-                <span className="block text-[0.72rem] text-subtle">
-                  {ageLabel(kid.ageMonths)}
-                </span>
-              </span>
-            </Link>
-          </li>
-        </ul>
-      </div>
-    );
-  }
-
-  const rowClass = (active: boolean) =>
-    active
-      ? "flex w-full cursor-pointer items-center gap-2.5 rounded-md bg-brand-soft px-1.5 py-1.5 text-left"
-      : "flex w-full cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors duration-(--dur-fast) ease-out hover:bg-page";
-
+  const kid = kids[0];
   return (
-    <div className="mt-6 px-1" role="group" aria-label="Who you're viewing">
+    <div className="mt-6 px-1">
       <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-subtle">
-        Viewing
+        My kids
       </p>
-      <div className="mt-2 flex flex-col gap-1">
-        <button
-          type="button"
-          aria-pressed={current === VIEW_CONTEXT_FAMILY ? "true" : "false"}
-          data-drawer-close=""
-          onClick={() => pick(VIEW_CONTEXT_FAMILY)}
-          className={rowClass(current === VIEW_CONTEXT_FAMILY)}
-        >
-          <FamilyAvatar size={30} />
-          <span
-            className={`min-w-0 flex-1 truncate text-sm ${
-              current === VIEW_CONTEXT_FAMILY
-                ? "font-bold text-[var(--clay-700)]"
-                : "font-semibold text-body"
-            }`}
+      <ul className="mt-2 flex flex-col gap-1">
+        <li>
+          <Link
+            href={`/app/kids/${kid.id}`}
+            className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
           >
-            Whole family
-          </span>
-          {current === VIEW_CONTEXT_FAMILY ? (
-            <Check size={16} className="shrink-0 text-brand" aria-hidden="true" />
-          ) : null}
-        </button>
-
-        {kids.map((kid, index) => {
-          const active = current === kid.id;
-          return (
-            <button
-              key={kid.id}
-              type="button"
-              aria-pressed={active ? "true" : "false"}
-              data-drawer-close=""
-              onClick={() => pick(kid.id)}
-              className={rowClass(active)}
-            >
-              <SwitcherKidAvatar kid={kid} index={index} size={30} />
-              <span className="min-w-0 flex-1">
-                <span
-                  className={`block truncate text-sm ${
-                    active ? "font-bold text-[var(--clay-700)]" : "font-semibold text-body"
-                  }`}
-                >
-                  {kid.name}
-                </span>
-                <span className="block text-[0.72rem] text-subtle">
-                  {ageLabel(kid.ageMonths)}
-                </span>
+            <SwitcherKidAvatar kid={kid} index={0} size={30} />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-body">
+                {kid.name}
               </span>
-              {active ? (
-                <Check size={16} className="shrink-0 text-brand" aria-hidden="true" />
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+              <span className="block text-[0.72rem] text-subtle">
+                {ageLabel(kid.ageMonths)}
+              </span>
+            </span>
+          </Link>
+        </li>
+      </ul>
     </div>
   );
 }

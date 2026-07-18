@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   formatProgressDate,
   progressAnswerLabel,
+  progressAssessmentCta,
   progressEmptyState,
   progressSourceLabel,
   progressSubjectHeadline,
@@ -96,6 +97,17 @@ describe("live Progress copy", () => {
       heading: "This page is ready for Maya.",
       body:
         "You have not shared any specific skills for Maya yet. Journal notes, check-in answers, and corrections will appear here.",
+    });
+  });
+
+  it("offers the first check-in when a child has no report yet", () => {
+    const copy = progressAssessmentCta("Maya");
+
+    assert.deepEqual(copy, {
+      heading: "See where Maya is today.",
+      body:
+        "You have not done a check-in for Maya yet. A few quick questions about what Maya is doing build their first progress report. It takes about five minutes, and you can add to it any time.",
+      cta: "Start Maya's check-in",
     });
   });
 
