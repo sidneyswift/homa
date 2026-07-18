@@ -1,5 +1,6 @@
 export const OPERATIONAL_PHASES = [
   "preparation_load",
+  "content_guard",
   "canonical_persist",
   "transport",
   "finalization",
@@ -17,6 +18,7 @@ export type OperationalDiagnosticScope =
   | "email_webhook";
 export type OperationalDiagnosticResult =
   | "failed"
+  | "blocked"
   | "retry_pending"
   | "runtime_session_unrecorded"
   | "setup_failure_unrecorded";

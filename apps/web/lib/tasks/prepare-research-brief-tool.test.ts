@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  isAuthenticatedDispatchTaskRun,
   isEnabledMorningResearchBriefDispatch,
+  prepareResearchBriefComposeDirectlyRedirect,
   prepareResearchBriefDispatchFailure,
 } from "../../agent/tools/prepare_research_brief";
 
@@ -60,5 +62,40 @@ describe("prepare_research_brief dispatch guard", () => {
         "prepare_research_brief requires enabled v2 and an authenticated morning dispatch run",
       ],
     });
+  });
+
+  it("recognizes a parent-created dispatch run as authenticated but not applicable", () => {
+    const parentTask = {
+      ...VALID_ATTRIBUTES,
+      taskKind: "custom",
+      deliveryVersion: "legacy",
+    };
+    assert.equal(isAuthenticatedDispatchTaskRun(parentTask), true);
+    assert.equal(isEnabledMorningResearchBriefDispatch(parentTask), false);
+  });
+
+  it("keeps unauthenticated contexts out of the redirect path", () => {
+    for (const attributes of [
+      { ...VALID_ATTRIBUTES, channel: "web" },
+      { ...VALID_ATTRIBUTES, channel: undefined },
+      { ...VALID_ATTRIBUTES, familyId: undefined },
+      { ...VALID_ATTRIBUTES, taskRunId: undefined },
+    ]) {
+      assert.equal(isAuthenticatedDispatchTaskRun(attributes), false);
+    }
+  });
+
+  it("redirects a non-v2 dispatch run to compose directly, with no dead end", () => {
+    const redirect = prepareResearchBriefComposeDirectlyRedirect();
+    assert.equal(redirect.ok, false);
+    if (redirect.ok) return;
+    assert.equal(redirect.retryable, false);
+    assert.equal(redirect.category, "not_applicable");
+    const note = redirect.errors.join(" ");
+    assert.match(note, /Compose the reply yourself/);
+    assert.match(note, /keeping whatever format the message asks for/);
+    assert.match(note, /do not call this tool again/);
+    assert.match(note, /Never mention tools, dispatch runs, or internal state/);
+    assert.doesNotMatch(note, /requires enabled v2/);
   });
 });

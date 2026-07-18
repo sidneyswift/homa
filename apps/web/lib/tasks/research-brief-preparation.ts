@@ -94,6 +94,7 @@ export interface PrepareResearchBriefInput {
 
 export type PrepareResearchBriefFailureCategory =
   | "dispatch_unavailable"
+  | "not_applicable"
   | "disabled"
   | "scope_unavailable"
   | "inactive_run"

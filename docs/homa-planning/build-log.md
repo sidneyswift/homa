@@ -38,6 +38,56 @@ Decisions made alone, flaggable:
   tested without a database (`digest-format.test.ts`, runs in
   `check:continuity`).
 
+## 2026-07-18 · A parent-created research task texted internal state to a family; four-layer fix
+
+Cause: at 6:02 AM ET the Gomes family (real customer, three parent-created
+daily tasks named "<child>'s morning research brief", kind custom) received
+"This dispatch isn't running in a state where I can prepare and send a
+morning research brief right now (it needs the authenticated morning
+dispatch run)..." as a delivered SMS, with the run marked done. Two sibling
+runs the same minute delivered real briefs. Root cause, adversarially
+verified: custom runs carry taskKind custom and deliveryVersion legacy, the
+research-brief skill description matched the task's name, the skill
+mandates `prepare_research_brief`, that tool hard-gates on morning_brief +
+research_brief_v2 and returned a terminal dead-end note, and the legacy
+dispatch delivery path texts any nonempty final message verbatim. Yesterday's
+merges (44904db web-token degrade, db1cbdb SMS split) never touched this
+path; 44904db is unreachable from dispatch sessions (they carry no Supabase
+token). Fixed same-session per `prod-bugs-fixed-not-stored`:
+
+- Tool: `prepare_research_brief` now distinguishes a real dispatch run
+  that does not use the prepared v2 pipeline (new terminal category
+  `not_applicable`, correct for parent-created tasks and legacy built-in
+  briefs alike) and its note tells the model the next step: compose
+  directly in the format the dispatch message asks for, never mention
+  tools or dispatch state. The old dead-end note remains only for
+  non-dispatch contexts.
+- Skill: `research-brief` description excludes parent-created tasks; a
+  scope-check section sends those runs to direct composition; the terminal
+  paragraph now says a stopped dispatch turn never explains internal
+  machinery to the family.
+- Prompt builder: research-flavored custom tasks are told "this is not the
+  built-in prepared morning brief: do not call prepare_research_brief",
+  and every custom task gets a family-facing failure voice line.
+- Deterministic backstop: `lib/tasks/outbound-guard.ts` deny-lists
+  internal vocabulary (snake_case identifiers, dispatch, task run,
+  retryable, authenticated) on the legacy dispatch delivery path; a match
+  fails the run visibly and delivers nothing. The incident SMS is a
+  fixture in its tests.
+
+Decisions made alone, flaggable: the deny list's exact terms (a custom task
+legitimately about the word "dispatch" would fail visibly instead of
+delivering, accepted); the snake_case identifier check strips links, bare
+domains, filenames, and email addresses first, skips save-only tasks
+entirely (their output may be code on the tasks page), but a DELIVERED
+custom task whose reply contains real code would still fail visibly every
+run until the task is rephrased; guard-failed runs are excluded from the
+DR-2 same-day retry on purpose (a retry would likely narrate again); not
+extending v2 prepared delivery to custom tasks (a product call, not made
+here); the digest re-reporting already-handled alerts was observed during
+this investigation and fixed separately the same morning (the digest
+entry above).
+
 ## 2026-07-18 · 48-hour review: oversized SMS now delivered, reaped morning briefs retried once
 
 Cause: the founder digests for 2026-07-16 and 2026-07-17 showed four
