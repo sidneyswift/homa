@@ -3,6 +3,82 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · Studio lab converged: founder picked direction 3 "Ledger"
+
+The founder pasted the direction lab's assembled reply: winning
+direction 3 "Ledger", steals from the Dossier direction (reference
+images large beside the sections they teach, the description framed as
+the routing contract, a tool table naming which SKILL.md sections drive
+each tool), and the recommended answer on all five build-changing
+questions (already built that way). Converged per the
+exploring-ui-directions skill: /admin/studio is now one interleaved
+filterable timeline of lab runs and fleet output (dedup by generation
+session id so a lab material never rows twice), the composer folded
+into "+ New lab run", and the skill package below carrying the three
+steals. Contradiction resolved explicitly: the Ledger direction's
+honest skip was "no home for the skill package", but the founder's
+same-day asks (skill X-ray, reference gaps, traces) require it on this
+surface, so the package section stays; that is the one deliberate
+deviation from the pure direction. The tool table is parsed from
+SKILL.md at read time (lib/materials/skill-package.ts), never
+hand-claimed, so it cannot drift.
+
+## 2026-07-18 · Founder console gets a Material studio tab (/admin/studio)
+
+Founder ask: "a material studio tab in admin, where I can clearly see
+into, and test, our material studio skill." Ran finding-unknowns plus
+exploring-ui-directions first; the four-direction comparison lab is
+`plans/2026-07-18-material-studio-admin-directions.html` (winner:
+direction 1 "Bench", composer first, runs ledger, skill package below).
+
+Decisions made alone, flaggable:
+
+- Test runs target SANDBOX families only, enforced server-side in the
+  channel route, because create_printable writes real materials rows
+  into the target family's binder. The composer lists sandbox families
+  only; a non-sandbox id is refused with a 409.
+- New `materials-lab` eve channel with a CRON_SECRET run route (the
+  dispatch run-now shape), never a direct tool call from the page: a
+  studio run is a real agent session with the real skill, tools, and
+  quality check, so what the founder tests is what families get.
+- One additive table `materials_studio_runs` (migration
+  20260718170000), deny-all like the other founder ledgers, so a run
+  that dies before create_printable stays visible as failed. Applied to
+  prod ahead of the deploy per the additive-may-lead law; the page
+  degrades to a labeled setup note when the table is absent.
+- The skill package section reads SKILL.md and references/ straight off
+  the deployed filesystem (filesystem-first ruling), traced via
+  next.config.ts; a founder-gated route serves the reference images.
+- Found while wiring the channel: the family-context instruction kept
+  its own hardcoded pinned-channel list (sms, email, dispatch), so
+  `agent-job` build sessions would have hydrated the "parent has not
+  finished setup" fallback instead of family context. Latent, not yet
+  user-visible (0 agent_jobs rows in prod at 2026-07-18T21:05Z, flag on
+  but unexercised). Fixed by exporting `PINNED_AGENT_CHANNELS` from
+  lib/agent-db.ts as the single source both resolveAgentAccess and the
+  instruction hydrate from; regression-pinned in
+  lib/materials/studio-brief.test.ts.
+
+Round 2, same evening (founder ask: an iteration loop): feedback + tags
+per run with a "Prompt for agent" improvement packet (new `studio_run`
+source in lib/admin/agent-prompt.ts), the full turn-by-turn trace
+embedded on a new /admin/studio/runs/[runId] page (trace renderer
+extracted to app/admin/session-trace.tsx, shared with the session
+inspector), and reference-image citations parsed from SKILL.md
+(lib/materials/skill-package.ts) with gap detection both ways. Two
+defects fixed on the way:
+
+- SKILL.md cited three reference images that were never shipped
+  (homa-cut-and-paste, homa-maze, homa-notes-bundle): dead pointers the
+  model could never read. Dropped the citations; the sections' binding
+  design patterns carry the craft, and skill-package.test.ts now
+  enforces citation-to-disk parity in both directions.
+- The feedback_tags text[] column was selected raw, and the console's
+  fetch_types-off client returns raw arrays as Postgres literal
+  strings, so the form spread "{}" into junk tags and the packet
+  builder crashed. Cast to to_json(...)::text and parse, per the
+  lib/admin/db.ts law the first query missed.
+
 ## 2026-07-18 · The wall and the report lock flip ON in production (founder order)
 
 Founder ordered the flip ("ok switch flags") after local testing. Walked

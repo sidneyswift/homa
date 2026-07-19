@@ -601,8 +601,6 @@ two-column instruction|work pattern stays constant; the labels change.
 
 ## Cut-and-paste word work
 
-Reference image: `references/homa-cut-and-paste-reference.png`
-
 A multi-sensory word work page where the child sees the model word,
 writes it on a practice line, then cuts out a tile and pastes it into
 a notebook or sorting activity. Four modalities for one concept: see,
@@ -693,8 +691,6 @@ work as a physical manipulative.
 
 ## Maze / puzzle practice
 
-Reference image: `references/homa-maze-reference.png`
-
 A maze that transforms rote drill into a navigation challenge.
 Correct answers advance through the maze; wrong answers hit dead
 ends. Self-checking without needing an answer key. This is the format
@@ -758,8 +754,6 @@ positioning. For very simple mazes (few forks, no theming),
 image-direct works. Include the answer text in the image prompt.
 
 ## Notes-and-practice bundle
-
-Reference image: `references/homa-notes-bundle-reference.png`
 
 A two-page format: page 1 is guided notes (Cornell-style two-column
 layout with terms and fill-in-the-blank explanations), page 2 is a

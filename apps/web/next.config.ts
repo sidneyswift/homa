@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
     // The OG card and its vendored fonts render at build time, but trace
     // them anyway so any future dynamic render finds the files.
     "/opengraph-image": ["./assets/fonts/*.woff"],
+    // The founder console's material studio reads the skill package
+    // (SKILL.md + reference images) off the deployed filesystem.
+    "/admin/studio": ["./agent/skills/materials-studio/**"],
+    "/admin/studio/reference/[file]": ["./agent/skills/materials-studio/**"],
   },
   async redirects() {
     return [

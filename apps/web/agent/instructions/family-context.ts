@@ -2,6 +2,7 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
 
 import {
   createCallerDbClient,
+  isPinnedAgentChannel,
   MissingFamilyContextError,
 } from "../../lib/agent-db";
 import { type MemoryRow } from "../../lib/agent-memory";
@@ -226,10 +227,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       rows = await dependencies.loadCallerFamilyContext(attributes);
     } else if (
       attributes?.familyId &&
-      (attributes.channel === "sms" ||
-        attributes.channel === "email" ||
-        attributes.channel === "dispatch" ||
-        attributes.channel === "subject_lesson")
+      isPinnedAgentChannel(attributes.channel)
     ) {
       rows = await dependencies.loadPinnedFamilyContext(attributes.familyId);
     } else {
