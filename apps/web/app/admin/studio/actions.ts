@@ -8,6 +8,8 @@ import {
   STUDIO_RUN_UUID_PATTERN,
   studioRequestProblem,
 } from "../../../lib/materials/studio-brief";
+import { studioFeedbackProblem } from "../../../lib/materials/studio-feedback";
+import { saveStudioRunFeedback } from "../../../lib/materials/studio-runs";
 
 /**
  * The studio's Run button (/admin/studio, direction lab
@@ -36,6 +38,32 @@ async function requestOrigin(): Promise<string> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
   return `${proto}://${host}`;
+}
+
+export interface StudioFeedbackState {
+  error: string | null;
+}
+
+/** Saves the founder's verdict on one test run (latest wins). The
+ * improvement packet (Prompt for agent on the run page) carries it out. */
+export async function saveStudioRunFeedbackAction(
+  runId: string,
+  tags: string[],
+  feedback: string,
+): Promise<StudioFeedbackState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+  if (!STUDIO_RUN_UUID_PATTERN.test(runId)) {
+    return { error: "That run could not be identified. Reload and try again." };
+  }
+  const problem = studioFeedbackProblem(feedback, tags);
+  if (problem) return { error: problem };
+
+  const saved = await saveStudioRunFeedback(runId, { feedback, tags });
+  if (!saved) return { error: "That run's row is gone. Reload the page." };
+  revalidatePath("/admin/studio");
+  revalidatePath(`/admin/studio/runs/${runId}`);
+  return { error: null };
 }
 
 export async function launchStudioRunAction(

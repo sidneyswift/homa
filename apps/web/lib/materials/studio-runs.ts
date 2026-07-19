@@ -72,6 +72,26 @@ export async function failStudioRunIfStarted(
   `;
 }
 
+/** Founder feedback on one run (the iteration loop). Latest wins; the
+ * improvement packet is the export. Founder-gated by the caller; the
+ * table is admin-only, so id alone identifies the row. */
+export async function saveStudioRunFeedback(
+  runId: string,
+  input: { feedback: string; tags: string[] },
+): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.materials_studio_runs
+    set feedback = ${input.feedback.trim() || null},
+        feedback_tags = ${input.tags},
+        feedback_at = now(),
+        updated_at = now()
+    where id = ${runId}
+    returning id
+  `;
+  return rows.length > 0;
+}
+
 /** The route's target guard: the family must exist, be a sandbox family,
  * and not be deleted. Returns the family name for the reply, null when
  * the guard refuses. */

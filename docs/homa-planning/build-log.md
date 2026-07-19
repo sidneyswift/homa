@@ -39,6 +39,26 @@ Decisions made alone, flaggable:
   instruction hydrate from; regression-pinned in
   lib/materials/studio-brief.test.ts.
 
+Round 2, same evening (founder ask: an iteration loop): feedback + tags
+per run with a "Prompt for agent" improvement packet (new `studio_run`
+source in lib/admin/agent-prompt.ts), the full turn-by-turn trace
+embedded on a new /admin/studio/runs/[runId] page (trace renderer
+extracted to app/admin/session-trace.tsx, shared with the session
+inspector), and reference-image citations parsed from SKILL.md
+(lib/materials/skill-package.ts) with gap detection both ways. Two
+defects fixed on the way:
+
+- SKILL.md cited three reference images that were never shipped
+  (homa-cut-and-paste, homa-maze, homa-notes-bundle): dead pointers the
+  model could never read. Dropped the citations; the sections' binding
+  design patterns carry the craft, and skill-package.test.ts now
+  enforces citation-to-disk parity in both directions.
+- The feedback_tags text[] column was selected raw, and the console's
+  fetch_types-off client returns raw arrays as Postgres literal
+  strings, so the form spread "{}" into junk tags and the packet
+  builder crashed. Cast to to_json(...)::text and parse, per the
+  lib/admin/db.ts law the first query missed.
+
 ## 2026-07-18 · The wall and the report lock flip ON in production (founder order)
 
 Founder ordered the flip ("ok switch flags") after local testing. Walked

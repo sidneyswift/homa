@@ -4,6 +4,10 @@ import path from "node:path";
 
 import { adminDb } from "./db";
 import { ageYears } from "./format";
+import {
+  parseSkillPackage,
+  type SkillReferenceCitation,
+} from "../materials/skill-package";
 
 /**
  * The material studio tab's data (/admin/studio, direction lab
@@ -91,33 +95,132 @@ export interface StudioRunRow {
   error: string | null;
   startedBy: string;
   createdAt: string;
+  feedback: string | null;
+  feedbackTags: string[];
+  feedbackAt: string | null;
   materials: StudioRunMaterial[];
+}
+
+type AdminSql = ReturnType<typeof adminDb>;
+
+interface StudioRunDbRow {
+  id: string;
+  family_id: string;
+  family_name: string;
+  child_name: string | null;
+  request: string;
+  session_id: string | null;
+  status: "started" | "completed" | "failed";
+  error: string | null;
+  started_by: string;
+  created_at: string;
+  feedback: string | null;
+  /** JSON text (db.ts law: fetch_types off means a raw text[] arrives as
+   * a Postgres array literal string, so the query casts to json::text). */
+  feedback_tags: string | null;
+  feedback_at: string | null;
+}
+
+/** Materials per session id via the generation->>sessionId provenance
+ * create_printable stores. Sequential caller keeps the db.ts laws. */
+async function materialsBySessionIds(
+  sql: AdminSql,
+  sessionIds: string[],
+): Promise<Map<string, StudioRunMaterial[]>> {
+  const bySession = new Map<string, StudioRunMaterial[]>();
+  if (sessionIds.length === 0) return bySession;
+  const materials = await sql<
+    {
+      id: string;
+      session_id: string;
+      title: string;
+      kind: string;
+      status: string;
+      gen_path: string | null;
+      page_count: string | null;
+      preview_url: string;
+      pdf_url: string;
+      review_pass: string | null;
+      review_issues: string | null;
+      created_at: string;
+    }[]
+  >`
+    select m.id, m.generation->>'sessionId' as session_id, m.title, m.kind,
+           m.status, m.generation->'input'->>'path' as gen_path,
+           (m.generation->>'pageCount')::text as page_count,
+           m.preview_url, m.pdf_url,
+           m.generation->'review'->>'pass' as review_pass,
+           (m.generation->'review'->'issues')::text as review_issues,
+           m.created_at::text as created_at
+    from public.materials m
+    where m.generation->>'sessionId' in ${sql(sessionIds)}
+    order by m.created_at asc
+  `;
+  for (const material of materials) {
+    const list = bySession.get(material.session_id) ?? [];
+    const parsedIssues = material.review_issues
+      ? (JSON.parse(material.review_issues) as string[])
+      : [];
+    const parsedPages = Number.parseInt(material.page_count ?? "", 10);
+    list.push({
+      id: material.id,
+      title: material.title,
+      kind: material.kind,
+      status: material.status,
+      path: material.gen_path,
+      pageCount: Number.isFinite(parsedPages) && parsedPages > 1 ? parsedPages : 1,
+      previewUrl: material.preview_url,
+      pdfUrl: material.pdf_url,
+      reviewPassed: material.review_pass !== "false",
+      reviewIssues: parsedIssues,
+      createdAt: material.created_at,
+    });
+    bySession.set(material.session_id, list);
+  }
+  return bySession;
+}
+
+function toStudioRunRow(
+  run: StudioRunDbRow,
+  materialsBySession: Map<string, StudioRunMaterial[]>,
+): StudioRunRow {
+  return {
+    id: run.id,
+    familyId: run.family_id,
+    familyName: run.family_name,
+    childName: run.child_name,
+    request: run.request,
+    sessionId: run.session_id,
+    status: run.status,
+    error: run.error,
+    startedBy: run.started_by,
+    createdAt: run.created_at,
+    feedback: run.feedback,
+    feedbackTags: run.feedback_tags
+      ? (JSON.parse(run.feedback_tags) as string[])
+      : [],
+    feedbackAt: run.feedback_at,
+    materials: run.session_id
+      ? (materialsBySession.get(run.session_id) ?? [])
+      : [],
+  };
 }
 
 /** Newest runs with the materials their sessions produced. Returns null
  * when the ledger table has not been migrated yet, so the page can show
  * a labeled setup note instead of crashing (additive-may-lead law). */
+const RUN_COLUMNS_SQL = `r.id, r.family_id, f.name as family_name, c.name as child_name,
+  r.request, r.session_id, r.status, r.error, r.started_by,
+  r.created_at::text as created_at, r.feedback,
+  to_json(r.feedback_tags)::text as feedback_tags,
+  r.feedback_at::text as feedback_at`;
+
 export async function listStudioRuns(limit: number): Promise<StudioRunRow[] | null> {
   const sql = adminDb();
-  let runs;
+  let runs: StudioRunDbRow[];
   try {
-    runs = await sql<
-      {
-        id: string;
-        family_id: string;
-        family_name: string;
-        child_name: string | null;
-        request: string;
-        session_id: string | null;
-        status: "started" | "completed" | "failed";
-        error: string | null;
-        started_by: string;
-        created_at: string;
-      }[]
-    >`
-      select r.id, r.family_id, f.name as family_name, c.name as child_name,
-             r.request, r.session_id, r.status, r.error, r.started_by,
-             r.created_at::text as created_at
+    runs = await sql<StudioRunDbRow[]>`
+      select ${sql.unsafe(RUN_COLUMNS_SQL)}
       from public.materials_studio_runs r
       join public.families f on f.id = r.family_id
       left join public.children c on c.id = r.child_id and c.family_id = r.family_id
@@ -132,71 +235,34 @@ export async function listStudioRuns(limit: number): Promise<StudioRunRow[] | nu
   const sessionIds = runs
     .map((run) => run.session_id)
     .filter((id): id is string => typeof id === "string" && id.length > 0);
-  const materialsBySession = new Map<string, StudioRunMaterial[]>();
-  if (sessionIds.length > 0) {
-    const materials = await sql<
-      {
-        id: string;
-        session_id: string;
-        title: string;
-        kind: string;
-        status: string;
-        gen_path: string | null;
-        page_count: string | null;
-        preview_url: string;
-        pdf_url: string;
-        review_pass: string | null;
-        review_issues: string | null;
-        created_at: string;
-      }[]
-    >`
-      select m.id, m.generation->>'sessionId' as session_id, m.title, m.kind,
-             m.status, m.generation->'input'->>'path' as gen_path,
-             (m.generation->>'pageCount')::text as page_count,
-             m.preview_url, m.pdf_url,
-             m.generation->'review'->>'pass' as review_pass,
-             (m.generation->'review'->'issues')::text as review_issues,
-             m.created_at::text as created_at
-      from public.materials m
-      where m.generation->>'sessionId' in ${sql(sessionIds)}
-      order by m.created_at asc
-    `;
-    for (const material of materials) {
-      const list = materialsBySession.get(material.session_id) ?? [];
-      const parsedIssues = material.review_issues
-        ? (JSON.parse(material.review_issues) as string[])
-        : [];
-      const parsedPages = Number.parseInt(material.page_count ?? "", 10);
-      list.push({
-        id: material.id,
-        title: material.title,
-        kind: material.kind,
-        status: material.status,
-        path: material.gen_path,
-        pageCount: Number.isFinite(parsedPages) && parsedPages > 1 ? parsedPages : 1,
-        previewUrl: material.preview_url,
-        pdfUrl: material.pdf_url,
-        reviewPassed: material.review_pass !== "false",
-        reviewIssues: parsedIssues,
-        createdAt: material.created_at,
-      });
-      materialsBySession.set(material.session_id, list);
-    }
-  }
+  const materialsBySession = await materialsBySessionIds(sql, sessionIds);
+  return runs.map((run) => toStudioRunRow(run, materialsBySession));
+}
 
-  return runs.map((run) => ({
-    id: run.id,
-    familyId: run.family_id,
-    familyName: run.family_name,
-    childName: run.child_name,
-    request: run.request,
-    sessionId: run.session_id,
-    status: run.status,
-    error: run.error,
-    startedBy: run.started_by,
-    createdAt: run.created_at,
-    materials: run.session_id ? (materialsBySession.get(run.session_id) ?? []) : [],
-  }));
+/** One run with its materials, for /admin/studio/runs/[runId]. Null when
+ * the run is gone or the ledger table is not migrated yet. */
+export async function getStudioRunDetail(runId: string): Promise<StudioRunRow | null> {
+  const sql = adminDb();
+  let runs: StudioRunDbRow[];
+  try {
+    runs = await sql<StudioRunDbRow[]>`
+      select ${sql.unsafe(RUN_COLUMNS_SQL)}
+      from public.materials_studio_runs r
+      join public.families f on f.id = r.family_id
+      left join public.children c on c.id = r.child_id and c.family_id = r.family_id
+      where r.id = ${runId}
+    `;
+  } catch (error) {
+    if ((error as { code?: string }).code === "42P01") return null;
+    throw error;
+  }
+  const run = runs[0];
+  if (!run) return null;
+  const materialsBySession = await materialsBySessionIds(
+    sql,
+    run.session_id ? [run.session_id] : [],
+  );
+  return toStudioRunRow(run, materialsBySession);
 }
 
 export interface FleetMaterialRow {
@@ -262,6 +328,11 @@ export interface SkillPackageView {
   sections: string[];
   /** File names under references/, .png only. */
   referenceImages: string[];
+  /** Every references/<file> the body cites: which section reaches for
+   * it, the "study it for" excerpt, and whether the file exists. */
+  citations: SkillReferenceCitation[];
+  /** Files under references/ that no section cites (dead weight). */
+  uncitedFiles: string[];
 }
 
 /** cwd is apps/web in the Next runtime (the report-writer.md pattern)
@@ -294,20 +365,15 @@ export async function readSkillPackage(): Promise<SkillPackageView | null> {
   } catch {
     return null;
   }
-  let description = "";
-  let body = raw;
-  const frontmatter = raw.match(/^---\n([\s\S]*?)\n---\n/);
-  if (frontmatter) {
-    body = raw.slice(frontmatter[0].length);
-    const descriptionLine = frontmatter[1].match(/^description:\s*([\s\S]*)$/m);
-    if (descriptionLine) description = descriptionLine[1].trim();
-  }
-  const sections = [...body.matchAll(/^## (.+)$/gm)].map((match) => match[1].trim());
+  const referenceImages = await listSkillReferenceImages();
+  const parsed = parseSkillPackage(raw, referenceImages);
   return {
-    description,
-    body,
-    lineCount: raw.split("\n").length,
-    sections,
-    referenceImages: await listSkillReferenceImages(),
+    description: parsed.description,
+    body: parsed.body,
+    lineCount: parsed.lineCount,
+    sections: parsed.sections,
+    referenceImages,
+    citations: parsed.citations,
+    uncitedFiles: parsed.uncitedFiles,
   };
 }

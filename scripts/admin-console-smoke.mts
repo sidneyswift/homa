@@ -29,8 +29,13 @@ const { listSessions, getSessionDetail } = await import("../apps/web/lib/admin/s
 const { getFamilyTasks, getFamilyBrain, getFamilyMaterialsDeep, getFamilyProgressDeep } =
   await import("../apps/web/lib/admin/family-deep-data");
 const { getFamilyScreenData } = await import("../apps/web/lib/admin/screen-data");
-const { listSandboxFamilies, listStudioRuns, listRecentFleetMaterials, readSkillPackage } =
-  await import("../apps/web/lib/admin/studio-data");
+const {
+  listSandboxFamilies,
+  listStudioRuns,
+  getStudioRunDetail,
+  listRecentFleetMaterials,
+  readSkillPackage,
+} = await import("../apps/web/lib/admin/studio-data");
 
 let failed = false;
 
@@ -146,13 +151,24 @@ try {
       ? "ledger table not migrated yet (page shows its setup note)"
       : `${studioRuns.length} rows · materials ${studioRuns.reduce((sum, run) => sum + run.materials.length, 0)}`,
   );
+  if (studioRuns !== null && studioRuns.length > 0) {
+    const runDetail = await getStudioRunDetail(studioRuns[0].id);
+    if (!runDetail) throw new Error("newest studio run detail came back null");
+    pass(
+      "studio run detail (newest)",
+      `status ${runDetail.status} · materials ${runDetail.materials.length} · feedback ${runDetail.feedbackAt ? "yes" : "none"}`,
+    );
+  } else {
+    pass("studio run detail", "skipped, no runs yet");
+  }
   const fleetMaterials = await listRecentFleetMaterials(10);
   pass("studio fleet materials", `${fleetMaterials.length} rows`);
   const skillPackage = await readSkillPackage();
   if (!skillPackage) throw new Error("materials-studio skill package could not be read");
+  const missingReferences = skillPackage.citations.filter((citation) => !citation.present);
   pass(
     "studio skill package",
-    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.referenceImages.length} reference images`,
+    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.citations.length} citations · ${missingReferences.length} missing references · ${skillPackage.uncitedFiles.length} uncited files`,
   );
 } catch (error) {
   fail("admin console smoke", error);

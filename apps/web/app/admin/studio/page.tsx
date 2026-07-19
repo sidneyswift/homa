@@ -45,6 +45,7 @@ function RunCard({ run }: { run: StudioRunRow }) {
           {run.request}
         </span>
         <Pill tone={runTone(run.status)}>{runLabel(run.status)}</Pill>
+        {run.feedbackAt ? <Pill tone="outline">feedback left</Pill> : null}
         <span className="text-[0.72rem] text-subtle">
           {familyDisplayName(run.familyName)}
           {run.childName ? ` · ${run.childName}` : ""} · {timeAgo(run.createdAt)}
@@ -110,19 +111,25 @@ function RunCard({ run }: { run: StudioRunRow }) {
           </div>
         ))}
         <p className="mt-3 flex flex-wrap gap-4 text-[0.76rem]">
+          <Link
+            href={`/admin/studio/runs/${run.id}`}
+            className="font-bold text-[var(--clay-600)] hover:underline"
+          >
+            Open the run: trace, feedback, agent packet
+          </Link>
           {run.sessionId ? (
             <Link
               href={`/admin/sessions/${run.sessionId}`}
               className="font-semibold text-[var(--clay-600)] hover:underline"
             >
-              Open the session X-ray
+              Session X-ray
             </Link>
           ) : null}
           <Link
             href={`/admin/chats?family=${run.familyId}`}
             className="font-semibold text-[var(--clay-600)] hover:underline"
           >
-            Open the family thread
+            Family thread
           </Link>
           <span className="text-subtle">started by {run.startedBy}</span>
         </p>
@@ -208,28 +215,64 @@ export default async function AdminStudioPage() {
                 </pre>
               </details>
             </div>
-            {skillPackage.referenceImages.length > 0 ? (
-              <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
-                <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
-                  Reference images the skill studies
+            <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+              <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
+                Reference images and what routes to them
+              </p>
+              {skillPackage.citations.length === 0 ? (
+                <p className="mt-2 text-[0.8rem] text-muted">
+                  The skill body cites no reference images.
                 </p>
-                <div className="mt-2.5 flex flex-wrap gap-3">
-                  {skillPackage.referenceImages.map((file) => (
-                    <a key={file} href={`/admin/studio/reference/${file}`} target="_blank" rel="noreferrer">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`/admin/studio/reference/${file}`}
-                        alt={file}
-                        className="w-[150px] rounded-md border border-border-subtle"
-                      />
-                      <span className="mt-1 block text-center font-mono text-[0.62rem] text-subtle">
-                        {file}
-                      </span>
-                    </a>
+              ) : (
+                <div className="mt-2.5 flex flex-col gap-4">
+                  {skillPackage.citations.map((citation) => (
+                    <div key={citation.file} className="flex flex-wrap items-start gap-4">
+                      {citation.present ? (
+                        <a
+                          href={`/admin/studio/reference/${citation.file}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="shrink-0"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`/admin/studio/reference/${citation.file}`}
+                            alt={citation.file}
+                            className="w-[150px] rounded-md border border-border-subtle"
+                          />
+                        </a>
+                      ) : (
+                        <div className="flex h-[194px] w-[150px] shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--rose-500)] px-3 text-center text-[0.72rem] font-semibold text-[var(--rose-600)]">
+                          cited but not shipped
+                        </div>
+                      )}
+                      <div className="min-w-[220px] flex-1 text-[0.8rem]">
+                        <p className="font-mono text-[0.72rem] font-bold text-strong">
+                          {citation.file}
+                        </p>
+                        <p className="mt-0.5">
+                          <span className="font-semibold text-muted">Used by:</span>{" "}
+                          {citation.section ?? "the skill preamble"}
+                        </p>
+                        <p className="mt-1 text-muted">{citation.excerpt}</p>
+                        {!citation.present ? (
+                          <p className="mt-1.5 font-semibold text-[var(--rose-600)]">
+                            Gap: the body promises this reference and the package does not
+                            ship it. Add the file under references/ or drop the citation.
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            ) : null}
+              )}
+              {skillPackage.uncitedFiles.length > 0 ? (
+                <p className="mt-3 rounded-md bg-page px-3 py-2 text-[0.78rem] text-muted">
+                  <span className="font-semibold">Dead weight:</span> shipped but never cited
+                  by any section: {skillPackage.uncitedFiles.join(", ")}
+                </p>
+              ) : null}
+            </div>
           </div>
         )}
       </div>
