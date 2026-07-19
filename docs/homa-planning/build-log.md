@@ -207,6 +207,23 @@ retest dates, and check-offs stay out of the model's reach), a 10-
 activity-per-week cap, and no month creation from chat (the report's
 one-tap consent stays the only door, so the wall is never bypassed).
 
+## 2026-07-19 · Second stranded Cosmo commit recovered: marketing-ugc-engine skill
+
+Follow-up to the recovery below. The second stranded commit on
+fix/handwrytten-sender (46411c9, marketing-ugc-engine skill, 8 files)
+is now on main. Decision made alone: the skill belongs on main because
+it fits the `.agents/skills/marketing-*` family that `marketing/AGENTS.md`
+names as the home of pipeline logic, references only surfaces that
+already exist (`marketing/creators/`, `marketing/campaigns/`,
+`marketing/voice/house-style.md`), and encodes the Homa red lines
+(child privacy absolute, never auto-publish, no AI-first framing,
+family data banned). Cherry-picked verbatim to preserve authorship,
+then swept in a follow-up commit: 29 em dashes replaced with
+law-compliant punctuation (the skill restates the no-em-dash law but
+its own prose violated it). Raw source kept in `marketing/raw/` per
+the provenance convention, swept the same way, matching the zero
+em-dash state of every existing raw file.
+
 ## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
 
 Founder ask: investigate .cosmo, update materials-studio, and put the
