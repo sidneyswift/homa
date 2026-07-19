@@ -96,9 +96,8 @@ export const SAMPLE_REPORT_COPY = {
 
 export const FOUNDER_STORY_COPY = {
   eyebrow: "Our story",
-  headline: "Built at our kitchen table.",
+  headline: "By homeschoolers, for homeschoolers.",
   body:
     "We built Homa at our kitchen table. We were planning lessons, teaching, and keeping records at the same time. The teaching mattered most. Planning and recordkeeping took time away from teaching. Homa first helped our family plan the week. It kept our records together. It showed us what to try next.",
-  closing: "You teach. Homa prepares the week.",
   signature: "Alessa & Carolyng",
 } as const;

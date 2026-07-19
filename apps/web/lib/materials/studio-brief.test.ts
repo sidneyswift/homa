@@ -7,7 +7,7 @@ import {
   STUDIO_REQUEST_MAX_CHARS,
   studioRequestProblem,
 } from "./studio-brief";
-import { PINNED_AGENT_CHANNELS } from "../agent-db";
+import { isPinnedAgentChannel } from "../agent-db";
 
 /**
  * The studio test bench's brief and channel wiring (/admin/studio,
@@ -58,20 +58,28 @@ describe("buildStudioBrief", () => {
 
 describe("pinned agent channels", () => {
   it("include every server-originated session channel that needs family context", () => {
-    for (const channel of ["sms", "email", "dispatch", "agent-job", "materials-lab"]) {
-      assert.ok(PINNED_AGENT_CHANNELS.has(channel), `${channel} missing`);
+    for (const channel of [
+      "sms",
+      "email",
+      "dispatch",
+      "subject_lesson",
+      "agent-job",
+      "materials-lab",
+    ]) {
+      assert.ok(isPinnedAgentChannel(channel), `${channel} missing`);
     }
-    assert.ok(!PINNED_AGENT_CHANNELS.has("web"), "web is caller-token, never pinned");
+    assert.ok(!isPinnedAgentChannel("web"), "web is caller-token, never pinned");
+    assert.ok(!isPinnedAgentChannel(undefined));
   });
 
-  it("are the set the family-context instruction hydrates from", async () => {
+  it("are the one set the family-context instruction hydrates from", async () => {
     const source = await readFile(
       new URL("../../agent/instructions/family-context.ts", import.meta.url),
       "utf8",
     );
     assert.ok(
-      source.includes("PINNED_AGENT_CHANNELS.has("),
-      "family-context.ts must gate its pinned branch on the shared channel set",
+      source.includes("isPinnedAgentChannel(attributes.channel)"),
+      "family-context.ts must gate its pinned branch on the shared channel guard",
     );
     assert.ok(
       !/attributes\.channel === "sms"/.test(source),

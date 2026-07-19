@@ -1,0 +1,101 @@
+import { selectParentVisibleMaterialRevisions } from "../../lib/materials/parent-visible";
+import type { MaterialArtifact } from "./material-card";
+
+type MaterialStatus = "draft" | "final" | "superseded";
+
+export interface ParentVisibleMaterialMessagePart {
+  id: string;
+  revisesId: string | null;
+  status: MaterialStatus;
+  reviewPass: boolean | null;
+  order: number;
+  sourcePartIndex: number;
+  material: MaterialArtifact;
+}
+
+function parsedStatus(value: unknown): MaterialStatus {
+  if (value === "final" || value === "superseded") return value;
+  return "draft";
+}
+
+function parsedReviewPass(value: unknown): boolean | null {
+  if (value === true) return true;
+  if (value === false) return false;
+  return null;
+}
+
+function parseMaterialMessagePart(
+  part: unknown,
+  sourcePartIndex: number,
+): ParentVisibleMaterialMessagePart | null {
+  if (typeof part !== "object" || part === null) return null;
+  const candidate = part as Record<string, unknown>;
+  if (
+    candidate.type !== "dynamic-tool" ||
+    candidate.state !== "output-available" ||
+    (candidate.toolName !== "create_printable" &&
+      candidate.toolName !== "show_material" &&
+      candidate.toolName !== "create_worksheet")
+  ) {
+    return null;
+  }
+
+  if (typeof candidate.output !== "object" || candidate.output === null) {
+    return null;
+  }
+  const output = candidate.output as Record<string, unknown>;
+  const rawMaterial =
+    candidate.toolName === "create_worksheet"
+      ? output.worksheet
+      : output.material;
+  if (typeof rawMaterial !== "object" || rawMaterial === null) return null;
+  const material = rawMaterial as Record<string, unknown>;
+  if (
+    typeof material.title !== "string" ||
+    typeof material.previewUrl !== "string" ||
+    typeof material.pdfUrl !== "string"
+  ) {
+    return null;
+  }
+
+  const id =
+    typeof material.id === "string" && material.id.length > 0
+      ? material.id
+      : `legacy-part:${sourcePartIndex}`;
+  const revisesId =
+    typeof material.revisesId === "string" && material.revisesId.length > 0
+      ? material.revisesId
+      : null;
+
+  return {
+    id,
+    revisesId,
+    status: parsedStatus(material.status),
+    reviewPass: parsedReviewPass(material.reviewPassed),
+    order: sourcePartIndex,
+    sourcePartIndex,
+    material: {
+      title: material.title,
+      ...(typeof material.kind === "string" ? { kind: material.kind } : {}),
+      skill: typeof material.skill === "string" ? material.skill : null,
+      childName:
+        typeof material.childName === "string" ? material.childName : null,
+      previewUrl: material.previewUrl,
+      pdfUrl: material.pdfUrl,
+    },
+  };
+}
+
+/**
+ * Parses material tool outputs and returns one current card per revision chain.
+ * The selected entries retain their original message-part positions.
+ */
+export function selectParentVisibleMaterialMessageParts(
+  parts: readonly unknown[],
+): ParentVisibleMaterialMessagePart[] {
+  const candidates = parts.flatMap((part, sourcePartIndex) => {
+    const candidate = parseMaterialMessagePart(part, sourcePartIndex);
+    return candidate ? [candidate] : [];
+  });
+  return selectParentVisibleMaterialRevisions(candidates);
+}

@@ -8,7 +8,8 @@
  *   2. tenancy tables are invisible and unwritable to anonymous traffic
  *   3. the events namespace and waitlist status cannot be abused on insert
  *   4. authenticated members cannot read or write another family's rows
- *   5. ChildProgress tables are family-readable and server-write-only
+ *   5. ChildProgress and subject lesson rows are family-readable and
+ *      server-write-only
  *
  * Usage: node scripts/isolation-check.mjs
  * Env: reads apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL /
@@ -238,6 +239,20 @@ async function expectAuthenticatedUpdateDenied(
   report(label, ok, `HTTP ${response.status}`);
 }
 
+async function expectAuthenticatedRpcDenied(
+  accessToken,
+  functionName,
+  args,
+  label,
+) {
+  const response = await restAs(accessToken, `rpc/${functionName}`, {
+    method: "POST",
+    body: JSON.stringify(args),
+  });
+  const ok = response.status === 401 || response.status === 403;
+  report(label, ok, `HTTP ${response.status}`);
+}
+
 // For tables with a real member-scoped policy (USING/WITH CHECK against the
 // caller's own family, not a hard "no policy at all" deny), a cross-family
 // PATCH is not rejected at the HTTP layer: RLS silently filters the target
@@ -425,6 +440,34 @@ async function childProgressSchemaExists() {
     where to_regclass(expected.table_name) is not null
   `;
   return rows[0]?.table_count === 10;
+}
+
+async function subjectLessonSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.subject_lessons') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
+/**
+ * The subject_lessons migration deliberately ships as an expand/contract
+ * pair (2026-07-18 merge-to-main review finding): the enforcing trigger is
+ * a SEPARATE, later migration that must not apply until the RPC-aware
+ * finalizeMaterialCaller code is confirmed READY in production, because it
+ * would otherwise reject every family's existing direct-update material
+ * approval. This checks whether that second migration has landed yet, so
+ * the isolation probe below can assert the right thing for either state
+ * instead of failing during the safe, deliberate window between them.
+ */
+async function materialStatusWriteBoundaryEnforced() {
+  const rows = await sql`
+    select exists (
+      select 1 from pg_trigger
+      where tgname = 'enforce_material_status_write_boundary'
+        and not tgisinternal
+    ) as present
+  `;
+  return rows[0]?.present === true;
 }
 
 async function morningResearchBriefV2SchemaExists() {
@@ -1060,6 +1103,149 @@ async function insertChildProgressFixtures(
     responseId: response.id,
     snapshotId: snapshot.id,
   };
+}
+
+async function insertSubjectLessonFixture(childId) {
+  const [lesson] = await sql`
+    insert into public.subject_lessons (
+      child_id,
+      subject_id,
+      target_item_id,
+      target_statement,
+      source_report_generated_at,
+      source_fingerprint,
+      bank_version,
+      idempotency_key
+    )
+    values (
+      ${childId},
+      'math',
+      'math.isolation-target',
+      'Isolation subject lesson target',
+      now(),
+      ${"7".repeat(64)},
+      'isolation-bank',
+      ${"7".repeat(64)}
+    )
+    returning id
+  `;
+  if (!lesson?.id) {
+    throw new Error("subject lesson fixture returned no id");
+  }
+  return lesson.id;
+}
+
+async function insertSubjectLessonMaterialFixture(
+  familyId,
+  childId,
+  lessonId,
+) {
+  await sql`
+    update public.subject_lessons
+    set build_status = 'running',
+        build_phase = 'making_worksheet',
+        attempt_count = 1,
+        content = ${sql.json({
+          title: "Isolation lesson",
+          materials: [],
+          steps: [
+            "The child reads one word.",
+            "The child reads a second word.",
+            "The child reads both words again.",
+          ],
+          practice: "Read both words tomorrow.",
+        })}
+    where id = ${lessonId}
+      and child_id = ${childId}
+  `;
+  const [material] = await sql`
+    insert into public.materials (
+      family_id,
+      child_id,
+      subject_lesson_id,
+      title,
+      kind,
+      skill,
+      subject,
+      pdf_url,
+      preview_url,
+      html,
+      source,
+      channel,
+      generation
+    )
+    values (
+      ${familyId},
+      ${childId},
+      ${lessonId},
+      'Isolation lesson worksheet',
+      'worksheet',
+      'Isolation subject lesson target',
+      'math',
+      'https://example.com/isolation-lesson.pdf',
+      'https://example.com/isolation-lesson.jpg',
+      '<p>Isolation lesson worksheet.</p>',
+      'html',
+      'subject_lesson',
+      '{"review":null}'::jsonb
+    )
+    returning id
+  `;
+  if (!material?.id) {
+    throw new Error("subject lesson material fixture returned no id");
+  }
+  return material.id;
+}
+
+async function expectSubjectLessonChildCascade(familyId) {
+  try {
+    const [child] = await sql`
+      insert into public.children (family_id, name, birth_month)
+      values (${familyId}, 'Isolation cascade child', '2020-01-01')
+      returning id
+    `;
+    const [lesson] = await sql`
+      insert into public.subject_lessons (
+        child_id,
+        subject_id,
+        target_statement,
+        source_report_generated_at,
+        source_fingerprint,
+        bank_version,
+        idempotency_key
+      )
+      values (
+        ${child.id},
+        'reading',
+        'Isolation cascade target',
+        now(),
+        ${"8".repeat(64)},
+        'isolation-bank',
+        ${"8".repeat(64)}
+      )
+      returning id
+    `;
+    await sql`
+      delete from public.children
+      where id = ${child.id} and family_id = ${familyId}
+    `;
+    const remaining = await sql`
+      select count(*)::integer as count
+      from public.subject_lessons
+      where id = ${lesson.id}
+    `;
+    report(
+      "deleting a child cascades subject lessons",
+      remaining[0]?.count === 0,
+      `remaining ${remaining[0]?.count ?? "unknown"}`,
+    );
+  } catch (error) {
+    report(
+      "deleting a child cascades subject lessons",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 }
 
 async function expectChildProgressConstraintRejections(context) {
@@ -2108,6 +2294,15 @@ async function expectAuthenticatedIsolation() {
       familyBUser.userId,
       familyBSecondUser.userId,
     );
+    const hasSubjectLessonSchema = await subjectLessonSchemaExists();
+    report(
+      "subject lesson migration is applied to the isolation target",
+      hasSubjectLessonSchema,
+      hasSubjectLessonSchema ? "table present" : "public.subject_lessons is missing",
+    );
+    const subjectLessonBId = hasSubjectLessonSchema
+      ? await insertSubjectLessonFixture(childBId)
+      : null;
     await expectAuthenticatedChildAnswersWritesDenied(
       familyBUser.accessToken,
       childBId,
@@ -2156,6 +2351,14 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B material fixture",
     );
+    const subjectLessonMaterialBId = subjectLessonBId
+      ? await insertSubjectLessonMaterialFixture(
+          familyBId,
+          childBId,
+          subjectLessonBId,
+        )
+      : null;
+
     await expectAuthenticatedInsertDenied(
       familyBUser.accessToken,
       "materials",
@@ -2171,6 +2374,30 @@ async function expectAuthenticatedIsolation() {
       },
       "auth member cannot forge material offer provenance on insert",
     );
+    // Expand/contract window (2026-07-18 merge-to-main review finding):
+    // the enforcing trigger is a deliberately separate, later migration
+    // that must not land until the RPC-aware finalizeMaterialCaller is
+    // confirmed READY in production -- applying it first would reject
+    // every family's existing direct-update approval. During that safe
+    // window a direct update still succeeds, on purpose; assert that
+    // honestly instead of failing, and assert the real denial once the
+    // second migration has landed.
+    if (await materialStatusWriteBoundaryEnforced()) {
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "materials",
+        "id",
+        materialBId,
+        { status: "final", approved_at: new Date().toISOString() },
+        "auth member cannot directly update material status",
+      );
+    } else {
+      report(
+        "auth member cannot directly update material status",
+        true,
+        "not yet enforced: enforce_material_status_write_boundary migration deliberately pending (code-then-migration rollout window)",
+      );
+    }
     await expectAuthenticatedUpdateDenied(
       familyBUser.accessToken,
       "materials",
@@ -2181,6 +2408,97 @@ async function expectAuthenticatedIsolation() {
           "00000000-0000-0000-0000-000000000000",
       },
       "auth member cannot forge material offer provenance on update",
+    );
+    if (subjectLessonBId && subjectLessonMaterialBId) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "materials",
+        subjectLessonMaterialBId,
+        0,
+        "auth member cannot read a lesson-linked draft material",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "materials",
+        {
+          family_id: familyBId,
+          child_id: childBId,
+          subject_lesson_id: subjectLessonBId,
+          title: "Client-forged lesson worksheet",
+          kind: "worksheet",
+          pdf_url: "https://example.com/client-forged.pdf",
+          preview_url: "https://example.com/client-forged.jpg",
+          html: "<p>Client-forged lesson worksheet.</p>",
+          source: "html",
+          channel: "web",
+        },
+        "auth member cannot forge subject lesson material provenance",
+      );
+      await expectAuthenticatedRpcDenied(
+        familyBSecondUser.accessToken,
+        "finalize_family_material",
+        {
+          p_family_id: familyBId,
+          p_material_id: subjectLessonMaterialBId,
+        },
+        "non-owner cannot finalize a lesson-linked material",
+      );
+      const ownerFinalize = await restAs(
+        familyBUser.accessToken,
+        "rpc/finalize_family_material",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            p_family_id: familyBId,
+            p_material_id: subjectLessonMaterialBId,
+          }),
+          headers: { Prefer: "return=representation" },
+        },
+      );
+      const ownerFinalizeRaw = await ownerFinalize.text();
+      report(
+        "account owner can finalize the exact lesson worksheet",
+        ownerFinalize.ok
+          && ownerFinalizeRaw.includes('"finalized":true'),
+        `HTTP ${ownerFinalize.status}, ${ownerFinalizeRaw.slice(0, 100)}`,
+      );
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "materials",
+        subjectLessonMaterialBId,
+        1,
+        "auth member can read a final lesson worksheet in Binder",
+      );
+    }
+
+    const ordinaryFinalize = await restAs(
+      familyBSecondUser.accessToken,
+      "rpc/finalize_family_material",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          p_family_id: familyBId,
+          p_material_id: materialBId,
+        }),
+        headers: { Prefer: "return=representation" },
+      },
+    );
+    const ordinaryFinalizeRaw = await ordinaryFinalize.text();
+    let ordinaryFinalizeBody = null;
+    try {
+      ordinaryFinalizeBody = ordinaryFinalizeRaw
+        ? JSON.parse(ordinaryFinalizeRaw)
+        : null;
+    } catch {
+      ordinaryFinalizeBody = null;
+    }
+    const ordinaryFinalizeRow = Array.isArray(ordinaryFinalizeBody)
+      ? ordinaryFinalizeBody[0]
+      : ordinaryFinalizeBody;
+    report(
+      "family member can finalize an ordinary material through the RPC",
+      ordinaryFinalize.ok && ordinaryFinalizeRow?.finalized === true,
+      `HTTP ${ordinaryFinalize.status}, ${ordinaryFinalizeRaw.slice(0, 100)}`,
     );
     // child_plans (migration #26) carries the same is_child_family_member
     // policy shape as children/family_memories/materials: real member-scoped
@@ -2307,6 +2625,44 @@ async function expectAuthenticatedIsolation() {
       chatAttachmentWriteFixture,
       "cross-family token cannot mutate Family B chat attachment",
     );
+
+    if (subjectLessonBId) {
+      await expectAuthenticatedReadDenied(
+        familyBUser.accessToken,
+        "subject_lessons",
+        "auth member cannot read subject lessons directly",
+      );
+      const subjectLessonWriteFixture = {
+        keyColumn: "id",
+        keyValue: subjectLessonBId,
+        insertRow: {
+          child_id: childBId,
+          subject_id: "math",
+          target_item_id: "math.client-forge",
+          target_statement: "Client-forged lesson target",
+          source_report_generated_at: new Date().toISOString(),
+          source_fingerprint: "9".repeat(64),
+          bank_version: "client-forge",
+          idempotency_key: "9".repeat(64),
+        },
+        updateRow: {
+          target_statement: "Authenticated clients cannot alter lessons.",
+        },
+      };
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        "subject_lessons",
+        subjectLessonWriteFixture,
+        "auth member cannot mutate own subject lesson",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyAUser.accessToken,
+        "subject_lessons",
+        subjectLessonWriteFixture,
+        "cross-family token cannot mutate Family B subject lesson",
+      );
+      await expectSubjectLessonChildCascade(familyBId);
+    }
 
     // children and child_plans both resolve their update policy through
     // is_family_member/is_child_family_member rather than denying
@@ -2728,6 +3084,10 @@ for (const table of [
 ]) {
   await expectAnonymousNoRowsOrDenied(table);
 }
+// Subject lesson packages are member-readable and server-write-only. This
+// also marks the new public tables as covered before the dynamic family probes.
+await expectAnonymousNoRowsOrDenied("subject_lessons");
+await expectAnonymousNoRowsOrDenied("subject_lesson_effect_receipts");
 // Lesson listen (plan 2026-07-13-lesson-listen.md): same posture as the
 // ChildProgress tables. Members read their own family's rows, every
 // write rides the server-only connection, anon sees and writes nothing.
@@ -3224,6 +3584,20 @@ await expectInsertDenied(
     observed_at: new Date().toISOString(),
   },
   "anon cannot forge child observations",
+);
+await expectInsertDenied(
+  "subject_lessons",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    subject_id: "math",
+    target_item_id: "math.probe",
+    target_statement: "Anon-forged subject lesson target",
+    source_report_generated_at: new Date().toISOString(),
+    source_fingerprint: "1".repeat(64),
+    bank_version: "isolation",
+    idempotency_key: "1".repeat(64),
+  },
+  "anon cannot forge subject lessons",
 );
 await expectInsertDenied(
   "lesson_recordings",

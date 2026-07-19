@@ -101,13 +101,42 @@ export interface RenderedPrintable {
   pageCount: number;
 }
 
+export interface PrintableRenderPolicy {
+  blockImageResources: boolean;
+  blockNavigationRequests: boolean;
+}
+
+export const SUBJECT_LESSON_RENDER_POLICY: PrintableRenderPolicy = {
+  blockImageResources: true,
+  blockNavigationRequests: true,
+};
+
+export function isPrintableRequestAllowed(
+  resourceType: string,
+  url: string,
+  policy?: PrintableRenderPolicy,
+  isNavigationRequest = false,
+): boolean {
+  if (policy?.blockNavigationRequests) {
+    if (resourceType === "document" && url === "about:blank") return true;
+    if (isNavigationRequest) return false;
+    if (resourceType === "document") return false;
+  }
+  if (resourceType === "document") return true;
+  if (policy?.blockImageResources && resourceType === "image") return false;
+  return isAllowedPrintableSubresourceUrl(url);
+}
+
 /**
  * renderPrintableHtml(html): Promise<RenderedPrintable>
  * One complete HTML document in; a letter-size PDF plus a JPEG per page
  * out. Waits for network quiet AND document.fonts.ready so web fonts and
  * illustrations are actually painted before capture.
  */
-export async function renderPrintableHtml(html: string): Promise<RenderedPrintable> {
+export async function renderPrintableHtml(
+  html: string,
+  policy?: PrintableRenderPolicy,
+): Promise<RenderedPrintable> {
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
@@ -125,9 +154,12 @@ export async function renderPrintableHtml(html: string): Promise<RenderedPrintab
     await page.setRequestInterception(true);
     page.on("request", (request) => {
       const url = request.url();
-      const allowed =
-        request.resourceType() === "document" ||
-        isAllowedPrintableSubresourceUrl(url);
+      const allowed = isPrintableRequestAllowed(
+        request.resourceType(),
+        url,
+        policy,
+        request.isNavigationRequest(),
+      );
       if (allowed) {
         request.continue().catch(() => {
           // Race: the request was already handled or the page is closing.

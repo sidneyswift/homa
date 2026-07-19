@@ -15,6 +15,17 @@ import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
 
+export function subjectLessonImageGenerationRestriction(
+  _input: { referenceImageUrls?: readonly string[] },
+  attributes: unknown,
+): string | null {
+  const channel = (attributes as { channel?: unknown } | null | undefined)
+    ?.channel;
+  return channel === "subject_lesson"
+    ? "Use an HTML-only subject lesson worksheet. Automatic lesson builds cannot generate or reference images."
+    : null;
+}
+
 /**
  * The materials studio's art department (MS-1): one image per call,
  * generated through the Vercel AI Gateway. Not illustration-shaped:
@@ -53,6 +64,14 @@ export default defineTool({
       ),
   }),
   async execute(input, ctx) {
+    const restriction = subjectLessonImageGenerationRestriction(
+      input,
+      ctx.session.auth.current?.attributes,
+    );
+    if (restriction) {
+      return { generated: false, note: restriction };
+    }
+
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
@@ -61,6 +80,15 @@ export default defineTool({
         return { generated: false, note: error.message };
       }
       throw error;
+    }
+    const channel = usageChannelFromAttributes(
+      ctx.session.auth.current?.attributes,
+    );
+    if (channel === "subject_lesson") {
+      return {
+        generated: false,
+        note: "Use an HTML-only subject lesson worksheet. Automatic lesson builds cannot generate or reference images.",
+      };
     }
 
     if (!blobConfigured()) {
@@ -81,7 +109,6 @@ export default defineTool({
     const attributes = ctx.session.auth.current?.attributes as
       | { phoneNumber?: string }
       | undefined;
-    const channel = usageChannelFromAttributes(ctx.session.auth.current?.attributes);
 
     // Image generation is the slow leg of an SMS material build. This
     // fallback shares the progress window with send_heads_up.

@@ -58,6 +58,15 @@ export default defineTool({
       }
       throw error;
     }
+    const channel = usageChannelFromAttributes(
+      ctx.session.auth.current?.attributes,
+    );
+    if (channel === "subject_lesson") {
+      return {
+        photos: [],
+        note: "Use an HTML-only subject lesson worksheet without photo or reference search.",
+      };
+    }
 
     if (!serpConfigured()) {
       return {
@@ -91,7 +100,7 @@ export default defineTool({
 
     await emitMapEvent("materials.photo_searched", {
       family_id: access.familyId,
-      channel: usageChannelFromAttributes(ctx.session.auth.current?.attributes),
+      channel,
       results: outcome.photos.length,
       duration_ms: Date.now() - startedAt,
     });

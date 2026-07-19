@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { Button } from "./ds/Button";
@@ -10,9 +11,11 @@ import { PlatformStrip } from "./PlatformStrip";
 import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
- * Category-led landing hero. The fixture-safe product demo replaces the
- * lifestyle-only image so a first-time visitor can see what using Homa means.
- * The primary action preserves the shared signup popup and link fallback.
+ * Category-led landing hero. The lifestyle photo returns behind the
+ * fixture-safe product demo (floating bottom-left, echoing the earlier
+ * "proof" card position) so a first-time visitor gets both the warmth of
+ * a real family and concrete proof of what using Homa means. The primary
+ * action preserves the shared signup popup and link fallback.
  */
 export function Hero() {
   const openPopup = useSignupPopup();
@@ -88,8 +91,36 @@ export function Hero() {
           </div>
           <PlatformStrip />
         </div>
-        <div data-reveal="" className="rv-d1" style={{ position: "relative" }}>
-          <HeroProductDemo />
+        <div data-reveal="" className="rv-d1 lp-hero-visual" style={{ position: "relative" }}>
+          <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-xl)" }}>
+            {/* objectPosition pans the crop left so the daughter sits right
+                of the floating phone instead of hidden behind it. */}
+            <Image
+              src="/images/hero-family.png"
+              alt="A mom and her daughter working through a workbook together at the kitchen table"
+              width={760}
+              height={440}
+              priority
+              sizes="(max-width: 880px) 100vw, 540px"
+              style={{ width: "100%", height: 440, objectFit: "cover", objectPosition: "30% 42%", display: "block" }}
+            />
+          </div>
+          {/* Slight tilt matches the hand-placed doodle language; the warm
+              drop-shadow separates the device from the busy photo behind it. */}
+          <div
+            className="lp-hero-phone-float"
+            style={{
+              position: "absolute",
+              left: -20,
+              bottom: -26,
+              width: 280,
+              transform: "rotate(-2.5deg) scale(0.62)",
+              transformOrigin: "bottom left",
+              filter: "drop-shadow(0 26px 38px rgba(51,42,33,0.38))",
+            }}
+          >
+            <HeroProductDemo />
+          </div>
         </div>
       </div>
     </section>

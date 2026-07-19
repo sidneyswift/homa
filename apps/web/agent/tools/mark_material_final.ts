@@ -17,6 +17,16 @@ import { usageChannelFromAttributes } from "../../lib/model-usage";
  * and future creations reference. Never call it on your own judgment;
  * approval is hers.
  */
+export function subjectLessonMaterialFinalizationRestriction(
+  attributes: unknown,
+): string | null {
+  const channel = (attributes as { channel?: unknown } | null | undefined)
+    ?.channel;
+  return channel === "subject_lesson"
+    ? "Automatic lesson builds cannot approve materials. The worksheet stays draft until parent approval."
+    : null;
+}
+
 export default defineTool({
   description:
     "Mark a material as the approved final version after the parent clearly approves it ('great', 'print it', 'she loves it'). Earlier drafts in its revision chain are superseded and cleaned up; the final becomes reusable as a reference for future materials. Use the id from the create_printable result.",
@@ -24,6 +34,20 @@ export default defineTool({
     materialId: z.uuid().describe("The approved version's id from the create_printable result."),
   }),
   async execute(input, ctx) {
+    const attributes = ctx.session.auth.current?.attributes;
+    const restriction = subjectLessonMaterialFinalizationRestriction(
+      attributes,
+    );
+    const channel = usageChannelFromAttributes(attributes);
+    if (restriction || channel === "subject_lesson") {
+      return {
+        finalized: false,
+        note:
+          restriction
+          ?? "Automatic lesson builds cannot approve materials. The worksheet stays draft until parent approval.",
+      };
+    }
+
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
@@ -40,16 +64,20 @@ export default defineTool({
         : await finalizeMaterialCaller(access.db, access.familyId, input.materialId);
     if (!result.finalized) return result;
 
-    await emitMapEvent("materials.finalized", {
-      family_id: access.familyId,
-      channel: usageChannelFromAttributes(ctx.session.auth.current?.attributes),
-      versions_superseded: result.versionsSuperseded ?? 0,
-    });
+    if (result.transitioned) {
+      await emitMapEvent("materials.finalized", {
+        family_id: access.familyId,
+        channel,
+        versions_superseded: result.versionsSuperseded,
+      });
+    }
 
     return {
       ...result,
       done: true,
-      note: "Kept as the final version; earlier drafts tidied away. Mention it in one short natural aside at most.",
+      note: result.transitioned
+        ? "Kept as the final version; earlier drafts tidied away. Mention it in one short natural aside at most."
+        : "That version was already kept. Mention it in one short natural aside at most.",
     };
   },
 });

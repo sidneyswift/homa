@@ -30,15 +30,11 @@ import {
   removeFamilyPhone,
 } from "../../lib/family-phone";
 import { mapDb } from "../../lib/map/db";
-import { sendReportEmail } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
 import { narrativeEnabled } from "../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../lib/map/narrative-runner";
-import {
-  createReport,
-  markReportEmailed,
-  reportAlreadyEmailed,
-} from "../../lib/map/store";
+import { sendReportEmailOnce } from "../../lib/map/report-email";
+import { createReport } from "../../lib/map/store";
 
 /**
  * /admin server actions. Same founder gate as the pages, but through
@@ -176,19 +172,22 @@ export async function buildChildReportAction(
     return { error: "Questions are still open for this kid. The checklist has to finish first." };
   }
 
-  const alreadyEmailed = await reportAlreadyEmailed(familyId, childId);
   const report = await createReport(familyId, childId);
   if (!report) {
     return { error: "The report didn't build. Reload and try again." };
   }
 
-  await emitMapEvent("map.report_generated", {
-    family_id: familyId,
-    child_id: report.childId,
-    mapped_subjects: report.scores.mappedCount,
-    observations: report.scores.observationCount,
-    bank_version: MAP_BANK_VERSION,
-  });
+  // A duplicate build (double click, a web scoring racing this one)
+  // changed nothing and emits nothing.
+  if (!report.duplicate) {
+    await emitMapEvent("map.report_generated", {
+      family_id: familyId,
+      child_id: report.childId,
+      mapped_subjects: report.scores.mappedCount,
+      observations: report.scores.observationCount,
+      bank_version: MAP_BANK_VERSION,
+    });
+  }
 
   // Mirror of /api/map/score's background phase: words first, then the
   // durable email so the link opens a finished report. Each step fails
@@ -205,14 +204,16 @@ export async function buildChildReportAction(
       }
     }
     try {
-      if (!alreadyEmailed && report.email) {
-        const emailed = await sendReportEmail(
+      // First scoring only; the claim inside is atomic, so a doubled
+      // build (double click, concurrent web scoring) sends one email.
+      if (report.email) {
+        await sendReportEmailOnce(
+          familyId,
+          report.childId,
           report.email,
           report.childName,
           report.token,
-          familyId,
         );
-        if (emailed) await markReportEmailed(familyId, report.childId);
       }
     } catch (error) {
       console.error(

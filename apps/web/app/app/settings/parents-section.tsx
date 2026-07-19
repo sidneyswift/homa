@@ -118,8 +118,16 @@ function AdultRowLine({
 }
 
 /** The signed-in adult's row with its name-photo-number editor. */
-function MyAdultItem({ adult, showPrimaryTag }: { adult: AdultRow; showPrimaryTag: boolean }) {
-  const [editing, setEditing] = useState(false);
+function MyAdultItem({
+  adult,
+  showPrimaryTag,
+  openPhoneEditorInitially,
+}: {
+  adult: AdultRow;
+  showPrimaryTag: boolean;
+  openPhoneEditorInitially: boolean;
+}) {
+  const [editing, setEditing] = useState(openPhoneEditorInitially);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -214,6 +222,7 @@ function MyAdultItem({ adult, showPrimaryTag }: { adult: AdultRow; showPrimaryTa
             type="tel"
             inputMode="tel"
             autoComplete="mobile tel"
+            autoFocus={openPhoneEditorInitially}
             defaultValue={adult.phoneDisplay ?? ""}
             placeholder="Ten digits, like 954 555 0123"
             className={inputClass}
@@ -399,6 +408,7 @@ export function ParentsSection({
   legacyPhones,
   homaNumberDisplay,
   homaNumberE164,
+  openSignedInAdultPhoneEditor,
 }: {
   adults: AdultRow[];
   pendingInvites: PendingInviteRow[];
@@ -406,6 +416,8 @@ export function ParentsSection({
   /** Homa's own texting number, formatted, or null when SMS is off. */
   homaNumberDisplay: string | null;
   homaNumberE164: string | null;
+  /** Opens only the authenticated adult's existing profile editor. */
+  openSignedInAdultPhoneEditor: boolean;
 }) {
   // The main-account concept only exists once a second adult (or an
   // invite on its way to one) is in the picture; the self-edit rule is
@@ -415,7 +427,7 @@ export function ParentsSection({
   const hasOtherAdult = adults.some((adult) => !adult.isYou);
 
   return (
-    <div>
+    <div id="parents">
       <SectionHeading>Parents</SectionHeading>
       {multiAdult && adults.some((adult) => adult.isPrimary) ? (
         <p className="mt-2 text-sm text-body">
@@ -425,7 +437,12 @@ export function ParentsSection({
       <ul className="divide-y divide-[var(--stone-100)]">
         {adults.map((adult) =>
           adult.isYou ? (
-            <MyAdultItem key={adult.userId} adult={adult} showPrimaryTag={multiAdult} />
+            <MyAdultItem
+              key={adult.userId}
+              adult={adult}
+              showPrimaryTag={multiAdult}
+              openPhoneEditorInitially={openSignedInAdultPhoneEditor}
+            />
           ) : (
             <li key={adult.userId} className="flex items-center gap-3 py-3 first:pt-1 last:pb-0">
               <AdultAvatar adult={adult} size={40} />

@@ -267,6 +267,13 @@ export interface CompareAndSwapProgressCheckInInput {
   next: ProgressCheckInNextState;
 }
 
+export interface CancelProgressReplyLoopsInput {
+  familyId: string;
+  checkInId: string;
+  keepDeliveryId: string | null;
+  keepRevision: number | null;
+}
+
 export interface StoredProgressCheckInResponse {
   id: string;
   childId: string;
@@ -522,6 +529,9 @@ export interface ProgressCheckInTransaction
   compareAndSwapCheckIn(
     input: CompareAndSwapProgressCheckInInput,
   ): Promise<ProgressCheckInRecord | null>;
+  cancelProgressReplyLoops(
+    input: CancelProgressReplyLoopsInput,
+  ): Promise<number>;
   findCheckInResponseReplay(
     input: FindProgressCheckInResponseReplayInput,
   ): Promise<StoredProgressCheckInResponse | null>;

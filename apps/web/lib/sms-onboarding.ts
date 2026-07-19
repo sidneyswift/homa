@@ -3,16 +3,14 @@ import { ageInMonths, MAP_BANK_VERSION, planQuestions, type MapAnswer } from "@h
 import { buildQueue } from "../app/onboarding/question-queue";
 import { addFamilyPhone } from "./family-phone";
 import { mapDb } from "./map/db";
-import { sendReportEmail } from "./map/email";
 import { emitMapEvent } from "./map/events";
 import { narrativeEnabled } from "./map/narrative-flag";
 import { runReportNarrative } from "./map/narrative-runner";
+import { sendReportEmailOnce } from "./map/report-email";
 import {
   addChild,
   createReport,
-  markReportEmailed,
   mirrorToWaitlist,
-  reportAlreadyEmailed,
   saveFamilySetup,
   startAnonymousFamily,
   type ScoredReport,
@@ -371,7 +369,6 @@ export async function finishChildReport(
   familyId: string,
   childId: string,
 ): Promise<ScoredReport | null> {
-  const alreadyEmailed = await reportAlreadyEmailed(familyId, childId);
   const report = await createReport(familyId, childId);
   if (!report) return null;
 
@@ -380,13 +377,17 @@ export async function finishChildReport(
     family_id: familyId,
     questions_answered: Object.keys(answers).length,
   });
-  await emitMapEvent("map.report_generated", {
-    family_id: familyId,
-    child_id: report.childId,
-    mapped_subjects: report.scores.mappedCount,
-    observations: report.scores.observationCount,
-    bank_version: MAP_BANK_VERSION,
-  });
+  // A duplicate scoring (a racing web scoring of the same child)
+  // changed nothing and emits nothing.
+  if (!report.duplicate) {
+    await emitMapEvent("map.report_generated", {
+      family_id: familyId,
+      child_id: report.childId,
+      mapped_subjects: report.scores.mappedCount,
+      observations: report.scores.observationCount,
+      bank_version: MAP_BANK_VERSION,
+    });
+  }
 
   // Post-score work runs detached: the SMS turn should not wait 20s of
   // narrative generation to text the link, and both steps self-heal
@@ -403,9 +404,10 @@ export async function finishChildReport(
       }
     }
     try {
-      if (!alreadyEmailed && report.email) {
-        const emailed = await sendReportEmail(report.email, report.childName, report.token, familyId);
-        if (emailed) await markReportEmailed(familyId, report.childId);
+      // First scoring only; the claim inside is atomic, so a doubled
+      // finish (retried SMS turn, web race) sends one email.
+      if (report.email) {
+        await sendReportEmailOnce(familyId, report.childId, report.email, report.childName, report.token);
       }
     } catch (error) {
       console.error(

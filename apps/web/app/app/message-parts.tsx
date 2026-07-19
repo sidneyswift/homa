@@ -10,6 +10,7 @@ import {
 import type { ChatAttachmentReceipt } from "./chat-attachments";
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
 import { ProgressConflictCard } from "./progress-conflict-card";
 import {
   parseProgressMessagePart,
@@ -102,6 +103,12 @@ type AssistantItem =
 
 function assistantItems(message: EveMessage): AssistantItem[] {
   const items: AssistantItem[] = [];
+  const materialByPartIndex = new Map(
+    selectParentVisibleMaterialMessageParts(message.parts).map((entry) => [
+      entry.sourcePartIndex,
+      entry.material,
+    ]),
+  );
   for (const [partIndex, part] of message.parts.entries()) {
     if (part.type === "text") {
       if (part.text.trim().length > 0) items.push({ kind: "text", text: part.text });
@@ -131,16 +138,8 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       part.toolName === "show_material" ||
       part.toolName === "create_worksheet"
     ) {
-      // show_material re-surfaces an existing material as the same
-      // card; create_worksheet is the retired v1 name: restored
-      // localStorage transcripts may still carry its parts, shaped
-      // {worksheet}.
-      const output = part.output as
-        | { material?: MaterialArtifact; worksheet?: MaterialArtifact }
-        | undefined;
-      const material = output?.material ?? output?.worksheet;
-      // previewUrl guards out refusals and pre-studio legacy payloads.
-      if (material?.previewUrl) {
+      const material = materialByPartIndex.get(partIndex);
+      if (material) {
         items.push({ kind: "material", material });
       }
       continue;

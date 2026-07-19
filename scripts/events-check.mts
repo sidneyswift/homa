@@ -46,8 +46,9 @@ function* walkSourceFiles(dir: string): Generator<string> {
 
 // The first quoted dotted name after an emit call is the event name; sink
 // object literals never contain dotted string literals, so a 200-char
-// window after the call open is safe for both emitEvent and emitMapEvent.
-const EMIT_CALL = /emit(?:Map)?Event\s*(?:<[^>]*>)?\(\s*[\s\S]{0,200}?"([a-z_]+\.[a-z_]+)"/g;
+// window after the call open is safe for emitEvent, emitMapEvent, and
+// emitMapEventOnce (the windowed-dedupe variant, same name-first shape).
+const EMIT_CALL = /emit(?:Map)?Event(?:Once)?\s*(?:<[^>]*>)?\(\s*[\s\S]{0,200}?"([a-z_]+\.[a-z_]+)"/g;
 
 const emittedEventSites = new Map<string, string[]>();
 for (const root of ROOTS) {
