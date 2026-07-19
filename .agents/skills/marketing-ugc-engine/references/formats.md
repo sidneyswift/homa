@@ -38,8 +38,8 @@ that create urgency.
 ## The 15-second formula
 
 ```
-0-2s:   Hook — stop the scroll
-2-4s:   Problem/context — "that's me" moment
+0-2s:   Hook: stop the scroll
+2-4s:   Problem/context: "that's me" moment
 3-7s:   Introduce product naturally
 7-12s:  Demonstrate payoff with visual proof
 12-15s: CTA (comment prompt, link in bio, follow)
@@ -67,5 +67,5 @@ The first 0.5 seconds determines 90% of performance.
 - No child faces, names, or voices in any format
 - Confession > demo (the moment it becomes a walkthrough, engagement dies)
 - Proof is artifacts: worksheets, screen recordings, assessment results
-- Never lead with "AI" — lead with the human discovery
+- Never lead with "AI". Lead with the human discovery
 - End on a comment prompt, not a hard sell

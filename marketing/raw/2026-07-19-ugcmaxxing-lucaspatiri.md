@@ -1,18 +1,18 @@
-# ugcmaxxing — the full operational guide
+# ugcmaxxing: the full operational guide
 
 Source: X article by @lucaspatiri_ (article ID 2078211411725975668)
 Date ingested: 2026-07-19
 Context: Sid shared in #homa-dev for skill creation
 
 2 billion organic views across 62 campaigns, managed 590 creators, and produced
-22,504 videos for mobile apps. Zero ad spend. The full operational guide — not
+22,504 videos for mobile apps. Zero ad spend. The full operational guide: not
 theory, the actual systems, rates, briefs, daily routines, and decisions that
 make campaigns work or fail.
 
 ## 1. Prerequisites
 
 When to start UGC: need bandwidth and budget. If bootstrapped, allocate $5-10K
-for month one creator payouts. Run it yourself — you'll always care more than an
+for month one creator payouts. Run it yourself. You'll always care more than an
 agency.
 
 If you don't have $5K or the time, start with organic (founder-led videos) and

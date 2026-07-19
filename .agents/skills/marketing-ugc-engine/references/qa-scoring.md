@@ -6,10 +6,10 @@ Score every creator draft on these 5 dimensions:
 
 | Dimension | 1 (fail) | 3 (acceptable) | 5 (exceptional) |
 |---|---|---|---|
-| **Hook strength** | First 0.5s is dead air or "hey guys" | Decent text/question but predictable | Stops the scroll cold — unexpected, emotional, or visually arresting |
+| **Hook strength** | First 0.5s is dead air or "hey guys" | Decent text/question but predictable | Stops the scroll cold: unexpected, emotional, or visually arresting |
 | **Clarity** | Audio muddy, framing bad, message unclear | Clean audio, decent framing, message lands | Crystal clear audio, intentional framing, message is unforgettable |
 | **Brand alignment** | Mentions AI first, shows children, wrong tone | Hits the product truth, avoids red lines | Nails Homa voice: reassuring, honest, confession-style |
-| **Engagement style** | Low energy, reading a script, feels like an ad | Natural energy, mostly authentic | Genuinely compelling — you'd watch even without knowing Homa |
+| **Engagement style** | Low energy, reading a script, feels like an ad | Natural energy, mostly authentic | Genuinely compelling: you'd watch even without knowing Homa |
 | **Conversion potential** | No reason to download after watching | Curiosity piqued, might check it out | Viewer thinks "I need this right now" |
 
 **Threshold:** Any score ≤ 2 = send back with feedback.
@@ -35,7 +35,7 @@ Use exact phrases so creators learn the vocabulary:
 | "first frame must be compelling" | Thumbnail wouldn't stop a scroll |
 | "more natural energy" | Feels scripted or stiff |
 | "confession, not demo" | Too much product walkthrough, not enough story |
-| "artifact proof only" | Showing or referencing a child — use worksheets/screens instead |
+| "artifact proof only" | Showing or referencing a child. Use worksheets/screens instead |
 
 ## Daily QA routine (first hour of every morning)
 
@@ -60,5 +60,5 @@ scores:
   conversion: 4
 total: 20
 verdict: approved  # approved | revision | rejected
-feedback: "needs a stronger visual hook — try on-screen text in first frame"
+feedback: "needs a stronger visual hook, try on-screen text in first frame"
 ```

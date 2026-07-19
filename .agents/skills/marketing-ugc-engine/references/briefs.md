@@ -39,13 +39,13 @@ That's it.
 ## Homa brief template
 
 ```markdown
-# [Campaign Name] — Creator Brief
+# [Campaign Name]: Creator Brief
 
 ## Objective
 After watching this video, the viewer should believe ___.
 
 ## What is Homa? (2 sentences)
-Homa helps homeschool moms find their child's real learning level — the
+Homa helps homeschool moms find their child's real learning level: the
 actual skill gaps, not just the grade on the box. One quick assessment
 shows exactly where to start and what comes next.
 
@@ -57,7 +57,7 @@ right level. Active on [platform].
 ## Key messages (pick 2-3 per video)
 - [ ] The grade on the box isn't always the right level
 - [ ] One worksheet can reveal the skill you've been skipping
-- [ ] Stop guessing which curriculum — find the level first
+- [ ] Stop guessing which curriculum. Find the level first
 - [ ] [Custom message for this campaign]
 
 ## Content specs
@@ -68,9 +68,9 @@ right level. Active on [platform].
 - Must NOT include: children's faces, names, or voices
 
 ## Reference videos
-1. [link] — why this works: [one line]
-2. [link] — why this works: [one line]
-3. [link] — why this works: [one line]
+1. [link] · why this works: [one line]
+2. [link] · why this works: [one line]
+3. [link] · why this works: [one line]
 
 ## Compensation
 [rate] per video, paid [weekly/biweekly] via [method].

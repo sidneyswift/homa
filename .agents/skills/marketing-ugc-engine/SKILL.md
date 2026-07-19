@@ -29,7 +29,7 @@ product constraints.
    the demand engine.
 4. **Family data banned.** Creator content never references real families by
    name. Anonymize to roles.
-5. **Don't lead with AI.** Briefs frame Homa as "finding the right level" —
+5. **Don't lead with AI.** Briefs frame Homa as "finding the right level":
    AI is the engine, not the pitch.
 
 ## Directory structure
@@ -56,9 +56,9 @@ marketing/
 1. Read `marketing/AGENTS.md` (the laws).
 2. Read `references/briefs.md` for the brief template and golden rules.
 3. Create campaign directory: `marketing/campaigns/<yyyy-mm-slug>/`.
-4. Write `brief.md` — exactly 5 components, one page max. See
+4. Write `brief.md`: exactly 5 components, one page max. See
    `references/briefs.md` for the template and anti-patterns.
-5. Write `playbook.md` — campaign objective, timeline, creator count target,
+5. Write `playbook.md`: campaign objective, timeline, creator count target,
    budget, format slots, KPI targets.
 
 ### Phase 2: Recruiting
@@ -104,17 +104,17 @@ marketing/
 
 ## Tools used
 
-- `marketing/creators/roster.md` — master creator roster
-- `marketing/campaigns/` — campaign directories
-- `marketing/voice/house-style.md` — voice authority
-- `marketing/AGENTS.md` — pipeline laws
+- `marketing/creators/roster.md`: master creator roster
+- `marketing/campaigns/`: campaign directories
+- `marketing/voice/house-style.md`: voice authority
+- `marketing/AGENTS.md`: pipeline laws
 
 ## Anti-patterns
 
 - Writing briefs longer than one page (kills authentic content at scale)
 - Scripting creator content word-for-word (guide, don't script)
 - Skipping the 20-minute call ("at 590 creators we still do every call")
-- Multiple rounds of revision (one round, one note — or it bottlenecks)
+- Multiple rounds of revision (one round, one note, or it bottlenecks)
 - Leading with AI or product features in briefs (lead with the human problem)
 - Using follower count as a quality signal (top video came from a modest following)
 - Filming children or using real family names (Homa's absolute red line)

@@ -33,7 +33,7 @@ Can they explain the app in one sentence after a brief description? If
 they can't reframe it naturally, they'll produce generic content.
 
 For Homa: "It helps moms find where their kid actually is before picking
-curriculum" — if they say something like this unprompted, they get it.
+curriculum". If they say something like this unprompted, they get it.
 
 ## Follower count is irrelevant
 
@@ -45,7 +45,7 @@ storytelling ability, not audience size.
 
 ```
 Hey [name]! I love your content about [specific video/topic]. We're
-building Homa — it helps homeschool moms figure out exactly where their
+building Homa. It helps homeschool moms figure out exactly where their
 kid is before choosing the next lesson. We're looking for moms who can
 share their real experience with it. Would you be open to a quick 20-min
 call to see if it's a fit? No pressure either way.

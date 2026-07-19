@@ -24,7 +24,7 @@ a call before posting anything.
 4. **Accounts and warm-up** (3 min): Verify their accounts. Explain
    warm-up: post 3-5 niche-relevant videos before mentioning Homa. This
    trains the algorithm to classify the account correctly. For Homa:
-   homeschool tips, curriculum opinions, mom life — then naturally
+   homeschool tips, curriculum opinions, mom life, then naturally
    introduce the app.
 
 5. **Compensation** (5-7 min): Present the rate. It's not negotiated. Be

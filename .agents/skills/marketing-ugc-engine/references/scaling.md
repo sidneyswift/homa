@@ -42,7 +42,7 @@ if possible.
 ## The weekly iteration loop (every Friday)
 
 1. **Pull top 5 and bottom 5 videos** of the week (by views, engagement,
-   or conversion — pick the metric that matters for the campaign phase).
+   or conversion: pick the metric that matters for the campaign phase).
 2. **Identify patterns in top performers:** What hook type? What format?
    What time posted? What creator tier?
 3. **Identify what failed in bottom performers:** Weak hook? Wrong format?
@@ -55,7 +55,7 @@ if possible.
 ### Friday report format
 
 ```markdown
-# Week of [date] — Campaign [name]
+# Week of [date] · Campaign [name]
 
 ## Top 5
 | Video | Creator | Views | Eng% | Why it worked |
