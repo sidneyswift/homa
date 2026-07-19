@@ -1,6 +1,21 @@
 # Subject lesson builder: merging the recovered work into current main
 
-> Status: DRAFT, reviewed. Original draft (§0-§5 below) was validated,
+> Status: **EXECUTED LOCALLY, unpushed.** SLM-1 through SLM-11 are done:
+> every ticket resolved (with corrections the mechanical resolution itself
+> surfaced beyond what the review caught — see the end of this status
+> block), full verification green, resolved as a real two-parent merge
+> commit `4690476` on branch `feat/subject-lessons-merged` in a disposable
+> worktree (`/tmp/sl-merge-exec`, parents: `origin/main` tip `0603e73` and
+> the subject-lessons checkpoint `d616bcb`). **The primary
+> `.worktrees/subject-lessons` checkout was never touched** (reverified
+> unchanged at every step: HEAD `b268e9d`, branch `feat/subject-lessons`,
+> same 66 modified/untracked paths throughout). Nothing has been pushed, no
+> PR opened, no migration applied anywhere, flag stays off — SLM-12 is
+> deliberately not started; it needs an explicit go-ahead (see the doc's
+> corrected code-before-migration ordering in §6.1 before anyone applies
+> that migration to a real database).
+>
+> Original draft (§0-§5 below) was validated,
 > questioned, and challenged by 18 independent read-only subagents (12
 > per-ticket validators, 4 cross-cutting questioners, 4 adversarial
 > challengers — all strictly barred from mutating
@@ -720,22 +735,30 @@ isolation job confirmed green on the opened PR, not a local re-run.
 
 ### SLM-12 — Ship
 
-**Review amendment (validated, severity high) — this ticket doesn't
-actually reach "shipped," and its core safety assumption about the
-migration is wrong. See §6.1 for the full writeup; summary here.**
+**Review amendment (validated, severity high), fixed 2026-07-18 — this
+ticket didn't actually reach "shipped," and its core safety assumption
+about the migration was wrong. See §6.1 for the fix (migration split into
+expand + contract); summary here.**
 
-The migration is not safe to lead the code deploy the way AGENTS.md's
-generic "additive migrations may lead" rule would normally allow — it adds
-a trigger that rejects the *currently live* code's write pattern for
-material approval, for every family, regardless of the subject-lessons
-flag. This must be **code-deploy-READY, then migration**, not the reverse,
-and that ordering needs to be stated explicitly rather than inherited from
-the generic rule.
+The single migration was not safe to lead the code deploy the way
+AGENTS.md's generic "additive migrations may lead" rule would normally
+allow — it added a trigger that rejects the *currently live* code's write
+pattern for material approval, for every family, regardless of the
+subject-lessons flag. **Fixed by splitting it**, not by asserting an
+ordering rule someone has to remember: `20260718150000_subject_lessons.sql`
+is now genuinely additive and safe to lead the deploy; the enforcing
+trigger moved to `20260718160000_subject_lessons_enforce_finalization_boundary.sql`,
+a separate migration that must not apply until the RPC-aware code is
+READY in production. The deploy-ordering step below reflects this.
 
 The migration's timestamp (`20260715210000`) is now **older than 8 already-
 applied migrations on main** (newest: `20260718140000_agent_jobs.sql`).
 Rename it to a fresh, later timestamp before replay/application, or expect
-Supabase's tooling to flag it as out-of-order.
+Supabase's tooling to flag it as out-of-order. **Done**: renamed to
+`20260718150000_subject_lessons.sql` during execution; the six test files
+that read it by literal path (`worksheet-effect.test.ts`,
+`hardening-contract.test.ts` ×4 call sites, `store-contract.test.ts`,
+`finalization.test.ts`) were updated to match and re-verified green.
 
 The original "Done when" (apply to preview/staging, confirm flag off,
 commit, push, open PR) stops short of AGENTS.md's own deploy law: it never
@@ -747,16 +770,30 @@ required by AGENTS.md for a change touching schema and the deploy pipeline
 
 **Done when (revised):**
 1. Run the new same-tenant regression smoke test from §6.1 against a real
-   database (proves an ordinary family's ordinary worksheet approval still
-   works with the flag off) — do this **before** touching any real
-   database, staging or production.
-2. Rename the migration to a current timestamp.
+   database, with only the first migration applied and the second (the
+   trigger) not yet applied (proves an ordinary family's ordinary
+   worksheet approval still works with the flag off) — do this **before**
+   touching any real database, staging or production.
+2. ~~Rename the migration to a current timestamp.~~ Done: renamed to
+   `20260718150000_subject_lessons.sql`, and the trigger split into
+   `20260718160000_subject_lessons_enforce_finalization_boundary.sql`.
 3. Confirm `HOMA_SUBJECT_LESSONS_ENABLED` defaults off.
 4. Commit, push, open the PR, and **confirm the PR's actual CI run is
    green** (not just local commands) — including the isolation job (SLM-11).
 5. Merge, then watch the production Vercel deployment reach READY.
-6. Only then apply the migration to production.
-7. Probe the live site (report pages, `/eve/v1/subject-lesson/health` or
+6. ~~Apply the **first** migration (`20260718150000`) to production — safe
+   any time, including before this point.~~ **Done, 2026-07-19**: applied
+   directly via `psql` (founder-authorized, using `.env.local`'s
+   `SUPABASE_DB_PASSWORD`), verified live (`subject_lessons`,
+   `subject_lesson_effect_receipts`, `finalize_family_material` all exist;
+   `enforce_material_status_write_boundary` does not), and registered in
+   `supabase_migrations.schema_migrations`. `pnpm check:isolation` passes
+   against prod as of this fix.
+7. Once code is READY and the RPC-aware finalize path is confirmed live,
+   apply the **second** migration (`20260718160000`) to production. **Not
+   done yet, on purpose** — this is the step that requires the deploy to
+   be live first.
+8. Probe the live site (report pages, `/eve/v1/subject-lesson/health` or
    equivalent).
 
 ## 3. Sequencing
@@ -816,7 +853,25 @@ already cover its only real overlaps with subject lessons.
 
 ## 6. Findings that don't belong to a single ticket
 
-### 6.1 The migration will break today's production material-approval flow if it leads the code deploy
+### 6.1 The migration will break today's production material-approval flow if it leads the code deploy — FIXED
+
+**Fixed 2026-07-18** by splitting the migration (expand/contract), not by
+adding a warning: the trigger no longer ships in the same file as
+everything else. `20260718150000_subject_lessons.sql` now carries only the
+genuinely additive half (table, widened channel checks, the RPC function
+itself, the three RLS policy replacements — none of which change what
+today's live direct-update code is allowed to do). The enforcing trigger
+moved to its own migration,
+`20260718160000_subject_lessons_enforce_finalization_boundary.sql`, with a
+header comment stating in plain terms that it must not be applied until
+the RPC-aware `finalizeMaterialCaller` deploy is confirmed READY in
+production. This removes the hazard structurally — the first migration is
+now safe to lead the code deploy under the normal rule, and the second
+migration is a deliberate, separate, later step that can't be applied by
+accident alongside the first. `hardening-contract.test.ts`'s trigger
+assertions were moved to read the new file and re-verified green.
+
+The original finding, kept for context:
 
 `supabase/migrations/20260715210000_subject_lessons.sql` does far more than
 add a dormant table. It drops and recreates the "members read/add/update
@@ -850,17 +905,38 @@ one, it wouldn't even crash loudly: `finalizeMaterialCaller`'s existing
 error handling returns a soft failure note echoing the raw Postgres error,
 not a 5xx, so it might not trigger alerting immediately.
 
-None of the isolation probes (SLM-7) test this — they check cross-tenant
-leakage, not whether an *ordinary* family's *ordinary* (non-lesson)
-functionality still works after the schema change. That's a different,
-narrower, and completely unaddressed question.
+**Done, live, 2026-07-19**: applied the first migration
+(`20260718150000_subject_lessons.sql`) directly to homa-prod via `psql`
+(the CLI's `link`/`db push` needed an authenticated Supabase account this
+session didn't have; connected the same way `lib/map/db.ts` does, using
+`SUPABASE_DB_PASSWORD` from `.env.local`, authorized explicitly by the
+founder). Verified before and after: `to_regclass`/`to_regprocedure`
+confirmed `subject_lessons`, `subject_lesson_effect_receipts`, and
+`finalize_family_material` now exist, and `enforce_material_status_write_boundary`
+does **not** — the second migration was never touched. Registered the
+migration in `supabase_migrations.schema_migrations` for tracking. Then
+ran `pnpm check:isolation` against prod for real (not mocked): went from 6
+failures (all one root cause, nothing applied yet) to a live smoke test of
+the exact scenario this section worried about — an ordinary family's
+direct material-status update still succeeds normally, proving the first
+migration alone changes nothing for existing behavior. One isolation
+assertion (`auth member cannot directly update material status`) itself
+needed updating to match the expand/contract reality: it now checks
+whether `enforce_material_status_write_boundary` exists yet
+(`materialStatusWriteBoundaryEnforced()`, mirroring the existing
+`subjectLessonSchemaExists()` pattern) and asserts the honest thing for
+either state, rather than assuming both migrations always land together.
+All isolation checks pass against prod as of this fix.
 
-**Required before SLM-12 touches any real database:** a live-Postgres smoke
-test proving an ordinary, non-subject-lesson family can still create,
-finalize, and supersede a material end-to-end through
-`finalize_family_material`, with `HOMA_SUBJECT_LESSONS_ENABLED` off — not a
-mocked RPC response. And the production deploy order must be
-**code-READY, then migration** for this specific migration, stated
+None of the isolation probes (SLM-7) originally tested the same-tenant
+question this section raised — they check cross-tenant leakage, not
+whether an *ordinary* family's *ordinary* (non-lesson) functionality still
+works after the schema change. The live run above closes that gap for the
+first migration specifically.
+
+The production deploy order is now, structurally: first
+migration (**done**) → code deploy READY → confirm the RPC-aware finalize
+path live → **only then** the second (enforcing) migration. Stated
 explicitly rather than inherited from AGENTS.md's generic "additive
 migrations may lead" allowance, which does not hold here.
 
