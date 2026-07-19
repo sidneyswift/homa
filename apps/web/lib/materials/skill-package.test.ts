@@ -21,7 +21,7 @@ name: sample
 description: Use when testing.
 ---
 
-Preamble cites references/pre-amble-art.png here.
+Preamble cites references/pre-amble-art.png here, and create_printable early.
 
 ## Foldable
 
@@ -30,10 +30,11 @@ This example shows tri-fold layout and glue tabs.
 Study it for fold geometry.
 
 More prose. references/homa-foldable-reference.png again in a snippet.
+Use generate_image for the art, then create_printable.
 
 ## Outline
 
-No reference here.
+No reference here. Always create_printable via the html path.
 
 ## Maze
 
@@ -42,10 +43,11 @@ Answer paths and dead ends.
 `;
 
 describe("parseSkillPackage", () => {
-  const parsed = parseSkillPackage(SAMPLE, [
-    "homa-foldable-reference.png",
-    "orphaned-extra.png",
-  ]);
+  const parsed = parseSkillPackage(
+    SAMPLE,
+    ["homa-foldable-reference.png", "orphaned-extra.png"],
+    ["create_printable", "generate_image", "find_materials"],
+  );
 
   it("reads the routing description and sections", () => {
     assert.equal(parsed.description, "Use when testing.");
@@ -64,10 +66,20 @@ describe("parseSkillPackage", () => {
     const foldable = parsed.citations[1];
     assert.ok(foldable.excerpt.includes("tri-fold layout"));
     assert.ok(foldable.excerpt.includes("Study it for fold geometry"));
+    // The file name is the view's heading; the excerpt never repeats it.
+    assert.ok(!foldable.excerpt.includes("Reference image"));
+    assert.ok(!foldable.excerpt.includes("references/"));
   });
 
   it("flags files on disk that nothing cites", () => {
     assert.deepEqual(parsed.uncitedFiles, ["orphaned-extra.png"]);
+  });
+
+  it("maps each named tool to the sections that drive it, in first-mention order", () => {
+    assert.deepEqual(parsed.toolMentions, [
+      { tool: "create_printable", sections: ["(preamble)", "Foldable", "Outline"] },
+      { tool: "generate_image", sections: ["Foldable"] },
+    ]);
   });
 });
 

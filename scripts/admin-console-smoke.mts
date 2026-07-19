@@ -33,6 +33,7 @@ const {
   listSandboxFamilies,
   listStudioRuns,
   getStudioRunDetail,
+  getStudioLedger,
   listRecentFleetMaterials,
   readSkillPackage,
 } = await import("../apps/web/lib/admin/studio-data");
@@ -163,12 +164,17 @@ try {
   }
   const fleetMaterials = await listRecentFleetMaterials(10);
   pass("studio fleet materials", `${fleetMaterials.length} rows`);
+  const ledger = await getStudioLedger(30);
+  pass(
+    "studio ledger",
+    `${ledger.entries.length} entries · ${ledger.labCount} lab · ${ledger.fleetCount} fleet · runs table ${ledger.runsAvailable ? "present" : "absent"}`,
+  );
   const skillPackage = await readSkillPackage();
   if (!skillPackage) throw new Error("materials-studio skill package could not be read");
   const missingReferences = skillPackage.citations.filter((citation) => !citation.present);
   pass(
     "studio skill package",
-    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.citations.length} citations · ${missingReferences.length} missing references · ${skillPackage.uncitedFiles.length} uncited files`,
+    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.citations.length} citations · ${missingReferences.length} missing references · ${skillPackage.uncitedFiles.length} uncited files · ${skillPackage.toolSurface.length} tools in the surface table`,
   );
 } catch (error) {
   fail("admin console smoke", error);

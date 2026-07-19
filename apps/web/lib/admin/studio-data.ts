@@ -265,6 +265,57 @@ export async function getStudioRunDetail(runId: string): Promise<StudioRunRow | 
   return toStudioRunRow(run, materialsBySession);
 }
 
+export type StudioLedgerEntry =
+  | { kind: "run"; at: string; run: StudioRunRow }
+  | { kind: "material"; at: string; material: FleetMaterialRow };
+
+export interface StudioLedger {
+  entries: StudioLedgerEntry[];
+  /** Null when the run ledger table is not migrated yet. */
+  runsAvailable: boolean;
+  labCount: number;
+  fleetCount: number;
+}
+
+/**
+ * The studio ledger (founder lab reply 2026-07-18: winning direction
+ * 3 "Ledger"): lab runs and real fleet output interleaved in one
+ * timeline, newest first. A material made BY a studio run session is
+ * represented by its run card, never twice, so fleet entries exclude
+ * materials whose generation session id matches a listed run.
+ */
+export async function getStudioLedger(limit: number): Promise<StudioLedger> {
+  const runs = await listStudioRuns(limit);
+  const fleet = await listRecentFleetMaterials(limit);
+  const runSessionIds = new Set(
+    (runs ?? [])
+      .map((run) => run.sessionId)
+      .filter((id): id is string => typeof id === "string" && id.length > 0),
+  );
+  const entries: StudioLedgerEntry[] = [
+    ...(runs ?? []).map((run) => ({
+      kind: "run" as const,
+      at: run.createdAt,
+      run,
+    })),
+    ...fleet
+      .filter((material) => !runSessionIds.has(material.sessionId ?? ""))
+      .map((material) => ({
+        kind: "material" as const,
+        at: material.createdAt,
+        material,
+      })),
+  ]
+    .sort((a, b) => (a.at < b.at ? 1 : -1))
+    .slice(0, limit);
+  return {
+    entries,
+    runsAvailable: runs !== null,
+    labCount: (runs ?? []).length,
+    fleetCount: entries.filter((entry) => entry.kind === "material").length,
+  };
+}
+
 export interface FleetMaterialRow {
   id: string;
   title: string;
@@ -276,6 +327,9 @@ export interface FleetMaterialRow {
   reviewPassed: boolean;
   previewUrl: string;
   createdAt: string;
+  /** The eve session that made it (generation provenance), for the
+   * ledger's run-vs-fleet dedup. */
+  sessionId: string | null;
 }
 
 /** What the skill is doing for real families, newest first, so lab
@@ -292,12 +346,14 @@ export async function listRecentFleetMaterials(limit: number): Promise<FleetMate
       source: string;
       status: string;
       review_pass: string | null;
+      session_id: string | null;
       preview_url: string;
       created_at: string;
     }[]
   >`
     select m.id, m.title, f.name as family_name, f.sandbox, m.kind, m.source,
            m.status, m.generation->'review'->>'pass' as review_pass,
+           m.generation->>'sessionId' as session_id,
            m.preview_url, m.created_at::text as created_at
     from public.materials m
     join public.families f on f.id = m.family_id
@@ -315,6 +371,7 @@ export async function listRecentFleetMaterials(limit: number): Promise<FleetMate
     reviewPassed: row.review_pass !== "false",
     previewUrl: row.preview_url,
     createdAt: row.created_at,
+    sessionId: row.session_id,
   }));
 }
 
@@ -333,7 +390,27 @@ export interface SkillPackageView {
   citations: SkillReferenceCitation[];
   /** Files under references/ that no section cites (dead weight). */
   uncitedFiles: string[];
+  /** The tool surface the body actually names, with the sections that
+   * drive each tool (parsed from SKILL.md) and a curated one-line role. */
+  toolSurface: { tool: string; role: string; sections: string[] }[];
 }
+
+/** Curated one-liners for the studio's known tool surface; the sections
+ * beside them come from parsing SKILL.md, never from this map. A tool
+ * the body names that is missing here still rows in with an empty role. */
+const TOOL_ROLES: Record<string, string> = {
+  create_printable:
+    "Renders a designed page (html, page image, or packet) to PDF plus previews, runs the vision quality check, stores the material row.",
+  generate_image: "Image-model art: coloring line art, characters, whole pages, the child from their photo.",
+  find_materials: "Searches this family's library so a found final beats a fresh idea.",
+  mark_material_final: "Parent approval: finalizes one version, supersedes the chain.",
+  show_material: "Re-shows an existing version exactly as made.",
+  search_photos: "Finds real web photos for nature study and real-object pages.",
+  keep_photo: "Claims a searched photo so its URL becomes embeddable.",
+  manage_child_progress: "Records capability evidence the difficulty rules read next time.",
+  remember: "Saves durable style and preference wins.",
+  send_heads_up: "The SMS progress note before a slow build.",
+};
 
 /** cwd is apps/web in the Next runtime (the report-writer.md pattern)
  * and the repo root under scripts/admin-console-smoke.mts; accept both. */
@@ -358,6 +435,23 @@ export function skillReferenceImagePath(fileName: string): string {
   return path.join(skillDir(), "references", fileName);
 }
 
+/** The deployed tool surface: module names under agent/tools. Same
+ * dual-root resolution as skillDir. */
+async function listAgentToolNames(): Promise<string[]> {
+  const fromAppRoot = path.join(process.cwd(), "agent", "tools");
+  const dir = existsSync(fromAppRoot)
+    ? fromAppRoot
+    : path.join(process.cwd(), "apps", "web", "agent", "tools");
+  try {
+    const entries = await readdir(dir);
+    return entries
+      .filter((name) => name.endsWith(".ts"))
+      .map((name) => name.slice(0, -3));
+  } catch {
+    return [];
+  }
+}
+
 export async function readSkillPackage(): Promise<SkillPackageView | null> {
   let raw: string;
   try {
@@ -366,7 +460,8 @@ export async function readSkillPackage(): Promise<SkillPackageView | null> {
     return null;
   }
   const referenceImages = await listSkillReferenceImages();
-  const parsed = parseSkillPackage(raw, referenceImages);
+  const toolNames = await listAgentToolNames();
+  const parsed = parseSkillPackage(raw, referenceImages, toolNames);
   return {
     description: parsed.description,
     body: parsed.body,
@@ -375,5 +470,10 @@ export async function readSkillPackage(): Promise<SkillPackageView | null> {
     referenceImages,
     citations: parsed.citations,
     uncitedFiles: parsed.uncitedFiles,
+    toolSurface: parsed.toolMentions.map((mention) => ({
+      tool: mention.tool,
+      role: TOOL_ROLES[mention.tool] ?? "",
+      sections: mention.sections,
+    })),
   };
 }

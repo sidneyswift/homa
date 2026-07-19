@@ -3,6 +3,26 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-18 · Studio lab converged: founder picked direction 3 "Ledger"
+
+The founder pasted the direction lab's assembled reply: winning
+direction 3 "Ledger", steals from the Dossier direction (reference
+images large beside the sections they teach, the description framed as
+the routing contract, a tool table naming which SKILL.md sections drive
+each tool), and the recommended answer on all five build-changing
+questions (already built that way). Converged per the
+exploring-ui-directions skill: /admin/studio is now one interleaved
+filterable timeline of lab runs and fleet output (dedup by generation
+session id so a lab material never rows twice), the composer folded
+into "+ New lab run", and the skill package below carrying the three
+steals. Contradiction resolved explicitly: the Ledger direction's
+honest skip was "no home for the skill package", but the founder's
+same-day asks (skill X-ray, reference gaps, traces) require it on this
+surface, so the package section stays; that is the one deliberate
+deviation from the pure direction. The tool table is parsed from
+SKILL.md at read time (lib/materials/skill-package.ts), never
+hand-claimed, so it cannot drift.
+
 ## 2026-07-18 · Founder console gets a Material studio tab (/admin/studio)
 
 Founder ask: "a material studio tab in admin, where I can clearly see

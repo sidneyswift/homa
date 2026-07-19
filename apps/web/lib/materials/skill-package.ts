@@ -23,6 +23,14 @@ export interface SkillReferenceCitation {
   present: boolean;
 }
 
+export interface SkillToolMention {
+  /** Tool name as the agent calls it, e.g. "create_printable". */
+  tool: string;
+  /** The ## sections whose body names the tool, in body order; a
+   * preamble mention shows as "(preamble)". */
+  sections: string[];
+}
+
 export interface ParsedSkillPackage {
   /** The frontmatter description, the skill's routing contract. */
   description: string;
@@ -35,17 +43,28 @@ export interface ParsedSkillPackage {
   citations: SkillReferenceCitation[];
   /** Files on disk that no part of the body cites. */
   uncitedFiles: string[];
+  /** Which sections drive each tool the body names (from toolNames),
+   * ordered by first mention. Parsed, never hand-claimed, so the table
+   * cannot drift from what SKILL.md actually says. */
+  toolMentions: SkillToolMention[];
 }
 
 const CITATION_PATTERN = /references\/([a-z0-9][a-z0-9-]*\.(?:png|jpg|jpeg))/gi;
 
-/** Lines following the citation line that describe the reference, up to
- * the next blank line or heading, capped so a rogue body cannot bloat
- * the view. */
+/** Lines following the citation that describe the reference, up to the
+ * next blank line or heading, capped so a rogue body cannot bloat the
+ * view. The citation token itself is stripped: the file name is already
+ * the view's heading, repeating it teaches nothing. */
 function excerptAfter(lines: string[], index: number): string {
   const collected: string[] = [];
   for (let i = index; i < lines.length && collected.length < 5; i++) {
-    const line = lines[i].trim();
+    const line = (
+      i === index
+        ? lines[i]
+            .replace(/Reference image:\s*/i, "")
+            .replace(/`?references\/[a-z0-9-]+\.(?:png|jpe?g)`?/gi, "")
+        : lines[i]
+    ).trim();
     if (i > index && (line.length === 0 || line.startsWith("#"))) break;
     if (line.length > 0) collected.push(line);
   }
@@ -55,6 +74,7 @@ function excerptAfter(lines: string[], index: number): string {
 export function parseSkillPackage(
   raw: string,
   filesOnDisk: readonly string[],
+  toolNames: readonly string[] = [],
 ): ParsedSkillPackage {
   let description = "";
   let body = raw;
@@ -70,6 +90,10 @@ export function parseSkillPackage(
   const citations: SkillReferenceCitation[] = [];
   const onDisk = new Set(filesOnDisk);
   const seen = new Set<string>();
+  const mentionSections = new Map<string, string[]>();
+  const toolPatterns = toolNames.map(
+    (tool) => [tool, new RegExp(`\\b${tool}\\b`)] as const,
+  );
   let currentSection: string | null = null;
 
   for (const [index, line] of lines.entries()) {
@@ -93,6 +117,13 @@ export function parseSkillPackage(
         present: onDisk.has(file),
       });
     }
+    for (const [tool, pattern] of toolPatterns) {
+      if (!pattern.test(line)) continue;
+      const sectionLabel = currentSection ?? "(preamble)";
+      const list = mentionSections.get(tool) ?? [];
+      if (!list.includes(sectionLabel)) list.push(sectionLabel);
+      if (!mentionSections.has(tool)) mentionSections.set(tool, list);
+    }
   }
 
   return {
@@ -102,5 +133,9 @@ export function parseSkillPackage(
     sections,
     citations,
     uncitedFiles: filesOnDisk.filter((file) => !seen.has(file)).sort(),
+    toolMentions: [...mentionSections.entries()].map(([tool, toolSections]) => ({
+      tool,
+      sections: toolSections,
+    })),
   };
 }
