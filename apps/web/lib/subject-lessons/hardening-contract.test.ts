@@ -121,10 +121,17 @@ describe("subject lesson provenance and owner effect boundary", () => {
   });
 
   it("blocks direct authenticated status updates and requires owner approval for lesson-linked rows", async () => {
-    const [migration, isolation] = await Promise.all([
+    const [migration, boundaryMigration, isolation] = await Promise.all([
       readFile(
         new URL(
           "../../../../supabase/migrations/20260718150000_subject_lessons.sql",
+          import.meta.url
+        ),
+        "utf8"
+      ),
+      readFile(
+        new URL(
+          "../../../../supabase/migrations/20260718160000_subject_lessons_enforce_finalization_boundary.sql",
           import.meta.url
         ),
         "utf8"
@@ -135,9 +142,17 @@ describe("subject lesson provenance and owner effect boundary", () => {
       ),
     ]);
 
+    // The enforcing trigger ships as its own later migration (expand/contract
+    // split, 2026-07-18 merge-to-main review finding): applying it before the
+    // RPC-aware finalizeMaterialCaller deploy would break material approval
+    // for every family. See that migration's header comment.
     assert.match(
-      migration,
+      boundaryMigration,
       /create trigger enforce_material_status_write_boundary/u
+    );
+    assert.match(
+      boundaryMigration,
+      /current_setting\(\s*'homa\.material_finalization_rpc',\s*true\s*\)/u
     );
     assert.match(
       migration,

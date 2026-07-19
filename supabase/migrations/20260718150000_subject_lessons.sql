@@ -5,6 +5,26 @@
 -- owner checks. Caller material approval keeps the caller JWT through the
 -- security-invoker RPC below. The feature remains dark until
 -- HOMA_SUBJECT_LESSONS_ENABLED is exactly "true".
+--
+-- Expand/contract split (2026-07-18 merge-to-main review finding): this
+-- migration is the EXPAND half only. It adds the new table, the widened
+-- channel checks, and the finalize_family_material RPC, none of which
+-- change what today's already-deployed code is allowed to do -- the three
+-- RLS policy replacements below still let an ordinary (subject_lesson_id
+-- is null) direct update through, exactly as the policies they replace
+-- did. It is safe to apply this migration ahead of the matching code
+-- deploy, the normal "additive migrations may lead" rule.
+--
+-- The CONTRACT half, the enforce_material_status_write_boundary trigger
+-- that actually requires the RPC, is deliberately a SEPARATE migration
+-- (20260718160000_subject_lessons_enforce_finalization_boundary.sql).
+-- That trigger has no subject_lesson_id exception: once it exists, EVERY
+-- authenticated-role update to materials.status/approved_at/
+-- subject_lesson_id must go through the RPC, including today's live
+-- direct-update finalizeMaterialCaller path for ordinary, non-lesson
+-- materials. Apply that second migration only after the RPC-aware code
+-- in this PR is deployed and confirmed READY in production -- applying it
+-- first breaks material approval for every family, flag or no flag.
 
 -- The dedicated builder records its real channel on durable material and
 -- model-usage receipts. Both tables predate this lane and constrain channel
@@ -411,34 +431,10 @@ create policy "members update their materials"
     )
   );
 
-create or replace function public.enforce_material_status_write_boundary()
-returns trigger
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-begin
-  if current_user = 'authenticated'
-    and current_setting(
-      'homa.material_finalization_rpc',
-      true
-    ) is distinct from 'allowed'
-  then
-    raise exception 'Use finalize_family_material for material approval'
-      using errcode = '42501';
-  end if;
-  return new;
-end;
-$$;
-
-revoke all on function public.enforce_material_status_write_boundary()
-  from public;
-
-create trigger enforce_material_status_write_boundary
-before update of status, approved_at, subject_lesson_id
-on public.materials
-for each row execute function
-  public.enforce_material_status_write_boundary();
+-- enforce_material_status_write_boundary (the trigger that actually
+-- requires the RPC) ships as its own later migration,
+-- 20260718160000_subject_lessons_enforce_finalization_boundary.sql -- see
+-- this file's header comment for why.
 
 -- One durable claim per logical worksheet creation. A revision keys on the
 -- material it revises, while the first creation uses the literal `initial`.
