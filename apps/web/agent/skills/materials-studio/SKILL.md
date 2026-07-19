@@ -950,7 +950,7 @@ one PDF via create_printable's `pages` input.
 ## Matching / visual discrimination worksheet recipe
 
 Reference image: `references/homa-pk-activity-treasury-reference.png`
-(from Treasury of Year-Round Preschool Activities — multi-activity PK page)
+(from Treasury of Year-Round Preschool Activities, a multi-activity PK page)
 
 What it is: two columns of images where the child draws lines to match
 pairs, OR rows of similar images where the child marks the different one.
@@ -959,7 +959,7 @@ Core visual discrimination skill for ages 3-6.
 Design patterns from reference:
 - Two distinct columns with generous spacing between them
 - Dot markers between each image and the center gap (child draws line dot-to-dot)
-- 4-6 pairs maximum — more overwhelms the age group
+- 4-6 pairs maximum: more overwhelms the age group
 - Each image is a simple, recognizable cartoon with thick outlines
 - Shuffled order on right column (never mirror the left ordering)
 - For same/different variant: 3-4 items per row, one obviously different
@@ -998,18 +998,18 @@ Design patterns (all binding for number-practice-page):
 - **Large numeral model**: top-center of the page, oversized
   (`font-size: 96px; font-weight: 700;`) so the child sees the target
   number at a glance.
-- **Section 1 — trace the numeral**: starting dot in green on a 3-line
+- **Section 1 · trace the numeral**: starting dot in green on a 3-line
   guide (top, mid, baseline) matching the handwriting-practice
   baseline. 4-6 repetitions across the row, first dotted, last blank.
-- **Section 2 — ten frame**: 2×5 grid of square cells. Fill exactly N
+- **Section 2 · ten frame**: 2×5 grid of square cells. Fill exactly N
   cells with a colored dot or themed icon; remaining cells empty. Child
   can color or stamp the filled cells.
-- **Section 3 — number word**: the word ("three") in large dotted
+- **Section 3 · number word**: the word ("three") in large dotted
   outline letters for tracing or coloring.
-- **Section 4 — count and color**: exactly N themed objects (stars,
+- **Section 4 · count and color**: exactly N themed objects (stars,
   apples, dinosaurs) in a row with the instruction "Color N [objects]."
   Objects are outline-only for coloring.
-- **Section 5 (optional) — independent writing**: 2-3 blank 3-line
+- **Section 5 (optional) · independent writing**: 2-3 blank 3-line
   guide rows with the prompt "Write the number" and no model.
 - **Name/date header** at top of page.
 
@@ -1043,7 +1043,7 @@ story retelling, vocabulary review. The child colors illustrations and
 reads/traces the text on each page.
 
 Always html path. Panel placement must be surgically precise for correct
-reading order after folding — the image model cannot guarantee this.
+reading order after folding: the image model cannot guarantee this.
 
 Design patterns (all binding for one-page-mini-book):
 
@@ -1057,7 +1057,7 @@ Design patterns (all binding for one-page-mini-book):
   FOLD lines (`border: 1px solid #ccc;`).
 - **Panel content**: cover (panel 1), story pages (panels 2-7), back
   cover (panel 8). Text must be oriented correctly for post-fold
-  reading — some panels print upside-down on the flat sheet.
+  reading: some panels print upside-down on the flat sheet.
 - **Sentence frame mini-books**: each page changes one variable (color,
   number, animal) with a B&W illustration the child colors. Pattern:
   "I see a [color] [animal]." with the variable word as a fill-in or
@@ -1125,10 +1125,10 @@ Design patterns (all binding for labeled-anatomy-diagram):
   horizontal list separated by bullet dots.
 - **Three scaffolding levels** (generate all three as separate pages
   in one packet, or let the parent choose):
-  1. Fully labeled (reference) — lines connect to printed labels.
-  2. Numbered with word bank (guided) — lines connect to numbers,
+  1. Fully labeled (reference): lines connect to printed labels.
+  2. Numbered with word bank (guided): lines connect to numbers,
      word bank below.
-  3. Blank lines only (assessment) — lines end at blank underscores,
+  3. Blank lines only (assessment): lines end at blank underscores,
      no word bank.
 - **Name/date header** at top of page.
 
@@ -1226,7 +1226,7 @@ Design patterns (all binding for classification-sorting-mat):
 Montessori three-part (or four-part) nomenclature card set:
 (1) labeled image cards (control), (2) unlabeled image cards,
 (3) name-only label cards, (4) optional definition cards.
-Self-correcting by design — the child matches parts 2 and 3 against
+Self-correcting by design: the child matches parts 2 and 3 against
 the control card to check their work.
 
 Great for: ages 3-8, Montessori families, vocabulary building, science
@@ -1391,7 +1391,7 @@ Design patterns (all binding for social-narrative):
 - **Page structure**: illustration taking top 50-60% of page, text
   below in large, clear font (`font-size: 22px; line-height: 1.6;`).
 - **6-8 pages total**: use packet recipe for assembly.
-- **First person voice**: "Sometimes I feel..." — the child is the
+- **First person voice**: "Sometimes I feel...": the child is the
   narrator.
 - **Simple sentences**: one idea per page. Maximum 2-3 sentences per
   page.
@@ -1487,7 +1487,7 @@ Design patterns (all binding for checklist-assessment):
   descriptions ("Can count objects to 10 with one-to-one
   correspondence"). Checkbox style: `□` character or styled box.
 - **Three assessment columns**: "Not Yet", "Sometimes",
-  "Consistently" — column headers at top, checkboxes in each row.
+  "Consistently": column headers at top, checkboxes in each row.
   `display: grid; grid-template-columns: 55% 15% 15% 15%;`
 - **Name/date header**: child's name, assessment date, assessor name.
 - **Footer**: notes field with 4-5 blank lines for free-form
