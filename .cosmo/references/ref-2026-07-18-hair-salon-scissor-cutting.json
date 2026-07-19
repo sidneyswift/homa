@@ -1,0 +1,51 @@
+{
+  "id": "ref-2026-07-18-hair-salon-scissor-cutting",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:35:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428526.844839",
+  "format": "fine-motor-activity",
+  "title": "Hair Salon Scissor Cutting Practice Sheets — Scissor Skills Pack",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "PreK (ages 2-5)",
+  "callouts": [],
+  "overview": {
+    "description": "Hair salon themed scissor cutting practice sheets. The child gives haircuts to illustrated faces by cutting along lines of varying difficulty (straight, wavy, zigzag). The hair IS the cutting line — the theme makes the practice purposeful and fun. Second fine motor drop from Aless (after hole punch strips). Both target hand skills: hole punching builds grip strength, scissor cutting builds cutting precision."
+  },
+  "designPatterns": {
+    "themeAsPurpose": {
+      "description": "The cutting line IS the hair. The child is not cutting an abstract line — they are giving a haircut. The theme provides both motivation and a natural error-check (if the hair looks weird, the cut went off track).",
+      "value": "Purpose-driven fine motor practice. The child is playing hairdresser, not doing a motor skills exercise."
+    },
+    "progressiveDifficulty": {
+      "description": "Hair styles progress from straight cuts (easiest) to wavy to zigzag to curly (hardest). Same progressive scaffolding as the Paw Patrol pre-writing pages.",
+      "value": "Built-in differentiation. Start with straight cuts, advance to complex curves."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "fine-motor",
+    "domain": "scissor-skills",
+    "topics": [
+      {
+        "id": "fine-motor.scissor-cutting-straight",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "fine-motor.scissor-cutting-curved",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "themed-scissor-cutting-page",
+        "description": "A page where the cutting line is embedded in a theme (hair for haircuts, grass for mowing, waves for surfing). Progressive difficulty: straight → wavy → zigzag → curves. The theme makes the cutting purposeful — the child is doing something, not just cutting."
+      }
+    ]
+  },
+  "notes": "Link likely expired. Second fine motor drop (after hole punch strips). Aless values fine motor as its own skill area: hole punching (grip strength) + scissor cutting (precision). Both activities are themed to make practice feel like play. The hair salon theme is particularly clever — the cutting line IS the content."
+}

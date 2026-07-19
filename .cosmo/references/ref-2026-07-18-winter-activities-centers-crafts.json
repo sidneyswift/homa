@@ -1,0 +1,32 @@
+{
+  "id": "ref-2026-07-18-winter-activities-centers-crafts",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:37:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428624.399569",
+  "format": "seasonal-activity-bundle",
+  "title": "FREE Winter Activities Centers — Crafts, Counting Activities, Holiday/New Years",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "PreK-1st Grade",
+  "callouts": [],
+  "overview": {
+    "description": "Winter/holiday themed activity bundle with centers, crafts, and counting activities. From the filename: multi-activity pack combining art (crafts), math (counting), and seasonal themes (winter, holiday, New Years). This is the seasonal-bundle format — multiple activity types packaged around one seasonal theme. Similar to the winter animal tracks pack but for a broader winter/holiday theme."
+  },
+  "overallSkillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "seasonal-activities",
+    "topics": [
+      {
+        "id": "math.counting-activities",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "art.seasonal-crafts",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ]
+  },
+  "notes": "Link likely expired. Seasonal activity bundle. Confirms Aless values seasonal/thematic bundling of activities — the same multi-format-per-theme pattern seen in the animal tracks pack. Seasonal themes (winter, holidays) provide natural curriculum hooks."
+}

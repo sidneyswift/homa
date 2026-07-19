@@ -1,0 +1,140 @@
+{
+  "id": "ref-2026-07-18-harcourt-trophies-2nd-assessments",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T15:47:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784404077.357359",
+  "format": "assessment-selection",
+  "title": "Harcourt Trophies Grade 2-1 End-of-Selection Tests — Vocab, Comprehension & Writing",
+  "publisher": "Harcourt",
+  "series": "Trophies",
+  "gradeLevel": "2nd grade, first half (2-1)",
+  "relatedRef": "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+  "callouts": ["assessments broken up into vocab, comprehension and writing sections"],
+  "assessments": [
+    {
+      "story": "Days With Frog and Toad",
+      "pages": ["A13", "A14", "A15", "A16"],
+      "sections": {
+        "vocabulary": {
+          "pages": ["A13"],
+          "format": "multiple-choice + cloze",
+          "itemCount": 6,
+          "structure": "Sentence with blank → pick from 4 options (A/B/C/D). Items 1-6 are multiple choice, items 19-20 are written response.",
+          "skillsTested": ["word meaning in context", "vocabulary application"],
+          "vocabularyWords": ["alone", "cheer", "fine", "meadow", "reason", "spoiled"]
+        },
+        "comprehension": {
+          "pages": ["A14", "A15", "A16"],
+          "format": "multiple-choice + short-answer",
+          "itemCount": 14,
+          "structure": "Questions 7-18 are multiple choice (4 options). Questions 19-20 are open-response (write the answer on lines).",
+          "questionTypes": ["main idea", "setting", "character feelings", "plot sequence", "cause/effect", "inference", "figurative language"],
+          "skillsTested": ["literal comprehension", "inferential comprehension", "character analysis", "figurative language interpretation"]
+        },
+        "writing": {
+          "pages": ["A16"],
+          "format": "short-answer",
+          "itemCount": 2,
+          "structure": "Questions 19-20: open-ended prompts with 2-3 lines for response. Requires recall + personal connection.",
+          "skillsTested": ["written expression", "text-based evidence", "personal connection to text"]
+        }
+      }
+    },
+    {
+      "story": "Johnny Appleseed",
+      "pages": ["A41", "A42", "A43", "A44"],
+      "sections": {
+        "vocabulary": {
+          "pages": ["A41"],
+          "format": "multiple-choice + cloze",
+          "itemCount": 6,
+          "structure": "Same format as Frog and Toad — sentence context + 4 options",
+          "skillsTested": ["word meaning in context", "vocabulary application"],
+          "vocabularyWords": ["frontier", "orchards", "nearby", "survive", "tame", "wild"]
+        },
+        "comprehension": {
+          "pages": ["A42", "A43", "A44"],
+          "format": "multiple-choice + short-answer",
+          "itemCount": 14,
+          "structure": "Questions 7-18 multiple choice. Questions 19-20 open-response.",
+          "questionTypes": ["genre identification", "narrator/character understanding", "factual recall", "sequence", "inference", "figurative language", "compare/contrast"],
+          "skillsTested": ["literal comprehension", "inferential comprehension", "genre awareness", "figurative language interpretation"]
+        },
+        "writing": {
+          "pages": ["A44"],
+          "format": "short-answer",
+          "itemCount": 2,
+          "structure": "Questions 19-20 open-ended with 2-3 lines. Example: 'Name two foods that you can make with apples.'",
+          "skillsTested": ["written expression", "text-based evidence", "creative thinking"]
+        }
+      }
+    }
+  ],
+  "overallLayout": {
+    "structure": "linear-top-to-bottom",
+    "spacing": "standard",
+    "visualHierarchy": "text-only — clean section headers (Vocabulary / Comprehension bold), no illustrations",
+    "whiteSpaceRatio": 0.30,
+    "flowDirection": "top-down"
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "comprehension-analysis",
+    "topics": [
+      {"id": "ela.vocabulary-in-context", "kind": "conceptual", "mapped": false},
+      {"id": "ela.reading-comprehension-fiction", "kind": "conceptual", "mapped": false},
+      {"id": "ela.written-response", "kind": "procedural", "mapped": false}
+    ],
+    "unmappedSkills": ["story-based-assessment", "figurative-language-interpretation"]
+  },
+  "difficulty": {
+    "ageBandMonths": [72, 96],
+    "complexity": "multi-skill (3 sections per assessment)",
+    "prerequisites": ["ela.decode-grade-level-text", "ela.basic-reading-comprehension"],
+    "scaffolding": "low (assessment — independent work)"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": ["none — text-only assessment format"],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["clean uncluttered layout keeps focus on comprehension, not decoration"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "designPatterns": {
+    "threePartAssessmentStructure": {
+      "description": "Every end-of-selection test follows the same three-part structure: Vocabulary → Comprehension → Writing. This creates a predictable ritual — kids know what to expect, parents know what each section measures.",
+      "sections": ["Vocabulary (6 items, MC + cloze)", "Comprehension (12 items, MC + inference)", "Writing (2 items, open response)"],
+      "consistency": "Identical structure across all stories in the book. Same item count, same format, same layout."
+    },
+    "mixedResponseTypes": {
+      "description": "Combines multiple-choice (items 1-18) with written response (items 19-20). The MC portion tests recognition; the writing portion tests recall and expression. This split prevents the assessment from being pure bubble-fill.",
+      "ratio": "18 MC : 2 written"
+    },
+    "storySpecificVocabulary": {
+      "description": "Vocabulary words come directly from the story the child just read. The assessment tests whether they absorbed the words from reading context, not from rote memorization. Words are used in NEW sentences, not copied from the story.",
+      "pattern": "6 vocab words per story, tested in novel sentence contexts"
+    },
+    "gradedLabeling": {
+      "description": "Grade badge in corner (e.g. 'Grade 2-1') makes it easy for parents to file and track progression. The '2-1' means second grade, first semester.",
+      "placement": "bottom-right corner, small dark badge"
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "story-assessment",
+        "description": "A three-section assessment tied to a specific reading selection: vocabulary (multiple-choice context sentences), comprehension (MC + short-answer), and writing (open response). Standardized format that repeats for every story. Currently no recipe for assessment/quiz/test generation in materials-studio."
+      }
+    ]
+  },
+  "notes": "This is the assessment companion to the practice book pages (ref-2026-07-18-harcourt-trophies-2nd-practice-book). Carolyng specifically called out the three-section structure (vocab, comprehension, writing). The pages shown are from the Appendix section (A13-A44), covering two different stories. The consistent structure across stories is a key design pattern — it means the child learns the test format once and can focus on content rather than figuring out what to do."
+}

@@ -1,0 +1,48 @@
+{
+  "id": "ref-2026-07-18-twinkl-i-spy-letter-l",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:15:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427346.203599",
+  "format": "letter-identification-worksheet",
+  "title": "I Spy the Letter Ll — Visual Scanning Activity (Twinkl)",
+  "publisher": "Twinkl",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "pageCount": 1,
+  "callouts": [],
+  "overview": {
+    "description": "Single-page 'I Spy' letter identification worksheet. Top: large Ll model (bold L + grey traceable L on writing lines). Center: lion illustration. Scattered across the page: ~30 circled letters in various fonts/cases — uppercase L, lowercase l, and similar-looking distractors (I, i, E, F, g). Child finds and marks all instances of L and l among the look-alike distractors."
+  },
+  "designPatterns": {
+    "visualScanningGame": {
+      "description": "'I Spy' framing turns letter identification into a search game. The child hunts for target letters among visually similar distractors. The distractors are carefully chosen: I/i (vertical line confusion), E/F (similar shapes), g (lowercase curve confusion).",
+      "value": "Letter discrimination — the child must distinguish L from I (both have vertical lines), which is one of the most common early reading confusions."
+    },
+    "themedCenterImage": {
+      "description": "A lion (L word) illustration in the center of the page. The letter-themed animal provides: (1) a visual anchor, (2) an initial-sound connection (L = lion), (3) a coloring opportunity.",
+      "value": "Multi-purpose: letter association + coloring break + visual interest."
+    },
+    "modelAndPractice": {
+      "description": "Top of page: large bold Ll model on writing lines + grey traceable version. The child sees the target letter in its correct form before hunting for it below.",
+      "value": "Reference model always visible. The child can look up when unsure."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "letter-knowledge",
+    "topics": [
+      {"id": "ela.letter-identification-Ll", "kind": "procedural", "mapped": false},
+      {"id": "ela.visual-discrimination", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "i-spy-letter-page",
+        "description": "A single-page letter identification game: large letter model at top (bold + traceable), themed illustration in center (animal starting with target letter = coloring opportunity), ~30 circled letters scattered around the page (mix of target + visually similar distractors). Child circles/dabs all instances of the target letter. Generatable for any letter. Distractors should be intelligently chosen based on common confusions (b/d, p/q, l/I, m/n)."
+      }
+    ]
+  },
+  "notes": "Lightweight single-page drop. The 'I Spy' format is a new game mechanic for letter identification — different from the Habitat Schoolhouse approach (color/circle all uppercase letters on a page) because it specifically includes VISUALLY SIMILAR distractors. The chosen distractors for L (I, i, E, F, g) are pedagogically intentional — they test the specific confusions that matter for this letter."
+}

@@ -1,0 +1,134 @@
+{
+  "id": "cur-2026-07-18-good-and-the-beautiful",
+  "name": "The Good and the Beautiful \u2014 Language Arts & Reading Curriculum (125MB scan)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T23:30:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784433434.130809",
+  "layer1_philosophy": {
+    "methodology": "Classical / Literature-Based (Good and the Beautiful)",
+    "principles": [
+      "Literature-based language arts with wholesome content",
+      "Integrated reading, writing, spelling, grammar",
+      "Charlotte Mason influences (nature study, copywork, narration)",
+      "Explicit phonics instruction with connected text",
+      "Art and poetry appreciation woven into language arts",
+      "Character education through literature selections"
+    ],
+    "learningTheory": "integrated-skills",
+    "assessmentApproach": "course-embedded",
+    "parentRole": "teacher-guide",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "good-and-the-beautiful-method",
+        "topicType": "method_philosophy",
+        "title": "The Good and the Beautiful Methodology",
+        "summary": "Literature-based language arts curriculum combining phonics, reading, writing, spelling, and grammar in a wholesome, nature-inspired framework. Charlotte Mason influenced with classical elements."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Reading",
+        "curriculumTopic": "Phonics & Decoding",
+        "homaSubject": "ela",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Writing",
+        "curriculumTopic": "Handwriting & Composition",
+        "homaSubject": "ela",
+        "homaDomain": "writing",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Grammar",
+        "curriculumTopic": "Parts of Speech, Sentence Structure",
+        "homaSubject": "ela",
+        "homaDomain": "grammar-language",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Spelling",
+        "curriculumTopic": "Spelling Patterns",
+        "homaSubject": "ela",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Poetry",
+        "curriculumTopic": "Poetry Appreciation",
+        "homaSubject": "ela",
+        "homaDomain": "literature",
+        "homaTopicId": null,
+        "status": "unmapped"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 15,
+      "mapped": 0,
+      "unmapped": 5,
+      "noSubject": 0,
+      "partial": 10
+    }
+  },
+  "layer3_structure": {
+    "cadence": "daily",
+    "sessionLengthMinutes": {
+      "language_arts": 30
+    },
+    "weeklyTemplate": "Daily integrated language arts lesson (reading + writing + spelling/grammar). Approximately 30 min/day.",
+    "progressionModel": "linear",
+    "reviewRhythm": "built into lessons",
+    "totalWeeks": 36
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "integrated-lesson",
+        "description": "Combined reading/writing/grammar lesson around a literature passage",
+        "recipe": null,
+        "status": "no_recipe"
+      },
+      {
+        "type": "copywork",
+        "description": "Copy beautiful sentences from literature for handwriting + internalization",
+        "recipe": null,
+        "status": "no_recipe"
+      },
+      {
+        "type": "spelling-practice",
+        "description": "Spelling word study with pattern focus",
+        "recipe": "html",
+        "status": "have_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 3,
+      "haveRecipe": 1,
+      "noRecipe": 2
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "method",
+      "item": "Add Good and the Beautiful methodology to knowledge_bank",
+      "impact": "One of the most popular homeschool curricula \u2014 understanding it is essential",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Integrated literature lesson format",
+      "impact": "Core TGATB format \u2014 combined reading/writing/grammar around literature",
+      "urgency": "medium"
+    }
+  ],
+  "notes": "125MB scan \u2014 very large file. The Good and the Beautiful is one of the most popular homeschool curricula in the US, particularly among families who value character education and wholesome content. Aless dropping this signals serious curriculum research. CamScanner-created scan (per Aless's question about scan quality)."
+}
