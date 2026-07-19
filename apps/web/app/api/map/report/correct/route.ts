@@ -160,13 +160,18 @@ export async function POST(request: Request): Promise<Response> {
       source,
       changes: changes.length,
     });
-    await emitMapEvent("map.report_generated", {
-      family_id: access.family.id,
-      child_id: childId,
-      mapped_subjects: scores.mappedCount,
-      observations: scores.observationCount,
-      bank_version: MAP_BANK_VERSION,
-    });
+    // A doubled correction submit rescored nothing the second time
+    // (createReport returned the row it already wrote); one scoring,
+    // one generated event.
+    if (!report?.duplicate) {
+      await emitMapEvent("map.report_generated", {
+        family_id: access.family.id,
+        child_id: childId,
+        mapped_subjects: scores.mappedCount,
+        observations: scores.observationCount,
+        bank_version: MAP_BANK_VERSION,
+      });
+    }
 
     after(async () => {
       if (!narrativeEnabled()) return;

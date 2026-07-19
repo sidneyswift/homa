@@ -41,6 +41,7 @@ import {
   profileInterestList,
   uniqueStrings,
 } from "./profile-context";
+import { isDuplicateScoring } from "./scoring-dedupe";
 import { hashToken, newToken } from "./tokens";
 import {
   buildTrajectoryEras,
@@ -754,6 +755,10 @@ export interface ScoredReport {
   /** Null only if scoring somehow ran before signup; callers must guard. */
   email: string | null;
   childId: string;
+  /** True when this call re-submitted a scoring the row already holds
+   * (same numbers, moments apart): nothing was written, and callers must
+   * not re-emit map.report_generated for it. */
+  duplicate: boolean;
 }
 
 /** One archived scoring, kept so the report can show dated movement.
@@ -783,96 +788,141 @@ const HISTORY_CAP = 12;
  * A rescore archives the previous scores into history (newest first,
  * capped), which powers the "+4 mo since June 6" movement chips. The
  * token survives rescores: the report URL is permanent.
+ *
+ * Concurrent scorings of one child serialize on a per-child advisory
+ * lock, and a submission that would rewrite the identical numbers
+ * moments after the row was written returns the existing report as a
+ * duplicate instead of writing (live 2026-07-18: the client POSTed
+ * /api/map/score twice per scoring, 0.09s to 0.72s apart; both calls
+ * pushed a same-numbers history snapshot and the second reset the
+ * narrative claim mid-generation, doubling the model call).
  */
 export async function createReport(familyId: string, childId: string): Promise<ScoredReport | null> {
   if (!(await childBelongsToFamily(childId, familyId))) return null;
   const sql = mapDb();
 
-  const childRows = await sql<{ name: string; birth_month: string }[]>`
-    select name, to_char(birth_month, 'YYYY-MM-DD') as birth_month
-    from public.children where id = ${childId}
-  `;
-  if (childRows.length === 0) return null;
-  const ageMonths = ageInMonths(childRows[0].birth_month);
+  const report = await sql.begin(async (tx): Promise<ScoredReport | null> => {
+    // Transaction-scoped, so pooler-safe: the second scoring waits here
+    // until the first commits, then reads the row the first one wrote.
+    await tx`
+      select pg_advisory_xact_lock(
+        hashtextextended(${"child-report-scoring:" + childId}, 0)
+      )
+    `;
 
-  const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.child_answers where child_id = ${childId}
-  `;
-  const scores = scoreMap(
-    ageMonths,
-    answerRows.map((row) => ({ itemId: row.question_id, answer: row.answer })),
-  );
+    const childRows = await tx<{ name: string; birth_month: string }[]>`
+      select name, to_char(birth_month, 'YYYY-MM-DD') as birth_month
+      from public.children where id = ${childId}
+    `;
+    if (childRows.length === 0) return null;
+    const ageMonths = ageInMonths(childRows[0].birth_month);
 
-  const existing = await sql<
-    {
-      scores: MapScores;
-      generated_at: string;
-      bank_version: string;
-      scorer_version: string | null;
-      scored_birth_date: string | null;
-      scored_age_months: number | null;
-      history: ScoreSnapshot[];
-      narrative: ReportNarrative | null;
-      narrative_meta: NarrativeMeta | null;
-      token: string | null;
-    }[]
-  >`
-    select scores, generated_at::text as generated_at, bank_version,
-           scorer_version, to_char(scored_birth_date, 'YYYY-MM-DD') as scored_birth_date,
-           scored_age_months, history,
-           narrative, narrative_meta, token
-    from public.child_reports where child_id = ${childId}
-  `;
-  const history: ScoreSnapshot[] =
-    existing.length > 0
-      ? [
-          {
-            scores: existing[0].scores,
-            generated_at: existing[0].generated_at,
-            bank_version: existing[0].bank_version,
-            scorer_version: existing[0].scorer_version,
-            birth_date: existing[0].scored_birth_date,
-            age_months: existing[0].scored_age_months,
-            narrative: existing[0].narrative,
-            narrative_meta: existing[0].narrative_meta,
-          },
-          ...existing[0].history,
-        ].slice(0, HISTORY_CAP)
-      : [];
+    const answerRows = await tx<{ question_id: string; answer: MapAnswer }[]>`
+      select question_id, answer from public.child_answers where child_id = ${childId}
+    `;
+    const scores = scoreMap(
+      ageMonths,
+      answerRows.map((row) => ({ itemId: row.question_id, answer: row.answer })),
+    );
 
-  // A rescore always rewrites the words next to the new numbers (founder
-  // ruling: regenerate on every rescore): the archived narrative rides in
-  // history and the live row's narrative resets until generation lands.
-  const token = existing[0]?.token ?? newToken();
-  await sql`
-    insert into public.child_reports (child_id, scores, bank_version,
-            scorer_version, scored_birth_date, scored_age_months,
-            token, history, generated_at, updated_at)
-    values (${childId}, ${sql.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION},
-            ${MAP_SCORER_VERSION}, ${childRows[0].birth_month}, ${ageMonths},
-            ${token}, ${sql.json(history as unknown as DbJson)}, now(), now())
-    on conflict (child_id) do update
-      set scores = excluded.scores, bank_version = excluded.bank_version,
-          scorer_version = excluded.scorer_version,
-          scored_birth_date = excluded.scored_birth_date,
-          scored_age_months = excluded.scored_age_months,
-          generated_at = now(), updated_at = now(), history = excluded.history,
-          narrative = null, narrative_meta = null
-  `;
+    const existing = await tx<
+      {
+        scores: MapScores;
+        generated_at: string;
+        generated_age_ms: number;
+        bank_version: string;
+        scorer_version: string | null;
+        scored_birth_date: string | null;
+        scored_age_months: number | null;
+        history: ScoreSnapshot[];
+        narrative: ReportNarrative | null;
+        narrative_meta: NarrativeMeta | null;
+        token: string | null;
+      }[]
+    >`
+      select scores, generated_at::text as generated_at,
+             (extract(epoch from (now() - generated_at)) * 1000)::float8 as generated_age_ms,
+             bank_version,
+             scorer_version, to_char(scored_birth_date, 'YYYY-MM-DD') as scored_birth_date,
+             scored_age_months, history,
+             narrative, narrative_meta, token
+      from public.child_reports where child_id = ${childId}
+    `;
+
+    const shared = {
+      scores,
+      childName: childRows[0].name,
+      ageMonths,
+      childId,
+    };
+
+    // The duplicate short-circuit: nothing is written, so the first
+    // scoring's history, generated_at, and (critically) its in-flight
+    // narrative claim all survive the re-submission.
+    if (
+      existing.length > 0 &&
+      existing[0].token !== null &&
+      isDuplicateScoring(
+        {
+          scores: existing[0].scores,
+          generatedAgeMs: existing[0].generated_age_ms,
+          bankVersion: existing[0].bank_version,
+          scorerVersion: existing[0].scorer_version,
+          scoredAgeMonths: existing[0].scored_age_months,
+        },
+        { scores, bankVersion: MAP_BANK_VERSION, scorerVersion: MAP_SCORER_VERSION, ageMonths },
+      )
+    ) {
+      return { ...shared, token: existing[0].token, email: null, duplicate: true };
+    }
+
+    const history: ScoreSnapshot[] =
+      existing.length > 0
+        ? [
+            {
+              scores: existing[0].scores,
+              generated_at: existing[0].generated_at,
+              bank_version: existing[0].bank_version,
+              scorer_version: existing[0].scorer_version,
+              birth_date: existing[0].scored_birth_date,
+              age_months: existing[0].scored_age_months,
+              narrative: existing[0].narrative,
+              narrative_meta: existing[0].narrative_meta,
+            },
+            ...existing[0].history,
+          ].slice(0, HISTORY_CAP)
+        : [];
+
+    // A rescore always rewrites the words next to the new numbers (founder
+    // ruling: regenerate on every rescore): the archived narrative rides in
+    // history and the live row's narrative resets until generation lands.
+    const token = existing[0]?.token ?? newToken();
+    await tx`
+      insert into public.child_reports (child_id, scores, bank_version,
+              scorer_version, scored_birth_date, scored_age_months,
+              token, history, generated_at, updated_at)
+      values (${childId}, ${tx.json(scores as unknown as DbJson)}, ${MAP_BANK_VERSION},
+              ${MAP_SCORER_VERSION}, ${childRows[0].birth_month}, ${ageMonths},
+              ${token}, ${tx.json(history as unknown as DbJson)}, now(), now())
+      on conflict (child_id) do update
+        set scores = excluded.scores, bank_version = excluded.bank_version,
+            scorer_version = excluded.scorer_version,
+            scored_birth_date = excluded.scored_birth_date,
+            scored_age_months = excluded.scored_age_months,
+            generated_at = now(), updated_at = now(), history = excluded.history,
+            narrative = null, narrative_meta = null
+    `;
+
+    return { ...shared, token, email: null, duplicate: false };
+  });
+  if (report === null) return null;
 
   const familyRows = await sql<{ email: string | null }[]>`
     select email from public.families where id = ${familyId}
   `;
   await touchFamily(familyId);
 
-  return {
-    token,
-    scores,
-    childName: childRows[0].name,
-    ageMonths,
-    email: familyRows[0].email,
-    childId,
-  };
+  return { ...report, email: familyRows[0].email };
 }
 
 /**

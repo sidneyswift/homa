@@ -61,13 +61,18 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
     }
 
-    await emitMapEvent("map.report_generated", {
-      family_id: family.id,
-      child_id: report.childId,
-      mapped_subjects: report.scores.mappedCount,
-      observations: report.scores.observationCount,
-      bank_version: MAP_BANK_VERSION,
-    });
+    // A duplicate submission (mid-beat refresh, doubled client POST, a
+    // second page context) changed nothing, so it emits nothing: one
+    // scoring, one event.
+    if (!report.duplicate) {
+      await emitMapEvent("map.report_generated", {
+        family_id: family.id,
+        child_id: report.childId,
+        mapped_subjects: report.scores.mappedCount,
+        observations: report.scores.observationCount,
+        bank_version: MAP_BANK_VERSION,
+      });
+    }
 
     // Background phase, post-response: write the narrative (flag-gated,
     // uncapped), THEN send the report email so the emailed link opens a

@@ -377,13 +377,17 @@ export async function finishChildReport(
     family_id: familyId,
     questions_answered: Object.keys(answers).length,
   });
-  await emitMapEvent("map.report_generated", {
-    family_id: familyId,
-    child_id: report.childId,
-    mapped_subjects: report.scores.mappedCount,
-    observations: report.scores.observationCount,
-    bank_version: MAP_BANK_VERSION,
-  });
+  // A duplicate scoring (a racing web scoring of the same child)
+  // changed nothing and emits nothing.
+  if (!report.duplicate) {
+    await emitMapEvent("map.report_generated", {
+      family_id: familyId,
+      child_id: report.childId,
+      mapped_subjects: report.scores.mappedCount,
+      observations: report.scores.observationCount,
+      bank_version: MAP_BANK_VERSION,
+    });
+  }
 
   // Post-score work runs detached: the SMS turn should not wait 20s of
   // narrative generation to text the link, and both steps self-heal

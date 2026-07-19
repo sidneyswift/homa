@@ -22,6 +22,41 @@ import type { FlowChild } from "./flow-types";
 
 const LINE_STAGGER_MS = 700;
 
+/** Score POSTs this page context has sent, kept by child id. The mount
+ * effect is otherwise remount-unsafe (its cancelled flag stops the
+ * navigation, not the POST), and every successful scoring beat exits
+ * through a full navigation, so within one page context a child is only
+ * ever legitimately scored once: a remount reuses the request instead
+ * of firing a second one (live 2026-07-18: /api/map/score landed twice
+ * per scoring, seconds or less apart; the server dedupes too, this
+ * keeps a well-behaved client from sending the second request at all).
+ * A failed POST clears its slot so the try-again path can re-send. */
+const scoreRequests = new Map<string, Promise<{ ok: boolean; token?: string }>>();
+
+function scoreChildOnce(childId: string): Promise<{ ok: boolean; token?: string }> {
+  const pending = scoreRequests.get(childId);
+  if (pending) return pending;
+  const request = (async () => {
+    const response = await fetch("/api/map/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ childId }),
+    });
+    return (await response.json()) as { ok: boolean; token?: string };
+  })().then(
+    (data) => {
+      if (!data.ok || !data.token) scoreRequests.delete(childId);
+      return data;
+    },
+    (error: unknown) => {
+      scoreRequests.delete(childId);
+      throw error;
+    },
+  );
+  scoreRequests.set(childId, request);
+  return request;
+}
+
 function buildLines(kids: FlowChild[], planSubject: string | null): string[] {
   if (planSubject) {
     const kid = kids[0];
@@ -78,12 +113,7 @@ export function ScoringStep({
         // upserts that kid's report and sends their report email once.
         let landingToken: string | null = null;
         for (const kid of frozenKids) {
-          const response = await fetch("/api/map/score", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ childId: kid.id }),
-          });
-          const data = (await response.json()) as { ok: boolean; token?: string };
+          const data = await scoreChildOnce(kid.id);
           if (!data.ok || !data.token) {
             if (!cancelled) setFailed(true);
             return;
