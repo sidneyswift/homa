@@ -8,6 +8,59 @@ const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
 const CHILD_ID = "00000000-0000-4000-8000-000000000002";
 const TASK_RUN_ID = "00000000-0000-4000-8000-000000000003";
 
+const validSubjectLessonEvents = {
+  "map.subject_lesson_requested": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+  },
+  "map.subject_lesson_started": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    attempt: 1,
+  },
+  "map.subject_lesson_ready": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    attempt: 1,
+  },
+  "map.subject_lesson_failed": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    attempt: 1,
+    error_code: "build_failed",
+  },
+  "map.subject_lesson_retried": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    attempt: 2,
+  },
+  "map.subject_lesson_kept": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+  },
+} as const;
+
+type SubjectLessonEventName = keyof typeof validSubjectLessonEvents;
+
+const subjectLessonAttemptEventNames = [
+  "map.subject_lesson_started",
+  "map.subject_lesson_ready",
+  "map.subject_lesson_failed",
+  "map.subject_lesson_retried",
+] as const satisfies ReadonlyArray<SubjectLessonEventName>;
+
+function subjectLessonEventSchema(name: SubjectLessonEventName) {
+  const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+  assert.ok(schema, `${name} is missing from the event registry`);
+  return schema;
+}
+
 const validProgressEvents = {
   "progress.evidence_recorded": {
     family_id: FAMILY_ID,
@@ -73,6 +126,141 @@ const validProgressEvents = {
     child_id: CHILD_ID,
   },
 } as const;
+
+test("subject lesson event registry contains the retained build and Keep names", () => {
+  assert.deepEqual(
+    Object.keys(EVENT_SCHEMAS)
+      .filter((name) => name.startsWith("map.subject_lesson_"))
+      .sort(),
+    Object.keys(validSubjectLessonEvents).sort(),
+  );
+});
+
+test("subject lesson event schemas accept every exact valid shape", () => {
+  for (const [name, props] of Object.entries(validSubjectLessonEvents)) {
+    assert.equal(
+      subjectLessonEventSchema(name as SubjectLessonEventName).safeParse(props)
+        .success,
+      true,
+      name,
+    );
+  }
+});
+
+test("subject lesson events reject malformed UUIDs and extra properties", () => {
+  for (const [name, props] of Object.entries(validSubjectLessonEvents)) {
+    const schema = subjectLessonEventSchema(name as SubjectLessonEventName);
+    assert.equal(
+      schema.safeParse({ ...props, family_id: "not-a-uuid" }).success,
+      false,
+      `${name} accepted a malformed family UUID`,
+    );
+    assert.equal(
+      schema.safeParse({ ...props, child_id: "not-a-uuid" }).success,
+      false,
+      `${name} accepted a malformed child UUID`,
+    );
+    assert.equal(
+      schema.safeParse({ ...props, extra: "not-allowed" }).success,
+      false,
+      `${name} accepted an extra property`,
+    );
+  }
+});
+
+test("subject lesson attempt events require positive integers", () => {
+  for (const name of subjectLessonAttemptEventNames) {
+    const schema = subjectLessonEventSchema(name);
+    const props = validSubjectLessonEvents[name];
+    for (const attempt of [0, -1, 1.5, "1"]) {
+      assert.equal(
+        schema.safeParse({ ...props, attempt }).success,
+        false,
+        `${name} accepted attempt ${String(attempt)}`,
+      );
+    }
+  }
+});
+
+test("subject lesson failure error codes are present and bounded", () => {
+  const schema = subjectLessonEventSchema("map.subject_lesson_failed");
+  const props = validSubjectLessonEvents["map.subject_lesson_failed"];
+  assert.equal(
+    schema.safeParse({ ...props, error_code: "" }).success,
+    false,
+  );
+  assert.equal(
+    schema.safeParse({ ...props, error_code: "x".repeat(81) }).success,
+    false,
+  );
+  const { error_code: _errorCode, ...withoutErrorCode } = props;
+  assert.equal(schema.safeParse(withoutErrorCode).success, false);
+});
+
+test("only HTML material creation accepts the subject lesson channel", () => {
+  const created = {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    channel: "subject_lesson",
+    kind: "worksheet",
+    source: "html",
+    reviewed: true,
+    review_passed: true,
+    sent_by_text: false,
+    duration_ms: 100,
+  } as const;
+  assert.equal(
+    EVENT_SCHEMAS["materials.created"].safeParse(created).success,
+    true,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["materials.created"].safeParse({
+      ...created,
+      channel: "subject-lesson",
+    }).success,
+    false,
+  );
+
+  const prohibitedSubjectLessonEvents = {
+    "materials.image_generated": {
+      family_id: FAMILY_ID,
+      channel: "subject_lesson",
+      duration_ms: 100,
+      has_references: false,
+    },
+    "materials.finalized": {
+      family_id: FAMILY_ID,
+      channel: "subject_lesson",
+      versions_superseded: 0,
+    },
+    "materials.photo_searched": {
+      family_id: FAMILY_ID,
+      channel: "subject_lesson",
+      results: 1,
+      duration_ms: 100,
+    },
+    "materials.photo_imported": {
+      family_id: FAMILY_ID,
+      channel: "subject_lesson",
+      bytes: 100,
+      duration_ms: 100,
+    },
+  } as const;
+
+  for (const [name, props] of Object.entries(prohibitedSubjectLessonEvents)) {
+    const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+    assert.equal(
+      schema.safeParse(props).success,
+      false,
+      `${name} accepted the automatic lesson channel`,
+    );
+    assert.equal(
+      schema.safeParse({ ...props, channel: "web" }).success,
+      true,
+      `${name} rejected the ordinary web channel`,
+    );
+  }
+});
 
 test("progress event registry contains all eleven exact names", () => {
   assert.deepEqual(

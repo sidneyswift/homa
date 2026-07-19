@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { scoreMap } from "@homa/core";
 
 import type { TrajectoryEra } from "../../../lib/map/trajectory-eras";
+import { subjectLessonsEnabled } from "../../../lib/subject-lessons/flag";
 import { ReportView, type ReportViewData } from "../r/[token]/report-view";
 import { SAMPLE_NARRATIVE } from "./narrative.fixture";
 import { SAMPLE_AGE_MONTHS, SAMPLE_ANSWERS, SAMPLE_PRIOR_ANSWERS } from "./sample-answers";
@@ -47,6 +48,7 @@ const breadcrumbJsonLd = {
 };
 
 export default function SampleReportPage() {
+  const lessonFlagOn = subjectLessonsEnabled();
   const birthMonth = sampleBirthMonth();
   const ageMonths = SAMPLE_AGE_MONTHS;
   const answers = SAMPLE_ANSWERS;
@@ -106,6 +108,7 @@ export default function SampleReportPage() {
         data={data}
         sample
         narrativeView={{ narrative: SAMPLE_NARRATIVE, rejectedPieces: [] }}
+        subjectLessonsEnabled={lessonFlagOn}
       />
     </>
   );

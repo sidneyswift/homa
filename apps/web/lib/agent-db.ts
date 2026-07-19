@@ -101,12 +101,13 @@ export function callerTokenIsExpired(token: string, nowSeconds: number): boolean
  *
  *   caller  · web chat. The caller's own JWT; RLS is the tenancy wall
  *             inside the query itself.
- *   pinned  · SMS, inbound email, and dispatcher sessions. No JWT
+ *   pinned  · SMS, inbound email, dispatcher, and subject lesson
+ *             sessions. No JWT
  *             exists, but the channel stamped familyId from an
  *             application-authenticated mapping (the parent-written
  *             phone row, the family's own registered email address, or
- *             the dispatcher's schedule row), the SAME trust basis the
- *             voice webhook tools already write on. Tools then run
+ *             a family-scoped schedule or lesson row), the SAME trust
+ *             basis the voice webhook tools already write on. Tools then run
  *             server-side reads/writes pre-scoped to that familyId
  *             through the guarded libs (never raw model input).
  *
@@ -123,7 +124,45 @@ export type AgentAccess =
   | { mode: "caller"; db: SupabaseClient; familyId: string }
   | { mode: "pinned"; familyId: string };
 
-const PINNED_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
+export type PinnedAgentChannel =
+  | "sms"
+  | "email"
+  | "dispatch"
+  | "subject_lesson"
+  | "agent-job";
+
+const PINNED_CHANNELS = new Set<PinnedAgentChannel>([
+  "sms",
+  "email",
+  "dispatch",
+  "subject_lesson",
+  "agent-job",
+]);
+
+export function isPinnedAgentChannel(
+  channel: unknown,
+): channel is PinnedAgentChannel {
+  return (
+    typeof channel === "string"
+    && PINNED_CHANNELS.has(channel as PinnedAgentChannel)
+  );
+}
+
+/**
+ * Returns family identity only for channels whose server adapter already
+ * authenticated and stamped that family.
+ */
+export function resolvePinnedFamilyId(attributes: unknown): string | null {
+  const attrs = (attributes ?? {}) as {
+    channel?: unknown;
+    familyId?: unknown;
+  };
+  return isPinnedAgentChannel(attrs.channel)
+    && typeof attrs.familyId === "string"
+    && attrs.familyId.length > 0
+    ? attrs.familyId
+    : null;
+}
 
 export interface ResolveAgentAccessDependencies {
   /** Does this authenticated user still belong to this family, right now? */
@@ -173,8 +212,9 @@ export async function resolveAgentAccess(
     }
     throw new MissingFamilyContextError();
   }
-  if (attrs.channel && PINNED_CHANNELS.has(attrs.channel) && attrs.familyId) {
-    return { mode: "pinned", familyId: attrs.familyId };
+  const pinnedFamilyId = resolvePinnedFamilyId(attrs);
+  if (pinnedFamilyId) {
+    return { mode: "pinned", familyId: pinnedFamilyId };
   }
   throw new MissingFamilyContextError();
 }

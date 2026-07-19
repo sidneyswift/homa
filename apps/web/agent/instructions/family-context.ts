@@ -34,11 +34,10 @@ import { isSlimMorningBriefDispatchContext } from "../../lib/tasks/brief-context
  * Two load paths, one wall (rendering + the pinned loader live in
  * lib/family-context, shared with the voice webhook):
  *   web  · the caller's own Supabase token (agent-db), RLS scopes rows.
- *   sms  · no token exists; the channel stamped familyId from the parent's
- *          own family_phones mapping (the SMS auth context), and reads run
- *          on the server connection pinned to that familyId. Interim until
- *          the M1-02 SET LOCAL role lands; familyId never comes from the
- *          model on either path.
+ *   pinned · no token exists; the authenticated server channel stamped
+ *            familyId, and reads run on the server connection pinned to
+ *            that family. Interim until the M1-02 SET LOCAL role lands;
+ *            familyId never comes from the model on either path.
  */
 
 async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRows> {
@@ -102,6 +101,11 @@ interface FamilyContextInstructionAttributes {
   familyId?: string;
   supabaseAccessToken?: string;
   viewChildId?: string;
+  /** Subject-lesson sessions stamp the lesson's own child here, never
+   *  viewChildId (that's the web app's context-switcher cookie). Used as
+   *  a focusChildId fallback so a lesson session's family context is
+   *  actually focused on the right child. */
+  childId?: string;
   memberName?: string;
   episodeId?: string;
   continuityContext?: string;
@@ -224,7 +228,8 @@ export async function resolveFamilyContextInstructionMarkdown(
       attributes?.familyId &&
       (attributes.channel === "sms" ||
         attributes.channel === "email" ||
-        attributes.channel === "dispatch")
+        attributes.channel === "dispatch" ||
+        attributes.channel === "subject_lesson")
     ) {
       rows = await dependencies.loadPinnedFamilyContext(attributes.familyId);
     } else {
@@ -235,9 +240,12 @@ export async function resolveFamilyContextInstructionMarkdown(
     // family's own children, so a stale value renders nothing.
     // memberName is auth-context-derived by every channel (the
     // caller's own membership row, or the parent-written phone or
-    // email mapping), never model input.
+    // email mapping), never model input. A subject-lesson session has
+    // no context switcher either; it stamps childId directly, which
+    // focusChildId falls back to so the context actually centers on
+    // that lesson's child.
     const familyContext = dependencies.renderFamilyContext(rows, {
-      focusChildId: attributes?.viewChildId,
+      focusChildId: attributes?.viewChildId ?? attributes?.childId,
       speakingWith: attributes?.memberName ?? null,
     });
     let progressContext = "";

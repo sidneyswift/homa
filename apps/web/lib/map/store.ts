@@ -31,6 +31,15 @@ import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
 import { foldFamilyDataIntoTx } from "../family-fold";
+import { subjectLessonsEnabled } from "../subject-lessons/flag";
+import {
+  SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
+} from "../subject-lessons/material-validity";
+import {
+  filterSubjectLessonSummariesForCurrentTargets,
+  type SubjectLessonSummaryCandidate,
+} from "../subject-lessons/summary-filter";
+import type { SubjectLessonSummary } from "../subject-lessons/types";
 import { mapDb, type DbJson } from "./db";
 import {
   cleanProfileFocus,
@@ -1156,6 +1165,76 @@ export interface ReportView {
    * migration #22), so the "Call Homa" card can prefill instead of ask
    * again. Null when nothing is linked yet. */
   familyPhone: string | null;
+}
+
+/**
+ * A permanent report token may reveal only current-target ready lessons.
+ * Build state remains owner-only while an existing artifact stays shareable.
+ */
+export async function listReadySubjectLessonSummariesByReportToken(
+  token: string,
+): Promise<SubjectLessonSummary[]> {
+  if (!subjectLessonsEnabled()) return [];
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      birth_date: string;
+      answers: Array<{ itemId: string; answer: MapAnswer }>;
+      lessons: SubjectLessonSummaryCandidate[];
+    }[]
+  >`
+    select to_char(child.birth_month, 'YYYY-MM-DD') as birth_date,
+           coalesce(
+             (
+               select jsonb_agg(
+                 jsonb_build_object(
+                   'itemId', answer.question_id,
+                   'answer', answer.answer
+                 )
+                 order by answer.question_id
+               )
+               from public.child_answers answer
+               where answer.child_id = child.id
+             ),
+             '[]'::jsonb
+           ) as answers,
+           coalesce(
+             (
+               select jsonb_agg(
+                 jsonb_build_object(
+                   'id', lesson.id,
+                   'subjectId', lesson.subject_id,
+                   'buildStatus', lesson.build_status,
+                   'sourceFingerprint', lesson.source_fingerprint
+                 )
+                 order by lesson.created_at
+               )
+               from public.subject_lessons lesson
+               join public.materials material
+                 on material.id = lesson.material_id
+                 and material.family_id = child.family_id
+               where lesson.child_id = child.id
+                 and lesson.superseded_at is null
+                 and lesson.build_status = 'ready'
+                 and ${sql.unsafe(SUBJECT_LESSON_MATERIAL_VALIDITY_SQL)}
+             ),
+             '[]'::jsonb
+           ) as lessons
+    from public.child_reports report
+    join public.children child on child.id = report.child_id
+    join public.families family on family.id = child.family_id
+    where report.token = ${token}
+      and report.revoked_at is null
+      and family.status <> 'deleted'
+  `;
+  const row = rows[0];
+  return row
+    ? filterSubjectLessonSummariesForCurrentTargets({
+        ageMonths: ageInMonths(row.birth_date),
+        answers: row.answers,
+        lessons: row.lessons,
+      })
+    : [];
 }
 
 /**
