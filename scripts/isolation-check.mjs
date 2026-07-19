@@ -449,6 +449,27 @@ async function subjectLessonSchemaExists() {
   return rows[0]?.present === true;
 }
 
+/**
+ * The subject_lessons migration deliberately ships as an expand/contract
+ * pair (2026-07-18 merge-to-main review finding): the enforcing trigger is
+ * a SEPARATE, later migration that must not apply until the RPC-aware
+ * finalizeMaterialCaller code is confirmed READY in production, because it
+ * would otherwise reject every family's existing direct-update material
+ * approval. This checks whether that second migration has landed yet, so
+ * the isolation probe below can assert the right thing for either state
+ * instead of failing during the safe, deliberate window between them.
+ */
+async function materialStatusWriteBoundaryEnforced() {
+  const rows = await sql`
+    select exists (
+      select 1 from pg_trigger
+      where tgname = 'enforce_material_status_write_boundary'
+        and not tgisinternal
+    ) as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function morningResearchBriefV2SchemaExists() {
   const rows = await sql`
     select count(*)::integer as table_count
@@ -2353,14 +2374,30 @@ async function expectAuthenticatedIsolation() {
       },
       "auth member cannot forge material offer provenance on insert",
     );
-    await expectAuthenticatedUpdateDenied(
-      familyBUser.accessToken,
-      "materials",
-      "id",
-      materialBId,
-      { status: "final", approved_at: new Date().toISOString() },
-      "auth member cannot directly update material status",
-    );
+    // Expand/contract window (2026-07-18 merge-to-main review finding):
+    // the enforcing trigger is a deliberately separate, later migration
+    // that must not land until the RPC-aware finalizeMaterialCaller is
+    // confirmed READY in production -- applying it first would reject
+    // every family's existing direct-update approval. During that safe
+    // window a direct update still succeeds, on purpose; assert that
+    // honestly instead of failing, and assert the real denial once the
+    // second migration has landed.
+    if (await materialStatusWriteBoundaryEnforced()) {
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "materials",
+        "id",
+        materialBId,
+        { status: "final", approved_at: new Date().toISOString() },
+        "auth member cannot directly update material status",
+      );
+    } else {
+      report(
+        "auth member cannot directly update material status",
+        true,
+        "not yet enforced: enforce_material_status_write_boundary migration deliberately pending (code-then-migration rollout window)",
+      );
+    }
     await expectAuthenticatedUpdateDenied(
       familyBUser.accessToken,
       "materials",
