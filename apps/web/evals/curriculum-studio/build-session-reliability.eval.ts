@@ -1,41 +1,44 @@
 import { defineEval } from "eve/evals";
+import { equals } from "eve/evals/expect";
+
+import {
+  buildSessionCredentialBlocker,
+  buildSessionFindings,
+  runBuildSessionEval,
+} from "./build-session-harness";
 
 /**
- * Fixture 5 (build-session reliability) of the curriculum-studio five-fixture
- * eval, intentionally deferred and skipped.
+ * Fixture 5 of the curriculum-studio five-fixture eval
+ * (docs/homa-planning/plans/2026-07-18-curriculum-studio-tweakable-plan.html,
+ * build-order stage "curriculum-studio skill v0 + five-fixture eval").
  *
- * What it would assert: a background build session woken with
- * buildStageBrief (lib/jobs/session.ts) on the 'agent-job' channel builds the
- * stage with create_printable and then finishes it with
- * report_agent_job_stage, acting with tools only and never messaging the
- * parent.
+ * Build-session reliability. A background stage session, woken with
+ * buildStageBrief (lib/jobs/session.ts), must build the stage's material with
+ * create_printable and then finish it with report_agent_job_stage, in that
+ * order, naming a material it actually built, and never messaging the parent.
+ * report_agent_job_stage is the only way a stage finishes, so a session that
+ * builds but never reports leaves the job wedged (handleUnreportedStage
+ * retries then parks it), which is the failure this pins.
  *
- * Why it is skipped, not written against this harness: the eve eval driver
- * (t.send / SendTurnPayload) can attach only ephemeral clientContext to a
- * turn. It cannot stamp a session's auth attributes, so it cannot put a
- * session on the 'agent-job' channel or give it the runner's job-worker
- * context. report_agent_job_stage guards exactly on those attributes
- * (refuseNonJobWorkerSession in lib/jobs/guard.ts) and would refuse any
- * session this harness can produce, so a faithful build-session run is not
- * expressible here. That matches the plan's own gate for this fixture:
- * assert it if the harness can seed a job-worker session with a specific
- * message, otherwise document why and ship the routing fixtures.
- *
- * The available alternative, if build-session coverage is wanted later, is a
- * model-backed harness that calls the real model directly with stubbed tools
- * (the pattern in evals/subject-lesson-builder/workflow-harness.ts): seed
- * buildStageBrief as the prompt, stub load_skill, create_printable, and
- * report_agent_job_stage, and grade the recorded call order. That bypasses
- * the channel guard by construction rather than exercising it, and it is
- * model-and-credential dependent, so it is left as a follow-up rather than
- * bundled into this routing-focused pass.
+ * Model-backed, so it skips without AI Gateway credentials, matching
+ * evals/subject-lesson-builder/workflow-success.eval.ts. See
+ * build-session-harness.ts for why this uses a direct model harness rather
+ * than the eve eval driver.
  */
 export default defineEval({
   description:
-    "Build-session stage reliability is deferred: the eval harness cannot seed a job-worker 'agent-job' session (see file comment).",
+    "The real Homa model builds a stage's material and finishes the stage by reporting it, through local tool stubs.",
+  tags: ["model-backed", "curriculum-studio"],
+  timeoutMs: 120_000,
   async test(t) {
-    t.skip(
-      "The eve eval harness cannot stamp 'agent-job' channel job-worker auth attributes, which report_agent_job_stage requires. See the file comment for the model-backed alternative.",
-    );
+    const blocker = buildSessionCredentialBlocker();
+    if (blocker) t.skip(blocker);
+
+    const result = await runBuildSessionEval();
+    const findings = buildSessionFindings(result);
+    t.log(`calls: ${result.calls.map((call) => call.name).join(" -> ")}`);
+    t.log(`terminal: ${result.text}`);
+    for (const finding of findings) t.log(finding);
+    t.check(findings, equals([]));
   },
 });

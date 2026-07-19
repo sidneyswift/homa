@@ -60,6 +60,6 @@ export default defineEval({
         (plan) => parseJobPlan("curriculum-studio", plan).ok,
         "start_agent_job plan validates against curriculum-studio JOB_CONTRACTS schema",
       ),
-    ).soft();
+    );
   },
 });

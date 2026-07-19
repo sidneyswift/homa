@@ -80,6 +80,24 @@ plan carrying your confirmed scope and sequence, and total_stages set to the
 number of weeks (or the number of build units you chose). The job tool
 re-scopes the family server-side; you never pass a family id.
 
+The plan is a JSON object with this exact shape. The job validates it and
+will not start if it does not match, so use these field names and values:
+
+- pacing: "mastery" or "fixed". Mastery for a sequence that must not skip
+  ahead (a phonics program); fixed for a survey unit on a set calendar.
+- weeks: the whole program length as a whole number of weeks, 1 to 200.
+- scopeAndSequence: the ordered blocks, each an object with "block" (a short
+  name) and "focus" (one line on what that stretch covers). At least one,
+  in build order.
+- curriculumKey (optional): the atlas id from find_curriculum_profile when
+  you started from a known profile. Leave it out when you built from a
+  described source or the child's own map.
+
+For example:
+{ "pacing": "mastery", "weeks": 36, "scopeAndSequence": [
+  { "block": "Letter sounds", "focus": "Single consonant and short vowel sounds" },
+  { "block": "Blending", "focus": "Two and three sound short vowel words" } ] }
+
 - One active curriculum build per child at a time. If she already has one
   running for this child, the tool tells you; do not start a second. Tell
   her what is already building and offer to change or stop it instead.

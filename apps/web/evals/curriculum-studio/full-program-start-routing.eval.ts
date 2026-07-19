@@ -19,11 +19,13 @@ import { parseJobPlan } from "../../lib/jobs/contracts";
  * (premature-start-guard.eval.ts) covers the confirm-first path for a bare
  * ask. Wording is paraphrased on purpose, never the SKILL.md description.
  *
- * Folded-in fixture (5): a soft plan-parses assertion proves the plan the
- * model handed start_agent_job validates against curriculum-studio's
- * JOB_CONTRACTS schema, the same shape startJob enforces server-side. Soft
- * because the plan's field shape is model-produced; a miss is a signal the
- * skill should document the plan shape, not a reason to fail the suite.
+ * Folded-in fixture (5): a plan-parses gate proves the plan the model handed
+ * start_agent_job validates against curriculum-studio's JOB_CONTRACTS schema
+ * via the exact parseJobPlan startJob uses server-side. It is a hard gate,
+ * not tracked-only: an unparseable plan is not a style nit, it is a job that
+ * would fail to start in production, so a miss here is always a real bug. The
+ * skill documents the plan shape (SKILL.md "Start the job") so the model can
+ * produce it.
  */
 export default defineEval({
   description:
@@ -44,6 +46,6 @@ export default defineEval({
         (plan) => parseJobPlan("curriculum-studio", plan).ok,
         "start_agent_job plan validates against curriculum-studio JOB_CONTRACTS schema",
       ),
-    ).soft();
+    );
   },
 });
