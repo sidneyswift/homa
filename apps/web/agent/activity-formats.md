@@ -124,3 +124,193 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 8-14. Simpler terms and fewer blanks for younger; denser notes and harder practice for older.
 - **Creation path:** html (uses packet recipe for multi-page; both pages need text precision)
 - **Example activity:** `[notes-and-practice-bundle] Two-step equations guided notes with practice maze`
+
+### matching-worksheet
+- **Slug:** `[matching-worksheet]`
+- **Name:** Matching / visual discrimination worksheet
+- **What it is:** Two columns of images; child draws lines to match pairs, or rows of similar images where the child marks which one is different. Core visual discrimination skill for preschool.
+- **Best for:** Visual discrimination, matching, same/different, categorization, uppercase-lowercase pairing.
+- **Subjects:** Math (matching quantities), ELA (letter matching, rhyming pairs), science (animal matching), any pairing/sorting concept
+- **Ages:** 3-6. Fewer items (4 pairs) and larger images for younger; more pairs (6-8) and subtler differences for older.
+- **Creation path:** image-direct (matching requires distinct, recognizable illustrations) or hybrid (HTML columns + generated images)
+- **Example activity:** `[matching-worksheet] Match the ocean animals — draw lines from each creature on the left to its pair on the right`
+
+### monthly-calendar
+- **Slug:** `[monthly-calendar]`
+- **Name:** Monthly planning calendar
+- **What it is:** Blank calendar grid (7 columns × 5-6 rows) with themed header illustrations. Used for weather charting, daily planning, tracking what was covered, practicing days of the week.
+- **Best for:** Calendar skills, weather tracking, daily routine charting, schedule awareness.
+- **Subjects:** Math (calendar, days, dates), science (weather tracking), social-emotional (daily routine)
+- **Ages:** 3-7. Larger cells with picture stickers for younger; writing-size cells for older.
+- **Creation path:** html (precise grid layout; header illustration can be image-direct)
+- **Example activity:** `[monthly-calendar] October calendar with pumpkin header — track daily weather with stickers`
+
+### sorting-worksheet
+- **Slug:** `[sorting-worksheet]`
+- **Name:** Sorting / classification worksheet
+- **What it is:** Labeled zones (2-3 categories) with cut-out images at the bottom. Child cuts images and pastes them into the correct category zone.
+- **Best for:** Classification, categorization, properties of objects (hot/cold, living/nonliving, big/small).
+- **Subjects:** Science (classification), math (sorting by attribute), ELA (word sorting), social studies (community helpers)
+- **Ages:** 3-7. Two categories for younger; three categories for older. Fewer items for younger.
+- **Creation path:** hybrid (HTML zones + generated images for cut-outs) or image-direct for simpler versions
+- **Example activity:** `[sorting-worksheet] Sort items into Hot and Cold — cut and paste into the correct zone`
+
+### number-practice-page
+- **Slug:** `[number-practice-page]`
+- **Name:** Single-number focus page
+- **What it is:** Single-number focus page with 4-5 activities (tracing, ten frame, number word, counting objects). Repeatable template for numbers 1-20.
+- **Best for:** Deep practice on one number at a time — tracing formation, quantity recognition, number word association.
+- **Subjects:** Math (counting, number formation)
+- **Ages:** 3-6. Larger tracing guides and fewer activities for younger; more complex counting and number bonds for older.
+- **Creation path:** html
+- **Example activity:** `[number-practice-page] Number 7 practice page with tracing, ten frame, and counting stars`
+
+### one-page-mini-book
+- **Slug:** `[one-page-mini-book]`
+- **Name:** One-page fold-and-cut mini book
+- **What it is:** Single letter-size page with 8-panel grid that folds into an 8-page mini book. Sentence frame stories where each page changes one variable.
+- **Best for:** Emergent readers practicing sentence frames, vocabulary reinforcement, any subject where repetition with variation builds fluency.
+- **Subjects:** ELA (reading, vocabulary), any subject for review
+- **Ages:** 3-8. Simpler sentence frames and larger text for younger; more complex sentences for older.
+- **Creation path:** html
+- **Example activity:** `[one-page-mini-book] Colors mini book — "I see a ___ ball" with coloring illustrations`
+
+### unit-study-packet
+- **Slug:** `[unit-study-packet]`
+- **Name:** Multi-page unit study packet
+- **What it is:** Multi-page themed bundle (8-12 activity types on one topic). Cover + teacher guide + reference posters + vocabulary + diagrams + coloring + craft + word search. Uses packet recipe.
+- **Best for:** Deep dives into a single topic across multiple activity types — ideal for week-long unit studies.
+- **Subjects:** Science, social studies, any thematic study
+- **Ages:** 4-10. Fewer pages and simpler activities for younger; denser content and more reading for older.
+- **Creation path:** html + hybrid (packet recipe)
+- **Example activity:** `[unit-study-packet] Butterflies unit study with life cycle diagram, anatomy poster, vocabulary cards, and coloring page`
+
+### labeled-anatomy-diagram
+- **Slug:** `[labeled-anatomy-diagram]`
+- **Name:** Labeled anatomy / parts diagram
+- **What it is:** Scientific illustration with numbered leader lines pointing to parts, word bank at bottom. Three scaffolding levels: fully labeled, numbered with word bank, blank for testing.
+- **Best for:** Learning parts of systems — body organs, plant anatomy, animal features, geographic features.
+- **Subjects:** Science, social studies (geography)
+- **Ages:** 5-12. Fewer parts and larger labels for younger; more detailed structures for older.
+- **Creation path:** hybrid
+- **Example activity:** `[labeled-anatomy-diagram] Human heart anatomy with 8 labeled parts and word bank`
+
+### cut-and-assemble-craft
+- **Slug:** `[cut-and-assemble-craft]`
+- **Name:** Cut-and-assemble paper craft
+- **What it is:** Page of labeled cutout pieces that child colors, cuts, and assembles into a 3D model or layered diagram. Includes fold lines, glue tabs, assembly instructions.
+- **Best for:** Hands-on model building — reinforces spatial reasoning and content knowledge simultaneously.
+- **Subjects:** Science (models), art, social studies
+- **Ages:** 4-10. Fewer pieces and simpler assembly for younger; more pieces and complex folding for older.
+- **Creation path:** hybrid
+- **Example activity:** `[cut-and-assemble-craft] 3D volcano model with labeled layers to cut, fold, and glue`
+
+### nature-identification-poster
+- **Slug:** `[nature-identification-poster]`
+- **Name:** Nature identification poster
+- **What it is:** Watercolor grid of 12+ species with labels. Field-guide aesthetic for nature study.
+- **Best for:** Nature study, species recognition, building observational vocabulary for outdoor learning.
+- **Subjects:** Science (biology, ecology, nature study)
+- **Ages:** 4-12. Fewer species and larger images for younger; more species and finer detail for older.
+- **Creation path:** hybrid or image-direct
+- **Example activity:** `[nature-identification-poster] Backyard birds poster with 16 species illustrations and common names`
+
+### classification-sorting-mat
+- **Slug:** `[classification-sorting-mat]`
+- **Name:** Classification sorting mat
+- **What it is:** T-chart or multi-column sorting mat with labeled category zones plus cut-out pieces at bottom. Designed for lamination and reuse.
+- **Best for:** Hands-on sorting and classification — reusable when laminated with velcro dots or magnets.
+- **Subjects:** Science (classification), math (sorting by attribute), ELA (word sorting)
+- **Ages:** 3-7. Two categories and fewer items for younger; three+ categories for older.
+- **Creation path:** html
+- **Example activity:** `[classification-sorting-mat] Living vs Non-Living sorting mat with 12 cut-out pictures`
+
+### 3-part-nomenclature-cards
+- **Slug:** `[3-part-nomenclature-cards]`
+- **Name:** Montessori 3-part nomenclature cards
+- **What it is:** Montessori nomenclature card set: labeled image cards (control), unlabeled image cards, name-only labels. Optional 4th set: definition cards. Self-correcting. Realistic imagery preferred.
+- **Best for:** Vocabulary acquisition through self-correcting matching — core Montessori material adaptable to any subject.
+- **Subjects:** Science, ELA (vocabulary), social studies, any subject
+- **Ages:** 3-8. Fewer cards and simpler vocabulary for younger; more cards and technical terms for older.
+- **Creation path:** hybrid
+- **Example activity:** `[3-part-nomenclature-cards] Ocean animals nomenclature cards with realistic photographs`
+
+### copy-work-pages
+- **Slug:** `[copy-work-pages]`
+- **Name:** Copywork handwriting pages
+- **What it is:** Handwriting practice using curated quotes, poems, or literature passages. Model text at top, practice lines below. Print and cursive versions available.
+- **Best for:** Handwriting fluency, exposure to quality literature, spelling reinforcement through transcription.
+- **Subjects:** ELA (handwriting, literature appreciation)
+- **Ages:** 5-12. Shorter passages and print for younger; longer passages and cursive for older.
+- **Creation path:** html
+- **Example activity:** `[copy-work-pages] Robert Louis Stevenson poem copywork with cursive practice lines`
+
+### guided-notes
+- **Slug:** `[guided-notes]`
+- **Name:** Guided notes page
+- **What it is:** Two-column Cornell-style notes: terms/questions on left, notes/examples on right with fill-in blanks. Summary section at bottom. Standalone (not paired with practice page).
+- **Best for:** Structured note-taking for new concepts — guides attention to key terms while requiring active processing.
+- **Subjects:** Math, science, ELA, social studies
+- **Ages:** 8-14. Simpler terms and fewer blanks for younger; denser notes for older.
+- **Creation path:** html
+- **Example activity:** `[guided-notes] Photosynthesis guided notes with vocabulary column and fill-in-the-blank explanations`
+
+### dot-marker-activity
+- **Slug:** `[dot-marker-activity]`
+- **Name:** Dot marker activity page
+- **What it is:** Large circles (1"+ diameter) arranged to form letters, numbers, or shapes. Child stamps with dot markers/bingo daubers. Extremely low-skill entry point.
+- **Best for:** Letter and number recognition for toddlers — combines fine motor with recognition through a satisfying stamping action.
+- **Subjects:** Math (number recognition), ELA (letter recognition)
+- **Ages:** 2-4. Fewer, larger circles for younger; more circles and complex shapes for older.
+- **Creation path:** html or image-direct
+- **Example activity:** `[dot-marker-activity] Letter B dot marker page with 15 large circles forming the letter shape`
+
+### playdough-mat
+- **Slug:** `[playdough-mat]`
+- **Name:** Playdough mat
+- **What it is:** Large outline shapes/letters designed as surfaces for playdough building. Thick bold outlines, generous sizing, designed for lamination.
+- **Best for:** Tactile letter and number formation — builds fine motor strength while reinforcing recognition.
+- **Subjects:** Math (shapes, numbers), ELA (letters)
+- **Ages:** 2-5. Simpler shapes for younger; letters and numbers for older.
+- **Creation path:** html or image-direct
+- **Example activity:** `[playdough-mat] Numbers 1-4 playdough mat with large outlines and counting dots`
+
+### social-narrative
+- **Slug:** `[social-narrative]`
+- **Name:** Social narrative / social story
+- **What it is:** First-person emotional literacy story: normalize the emotion, describe body signals, state the goal, list coping strategies, end with positive affirmation. Illustration + text per page.
+- **Best for:** Emotional regulation, social skills development, preparing for challenging situations.
+- **Subjects:** Personal & Social Development (emotional regulation, social skills)
+- **Ages:** 3-8. Simpler language and fewer pages for younger; more nuanced strategies for older.
+- **Creation path:** hybrid (packet recipe for multi-page)
+- **Example activity:** `[social-narrative] "When I Feel Frustrated" social story with coping strategies`
+
+### visual-schedule-cards
+- **Slug:** `[visual-schedule-cards]`
+- **Name:** Visual schedule cards
+- **What it is:** Daily routine cards with activity illustrations and labels. Designed for cutting apart, lamination, and sequencing on a board.
+- **Best for:** Building daily routine awareness, executive function, independence in transitions.
+- **Subjects:** Personal & Social Development (daily routine, executive function)
+- **Ages:** 2-7. Fewer cards and simpler routines for younger; more detailed schedules for older.
+- **Creation path:** hybrid
+- **Example activity:** `[visual-schedule-cards] Morning routine cards — wake up, get dressed, eat breakfast, brush teeth`
+
+### cross-number-puzzle
+- **Slug:** `[cross-number-puzzle]`
+- **Name:** Cross-number puzzle
+- **What it is:** Grid-based number puzzle with row + column sum/product constraints (Beast Academy style). Pre-filled cells and blanks. Pure mathematical puzzle, no decoration.
+- **Best for:** Mathematical reasoning and logic — combines operations practice with puzzle-solving satisfaction.
+- **Subjects:** Math (operations, number sense, logic)
+- **Ages:** 7-12. Addition-only and smaller grids for younger; multiplication and larger grids for older.
+- **Creation path:** html
+- **Example activity:** `[cross-number-puzzle] 4x4 addition grid where rows and columns must sum to target numbers`
+
+### checklist-assessment
+- **Slug:** `[checklist-assessment]`
+- **Name:** Parent readiness checklist
+- **What it is:** Parent-facing readiness checklist with section headers by skill domain and three assessment columns (Not Yet / Sometimes / Consistently). Tracks 10-15 observable behaviors. Parent tool, not child-facing.
+- **Best for:** Milestone tracking, readiness assessment, identifying skill gaps before transitions (e.g., kindergarten readiness).
+- **Subjects:** All subjects (academic + social-emotional + motor + executive function)
+- **Ages:** 3-7. Developmental milestones vary by target grade/transition.
+- **Creation path:** html
+- **Example activity:** `[checklist-assessment] Kindergarten readiness checklist covering letters, numbers, motor skills, and social development`
