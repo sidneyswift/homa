@@ -29,6 +29,34 @@ export function shouldGateStage(stageNumber: number): boolean {
   return stageNumber === 1;
 }
 
+/**
+ * How long a stage may hold its in_progress lease before the reaper treats it
+ * as abandoned. A stage's in_progress status IS the runner's lease
+ * (claimNextRunnableJob excludes any job that has one), and the agent-job
+ * channel's turn/session events normally release or park it. But a
+ * hard-killed serverless function (a Vercel timeout or OOM) fires none of
+ * those events, so without a reaper the stage stays in_progress forever and
+ * its job can never be claimed again: silently stuck, never recovered.
+ *
+ * Deliberately set above the longest legitimate stage build (the /eve stream
+ * runs at maxDuration "max"), so a stage still in_progress past the cutoff is
+ * provably dead and the reaper can never race a session that is still
+ * building and about to report. 20 minutes is the conservative start.
+ */
+export const STALE_STAGE_TIMEOUT_MS = 20 * 60 * 1000;
+
+/** The instant before which an in_progress stage's lease is abandoned. Pure
+ * so the timeout decision is testable without a database, the way
+ * shouldGateStage keeps the gate rule pure. The reaper passes this as the
+ * bound of a Postgres `updated_at <` filter, so the comparison itself runs in
+ * the database, exactly like reapStaleTaskRuns' cutoff. */
+export function staleStageLeaseCutoff(
+  now: Date,
+  timeoutMs: number = STALE_STAGE_TIMEOUT_MS,
+): Date {
+  return new Date(now.getTime() - timeoutMs);
+}
+
 export interface ClaimedJob {
   jobId: string;
   familyId: string;
@@ -474,4 +502,81 @@ export async function handleUnreportedStage(
     title: job.title,
     kind: "needs_attention",
   });
+}
+
+/**
+ * The safety net the agent-job channel's turn/session events cannot provide:
+ * when a build's serverless function is hard-killed (timeout, OOM) none of
+ * those events fire, so its stage is left in_progress with nobody to release
+ * the lease, and claimNextRunnableJob then excludes that job forever. This
+ * runs at the top of every runner tick and recovers each stage whose lease
+ * has gone stale by routing it through the SAME handleUnreportedStage path a
+ * clean turn.completed would have taken: retry up to MAX_STAGE_ATTEMPTS, then
+ * park as needs-attention with a milestone. Nothing job-specific is invented
+ * here; the stale sweep just supplies the trigger the lost function never did.
+ *
+ * Fleet-wide, like claimNextRunnableJob and reapStaleTaskRuns: it scans across
+ * families on the server connection, then re-scopes every write by the job
+ * row's own family_id, never model input. The stages-to-jobs join on
+ * (id, family_id) proves each stage's family matches its job's, and the cutoff
+ * filter (see staleStageLeaseCutoff) sits above the longest legitimate build,
+ * so a returned stage is provably dead: there is no live session to race.
+ * Returns the number of stages recovered.
+ */
+export async function reapStaleJobStages(now = new Date()): Promise<number> {
+  const sql = mapDb();
+  const cutoff = staleStageLeaseCutoff(now).toISOString();
+  // Every returned row is already stale (the cutoff filter is in SQL, as in
+  // reapStaleTaskRuns); oldest first so the bounded batch surfaces the stalest
+  // leases, and any beyond the limit are swept on the next tick.
+  const stale = await sql<
+    {
+      job_id: string;
+      family_id: string;
+      stage_number: number;
+      skill: string;
+      child_id: string | null;
+      title: string;
+      plan_revision: number;
+      total_stages: number;
+    }[]
+  >`
+    select s.job_id, s.family_id, s.stage_number,
+           j.skill, j.child_id, j.title, j.plan_revision, j.total_stages
+    from public.agent_job_stages s
+    join public.agent_jobs j
+      on j.id = s.job_id and j.family_id = s.family_id
+    where s.status = 'in_progress'
+      and s.updated_at < ${cutoff}
+    order by s.updated_at asc
+    limit 25
+  `;
+
+  let reaped = 0;
+  for (const row of stale) {
+    const job: ClaimedJob = {
+      jobId: row.job_id,
+      familyId: row.family_id,
+      skill: row.skill,
+      childId: row.child_id,
+      title: row.title,
+      planRevision: row.plan_revision,
+      stageNumber: row.stage_number,
+      totalStages: row.total_stages,
+    };
+    try {
+      await handleUnreportedStage(
+        job,
+        "the build session was lost before it reported this stage (reaped after a stale in_progress lease)",
+      );
+      reaped++;
+    } catch (error) {
+      // One wedged stage must not stop the rest of the batch from recovering.
+      console.error(
+        `agent-job reaper failed to recover job ${row.job_id} stage ${row.stage_number}:`,
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+  }
+  return reaped;
 }

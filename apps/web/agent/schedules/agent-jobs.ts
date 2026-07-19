@@ -5,6 +5,7 @@ import { agentJobsEnabled } from "../../lib/jobs/flag";
 import {
   claimNextRunnableJob,
   finalizeCooperativeCancel,
+  reapStaleJobStages,
   releaseStageClaim,
 } from "../../lib/jobs/runner";
 import { buildStageBrief, loadJobPlan } from "../../lib/jobs/session";
@@ -35,6 +36,13 @@ export default defineSchedule({
     waitUntil(
       (async () => {
         if (!agentJobsEnabled()) return;
+
+        // Recover any stage whose serverless build was hard-killed (timeout,
+        // OOM) before its turn/session events could release the lease. Without
+        // this, the stage stays in_progress and claimNextRunnableJob excludes
+        // its job forever. Runs before the claim loop so a stage released back
+        // to pending here can be re-claimed in this same tick.
+        await reapStaleJobStages();
 
         for (let i = 0; i < MAX_STAGES_PER_TICK; i++) {
           const claim = await claimNextRunnableJob();
