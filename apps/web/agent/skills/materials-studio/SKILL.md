@@ -113,6 +113,31 @@ page.
 - Self-checking formats (mazes, puzzles) replace answer keys for drill. Wrong answers = dead ends = instant feedback without red-pen anxiety.
 - Practice embedded in reference materials: foldables that contain practice problems alongside definitions are more engaging than separate drill sheets.
 
+**Math practice, any age** (field directives, 2026-07-18):
+
+- Every math worksheet ships with an answer key unless the format is
+  self-checking (maze, puzzle, constraint grid). Parents need to check
+  work without redoing the math themselves. Key on a separate page or
+  upside-down at the bottom, never beside the problems.
+- Open response, never bubble grids. No standardized-test answer boxes,
+  no fill-in-the-bubble strips. The child writes the answer.
+- The page itself can be the interactive experience: color-by-answer
+  puzzles, spinner games (paper clip and pencil as the spinner), dot-grid
+  pattern drawing. Pencil-and-paper interactivity needs no purchases and
+  no prep. Offer these alongside manipulative-based activities, not
+  instead of them.
+- End practice pages with one Challenge block: a harder extension that
+  stretches fast finishers and shows the parent where the child actually
+  is. It is a diagnostic disguised as a stretch, so keep it warm, never
+  framed as a test.
+- Cross into ELA when it fits the child: a math-log prompt ("Make up a
+  story where someone starts with 18 shells and ends with 8") turns a
+  subtraction page into storytelling. Use the child's interests for the
+  story seed.
+- After the page is delivered, mention once that a photo of the finished
+  page is welcome: Homa can check the answers and remember what clicked.
+  One gentle offer, never a chore.
+
 **Direct Instruction (DISTAR)** (all ages where DI curriculum is used):
 
 - Scripted lessons. Every word the parent says should be written out if the family follows DI. Materials should include exact teaching scripts with parent text in one style and expected child responses in another.
@@ -403,6 +428,10 @@ addition, patterns, or place value, consider offering one:
 - Print the manipulative itself when it helps: a ten-frame mat, a strip
   of cut-out counters, a 0-20 number line. The html path owns these;
   exact grid geometry is its strength.
+- Printed manipulative sets (pattern blocks, number cards, fraction
+  tiles) are durable goods, not one-shot pages: white background, outline
+  art, clear cut lines, sized for small hands, and a one-line note that
+  laminating (or a sheet protector) makes them last the year.
 - Or write the page's instruction line to use what the house already
   has: beans, coins, cereal, toy cars. Never send her shopping.
 - Mention it once, as an offer, when it genuinely fits ("want a
@@ -929,8 +958,8 @@ one PDF via create_printable's `pages` input.
 
 ## Matching / visual discrimination worksheet recipe
 
-Reference image: `references/homa-pk-activity-treasury-reference.png`
-(from Treasury of Year-Round Preschool Activities — multi-activity PK page)
+(Patterns extracted from Treasury of Year-Round Preschool Activities, a
+multi-activity PK page; no Homa-style reference image shipped yet.)
 
 What it is: two columns of images where the child draws lines to match
 pairs, OR rows of similar images where the child marks the different one.
@@ -939,10 +968,14 @@ Core visual discrimination skill for ages 3-6.
 Design patterns from reference:
 - Two distinct columns with generous spacing between them
 - Dot markers between each image and the center gap (child draws line dot-to-dot)
-- 4-6 pairs maximum — more overwhelms the age group
+- 4-6 pairs maximum: more overwhelms the age group
 - Each image is a simple, recognizable cartoon with thick outlines
 - Shuffled order on right column (never mirror the left ordering)
 - For same/different variant: 3-4 items per row, one obviously different
+- Cut-apart variant, two-piece puzzle cards: each pair prints as one card
+  split by a wavy or zigzag cut line (compound word halves, equation and
+  answer, word and picture). The mismatched cut is the self-check: wrong
+  pairs visibly do not fit. Print on the heaviest stock the family has.
 - Name/Date header at top
 
 Creation paths:
@@ -978,18 +1011,18 @@ Design patterns (all binding for number-practice-page):
 - **Large numeral model**: top-center of the page, oversized
   (`font-size: 96px; font-weight: 700;`) so the child sees the target
   number at a glance.
-- **Section 1 — trace the numeral**: starting dot in green on a 3-line
+- **Section 1 · trace the numeral**: starting dot in green on a 3-line
   guide (top, mid, baseline) matching the handwriting-practice
   baseline. 4-6 repetitions across the row, first dotted, last blank.
-- **Section 2 — ten frame**: 2×5 grid of square cells. Fill exactly N
+- **Section 2 · ten frame**: 2×5 grid of square cells. Fill exactly N
   cells with a colored dot or themed icon; remaining cells empty. Child
   can color or stamp the filled cells.
-- **Section 3 — number word**: the word ("three") in large dotted
+- **Section 3 · number word**: the word ("three") in large dotted
   outline letters for tracing or coloring.
-- **Section 4 — count and color**: exactly N themed objects (stars,
+- **Section 4 · count and color**: exactly N themed objects (stars,
   apples, dinosaurs) in a row with the instruction "Color N [objects]."
   Objects are outline-only for coloring.
-- **Section 5 (optional) — independent writing**: 2-3 blank 3-line
+- **Section 5 (optional) · independent writing**: 2-3 blank 3-line
   guide rows with the prompt "Write the number" and no model.
 - **Name/date header** at top of page.
 
@@ -1023,7 +1056,7 @@ story retelling, vocabulary review. The child colors illustrations and
 reads/traces the text on each page.
 
 Always html path. Panel placement must be surgically precise for correct
-reading order after folding — the image model cannot guarantee this.
+reading order after folding. The image model cannot guarantee this.
 
 Design patterns (all binding for one-page-mini-book):
 
@@ -1037,7 +1070,7 @@ Design patterns (all binding for one-page-mini-book):
   FOLD lines (`border: 1px solid #ccc;`).
 - **Panel content**: cover (panel 1), story pages (panels 2-7), back
   cover (panel 8). Text must be oriented correctly for post-fold
-  reading — some panels print upside-down on the flat sheet.
+  reading: some panels print upside-down on the flat sheet.
 - **Sentence frame mini-books**: each page changes one variable (color,
   number, animal) with a B&W illustration the child colors. Pattern:
   "I see a [color] [animal]." with the variable word as a fill-in or
@@ -1071,6 +1104,13 @@ Design patterns (all binding for unit-study-packet):
   image-direct), child's name field, topic subtitle.
 - **Teacher guide**: parent-facing. Objectives, materials needed,
   suggested schedule, vocabulary list. Plain text, no decoration.
+- **Resource page**: parent-facing list of books, videos, and reference
+  material on the topic, one line each with a note on why. Field
+  directive (2026-07-18): a unit study without a resource page leaves
+  the parent doing the research Homa should have done.
+- **Materials list**: everything the craft and activity pages need,
+  gathered in one place, phrased for what the house already has. Cover
+  every child who will use the packet, not just the oldest.
 - **Consistent theming**: every page uses the same color accent, the
   same illustration style, and the same header format.
 - **Each page is one activity type**: pull from materials-studio's
@@ -1105,10 +1145,10 @@ Design patterns (all binding for labeled-anatomy-diagram):
   horizontal list separated by bullet dots.
 - **Three scaffolding levels** (generate all three as separate pages
   in one packet, or let the parent choose):
-  1. Fully labeled (reference) — lines connect to printed labels.
-  2. Numbered with word bank (guided) — lines connect to numbers,
+  1. Fully labeled (reference): lines connect to printed labels.
+  2. Numbered with word bank (guided): lines connect to numbers,
      word bank below.
-  3. Blank lines only (assessment) — lines end at blank underscores,
+  3. Blank lines only (assessment): lines end at blank underscores,
      no word bank.
 - **Name/date header** at top of page.
 
@@ -1206,7 +1246,7 @@ Design patterns (all binding for classification-sorting-mat):
 Montessori three-part (or four-part) nomenclature card set:
 (1) labeled image cards (control), (2) unlabeled image cards,
 (3) name-only label cards, (4) optional definition cards.
-Self-correcting by design — the child matches parts 2 and 3 against
+Self-correcting by design: the child matches parts 2 and 3 against
 the control card to check their work.
 
 Great for: ages 3-8, Montessori families, vocabulary building, science
@@ -1371,7 +1411,7 @@ Design patterns (all binding for social-narrative):
 - **Page structure**: illustration taking top 50-60% of page, text
   below in large, clear font (`font-size: 22px; line-height: 1.6;`).
 - **6-8 pages total**: use packet recipe for assembly.
-- **First person voice**: "Sometimes I feel..." — the child is the
+- **First person voice**: "Sometimes I feel...": the child is the
   narrator.
 - **Simple sentences**: one idea per page. Maximum 2-3 sentences per
   page.
@@ -1467,7 +1507,7 @@ Design patterns (all binding for checklist-assessment):
   descriptions ("Can count objects to 10 with one-to-one
   correspondence"). Checkbox style: `□` character or styled box.
 - **Three assessment columns**: "Not Yet", "Sometimes",
-  "Consistently" — column headers at top, checkboxes in each row.
+  "Consistently", with column headers at top and checkboxes in each row.
   `display: grid; grid-template-columns: 55% 15% 15% 15%;`
 - **Name/date header**: child's name, assessment date, assessor name.
 - **Footer**: notes field with 4-5 blank lines for free-form
@@ -1476,6 +1516,141 @@ Design patterns (all binding for checklist-assessment):
   designed for quick parent scanning. No dense text blocks.
 - **Repeat-friendly**: include a "Date" column so the same form can
   be printed multiple times across the year for progress comparison.
+
+## Clip cards
+
+A set of cards, each with a target item on top and 3 answer choices along
+the bottom edge. The child clips a clothespin (or drops a coin, or marks
+with a dot marker) on the correct answer. Self-checking when the back of
+the card carries a small dot behind the right choice.
+
+Great for: ages 3-7, counting (count the objects, clip the numeral),
+letter sounds (picture on top, clip the letter), rhymes, shapes, colors,
+Spanish vocabulary. A core fine-motor-plus-recognition format.
+
+Always html path for the card grid; hybrid when the target images need
+illustration. 6-8 cards per letter page, 2 columns.
+
+Design patterns (all binding for clip-cards):
+
+- **Card geometry**: rounded rectangle (`border: 2px solid #221e1a;
+  border-radius: 12px;`), roughly 3.5in wide so a clothespin fits the
+  bottom edge. Answer choices sit in a row flush with the bottom edge
+  with clear space between them for the clip.
+- **One question per card**: the target (image or numeral or word)
+  dominates the top two-thirds.
+- **Three choices, one clearly correct**: distractors are plausible but
+  not tricky at this age. Large type or large icons.
+- **Self-check dots**: a small filled dot printed on the reverse behind
+  the correct answer (a second page, mirrored, with the note "print
+  double-sided to make the cards self-checking").
+- **Cut lines** between cards, lamination note once, per the printed
+  manipulative rules above.
+
+## File-folder game
+
+Two pages designed to be glued inside a manila file folder: the left page
+is a themed board with labeled zones, the right page holds moveable
+pieces the child places on the board (or a second board). Matching money
+to presidents, sorting animals to habitats, mapping numerals to
+quantities. The folder closes and stores on a shelf, so it is a reusable
+learning station, not a consumable worksheet.
+
+Great for: ages 3-8, any matching or sorting skill the family wants to
+revisit; quiet-time independent work; younger siblings inheriting the
+folder later.
+
+Mixed paths: html for the board's zones and labels, hybrid when the
+pieces need illustration. Two letter pages plus one page of cut-out
+pieces, assembled with the packet recipe.
+
+Design patterns (all binding for file-folder-game):
+
+- **Board zones**: large labeled regions (`border: 2px dashed #6b6259;
+  border-radius: 10px;`) sized so a piece fits inside with margin.
+- **Pieces page**: outline-only cut-out tiles with clear cut lines, all
+  the same size, no piece ambiguous about where it belongs at the base
+  level.
+- **Assembly note to the parent**: three short lines (glue pages inside
+  folder, laminate or sheet-protect the pieces, store pieces in a bag
+  stapled inside). Never assume she has made one before.
+- **Title on the folder tab**: one line the parent can copy onto the
+  tab so the shelf stays browsable.
+- **Difficulty by swap**: harder piece sets can join the same board
+  later (numerals now, number words next month). Name the board
+  generically enough to allow it.
+
+## Cloze story
+
+A short story or paragraph with key words blanked out and a word bank to
+choose from. The child reads the context, picks the word that fits, and
+writes it in the blank. The illustrated variant (picture-label cloze)
+puts a scene at the top and sentence frames below that describe it.
+
+Great for: ages 5-10, vocabulary in context, sight words, grammar
+(choosing the verb form that fits), reading comprehension, early writing
+confidence. Reading and writing in one activity without blank-page
+intimidation.
+
+Always html path: blank widths, word-bank layout, and line spacing need
+text precision.
+
+Design patterns (all binding for cloze-story):
+
+- **Word bank first**: bordered box at top (`border: 1.5px solid
+  #6b6259; border-radius: 6px;`), words separated by generous space,
+  each word used exactly once at the base level.
+- **Blanks sized to the answer**: underline blanks
+  (`border-bottom: 2px solid #221e1a;`) wide enough for the longest
+  bank word, so blank width never gives the answer away.
+- **Story about the child's world**: their name, their pets, their
+  interests seed the story. A cloze about their own dog beats a generic
+  one.
+- **6-10 blanks maximum**, one per sentence, never two blanks in one
+  sentence at the base level.
+- **Picture-label variant**: illustrated scene on the top half (hybrid
+  path), 4-6 sentence frames below, each frame describing something
+  visible in the scene so the picture is the context clue.
+- **Level up**: remove the word bank, or add distractor words that fit
+  grammatically but not semantically. Name the level in metadata.
+
+## Reading comprehension mini-unit
+
+A magazine-style multi-page unit: an engaging illustrated passage, an
+explicit skill lesson, a second shorter passage to transfer the skill to,
+and vocabulary work. The spiral structure (read, learn the skill, apply
+it to NEW text, build vocabulary) proves transfer instead of memory.
+
+Great for: ages 6-12, reading comprehension skills (sequence, main idea,
+cause and effect, inference), nonfiction reading stamina, vocabulary
+growth. The strongest format for "she reads fine but does not remember
+what she read."
+
+Mixed paths: hybrid for the passage pages (real photos via search_photos
+for nonfiction topics; the magazine feel comes from imagery), html for
+the skill and vocabulary pages. Assembled with the packet recipe, 4-6
+pages.
+
+Design patterns (all binding for reading-comprehension-mini-unit):
+
+- **Passage page feels like a magazine, not a workbook**: full-width
+  photo or illustration, headline title, body text in comfortable
+  columns (`font-size: 15px; line-height: 1.7;`).
+- **Vocabulary sidebar**: 3-4 key words defined in a tinted box beside
+  the passage, right where the child meets them, not on a separate page.
+  Definitions in child language.
+- **Skill page names the skill**: one line saying what the skill is
+  ("Sequence means the order things happen"), then a graphic organizer
+  to practice it (numbered boxes, flow arrows, a two-column
+  cause/effect table).
+- **Transfer passage**: a second, shorter passage on a related but
+  different topic (butterflies, then ladybugs). The child applies the
+  same skill to text they have not seen. This page is the point of the
+  unit; never skip it.
+- **Vocabulary page last**: the sidebar words return in new sentence
+  contexts (cloze-story rules apply).
+- **Comprehension questions mix recognition and expression**: a few
+  multiple-choice plus one short written response, never all bubbles.
 
 ## Design rules (binding)
 
@@ -1489,6 +1664,10 @@ Design patterns (all binding for checklist-assessment):
   top or the child's name pre-printed, spelled exactly as the family
   spells it.
 - Never red-pen framing, scores, or anything that grades.
+- When a page has room, a small "try this together" box at the bottom
+  offers the parent one playful real-world extension of the skill (count
+  the forks while setting the table). An offer for connection, never
+  homework, never required to finish the page.
 
 ## Page density by age (layout and item counts; the LEVEL comes from evidence, above)
 

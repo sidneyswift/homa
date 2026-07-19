@@ -83,11 +83,11 @@ daily instruction guides, and cross-curricular center cards. These turn your
 week descriptions into something the parent can print and follow.
 
 New format slugs available for weekly orchestration:
-- `[weekly-lesson-planner]` — week-at-a-glance grid showing all subjects across 5 days
-- `[daily-instruction-guide]` — step-by-step teaching guide for one day
-- `[center-activity-card]` — cross-curricular center card themed to the week's anchor
-- `[story-assessment]` — three-part end-of-selection test (vocab + comprehension + writing)
-- `[school-home-connection]` — embeddable callout box with parent bonding activity
+- `[weekly-lesson-planner]`: week-at-a-glance grid showing all subjects across 5 days
+- `[daily-instruction-guide]`: step-by-step teaching guide for one day
+- `[center-activity-card]`: cross-curricular center card themed to the week's anchor
+- `[story-assessment]`: three-part end-of-selection test (vocab + comprehension + writing)
+- `[school-home-connection]`: embeddable callout box with parent bonding activity
 
 ## Balanced Literacy / Story-as-Hub methodology
 
@@ -173,7 +173,7 @@ Mastery, or says "we use Direct Instruction":
 - 20-minute daily lessons. Short, focused, and consistent beats long and variable.
 - No decorative art on materials. Clean, minimal, high-contrast. Text and practice only.
 - Modified orthography is acceptable for early lessons (macrons over long vowels,
-  joined letters for digraphs) — these fade as the child progresses.
+  joined letters for digraphs). These fade as the child progresses.
 - Format preferences: `[handwriting-practice]`, `[flash-cards]`, `[themed-worksheet]`
   with scripted instructions. Avoid `[coloring-page]` and `[foldable]` (too unstructured).
 
@@ -265,7 +265,7 @@ or "classical conversations":
 - Rhetoric stage (9-12): original expression and persuasion. Essay scaffolds, debate
   prep, research projects.
 - Integrated subjects through literature: the reading selection drives spelling, grammar,
-  vocabulary, and writing — similar to balanced literacy but with classical literature
+  vocabulary, and writing, similar to balanced literacy but with classical literature
   selections and a moral/character education emphasis.
 - Art and poetry appreciation woven into language arts, not separate subjects.
 - Nature study (Charlotte Mason influence) in many classical curricula.
