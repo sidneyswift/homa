@@ -461,6 +461,16 @@ h1, h2, h3, h4, h5, h6 {
   .lp-pain-grid {
     grid-template-columns: 1fr 1fr !important;
   }
+  /* Founder story card stacks with the photo first: meet the humans, then
+     read their words. The photo narrows so it reads as a portrait, not a
+     banner. */
+  .lp-story-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lp-story-grid .lp-story-photo {
+    order: -1;
+    max-width: 240px;
+  }
   .lp-capability-grid {
     grid-template-columns: 1fr !important;
   }
