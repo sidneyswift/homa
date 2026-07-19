@@ -875,30 +875,41 @@ export async function createReport(familyId: string, childId: string): Promise<S
   };
 }
 
-export async function markReportEmailed(familyId: string, childId: string): Promise<void> {
+/**
+ * Atomically claims the one-time report email for this child: true for
+ * exactly one caller, false for everyone else and for every rescore after
+ * it. The claim IS the emailed_at write, taken before the send. The old
+ * read-then-send check let two concurrent scorings of the same child both
+ * pass it and email the family twice (seen live 2026-07-18: three doubled
+ * report emails across two families).
+ */
+export async function claimReportEmail(familyId: string, childId: string): Promise<boolean> {
   const sql = mapDb();
-  await sql`
-    update public.child_reports
+  const rows = await sql<{ child_id: string }[]>`
+    update public.child_reports r
     set emailed_at = now()
-    where child_id = ${childId}
-      and exists (
-        select 1 from public.children c
-        where c.id = ${childId} and c.family_id = ${familyId}
-      )
+    from public.children c
+    where r.child_id = ${childId}
+      and c.id = r.child_id
+      and c.family_id = ${familyId}
+      and r.emailed_at is null
+    returning r.child_id
   `;
+  return rows.length > 0;
 }
 
-/** True when this child's report has already gone out by email (rescores
- * after a deep dive must not re-send it). */
-export async function reportAlreadyEmailed(familyId: string, childId: string): Promise<boolean> {
+/** Returns a claim whose email never went out, so the next scoring can
+ * retry the send (the retry behavior mark-after-success used to give). */
+export async function releaseReportEmailClaim(familyId: string, childId: string): Promise<void> {
   const sql = mapDb();
-  const rows = await sql<{ emailed: boolean }[]>`
-    select emailed_at is not null as emailed
-    from public.child_reports r
-    join public.children c on c.id = r.child_id
-    where r.child_id = ${childId} and c.family_id = ${familyId}
+  await sql`
+    update public.child_reports r
+    set emailed_at = null
+    from public.children c
+    where r.child_id = ${childId}
+      and c.id = r.child_id
+      and c.family_id = ${familyId}
   `;
-  return rows[0]?.emailed ?? false;
 }
 
 const RETEST_DAYS = 28;
