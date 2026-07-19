@@ -375,6 +375,47 @@ export async function listRecentFleetMaterials(limit: number): Promise<FleetMate
   }));
 }
 
+export interface StudioOutputStats {
+  totalMaterials: number;
+  familiesReached: number;
+  last7Days: number;
+  last30Days: number;
+  /** Of the last 30 days' materials, how many passed the vision
+   * quality check (pass !== "false", same rule as the ledger rows). */
+  last30DaysPassed: number;
+}
+
+/** The funnel's third stage in numbers: what the skill has shipped to
+ * families, all time and lately. One query, db.ts laws apply. */
+export async function getStudioOutputStats(): Promise<StudioOutputStats> {
+  const sql = adminDb();
+  const rows = await sql<
+    {
+      total_materials: number;
+      families_reached: number;
+      last7: number;
+      last30: number;
+      last30_passed: number;
+    }[]
+  >`
+    select count(*)::int as total_materials,
+           count(distinct m.family_id)::int as families_reached,
+           count(*) filter (where m.created_at > now() - interval '7 days')::int as last7,
+           count(*) filter (where m.created_at > now() - interval '30 days')::int as last30,
+           count(*) filter (where m.created_at > now() - interval '30 days'
+             and coalesce(m.generation->'review'->>'pass', 'true') <> 'false')::int as last30_passed
+    from public.materials m
+  `;
+  const row = rows[0];
+  return {
+    totalMaterials: row?.total_materials ?? 0,
+    familiesReached: row?.families_reached ?? 0,
+    last7Days: row?.last7 ?? 0,
+    last30Days: row?.last30 ?? 0,
+    last30DaysPassed: row?.last30_passed ?? 0,
+  };
+}
+
 export interface SkillPackageView {
   /** The frontmatter description, the skill's routing contract. */
   description: string;

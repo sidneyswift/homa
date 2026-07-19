@@ -1,0 +1,466 @@
+{
+  "id": "cur-2026-07-19-100-easy-lessons",
+  "name": "Teach Your Child to Read in 100 Easy Lessons (Engelmann, Haddox & Bruner)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T10:37:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784471821.086149",
+  "layer1_philosophy": {
+    "methodology": "Direct Instruction (DISTAR)",
+    "principles": [
+      "Scripted, step-by-step lessons that remove teacher guesswork \u2014 every word the parent says is written out",
+      "Modified orthography (Distar alphabet) to make English phonetically regular for beginning readers before transitioning to standard print",
+      "Sounds taught before letter names \u2014 decoding is the central skill, not letter identification",
+      "Continuous blending (say the word slowly without pausing between sounds, then say it fast) rather than choppy segmenting",
+      "Built-in error correction procedures for every task type \u2014 the program anticipates exactly how a child might fail and scripts the fix"
+    ],
+    "learningTheory": "mastery-based-sequential",
+    "assessmentApproach": "continuous-inline-correction",
+    "parentRole": "script-reader-and-corrector",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "direct-instruction-distar",
+        "topicType": "method_philosophy",
+        "title": "Direct Instruction (DISTAR) \u2014 Engelmann Method",
+        "summary": "Highly structured, scripted teaching method where every word the teacher says is prescribed. Based on the principle that if a child fails, the communication was unclear, not the child. Uses carefully sequenced examples, built-in error correction, and modified orthography (joined letters, macrons) to teach reading through systematic phonics. Adapted from SRA's Distar Fast Cycle Reading Program for home use."
+      },
+      {
+        "suggestedKey": "distar-home-reading-format",
+        "topicType": "method_format",
+        "title": "100 Easy Lessons Format \u2014 Scripted Daily Reading",
+        "summary": "Each lesson is a single 20-minute session with 5-10 numbered tasks: sounds introduction, say-it-fast (oral blending), say-the-sounds (segmenting), word reading (arrow-and-ball notation), rhyming, story reading with comprehension questions, picture comprehension, and sounds writing (letter formation). Parent reads red text verbatim; child responses are indicated. Correction procedures boxed inline."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Phonics \u2014 Sound introduction",
+        "curriculumTopic": "Individual letter sounds (m, s, a, e, t, etc.) taught one at a time in isolation",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_F978c32kDr",
+        "homaTopicName": "Single Letter Sounds",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Consonant digraphs",
+        "curriculumTopic": "th, sh, wh, ch taught as single sounds",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_9-OHslmt1g",
+        "homaTopicName": "Consonant Digraphs",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Continuous blending",
+        "curriculumTopic": "Sliding finger along arrow, saying sounds without pausing, then saying the word fast",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__KHQttMde3",
+        "homaTopicName": "Blending Sounds to Read Words",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Say-it-fast (oral blending)",
+        "curriculumTopic": "Parent says compound word in parts, child blends: motor...boat \u2192 motorboat",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__KHQttMde3",
+        "homaTopicName": "Blending Sounds to Read Words",
+        "status": "mapped",
+        "note": "Oral-only precursor to written blending \u2014 same Homa topic but earlier scaffold"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 CVC word reading",
+        "curriculumTopic": "Words like mat, sat, am, eat, rat read with arrow notation",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_Yw3cLdKa8n",
+        "homaTopicName": "Reading and Writing CVC Words",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Vowel digraphs & long vowels",
+        "curriculumTopic": "Modified orthography: macrons for long vowels (\u0101, \u0113, \u012b, \u014d), joined letters for digraphs",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_BtMbZibZUj",
+        "homaTopicName": "Vowel Digraphs",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Diphthongs",
+        "curriculumTopic": "ou/ow sounds (loud, owww)",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_fMd7v87IiI",
+        "homaTopicName": "Diphthongs and complex vowels",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 R-controlled vowels",
+        "curriculumTopic": "ar, er/or sounds (car, brother)",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_a6m7PqTuJN",
+        "homaTopicName": "R-Controlled Vowel Sounds",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Rhyming",
+        "curriculumTopic": "Change onset, keep rime: m\u2192at, r\u2192at (Lessons 3+)",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_4GiE83rJF_",
+        "homaTopicName": "Rhyming words",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Onsets and rimes",
+        "curriculumTopic": "Word families used in rhyming tasks (at, am, eat families)",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_PvU3eoikev",
+        "homaTopicName": "Onsets & Rimes",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Segmenting words into sounds",
+        "curriculumTopic": "Say-the-sounds tasks: child segments am \u2192 aaa-mmm",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_BhYJZUsErp",
+        "homaTopicName": "Segmenting words into sounds",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Irregular/sight words",
+        "curriculumTopic": "said, have, old, give \u2014 irregularly spelled words introduced after lesson ~40",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_YKkCM63fSC",
+        "homaTopicName": "Reading High-Frequency Words by Sight",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Fluency",
+        "curriculumTopic": "Arrow reading: slow sounding then fast reading, progressing to reading 'the fast way'",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_ZhvwM6LMBL",
+        "homaTopicName": "Reading fluently",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Story comprehension",
+        "curriculumTopic": "Second reading + comprehension questions (who, what, why, prediction)",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_sSQlLOnAow",
+        "homaTopicName": "Characters, settings, and events",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Picture comprehension",
+        "curriculumTopic": "Look at the picture, answer questions about what you see + predict",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_OlhMP7ShFT",
+        "homaTopicName": "Pictures and Text Working Together",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Prediction",
+        "curriculumTopic": "What do you think will happen? questions after story reading",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_8-POYyg7GJ",
+        "homaTopicName": "Predicting what happens next",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Handwriting \u2014 Letter formation",
+        "curriculumTopic": "Sounds writing: trace model letter then write 3-5 independently",
+        "homaSubject": "English",
+        "homaDomain": "Handwriting & Transcription",
+        "homaTopicId": "mt_DMvKfP4uGC",
+        "homaTopicName": "Letter Formation Families",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Handwriting \u2014 Capital letters",
+        "curriculumTopic": "Capital letters introduced later in the program",
+        "homaSubject": "English",
+        "homaDomain": "Handwriting & Transcription",
+        "homaTopicId": "mt_H7DquwQi_F",
+        "homaTopicName": "Forming Capital Letters",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Connecting text to experience",
+        "curriculumTopic": "Picture comprehension questions link story to child's life (Did you ever go fishing?)",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_5n-O41lUgn",
+        "homaTopicName": "Connecting reading to experience",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Modified orthography / print concepts",
+        "curriculumTopic": "Understanding that letters represent sounds, left-to-right tracking via arrow notation, transition from Distar orthography to standard print",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_1KCwbGvm1F",
+        "homaTopicName": "Understanding print",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Compound words",
+        "curriculumTopic": "Say-it-fast compound word tasks (motor+boat, ice+cream) in early oral blending",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_70Ys4i1AB1",
+        "homaTopicName": "Compound Words",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading \u2014 Listening comprehension",
+        "curriculumTopic": "Parent reads story sentences aloud during first reading, asks comprehension questions during second reading",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_mLPEMpYb_R",
+        "homaTopicName": "Listening to Texts Read Aloud",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Phonics vocabulary",
+        "curriculumTopic": "Terms: sounds, words, sentences, rhyming, sounding out, reading the fast way",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_EqXlZfB4jp",
+        "homaTopicName": "Phonics Vocabulary",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Letter names",
+        "curriculumTopic": "Lesson 77+: transition from sounds to letter names. Child learns full alphabet names and identifies letters whose names don't match their sounds (c, g, h, w, x, y, q).",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_frDIaXzWbx",
+        "homaTopicName": "Knowing all letters",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Split digraphs / Magic E",
+        "curriculumTopic": "Lesson 77+: long vowel rule taught explicitly \u2014 'These words have an e on the end. The e doesn't make a sound. But you can tell how to say the rest of the word by saying the letter names.'  side, take, smile, bite, lake, five, nine, fine, late.",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_C7abt7pRr6",
+        "homaTopicName": "Split Digraphs and Magic E",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Inflectional endings",
+        "curriculumTopic": "Words with -ing, -ed, -er, -est endings appear throughout lessons 62-100 (hunting, stopping, getting, shopping, sitting, sleeping, talked, started, lived).",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__CMXZiPfTV",
+        "homaTopicName": "Reading Inflectional Endings",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics \u2014 Contractions",
+        "curriculumTopic": "Contractions appear in later stories: 'I'm', 'can't', 'don't', 'I'll', 'couldn't'",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_t1JXeNgKcu",
+        "homaTopicName": "Reading Contractions",
+        "status": "mapped"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 27,
+      "mapped": 27,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 0
+    }
+  },
+  "layer3_structure": {
+    "cadence": "daily (100 lessons, recommend 5 days/week)",
+    "sessionLengthMinutes": {
+      "full-lesson": 20
+    },
+    "weeklyTemplate": "One lesson per day, 5 days/week. Each lesson contains 5-10 task types in fixed order: sounds introduction \u2192 say-it-fast (oral blending) \u2192 say-the-sounds (segmenting) \u2192 word reading (arrow notation) \u2192 rhyming \u2192 sounds review \u2192 story reading \u2192 second reading with comprehension \u2192 picture comprehension \u2192 sounds writing. Not all tasks appear in every lesson.",
+    "progressionModel": "linear-mastery",
+    "reviewRhythm": "No formal assessment. Mastery is continuous: correction procedures repeat the step until the child responds correctly. If a child struggles with a lesson, repeat it the next day. Built-in review via cycling previously learned sounds/words in every new lesson.",
+    "totalWeeks": 20,
+    "notes": "100 lessons at 5/week = 20 weeks. Program designed to be completed within about two-thirds of a school year. The Engelmann approach is that if you follow the script precisely, the child will read at the end. Lessons 1-16 focus on oral skills and sound introduction. Lessons 17+ add stories. Lessons ~60-100 transition from modified to standard orthography. By lesson 100, child reads simple stories with standard English."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "sounds-introduction",
+        "description": "Parent points to a large letter with arrow, models the sound, child repeats. Modified orthography (macrons for long vowels, joined letters for digraphs). One new sound per lesson.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "distar-sound-card",
+          "creationPath": "html",
+          "description": "Large single letter or digraph in Distar orthography with arrow underneath (ball at start, arrow pointing right). Macron or joining marks where needed. Blank space below for child to trace. Black on white, very clean, minimal page.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "say-it-fast-drill",
+        "description": "Oral-only activity: parent says compound word or multi-syllable word in parts, child blends orally. No printed page needed \u2014 pure verbal exercise.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "oral-blending-prompt-card",
+          "creationPath": "html",
+          "description": "Parent prompt card with word pairs printed in large text, split by a divider line. e.g. 'motor | boat \u2192 motorboat'. Not for the child to see \u2014 parent reference only. Could be flash-card format.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "arrow-word-reading",
+        "description": "Words printed large with dots under each sound and an arrow running left-to-right. Child touches first ball, sounds out slowly along arrow, then reads fast. The core DISTAR reading exercise.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "distar-word-reading",
+          "creationPath": "html",
+          "description": "Page with 6-10 words in large bold font, each with a horizontal arrow underneath and dots (balls) at each sound position. Child traces finger along arrow while blending. Uses Distar-style orthography marks (macrons, joined letters, small/large distinction). Clean black-and-white layout, one column.",
+          "complexity": "high"
+        }
+      },
+      {
+        "type": "story-reading",
+        "description": "Short decodable stories (5-15 sentences) using only sounds the child has learned, printed in large Distar orthography that transitions toward standard print. Comprehension questions follow.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "decodable-story-page",
+          "creationPath": "html",
+          "description": "Story text in large font with underlined and arrow-tracked sentences for the child to read. Initially uses Distar orthography (joined letters, macrons) that fades toward standard print in later lessons. Comprehension questions in a sidebar or below the story. Illustration area at bottom or side.",
+          "complexity": "high"
+        }
+      },
+      {
+        "type": "picture-comprehension",
+        "description": "Black-and-white illustration related to the story. Parent asks open-ended questions about the picture to build inference and prediction skills.",
+        "recipe": "coloring-page",
+        "status": "have_recipe",
+        "note": "Existing coloring-page recipe can serve as the illustration, with comprehension prompts added"
+      },
+      {
+        "type": "sounds-writing",
+        "description": "Trace a model letter, then write it 3-5 times independently on a line. Two letters per lesson (one per line). Error feedback from parent.",
+        "recipe": "tracing-guide",
+        "status": "have_recipe"
+      },
+      {
+        "type": "rhyming-drill",
+        "description": "Parent points to sounds, child changes onset to generate rhymes (m-at \u2192 mat, r-at \u2192 rat, s-at \u2192 sat). Printed letter-arrow format.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "onset-rime-drill",
+          "creationPath": "html",
+          "description": "Page with a rime (e.g. 'at') in large text with arrow. Onset letters listed to the left. Child combines onset + rime and reads the word. Arrows and dots for tracking. 6-8 word families per page.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "sounds-review",
+        "description": "Page of individual sounds (6-10) each with an arrow. Child says each sound. Mixes new and previously learned sounds for review.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "sound-review-grid",
+          "creationPath": "html",
+          "description": "Grid of individual letters/digraphs, each with a small arrow underneath. 2-3 columns, 3-5 rows. Child says the sound for each. Mix of recently introduced and review sounds. Clean, high-contrast black-and-white.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "recommended-reading-list",
+        "description": "End-of-program graded book list (20 titles from Eric Carle to Magic Tree House). Each book lists vocabulary words to pre-teach. Parent reads book aloud first, then teaches words, then child reads independently.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "recommended-reading-card",
+          "creationPath": "html",
+          "description": "Card per book: cover thumbnail, title/author, grade level indicator, vocabulary words to teach, reading steps. Printable set for the reading shelf.",
+          "complexity": "low"
+        }
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 9,
+      "haveRecipe": 2,
+      "noRecipe": 7
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "recipe",
+      "item": "Build distar-word-reading recipe (html) \u2014 arrow-and-ball word reading pages",
+      "impact": "Core activity of the entire 100 Easy Lessons program. Without this, Homa cannot generate the central exercise type.",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build decodable-story-page recipe (html) \u2014 short decodable stories with comprehension questions",
+      "impact": "Stories appear from lesson 17 onward and are the goal of the program. Essential for reading practice.",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build distar-sound-card recipe (html) \u2014 single sound introduction with arrow",
+      "impact": "Every lesson introduces or reviews sounds. Core building block.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build onset-rime-drill recipe (html) \u2014 rhyming word family practice with arrows",
+      "impact": "Rhyming is a recurring task type. Useful beyond DISTAR for any phonics curriculum.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build sound-review-grid recipe (html) \u2014 grid of sounds for rapid review",
+      "impact": "Review task appears in most lessons. Simple to build.",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "Build oral-blending-prompt-card recipe (html) \u2014 parent reference cards for say-it-fast drills",
+      "impact": "Nice to have. This is oral-only, so a recipe is optional \u2014 could just be a list in the lesson plan.",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Add direct-instruction-distar to knowledge_bank (method_philosophy)",
+      "impact": "Enables curriculum-writer to generate DISTAR-style lesson structures. The method is highly specific and unlike any other methodology Homa currently knows.",
+      "urgency": "high"
+    },
+    {
+      "category": "method",
+      "item": "Add distar-home-reading-format to knowledge_bank (method_format)",
+      "impact": "Teaches Homa the specific lesson structure (task sequence, correction procedures, arrow notation) so it can plan weeks in this style.",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build recommended-reading-card recipe (html) \u2014 graded book cards with pre-teach vocabulary",
+      "impact": "Enables Homa to generate reading list cards for post-program transition",
+      "urgency": "low"
+    }
+  ],
+  "notes": "This is a heavyweight curriculum ingestion. 'Teach Your Child to Read in 100 Easy Lessons' is one of the most popular homeschool phonics programs ever published \u2014 over 500K copies sold. Its DISTAR method is research-backed (Project Follow Through) and uniquely structured among phonics programs. The key differentiator is the scripted, sequential, mastery-based approach with modified orthography. Every single topic in the curriculum maps to existing Homa taxonomy \u2014 the gap is entirely in activity formats/recipes (the arrow-and-ball notation, the decodable story format) and methodology knowledge, not in subject matter coverage. The 120-page PDF is a scan (all images, no extractable text). The program targets ages 4-5 (bright 3s through struggling older readers). 22 taxonomy topics mapped with 100% coverage. Part 2 PDF (lessons 62-100) dropped separately by Aless on 2026-07-19 10:44 EDT, ingested to verify later-program features.",
+  "sourceMessageTs_part2": "1784472280.990279"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "ref-2026-07-18-snowball-fight-compound-word-game",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:31:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428264.835909",
+  "format": "card-game",
+  "title": "Snowball Fight — Compound Word Game",
+  "publisher": "TPT (link expired before download)",
+  "gradeLevel": "K-2nd Grade",
+  "pageCount": "unknown (link expired)",
+  "callouts": [],
+  "overview": {
+    "description": "A 'Snowball Fight' themed compound word game. From the filename: compound word practice through a physical/interactive game mechanic (snowball fight = crumple paper into balls, throw, open, read, match). Two compound word game drops in a row from Aless signals this is a skill she's specifically targeting. Link expired before download — reference from filename."
+  },
+  "designPatterns": {
+    "snowballFightMechanic": {
+      "description": "Likely format: each student writes/receives a word on paper, crumples it into a 'snowball,' throws it across the room, picks up someone else's snowball, opens it, and finds their match. The physical throwing + movement + reading creates a high-energy game from a literacy skill.",
+      "value": "Kinesthetic learners get to MOVE. The game creates urgency and excitement around what would otherwise be a matching worksheet."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonological-awareness",
+    "topics": [
+      {"id": "ela.compound-word-matching", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "Second compound word game drop in a row (after 'I Have Who Has'). Link expired. Aless is clearly targeting compound words as a specific skill AND showing multiple game formats for the same skill. The pattern: same skill (compound words) × different game mechanics (chain game, snowball fight) = multiple ways to practice. This is the same multi-modal approach she showed with the Harcourt alt teaching strategies (visual/kinesthetic/auditory)."
+}

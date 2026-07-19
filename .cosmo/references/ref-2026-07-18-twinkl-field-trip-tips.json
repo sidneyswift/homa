@@ -1,0 +1,47 @@
+{
+  "id": "ref-2026-07-18-twinkl-field-trip-tips",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:11:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427118.075609",
+  "format": "parent-guide-infographic",
+  "title": "Field Trip Tips — FIELD TRIP Acrostic Guide for Homeschool Families",
+  "publisher": "Twinkl",
+  "series": null,
+  "gradeLevel": "all ages (parent-facing)",
+  "pageCount": 1,
+  "callouts": [],
+  "overview": {
+    "description": "A single-page parent reference using the FIELD TRIP acrostic to provide 8 tips for successful homeschool field trips. Concise, actionable advice covering planning, child involvement, sensory awareness, pacing, and reflection."
+  },
+  "tips": {
+    "F": {"title": "Find a Fun Place", "key": "Wide variety of adventures — overnight trips and simple outings both count. Plan WITH your child."},
+    "I": {"title": "Ignite Curiosity", "key": "Use children's passions as the starting point. Push comfort zones sometimes, but also indulge curiosity."},
+    "E": {"title": "Engage Your Children", "key": "Children help with planning, packing, preparing, and reflection. Virtually visit the location beforehand. Let them lead during exploration."},
+    "L": {"title": "Listen to Cues", "key": "Foreshadow what to expect. Watch for signs they need a break. Leave BEFORE you think they're ready — end on a win."},
+    "D": {"title": "Dare to Adventure", "key": "Try new things. Go places you haven't been. Let the child lead. Plan for safety but push boundaries."},
+    "T": {"title": "Take Your Time, Watch Your Time", "key": "Don't over-plan. Slowing down is a luxury. Places can be revisited. Plan for the child's peak energy time. Watch the clock AND the child."},
+    "I2": {"title": "Identify Wins and Revisit", "key": "Track what went well. Keep a list of what you used/didn't. Reflect on success and adjustment areas. Learn from each trip for the next one."},
+    "P": {"title": "Pack for Success", "key": "Pack for unexpected and expected. Snacks, extra clothes, calming activities. Age-appropriate backpacks build responsibility."}
+  },
+  "designPatterns": {
+    "acrosticFramework": {
+      "description": "The 8 tips spell FIELD TRIP. Mnemonic structure makes the advice memorable and shareable.",
+      "value": "Parents remember 'FIELD TRIP' and can recall the tips. Simple, sticky framework."
+    },
+    "endOnAWin": {
+      "description": "The 'Listen to Cues' tip explicitly says: 'Try to leave before you think they are ready and end the trip successfully.' Counter-intuitive but critical — a trip that ends with a meltdown is remembered as a bad trip, even if 90% was great.",
+      "value": "This is a parenting wisdom nugget, not just logistics advice. Homa could surface this kind of practical wisdom in field trip suggestions."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "field-trip-planning-guide",
+        "description": "A parent-facing field trip companion: pre-trip checklist (what to bring, virtual preview links), during-trip observation prompts for the child, and post-trip reflection page. Tied to the week's learning theme. Could be generated alongside weekly plans."
+      }
+    ]
+  },
+  "notes": "Ninth Aless drop. This is a lightweight single-page reference — the simplest drop from either user. But it fills a gap: field trips are a column in the Peaceful Press co-op guide, and Carolyng's Harcourt system doesn't cover them at all. Aless is saying field trips are part of the curriculum, and parents need guidance on HOW to do them well. The 'end on a win' insight is particularly valuable — it's the kind of practical wisdom that distinguishes experienced homeschoolers."
+}

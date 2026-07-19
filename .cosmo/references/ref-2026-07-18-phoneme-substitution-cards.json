@@ -1,0 +1,52 @@
+{
+  "id": "ref-2026-07-18-phoneme-substitution-cards",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:29:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428149.123199",
+  "format": "phonemic-awareness-center",
+  "title": "Phoneme Substitution Cards — Phonemic Awareness Center (281 pages)",
+  "publisher": "My Teaching Pal (TPT)",
+  "gradeLevel": "K-2nd Grade",
+  "pageCount": 281,
+  "callouts": [],
+  "overview": {
+    "description": "A 281-page phoneme substitution card set organized by phonics pattern (CVC, FLSZ, -ck, blends, digraphs, etc.). Each card shows: source word with image → arrow → target image with dashed writing line. The child identifies which sound changed and writes the new word using magnetic letters, letter tiles, or dry-erase marker. Three positions: initial sound substitution (lock→sock), medial (dock→duck), and final (log→?). Designed as a laminate-and-reuse center activity.",
+    "positions": ["Initial (beginning sound)", "Medial (middle sound)", "Final (ending sound)"],
+    "phonicsPatterns": ["CVC", "FLSZ", "-ck", "blends", "digraphs"],
+    "progressionNote": "Initial sounds are easiest. Introduce medial and final sounds as students become ready."
+  },
+  "designPatterns": {
+    "sourceTargetArrow": {
+      "description": "Each card: known word (image + text) → arrow → new word (image + dashed writing line). The child sees the source word, hears the target sound, and writes/builds the new word. The arrow makes the transformation explicit.",
+      "value": "Phoneme manipulation is the highest-level phonological awareness skill. This card format makes the abstract operation (sound substitution) concrete and visual."
+    },
+    "manipulativeIntegration": {
+      "description": "Cards designed for use with magnetic letters or letter tiles placed ON the card, or dry-erase marker on laminated card. Physical letter manipulation alongside the visual prompt.",
+      "value": "Multi-sensory: see the image + hear the sound + touch/move the letters + write the word. Four channels for one skill."
+    },
+    "positionLabeling": {
+      "description": "Each card is labeled with position: Initial, Medial, or Final. Cards organized by which position changes. Teacher picks the position appropriate to the student's level.",
+      "value": "Built-in differentiation by phonological complexity."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonological-awareness",
+    "topics": [
+      {"id": "ela.phoneme-substitution-initial", "kind": "procedural", "mapped": false},
+      {"id": "ela.phoneme-substitution-medial", "kind": "procedural", "mapped": false},
+      {"id": "ela.phoneme-substitution-final", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "phoneme-substitution-card",
+        "description": "A card showing source word (image + text) → arrow → target word (image + writing line). Child identifies the changed sound and writes/builds the new word. Labeled by position (initial/medial/final). Organized by phonics pattern. Designed for lamination + magnetic letters or dry-erase. Generatable for any CVC word family."
+      }
+    ]
+  },
+  "notes": "The largest ELA-specific drop from Aless (281 pages). Phoneme substitution is the most advanced phonological awareness skill — harder than rhyming, harder than blending, harder than segmenting. This signals that Aless is thinking about the FULL phonological awareness progression, not just letter recognition. Combined with the rhyming clip cards and the I Spy letter page, she's covering: letter identification → rhyming → phoneme substitution. That's the developmental sequence for reading readiness."
+}

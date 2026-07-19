@@ -1,0 +1,83 @@
+{
+  "id": "ref-2026-07-18-magna-tiles-numbers",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:15:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427359.081689",
+  "format": "printable-activity-cards",
+  "title": "MAGNA-TILES Numbers (0-9) \u2014 Build, Trace & Write Activity",
+  "publisher": "MAGNA-TILES / Mega Brands",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "overview": {
+    "description": "23-page printable number activity set (0-9). Each number gets a dedicated page with a large numeral outline designed for building with MAGNA-TILES or microMAGs directly on the page. Children build the number shape with tiles, then trace and write the numeral and number word. Combines manipulative play with handwriting practice. Multi-sensory approach: tactile (building), visual (seeing the shape), and motor (tracing/writing)."
+  },
+  "layout": {
+    "structure": "single-focus",
+    "spacing": "airy",
+    "visualHierarchy": "numeral-dominant",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "center-out"
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "counting-cardinality",
+    "topics": [
+      {
+        "id": "math.number-recognition-0-9",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "math.number-writing-0-9",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": [
+      "fine-motor.number-formation"
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      36,
+      72
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "branded-manipulative",
+    "characters": [],
+    "visualStyle": "clean-geometric",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "hands-on building",
+      "multi-sensory",
+      "familiar toy brand"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "manipulative-building-mat",
+        "description": "Large numeral/letter/shape outlines designed for children to build on top of with physical manipulatives (tiles, blocks, Legos). Needs enough scale for real objects. Different from tracing \u2014 this is 3D building."
+      }
+    ]
+  },
+  "designPatterns": {
+    "multiSensory": {
+      "description": "Build (tactile) \u2192 Trace (visual-motor) \u2192 Write (fine motor). Three modalities for the same concept.",
+      "value": "Multi-sensory number learning anchors recognition through multiple pathways."
+    }
+  },
+  "notes": "Interesting bridge between physical manipulatives and worksheets. Aless's interest suggests she values activities that connect hands-on play to academic skills."
+}

@@ -1,0 +1,67 @@
+{
+  "id": "cur-2026-07-18-write-on-track",
+  "name": "Write on Track \u2014 Writing & Language Arts Textbook/Handbook",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T23:48:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784434496.600839",
+  "layer1_philosophy": {
+    "methodology": "Process Writing / Writing Workshop",
+    "principles": [
+      "Writing as a learnable process (prewriting \u2192 drafting \u2192 revising \u2192 editing \u2192 publishing)",
+      "Genre-based writing instruction",
+      "Writer's toolkit approach (reference handbook for students)",
+      "Grammar and mechanics taught in context of writing"
+    ],
+    "learningTheory": "process-based",
+    "assessmentApproach": "portfolio",
+    "parentRole": "teacher-coach",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": []
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Writing",
+        "curriculumTopic": "Writing Process",
+        "homaSubject": "ela",
+        "homaDomain": "writing",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Grammar",
+        "curriculumTopic": "Grammar & Mechanics",
+        "homaSubject": "ela",
+        "homaDomain": "grammar-language",
+        "homaTopicId": null,
+        "status": "partial"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 10,
+      "mapped": 0,
+      "unmapped": 2,
+      "noSubject": 0,
+      "partial": 8
+    }
+  },
+  "layer3_structure": {
+    "cadence": "reference-book",
+    "sessionLengthMinutes": {},
+    "weeklyTemplate": "Reference/handbook style \u2014 used alongside writing assignments, not structured as daily lessons.",
+    "progressionModel": "reference",
+    "reviewRhythm": "N/A",
+    "totalWeeks": null
+  },
+  "layer4_activities": {
+    "activityTypes": [],
+    "stats": {
+      "totalActivityTypes": 0,
+      "haveRecipe": 0,
+      "noRecipe": 0
+    }
+  },
+  "decisionsNeeded": [],
+  "notes": "96MB scan (Part 1 of 2). Writing handbook/textbook. 'Write on Track' is a popular student writing handbook. Combined with Part 2, this gives Homa a reference for what structured writing instruction looks like. CamScanner scan."
+}

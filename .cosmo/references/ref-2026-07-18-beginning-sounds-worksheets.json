@@ -1,0 +1,29 @@
+{
+  "id": "ref-2026-07-18-beginning-sounds-worksheets",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:31:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428292.026779",
+  "format": "phonics-worksheet",
+  "title": "Beginning Sounds Worksheets — Letter Sounds and Letter Recognition Activities (FREE)",
+  "publisher": "TPT (link expired before download)",
+  "gradeLevel": "PreK-K",
+  "pageCount": "unknown (link expired)",
+  "callouts": [],
+  "overview": {
+    "description": "Beginning sounds worksheets targeting initial letter sounds and letter recognition. From the filename: activities that connect letter shapes to their sounds through pictures of objects that start with each letter. Likely format: letter at top + images below, child identifies/circles/colors items that start with that letter's sound. Link expired before download."
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {"id": "ela.beginning-sounds-identification", "kind": "procedural", "mapped": false},
+      {"id": "ela.letter-sound-correspondence", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["themed-worksheet"],
+    "gaps": []
+  },
+  "notes": "Link expired. This fills the gap between letter identification (I Spy) and phoneme substitution in Aless's ELA progression: letter ID → beginning sounds → rhyming → compound words → phoneme substitution. The beginning sounds skill (which letter does 'ball' start with?) is foundational for decoding."
+}

@@ -1,0 +1,42 @@
+{
+  "id": "ref-2026-07-18-compound-word-puzzles",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:37:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428644.756359",
+  "format": "puzzle-cards",
+  "title": "Compound Word Puzzles",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "K-2nd Grade",
+  "callouts": [],
+  "overview": {
+    "description": "Compound word puzzle cards. Likely format: two-piece interlocking puzzle cards — one half shows word 1 + image, other half shows word 2 + image. When matched correctly, the puzzle pieces interlock and the compound word is formed. Self-correcting: only the correct halves fit together. Third compound word resource from Aless (after I Have Who Has chain game + Snowball Fight movement game). Three different game mechanics for the same skill."
+  },
+  "designPatterns": {
+    "puzzleSelfCorrection": {
+      "description": "Interlocking puzzle pieces only fit when the match is correct. Same self-correcting principle as Montessori nomenclature cards — the material itself provides the error check.",
+      "value": "Independent learning. No teacher needed to verify matches."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonological-awareness",
+    "topics": [
+      {
+        "id": "ela.compound-word-blending",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "two-piece-puzzle-cards",
+        "description": "Interlocking puzzle card pairs: each pair forms a match (compound word, math equation = answer, Spanish word = English word). Cut from cardstock, self-correcting through unique interlock shapes. Generatable for any matching skill."
+      }
+    ]
+  },
+  "notes": "Link likely expired. Third compound word format: chain game (auditory/social) + snowball fight (kinesthetic/movement) + puzzles (tactile/self-correcting). Three game mechanics, one skill. This is Aless showing what Carolyng described when she talked about visual/kinesthetic/auditory options — multiple pathways to the same learning."
+}
