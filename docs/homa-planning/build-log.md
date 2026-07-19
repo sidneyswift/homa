@@ -3,6 +3,62 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
+
+Founder ask: investigate .cosmo, update materials-studio, and put the
+whole funnel (Cosmo ingestion → skill graduation → family output) on
+the /admin/studio surface.
+
+**Recovery.** Cosmo's latest batch ingest commit (d988ffa, 70 new
+reference analyses + 11 curriculum analyses + updated taste model) was
+pushed to the already-merged fix/handwrytten-sender branch and never
+reached main; only the graduation commit (0f066b7) did. Restored the
+81 stranded .cosmo files onto this branch. Note for future sessions:
+Cosmo's commit timestamps run about four days behind wall clock (its
+"Jul 15" commits sit on top of Jul 19 merges), and it has now twice
+pushed to a stale PR branch; check origin branches for stranded Cosmo
+commits before trusting main's .cosmo state. A second stranded commit
+(46411c9, marketing-ugc-engine skill) remains unrecovered on that
+branch: out of scope here, flagged to the founder.
+
+**Graduation repair (main CI had three red gates from 0f066b7).**
+(1) check:fleet-skills: em dashes in SKILL.md (15), plus 24 in
+activity-formats.md and 7 in curriculum-writer.md, all replaced with
+law-compliant punctuation. (2) check:materials: SKILL.md cited
+homa-pk-activity-treasury-reference.png which was never shipped;
+citation removed, patterns kept. (3) check:taxonomy: the batch added
+40 topics under 17 unmapped subject>domain pairs in two mixed
+vocabularies, including 6 duplicate topics. Deleted the duplicates
+(no dependency edges touched them), normalized 26 topics onto existing
+Marble domains, added 4 genuinely new mapped pairs (History >
+Geography, History > Cultural Studies, English > Literature as literacy
+content, Life Skills > Daily Living), regenerated the slug map (37 new
+frozen ids) and progress index (1380 assessment topics). One map test
+updated because behavior genuinely improved: PreK math topics now put
+a 40-month-old in window, so the "windows floor at 48 months" premise
+moved to 36 with a new test locking the improvement.
+
+**Skill update from the batch's field directives.** Math-practice
+rules (answer keys mandatory, no bubble grids, challenge blocks,
+pencil-and-paper interactivity, math-log ELA crossover,
+upload-for-review offer), lamination-ready printable manipulatives,
+unit-study resource page + materials list, try-this-together box, and
+four new recipes with registry entries: clip cards, file-folder game,
+cloze story, reading comprehension mini-unit. Gap coverage after this
+pass: 27 of 90 flagged formats covered, 63 open by design (planner and
+curriculum formats belong to the coming lesson-planner layer, not
+materials-studio).
+
+**Inspo funnel.** /admin/studio now opens with the three-stage funnel:
+intake (parsed live from .cosmo analyses), graduation (skill sections,
+registry entries, and the open-gap backlog computed by crossing
+recipeMatch.gaps against shipped recipes), output (materials and
+families from the production ledger). New pure module
+lib/materials/cosmo-funnel.ts with tests in check:materials, disk
+layer lib/admin/cosmo-data.ts, .cosmo JSON/markdown traced into the
+studio functions (heavy inspo images and PDFs excluded,
+outputFileTracingRoot pinned to the monorepo root).
+
 ## 2026-07-18 · Studio lab converged: founder picked direction 3 "Ledger"
 
 The founder pasted the direction lab's assembled reply: winning
