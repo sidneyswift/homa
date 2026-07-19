@@ -14,6 +14,8 @@ import {
   BRIEF_FEEDBACK_ERROR_MESSAGE,
   runBriefFeedbackInteraction,
 } from "./task-feedback-interaction";
+import { AgentJobOverlay } from "./agent-job-overlay";
+import type { AgentJobView } from "./agent-job-view";
 import { TaskEditOverlay } from "./task-edit-overlay";
 import { briefFeedbackControlState, groupRunsByDay } from "./task-history";
 import {
@@ -74,17 +76,49 @@ const CUSTOM_TASK: TaskRowView = {
  * tests deterministic as real time passes the fixture dates). */
 const RENDER_NOW = new Date("2026-07-11T22:00:00.000Z");
 
-function renderView(tasks: TaskRowView[], runs: TaskRunView[] = []): string {
+/** A curriculum build waiting on the parent (gate-first-volume): volumes 1
+ * and 2 are saved, volume 3 is ready for review, the rest are still to
+ * come. */
+const AWAITING_JOB: AgentJobView = {
+  id: "job-1",
+  skill: "curriculum-studio",
+  title: "Theo's All About Reading plan",
+  status: "awaiting_input",
+  totalStages: 9,
+  progressNote: "Volume 3 is ready for you to look over.",
+  startedAt: "2026-07-14T13:00:00.000Z",
+  position: 3,
+  stages: [
+    { stageNumber: 1, status: "approved", title: "Weeks 1-4" },
+    { stageNumber: 2, status: "approved", title: "Weeks 5-8" },
+    { stageNumber: 3, status: "ready_for_review", title: "Weeks 9-12" },
+  ],
+};
+
+function renderView(
+  tasks: TaskRowView[],
+  runs: TaskRunView[] = [],
+  jobs: AgentJobView[] = [],
+): string {
   return renderToStaticMarkup(
     <AppRouterContext.Provider value={ROUTER}>
       <TasksView
         tasks={tasks}
+        jobs={jobs}
         runs={runs}
         timeZone="America/New_York"
         briefFlagOn
         textingLinked
         now={RENDER_NOW}
       />
+    </AppRouterContext.Provider>,
+  );
+}
+
+function renderJobOverlay(job: AgentJobView): string {
+  return renderToStaticMarkup(
+    <AppRouterContext.Provider value={ROUTER}>
+      <AgentJobOverlay job={job} onClose={() => {}} />
     </AppRouterContext.Provider>,
   );
 }
@@ -300,6 +334,95 @@ describe("TasksView", () => {
     );
     assert.match(html, /aria-live="polite"/);
     assert.match(html, />Ask Homa about this<\/a>/);
+  });
+});
+
+describe("agent job cards", () => {
+  it("shows an In progress section only when a build is active", () => {
+    const withoutJobs = renderView([BRIEF_TASK]);
+    assert.doesNotMatch(withoutJobs, /In progress/);
+
+    const withJob = renderView([BRIEF_TASK], [], [AWAITING_JOB]);
+    assert.match(withJob, /In progress/);
+    // The card opens the steer dialog, same aria contract as a task card,
+    // and closed on first paint.
+    assert.match(
+      withJob,
+      /<button[^>]*aria-haspopup="dialog"[^>]*>Theo&#x27;s All About Reading plan<\/button>/,
+    );
+    assert.doesNotMatch(withJob, /role="dialog"/);
+  });
+
+  it("reads the build's place in the parent's own words, no raw stage 0", () => {
+    const html = renderView([BRIEF_TASK], [], [AWAITING_JOB]);
+    // Curriculum vocabulary (Volume), the family's start date, and the
+    // one pill that asks for a tap.
+    assert.match(html, /Volume 3 of 9 · started Jul 14/);
+    assert.match(html, />Ready for you</);
+
+    // A just-started build sits at current_stage 0; the card must still
+    // read "Volume 1", never "Volume 0".
+    const fresh = renderView(
+      [BRIEF_TASK],
+      [],
+      [
+        {
+          ...AWAITING_JOB,
+          id: "job-fresh",
+          status: "queued",
+          progressNote: null,
+          position: 1,
+          stages: [],
+        },
+      ],
+    );
+    assert.match(fresh, /Volume 1 of 9/);
+    assert.doesNotMatch(fresh, /Volume 0/);
+    assert.match(fresh, />Building</);
+  });
+});
+
+describe("AgentJobOverlay", () => {
+  it("lists the volumes with calm, no-red status words and steer controls", () => {
+    const html = renderJobOverlay(AWAITING_JOB);
+
+    assert.match(html, /role="dialog"/);
+    assert.match(html, /<h2 id="agent-job-title"[^>]*>Theo&#x27;s All About Reading plan<\/h2>/);
+
+    // Each built volume by its own words; the ready one asks for a tap.
+    assert.match(html, /Volume 1[\s\S]*Weeks 1-4[\s\S]*Saved/);
+    assert.match(html, /Volume 3[\s\S]*Weeks 9-12[\s\S]*Ready for you/);
+    // Volumes 4 through 9 have no rows yet; they collapse to one up-next line.
+    assert.match(html, /Volumes 4-9/);
+    assert.match(html, />Up next</);
+
+    // The one primary action is coral (bg-brand / text-on-brand) and present
+    // only at the gate; Pause and the two-tap stop stay quiet. No red anywhere.
+    assert.match(
+      html,
+      /<button[^>]*bg-brand[^>]*text-on-brand[^>]*>[\s\S]*?Approve and keep building<\/button>/,
+    );
+    assert.match(html, />Pause<\/button>/);
+    assert.match(html, />Stop this build<\/button>/);
+    assert.doesNotMatch(html, /Resume building/);
+  });
+
+  it("hides Approve unless the build is waiting, and offers Resume when paused", () => {
+    const running = renderJobOverlay({
+      ...AWAITING_JOB,
+      status: "running",
+      stages: [
+        { stageNumber: 1, status: "approved", title: "Weeks 1-4" },
+        { stageNumber: 2, status: "in_progress", title: "Weeks 5-8" },
+      ],
+    });
+    assert.doesNotMatch(running, /Approve and keep building/);
+    assert.match(running, />Pause<\/button>/);
+    assert.match(running, /Weeks 5-8[\s\S]*Building/);
+
+    const paused = renderJobOverlay({ ...AWAITING_JOB, status: "paused" });
+    assert.match(paused, /Resume building/);
+    assert.doesNotMatch(paused, />Pause<\/button>/);
   });
 });
 

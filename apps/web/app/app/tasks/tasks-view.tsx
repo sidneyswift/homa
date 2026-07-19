@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Bell, ChevronRight, FlaskConical, Moon, Plus } from "lucide-react";
 
 import { setTaskPausedAction } from "./actions";
+import { AgentJobCard } from "./agent-job-card";
+import type { AgentJobView } from "./agent-job-view";
 import { BUILT_IN_COPY } from "./task-copy";
 import { TaskEditOverlay } from "./task-edit-overlay";
 import { TaskHistory } from "./task-history";
@@ -279,6 +281,7 @@ function DarkKindCard({
 
 export function TasksView({
   tasks,
+  jobs,
   runs,
   timeZone,
   briefFlagOn,
@@ -286,6 +289,9 @@ export function TasksView({
   now,
 }: {
   tasks: TaskRowView[];
+  /** The family's active agent jobs (curriculum builds and any future job
+   * skill). Empty when the flag is off or nothing is building. */
+  jobs: AgentJobView[];
   runs: TaskRunView[];
   timeZone: string;
   briefFlagOn: boolean;
@@ -332,6 +338,24 @@ export function TasksView({
           textingLinked={textingLinked}
           onClose={() => setCreating(false)}
         />
+      ) : null}
+
+      {/* Active builds sit above the recurring schedule: they are a
+          different shape of work (a finite thing Homa is finishing, not a
+          switch that runs every day), so they get their own calm heading
+          rather than mixing in under "Scheduled". Hidden entirely when
+          nothing is building. */}
+      {jobs.length > 0 ? (
+        <section className="mt-6">
+          <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">
+            In progress
+          </h2>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {jobs.map((job) => (
+              <AgentJobCard key={job.id} job={job} timeZone={timeZone} />
+            ))}
+          </div>
+        </section>
       ) : null}
 
       <section className="mt-6">
