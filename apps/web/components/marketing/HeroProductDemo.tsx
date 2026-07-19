@@ -1,68 +1,50 @@
 import type { ReactNode } from "react";
-import { Check, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { ArrowUp, Check, ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
 
+/**
+ * iOS Messages (16+) doesn't draw a triangular tail: the "tail" illusion is
+ * only the tight 4px corner against the full 18px radius everywhere else.
+ * An earlier version also clipped a hard triangle over that corner, which
+ * read as a cartoon speech-bubble rather than a real text thread.
+ */
 function SentBubble({ children }: { children: ReactNode }) {
   return (
-    <div style={{ alignSelf: "flex-end", position: "relative", maxWidth: "86%" }}>
-      <div
-        style={{
-          padding: "8px 11px",
-          borderRadius: "18px 18px 4px 18px",
-          background: "var(--clay-500)",
-          color: "#fff",
-          fontSize: "0.84rem",
-          lineHeight: 1.35,
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
-        {children}
-      </div>
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          right: -1,
-          bottom: 1,
-          width: 10,
-          height: 12,
-          background: "var(--clay-500)",
-          clipPath: "polygon(0 0, 0 100%, 100% 100%)",
-        }}
-      />
+    <div
+      style={{
+        alignSelf: "flex-end",
+        maxWidth: "86%",
+        padding: "8px 11px",
+        borderRadius: "18px 18px 4px 18px",
+        background: "var(--clay-500)",
+        color: "#fff",
+        fontSize: "0.84rem",
+        lineHeight: 1.35,
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      {children}
     </div>
   );
 }
 
 function ReceivedBubble({ children }: { children: ReactNode }) {
   return (
-    <div style={{ alignSelf: "flex-start", position: "relative", maxWidth: "88%" }}>
-      <div
-        style={{
-          padding: "8px 11px",
-          borderRadius: "18px 18px 18px 4px",
-          background: "var(--surface-raised)",
-          color: "var(--text-strong)",
-          fontSize: "0.84rem",
-          lineHeight: 1.35,
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
-        {children}
-      </div>
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: -1,
-          bottom: 1,
-          width: 10,
-          height: 12,
-          background: "var(--surface-raised)",
-          clipPath: "polygon(100% 0, 0 100%, 100% 100%)",
-        }}
-      />
+    <div
+      style={{
+        alignSelf: "flex-start",
+        maxWidth: "88%",
+        padding: "8px 11px",
+        borderRadius: "18px 18px 18px 4px",
+        background: "var(--surface-raised)",
+        color: "var(--text-strong)",
+        fontSize: "0.84rem",
+        lineHeight: 1.35,
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -89,12 +71,13 @@ export function HeroProductDemo() {
           maxWidth: 280,
           margin: "0 auto",
           padding: "10px",
-          borderRadius: 40,
-          background: "linear-gradient(165deg, #3f3831 0%, var(--stone-900) 42%, #14110f 100%)",
-          boxShadow: "var(--shadow-xl), inset 0 0 0 1px rgba(255,255,255,0.1)",
+          borderRadius: 42,
+          background:
+            "linear-gradient(115deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 16%), linear-gradient(165deg, #4a4541 0%, #221f1c 45%, #0c0b0a 100%)",
+          boxShadow: "var(--shadow-xl), inset 0 0 0 1px rgba(255,255,255,0.12)",
         }}
       >
-        {/* Hardware buttons, decorative only */}
+        {/* Hardware buttons, decorative only, with a faint bevel highlight */}
         <span
           aria-hidden="true"
           style={{
@@ -104,7 +87,7 @@ export function HeroProductDemo() {
             width: 3,
             height: 26,
             borderRadius: "2px 0 0 2px",
-            background: "#2c2824",
+            background: "linear-gradient(90deg, #4a4540, #1a1815)",
           }}
         />
         <span
@@ -116,7 +99,7 @@ export function HeroProductDemo() {
             width: 3,
             height: 46,
             borderRadius: "2px 0 0 2px",
-            background: "#2c2824",
+            background: "linear-gradient(90deg, #4a4540, #1a1815)",
           }}
         />
         <span
@@ -128,7 +111,7 @@ export function HeroProductDemo() {
             width: 3,
             height: 60,
             borderRadius: "0 2px 2px 0",
-            background: "#2c2824",
+            background: "linear-gradient(270deg, #4a4540, #1a1815)",
           }}
         />
 
@@ -269,8 +252,8 @@ export function HeroProductDemo() {
                   minWidth: 17,
                   padding: "1px 5px",
                   borderRadius: "var(--radius-pill)",
-                  background: "var(--stone-200)",
-                  color: "var(--stone-700)",
+                  background: "var(--clay-100)",
+                  color: "var(--clay-600)",
                   fontSize: "0.56rem",
                   fontWeight: 700,
                   textAlign: "center",
@@ -322,7 +305,35 @@ export function HeroProductDemo() {
               background: "linear-gradient(180deg, #f4ede3 0%, #ebe2d4 55%, #f4ede3 100%)",
             }}
           >
+            {/* Real Messages threads open with a tiny centered day marker and
+                show Delivered under your last sent bubble; both signifiers do
+                more to sell the thread than any amount of chrome. */}
+            <p
+              aria-hidden="true"
+              style={{
+                margin: "0 0 1px",
+                alignSelf: "center",
+                color: "var(--text-subtle)",
+                fontSize: "0.6rem",
+                fontWeight: 500,
+              }}
+            >
+              <strong style={{ fontWeight: 700 }}>Today</strong> 9:41
+            </p>
+
             <SentBubble>Maya is into butterflies right now.</SentBubble>
+            <p
+              aria-hidden="true"
+              style={{
+                margin: "-3px 2px 0 0",
+                alignSelf: "flex-end",
+                color: "var(--text-subtle)",
+                fontSize: "0.58rem",
+                fontWeight: 600,
+              }}
+            >
+              Delivered
+            </p>
 
             <ReceivedBubble>Great! I&apos;ll make today&apos;s math worksheet butterfly-themed.</ReceivedBubble>
 
@@ -337,21 +348,36 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <img
-                src="/images/hero-butterfly-math.png"
-                alt=""
-                width={1024}
-                height={1536}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: 148,
-                  objectFit: "cover",
-                  objectPosition: "top center",
-                  background: "#fff",
-                }}
-              />
+              <div style={{ position: "relative" }}>
+                <img
+                  src="/images/hero-butterfly-math.png"
+                  alt=""
+                  width={1024}
+                  height={1536}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "auto",
+                    maxHeight: 118,
+                    objectFit: "cover",
+                    objectPosition: "top center",
+                    background: "#fff",
+                  }}
+                />
+                {/* Fades the crop into the file row below so the worksheet
+                    reads as a deliberate preview peek, not a broken image. */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 34,
+                    background: "linear-gradient(to top, var(--surface-raised) 0%, rgba(255,255,255,0) 100%)",
+                  }}
+                />
+              </div>
               <div
                 style={{
                   display: "flex",
@@ -430,12 +456,9 @@ export function HeroProductDemo() {
                 borderRadius: "50%",
                 background: "var(--stone-200)",
                 color: "var(--stone-700)",
-                fontSize: "1rem",
-                fontWeight: 500,
-                lineHeight: 1,
               }}
             >
-              +
+              <Plus size={14} strokeWidth={2.4} aria-hidden="true" />
             </span>
             <span
               style={{
@@ -463,11 +486,9 @@ export function HeroProductDemo() {
                 borderRadius: "50%",
                 background: "var(--clay-500)",
                 color: "#fff",
-                fontSize: "0.82rem",
-                fontWeight: 700,
               }}
             >
-              ↑
+              <ArrowUp size={15} strokeWidth={2.8} aria-hidden="true" />
             </span>
           </div>
           <div
