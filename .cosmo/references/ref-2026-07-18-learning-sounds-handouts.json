@@ -1,0 +1,65 @@
+{
+  "id": "ref-2026-07-18-learning-sounds-handouts",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427428.014969",
+  "format": "phonics-handout-set",
+  "title": "Learning Sounds Handouts \u2014 Phonics & Letter Sounds Visual Cards",
+  "publisher": "Unknown (image-based PDF, no extractable text)",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "overview": {
+    "description": "16-page set of learning sounds handouts. Entirely image-based (no extractable text), suggesting these are visual cards or posters showing letter-sound associations with illustrations. Likely shows each letter paired with a representative image/word for phonics instruction."
+  },
+  "layout": {
+    "structure": "single-focus",
+    "spacing": "airy",
+    "visualHierarchy": "illustration-dominant",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "center-out"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "ela.letter-sound-correspondence",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      36,
+      72
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "unknown (image-based)",
+    "colorPalette": "unknown",
+    "appealDrivers": [
+      "visual association"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "unknown",
+    "margins": "unknown",
+    "inkDensity": "unknown",
+    "colorRequirement": "unknown"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "flash-cards"
+    ],
+    "gaps": []
+  },
+  "notes": "Image-based PDF \u2014 could not extract text. Likely phonics visual cards. Pairs well with Aless's other phonics drops (rhyming clip cards, I Spy letter, beginning sounds)."
+}

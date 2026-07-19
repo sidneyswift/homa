@@ -1,0 +1,47 @@
+{
+  "id": "cur-2026-07-18-write-in-track-pt2",
+  "name": "Write in Track Part 2 \u2014 Writing & Language Arts Handbook (Companion)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T00:05:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784435137.490789",
+  "layer1_philosophy": {
+    "methodology": "Process Writing / Writing Workshop",
+    "principles": [
+      "See Part 1 (cur-2026-07-18-write-on-track)"
+    ],
+    "learningTheory": "process-based",
+    "assessmentApproach": "portfolio",
+    "parentRole": "teacher-coach",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": []
+  },
+  "layer2_scope": {
+    "mappings": [],
+    "stats": {
+      "totalCurriculumTopics": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 0
+    }
+  },
+  "layer3_structure": {
+    "cadence": "reference-book",
+    "sessionLengthMinutes": {},
+    "weeklyTemplate": "Companion to Part 1",
+    "progressionModel": "reference",
+    "reviewRhythm": "N/A",
+    "totalWeeks": null
+  },
+  "layer4_activities": {
+    "activityTypes": [],
+    "stats": {
+      "totalActivityTypes": 0,
+      "haveRecipe": 0,
+      "noRecipe": 0
+    }
+  },
+  "decisionsNeeded": [],
+  "notes": "62MB scan. Part 2 of Write on Track writing handbook. See Part 1 for full analysis."
+}

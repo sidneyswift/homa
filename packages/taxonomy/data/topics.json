@@ -31279,7 +31279,7 @@
       "id": "mt_27spJDX8wC",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Ocean Life",
       "name": "Seashore Animals",
       "description": "Identify and classify seashore animals (seahorse, crabs, jellyfish, starfish, lobster, clam, sea urchin) and their habitats",
       "ageRangeStart": 4,
@@ -31297,7 +31297,7 @@
       "id": "mt_lrDBZn7M8A",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Earth Science",
+      "domain": "Earth's Systems",
       "name": "Wave Anatomy",
       "description": "Identify parts of an ocean wave (peak, crest, lip, spray, barrel, wall, shoulder) and understand wave formation",
       "ageRangeStart": 6,
@@ -31315,7 +31315,7 @@
       "id": "mt_Ej4V3s5Rax",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Ocean Life",
       "name": "Jellyfish Anatomy",
       "description": "Identify parts of a jellyfish (bell, gonads, oral arms, lappets, mouth) and understand how jellyfish eat and move",
       "ageRangeStart": 5,
@@ -31333,7 +31333,7 @@
       "id": "mt_HHzJ4VVtGv",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Earth Science",
+      "domain": "Earth's Systems",
       "name": "Sand Composition and Erosion",
       "description": "Understand what sand is made of (rock and mineral particles) and how erosion creates sand over time",
       "ageRangeStart": 5,
@@ -31351,7 +31351,7 @@
       "id": "mt_ZDUMRoJ1pt",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Ocean Life",
       "name": "Tide Pool Ecosystems",
       "description": "Understand tide pool ecosystems: what lives there, how organisms survive changing water levels, and food web relationships",
       "ageRangeStart": 5,
@@ -31422,8 +31422,8 @@
     {
       "id": "mt_C6QxiXnbAP",
       "type": "CONCEPTUAL",
-      "subject": "English",
-      "domain": "Fine Arts",
+      "subject": "History",
+      "domain": "Cultural Studies",
       "name": "Art Appreciation",
       "description": "Study classic paintings by theme; identify artist, style, and period; practice observation and narration of artwork",
       "ageRangeStart": 4,
@@ -31531,7 +31531,7 @@
       "id": "mt_ClDl1OgeMN",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Insects & Minibeasts",
       "name": "Earthworm Anatomy",
       "description": "Identify the main body parts of an earthworm (clitellum, segments, mouth, anus, setae) and understand how body structure relates to function (burrowing, eating, breathing through skin)",
       "ageRangeStart": 5,
@@ -31549,7 +31549,7 @@
       "id": "mt_FvI4o-A6nj",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Insects & Minibeasts",
       "name": "Earthworm Lifecycle",
       "description": "Understand the lifecycle of an earthworm from mating through egg/cocoon stage to embryo, hatchling, and adult, recognizing that earthworms reproduce differently from mammals",
       "ageRangeStart": 5,
@@ -31567,7 +31567,7 @@
       "id": "mt_svxMiEw_bd",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Insects & Minibeasts",
       "name": "Earthworm Importance for Soil",
       "description": "Understand why earthworms are important for soil health and gardens: they aerate soil by burrowing, break down dead matter (decomposition), and recycle nutrients back into the soil",
       "ageRangeStart": 5,
@@ -31585,7 +31585,7 @@
       "id": "mt_Ac68amOdF1",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Organisms & Life Processes",
       "name": "Taxonomy Basics",
       "description": "Read and understand taxonomic classification labels (Kingdom, Phylum, Class, Order, Family, Genus, Species) as a way scientists organize all living things into groups, starting from the broadest (Kingdom) to the most specific (Species)",
       "ageRangeStart": 7,
@@ -31656,7 +31656,7 @@
     {
       "id": "mt_a3k9x2m7p1",
       "subject": "English",
-      "domain": "phonics-word-reading",
+      "domain": "Phonics & Word Reading",
       "name": "CVC Word Reading (Short A)",
       "description": "Read and write CVC words with short a vowel sound (cab, mad, bag, ham, pan, map)",
       "type": "PROCEDURAL",
@@ -31674,7 +31674,7 @@
     {
       "id": "mt_b7n4w8q2r5",
       "subject": "English",
-      "domain": "reading-fluency",
+      "domain": "Reading Comprehension",
       "name": "Rereading for Fluency",
       "description": "Build reading fluency through repeated reading of familiar text, focusing on accuracy, rate, and expression",
       "type": "PROCEDURAL",
@@ -31690,27 +31690,9 @@
       "standards": []
     },
     {
-      "id": "mt_c2j6v9t4y8",
-      "subject": "English",
-      "domain": "reading-literature",
-      "name": "Poetry Appreciation",
-      "description": "Read, recite, and appreciate classic and contemporary poetry, including rhythm, rhyme, imagery, and emotional response",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 4,
-      "ageRangeEnd": 12,
-      "evidence": [
-        "Recite at least one poem from memory",
-        "Identify rhyming words and rhythm patterns in a poem",
-        "Describe how a poem makes them feel and why"
-      ],
-      "assessmentPrompt": "Could {{name}} recite a favorite poem and talk about what they like about it — the sounds, the pictures it paints, or how it makes them feel?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
       "id": "mt_d5h3u1s6x0",
       "subject": "English",
-      "domain": "vocabulary",
+      "domain": "Vocabulary",
       "name": "Story Vocabulary in Context",
       "description": "Learn and use vocabulary words encountered in reading selections, understanding meaning from context clues in the story",
       "type": "CONCEPTUAL",
@@ -31728,7 +31710,7 @@
     {
       "id": "mt_e8g2z5r9w3",
       "subject": "English",
-      "domain": "reading-comprehension",
+      "domain": "Reading Comprehension",
       "name": "Main Idea and Key Details",
       "description": "Identify the main idea of a text and the key details that support it, distinguishing central message from supporting information",
       "type": "CONCEPTUAL",
@@ -31746,7 +31728,7 @@
     {
       "id": "mt_f1k7y4p8v2",
       "subject": "English",
-      "domain": "phonics-word-reading",
+      "domain": "Phonics & Word Reading",
       "name": "Phonogram Word Families",
       "description": "Recognize and decode words using common phonograms or word family patterns (-id, -ide, -ight, -ake, etc.), including syllable patterns",
       "type": "PROCEDURAL",
@@ -31764,7 +31746,7 @@
     {
       "id": "mt_g4m9x6n1t7",
       "subject": "English",
-      "domain": "writing",
+      "domain": "Writing Composition",
       "name": "Developing Ideas in Writing",
       "description": "Develop writing topics with supporting ideas, details, and examples; move from brainstorming to organized drafts",
       "type": "PROCEDURAL",
@@ -31782,7 +31764,7 @@
     {
       "id": "mt_h6p2w8q3s5",
       "subject": "Science",
-      "domain": "life-science",
+      "domain": "Insects & Minibeasts",
       "name": "Insect Classification",
       "description": "Classify creatures as insects vs non-insects based on the defining characteristics: six legs, three body parts (head, thorax, abdomen), exoskeleton, antennae",
       "type": "CONCEPTUAL",
@@ -31800,7 +31782,7 @@
     {
       "id": "mt_j9r5v1t7z4",
       "subject": "Science",
-      "domain": "life-science",
+      "domain": "The Human Body",
       "name": "Human Heart Anatomy",
       "description": "Identify and name the main parts of the human heart: aorta, ventricles, atria, valves, veins, arteries, vena cava",
       "type": "CONCEPTUAL",
@@ -31818,7 +31800,7 @@
     {
       "id": "mt_k3s8w2u6y0",
       "subject": "Science",
-      "domain": "life-science",
+      "domain": "The Human Body",
       "name": "Circulatory System Basics",
       "description": "Understand that the heart pumps blood through the body via the circulatory system including heart, veins, arteries, and capillaries",
       "type": "CONCEPTUAL",
@@ -31836,7 +31818,7 @@
     {
       "id": "mt_l6t1x5n9a3",
       "subject": "Science",
-      "domain": "life-science",
+      "domain": "The Human Body",
       "name": "Blood Composition",
       "description": "Know basic components of blood: red blood cells (carry oxygen), white blood cells (fight infection), platelets (clotting), and plasma (liquid carrier)",
       "type": "CONCEPTUAL",
@@ -31852,45 +31834,9 @@
       "standards": []
     },
     {
-      "id": "mt_m8u4y7p2b6",
-      "subject": "Science",
-      "domain": "life-science",
-      "name": "Seashore Animals",
-      "description": "Identify and classify seashore animals including seahorse, crabs, jellyfish, starfish, lobster, clam, sea urchin and their basic characteristics",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 4,
-      "ageRangeEnd": 8,
-      "evidence": [
-        "Identify at least 6 seashore animals by sight",
-        "Describe one characteristic of each animal",
-        "Sort seashore animals by body type or habitat zone"
-      ],
-      "assessmentPrompt": "Could {{name}} identify common seashore animals like crabs, starfish, and jellyfish, and tell you something about each one?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
-      "id": "mt_n1v7z3q5c9",
-      "subject": "Science",
-      "domain": "life-science",
-      "name": "Jellyfish Anatomy",
-      "description": "Identify parts of a jellyfish: bell, gonads, oral arms, lappets, mouth",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 5,
-      "ageRangeEnd": 10,
-      "evidence": [
-        "Label at least 4 parts of a jellyfish on a diagram",
-        "Describe the function of the bell and oral arms",
-        "Explain how a jellyfish moves and eats"
-      ],
-      "assessmentPrompt": "Could {{name}} look at a jellyfish diagram and point to the bell, oral arms, and mouth, and explain what each part does?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
       "id": "mt_o4w9a6r8d2",
       "subject": "Science",
-      "domain": "life-science",
+      "domain": "Insects & Minibeasts",
       "name": "Minibeast Identification",
       "description": "Identify common minibeasts and invertebrates: snail, woodlouse, ant, centipede, earthworm, ladybird, bumblebee, spider, slug, moth, butterfly",
       "type": "CONCEPTUAL",
@@ -31906,63 +31852,9 @@
       "standards": []
     },
     {
-      "id": "mt_p7x2b5s1e8",
-      "subject": "Science",
-      "domain": "earth-space-science",
-      "name": "Wave Anatomy",
-      "description": "Identify parts of an ocean wave: peak, crest, lip, spray, barrel, wall, shoulder",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 6,
-      "ageRangeEnd": 10,
-      "evidence": [
-        "Label at least 4 parts of a wave on a diagram",
-        "Describe what happens at the crest and barrel of a wave",
-        "Explain why waves break near the shore"
-      ],
-      "assessmentPrompt": "Could {{name}} look at a diagram of a wave and point to the crest, barrel, and lip?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
-      "id": "mt_q9y5c8t3f1",
-      "subject": "Science",
-      "domain": "earth-space-science",
-      "name": "Sand Composition and Erosion",
-      "description": "Understand what sand is made of (tiny pieces of rock, shells, coral broken down over time) and how erosion creates it through wind and water action",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 5,
-      "ageRangeEnd": 10,
-      "evidence": [
-        "Explain that sand comes from rocks and shells broken into tiny pieces",
-        "Describe how water and wind break rocks into sand over time",
-        "Observe sand under magnification and identify different grain types"
-      ],
-      "assessmentPrompt": "Could {{name}} explain where sand comes from and how rocks slowly turn into sand through wind and water?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
-      "id": "mt_r2z8d1u6g4",
-      "subject": "Science",
-      "domain": "earth-space-science",
-      "name": "Tide Pool Ecosystems",
-      "description": "Understand tide pool ecosystems: what they are, how tides create them, common organisms found in them, and how creatures adapt to changing water levels",
-      "type": "CONCEPTUAL",
-      "ageRangeStart": 5,
-      "ageRangeEnd": 10,
-      "evidence": [
-        "Explain what a tide pool is and how it forms",
-        "Name at least 4 creatures commonly found in tide pools",
-        "Describe one adaptation that helps a tide pool animal survive"
-      ],
-      "assessmentPrompt": "Could {{name}} explain what a tide pool is and name several creatures that live in one?",
-      "centrality": 0.01,
-      "standards": []
-    },
-    {
       "id": "mt_s5a1e4v9h7",
       "subject": "Personal & Social Development",
-      "domain": "emotional-literacy",
+      "domain": "Emotional Literacy",
       "name": "Emotional Regulation Strategies",
       "description": "Identify and use calming strategies (deep breaths, counting to 10, walking away, squeezing a stress ball) when experiencing strong emotions like frustration",
       "type": "PROCEDURAL",
@@ -31980,7 +31872,7 @@
     {
       "id": "mt_t8b4f7w2j0",
       "subject": "Personal & Social Development",
-      "domain": "emotional-literacy",
+      "domain": "Emotional Literacy",
       "name": "Social Narrative Comprehension",
       "description": "Engage with and understand first-person social stories that normalize emotions, describe body signals, and model coping strategies for common social situations",
       "type": "CONCEPTUAL",
@@ -31998,7 +31890,7 @@
     {
       "id": "mt_u1c7g0x5k3",
       "subject": "Mathematics",
-      "domain": "number-sense",
+      "domain": "Number Representation & Place Value",
       "name": "Ten Frame Representation",
       "description": "Represent a given number by filling in circles on a ten frame; understand that a full ten frame shows 10 and use ten frames to compose and decompose numbers to 10",
       "type": "PROCEDURAL",
@@ -32016,7 +31908,7 @@
     {
       "id": "mt_v4d9h3y8l6",
       "subject": "Mathematics",
-      "domain": "number-sense",
+      "domain": "Counting & Cardinality",
       "name": "Number Word Recognition 1-10",
       "description": "Recognize and read the written word form of numbers one through ten; match number words to numerals and quantities",
       "type": "CONCEPTUAL",
@@ -32034,7 +31926,7 @@
     {
       "id": "mt_w7e2j6z1m9",
       "subject": "Mathematics",
-      "domain": "number-sense",
+      "domain": "Counting & Cardinality",
       "name": "Counting with Manipulatives",
       "description": "Count physical objects (themed counters, cut-outs, real objects) with one-to-one correspondence, moving or touching each object while counting",
       "type": "PROCEDURAL",

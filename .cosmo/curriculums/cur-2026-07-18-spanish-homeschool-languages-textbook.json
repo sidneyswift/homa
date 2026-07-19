@@ -1,0 +1,88 @@
+{
+  "id": "cur-2026-07-18-spanish-homeschool-languages-textbook",
+  "name": "Homeschool Languages \u2014 Spanish Level 1 Full Textbook",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:13:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426023.893809",
+  "layer1_philosophy": {
+    "methodology": "Immersive Visual Vocabulary",
+    "principles": [
+      "Full-immersion through picture dictionaries and visual scenes",
+      "Vocabulary organized by thematic contexts (home, school, body, animals)",
+      "Self-paced workbook format for independent or guided study",
+      "Real-world contextualization of target language"
+    ],
+    "learningTheory": "immersive-contextual",
+    "assessmentApproach": "self-check",
+    "parentRole": "facilitator",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "homeschool-languages-spanish",
+        "topicType": "method_format",
+        "title": "Homeschool Languages Spanish L1 Format",
+        "summary": "Visual immersion Spanish textbook with dictionary margins, thematic vocabulary, and picture-based learning for all ages."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Spanish",
+        "curriculumTopic": "Basic Vocabulary",
+        "homaSubject": "world-languages",
+        "homaDomain": "spanish",
+        "homaTopicId": null,
+        "status": "partial"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 8,
+      "mapped": 0,
+      "unmapped": 3,
+      "noSubject": 0,
+      "partial": 5
+    }
+  },
+  "layer3_structure": {
+    "cadence": "self-paced",
+    "sessionLengthMinutes": {
+      "spanish": 20
+    },
+    "weeklyTemplate": "Self-paced textbook. Work through thematic units at student's pace.",
+    "progressionModel": "linear",
+    "reviewRhythm": "built into units",
+    "totalWeeks": null
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "picture-dictionary",
+        "description": "Visual vocabulary pages with labeled illustrations",
+        "recipe": null,
+        "status": "no_recipe"
+      },
+      {
+        "type": "vocabulary-exercises",
+        "description": "Fill-in, matching, and labeling exercises",
+        "recipe": "html",
+        "status": "have_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 2,
+      "haveRecipe": 1,
+      "noRecipe": 1
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "method",
+      "item": "Add visual immersion Spanish methodology",
+      "impact": "Supports Spanish language learning track",
+      "urgency": "low"
+    }
+  ],
+  "notes": "64MB scan. Full textbook version of the Homeschool Languages Spanish Level 1 booklet sample (already ingested). This is the complete textbook with dictionary-margin format. Aless dropped both the sample AND the full textbook \u2014 strong signal that this is a curriculum she's considering."
+}

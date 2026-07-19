@@ -11,7 +11,7 @@
     },
     {
       "id": "ref-2026-07-17-short-a-cvc-cut-paste",
-      "title": "Short A CVC Words \u2014 Write, Cut & Paste Activity",
+      "title": "Short A CVC Words — Write, Cut & Paste Activity",
       "droppedBy": "sid",
       "droppedAt": "2026-07-17T16:52:00-04:00",
       "subject": "ela",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ref-2026-07-17-social-story-frustrated",
-      "title": "When I Get Frustrated \u2014 Social Story",
+      "title": "When I Get Frustrated — Social Story",
       "droppedBy": "sid",
       "droppedAt": "2026-07-17T21:52:00-04:00",
       "subject": "personal-social-development",
@@ -683,6 +683,636 @@
       "format": "curriculum-sample",
       "droppedBy": "cosmo-atlas-scrape",
       "droppedAt": "2026-07-17T22:08:00-04:00"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+      "title": "Harcourt Trophies Grade 2 Practice Book — Selected Pages",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T15:46:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "practice-book-selection"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-trophies-2nd-assessments",
+      "title": "Harcourt Trophies Grade 2-1 End-of-Selection Tests — Vocab, Comprehension & Writing",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T15:47:00-04:00",
+      "subject": "ela",
+      "domain": "comprehension-analysis",
+      "format": "assessment-selection"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
+      "title": "Harcourt Trophies Grade 2 Teacher Guide — Lesson Planner + Cross-Curricular Centers",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T16:52:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "teacher-guide-lesson-planner"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages",
+      "title": "Harcourt Trophies Grade 2 Teacher Guide — Day 1 Detail Pages (Phonics, Spelling, Writing, Grammar)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T17:02:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "teacher-guide-day-detail"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-trophies-2nd-alt-teaching-strategies",
+      "title": "Harcourt Trophies Grade 2 Teacher Guide — Alternative Teaching Strategies (Multi-Modal)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T17:25:00-04:00",
+      "subject": "ela",
+      "domain": "grammar-language",
+      "format": "teacher-guide-alt-strategies"
+    },
+    {
+      "id": "ref-2026-07-18-harcourt-math-2nd-grade-selection",
+      "title": "Harcourt Math Grade 2 — Puzzles, Games, Manipulatives, Story Problems",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T17:42:00-04:00",
+      "subject": "math",
+      "domain": "operations-algebraic-thinking",
+      "format": "math-workbook-selection"
+    },
+    {
+      "id": "ref-2026-07-18-azar-basic-english-grammar",
+      "title": "Basic English Grammar, 2nd Edition — Betty Schrampfer Azar (Longman)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T18:12:00-04:00",
+      "subject": "ela",
+      "domain": "grammar-language",
+      "format": "grammar-reference-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-reading-options-achievement",
+      "title": "Reading Options for Achievement: Let's Read! (Level C) — Options Publishing",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T18:18:00-04:00",
+      "subject": "ela",
+      "domain": "comprehension-analysis",
+      "format": "reading-comprehension-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-get-ahead-in-math-decimals",
+      "title": "Get Ahead in Math (Level C) — Self-Teaching Math Worksheet Format",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T18:35:00-04:00",
+      "subject": "math",
+      "domain": "number-operations",
+      "format": "math-practice-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-peaceful-press-playful-pioneers-coop",
+      "title": "The Playful Pioneers Co-Op Guide — 26-Week Literature & Project-Based Curriculum",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T21:55:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "integrated-curriculum",
+      "format": "co-op-curriculum-guide"
+    },
+    {
+      "id": "ref-2026-07-18-ckla-preschool-all-about-me",
+      "title": "CKLA Preschool Teacher Guide — Domain 1: All About Me (310 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T21:55:00-04:00",
+      "subject": "ela",
+      "domain": "emergent-literacy",
+      "format": "curriculum-teacher-guide"
+    },
+    {
+      "id": "ref-2026-07-18-habitat-schoolhouse-record-keeping",
+      "title": "Habitat Schoolhouse Preschool — Record Keeping Set (Pond Map + Progress Cards)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T21:59:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "record-keeping-system"
+    },
+    {
+      "id": "ref-2026-07-18-habitat-schoolhouse-prek-workbook5",
+      "title": "Habitat Schoolhouse Preschool Workbook 5 Part 2 (Letters S, T, U)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T21:59:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "preschool-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-habitat-schoolhouse-prek-workbook1",
+      "title": "Habitat Schoolhouse Preschool Workbook 1 Part 2 (Letters C, D + Count to 5)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:00:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "preschool-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-kennedy-center-start-with-the-arts",
+      "title": "Start with the Arts — Kennedy Center/VSA Inclusive Arts Curriculum (552 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:02:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "arts-integrated-early-childhood",
+      "format": "comprehensive-arts-curriculum"
+    },
+    {
+      "id": "ref-2026-07-18-ecme-music-right-from-start",
+      "title": "Music Right from the Start — ECME Theory & Practice Guidebook (84 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:11:00-04:00",
+      "subject": "music",
+      "domain": "early-childhood-music-education",
+      "format": "music-education-guidebook"
+    },
+    {
+      "id": "ref-2026-07-18-ckla-preschool-animals-activity-pages",
+      "title": "CKLA Preschool Activity Pages — Domain 3: Animals (Pre-Writing + Phonics)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:11:00-04:00",
+      "subject": "ela",
+      "domain": "emergent-literacy",
+      "format": "preschool-activity-pages"
+    },
+    {
+      "id": "ref-2026-07-18-twinkl-field-trip-tips",
+      "title": "Field Trip Tips — FIELD TRIP Acrostic Guide (Twinkl)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:11:00-04:00",
+      "subject": "life-skills",
+      "domain": "field-trip-planning",
+      "format": "parent-guide-infographic"
+    },
+    {
+      "id": "ref-2026-07-18-montessori-nomenclature-solar-system",
+      "title": "Solar System Montessori Nomenclature Cards — 3-Part + Definition Cards",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:12:00-04:00",
+      "subject": "science",
+      "domain": "astronomy",
+      "format": "montessori-nomenclature-cards"
+    },
+    {
+      "id": "ref-2026-07-18-homeschool-languages-spanish-level1",
+      "title": "Homeschool Languages — Spanish Level 1 Booklets Sample",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:12:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "language-learning-picture-book"
+    },
+    {
+      "id": "ref-2026-07-18-los-pollitos-unit1-home-supplements",
+      "title": "Los Pollitos Dicen — Unit 1 Home Supplements (Spanish Parent Guide)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:14:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "parent-home-supplement"
+    },
+    {
+      "id": "ref-2026-07-18-habitat-schoolhouse-prek-workbook2",
+      "title": "Habitat Schoolhouse Preschool Workbook 2 Part 1 (Letters E, F + Earth/Ocean)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:14:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "preschool-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-habitat-schoolhouse-prek-workbook6",
+      "title": "Habitat Schoolhouse Preschool Workbook 6 Part 1 (Letters V, W + Word Tracing)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:14:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "early-childhood",
+      "format": "preschool-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-pawpatrol-prewriting",
+      "title": "Paw Patrol Pre-Writing Worksheets — Character-Driven Stroke Practice",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:15:00-04:00",
+      "subject": "ela",
+      "domain": "pre-writing",
+      "format": "character-themed-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-los-pollitos-unit1-teacher-guide",
+      "title": "Los Pollitos Dicen — Unit 1 Teacher Guide (Spanish Mama Curriculum)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:13:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "language-teacher-guide"
+    },
+    {
+      "id": "ref-2026-07-18-twinkl-rhyming-clip-cards",
+      "title": "Rhyming Match Clip Cards (Twinkl)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:15:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "clip-card-activity"
+    },
+    {
+      "id": "ref-2026-07-18-twinkl-i-spy-letter-l",
+      "title": "I Spy the Letter Ll — Visual Scanning Activity (Twinkl)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:15:00-04:00",
+      "subject": "ela",
+      "domain": "letter-knowledge",
+      "format": "letter-identification-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-montessori-3part-community-helpers",
+      "title": "Montessori 3-Part Cards — Community Helpers",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:16:00-04:00",
+      "subject": "social-studies",
+      "domain": "community-helpers",
+      "format": "montessori-nomenclature-cards"
+    },
+    {
+      "id": "ref-2026-07-18-montessori-3part-houses-world",
+      "title": "Montessori Geography — Houses Around the World 3-Part Cards",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "subject": "social-studies",
+      "domain": "geography-culture",
+      "format": "montessori-nomenclature-cards"
+    },
+    {
+      "id": "ref-2026-07-18-winter-animal-tracks-montessori",
+      "title": "Winter Animal Tracks — Forest Footprint Tracing Activity (28 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:21:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "nature-study",
+      "format": "themed-activity-pack"
+    },
+    {
+      "id": "ref-2026-07-18-volcanoes-vocab-cards-test",
+      "title": "Volcanoes Vocabulary Cards + Graphic Organizer + Test (K-3rd)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:26:00-04:00",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "vocabulary-study-set"
+    },
+    {
+      "id": "ref-2026-07-18-file-folder-presidents-money-match",
+      "title": "Money Match — Presidents Day File Folder Game (Autism Educators)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:27:00-04:00",
+      "subject": "math",
+      "domain": "financial-literacy",
+      "format": "file-folder-game"
+    },
+    {
+      "id": "ref-2026-07-18-health-human-body-unit",
+      "title": "Health & the Human Body — 6-Organ Science Unit (35 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:28:00-04:00",
+      "subject": "science",
+      "domain": "human-body",
+      "format": "science-unit-study"
+    },
+    {
+      "id": "ref-2026-07-18-phoneme-substitution-cards",
+      "title": "Phoneme Substitution Cards — Phonemic Awareness Center (281 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:29:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "phonemic-awareness-center"
+    },
+    {
+      "id": "ref-2026-07-18-spanish-minibook-numeros-colores",
+      "title": "Mi Libro de Números y Colores — Spanish Mini Book",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:29:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "cut-fold-minibook"
+    },
+    {
+      "id": "ref-2026-07-18-hole-punch-fine-motor",
+      "title": "Celebration Theme Hole Punch Strips — Fine Motor Activity",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:29:00-04:00",
+      "subject": "fine-motor",
+      "domain": "hand-strength",
+      "format": "fine-motor-activity"
+    },
+    {
+      "id": "ref-2026-07-18-i-have-who-has-compound-words",
+      "title": "I Have Who Has — Compound Words Blending & Segmenting Game",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:30:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "card-game"
+    },
+    {
+      "id": "ref-2026-07-18-snowball-fight-compound-word-game",
+      "title": "Snowball Fight — Compound Word Game",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:31:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "card-game"
+    },
+    {
+      "id": "ref-2026-07-18-beginning-sounds-worksheets",
+      "title": "Beginning Sounds Worksheets — Letter Sounds & Recognition (FREE)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:31:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-beginning-sounds-worksheets-2",
+      "title": "Beginning Sounds Worksheets (2nd source)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:32:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-solar-system-worksheets-prek",
+      "title": "Solar System Worksheets for PreK and Kinder (FREE)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:32:00-04:00",
+      "subject": "science",
+      "domain": "astronomy",
+      "format": "science-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-solar-system-activity-packet",
+      "title": "Solar System Activity Packet — Labeling + Writing + Matching",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:33:00-04:00",
+      "subject": "science",
+      "domain": "astronomy",
+      "format": "science-activity-packet"
+    },
+    {
+      "id": "ref-2026-07-18-solar-system-cut-paste",
+      "title": "Solar System Cut & Paste Activity",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:33:00-04:00",
+      "subject": "science",
+      "domain": "astronomy",
+      "format": "cut-and-paste-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-numbers-0-10-counting-ordering",
+      "title": "Numbers 0-10 — Counting, Ordering, Missing, One More/Less",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:34:00-04:00",
+      "subject": "math",
+      "domain": "counting-cardinality",
+      "format": "math-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-hair-salon-scissor-cutting",
+      "title": "Hair Salon Scissor Cutting Practice — Scissor Skills Pack",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:35:00-04:00",
+      "subject": "fine-motor",
+      "domain": "scissor-skills",
+      "format": "fine-motor-activity"
+    },
+    {
+      "id": "ref-2026-07-18-phonics-letter-sounds-cvc",
+      "title": "Phonics Worksheets — Letter Sounds, CVC Words, Initial Sounds",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:35:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-winter-patterns-cut-paste",
+      "title": "Winter Patterns Cut and Paste",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:36:00-04:00",
+      "subject": "math",
+      "domain": "patterns-algebra",
+      "format": "cut-and-paste-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-winter-activities-centers-crafts",
+      "title": "Winter Activities Centers — Crafts + Counting + Holiday",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:37:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "seasonal-activities",
+      "format": "seasonal-activity-bundle"
+    },
+    {
+      "id": "ref-2026-07-18-compound-word-puzzles",
+      "title": "Compound Word Puzzles",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:37:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "puzzle-cards"
+    },
+    {
+      "id": "ref-2026-07-18-compound-words-playdough-mats",
+      "title": "Compound Words Playdough Mats — Phonological Awareness",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:38:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "playdough-mat"
+    },
+    {
+      "id": "ref-2026-07-18-listen-color-spring-garden",
+      "title": "Listen and Color Spring Worksheet — Garden Animals",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:23:00-04:00",
+      "subject": "ela",
+      "domain": "listening-comprehension",
+      "format": "listen-and-color"
+    },
+    {
+      "id": "ref-2026-07-18-volcanoes-lava-workbook",
+      "title": "Volcanoes and Lava Workbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:26:00-04:00",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "science-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-presidents-day-coloring",
+      "title": "Presidents Day Coloring Pages",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:33:00-04:00",
+      "subject": "social-studies",
+      "domain": "us-presidents",
+      "format": "coloring-page"
+    },
+    {
+      "id": "ref-2026-07-19-treasury-year-round-pk-activities",
+      "title": "Treasury of Year-Round Preschool Activities (Teacher Created Materials, ©2000)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T00:52:00-04:00",
+      "subject": "multi-subject",
+      "domain": "preschool-integrated",
+      "format": "activity-collection"
+    },
+    {
+      "id": "ref-2026-07-19-alphabet-pages-y1",
+      "title": "Alphabet Pages Year 1 (Playing Preschool companion)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:06:00-04:00",
+      "subject": "English",
+      "domain": "Phonics & Word Reading",
+      "format": "printable-set"
+    },
+    {
+      "id": "ref-2026-07-18-magna-tiles-numbers",
+      "title": "MAGNA-TILES Numbers (0-9) — Build, Trace & Write Activity",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:15:00-04:00",
+      "subject": "math",
+      "domain": "counting-cardinality",
+      "format": "printable-activity-cards"
+    },
+    {
+      "id": "ref-2026-07-18-learning-sounds-handouts",
+      "title": "Learning Sounds Handouts — Phonics & Letter Sounds Visual Cards",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-handout-set"
+    },
+    {
+      "id": "ref-2026-07-18-phonological-awareness-scope-sequence",
+      "title": "Phonological Awareness Skills — 35-Lesson Scope & Sequence Chart",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:20:00-04:00",
+      "subject": "ela",
+      "domain": "phonological-awareness",
+      "format": "scope-and-sequence-chart"
+    },
+    {
+      "id": "ref-2026-07-18-morning-menu-starter",
+      "title": "My Morning Menu — Daily Calendar & Weather Circle Time Workbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "subject": "multidisciplinary",
+      "domain": "daily-living",
+      "format": "daily-routine-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-toddler-alphabet-dot-book",
+      "title": "Toddler A-Z Alphabet Dot Book — Letter Recognition & Fine Motor (195 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:16:00-04:00",
+      "subject": "ela",
+      "domain": "letter-knowledge",
+      "format": "alphabet-activity-book"
+    },
+    {
+      "id": "ref-2026-07-18-volcano-labelling-worksheet",
+      "title": "Volcano Labelling Worksheet with Answer Key (A4)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "labeling-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-layers-of-earth-labeling",
+      "title": "Layers of the Earth — Free Labeling Worksheet",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:20:00-04:00",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "labeling-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-ab-pattern-worksheets",
+      "title": "FREE AB Pattern Worksheets — No Prep, Designed for Special Education",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:21:00-04:00",
+      "subject": "math",
+      "domain": "patterns-algebra",
+      "format": "pattern-worksheet"
+    },
+    {
+      "id": "ref-2026-07-18-christmas-tree-playdough-counting",
+      "title": "Christmas Tree Playdough Counting to 12 — Fine Motor Freebie",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:23:00-04:00",
+      "subject": "math",
+      "domain": "counting-cardinality",
+      "format": "playdough-mat"
+    },
+    {
+      "id": "ref-2026-07-19-treasury-year-round-pk-activities-2",
+      "title": "Treasury of Year-Round Preschool Activities Part 2 (Teacher Created Materials)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T01:10:00-04:00",
+      "subject": "multi-subject",
+      "domain": "preschool-integrated",
+      "format": "activity-collection"
+    },
+    {
+      "id": "ref-2026-07-18-sentence-pyramid-worksheets",
+      "title": "Sentence Pyramid Worksheets — 113 Pages Phonics Fluency Practice (AUS-UK Version)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:14:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-fluency-workbook"
+    },
+    {
+      "id": "ref-2026-07-18-blending-segmenting-phoneme-cards",
+      "title": "Blending & Segmenting Phoneme Cards — SoR Reading Decodable Words (311 pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:15:00-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-clip-card-set"
+    },
+    {
+      "id": "ref-2026-07-18-bathroom-vocabulary-spanish-flashcards",
+      "title": "Bathroom Vocabulary Flashcards in Spanish — PreK & Kindergarten (Real Photos)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:18:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "vocabulary-flashcards"
+    },
+    {
+      "id": "ref-2026-07-18-house-vocabulary-spanish-flashcards",
+      "title": "House Vocabulary Flashcards in Spanish — PreK & Kindergarten (Real Photos)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:19:00-04:00",
+      "subject": "world-languages",
+      "domain": "spanish",
+      "format": "vocabulary-flashcards"
+    },
+    {
+      "id": "ref-2026-07-18-preschool-countries-italy-unit",
+      "title": "Preschool Countries: Italy Unit — Week 10 Activity Pack (ZIP)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "subject": "social-studies",
+      "domain": "geography-culture",
+      "format": "country-unit-study-pack"
     }
   ]
 }

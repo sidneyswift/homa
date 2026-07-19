@@ -1,0 +1,86 @@
+{
+  "id": "ref-2026-07-18-morning-menu-starter",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427086.504839",
+  "format": "daily-routine-workbook",
+  "title": "My Morning Menu \u2014 Daily Calendar & Weather Circle Time Workbook",
+  "publisher": "Unknown",
+  "gradeLevel": "PreK-1st (ages 3-7)",
+  "overview": {
+    "description": "13-page daily morning routine workbook. Includes: name writing page, date selector (month/day/year/day of week), season & weather tracker (temperature categories: hot/warm/cold/cool; weather types: sunny/cloudy/rainy/snowy/windy/stormy). Designed for daily circle time or morning meeting \u2014 the child fills it out each morning as part of a consistent routine. Teaches calendar skills, weather awareness, and establishes predictable daily structure."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "text-dominant",
+    "whiteSpaceRatio": 0.5,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "daily-living",
+    "topics": [
+      {
+        "id": "life-skills.calendar-awareness",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "science.weather-observation",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.name-writing",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      36,
+      84
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-educational",
+    "colorPalette": "limited-palette",
+    "appealDrivers": [
+      "daily routine",
+      "predictable structure",
+      "ownership (my menu)"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "daily-morning-menu",
+        "description": "Reusable daily circle time page: date selector, weather tracker, season indicator, name practice. Could be generated fresh each morning with pre-filled date options for the current week/month. Laminate-and-reuse or print-daily format."
+      }
+    ]
+  },
+  "designPatterns": {
+    "dailyRitual": {
+      "description": "Not a one-time worksheet \u2014 this is a daily routine tool. The child fills it out EVERY morning as part of morning meeting/circle time.",
+      "value": "Routine-building tool that teaches through repetition. Calendar, weather, and name-writing skills develop through daily practice, not isolated worksheets."
+    }
+  },
+  "notes": "Pairs with the Daily Rhythm Cards drop. Aless clearly values structured daily routines as a learning framework. Both drops are about making the day predictable and embedding skills into the routine itself."
+}

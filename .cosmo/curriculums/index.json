@@ -1,0 +1,114 @@
+{
+  "curriculums": [
+    {
+      "id": "cur-2026-07-18-harcourt-trophies-2nd",
+      "name": "Harcourt Trophies Grade 2 Teacher Edition — Full Curriculum Architecture",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T16:52:00-04:00",
+      "methodology": "Balanced Literacy (Story-as-Hub)",
+      "mappedPct": 0,
+      "gapCount": 12,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-playing-preschool-y1",
+      "name": "Playing Preschool Year 1 by Busy Toddler",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:05:00-04:00",
+      "methodology": "Play-Based / Experiential (Busy Toddler)",
+      "mappedPct": 73,
+      "gapCount": 14,
+      "decisionsCount": 9
+    },
+    {
+      "id": "cur-2026-07-19-playing-preschool-y2",
+      "name": "Playing Preschool Year 2 by Busy Toddler",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:07:00-04:00",
+      "methodology": "Play-Based / Experiential (Busy Toddler) — Year 2",
+      "mappedPct": 90,
+      "gapCount": 7,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-early-years-v2",
+      "name": "Early Years Vol. 2 (Second Edition) — Year at a Glance",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:12:00-04:00",
+      "methodology": "Charlotte Mason / Gentle Classical (Early Years)",
+      "mappedPct": 78,
+      "gapCount": 7,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-100-easy-lessons",
+      "name": "Teach Your Child to Read in 100 Easy Lessons (Engelmann, Haddox & Bruner)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T10:37:00-04:00",
+      "methodology": "Direct Instruction (DISTAR)",
+      "mappedPct": 100,
+      "gapCount": 7,
+      "decisionsCount": 9
+    },
+    {
+      "id": "cur-2026-07-18-hometessori-primary-sample",
+      "name": "Hometessori Primary Album Basic Collection Sample (Ages 3-6)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "methodology": "Montessori",
+      "mappedPct": 25,
+      "gapCount": 15,
+      "decisionsCount": 3
+    },
+    {
+      "id": "cur-2026-07-18-good-and-the-beautiful",
+      "name": "The Good and the Beautiful — Language Arts & Reading Curriculum (125MB scan)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T23:30:00-04:00",
+      "methodology": "Classical / Literature-Based (Good and the Beautiful)",
+      "mappedPct": 0,
+      "gapCount": 5,
+      "decisionsCount": 2
+    },
+    {
+      "id": "cur-2026-07-18-write-on-track",
+      "name": "Write on Track — Writing & Language Arts Textbook/Handbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T23:48:00-04:00",
+      "methodology": "Process Writing / Writing Workshop",
+      "mappedPct": 0,
+      "gapCount": 2,
+      "decisionsCount": 0
+    },
+    {
+      "id": "cur-2026-07-18-write-in-track-pt2",
+      "name": "Write in Track Part 2 — Writing & Language Arts Handbook (Companion)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T00:05:00-04:00",
+      "methodology": "Process Writing / Writing Workshop",
+      "mappedPct": 0,
+      "gapCount": 0,
+      "decisionsCount": 0
+    },
+    {
+      "id": "cur-2026-07-18-spanish-homeschool-languages-textbook",
+      "name": "Homeschool Languages — Spanish Level 1 Full Textbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:13:00-04:00",
+      "methodology": "Immersive Visual Vocabulary",
+      "mappedPct": 0,
+      "gapCount": 3,
+      "decisionsCount": 1
+    },
+    {
+      "id": "cur-2026-07-19-teach-child-read-100-lessons",
+      "name": "Teach Your Child to Read in 100 Easy Lessons (Siegfried Engelmann) — Parts 1 & 2",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T10:43:00-04:00",
+      "methodology": "Direct Instruction (DISTAR/SRA)",
+      "mappedPct": 0,
+      "gapCount": 1,
+      "decisionsCount": 2
+    }
+  ]
+}

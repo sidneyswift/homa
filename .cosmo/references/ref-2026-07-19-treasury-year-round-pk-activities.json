@@ -1,0 +1,93 @@
+{
+  "id": "ref-2026-07-19-treasury-year-round-pk-activities",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T00:52:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784436745.868859",
+  "format": "activity-collection",
+  "title": "Treasury of Year-Round Preschool Activities (Teacher Created Materials, ©2000)",
+  "pageCount": 120,
+  "description": "A comprehensive 120-page year-round preschool activity book organized by month (September–August), with 4 weekly themed units per month. Each unit includes 5 days of structured activities: sharing time discussions, movement activities, themed lessons with reproducible worksheets, arts & crafts projects, and cooking experiences. Includes monthly planning calendars, food supply lists, activity supply lists, cooking rules, and a skills index.",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "text-and-illustration-balanced",
+    "whiteSpaceRatio": 0.30,
+    "flowDirection": "top-down",
+    "notes": "Two-page spreads: left page is typically a worksheet/activity page, right page is the next day's lesson plan or another worksheet. Lesson plan pages are text-heavy with embedded illustrations. Worksheet pages have bold titles, simple instructions, and large illustration areas for young children."
+  },
+  "skillTargeting": {
+    "subject": "multi-subject",
+    "domain": "preschool-integrated",
+    "topics": [
+      {"id": "math.count-objects-1-10", "kind": "procedural", "mapped": true},
+      {"id": "math.rote-count-1-10", "kind": "procedural", "mapped": true},
+      {"id": "math.number-writing-0-10", "kind": "procedural", "mapped": true},
+      {"id": "ela.letter-recognition-uppercase", "kind": "conceptual", "mapped": true},
+      {"id": "ela.letter-recognition-lowercase", "kind": "conceptual", "mapped": true},
+      {"id": "ela.letter-formation", "kind": "procedural", "mapped": true},
+      {"id": "ela.letter-sounds", "kind": "conceptual", "mapped": true}
+    ],
+    "unmappedSkills": [
+      {"suggestedId": "art.cutting-skills", "description": "Scissor skills — cutting along lines, cutting out shapes for bracelets and crafts"},
+      {"suggestedId": "art.coloring-within-lines", "description": "Coloring exercises integrated into most worksheet pages"},
+      {"suggestedId": "motor.tracing-shapes", "description": "Tracing circles, triangles, and other shapes on themed pages"},
+      {"suggestedId": "science.seasons-weather", "description": "Seasonal awareness woven through monthly themes (winter clothing, spring flowers, summer fruits)"},
+      {"suggestedId": "science.animals-habitats", "description": "Animals by season — owls, squirrels (Nov), reindeer (Dec), honeybees (Apr), caterpillars/butterflies (Apr)"},
+      {"suggestedId": "social.community-helpers", "description": "Implicit in sharing time and social themes"},
+      {"suggestedId": "social.holidays-traditions", "description": "Halloween, Thanksgiving, Hanukkah, Kwanzaa, Valentine's Day, Presidents' Day, Easter, St. Patrick's Day, Mother's Day, Father's Day, Fourth of July"},
+      {"suggestedId": "motor.fine-motor-gluing", "description": "Gluing cotton to cloud shapes, glitter to stars, tissue paper to trees"},
+      {"suggestedId": "cooking.simple-recipes", "description": "Weekly cooking experiences: cookie decorating, pudding, toast, fruit arrangements"},
+      {"suggestedId": "music.movement-songs", "description": "Movement activities with songs and fingerplays each week ('Here Is the Beehive', 'Twinkle Twinkle')"},
+      {"suggestedId": "ela.visual-discrimination", "description": "Same/different exercises (matching ghosts, matching dinosaurs), spotting odd-one-out"},
+      {"suggestedId": "math.patterns", "description": "Pattern recognition in several worksheets (winter patterns cut & paste)"},
+      {"suggestedId": "social.spatial-concepts", "description": "Up/down, hot/cold sorting activities"}
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [36, 60],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "notes": "Designed for preschool/pre-K (ages 3-5). Each weekly unit scaffolds heavily with teacher-directed sharing time before independent worksheet work. Activities range from simple coloring to cutting-and-pasting to tracing letters/numbers."
+  },
+  "theming": {
+    "themeType": "seasonal",
+    "characters": ["cartoon dinosaurs", "seasonal animals (owls, squirrels, reindeer, bees, butterflies)", "holiday characters (pilgrims, turkeys, ghosts, hearts)"],
+    "visualStyle": "hand-drawn clip-art",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["seasonal familiarity", "large simple illustrations suitable for coloring", "kid-friendly themes per month", "hands-on crafts and cooking to break up worksheet pages"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "mixed",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Entire book is B&W. Most worksheet pages are landscape (two per spread). Some activity pages are portrait. All designed for easy photocopying."
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["counting-mat", "tracing-guide", "coloring-page", "cut-and-paste"],
+    "gaps": [
+      {"format": "movement-activity-card", "description": "Song/fingerplay cards with illustrated actions — like 'Here Is the Beehive' with hand motions. Not a printable worksheet but a reference card for the teacher/parent."},
+      {"format": "cooking-recipe-card", "description": "Simple illustrated cooking recipe for preschoolers with numbered steps and safety callouts. Weekly feature in this book."},
+      {"format": "monthly-planning-calendar", "description": "Blank monthly calendar grid with themed header illustrations. Used for weather charting, daily planning, schedule tracking."},
+      {"format": "matching-worksheet", "description": "Draw-lines-to-match activity (e.g., matching ghosts, matching uppercase to lowercase letters). Different from flash cards — it's a single worksheet with two columns to connect."},
+      {"format": "same-different-worksheet", "description": "Rows of similar images where child marks which is different. Visual discrimination exercise."},
+      {"format": "sorting-worksheet", "description": "Classify items into categories (hot/cold, up/down). Cut-out images placed into labeled zones."}
+    ]
+  },
+  "curriculumStructure": {
+    "organization": "monthly",
+    "months": ["September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"],
+    "weeksPerMonth": 4,
+    "daysPerWeek": 5,
+    "dailyStructure": ["Sharing Time (discussion)", "Movement Activity (song/fingerplay)", "Lesson (worksheet + directions)", "Arts and Crafts", "Cooking Experience (Day 5)"],
+    "monthlyIncludes": ["Planning Calendar", "Supply List"],
+    "letterSequence": "A-Z across year (3 letters/month)",
+    "numberSequence": "0-9 across first months, review ongoing",
+    "shapeSequence": "One shape per month (circle, triangle, rectangle, star, etc.)",
+    "colorSequence": "3-4 colors per month"
+  },
+  "notes": "This is a full year-round curriculum disguised as an activity book. The real value isn't any single worksheet — it's the integrated weekly rhythm: discuss → move → practice → create → cook. That 5-day loop is a powerful pattern for Homa's weekly planner. The B&W clip-art style is dated (2000) but the pedagogical structure is solid. Key insight: every theme connects to a letter, number, shape, AND color — that multi-strand threading through seasonal themes is what makes it work as a curriculum, not just a worksheet collection."
+}

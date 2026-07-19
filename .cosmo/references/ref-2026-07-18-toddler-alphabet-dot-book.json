@@ -1,0 +1,84 @@
+{
+  "id": "ref-2026-07-18-toddler-alphabet-dot-book",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:16:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427056.942069",
+  "format": "alphabet-activity-book",
+  "title": "Toddler A-Z Alphabet Dot Book \u2014 Letter Recognition & Fine Motor (195 pages)",
+  "publisher": "Unknown",
+  "gradeLevel": "Toddler-PreK (ages 2-5)",
+  "overview": {
+    "description": "Massive 195-page alphabet activity book. Each letter gets multiple pages: letter introduction ('A is for...'), then associated words with illustrations (apple, alpaca, etc.). Likely includes dot marker activities (based on 'Dot Book' title) where toddlers use bingo daubers/dot markers to fill in circles on each letter. Covers all 26 letters. Multi-sensory: visual recognition + fine motor (dotting/stamping)."
+  },
+  "layout": {
+    "structure": "single-focus",
+    "spacing": "airy",
+    "visualHierarchy": "letter-dominant",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "letter-knowledge",
+    "topics": [
+      {
+        "id": "ela.letter-recognition-uppercase",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.letter-recognition-lowercase",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.letter-sound-correspondence",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": [
+      "fine-motor.dot-marker-stamping"
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      24,
+      60
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [
+      "various animals and objects per letter"
+    ],
+    "visualStyle": "cartoon",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "dot marker play",
+      "animal associations",
+      "large simple pages"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "medium",
+    "colorRequirement": "color optional"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "dot-marker-activity",
+        "description": "Pages with large circles for dot marker/bingo dauber stamping. Letters, numbers, or shapes formed by circles that toddlers fill in. Extremely low-skill entry \u2014 suitable for 2-year-olds. Needs large, well-spaced circles (at least 1-inch diameter)."
+      }
+    ]
+  },
+  "notes": "At 195 pages, this is substantial. The dot marker format is specifically designed for toddlers \u2014 the fine motor demand is minimal (just stamping), making it accessible to very young children. Signals that Aless is thinking about her youngest learner's needs."
+}

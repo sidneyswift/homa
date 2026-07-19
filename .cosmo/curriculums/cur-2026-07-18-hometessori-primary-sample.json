@@ -1,0 +1,188 @@
+{
+  "id": "cur-2026-07-18-hometessori-primary-sample",
+  "name": "Hometessori Primary Album Basic Collection Sample (Ages 3-6)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427464.613379",
+  "layer1_philosophy": {
+    "methodology": "Montessori",
+    "principles": [
+      "Child-led exploration with prepared environment",
+      "Hands-on manipulatives over worksheets",
+      "Three-Period Lesson for introducing concepts",
+      "Sensorial foundation before abstract concepts",
+      "Practical life skills integrated into academics",
+      "Observation-based assessment, not testing"
+    ],
+    "learningTheory": "developmental-stages",
+    "assessmentApproach": "observation-and-record",
+    "parentRole": "guide-facilitator",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "montessori-primary-hometessori",
+        "topicType": "method_format",
+        "title": "Hometessori Primary (3-6) Home Adaptation",
+        "summary": "Budget-friendly Montessori homeschool curriculum with print kits replacing expensive materials. Covers Sensorial, Math, Practical Life, Language albums."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Sensorial",
+        "curriculumTopic": "Pink Tower / Brown Stair / Red Rods",
+        "homaSubject": "math",
+        "homaDomain": "geometry-spatial",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "math.visual-discrimination-dimension",
+          "domain": "geometry-spatial",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            36,
+            72
+          ]
+        }
+      },
+      {
+        "curriculumSubject": "Sensorial",
+        "curriculumTopic": "Color Tablets",
+        "homaSubject": "art",
+        "homaDomain": "visual-arts",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "art.color-recognition-matching",
+          "domain": "visual-arts",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            24,
+            60
+          ]
+        }
+      },
+      {
+        "curriculumSubject": "Math",
+        "curriculumTopic": "Numbers & Operations",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "math.count-objects-1-10",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Practical Life",
+        "curriculumTopic": "Pouring, Spooning, Care of Self",
+        "homaSubject": "life-skills",
+        "homaDomain": "daily-living",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "life-skills.practical-life-motor",
+          "domain": "daily-living",
+          "kind": "procedural",
+          "teachingWindowMonths": [
+            24,
+            72
+          ]
+        }
+      },
+      {
+        "curriculumSubject": "Language",
+        "curriculumTopic": "Sandpaper Letters, Movable Alphabet",
+        "homaSubject": "ela",
+        "homaDomain": "letter-knowledge",
+        "homaTopicId": null,
+        "status": "partial"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 20,
+      "mapped": 5,
+      "unmapped": 10,
+      "noSubject": 2,
+      "partial": 3
+    }
+  },
+  "layer3_structure": {
+    "cadence": "daily, child-paced",
+    "sessionLengthMinutes": {
+      "sensorial": 20,
+      "math": 20,
+      "practical_life": 30,
+      "language": 20
+    },
+    "weeklyTemplate": "Follow the child. Presentations offered but not forced. Multiple activities available; child chooses.",
+    "progressionModel": "mastery",
+    "reviewRhythm": "daily observation record, no formal testing",
+    "totalWeeks": null
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "three-period-lesson",
+        "description": "Name it \u2192 Show me \u2192 What is it? Multi-stage concept introduction",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "three-period-lesson-guide",
+          "creationPath": "html",
+          "description": "Parent guide card for delivering a three-period lesson on any concept. Stage 1: 'This is X.' Stage 2: 'Show me X.' Stage 3: 'What is X?' With timing and observation notes.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "matching-cards",
+        "description": "3-part nomenclature cards (picture, label, control)",
+        "recipe": "montessori-nomenclature-cards",
+        "status": "have_recipe"
+      },
+      {
+        "type": "pattern-cards",
+        "description": "Pattern cards for building/replicating with manipulatives",
+        "recipe": null,
+        "status": "no_recipe"
+      },
+      {
+        "type": "diy-materials",
+        "description": "Print-and-make versions of Montessori materials (color tablets, etc.)",
+        "recipe": null,
+        "status": "no_recipe"
+      },
+      {
+        "type": "observation-record",
+        "description": "Daily observation record sheet for parent tracking",
+        "recipe": null,
+        "status": "no_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 5,
+      "haveRecipe": 1,
+      "noRecipe": 4
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "method",
+      "item": "Add Montessori methodology to knowledge_bank (homeschool adaptation)",
+      "impact": "Enables Montessori-style lesson planning and material generation",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Three-period lesson guide cards",
+      "impact": "Core Montessori teaching format \u2014 needed for any Montessori family",
+      "urgency": "high"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add sensorial domain and practical life topics",
+      "impact": "Montessori's unique subject areas don't map to traditional taxonomy",
+      "urgency": "medium"
+    }
+  ],
+  "notes": "First full Montessori curriculum drop. 208-page sample of a commercial product (Hometessori by MindSprout). Key insight: Montessori homeschool requires print-and-make alternatives to expensive classroom materials. The curriculum includes both teacher manuals (lesson presentations) and print kits (materials). This is a significant methodology addition for Homa."
+}

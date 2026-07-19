@@ -179,16 +179,29 @@ describe("ready_next", () => {
   });
 
   it("never returns empty for a child younger than the graph's windows", () => {
-    // The imported windows floor at 48 months; a 3-year-old still gets
-    // ranked entry points, labeled honestly as usually-later material.
+    // The math windows floor at 36 months (the inspo-flywheel PreK
+    // topics; the Marble import alone floored at 48). A 2.5-year-old
+    // still gets ranked entry points, labeled honestly as
+    // usually-later material.
     const result = run(
       { query: "ready_next", subjectId: "math" },
-      { ageMonths: 40 },
+      { ageMonths: 30 },
     ) as { readyNow: Array<{ windowFit: string }> };
     assert.ok(result.readyNow.length > 0);
     assert.ok(
       result.readyNow.every((topic) => topic.windowFit === "usually_later"),
     );
+  });
+
+  it("puts a young 3-year-old in window for the PreK math roots", () => {
+    // Before the 2026-07-19 PreK additions every math window started at
+    // 48 months and a 40-month-old saw only usually-later material.
+    const result = run(
+      { query: "ready_next", subjectId: "math" },
+      { ageMonths: 40 },
+    ) as { readyNow: Array<{ windowFit: string }> };
+    assert.ok(result.readyNow.length > 0);
+    assert.ok(result.readyNow.some((topic) => topic.windowFit === "now"));
   });
 
   it("counts confirmed graph evidence into the basis and never re-offers confirmed topics", () => {

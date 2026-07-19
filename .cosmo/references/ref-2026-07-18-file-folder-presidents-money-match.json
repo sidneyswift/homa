@@ -1,0 +1,50 @@
+{
+  "id": "ref-2026-07-18-file-folder-presidents-money-match",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:27:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428046.263989",
+  "format": "file-folder-game",
+  "title": "Money Match — Presidents' Day File Folder Matching Activity (Autism Educators)",
+  "publisher": "AutismEducators.com",
+  "gradeLevel": "Elementary (adapted for autism spectrum)",
+  "pageCount": 5,
+  "callouts": [],
+  "overview": {
+    "description": "A 5-page file folder matching game: Match US presidents to their bills ($1 Washington, $5 Lincoln, $10 Hamilton, $20 Jackson, $50 Grant, $100 Franklin). One page glued to the left side of a file folder (president portrait cards), one page glued to the right (bill images with Velcro dots). Child matches portrait cards to the correct bills. From AutismEducators.com — designed specifically for children on the autism spectrum. Includes IEP goal bank reference.",
+    "gameComponents": ["Left folder page: president portrait cards (cut-out)", "Right folder page: bill images with matching circles (Velcro attachment points)", "Answer key included"],
+    "presidents": ["Washington ($1)", "Lincoln ($5)", "Hamilton ($10)", "Jackson ($20)", "Grant ($50)", "Franklin ($100)"]
+  },
+  "designPatterns": {
+    "fileFolderGameFormat": {
+      "description": "A file folder game is a self-contained activity station: one page glued to each inside face of a manila folder. The child opens the folder and works the activity. Portable, storable, reusable. Uses Velcro or pockets for physical matching. The file folder IS the game board.",
+      "value": "Tactile, self-contained, portable. No loose pieces (everything lives in the folder). Great for busy bags, car trips, waiting rooms. The physical matching (Velcro) adds kinesthetic engagement."
+    },
+    "autismAdaptedDesign": {
+      "description": "From AutismEducators.com — designed for children on the autism spectrum. Clean visual layout, minimal distractions, clear matching task, physical manipulation (Velcro), predictable structure. The publisher offers IEP Goal Banks — these activities are aligned to Individualized Education Program goals.",
+      "value": "Materials designed for neurodivergent learners often work better for ALL learners. Clean layout, clear task, physical engagement = universal good design."
+    },
+    "realWorldImages": {
+      "description": "Uses actual US bill images — real money, not cartoon versions. Same 'respect the child's intelligence with real images' principle as the Montessori nomenclature cards.",
+      "value": "Financial literacy with accurate representations. The child recognizes actual bills, not simplified drawings."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "math",
+    "domain": "financial-literacy",
+    "topics": [
+      {"id": "math.money-identification", "kind": "conceptual", "mapped": false},
+      {"id": "social-studies.us-presidents", "kind": "conceptual", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "file-folder-game",
+        "description": "A two-page printable designed to be glued inside a manila file folder. Left page: moveable pieces (cards, labels) with Velcro backing. Right page: matching targets with Velcro dots. Self-contained, portable, reusable. Generatable for any matching skill: money identification, vocabulary matching, color sorting, shape matching, Spanish vocabulary."
+      }
+    ]
+  },
+  "notes": "Another autism-specific resource from Aless — reinforces her inclusivity signal from the Kennedy Center drop. The file folder game is a new activity FORMAT for Homa. It's different from worksheets (reusable), flash cards (two-sided flat), and clip cards (single cards). The file folder is a portable game station. Also: this is a math/social studies crossover (money + presidents) — consistent with Aless's cross-curricular pattern."
+}
