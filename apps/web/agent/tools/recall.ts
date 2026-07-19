@@ -144,10 +144,14 @@ export default defineTool({
         typeof attrs?.memberUserId === "string" && attrs.memberUserId.length > 0
           ? `member_user_id.eq.${attrs.memberUserId},member_user_id.is.null`
           : null;
+      // visibility = 'family' mirrors the continuity RLS policy (internal
+      // dispatch prompts and undelivered drafts are server-only), the same
+      // belt-on-brace as the family_id filter above the database's wall.
       let chatQuery = db
         .from("conversation_messages")
         .select("role, content, channel, created_at")
         .eq("family_id", familyId)
+        .eq("visibility", "family")
         .textSearch("content", input.query, searchText)
         .order("created_at", { ascending: false })
         .limit(input.limit);
