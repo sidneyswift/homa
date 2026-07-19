@@ -37,6 +37,12 @@ export const USAGE_SURFACES = [
   "embedding",
   "lesson_tone",
   "lesson_synthesis",
+  // A background job build session's own turns (agent-jobs cost
+  // attribution, plans/2026-07-19-agent-jobs-cost-attribution.md). Lets the
+  // console slice agent-jobs model spend instead of counting it as chat. The
+  // stage's nested image/review calls keep their own materials_* surfaces;
+  // the per-job rollup reunites them by build session id, not by surface.
+  "agent_job",
   ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface,
 ] as const;
 export type UsageSurface = (typeof USAGE_SURFACES)[number];
@@ -139,6 +145,10 @@ export function usageSurfaceFromAttributes(attributes: unknown): UsageSurface {
         deliveryVersion?: string;
       }
     | undefined;
+  // A job build session (the agent-jobs runner's channel). Every model call
+  // it makes is agent-jobs spend, not chat; label it so the console can slice
+  // it. The runner stamps channel 'agent-job' on the session auth attributes.
+  if (candidate?.channel === "agent-job") return "agent_job";
   if (
     candidate?.channel === "subject_lesson"
     && candidate.modelUsageSurface

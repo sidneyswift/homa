@@ -24,6 +24,22 @@ describe("model usage surfaces", () => {
     );
   });
 
+  it("registers the agent-job build surface", () => {
+    assert.ok(USAGE_SURFACES.includes("agent_job"));
+  });
+
+  it("classifies a job build session's own turns as agent_job spend", () => {
+    assert.equal(
+      usageSurfaceFromAttributes({
+        channel: "agent-job",
+        familyId: "family-1",
+        agentJobId: "job-1",
+        agentJobStageNumber: "3",
+      }),
+      "agent_job",
+    );
+  });
+
   it("keeps other channels, missing identity, and generic dispatch as chat", () => {
     const cases = [
       {

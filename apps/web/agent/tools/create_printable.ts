@@ -550,6 +550,7 @@ export default defineTool({
       previewJpegs: rendered.pageJpegs,
       pageCount: rendered.pageCount,
       brief,
+      sessionId: ctx.session.id,
     });
     const sourceOfferDeliveryId =
       review?.pass === true

@@ -166,6 +166,12 @@ export interface StageBuiltInput {
   job: ClaimedJob;
   materialId: string | null;
   metering?: { sandboxCpuSeconds?: number; pageFetchCount?: number; modelTokens?: number };
+  // The build session that produced this stage, recorded so the per-family
+  // agent-jobs spend rollup can join model_usage.session_id to it for this
+  // stage's authoritative model cost (agent-jobs cost attribution). The
+  // model-supplied metering above is retired and non-authoritative; see the
+  // 20260719120000 migration.
+  buildSessionId?: string | null;
 }
 
 /**
@@ -190,6 +196,7 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
         sandbox_cpu_seconds = ${metering.sandboxCpuSeconds ?? null},
         page_fetch_count = ${metering.pageFetchCount ?? null},
         model_tokens = ${metering.modelTokens ?? null},
+        build_session_id = coalesce(${input.buildSessionId ?? null}, build_session_id),
         updated_at = now()
     where job_id = ${job.jobId} and family_id = ${job.familyId}
       and stage_number = ${job.stageNumber}
@@ -348,6 +355,7 @@ export async function completeStageFromWorker(
   stageNumber: number,
   materialIds: string[],
   metering: StageMetering = {},
+  buildSessionId: string | null = null,
 ): Promise<WorkerStageResult> {
   const sql = mapDb();
   const rows = await sql<
@@ -402,7 +410,7 @@ export async function completeStageFromWorker(
   // Artifacts are already linked above; recordStageBuilt does the transition
   // (gate/approve, advance, complete) and the events. Pass materialId null so
   // it does not re-link.
-  await recordStageBuilt({ job, materialId: null, metering });
+  await recordStageBuilt({ job, materialId: null, metering, buildSessionId });
   return { ok: true, status: shouldGateStage(stageNumber) ? "awaiting_input" : "running" };
 }
 

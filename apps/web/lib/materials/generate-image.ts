@@ -78,6 +78,12 @@ export async function generateStudioImage(input: {
   prompt: string;
   shape?: ImageShape;
   referenceImageUrls?: string[];
+  // The calling eve session, so this image's spend lands in model_usage keyed
+  // to the session that caused it (agent-jobs cost attribution). Optional and
+  // null-safe: a chat-driven image simply attributes to its chat session, a
+  // background build's image to its build session, reuniting a job's real
+  // material cost with its chat turns by build session id.
+  sessionId?: string | null;
 }): Promise<StudioImageResult> {
   const referenceUrls = (input.referenceImageUrls ?? []).slice(0, MAX_REFERENCE_IMAGES);
   for (const url of referenceUrls) {
@@ -139,6 +145,7 @@ export async function generateStudioImage(input: {
       imagesCount: result.images.length,
       imageSize: size,
       durationMs: Date.now() - startedAt,
+      sessionId: input.sessionId ?? null,
     });
 
     const url = await uploadStudioImageBytes({

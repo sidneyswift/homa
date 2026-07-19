@@ -317,6 +317,18 @@ export default async function AdminOverviewPage({
           subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
         />
         <Tile
+          label="Agent-jobs cost (est)"
+          value={formatUsd(data.agentJobsSpend.cost.estimatedUsd)}
+          sub={
+            data.agentJobsSpend.cost.unpricedModels.length > 0
+              ? `no price on file: ${data.agentJobsSpend.cost.unpricedModels.join(", ")} · add it to lib/model-pricing.ts`
+              : data.agentJobsSpend.calls > 0
+                ? `${formatTokens(data.agentJobsSpend.tokens)} tokens · ${formatInt(data.agentJobsSpend.calls)} calls · plan-included, monitored not charged`
+                : "no agent-jobs build spend in range yet"
+          }
+          subTone={data.agentJobsSpend.cost.unpricedModels.length > 0 ? "gold" : "muted"}
+        />
+        <Tile
           label="Map emails"
           value={String(emailSubmitted)}
           sub={

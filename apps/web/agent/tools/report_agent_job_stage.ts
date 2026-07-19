@@ -63,6 +63,11 @@ export default defineTool({
         pageFetchCount: input.pageFetchCount,
         modelTokens: input.modelTokens,
       },
+      // The build session reporting this stage is the one whose model spend
+      // (its turns plus the images and reviews it caused) is this stage's real
+      // cost. Recording it here is the authoritative billing key, not the
+      // model-supplied metering above (agent-jobs cost attribution).
+      ctx.session.id,
     );
     if (!result.ok) return { recorded: false, note: result.note };
     return {

@@ -126,6 +126,7 @@ export default defineTool({
       prompt: input.prompt,
       shape: input.shape,
       referenceImageUrls: input.referenceImageUrls,
+      sessionId: ctx.session.id,
     });
     if (!result.ok) {
       return { generated: false, note: result.note };

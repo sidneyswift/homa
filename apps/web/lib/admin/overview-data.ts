@@ -12,6 +12,7 @@ import {
 } from "./morning-brief-metrics";
 import { summarizeUsageCost, type UsageCostSummary } from "../model-pricing";
 import { getModelPriceBook, type PriceBookStatus } from "../model-pricing-live";
+import { fleetAgentJobsSpend, type AgentJobsSpend } from "../jobs/spend";
 import type { FamilyTaskKind } from "../tasks/kinds";
 
 /**
@@ -100,6 +101,12 @@ export interface FleetOverview {
   modelTokens: number;
   /** Price-book estimate of range spend, plus any unpriced models. */
   modelCost: UsageCostSummary;
+  /** The agent-jobs slice of that spend (build sessions' turns plus the
+   * images and reviews they caused), attributed by build session id. Same
+   * price book as modelCost. Plan-included and monitored, never charged
+   * (founder posture 2026-07-19); this is the number the margin review
+   * watches. */
+  agentJobsSpend: AgentJobsSpend;
   /** Which prices did the math: live gateway or pinned fallback. */
   priceBook: PriceBookStatus;
   /** Alerts marked handled that would otherwise show in this range. */
@@ -355,6 +362,14 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
   const handledAlerts = await listHandledAlerts(rangeDays);
 
   const cutoff = Date.now() - rangeDays * 24 * 60 * 60 * 1000;
+  // The agent-jobs slice of the same window, priced with the same book so it
+  // is comparable to modelCost. Sequential after the usage query (never
+  // Promise.all: see lib/admin/db.ts), and reuses priceBook.rates so it does
+  // not refetch the price feed.
+  const agentJobsSpend = await fleetAgentJobsSpend(
+    { since: new Date(cutoff) },
+    priceBook.rates,
+  );
   const activeIds = new Set(
     snapshots
       .filter(
@@ -459,6 +474,7 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       })),
       { rates: priceBook.rates },
     ),
+    agentJobsSpend,
     priceBook: { source: priceBook.source, fetchedAt: priceBook.fetchedAt },
     handledAlerts,
   };

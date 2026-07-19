@@ -81,6 +81,10 @@ export async function reviewArtifact(input: {
   previewJpegs: readonly Buffer[];
   pageCount: number;
   brief: string;
+  // The calling eve session, so review spend attributes to the session that
+  // caused it (agent-jobs cost attribution). Optional and null-safe, same as
+  // generateStudioImage.
+  sessionId?: string | null;
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.previewJpegs.length === 0) return null;
@@ -134,6 +138,7 @@ export async function reviewArtifact(input: {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      sessionId: input.sessionId ?? null,
     });
 
     return { pass: result.object.pass, issues: result.object.issues };
