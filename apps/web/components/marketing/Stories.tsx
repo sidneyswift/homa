@@ -48,14 +48,9 @@ export function Stories() {
             className="lp-story-grid"
             style={{ display: "grid", gridTemplateColumns: "1fr 236px", gap: 32, alignItems: "center" }}
           >
-            <div>
-              <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
-                {FOUNDER_STORY_COPY.body}
-              </p>
-              <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "16px 0 0", fontSize: "0.98rem" }}>
-                {FOUNDER_STORY_COPY.closing}
-              </p>
-            </div>
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
+              {FOUNDER_STORY_COPY.body}
+            </p>
             {/* Tilted like a snapshot laid on the kitchen table, echoing the
                 hero phone's hand-placed language. */}
             <div className="lp-story-photo" style={{ transform: "rotate(2deg)" }}>
@@ -87,7 +82,6 @@ export function Stories() {
             >
               {FOUNDER_STORY_COPY.signature}
             </p>
-            <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.8rem" }}>Co-founders of Homa</p>
           </div>
         </div>
       </div>
