@@ -158,6 +158,21 @@ from calibration runs, re-check after any model swap):
   objects), generate a SINGLE object on a white background, nothing
   else, and repeat it yourself. Never repeat a full-page image
   (calibration's one failure, caught by the quality check).
+- Sprite slicing is banned: never generate one image of a grid or sheet
+  of objects and slice it into cells with CSS (background-size,
+  background-position, overflow crops). The image model does not place
+  objects on an exact pixel grid, and the print engine renders
+  background-image positioning differently from the screen, so a sliced
+  page can look right in the on-screen check and still ship broken.
+- Many distinct scattered objects on one page (a search-and-find ring,
+  an I-spy mat, a sorting mat): hybrid, with the scatter as ONE
+  generate_image call. Ask for a single image that already contains
+  every object arranged the way the page needs (in a ring, scattered
+  across the sheet), with no text or letters in the image. Your HTML
+  owns the title, the instructions, and any center letter or label.
+  Never go image-direct with the title baked into the art here; a wrong
+  title means re-rolling the whole page. Never build the scatter from
+  many separately positioned pieces or a sliced sheet.
 - Foldable / interactive notebook insert: prefer hybrid (doodle art +
   HTML structure) or image-direct when the whole panel is art-driven.
   Use html alone only for text-heavy reference foldables (vocab, formulas)
@@ -185,6 +200,11 @@ from calibration runs, re-check after any model swap):
   previewUrl, an earlier generate_image URL). With references, describe
   what changes and what stays ("keep the layout and line style; replace
   the puppy with...").
+- A photo the parent shared in chat is a first-class reference too:
+  family-scoped chat upload URLs pass the same artifact check. In a
+  later session, find_attachments lists her uploads with their
+  captions; recover the photo there instead of asking her to send it
+  again.
 - Ask for "no text or letters in the image" on art that sits inside an
   html page; your HTML owns the words.
 - One strong image beats three weak ones; reuse a good URL across
