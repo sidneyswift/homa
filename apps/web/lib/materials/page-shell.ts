@@ -39,6 +39,29 @@ export function hasPageBreakMarkup(html: string): boolean {
   return PAGE_BREAK_MARKUP.test(html);
 }
 
+export const SPRITE_SLICE_GATE_NOTE =
+  "The page HTML was rejected: it scales a background image past 100 percent, which is sprite slicing. PDF viewers disagree on scaled background positioning, so sliced cells can print blank for the parent even when the preview looks right. Give each picture its own <img> tag, or generate one image that already contains the whole arrangement and keep the title and instructions in HTML.";
+
+const BACKGROUND_SIZE_DECLARATION = /background-size\s*:\s*([^;{}]*)/gi;
+
+/**
+ * background-size above 100 percent is the sprite-slicing signature: one
+ * big image scaled up so each cell shows a slice through
+ * background-position. Image models do not draw exact grids, and PDF
+ * viewers disagree on the positioning the print engine emits for this
+ * construct (2026-07-19: Chromium and pdf.js drew the shipped page fine
+ * while Quartz rendered the same bytes with blank cells), so the tool
+ * refuses it outright instead of trusting any single review render.
+ */
+export function hasSpriteSliceMarkup(html: string): boolean {
+  for (const declaration of html.matchAll(BACKGROUND_SIZE_DECLARATION)) {
+    for (const token of declaration[1].matchAll(/(\d+(?:\.\d+)?)\s*%/g)) {
+      if (Number.parseFloat(token[1]) > 100) return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Models sometimes deliver the page wrapped in an XML CDATA section
  * (`<![CDATA[ ... ]]>`). Browsers parse the opening marker as a bogus
@@ -66,11 +89,13 @@ function visibleText(html: string): string {
 /**
  * validatePrintableHtml(html, extraText): string | null
  * Returns a refusal reason for the model, or null when the sheet passes.
- * Two gates: no executable markup (the renderer draws pages, it never
- * runs the agent's code paths), and the brand laws on visible text.
+ * Three gates: no executable markup (the renderer draws pages, it never
+ * runs the agent's code paths), no sprite slicing (viewer-divergent in
+ * print), and the brand laws on visible text.
  */
 export function validatePrintableHtml(html: string, extraText: string): string | null {
   if (BLOCKED_MARKUP.test(html)) return SHEET_GATE_NOTE;
+  if (hasSpriteSliceMarkup(html)) return SPRITE_SLICE_GATE_NOTE;
   const text = `${visibleText(html)} ${extraText}`;
   if (EM_DASH.test(text) || BANNED_WORDS.test(text)) return SHEET_GATE_NOTE;
   return null;

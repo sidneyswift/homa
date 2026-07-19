@@ -40,6 +40,7 @@ import {
   renderPrintableHtml,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
+import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispatch-input";
@@ -687,7 +688,10 @@ export default defineTool({
       if (insertError || !insertedRow) {
         return {
           created: false,
-          note: `Could not save the material record: ${insertError?.message ?? "unknown"}. If the child id was wrong, use one from the family context block.`,
+          note: materialSaveFailureNote(
+            insertError,
+            input.childId !== undefined,
+          ),
         };
       }
       materialId = insertedRow.id;
