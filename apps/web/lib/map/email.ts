@@ -87,6 +87,14 @@ export function classifyResendHttpFailure(
     : "rejected";
 }
 
+/** The email_sends error string for a refused Resend POST. A bare
+ * "HTTP 422" made the 2026-07-18 founder-console alerts undiagnosable
+ * without replaying the send; Resend's body names the offending field. */
+export function resendFailureDetail(status: number, body: string): string {
+  const detail = body.replace(/\s+/g, " ").trim().slice(0, 300);
+  return detail ? `HTTP ${status}: ${detail}` : `HTTP ${status}`;
+}
+
 export interface EmailSubmissionOptions {
   fetch?: typeof globalThis.fetch;
   rfcMessageIdTimeoutMs?: number;
@@ -255,10 +263,12 @@ async function submitToResend(
       },
     );
     if (!response.ok) {
-      console.error(`map email: send failed HTTP ${response.status}`);
+      const body = await response.text().catch(() => "");
+      const detail = resendFailureDetail(response.status, body);
+      console.error(`map email: send failed ${detail}`);
       return {
         result: { status: classifyResendHttpFailure(response.status) },
-        error: `HTTP ${response.status}`,
+        error: detail,
       };
     }
     const payload = (await response.json()) as { id?: unknown };
@@ -325,14 +335,19 @@ export async function sendFamilyInviteEmail(
   });
 }
 
-export async function sendReportEmail(
+/** The report-link email's submission, with the full three-way outcome:
+ * the exactly-once wrapper (lib/map/report-email.ts) needs to tell a
+ * definitive refusal from an unknown one to decide whether its claim is
+ * released. Call it through sendReportEmailOnce, never directly, so the
+ * one-email-per-child law stays in one place. */
+export async function submitReportEmail(
   to: string,
   childName: string,
   reportToken: string,
   familyId?: string,
-): Promise<boolean> {
+): Promise<HomaEmailSubmission> {
   const url = `${siteUrl()}/onboarding/r/${reportToken}`;
-  return send({
+  return submit({
     ledger: { kind: "report_link", familyId },
     to,
     subject: reportEmailSubject(childName),
