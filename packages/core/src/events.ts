@@ -363,6 +363,17 @@ export const EVENT_SCHEMAS = {
     subject: z.string(),
     done_count: z.number().int().min(0),
   }),
+  // Homa edited a plan's activities from chat (the edit_plan tool, one
+  // event per applied batch). Counts only, no activity text: the funnel
+  // reads how often the agent drives the planner without carrying PII.
+  "map.plan_edited": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    subject: z.string(),
+    added: z.number().int().min(0),
+    replaced: z.number().int().min(0),
+    removed: z.number().int().min(0),
+  }),
   // The LLM narrative layer (D8 overturn, 2026-07-06). One event per
   // finished generation; kind separates the report from a four-week plan.
   "map.narrative_generated": z.object({

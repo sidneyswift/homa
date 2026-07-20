@@ -3,6 +3,38 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-19 · Planner canvas in chat: Homa opens and edits the planner (founder ruling: direct writes)
+
+Built after a live family (Chelsea, 2026-07-19 chats) asked how to input
+lessons into the planner and Homa answered honestly that she had no
+visibility into it. Founder ruled **"write directly"**: edit_plan applies
+activity changes to `child_plans` immediately, no propose-then-confirm
+step. Shape follows the Vercel chatbot artifact pattern translated to
+eve's tool-output seam:
+
+- `open_planner` (read-only) returns every plan's current week with
+  activity indices AND opens the week board as a canvas beside the web
+  chat (`planner-canvas.tsx`; the tool-output part is the open signal,
+  the same seam as the snap card). Over SMS/email nothing opens and the
+  tool result says so.
+- `edit_plan` adds/replaces/removes week activities. The pure engine
+  (`lib/map/plan-edits.ts`) validates the whole batch before anything
+  writes and remaps "week.index" check-off keys when indices shift
+  (remove shifts later keys down; replace clears its own check). One
+  UPDATE writes plan + remapped progress together.
+- `GET /api/map/plan/board` feeds the canvas (RLS, signed-in only);
+  each applied edit_plan result refetches it, and the refetch writes
+  the server's remapped check map through to localStorage
+  (`overwritePlanChecks`) so stale local keys cannot tick moved boxes.
+- Judgment lives in the `planner` fleet skill (open-then-edit
+  discipline, activity voice rules, honest limits); the tools stay
+  narrow. New `map.plan_edited` event (counts only, no text).
+
+Agent-decided (no ruling asked): activities-only editing (focus lines,
+retest dates, and check-offs stay out of the model's reach), a 10-
+activity-per-week cap, and no month creation from chat (the report's
+one-tap consent stays the only door, so the wall is never bypassed).
+
 ## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
 
 Founder ask: investigate .cosmo, update materials-studio, and put the
