@@ -6,6 +6,8 @@ import {
   sweepThankYouCards,
   type ThankYouCardSweepResult,
 } from "../../../../lib/cards/thank-you";
+import { dripEnabled } from "../../../../lib/drip/flag";
+import { runDripSweep, type DripSweepResult } from "../../../../lib/drip/sweep";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
@@ -97,6 +99,12 @@ export async function GET(request: Request): Promise<Response> {
     audioDeleted: 0,
   };
   let staleSubjectLessons = 0;
+  let drip: DripSweepResult = {
+    skipped: true,
+    considered: 0,
+    setupSent: 0,
+    reportSent: 0,
+  };
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -165,6 +173,12 @@ export async function GET(request: Request): Promise<Response> {
         );
       }
     }
+    // The onboarding drip (funnel work 2026-07-20). DARK by default: it runs
+    // only when HOMA_DRIP_ENABLED is exactly "true", so nothing reaches a
+    // real family until the copy clears review and compliance lands.
+    if (dripEnabled()) {
+      drip = await runDripSweep();
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     console.error("map/cron failed:", message);
@@ -181,6 +195,7 @@ export async function GET(request: Request): Promise<Response> {
         digest,
         lessons,
         staleSubjectLessons,
+        drip,
       },
       message,
     );
@@ -196,6 +211,7 @@ export async function GET(request: Request): Promise<Response> {
         digest,
         lessons,
         staleSubjectLessons,
+        drip,
       },
       { status: 500 },
     );
@@ -211,6 +227,7 @@ export async function GET(request: Request): Promise<Response> {
     digest,
     lessons,
     staleSubjectLessons,
+    drip,
   });
   return Response.json({
     ok: true,
@@ -223,5 +240,6 @@ export async function GET(request: Request): Promise<Response> {
     digest,
     lessons,
     staleSubjectLessons,
+    drip,
   });
 }
