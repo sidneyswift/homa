@@ -21,6 +21,28 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
 export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
 
+/** The onboarding flow's trackable cards: map-flow.tsx's FlowPhase minus
+ *  the non-card "loading" and "bootstrap-error" states. Emitted once per
+ *  family per step by map.step_viewed, so per-card drop-off is finally
+ *  measurable: before this, a family stuck on the parent (account) step
+ *  was indistinguishable in the data from one that never arrived. Shared
+ *  by the event schema and the /api/map/step route's allowlist. Funnel
+ *  work 2026-07-20 (docs/homa-planning/plans/2026-07-20-onboarding-funnel-drip.md). */
+export const MAP_FLOW_STEPS = [
+  "parent",
+  "family",
+  "homeschool",
+  "kids",
+  "preparing",
+  "checklist",
+  "extras",
+  "next-kid",
+  "scoring",
+  "deepdive",
+  "hub",
+] as const;
+export type MapFlowStep = (typeof MAP_FLOW_STEPS)[number];
+
 const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
   .string()
   .min(1)
@@ -126,6 +148,15 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     child_id: z.uuid(),
     entry: z.enum(["instant", "link"]),
+  }),
+  // Fired once per family per onboarding card reached (map-flow.tsx phase
+  // transitions, beaconed through /api/map/step). The step is a UI phase
+  // name, never content, so this carries no PII. This is the only event
+  // that makes per-card onboarding drop-off measurable. Funnel work
+  // 2026-07-20.
+  "map.step_viewed": z.object({
+    family_id: z.uuid(),
+    step: z.enum(MAP_FLOW_STEPS),
   }),
   "map.reminder_sent": z.object({
     family_id: z.uuid(),

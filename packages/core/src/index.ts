@@ -13,11 +13,13 @@ export { ACTION_COSTS } from "./action-costs";
 
 export {
   EVENT_SCHEMAS,
+  MAP_FLOW_STEPS,
   WALL_DOORS,
   emitEvent,
   type EventName,
   type EventProps,
   type EventSink,
+  type MapFlowStep,
   type WallDoor,
 } from "./events";
 

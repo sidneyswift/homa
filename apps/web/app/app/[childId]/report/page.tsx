@@ -19,6 +19,7 @@ import { isFamilyAccountOwner } from "../../../../lib/subject-lessons/owner";
 import { listCurrentSubjectLessonSummaries } from "../../../../lib/subject-lessons/store";
 import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
 import { ReportView } from "../../../onboarding/r/[token]/report-view";
+import { CompleteProfilePrompt } from "./complete-profile-prompt";
 import { WelcomeChooser } from "./welcome-chooser";
 
 /**
@@ -36,7 +37,7 @@ export default async function AppReportPage({
   searchParams,
 }: {
   params: Promise<{ childId: string }>;
-  searchParams: Promise<{ welcome?: string }>;
+  searchParams: Promise<{ welcome?: string; fresh?: string }>;
 }) {
   const { childId } = await params;
   const policy = progressRoutePolicy(
@@ -141,7 +142,13 @@ export default async function AppReportPage({
   // The unlock's landing (?welcome=1, set by /api/billing/confirm):
   // the first-subject chooser, rendered only once the family is
   // actually open so a stale URL can never pair a wall with a welcome.
-  const { welcome } = await searchParams;
+  const { welcome, fresh } = await searchParams;
+  // The post-report profile card: only on the fresh-from-scoring landing
+  // (?fresh=1), and only when there is no mailing address yet, so it shows
+  // once, right after the report, and never nags a returning visitor
+  // (funnel work 2026-07-20). The billing welcome chooser takes the moment
+  // when both could apply.
+  const showProfilePrompt = fresh === "1" && !data.family.address_line;
   const scoreById = new Map(report.scores.subjects.map((score) => [score.subjectId, score]));
   const welcomeSubjects =
     welcome === "1" && !wall
@@ -186,6 +193,7 @@ export default async function AppReportPage({
           wall={wall}
         />
       ) : null}
+      {showProfilePrompt ? <CompleteProfilePrompt childName={report.childName} /> : null}
     </>
   );
 }

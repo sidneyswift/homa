@@ -2,18 +2,29 @@
 
 import { useRef, useState } from "react";
 
-import { normalizeUsPhoneE164, US_STATES } from "@homa/core";
+import { US_STATES } from "@homa/core";
 
-import { PhoneClaim } from "../../components/phone-claim";
 import { uploadAvatarPhoto } from "../../lib/avatar-upload";
 
 /**
- * The create-your-family step (founder call 2026-07-08: one onboarding
- * for every door). Right after the account moment, before kids: family
- * name, the parent's name (prefilled from signup or the Google profile),
- * address, cell number, and an optional profile photo. Visual language
- * matches the add-a-child card (labels above inputs, one card) so the
- * two setup moments read as siblings.
+ * The create-your-family step (founder call 2026-07-08: one onboarding for
+ * every door). Right after the account moment, before kids: family name,
+ * the parent's name (prefilled from signup or the Google profile), the
+ * state, and an optional profile photo.
+ *
+ * Funnel fix 2026-07-20 (docs/homa-planning/plans/2026-07-20-onboarding-funnel-drip.md):
+ * the mailing address and cell number left this card. Production showed
+ * ~17% of new accounts stopping at exactly this screen, before answering a
+ * single question, because a full street address and a phone number were
+ * demanded before the parent had seen any value. The two heavy, sensitive
+ * asks move to an optional "complete your profile" card AFTER the first
+ * report is on screen (CompleteProfilePrompt), where the parent has
+ * already done the whole assessment and the mailing-address value framing
+ * ("so Homa can mail materials and point you to activities near you") can
+ * actually land. State stays here: it is one tap, it is not sensitive, and
+ * it is the field Homa needs to follow the right state's homeschool rules.
+ * The server schema already treats address and phone as optional
+ * (mapFamilySetupSchema), so this is a client-only change.
  *
  * The photo uploads straight from the browser to the avatars bucket
  * (owner-scoped storage policies, migration #26) and only its public URL
@@ -38,12 +49,7 @@ export function FamilyStep({
   const [parentName, setParentName] = useState(
     [firstName, lastName].filter(Boolean).join(" "),
   );
-  const [addressLine, setAddressLine] = useState("");
-  const [city, setCity] = useState("");
   const [usState, setUsState] = useState("");
-  const [zip, setZip] = useState("");
-  const [phone, setPhone] = useState("");
-  const [phoneTaken, setPhoneTaken] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -68,12 +74,8 @@ export function FamilyStep({
       setError("Add your name so Homa knows what to call you.");
       return;
     }
-    if (!addressLine.trim() || !city.trim() || !usState || !zip.trim()) {
-      setError("Add your address, it helps Homa follow your state's homeschool rules.");
-      return;
-    }
-    if (!phone.trim() || !normalizeUsPhoneE164(phone)) {
-      setError("That doesn't look like a US cell number. It needs all ten digits.");
+    if (!usState) {
+      setError("Pick your state, it helps Homa follow your state's homeschool rules.");
       return;
     }
     setError(null);
@@ -97,33 +99,13 @@ export function FamilyStep({
         body: JSON.stringify({
           familyName: trimmedFamilyName,
           parentName: trimmedParentName,
-          addressLine: addressLine.trim(),
-          city: city.trim(),
           usState,
-          zip: zip.trim(),
-          phone: phone.trim(),
           ...(avatarUrl ? { avatarUrl } : {}),
         }),
       });
-      const data = (await response.json()) as {
-        ok: boolean;
-        reason?: string;
-        phoneTaken?: boolean;
-      };
+      const data = (await response.json()) as { ok: boolean; reason?: string };
       if (!data.ok) {
-        setError(
-          data.reason === "bad-phone"
-            ? "That doesn't look like a US cell number. It needs all ten digits."
-            : "That didn't save. One more try usually does it.",
-        );
-        setBusy(false);
-        return;
-      }
-      if (data.phoneTaken) {
-        // Profile saved; the number belongs to another family. Offer
-        // the verified claim instead of a dead end (U7); she can also
-        // skip it and keep going.
-        setPhoneTaken(phone.trim());
+        setError("That didn't save. One more try usually does it.");
         setBusy(false);
         return;
       }
@@ -178,92 +160,27 @@ export function FamilyStep({
           className={inputClass}
         />
 
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-address">
-          Street address{" "}
+        <label className="mt-4 block font-medium text-strong" htmlFor="family-state">
+          State{" "}
           <span className="font-normal text-muted">(so Homa can follow your state&apos;s rules)</span>
         </label>
-        {/* address-line1, not street-address: the latter is the token for
-            a WHOLE address in one field, and with separate city/state/zip
-            fields it makes browser autofill dump everything here. */}
-        <input
-          id="family-address"
-          type="text"
-          autoComplete="address-line1"
+        <select
+          id="family-state"
+          autoComplete="address-level1"
           required
-          value={addressLine}
-          onChange={(event) => setAddressLine(event.target.value)}
-          placeholder="123 Maple Street"
+          value={usState}
+          onChange={(event) => setUsState(event.target.value)}
           className={inputClass}
-        />
-
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
-          <div>
-            <label className="block font-medium text-strong" htmlFor="family-city">
-              City
-            </label>
-            <input
-              id="family-city"
-              type="text"
-              autoComplete="address-level2"
-              required
-              value={city}
-              onChange={(event) => setCity(event.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block font-medium text-strong" htmlFor="family-state">
-              State
-            </label>
-            <select
-              id="family-state"
-              autoComplete="address-level1"
-              required
-              value={usState}
-              onChange={(event) => setUsState(event.target.value)}
-              className={inputClass}
-            >
-              <option value="" disabled>
-                State
-              </option>
-              {US_STATES.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.code}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block font-medium text-strong" htmlFor="family-zip">
-              ZIP
-            </label>
-            <input
-              id="family-zip"
-              type="text"
-              inputMode="numeric"
-              autoComplete="postal-code"
-              required
-              value={zip}
-              onChange={(event) => setZip(event.target.value)}
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-phone">
-          Cell number <span className="font-normal text-muted">(so you can text Homa)</span>
-        </label>
-        <input
-          id="family-phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="mobile tel"
-          required
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder="(954) 555-0123"
-          className={inputClass}
-        />
+        >
+          <option value="" disabled>
+            Pick your state
+          </option>
+          {US_STATES.map((state) => (
+            <option key={state.code} value={state.code}>
+              {state.name}
+            </option>
+          ))}
+        </select>
 
         <label className="mt-4 block font-medium text-strong" htmlFor="family-photo">
           Your photo <span className="font-normal text-muted">(optional)</span>
@@ -307,34 +224,13 @@ export function FamilyStep({
           </p>
         ) : null}
 
-        {phoneTaken ? (
-          <>
-            <p className="mt-3 text-sm text-body" role="alert">
-              Everything saved. That number is connected to a different Homa family right
-              now; if it&apos;s yours, verify it and it moves here.
-            </p>
-            <PhoneClaim
-              phone={phoneTaken}
-              phoneDisplay={phoneTaken}
-              onClaimed={() => setPhoneTaken(null)}
-            />
-            <button
-              type="button"
-              onClick={onDone}
-              className="mt-4 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
-            >
-              Continue
-            </button>
-          </>
-        ) : (
-          <button
-            type="submit"
-            disabled={busy}
-            className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
-          >
-            {busy ? "Saving\u2026" : "Continue"}
-          </button>
-        )}
+        <button
+          type="submit"
+          disabled={busy}
+          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+        >
+          {busy ? "Saving…" : "Continue"}
+        </button>
       </form>
     </div>
   );
