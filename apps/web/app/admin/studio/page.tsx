@@ -9,6 +9,7 @@ import {
   getStudioLedger,
   getStudioOutputStats,
   listSandboxFamilies,
+  listSkillRecipeSlugs,
   readSkillPackage,
   type FleetMaterialRow,
   type StudioOutputStats,
@@ -416,8 +417,14 @@ export default async function AdminStudioPage({
   const ledger = await getStudioLedger(30);
   const output = await getStudioOutputStats();
   const skillPackage = await readSkillPackage();
+  // Recipes ship as sibling files now, not SKILL.md sections, so gap
+  // coverage matches against both the section headings and the recipe slugs.
+  const recipeSlugs = await listSkillRecipeSlugs();
   // Filesystem, not the pooler: safe after the db reads.
-  const cosmo = await readCosmoFunnel(skillPackage?.sections ?? []);
+  const cosmo = await readCosmoFunnel([
+    ...(skillPackage?.sections ?? []),
+    ...recipeSlugs,
+  ]);
 
   const visible = ledger.entries.filter((entry) =>
     view === "all" ? true : view === "lab" ? entry.kind === "run" : entry.kind === "material",
