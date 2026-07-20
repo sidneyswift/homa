@@ -58,6 +58,7 @@
     "lint": "turbo run lint",
     "map:narrative-fixtures": "tsx scripts/map-narrative-fixtures.mts",
     "materials:calibrate": "tsx scripts/materials-calibration.mts",
+    "evals:materials-studio": "tsx --tsconfig apps/web/tsconfig.json scripts/materials-studio-eval.mts",
     "morning-research-brief-v2:e2e": "tsx scripts/morning-research-brief-v2-e2e.mts",
     "morning-research-brief-v2:report": "tsx scripts/morning-research-brief-v2-report.mts",
     "progress:reconcile": "tsx scripts/reconcile-child-progress.mts",
