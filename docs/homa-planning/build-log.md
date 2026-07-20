@@ -3,6 +3,45 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
+
+Founder ask: review the last 24h of Material Studio work, inventory
+#homa-inspo against ingested state, fix the ingestion skills so the PNG
+dump and taxonomy deletion cannot recur, and design a validated
+Slack-to-skill pipeline.
+
+**Audit (25-agent workflow over a full Slack pull, adversarially
+verified).** 115 logical drops in #homa-inspo: 39 ingested, 52 partial,
+26 not ingested. Break point 2026-07-19 ~20:25 UTC: Cosmo's repo writes
+landed in an ephemeral sandbox; 19 drops after it (12 curriculums incl.
+Blossom & Root Year 0 with an explicit "Ingest" command) have zero disk
+trace. 14 TPT links permanently lost to expiry because capture waited
+for analysis. 29 drift items confirmed between the ingestion skills and
+the post-PR-#57 repo.
+
+**Shipped.** Full rewrite of `.agents/skills/reference-ingestion` and
+targeted rewrite of `.agents/skills/curriculum-ingestion`: capture
+before analysis, Slack-ts dating, recipes as files (never SKILL.md
+sections), founder-gated anchors, append-only taxonomy with the
+`Subject > Domain` MARBLE_DOMAIN_MAP key law and manifest sha256
+updates, funnel-shaped gap slugs, PR-only shipping, verifier-gated
+:ship:. `.cosmo/scripts/verify-ingestion.py` rewritten (old step 4
+globbed deleted PNGs and failed every ref repo-wide; new version adds a
+staleness preflight, real gap resolution, additive taxonomy assertion,
+curriculum mode, and --regen-index; index.json files are generated,
+never hand-edited). `.cosmo/open-gaps.json` added: 63 acknowledged open
+gaps. Verifier matrix at ship time: 131/191 pass; the 60 failures are
+the honest re-analysis backlog (59 incomplete five-dimension analyses).
+
+**Founder rulings recorded this session** (see the reconciliation
+register): `main-branch-protection`, `fleet-skill-file-cap-removed`
+(D1 resolved by removal; byte caps stay), `golden-exemplar-anchors`
+(D2 ratified), `inspo-originals-offrepo` (gitignore + Blob; Cosmo's
+machine reaches Blob via a 1Password token reference, which requires
+the founder to create the 1Password item). Cosmo machine hygiene ships
+as `.cosmo/scripts/session-start.sh` (fresh branch off origin/main,
+clock-skew and stray-commit warnings), referenced from the skills.
+
 ## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
 
 Founder ask: investigate .cosmo, update materials-studio, and put the

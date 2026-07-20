@@ -1,21 +1,51 @@
 ---
 name: reference-ingestion
-description: Analyze reference materials (worksheets, activities, printables) dropped in #homa-inspo by Aless or Carolyng. Extract structured analysis along five dimensions, store as JSON, cross-reference against materials-studio recipes, update taste signals, and reply with a teach-me-explainer breakdown that gives the non-technical user vocabulary for what they like.
+description: Use when a reference material (worksheet image, activity PDF, printable, screenshot, photo of a physical page, or a bare product link) lands in #homa-inspo, or when draining the ingestion backlog. Captures the drop durably, analyzes it along five dimensions, stores JSON, logs taste, hands off or performs product graduation in the post-Jul-20 fat-skill shape (recipe files, anchors, append-only taxonomy), and replies with a teach-me explainer. For a full curriculum with a philosophy and a sequence, use curriculum-ingestion instead.
 ---
 
 # Reference Ingestion
 
-## When to use
+## When to use, and routing
 
-A reference material (worksheet image, activity PDF, educational printable, screenshot) lands in the **#homa-inspo** Slack channel from Aless or Carolyng. Your job: analyze it, catalog it, detect gaps, update taste, and reply with a structured breakdown that teaches the dropper *why* they like it.
+Something lands in the **#homa-inspo** Slack channel (`C0BHQDC033M`). Route it first:
+
+| Drop looks like | Route |
+|---|---|
+| Single worksheet, activity page, printable, screenshot of one printable | This skill |
+| Multi-page published curriculum, scope-and-sequence, methodology guide | `curriculum-ingestion` |
+| Photo of a physical workbook page or material | This skill, with `printFormat` marked `unknown` |
+| Bare TPT/Etsy/product link, no file | This skill: capture the link target NOW (step 0), then route by what it is |
+| Bulk scrape batch (atlas-style, no Slack message per file) | This skill, with `analysisQuality: "heuristic"`; never log taste from bulk |
+| Text-only feedback or discussion | Not ingestion. Log to `.cosmo/feedback-log.md` if actionable |
+
+Droppers are any founder (Sid, Aless, Carolyng). Taste signals come from founder drops only, never from bulk sources.
+
+## Non-negotiable laws (each one has a scar behind it)
+
+1. **Never commit any binary under `apps/web/agent/skills/`.** The skill package is markdown only. The 2026-07-18 ingest committed 27.5MB of PNGs there, broke the `check:fleet-skills` size caps, and every one of those PNGs was later deleted (PR #57). Images the product uses ship only through the anchor pipeline below.
+2. **Never send a copyrighted original, or an image derived from one, into the product.** External inspo files stay out of git entirely (see step 0). Product anchor images are Homa-authored pages produced on the `/admin/studio` bench and founder approved (founder ruling `golden-exemplar-anchors`, 2026-07-20, ratifying plan section 3.4). Generating exploratory images for your own analysis is fine: keep them as local scratch, do not commit them.
+3. **Taxonomy edits are append-only.** Never re-serialize, re-sort, or dedupe `topics.json`. Topic names are legal duplicates across age bands (spiral curriculum). A 2026-07-18 dedupe-by-name pass silently deleted 33 topics and left 131 dangling edges; PR #58 restored them. Follow the exact sequence in step 8.
+4. **Ship on a fresh branch, PR only, never direct to main** (founder ruling `main-branch-protection`, 2026-07-20; the branch is also protected on GitHub). Start every session with `bash .cosmo/scripts/session-start.sh`: it syncs to `origin/main`, creates the fresh branch, warns about stranded commits, and blocks on clock skew. Cosmo has pushed direct to main and left it red twice; it has also stranded commits on already-merged branches.
+5. **Dates come from the Slack message `ts`, never the machine clock.** The ingest machine's clock has run about 4 days slow and produced wrongly dated ref ids.
+6. **No em dash anywhere**, in this skill's outputs, in ref JSONs, in any graduated prose. `check:fleet-skills` fails on them and a whole cleanup commit (ec25671) exists because of them.
 
 ## Workflow
 
+### 0. Capture immediately, before any analysis
+
+Links expire in hours and files leave Slack. Capture first, think later.
+
+- Auth: resolve the bot token per the committed root `.env.example` (1Password: `op run --env-file=.env.example -- <cmd>`). Never a machine-local env file.
+- Pull the message: `conversations.history` on `C0BHQDC033M` (paginate; more than 100 messages needs cursors; check thread replies too).
+- Download every `files[].url_private` with the bearer token into `.cosmo/inspo-files/` (PDFs) or `.cosmo/inspo-images/` (images). Stream large files; drops over 100MB are normal. These directories are gitignored working copies (founder ruling `inspo-originals-offrepo`, 2026-07-20): never commit an original.
+- Upload each downloaded original to Vercel Blob for durability and record the returned URL in the ref JSON as `blobUrl` (token: `BLOB_READ_WRITE_TOKEN` via the root `.env.example` 1Password reference; `curl -X PUT "https://blob.vercel-storage.com/inspo/<id>/<filename>" -H "Authorization: Bearer $BLOB_READ_WRITE_TOKEN" -H "x-content-type: application/pdf" --data-binary @<file>`). If the token is unavailable, keep the local copy, set `"blobUrl": null`, and note it; do not skip the download.
+- For a bare link: fetch the target page and any free sample file now. If the fetch fails, record the failure in the ref JSON (`"captureFailed": "<reason>"`) so the loss is visible instead of silent. Fourteen TPT links from July are permanently lost because capture waited.
+- Write the stub ref JSON at `.cosmo/references/<id>.json` right away with at least `id`, `sourceChannel`, `sourceMessageTs`, `droppedBy`, `droppedAt` (from Slack `ts`), and the local file paths.
+
 ### 1. Identify the reference
 
-- Note who dropped it (Aless or Carolyng) — this matters for taste signals.
-- Determine the format: worksheet, coloring page, flash card, activity page, poster, game board, other.
-- Assign an id: `ref-<YYYY-MM-DD>-<short-slug>` (e.g. `ref-2026-07-12-dino-counting-mat`).
+- Assign the id: `ref-<YYYY-MM-DD>-<short-slug>`, date from the Slack `ts`.
+- Note who dropped it and the format: worksheet, coloring page, flash card, activity page, poster, game board, photo, other.
 
 ### 2. Analyze along five dimensions
 
@@ -31,13 +61,15 @@ A reference material (worksheet image, activity PDF, educational printable, scre
 
 #### B. Skill targeting (map to Homa taxonomy)
 
-Map to the three-level taxonomy: **subject → domain → topic**.
+Map to the three-level taxonomy: **subject, then domain, then topic**.
 
 - Subject: e.g. `math`, `ela`, `science`
-- Domain: e.g. `counting-cardinality`, `letter-knowledge` (use `TaxonomyDomain.id`)
-- Topic: e.g. `math.count-objects-1-10` (use `TaxonomyTopic.id` bank convention `<subject>.<slug>`)
+- Domain: e.g. `counting-cardinality`, `letter-knowledge` (Homa slug ids, `TaxonomyDomain.id`)
+- Topic: e.g. `math.count-objects-1-10` (bank convention `<subject>.<slug>`)
 - Topic kind: `conceptual`, `procedural`, `representational`, `language`, `meta`
-- If the reference targets something not in the taxonomy, flag it as `unmapped` with a suggested slug.
+- If the reference targets something not in the taxonomy, flag it in `unmappedSkills` with a suggested slug.
+
+**Vocabulary boundary:** the analysis JSON uses Homa slug ids (`math`, `counting-cardinality`). The taxonomy data file `topics.json` uses Marble display names for both subject and domain (`Mathematics`, `Counting & Cardinality`), and the pair must compose to an existing `MARBLE_DOMAIN_MAP` key in `packages/taxonomy/src/mapping.ts`, which is the combined string `<Subject> > <Domain>` (e.g. `Mathematics > Counting & Cardinality`). The two vocabularies never mix. Example pair: analysis says `subject: "math", domain: "counting-cardinality"`; a topics.json entry says `"subject": "Mathematics", "domain": "Counting & Cardinality"`.
 
 #### C. Difficulty calibration
 
@@ -45,7 +77,7 @@ Map to the three-level taxonomy: **subject → domain → topic**.
 |---|---|
 | Age band | estimated months range, e.g. `[36, 60]` |
 | Complexity | single-skill, multi-skill, layered |
-| Prerequisites | list of Homa topic ids the child should have before this |
+| Prerequisites | Homa topic ids the child should have before this |
 | Scaffolding level | high (guided), medium (some support), low (independent) |
 
 #### D. Theming
@@ -56,7 +88,7 @@ Map to the three-level taxonomy: **subject → domain → topic**.
 | Characters | named characters or archetypes present |
 | Visual style | cartoon, realistic, minimalist, hand-drawn, clip-art |
 | Color palette | full-color, black-and-white, limited palette |
-| Appeal drivers | what makes it visually engaging (cute factor, action, detail density) |
+| Appeal drivers | what makes it visually engaging |
 
 #### E. Print format
 
@@ -68,297 +100,178 @@ Map to the three-level taxonomy: **subject → domain → topic**.
 | Ink density | light (parent-friendly), medium, heavy |
 | Color requirement | prints well in B&W, needs color, color optional |
 
+For a photo drop, mark `printFormat` fields `"unknown"` where the photo cannot show them.
+
 ### 3. Store the analysis
 
-Write to `.cosmo/references/<id>.json`:
+Write the full ref JSON at `.cosmo/references/<id>.json`. Keep the existing five-dimension schema (see any recent `ref-*.json` for the shape) and include:
+
+- `recipeMatch` (step 4 output)
+- `analysisQuality`: `"full"` for a real per-item analysis, `"heuristic"` for template-filled bulk entries
+- `stages`: the single source of truth for this drop's pipeline position:
 
 ```json
-{
-  "id": "ref-2026-07-12-dino-counting-mat",
-  "droppedBy": "aless",
-  "droppedAt": "2026-07-12T14:30:00-04:00",
-  "sourceChannel": "homa-inspo",
-  "sourceMessageTs": "1784229811.234149",
-  "format": "worksheet",
-  "title": "Dinosaur Counting Mat (1-10)",
-  "layout": {
-    "structure": "grid",
-    "spacing": "airy",
-    "visualHierarchy": "illustration-dominant",
-    "whiteSpaceRatio": 0.35,
-    "flowDirection": "top-down"
-  },
-  "skillTargeting": {
-    "subject": "math",
-    "domain": "counting-cardinality",
-    "topics": [
-      {
-        "id": "math.count-objects-1-10",
-        "kind": "procedural",
-        "mapped": true
-      }
-    ],
-    "unmappedSkills": []
-  },
-  "difficulty": {
-    "ageBandMonths": [36, 60],
-    "complexity": "single-skill",
-    "prerequisites": ["math.rote-count-1-10"],
-    "scaffolding": "medium"
-  },
-  "theming": {
-    "themeType": "interest-led",
-    "characters": ["cartoon dinosaurs"],
-    "visualStyle": "cartoon",
-    "colorPalette": "full-color",
-    "appealDrivers": ["cute factor", "kid-favorite subject"]
-  },
-  "printFormat": {
-    "pageSize": "letter",
-    "orientation": "portrait",
-    "margins": "standard",
-    "inkDensity": "medium",
-    "colorRequirement": "prints well in B&W"
-  },
-  "recipeMatch": {
-    "matchedRecipes": ["counting-mat"],
-    "gaps": []
-  },
-  "notes": "Clean layout. Good balance of illustration and exercise space."
+"stages": {
+  "captured": "2026-07-20T18:04:00Z",
+  "analyzed": true,
+  "tasteLogged": true,
+  "graduation": { "kind": "recipe", "targets": ["references/recipes/<slug>.md"], "commit": null },
+  "taxonomy": { "proposedTopics": [], "commit": null },
+  "shippedPr": null,
+  "slackReplyTs": null,
+  "shipReaction": false
 }
 ```
 
-Update the manifest at `.cosmo/references/index.json`:
+`graduation.kind` is one of `recipe` (new format file needed), `pattern` (edit an existing recipe file), `subject` (teaching insight for a subjects or approaches file), `none`, or `pending`.
 
-```json
-{
-  "references": [
-    {
-      "id": "ref-2026-07-12-dino-counting-mat",
-      "title": "Dinosaur Counting Mat (1-10)",
-      "droppedBy": "aless",
-      "droppedAt": "2026-07-12T14:30:00-04:00",
-      "subject": "math",
-      "domain": "counting-cardinality",
-      "format": "worksheet"
-    }
-  ]
-}
+Then regenerate the manifest instead of hand-editing it:
+
+```
+python3 .cosmo/scripts/verify-ingestion.py --regen-index
 ```
 
-If `index.json` already exists, append to the `references` array.
+`index.json` is a generated view of the ref JSONs. Never append to it by hand; hand edits are how 37 refs went missing from it. `.cosmo/inspo-catalog.md` is a historical narrative log, not a status system; do not treat its entries as pipeline state.
 
-### 4. Generate Homa-style reference image
+### 4. Cross-reference against materials-studio recipes
 
-Never store copyrighted originals in the repo. Instead, transform the
-reference into a Homa-style example that captures the structural patterns
-in Homa's own design language.
+List the actual shipped recipes at analysis time:
 
-**Process:**
+```
+ls apps/web/agent/skills/materials-studio/references/recipes/
+```
 
-1. If the reference is a PDF, extract only the actual worksheet/material
-   pages (skip cover pages, terms of use, alignment charts, ads). Use
-   pymupdf (`import fitz`) to render the key pages as PNGs at 2x zoom
-   for clean detail.
-2. **Pass the extracted page images as visual references** to gpt-image-2
-   alongside your prompt. The model can *see* the original layout —
-   panel structure, spacing, fold geometry, visual hierarchy — and
-   produce a far more accurate Homa-style version than text description
-   alone. Use the OpenAI images API with the extracted PNGs as input
-   images (base64-encoded).
-3. Write a gpt-image-2 prompt that describes **what to keep and what to
-   change**. The prompt steers the model away from copying copyrighted
-   content while preserving structural patterns:
-   - Keep: layout structure, panel geometry, spacing ratios, visual
-     hierarchy, element placement, fold lines, section organization
-   - Change: subject/topic (use a different one), all text content,
-     characters (use Homa's design language), branding (none), color
-     palette (Homa's warm playful palette)
-   - Example prompt: "Using the reference image as a structural guide,
-     create a Homa-style [format] for [different topic]. Keep the same
-     panel layout, fold geometry, and spacing. Replace all text with
-     [new content]. Use Fredoka font style, warm earthy colors
-     (#6b6259, #b3a492, #f5f0e8), hand-drawn doodle aesthetic. No
-     branding, no copyrighted characters."
-4. Generate via the Vercel AI Gateway:
-   - Model: `gpt-image-2` (via `$OPENAI_BASE_URL`)
-   - Size: `1536x1024` for landscape formats (foldables), `1024x1536`
-     for portrait formats (outlines, worksheets)
-   - Source API key: `source ~/.gbrain/env.sh` for `OPENAI_API_KEY` and
-     `OPENAI_BASE_URL`
-   - Reference images: pass up to 4 extracted page PNGs as base64 input
-     images. Pick the most structurally informative pages (the actual
-     worksheet/activity pages, not cover or filler).
+Never match against a remembered list; the library grows and any hardcoded list in prose goes stale (33 recipe files ship today).
 
-   ```python
-   import fitz, base64, requests, os
+- **Which existing recipe would produce this?** Record filename slugs in `recipeMatch.matchedRecipes`.
+- **What patterns have no recipe?** Record in `recipeMatch.gaps`. **Gap names must be lowercase multi-word hyphen slugs** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). The coverage tracker in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else. Free-prose description goes in `notes`.
+- If a gap later graduates under a different recipe name, a `GAP_ALIASES` entry in `apps/web/lib/materials/cosmo-funnel.ts` must be added in the same change that ships the recipe.
 
-   # Extract key pages as base64 PNGs
-   doc = fitz.open(pdf_path)
-   reference_images = []
-   for page_num in key_page_indices:  # e.g. [2, 3] — the actual worksheet pages
-       page = doc[page_num]
-       pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-       png_bytes = pix.tobytes("png")
-       b64 = base64.b64encode(png_bytes).decode()
-       reference_images.append({
-           "type": "input_image",
-           "image_url": f"data:image/png;base64,{b64}"
-       })
-   doc.close()
+### 5. Update taste signals
 
-   # Generate with visual references
-   response = requests.post(
-       f"{os.environ['OPENAI_BASE_URL']}/images/generations",
-       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
-       json={
-           "model": "gpt-image-2",
-           "prompt": prompt,  # structural description + what to change
-           "size": size,      # "1024x1536" or "1536x1024"
-           "image": reference_images,  # extracted page PNGs as visual input
-       }
-   )
-   ```
-
-5. Save the generated image to
-   `apps/web/agent/skills/materials-studio/references/homa-<format>-reference.png`
-   (e.g. `homa-foldable-reference.png`, `homa-outline-reference.png`).
-6. If the reference introduces a **new recipe type** not yet in the
-   materials-studio skill, add a recipe section to
-   `apps/web/agent/skills/materials-studio/SKILL.md` with:
-   - A `Reference image:` pointer to the generated image
-   - HTML/CSS recipe code for the format
-   - Creation path guidance (image-direct vs html vs hybrid)
-   - Design patterns extracted from the reference
-   Also update the creation path judgment rules in the same skill.
-7. If the reference matches an **existing recipe**, add the generated
-   image as an additional reference (rename to avoid collisions, e.g.
-   `homa-foldable-reference-2.png`).
-
-**What the prompt should capture vs. what it should change:**
-
-| Capture (structural pattern) | Change (expression) |
-|---|---|
-| Panel layout, fold geometry | Different subject/topic |
-| Two-column instruction/work split | Different field labels |
-| Section header style | Different title text |
-| Spacing, density, visual hierarchy | Homa's design language |
-| Scaffold structure (blank/filled variants) | Original example content |
-
-| Never include | Why |
-|---|---|
-| Original brand name or logo | Copyright |
-| Original characters (e.g. specific sheep mascot) | Copyright |
-| Exact text/problems from original | Copyright |
-| Terms of use, alignment charts | Not the material |
-
-### 5. Cross-reference against materials-studio recipes
-
-The materials-studio supports these creation paths: **image-direct**, **html**, **hybrid**. It has proven recipes for:
-
-- Coloring pages, posters (image-direct)
-- Tracing guides, handwriting practice (html — letter boxes, three-line guides)
-- Counting mats, number worksheets (html or image-direct)
-- Flash cards (html)
-- Themed worksheets with art + exercises (hybrid)
-- Foldables / interactive notebook inserts (hybrid or image-direct)
-- Structured outlines / essay scaffolds (html)
-
-For each reference, ask:
-- **Which existing recipe would produce this?** Record in `recipeMatch.matchedRecipes`.
-- **What patterns does this reference use that we have NO recipe for?** Record in `recipeMatch.gaps` with a description of what the recipe would need to do.
-
-Gap examples: "maze generator", "cut-and-paste sorting activity", "multi-page booklet", "board game layout".
-
-### 6. Update taste signals
-
-Append to `.cosmo/homa-taste.md` under a section for the dropper:
+Append to `.cosmo/homa-taste.md` under the dropper's section, founder drops only:
 
 ```markdown
-### Aless — 2026-07-12
+### Aless, 2026-07-12
 - Dropped: Dinosaur Counting Mat (ref-2026-07-12-dino-counting-mat)
 - Signal: prefers airy grid layouts over dense worksheets
 - Signal: gravitates toward interest-led theming (dinosaurs) over neutral
-- Signal: values illustration-dominant visual hierarchy
 ```
 
-Look for patterns across multiple drops from the same person. When you see a pattern emerge (3+ consistent signals), promote it to a **confirmed preference** at the top of their section.
+When 3+ consistent signals from the same person emerge, promote to a confirmed preference at the top of their section. Bulk-scrape refs never generate taste entries; their analysis is heuristic, not a founder's choice.
 
-### 7. Graduate to materials-studio
+### 6. Graduate to the product (the fat-skill shapes)
 
-If the reference demonstrates a format pattern NOT already in materials-studio SKILL.md:
-- Write a new recipe section directly into `apps/web/agent/skills/materials-studio/SKILL.md` (before "Design rules (binding)")
-- Include: reference image pointer, HTML/CSS template, creation path guidance, design patterns
-- Follow the exact format of existing recipes (foldable, outline, cut-and-paste sections)
+This is where Homa actually gets smarter. Every write below follows the post-PR-#57 structure. If you cannot run the required guards in your environment, stop here: set `graduation.kind` accordingly, fill `graduation.targets` with the intended paths, leave `commit: null`, and say so in your Slack reply. An honest handoff beats a broken push.
 
-If the reference matches an existing recipe but demonstrates a NEW design pattern:
-- Add the pattern to the existing recipe section's design patterns list
+**Budget first:** the file-count cap was removed by founder ruling `fleet-skill-file-cap-removed` (2026-07-20), but the byte caps remain binding: 512KB per file, 2MB per package (`check:fleet-skills`). Recipe files are small markdown; if a batch would approach the package byte cap, stop and escalate.
 
-### 8. Update activity format registry
+#### 6a. New format: a recipe file, never a SKILL.md section
 
-- Add or update the format entry in `apps/web/agent/activity-formats.md`
-- Include slug, name, what it is, best for, subjects, ages, creation path, example activity
-- Follow the exact format of existing entries
+Create `apps/web/agent/skills/materials-studio/references/recipes/<gap-slug>.md`:
 
-### 9. Enrich taxonomy
+- Plain markdown, `# Title` first line, **no frontmatter**
+- If a golden anchor exists for the format, a first paragraph: `Golden anchor: pass anchorIds: ["<id>"] to generate_image ... the anchor sets the visual bar, not the specifics`
+- When-to-use prose, a `Great for:` line
+- Creation path: `html`, `hybrid`, or `image-direct`, with the reasoning
+- A binding section `Design patterns (all binding for <slug>):` with bullet rules
+- For html and hybrid paths, a worked HTML snippet in a fenced code block
 
-If the reference targets concepts not in `packages/taxonomy/data/topics.json`:
-- Add topics directly. Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL", subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`
-- Run `pnpm --filter @homa/taxonomy validate` after adding
-- Update topic counts in `packages/taxonomy/data/manifest.json`
+Then add exactly one row to the Format library index table in `apps/web/agent/skills/materials-studio/SKILL.md` (format | reach for it when | recipe file). Recipes as inline SKILL.md sections are dead; PR #57 relocated them all to files and the router just indexes them.
 
-### 10. Write teaching approach rules
+#### 6b. Existing format, new pattern
 
-If the reference reveals how a subject should be taught at a specific age:
-- Write the rule directly into materials-studio SKILL.md's "Subject decision rules" section
-- Examples: "For phonics practice at K-2 level, prefer multi-sensory formats (write + cut + paste) when the parent hasn't specified a format." or "For math operations at grades 4-6, color-coded step sequences aid memorization."
+Edit that recipe file's design-patterns list. Update, do not duplicate. Never create `<slug>-2` variants.
 
-### 11. Reply in Slack thread
+#### 6c. Teaching or pedagogy insight
 
-Use the **teach-me-explainer** technique from finding-unknowns: give the non-technical user vocabulary to describe what they are responding to.
+Write it into `apps/web/agent/skills/materials-studio/references/subjects/<name>.md` or `references/approaches/<name>.md` (create the file plus its routing-table row in SKILL.md when new). Only a rule binding for every page of a whole subject belongs in the router itself, and that is rare.
 
-Structure your reply:
+#### 6d. Activity format registry
+
+Add the entry to `apps/web/agent/activity-formats.md` with the exact slug line format the coverage matcher parses:
+
+```markdown
+- **Slug:** `[<slug>]`
+```
+
+plus name, what it is, best for, subjects, ages, creation path, example activity, following existing entries.
+
+#### 6e. Anchors are founder-gated; you propose, never ship
+
+The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, a Golden anchors table row in materials-studio SKILL.md, and the `anchorIds` paragraph in the matching recipe file. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
+
+Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the five writes. Two of those writes (the SKILL.md anchor-table row and the recipe file's `anchorIds` paragraph) have no automated guard and must be hand-checked. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
+
+### 7. Guards for graduation writes
+
+Run before pushing, from the repo root:
+
+- `pnpm check:fleet-skills` (package hygiene, size caps, em-dash ban)
+- `pnpm check:materials` (cosmo-funnel coverage and alias resolution)
+- `pnpm check:taxonomy` when taxonomy was touched (step 8)
+
+A red guard means fix or hand off, never push anyway.
+
+### 8. Enrich taxonomy (exact sequence, append-only)
+
+If the reference targets concepts missing from the taxonomy:
+
+1. **Append** new topic objects to the `topics` array in `packages/taxonomy/data/topics.json`, and bump the file's `topicCount` field by the same amount (the file shape is `{version, topicCount, topics: [...]}`). Topic shape: `{ id: "mt_<10-char-random>", type, subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`. `type` is usually `"CONCEPTUAL"` or `"PROCEDURAL"`; `"REPRESENTATIONAL"`, `"LANGUAGE"`, and `"META"` are valid when the concept genuinely is one. Append at the end; do not touch existing entries.
+2. `subject` and `domain` are both Marble display names, and the pair composed as `<Subject> > <Domain>` (e.g. `Mathematics > Counting & Cardinality`) must exactly match an existing `MARBLE_DOMAIN_MAP` key in `packages/taxonomy/src/mapping.ts`. A genuinely new pair requires a `mapping.ts` edit in the same change.
+3. `pnpm taxonomy:slugs` (regenerates `data/homa-slug-map.json`)
+4. `pnpm taxonomy:progress` (regenerates `src/progress.generated.ts`)
+5. Update `packages/taxonomy/data/manifest.json`: the counts AND the `bytes` + `sha256` entry in `manifest.files` for every data file the change touched (at minimum `topics.json`; `shasum -a 256 <file>` gives the hash). A stale checksum guarantees a red `check:taxonomy`.
+6. `pnpm check:taxonomy` must exit 0.
+7. Sanity diff: `git diff --stat` on `topics.json` must show insertions only. The topic count (`topicCount` and the array length) must strictly grow. Never trust your own summary of what changed; the 07-18 incident claimed "+8 topics" and netted -29.
+
+There is no `pnpm --filter @homa/taxonomy validate` command. It never existed; the real gate is `pnpm check:taxonomy`.
+
+### 9. Reply in the Slack thread
+
+Use the teach-me-explainer technique: give the non-technical dropper vocabulary for what they are responding to.
 
 1. **One-line summary**: what this reference is and what skill it targets.
-2. **What makes this work** (2-3 bullets): name the design qualities using approachable vocabulary. Explain *why* these qualities matter for the child.
-   - Example: "You might be responding to the _visual hierarchy_ — the way the main activity dominates the page while instructions stay small. That keeps the child focused on doing, not reading."
-   - Example: "The _airy spacing_ gives each counting group its own breathing room. Dense pages overwhelm younger kids; this one won't."
-3. **How Homa could make this**: which recipe path we would use, or flag if this is a gap.
-4. **What we learned**: one sentence on the taste signal ("You and Aless both gravitate toward illustration-heavy layouts — that's a pattern we're tracking").
+2. **What makes this work** (2-3 bullets): name the design qualities in approachable words and why they matter for the child.
+3. **How Homa could make this**: which recipe path, or name the gap honestly.
+4. **What we learned**: one sentence on the taste signal.
 
-Keep it warm, concrete, and jargon-light. These are homeschool moms, not designers. The goal is to give them words for their intuition so future feedback gets sharper.
+Keep it warm, concrete, and jargon-light. These are homeschool moms, not designers.
+
+### 10. Verify, then react
+
+Run the gate:
+
+```
+python3 .cosmo/scripts/verify-ingestion.py <ref-id>
+```
+
+React to the original Slack drop with :ship: **only on exit 0**, and only after the thread reply was actually sent (the one thing the script cannot see). The :ship: reaction is the verified-ingestion marker; its absence means the drop is not done. If the verifier is blocked because your checkout is stale, sync to `origin/main` first; a verdict from a stale tree is worthless.
 
 ## File locations
 
 | What | Path |
 |---|---|
-| Individual reference | `.cosmo/references/<id>.json` |
-| Reference manifest | `.cosmo/references/index.json` |
+| Ref JSON (canonical per-drop truth) | `.cosmo/references/<id>.json` |
+| Manifest (generated, never hand-edited) | `.cosmo/references/index.json` |
+| Open gap backlog (machine-readable) | `.cosmo/open-gaps.json` |
 | Taste model | `.cosmo/homa-taste.md` |
-| Materials-studio skill | `apps/web/agent/skills/materials-studio/SKILL.md` |
-| Taxonomy types | `packages/taxonomy/src/types.ts` |
+| Downloaded originals | `.cosmo/inspo-files/`, `.cosmo/inspo-images/` |
+| Recipes | `apps/web/agent/skills/materials-studio/references/recipes/<slug>.md` |
+| Subject and approach docs | `.../references/subjects/`, `.../references/approaches/` |
+| Skill router (index tables only) | `apps/web/agent/skills/materials-studio/SKILL.md` |
+| Anchor images | `apps/web/lib/materials/anchor-sources/<id>.jpg` |
+| Anchor registry | `apps/web/lib/materials/anchors.ts` |
+| Anchor bytes (generated) | `apps/web/lib/materials/anchor-bytes.generated.ts` |
+| Anchor build script | `scripts/build-material-anchors.mts` |
+| Gap aliases and funnel | `apps/web/lib/materials/cosmo-funnel.ts` |
 | Activity format registry | `apps/web/agent/activity-formats.md` |
 | Taxonomy topics | `packages/taxonomy/data/topics.json` |
-| Taxonomy manifest | `packages/taxonomy/data/manifest.json` |
-
-## Post-ingestion verification
-
-After completing all steps above and confirming the ref JSON was written correctly:
-
-1. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji.
-2. This signals to Sid (and the dropper) that the material has been fully ingested through the reference-ingestion skill.
-3. Only react AFTER verifying:
-   - The ref JSON exists at `.cosmo/references/<id>.json` with all 5 dimensions
-   - The index.json was updated
-   - The taste model was updated
-   - The teach-me-explainer reply was sent
-4. If any step failed or was skipped, do NOT react with 🚢 — fix the issue first.
-
-The 🚢 emoji is a **verified ingestion marker**. Its presence on a message means "this drop was fully processed through the reference-ingestion skill." Its absence means it wasn't.
+| Taxonomy domain map | `packages/taxonomy/src/mapping.ts` |
+| Verifier | `.cosmo/scripts/verify-ingestion.py` |
 
 ## Notes
 
-- This skill modifies product files directly: materials-studio SKILL.md, activity-formats.md, taxonomy data, and subject decision rules. Every write makes Homa smarter for the next family that asks for a material or curriculum.
-- If you cannot determine a dimension (e.g. print format from a low-res screenshot), mark it `"unknown"` and note why.
-- When in doubt about taxonomy mapping, check the taxonomy data files in `packages/taxonomy/data/`.
-- One reference per JSON file. One analysis per Slack message drop. Every drop should leave the product measurably smarter: at minimum a taste log entry, ideally also a recipe, format entry, or taxonomy addition.
+- One reference per JSON file, one analysis per drop. Every drop should leave the product measurably smarter: at minimum a taste entry, ideally a recipe, format entry, or taxonomy addition.
+- If you cannot determine a dimension, mark it `"unknown"` and say why.
+- Never copy this skill's prose into anything under `apps/web/agent/skills/`; product skill text has its own voice rules and guards.

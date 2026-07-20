@@ -6,6 +6,18 @@ Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo mon
 
 **Read next, in order:** [`BUILD.md`](BUILD.md) (the engineering entry point: reading order, build phases, non-negotiable laws) → [`docs/homa-planning/13-mr-prd.md`](docs/homa-planning/13-mr-prd.md) (the product contract). For the repo's file-by-file layout, see [`README.md`](README.md)'s Repo map.
 
+## Co-founder Slack: feedback and references
+
+There is a Slack workspace where the non-technical, phone-based co-founders
+build Homa with us. They drop feedback and reference material (reference
+images, curriculums, example worksheets they like) into `#homa-inspo` and
+`#homa-feedback`. A Slack agent named Cosmo sometimes ingests these
+automatically, but it often misses them. When drops go uningested, pull them
+in with the [`reference-ingestion`](.agents/skills/reference-ingestion/SKILL.md)
+skill (single reference images, worksheets, examples) or the
+[`curriculum-ingestion`](.agents/skills/curriculum-ingestion/SKILL.md) skill
+(full curriculums), which feed material-studio and Homa's other capabilities.
+
 ## Agent capabilities: fat skills over narrow tools
 
 When changing what Homa can do for families, **start at the skill layer, not
