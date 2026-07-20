@@ -2,12 +2,7 @@ import Link from "next/link";
 
 import { ageInMonths, getMapSubject, isInScoredRange, MONTH_PLAN_SUBJECT } from "@homa/core";
 
-import type { ChildRecord } from "../../../lib/family";
-import {
-  currentWeekIndex,
-  type DashboardPlan,
-  type DashboardReport,
-} from "../../../lib/dashboard";
+import { currentWeekIndex, type DashboardPlan } from "../../../lib/plan-week";
 import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
@@ -69,6 +64,16 @@ interface FocusRow {
   retestDue: boolean;
 }
 
+/** The slice of a child row this board actually reads. ChildRecord
+ * satisfies it structurally, and so does the canvas's fetched payload,
+ * so the board renders server-fed or client-fed without adapters. */
+export interface PlannerKid {
+  id: string;
+  name: string;
+  birth_month: string;
+  avatar_url: string | null;
+}
+
 export function PlannerView({
   kids,
   reports,
@@ -76,15 +81,22 @@ export function PlannerView({
   timeZone,
   now,
   focusChildId,
+  surface = "page",
 }: {
-  kids: ChildRecord[];
-  reports: Map<string, DashboardReport>;
+  kids: PlannerKid[];
+  reports: Map<string, { token: string | null }>;
   plans: DashboardPlan[];
   timeZone: string;
   now: Date;
   /** One kid selected in the context switcher, or null for everyone. */
   focusChildId: string | null;
+  /** "canvas" when the board renders beside the chat: the ask-Homa
+   * button disappears (she is already right there), the day grid stays
+   * one column for the narrow panel, and month links open a new tab so
+   * the conversation is never navigated away from. */
+  surface?: "page" | "canvas";
 }) {
+  const canvas = surface === "canvas";
   const nowMs = now.getTime();
   const plansByKid = new Map<string, DashboardPlan[]>();
   for (const plan of plans) {
@@ -172,16 +184,24 @@ export function PlannerView({
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
             This week {"\u00b7"} {weekSpanLabel(now, timeZone)}
           </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1
+            className={
+              canvas
+                ? "mt-1.5 font-display text-xl font-semibold leading-tight tracking-[-0.015em] text-strong"
+                : "mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong"
+            }
+          >
             {focusKid ? `${focusKid.name}'s week` : "Your week"}
           </h1>
         </div>
-        <Link
-          href="/app"
-          className="rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
-        >
-          Ask Homa to adjust the week
-        </Link>
+        {canvas ? null : (
+          <Link
+            href="/app"
+            className="rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+          >
+            Ask Homa to adjust the week
+          </Link>
+        )}
       </header>
 
       {focusRows.length === 0 ? (
@@ -216,6 +236,7 @@ export function PlannerView({
                   <Link
                     key={child.id}
                     href={`/onboarding/r/${token}`}
+                    target={canvas ? "_blank" : undefined}
                     className="inline-flex min-h-10 items-center rounded-pill bg-brand px-4 py-2 text-xs font-semibold text-on-brand transition-colors hover:bg-brand-hover"
                   >
                     Open {child.name}&apos;s report
@@ -280,6 +301,7 @@ export function PlannerView({
                     gate 2026-07-11). */}
                 <Link
                   href={row.planHref}
+                  target={canvas ? "_blank" : undefined}
                   className="text-[0.72rem] font-semibold text-brand hover:underline"
                 >
                   full month
@@ -289,7 +311,7 @@ export function PlannerView({
           </div>
 
           <div className="mt-3">
-            <DayGrid days={days} plans={dayPlans} />
+            <DayGrid days={days} plans={dayPlans} singleColumn={canvas} />
           </div>
 
           {/* Right under the boxes it forgives (reader gate 2026-07-11:

@@ -17,6 +17,11 @@ import {
 } from "./progress-message-parts";
 import { ProgressQuestionCard } from "./progress-question-card";
 import { ProgressUpdateChip } from "./progress-update-chip";
+import {
+  parsePlannerOpenPart,
+  PlannerCard,
+  type PlannerOpenSignal,
+} from "./planner-canvas";
 import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
 import { WorkedForLine, workedForSteps } from "./worked-for";
 
@@ -72,6 +77,13 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Final kept", detail: output.title };
   }
+  if (
+    part.toolName === "edit_plan" &&
+    output.updated === true &&
+    typeof output.summary === "string"
+  ) {
+    return { label: "Planner updated", detail: output.summary };
+  }
   return null;
 }
 
@@ -98,6 +110,7 @@ type AssistantItem =
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "chip"; chip: MemoryChipContent }
   | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
+  | { kind: "planner"; signal: PlannerOpenSignal }
   | SourcedProgressAssistantItem;
 
 function assistantItems(message: EveMessage): AssistantItem[] {
@@ -124,6 +137,11 @@ function assistantItems(message: EveMessage): AssistantItem[] {
         card: snapCard,
         sourceActionKey: `${message.id}:${partIndex}`,
       });
+      continue;
+    }
+    const plannerSignal = parsePlannerOpenPart(part);
+    if (plannerSignal) {
+      items.push({ kind: "planner", signal: plannerSignal });
       continue;
     }
     if (
@@ -164,6 +182,8 @@ function AssistantItemView({
   activeSnapPartKey,
   onSnapAddFiles,
   onSnapTypeInstead,
+  childNameById,
+  onOpenPlanner,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
@@ -174,6 +194,8 @@ function AssistantItemView({
   activeSnapPartKey?: string;
   onSnapAddFiles?: (files: readonly File[]) => void;
   onSnapTypeInstead?: () => void;
+  childNameById?: ReadonlyMap<string, string>;
+  onOpenPlanner?: (signal: PlannerOpenSignal) => void;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -208,6 +230,17 @@ function AssistantItemView({
               ? onSnapTypeInstead
               : undefined
           }
+        />
+      );
+    case "planner":
+      return (
+        <PlannerCard
+          childName={
+            item.signal.childId
+              ? childNameById?.get(item.signal.childId) ?? null
+              : null
+          }
+          onOpen={onOpenPlanner ? () => onOpenPlanner(item.signal) : undefined}
         />
       );
     case "progress_update":
@@ -269,6 +302,7 @@ export function MessageView({
   activeSnapPartKey,
   onSnapAddFiles,
   onSnapTypeInstead,
+  onOpenPlanner,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -290,6 +324,8 @@ export function MessageView({
   activeSnapPartKey?: string;
   onSnapAddFiles?: (files: readonly File[]) => void;
   onSnapTypeInstead?: () => void;
+  /** Reopens the planner canvas from a transcript planner card. */
+  onOpenPlanner?: (signal: PlannerOpenSignal) => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -338,6 +374,8 @@ export function MessageView({
           activeSnapPartKey={activeSnapPartKey}
           onSnapAddFiles={onSnapAddFiles}
           onSnapTypeInstead={onSnapTypeInstead}
+          childNameById={childNameById}
+          onOpenPlanner={onOpenPlanner}
         />
       ))}
     </div>
@@ -362,6 +400,8 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   // own job (copy-review 2026-07-13); plain setup language instead.
   load_skill: "getting set up…",
   manage_child_progress: "updating progress…",
+  open_planner: "opening the planner…",
+  edit_plan: "updating the planner…",
 };
 
 /** The skill whose load marks a material build starting; the studio

@@ -100,11 +100,21 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
   );
 }
 
-export function DayGrid({ days, plans }: { days: PlannerDay[]; plans: PlannerDayPlan[] }) {
+export function DayGrid({
+  days,
+  plans,
+  singleColumn = false,
+}: {
+  days: PlannerDay[];
+  plans: PlannerDayPlan[];
+  /** The chat's planner canvas is ~half a viewport wide: five viewport-
+   * breakpoint columns would crush there, so it stacks the days. */
+  singleColumn?: boolean;
+}) {
   const plansByKey = useMemo(() => new Map(plans.map((plan) => [plan.key, plan])), [plans]);
 
   return (
-    <div className="grid gap-3 md:grid-cols-5">
+    <div className={singleColumn ? "grid gap-3" : "grid gap-3 md:grid-cols-5"}>
       {days.map((day) => (
         <section
           key={day.cell.label}
