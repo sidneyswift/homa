@@ -36,3 +36,7 @@ homa-template/
 # live in Blob (founder ruling inspo-originals-offrepo, 2026-07-20).
 .cosmo/inspo-files/
 .cosmo/inspo-images/
+
+# Python bytecode
+__pycache__/
+*.pyc
