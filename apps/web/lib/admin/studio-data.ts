@@ -476,6 +476,23 @@ export function skillReferenceImagePath(fileName: string): string {
   return path.join(skillDir(), "references", fileName);
 }
 
+/** Shipped recipe slugs: one per file under references/recipes/. Since the
+ * fat-skill restructure, recipes live as sibling files (not SKILL.md
+ * sections), so these are the canonical "what shipped" set for gap
+ * coverage. Read fresh per call; a newly graduated recipe counts with no
+ * code change. */
+export async function listSkillRecipeSlugs(): Promise<string[]> {
+  try {
+    const entries = await readdir(path.join(skillDir(), "references", "recipes"));
+    return entries
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => name.slice(0, -3))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
 /** The deployed tool surface: module names under agent/tools. Same
  * dual-root resolution as skillDir. */
 async function listAgentToolNames(): Promise<string[]> {

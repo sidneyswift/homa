@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1601,
+  "topicCount": 1634,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -31321,7 +31321,7 @@
       "id": "mt_nXD4le6zsX",
       "type": "PROCEDURAL",
       "subject": "Mathematics",
-      "domain": "Number & Place Value",
+      "domain": "Number Representation & Place Value",
       "name": "Ten-Frame Representation",
       "description": "Represent a given number by filling in circles on a ten frame; use ten-frames to visualize addition by 'making ten' first",
       "ageRangeStart": 4,
@@ -31339,7 +31339,7 @@
       "id": "mt_RgkrH1bkEC",
       "type": "PROCEDURAL",
       "subject": "English",
-      "domain": "Phonics & Word Study",
+      "domain": "Phonics & Word Reading",
       "name": "CVC Words: Short A",
       "description": "Read and write CVC words with short 'a' vowel sound (cat, hat, map, bat, can, fan); segment and blend individual phonemes",
       "ageRangeStart": 5,
@@ -31357,7 +31357,7 @@
       "id": "mt_8HK395fyjN",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Organisms & Life Processes",
       "name": "Earthworm Biology",
       "description": "Understand earthworm anatomy (segments, clitellum, setae), habitat, diet, and role in soil health and composting",
       "ageRangeStart": 5,
@@ -31375,7 +31375,7 @@
       "id": "mt_9Bz9DqsHd4",
       "type": "CONCEPTUAL",
       "subject": "Science",
-      "domain": "Life Science",
+      "domain": "Insects & Minibeasts",
       "name": "Insect Anatomy & Classification",
       "description": "Identify basic insect body parts (head, thorax, abdomen, 6 legs, antenna, wings) and distinguish insects from other small creatures (spiders, worms)",
       "ageRangeStart": 4,
@@ -31387,6 +31387,630 @@
         "Sort pictures of small creatures into 'insect' and 'not insect'"
       ],
       "assessmentPrompt": "Could {{name}} tell you what makes something an insect and point out the body parts on a picture?",
+      "standards": []
+    },
+    {
+      "id": "mt_i2F1nWxJjv",
+      "type": "REPRESENTATIONAL",
+      "subject": "Mathematics",
+      "domain": "Algebra",
+      "name": "Numbers on a number line",
+      "description": "Understand inequalities as statements comparing expressions, represent solutions on a number line, and solve simple linear inequalities using the same inverse-operation methods as equations",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 14,
+      "centrality": 0.1559507523939808,
+      "evidence": [
+        "Write an inequality from a worded constraint (e.g., 'must be at least 12' \u2192 x \u2265 12)",
+        "Represent the solution set of an inequality on a number line with open or closed circles",
+        "Solve a one-step or two-step inequality such as 3x + 1 < 10"
+      ],
+      "assessmentPrompt": "Can {{name}} solve an inequality like 2x + 1 < 9, show the answer on a number line, and explain what all the solutions have in common?",
+      "standards": [
+        "ccss-math:6.EE.8",
+        "ccss-math:7.EE.4b",
+        "uk-nc-2013:KS3.Maths.Alg.7"
+      ]
+    },
+    {
+      "id": "mt_MyGblah2yY",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Fractions",
+      "name": "Understanding fractions",
+      "description": "Write simple fractions (e.g. 1/2 of 6 = 3) and recognise the equivalence of 2/4 and 1/2",
+      "ageRangeStart": 6,
+      "ageRangeEnd": 7,
+      "centrality": 0.1956224350205198,
+      "evidence": [
+        "Write 1/2 of 10 = 5",
+        "Explain that 2/4 is the same as 1/2 using a diagram",
+        "Calculate simple unit fractions of quantities and write the result"
+      ],
+      "assessmentPrompt": "If {{name}} has 6 strawberries and eats half of them, can they write that as \"1/2 of 6 = 3\" \u2014 and explain why 2/4 and 1/2 are the same amount?",
+      "standards": [
+        "uk-nc-2013:Maths/Y2/F/2"
+      ]
+    },
+    {
+      "id": "mt_ZLqYE7la4Z",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Fractions",
+      "name": "Addition and subtraction word problems",
+      "description": "Solve word problems involving addition and subtraction of fractions with like denominators, using visual models and equations",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.03419972640218878,
+      "evidence": [
+        "A jug contains 3/4 litre of juice; 2/4 litre is poured out \u2014 how much remains?",
+        "Two pieces of ribbon are 2 3/8 and 1 5/8 inches \u2014 what is their total length?",
+        "Draw a fraction model to represent and solve a fraction word problem"
+      ],
+      "assessmentPrompt": "If {{name}} reads that one section of a nature trail is 3/8 km and another is 5/8 km, can they work out the total distance without a calculator?",
+      "standards": []
+    },
+    {
+      "id": "mt_oDlduFnemk",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Geometry",
+      "name": "Numbers on a number line",
+      "description": "Understand a coordinate system defined by two perpendicular number lines (axes) with an origin at (0,0); know that an ordered pair (x, y) specifies a unique point where the first number gives horizontal distance and the second gives vertical distance from the origin",
+      "ageRangeStart": 10,
+      "ageRangeEnd": 11,
+      "centrality": 0.05471956224350205,
+      "evidence": [
+        "Identify the x-axis, y-axis, and origin on a coordinate grid",
+        "Explain that (3, 5) means go 3 along the x-axis and 5 up the y-axis",
+        "Distinguish (2, 4) from (4, 2) by explaining each coordinate's meaning"
+      ],
+      "assessmentPrompt": "If {{name}} looks at a map with a grid and you describe a location as \"3 across and 5 up from the origin\", can they find the exact point \u2014 and explain what each of the two numbers tells you?",
+      "standards": [
+        "ccss-math:5.G.1"
+      ]
+    },
+    {
+      "id": "mt_zMEvtigoM3",
+      "type": "META",
+      "subject": "Mathematics",
+      "domain": "Mathematical Thinking",
+      "name": "Numbers on a number line",
+      "description": "Select and use appropriate tools and representations (number lines, hundred squares, rulers, part-whole models) to support problem-solving",
+      "ageRangeStart": 6,
+      "ageRangeEnd": 7,
+      "centrality": 0.03693570451436388,
+      "evidence": [
+        "Choose a number line or hundred square to support adding or subtracting two-digit numbers",
+        "Select a ruler when a problem requires measuring length",
+        "Explain why one representation (e.g. a number line vs cubes) is more helpful for a particular problem"
+      ],
+      "assessmentPrompt": "When {{name}} is tackling a maths problem, do they choose a useful tool \u2014 like a number line for addition or a hundred square to count on \u2014 rather than always working in their head?",
+      "standards": []
+    },
+    {
+      "id": "mt_dXq9VWm31W",
+      "type": "META",
+      "subject": "Mathematics",
+      "domain": "Mathematical Thinking",
+      "name": "Understanding fractions",
+      "description": "Move fluently between real-world situations, diagrams, and symbolic equations involving three-digit numbers and fractions, explaining what each part represents",
+      "ageRangeStart": 7,
+      "ageRangeEnd": 8,
+      "centrality": 0.05745554035567715,
+      "evidence": [
+        "Write an equation with three-digit numbers to match a measurement or money word problem",
+        "Draw a bar model to represent a fraction problem and use it to solve",
+        "Explain how a number line diagram relates to the quantities in a word problem"
+      ],
+      "assessmentPrompt": "When {{name}} works through a maths problem involving fractions or three-digit numbers, can they switch between drawing a diagram, using a number line, and writing an equation \u2014 and explain what each one shows?",
+      "standards": []
+    },
+    {
+      "id": "mt_3VmBdlAeOZ",
+      "type": "META",
+      "subject": "Mathematics",
+      "domain": "Mathematical Thinking",
+      "name": "Fractions on a number line",
+      "description": "Move fluently between real-world situations, diagrams, number lines, and symbolic equations involving multiplication, fractions, and decimals, explaining what each representation shows",
+      "ageRangeStart": 8,
+      "ageRangeEnd": 9,
+      "centrality": 0.08344733242134063,
+      "evidence": [
+        "Represent a sharing problem as both a fraction diagram and a division equation",
+        "Explain how a bar model for 4 \u00d7 23 connects to the area model and the written method",
+        "Translate a decimal on a number line into a fraction and explain the equivalence"
+      ],
+      "assessmentPrompt": "When {{name}} works on a maths problem involving decimals or fractions, can they move between a fraction strip, a number line, and a written equation \u2014 explaining what each one is showing?",
+      "standards": []
+    },
+    {
+      "id": "mt_SmghasIvbT",
+      "type": "META",
+      "subject": "Mathematics",
+      "domain": "Mathematical Thinking",
+      "name": "Multi-Step Problem Solving",
+      "description": "Make sense of multi-step problems involving four operations, fractions, and area/volume by identifying sub-steps, choosing a strategy, and monitoring progress",
+      "ageRangeStart": 8,
+      "ageRangeEnd": 9,
+      "centrality": 0.119015047879617,
+      "evidence": [
+        "Break a two-step word problem into parts and explain a plan before calculating",
+        "Choose between drawing a diagram or writing equations for a perimeter problem",
+        "Check a fraction-of-quantity answer by estimating: 3/5 of 20 must be more than half of 20"
+      ],
+      "assessmentPrompt": "When {{name}} tackles a complex maths problem involving area, fractions, and multiple steps, do they plan their approach \u2014 estimating roughly what the answer should be before calculating, and then checking it makes sense at the end?",
+      "standards": []
+    },
+    {
+      "id": "mt_2ESZh70NyS",
+      "type": "META",
+      "subject": "Mathematics",
+      "domain": "Mathematical Thinking",
+      "name": "Understanding fractions (age 9+)",
+      "description": "Construct and present logical mathematical arguments involving multiple steps; critique others' reasoning about fractions, angles, or calculations and clearly explain errors or alternative methods",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.1367989056087551,
+      "evidence": [
+        "Prove that 3/4 > 2/3 using a common denominator argument and a visual model",
+        "Find and explain an error in a long multiplication where a partial product was misaligned",
+        "Present a chain of reasoning to show that angles in a triangle sum to 180\u00b0 by tearing and arranging"
+      ],
+      "assessmentPrompt": "If {{name}} and a classmate solve the same maths problem differently, can {{name}} compare the two approaches, explain which method is more efficient, and identify any errors in either working?",
+      "standards": []
+    },
+    {
+      "id": "mt_DLcEzmmj2r",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Measurement",
+      "name": "Addition and subtraction word problems",
+      "description": "Solve word problems involving lengths within 100, using addition and subtraction with drawings and equations",
+      "ageRangeStart": 7,
+      "ageRangeEnd": 8,
+      "centrality": 0.04651162790697674,
+      "evidence": [
+        "Solve 'The rope is 45 cm long. I cut off 18 cm. How long is it now?'",
+        "Draw a diagram (e.g. a ruler drawing) to represent a length word problem",
+        "Write an equation with a symbol for the unknown to represent the problem"
+      ],
+      "assessmentPrompt": "If {{name}} has a piece of rope 75 cm long and cuts off 28 cm, can they work out how much rope is left \u2014 and draw a number-line diagram to show it?",
+      "standards": [
+        "ccss-math:2.MD.5"
+      ]
+    },
+    {
+      "id": "mt_IL86kadLSS",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Measurement",
+      "name": "Numbers on a number line",
+      "description": "Solve word problems involving elapsed time by adding and subtracting time intervals in minutes, including using a number line",
+      "ageRangeStart": 8,
+      "ageRangeEnd": 9,
+      "centrality": 0.05882352941176471,
+      "evidence": [
+        "A film starts at 2:15 and lasts 47 minutes \u2014 when does it end?",
+        "Calculate how many minutes between 9:20 and 10:05",
+        "Use a number line to show the elapsed time between two events"
+      ],
+      "assessmentPrompt": "If {{name}} starts football practice at 3:20 p.m. and it lasts 75 minutes, can they work out what time it finishes \u2014 using a number line to help?",
+      "standards": []
+    },
+    {
+      "id": "mt_GzcJEVkNRn",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Measurement",
+      "name": "Understanding angles (age 8+)",
+      "description": "Multiply side lengths to find areas of rectangles and represent whole-number products as rectangular areas",
+      "ageRangeStart": 8,
+      "ageRangeEnd": 9,
+      "centrality": 0.1723666210670315,
+      "evidence": [
+        "Calculate the area of a 7 cm \u00d7 9 cm rectangle as 63 cm\u00b2",
+        "Draw a rectangle with area 36 square units and label its side lengths",
+        "Solve: A garden is 8 m by 5 m \u2014 what is its area?"
+      ],
+      "assessmentPrompt": "If {{name}} needs to carpet a room that is 5 m by 4 m, can they work out how much carpet to buy \u2014 using multiplication rather than counting squares?",
+      "standards": []
+    },
+    {
+      "id": "mt_5HV4mbgSGH",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Measurement",
+      "name": "Fractions on a number line",
+      "description": "Solve word problems involving distances, time intervals, liquid volumes, masses, and money using the four operations with fractions or decimals; represent with diagrams including number lines",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.09302325581395349,
+      "evidence": [
+        "A 2.5 kg bag of flour is split equally into 4 portions \u2014 what does each weigh?",
+        "A journey takes 1 hr 45 min; what time do you arrive if you leave at 09:20?",
+        "Three ribbons of 0.75 m, 1.2 m, and 0.95 m \u2014 what is the total length?"
+      ],
+      "assessmentPrompt": "If {{name}} is planning a 4.5 km walk and has already walked 1.75 km, can they work out how far is left \u2014 and estimate how long the remaining walk might take?",
+      "standards": []
+    },
+    {
+      "id": "mt_2VpdPjvewx",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Measurement",
+      "name": "Decimal place value",
+      "description": "Convert among different-sized standard measurement units within a given system (e.g. 5 cm to 0.05 m) using decimal notation to up to three decimal places; convert between smaller and larger units of length, mass, volume, and time",
+      "ageRangeStart": 10,
+      "ageRangeEnd": 11,
+      "centrality": 0.1039671682626539,
+      "evidence": [
+        "Convert 3,250 g to 3.25 kg using decimal notation",
+        "Convert 0.45 km to 450 m",
+        "Explain the relationship between mm, cm, m, and km using powers of 10"
+      ],
+      "assessmentPrompt": "If {{name}} needs to convert 5 cm to metres and write the answer as a decimal, can they do it \u2014 and also convert 2.45 kg into grams?",
+      "standards": []
+    },
+    {
+      "id": "mt_U4cIBXVug4",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Multiplication & Division",
+      "name": "Multiplicative Comparison",
+      "description": "Interpret a multiplication equation as a comparison (e.g. 35 = 5 \u00d7 7 means 35 is 5 times as many as 7); represent verbal statements of multiplicative comparisons as equations",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.04377564979480164,
+      "evidence": [
+        "Explain that '4 times as many' means multiply by 4",
+        "Write an equation for: Sarah has 3 times as many stickers as Tom, who has 8 stickers",
+        "Distinguish multiplicative comparison from additive comparison in word problems"
+      ],
+      "assessmentPrompt": "Can {{name}} look at '35 = 5 \u00d7 7' and explain it as '35 is five times as many as 7' \u2014 understanding it as a comparison, not just a multiplication fact?",
+      "standards": []
+    },
+    {
+      "id": "mt_A-FyLLLLzy",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Multiplication & Division",
+      "name": "Shape patterns",
+      "description": "Generate a number or shape pattern that follows a given rule; identify apparent features of the pattern not explicit in the rule and explain informally why they occur",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.03693570451436388,
+      "evidence": [
+        "Given 'start at 1, add 3', generate terms and notice they alternate odd/even",
+        "Given a shape pattern, predict the next three terms and describe the rule",
+        "Explain why starting at 2 and adding 4 always gives even numbers"
+      ],
+      "assessmentPrompt": "If {{name}} is told 'start at 3 and multiply by 2 each time', can they write out the pattern \u2014 3, 6, 12, 24, 48 \u2014 and spot any interesting features in how it grows?",
+      "standards": []
+    },
+    {
+      "id": "mt_ZOJ6EbdPOb",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Multiplication & Division",
+      "name": "Understanding fractions",
+      "description": "Solve problems involving scaling by simple fractions and problems involving simple rates",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.03693570451436388,
+      "evidence": [
+        "A recipe for 4 people needs 200 g of flour \u2014 how much for 6 people?",
+        "If 3 kg costs \u00a312, how much does 5 kg cost?",
+        "Scale a shape by a factor of 1/2 and find the new dimensions"
+      ],
+      "assessmentPrompt": "If a recipe serves 4 and {{name}} wants to make it for 6, can they scale up each ingredient \u2014 for example, changing '2 cups of flour' to '3 cups'?",
+      "standards": []
+    },
+    {
+      "id": "mt_SoDP1fSQEB",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Multiplication & Division",
+      "name": "Decimal place value",
+      "description": "Multiply one-digit numbers with up to two decimal places by whole numbers (e.g. 3.47 \u00d7 6)",
+      "ageRangeStart": 10,
+      "ageRangeEnd": 11,
+      "centrality": 0.1203830369357045,
+      "evidence": [
+        "Correctly compute 4.56 \u00d7 7 using a written method",
+        "Use place-value reasoning to explain why 3.2 \u00d7 5 = 16.0",
+        "Model a decimal multiplication using an area diagram or expanded form"
+      ],
+      "assessmentPrompt": "Can {{name}} work out '3.47 \u00d7 6' \u2014 keeping the decimal point in the right place and carrying correctly through each column?",
+      "standards": []
+    },
+    {
+      "id": "mt__casygEB85",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Number Representation & Place Value",
+      "name": "Decimal place value",
+      "description": "Round decimals to any place using place-value understanding; round any whole number to a required degree of accuracy",
+      "ageRangeStart": 10,
+      "ageRangeEnd": 11,
+      "centrality": 0.09302325581395349,
+      "evidence": [
+        "Round 3.4567 to 2 decimal places (3.46)",
+        "Round 7,654,321 to the nearest 100,000 (7,700,000)",
+        "Use rounding to estimate 4.83 \u00d7 2.17 \u2248 5 \u00d7 2 = 10"
+      ],
+      "assessmentPrompt": "Can {{name}} round a decimal like 3.748 to one decimal place (3.7) or two decimal places (3.75) \u2014 and explain which digit they look at to decide?",
+      "standards": []
+    },
+    {
+      "id": "mt_PsylzZ9lHW",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Number Representation & Place Value",
+      "name": "Fractions on a number line",
+      "description": "Understand and use place value for decimals, measures, and integers of any size; extend the number system to include all positive and negative integers, decimals, and fractions on a single number line",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 12,
+      "centrality": 0.09712722298221614,
+      "evidence": [
+        "Identify the value of any digit in numbers of any size including decimals",
+        "Place positive and negative integers, decimals, and fractions on a number line",
+        "Use place value to compare and order numbers across the full number system"
+      ],
+      "assessmentPrompt": "Can {{name}} place a mix of numbers \u2014 like 3, \u22122, 0.5, \u22121.75, and \u00bc \u2014 all on the same number line, in the right order?",
+      "standards": [
+        "uk-nc-2013:KS3.Maths.Num.1"
+      ]
+    },
+    {
+      "id": "mt_RWUY7_IXvw",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Number Representation & Place Value",
+      "name": "Numbers on a number line",
+      "description": "Understand the absolute value of a rational number as its distance from zero on the number line; interpret absolute value as magnitude in real-world contexts; distinguish absolute value comparisons from ordering statements",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 12,
+      "centrality": 0.02325581395348837,
+      "evidence": [
+        "Define absolute value as distance from zero on a number line",
+        "Calculate the absolute value of positive and negative rational numbers",
+        "Distinguish between comparing absolute values and comparing signed numbers in real-world contexts"
+      ],
+      "assessmentPrompt": "Can {{name}} tell you that the absolute value of \u22127 is 7 \u2014 because it's 7 steps from zero on a number line regardless of direction \u2014 and use this idea to compare distances?",
+      "standards": [
+        "ccss-math:6.NS.7c",
+        "ccss-math:6.NS.7d"
+      ]
+    },
+    {
+      "id": "mt_hCVPYlF-7Y",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Number Representation & Place Value",
+      "name": "Square and cube numbers",
+      "description": "Use integer powers and associated real roots (square, cube, and higher); recognise powers of 2, 3, 4, and 5; distinguish between exact representations of roots and their decimal approximations",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 14,
+      "centrality": 0.08344733242134063,
+      "evidence": [
+        "Calculate squares, cubes, and higher integer powers of whole numbers",
+        "Find square roots and cube roots of perfect squares and perfect cubes",
+        "Recognise key powers (powers of 2 up to 2\u00b9\u2070, powers of 3 up to 3\u2075, etc.) and distinguish exact roots from approximations"
+      ],
+      "assessmentPrompt": "Can {{name}} work out that \u221a25 = 5 and \u221b27 = 3 \u2014 knowing these are the inverse of squaring and cubing \u2014 and say whether \u221a50 is closer to 7 or 8?",
+      "standards": [
+        "ccss-math:8.EE.2",
+        "uk-nc-2013:KS3.Maths.Num.7"
+      ]
+    },
+    {
+      "id": "mt_VVn1IXjkzn",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Number Representation & Place Value",
+      "name": "Estimating by rounding",
+      "description": "Use approximation through rounding to estimate answers and calculate possible resulting errors expressed using inequality notation a < x \u2264 b; understand upper and lower bounds of rounded values",
+      "ageRangeStart": 12,
+      "ageRangeEnd": 14,
+      "centrality": 0.08891928864569083,
+      "evidence": [
+        "Estimate the answer to a calculation by rounding all values appropriately",
+        "Calculate upper and lower bounds of a rounded measurement",
+        "Express error intervals using inequality notation"
+      ],
+      "assessmentPrompt": "If a length is measured as 7 cm to the nearest cm, can {{name}} say the actual length could be anywhere from 6.5 cm to 7.5 cm \u2014 understanding that rounding creates a range of possible values?",
+      "standards": [
+        "uk-nc-2013:KS3.Maths.Num.14"
+      ]
+    },
+    {
+      "id": "mt_FnUJMXPUZX",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Ratio & Proportion",
+      "name": "Understanding fractions",
+      "description": "Solve problems involving unequal sharing and grouping using knowledge of fractions and multiples",
+      "ageRangeStart": 10,
+      "ageRangeEnd": 11,
+      "centrality": 0.08071135430916553,
+      "evidence": [
+        "Share 40 sweets between two children in the ratio 3:5",
+        "Solve: 'Tom gets twice as many as Sam and Sam gets three times as many as Jo. If there are 30 altogether, how many does each get?'",
+        "Use fraction knowledge to explain why sharing in ratio 2:3 means one person gets 2/5 of the total"
+      ],
+      "assessmentPrompt": "If three friends share a bag of 24 sweets so that one person gets twice as many as each of the others, can {{name}} work out how many each person receives?",
+      "standards": []
+    },
+    {
+      "id": "mt_PdYlsA33jB",
+      "type": "PROCEDURAL",
+      "subject": "Personal & Social Development",
+      "domain": "Friendship & Cooperation",
+      "name": "Asking for Help",
+      "description": "Ask for help when they need it \u2014 from a friend, teacher, or family member \u2014 and understand that asking for help is a sign of strength, not weakness",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01094391244870041,
+      "evidence": [
+        "Approach an appropriate person and ask for help clearly",
+        "Identify who to go to for different kinds of help (academic, emotional, practical)",
+        "Explain why asking for help is sensible rather than something to be embarrassed about"
+      ],
+      "assessmentPrompt": "If {{name}} is stuck on something at school or feeling worried about something, will they ask a teacher or friend for help rather than struggling in silence?",
+      "standards": [
+        "ib-pyp-pspe:PSPE.INT.P1.LO.7"
+      ]
+    },
+    {
+      "id": "mt_UGf6jICEhs",
+      "type": "CONCEPTUAL",
+      "subject": "Personal & Social Development",
+      "domain": "Self-Regulation & Resilience",
+      "name": "Learning from Mistakes",
+      "description": "Understand that making mistakes is a normal part of learning and that everyone \u2014 including adults \u2014 makes mistakes, and begin to see mistakes as opportunities to learn rather than reasons to give up",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.02599179206566347,
+      "evidence": [
+        "Describe a time they made a mistake and what they learned from it",
+        "Respond to a mistake by trying again rather than giving up",
+        "Explain why mistakes help people learn"
+      ],
+      "assessmentPrompt": "If {{name}} gets an answer wrong in class or messes up during a game, do they bounce back and keep trying rather than shutting down or saying 'I can't do it'?",
+      "standards": [
+        "ib-pyp-pspe:PSPE-ID-CU-P1-2",
+        "ib-pyp-pspe:PSPE-ID-LO-P1-9"
+      ]
+    },
+    {
+      "id": "mt_U_tJvy3cbB",
+      "type": "PROCEDURAL",
+      "subject": "Science",
+      "domain": "Matter & Materials",
+      "name": "Separating Mixtures",
+      "description": "Select and carry out appropriate separation techniques for different types of mixtures: filtration (insoluble solids), distillation (liquids by boiling point), crystallisation (dissolved solids), and chromatography (coloured substances)",
+      "ageRangeStart": 11,
+      "ageRangeEnd": 13,
+      "centrality": 0.04240766073871409,
+      "evidence": [
+        "Selects the correct separation technique for a given mixture with justification",
+        "Describes the steps of simple distillation and explains why it works",
+        "Interprets a chromatography result (Rf values, number of components)",
+        "Explains why filtration removes sand from water but not salt"
+      ],
+      "assessmentPrompt": "If {{name}} needed to separate salt from sand mixed together in water, could they describe two stages of separation, the equipment needed, and explain why each step works?",
+      "standards": [
+        "uk-nc-2013:KS3.Sci.Chem.PIS.2"
+      ]
+    },
+    {
+      "id": "mt_7OJjLOl0fz",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Polar Regions",
+      "name": "Polar Animals",
+      "description": "Know about other polar animals besides penguins and polar bears \u2014 seals that swim under ice, walruses with long tusks, Arctic foxes that turn white in winter, snowy owls, narwhals with their unicorn-like tusk, and whales that migrate to polar waters to feed \u2014 and that all these animals have special features to survive extreme cold",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.05882352941176471,
+      "evidence": [
+        "Name at least four polar animals beyond penguins and polar bears, such as seals, walruses, Arctic foxes, snowy owls, or narwhals",
+        "Describe one way each named animal survives the cold (e.g. walrus blubber, Arctic fox white winter coat)",
+        "State that narwhals have a long spiral tusk and live in Arctic waters"
+      ],
+      "assessmentPrompt": "Can {{name}} name several animals that live in the freezing polar regions \u2014 like walruses, Arctic foxes, snowy owls, or narwhals \u2014 and explain how they cope with the cold?",
+      "standards": []
+    },
+    {
+      "id": "mt_xVW5U41tbp",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Rainforests",
+      "name": "Rainforest Animals",
+      "description": "Name and recognise iconic rainforest animals \u2014 jaguars, toucans, sloths, poison dart frogs, howler monkeys, macaws, and butterflies \u2014 and know which layer of the rainforest each lives in",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.1162790697674419,
+      "evidence": [
+        "Name at least five iconic rainforest animals such as jaguars, toucans, sloths, poison dart frogs, and howler monkeys",
+        "Match at least three animals to the rainforest layer where they live (e.g. monkeys in the canopy, jaguars on the forest floor)",
+        "Describe one distinctive feature of each named animal"
+      ],
+      "assessmentPrompt": "Can {{name}} name at least five animals that live in the rainforest and tell you something about each \u2014 like a toucan's big colourful beak or a sloth hanging upside down in the trees?",
+      "standards": []
+    },
+    {
+      "id": "mt_GheLsWvrJ4",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Space Systems & Earth's History",
+      "name": "How fossils form",
+      "description": "Identify evidence from patterns in rock formations and fossils in rock layers to support an explanation for changes in a landscape over time",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 10,
+      "centrality": 0.02462380300957592,
+      "evidence": [
+        "Explain that rock layers (strata) form over time, with the oldest at the bottom",
+        "Describe how fossils in different layers provide evidence of organisms that lived at different times",
+        "Use patterns in rock formations to explain how a landscape has changed over millions of years"
+      ],
+      "assessmentPrompt": "If {{name}} sees layers of rock in a cliff face, can they explain that the bottom layers are oldest and any fossils tell us what lived there long ago?",
+      "standards": [
+        "ngss-k5:4-ESS1-1"
+      ]
+    },
+    {
+      "id": "mt_I047mKeeaq",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "The Human Body",
+      "name": "Types of Teeth",
+      "description": "Identify the four types of human teeth (incisors for cutting, canines for tearing, premolars and molars for grinding) and understand that tooth shape is linked to function, just as in other animals \u2014 herbivores have flat teeth, carnivores have sharp teeth",
+      "ageRangeStart": 7,
+      "ageRangeEnd": 9,
+      "centrality": 0.006839945280437756,
+      "evidence": [
+        "Name the four tooth types and describe each one's job: incisors cut, canines tear, premolars/molars grind",
+        "Compare human teeth to herbivore teeth (flat, for grinding plants) and carnivore teeth (sharp, for tearing meat)",
+        "Explain that humans have all types because we are omnivores \u2014 we eat both plants and meat"
+      ],
+      "assessmentPrompt": "Can {{name}} look in a mirror, point out their different types of teeth, and explain what each type is for?",
+      "standards": []
+    },
+    {
+      "id": "mt_z7AJZapsJj",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Volcanoes & Earthquakes",
+      "name": "The Rock Cycle",
+      "description": "Understand the rock cycle: rocks slowly change from one type to another over millions of years \u2014 igneous rock weathers into sediment, sediment becomes sedimentary rock, heat and pressure create metamorphic rock, and melting starts the cycle again",
+      "ageRangeStart": 9,
+      "ageRangeEnd": 11,
+      "centrality": 0.02462380300957592,
+      "evidence": [
+        "Describe the rock cycle as a continuous process with no beginning or end",
+        "Trace at least one complete path through the cycle from igneous to sedimentary to metamorphic and back",
+        "Explain that the rock cycle operates over millions of years through weathering, pressure, heat, and melting"
+      ],
+      "assessmentPrompt": "If {{name}} saw igneous rock, sandstone, and marble side by side, could they explain how each type forms and how rocks slowly transform from one type to another in a never-ending cycle?",
+      "standards": []
+    },
+    {
+      "id": "mt_fhqVdj4BYr",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Weather & Climate",
+      "name": "The Water Cycle",
+      "description": "Understand the water cycle: the Sun heats water in oceans and lakes causing it to evaporate into water vapour, the vapour rises and cools to form clouds (condensation), and water falls back to Earth as rain, snow, or hail (precipitation) \u2014 then the cycle repeats",
+      "ageRangeStart": 7,
+      "ageRangeEnd": 9,
+      "centrality": 0.09165526675786594,
+      "evidence": [
+        "Name the three main stages: evaporation, condensation, precipitation",
+        "Explain the Sun's role in driving the water cycle",
+        "Describe the water cycle as a continuous loop with no beginning or end"
+      ],
+      "assessmentPrompt": "Can {{name}} trace the journey of a raindrop \u2014 from the ocean being heated by the Sun, rising as invisible vapour, forming a cloud, and falling back down as rain \u2014 and explain it keeps going round and round?",
       "standards": []
     }
   ]

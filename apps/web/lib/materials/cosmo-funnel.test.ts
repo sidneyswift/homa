@@ -211,13 +211,23 @@ describe("the real corpus and the real skill package", () => {
     const skill = await readFile(skillPath, "utf8");
     const registry = parseRegistrySlugs(await readFile(registryPath, "utf8"));
     const sections = [...skill.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
-    const sectionSlugs = sections.map(normalizeFormatSlug);
+    // Recipes ship as sibling files now, not SKILL.md sections.
+    const recipeFiles = await readdir(
+      path.join(path.dirname(skillPath), "references", "recipes"),
+    );
+    const recipeSlugs = recipeFiles
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => name.slice(0, -3));
+    const shippedSlugs = [...sections, ...recipeSlugs].map(normalizeFormatSlug);
     const registrySet = new Set(registry.map(normalizeFormatSlug));
     for (const target of new Set(Object.values(GAP_ALIASES))) {
       const hit =
         registrySet.has(target) ||
-        sectionSlugs.some((slug) => slug === target || slug.includes(target));
-      assert.ok(hit, `alias target "${target}" matches no SKILL.md section and no registry slug`);
+        shippedSlugs.some((slug) => slug === target || slug.includes(target));
+      assert.ok(
+        hit,
+        `alias target "${target}" matches no shipped recipe, SKILL.md section, or registry slug`,
+      );
     }
   });
 });
