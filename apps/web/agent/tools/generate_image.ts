@@ -4,6 +4,12 @@ import { z } from "zod";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
 import { rateLimited } from "../../lib/map/ratelimit";
+import {
+  decodeStudioAnchorBytes,
+  getStudioAnchor,
+  listStudioAnchors,
+  studioAnchorIds,
+} from "../../lib/materials/anchors";
 import { blobConfigured } from "../../lib/materials/artifact-store";
 import {
   generateStudioImage,
@@ -14,6 +20,13 @@ import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
+
+// The fixed anchor menu, rendered once for the tool schema. The model may
+// only name an id from this list; it can never pass a URL through the
+// anchor path, so no tenant boundary is crossed (see lib/materials/anchors).
+const ANCHOR_MENU = listStudioAnchors()
+  .map((anchor) => `"${anchor.id}" (${anchor.useWhen})`)
+  .join("; ");
 
 export function subjectLessonImageGenerationRestriction(
   _input: { referenceImageUrls?: readonly string[] },
@@ -39,7 +52,7 @@ export function subjectLessonImageGenerationRestriction(
  */
 export default defineTool({
   description:
-    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
+    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. For some formats you can also pass anchorIds to ride on a shared Homa reference image that sets the visual quality bar (see the anchorIds menu). Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
   inputSchema: z.object({
     prompt: z
       .string()
@@ -61,6 +74,13 @@ export default defineTool({
       .optional()
       .describe(
         "Up to 4 URLs from THIS family's own space (find_materials previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) whose style, layout, characters, or likeness should guide the result.",
+      ),
+    anchorIds: z
+      .array(z.string())
+      .max(4)
+      .optional()
+      .describe(
+        `Optional fleet anchor ids: shared Homa reference images that set the visual quality bar and format for a material. The anchor leads the reference set. Choose only when one clearly fits what you are building, then still write your own prompt (your own example content and wording). Menu: ${ANCHOR_MENU}. Omit when none fits.`,
       ),
   }),
   async execute(input, ctx) {
@@ -119,6 +139,24 @@ export default defineTool({
       });
     }
 
+    // Resolve fleet anchor ids to trusted bytes. The model may only name an
+    // id from the fixed registry; an unknown id is a model-readable error,
+    // never a URL fetch. Family references still flow through
+    // isFamilyArtifactUrl inside generateStudioImage.
+    const anchorBytes: Uint8Array[] = [];
+    for (const anchorId of input.anchorIds ?? []) {
+      const bytes = getStudioAnchor(anchorId)
+        ? decodeStudioAnchorBytes(anchorId)
+        : null;
+      if (!bytes) {
+        return {
+          generated: false,
+          note: `Unknown material anchor "${anchorId}". Use one of: ${studioAnchorIds().join(", ")}, or omit anchorIds.`,
+        };
+      }
+      anchorBytes.push(bytes);
+    }
+
     const startedAt = Date.now();
     const result = await generateStudioImage({
       familyId: access.familyId,
@@ -126,6 +164,7 @@ export default defineTool({
       prompt: input.prompt,
       shape: input.shape,
       referenceImageUrls: input.referenceImageUrls,
+      anchorBytes,
     });
     if (!result.ok) {
       return { generated: false, note: result.note };
