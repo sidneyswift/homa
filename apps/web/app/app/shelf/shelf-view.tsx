@@ -38,7 +38,7 @@ async function uploadPhoto(
 ): Promise<string> {
   let payload: Blob = file;
   let mediaType = file.type || "image/jpeg";
-  let pathName = `${slot}.jpg`;
+  const pathName = `${slot}.jpg`;
 
   if (file.type.startsWith("image/")) {
     const prepared = await prepareChildPhotoForUpload(file);
