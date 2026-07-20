@@ -1,5 +1,7 @@
 # Cross-number puzzle
 
+**Golden anchor (binding):** pass `anchorIds: ["cross-number-puzzle"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Grid-based puzzles with row + column sum constraints (Beast Academy
 style). Like a crossword but with numbers and mathematical operations.
 

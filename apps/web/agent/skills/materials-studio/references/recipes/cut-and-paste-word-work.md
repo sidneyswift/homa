@@ -1,5 +1,7 @@
 # Cut-and-paste word work
 
+**Golden anchor (binding):** pass `anchorIds: ["cut-and-paste-word-work"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 A multi-sensory word work page where the child sees the model word,
 writes it on a practice line, then cuts out a tile and pastes it into
 a notebook or sorting activity. Four modalities for one concept: see,

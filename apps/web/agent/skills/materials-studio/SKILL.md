@@ -404,13 +404,22 @@ recipe is not a reason to force the wrong format.
 
 ### Golden anchors (they set the visual bar)
 
-Many materials have a golden anchor: a finished Homa reference image that
-shows the exact quality bar. When you build one of these on the image or
-hybrid path, pass its id to generate_image as `anchorIds` so the image
-model matches the Homa look. Then still write your OWN prompt with your own
-example content (your own numbers, your own wording), never a copy of the
-anchor's or any source's specifics. The anchor sets the bar; your prompt
-supplies the material.
+Binding: when the material you are building matches a row below, pass that
+anchor id to generate_image as `anchorIds` on the FIRST image call. This is
+the only way the Homa visual bar reaches the image model; skip it and the
+page ships off-brand even if the prompt is good. Passing no anchor when one
+fits is a defect the eval flags.
+
+Pick by what the material TEACHES first, then its format. When a topic-
+specific anchor and a format anchor both fit, take the topic one: it sets a
+tighter bar. A PEMDAS or order-of-operations foldable rides
+`order-of-operations-chart` (the topic), not `foldable` (the format). A
+Singapore number-bonds page rides `singapore-workbook-page`, not a generic
+math anchor. Only fall back to the format anchor when no topic anchor fits.
+
+Then still write your OWN prompt with your own example content (your own
+numbers, your own wording), never a copy of the anchor's or any source's
+specifics. The anchor sets the bar; your prompt supplies the material.
 
 | Anchor id | Use it when building... |
 | --- | --- |

@@ -1,8 +1,11 @@
 # Foldable / interactive notebook insert
 
-Golden anchor: pass `anchorIds: ["foldable"]` to generate_image so the
-output matches the Homa foldable bar (tri-fold layout, fold lines, glue
-tab, color-coded panels, embedded practice). Write your own prompt with
+**Golden anchor (binding):** pass `anchorIds: ["foldable"]` to
+generate_image so the output matches the Homa foldable bar (tri-fold
+layout, fold lines, glue tab, color-coded panels, embedded practice). BUT
+if the foldable teaches a topic that has its own anchor, ride the topic
+one instead: a PEMDAS or order-of-operations foldable rides
+`order-of-operations-chart`, not `foldable`. Write your own prompt with
 your own content; the anchor sets the visual bar, not the specifics.
 
 A foldable is a tactile learning tool the child prints, cuts, folds,

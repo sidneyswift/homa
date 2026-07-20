@@ -1,5 +1,7 @@
 # One-page mini book
 
+**Golden anchor (binding):** pass `anchorIds: ["one-page-mini-book"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 A single letter-size page with an 8-panel grid that folds into an 8-page
 mini book. Requires precise panel placement so pages read in correct order
 after folding: fold along all lines, fold in half, cut center dotted line,

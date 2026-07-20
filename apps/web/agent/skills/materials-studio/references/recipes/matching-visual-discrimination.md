@@ -1,5 +1,7 @@
 # Matching / visual discrimination worksheet recipe
 
+**Golden anchor (binding):** pass `anchorIds: ["matching-visual-discrimination"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 (Patterns extracted from Treasury of Year-Round Preschool Activities, a
 multi-activity PK page; no Homa-style reference image shipped yet.)
 

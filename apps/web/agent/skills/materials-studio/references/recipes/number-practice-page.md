@@ -1,5 +1,7 @@
 # Number practice page
 
+**Golden anchor (binding):** pass `anchorIds: ["number-practice-page"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 A single-number focus page with 4-5 activities on one sheet: tracing/writing
 the numeral, ten frame fill-in, number word coloring, object counting
 (color N stars/items). Repeatable template across numbers 1-20.

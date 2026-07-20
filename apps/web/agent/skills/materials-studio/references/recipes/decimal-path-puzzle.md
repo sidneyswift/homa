@@ -1,5 +1,7 @@
 # Decimal path puzzle
 
+**Golden anchor (binding):** pass `anchorIds: ["decimal-path-puzzle"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Path-tracing puzzle with connected nodes containing decimal numbers.
 Students follow a rule (increasing order, sums to target) to trace
 the correct path from Start to End.

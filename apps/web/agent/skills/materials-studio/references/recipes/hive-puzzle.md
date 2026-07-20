@@ -1,5 +1,7 @@
 # Hive puzzle
 
+**Golden anchor (binding):** pass `anchorIds: ["hive-puzzle"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Hexagonal grid logic puzzle where students fill empty hexagons
 following a constraint rule (e.g., "each hexagon contains the smallest
 number not appearing in any adjacent hexagon"). Derived from Beast

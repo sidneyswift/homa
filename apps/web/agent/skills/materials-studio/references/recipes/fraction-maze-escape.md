@@ -1,5 +1,7 @@
 # Fraction maze escape
 
+**Golden anchor (binding):** pass `anchorIds: ["fraction-maze-escape"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Grid navigation puzzle where each cell contains a fraction and
 students trace a path from start to finish following a mathematical
 rule (e.g., decreasing value, only proper fractions). Derived from

@@ -1,5 +1,7 @@
 # Daily rhythm cards
 
+**Golden anchor (binding):** pass `anchorIds: ["daily-rhythm-cards"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Printable cards for building a visual daily schedule. Each card
 represents one activity block with an icon and label. Designed to
 be cut apart and arranged on a schedule board.

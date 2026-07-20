@@ -1,5 +1,7 @@
 # Singapore math workbook page
 
+**Golden anchor (binding):** pass `anchorIds: ["singapore-workbook-page"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Visual-manipulative math page using ten-frames, bar models, and
 concrete-pictorial-abstract (CPA) progression. Modeled after
 Dimensions Math / Singapore Math approach.

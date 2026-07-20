@@ -1,5 +1,7 @@
 # Unit study packet
 
+**Golden anchor (binding):** pass `anchorIds: ["unit-study-packet"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 A multi-page themed study bundle containing 8-12 different activity types
 all centered on one topic. Uses the packet recipe (see "Packets: several
 pages, one PDF" above) for assembly.

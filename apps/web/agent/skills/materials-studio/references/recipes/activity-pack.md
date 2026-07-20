@@ -1,5 +1,7 @@
 # Activity pack
 
+**Golden anchor (binding):** pass `anchorIds: ["activity-pack"]` to generate_image so the output matches the Homa visual bar for this format. If the material teaches a topic with its own anchor (see the router Golden anchors table), ride that instead. Your prompt supplies the content; the anchor sets the bar.
+
 Single page with 4 mini-activities in quadrants, covering different
 skill types (counting, labeling, creative, knowledge) around one
 theme. Can be cut apart into 4 separate activities.
