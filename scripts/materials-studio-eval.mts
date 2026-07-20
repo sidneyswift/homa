@@ -6,12 +6,18 @@
  * decision trace, so a reviewing agent can see exactly where the skill
  * failed and iterate.
  *
- * Usage:
- *   pnpm evals:materials-studio                 # full suite
- *   pnpm evals:materials-studio -- --scenario activity-pack-space-theme
+ * Two grading layers: deterministic checks (routing, recipe reads, anchor,
+ * thrash) as the objective gate, and an LLM judge scoring "delighted first
+ * try" with the single most useful skill fix.
  *
- * Costs real model tokens (one to three calls per scenario, no images).
- * Out of band by design, never CI. Reports land in
+ * Usage:
+ *   pnpm evals:materials-studio                 # deterministic + judge
+ *   pnpm evals:materials-studio -- --scenario activity-pack-space-theme
+ *   pnpm evals:materials-studio -- --no-judge   # objective gate only, cheaper
+ *
+ * Needs the AI Gateway (apps/web/.env.local), like pnpm materials:calibrate.
+ * Costs real model tokens (one scenario call plus one judge call each, no
+ * images). Out of band by design, never CI. Reports land in
  * docs/homa-planning/materials/evals/.
  */
 import { loadEnvFile } from "node:process";
@@ -32,12 +38,16 @@ const { STUDIO_SCENARIOS } = await import(
 const { runStudioScenario, gradeStudioTrace } = await import(
   "../apps/web/evals/materials-studio/studio-harness"
 );
+const { judgeStudioTrace } = await import(
+  "../apps/web/evals/materials-studio/judge"
+);
 
 function argValue(flag: string): string | null {
   const index = process.argv.indexOf(flag);
   return index >= 0 ? (process.argv[index + 1] ?? null) : null;
 }
 
+const runJudge = !process.argv.includes("--no-judge");
 const onlyScenario = argValue("--scenario");
 const scenarios = onlyScenario
   ? STUDIO_SCENARIOS.filter((scenario) => scenario.id === onlyScenario)
@@ -64,6 +74,9 @@ const lines: string[] = [
 
 let passCount = 0;
 let failCount = 0;
+let delightedCount = 0;
+let judgedCount = 0;
+const skillFixes: string[] = [];
 
 for (const scenario of scenarios) {
   process.stdout.write(`running ${scenario.id}... `);
@@ -73,13 +86,28 @@ for (const scenario of scenarios) {
     const failed = checks.filter((check) => !check.pass);
     passCount += checks.length - failed.length;
     failCount += failed.length;
+    const verdict = runJudge ? await judgeStudioTrace(scenario, trace) : null;
+    if (verdict) {
+      judgedCount += 1;
+      if (verdict.delightedFirstTry) delightedCount += 1;
+      if (verdict.skillFix && verdict.skillFix.toLowerCase() !== "none") {
+        skillFixes.push(`${scenario.id}: ${verdict.skillFix}`);
+      }
+    }
     console.log(
-      failed.length === 0
-        ? `PASS (${checks.length} checks)`
-        : `FAIL ${failed.length}/${checks.length}: ${failed.map((c) => c.name).join("; ")}`,
+      `${failed.length === 0 ? `checks PASS (${checks.length})` : `checks FAIL ${failed.length}/${checks.length}`}` +
+        (verdict ? ` · judge ${verdict.score}/5${verdict.delightedFirstTry ? " keeper" : ""}` : ""),
     );
 
     lines.push(`## ${scenario.id}`, "", `Request: "${scenario.request}"`, "");
+    if (verdict) {
+      lines.push(
+        `Judge: ${verdict.delightedFirstTry ? "KEEPER first try" : "would need a round trip"} · score ${verdict.score}/5 · customization ${verdict.customization}`,
+        `- Went wrong: ${verdict.wentWrong}`,
+        `- Skill fix: ${verdict.skillFix}`,
+        "",
+      );
+    }
     for (const check of checks) {
       lines.push(`- ${check.pass ? "PASS" : "FAIL"}  ${check.name}: ${check.detail}`);
     }
@@ -110,9 +138,27 @@ for (const scenario of scenarios) {
   }
 }
 
-lines.push("---", "", `Totals: ${passCount} checks passed, ${failCount} failed.`);
+lines.push(
+  "---",
+  "",
+  `Deterministic checks: ${passCount} passed, ${failCount} failed.`,
+);
+if (judgedCount > 0) {
+  lines.push(
+    `Judge: ${delightedCount}/${judgedCount} keepers on the first try.`,
+    "",
+    "## Skill fixes to iterate on",
+    "",
+    ...(skillFixes.length > 0
+      ? skillFixes.map((fix) => `- ${fix}`)
+      : ["- none: the judge found nothing to change"]),
+  );
+}
 const reportPath = path.join(reportDir, `${date}-decision-scorecard.md`);
 writeFileSync(reportPath, lines.join("\n") + "\n");
 console.log(`\nScorecard: ${reportPath}`);
-console.log(`Totals: ${passCount} passed, ${failCount} failed.`);
+console.log(
+  `Deterministic: ${passCount} passed, ${failCount} failed.` +
+    (judgedCount > 0 ? ` Judge: ${delightedCount}/${judgedCount} keepers.` : ""),
+);
 process.exit(failCount > 0 ? 1 : 0);

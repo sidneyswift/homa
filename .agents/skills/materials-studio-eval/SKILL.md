@@ -19,18 +19,30 @@ routing eval whenever the skill description changes.
 
 ## Tier 2: decisions (the core loop, run this most)
 
-    pnpm evals:materials-studio
+    pnpm evals:materials-studio                # deterministic + LLM judge
     pnpm evals:materials-studio -- --scenario activity-pack-space-theme
+    pnpm evals:materials-studio -- --no-judge  # objective gate only, cheaper
 
 Real model + the real shipped skill package. The stubbed read_file serves
 the REAL reference files at their /workspace paths, so load-on-demand is
 honestly exercised; stubbed generate_image and create_printable record
-every decision free of image cost. Scenarios and their expectations live
-in `apps/web/evals/materials-studio/scenarios.ts`; the harness in
-`studio-harness.ts`. The scorecard lands in
+every decision free of image cost. Two grading layers:
+
+- Deterministic checks (routing, recipe reads, anchor, theme keywords,
+  thrash): the objective gate. Pure logic, unit-tested in check:materials
+  (`studio-harness.test.ts`), so the grading contract cannot silently rot.
+- LLM judge (`judge.ts`): scores "delighted first try" 1 to 5, rates how
+  genuine the customization is, and returns the single most useful skill
+  fix. The feedback-at-scale layer; it grades decisions and the built
+  spec, never rendered pixels.
+
+Needs the AI Gateway (run with `apps/web/.env.local` present, same as
+`pnpm materials:calibrate`); without it the model call hangs, while the
+deterministic grader still runs and is CI-tested. Scenarios live in
+`scenarios.ts`, the harness in `studio-harness.ts`. The scorecard lands in
 `docs/homa-planning/materials/evals/<date>-decision-scorecard.md` with
-per-check verdicts plus the full decision trace (files read, anchors,
-image prompts, final reply).
+per-check verdicts, the judge verdict, a rolled-up skill-fix list, and the
+full decision trace (files read, anchors, image prompts, final reply).
 
 What the checks mean when they fail:
 
