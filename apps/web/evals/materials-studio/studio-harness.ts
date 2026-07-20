@@ -262,7 +262,12 @@ export async function runStudioScenario(
       maxRetries: 1,
     });
     text = result.text;
-    messages.push({ role: "assistant", content: result.text });
+    // A tool-only step can end with empty text; an empty assistant content
+    // block is rejected by the provider on the next turn.
+    messages.push({
+      role: "assistant",
+      content: result.text.trim() === "" ? "(built the material)" : result.text,
+    });
   }
 
   return {
