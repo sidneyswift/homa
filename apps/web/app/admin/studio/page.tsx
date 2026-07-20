@@ -539,8 +539,10 @@ export default async function AdminStudioPage({
               </p>
               <p className="mt-2 text-[0.74rem] text-subtle">
                 SKILL.md · {skillPackage.lineCount} lines ·{" "}
-                {skillPackage.sections.length} sections ·{" "}
-                {skillPackage.referenceImages.length} reference images
+                {skillPackage.recipes.length} recipes ·{" "}
+                {skillPackage.subjects.length} subjects ·{" "}
+                {skillPackage.approaches.length} approaches ·{" "}
+                {skillPackage.anchors.length} golden anchors
               </p>
               <details className="mt-3">
                 <summary className="cursor-pointer text-[0.8rem] font-bold text-[var(--clay-600)]">
@@ -592,53 +594,68 @@ export default async function AdminStudioPage({
 
             <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
-                Reference images, beside the sections they teach
+                Golden anchors · the reference images the model rides on
               </p>
-              {skillPackage.citations.length === 0 ? (
+              {skillPackage.anchors.length === 0 ? (
                 <p className="mt-2 text-[0.8rem] text-muted">
-                  SKILL.md cites no reference images.
+                  No golden anchors registered.
                 </p>
               ) : (
                 <div className="mt-2.5 flex flex-col gap-4">
-                  {skillPackage.citations.map((citation) => (
-                    <div key={citation.file} className="flex flex-wrap items-start gap-4">
-                      {citation.present ? (
-                        <a
-                          href={`/admin/studio/reference/${citation.file}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="shrink-0"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={`/admin/studio/reference/${citation.file}`}
-                            alt={citation.file}
-                            className="w-[240px] rounded-md border border-border-subtle"
-                          />
-                        </a>
-                      ) : (
-                        <div className="flex h-[160px] w-[240px] shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--rose-500)] bg-[var(--danger-soft,#FBE9E4)] px-3 text-center text-[0.72rem] font-semibold text-[var(--rose-600)]">
-                          Cited by the skill but not shipped in references/
-                        </div>
-                      )}
+                  {skillPackage.anchors.map((anchor) => (
+                    <div key={anchor.id} className="flex flex-wrap items-start gap-4">
+                      <a
+                        href={`/admin/studio/anchor/${anchor.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shrink-0"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/admin/studio/anchor/${anchor.id}`}
+                          alt={anchor.title}
+                          className="w-[240px] rounded-md border border-border-subtle"
+                        />
+                      </a>
                       <div className="min-w-[240px] flex-1">
-                        <p className="font-mono text-[0.68rem] font-bold text-body">{citation.file}</p>
+                        <p className="font-mono text-[0.68rem] font-bold text-body">
+                          {anchor.id}{" "}
+                          <span className="font-sans font-semibold text-subtle">
+                            ({anchor.register})
+                          </span>
+                        </p>
                         <p className="mt-0.5 text-[0.78rem] font-semibold text-strong">
-                          Teaches: {citation.section ?? "the package preamble"}
+                          {anchor.title}
                         </p>
                         <p className="mt-1 text-[0.78rem] leading-relaxed text-muted">
-                          {citation.excerpt}
+                          Use when {anchor.useWhen}.
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              {skillPackage.uncitedFiles.length > 0 ? (
-                <p className="mt-3 text-[0.76rem] font-semibold text-[var(--gold-ink,#8A6410)]">
-                  In references/ but cited nowhere: {skillPackage.uncitedFiles.join(", ")}
-                </p>
-              ) : null}
+              <p className="mt-5 font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
+                Shipped reference docs
+              </p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Recipes ({skillPackage.recipes.length}):
+                </span>{" "}
+                {skillPackage.recipes.join(", ")}
+              </p>
+              <p className="mt-1.5 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Subjects ({skillPackage.subjects.length}):
+                </span>{" "}
+                {skillPackage.subjects.join(", ")}
+              </p>
+              <p className="mt-1.5 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Approaches ({skillPackage.approaches.length}):
+                </span>{" "}
+                {skillPackage.approaches.join(", ")}
+              </p>
             </div>
           </div>
         )}
