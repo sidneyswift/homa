@@ -9,7 +9,89 @@ import {
   briefSelectionDate,
   isSlimMorningBriefDispatchContext,
   renderBriefV2Context,
+  researchBriefV2ContextIsAnchorable,
 } from "./brief-context";
+
+describe("researchBriefV2ContextIsAnchorable", () => {
+  const candidate = { id: "k1" } as never;
+  function child(overrides: Record<string, unknown> = {}) {
+    return {
+      id: "child-1",
+      name: "Nova",
+      stage: "early_elem",
+      subjectKeys: [],
+      frontierDomains: [],
+      currentWorkFacts: [],
+      frontierFacts: [],
+      candidates: [candidate],
+      ...overrides,
+    } as never;
+  }
+
+  it("is false when no child has any candidate", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child({ candidates: [], frontierFacts: ["named frontier: x"] })],
+        observations: [],
+      }),
+      false,
+    );
+  });
+
+  it("is false when a candidate has no frontier, work, or observation anchor", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child()],
+        observations: [],
+      }),
+      false,
+    );
+  });
+
+  it("is true when a candidate is anchored by a named frontier", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child({ frontierFacts: ["named frontier: reads on their own"] })],
+        observations: [],
+      }),
+      true,
+    );
+  });
+
+  it("is true when a candidate is anchored by current work", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child({ currentWorkFacts: ["current work: skip-counts by 5s"] })],
+        observations: [],
+      }),
+      true,
+    );
+  });
+
+  it("is true when a candidate is anchored by a fresh observation for that child", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child({ id: "child-1" })],
+        observations: [
+          { id: "o1", childId: "child-1", childName: "Nova", quote: "q", observedOn: "Jul 20" },
+        ],
+      }),
+      true,
+    );
+  });
+
+  it("does not anchor a candidate with only another child's observation", () => {
+    assert.equal(
+      researchBriefV2ContextIsAnchorable({
+        children: [child({ id: "child-1" })],
+        observations: [
+          { id: "o1", childId: "child-2", childName: "Kai", quote: "q", observedOn: "Jul 20" },
+        ],
+      }),
+      false,
+    );
+  });
+});
 
 describe("morning research brief v2 context", () => {
   it("uses slim context only for an authenticated v2 morning brief dispatch", () => {

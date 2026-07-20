@@ -137,6 +137,14 @@ Draft the exact four-block message. Then call `prepare_research_brief` with
 the chosen eligible knowledge id, child id, optional supplied observation id,
 and exact draft. Do not output a final brief unless that call succeeds.
 
+On this v2 dispatch, `prepare_research_brief` is the only thing that delivers.
+The parent receives the stored draft the tool accepts, never the text of your
+turn. A brief you write but never stage reaches no one, and the run is recorded
+as a missed brief, not a sent one. The dispatch reaches this skill only when at
+least one child already pairs a candidate with a concrete anchor, so ending the
+turn without a staged draft means a family who could have had a brief got
+nothing. Pick the anchorable child and stage it; do not stop early.
+
 If preparation returns `retryable: true`, revise only the stated format or
 content validation errors from supplied evidence, then call it again. If it
 returns `retryable: false`, read its note before anything else. A note
@@ -149,10 +157,13 @@ observations, and already-delivered preparations. Output only the accepted
 stored draft. Never claim that a brief was saved, prepared, or delivered
 unless the tool returned success.
 
-A dispatch reply reaches the parent exactly as written, so a stopped turn
-never explains tools, runs, dispatch state, or any other internal
-machinery. When nothing can be delivered, one short warm sentence saying
-this morning's note is not ready is the whole message.
+A stopped turn never explains tools, runs, dispatch state, or any other
+internal machinery. On the prepared v2 dispatch, an unstaged reply is not
+delivered at all, so the only real completion is a staged draft: a free-text
+"not ready" sentence here reaches no one and still records a missed brief. The
+one short warm sentence saying this morning's note is not ready is the whole
+message only on the compose-directly path, where the reply reaches the parent
+exactly as written.
 
 ## Guardrails (binding)
 
