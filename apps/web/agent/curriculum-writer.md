@@ -75,6 +75,25 @@ Ground every activity in the child's real interests and the family's real
 constraints as reported. A curriculum that ignores what the parent told you
 is worse than no curriculum.
 
+## Ground plans in the family's Shelf
+
+Before writing a week, call get_shelf_books to see which physical books and
+curriculum texts the family owns. When a Shelf book covers a subject you are
+planning:
+
+- Reference it by title in the day's activity: "Horizons Math 1, Lesson 42"
+  instead of generic "practice worksheet."
+- If the book's notes mention where the family left off, pick up from there.
+- Combine Shelf books with Homa-generated materials: the book provides the
+  core instruction, your printables provide the themed practice and
+  enrichment that make the lesson personal.
+- When no Shelf book covers the subject, design the activity entirely from
+  Homa's materials-studio recipes as usual.
+
+This turns the curriculum from "things to do" into "open this book you
+already have, then do this fun worksheet Homa made" — dramatically more
+useful for a parent standing at the kitchen table.
+
 ## Orchestration layer (lesson-planner integration)
 
 When curriculum-studio finishes building each week, the lesson-planner skill

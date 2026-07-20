@@ -395,3 +395,77 @@ export async function recallPinned(input: {
 
   return hits.slice(0, input.limit);
 }
+
+// ---------------------------------------------------------------------------
+// Shelf books (get_shelf_books tool, 2026-07-20)
+// ---------------------------------------------------------------------------
+
+export interface PinnedShelfBook {
+  id: string;
+  title: string;
+  author: string | null;
+  coverUrl: string;
+  tocUrl: string | null;
+  notes: string | null;
+}
+
+export async function getShelfBooksPinned(
+  familyId: string,
+  opts: { search?: string; limit: number },
+): Promise<PinnedShelfBook[]> {
+  const sql = mapDb();
+
+  let rows;
+  if (opts.search) {
+    const pattern = `%${opts.search}%`;
+    rows = await sql<
+      {
+        id: string;
+        title: string;
+        author: string | null;
+        cover_url: string;
+        toc_url: string | null;
+        notes: string | null;
+      }[]
+    >`
+      select id, title, author, cover_url, toc_url, notes
+      from public.shelf_books
+      where family_id = ${familyId}
+        and status = 'active'
+        and (
+          title ilike ${pattern}
+          or author ilike ${pattern}
+          or notes ilike ${pattern}
+        )
+      order by created_at desc
+      limit ${opts.limit}
+    `;
+  } else {
+    rows = await sql<
+      {
+        id: string;
+        title: string;
+        author: string | null;
+        cover_url: string;
+        toc_url: string | null;
+        notes: string | null;
+      }[]
+    >`
+      select id, title, author, cover_url, toc_url, notes
+      from public.shelf_books
+      where family_id = ${familyId}
+        and status = 'active'
+      order by created_at desc
+      limit ${opts.limit}
+    `;
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    author: row.author,
+    coverUrl: row.cover_url,
+    tocUrl: row.toc_url,
+    notes: row.notes,
+  }));
+}
