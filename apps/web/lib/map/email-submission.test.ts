@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   classifyResendHttpFailure,
+  resendFailureDetail,
   submitAgentComposedEmail,
   submitResearchBriefEmail,
 } from "./email";
@@ -48,6 +49,35 @@ describe("Resend submission failure classification", () => {
     assert.equal(classifyResendHttpFailure(408), "unknown");
     assert.equal(classifyResendHttpFailure(429), "unknown");
     assert.equal(classifyResendHttpFailure(500), "unknown");
+  });
+
+  it("keeps Resend's refusal body in the ledger error, bounded and flattened", () => {
+    assert.equal(
+      resendFailureDetail(
+        422,
+        '{\n  "statusCode": 422,\n  "message": "Invalid `to` field."\n}',
+      ),
+      'HTTP 422: { "statusCode": 422, "message": "Invalid `to` field." }',
+    );
+    assert.equal(resendFailureDetail(500, "   "), "HTTP 500");
+    const flooded = resendFailureDetail(422, "x".repeat(1000));
+    assert.equal(flooded.length, "HTTP 422: ".length + 300);
+  });
+
+  it("survives a refusal whose body cannot be read", async () => {
+    await withMockResend(
+      async () =>
+        new Response("Invalid `to` field.", { status: 422 }),
+      async () => {
+        const result = await submitAgentComposedEmail(
+          "not-a-real-recipient@example.com",
+          "Subject",
+          ["Body"],
+        );
+        assert.deepEqual(result, { status: "rejected" });
+      },
+      true,
+    );
   });
 });
 

@@ -35,6 +35,138 @@ retest dates, and check-offs stay out of the model's reach), a 10-
 activity-per-week cap, and no month creation from chat (the report's
 one-tap consent stays the only door, so the wall is never bypassed).
 
+## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
+
+Founder ask: investigate .cosmo, update materials-studio, and put the
+whole funnel (Cosmo ingestion → skill graduation → family output) on
+the /admin/studio surface.
+
+**Recovery.** Cosmo's latest batch ingest commit (d988ffa, 70 new
+reference analyses + 11 curriculum analyses + updated taste model) was
+pushed to the already-merged fix/handwrytten-sender branch and never
+reached main; only the graduation commit (0f066b7) did. Restored the
+81 stranded .cosmo files onto this branch. Note for future sessions:
+Cosmo's commit timestamps run about four days behind wall clock (its
+"Jul 15" commits sit on top of Jul 19 merges), and it has now twice
+pushed to a stale PR branch; check origin branches for stranded Cosmo
+commits before trusting main's .cosmo state. A second stranded commit
+(46411c9, marketing-ugc-engine skill) remains unrecovered on that
+branch: out of scope here, flagged to the founder.
+
+**Graduation repair (main CI had three red gates from 0f066b7).**
+(1) check:fleet-skills: em dashes in SKILL.md (15), plus 24 in
+activity-formats.md and 7 in curriculum-writer.md, all replaced with
+law-compliant punctuation. (2) check:materials: SKILL.md cited
+homa-pk-activity-treasury-reference.png which was never shipped;
+citation removed, patterns kept. (3) check:taxonomy: the batch added
+40 topics under 17 unmapped subject>domain pairs in two mixed
+vocabularies, including 6 duplicate topics. Deleted the duplicates
+(no dependency edges touched them), normalized 26 topics onto existing
+Marble domains, added 4 genuinely new mapped pairs (History >
+Geography, History > Cultural Studies, English > Literature as literacy
+content, Life Skills > Daily Living), regenerated the slug map (37 new
+frozen ids) and progress index (1380 assessment topics). One map test
+updated because behavior genuinely improved: PreK math topics now put
+a 40-month-old in window, so the "windows floor at 48 months" premise
+moved to 36 with a new test locking the improvement.
+
+**Skill update from the batch's field directives.** Math-practice
+rules (answer keys mandatory, no bubble grids, challenge blocks,
+pencil-and-paper interactivity, math-log ELA crossover,
+upload-for-review offer), lamination-ready printable manipulatives,
+unit-study resource page + materials list, try-this-together box, and
+four new recipes with registry entries: clip cards, file-folder game,
+cloze story, reading comprehension mini-unit. Gap coverage after this
+pass: 27 of 90 flagged formats covered, 63 open by design (planner and
+curriculum formats belong to the coming lesson-planner layer, not
+materials-studio).
+
+**Inspo funnel.** /admin/studio now opens with the three-stage funnel:
+intake (parsed live from .cosmo analyses), graduation (skill sections,
+registry entries, and the open-gap backlog computed by crossing
+recipeMatch.gaps against shipped recipes), output (materials and
+families from the production ledger). New pure module
+lib/materials/cosmo-funnel.ts with tests in check:materials, disk
+layer lib/admin/cosmo-data.ts, .cosmo JSON/markdown traced into the
+studio functions (heavy inspo images and PDFs excluded,
+outputFileTracingRoot pinned to the monorepo root).
+
+## 2026-07-18 · Studio lab converged: founder picked direction 3 "Ledger"
+
+The founder pasted the direction lab's assembled reply: winning
+direction 3 "Ledger", steals from the Dossier direction (reference
+images large beside the sections they teach, the description framed as
+the routing contract, a tool table naming which SKILL.md sections drive
+each tool), and the recommended answer on all five build-changing
+questions (already built that way). Converged per the
+exploring-ui-directions skill: /admin/studio is now one interleaved
+filterable timeline of lab runs and fleet output (dedup by generation
+session id so a lab material never rows twice), the composer folded
+into "+ New lab run", and the skill package below carrying the three
+steals. Contradiction resolved explicitly: the Ledger direction's
+honest skip was "no home for the skill package", but the founder's
+same-day asks (skill X-ray, reference gaps, traces) require it on this
+surface, so the package section stays; that is the one deliberate
+deviation from the pure direction. The tool table is parsed from
+SKILL.md at read time (lib/materials/skill-package.ts), never
+hand-claimed, so it cannot drift.
+
+## 2026-07-18 · Founder console gets a Material studio tab (/admin/studio)
+
+Founder ask: "a material studio tab in admin, where I can clearly see
+into, and test, our material studio skill." Ran finding-unknowns plus
+exploring-ui-directions first; the four-direction comparison lab is
+`plans/2026-07-18-material-studio-admin-directions.html` (winner:
+direction 1 "Bench", composer first, runs ledger, skill package below).
+
+Decisions made alone, flaggable:
+
+- Test runs target SANDBOX families only, enforced server-side in the
+  channel route, because create_printable writes real materials rows
+  into the target family's binder. The composer lists sandbox families
+  only; a non-sandbox id is refused with a 409.
+- New `materials-lab` eve channel with a CRON_SECRET run route (the
+  dispatch run-now shape), never a direct tool call from the page: a
+  studio run is a real agent session with the real skill, tools, and
+  quality check, so what the founder tests is what families get.
+- One additive table `materials_studio_runs` (migration
+  20260718170000), deny-all like the other founder ledgers, so a run
+  that dies before create_printable stays visible as failed. Applied to
+  prod ahead of the deploy per the additive-may-lead law; the page
+  degrades to a labeled setup note when the table is absent.
+- The skill package section reads SKILL.md and references/ straight off
+  the deployed filesystem (filesystem-first ruling), traced via
+  next.config.ts; a founder-gated route serves the reference images.
+- Found while wiring the channel: the family-context instruction kept
+  its own hardcoded pinned-channel list (sms, email, dispatch), so
+  `agent-job` build sessions would have hydrated the "parent has not
+  finished setup" fallback instead of family context. Latent, not yet
+  user-visible (0 agent_jobs rows in prod at 2026-07-18T21:05Z, flag on
+  but unexercised). Fixed by exporting `PINNED_AGENT_CHANNELS` from
+  lib/agent-db.ts as the single source both resolveAgentAccess and the
+  instruction hydrate from; regression-pinned in
+  lib/materials/studio-brief.test.ts.
+
+Round 2, same evening (founder ask: an iteration loop): feedback + tags
+per run with a "Prompt for agent" improvement packet (new `studio_run`
+source in lib/admin/agent-prompt.ts), the full turn-by-turn trace
+embedded on a new /admin/studio/runs/[runId] page (trace renderer
+extracted to app/admin/session-trace.tsx, shared with the session
+inspector), and reference-image citations parsed from SKILL.md
+(lib/materials/skill-package.ts) with gap detection both ways. Two
+defects fixed on the way:
+
+- SKILL.md cited three reference images that were never shipped
+  (homa-cut-and-paste, homa-maze, homa-notes-bundle): dead pointers the
+  model could never read. Dropped the citations; the sections' binding
+  design patterns carry the craft, and skill-package.test.ts now
+  enforces citation-to-disk parity in both directions.
+- The feedback_tags text[] column was selected raw, and the console's
+  fetch_types-off client returns raw arrays as Postgres literal
+  strings, so the form spread "{}" into junk tags and the packet
+  builder crashed. Cast to to_json(...)::text and parse, per the
+  lib/admin/db.ts law the first query missed.
+
 ## 2026-07-18 · The wall and the report lock flip ON in production (founder order)
 
 Founder ordered the flip ("ok switch flags") after local testing. Walked
@@ -581,6 +713,37 @@ returned HTTP 200; `get_runtime_errors` for `/eve/__server` showed no
 timeouts in the first hour after READY. Historical cluster entries from
 before this deploy remain in Vercel until they age out; new 300s kills on
 that route are the signal to reopen.
+
+## 2026-07-15 · Founder ruling: subject cards offer one saved lesson
+
+The founder approved replacing each eligible report subject card's
+subject-specific four-week-plan action with one saved next-skill lesson, one
+practice suggestion, and one automatically generated worksheet. The separate
+whole-child four-week month remains unchanged. The full approved contract is
+`docs/superpowers/specs/2026-07-15-subject-lesson-with-worksheet-design.md`.
+
+Task 1 registers the ruling and extracts the existing deterministic first-target
+walk into `packages/core/src/map/lesson-target.ts`. The legacy
+`buildFourWeekPlan` now calls the shared selector, so its two targets, practice
+patterns, weeks, and month-plan consumers retain their existing behavior.
+
+Founder decision, 2026-07-18, on the merge into main: swap, not coexist —
+`WelcomeChooser`'s post-payment per-subject links (report-lock,
+2026-07-18) replace "Homa builds the four-week plan" with the same lesson
+build/open action the report body uses, whenever subject lessons are on.
+See `docs/homa-planning/plans/2026-07-18-subject-lesson-merge-to-main.md`
+§6.2.
+
+## 2026-07-15 · Material generation is durable from the start
+
+- Material generation is a durable background job from enqueue.
+- Sixty seconds changes only the inline-to-persistent UI presentation.
+- An in-flight turn is never migrated or restarted.
+- One honest thread is the selected parent UX.
+- V1 stages the background lane for materials and uses active-only polling.
+- Background execution is not a separate billable capability. Existing model,
+  image, review, render, and material telemetry remains cost truth.
+- D7 remains binding.
 
 ## 2026-07-15 (evening) · Phase C tracking opened for the fleet-skills dormant window
 

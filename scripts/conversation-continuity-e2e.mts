@@ -35,6 +35,9 @@ const {
   resolveInboundContinuity,
   resolvedContinuityAttributes,
 } = await import("../apps/web/lib/conversation-continuity/ledger");
+const { updateConversationMessageEmbedding } = await import(
+  "../apps/web/lib/conversation-log"
+);
 const {
   beginDeliveryAttempt,
   listFamilyDeliveryRecipients,
@@ -65,6 +68,13 @@ const failures: string[] = [];
 function report(label: string, ok: boolean, detail = ""): void {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${ok ? "" : `  (${detail})`}`);
   if (!ok) failures.push(label);
+}
+
+function syntheticEmbeddingWithUnitAt(index: number): string {
+  return `[${Array.from(
+    { length: 1536 },
+    (_, embeddingIndex) => (embeddingIndex === index ? "1" : "0"),
+  ).join(",")}]`;
 }
 
 async function authRequest(pathname: string, body: unknown) {
@@ -198,6 +208,138 @@ try {
   `;
   const runId = runRows[0].id;
   const episodeId = await createProactiveEpisode({ familyId });
+  const terminalSession = `continuity-terminal-${suffix}`;
+  const terminalTurnId = "turn-terminal";
+  const progressText = "I am still building the printable.";
+  const terminalText = "The final printable is ready.";
+  const progressEmbedding = syntheticEmbeddingWithUnitAt(0);
+  const terminalEmbedding = syntheticEmbeddingWithUnitAt(1);
+  const earlyAssistant = await persistCanonicalMessage({
+    attributes: { familyId, episodeId },
+    sessionId: terminalSession,
+    channel: "web",
+    sequence: 0,
+    role: "assistant",
+    content: progressText,
+    turnId: terminalTurnId,
+    terminal: false,
+  });
+  if (!earlyAssistant) throw new Error("early assistant row did not persist");
+  await updateConversationMessageEmbedding({
+    familyId,
+    messageId: earlyAssistant.id,
+    embedding: progressEmbedding,
+    sourceContent: progressText,
+    replaceExisting: false,
+  });
+  const progressRows = await sql<{ created_at: string }[]>`
+    select created_at::text as created_at
+    from public.conversation_messages
+    where id = ${earlyAssistant.id} and family_id = ${familyId}
+  `;
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  const terminalAssistant = await persistCanonicalMessage({
+    attributes: { familyId, episodeId },
+    sessionId: terminalSession,
+    channel: "web",
+    sequence: 0,
+    role: "assistant",
+    content: terminalText,
+    turnId: terminalTurnId,
+    terminal: true,
+  });
+  if (!terminalAssistant) throw new Error("terminal assistant row did not persist");
+  const terminalRows = await sql<
+    {
+      id: string;
+      content: string;
+      created_at: string;
+      embedding: string | null;
+    }[]
+  >`
+    select id, content, created_at::text as created_at,
+           embedding::text as embedding
+    from public.conversation_messages
+    where family_id = ${familyId}
+      and session_id = ${terminalSession}
+      and coalesce(turn_id, '') = ${terminalTurnId}
+      and role = 'assistant'
+      and sequence = 0
+  `;
+  report(
+    "terminal assistant output is the one canonical row",
+    terminalRows.length === 1 &&
+      terminalRows[0]?.id === earlyAssistant.id &&
+      terminalAssistant.id === earlyAssistant.id &&
+      terminalRows[0]?.content === terminalText &&
+      new Date(terminalRows[0]?.created_at ?? 0).getTime() >
+        new Date(progressRows[0]?.created_at ?? 0).getTime(),
+  );
+  report(
+    "terminal replacement clears the progress embedding",
+    terminalRows[0]?.embedding === null,
+  );
+
+  await updateConversationMessageEmbedding({
+    familyId,
+    messageId: terminalAssistant.id,
+    embedding: progressEmbedding,
+    sourceContent: progressText,
+    replaceExisting: false,
+  });
+  const staleReplayVectorRows = await sql<{ embedding: string | null }[]>`
+    select embedding::text as embedding
+    from public.conversation_messages
+    where id = ${terminalAssistant.id} and family_id = ${familyId}
+  `;
+  report(
+    "replayed progress vector cannot attach to terminal text",
+    staleReplayVectorRows[0]?.embedding === null,
+  );
+
+  await updateConversationMessageEmbedding({
+    familyId,
+    messageId: terminalAssistant.id,
+    embedding: terminalEmbedding,
+    sourceContent: terminalText,
+    replaceExisting: true,
+  });
+  const terminalVectorRows = await sql<{ embedding: string | null }[]>`
+    select embedding::text as embedding
+    from public.conversation_messages
+    where id = ${terminalAssistant.id} and family_id = ${familyId}
+  `;
+  report(
+    "terminal embedding replacement writes the final vector",
+    terminalVectorRows[0]?.embedding === terminalEmbedding,
+  );
+
+  await persistCanonicalMessage({
+    attributes: { familyId, episodeId },
+    sessionId: terminalSession,
+    channel: "web",
+    sequence: 0,
+    role: "assistant",
+    content: progressText,
+    turnId: terminalTurnId,
+    terminal: false,
+  });
+  const replayedRows = await sql<
+    { content: string; created_at: string; embedding: string | null }[]
+  >`
+    select content, created_at::text as created_at,
+           embedding::text as embedding
+    from public.conversation_messages
+    where id = ${terminalAssistant.id} and family_id = ${familyId}
+  `;
+  report(
+    "progress replay cannot replace terminal assistant output",
+    replayedRows[0]?.content === terminalText &&
+      replayedRows[0]?.created_at === terminalRows[0]?.created_at &&
+      replayedRows[0]?.embedding === terminalEmbedding,
+  );
+
   const dispatchSession = `continuity-dispatch-${suffix}`;
 
   await persistCanonicalMessage({

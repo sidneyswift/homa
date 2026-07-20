@@ -7,6 +7,8 @@ import { requireFounder } from "../../../../../../lib/admin/gate";
 import { narrativeEnabled } from "../../../../../../lib/map/narrative-flag";
 import { getStateRequirements } from "../../../../../../lib/map/state-requirements";
 import { getReportByToken } from "../../../../../../lib/map/store";
+import { subjectLessonsEnabled } from "../../../../../../lib/subject-lessons/flag";
+import { listCurrentSubjectLessonSummaries } from "../../../../../../lib/subject-lessons/store";
 import { EmptyNote } from "../../../../ui";
 import { ReportView } from "../../../../../onboarding/r/[token]/report-view";
 import { isUuid } from "../../family-shell";
@@ -69,6 +71,12 @@ export default async function AdminChildReportMirrorPage({
   const report = await getReportByToken(row.token, { stampFirstView: false });
   if (!report) notFound();
 
+  const lessonFlagOn = subjectLessonsEnabled();
+  const subjectLessons = lessonFlagOn
+    ? await listCurrentSubjectLessonSummaries(familyId, childId).catch(
+        () => [],
+      )
+    : [];
   const flagOn = narrativeEnabled();
   const meta = report.narrativeMeta;
   const ready = meta?.status === "ready" && report.narrative !== null;
@@ -102,6 +110,8 @@ export default async function AdminChildReportMirrorPage({
           mirror
           narrativeView={narrativeView}
           stateRequirements={stateRequirements}
+          subjectLessonsEnabled={lessonFlagOn}
+          subjectLessons={subjectLessons}
         />
       </div>
     </div>

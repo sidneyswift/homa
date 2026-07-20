@@ -30,6 +30,7 @@ import {
   personalizeStatement,
   planQuestions,
   scoreMap,
+  selectSubjectLessonTarget,
   validateNarrative,
   validatePlanNarrative,
   type MapAnswer,
@@ -474,17 +475,24 @@ report(
 
 {
   let plansOk = true;
+  let targetParityOk = true;
   for (const domain of MAP_SUBJECTS) {
     for (const age of [30, 50, 126, 180]) {
       const base = planQuestions(age).find((plan) => plan.subjectId === domain.id)!.base;
-      const plan = buildFourWeekPlan(domain.id, age, [{ itemId: base.id, answer: "not_yet" }], {
+      const answers: MapAnswerInput[] = [{ itemId: base.id, answer: "not_yet" }];
+      const plan = buildFourWeekPlan(domain.id, age, answers, {
         interests: ["dinosaurs"],
         style: "charlotte_mason",
       });
+      const lessonTarget = selectSubjectLessonTarget(domain.id, age, answers);
       if (!plan || plan.weeks.length !== 4 || plan.targets.length === 0) {
         plansOk = false;
         failures.push(`plan ${domain.id}@${age}: malformed`);
         continue;
+      }
+      if (!lessonTarget || lessonTarget.targetStatement !== plan.targets[0]) {
+        targetParityOk = false;
+        failures.push(`lesson target ${domain.id}@${age}: diverged from four-week plan`);
       }
       for (const week of plan.weeks) {
         if (week.activities.length < 2) {
@@ -510,6 +518,10 @@ report(
     }
   }
   report(`plan builder: 4 clean weeks for all ${MAP_SUBJECTS.length} subjects at 4 ages`, plansOk && failures.every((f) => !f.startsWith("plan ")));
+  report(
+    "lesson target: first target matches every covered four-week plan",
+    targetParityOk,
+  );
 }
 
 // ---------- 5b. The unified month: one weighted plan for the whole child ----------

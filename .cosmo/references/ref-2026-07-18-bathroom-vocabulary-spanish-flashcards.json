@@ -1,0 +1,38 @@
+{
+  "id": "ref-2026-07-18-bathroom-vocabulary-spanish-flashcards",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:18:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427856.516609",
+  "format": "vocabulary-flashcards",
+  "title": "Bathroom Vocabulary Flashcards in Spanish \u2014 PreK & Kindergarten (Real Photos)",
+  "publisher": "TPT",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "overview": {
+    "description": "Spanish vocabulary flashcards featuring bathroom-related words with real photographs (not illustrations). Uses real photos for concrete vocabulary acquisition. Part of a series \u2014 paired with House Vocabulary flashcards. Large file (60MB) suggests high-resolution photo cards."
+  },
+  "skillTargeting": {
+    "subject": "world-languages",
+    "domain": "spanish",
+    "topics": [
+      {
+        "id": "spanish.bathroom-vocabulary",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "flash-cards"
+    ],
+    "gaps": [
+      {
+        "name": "real-photo-vocabulary-cards",
+        "description": "Vocabulary cards using real photographs instead of illustrations. More concrete for young learners. Needs high-res images. Spanish bilingual format with word + photo."
+      }
+    ]
+  },
+  "notes": "Part of Aless's Spanish language learning cluster (with Homeschool Languages, Los Pollitos, Spanish minibook). The use of real photos (not cartoon) is noteworthy \u2014 may indicate a preference for concrete/realistic visual style for vocabulary. 60MB file."
+}

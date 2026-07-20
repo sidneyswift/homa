@@ -11,4 +11,12 @@ export default defineAgent({
   compaction: {
     thresholdPercent: 0.75,
   },
+  build: {
+    // The material preview rasterizer (lib/materials/rasterize-pdf.ts,
+    // HOMA-M1): pdf.js and its native canvas backend must ship as real
+    // node_modules in the hosted build, never inlined into the bundle,
+    // or the deployed function cannot resolve the platform binary and
+    // previews fall back to screenshots that may not match the PDF.
+    externalDependencies: ["pdfjs-dist", "@napi-rs/canvas"],
+  },
 });

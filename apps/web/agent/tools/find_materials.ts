@@ -10,6 +10,15 @@ import {
   getMaterialPinned,
 } from "../../lib/materials/library";
 
+export function subjectLessonMaterialFinalOnly(
+  attributes: unknown,
+): boolean {
+  const channel = (
+    attributes as { channel?: unknown } | null | undefined
+  )?.channel;
+  return channel === "subject_lesson";
+}
+
 /**
  * The library's read path (MS-4): before designing anything, look for a
  * final that already fits. A found final's previewUrl works as a
@@ -37,6 +46,10 @@ export default defineTool({
     limit: z.number().int().min(1).max(12).optional().describe("Defaults to 6."),
   }),
   async execute(input, ctx) {
+    const finalOnly = subjectLessonMaterialFinalOnly(
+      ctx.session.auth.current?.attributes,
+    );
+
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
@@ -50,9 +63,13 @@ export default defineTool({
     if (input.materialId) {
       const material =
         access.mode === "pinned"
-          ? await getMaterialPinned(access.familyId, input.materialId)
+          ? await getMaterialPinned(
+              access.familyId,
+              input.materialId,
+              { finalOnly },
+            )
           : await getMaterialCaller(access.db, access.familyId, input.materialId);
-      if (!material) {
+      if (!material || (finalOnly && material.status !== "final")) {
         return {
           materials: [],
           note: "No material with that id in this family.",
@@ -70,7 +87,9 @@ export default defineTool({
       subject: input.subject,
       theme: input.theme,
       character: input.character,
-      status: input.status ?? ("final" as const),
+      status: finalOnly
+        ? ("final" as const)
+        : input.status ?? ("final" as const),
       limit: input.limit ?? 6,
     };
     const materials =

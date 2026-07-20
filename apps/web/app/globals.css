@@ -449,8 +449,27 @@ h1, h2, h3, h4, h5, h6 {
   .lp-product-demo-phone {
     max-width: 280px !important;
   }
+  /* Narrower column means the desktop offset/scale would push the phone
+     past the page padding, so both shrink together to keep it anchored
+     over the family photo's corner instead of clipping off-screen. The
+     tilt matches the desktop treatment. */
+  .lp-hero-phone-float {
+    left: -12px !important;
+    bottom: -20px !important;
+    transform: rotate(-2.5deg) scale(0.5) !important;
+  }
   .lp-pain-grid {
     grid-template-columns: 1fr 1fr !important;
+  }
+  /* Founder story card stacks with the photo first: meet the humans, then
+     read their words. The photo narrows so it reads as a portrait, not a
+     banner. */
+  .lp-story-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lp-story-grid .lp-story-photo {
+    order: -1;
+    max-width: 240px;
   }
   .lp-capability-grid {
     grid-template-columns: 1fr !important;

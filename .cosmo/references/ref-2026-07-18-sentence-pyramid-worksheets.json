@@ -1,0 +1,109 @@
+{
+  "id": "ref-2026-07-18-sentence-pyramid-worksheets",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:14:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426051.008849",
+  "format": "phonics-fluency-workbook",
+  "title": "Sentence Pyramid Worksheets \u2014 113 Pages Phonics Fluency Practice (AUS-UK Version)",
+  "publisher": "My Teaching Pal (TPT)",
+  "gradeLevel": "K-3rd (ages 5-9)",
+  "overview": {
+    "description": "126-page (113 content pages) phonics fluency resource. Students read sentence pyramids \u2014 each line adds a word, building from 1 word to full sentences. They highlight target phonics skill words, then color the matching picture. Comprehensive scope: CVC \u2192 short vowels \u2192 consonant blends \u2192 digraphs \u2192 Magic E \u2192 R-controlled vowels \u2192 vowel teams \u2192 diphthongs \u2192 ending blends. AUS-UK spelling version. Includes table of contents with scope showing exact page ranges for each skill."
+  },
+  "layout": {
+    "structure": "linear-top-to-bottom",
+    "spacing": "airy",
+    "visualHierarchy": "text-dominant",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "ela.cvc-decoding",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.short-vowel-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.consonant-blend-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.digraph-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.magic-e-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.r-controlled-vowel-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.vowel-team-reading",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": [
+      "ela.reading-fluency"
+    ]
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      60,
+      108
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "ela.letter-sound-correspondence"
+    ],
+    "scaffolding": "medium"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-educational",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "pyramid structure builds confidence",
+      "illustration payoff at end"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "color optional"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "sentence-pyramid",
+        "description": "Progressive sentence building \u2014 each line adds a word. Line 1: 'The'. Line 2: 'The dog'. Line 3: 'The dog ran'. Student reads each level, highlights target phonics skill, colors matching picture. Great for fluency building with phonics focus."
+      }
+    ]
+  },
+  "designPatterns": {
+    "pyramidScaffolding": {
+      "description": "Each page builds a sentence one word at a time, creating a pyramid shape. This scaffolds reading fluency \u2014 the student succeeds at each level before adding complexity.",
+      "value": "Built-in differentiation and confidence building. Struggling readers can stop at shorter lines; advanced readers complete the full pyramid."
+    }
+  },
+  "notes": "Comprehensive phonics scope from CVC through diphthongs. The pyramid format is clever for fluency \u2014 unlike isolated word lists, it builds towards real sentences. AUS-UK spelling version suggests Aless is sourcing internationally."
+}

@@ -14,6 +14,7 @@ homa-research/
 
 # ── Scratch output from scripts ─────────────────────────────────────────────
 .eve-upgrade-check.log
+.superpowers/
 supabase/.temp/
 .context/compound-engineering/ce-optimize/prompt-suggestions/iteration-*-diagnostics.json
 
@@ -29,5 +30,4 @@ node_modules/
 
 # Template is canonical on the remote (branch+tag template-archive); local copy stays untracked
 homa-template/
-.env*
 .output/

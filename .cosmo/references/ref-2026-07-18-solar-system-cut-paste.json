@@ -1,0 +1,27 @@
+{
+  "id": "ref-2026-07-18-solar-system-cut-paste",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:33:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428433.143929",
+  "format": "cut-and-paste-worksheet",
+  "title": "Solar System Cut & Paste Activity",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "PreK-2nd Grade",
+  "relatedRefs": [
+    "ref-2026-07-18-montessori-nomenclature-solar-system",
+    "ref-2026-07-18-solar-system-worksheets-prek",
+    "ref-2026-07-18-solar-system-activity-packet"
+  ],
+  "callouts": [],
+  "overview": {
+    "description": "Solar system cut-and-paste activity. Child cuts out planet images/labels, pastes them in correct order or position on a diagram. Fourth solar system drop from Aless. The cut-and-paste format adds a tactile/kinesthetic dimension to the solar system study — the child physically places planets in order, which is more engaging and memorable than circling or writing."
+  },
+  "designPatterns": {
+    "cutAndPaste": {
+      "description": "Child cuts out pieces and glues them in the correct position. Combines: scissor skills (fine motor) + sequencing/ordering (cognitive) + spatial placement (visual-spatial). The physical act of placing a planet between Mars and Saturn reinforces its position more than reading about it.",
+      "value": "Multi-sensory learning. Cutting + reading + deciding + placing = four engagement channels."
+    }
+  },
+  "notes": "Link likely expired. Fourth solar system resource. Aless now has: nomenclature cards (matching) + worksheets (writing) + activity packet (labeling + writing + matching) + cut-and-paste (kinesthetic ordering). Four formats for one topic. This is EXACTLY the multi-format unit pattern Homa should generate: one topic request → 4-5 activity types automatically."
+}

@@ -23,6 +23,7 @@ import {
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
 import type { TrajectoryEra } from "../../../../lib/map/trajectory-eras";
 import type { ReportLock, WallCheckout } from "../../../../lib/billing/wall-types";
+import type { SubjectLessonSummary } from "../../../../lib/subject-lessons/types";
 import { Logo } from "../../../../components/brand/Logo";
 import { DoorLink } from "../../../../components/billing/door-link";
 import { ReportLockOffer } from "../../../../components/billing/report-lock-offer";
@@ -36,6 +37,7 @@ import { ReportNav } from "./report-nav";
 import { ReportSnapshot } from "./report-snapshot";
 import { StalenessBanner } from "./staleness-banner";
 import { StateCard } from "./state-card";
+import { SubjectLessonButton } from "./subject-lesson-button";
 
 /**
  * The progress report renderer, shared by the live tokenized page, the
@@ -151,8 +153,10 @@ export function ReportView({
   narrativeView = null,
   stateRequirements = null,
   wall = null,
+  subjectLessonsEnabled = false,
+  subjectLessons = [],
   reportLock = null,
-  viewerActions = { call: true, month: true },
+  viewerActions = { call: true, month: true, lesson: false },
 }: {
   data: ReportViewData;
   sample?: boolean;
@@ -174,6 +178,10 @@ export function ReportView({
    * family is walled, null when every door is open (the default, and
    * always the case while HOMA_WALL_ENABLED is off). */
   wall?: WallCheckout | null;
+  /** The exact dark flag. False preserves the legacy subject-plan door. */
+  subjectLessonsEnabled?: boolean;
+  /** Current target-matching rows visible to this viewer. */
+  subjectLessons?: SubjectLessonSummary[];
   /** The report lock (plans/2026-07-18-report-lock.md): when present,
    * only its freeSubjects render as full rows; every other mapped
    * subject renders held (name and answer count, no scores, no blur)
@@ -182,15 +190,16 @@ export function ReportView({
    * HOMA_REPORT_LOCK_ENABLED is off. Never passed by the sample or the
    * founder mirror. */
   reportLock?: ReportLock | null;
-  /** Which of the letter's two actions THIS viewer's session can
-   * actually complete (founder ruling 2026-07-14, report-page dead
-   * ends, option b): the call needs a signed-in family member, the
-   * month BUILD needs a resume cookie or membership. Suppressed
-   * buttons beat dead ones: a text-born family has neither and used
-   * to get a circular device hint. Defaults keep the signed-in /app
-   * route unchanged; an already-built month renders as a plain
-   * tokenized link for every viewer regardless. */
-  viewerActions?: { call: boolean; month: boolean };
+  /** Call, month, and owner-only lesson build permissions. Which of the
+   * letter's actions THIS viewer's session can actually complete
+   * (founder ruling 2026-07-14, report-page dead ends, option b): the
+   * call needs a signed-in family member, the month BUILD needs a
+   * resume cookie or membership, lesson build needs account ownership.
+   * Suppressed buttons beat dead ones: a text-born family has neither
+   * and used to get a circular device hint. Defaults keep the
+   * signed-in /app route unchanged; an already-built month renders as
+   * a plain tokenized link for every viewer regardless. */
+  viewerActions?: { call: boolean; month: boolean; lesson: boolean };
 }) {
   const report = data;
   const inApp = context === "app";
@@ -214,6 +223,9 @@ export function ReportView({
     const movement = movementFor(score, prior);
     if (movement) movements.set(score.subjectId, movement);
   }
+  const subjectLessonBySubject = new Map(
+    subjectLessons.map((lesson) => [lesson.subjectId, lesson]),
+  );
 
   const answersByDomain = new Map<string, ReceiptRow[]>();
   for (const entry of report.answers) {
@@ -469,6 +481,21 @@ export function ReportView({
         const subjectAnswers = answersByDomain.get(score.subjectId) ?? [];
         const movement = movements.get(score.subjectId);
         const badgeStyle = badgeStyleForPosition(score.position);
+        const subjectLesson = subjectLessonBySubject.get(score.subjectId);
+        const lessonLabel = subjectLesson
+          ? "Open the lesson"
+          : "Build the next lesson";
+        const lessonUrl = subjectLesson
+          ? `/onboarding/r/${report.token}/lesson/${score.subjectId}`
+          : null;
+        const subjectActionHeight = subjectLessonsEnabled
+          ? "min-h-11"
+          : "min-h-10";
+        const subjectActionVariant = subjectLessonsEnabled
+          ? "primary-strong"
+          : score.position === "growing"
+            ? "primary"
+            : "secondary";
         const domainSources = Array.from(
           new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
         );
@@ -582,11 +609,13 @@ export function ReportView({
                       <span
                         aria-disabled="true"
                         className={reportButtonClass(
-                          score.position === "growing" ? "primary" : "secondary",
-                          "inline-flex min-h-10 cursor-default items-center px-4 py-2 text-xs font-semibold opacity-60",
+                          subjectActionVariant,
+                          `inline-flex ${subjectActionHeight} cursor-default items-center px-4 py-2 text-xs font-semibold opacity-60`,
                         )}
                       >
-                        Build the 4-week plan
+                        {subjectLessonsEnabled
+                          ? lessonLabel
+                          : "Build the 4-week plan"}
                       </span>
                       <span
                         aria-disabled="true"
@@ -603,31 +632,45 @@ export function ReportView({
                     <Link
                       href="/onboarding"
                       className={reportButtonClass(
-                        "primary",
-                        "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
+                        subjectLessonsEnabled
+                          ? "primary-strong"
+                          : "primary",
+                        `inline-flex ${subjectActionHeight} items-center px-4 py-2 text-xs font-semibold ${
+                          subjectLessonsEnabled
+                            ? "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
+                            : ""
+                        }`.trim(),
                       )}
                     >
-                      Get your own report to unlock plans
+                      {subjectLessonsEnabled
+                        ? "Get your own report to build lessons"
+                        : "Get your own report to unlock plans"}
                     </Link>
                   ) : (
                     <>
-                      {/* Emphasis follows position: the 4-week plan is
-                          THE move on a growing subject, so only there
-                          does it get the solid clay primary. A DoorLink,
-                          not a Link: the tap is a wall door and beacons
-                          report.action_tapped; the plan page owns the
-                          wall decision server-side. */}
-                      <DoorLink
-                        href={`/onboarding/r/${report.token}/plan/${score.subjectId}`}
-                        door="plan"
-                        childId={report.childId}
-                        className={reportButtonClass(
-                          score.position === "growing" ? "primary" : "secondary",
-                          "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
-                        )}
-                      >
-                        Build the 4-week plan
-                      </DoorLink>
+                      {subjectLessonsEnabled ? (
+                        subjectLesson || viewerActions.lesson ? (
+                          <SubjectLessonButton
+                            childId={report.childId}
+                            subjectId={score.subjectId}
+                            lessonUrl={lessonUrl}
+                            wall={wall}
+                            emphasis="primary"
+                          />
+                        ) : null
+                      ) : (
+                        <DoorLink
+                          href={`/onboarding/r/${report.token}/plan/${score.subjectId}`}
+                          door="plan"
+                          childId={report.childId}
+                          className={reportButtonClass(
+                            score.position === "growing" ? "primary" : "secondary",
+                            "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
+                          )}
+                        >
+                          Build the 4-week plan
+                        </DoorLink>
+                      )}
                       {/* Says the action honestly: this one leaves the
                           report and asks more questions. */}
                       <Link

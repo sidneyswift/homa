@@ -1,3 +1,5 @@
+import { ACTION_COSTS } from "@homa/core";
+
 import { mapDb } from "./map/db";
 
 /**
@@ -35,10 +37,16 @@ export const USAGE_SURFACES = [
   "embedding",
   "lesson_tone",
   "lesson_synthesis",
+  ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface,
 ] as const;
 export type UsageSurface = (typeof USAGE_SURFACES)[number];
 
-export type UsageChannel = "web" | "sms" | "email" | "dispatch";
+export type UsageChannel =
+  | "web"
+  | "sms"
+  | "email"
+  | "dispatch"
+  | "subject_lesson";
 
 export interface ModelUsageRow {
   familyId: string | null;
@@ -111,29 +119,43 @@ export function gatewayAttribution(
 /** Session-auth attributes -> the ledger's channel value. */
 export function usageChannelFromAttributes(attributes: unknown): UsageChannel {
   const channel = (attributes as { channel?: string } | undefined)?.channel;
-  return channel === "sms" || channel === "email" || channel === "dispatch"
+  return channel === "sms"
+    || channel === "email"
+    || channel === "dispatch"
+    || channel === "subject_lesson"
     ? channel
     : "web";
 }
 
-/** Authenticated task-kind attribution for Eve model calls. */
+/** Authenticated task-kind and internal-channel attribution for Eve model calls. */
 export function usageSurfaceFromAttributes(attributes: unknown): UsageSurface {
-  const auth = attributes as
+  const candidate = attributes as
     | {
-        channel?: string;
+        channel?: unknown;
+        modelUsageSurface?: unknown;
         familyId?: string;
         taskKind?: string;
         taskRunId?: string;
         deliveryVersion?: string;
       }
     | undefined;
-  return auth?.channel === "dispatch" &&
-    auth.taskKind === "morning_brief" &&
-    auth.deliveryVersion === "research_brief_v2" &&
-    typeof auth.familyId === "string" &&
-    auth.familyId.length > 0 &&
-    typeof auth.taskRunId === "string" &&
-    auth.taskRunId.length > 0
-    ? "morning_brief"
-    : "chat";
+  if (
+    candidate?.channel === "subject_lesson"
+    && candidate.modelUsageSurface
+      === ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface
+  ) {
+    return ACTION_COSTS.subjectLessonWithWorksheet.modelUsageSurface;
+  }
+  if (
+    candidate?.channel === "dispatch" &&
+    candidate.taskKind === "morning_brief" &&
+    candidate.deliveryVersion === "research_brief_v2" &&
+    typeof candidate.familyId === "string" &&
+    candidate.familyId.length > 0 &&
+    typeof candidate.taskRunId === "string" &&
+    candidate.taskRunId.length > 0
+  ) {
+    return "morning_brief";
+  }
+  return "chat";
 }

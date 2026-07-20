@@ -78,8 +78,17 @@ export async function generateStudioImage(input: {
   prompt: string;
   shape?: ImageShape;
   referenceImageUrls?: string[];
+  /**
+   * Pre-trusted reference bytes from the fleet anchor registry (no family
+   * data, no URL). The tool resolves anchor ids to these bytes; they are
+   * NOT subject to isFamilyArtifactUrl because they never came from a URL
+   * and carry no tenant boundary. Anchors lead, so they set the bar.
+   */
+  anchorBytes?: readonly Uint8Array[];
 }): Promise<StudioImageResult> {
-  const referenceUrls = (input.referenceImageUrls ?? []).slice(0, MAX_REFERENCE_IMAGES);
+  const anchorReferences = (input.anchorBytes ?? []).slice(0, MAX_REFERENCE_IMAGES);
+  const urlBudget = MAX_REFERENCE_IMAGES - anchorReferences.length;
+  const referenceUrls = (input.referenceImageUrls ?? []).slice(0, Math.max(0, urlBudget));
   for (const url of referenceUrls) {
     if (!isFamilyArtifactUrl(url, input.familyId)) {
       return {
@@ -89,7 +98,7 @@ export async function generateStudioImage(input: {
     }
   }
 
-  const references: Uint8Array[] = [];
+  const references: Uint8Array[] = [...anchorReferences];
   for (const url of referenceUrls) {
     const bytes = await fetchReferenceBytes(url);
     if (!bytes) {

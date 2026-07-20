@@ -1,0 +1,48 @@
+{
+  "id": "ref-2026-07-18-numbers-0-10-counting-ordering",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:34:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428453.549849",
+  "format": "math-worksheet",
+  "title": "Numbers 0 to 10 FREEBIE — Counting, Ordering, Missing, One More, One Less",
+  "publisher": "TPT (link expired)",
+  "gradeLevel": "PreK-K",
+  "callouts": [],
+  "overview": {
+    "description": "Numbers 0-10 worksheet pack covering multiple math skills: counting objects, number ordering/sequencing, finding missing numbers in a sequence, and one-more/one-less relationships. From the filename, this targets the core early math competencies in one pack. Link expired before download."
+  },
+  "designPatterns": {
+    "multiSkillNumberPack": {
+      "description": "One number range (0-10) practiced through four different skill types: counting (how many?), ordering (put in sequence), missing numbers (fill the gap), and one-more/one-less (±1 relationships). Each skill type is a different cognitive demand on the same content.",
+      "value": "The child encounters numbers 0-10 through four different lenses. Counting is recognition; ordering is sequencing; missing numbers is pattern completion; one-more/one-less is early addition/subtraction."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "math",
+    "domain": "counting-cardinality",
+    "topics": [
+      {
+        "id": "math.counting-0-10",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.number-ordering",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.missing-numbers",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.one-more-one-less",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ]
+  },
+  "notes": "Link expired. First pure math worksheet drop from Aless (the Harcourt Math was from Carolyng discussion context). Covers the foundational number sense skills for PreK-K. The multi-skill approach (4 skill types for one number range) is the same pattern as the multi-format approach for topics — different cognitive demands on the same content."
+}

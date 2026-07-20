@@ -9,16 +9,16 @@
     "ngss-ms"
   ],
   "counts": {
-    "topics": 1593,
+    "topics": 1634,
     "topicsBySubject": {
       "Computing": 21,
-      "English": 288,
-      "History": 90,
+      "English": 298,
+      "History": 93,
       "Learning to Learn": 18,
-      "Life Skills": 37,
-      "Mathematics": 504,
-      "Personal & Social Development": 88,
-      "Science": 547
+      "Life Skills": 42,
+      "Mathematics": 508,
+      "Personal & Social Development": 90,
+      "Science": 564
     },
     "dependencies": 3221,
     "curricula": 7,
@@ -28,8 +28,8 @@
   },
   "files": {
     "topics.json": {
-      "bytes": 1670722,
-      "sha256": "54eae72f5e7ebe492180d3a97a325564c36fefaf716192b84400f3e243ed54b7"
+      "bytes": 1713602,
+      "sha256": "ec11608885bbecc02f5b0b24dc359052c6bcb9f0bd10c9293608dc982e8829a2"
     },
     "dependencies.json": {
       "bytes": 696944,
@@ -49,5 +49,6 @@
     "child mastery beliefs (PII)",
     "teaching research",
     "visualizations"
-  ]
+  ],
+  "topicCount": 1601
 }

@@ -1,11 +1,15 @@
+import Image from "next/image";
+
 import { Squiggle } from "./ds/Squiggle";
 import { Doodle } from "./Doodle";
 import { Eyebrow } from "./dividers";
 import { FOUNDER_STORY_COPY } from "./landing-content";
 
 /**
- * Honest founder story. No family testimonial or founder photo renders until
- * a consented source exists; the public co-founder signature carries trust.
+ * Honest founder story. The co-founder photo is founder-supplied
+ * (2026-07-18), so the consent bar for rendering it is met. It sits in a
+ * rounded slot (not a blob mask: the tight two-face crop can't afford edge
+ * cropping) beside the quote, with the signature spanning below both.
  */
 export function Stories() {
   return (
@@ -40,12 +44,32 @@ export function Stories() {
             padding: "30px 32px",
           }}
         >
-          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
-            {FOUNDER_STORY_COPY.body}
-          </p>
-          <p style={{ color: "var(--text-muted)", lineHeight: 1.6, margin: "16px 0 0", fontSize: "0.98rem" }}>
-            {FOUNDER_STORY_COPY.closing}
-          </p>
+          <div
+            className="lp-story-grid"
+            style={{ display: "grid", gridTemplateColumns: "1fr 236px", gap: 32, alignItems: "center" }}
+          >
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", lineHeight: 1.55, color: "var(--text-strong)", margin: 0 }}>
+              {FOUNDER_STORY_COPY.body}
+            </p>
+            {/* Tilted like a snapshot laid on the kitchen table, echoing the
+                hero phone's hand-placed language. */}
+            <div className="lp-story-photo" style={{ transform: "rotate(2deg)" }}>
+              <Image
+                src="/images/founders.jpg"
+                alt="Alessa and Carolyng, Homa's co-founders, smiling together outside in the sun"
+                width={920}
+                height={868}
+                sizes="(max-width: 880px) 70vw, 236px"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "var(--radius-lg)",
+                  boxShadow: "var(--shadow-md)",
+                }}
+              />
+            </div>
+          </div>
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-subtle)" }}>
             <p
               style={{
@@ -58,7 +82,6 @@ export function Stories() {
             >
               {FOUNDER_STORY_COPY.signature}
             </p>
-            <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "0.8rem" }}>Co-founders of Homa</p>
           </div>
         </div>
       </div>

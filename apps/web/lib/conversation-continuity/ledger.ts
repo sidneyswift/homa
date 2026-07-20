@@ -357,17 +357,48 @@ export async function persistCanonicalMessage(
           on conflict
             (session_id, (coalesce(turn_id, '')), role, sequence)
           do update set
-            episode_id = coalesce(public.conversation_messages.episode_id, excluded.episode_id),
-            member_user_id = coalesce(public.conversation_messages.member_user_id, excluded.member_user_id),
+            content = case
+              when ${input.role === "assistant" && input.terminal === true}
+                then excluded.content
+              else public.conversation_messages.content
+            end,
+            created_at = case
+              when ${input.role === "assistant" && input.terminal === true}
+                then excluded.created_at
+              else public.conversation_messages.created_at
+            end,
+            embedding = case
+              when ${input.role === "assistant" && input.terminal === true}
+                and public.conversation_messages.content is distinct from excluded.content
+                then null
+              else public.conversation_messages.embedding
+            end,
+            episode_id = coalesce(
+              public.conversation_messages.episode_id,
+              excluded.episode_id
+            ),
+            member_user_id = coalesce(
+              public.conversation_messages.member_user_id,
+              excluded.member_user_id
+            ),
             visibility = case
               when public.conversation_messages.visibility = 'family'
                 or excluded.visibility = 'family'
               then 'family'
               else 'internal'
             end,
-            task_run_id = coalesce(public.conversation_messages.task_run_id, excluded.task_run_id),
-            provider_message_id = coalesce(public.conversation_messages.provider_message_id, excluded.provider_message_id),
-            thread_key_hash = coalesce(public.conversation_messages.thread_key_hash, excluded.thread_key_hash)
+            task_run_id = coalesce(
+              public.conversation_messages.task_run_id,
+              excluded.task_run_id
+            ),
+            provider_message_id = coalesce(
+              public.conversation_messages.provider_message_id,
+              excluded.provider_message_id
+            ),
+            thread_key_hash = coalesce(
+              public.conversation_messages.thread_key_hash,
+              excluded.thread_key_hash
+            )
           returning id
         `
       )[0].id;

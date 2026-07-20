@@ -1,0 +1,443 @@
+{
+  "id": "cur-2026-07-18-harcourt-trophies-2nd",
+  "name": "Harcourt Trophies Grade 2 Teacher Edition — Full Curriculum Architecture",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T16:52:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784407931.510559",
+  "relatedRefs": [
+    "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+    "ref-2026-07-18-harcourt-trophies-2nd-assessments",
+    "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
+    "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages"
+  ],
+
+  "layer1_philosophy": {
+    "methodology": "Balanced Literacy (Harcourt Trophies)",
+    "principles": [
+      "Story-as-hub: one reading selection per week powers every skill strand",
+      "Spiral review: introduce → practice → generalize → apply → assess within one week",
+      "Integrated language arts: phonics, spelling, vocabulary, grammar, writing all taught through/alongside the reading selection",
+      "Cross-curricular extension: the week's story theme drives science, social studies, drama, and technology centers",
+      "Leveled differentiation: every day has below-level, on-level, advanced, and ELL variants available"
+    ],
+    "learningTheory": "spiral with mastery checkpoints (weekly post-test on spelling, end-of-selection assessment on comprehension)",
+    "assessmentApproach": "structured three-part assessment per story (vocabulary MC → comprehension MC → written response)",
+    "parentRole": "teacher-facilitator (teacher guide provides full scripted lessons with IF/THEN branching for struggling readers)",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "balanced-literacy-trophies",
+        "topicType": "method_philosophy",
+        "title": "Balanced Literacy (Harcourt Trophies)",
+        "summary": "Story-centered weekly units where a single reading selection drives all ELA skill strands plus cross-curricular centers. Combines explicit phonics instruction with literature-based comprehension and integrated writing."
+      },
+      {
+        "suggestedKey": "story-as-hub-format",
+        "topicType": "method_format",
+        "title": "Story-as-Hub Weekly Format",
+        "summary": "One reading selection per week. All phonics, spelling, vocabulary, grammar, writing, and cross-curricular activities connect to the story. 5-day arc: introduce → practice → generalize → apply → assess. Teacher guide provides day-by-day scripted lessons."
+      }
+    ]
+  },
+
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Oral Language",
+        "curriculumTopic": "Sharing Literature (stories, poems)",
+        "homaSubject": "ela",
+        "homaDomain": "reading-literature",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.shared-reading-oral-language",
+          "domain": "reading-literature",
+          "kind": "conceptual",
+          "teachingWindowMonths": [60, 96]
+        }
+      },
+      {
+        "curriculumSubject": "Word Work — Phonics",
+        "curriculumTopic": "Phonograms (-id, -ide), Syllables",
+        "homaSubject": "ela",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.phonogram-word-families",
+          "domain": "phonics-word-reading",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 96]
+        }
+      },
+      {
+        "curriculumSubject": "Word Work — Spelling",
+        "curriculumTopic": "Pretest → Build Words → Generalize → Review → Post-test + Writing Application",
+        "homaSubject": "ela",
+        "homaDomain": "spelling",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.spelling-word-sort-patterns",
+          "domain": "spelling",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 96]
+        }
+      },
+      {
+        "curriculumSubject": "Word Work — Vocabulary",
+        "curriculumTopic": "Story vocabulary (dull, exciting, handsome, hardly, sideways, sparkling, spotted) + High-Frequency Words",
+        "homaSubject": "ela",
+        "homaDomain": "vocabulary",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.story-vocabulary-context",
+          "domain": "vocabulary",
+          "kind": "conceptual",
+          "teachingWindowMonths": [60, 96]
+        }
+      },
+      {
+        "curriculumSubject": "Reading — Comprehension",
+        "curriculumTopic": "Main Idea (focus skill), Decoding/Phonics, Locate Information",
+        "homaSubject": "ela",
+        "homaDomain": "reading-comprehension",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.main-idea-key-details",
+          "domain": "reading-comprehension",
+          "kind": "conceptual",
+          "teachingWindowMonths": [72, 108]
+        }
+      },
+      {
+        "curriculumSubject": "Reading — Fluency",
+        "curriculumTopic": "Rereading for Fluency, Self-Selected Reading",
+        "homaSubject": "ela",
+        "homaDomain": "reading-fluency",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.rereading-fluency-practice",
+          "domain": "reading-fluency",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 108]
+        }
+      },
+      {
+        "curriculumSubject": "Language Arts — Writing",
+        "curriculumTopic": "Writer's Craft: Developing Ideas and Topics, Writing Prompts, Self-Selected Writing",
+        "homaSubject": "ela",
+        "homaDomain": "writing",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.writing-developing-ideas",
+          "domain": "writing",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 108]
+        }
+      },
+      {
+        "curriculumSubject": "Language Arts — Grammar",
+        "curriculumTopic": "Sentences: Introduce → Review → Review → Review → Test",
+        "homaSubject": "ela",
+        "homaDomain": "grammar",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "ela.sentences-grammar",
+          "domain": "grammar",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 96]
+        }
+      },
+      {
+        "curriculumSubject": "Daily Language Practice",
+        "curriculumTopic": "Spiral review — error correction (capitalization, punctuation, spelling in real sentences)",
+        "homaSubject": "ela",
+        "homaDomain": "grammar",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Covers grammar + spelling + mechanics simultaneously via sentence-level error correction"
+      },
+      {
+        "curriculumSubject": "Cross-Curricular — Science",
+        "curriculumTopic": "Chameleon Habitat (habitats, camouflage, adaptation)",
+        "homaSubject": "science",
+        "homaDomain": "life-science",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "science.animal-habitats-adaptation",
+          "domain": "life-science",
+          "kind": "conceptual",
+          "teachingWindowMonths": [60, 108]
+        }
+      },
+      {
+        "curriculumSubject": "Cross-Curricular — Social Studies",
+        "curriculumTopic": "Zoo Map (map skills, spatial reasoning, grid coordinates)",
+        "homaSubject": "social-studies",
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "no_subject",
+        "suggested": {
+          "topicSlug": "social-studies.map-skills-grid-coordinates",
+          "domain": "geography-and-maps",
+          "kind": "procedural",
+          "teachingWindowMonths": [60, 108]
+        }
+      },
+      {
+        "curriculumSubject": "Cross-Curricular — Drama",
+        "curriculumTopic": "A Day in the Life of a Chameleon (role play, creative expression, oral language)",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "no_subject",
+        "suggested": {
+          "topicSlug": "drama.dramatic-play-role-play",
+          "domain": "dramatic-arts",
+          "kind": "conceptual",
+          "teachingWindowMonths": [48, 108]
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 12,
+      "mapped": 0,
+      "unmapped": 8,
+      "noSubject": 2,
+      "partial": 2
+    }
+  },
+
+  "layer3_structure": {
+    "cadence": "5 days/week",
+    "sessionLengthMinutes": {
+      "oralLanguage": 15,
+      "phonics": 15,
+      "spelling": 10,
+      "vocabulary": 10,
+      "reading": 30,
+      "writing": 20,
+      "grammar": 10,
+      "dailyLanguagePractice": 5,
+      "crossCurricularCenter": 15,
+      "independentReading": 15
+    },
+    "weeklyTemplate": "Every day: Oral Language (15m) + Word Work: phonics+spelling+vocab (35m) + Read (30m) + Language Arts: writing+grammar (30m) + Daily Language Practice (5m) + Independent Reading (15m). Cross-curricular centers rotate through the week (1 per day, 15-30 min each). Total: ~2.5 hours/day.",
+    "progressionModel": "spiral within each week (introduce → practice → generalize → apply → assess), with new story + new skills each subsequent week",
+    "reviewRhythm": "Daily language practice = spiral review of all previous skills. Weekly spelling post-test. End-of-selection assessment (vocab + comprehension + writing) per story. Mid-year and end-of-year cumulative tests.",
+    "totalWeeks": 36,
+    "dailyArc": {
+      "day1": "Introduce: new story read-aloud, introduce phonics pattern, spelling pretest, introduce grammar concept. Heavy teacher-led modeling.",
+      "day2": "Practice: read the main selection, build spelling words, introduce vocab, review grammar. Child interacts with the text.",
+      "day3": "Generalize: reread for fluency, state spelling generalization, connected nonfiction reading. Making patterns explicit.",
+      "day4": "Apply: comprehension assessment practice, spelling review, writing prompt, grammar review. Testing understanding.",
+      "day5": "Assess: spelling post-test with writing application, fluency rereading, self-selected reading/writing, grammar test. Celebrating mastery."
+    }
+  },
+
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "weekly-lesson-planner",
+        "description": "A parent-facing week-at-a-glance printable showing all skill strands across all 5 days for one unit topic. Color-coded day columns, skill strand rows. The parent's daily map.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "weekly-lesson-planner",
+          "creationPath": "html",
+          "description": "5-column (Mon-Fri) × N-row (skill strands) grid with color-coded columns. Each cell contains: activity name, brief description, page reference or resource link. Top header shows the unit topic/story and focus skills for the week. Footer shows materials needed.",
+          "complexity": "high"
+        }
+      },
+      {
+        "type": "cross-curricular-center-card",
+        "description": "Individual activity cards for learning centers, themed around the week's topic. Each card: colored header, activity title, description paragraph, time estimate, MATERIALS list in sidebar box.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "center-activity-card",
+          "creationPath": "hybrid",
+          "description": "Illustrated activity card with: subject icon header, activity title, instruction paragraph, time clock graphic, materials list box. One story theme drives all centers (science, literacy, social studies, drama, technology).",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "daily-instruction-guide",
+        "description": "Teacher-facing guide for one day's instruction: what to teach, in what order, with IF/THEN differentiation paths. Includes leveled worksheet references.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "daily-instruction-guide",
+          "creationPath": "html",
+          "description": "Single-page instruction guide with: day header, ordered skill blocks, each block has teaching steps + differentiation sidebar (below-level / on-level / advanced paths). 5-day progression badges visible.",
+          "complexity": "high"
+        }
+      },
+      {
+        "type": "spelling-word-sort",
+        "description": "Sorting activity for spelling patterns: children sort words by phonogram or pattern (e.g., -id vs -ide words)",
+        "recipe": "cut-and-paste",
+        "status": "have_recipe"
+      },
+      {
+        "type": "decodable-reader",
+        "description": "Short reader with controlled vocabulary targeting the week's phonics pattern",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "decodable-reader",
+          "creationPath": "hybrid",
+          "description": "4-8 page mini-book with illustrations and text using controlled vocabulary. All words decodable with target phonics patterns + high-frequency words.",
+          "complexity": "high"
+        }
+      },
+      {
+        "type": "comprehension-worksheet",
+        "description": "Reading comprehension questions tied to the week's story selection",
+        "recipe": "reading-comprehension-story",
+        "status": "have_recipe"
+      },
+      {
+        "type": "writing-prompt-page",
+        "description": "Story-connected writing prompt with lined response area",
+        "recipe": "copy-work-pages",
+        "status": "have_recipe",
+        "notes": "Existing copy-work recipe covers the format, but needs adaptation for open-ended prompts vs. model copying"
+      },
+      {
+        "type": "grammar-practice",
+        "description": "Daily error correction exercises (find and fix capitalization, punctuation, spelling errors in sentences)",
+        "recipe": "themed-worksheet",
+        "status": "have_recipe"
+      },
+      {
+        "type": "end-of-selection-assessment",
+        "description": "Three-part test: vocabulary (6 MC), comprehension (12 MC), written response (2 prompts). Standardized format per story.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "story-assessment",
+          "creationPath": "html",
+          "description": "Three-section test: Section 1 vocab (word in new sentence context, 4 MC options), Section 2 comprehension (story-based questions, 4 MC options), Section 3 written response (2 open prompts with lined space). Standard header with student name, date, story title.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "school-home-connection",
+        "description": "Small boxed section on practice pages giving parents a specific, playful activity to extend the skill at home (not homework, a bonding suggestion)",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "school-home-connection",
+          "creationPath": "html",
+          "description": "A small callout box (can be added to any worksheet) with: house icon, activity title, 2-3 sentence parent-friendly instruction for extending the skill through play or daily life. Materials: things already in the home.",
+          "complexity": "low"
+        }
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 10,
+      "haveRecipe": 4,
+      "noRecipe": 6
+    }
+  },
+
+  "decisionsNeeded": [
+    {
+      "category": "new-skill",
+      "item": "Build 'lesson-planner' skill — the orchestration layer that generates weekly planners, daily guides, center cards, and materials lists",
+      "impact": "Transforms Homa from worksheet-maker into a curriculum SYSTEM. This is the missing layer between curriculum-studio (what to teach) and materials-studio (individual printables).",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build weekly-lesson-planner recipe (html path)",
+      "impact": "The parent-facing artifact that eliminates 'what do I do today?' — the single most requested planning tool",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build center-activity-card recipe (hybrid path)",
+      "impact": "Cross-curricular centers are what Carolyng loves most — story-themed science, social studies, drama activities with materials lists",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build daily-instruction-guide recipe (html path)",
+      "impact": "Tells the parent HOW to teach each day, not just WHAT. Includes differentiation paths.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build story-assessment recipe (html path)",
+      "impact": "Three-part assessment per story — vocab + comprehension + writing. Closes the assess layer.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build school-home-connection callout box (html path)",
+      "impact": "Carolyng's #1 signal: parent-engagement elements on every page",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add social-studies subject with geography-and-maps domain",
+      "impact": "Map skills, geography, civics — currently no subject at all",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add drama/dramatic-arts subject or domain",
+      "impact": "Role play, creative expression, oral language through drama",
+      "urgency": "low"
+    }
+  ],
+
+  "architecturalInsight": {
+    "fourLayerModel": {
+      "description": "Carolyng's Trophies drops revealed a four-layer curriculum architecture that published programs use and that Homa should replicate",
+      "layers": [
+        {
+          "name": "Lesson Planner",
+          "function": "Weekly orchestration — what to do each day, how skills build across the week",
+          "homaEquivalent": "NEW: lesson-planner skill output",
+          "status": "missing"
+        },
+        {
+          "name": "Daily Instruction Guide",
+          "function": "Teaching steps + diagnostic IF/THEN branching + leveled options per day",
+          "homaEquivalent": "NEW: lesson-planner skill daily guide output",
+          "status": "missing"
+        },
+        {
+          "name": "Practice Materials",
+          "function": "Student-facing worksheets, activities, centers",
+          "homaEquivalent": "materials-studio (exists)",
+          "status": "exists"
+        },
+        {
+          "name": "Assessment",
+          "function": "End-of-unit tests — vocabulary → comprehension → written response",
+          "homaEquivalent": "NEW: story-assessment recipe in materials-studio",
+          "status": "missing"
+        }
+      ],
+      "lateralExtension": {
+        "name": "Cross-Curricular Centers",
+        "function": "The week's theme extends into science, social studies, drama, technology as hands-on center activities",
+        "homaEquivalent": "NEW: center-activity-card recipe",
+        "status": "missing"
+      }
+    }
+  },
+
+  "notes": "This is not just a curriculum ingestion — it's an architecture blueprint. Carolyng's four drops from the same Trophies book (practice pages, assessments, lesson planner, day detail pages) collectively revealed the full four-layer system that makes a published curriculum feel 'complete.' The key product insight: Homa has the Practice Materials layer (materials-studio) and the beginning of curriculum planning (curriculum-studio), but is completely missing the Lesson Planner layer (weekly orchestration), the Daily Instruction layer (how to teach), and the Assessment layer (how to verify). Building the lesson-planner skill closes all three gaps."
+}

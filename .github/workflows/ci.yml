@@ -97,6 +97,9 @@ jobs:
       - name: Materials checks (page shell pagination, packet bodies, binder model)
         run: pnpm check:materials
 
+      - name: Materials preview raster E2E (previews must come from the PDF bytes)
+        run: pnpm check:materials-preview
+
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e

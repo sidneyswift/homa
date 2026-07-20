@@ -44,74 +44,65 @@ tell, and it costs trust.
 
 ## Subject decision rules: what the page asks for, not how it renders
 
-Evidence above sets the level; these rules set the content once you know the
-subject. Folded in here (2026-07-15) from what were two separate database
-skills, generalized in 2026-07-06 from Homa's founding-family patterns, now
-retired as a database system: this craft belongs with the rest of materials
-production, not in a second skill you would load separately for the same
-page.
+Evidence above sets the level; these rules set the content once you know
+what the page is. Two things beyond the format shape that content: the
+SUBJECT the page teaches, and any named APPROACH the family follows. Each
+has a reference file. Before you build, read the subject file that matches
+the page, and the approach file if the family follows one. A page can need
+both: a Montessori counting page reads counting AND montessori. If the
+subject is not listed, the difficulty and design rules already cover it;
+do not force a fit.
 
-**Letters and letter sounds** (roughly ages 2.5 to 7):
+Read either with:
+`read_file /workspace/skills/materials-studio/references/<subjects|approaches>/<name>.md`
 
-- Sounds before letter names. "What sound does M make?" beats "name this
-  letter" for reading readiness. If the child already knows letter names,
-  shift the whole page toward sounds.
-- Start from THEIR letters: the first letter of the child's name, then
-  letters from their current obsessions (D for dinosaur). Familiar beats
-  alphabetical order.
-- One or two target letters per page, never more. Add one review letter from
-  a previous page if you know one.
-- Pair uppercase and lowercase together (M m) so they register as one letter.
-- Vary the exercise types across the page: trace the letter, circle the
-  letter hiding in a short row of letters, circle the picture-word that
-  starts with the sound, find the letter inside one short word.
-- Solid on single letter sounds? Step up gently: word families (at, an) and
-  blending two sounds, not sight-word drills.
-- Keep it winnable: end with the child's name to trace, a guaranteed success.
-- A family whose curriculum boxes letters instead of using a three-line
-  guide (Handwriting Without Tears, for one) still gets these same rules;
-  see "Letter boxes" above for the exact box geometry.
+| If the page's subject is... | read subjects/ |
+| --- | --- |
+| letters and letter sounds (ages ~2.5 to 7) | letters |
+| counting and early number (ages ~2 to 6) | counting |
+| CVC words and early phonics (ages ~4 to 7) | cvc-phonics |
+| essay and structured writing (ages ~9 to 14) | essay-writing |
+| math operations and algebra (ages ~9 to 14) | math-operations |
+| math puzzles and logic games (ages ~7 to 12) | math-puzzles-logic-games |
+| social-emotional learning (ages ~3 to 8) | social-emotional-learning |
+| unit studies and thematic packs (all ages) | unit-studies-thematic-packs |
 
-**Counting and early number** (roughly ages 2 to 6):
+| If the family follows... | read approaches/ |
+| --- | --- |
+| Direct Instruction / DISTAR | direct-instruction |
+| play-based / experiential | play-based |
+| Charlotte Mason | charlotte-mason |
+| Montessori | montessori |
+| Singapore Math (CPA progression) | singapore-math |
+| balanced literacy | balanced-literacy |
 
-- Count things they love. Ten dinosaurs beat ten dots, every time.
-- One number skill per page: counting objects OR recognizing numerals OR
-  writing numerals. Never all three at once.
-- Aim just past their edge: if they count to 10 comfortably, practice 8 to
-  12. Inside their range is boring; far past it is discouraging.
-- Always include one "how many altogether?" moment after counting
-  (cardinality: the last number said IS the amount).
-- For younger kids, include one small-group moment (1 to 4 things) they can
-  recognize at a glance without counting.
-- Mix count-and-circle, count-and-write-the-number, and "circle the group
-  that has more" for comparison.
-- Keep number formation practice separate unless writing numerals IS the
-  focus.
-- End with something guaranteed: counting something they can always count.
+### Math practice laws (binding, every math page; field directives 2026-07-18)
 
-**CVC words and early phonics** (roughly ages 4 to 7):
+These apply to every math page whether or not a subject or approach file
+loads:
 
-- Multi-sensory beats single-channel. When the parent asks for phonics practice and hasn't named a specific format, prefer cut-and-paste (see → write → cut → paste = four modalities reinforcing one word) over plain fill-in-the-blank.
-- Systematic progression matters. Short a CVC words before short e, before blends, before digraphs. The format stays constant; the phonics content progresses. One vowel sound per page, not mixed.
-- Six to eight words per page for early readers. Enough to practice without overwhelming.
-- Model-then-do: the printed word is always visible as reference while the student writes and matches. Never ask a K-2 child to produce a word from memory alone unless the parent says they're ready.
-- Level the same format: Level 1 = simple CVC (cab, map), Level 2 = more words or harder patterns. Same layout, different content. Parents appreciate the consistency.
-
-**Essay and structured writing** (roughly ages 9 to 14):
-
-- Structure IS instruction. A two-column layout where the left column defines what each section is ("a. topic sentence", "b. supporting evidence") and the right column has blanks teaches process and practice simultaneously.
-- Difficulty differentiation via evidence slots: 2 examples per body paragraph for younger/developing writers, 3 for more rigorous work. Same skeleton, different depth.
-- Process metadata reinforces writing-as-process: include name, date, topic/title, and draft-due fields. The outline is not a one-shot assignment.
-- No visual decoration for writing scaffolds. Clean B&W, structure-only. The absence of visual noise signals "this is serious work."
-
-**Math operations and algebra** (roughly ages 9 to 14):
-
-- Color-coded step sequences aid memorization for multi-step processes (PEMDAS, equation-solving algorithms). Each operation or step gets its own accent color.
-- Mnemonic anchoring: pair a verbal mnemonic with a small illustration for sequential processes. Humor helps memory ("Please Excuse My Dear Aunt Sally" + sheep).
-- Teach-then-practice bundles: guided notes page introduces the concept (Cornell-style two-column: category | worked examples with blanks), followed by a practice activity on the next page. Single printable, two functions.
-- Progressive on-ramp within a single material: review prerequisites before the new concept, build to standard problems, end with "Watch Out" edge cases that break the default algorithm.
-- Self-checking formats (mazes, puzzles) replace answer keys for drill. Wrong answers = dead ends = instant feedback without red-pen anxiety.
-- Practice embedded in reference materials: foldables that contain practice problems alongside definitions are more engaging than separate drill sheets.
+- Every math worksheet ships with an answer key unless the format is
+  self-checking (maze, puzzle, constraint grid). Parents need to check
+  work without redoing the math themselves. Key on a separate page or
+  upside-down at the bottom, never beside the problems.
+- Open response, never bubble grids. No standardized-test answer boxes,
+  no fill-in-the-bubble strips. The child writes the answer.
+- The page itself can be the interactive experience: color-by-answer
+  puzzles, spinner games (paper clip and pencil as the spinner), dot-grid
+  pattern drawing. Pencil-and-paper interactivity needs no purchases and
+  no prep. Offer these alongside manipulative-based activities, not
+  instead of them.
+- End practice pages with one Challenge block: a harder extension that
+  stretches fast finishers and shows the parent where the child actually
+  is. It is a diagnostic disguised as a stretch, so keep it warm, never
+  framed as a test.
+- Cross into ELA when it fits the child: a math-log prompt ("Make up a
+  story where someone starts with 18 shells and ends with 8") turns a
+  subtraction page into storytelling. Use the child's interests for the
+  story seed.
+- After the page is delivered, mention once that a photo of the finished
+  page is welcome: Homa can check the answers and remember what clicked.
+  One gentle offer, never a chore.
 
 ## Before designing: check the library
 
@@ -158,6 +149,21 @@ from calibration runs, re-check after any model swap):
   objects), generate a SINGLE object on a white background, nothing
   else, and repeat it yourself. Never repeat a full-page image
   (calibration's one failure, caught by the quality check).
+- Sprite slicing is banned: never generate one image of a grid or sheet
+  of objects and slice it into cells with CSS (background-size,
+  background-position, overflow crops). The image model does not place
+  objects on an exact pixel grid, and the print engine renders
+  background-image positioning differently from the screen, so a sliced
+  page can look right in the on-screen check and still ship broken.
+- Many distinct scattered objects on one page (a search-and-find ring,
+  an I-spy mat, a sorting mat): hybrid, with the scatter as ONE
+  generate_image call. Ask for a single image that already contains
+  every object arranged the way the page needs (in a ring, scattered
+  across the sheet), with no text or letters in the image. Your HTML
+  owns the title, the instructions, and any center letter or label.
+  Never go image-direct with the title baked into the art here; a wrong
+  title means re-rolling the whole page. Never build the scatter from
+  many separately positioned pieces or a sliced sheet.
 - Foldable / interactive notebook insert: prefer hybrid (doodle art +
   HTML structure) or image-direct when the whole panel is art-driven.
   Use html alone only for text-heavy reference foldables (vocab, formulas)
@@ -185,6 +191,11 @@ from calibration runs, re-check after any model swap):
   previewUrl, an earlier generate_image URL). With references, describe
   what changes and what stays ("keep the layout and line style; replace
   the puppy with...").
+- A photo the parent shared in chat is a first-class reference too:
+  family-scoped chat upload URLs pass the same artifact check. In a
+  later session, find_attachments lists her uploads with their
+  captions; recover the photo there instead of asking her to send it
+  again.
 - Ask for "no text or letters in the image" on art that sits inside an
   html page; your HTML owns the words.
 - One strong image beats three weak ones; reuse a good URL across
@@ -353,6 +364,10 @@ addition, patterns, or place value, consider offering one:
 - Print the manipulative itself when it helps: a ten-frame mat, a strip
   of cut-out counters, a 0-20 number line. The html path owns these;
   exact grid geometry is its strength.
+- Printed manipulative sets (pattern blocks, number cards, fraction
+  tiles) are durable goods, not one-shot pages: white background, outline
+  art, clear cut lines, sized for small hands, and a one-line note that
+  laminating (or a sheet protector) makes them last the year.
 - Or write the page's instruction line to use what the house already
   has: beans, coins, cereal, toy cars. Never send her shopping.
 - Mention it once, as an offer, when it genuinely fits ("want a
@@ -372,516 +387,92 @@ counters):
 </table>
 ```
 
-## Foldable / interactive notebook insert
+## Format library (load the recipe before you build)
 
-Reference image: `references/homa-foldable-reference.png`
-This Homa-style foldable example shows tri-fold layout, fold lines,
-glue tab, color-coded operation symbols, definitions panel, and embedded
-practice panel. Study it for layout, fold geometry, and panel structure.
-Original structural patterns drawn from TPT foldable inspo (Math Doodles
-PEMDAS), re-expressed in Homa's design language.
+Each format below has a full recipe as a sibling file: layout geometry,
+the binding design patterns, worked HTML, path choice, and scaffolded
+versions. The router does not carry them, so they cost nothing until you
+need one. Once the subject rules and the request point to a format, read
+its recipe first, then build:
 
-A foldable is a tactile learning tool the child prints, cuts, folds,
-and glues into a notebook. The reference material and the practice
-live on the same physical object, not a separate worksheet. Foldables
-are the format when the parent or inspo asks for interactive notebooks,
-fold-and-glue inserts, or accordion-style reference cards.
+`read_file /workspace/skills/materials-studio/references/recipes/<name>.md`
 
-The platform shell is portrait (8.5×11in). A foldable's content area
-lives inside that shell rotated or divided so the final printed page
-folds into the right shape. Never declare `@page`; the shell owns the
-page. Two common layouts:
+Pick by what the page must DO, not by habit. When two formats fit, the
+subject rules and the child's evidence break the tie. When nothing here
+fits, design from the creation-path and design rules directly; a missing
+recipe is not a reason to force the wrong format.
 
-**Accordion tri-fold** (the PEMDAS pattern): divide the page into
-three equal horizontal bands. Each band is one panel of the folded
-strip. Top band = cover (title, mnemonic art, glue tab). Middle band
-= definitions / reference. Bottom band = embedded practice problems.
-The child cuts along the outer border, folds along the band borders,
-and glues the tab into a notebook.
+### Golden anchors (they set the visual bar)
 
-**Two-flap / four-flap book**: divide the page into a fixed base and
-2–4 flaps that fold over it. Under each flap: a term, rule, or step.
-On the flap surface: a prompt or question.
+Many materials have a golden anchor: a finished Homa reference image that
+shows the exact quality bar. When you build one of these on the image or
+hybrid path, pass its id to generate_image as `anchorIds` so the image
+model matches the Homa look. Then still write your OWN prompt with your own
+example content (your own numbers, your own wording), never a copy of the
+anchor's or any source's specifics. The anchor sets the bar; your prompt
+supplies the material.
 
-Design patterns (all binding for foldables):
+| Anchor id | Use it when building... |
+| --- | --- |
+| order-of-operations-chart | an order-of-operations (PEMDAS/GEMDAS) chart, poster, or foldable |
+| five-paragraph-essay-outline | a five-paragraph essay outline or structured writing scaffold |
+| foldable | a foldable or interactive notebook insert |
+| cut-and-paste-word-work | a cut-and-paste CVC word work page |
+| number-practice-page | a single-number practice page (trace, ten-frame, count) |
+| math-practice | a general arithmetic or math practice page |
+| one-page-mini-book | a one-page mini book that folds into eight panels |
+| matching-visual-discrimination | a preschool matching or visual discrimination page |
+| unit-study-packet | a themed, multi-activity unit study packet |
+| activity-pack | a four-quadrant themed activity pack |
+| daily-rhythm-cards | cut-apart daily schedule or rhythm cards |
+| visual-schedule-cards | visual schedule cards for routines |
+| singapore-workbook-page | a Singapore-style concrete-pictorial-abstract math page |
+| hive-puzzle | a hexagonal hive number-constraint puzzle |
+| cross-number-puzzle | a cross-number arithmetic puzzle |
+| fraction-link-puzzle | a fraction-equivalence link puzzle |
+| fraction-maze-escape | a fraction-comparison or ordering maze |
+| decimal-path-puzzle | a decimal comparison or ordering path puzzle |
+| geometry-maze | a geometry or angle maze, or maze-style practice page |
 
-- **Fold lines**: `border-top: 2.5px dashed #b3a492;` between panels.
-  Label faintly: "✂️ cut" on outer edges, "fold" on internal
-  creases, "glue here ▸" on the attachment tab.
-- **Glue tab**: a narrow strip (~0.75in) on one end with a dotted
-  border and "GLUE" in small caps. Background `#f5f0e8` so the child
-  sees it is not content.
-- **Large display text**: the key concept in big, bold letters
-  (`font-size: 72px–110px; font-weight: 700;`). Bubble-letter style
-  for younger kids (Fredoka weight 600+). Each letter or step can
-  carry its own accent color for color-coded-by-concept.
-- **Practice panel**: practice problems are part of the foldable, not
-  a separate page. Place them in the bottom or back panel with answer
-  blanks (`border-bottom: 2px solid #6b6259; width: 60px; display:
-  inline-block;`).
-- **Scaffolded versions**: generate the blank (fill-in) version first.
-  Offer answer-key and color versions as follow-ups if the parent
-  wants them. Keep the same layout, with answers in a muted accent color or full
-  color fills on each section.
-- **Mnemonic anchoring**: pair a verbal mnemonic with a small
-  illustration (use generate_image for one small character/icon on
-  white background, embed via hybrid path). Humor helps memory.
+Most materials have no anchor yet, and that is fine: build from the recipe
+and design rules. Only pass an anchor id that clearly matches what you are
+making.
 
-```html
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  .foldable { width: 100%; }
-  .panel { min-height: 200px; padding: 20px 24px;
-    border-bottom: 2.5px dashed #b3a492; position: relative; }
-  .panel:last-child { border-bottom: none; }
-  .fold-label { position: absolute; right: 12px; top: -10px;
-    font-size: 10px; color: #b3a492; font-family: sans-serif;
-    letter-spacing: 0.1em; }
-  .glue-tab { height: 56px; border: 2px dotted #b3a492;
-    background: #f5f0e8; display: flex; align-items: center;
-    justify-content: center; font-size: 11px; letter-spacing: 0.2em;
-    color: #b3a492; text-transform: uppercase; }
-  .concept-letter { font-family: 'Fredoka', sans-serif;
-    font-weight: 700; font-size: 96px; display: inline-block;
-    margin: 0 6px; }
-  .practice-blank { border-bottom: 2px solid #6b6259;
-    width: 60px; display: inline-block; margin: 0 4px; }
-</style>
-
-<div class="foldable">
-  <div class="glue-tab">✂️ cut along outer edge · glue this tab into notebook</div>
-  <div class="panel">
-    <span class="fold-label">fold</span>
-    <!-- Cover panel: title + mnemonic art -->
-    <div style="text-align:center;">
-      <span class="concept-letter" style="color:#e25b45;">P</span>
-      <span class="concept-letter" style="color:#f5a623;">E</span>
-      <span class="concept-letter" style="color:#4caf50;">M</span>
-      <span class="concept-letter" style="color:#00897b;">D</span>
-      <span class="concept-letter" style="color:#2196f3;">A</span>
-      <span class="concept-letter" style="color:#9c27b0;">S</span>
-    </div>
-  </div>
-  <div class="panel">
-    <span class="fold-label">fold</span>
-    <!-- Reference panel: definitions -->
-  </div>
-  <div class="panel">
-    <!-- Practice panel: embedded problems -->
-    <p>Solve: 3 + (4 × 2) = <span class="practice-blank"></span></p>
-  </div>
-</div>
-```
-
-Path choice: hybrid is the default (generate_image for the mnemonic
-character or decorative art, HTML for structure and text). Use
-image-direct when the whole foldable is art-driven (a coloring
-foldable, a visual-only science diagram). Use html alone for
-text-heavy reference foldables (vocabulary, formula cards) where
-surgical revision matters more than organic feel.
-
-## Structured outline / essay scaffold
-
-Reference image: `references/homa-outline-reference.png`
-This Homa-style structured outline example shows a two-column
-instruction|work layout, Roman numeral section headers, labeled
-sub-fields with blank writing lines, and clean B&W design. Study it
-for layout proportions, section structure, and field labeling.
-Original structural patterns drawn from TPT essay outline inspo
-(The Daring English Teacher), re-expressed in Homa's design language.
-
-A structured outline breaks a complex task, such as writing an essay, planning
-a research project, or outlining a book report, into a fill-in-the-blank
-framework with labeled sections. The structure teaches the process:
-the child learns what goes where by filling it in. This is the format
-when the parent asks for essay outlines, writing scaffolds, planning
-sheets, or process organizers.
-
-Always html path. Text precision, table alignment, and cheap surgical
-revision are the whole point. No organic art, no images. Structure IS
-the design.
-
-Design patterns (all binding for outlines):
-
-- **Two-column layout**: left column = instruction (what goes here,
-  in italic or muted color), right column = blank lines for student
-  work. The left column teaches; the right column practices.
-- **Section headers**: bold, with Roman numerals or numbered steps.
-  A thin top border separates sections. Header carries the section
-  name ("I. Introduction", "II. Body Paragraph 1").
-- **Sub-fields**: each section breaks into labeled sub-parts
-  ("a. topic sentence", "b. supporting evidence", "c. explanation").
-  Sub-labels in the left column; blank lines in the right.
-- **Blank lines**: `border-bottom: 1.5px solid #6b6259; min-height:
-  24px;`. Use generous spacing so the child can write comfortably.
-  3–4 lines per sub-field for younger writers, 2 lines for older.
-- **Difficulty variants**: same layout, different field counts. A
-  simpler version has 2 evidence slots per body paragraph; a harder
-  version has 3. Generate the version that matches the child's level
-  (from the difficulty-from-evidence rules above), and offer the
-  other if the parent wants it.
-- **Process metadata header**: name, date, topic/title, and optionally
-  draft-due and final-due date fields. Reinforces writing-as-process.
-- **No decoration**: stark, clean B&W. No doodles, no clipart, no
-  color accents. The absence of visual noise signals "this is serious
-  work" and keeps the focus on the writing.
-- **Print-friendly**: portrait, single page when possible. A five-
-  paragraph essay outline fits one page for grades 7+; for younger
-  kids with more writing space, allow two pages.
-
-```html
-<style>
-  .outline-header { display: flex; flex-wrap: wrap; gap: 8px 24px;
-    margin-bottom: 20px; font-size: 13px;
-    font-family: 'Plus Jakarta Sans', sans-serif; }
-  .outline-header .field { flex: 1 1 40%; }
-  .outline-header .field-line { border-bottom: 1.5px solid #6b6259;
-    min-width: 120px; display: inline-block; margin-left: 4px; }
-  .section { border-top: 2px solid #221e1a; margin-top: 16px;
-    padding-top: 10px; }
-  .section-title { font-weight: 700; font-size: 15px;
-    margin-bottom: 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .two-col { display: grid; grid-template-columns: 170px 1fr;
-    gap: 4px 12px; margin-bottom: 6px; }
-  .two-col .label { font-size: 12px; color: #6b6259;
-    font-style: italic; padding-top: 4px; }
-  .two-col .blank { border-bottom: 1.5px solid #6b6259;
-    min-height: 24px; }
-</style>
-
-<div class="outline-header">
-  <div class="field">Name: <span class="field-line"></span></div>
-  <div class="field">Date: <span class="field-line"></span></div>
-  <div class="field">Essay Topic: <span class="field-line"></span></div>
-  <div class="field">Essay Title: <span class="field-line"></span></div>
-</div>
-
-<div class="section">
-  <div class="section-title">I. Introduction</div>
-  <div class="two-col">
-    <div class="label">a. attention getter</div>
-    <div class="blank"></div>
-  </div>
-  <div class="two-col">
-    <div class="label">b. background information</div>
-    <div class="blank"></div>
-  </div>
-  <div class="two-col">
-    <div class="label">c. thesis statement</div>
-    <div class="blank"></div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">II. Body Paragraph 1</div>
-  <div class="two-col">
-    <div class="label">a. topic sentence</div>
-    <div class="blank"></div>
-  </div>
-  <div class="two-col">
-    <div class="label">b. example / evidence</div>
-    <div class="blank"></div>
-  </div>
-  <div class="two-col">
-    <div class="label">c. explanation</div>
-    <div class="blank"></div>
-  </div>
-  <div class="two-col">
-    <div class="label">d. transition</div>
-    <div class="blank"></div>
-  </div>
-</div>
-<!-- Repeat for Body Paragraphs 2-3, then V. Conclusion -->
-```
-
-Adapt the section names and sub-fields to the actual task. A book
-report outline replaces "thesis" with "main idea" and adds a
-"characters" section. A research outline adds "sources" fields. The
-two-column instruction|work pattern stays constant; the labels change.
-
-## Cut-and-paste word work
-
-Reference image: `references/homa-cut-and-paste-reference.png`
-
-A multi-sensory word work page where the child sees the model word,
-writes it on a practice line, then cuts out a tile and pastes it into
-a notebook or sorting activity. Four modalities for one concept: see,
-write, cut, paste. This is the format when the parent asks for
-cut-and-paste activities, word work, word sorts, or multi-sensory
-phonics practice.
-
-Great for: CVC words, word families, sight words, vocabulary,
-sorting activities. Especially effective for K-2 phonics and
-special education where kinesthetic manipulation reinforces learning.
-
-Always html path. Precise grid geometry, dotted cut lines, and
-writing lines need surgical precision that the image model cannot
-reliably produce.
-
-Design patterns (all binding for cut-and-paste):
-
-- **Grid layout**: 2-column grid, one word per cell. 6-8 words
-  per page for K-2; can increase to 10-12 for older students.
-- **Cell structure**: each cell contains three elements stacked
-  vertically: (1) printed model word in large clear type, (2) a
-  writing practice line matching the handwriting-practice baseline,
-  (3) a cut-out tile at the bottom of the cell.
-- **Dotted cut borders**: `border: 2px dashed #b3a492;` on cut-out
-  tiles and the horizontal separator line between the practice area
-  and the tile strip.
-- **Cut tiles strip**: a horizontal band at the bottom of the page,
-  separated from the main grid by a labeled cut line
-  ("✂️ cut along this line"). Each tile repeats the word in a
-  bordered box the child cuts out individually.
-- **Writing lines**: match the tracing-guide baseline style
-  (`border-bottom: 2px solid #6b6259; min-height: 28px;`).
-- **Consistent cell sizing**: all cells equal height and width for
-  clean grid alignment.
-- **Visual clarity**: large, clear font for model words
-  (`font-size: 32px; font-weight: 600;`). Enough spacing between
-  cells for small hands to cut.
-
-```html
-<link href="https://fonts.googleapis.com/css2?family=Andika&display=swap" rel="stylesheet">
-<style>
-  .cwp-grid { display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px; margin-bottom: 24px; }
-  .cwp-cell { border: 1.5px solid #6b6259; border-radius: 6px;
-    padding: 14px 16px; text-align: center; }
-  .cwp-model { font-family: 'Andika', sans-serif; font-size: 32px;
-    font-weight: 600; color: #221e1a; margin-bottom: 8px; }
-  .cwp-write-line { border-bottom: 2px solid #6b6259;
-    min-height: 28px; margin: 8px auto; width: 85%; }
-  .cwp-cut-separator { border-top: 2.5px dashed #b3a492;
-    margin: 20px 0 12px; position: relative; padding-top: 4px; }
-  .cwp-cut-label { font-size: 10px; color: #b3a492;
-    letter-spacing: 0.1em; text-align: center; }
-  .cwp-tiles { display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 10px; }
-  .cwp-tile { border: 2px dashed #b3a492; border-radius: 4px;
-    padding: 10px; text-align: center; font-family: 'Andika', sans-serif;
-    font-size: 22px; }
-</style>
-
-<div class="cwp-grid">
-  <div class="cwp-cell">
-    <div class="cwp-model">cat</div>
-    <div class="cwp-write-line"></div>
-  </div>
-  <div class="cwp-cell">
-    <div class="cwp-model">hat</div>
-    <div class="cwp-write-line"></div>
-  </div>
-  <!-- repeat for remaining words -->
-</div>
-
-<div class="cwp-cut-separator">
-  <div class="cwp-cut-label">✂️ cut along this line</div>
-</div>
-
-<div class="cwp-tiles">
-  <div class="cwp-tile">cat</div>
-  <div class="cwp-tile">hat</div>
-  <!-- one tile per word -->
-</div>
-```
-
-Path choice: html, always. The grid geometry, dotted cut lines, and
-writing-line precision are exactly what the html path exists for.
-Image-direct would lose the cut-line fidelity that makes this format
-work as a physical manipulative.
-
-## Maze / puzzle practice
-
-Reference image: `references/homa-maze-reference.png`
-
-A maze that transforms rote drill into a navigation challenge.
-Correct answers advance through the maze; wrong answers hit dead
-ends. Self-checking without needing an answer key. This is the format
-when the parent asks for mazes, puzzle worksheets, or gamified
-practice.
-
-Works for: math facts (follow the correct products), phonics (follow
-the CVC words), vocabulary matching, sight words, any fact-based
-drill that has right/wrong answers.
-
-Design patterns (all binding for mazes):
-
-- **Clear start/finish markers**: labeled "START" and "FINISH" with
-  bold borders or arrows. The child knows exactly where to begin.
-- **Decision points with answer choices**: each fork in the path
-  presents a problem or question. The correct answer leads forward;
-  wrong answers dead-end visibly.
-- **Dead ends are visible**: wrong paths should clearly terminate
-  (wall, blocked path) so the child self-corrects without an
-  answer key.
-- **Progressive difficulty**: early decision points are easier;
-  later ones are harder. Graduated on-ramp within one maze.
-- **Themed illustrations**: the maze path can weave through themed
-  artwork (space, jungle, ocean) to make it visually engaging.
-- **Answer labels at decision points**: large, clear text for each
-  answer choice (`font-size: 18px; font-weight: 600;`).
-- **Path width**: wide enough for a pencil line (~20px visual width
-  in the maze artwork).
-
-```html
-<style>
-  .maze-container { position: relative; width: 100%; }
-  .maze-img { width: 100%; display: block; }
-  .maze-label { position: absolute; font-family: 'Fredoka', sans-serif;
-    font-size: 18px; font-weight: 600; color: #221e1a;
-    background: rgba(255,255,255,0.85); padding: 2px 8px;
-    border-radius: 4px; }
-  .maze-start { position: absolute; font-family: 'Fredoka', sans-serif;
-    font-size: 14px; font-weight: 700; color: #4caf50;
-    letter-spacing: 0.1em; text-transform: uppercase; }
-  .maze-finish { position: absolute; font-family: 'Fredoka', sans-serif;
-    font-size: 14px; font-weight: 700; color: #e25b45;
-    letter-spacing: 0.1em; text-transform: uppercase; }
-</style>
-
-<div class="maze-container">
-  <img class="maze-img" src="{generated_maze_image_url}" alt="practice maze" />
-  <span class="maze-start" style="top: 5%; left: 8%;">Start</span>
-  <span class="maze-finish" style="bottom: 5%; right: 8%;">Finish</span>
-  <!-- Position answer labels at each decision point -->
-  <span class="maze-label" style="top: 20%; left: 30%;">7 x 8 = 56</span>
-  <span class="maze-label" style="top: 20%; left: 60%;">7 x 8 = 54</span>
-  <!-- repeat for each fork -->
-</div>
-```
-
-Path choice: hybrid is preferred. Use generate_image for the maze
-artwork and paths (the organic, hand-drawn feel is the whole point),
-then overlay answer labels at decision points with HTML absolute
-positioning. For very simple mazes (few forks, no theming),
-image-direct works. Include the answer text in the image prompt.
-
-## Notes-and-practice bundle
-
-Reference image: `references/homa-notes-bundle-reference.png`
-
-A two-page format: page 1 is guided notes (Cornell-style two-column
-layout with terms and fill-in-the-blank explanations), page 2 is a
-practice activity (drill problems, fill-in-the-blank, or matching).
-Teach then practice in one printable. This is the format when the
-parent asks for notes-and-practice, guided notes with an activity,
-or teach-then-drill pages.
-
-Works for: any subject where concept introduction precedes drill.
-Math operations, grammar rules, science vocabulary, history facts.
-Especially strong for grades 3-8 where students are learning to
-take notes and need structure.
-
-Uses the packet recipe (two pages, one PDF) via create_printable's
-`pages` input. Each page is an html entry.
-
-Design patterns (all binding for notes-and-practice bundles):
-
-- **Page 1: guided notes**:
-  - Two-column layout: narrow term column (~120px) on the left,
-    wide explanation column on the right.
-  - Section dividers: thin horizontal rules between concept groups.
-  - Fill-in-the-blank: key terms or values left as blank lines
-    within the explanation text.
-  - Student notes area: 2-3 blank lines at the bottom of each
-    section for the student's own observations.
-  - Header: topic title, name field, date field.
-
-- **Page 2: practice activity**:
-  - Numbered problems or matching columns.
-  - Problems progress from straightforward application to
-    multi-step or tricky edge cases.
-  - Answer blanks: `border-bottom: 2px solid #6b6259; width: 80px;`
-  - For matching: two columns with items to connect.
-  - Include 8-12 problems for grades 3-5, 12-16 for grades 6-8.
-
-- **Visual continuity**: both pages share the same header style,
-  font family, and spacing conventions so they read as one unit.
-
-```html
-<!-- PAGE 1: Guided Notes -->
-<style>
-  .notes-header { display: flex; flex-wrap: wrap; gap: 8px 24px;
-    margin-bottom: 16px; font-size: 13px;
-    font-family: 'Plus Jakarta Sans', sans-serif; }
-  .notes-header .field { flex: 1 1 40%; }
-  .notes-header .field-line { border-bottom: 1.5px solid #6b6259;
-    min-width: 120px; display: inline-block; margin-left: 4px; }
-  .notes-title { font-family: 'Fredoka', sans-serif; font-size: 22px;
-    font-weight: 700; margin-bottom: 16px; text-align: center; }
-  .notes-section { border-top: 1.5px solid #d9d2c7; margin-top: 14px;
-    padding-top: 10px; }
-  .notes-two-col { display: grid; grid-template-columns: 120px 1fr;
-    gap: 4px 14px; margin-bottom: 8px; }
-  .notes-term { font-size: 13px; font-weight: 700; color: #221e1a;
-    padding-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .notes-explanation { font-size: 13px; color: #6b6259;
-    line-height: 1.8; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .notes-blank { border-bottom: 2px solid #6b6259; width: 80px;
-    display: inline-block; margin: 0 4px; }
-  .notes-student-lines { margin-top: 6px; }
-  .notes-student-lines div { border-bottom: 1.5px solid #d9d2c7;
-    min-height: 22px; margin-bottom: 4px; }
-</style>
-
-<div class="notes-header">
-  <div class="field">Name: <span class="field-line"></span></div>
-  <div class="field">Date: <span class="field-line"></span></div>
-</div>
-<div class="notes-title">Two-Step Equations</div>
-
-<div class="notes-section">
-  <div class="notes-two-col">
-    <div class="notes-term">Two-step equation</div>
-    <div class="notes-explanation">
-      An equation that takes <span class="notes-blank"></span> steps to solve.
-      First, use <span class="notes-blank"></span> operations (add/subtract),
-      then use <span class="notes-blank"></span> operations (multiply/divide).
-    </div>
-  </div>
-  <div class="notes-student-lines">
-    <div></div><div></div>
-  </div>
-</div>
-<!-- Repeat sections for each concept -->
-```
-
-```html
-<!-- PAGE 2: Practice -->
-<style>
-  .practice-title { font-family: 'Fredoka', sans-serif; font-size: 20px;
-    font-weight: 700; margin-bottom: 16px; text-align: center; }
-  .practice-problem { font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px; margin-bottom: 14px; display: flex;
-    align-items: baseline; gap: 8px; }
-  .practice-num { font-weight: 700; min-width: 24px; }
-  .practice-blank { border-bottom: 2px solid #6b6259; width: 80px;
-    display: inline-block; margin: 0 4px; }
-  .practice-work-area { border: 1.5px solid #d9d2c7; border-radius: 4px;
-    min-height: 48px; margin-left: 32px; margin-bottom: 8px; }
-</style>
-
-<div class="practice-title">Practice: Two-Step Equations</div>
-
-<div class="practice-problem">
-  <span class="practice-num">1.</span>
-  <span>3x + 5 = 20 &rarr; x = <span class="practice-blank"></span></span>
-</div>
-<div class="practice-work-area"></div>
-
-<div class="practice-problem">
-  <span class="practice-num">2.</span>
-  <span>2x - 7 = 11 &rarr; x = <span class="practice-blank"></span></span>
-</div>
-<div class="practice-work-area"></div>
-<!-- Repeat for remaining problems -->
-```
-
-Path choice: html for both pages, always. Text precision, table
-alignment, and cheap surgical revision matter on both the notes and
-the practice page. Use the packet recipe to combine both pages into
-one PDF via create_printable's `pages` input.
+| Format | Reach for it when the page must... | Recipe file |
+| --- | --- | --- |
+| Foldable / notebook insert | be a tactile fold-and-glue tool with reference and practice on one object | foldable |
+| Structured outline / essay scaffold | teach a writing or planning process through a fill-in framework | structured-outline |
+| Cut-and-paste word work | reinforce one word four ways (see, write, cut, paste); early phonics | cut-and-paste-word-work |
+| Maze / puzzle practice | make drill self-checking: right answers advance, wrong ones dead-end | maze-puzzle-practice |
+| Notes-and-practice bundle | pair a guided-notes page with a practice page (teach, then do) | notes-and-practice-bundle |
+| Matching / visual discrimination | build early visual matching and sorting on one preschool page | matching-visual-discrimination |
+| Number practice page | focus one numeral with trace, ten-frame, count, and color activities | number-practice-page |
+| One-page mini book | fold one sheet into an 8-page book (needs exact panel order) | one-page-mini-book |
+| Unit study packet | bundle 8 to 12 activities on one theme into a multi-page packet | unit-study-packet |
+| Labeled anatomy diagram | label parts of a scientific illustration with a word bank | labeled-anatomy-diagram |
+| Cut-and-assemble craft | color, cut, and build a 3D model or layered diagram | cut-and-assemble-craft |
+| Nature identification poster | show a labeled species grid for nature study | nature-identification-poster |
+| Classification sorting mat | sort cut-out pieces into labeled category zones (laminate, reuse) | classification-sorting-mat |
+| 3-part nomenclature cards | make a Montessori self-checking card set (image, label, control) | nomenclature-cards |
+| Copy-work pages | practice handwriting from a curated quote or passage | copy-work-pages |
+| Guided notes | give a Cornell two-column notes page that scaffolds a new concept | guided-notes |
+| Dot-marker activity | let a toddler stamp dot-marker circles to form letters, numbers, shapes | dot-marker-activity |
+| Playdough mat | give a laminate-and-reuse surface to form shapes or letters in dough | playdough-mat |
+| Social narrative | walk a child through a feeling or situation in first-person story form | social-narrative |
+| Visual schedule cards | make cut-apart routine cards to sequence a day | visual-schedule-cards |
+| Cross-number puzzle | drill arithmetic inside a row and column sum-constraint grid | cross-number-puzzle |
+| Checklist assessment | give parents a warm whole-child readiness checklist | checklist-assessment |
+| Clip cards | make a clip-the-answer or mark-the-answer card set for repeat practice | clip-cards |
+| File-folder game | build a glue-in-a-folder board game with moveable pieces | file-folder-game |
+| Cloze story | have the child fill passage blanks from a word bank | cloze-story |
+| Reading comprehension mini-unit | teach a comprehension skill across passages, a lesson, and vocab | reading-comprehension-mini-unit |
+| Hive puzzle | drill number sense in a self-checking hexagonal constraint puzzle | hive-puzzle |
+| Fraction link puzzle | practice fraction equivalence in a grid of linked cells | fraction-link-puzzle |
+| Fraction maze escape | compare and order fractions by tracing a path through a grid | fraction-maze-escape |
+| Decimal path puzzle | order decimals by tracing the correct path through nodes | decimal-path-puzzle |
+| Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
+| Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
+| Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
 
 ## Design rules (binding)
 
@@ -895,6 +486,10 @@ one PDF via create_printable's `pages` input.
   top or the child's name pre-printed, spelled exactly as the family
   spells it.
 - Never red-pen framing, scores, or anything that grades.
+- When a page has room, a small "try this together" box at the bottom
+  offers the parent one playful real-world extension of the skill (count
+  the forks while setting the table). An offer for connection, never
+  homework, never required to finish the page.
 
 ## Page density by age (layout and item counts; the LEVEL comes from evidence, above)
 

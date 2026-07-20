@@ -1,12 +1,28 @@
 import { defineHook } from "eve/hooks";
 
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
+import {
+  delegatedSessionLineage,
+  isParentedEveSession,
+} from "../../lib/conversation-continuity/session-lineage";
 import { persistConversationMessage } from "../../lib/conversation-log";
+import { emitMapEvent } from "../../lib/map/events";
 import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/research-brief-delivery";
 
 /**
+ * Internal lesson-builder chatter is durable in Eve and the lesson row, but
+ * is not a parent conversation and must not enter recall.
+ */
+export function shouldSkipConversationPersistence(
+  attributes: unknown,
+): boolean {
+  const channel = (attributes as { channel?: unknown } | undefined)?.channel;
+  return channel === "subject_lesson";
+}
+
+/**
  * The durable chat record (agentic ladder item 5, an M1-02 slice): every
- * user and assistant message, on EVERY channel (web chat and SMS), lands
+ * parent-facing user and assistant message lands
  * in public.conversation_messages the moment its stream event is durably
  * recorded. eve's Workflow storage keeps the live session; Postgres keeps
  * the permanent, searchable record the recall tool greps
@@ -26,9 +42,32 @@ import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/r
 export default defineHook({
   events: {
     async "message.received"(event, ctx) {
+      const attributes = ctx.session.auth.current?.attributes;
+      if (shouldSkipConversationPersistence(attributes)) return;
+
       try {
+        const familyId = (
+          ctx.session.auth.current?.attributes as
+            | { familyId?: string }
+            | undefined
+        )?.familyId;
+        if (ctx.session.parent && familyId) {
+          const lineage = delegatedSessionLineage({
+            childSessionId: ctx.session.id,
+            parent: ctx.session.parent,
+          });
+          await emitMapEvent("conversation.session_delegated", {
+            family_id: familyId,
+            child_session_hash: lineage.childSessionHash,
+            parent_session_hash: lineage.parentSessionHash,
+            root_session_hash: lineage.rootSessionHash,
+          });
+          return;
+        }
+        if (ctx.session.parent) return;
+
         const persisted = await persistConversationMessage({
-          attributes: ctx.session.auth.current?.attributes,
+          attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
           sequence: event.data.sequence,
@@ -36,7 +75,6 @@ export default defineHook({
           content: event.data.message,
           turnId: event.data.turnId,
         });
-        const attributes = ctx.session.auth.current?.attributes;
         if (persisted && attributes) {
           Object.assign(
             attributes,
@@ -55,6 +93,12 @@ export default defineHook({
       }
     },
     async "message.completed"(event, ctx) {
+      const attributes = ctx.session.auth.current?.attributes;
+      if (shouldSkipConversationPersistence(attributes)) return;
+      if (isParentedEveSession(ctx.session.parent)) {
+        return;
+      }
+
       try {
         if (!event.data.message) return;
         // V2 dispatch validates and substitutes the staged draft before any
@@ -67,7 +111,7 @@ export default defineHook({
           return;
         }
         await persistConversationMessage({
-          attributes: ctx.session.auth.current?.attributes,
+          attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
           sequence: event.data.sequence,

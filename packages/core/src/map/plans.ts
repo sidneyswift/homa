@@ -1,5 +1,6 @@
 import { ageLabel } from "./bands";
 import { getMapSubject, growingActivityFor, MAP_BANK_VERSION } from "./bank";
+import { selectSubjectPlanTargets } from "./lesson-target";
 import { scoreMap, type MapAnswerInput } from "./scoring";
 
 /**
@@ -324,49 +325,9 @@ export function buildFourWeekPlan(
 ): FourWeekPlan | null {
   const domain = getMapSubject(subjectId);
   if (!domain) return null;
-
-  const scores = scoreMap(ageMonths, answers);
-  const score = scores.subjects.find((entry) => entry.subjectId === subjectId);
-  const answered = new Map(answers.map((entry) => [entry.itemId, entry.answer]));
-  const sorted = [...domain.items].sort((a, b) => a.typicalMonths - b.typicalMonths);
-
-  // The starting line: strongest confirmed skill (if any).
-  const startingLine = score?.strongestObservedStatement ?? null;
-
-  // The highest anchor she confirmed, in months: nothing below it can be a
-  // target (re-proving the obvious is busywork, not a plan).
-  let reachedMonths = -Infinity;
-  let lowestNotYet: number | null = null;
-  for (const item of sorted) {
-    const answer = answered.get(item.id);
-    if (answer === "easily") reachedMonths = Math.max(reachedMonths, item.typicalMonths);
-    if (answer === "getting_there") reachedMonths = Math.max(reachedMonths, item.typicalMonths - 6);
-    if (answer === "not_yet" && (lowestNotYet === null || item.typicalMonths < lowestNotYet)) {
-      lowestNotYet = item.typicalMonths;
-    }
-  }
-  // With nothing confirmed, the honest aim is the named not-yet itself, not
-  // the bottom of the bank (a 6-year-old's plan must never target
-  // block-stacking). The deep dive refines this floor further.
-  const floor = Number.isFinite(reachedMonths)
-    ? reachedMonths
-    : lowestNotYet !== null
-      ? lowestNotYet - 1
-      : -Infinity;
-
-  // Targets: the first two rungs above the floor that aren't confirmed
-  // (a not-yet names the frontier directly).
-  const targets: string[] = [];
-  for (const item of sorted) {
-    if (targets.length >= 2) break;
-    if (answered.get(item.id) === "easily") continue;
-    if (item.typicalMonths <= floor) continue;
-    targets.push(item.statement);
-  }
-  if (targets.length === 0) {
-    // Everything in the bank confirmed: aim the plan at depth, not rungs.
-    targets.push(`Going wider in ${domain.displayName.toLowerCase()}: past every benchmark on file`);
-  }
+  const selectedTargets = selectSubjectPlanTargets(subjectId, ageMonths, answers);
+  if (!selectedTargets) return null;
+  const { startingLine, targets } = selectedTargets;
 
   const interest = context.interests?.[0] ?? "whatever they love most right now";
   const patterns = PRACTICE_PATTERNS[subjectId] ?? PRACTICE_PATTERNS.math;

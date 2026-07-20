@@ -1,0 +1,302 @@
+{
+  "id": "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T15:46:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784403967.996759",
+  "format": "practice-book-selection",
+  "title": "Harcourt Trophies Grade 2 Practice Book — Selected Pages",
+  "publisher": "Harcourt",
+  "series": "Trophies",
+  "gradeLevel": "2nd grade",
+  "pagesShown": [1, 11, 16, 18, 19, 34],
+  "callouts": ["school-home connection", "try this sections", "general use of space"],
+  "worksheets": [
+    {
+      "page": 1,
+      "title": "A Day at the Zoo — Phonograms: -id, -ide",
+      "linkedStory": "The Mixed-Up Chameleon",
+      "type": "cloze-story",
+      "layout": {
+        "structure": "sectioned",
+        "spacing": "airy",
+        "visualHierarchy": "exercise-dominant with illustration support",
+        "whiteSpaceRatio": 0.30,
+        "flowDirection": "top-down"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "phonics-word-reading",
+        "topics": [
+          {
+            "id": "ela.phonograms-id-ide",
+            "kind": "procedural",
+            "mapped": false,
+            "suggestedSlug": "ela.phonogram-word-families"
+          }
+        ],
+        "unmappedSkills": ["word-family-application-in-context"]
+      },
+      "features": {
+        "wordBox": true,
+        "numberedBlanks": true,
+        "storyContext": true,
+        "illustration": "large B&W line art (chameleon scene, ~40% of page)",
+        "schoolHomeConnection": "Invite your child to draw pictures of animals riding, sliding, and hiding. Help him or her write sentences to go with them."
+      }
+    },
+    {
+      "page": 11,
+      "title": "Spelling Words Sort — Words with ame / ake",
+      "linkedStory": "Get Up and Go!",
+      "type": "spelling-sort",
+      "layout": {
+        "structure": "grid",
+        "spacing": "airy",
+        "visualHierarchy": "balanced — word bank and sort grid equal weight",
+        "whiteSpaceRatio": 0.40,
+        "flowDirection": "top-down, then left-right"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "phonics-word-reading",
+        "topics": [
+          {
+            "id": "ela.spelling-word-sort",
+            "kind": "procedural",
+            "mapped": false,
+            "suggestedSlug": "ela.spelling-word-patterns"
+          }
+        ],
+        "unmappedSkills": ["syllable-sorting"]
+      },
+      "features": {
+        "wordBank": ["games", "make", "take", "name", "flame", "same", "became", "brake", "snake", "eyelid", "slide", "line", "more", "mistake", "together"],
+        "sortCategories": ["Words with ame", "Words with ake"],
+        "secondarySort": ["One-Syllable Words", "Two-Syllable Words", "Three-Syllable Words"],
+        "pencilGraphic": true,
+        "numberedSlots": true
+      }
+    },
+    {
+      "page": 16,
+      "title": "Author's Purpose — Read signs and identify purpose",
+      "linkedStory": "Get Up and Go!",
+      "type": "reading-comprehension",
+      "layout": {
+        "structure": "sectioned",
+        "spacing": "airy",
+        "visualHierarchy": "text-blocks-with-illustration equal weight",
+        "whiteSpaceRatio": 0.25,
+        "flowDirection": "top-down"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "comprehension-analysis",
+        "topics": [
+          {
+            "id": "ela.authors-purpose",
+            "kind": "conceptual",
+            "mapped": false,
+            "suggestedSlug": "ela.identify-authors-purpose"
+          }
+        ],
+        "unmappedSkills": []
+      },
+      "features": {
+        "realWorldTextExamples": ["BE ON TIME FOR SCHOOL! (informational sign)", "SCOTT FOR BEST CLOWN! (persuasive poster)"],
+        "framedTextBlocks": true,
+        "decorativeBorders": true,
+        "illustration": "boy at bus stop, circus clown poster with stars",
+        "openResponseLine": true,
+        "schoolHomeConnection": "Look at a few types of writing with your child, such as recipes, invitations, and advertisements. Ask your child why the author wrote each type."
+      }
+    },
+    {
+      "page": 18,
+      "title": "Picture Labels — Inflections: -ed",
+      "linkedStory": "Henry and Mudge Under the Yellow Moon",
+      "type": "picture-label-cloze",
+      "layout": {
+        "structure": "sectioned",
+        "spacing": "airy",
+        "visualHierarchy": "illustration-dominant",
+        "whiteSpaceRatio": 0.25,
+        "flowDirection": "top-down"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "phonics-word-reading",
+        "topics": [
+          {
+            "id": "ela.inflections-ed",
+            "kind": "procedural",
+            "mapped": false,
+            "suggestedSlug": "ela.inflectional-endings"
+          }
+        ],
+        "unmappedSkills": []
+      },
+      "features": {
+        "wordBox": ["mailed", "painted", "barked", "checked", "finished", "thanked", "licked", "opened"],
+        "pictureScenes": 4,
+        "sentenceFrames": true,
+        "illustration": "4 distinct scene illustrations (dog barking, mailbox, test-taking, house-painting)",
+        "schoolHomeConnection": "Act out one of the action words. Challenge your child to guess the correct word. Encourage your child to act out an action for you to guess."
+      }
+    },
+    {
+      "page": 19,
+      "title": "Spelling Words Sort — Words with ed",
+      "linkedStory": "Henry and Mudge Under the Yellow Moon",
+      "type": "spelling-sort",
+      "layout": {
+        "structure": "grid",
+        "spacing": "airy",
+        "visualHierarchy": "balanced — word bank and sort grid equal weight",
+        "whiteSpaceRatio": 0.40,
+        "flowDirection": "top-down, then left-right"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "phonics-word-reading",
+        "topics": [
+          {
+            "id": "ela.spelling-word-sort",
+            "kind": "procedural",
+            "mapped": false,
+            "suggestedSlug": "ela.spelling-word-patterns"
+          }
+        ],
+        "unmappedSkills": []
+      },
+      "features": {
+        "wordBank": ["barked", "licked", "backed", "thanked", "painted", "opened", "mailed", "checked", "remarked", "finished", "mistake", "became", "about", "few", "same"],
+        "sortCategories": ["Words with ed"],
+        "secondarySort": ["One-Syllable Words", "Two-Syllable Words"],
+        "pencilGraphic": true,
+        "numberedSlots": true
+      }
+    },
+    {
+      "page": 34,
+      "title": "Phonograms: -at, -ate — Word Sort Chart",
+      "linkedStory": "Wilson Sat Alone",
+      "type": "word-sort-chart",
+      "layout": {
+        "structure": "grid",
+        "spacing": "airy",
+        "visualHierarchy": "illustration and sort-grid equal weight",
+        "whiteSpaceRatio": 0.35,
+        "flowDirection": "top-down"
+      },
+      "skillTargeting": {
+        "subject": "ela",
+        "domain": "phonics-word-reading",
+        "topics": [
+          {
+            "id": "ela.phonograms-at-ate",
+            "kind": "procedural",
+            "mapped": false,
+            "suggestedSlug": "ela.phonogram-word-families"
+          }
+        ],
+        "unmappedSkills": []
+      },
+      "features": {
+        "wordBank": ["acrobat", "gate", "ate", "create", "flat", "that", "appreciate", "state", "fat", "sat"],
+        "twoColumnChart": true,
+        "headerWords": ["sat", "gate"],
+        "headerIllustrations": ["B&W bear sitting", "B&W gate"],
+        "writingLines": true,
+        "schoolHomeConnection": "Encourage your child to think of a story that uses many of the phonics words. Write down sentences as your child says them. Ask your child to underline the phonics words."
+      }
+    }
+  ],
+  "overallLayout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "balanced — illustration and exercise share space without crowding",
+    "whiteSpaceRatio": 0.32,
+    "flowDirection": "top-down"
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {"id": "ela.phonogram-word-families", "kind": "procedural", "mapped": false},
+      {"id": "ela.spelling-word-patterns", "kind": "procedural", "mapped": false},
+      {"id": "ela.inflectional-endings", "kind": "procedural", "mapped": false},
+      {"id": "ela.identify-authors-purpose", "kind": "conceptual", "mapped": false}
+    ],
+    "unmappedSkills": ["word-family-application-in-context", "syllable-sorting"]
+  },
+  "difficulty": {
+    "ageBandMonths": [72, 96],
+    "complexity": "single-skill per page",
+    "prerequisites": ["ela.letter-recognition", "ela.basic-phonics-cvc"],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": ["story characters from Trophies reading series (chameleon, Henry & Mudge, Wilson)"],
+    "visualStyle": "hand-drawn line art (B&W)",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["story connection gives context to practice", "recognizable characters from reading lessons", "large friendly illustrations"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "designPatterns": {
+    "schoolHomeConnection": {
+      "description": "Small boxed section at bottom-left of every worksheet with a house icon. Gives the parent a specific, playful activity to extend the skill at home. Not homework — it's a bonding activity suggestion.",
+      "frequency": "every page (at least on the pages shown)",
+      "placement": "bottom-left, small font, boxed",
+      "examples": [
+        "Draw pictures of animals riding, sliding, and hiding",
+        "Look at recipes, invitations, and advertisements and discuss author's purpose",
+        "Act out action words for each other to guess",
+        "Write down sentences using phonics words"
+      ]
+    },
+    "tryThis": {
+      "description": "Secondary exercise or extension on some pages (the syllable sort under the word-pattern sort). A bonus challenge that doesn't overwhelm the main task.",
+      "placement": "below the main exercise, visually separated",
+      "purpose": "differentiation — gives faster students something extra without making the main task feel incomplete"
+    },
+    "storyIntegration": {
+      "description": "Every worksheet is tied to a specific story from the Trophies reading program. The practice reinforces skills encountered during reading, so the child applies phonics/vocab/comprehension in a connected context rather than isolation.",
+      "pattern": "header badge shows story title + skill label"
+    },
+    "wordBox": {
+      "description": "Grey-shaded box containing the word bank at the top of the page. Words are clearly separated, readable, and visually distinct from the exercise area below.",
+      "placement": "top of page, full-width or near-full-width"
+    },
+    "generousWritingLines": {
+      "description": "Lines for student responses are long and wide-spaced, appropriate for 2nd-grade handwriting. Not cramped.",
+      "lineHeight": "approximately 1cm between lines"
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["themed-worksheet", "spelling-sort"],
+    "gaps": [
+      {
+        "name": "cloze-story",
+        "description": "A fill-in-the-blank narrative where the child selects words from a word box to complete a short story. Combines reading comprehension + vocabulary/phonics application. Different from plain fill-in-the-blank because the blanks are embedded in a flowing story."
+      },
+      {
+        "name": "picture-label-cloze",
+        "description": "Illustrated scenes with sentence frames below. Child reads the picture, selects from a word bank, and completes the sentence describing the scene. Visual literacy + vocabulary."
+      },
+      {
+        "name": "school-home-connection-block",
+        "description": "A reusable component/pattern: small boxed section with a parent-activity suggestion related to the skill. Could be added to any existing worksheet recipe as an optional component."
+      }
+    ]
+  },
+  "notes": "This is a published practice book selection, not a standalone worksheet. Carolyng specifically called out three design features: (1) the School-Home Connection sections on every page, (2) the 'Try This' extension sections, and (3) the general use of space. The practice book is literature-connected — each worksheet reinforces a skill from a specific reading selection. The airy spacing and generous white space are notable for a publisher workbook. Light ink density makes it very parent-friendly for printing."
+}

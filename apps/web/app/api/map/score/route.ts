@@ -2,13 +2,13 @@ import { after } from "next/server";
 
 import { MAP_BANK_VERSION, mapScoreRequestSchema } from "@homa/core";
 
-import { sendReportEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../lib/map/narrative-runner";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { sendReportEmailOnce } from "../../../../lib/map/report-email";
 import { requireFamily } from "../../../../lib/map/session";
-import { createReport, markReportEmailed, reportAlreadyEmailed } from "../../../../lib/map/store";
+import { createReport } from "../../../../lib/map/store";
 
 /**
  * POST /api/map/score
@@ -56,22 +56,23 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    // Rescores (after a deep dive) update the same report row and must not
-    // re-send the email; only the first scoring of a child emails her.
-    const alreadyEmailed = await reportAlreadyEmailed(family.id, parsed.data.childId);
-
     const report = await createReport(family.id, parsed.data.childId);
     if (!report) {
       return Response.json({ ok: false, reason: "unknown-child" }, { status: 400 });
     }
 
-    await emitMapEvent("map.report_generated", {
-      family_id: family.id,
-      child_id: report.childId,
-      mapped_subjects: report.scores.mappedCount,
-      observations: report.scores.observationCount,
-      bank_version: MAP_BANK_VERSION,
-    });
+    // A duplicate submission (mid-beat refresh, doubled client POST, a
+    // second page context) changed nothing, so it emits nothing: one
+    // scoring, one event.
+    if (!report.duplicate) {
+      await emitMapEvent("map.report_generated", {
+        family_id: family.id,
+        child_id: report.childId,
+        mapped_subjects: report.scores.mappedCount,
+        observations: report.scores.observationCount,
+        bank_version: MAP_BANK_VERSION,
+      });
+    }
 
     // Background phase, post-response: write the narrative (flag-gated,
     // uncapped), THEN send the report email so the emailed link opens a
@@ -89,9 +90,10 @@ export async function POST(request: Request): Promise<Response> {
         }
       }
       try {
-        if (!alreadyEmailed && report.email) {
-          const emailed = await sendReportEmail(report.email, report.childName, report.token, family.id);
-          if (emailed) await markReportEmailed(family.id, report.childId);
+        // First scoring only; the claim inside decides, atomically, so a
+        // doubled POST (mid-beat refresh, double submit) sends one email.
+        if (report.email) {
+          await sendReportEmailOnce(family.id, report.childId, report.email, report.childName, report.token);
         }
       } catch (error) {
         console.error(

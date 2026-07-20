@@ -572,6 +572,10 @@ export class ProgressCheckInService {
       if (nextCheckIn === null) {
         throw new Error("Locked check-in compare-and-swap failed");
       }
+      await this.cancelSupersededReplyLoops(
+        transaction,
+        nextCheckIn,
+      );
       const outcome = parseStoredProgressCheckInResponseOutcome(
         this.responseOutcome({
           checkIn: nextCheckIn,
@@ -646,6 +650,7 @@ export class ProgressCheckInService {
           next: {
             ...this.preservedNextState(locked.checkIn, context),
             state: "paused" as const,
+            currentDeliveryId: null,
             pendingRuntimeSessionId: null,
             pendingTurnId: null,
             pauseReason: input.reason,
@@ -766,6 +771,7 @@ export class ProgressCheckInService {
       if (updated === null) {
         throw new Error("Delivery outcome pause lost its prompt");
       }
+      await this.cancelSupersededReplyLoops(transaction, updated);
       return {
         status: "paused",
         checkIn: updated,
@@ -855,6 +861,7 @@ export class ProgressCheckInService {
       if (updated === null) {
         throw new Error("Locked takeover compare-and-swap failed");
       }
+      await this.cancelSupersededReplyLoops(transaction, updated);
       return {
         status: "takeover_accepted",
         checkIn: updated,
@@ -1070,6 +1077,10 @@ export class ProgressCheckInService {
               "Locked conflict check-in compare-and-swap failed",
             );
           }
+          await this.cancelSupersededReplyLoops(
+            transaction,
+            relatedCheckIn,
+          );
         }
       }
       await this.childProgressService
@@ -1220,6 +1231,37 @@ export class ProgressCheckInService {
     });
   }
 
+  private cancelSupersededReplyLoops(
+    transaction: ProgressCheckInTransaction,
+    checkIn: ProgressCheckInRecord,
+  ): Promise<number> {
+    switch (checkIn.state) {
+      case "active":
+        return transaction.cancelProgressReplyLoops({
+          familyId: checkIn.familyId,
+          checkInId: checkIn.id,
+          keepDeliveryId: checkIn.currentDeliveryId,
+          keepRevision:
+            checkIn.currentDeliveryId === null
+              ? null
+              : checkIn.revision,
+        });
+      case "paused":
+      case "completed":
+      case "stopped":
+        return transaction.cancelProgressReplyLoops({
+          familyId: checkIn.familyId,
+          checkInId: checkIn.id,
+          keepDeliveryId: null,
+          keepRevision: null,
+        });
+      default: {
+        const exhaustiveState: never = checkIn.state;
+        return exhaustiveState;
+      }
+    }
+  }
+
   private lockAuthenticatedMember(
     transaction: ProgressCheckInTransaction,
     context: ProgressCheckInContext,
@@ -1254,6 +1296,7 @@ export class ProgressCheckInService {
     if (updated === null) {
       throw new Error("Existing active prompt marker refresh failed");
     }
+    await this.cancelSupersededReplyLoops(transaction, updated);
     return updated;
   }
 
@@ -1544,6 +1587,7 @@ export class ProgressCheckInService {
       if (updated === null) {
         throw new Error("Locked check-in compare-and-swap failed");
       }
+      await this.cancelSupersededReplyLoops(transaction, updated);
       return decision.buildResult(updated);
     });
   }

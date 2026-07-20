@@ -1,0 +1,67 @@
+{
+  "id": "ref-2026-07-19-alphabet-pages-y1",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T09:06:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784466360.768249",
+  "format": "printable-set",
+  "title": "Alphabet Pages Year 1 (Playing Preschool companion)",
+  "layout": {
+    "structure": "single-element-per-page",
+    "spacing": "maximally airy",
+    "visualHierarchy": "letter-only — one giant uppercase bubble letter fills the entire page",
+    "whiteSpaceRatio": 0.65,
+    "flowDirection": "center-out"
+  },
+  "skillTargeting": {
+    "subject": "English",
+    "domain": "Phonics & Word Reading",
+    "topics": [
+      {
+        "id": "English.knowing-all-letters",
+        "kind": "procedural",
+        "mapped": true
+      }
+    ],
+    "unmappedSkills": [],
+    "notes": "Also targets fine motor (decorating, cutting, gluing) and art (process art on letter shapes). The letter is a canvas, not a tracing exercise."
+  },
+  "difficulty": {
+    "ageBandMonths": [30, 60],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "low — completely open-ended, child decides how to decorate"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "bold outline bubble letters — thick black outlines, rounded, hand-drawn feel",
+    "colorPalette": "black-and-white",
+    "appealDrivers": ["giant size fills page — satisfying to decorate", "thick outlines easy for young hands", "open canvas for any medium (paint, stickers, collage, crayons)"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "minimal — letter fills most of the page",
+    "inkDensity": "light — just outlines",
+    "colorRequirement": "B&W only (designed to be decorated, not pre-colored)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "alphabet-art-page",
+        "description": "One giant bubble letter per page (uppercase only for preschool, both cases for older). Thick outline, designed as a craft canvas — child decorates with paint, dot stickers, collage materials, etc. Then cuts out and collects into an alphabet portfolio. Different from tracing-guide (which is about motor memory and formation). This is about letter recognition through creative art.",
+        "creationPath": "image-direct",
+        "complexity": "low"
+      }
+    ]
+  },
+  "coverPage": {
+    "title": "ALPHABET CRAFT BOOK",
+    "style": "Patterned border with colorful learning icons (blocks, beakers, flowers, lightbulbs, shapes) — childlike but polished. Center white panel with bold block title.",
+    "notes": "Cover page doubles as a portfolio title page. Child writes their name in the blank space."
+  },
+  "companionTo": "cur-2026-07-19-playing-preschool-y1",
+  "notes": "This is the printable companion to Playing Preschool Year 1 (dropped in the previous message). 26 uppercase bubble letters (A-Z) + intro page + cover page = 29 pages. Each letter is introduced during its unit in the main curriculum (e.g., Aa in Unit 1 Apples, Rr in Unit 2 Colors). The child decorates one letter per unit, building a keepsake alphabet book over the school year. Design is intentionally minimal — the letter IS the page, leaving maximum creative freedom."
+}

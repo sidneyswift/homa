@@ -6,6 +6,7 @@ import {
   Filter,
   ListTree,
   MessagesSquare,
+  Palette,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +26,7 @@ const ITEMS = [
   { href: "/admin/sessions", label: "Sessions", icon: Activity },
   { href: "/admin/pulse", label: "Pulse", icon: ListTree },
   { href: "/admin/funnels", label: "Funnels", icon: Filter },
+  { href: "/admin/studio", label: "Studio", icon: Palette },
 ] as const;
 
 export function AdminNav() {

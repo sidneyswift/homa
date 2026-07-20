@@ -6,6 +6,7 @@ import {
   joinPageBodies,
   SHEET_PAGE_CLASS,
   splitPageBodies,
+  SPRITE_SLICE_GATE_NOTE,
   stripCdataWrapper,
   validatePrintableHtml,
   wrapPrintableDocument,
@@ -45,6 +46,28 @@ test("an unterminated CDATA opener is left for the gate, not silently eaten", ()
 test("the brand gate still refuses executable markup after stripping", () => {
   const wrapped = "<![CDATA[<script>alert(1)</script>]]>";
   assert.notEqual(validatePrintableHtml(stripCdataWrapper(wrapped), ""), null);
+});
+
+test("sprite slicing is refused: the exact shipped 2026-07-19 construct", () => {
+  const html =
+    "<style>.icon { background-image: url('https://example.com/sheet.png');" +
+    " background-size: 400% 400%; }</style>" +
+    "<div class=\"icon\" style=\"background-position: 33.333% 66.667%;\"></div>";
+  assert.equal(validatePrintableHtml(html, ""), SPRITE_SLICE_GATE_NOTE);
+});
+
+test("sprite slicing in an inline style attribute is refused too", () => {
+  const html =
+    "<div style=\"background-image: url(a.png); background-size: 250% 250%\"></div>";
+  assert.equal(validatePrintableHtml(html, ""), SPRITE_SLICE_GATE_NOTE);
+});
+
+test("full-bleed and keyword background sizes stay allowed", () => {
+  const html =
+    "<style>.hero { background-size: 100% 100%; }" +
+    " .banner { background-size: cover; }" +
+    " .tile { background-size: 48px 48px, 50% auto; }</style><div>page</div>";
+  assert.equal(validatePrintableHtml(html, ""), null);
 });
 
 test("a packet document boxes every page and repeats the footer on each", () => {
