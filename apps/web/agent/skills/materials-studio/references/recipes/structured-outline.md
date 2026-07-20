@@ -1,13 +1,10 @@
 # Structured outline / essay scaffold
 
-Reference image (binary, describe-only): it lives at
-`/workspace/skills/materials-studio/references/homa-outline-reference.png`.
-This Homa-style structured outline example shows a two-column
-instruction|work layout, Roman numeral section headers, labeled
-sub-fields with blank writing lines, and clean B&W design: layout
-proportions, section structure, and field labeling. Original structural
-patterns drawn from TPT essay outline inspo (The Daring English
-Teacher), re-expressed in Homa's design language.
+Golden anchor: pass `anchorIds: ["five-paragraph-essay-outline"]` to
+generate_image so the output matches the Homa outline bar (two-column
+instruction and work layout, numbered section headers, labeled sub-fields
+with blank writing lines, warm and grown-up). Write your own prompt with
+your own content; the anchor sets the visual bar, not the specifics.
 
 A structured outline breaks a complex task, such as writing an essay, planning
 a research project, or outlining a book report, into a fill-in-the-blank

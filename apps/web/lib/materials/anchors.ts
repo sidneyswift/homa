@@ -28,6 +28,8 @@ export interface MaterialAnchor {
   readonly mediaType: string;
 }
 
+const JPEG = "image/jpeg";
+
 const REGISTRY: readonly MaterialAnchor[] = [
   {
     id: "order-of-operations-chart",
@@ -35,7 +37,7 @@ const REGISTRY: readonly MaterialAnchor[] = [
     useWhen:
       "building a math reference chart, poster, or foldable about the order of operations (PEMDAS or GEMDAS)",
     register: "playful",
-    mediaType: "image/jpeg",
+    mediaType: JPEG,
   },
   {
     id: "five-paragraph-essay-outline",
@@ -43,7 +45,129 @@ const REGISTRY: readonly MaterialAnchor[] = [
     useWhen:
       "building an essay outline, a writing scaffold, or a structured planning sheet for older students",
     register: "restrained",
-    mediaType: "image/jpeg",
+    mediaType: JPEG,
+  },
+  {
+    id: "foldable",
+    title: "Foldable / interactive notebook insert",
+    useWhen: "building a foldable or interactive notebook insert",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "cut-and-paste-word-work",
+    title: "Cut-and-paste CVC word work page",
+    useWhen: "building a cut-and-paste word work page for early phonics or CVC words",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "number-practice-page",
+    title: "Single-number practice page",
+    useWhen:
+      "building a single-number practice page (trace, ten-frame, count, color)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "math-practice",
+    title: "General math practice page",
+    useWhen: "building a general arithmetic or math practice page",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "one-page-mini-book",
+    title: "One-page fold-into-eight mini book",
+    useWhen: "building a one-page mini book that folds into eight panels",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "matching-visual-discrimination",
+    title: "Preschool matching / visual discrimination page",
+    useWhen:
+      "building a preschool matching, sorting, or visual discrimination page",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "unit-study-packet",
+    title: "Themed unit study packet",
+    useWhen: "building a themed, multi-activity unit study packet",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "activity-pack",
+    title: "Four-quadrant activity pack",
+    useWhen: "building a themed activity pack of four mini-activities in quadrants",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "daily-rhythm-cards",
+    title: "Daily rhythm / schedule cards",
+    useWhen: "building cut-apart daily schedule or rhythm cards",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "visual-schedule-cards",
+    title: "Visual schedule cards",
+    useWhen: "building visual schedule cards for routines or transitions",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "singapore-workbook-page",
+    title: "Singapore-style CPA math workbook page",
+    useWhen:
+      "building a Singapore-style workbook page using the concrete-pictorial-abstract progression",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "hive-puzzle",
+    title: "Hexagonal hive constraint puzzle",
+    useWhen: "building a hexagonal hive number-constraint puzzle",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "cross-number-puzzle",
+    title: "Cross-number arithmetic puzzle",
+    useWhen: "building a cross-number (crossword-style) arithmetic puzzle",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "fraction-link-puzzle",
+    title: "Fraction-equivalence link puzzle",
+    useWhen: "building a fraction-equivalence or fraction-link grid puzzle",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "fraction-maze-escape",
+    title: "Fraction-comparison maze",
+    useWhen: "building a fraction-comparison or ordering maze",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "decimal-path-puzzle",
+    title: "Decimal-ordering path puzzle",
+    useWhen: "building a decimal comparison or ordering path puzzle",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "geometry-maze",
+    title: "Geometry / angle maze",
+    useWhen: "building a geometry or angle maze, or a maze-style practice page",
+    register: "playful",
+    mediaType: JPEG,
   },
 ];
 

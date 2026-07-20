@@ -1,16 +1,22 @@
 /**
  * Regenerates apps/web/lib/materials/anchor-bytes.generated.ts from the
- * source anchor images bundled in the materials-studio skill package.
+ * compressed source anchor images in apps/web/lib/materials/anchor-sources.
  *
  * Fleet material anchors are shared, read-only reference images (no family
  * data) that the materials studio hands to the image model to set the
- * visual bar. The tool runs server-side and cannot read the sandbox
+ * visual bar. They live OUTSIDE the skill package on purpose: the package
+ * has a hard size cap (check:fleet-skills) and a growing image library
+ * would blow it. The tool runs server-side and cannot read the sandbox
  * filesystem, so the bytes travel as base64 embedded in code: pure, works
  * in both Next and eve build, and needs no network fetch at runtime.
  *
- * Source of truth: the .jpg files in the anchors directory. This script is
- * the only writer of the generated module. Re-run after adding or
- * replacing an anchor image:  node --experimental-strip-types scripts/build-material-anchors.mts
+ * Scaling note: base64-in-code is fine for a couple dozen small anchors.
+ * Past that, move the bytes to a fleet CDN/Blob namespace and have the
+ * tool fetch trusted URLs (needs Blob write access this codegen lacks).
+ *
+ * Source of truth: the .jpg files in anchor-sources. This script is the
+ * only writer of the generated module. Re-run after adding or replacing
+ * an anchor image:  pnpm build:material-anchors
  *
  * The registry metadata (id -> title, useWhen, register) lives in
  * apps/web/lib/materials/anchors.ts and must list exactly the ids present
@@ -19,7 +25,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
 
-const ANCHOR_DIR = "apps/web/agent/skills/materials-studio/references/anchors";
+const ANCHOR_DIR = "apps/web/lib/materials/anchor-sources";
 const OUT = "apps/web/lib/materials/anchor-bytes.generated.ts";
 
 const files = readdirSync(ANCHOR_DIR)

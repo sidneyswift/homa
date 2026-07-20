@@ -63,6 +63,9 @@ Read either with:
 | CVC words and early phonics (ages ~4 to 7) | cvc-phonics |
 | essay and structured writing (ages ~9 to 14) | essay-writing |
 | math operations and algebra (ages ~9 to 14) | math-operations |
+| math puzzles and logic games (ages ~7 to 12) | math-puzzles-logic-games |
+| social-emotional learning (ages ~3 to 8) | social-emotional-learning |
+| unit studies and thematic packs (all ages) | unit-studies-thematic-packs |
 
 | If the family follows... | read approaches/ |
 | --- | --- |
@@ -146,6 +149,21 @@ from calibration runs, re-check after any model swap):
   objects), generate a SINGLE object on a white background, nothing
   else, and repeat it yourself. Never repeat a full-page image
   (calibration's one failure, caught by the quality check).
+- Sprite slicing is banned: never generate one image of a grid or sheet
+  of objects and slice it into cells with CSS (background-size,
+  background-position, overflow crops). The image model does not place
+  objects on an exact pixel grid, and the print engine renders
+  background-image positioning differently from the screen, so a sliced
+  page can look right in the on-screen check and still ship broken.
+- Many distinct scattered objects on one page (a search-and-find ring,
+  an I-spy mat, a sorting mat): hybrid, with the scatter as ONE
+  generate_image call. Ask for a single image that already contains
+  every object arranged the way the page needs (in a ring, scattered
+  across the sheet), with no text or letters in the image. Your HTML
+  owns the title, the instructions, and any center letter or label.
+  Never go image-direct with the title baked into the art here; a wrong
+  title means re-rolling the whole page. Never build the scatter from
+  many separately positioned pieces or a sliced sheet.
 - Foldable / interactive notebook insert: prefer hybrid (doodle art +
   HTML structure) or image-direct when the whole panel is art-driven.
   Use html alone only for text-heavy reference foldables (vocab, formulas)
@@ -173,6 +191,11 @@ from calibration runs, re-check after any model swap):
   previewUrl, an earlier generate_image URL). With references, describe
   what changes and what stays ("keep the layout and line style; replace
   the puppy with...").
+- A photo the parent shared in chat is a first-class reference too:
+  family-scoped chat upload URLs pass the same artifact check. In a
+  later session, find_attachments lists her uploads with their
+  captions; recover the photo there instead of asking her to send it
+  again.
 - Ask for "no text or letters in the image" on art that sits inside an
   html page; your HTML owns the words.
 - One strong image beats three weak ones; reuse a good URL across
@@ -381,7 +404,7 @@ recipe is not a reason to force the wrong format.
 
 ### Golden anchors (they set the visual bar)
 
-A few materials have a golden anchor: a finished Homa reference image that
+Many materials have a golden anchor: a finished Homa reference image that
 shows the exact quality bar. When you build one of these on the image or
 hybrid path, pass its id to generate_image as `anchorIds` so the image
 model matches the Homa look. Then still write your OWN prompt with your own
@@ -391,8 +414,25 @@ supplies the material.
 
 | Anchor id | Use it when building... |
 | --- | --- |
-| order-of-operations-chart | an order-of-operations (PEMDAS/GEMDAS) reference chart, poster, or foldable |
+| order-of-operations-chart | an order-of-operations (PEMDAS/GEMDAS) chart, poster, or foldable |
 | five-paragraph-essay-outline | a five-paragraph essay outline or structured writing scaffold |
+| foldable | a foldable or interactive notebook insert |
+| cut-and-paste-word-work | a cut-and-paste CVC word work page |
+| number-practice-page | a single-number practice page (trace, ten-frame, count) |
+| math-practice | a general arithmetic or math practice page |
+| one-page-mini-book | a one-page mini book that folds into eight panels |
+| matching-visual-discrimination | a preschool matching or visual discrimination page |
+| unit-study-packet | a themed, multi-activity unit study packet |
+| activity-pack | a four-quadrant themed activity pack |
+| daily-rhythm-cards | cut-apart daily schedule or rhythm cards |
+| visual-schedule-cards | visual schedule cards for routines |
+| singapore-workbook-page | a Singapore-style concrete-pictorial-abstract math page |
+| hive-puzzle | a hexagonal hive number-constraint puzzle |
+| cross-number-puzzle | a cross-number arithmetic puzzle |
+| fraction-link-puzzle | a fraction-equivalence link puzzle |
+| fraction-maze-escape | a fraction-comparison or ordering maze |
+| decimal-path-puzzle | a decimal comparison or ordering path puzzle |
+| geometry-maze | a geometry or angle maze, or maze-style practice page |
 
 Most materials have no anchor yet, and that is fine: build from the recipe
 and design rules. Only pass an anchor id that clearly matches what you are
@@ -426,6 +466,13 @@ making.
 | File-folder game | build a glue-in-a-folder board game with moveable pieces | file-folder-game |
 | Cloze story | have the child fill passage blanks from a word bank | cloze-story |
 | Reading comprehension mini-unit | teach a comprehension skill across passages, a lesson, and vocab | reading-comprehension-mini-unit |
+| Hive puzzle | drill number sense in a self-checking hexagonal constraint puzzle | hive-puzzle |
+| Fraction link puzzle | practice fraction equivalence in a grid of linked cells | fraction-link-puzzle |
+| Fraction maze escape | compare and order fractions by tracing a path through a grid | fraction-maze-escape |
+| Decimal path puzzle | order decimals by tracing the correct path through nodes | decimal-path-puzzle |
+| Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
+| Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
+| Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
 
 ## Design rules (binding)
 

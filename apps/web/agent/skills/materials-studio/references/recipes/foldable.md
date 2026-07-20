@@ -1,13 +1,9 @@
 # Foldable / interactive notebook insert
 
-Reference image (binary, describe-only): read it is not possible, but it
-lives at
-`/workspace/skills/materials-studio/references/homa-foldable-reference.png`.
-This Homa-style foldable example shows tri-fold layout, fold lines, glue
-tab, color-coded operation symbols, definitions panel, and embedded
-practice panel: layout, fold geometry, and panel structure. Original
-structural patterns drawn from TPT foldable inspo (Math Doodles PEMDAS),
-re-expressed in Homa's design language.
+Golden anchor: pass `anchorIds: ["foldable"]` to generate_image so the
+output matches the Homa foldable bar (tri-fold layout, fold lines, glue
+tab, color-coded panels, embedded practice). Write your own prompt with
+your own content; the anchor sets the visual bar, not the specifics.
 
 A foldable is a tactile learning tool the child prints, cuts, folds,
 and glues into a notebook. The reference material and the practice

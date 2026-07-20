@@ -46,9 +46,19 @@ test("metadata is well-formed for every anchor", () => {
   }
 });
 
-test("the expected anchors exist (guards renames)", () => {
-  assert.ok(getStudioAnchor("order-of-operations-chart"));
-  assert.ok(getStudioAnchor("five-paragraph-essay-outline"));
+test("the expected anchors exist (guards renames and dropped folds)", () => {
+  for (const id of [
+    "order-of-operations-chart",
+    "five-paragraph-essay-outline",
+    "foldable",
+    "hive-puzzle",
+    "singapore-workbook-page",
+    "unit-study-packet",
+  ]) {
+    assert.ok(getStudioAnchor(id), `anchor ${id} is registered`);
+  }
+  // The folded-in library should not silently shrink.
+  assert.ok(studioAnchorIds().length >= 19, "at least 19 anchors registered");
 });
 
 test("an unknown id resolves to nothing (only registry ids are trusted)", () => {

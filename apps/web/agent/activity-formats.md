@@ -354,3 +354,73 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 6-12. Passage length and question depth scale with reading level evidence.
 - **Creation path:** hybrid for passage pages (real photos for nonfiction), html for skill and vocabulary pages, packet recipe for assembly.
 - **Example activity:** `[reading-comprehension-mini-unit] Sequence skill unit: butterfly life cycle passage, then apply to a ladybug passage`
+
+### hive-puzzle
+- **Slug:** `[hive-puzzle]`
+- **Name:** Hive puzzle
+- **What it is:** Hexagonal grid logic puzzle. Students fill empty hexagons following a constraint rule (e.g., smallest number not in any adjacent cell). Based on Beast Academy Hive Puzzles.
+- **Best for:** Logical reasoning, spatial thinking, number sense, constraint satisfaction.
+- **Subjects:** Math (logic, number sense)
+- **Ages:** 7-12. Fewer hexagons and simpler rules for younger; larger clusters and harder rules for older.
+- **Creation path:** image-direct
+- **Example activity:** `[hive-puzzle] 7-hexagon clusters — fill each cell with 1-7 so no touching hexagons share a number`
+
+### fraction-link-puzzle
+- **Slug:** `[fraction-link-puzzle]`
+- **Name:** Fraction link puzzle
+- **What it is:** Grid puzzle with fractions and whole numbers. Students find relationships between adjacent cells (equivalence, simplification) to complete the grid.
+- **Best for:** Fraction equivalence, simplification, fraction-whole number relationships.
+- **Subjects:** Math (fractions)
+- **Ages:** 8-12. Simple fractions (halves, thirds) for younger; complex fractions and mixed numbers for older.
+- **Creation path:** image-direct
+- **Example activity:** `[fraction-link-puzzle] 4x5 grid with fraction equivalence — fill blanks so adjacent cells simplify to the same value`
+
+### fraction-maze-escape
+- **Slug:** `[fraction-maze-escape]`
+- **Name:** Fraction maze escape
+- **What it is:** Grid of fractions where students trace a path from start to exit following a mathematical rule (e.g., decreasing value, only proper fractions).
+- **Best for:** Fraction comparison, ordering, number sense in a puzzle context.
+- **Subjects:** Math (fractions, ordering)
+- **Ages:** 8-12. Simple fractions for younger; mixed numbers and improper fractions for older.
+- **Creation path:** image-direct
+- **Example activity:** `[fraction-maze-escape] 5x5 fraction grid — trace a path from top-left to bottom-right using only decreasing fractions`
+
+### decimal-path-puzzle
+- **Slug:** `[decimal-path-puzzle]`
+- **Name:** Decimal path puzzle
+- **What it is:** Network of connected nodes with decimal numbers. Students trace the correct path following a rule (increasing order, sums to target).
+- **Best for:** Decimal comparison, ordering, place value understanding.
+- **Subjects:** Math (decimals, place value)
+- **Ages:** 9-12. Tenths for younger; hundredths and thousandths for older.
+- **Creation path:** image-direct
+- **Example activity:** `[decimal-path-puzzle] Trace a path from Start to End visiting nodes in increasing decimal order`
+
+### daily-rhythm-cards
+- **Slug:** `[daily-rhythm-cards]`
+- **Name:** Daily rhythm cards
+- **What it is:** Printable cards for building a visual daily schedule. Each card has an icon, activity name, and optional time slot. Cut apart and arrange on a schedule board.
+- **Best for:** Routine building, time management, transitions, executive function.
+- **Subjects:** Personal & Social Development (routine, executive function)
+- **Ages:** 3-8. Fewer cards and picture-only for younger; more cards with time slots for older.
+- **Creation path:** html
+- **Example activity:** `[daily-rhythm-cards] 12 cards — Morning Circle, Read Aloud, Math Time, Snack, Art, Science, Free Play, Writing, Music, Nature Walk, Clean Up, Story Time`
+
+### activity-pack
+- **Slug:** `[activity-pack]`
+- **Name:** Activity pack (multi-activity page)
+- **What it is:** Single page with 4 mini-activities in quadrants around one theme. Covers different skill types (counting, labeling, creative, knowledge). Can be cut apart.
+- **Best for:** Multi-skill reinforcement, unit study companions, choice boards.
+- **Subjects:** Any — themed (animals, seasons, topics). Each quadrant targets a different skill.
+- **Ages:** 3-7. Simpler activities for younger; more complex prompts for older.
+- **Creation path:** hybrid
+- **Example activity:** `[activity-pack] Ocean Animals — count sea creatures, label parts of a fish, draw your favorite ocean animal, true/false ocean facts`
+
+### singapore-workbook-page
+- **Slug:** `[singapore-workbook-page]`
+- **Name:** Singapore math workbook page
+- **What it is:** Visual-manipulative math page using ten-frames, bar models, and CPA progression (concrete → pictorial → abstract). Modeled after Dimensions Math / Singapore Math approach.
+- **Best for:** Building number sense through visual representations, making ten, number bonds.
+- **Subjects:** Math (operations, number bonds, place value)
+- **Ages:** 4-9. Ten-frames and simple addition for younger; bar models and multi-step for older.
+- **Creation path:** hybrid
+- **Example activity:** `[singapore-workbook-page] Addition to 20 — ten-frame dot manipulation showing 8 + 5 by making 10 first`
