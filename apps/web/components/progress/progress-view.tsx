@@ -16,6 +16,7 @@ import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
+import { LessonsCard, type ProgressLessonsCardData } from "./lessons-card";
 import { ProgressMap } from "./progress-map";
 import { ProgressSubjects } from "./progress-subjects";
 import type { SubjectDoorRow } from "./subject-door-context";
@@ -154,6 +155,7 @@ export function ProgressView({
   report,
   eras,
   kids,
+  lessons = null,
   deeperChecks = true,
 }: {
   view: ChildProgressView;
@@ -171,6 +173,10 @@ export function ProgressView({
   eras: TrajectoryEra[];
   /** The family's kids in family order (drives the switcher's tones). */
   kids: ProgressViewKid[];
+  /** The lesson-listen door and this child's latest reviews. Null while
+   * the flag is off, and absent on read-only mirrors, which have no
+   * business offering a recording door. */
+  lessons?: ProgressLessonsCardData | null;
   /** False on read-only mirrors (the founder console): the subject
    * panel's deep-dive door walks the family's own flow, so only her
    * session offers it. */
@@ -200,6 +206,11 @@ export function ProgressView({
     displayName: tile.displayName,
     needsConfirm: tile.needsConfirm,
   }));
+
+  // A child with no subjects and no report has never been assessed, so
+  // the first check-in stays the page's one ask and the recording door
+  // waits below it. Every other child sees the door up top.
+  const neverAssessed = view.subjects.length === 0 && report === null;
 
   return (
     <PageColumn>
@@ -233,6 +244,13 @@ export function ProgressView({
           </div>
           <KidSwitcher kids={kids} currentChildId={view.childId} />
         </header>
+
+        {/* Directly under the header, where a parent looking for it will
+            find it. It shipped below the chart first and was invisible
+            in practice (2026-07-21): on a scored child the chart plus a
+            dozen subject rows push it a full screen down, with nothing
+            above hinting it exists. */}
+        {lessons && !neverAssessed ? <LessonsCard card={lessons} /> : null}
 
         {view.subjects.length === 0 ? (
           <div className="mt-7">
@@ -288,6 +306,8 @@ export function ProgressView({
             </div>
           </div>
         )}
+
+        {lessons && neverAssessed ? <LessonsCard card={lessons} /> : null}
       </div>
     </PageColumn>
   );

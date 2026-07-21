@@ -5,8 +5,6 @@ import { getAppData } from "../../../../lib/app-data";
 import { getRecentWins } from "../../../../lib/dashboard";
 import { getCurriculaForChildren } from "../../../../lib/curriculum";
 import { parentFirstName } from "../../../../lib/family";
-import { lessonListenEnabled } from "../../../../lib/lessons/flag";
-import { listLessonsForChild } from "../../../../lib/lessons/store";
 import { PageColumn } from "../../../../components/dashboard/page-column";
 import { KidView } from "./kid-view";
 
@@ -39,12 +37,9 @@ export default async function KidPage({
   if (kidIndex === -1) notFound();
   const child = children[kidIndex];
 
-  const [wins, curricula, lessons] = await Promise.all([
+  const [wins, curricula] = await Promise.all([
     getRecentWins([child.id]),
     getCurriculaForChildren([child.id]),
-    lessonListenEnabled()
-      ? listLessonsForChild(family.id, child.id, 5)
-      : Promise.resolve([]),
   ]);
 
   return (
@@ -59,18 +54,6 @@ export default async function KidPage({
         wins={wins}
         curriculum={curricula.get(child.id) ?? null}
         curriculumPending={pendingCurriculumChildIds.has(child.id)}
-        lessonListen={
-          lessonListenEnabled()
-            ? {
-                recordHref: `/app/kids/${child.id}/lessons/record`,
-                lessons: lessons.map((lesson) => ({
-                  id: lesson.id,
-                  status: lesson.status,
-                  startedAt: lesson.startedAt,
-                })),
-              }
-            : null
-        }
       />
     </PageColumn>
   );

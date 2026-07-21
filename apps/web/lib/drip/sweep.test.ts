@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { chooseDripNudge, type DripSignals } from "./sweep";
+import { chooseDripNudge, planDripSends, type DripSignals } from "./sweep";
 
 const NOW = new Date("2026-07-20T12:00:00Z");
 const DAYS = (n: number) => new Date(NOW.getTime() - n * 24 * 60 * 60 * 1000);
@@ -181,4 +181,33 @@ test("an unopened report outranks the loop-back nudge", () => {
 test("suppression and the 7-day cap silence the loop-back nudge too", () => {
   assert.equal(chooseDripNudge(withPlan({ suppressed: true }), NOW), null);
   assert.equal(chooseDripNudge(withPlan({ lastDripSentAt: DAYS(2) }), NOW), null);
+});
+
+test("the per-run cap trickles a backlog and reports the real queue size", () => {
+  const backlog = Array.from({ length: 12 }, (_, i) =>
+    base({ familyId: `fam-${i}` }),
+  );
+  const plan = planDripSends(backlog, NOW, 5);
+  assert.equal(plan.sends.length, 5);
+  assert.equal(plan.eligible, 12);
+  assert.equal(plan.capped, true);
+});
+
+test("a queue under the cap sends everything and reports no cap", () => {
+  const plan = planDripSends([base({ familyId: "a" }), base({ familyId: "b" })], NOW, 5);
+  assert.equal(plan.sends.length, 2);
+  assert.equal(plan.eligible, 2);
+  assert.equal(plan.capped, false);
+});
+
+test("the cap counts only eligible families, never the ineligible", () => {
+  const signals = [
+    base({ familyId: "eligible" }),
+    base({ familyId: "suppressed", suppressed: true }),
+    base({ familyId: "too-new", createdAt: HOURS(1) }),
+  ];
+  const plan = planDripSends(signals, NOW, 5);
+  assert.equal(plan.eligible, 1);
+  assert.equal(plan.sends[0].family.familyId, "eligible");
+  assert.equal(plan.capped, false);
 });

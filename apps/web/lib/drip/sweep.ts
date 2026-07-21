@@ -34,10 +34,11 @@ import { mintLinkToken } from "../map/store";
  *
  * Caps (the not-pushy contract): at most one drip email per family per 7
  * days, each nudge kind at most once ever, any email.opt_out stops
- * everything, and every rule is re-checked at send time. A family sits in at
- * most one audience, and each nudge uses a link that cannot collide: the
- * setup nudge mints a resume link, the report nudge uses the durable
- * per-report token.
+ * everything, at most MAX_SENDS_PER_RUN sends per hourly tick so a backlog
+ * trickles instead of bursting, and every rule is re-checked at send time.
+ * A family sits in at most one audience, and each nudge uses a link that
+ * cannot collide: the setup nudge mints a resume link, the report nudge uses
+ * the durable per-report token.
  */
 
 const GLOBAL_CAP_MS = 7 * 24 * 60 * 60 * 1000;
@@ -48,6 +49,15 @@ const REPORT_MIN_AGE_MS = 48 * 60 * 60 * 1000;
  * true rather than premature. */
 const LOOP_BACK_MIN_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SWEEP_LIMIT = 200;
+/**
+ * Ceiling on sends per hourly tick, so a backlog trickles out instead of
+ * arriving as one burst. The first live batch was 21 eligible families from a
+ * domain that had never sent proactive mail, and a burst from a young sender
+ * is exactly what hurts deliverability. At five an hour that queue clears in
+ * an afternoon. The cap is reported in the result, never silent: a run that
+ * stops here must not read as a finished queue.
+ */
+const MAX_SENDS_PER_RUN = 5;
 
 export interface DripSignals {
   familyId: string;
@@ -147,12 +157,53 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
   return null;
 }
 
+export interface PlannedDripSend {
+  family: DripSignals;
+  decision: Exclude<DripDecision, null>;
+}
+
+export interface DripPlan {
+  /** The sends this tick may make, already truncated to the cap. */
+  sends: PlannedDripSend[];
+  /** How many families were eligible before the cap. */
+  eligible: number;
+  /** True when the cap held sends back for a later tick. */
+  capped: boolean;
+}
+
+/**
+ * Which families this tick sends to, in one pure pass, so the cadence rule is
+ * unit tested alongside the eligibility rules. Eligibility is decided for
+ * every family first, then the cap truncates: that way `eligible` reports the
+ * true size of the queue rather than just what fit.
+ */
+export function planDripSends(
+  signals: DripSignals[],
+  now: Date,
+  limit: number = MAX_SENDS_PER_RUN,
+): DripPlan {
+  const eligible: PlannedDripSend[] = [];
+  for (const family of signals) {
+    const decision = chooseDripNudge(family, now);
+    if (decision) eligible.push({ family, decision });
+  }
+  return {
+    sends: eligible.slice(0, limit),
+    eligible: eligible.length,
+    capped: eligible.length > limit,
+  };
+}
+
 export interface DripSweepResult {
   skipped: boolean;
   considered: number;
   setupSent: number;
   reportSent: number;
   loopBackSent: number;
+  /** Families eligible this tick, before the per-run cap. */
+  eligible: number;
+  /** True when the cap deferred sends to a later tick. */
+  capped: boolean;
 }
 
 function toDate(value: unknown): Date | null {
@@ -319,13 +370,12 @@ async function dripAlreadySent(familyId: string, kind: string): Promise<boolean>
  */
 export async function runDripSweep(now: Date = new Date()): Promise<DripSweepResult> {
   const signals = await loadDripSignals();
+  const plan = planDripSends(signals, now);
   let setupSent = 0;
   let reportSent = 0;
   let loopBackSent = 0;
 
-  for (const family of signals) {
-    const decision = chooseDripNudge(family, now);
-    if (!decision) continue;
+  for (const { family, decision } of plan.sends) {
     if (await dripAlreadySent(family.familyId, decision.kind)) continue;
 
     let submission: HomaEmailSubmission = { status: "unknown" };
@@ -377,5 +427,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
     setupSent,
     reportSent,
     loopBackSent,
+    eligible: plan.eligible,
+    capped: plan.capped,
   };
 }
