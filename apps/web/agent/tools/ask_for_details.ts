@@ -49,7 +49,7 @@ const askForDetails = defineTool({
       kind: input.kind,
       intro: input.intro ?? null,
       note:
-        "The card is on her screen and this turn is over. Write NOTHING after this: no question, no instruction, and above all not a line about the card itself. \"I'll wait for you to fill that in\" and \"just pop those in below\" are the exact sentences to avoid, because she can see the fields and the card is still sitting there in her scrollback afterwards saying something she already did. It saves itself, and you will hear what she entered.",
+        "END TURN. Emit no text after this tool call. The fields are visible to her and the card saves itself; her entries arrive as the next message. Any sentence here is either narrating a card she can already see or asking for what it already asks.",
     };
   },
 });

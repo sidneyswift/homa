@@ -106,7 +106,7 @@ export default defineTool({
       // words; never read the list back as a list.
       strengths,
       alreadyScored: report.duplicate,
-      note: "Her report is on screen now, and she is watching it draw. Say one true thing about what it shows, in your own words, about this child. Do not list the subjects, do not read numbers back, and do not tell her to check her email.",
+      note: "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Do not list subjects, do not read numbers back, and never tell her to check her email.",
     };
   },
 });

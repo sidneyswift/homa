@@ -78,45 +78,6 @@ export function browserTimeZone(): string | null {
   }
 }
 
-/**
- * The two lines that are on her screen before any model call returns.
- *
- * They exist because the first turn of a brand new family is the slowest
- * turn the product ever runs: a cold function, the auth walk, a blocking
- * persist, context assembly, and only then a first token. Three to eight
- * seconds of nothing, at the exact moment she is deciding whether this
- * is real. These are deterministic, copy-gated, and rendered client-side
- * at once, so the model's own opener arrives as the third line of a
- * conversation that already started.
- *
- * They say nothing that could be wrong. No claim about her family, and
- * no promise about timing: the reader gate caught an earlier line
- * ("give me a minute") contradicting the six minutes the very next card
- * quotes, so the product's first sentence was already wrong. The second
- * line names what actually happens next instead.
- */
-export function welcomeLinesFor(config: OnboardingChatConfig): string[] {
-  const greeting = config.parentName ? `Hi ${config.parentName}.` : "Hi.";
-  return [
-    `${greeting} I'm Homa.`,
-    "A few answers about your kids and I can start helping you teach them.",
-  ];
-}
-
-/**
- * The kickoff's durable lock.
- *
- * The three in-memory locks (a ref, a live session with messages,
- * server history) all die with the component. A remount recreates every
- * one of them, and a remount is not exotic: React's development strict
- * mode does it on every mount, a fast refresh does it, and so does any
- * parent that moves the subtree. What she sees when it happens is Homa
- * saying hello twice, which reads as Homa forgetting she already had.
- *
- * Keyed by family rather than by browser, so a second family on a shared
- * laptop still gets its own opening, and a cleared store costs one extra
- * hello rather than silence.
- */
 export function kickoffStorageKey(familyId: string): string {
   return `homa-onboarding-kickoff-${familyId}`;
 }

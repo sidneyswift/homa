@@ -15,7 +15,6 @@ import {
   kickoffAlreadySent,
   kickoffDirectiveFor,
   markKickoffSent,
-  welcomeLinesFor,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
 import {
@@ -982,27 +981,9 @@ export function ChatClient({
     ),
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
-  // Whether SHE has said anything visible yet. Two different bugs live
-  // here, and they pull in opposite directions.
-  //
   // The opening directive is a transcript item that renders nothing, and
-  // so is a turn that died before writing a word. Counting either as
-  // "the conversation has started" hid the welcome behind an invisible
-  // message and left a brand new parent looking at an empty screen
-  // during the slowest turn the product runs.
-  //
-  // But counting Homa's own opener retires the welcome the instant it
-  // arrives, so the two lines flash and vanish. They are not a
-  // placeholder for her reply, they are the first two lines OF the
-  // conversation, and her reply is meant to land underneath them as the
-  // third. So the welcome stays until the parent herself speaks, which
-  // is the moment it has done its job.
-  const hasParentMessage = transcript.some(
-    (item) =>
-      item.kind === "message" &&
-      item.message.role === "user" &&
-      messageRendersSomething(item.message),
-  );
+  // so is a turn that died before writing a word. Neither counts as the
+  // conversation having started.
   const hasVisibleMessages = transcript.some(
     (item) => item.kind === "message" && messageRendersSomething(item.message),
   );
@@ -1075,9 +1056,6 @@ export function ChatClient({
   // tool's own focus. The first pass only records what a restored
   // session already carried, so a reload never re-throws the panel up;
   // the transcript's planner cards reopen it on purpose instead.
-  // The two lines already on screen while the first turn travels. They
-  // stop being the whole page the moment anything real arrives.
-  const welcomeLines = onboarding ? welcomeLinesFor(onboarding) : [];
   const queuedParentMessages = queued
     .map((entry, index) => ({ entry, index }))
     .filter(({ entry }) => entry.lane !== "directive");
@@ -1399,26 +1377,6 @@ export function ChatClient({
           aria-hidden="true"
           className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
         />
-        {!hasParentMessage && onboarding ? (
-          /* The pre-warmed welcome: two deterministic lines on screen
-             before any model call can return. The first turn of a brand
-             new family is the slowest turn the product runs, and these
-             three to eight seconds are exactly when she is deciding
-             whether this is real. They rise in on the shared line
-             grammar, one after the other, and they say nothing that
-             could turn out to be wrong. */
-          <div className="flex flex-col items-start gap-3">
-            {welcomeLines.map((line, index) => (
-              <p
-                key={line}
-                className="nb-line leading-relaxed text-body"
-                style={{ animationDelay: `${index * 600}ms` }}
-              >
-                {line}
-              </p>
-            ))}
-          </div>
-        ) : null}
         {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">

@@ -6,7 +6,6 @@ import { visitShapeFromHistory } from "../onboarding/onboarding-chat-props";
 import {
   kickoffDirectiveFor,
   kickoffKindFor,
-  welcomeLinesFor,
   RESUME_GAP_MS,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
@@ -73,22 +72,6 @@ describe("kickoffDirectiveFor", () => {
       ),
       null,
     );
-  });
-});
-
-describe("welcomeLinesFor", () => {
-  it("uses her name when Homa has it, and stays whole when it does not", () => {
-    assert.deepEqual(welcomeLinesFor(base)[0], "Hi Alessa. I'm Homa.");
-    assert.deepEqual(welcomeLinesFor({ ...base, parentName: null })[0], "Hi. I'm Homa.");
-  });
-
-  it("promises nothing that could turn out to be wrong", () => {
-    for (const line of welcomeLinesFor(base)) {
-      // The em-dash ban, written as an escape so this file does not
-      // itself contain the character every repo scan looks for.
-      assert.doesNotMatch(line, /\u2014/);
-      assert.doesNotMatch(line, /behind/i);
-    }
   });
 });
 

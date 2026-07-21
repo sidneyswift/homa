@@ -83,7 +83,7 @@ const startChecklist = defineTool({
       minutesLeft: state.minutesLeft,
       resumed: state.answered > 0,
       note:
-        "The questions are open on her screen now. Stop here and say nothing else: she is answering, not reading. Her taps save as she goes, and you will hear when she is done or stops.",
+        "END TURN. Emit no text after this tool call. The questions have taken over her screen, so she is answering rather than reading; taps save as they happen and you will hear when she stops or finishes.",
     };
   },
 });

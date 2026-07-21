@@ -3,6 +3,64 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-21 · Founder ruling: no deterministic welcome, Homa opens herself
+
+Walked live on the dev server, founder verdict on the pre-warmed
+welcome: **"that seems forced. I don't think that there should be a
+separate deterministic message from Homa. It should start from the
+actual model."**
+
+This overturns a decision the spec locked in section 1 ("the real eve
+agent, with a pre-warmed deterministic welcome; two short copy-gated
+lines render instantly client-side while the kickoff round-trips"). The
+two client-side lines are removed.
+
+**What the welcome was actually covering, and the better fix.** It
+existed because the first turn is the slowest the product runs and she
+watches a blank screen through all of it. The founder screenshot showed
+the real cause: a collapsed "Worked on it" line ABOVE the thinking
+indicator, meaning the model had already spent a tool call before
+writing a word. That call was `load_skill`, fetching the onboarding
+skill, so the first impression cost TWO model round trips, and my own
+architecture caused it by putting the arc in a load-on-demand skill.
+
+The opening line moved into `onboarding-mode.ts`, which is a dynamic
+instruction and is therefore already loaded before the turn starts. The
+skill still owns the whole arc from turn two onward. Verified: the only
+tool call on the opening turn is now the facts card, no `load_skill`,
+and the turn runs 12 to 15 seconds of pure generation instead of two
+passes.
+
+**Instructions that fought themselves.** The first version said "one or
+two sentences on what you are for, then put up the facts card. No
+greeting flourish, no list of features, no questions in prose." It
+produced exactly a feature list and a prose question, because "sentences
+on what you are for" invites a product description, and a bare
+prohibition loses to the model's instinct to explain the card it just
+put up. Rewritten as one sentence of shape plus a worked NEGATIVE
+example (the actual bad output, with the three things wrong with it
+named) and one worked positive. That landed.
+
+**Two anti-slop guards, both from live output.** A model with a tool
+call mid-turn repeats itself: the same sentence rendered above AND below
+the card, word for word, inside one message. And told to say nothing
+after a card, it narrates its silence: it wrote
+`*(waits silently while the card is on her screen)*`. Both now handled
+in the renderer (`app/app/assistant-text.ts`) rather than in a prompt,
+because a prompt is probabilistic and a parent notices both instantly.
+The rules are narrow: no real reply repeats a whole paragraph verbatim
+inside one turn, and no real reply is nothing but a parenthetical about
+what Homa is doing. A wrapped aside addressed to HER survives.
+
+**Tool notes are machine-facing and must read that way.** The card's
+note began "The card is on her screen and this turn is over", warm
+third-person prose, and the model said a version of it out loud under
+the card. Rewritten terse and imperative ("END TURN. Emit no text after
+this tool call.") so it cannot be paraphrased into speech. The sibling
+notes on `start_checklist` and `score_child_report` were the same shape
+and were fixed with it; `score_child_report` says SPEAK AFTER THIS ONE,
+because the reveal genuinely wants her voice over the chart.
+
 ## 2026-07-21 · Chat-first onboarding, phase one: the spine, built behind a flag
 
 Founder ask: build the chat-first onboarding described in

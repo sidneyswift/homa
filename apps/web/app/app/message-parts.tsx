@@ -3,6 +3,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
+import { isStageDirection } from "./assistant-text";
 import { isHiddenDirective } from "../../lib/onboarding/directives";
 import {
   AttachmentReceiptChips,
@@ -165,9 +166,21 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       entry.material,
     ]),
   );
+  // Text already shown in THIS message, so a model that restates itself
+  // around a tool call does not print the same paragraph twice. Seen
+  // live on the opening turn: one sentence, rendered above and below the
+  // card, word for word (assistant-text.ts).
+  const shownText = new Set<string>();
   for (const [partIndex, part] of message.parts.entries()) {
     if (part.type === "text") {
-      if (part.text.trim().length > 0) items.push({ kind: "text", text: part.text });
+      const trimmed = part.text.trim();
+      if (trimmed.length === 0) continue;
+      // Homa narrating her own silence is not something to show a parent.
+      if (isStageDirection(trimmed)) continue;
+      const key = trimmed.replace(/\s+/g, " ");
+      if (shownText.has(key)) continue;
+      shownText.add(key);
+      items.push({ kind: "text", text: part.text });
       continue;
     }
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
