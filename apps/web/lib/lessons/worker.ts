@@ -10,6 +10,7 @@ import {
   type LessonClausePair,
   type LessonSegmentText,
 } from "./pairs";
+import { captureJournalClaims } from "../child-progress/journal-capture";
 import { lessonObservedAt } from "./observed-at";
 import {
   assembleLessonTranscript,
@@ -323,11 +324,28 @@ async function recordVerifiedClauses(input: {
       notes.push({ ...pair, outcome: "skipped_flag_off" });
       continue;
     }
+    // The clause is already provenance-verified against the segment, so
+    // the judgment step only has to decide which skill it demonstrates
+    // (AGENTS.md "Models judge, code verifies"). Claims are scoped to
+    // this lesson's child: a recording is one child by construction.
+    const capture = await captureJournalClaims({
+      familyId: input.lesson.familyId,
+      childId: input.lesson.childId,
+      message: pair.clause,
+      surface: "lesson",
+    });
     const result = await recordJournalProgressEvidence({
       familyId: input.lesson.familyId,
       childId: input.lesson.childId,
       memberUserId: input.lesson.createdBy,
       quote: pair.clause,
+      ...(capture.claims
+        ? {
+            claims: capture.claims.filter(
+              (claim) => claim.childId === input.lesson.childId,
+            ),
+          }
+        : {}),
       channel: "lesson",
       messageId: null,
       observedAt,
