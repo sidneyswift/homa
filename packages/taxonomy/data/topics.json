@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1657,
+  "topicCount": 1658,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32426,6 +32426,24 @@
       "Retell one connection between the composer's life and their music, for example nature sounds appearing in a symphony about the countryside"
     ],
     "assessmentPrompt": "Can {{name}} tell you something true about a studied composer's life and name one piece of music they wrote?",
+    "standards": []
+  },
+  {
+    "id": "mt_6VIt9iNslV",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Speaking & Listening",
+    "name": "Joining In with Rhymes and Chants",
+    "description": "Join in with familiar rhymes, chants, and fingerplays said aloud together: echo a line after a leader, take the answering part in a call-and-response chant, keep a steady clap or tap while chanting, and supply the rhyming word when a familiar verse pauses",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 6,
+    "centrality": 0.01,
+    "evidence": [
+      "Join in on the repeated or answering lines of a familiar chant without being fed the words",
+      "Clap or tap along with the beat of a chant for at least one verse",
+      "Fill in the final rhyming word when a well-known rhyme pauses before it"
+    ],
+    "assessmentPrompt": "When you start a rhyme or chant {{name}} knows well, do they join in, clap along, or finish the rhyming word on their own?",
     "standards": []
   }
 ]

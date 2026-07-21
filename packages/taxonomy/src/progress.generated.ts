@@ -58,6 +58,7 @@ export const GENERATED_PROGRESS_TAXONOMY_TOPICS = [
   {"id":"language.group-discussions","subject":"language","domain":"speaking-listening","name":"Group discussions","teachingWindowMonths":[48,132]},
   {"id":"language.identifying-reasons-behind-a-speakers-points","subject":"language","domain":"speaking-listening","name":"Identifying Reasons Behind a Speaker's Points","teachingWindowMonths":[108,120]},
   {"id":"language.inference-vs-explicit-meaning","subject":"language","domain":"english-thinking","name":"Inference vs Explicit Meaning","teachingWindowMonths":[84,108]},
+  {"id":"language.joining-in-with-rhymes-and-chants","subject":"language","domain":"speaking-listening","name":"Joining In with Rhymes and Chants","teachingWindowMonths":[36,72]},
   {"id":"language.knowing-what-you-dont-know","subject":"language","domain":"english-thinking","name":"Knowing What You Don't Know","teachingWindowMonths":[96,120]},
   {"id":"language.listening-and-responding","subject":"language","domain":"speaking-listening","name":"Listening and responding","teachingWindowMonths":[48,132]},
   {"id":"language.monitoring-comprehension","subject":"language","domain":"english-thinking","name":"Monitoring Comprehension","teachingWindowMonths":[72,96]},

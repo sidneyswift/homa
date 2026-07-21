@@ -544,3 +544,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 3-8. A 3x3 grid (8 items plus free space) for ages 3-6 or 8-9 item pools; a 4x4 grid for ages 7+ or larger pools.
 - **Creation path:** hybrid (generate_image once per pool item, reused across every board; HTML for the grid, free space, and per-board frame styling).
 - **Example activity:** `[picture-bingo-board] Four shuffled 3x3 boards of Spanish farm-animal vocabulary (el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro) with a "¡Gratis!" free space, for a caller-led round.`
+
+### chant-and-rhyme-card
+- **Slug:** `[chant-and-rhyme-card]`
+- **Name:** Chant and rhyme card
+- **What it is:** A one-page say-aloud card for a traditional chant, nursery rhyme, or fingerplay: the full text in large read-aloud type, one spoken line per printed line, with optional leader/everyone chips for call-and-response, italic clap or action hints, and a small parent footer on how to teach it. Nothing to trace, cut, or fill in; the page is for saying together, not writing.
+- **Best for:** Circle-time and morning-basket routines, rhyme and rhythm play that builds phonological awareness before formal phonics, oral language for toddlers and preschoolers, memory work, call-and-response games, and clapping or jump-rope chants for older siblings.
+- **Subjects:** ELA (phonological awareness, oral language), music (steady beat), Spanish and other languages (traditional rhymes in the target language)
+- **Ages:** 2-6 for saying along; 5-8 for jump-rope and clapping-game chants
+- **Creation path:** html (precise typography for cues and line breaks; optional hybrid for one small spot illustration). Traditional public-domain or family-created chants only, never a published compiler's arrangement.
+- **Example activity:** `[chant-and-rhyme-card] "One potato, two potato" counting-out chant with "(tap fists on each potato)" action hints and a parent footer on letting the child join in over several days.`

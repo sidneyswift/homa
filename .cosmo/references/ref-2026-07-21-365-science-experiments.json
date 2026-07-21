@@ -1,0 +1,142 @@
+{
+  "id": "ref-2026-07-21-365-science-experiments",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T23:04:05-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784603045.385599",
+  "format": "experiment-activity-book",
+  "title": "365 Science Experiments",
+  "author": "credited only as 'Written and tested by teachers' on the cover; no individual author named anywhere in the captured pages",
+  "illustrator": "Glen Singleton",
+  "editor": "Estelle Longfield",
+  "designArtDirection": "Katy Wall",
+  "publisher": "Hinkler Books Pty Ltd, 45-55 Fairchild Street, Heatherton Victoria 3202 Australia, text and cover design copyright Hinkler Books 2007, 2010, ISBN 978 1 7418 5626 2, printed and bound in China; all verified directly from the scanned imprint page (scan 103)",
+  "pdfScanPageCount": 104,
+  "physicalPageCount": "not printed on the pages themselves (the book numbers its experiments 1-365, not its pages); roughly 200 physical pages estimated from the capture shape: scan 0 is the cover, scans 1-102 are almost all photos of two-page spreads at about 4 experiments per spread plus section openers and front matter, scan 103 is the alphabetical index plus imprint spread; capture runs cover to imprint and the index cites experiments 1 through 365, so the capture is complete",
+  "gradeLevel": "ages 4-12, stated directly in the book's own front matter ('These experiments will be of interest to children aged from four to twelve years')",
+  "sourceFiles": [
+    {
+      "filename": "365-science-experiments.pdf",
+      "localPath": ".cosmo/inspo-files/365-science-experiments.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-21-365-science-experiments/365-science-experiments.pdf"
+    }
+  ],
+  "blobPathNote": "The Blob archive path carries a cur- prefix (inspo/cur-2026-07-21-365-science-experiments/) from before this routing call; this analysis routed the drop as a reference, so the ref id carries the ref- prefix while the blobUrl keeps the already-archived cur- path. The file bytes are identical either way.",
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, decided on the skills' own rules despite the blob path's cur- prefix. The book is a big bound compendium of 365 numbered experiment activities organized into six discipline sections with edge tabs (astronomy, biology, chemistry, geology/geography, physics, weather, each opened by a definition page, a cartoon, and a blank experiment-log page). What it is NOT: a curriculum. No scope and sequence, no weekly or daily plan, no progression (the numbering is a count, not an order; the front matter tells the adult to choose experiments appropriate to the child's skills), no assessment beyond an optional log, and its methodology content is two front-matter pages (a supervision-symbol guide and a one-page 'Clues for use of this workbook'). The curriculum skill's decisive test, a philosophy AND a sequence, fails on the sequence half exactly as it did for the toddler science activity book (ref-2026-07-20-toddlers-science-activity-book, 100+ activities, how-to-use front matter, safety system), which is the controlling precedent and also routed reference. The Venezia composers volume went curriculum on wave-coherence plus embedded method pedagogy; this is a standalone drop whose per-page value is exactly what reference analysis captures: a recurring activity-page design system feeding materials-studio."
+  },
+  "layout": {
+    "structure": "grid",
+    "spacing": "dense",
+    "visualHierarchy": "activity-block-dominant",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "top-down",
+    "notes": "Verified repeatedly across sampled spreads from every section and both ends of the numbering (scans 0-3, 8, 20, 46, 60, 70, 96, 100, 103: experiments 1-5, 22-25, 64-67, 163-166, 213-216, 246-249, 344-347, 360-363). Every one of the 365 experiments uses the identical compact block, 2 blocks per physical page, 4 per spread: (1) a black title bar with the experiment number and name plus a small section icon; (2) a one-sentence purpose line in plain active words ('See how clay absorbs water,' 'Make your own gravity'); (3) a gray Materials box, bulleted household items; (4) a numbered STEPS list, occasionally two-column; (5) a boxed 'Did You Know?' fact with a concrete number or comparison where one exists; (6) one Glen Singleton black-and-white cartoon gag, usually with a speech-bubble joke commenting on the experiment; (7) a bottom strip of 6 circular symbols (adult supervision for all ages, adult supervision for younger children, adult-to-discuss, outdoors ok, indoors ok, tools needed) defined in the front-matter Guide to Symbols. Section openers are the only color-rich pages: a full-page color cartoon, the discipline name, and a one-line definition ('Astronomy: The scientific study of celestial bodies'), plus a lined experiment-log page (Date / Experiment / Notes). Colored edge tabs on every page show the six sections. Steps that need no fixed answer end on an observation question ('Which one lands first?'), a real, repeated design choice."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "scientific-inquiry",
+    "topics": [
+      {
+        "id": "mt_Wa44s-f8Ws",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "'Simple tests and experiments' (Science > Scientific Inquiry, 5-7) is the book's dead-center match: household-materials tests with observation."
+      },
+      {
+        "id": "mt_qgb76wHN2X",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "'Fair testing' (7-9), with the existing ladder continuing at mt_eoPcc4nrBE (8-11), mt_5PgQB0QkWi (9-11), mt_Ae56umVlTT controlling variables (11-12), and mt_3jmBpEepYX drawing conclusions (12-13), spans the book's full stated 4-12 range on the inquiry side. Several experiments are explicit comparison tests (drop an orange and a grape, newspaper inside vs outside for a week)."
+      },
+      {
+        "id": "mt_HZvTriQWTh",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Local weather patterns' (Earth's Systems, 5-6) plus the 30-topic Weather & Climate domain cover the closing weather section (cloud classification, precipitation, humidity)."
+      },
+      {
+        "id": "mt_GF6L7J4MNN",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Water Transport in Plants' (Organisms & Life Processes, 7-8) is literally experiment 66/67 territory (flower in a sealed bottle, leaves in petroleum jelly); the 65-topic Organisms & Life Processes domain covers the biology section."
+      },
+      {
+        "id": "mt_e3-_toGuWf",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Testing Materials for Uses' (Matter & Materials, 7-10) and its 41-topic domain cover the chemistry section (dissolving, wax state changes, milk-swirl surface tension)."
+      },
+      {
+        "id": "mt_9NvuqZKNiV",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Magnetic Materials' (Forces & Motion, 7-8) and the Forces & Motion / Energy / Waves Light & Sound domains (28+28+25 topics) cover the physics section (gravity drops, shadows, mirrors, lenses); the cover itself spells SCIENCE partly in horseshoe magnets."
+      },
+      {
+        "id": "mt_iGSfQg3g5c",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Sunlight warms things up' (Energy, 5-6) covers solar experiments like 362 (dark vs light paper melting ice); Space Exploration and Space Systems & Earth's History (26+16 topics) cover the astronomy section."
+      }
+    ],
+    "unmappedSkills": [],
+    "notes": "Checked fresh against packages/taxonomy/data/topics.json at 1657 pre-existing topics (1658 after this session's drop 1 add): Science alone has 567 topics across 19 domains, including a 32-topic Scientific Inquiry domain whose difficulty ladder ('Simple tests and experiments' 5-7 through 'Drawing conclusions from evidence' 12-13) brackets this book's stated 4-12 range on both sides. Keyword checks run before claiming anything: 'experiment' (3 hits incl. the 5-7 anchor), 'fair test/hypothes/scientific method' (8 hits), 'observ/predict' (53 Science hits), 'investigat' (10 hits). Verdict: heavy reuse, zero genuine taxonomy gaps; every one of the six sections lands in an existing well-populated domain, so no topic is proposed from this drop. The one adjacent architecture question (whether early-years science should ever split by subdiscipline) was already recorded by the toddler science book ref and is deliberately not duplicated here."
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 144],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "medium",
+    "notes": "The book's own front matter does the calibration honestly: a Guide to Symbols page distinguishes adult-supervision-for-all-ages (matches, hot water) from supervision-for-younger-children (scissors) from adult-to-discuss-the-outcome, plus outdoors/indoors and tools symbols on every experiment, and it tells the adult 'The symbols are a guide only... determine the appropriate experiments for each child, taking into account the skills they possess.' Within one experiment the child does the doing while the adult handles flagged steps; older children can run many experiments independently, which is genuinely lower scaffolding than the toddler activity-book genre."
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": [
+      "one recurring unnamed Glen Singleton cartoon character, a round pudgy planet-like figure with a Saturn ring (plus occasional kid characters), delivering a speech-bubble gag on nearly every experiment",
+      "no licensed characters"
+    ],
+    "visualStyle": "black-and-white ink cartoons with hand-lettered-look casual type on activity pages; full-color painted cartoon spreads at section openers; photographic cover",
+    "colorPalette": "black-and-white interior with one accent (gray/green boxes); color reserved for section openers and edge tabs",
+    "appealDrivers": [
+      "a joke on every page: the gag cartoons make dense procedure pages feel light, the same humor-as-on-ramp instinct as the Venezia biographies and Beast Academy",
+      "'Did You Know?' facts with real numbers (the Sun is 100 times Earth's diameter; the sea holds 97 percent of Earth's water) reward curiosity beyond the procedure",
+      "the 365 count itself: an experiment for every day makes science feel abundant and ordinary rather than special-occasion",
+      "everyday materials only (balloons, string, soda bottles, newspaper), so any experiment is startable today"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "not applicable to the source: a thick spiral-bound retail compendium (wire binding visible in every spread photo), used from the book, not reproduced; only the per-section experiment-log pages are writable, and they are log sheets, not worksheets",
+    "orientation": "portrait trim; the capture is one photo per two-page spread on landscape canvases (842x595pt) with a portrait cover and some rotated pages, verified via per-page mediabox dimensions",
+    "margins": "tight; the four-blocks-per-spread grid runs edge to edge with colored section tabs bleeding off the page edge",
+    "inkDensity": "not applicable as a home-print property of the source; a Homa experiment page generated from this pattern is naturally ink-light (text boxes plus one small cartoon)",
+    "colorRequirement": "the interior pattern is genuinely black-and-white plus one accent; a Homa rendition prints fine in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["art-project-instructions"],
+    "gaps": [],
+    "notes": "Checked all 45 shipped recipe files fresh this session, then 46 after drop 1's chant-and-rhyme-card landed. Every one of the sampled experiments fits the existing art-project-instructions shell (materials list plus numbered steps for one hands-on activity), which already carried two source-confirmed variants: the skill-tip callout for textbook Investigate activities and the toddler stat-and-icon variant from the Callisto toddler science book. No new recipe file is needed and no format gap exists. What this drop DID surface, confirmed across all six sections and both ends of the 1-365 numbering rather than assumed from one page, is a third recurring variant missing from that recipe's documented patterns: the one-sentence purpose line under the title, the child-facing 'Did You Know?' fact box (distinct from the inquiry-skill tip box), the plain-words safety-and-setting line derived from what the steps actually require, and ending open-outcome experiments on an observation question instead of announcing the result. Graduated this session as the 'Experiment fact-box variant' edit to art-project-instructions.md (update to the existing recipe file per step 6b, not a duplicate recipe), with the recipe's routing prose extended to name family experiment books."
+  },
+  "stages": {
+    "captured": "2026-07-21T13:18:45Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pattern",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Identity verified directly from the pages: cover reads '365 SCIENCE EXPERIMENTS / Written and tested by teachers / Illustrated by Glen Singleton'; the scanned imprint page gives the full Hinkler Books credit block (publisher address, 2007/2010 copyrights, editor Estelle Longfield, illustrations Glen Singleton, design and art direction Katy Wall, typesetting Palmer Higgs and Macmillan Publishing Solutions, ISBN 978 1 7418 5626 2). Date bookkeeping: id date 2026-07-21 is the UTC date of Slack ts 1784603045.385599 (2026-07-21T03:04:05Z); droppedAt is the same instant in America/New_York (2026-07-20T23:04:05-04:00), late the previous evening by local calendar, the fourth drop of Aless's 07-20 evening. Embedded PDF metadata is CamScanner boilerplate titled 'CamScanner 7-20-26 21.46' created 2026-07-21T03:01:38Z, about 2.5 minutes before the drop. Stall protection honored: the 133MB file was never bulk-rendered; page geometry and text-extraction probes ran via pypdf, then 20 representative pages were rendered individually with PyMuPDF across the full 0-103 range (both ends, every section, roughly every 40th experiment) after the recurring block pattern proved identical at every probe. 'captured' reflects this checkout's local file mtime; the file and its Blob URL were staged before this session began. Copyright honored: Hinkler's text, cartoons, and photographs were viewed for analysis only; the experiment fact-box variant encodes the generic page-pattern (purpose line, fact box, safety line, observation-question ending) in Homa's own words with Homa's own examples, never Hinkler's text or Singleton's characters."
+}

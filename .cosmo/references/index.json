@@ -1673,6 +1673,24 @@
       "subject": "multi-subject",
       "domain": "scientific-inquiry",
       "format": "activity-idea-book"
+    },
+    {
+      "id": "ref-2026-07-21-365-science-experiments",
+      "title": "365 Science Experiments",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T23:04:05-04:00",
+      "subject": "science",
+      "domain": "scientific-inquiry",
+      "format": "experiment-activity-book"
+    },
+    {
+      "id": "ref-2026-07-21-one-potato-two-potato",
+      "title": "One Potato, Two Potato, Three Potato, Four: 165 Chants for Children",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T19:42:42-04:00",
+      "subject": "ela",
+      "domain": "speaking-listening",
+      "format": "chant-anthology-book"
     }
   ]
 }

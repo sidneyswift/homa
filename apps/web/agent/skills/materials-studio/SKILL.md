@@ -476,6 +476,7 @@ making.
 | Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
 | Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
 | Composer listening guide | give the child one thing to listen for and ordered moments to catch while a real piece of music plays | composer-listening-guide |
+| Chant and rhyme card | print a traditional chant, nursery rhyme, or fingerplay as a large-type say-aloud card with leader/everyone and clap cues | chant-and-rhyme-card |
 | Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
 | Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
 | Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, a bare technique-reference card, or a published science textbook's "Investigate" activity | art-project-instructions |

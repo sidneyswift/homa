@@ -22,7 +22,10 @@ skill-tip callout variant below instead of the reflection prompt. Also
 covers a toddler-age parent-led activity book's own recurring shape
 (ages 1-3, gather a few household or pantry items, a parent does any
 setup, the child does the hands-on part), using the toddler stat-and-icon
-variant below instead of the reflection prompt.
+variant below instead of the reflection prompt. And it covers a family
+science-experiment book's recurring numbered-experiment page (ages 4-12,
+household materials, numbered steps, observe what happens), using the
+experiment fact-box variant below.
 
 Hybrid path by default: generate_image for a small inspiration thumbnail
 showing the finished example, the technique in progress, or the art
@@ -100,6 +103,27 @@ Design patterns (all binding for art-project-instructions):
   parent-only steps into the numbered child steps. Use this variant for
   toddler or early-years (ages 1-4) activity content specifically; the
   plain variant above stays the default for ages 5+.
+- **Experiment fact-box variant (optional)**: sourced directly from a
+  2007/2010 Hinkler "365 Science Experiments" family experiment book,
+  confirmed consistent across all six of its sections (astronomy, biology,
+  chemistry, geology/geography, physics, weather), not assumed. For a home
+  science experiment page (ages 4-12), add three things to the same
+  materials-plus-steps shell: (1) a one-sentence purpose line directly
+  under the title stating what the child will see or find out, in plain
+  active words ("See how clay absorbs water," "Make your own gravity"),
+  never a mechanism lecture; (2) one small "Did you know?" fact box
+  (`border: 1.5px solid #6b6259; border-radius: 6px; padding: 10px 14px;`)
+  holding a single concrete, child-facing fact connected to the experiment,
+  with a real number or comparison when one exists ("the Sun is about 100
+  times wider than Earth"); this box is different from the skill-tip
+  callout, which names an inquiry skill, and a page may carry either or
+  both; (3) a short safety-and-setting line above the materials list naming
+  the supervision level and setting in plain words ("Do this outside, with
+  a grown-up for the hot water step"), pulled from what the steps actually
+  require, never boilerplate. Where the experiment has no fixed outcome,
+  end the final step on an observation question ("Which one lands first?"
+  "What do you notice after a week?") instead of announcing the result,
+  so the child observes before being told.
 
 ```html
 <style>

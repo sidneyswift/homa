@@ -1,0 +1,152 @@
+{
+  "id": "ref-2026-07-21-one-potato-two-potato",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T19:42:42-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784590962.862169",
+  "priorFailedDropTs": "1784589473.370809",
+  "format": "chant-anthology-book",
+  "title": "One Potato, Two Potato, Three Potato, Four: 165 Chants for Children",
+  "compiler": "Mary Lou Colgin (copyright page: M. L. Colgin, copyright 1982 by Mary Louise N. Colgin)",
+  "designer": "Sheila Moceyunas",
+  "coverIllustrator": "Linda Greigg (cover illustration copyright 1988)",
+  "interiorIllustrations": "engravings reproduced with permission from Animals by Jim Harter, Dover Publications, 1979",
+  "publisher": "Gryphon House, Mt. Rainier, Maryland, USA (previously published as Chants for Children; ISBN 0-87659-141-1 on the title-page verso, ISBN 0-87659-116-0 on the scanned back cover, two printings of the same title)",
+  "pdfScanPageCount": 43,
+  "physicalPageCount": "roughly 80 including covers: printed body runs Preface then pages 1-76 (Bibliography starts at 76), followed by publisher ad pages and the back cover; capture is complete from front cover (scan 0) to back cover (scan 42)",
+  "gradeLevel": "early childhood, roughly ages 2-6 primary (the preface addresses early childhood programs and families; jump-rope and clapping chants stretch usefully to 8)",
+  "sourceFiles": [
+    {
+      "filename": "one-potato-two-potato.pdf",
+      "localPath": ".cosmo/inspo-files/one-potato-two-potato.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-21-one-potato-two-potato/one-potato-two-potato.pdf"
+    }
+  ],
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, decided on the skills' own rules. The prior unverified claim called this a 'nursery rhyme collection', which might suggest curriculum; the actual pages refute the framing (see identityCorrection). This is a single bound retail anthology of 165 chants: no scope and sequence, no weekly or daily plans, no progression model, no assessment, and its sections (Creatures, Numbers and ABC's, Food, Nursery Rhymes, People Plus, Holidays and Seasons, Response Chants) are thematic groupings, not a teaching order. The curriculum skill's decisive test is 'a philosophy AND a sequence'; this book has a one-page preface with a real mini-philosophy (chants as choral speaking that builds oral language before reading and writing) but no sequence of any kind, so it fails the test. Closest precedent is the toddler science activity book (ref-2026-07-20-toddlers-science-activity-book), a bound retail book of 100+ activities with a how-to-use front matter, which also routed reference. The Venezia Beethoven volume went curriculum on wave-coherence plus embedded method content; neither applies here (a standalone drop, and the method content is one preface page, recorded below rather than lost)."
+  },
+  "identityCorrection": "The stale never-persisted prior reply called this a '43-page nursery rhyme collection'. Two corrections from the actual pages: (1) 43 is the PDF SCAN page count (cover single, front-matter singles, then mostly two-page-spread photos), not the book's page count; the printed body runs to page 76 (Bibliography) plus front matter, ads, and covers, roughly 80 physical pages, all captured. (2) It is a CHANT anthology, not a nursery rhyme collection: the cover subtitle is '165 Chants for Children' and Nursery Rhymes is just one of seven content sections (pages 29-40). The preface frames the whole book as choral-speaking material ranging 'from the venerable Mother Goose rhymes to the contemporary jump-rope calls'.",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "chant-text-dominant",
+    "whiteSpaceRatio": 0.45,
+    "flowDirection": "top-down",
+    "notes": "Verified across sampled spreads in all seven sections plus front and back matter (scans 0-5, 12, 16, 20, 23, 26, 30, 33, 36, 39-42). Every content page follows one template: 3-6 chants per page in a single column, each chant starting with an oversized drop-cap initial, one spoken line per printed line, blank space between chants, generous margins. Black-and-white Dover engravings (animals, clocks, trains, ships) are placed per page relating loosely to a chant's subject; the Numbers and ABC's section adds oversized display numerals in the outer margins. Section openers are a plain title plus rule line. Two structural extras verified directly: the Response Chants section opener (printed page 60) carries explicit performance instructions (leader chants one line and the group the next, half the class responds to the other half, or the group echoes each line), and individual chants carry inline cues like '(pause)', '(Continue with numbers three and two.)', and '(Everybody) HAMBONE!'. Back matter is a real reference apparatus: Index of First Lines (74-75) and a scholarly Bibliography (76) citing the Opies' Oxford Nursery Rhyme Book among others."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "speaking-listening",
+    "topics": [
+      {
+        "id": "mt_6VIt9iNslV",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "'Joining In with Rhymes and Chants' (English > Speaking & Listening, ages 3-6, PROCEDURAL), the one genuine keyword-checked gap this drop filled: before this session the taxonomy had zero topics for oral joining-in below Reciting Poetry's age-6 floor. Checked 'chant' and 'choral' (zero English hits), 'nursery' (zero hits), 'fingerplay' and 'action rhyme' (zero hits) across all 1657 pre-existing topics before adding."
+      },
+      {
+        "id": "mt_4GiE83rJF_",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Rhyming words' (English > Phonics & Word Reading, 4-6) covers the rhyme-awareness payload of the whole anthology on the reading side."
+      },
+      {
+        "id": "mt_PvU3eoikev",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Onsets & Rimes' (4-7): word-family play in chants like 'Higglety, pigglety, pop' feeds the same phonogram sensitivity."
+      },
+      {
+        "id": "mt_UvNrOXny1i",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "'Syllables' (5-6): clapping the rhythm of a chant is syllable segmentation in disguise; the preface explicitly says to clap hands to the rhythm."
+      },
+      {
+        "id": "mt_ZBMcX2oRor",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "'Reciting Poetry' (English > Speaking & Listening, 6-10) picks up exactly where the new joining-in topic ends, for the older-child memory-work use of the same material."
+      },
+      {
+        "id": "mt_mB7DVai-Uf",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "'Listening and responding' (4-11) covers the Response Chants section's call-and-response mode."
+      },
+      {
+        "id": "mt_nvdpxAJTBG",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Counting chants (Five Little Monkeys, One Elephant, Every Morning at Eight O'Clock) exercise early counting sequences; 'Counting in 2s' is the nearest Counting & Cardinality neighbor and the milestone-bank counting items cover the younger end."
+      }
+    ],
+    "unmappedSkills": [],
+    "notes": "Mapped against packages/taxonomy/data/topics.json as of this session (1657 topics pre-add, 1658 after) and cross-checked against packages/taxonomy/src/domains.ts: the reserved authored assessment domains phonological-awareness (phonics), early-talk and oral-storytelling (language), and rhythm-beat and singing (music) are assessment-kind homes, not topics.json content, so the musical steady-beat payload of chanting is deliberately NOT proposed as a Music topic; Music's only topics.json domain is Composer Study & Music Appreciation, which this book does not touch. One topic added under the existing MARBLE_DOMAIN_MAP pair 'English > Speaking & Listening' (no mapping.ts edit needed)."
+  },
+  "difficulty": {
+    "ageBandMonths": [24, 72],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "notes": "Fully adult-led oral material: the parent or teacher carries the chant and the child joins at whatever level works, which the preface makes explicit ('Do your children need to hear the chant from you until they catch it? Or will repeating it after you line by line be successful? Try a variety of methods.'). No reading required of the child anywhere in the book. Response chants add a simple turn-taking demand; jump-rope chants at the top of the range add gross-motor timing."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "traditional folk and Mother Goose cast (Humpty Dumpty, Wee Willie Winkie, the Man in the Moon, Hambone, assorted pigs, hens, monkeys, and elephants)",
+      "no invented recurring character; the 1988 cover painting shows four diverse children passing potatoes"
+    ],
+    "visualStyle": "vintage black-and-white Dover engravings inside (Jim Harter's Animals collection, credited on the copyright page); one full-color watercolor cover",
+    "colorPalette": "black-and-white interior, full-color cover only",
+    "appealDrivers": [
+      "the chants themselves are the appeal: rhythm, rhyme, nonsense syllables, and call-and-response turn-taking, all performable with zero materials",
+      "oversized drop-cap initials and margin numerals give pre-readers a visual anchor per chant",
+      "engravings lend a warm heritage feel without competing with the text",
+      "explicit permission for child-created chants ('Sometimes the best chant of all is the child's own creation. Capture it and name it as that child's.') plus extra blank pages bound in for exactly that"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "not applicable to the source: a bound retail paperback teachers' resource (Gryphon House, $9.95 sticker preserved on the scanned back cover), read and performed from, not reproduced; no page is a fillable or reproducible worksheet",
+    "orientation": "portrait trim; the CamScanner capture mixes portrait single-page photos (scans 0, 1, 3, 4, 10, 15, 18, 24, 29, 32, 42) with landscape two-page-spread photos (the rest), verified via per-page mediabox dimensions",
+    "margins": "generous throughout, a deliberate airy setting for at-a-glance reading aloud",
+    "inkDensity": "not applicable as a home-print property; the source is a professionally printed black-and-white book. A Homa chant-and-rhyme-card generated from the same material is inherently ink-light (text plus small cues, no fills)",
+    "colorRequirement": "interior needs no color at all; only the cover is color"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["copy-work-pages", "clip-cards"],
+    "gaps": ["chant-and-rhyme-card"],
+    "notes": "Checked all 45 shipped recipe files fresh this session (ls of references/recipes/). Partial matches only: copy-work-pages handles poetry as handwriting material (ages 5-12, the write-it-down use, not the say-it-aloud use) and clip-cards handles rhyme recognition as a clip activity; composer-listening-guide is the only oral-performance-adjacent format and it is listening, not speaking. Nothing produced a say-aloud page: large-type chant text, one spoken line per line, leader/everyone cues for call-and-response, clap and action hints, and a parent how-to footer, which is exactly the repeated shape of this book's pages plus its Response Chants instructions. That genuine gap graduated this session as the new chant-and-rhyme-card recipe (html path); the gap slug and recipe filename match, so no GAP_ALIASES entry is needed."
+  },
+  "knowledgeBankProposal": {
+    "note": "In-JSON proposal only, no DB write attempted from this session, matching current ingest practice.",
+    "suggestedKey": "chant-based-oral-language",
+    "topicType": "method_format",
+    "title": "Chants and Choral Speaking for Early Oral Language",
+    "summary": "Colgin's 1982 Gryphon House anthology frames chants (Mother Goose rhymes through jump-rope calls) as choral speaking that builds speaking and listening skills before reading and writing: adult carries the chant, child joins at their own level (echo line-by-line, take the response part, or just clap the beat), repetition across days not minutes, capture and name the child's own invented chants. Zero-materials, zero-prep oral language work for ages 2-6."
+  },
+  "stages": {
+    "captured": "2026-07-21T13:15:39Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/chant-and-rhyme-card.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": ["Joining In with Rhymes and Chants"],
+      "commit": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Identity verified directly from the pages: cover reads 'ONE POTATO, TWO POTATO, THREE POTATO, FOUR / 165 Chants for Children / Compiled by Mary Lou Colgin'; title page adds 'Designed by Sheila Moceyunas' and the Gryphon House imprint with 'Previously published as Chants for Children'; copyright page gives copyright 1982 Mary Louise N. Colgin, Library of Congress Catalog Card 88-82376, first printing July 1982. Date bookkeeping: id date 2026-07-21 is the UTC date of the Slack ts 1784590962.862169 (2026-07-20T23:42:42Z); droppedAt is the same instant in America/New_York (2026-07-20T19:42:42-04:00), previous evening by local calendar, same pattern as the Venezia wave. Embedded PDF metadata is CamScanner boilerplate titled 'CamScanner 7-20-26 19.08' created 2026-07-20T23:14:55Z, about 28 minutes before the successful drop. THIS IS A RE-DROP: the same title was first dropped at ts 1784589473.370809 (file F0BJHUZARN1 is the re-drop against the failed first F0BKFEBKU6L), the first file failed to load for the prior bot, and BOTH messages carry stale unearned :ship: reactions plus a stale never-persisted reply making the '43-page nursery rhyme collection' claim corrected in identityCorrection. Both messages need a fresh reply/reaction pass once this analysis ships; no Slack access from this session, so slackReplyTs stays null and shipReaction stays false, honestly. 'captured' reflects this checkout's local file mtime; the file and its Blob URL were staged before this session began. Copyright honored: the compilation's arrangement, preface text, and cover art were viewed for analysis only; the chant-and-rhyme-card recipe encodes the generic performance-card pattern and instructs use of traditional public-domain or family-created chants only, never a compiler's arrangement. The worked example in the recipe uses a traditional anonymous folk chant, not Colgin's original prose."
+}
