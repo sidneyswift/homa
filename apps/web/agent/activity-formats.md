@@ -468,9 +468,9 @@ The curriculum writer loads this to recommend buildable activities.
 ### art-project-instructions
 - **Slug:** `[art-project-instructions]`
 - **Name:** Art project instructions
-- **What it is:** A materials list followed by 3-6 numbered steps for making one concrete art or craft piece, with an optional small inspiration thumbnail and an optional closing reflection question. A bare technique-reference variant drops the thumbnail and reflection box for a plain how-to card.
-- **Best for:** Formal skills-based art curricula built around the Elements of Art and Principles of Design, or any curriculum with a recurring hands-on "make something" activity that rotates through different media (drawing, painting, clay, printmaking, weaving, paper folding, assemblage) using the same page shell each time.
-- **Subjects:** Art (making, technique, elements and principles)
-- **Ages:** 5-10. Fewer, larger steps for younger; more steps and a reflection prompt tied to the family's own comprehension-skill vocabulary for older.
+- **What it is:** A materials list followed by 3-6 numbered steps for making one concrete art or craft piece, with an optional small inspiration thumbnail and an optional closing reflection question. A bare technique-reference variant drops the thumbnail and reflection box for a plain how-to card. An optional skill-tip callout box names and defines one inquiry skill for a hands-on science investigation instead of the reflection question.
+- **Best for:** Formal skills-based art curricula built around the Elements of Art and Principles of Design, a published science textbook's recurring hands-on "Investigate" activity, or any curriculum with a recurring "make something" or "try this" activity that rotates through different media or materials using the same page shell each time.
+- **Subjects:** Art (making, technique, elements and principles), Science (hands-on investigations and experiments)
+- **Ages:** 5-10. Fewer, larger steps for younger; more steps and a reflection prompt (or skill-tip callout, for science) tied to the family's own comprehension-skill or process-skills vocabulary for older.
 - **Creation path:** hybrid (generate_image for the inspiration thumbnail, HTML for the materials list and steps) or html-only for the bare technique-reference variant
 - **Example activity:** `[art-project-instructions] Paper-plate weaving: materials list, five numbered steps, and a reflection question about the pattern the child made`

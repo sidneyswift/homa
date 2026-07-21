@@ -101,6 +101,16 @@
       "decisionsCount": 5
     },
     {
+      "id": "cur-2026-07-19-harcourt-science",
+      "name": "Harcourt Science (Grade 1, Harcourt School Publishers pupil edition, copyright 2000)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T17:34:09-04:00",
+      "methodology": "A published, skills-based elementary science textbook organized around a consistent two-step lesson pattern: a hands-on 'Investigate' activity that lets the child observe or test something firsthand, always followed by a short 'Learn About' reading passage that names and explains what the child just did, never the other way around. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in a front-matter 'Using Science Skills' spread and then referenced by name throughout the whole book, including inside a small 'Science Skill' tip box on many Investigate activities and in the numbered 'Using Science Skills' tasks that close every chapter review.",
+      "mappedPct": 81,
+      "gapCount": 1,
+      "decisionsCount": 5
+    },
+    {
       "id": "cur-2026-07-19-playing-preschool-y1",
       "name": "Playing Preschool Year 1 by Busy Toddler",
       "droppedBy": "aless",

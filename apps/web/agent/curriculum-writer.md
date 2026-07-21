@@ -391,3 +391,72 @@ planning implications:
   if the family also wants a picture-study-style portfolio card alongside their
   textbook, not as the default artist reference (its reflection prompt is written
   for CM's gaze-and-recall routine, which this methodology does not use).
+
+### Published Elementary Science Textbook (Investigate-Then-Explain, e.g. Harcourt Science)
+
+When a family uses a published, grade-level school-market science textbook
+(Harcourt Science, or any program built on a hands-on "Investigate" activity
+followed by a short "Learn About" reading passage), plan around this
+structure rather than a nature-study or unit-study rhythm:
+
+- Investigate before explaining. Every lesson opens with a short hands-on
+  activity (a materials list plus 2-4 numbered steps) that lets the child
+  observe or test something firsthand, then follows with a brief reading
+  passage (a few short declarative sentences, 1-2 bolded vocabulary words)
+  that names and explains what the child just did. Do not reorder this: the
+  concrete experience always comes before the term.
+- A fixed, named process-skills vocabulary runs through the whole program
+  and is reused deliberately, not just once: Observe, Compare, Classify,
+  Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make
+  Models, Gather Information, Plan, Order. Name the specific skill an
+  activity practices using this vocabulary rather than inventing new terms,
+  the same way the textbook's own "Science Skill" tip box does.
+  `[art-project-instructions]`'s skill-tip callout variant is built for
+  exactly this.
+- Lessons stack into short chapters (2-6 lessons), and each chapter closes
+  with a review that mixes three things in one sitting: a few open "tell
+  what you know" prompts tied to photos, a picture-to-word vocabulary
+  matching set, and 2-4 numbered "Using Science Skills" mini-tasks that
+  apply that chapter's named skills to a new example. Do not compress
+  those to a single quiz format.
+- Chapters stack into units (2 chapters each is typical), and each unit
+  closes with open-ended "Activities for Home or School" enrichment and a
+  "Wrap Up" spread (a writing prompt, often a foldable or flap book; a
+  read-aloud recommendation naming a real trade book; sometimes a
+  suggested website). Treat the writing prompt as a real, separate
+  material, not a footnote.
+- Cross-curricular connection spreads recur every lesson or two, usually a
+  short biography of a real scientist, engineer, or other professional
+  (a geologist, an architect, a hot-air balloonist, a doctor) tied to that
+  lesson's content, alongside a math, social studies, or language-arts
+  tie-in activity. `[artist-composer-study-card]` can be reused for these
+  bios in a pinch (frame, short bio, reflection stem) but its prompts are
+  written for CM-style artist study; adapt the labels rather than using it
+  unedited.
+- Assessment is built into the chapter review above, not a separate test.
+  Do not suggest additional quizzes or graded worksheets unless the family
+  asks for one.
+- A separate glossary (term plus one real-world photo example, page
+  cross-referenced) and separate handbook sections (tool how-to references
+  like a hand lens or thermometer; body-systems pages like the respiratory
+  system) function as ongoing whole-year references, not weekly content to
+  schedule.
+- This is a different shape from Direct Instruction (no script, no
+  choral response) and from nature study or Charlotte Mason science (the
+  investigate-first sequence is explicit and textbook-driven, not child-led
+  outdoor observation), even though all three can coexist in one family's
+  week for different subjects.
+- Map to Homa's `science` subject and its Marble-imported assessment
+  domains (`scientific-inquiry`, `organisms-life-processes`,
+  `ecosystems-habitats`, `matter-materials`, `forces-motion`,
+  `earths-systems`, `weather-climate`, `the-human-body`, and so on,
+  whichever domain matches that lesson's content) rather than inventing a
+  new domain; Homa's Science coverage is broad and deep enough that most
+  lessons in this kind of textbook map directly.
+- Format preferences: `[art-project-instructions]` (skill-tip callout
+  variant) for every "Investigate" hands-on activity and for the Science
+  Handbook's bare tool how-to references; `[matching-visual-discrimination]`
+  for chapter-review vocabulary matching; `[labeled-anatomy-diagram]` for
+  labeled plant-parts or body-systems diagrams; `[3-part-nomenclature-cards]`
+  for the glossary; `[foldable]` for Unit Wrap Up writing prompts that ask
+  for a flap or pull book.

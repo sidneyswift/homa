@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1638,
+  "topicCount": 1640,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32083,6 +32083,43 @@
         "Move or respond physically to changes in tempo or mood"
       ],
       "assessmentPrompt": "While listening to a new piece of music, can {{name}} say whether it feels fast or slow, and name one instrument they hear?",
+      "standards": []
+    }
+,
+    {
+      "id": "mt_vgB4oY7Qyl",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Matter & Materials",
+      "name": "Floating and Sinking",
+      "description": "Predict then test whether everyday objects float or sink in water, and notice that shape as well as material affects whether an object floats, not size or weight alone",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Sort a set of everyday objects into floats and sinks after testing each one in water",
+        "Predict whether an object will float or sink before testing it, then check the prediction",
+        "Notice that changing an object's shape (for example flattening a ball of clay into a boat) can change whether it floats"
+      ],
+      "assessmentPrompt": "If you give {{name}} a small object and ask whether it will float or sink in water, can they make a prediction and then test it to find out?",
+      "standards": []
+    },
+    {
+      "id": "mt_akAzChSPGT",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Forces & Motion",
+      "name": "How Wheels Help Objects Move",
+      "description": "Understand that wheels turning on an axle make objects easier to move than sliding the same object directly across a surface, comparing how far or how easily a wheeled object moves compared to one without wheels",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Compare pushing a toy with wheels to pushing the same toy without wheels, and describe which is easier",
+        "Explain in their own words that a wheel turns on an axle to help something move",
+        "Identify wheels on everyday objects (wagons, bikes, cars, office chairs) and explain what job the wheels do"
+      ],
+      "assessmentPrompt": "Can {{name}} explain why a wagon with wheels is easier to pull than a box without wheels?",
       "standards": []
     }
   ]

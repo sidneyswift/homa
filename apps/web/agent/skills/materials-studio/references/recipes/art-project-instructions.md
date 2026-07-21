@@ -15,7 +15,10 @@ variety), any curriculum with a recurring "make something" activity that
 needs the same materials-list-plus-numbered-steps shell no matter what
 the medium is that week. Also works as a bare technique-reference card
 (how to mix a tint, how to make a sponge print) with no project framing
-at all.
+at all. The same shell also covers a published science textbook's
+recurring hands-on "Investigate" activity (gather a few household
+materials, follow numbered steps, observe a result), using the
+skill-tip callout variant below instead of the reflection prompt.
 
 Hybrid path by default: generate_image for a small inspiration thumbnail
 showing the finished example, the technique in progress, or the art
@@ -56,6 +59,19 @@ Design patterns (all binding for art-project-instructions):
   card that is not tied to one project or artist, drop the title's
   project framing and the reflection box entirely; keep only the
   materials list and the numbered steps, html-only, no thumbnail.
+- **Skill-tip callout (optional)**: for a hands-on science investigation
+  or experiment that follows this same materials-list-plus-numbered-steps
+  shell (a published science textbook's "Investigate" activity, for
+  example), add one small bordered tip box (`border: 1.5px solid
+  #b3a492; border-radius: 6px; padding: 10px 14px; background:
+  #f0ede8;`) near the last step, naming and defining the one inquiry
+  skill the activity practices, for example "Science Skill: To draw a
+  conclusion, use what you have observed to form an idea." Pull the
+  skill name from the curriculum's own process-skills vocabulary
+  (Observe, Compare, Classify, Sequence, Infer, Predict, Measure,
+  Communicate, Draw Conclusions, Make Models, Gather Information, Plan)
+  when the family's program names one, rather than inventing new terms.
+  Skip this box entirely for art projects, where it does not apply.
 - **Same shell regardless of medium**: whether the medium is drawing,
   painting, collage, clay, printmaking, weaving, paper folding, or
   assemblage from found objects, reuse the identical materials-list and
