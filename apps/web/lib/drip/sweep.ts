@@ -1,3 +1,5 @@
+import { emailHash } from "../email/hash";
+import { suppressedHashesForDrip } from "../email/suppression";
 import { mapDb } from "../map/db";
 import {
   siteUrl,
@@ -51,7 +53,12 @@ export interface DripSignals {
   anyReportViewed: boolean;
   unviewedChildName: string | null;
   unviewedReportToken: string | null;
+  /** The family turned proactive email off (journal_opt_out_at set, from an
+   * inbound "stop"). Cleared by "start", so it reads current state. */
   optedOut: boolean;
+  /** This address is on the suppression list for the drip (unsubscribe,
+   * "stop", or a hard bounce/complaint). */
+  suppressed: boolean;
   lastDripSentAt: Date | null;
   sentKinds: string[];
 }
@@ -69,7 +76,7 @@ export type DripDecision =
  * setup nudge. Every guard here is also expressed in the sweep's re-check.
  */
 export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
-  if (signals.optedOut) return null;
+  if (signals.optedOut || signals.suppressed) return null;
   if (
     signals.lastDripSentAt &&
     now.getTime() - signals.lastDripSentAt.getTime() < GLOBAL_CAP_MS
@@ -172,10 +179,7 @@ async function loadDripSignals(): Promise<DripSignals[]> {
         where c.family_id = f.id and r.emailed_at is not null and r.viewed_at is null
         order by r.emailed_at limit 1
       ) as unviewed_token,
-      exists(
-        select 1 from public.events e
-        where e.family_id = f.id and e.name = 'email.opt_out'
-      ) as opted_out,
+      f.journal_opt_out_at is not null as opted_out,
       (
         select max(es.created_at) from public.email_sends es
         where es.family_id = f.id and es.kind like 'drip_%'
@@ -196,7 +200,7 @@ async function loadDripSignals(): Promise<DripSignals[]> {
     limit ${SWEEP_LIMIT}
   `;
 
-  return rows.map((row) => ({
+  const signals: DripSignals[] = rows.map((row) => ({
     familyId: row.id,
     email: row.email,
     firstName: row.first_name,
@@ -209,9 +213,20 @@ async function loadDripSignals(): Promise<DripSignals[]> {
     unviewedChildName: row.unviewed_child_name,
     unviewedReportToken: row.unviewed_token,
     optedOut: row.opted_out,
+    suppressed: false,
     lastDripSentAt: toDate(row.last_drip_sent_at),
     sentKinds: Array.isArray(row.sent_kinds) ? row.sent_kinds : [],
   }));
+
+  // One batch suppression lookup for the whole candidate set, keyed by the
+  // address hash the ledger already uses.
+  const suppressed = await suppressedHashesForDrip(
+    signals.map((signal) => emailHash(signal.email)),
+  );
+  for (const signal of signals) {
+    signal.suppressed = suppressed.has(emailHash(signal.email));
+  }
+  return signals;
 }
 
 /** Final defensive guard against a double send: even though the audience

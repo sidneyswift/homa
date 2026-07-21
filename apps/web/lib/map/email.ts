@@ -1,7 +1,7 @@
-import { createHash } from "node:crypto";
-
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
+import { emailHash } from "../email/hash";
+import { mintUnsubscribeToken } from "../email/unsubscribe-token";
 import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id";
 import { escapeHtml } from "../html-escape";
 import type { TaskDeliveryVersion } from "../tasks/delivery-version";
@@ -71,6 +71,8 @@ interface SendArgs {
    * (founder console, MJ-14). Best-effort: the ledger never breaks the
    * send it is recording. */
   ledger?: EmailLedger;
+  /** Extra SMTP headers, e.g. List-Unsubscribe for proactive mail. */
+  headers?: Record<string, string>;
 }
 
 export type HomaEmailSubmission =
@@ -156,12 +158,6 @@ export async function retrieveResendRfcMessageIdForSubmission(
     key,
     options,
   );
-}
-
-/** sha256 of the lowercased address, the ledger's PII posture (matches
- * conversation_deliveries.destination_hash). */
-function emailHash(address: string): string {
-  return createHash("sha256").update(address.trim().toLowerCase()).digest("hex");
 }
 
 /**
@@ -265,6 +261,9 @@ async function submitToResend(
         subject: args.subject,
         html,
         text,
+        ...(args.headers && Object.keys(args.headers).length > 0
+          ? { headers: args.headers }
+          : {}),
       }),
       },
     );
@@ -639,6 +638,22 @@ export async function sendBandReadyEmail(
 const DRIP_OUTER_NOTE =
   "We email you about your family's homeschool: your reports, a reminder to finish what you started, and the occasional nudge when there's new progress to see. No marketing. Every kind has an off switch.";
 
+/** List-Unsubscribe headers for a proactive email (RFC 2369 + RFC 8058
+ * one-click). The mailto path always works (an inbound "unsubscribe" reply
+ * opts out); the https one-click path is added only when
+ * EMAIL_UNSUBSCRIBE_SECRET is set, so a missing secret degrades to
+ * mailto-only rather than shipping a dead link. */
+function unsubscribeHeaders(to: string): Record<string, string> {
+  const mailto = `mailto:${REPLY_TO}?subject=unsubscribe`;
+  const token = mintUnsubscribeToken(to);
+  if (!token) return { "List-Unsubscribe": `<${mailto}>` };
+  const httpsUrl = `${siteUrl()}/api/email/unsubscribe?t=${encodeURIComponent(token)}`;
+  return {
+    "List-Unsubscribe": `<${httpsUrl}>, <${mailto}>`,
+    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  };
+}
+
 /** Nudge for a family that signed up but never reached a report: setup
  * unfinished, or no child added yet (Appendix A2). Resume link. */
 export async function submitDripSetupNudge(
@@ -650,6 +665,7 @@ export async function submitDripSetupNudge(
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
     ledger: { kind: "drip_setup_nudge", familyId },
+    headers: unsubscribeHeaders(to),
     to,
     subject: firstName
       ? `Pick up where you left off, ${firstName}`
@@ -679,6 +695,7 @@ export async function submitDripReportUnviewed(
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
     ledger: { kind: "drip_report_unviewed", familyId },
+    headers: unsubscribeHeaders(to),
     to,
     subject: `${childName}'s progress report is ready to open`,
     preview: `${childName}'s report is finished and waiting for you.`,
@@ -707,6 +724,7 @@ export async function submitDripAddKid(
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
     ledger: { kind: "drip_add_kid", familyId },
+    headers: unsubscribeHeaders(to),
     to,
     subject: firstName
       ? `Add the rest of your crew, ${firstName}`

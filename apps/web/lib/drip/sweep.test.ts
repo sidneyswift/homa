@@ -21,6 +21,7 @@ function base(overrides: Partial<DripSignals> = {}): DripSignals {
     unviewedChildName: null,
     unviewedReportToken: null,
     optedOut: false,
+    suppressed: false,
     lastDripSentAt: null,
     sentKinds: [],
     ...overrides,
@@ -103,6 +104,10 @@ test("opt-out silences everything", () => {
     unviewedReportToken: "tok-123",
   });
   assert.equal(chooseDripNudge(signals, NOW), null);
+});
+
+test("a suppressed address gets nothing, even when otherwise eligible", () => {
+  assert.equal(chooseDripNudge(base({ suppressed: true }), NOW), null);
 });
 
 test("a family with an opened report and full setup gets nothing", () => {

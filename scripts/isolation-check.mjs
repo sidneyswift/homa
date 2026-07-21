@@ -3204,6 +3204,10 @@ await expectEmptyRead("thank_you_cards");
 // email ledger holds address hashes and delivery errors; the cron
 // heartbeat is pure ops state. No Data API role reads or writes either.
 await expectReadDenied("email_sends");
+// Email suppression list (migration 2026-07-20): server-only deny-all like
+// email_sends. Written by the unsubscribe route, the bounce/complaint
+// webhook, and the inbound "stop" handler; read by the drip sweep.
+await expectReadDenied("email_suppressions");
 await expectReadDenied("cron_runs");
 // Founder alert acks (migration #81): deny-all, server-only; only the
 // founder-gated /admin action writes.
