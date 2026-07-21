@@ -152,8 +152,15 @@ const compactionSchema = z.object({
         content: z
           .string()
           .min(4)
-          .max(MEMORY_ENTRY_MAX_CHARS)
-          .describe("One compact self-contained sentence saying everything they said."),
+          // Deliberately looser than the real limit. The transport schema
+          // only has to PARSE; MEMORY_ENTRY_MAX_CHARS is enforced in
+          // validateMerge, which rejects one proposal instead of throwing
+          // away the whole response. Cause: a merge 6 characters over 300
+          // failed the entire pass, taking two flawless splits with it.
+          .max(MEMORY_ENTRY_MAX_CHARS * 3)
+          .describe(
+            `One compact self-contained sentence saying everything they said, at most ${MEMORY_ENTRY_MAX_CHARS} characters.`,
+          ),
         kind: z.enum(["fact", "what_works"]),
       }),
     )
@@ -174,8 +181,12 @@ const compactionSchema = z.object({
               content: z
                 .string()
                 .min(4)
-                .max(MEMORY_ENTRY_MAX_CHARS)
-                .describe("That child's fact alone, standing on its own without the others."),
+                // Loose here, enforced in validateSplit. See the note on
+                // the merge content field.
+                .max(MEMORY_ENTRY_MAX_CHARS * 3)
+                .describe(
+                  `That child's fact alone, standing on its own without the others, at most ${MEMORY_ENTRY_MAX_CHARS} characters.`,
+                ),
             }),
           )
           .min(2)
@@ -247,6 +258,14 @@ export function validateMerge(
   const kinds = new Set(targets.map((row) => row.kind));
   if (kinds.size > 1 || !kinds.has(merge.kind)) {
     return { ok: false, reason: "cross-kind", detail: "merge mixed fact with what_works" };
+  }
+
+  if (merge.content.length > MEMORY_ENTRY_MAX_CHARS) {
+    return {
+      ok: false,
+      reason: "too-long",
+      detail: `merged entry is ${merge.content.length} characters, over the ${MEMORY_ENTRY_MAX_CHARS} cap`,
+    };
   }
 
   const blocked = scanMemoryContent(merge.content);
@@ -321,6 +340,13 @@ export function validateSplit(
       };
     }
     const content = part.content.trim();
+    if (content.length > MEMORY_ENTRY_MAX_CHARS) {
+      return {
+        ok: false,
+        reason: "too-long",
+        detail: `part for ${part.childName} is ${content.length} characters, over the ${MEMORY_ENTRY_MAX_CHARS} cap`,
+      };
+    }
     const blocked = scanMemoryContent(content);
     if (blocked) {
       return { ok: false, reason: "blocked-by-scan", detail: blocked };
@@ -418,8 +444,18 @@ export async function compactFamilyMemories(
       listing,
     ].join("\n"),
     schema: compactionSchema,
-    maxOutputTokens: 2000,
-    maxRetries: 1,
+    // Generous on purpose. Sonnet 5 thinks before it answers, and that
+    // reasoning comes out of the SAME output budget: a 2,000 cap was
+    // spent entirely on thinking (1,999 tokens) and returned no object
+    // at all, failing as finishReason "length". Compaction reads a whole
+    // family's store and weighs entries against each other, which is
+    // exactly the shape of task that thinks for a while.
+    maxOutputTokens: 12000,
+    // Structured output on this task is not reliably one-shot: observed
+    // failing twice in a row locally against a real family store, once on
+    // budget and once returning unparseable text with finishReason "stop".
+    // Nothing waits on this pass, so spend the retries.
+    maxRetries: 3,
     providerOptions: {
       gateway: {
         disallowPromptTraining: true,

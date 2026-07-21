@@ -450,3 +450,72 @@ describe("validateSplit, unpacking a packed row", () => {
     assert.equal(verdict.reason, "blocked-by-scan");
   });
 });
+
+/**
+ * The 300 char cap lives in the validators, NOT in the transport schema.
+ * Cause: a merged entry 6 characters over 300 failed Zod parsing, which
+ * threw away the model's ENTIRE response including two flawless splits.
+ * A per-proposal problem must cost one proposal.
+ */
+describe("the entry cap rejects one proposal, not the batch", () => {
+  const rows = [
+    row({ child_id: ALMA, content: "Alma pauses between syllables when reading print." }),
+    row({ child_id: ALMA, content: "Alma cannot yet count syllable beats by ear." }),
+  ];
+
+  it("refuses a merged entry over the cap", () => {
+    const verdict = validateMerge(
+      { replaces: [0, 1], content: "A".repeat(301), kind: "fact" },
+      rows,
+    );
+    assert.equal(verdict.ok, false);
+    assert.equal(verdict.ok === false && verdict.reason, "too-long");
+  });
+
+  it("accepts an entry exactly at the cap", () => {
+    // Two long rows, so a 300 char merge still clears the no-saving guard
+    // and the cap is genuinely the only rule under test.
+    const longRows = [
+      row({ child_id: ALMA, content: `Alma ${"x".repeat(245)}` }),
+      row({ child_id: ALMA, content: `Alma ${"y".repeat(245)}` }),
+    ];
+    const exact = `Alma ${"z".repeat(295)}`;
+    assert.equal(exact.length, 300);
+
+    const verdict = validateMerge({ replaces: [0, 1], content: exact, kind: "fact" }, longRows);
+    assert.equal(verdict.ok, true, verdict.ok === false ? verdict.reason : "");
+  });
+
+  it("refuses one character over", () => {
+    const longRows = [
+      row({ child_id: ALMA, content: `Alma ${"x".repeat(245)}` }),
+      row({ child_id: ALMA, content: `Alma ${"y".repeat(245)}` }),
+    ];
+    const over = `Alma ${"z".repeat(296)}`;
+    assert.equal(over.length, 301);
+
+    const verdict = validateMerge({ replaces: [0, 1], content: over, kind: "fact" }, longRows);
+    assert.equal(verdict.ok, false);
+    assert.equal(verdict.ok === false && verdict.reason, "too-long");
+  });
+
+  it("refuses a split part over the cap without failing the whole split", () => {
+    const packed = row({
+      child_id: null,
+      content: "For Ara the focus is narration; for Alma it is creative writing across genres.",
+    });
+    const verdict = validateSplit(
+      {
+        entry: 0,
+        parts: [
+          { childName: "Ara", content: "Ara focuses on narration." },
+          { childName: "Alma", content: "B".repeat(301) },
+        ],
+      },
+      [packed],
+      NAMES,
+    );
+    assert.equal(verdict.ok, false);
+    assert.equal(verdict.ok === false && verdict.reason, "too-long");
+  });
+});

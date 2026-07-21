@@ -79,8 +79,12 @@ only that entry, knowing nothing about the sibling, understands it.
 
 ## How to write the merged entry
 
-- One compact self-contained sentence, under 300 characters. Someone
-  reading it cold, with no other entries, understands it.
+- One compact self-contained sentence. **Hard limit 300 characters, and
+  aim for 250.** An entry over the limit is thrown away and the entries
+  it would have replaced stay as they were, so a merge that runs long
+  buys nothing. If everything genuinely will not fit in 300, merge fewer
+  entries rather than writing one long one.
+- Someone reading it cold, with no other entries, understands it.
 - Name the child the same way the originals did.
 - Keep every specific that still matters: the book titles, the letters,
   the exact skill. Compaction is not summarizing away the details, it

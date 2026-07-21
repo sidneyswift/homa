@@ -109,8 +109,16 @@ export async function extractMemoriesFromText(input: {
       `<conversation>${input.text.slice(0, 24000)}</conversation>`,
     ].join("\n"),
     schema: extractionSchema,
-    maxOutputTokens: 1500,
-    maxRetries: 1,
+    // Sonnet 5 thinks before answering and that reasoning is charged to
+    // the SAME output budget: compaction, an easier task than this one,
+    // was observed burning 2,414 thinking tokens against a 24,000 char
+    // input. A cap of 1,500 could not survive that, and the failure mode
+    // is nasty: generateObject throws, extractCallMemories un-claims the
+    // row, and the next cron pass retries the same doomed call forever.
+    // No family has hit it yet (15 of 15 transcripts extracted), so this
+    // is the hazard closed before it fires, not an outage.
+    maxOutputTokens: 8000,
+    maxRetries: 2,
     providerOptions: {
       gateway: {
         disallowPromptTraining: true,
