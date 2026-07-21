@@ -1,4 +1,5 @@
 import { mapDb } from "../map/db";
+import { familyOnboardingActive } from "../onboarding/state";
 import type { WallCheckout } from "./wall-types";
 
 /**
@@ -58,11 +59,45 @@ function checkoutUrl(base: string, familyId: string, email: string | null): stri
   return url.toString();
 }
 
+export interface WallAccessRow {
+  billingExempt: boolean;
+  trialStartedAt: string | null;
+  profileCompletedAt: string | null;
+  context: unknown;
+}
+
+/** Why a door stayed open, or null when the wall applies. Named so the
+ *  order is testable: a silently mis-ordered exemption either walls a
+ *  paying family or opens the wall for everyone. */
+export type WallExemption = "billing_exempt" | "trial_started" | "onboarding";
+
+/**
+ * wallExemption(row): the ordered exemption decision, with no I/O.
+ *
+ * Order matters and is deliberate: an exempt family is exempt whatever
+ * else is true, a trialing family has already given a card, and only
+ * then does the onboarding bypass apply. Onboarding sits last so it can
+ * never mask a billing state the founder set by hand.
+ */
+export function wallExemption(row: WallAccessRow): WallExemption | null {
+  if (row.billingExempt) return "billing_exempt";
+  if (row.trialStartedAt) return "trial_started";
+  if (
+    familyOnboardingActive({
+      profileCompletedAt: row.profileCompletedAt,
+      context: row.context,
+    })
+  ) {
+    return "onboarding";
+  }
+  return null;
+}
+
 /**
  * familyWallCheckout(familyId): WallCheckout | null
  * The one wall question every door asks: null means the door is open
- * (flag off, links unconfigured, family exempt, or trial started);
- * a WallCheckout means show the wall with these checkout URLs.
+ * (flag off, links unconfigured, or an exemption above); a WallCheckout
+ * means show the wall with these checkout URLs.
  */
 export async function familyWallCheckout(familyId: string): Promise<WallCheckout | null> {
   if (!wallEnabled()) return null;
@@ -78,14 +113,38 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
   try {
     const sql = mapDb();
     const rows = await sql<
-      { trial_started_at: string | null; billing_exempt: boolean; email: string | null }[]
+      {
+        trial_started_at: string | null;
+        billing_exempt: boolean;
+        email: string | null;
+        profile_completed_at: string | null;
+        context: unknown;
+      }[]
     >`
-      select trial_started_at::text as trial_started_at, billing_exempt, email
+      select trial_started_at::text as trial_started_at, billing_exempt, email,
+             profile_completed_at::text as profile_completed_at, context
       from public.families
       where id = ${familyId}
     `;
     const row = rows[0];
-    if (!row || row.billing_exempt || row.trial_started_at) return null;
+    if (!row) return null;
+    // Chat-first onboarding (plans/2026-07-21-chat-first-onboarding.md
+    // §7): the first chat door tap IS Homa's opening message once
+    // onboarding is a conversation, so a walled family would meet the
+    // paywall before meeting Homa. Onboarding families never see the
+    // door wall; what they see instead, and when, is the credit lockout
+    // that the P1 ruling still has to authorize. Behind
+    // HOMA_CHAT_ONBOARDING, so nothing changes until the flow ships.
+    if (
+      wallExemption({
+        billingExempt: row.billing_exempt,
+        trialStartedAt: row.trial_started_at,
+        profileCompletedAt: row.profile_completed_at,
+        context: row.context,
+      })
+    ) {
+      return null;
+    }
 
     return {
       monthlyUrl: checkoutUrl(links.monthly, familyId, row.email),
