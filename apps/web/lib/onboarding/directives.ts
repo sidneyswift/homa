@@ -108,7 +108,12 @@ export function formatHiddenDirective(
   for (const [key, value] of Object.entries(params)) {
     if (value === null || value === undefined) continue;
     const safeKey = key.replace(/[^a-zA-Z0-9_]/g, "");
-    const safeValue = String(value).replace(/[^a-zA-Z0-9_.:-]/g, "");
+    // The slash is in the set because every IANA time zone has one
+    // ("America/Chicago"), and stripping it silently produced a zone
+    // name that parses as nothing and would have been saved as one.
+    // Neither the slash nor anything else here can terminate a marker:
+    // only "]]" and whitespace do, and both stay out of the set.
+    const safeValue = String(value).replace(/[^a-zA-Z0-9_./:-]/g, "");
     if (safeKey.length === 0 || safeValue.length === 0) continue;
     parts.push(`${safeKey}=${safeValue}`);
   }

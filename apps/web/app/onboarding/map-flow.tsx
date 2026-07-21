@@ -8,6 +8,8 @@ import { readUtmFromLocation } from "../../lib/waitlist-client";
 import { ChecklistStep } from "./checklist-step";
 import { DeepDiveStep } from "./deep-dive-step";
 import type { FlowChild, FlowPhase } from "./flow-types";
+import { ChatStep } from "./chat-step";
+import type { OnboardingChatProps } from "./onboarding-chat-props";
 import { ExtrasStep } from "./extras-step";
 import { FamilyStep } from "./family-step";
 import { HomeschoolStep } from "./homeschool-step";
@@ -118,7 +120,15 @@ function decidePostKidsRoute(children: FlowChild[]): PostKidsRoute {
  * land on the new content instead of a stale position. */
 const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "family", "kids"]);
 
-export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) => void }) {
+export function MapFlow({
+  onPhaseChange,
+  chat = null,
+}: {
+  onPhaseChange?: (phase: FlowPhase) => void;
+  /** Chat-first onboarding's server props, or null when the flag is off
+   *  and every route below runs exactly as it always has. */
+  chat?: OnboardingChatProps | null;
+}) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const [children, setChildren] = useState<FlowChild[]>([]);
   const [email, setEmail] = useState<string | null>(null);
@@ -315,6 +325,16 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         return;
       }
 
+      // Chat-first onboarding: past the account, there are no more
+      // steps to route between. Where she is comes from the family
+      // record, and Homa picks up from it. This sits directly under the
+      // email gate so a returning parent lands in the conversation
+      // rather than in a card she half-finished before the flag flipped.
+      if (chat) {
+        setPhase("chat");
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const deepDive = params.get("dd");
       if (deepDive) {
@@ -358,6 +378,11 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
 
       applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
     })();
+    // `chat` is a server-rendered prop that cannot change without a
+    // navigation, and adding it would re-run the resume decision on any
+    // re-render that reshapes it, routing a parent who is midway through
+    // answering back to the top of the flow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshState, bootstrapSession, beginChecklist, applyPostKidsRoute]);
 
   const activeChild = children.find((child) => child.id === activeChildId) ?? null;
@@ -393,6 +418,15 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
         <ParentStep
           onDone={() => {
             void (async () => {
+              // Chat-first onboarding: the account was the last card.
+              // Everything after it is a conversation, and going there
+              // now, before another state round trip, is what puts the
+              // welcome on screen while the first turn is still
+              // travelling.
+              if (chat) {
+                setPhase("chat");
+                return;
+              }
               // The create-your-family card is always next for a fresh
               // signup; a returning account that already finished it
               // (folded into an older family) routes past.
@@ -406,6 +440,13 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
           }}
         />
       );
+    }
+
+    if (phase === "chat") {
+      // Unreachable without server props: the route below only sets this
+      // phase when they exist, and rendering an empty chat would be a
+      // blank screen with no way out.
+      return chat ? <ChatStep chat={chat} /> : null;
     }
 
     if (phase === "family") {

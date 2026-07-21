@@ -95,6 +95,18 @@ describe("formatHiddenDirective", () => {
     assert.equal(isHiddenDirective(text), true);
     assert.equal(parseHiddenDirective(text)?.params.panel, "plannerandnowIamloose");
   });
+
+  it("keeps a time zone intact, slash and all", () => {
+    const text = formatHiddenDirective("kickoff", { timeZone: "America/Chicago" });
+    assert.equal(isHiddenDirective(text), true);
+    assert.equal(parseHiddenDirective(text)?.params.timeZone, "America/Chicago");
+    assert.equal(
+      parseHiddenDirective(
+        formatHiddenDirective("kickoff", { timeZone: "America/Argentina/Buenos_Aires" }),
+      )?.params.timeZone,
+      "America/Argentina/Buenos_Aires",
+    );
+  });
 });
 
 describe("hasVisibleText", () => {

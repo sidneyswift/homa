@@ -3,6 +3,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
+import { isHiddenDirective } from "../../lib/onboarding/directives";
 import {
   AttachmentReceiptChips,
   UserAttachmentDisplay,
@@ -28,6 +29,14 @@ import {
   QuestionCard,
   type QuestionCardData,
 } from "./question-card";
+import {
+  ChecklistCard,
+  parseChecklistCardPart,
+  parseReportCardPart,
+  type ChecklistCardData,
+  type ReportCardData,
+} from "./onboarding-cards";
+import { ReportRevealCard } from "./report-reveal-card";
 import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
 import { WorkedForLine, workedForSteps } from "./worked-for";
 
@@ -118,6 +127,8 @@ type AssistantItem =
   | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
   | { kind: "questions"; card: QuestionCardData; sourceActionKey: string }
   | { kind: "planner"; signal: PlannerOpenSignal }
+  | { kind: "checklist"; card: ChecklistCardData; sourceActionKey: string }
+  | { kind: "report"; card: ReportCardData; sourceActionKey: string }
   | SourcedProgressAssistantItem;
 
 function assistantItems(message: EveMessage): AssistantItem[] {
@@ -166,6 +177,24 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({ kind: "planner", signal: plannerSignal });
       continue;
     }
+    const checklistCard = parseChecklistCardPart(part);
+    if (checklistCard) {
+      items.push({
+        kind: "checklist",
+        card: checklistCard,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
+    const reportCard = parseReportCardPart(part);
+    if (reportCard) {
+      items.push({
+        kind: "report",
+        card: reportCard,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||
@@ -202,6 +231,10 @@ function AssistantItemView({
   questionAnswers,
   childNameById,
   onOpenPlanner,
+  activeChecklistPartKey,
+  onOpenChecklist,
+  activeReportPartKey,
+  onOpenReport,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
@@ -218,6 +251,10 @@ function AssistantItemView({
   questionAnswers?: ReadonlyMap<string, string>;
   childNameById?: ReadonlyMap<string, string>;
   onOpenPlanner?: (signal: PlannerOpenSignal) => void;
+  activeChecklistPartKey?: string;
+  onOpenChecklist?: (childId: string) => void;
+  activeReportPartKey?: string;
+  onOpenReport?: (childId: string) => void;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -239,6 +276,26 @@ function AssistantItemView({
       return <MaterialCard material={item.material} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
+    case "checklist":
+      return (
+        <ChecklistCard
+          card={item.card}
+          active={item.sourceActionKey === activeChecklistPartKey}
+          onOpen={
+            item.sourceActionKey === activeChecklistPartKey ? onOpenChecklist : undefined
+          }
+        />
+      );
+    case "report":
+      return (
+        <ReportRevealCard
+          card={item.card}
+          active={item.sourceActionKey === activeReportPartKey}
+          onOpenReport={
+            item.sourceActionKey === activeReportPartKey ? onOpenReport : undefined
+          }
+        />
+      );
     case "snap":
       return (
         <SnapCard
@@ -347,6 +404,10 @@ export function MessageView({
   onQuestionTypeInstead,
   questionAnswers,
   onOpenPlanner,
+  activeChecklistPartKey,
+  onOpenChecklist,
+  activeReportPartKey,
+  onOpenReport,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -376,12 +437,23 @@ export function MessageView({
   questionAnswers?: ReadonlyMap<string, string>;
   /** Reopens the planner canvas from a transcript planner card. */
   onOpenPlanner?: (signal: PlannerOpenSignal) => void;
+  /** The one checklist card that may still open the questions. */
+  activeChecklistPartKey?: string;
+  onOpenChecklist?: (childId: string) => void;
+  /** The one report reveal that may still open the report. */
+  activeReportPartKey?: string;
+  onOpenReport?: (childId: string) => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
       .map((part) => (part.type === "text" ? part.text : ""))
       .join("")
       .trim();
+    // A hidden onboarding directive is the app talking on her behalf
+    // (lib/onboarding/directives.ts). eve renders the submitted message
+    // optimistically, so without this it appears as HER bubble, in
+    // brackets, seconds after she taps something.
+    if (isHiddenDirective(text)) return null;
     const { visibleText, markers } = parseAttachmentMarkers(text);
     if (visibleText.length === 0 && markers.length === 0) return null;
     return (
@@ -430,6 +502,10 @@ export function MessageView({
           questionAnswers={questionAnswers}
           childNameById={childNameById}
           onOpenPlanner={onOpenPlanner}
+          activeChecklistPartKey={activeChecklistPartKey}
+          onOpenChecklist={onOpenChecklist}
+          activeReportPartKey={activeReportPartKey}
+          onOpenReport={onOpenReport}
         />
       ))}
     </div>

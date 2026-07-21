@@ -150,6 +150,64 @@ export async function completeOnboarding(familyId: string): Promise<OnboardingRe
   return writeOnboardingRecord(familyId, { state: "done" });
 }
 
+export interface OnboardingChatFamily {
+  profileCompletedAt: string | null;
+  context: unknown;
+  timeZone: string | null;
+  parentName: string | null;
+  children: { id: string; name: string; avatarUrl: string | null }[];
+}
+
+/**
+ * loadOnboardingChatFamily(familyId): the columns the chat phase needs
+ * that the flow's own FamilyRow does not carry (the context blob, the
+ * time zone, and the roster with avatars).
+ *
+ * Its own reader rather than a widened FamilyRow: that type is shared by
+ * every map route, and growing it for one surface would make every one
+ * of them pay for two columns they never read.
+ */
+export async function loadOnboardingChatFamily(
+  familyId: string,
+): Promise<OnboardingChatFamily | null> {
+  const sql = mapDb();
+  const [families, children] = await Promise.all([
+    sql<
+      {
+        profile_completed_at: string | null;
+        context: unknown;
+        time_zone: string | null;
+        first_name: string | null;
+        parent_display_name: string | null;
+      }[]
+    >`
+      select profile_completed_at::text as profile_completed_at, context, time_zone,
+             first_name, parent_display_name
+      from public.families
+      where id = ${familyId}
+    `,
+    sql<{ id: string; name: string; avatar_url: string | null }[]>`
+      select id, name, avatar_url
+      from public.children
+      where family_id = ${familyId}
+      order by created_at asc
+    `,
+  ]);
+  const family = families[0];
+  if (!family) return null;
+  return {
+    profileCompletedAt: family.profile_completed_at,
+    context: family.context,
+    timeZone: family.time_zone,
+    parentName: family.first_name ?? family.parent_display_name ?? null,
+    children: children.map((child) => ({
+      id: child.id,
+      name: child.name,
+      avatarUrl: child.avatar_url,
+    })),
+  };
+}
+
 export interface FamilyBasicsInput {
   /** What she wants Homa to call her. */
   callMeName?: string;

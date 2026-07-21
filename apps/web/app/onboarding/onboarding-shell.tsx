@@ -8,6 +8,7 @@ import { Footer } from "../../components/marketing/Footer";
 import { Nav } from "../../components/marketing/Nav";
 import type { FlowPhase } from "./flow-types";
 import { MapFlow } from "./map-flow";
+import type { OnboardingChatProps } from "./onboarding-chat-props";
 
 /**
  * Chrome for the onboarding flow (UX review 2026-07-06, approved in full).
@@ -50,10 +51,24 @@ const FULL_CHROME_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>([
  * card below changes height between questions. */
 const TOP_ANCHORED_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["checklist", "deepdive"]);
 
-export function OnboardingShell() {
+export function OnboardingShell({
+  chat = null,
+}: {
+  /** Chat-first onboarding's server-assembled props, or null when the
+   *  flag is off and the card flow runs exactly as it always has. */
+  chat?: OnboardingChatProps | null;
+}) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const fullChrome = FULL_CHROME_PHASES.has(phase);
   const topAnchored = TOP_ANCHORED_PHASES.has(phase);
+
+  // The conversation owns the whole viewport. Nav, footer, page padding
+  // and the 68rem measure all belong to a page you read; this is a
+  // surface you live in, built around the message box at the bottom of
+  // a phone.
+  if (phase === "chat") {
+    return <MapFlow onPhaseChange={setPhase} chat={chat} />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]">
@@ -76,7 +91,7 @@ export function OnboardingShell() {
         }`}
       >
         <div className={`w-full ${topAnchored ? "" : "my-auto"}`}>
-          <MapFlow onPhaseChange={setPhase} />
+          <MapFlow onPhaseChange={setPhase} chat={chat} />
         </div>
       </main>
 

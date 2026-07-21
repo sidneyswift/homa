@@ -30,6 +30,11 @@ export type WallDoor = (typeof WALL_DOORS)[number];
  *  work 2026-07-20 (docs/homa-planning/plans/2026-07-20-onboarding-funnel-drip.md). */
 export const MAP_FLOW_STEPS = [
   "parent",
+  /** Chat-first onboarding's one step after the account
+   *  (plans/2026-07-21-chat-first-onboarding.md). Kept in the same
+   *  allowlist as the card steps so the funnel can compare the two
+   *  flows on one chart instead of two. */
+  "chat",
   "family",
   "homeschool",
   "kids",

@@ -11,6 +11,18 @@ import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
+  browserTimeZone,
+  kickoffDirectiveFor,
+  welcomeLinesFor,
+  type OnboardingChatConfig,
+} from "./onboarding-chat";
+import {
+  latestChecklistRequest,
+  latestReportReveal,
+} from "./onboarding-cards";
+import { ChecklistTakeover } from "./checklist-takeover";
+import { formatHiddenDirective } from "../../lib/onboarding/directives";
+import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
@@ -38,6 +50,7 @@ import {
 } from "./chat-storage";
 import {
   appendPreparedChatSendToQueue,
+  flushChatQueue,
   focusChatComposerInput,
   prepareChatSend,
   type ChatSendAcceptance,
@@ -197,6 +210,7 @@ export function ChatClient({
   slashSkills,
   serverHistory = null,
   wall = null,
+  onboarding = null,
 }: {
   storageKey: string;
   familyId: string | null;
@@ -226,6 +240,16 @@ export function ChatClient({
   /** The composer's "/" menu: kids to mention + the advertised skills. */
   kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
+  /** Chat-first onboarding (plans/2026-07-21-chat-first-onboarding.md).
+   * Null on every ordinary /app visit, which is every visit until the
+   * HOMA_CHAT_ONBOARDING flag is on. Non-null turns this same surface
+   * into the first-days surface: a deterministic welcome renders before
+   * the model can answer, and one machine message opens the
+   * conversation. It is the same component on purpose. A parallel "lean"
+   * chat would re-implement lost-turn recovery, the stall triad, and the
+   * 4am rotation, and would do it exactly where a first-session parent
+   * has the least patience for a dropped turn. */
+  onboarding?: OnboardingChatConfig | null;
 }) {
   const [supabase] = useState(() => createSupabaseBrowserClient());
   // Load + rotation decision, once per mount (fresh morning = fresh
@@ -333,6 +357,16 @@ export function ChatClient({
    *  the first pass records whatever a restored session carries WITHOUT
    *  opening it: a mid-day reload should not throw the panel back up. */
   const handledPlannerPartKeyRef = useRef<string | null | undefined>(undefined);
+  /** One kickoff per mount. See the kickoff effect for the other two locks. */
+  const kickoffSentRef = useRef(false);
+  /** sendMessage is declared below the effects that need it, and the
+   *  React Compiler rejects an effect capturing it directly, the same
+   *  reason sendRef exists for onFinish. */
+  const sendMessageRef = useRef<
+    ((text: string, source: ChatSendSource) => ChatSendAcceptance) | null
+  >(null);
+  /** The child whose questions have taken over the screen, or null. */
+  const [checklistTakeover, setChecklistTakeover] = useState<string | null>(null);
   const turnStartedAtRef = useRef<number | null>(null);
   const childNameById = useMemo(
     () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
@@ -637,18 +671,25 @@ export function ChatClient({
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
       if (!snapshot.error && queued.length > 0) {
-        const message = queued.map((entry) => entry.text).join("\n\n");
-        setQueued([]);
+        // A directive goes out alone and her words go out joined, in the
+        // order the events actually happened (chat-send-policy.ts). What
+        // is left waits for the line after this one.
+        const flush = flushChatQueue(queued);
+        const message = flush.outgoing;
+        setQueued(flush.remaining);
         // Next tick: this callback runs inside the previous send's
         // teardown, and eve rejects overlapping sends.
-        setTimeout(() => {
-          setBusySeconds(0);
-          turnModalityRef.current = queuedTurnModalityRef.current;
-          lastSendRef.current = { text: message, atMs: currentTimeMs() };
-          turnStartedAtRef.current = currentTimeMs();
-          markTurnStarted();
-          void sendRef.current?.({ message });
-        }, 0);
+        if (message !== null) {
+          setTimeout(() => {
+            setBusySeconds(0);
+            turnModalityRef.current =
+              flush.lane === "directive" ? "text" : queuedTurnModalityRef.current;
+            lastSendRef.current = { text: message, atMs: currentTimeMs() };
+            turnStartedAtRef.current = currentTimeMs();
+            markTurnStarted();
+            void sendRef.current?.({ message });
+          }, 0);
+        }
       }
     },
   });
@@ -660,6 +701,10 @@ export function ChatClient({
   useEffect(() => {
     sendRef.current = agentSend;
   }, [agentSend]);
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
 
   useEffect(() => {
     if (
@@ -931,7 +976,8 @@ export function ChatClient({
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
-  const showSuggestions = agent.data.messages.length === 0 && !busy;
+  const showSuggestions =
+    agent.data.messages.length === 0 && !busy && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
@@ -974,10 +1020,31 @@ export function ChatClient({
     focusChatComposerInput(composerFormRef.current);
   }, []);
 
+  // The whole report, from the reveal card. It is a real page with a
+  // real URL, so it opens as one: the conversation is still here when
+  // she comes back, and the link is hers to keep.
+  const openChildReport = useCallback((childId: string) => {
+    window.location.assign(`/app/${childId}/report`);
+  }, []);
+
   // Canvas auto-open: a NEW open_planner result opens the panel with the
   // tool's own focus. The first pass only records what a restored
   // session already carried, so a reload never re-throws the panel up;
   // the transcript's planner cards reopen it on purpose instead.
+  // The two lines already on screen while the first turn travels. They
+  // stop being the whole page the moment anything real arrives.
+  const welcomeLines = onboarding ? welcomeLinesFor(onboarding) : [];
+  const queuedParentMessages = queued
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.lane !== "directive");
+  // The one checklist card that may still open the questions, and the
+  // one report reveal that may still open the report. Same rule as the
+  // snap card: newest, nothing from her after it, and only while the
+  // line is free.
+  const activeChecklist = busy
+    ? null
+    : latestChecklistRequest(agent.data.messages);
+  const activeReport = latestReportReveal(agent.data.messages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -989,6 +1056,32 @@ export function ChatClient({
     handledPlannerPartKeyRef.current = latest.partKey;
     setPlannerCanvas(latest.signal);
   }, [agent.data.messages]);
+
+  // The opening machine message (plans/2026-07-21-chat-first-onboarding.md
+  // §2.4.4). Idempotence has three locks, because a doubled kickoff
+  // means Homa says hello twice and reads as forgetting she already had.
+  //   1. A ref, for a re-render inside this mount.
+  //   2. A live session that already carries messages, for a remount
+  //      over a conversation in progress.
+  //   3. Server history for this family, for a remount on a new device
+  //      or after the 4am rotation, where nothing local survives.
+  // A visit whose gap is short enough to be a pause sends nothing at
+  // all: she gets her screen back, not a greeting.
+  useEffect(() => {
+    if (!onboarding || kickoffSentRef.current) return;
+    if (agent.data.messages.length > 0) return;
+    if (archived.length > 0 && onboarding.firstVisit) return;
+    const directive = kickoffDirectiveFor(onboarding, browserTimeZone());
+    if (directive === null) {
+      kickoffSentRef.current = true;
+      return;
+    }
+    kickoffSentRef.current = true;
+    sendMessageRef.current?.(directive, { kind: "directive" });
+    // Sending exactly once per mount, gated on its own ref: re-running
+    // when messages arrive is the doubled-hello bug.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboarding]);
 
   function updateProgressActionLifecycle(
     next: ProgressActionLifecycleState,
@@ -1126,15 +1219,20 @@ export function ChatClient({
     // restarts the durable event cursor.
     if (!agent.session?.sessionId) durableCursorRef.current = 0;
     // A queue held back by a failed turn rides along with the next
-    // manual send, in the order she wrote everything.
-    const outgoing = [
-      ...queued.map((entry) => entry.text),
-      plan.message,
-    ].join("\n\n");
-    setQueued([]);
+    // manual send, in the order she wrote everything. A directive in
+    // that queue still goes alone: it is the app's sentence, and gluing
+    // it to hers is the exact failure the lane exists to prevent.
+    const flush = flushChatQueue(queued, {
+      text: plan.message,
+      lane: plan.lane,
+      progressActionKey: plan.progressActionKey,
+    });
+    const outgoing = flush.outgoing;
+    if (outgoing === null) return "rejected";
+    setQueued(flush.remaining);
     setBusySeconds(0);
     autoStoppedRef.current = false;
-    turnModalityRef.current = plan.modality;
+    turnModalityRef.current = flush.lane === "directive" ? "text" : plan.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
@@ -1245,7 +1343,26 @@ export function ChatClient({
           aria-hidden="true"
           className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
         />
-        {!hasAnyMessages ? (
+        {!hasAnyMessages && onboarding ? (
+          /* The pre-warmed welcome: two deterministic lines on screen
+             before any model call can return. The first turn of a brand
+             new family is the slowest turn the product runs, and these
+             three to eight seconds are exactly when she is deciding
+             whether this is real. They rise in on the shared line
+             grammar, one after the other, and they say nothing that
+             could turn out to be wrong. */
+          <div className="flex flex-col items-start gap-3">
+            {welcomeLines.map((line, index) => (
+              <p
+                key={line}
+                className="nb-line leading-relaxed text-body"
+                style={{ animationDelay: `${index * 600}ms` }}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+        ) : !hasAnyMessages ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
@@ -1318,6 +1435,14 @@ export function ChatClient({
                   }
                   onQuestionTypeInstead={focusComposer}
                   onOpenPlanner={setPlannerCanvas}
+                  activeChecklistPartKey={
+                    isLiveMessage ? activeChecklist?.partKey : undefined
+                  }
+                  onOpenChecklist={setChecklistTakeover}
+                  activeReportPartKey={
+                    isLiveMessage ? activeReport?.partKey : undefined
+                  }
+                  onOpenReport={openChildReport}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
                   }
@@ -1383,14 +1508,18 @@ export function ChatClient({
             ) : null}
           </div>
         ) : null}
-        {queued.length > 0 ? (
+        {queuedParentMessages.length > 0 ? (
           // Messages sent mid-turn wait here as dimmed bubbles (the
           // Cursor queue, in texting clothes) and go out on turn end;
           // the X pulls one back before it sends. "Send now" interrupts:
           // stopping the turn is all it takes, the flush in onFinish
           // delivers the queue the moment the abort settles.
+          // A queued directive is not one of her messages, so it shows
+          // nothing here and carries its true queue index with it: the
+          // X removes what she pointed at, not whatever sits at that
+          // position in a shorter list.
           <div className="flex flex-col items-end gap-2">
-            {queued.map((entry, index) => (
+            {queuedParentMessages.map(({ entry, index }) => (
               <div
                 key={`${index}:${entry.text.slice(0, 24)}`}
                 className="flex max-w-[76%] items-center gap-2"
@@ -1639,6 +1768,27 @@ export function ChatClient({
           </p>
         ) : null}
       </footer>
+      {checklistTakeover !== null ? (
+        <ChecklistTakeover
+          childId={checklistTakeover}
+          onClose={(exit) => {
+            setChecklistTakeover(null);
+            if (!exit) return;
+            // The handoff. It carries hints, never facts: the counts are
+            // re-derived server-side, and this only tells Homa which
+            // child the parent was just answering for and roughly where
+            // she got to, so her next line is about the right kid.
+            sendMessageRef.current?.(
+              formatHiddenDirective("checklist_complete", {
+                childId: exit.childId,
+                answered: exit.answered,
+                remaining: exit.remaining,
+              }),
+              { kind: "directive" },
+            );
+          }}
+        />
+      ) : null}
       {wall ? (
         <WallModal
           door="chat"
