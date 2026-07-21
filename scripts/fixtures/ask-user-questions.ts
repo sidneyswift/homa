@@ -30,10 +30,19 @@ export const ASK_USER_QUESTIONS_FAILURE_MODES = [
 export type AskUserQuestionsFailureMode =
   (typeof ASK_USER_QUESTIONS_FAILURE_MODES)[number];
 
+export interface FixtureChild {
+  id: string;
+  name: string;
+  age: number;
+}
+
 export interface AskUserQuestionsFixture {
   id: string;
   /** The family block Homa sees this turn, in plain words. */
   familyBlurb: string;
+  /** Drives a realistic get_children result. Homa cannot judge which
+   * child is meant if the roster comes back empty. */
+  children: readonly FixtureChild[];
   /** What the parent just said. */
   message: string;
   expect: AskUserQuestionsExpectation;
@@ -41,7 +50,25 @@ export interface AskUserQuestionsFixture {
   why: string;
   /** Set on negatives only: the over-call this fixture defends against. */
   failureMode?: AskUserQuestionsFailureMode;
+  /**
+   * Realistic results for the tools this scenario actually reaches for,
+   * merged over the shared defaults. A tool that answers "no result"
+   * teaches Homa nothing, and an agent that learns nothing falls back on
+   * asking, which would quietly rig every fixture toward the card.
+   */
+  toolResults?: Readonly<Record<string, unknown>>;
 }
+
+/**
+ * What an unlisted tool returns. Deliberately a plausible EMPTY success
+ * rather than a failure: "I looked and there is nothing saved" is a real
+ * answer Homa can act on, where "no result available" reads as a broken
+ * tool and invites her to ask instead.
+ */
+export const DEFAULT_TOOL_RESULT = {
+  ok: true,
+  note: "Nothing saved for this yet.",
+} as const;
 
 export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   // Positives, under the reluctant doctrine (founder ruling 2026-07-21,
@@ -50,6 +77,11 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "positive-which-child",
     familyBlurb: "Three children: Maya is 7, Jordan is 9, Skye is 4.",
+    children: [
+      { id: "c-maya", name: "Maya", age: 7 },
+      { id: "c-jordan", name: "Jordan", age: 9 },
+      { id: "c-skye", name: "Skye", age: 4 },
+    ],
     message: "Can you make a reading practice page?",
     expect: "ask",
     why:
@@ -59,6 +91,16 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
     id: "positive-which-curriculum",
     familyBlurb:
       "Jordan is 9. The family owns two science curriculums and is partway through both: Blossom & Root Year 2 and Elemental Science.",
+    children: [{ id: "c-jordan", name: "Jordan", age: 9 }],
+    toolResults: {
+      find_curriculum_profile: {
+        ok: true,
+        curriculums: [
+          { name: "Blossom & Root Year 2", subject: "science", inProgress: true },
+          { name: "Elemental Science", subject: "science", inProgress: true },
+        ],
+      },
+    },
     message: "Can you pull up tomorrow's science lesson for Jordan?",
     expect: "ask",
     why:
@@ -73,6 +115,13 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-approach-fork",
     familyBlurb: "Maya is 7. No Spanish on the planner yet.",
+    children: [{ id: "c-maya", name: "Maya", age: 7 }],
+    toolResults: {
+      find_curriculum_profile: {
+        ok: true,
+        note: "Beginner Spanish for this age usually starts with spoken songs and picture vocabulary before any reading or grammar.",
+      },
+    },
     message:
       "I want to start Spanish with Maya but I have no idea how to begin.",
     expect: "no_ask",
@@ -84,6 +133,27 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
     id: "negative-week-shape",
     familyBlurb:
       "Jordan is 9. The planner has a light week: two math activities, nothing else.",
+    children: [{ id: "c-jordan", name: "Jordan", age: 9 }],
+    toolResults: {
+      open_planner: {
+        opened: true,
+        children: [
+          {
+            childName: "Jordan",
+            plans: [
+              {
+                subjectName: "Math",
+                weekFocus: "Long division with remainders",
+                activities: [
+                  { index: 0, text: "Two practice pages", done: false },
+                  { index: 1, text: "Division card game", done: false },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
     message:
       "We suddenly have a free week because co-op is cancelled. What should we do with it?",
     expect: "no_ask",
@@ -94,6 +164,7 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-yes-no",
     familyBlurb: "Skye is 4. A counting page was just made.",
+    children: [{ id: "c-skye", name: "Skye", age: 4 }],
     message: "Should I print that one out?",
     expect: "no_ask",
     why: "A yes or no answer is a sentence, not a card of options.",
@@ -102,6 +173,7 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-answerable",
     familyBlurb: "Maya is 7 and loves horses.",
+    children: [{ id: "c-maya", name: "Maya", age: 7 }],
     message: "What's a good read-aloud for a 7 year old?",
     expect: "no_ask",
     why:
@@ -111,6 +183,13 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-just-do-it",
     familyBlurb: "Skye is 4 and is working on counting to 10.",
+    children: [{ id: "c-skye", name: "Skye", age: 4 }],
+    toolResults: {
+      create_printable: {
+        created: true,
+        material: { id: "m-1", title: "Counting to 10", previewUrl: "https://example.test/p.png" },
+      },
+    },
     message: "Can you make Skye a counting page for tomorrow?",
     expect: "no_ask",
     why:
@@ -120,6 +199,17 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-already-answered",
     familyBlurb: "Three children: Maya is 7, Jordan is 9, Skye is 4.",
+    children: [
+      { id: "c-maya", name: "Maya", age: 7 },
+      { id: "c-jordan", name: "Jordan", age: 9 },
+      { id: "c-skye", name: "Skye", age: 4 },
+    ],
+    toolResults: {
+      create_printable: {
+        created: true,
+        material: { id: "m-2", title: "Reading practice", previewUrl: "https://example.test/r.png" },
+      },
+    },
     message:
       "Can you make a reading page for Jordan? Something on the harder side, he's bored.",
     expect: "no_ask",
@@ -130,6 +220,7 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-one-option",
     familyBlurb: "Maya is 7. Only one child in the family.",
+    children: [{ id: "c-maya", name: "Maya", age: 7 }],
     message: "Can you log the two hours we did this morning?",
     expect: "no_ask",
     why: "There is one child and one action, so no fork exists to offer.",
@@ -138,6 +229,7 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
   {
     id: "negative-venting",
     familyBlurb: "Jordan is 9 and has been struggling with long division.",
+    children: [{ id: "c-jordan", name: "Jordan", age: 9 }],
     message:
       "Today was awful. Jordan cried through math again and I'm wondering if I'm even cut out for this.",
     expect: "no_ask",
