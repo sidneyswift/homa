@@ -565,6 +565,44 @@ granular and real-time, no corner-cutting.
   model evals run nightly on a schedule; the month-in-an-hour family
   simulator ships alongside the bridges on the disposable-Postgres harness.
 
+### 5.0 What shipped 2026-07-21, same session
+
+The matcher was not improved, it was replaced. D3's "model proposes,
+code verifies" is now the architecture and a binding law in `AGENTS.md`.
+
+| Shipped | PR |
+|---|---|
+| Lesson trust gate recalibrated (100% honest-pair rejection) | #84 |
+| Voice Phase 0 honesty, recovered from an uncommitted worktree | #88 |
+| Lesson `observedAt` survives the Postgres text form | #90 |
+| Synthesis output headroom | #91 |
+| Recall corpus in CI + conservative polarity default (D4) | #92 |
+| Claim extraction: model judges, code verifies | #97 |
+| The measurement: recall 29% to 86%, precision held at 100% | #99 |
+
+Measured on the same 26 real parent phrasings, extraction plus the
+deterministic gate against the real model:
+
+```
+recall    12/14 (86%)   lexical matcher: 4/14 (29%)
+precision  6/6 (100%)   lexical matcher: 6/6 (100%)
+```
+
+Both remaining misses are the gate being conservative (low confidence
+rides as an observation), not the model being wrong.
+
+Rollout: `HOMA_CLAIM_EXTRACTION_ENABLED` set on Vercel production
+2026-07-21. Note for anyone repeating this: `vercel redeploy` clones a
+deployment's env snapshot and will NOT pick up a variable added after
+that deployment was created. A fresh git-triggered deployment is
+required, which is what this PR provides. Rollback is the flag off; the
+legacy matcher stays in place and writes less, never more, so it can
+lose new signal but cannot corrupt an existing record.
+
+Still open from this document: the chart-history append (D1), the
+backstop sweep (D3b), the strength schema (D4), the follow-up rail (D5),
+the artifact bridges (D8), and the taxonomy authoring track (D7).
+
 ### 5.1 Ratified build sequence
 
 1. **Baseline** (D9): trigger eval + matcher corpus wired into CI, run once
