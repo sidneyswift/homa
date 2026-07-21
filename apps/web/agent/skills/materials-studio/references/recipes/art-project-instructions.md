@@ -18,7 +18,11 @@ the medium is that week. Also works as a bare technique-reference card
 at all. The same shell also covers a published science textbook's
 recurring hands-on "Investigate" activity (gather a few household
 materials, follow numbered steps, observe a result), using the
-skill-tip callout variant below instead of the reflection prompt.
+skill-tip callout variant below instead of the reflection prompt. Also
+covers a toddler-age parent-led activity book's own recurring shape
+(ages 1-3, gather a few household or pantry items, a parent does any
+setup, the child does the hands-on part), using the toddler stat-and-icon
+variant below instead of the reflection prompt.
 
 Hybrid path by default: generate_image for a small inspiration thumbnail
 showing the finished example, the technique in progress, or the art
@@ -77,6 +81,25 @@ Design patterns (all binding for art-project-instructions):
   assemblage from found objects, reuse the identical materials-list and
   numbered-steps template. Only the words and the optional inspiration
   image change from project to project.
+- **Toddler stat-and-icon variant (optional)**: sourced directly from a
+  2021 Callisto Publishing toddler science activity book, confirmed
+  consistent across every one of its 6 chapters, not assumed. Add a
+  short skill-icon strip above the title (3-6 small icon-plus-label
+  chips naming what the activity practices, for example "fine motor
+  skills," "cause and effect," "observation"; pull labels from the
+  family's own curriculum vocabulary when it has one, otherwise use
+  plain skill names a parent would recognize). Below the title, add a
+  three-line stat block before the materials list: a messiness rating
+  (1 low ink/mess to 5 highest, described in words for the parent, for
+  example "Messiness: 2"), a prep time, and a separate activity time
+  (the two are genuinely different: prep is what the parent does before
+  the child starts, activity is the child's own hands-on time). When any
+  setup must happen before the child is involved (drawing an outline,
+  mixing a base color, freezing an ingredient), give it its own small
+  "PREP" sub-list above the child-facing "STEPS" list rather than mixing
+  parent-only steps into the numbered child steps. Use this variant for
+  toddler or early-years (ages 1-4) activity content specifically; the
+  plain variant above stays the default for ages 5+.
 
 ```html
 <style>
@@ -97,5 +120,13 @@ Design patterns (all binding for art-project-instructions):
     align-items: center; justify-content: center; font-weight: 700; }
   .api-reflection { border: 1.5px solid #6b6259; border-radius: 6px;
     padding: 14px; min-height: 60px; margin-top: 16px; font-size: 14px; }
+  .api-skill-strip { display: flex; gap: 8px; margin-bottom: 10px; }
+  .api-skill-chip { border: 1.5px solid #6b6259; border-radius: 6px;
+    padding: 6px 8px; font-size: 11px; font-weight: 600; text-align: center;
+    color: #6b6259; }
+  .api-stat-block { font-size: 13px; color: #6b6259; margin-bottom: 10px;
+    line-height: 1.6; }
+  .api-prep { border: 1.5px dashed #b3a492; border-radius: 6px;
+    padding: 10px 14px; margin-bottom: 14px; background: #f6f4f0; }
 </style>
 ```

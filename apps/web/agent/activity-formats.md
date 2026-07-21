@@ -524,3 +524,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 6-9.
 - **Creation path:** html for plain number/word/letter sorts, hybrid when items are illustrated attribute cards.
 - **Example activity:** `[circle-diagram-two-set-sort] Numbers 1-9 to place in a diagram labeled "perfect squares" and "odd numbers," where 1 and 9 belong in the overlap and 2, 4, 6, 8 belong outside both.`
+
+### picture-bingo-board
+- **Slug:** `[picture-bingo-board]`
+- **Name:** Picture bingo board
+- **What it is:** A set of bingo-style boards built from one shared pool of items (vocabulary, math facts, sight words), each board a grid (usually 3x3) holding a different shuffled arrangement of the same pool plus one labeled free space, so a family can print several unique boards for a caller-led group round without any two boards matching.
+- **Best for:** Vocabulary recall and listening practice in any subject or language, a lower-pressure alternative to flash-card drill, group or co-op play, and foreign-language vocabulary where the caller says the word aloud and the child matches it to the picture.
+- **Subjects:** Any subject or language with a discrete, nameable item pool (animals, sight words, math facts, vocabulary sets)
+- **Ages:** 3-8. A 3x3 grid (8 items plus free space) for ages 3-6 or 8-9 item pools; a 4x4 grid for ages 7+ or larger pools.
+- **Creation path:** hybrid (generate_image once per pool item, reused across every board; HTML for the grid, free space, and per-board frame styling).
+- **Example activity:** `[picture-bingo-board] Four shuffled 3x3 boards of Spanish farm-animal vocabulary (el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro) with a "¡Gratis!" free space, for a caller-led round.`

@@ -483,6 +483,7 @@ making.
 | Pattern extension practice | copy, continue, choose, or create a simple repeating AB pattern | pattern-extension-practice |
 | Comic narrative math page | teach a concept through 2-4 comic panels of character dialogue, ending in a story-linked question | comic-narrative-math-page |
 | Circle diagram two-set sort | sort items into two overlapping circles so both-attribute and neither-attribute items have a real home | circle-diagram-two-set-sort |
+| Picture bingo board | give a family several shuffled boards from one shared item pool for a caller-led recall game | picture-bingo-board |
 
 ## Design rules (binding)
 
