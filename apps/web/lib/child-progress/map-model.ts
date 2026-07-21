@@ -142,33 +142,30 @@ export interface ProgressUpdatedLine {
 }
 
 /**
- * The header's freshness line: "Updated today · Jul 12, 2026" when
- * anything landed today, otherwise the newest observation's date. Null
- * before any evidence exists.
+ * The header's freshness line. It dates the reading, not the newest
+ * ledger row: the projection is rebuilt from the ledger on every load,
+ * so the page is current as of the visit even when the newest evidence
+ * is older (founder ask 2026-07-21; "Updated Jul 12" on a July 21 visit
+ * read as a stale page). "Updated today" still marks days evidence
+ * lands; per-subject rows keep the per-evidence dates. Null before any
+ * evidence exists, where the first check-in owns the page.
  */
 export function progressUpdatedLine(
   view: ChildProgressView,
+  now: Date,
 ): ProgressUpdatedLine | null {
-  let latest: string | null = null;
-  for (const subject of view.subjects) {
-    if (subject.latestObservedAt === null) continue;
-    if (
-      latest === null ||
-      new Date(subject.latestObservedAt).getTime() >
-        new Date(latest).getTime()
-    ) {
-      latest = subject.latestObservedAt;
-    }
-  }
-  if (latest === null) return null;
-  const date = formatProgressDate(latest, view.timeZone);
+  const hasEvidence = view.subjects.some(
+    (subject) => subject.latestObservedAt !== null,
+  );
+  if (!hasEvidence) return null;
   const today = view.subjects.some(
     (subject) => subject.state === "updated_recently",
   );
   // "Updated today" carries the whole fact; adding the date would say
   // it twice (editor gate).
+  if (today) return { label: "Updated today", today: true };
   return {
-    label: today ? "Updated today" : `Updated ${date}`,
-    today,
+    label: `As of ${formatProgressDate(now.toISOString(), view.timeZone)}`,
+    today: false,
   };
 }

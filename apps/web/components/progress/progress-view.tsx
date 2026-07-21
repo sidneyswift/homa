@@ -182,8 +182,9 @@ export function ProgressView({
    * session offers it. */
   deeperChecks?: boolean;
 }) {
-  const updatedLine = progressUpdatedLine(view);
-  const tiles = buildProgressTiles(view, new Date());
+  const now = new Date();
+  const updatedLine = progressUpdatedLine(view, now);
+  const tiles = buildProgressTiles(view, now);
 
   const generatedDate = report
     ? new Date(report.generatedAt).toLocaleDateString("en-US", {
