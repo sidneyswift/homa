@@ -5,7 +5,7 @@ import { Logo } from "../brand/Logo";
  * (plans/2026-07-21-chat-first-onboarding.md §7.3, F1).
  *
  * This is the moment the whole free period is built toward: she asks for
- * one more thing, the week's makings are gone, and she decides. Nothing
+ * one more thing, the week's allowance is gone, and she decides. Nothing
  * constructs this card in a live path, and nothing may until the P1
  * ruling lands, because turning the meter on supersedes four recorded
  * decisions. It exists now so the founder can look at the conversion
@@ -31,6 +31,14 @@ import { Logo } from "../brand/Logo";
  * Nothing is hostage. Her report, her binder, and her planner stay
  * readable while she waits. That line is on the card because it has to
  * be true, and putting it in writing is what keeps it true.
+ *
+ * One open question for the founder, raised by the copy editor gate:
+ * "makings" is an invented noun doing load-bearing work on the single
+ * screen where a parent is asked for money, and it has to be decoded
+ * exactly there. Section 7.1 says the noun goes through the copy gates
+ * once and is then the only name used anywhere. The gate has now run and
+ * rejected it, so this card says what it means instead ("everything I
+ * can make for you this week") and the noun stays unspent.
  */
 
 export interface LockoutEndowment {
@@ -40,7 +48,7 @@ export interface LockoutEndowment {
   artifacts: string[];
   /** Saved memories about this family. */
   memoryCount: number;
-  /** Hours on the record so far. */
+  /** Hours saved so far. */
   hoursLogged: number;
 }
 
@@ -48,7 +56,8 @@ export interface LockoutCardProps {
   /** What she just asked for, in her own terms. */
   requested: string;
   endowment: LockoutEndowment;
-  /** When the week's makings come back, already formatted. */
+  /** When the allowance comes back, already phrased for a sentence
+   *  ("on Monday morning"): it is read inside three different lines. */
   refillLabel: string;
   monthlyUrl: string;
   onWait?: () => void;
@@ -70,34 +79,39 @@ export function LockoutCard({
       ? `${endowment.scoredChildren.join(" and ")}, with a progress report each`
       : null,
     endowment.artifacts.length > 0
-      ? plural(endowment.artifacts.length, "thing you kept", "things you kept")
+      ? plural(endowment.artifacts.length, "thing you saved", "things you saved")
       : null,
     endowment.memoryCount > 0
-      ? plural(endowment.memoryCount, "note about your family", "notes about your family")
+      ? plural(
+          endowment.memoryCount,
+          "thing I remember about your family",
+          "things I remember about your family",
+        )
       : null,
     endowment.hoursLogged > 0
-      ? `${endowment.hoursLogged} hours on the record`
+      ? `${endowment.hoursLogged} hours saved`
       : null,
   ].filter((line): line is string => line !== null);
 
   return (
     <section
       className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
-      aria-label="About this week's makings"
+      aria-label="About what I can make this week"
     >
       <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
         <Logo size={15} variant="mark" />
-        Here is where we are
+        Your week so far
       </p>
-      <p className="mt-2.5 text-body">{requested} is ready to make.</p>
+      <p className="mt-2.5 text-body">I am ready to make {requested}.</p>
       <p className="mt-1.5 text-body">
-        This week&apos;s makings are used up. A fresh set arrives {refillLabel}.
+        You have used everything I can make for you this week. I can make more{" "}
+        {refillLabel}.
       </p>
 
       {madeLines.length > 0 ? (
         <div className="mt-4 rounded-md border border-border-subtle bg-page p-3.5">
           <p className="text-xs font-bold uppercase tracking-wide text-subtle">
-            What we made together
+            What you have so far
           </p>
           <ul className="mt-2 space-y-1">
             {madeLines.map((line) => (
@@ -125,8 +139,8 @@ export function LockoutCard({
       ) : null}
 
       <p className="mt-4 text-body">
-        Membership is $19 a month and makings stop being counted. Your first 30 days are
-        free.
+        Your first 30 days are free. After that it is $19 a month. There is no weekly
+        limit on what I make.
       </p>
 
       <div className="mt-4 flex flex-col gap-2">
@@ -141,12 +155,12 @@ export function LockoutCard({
           onClick={onWait}
           className="flex min-h-11 w-full items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
         >
-          Wait for {refillLabel}
+          Make it {refillLabel} instead
         </button>
       </div>
       <p className="mt-2.5 text-xs text-subtle">
-        If you wait, I&apos;ll make it the moment your makings are back and tell you it is
-        there. Everything you already have stays open either way.
+        If you wait, I will make it {refillLabel} and tell you it is ready. Everything you
+        already have stays available either way.
       </p>
     </section>
   );

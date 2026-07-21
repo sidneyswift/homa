@@ -211,7 +211,7 @@ export function ChecklistCard({
             ? "almost done"
             : answered > 0
               ? `about ${minutesLeft} min left`
-              : `about ${minutesLeft} min in all`}
+              : `about ${minutesLeft} min`}
         </p>
       </div>
       {/* The hairline, not a rail: on a phone the full rail was a settled
@@ -227,8 +227,8 @@ export function ChecklistCard({
       </div>
       <p className="mt-3 text-sm text-muted">
         {answered > 0
-          ? `You have told me ${answered} ${answered === 1 ? "thing" : "things"} about ${card.childName} already. Stop whenever you like.`
-          : `Some questions about ${card.childName}. Even five answers tell me a lot, and you can stop whenever you like.`}
+          ? `You have given me ${answered} ${answered === 1 ? "answer" : "answers"} about ${card.childName} so far. You can stop whenever you like.`
+          : `Even five answers about ${card.childName} tell me a lot. You can stop whenever you like.`}
       </p>
       <button
         type="button"

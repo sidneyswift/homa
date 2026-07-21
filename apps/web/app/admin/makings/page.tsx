@@ -91,7 +91,7 @@ export default async function AdminMakingsPage() {
         <div className="mt-3">
           <LockoutCard
             requested="Mia's fractions worksheet"
-            refillLabel="Monday morning"
+            refillLabel="on Monday morning"
             monthlyUrl="#"
             endowment={{
               scoredChildren: ["Mia", "Leo"],

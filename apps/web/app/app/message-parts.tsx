@@ -115,7 +115,7 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
       // "Hours logged" next to "45 min" read as a unit mismatch, and for
       // a homeschool mom "logged" raises a question the chip never
       // answered: logged where, and is this the record my state asks for.
-      label: "Saved to your hours",
+      label: "Hours saved",
       detail: `${output.subject}, ${output.minutes} min`,
     };
   }

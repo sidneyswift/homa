@@ -155,15 +155,15 @@ export function ChecklistTakeover({
         {failed ? (
           <div className="mt-10 text-center">
             <p className="text-body">
-              The questions did not open. Nothing you have answered is lost,
-              and you can try again.
+              The questions did not open. Nothing you answered is lost. You can
+              try again from the chat.
             </p>
             <button
               type="button"
               onClick={() => onClose(null)}
               className="mt-4 min-h-11 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
             >
-              Go back to chat
+              Back to chat
             </button>
           </div>
         ) : child ? (

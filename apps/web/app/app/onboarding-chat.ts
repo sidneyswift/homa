@@ -99,6 +99,6 @@ export function welcomeLinesFor(config: OnboardingChatConfig): string[] {
   const greeting = config.parentName ? `Hi ${config.parentName}.` : "Hi.";
   return [
     `${greeting} I'm Homa.`,
-    "Answer a few questions and I can start helping with your kids.",
+    "A few answers about your kids and I can start helping you teach them.",
   ];
 }

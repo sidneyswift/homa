@@ -153,7 +153,7 @@ export function ReportRevealCard({
   if (!active) {
     return (
       <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
-        <span className="font-semibold text-sage">Report ready</span>
+        <span className="font-semibold text-sage">Progress report ready</span>
         <span className="truncate text-body">{card.childName}</span>
       </p>
     );
@@ -161,7 +161,7 @@ export function ReportRevealCard({
 
   const skippedLine =
     card.skipped > 0
-      ? `${card.skipped} are still blank, and that is fine. You can fill them in any time.`
+      ? `${card.skipped} ${card.skipped === 1 ? "answer is" : "answers are"} still blank. You can fill them in any time.`
       : null;
 
   return (
@@ -187,7 +187,7 @@ export function ReportRevealCard({
       {card.strengths.length > 0 ? (
         <div className="mt-3.5">
           <p className="text-xs font-bold uppercase tracking-wide text-subtle">
-            Strongest right now
+            Strongest subjects right now
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {card.strengths.map((strength) => (
