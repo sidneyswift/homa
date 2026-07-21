@@ -3,6 +3,44 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-21 · Signal-capture audit ruled: nine founder decisions set the rebuild
+
+Same day as the Progress header-date fix (PR #79), the founder asked whether
+that fix was "a Band-Aid on a bullet wound" and ordered a from-scratch audit
+of the whole capture-to-scoring pipeline. A 21-agent audit (8 subsystem maps,
+7 adversarial hunts, cross-cutting design passes) plus direct prod queries
+found: conversational journaling has produced exactly 1 evidence row ever
+fleet-wide; the check-in system has been started 3 times ever (2 stuck
+paused); and, independent of capture, the trajectory chart cannot gain a
+dated point after onboarding because `saveDerivedProgress` overwrites report
+scores with no history append (56 of 66 prod reports have zero history).
+Full findings: `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
+
+The founder then ruled all nine decisions question by question (registered
+as `progress-signal-capture-v2` in the reconciliation register): per-change
+chart history, model-proposes-code-verifies matching, a per-turn backstop
+sweep, a strength-weighted evidence schema landing before the bridges, the
+`journal_followup` bound-question rail capped at one per family per day, a
+one-time conversational offer of the evening check-in, all five artifact
+bridges (planner, worksheets, plan-edit preservation, hours, photos),
+per-child fan-out with deterministic age gates, and an evals-first build
+order (baseline the broken system, then land every fix with numbers).
+Open: the D6 voice Phase-0 discrepancy (founder to confirm where that
+shipped). Taxonomy topic authoring was first left as its own content
+effort, then the founder amended the ruling later the same day: it joins
+this build as a parallel content track.
+
+Found and fixed the same day, in passing: the lesson-listen trust gate
+rejected 100% of honest clause pairs (a real lesson produced a healthy
+review and zero progress writes, silently). The 0.5 clause-to-excerpt
+overlap floor was calibrated for journal text; lesson dialogue splits
+meaning across speakers. PR #84 grounds the clause in its verbatim-
+verified segment, tightens excerpt provenance to the claimed segment,
+adds number-word aliases to the shared tokenizer, and makes the
+all-rejected case loud (rejected_count on lesson.review_ready plus an
+honest line on the review page). Verified by replaying the four real
+rejected pairs: all pass; invented-claim controls still fail.
+
 ## 2026-07-21 · Homa can ask the parent to choose, on web only; one founder ruling
 
 Founder ask: check whether an `ask_user_questions` tool already existed in
@@ -95,7 +133,6 @@ PR; a non-`cosmo/ingest-*` branch is a complete no-op.
 Session-start.sh's own clock check now also reads GitHub's clock instead
 of Slack's, matching the hook and reducing the dependency surface to one
 service this workflow already needs reachable.
-
 
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
