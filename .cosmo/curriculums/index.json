@@ -91,6 +91,16 @@
       "decisionsCount": 6
     },
     {
+      "id": "cur-2026-07-19-harcourt-art-everywhere",
+      "name": "Harcourt Art Everywhere (Harcourt School Publishers Art series pupil edition, Grade 1 by content evidence and series-title convention, 2006)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T17:15:51-04:00",
+      "methodology": "A published, skills-based elementary art textbook organized around the formal Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm and movement, unity, variety), teaching each as explicit vocabulary rather than letting it emerge incidentally. This is a materially different approach from Charlotte Mason picture study: there is no single-artist quiet-observation-then-recall routine anywhere in the sampled pages. Instead every lesson pairs one element or principle with a short hands-on making activity and two or more brief fine-art examples for quick visual comparison.",
+      "mappedPct": 27,
+      "gapCount": 5,
+      "decisionsCount": 5
+    },
+    {
       "id": "cur-2026-07-19-playing-preschool-y1",
       "name": "Playing Preschool Year 1 by Busy Toddler",
       "droppedBy": "aless",

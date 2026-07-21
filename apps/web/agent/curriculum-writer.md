@@ -107,11 +107,12 @@ literature-based approach), structure weeks around the reading selection:
 ## Methodology-aware planning rules
 
 When a parent identifies their teaching methodology or curriculum approach, apply
-these rules to shape the entire curriculum. These are synthesized from 12 curriculum
+these rules to shape the entire curriculum. These are synthesized from 13 curriculum
 analyses (The Good and the Beautiful, Harcourt Trophies, Hometessori Primary, 
 Homeschool Languages Spanish, Write on Track, Get Set for School / Handwriting
 Without Tears, Teach Your Child to Read in 100 Easy
-Lessons, Peaceful Press Early Years, Playing Preschool Year 1 and Year 2).
+Lessons, Peaceful Press Early Years, Playing Preschool Year 1 and Year 2,
+Harcourt Art Everywhere).
 
 ### Charlotte Mason
 
@@ -337,3 +338,56 @@ Tears", or uses Get Set for School:
   pre-writing strokes; `[tracing-guide]` for name-writing practice once individual
   letters are secure; `[number-practice-page]` once a child is ready to combine digit
   formation with counting and cardinality on the same page.
+
+### Elements & Principles of Design / Skills-Based Art (Harcourt Art, published
+school-market art textbooks)
+
+When a family uses a published, skills-based art textbook (Harcourt Art, or any
+program organized around the seven Elements of Art and six Principles of Design
+rather than a single studied artist per block), do not apply the Charlotte Mason
+picture-study rules above. This is a different art methodology with different
+planning implications:
+
+- Organize by element or principle, not by artist. Each block of lessons teaches
+  ONE formal vocabulary term (line, shape, color, value, form, texture, space,
+  balance, emphasis, pattern, rhythm, unity, variety) as the explicit lesson focus,
+  in increasing complexity across the year. The artwork shown is a brief supporting
+  example of that term, not the object of a slow, single-work study.
+- A hands-on making activity every lesson, with an explicit Plan -> Create ->
+  Reflect (or equivalent named) process, using a different concrete medium and
+  technique almost every lesson: drawing, painting, collage, clay, printmaking,
+  weaving, paper folding, mobile-making, mask- or puppet-making, and assemblage
+  from found objects all rotate through, tied to whichever element or principle
+  is that lesson's focus.
+- Pair the making activity with two or more brief fine-art examples from a broad,
+  diverse artist roster (historical Western masters, folk and self-taught artists,
+  non-Western artists, and named contemporary or student artists), used for quick
+  visual comparison, not a quiet gaze-then-recall exercise. Do not force the CM
+  picture-study "hide it and recall from memory" routine onto this methodology; it
+  is not how these programs teach art appreciation.
+- Where the family's own program ties a reading-comprehension skill to each art
+  unit (for example note details, compare and contrast, make inferences, sequence,
+  draw conclusions, main idea, in increasing complexity across the year), carry
+  that same skill into the unit's reflection question so art class reinforces the
+  same comprehension work the child is doing in reading.
+- Cross-curricular connection spreads are a real, recurring feature, not an
+  afterthought: an artist's biography tied to social studies or science, a
+  geometry or symmetry tie-in for math, a picture-book illustrator for literature.
+  Weave one in every lesson or two rather than saving all of them for a single
+  "connections" unit.
+- Assessment is a "review and reflect" recap at the end of each unit, not a test;
+  the Elements of Art, Principles of Design, and a glossary of art vocabulary
+  function as an ongoing reference the child returns to all year.
+- Map to Homa's `art` subject's assessment domains rather than the CM-specific
+  `Art > Picture Study & Art Appreciation` content domain: `technique-observation`
+  for element/principle/vocabulary and technique content, `art-exploration` for
+  the hands-on making activities, `drawing-representation` for drawing-specific
+  work.
+- Format preferences: `[art-project-instructions]` for every hands-on making
+  activity and for bare technique-reference cards (the recurring format across
+  this methodology, regardless of medium); `[3-part-nomenclature-cards]` for
+  Elements of Art / Principles of Design vocabulary, adapted from the program's
+  own term-plus-photo-example glossary style; `[artist-composer-study-card]` only
+  if the family also wants a picture-study-style portfolio card alongside their
+  textbook, not as the default artist reference (its reflection prompt is written
+  for CM's gaze-and-recall routine, which this methodology does not use).

@@ -477,6 +477,7 @@ making.
 | Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
 | Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
 | Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
+| Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, or a bare technique-reference card | art-project-instructions |
 
 ## Design rules (binding)
 

@@ -1,0 +1,323 @@
+{
+  "id": "cur-2026-07-19-harcourt-art-everywhere",
+  "name": "Harcourt Art Everywhere (Harcourt School Publishers Art series pupil edition, Grade 1 by content evidence and series-title convention, 2006)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T17:15:51-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784495751.827859",
+  "sourceFiles": [
+    {
+      "filename": "harcourt-art-everywhere.pdf",
+      "localPath": ".cosmo/inspo-files/harcourt-art-everywhere.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-harcourt-art-everywhere/harcourt-art-everywhere.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "A published, skills-based elementary art textbook organized around the formal Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm and movement, unity, variety), teaching each as explicit vocabulary rather than letting it emerge incidentally. This is a materially different approach from Charlotte Mason picture study: there is no single-artist quiet-observation-then-recall routine anywhere in the sampled pages. Instead every lesson pairs one element or principle with a short hands-on making activity and two or more brief fine-art examples for quick visual comparison.",
+    "principles": [
+      "Six units (Line and Shape; Color and Value; Pattern, Rhythm, and Texture; Form and Space; Balance and Emphasis; Variety and Unity), five lessons each, 30 lessons total. Each unit teaches one pair of Elements-of-Art/Principles-of-Design vocabulary terms as its explicit focus, building from simple (line, shape) toward more complex, multi-element composition (variety, unity) by the end of the year",
+      "A hands-on 'Artist's Workshop' making activity in every lesson, run as an explicit Plan, Create, Reflect process with its own short materials list. The medium changes almost every lesson: drawing, painting, collage, clay sculpture, printmaking (sponge, stencil, foam tray, monoprint), weaving, paper mosaic, paper folding and origami, mobile-making, sock-puppet-making, mask-making, and assemblage from found objects all appear across the book, each tied to that lesson's element or principle",
+      "Every lesson pairs its making activity with two or more real fine-art reproductions used as brief visual examples of that lesson's vocabulary term, drawn from an unusually broad and diverse Gallery of Artists (historical Western masters such as van Gogh, Picasso, Matisse, Cezanne, and Renoir; folk and self-taught artists; non-Western and international artists; and named contemporary and student artists). The artwork is a quick point of comparison, never the object of a slow single-work study",
+      "Reading-comprehension skill integration: each of the 6 units pairs its art content with one reading skill in increasing complexity across the year (Note Details, Compare and Contrast, Make Inferences, Sequence, Draw Conclusions, Main Idea), applied to a shown artwork or a short piece of art-related text, explicitly bridging art class into the school's wider literacy program",
+      "Cross-curricular connection spreads recur every lesson or two, linking the unit's artist or technique outward to social studies (an artist's biography or a cross-cultural comparison), science, math (shape, symmetry), literature (a picture-book illustrator), or drama",
+      "Assessment is a 'Review and Reflect' recap spread at the end of each unit, not a test or score. The Student Handbook's Elements of Art and Principles of Design reference pages, a roughly 100-term illustrated glossary, and the Gallery of Artists function as an ongoing whole-year reference the child returns to, not a graded checkpoint",
+      "Written as a pupil (student) edition, not a teacher's guide: front matter includes a 'Reading Your Textbook' section addressed directly to the young reader explaining how to use titles, captions, and steps. It is nonetheless a school-classroom-market book (the Student Handbook's Art Safety page gives classroom rules, and a 'Maps of Museums and Art Sites' section implies group field-trip-style extension), so a homeschool parent adapts it as a co-reader and activity facilitator rather than reading it as written purely for one child at home"
+    ],
+    "learningTheory": "developmental-sequential, direct-instruction-of-formal-vocabulary (art production, brief art history/appreciation, and formal element/principle vocabulary taught together on every lesson, a pattern commonly called Discipline-Based Art Education in published US school art curricula; that label is offered here as a description, not because the book itself uses the term)",
+    "assessmentApproach": "unit-ending-review-and-reflect-recap, no tests or scores observed",
+    "parentRole": "facilitator-and-co-reader",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "elements-and-principles-of-design-art",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available). apps/web/agent/curriculum-writer.md's Methodology-aware planning rules section had no skills-based / Elements-and-Principles art methodology section before this session (its only art content was a few Charlotte Mason picture-study bullets inside the CM section), so this is very likely a genuine first entry for this method, independent of whatever the knowledge_bank table itself holds"
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "elements-and-principles-of-design-art",
+        "topicType": "method_philosophy",
+        "title": "Elements & Principles of Design Skills-Based Art Instruction",
+        "summary": "A published-textbook approach to elementary art that teaches the Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm, unity, variety) as explicit vocabulary, one term per teaching block, building from simple toward complex across a year. Every lesson pairs a hands-on making activity (a different concrete medium and technique almost every time: drawing, painting, clay, printmaking, weaving, paper folding, assemblage) with brief fine-art examples from a broad and diverse artist roster used for quick visual comparison, not slow single-work study. Reading-comprehension skills and cross-curricular connections are woven through every unit, and assessment is an end-of-unit recap rather than a test. This is a distinct methodology from Charlotte Mason picture study: it teaches technique and formal vocabulary directly rather than cultivating quiet, unscripted observation of one artist's work over a block of weeks."
+      },
+      {
+        "suggestedKey": "harcourt-art-everywhere-format",
+        "topicType": "method_format",
+        "title": "Harcourt Art Everywhere Pupil Edition Format",
+        "summary": "A 208-page elementary art pupil edition (Harcourt School Publishers Art series, authors Jacqueline Chanda and Kristen Pederson Marstaller, 2006 copyright) organized into 6 units of 5 lessons each (30 lessons), every lesson a fixed 2-page spread: a vocabulary-word focus, 2 or more fine-art reproductions with a reading-skill-tied question, an Artist's Workshop hands-on activity (materials list plus Plan, Create, Reflect steps), and often a cross-curricular connection box. Units close with a Review and Reflect recap. A Student Handbook appendix (roughly 64 pages) holds maps of real museums and artist birthplaces, art-safety rules, step-by-step Art Techniques references for every medium used in the book, full Elements of Art and Principles of Design reference spreads, a 44-artist Gallery of Artists, and a roughly 100-term illustrated Glossary. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Unit 1: Line and Shape",
+        "curriculumTopic": "Line as an element of art (lines that show motion, lines with direction) and shapes formed by joining lines",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "art > technique-observation ('Technique & observation') is the closest existing native Homa domain for formal element/principle vocabulary, but like fine_motor > hand-control in the earlier Handwriting Without Tears ingest, it is an assessment domain authored in packages/taxonomy/src/domains.ts with no discrete topic bank in topics.json (that pipeline only holds Marble-imported subject/domain pairs), so there is no single topic id to point to"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 1: Line and Shape",
+        "curriculumTopic": "Basic 2D shape vocabulary (circle, square, triangle, rectangle) and free-form shapes",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "Mathematics > Geometry is an existing, populated Marble-imported domain; basic shape naming is squarely inside its scope even without pointing to one specific topic id here"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2: Color and Value",
+        "curriculumTopic": "Color theory: the color wheel, warm and cool colors, mixing colors, and value (light and dark) applied to observational and expressive painting",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Same reasoning as the Unit 1 row above: correct domain, no discrete topic bank to point a topic id at"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3: Pattern, Rhythm, and Texture",
+        "curriculumTopic": "Pattern (repeating lines, shapes, or colors), rhythm and movement, and texture (real and visual)",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Unit 4: Form and Space",
+        "curriculumTopic": "Three-dimensional form (sculpture, architecture, mobiles) and space (positive and negative space, foreground, background, horizon line)",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Unit 5: Balance and Emphasis",
+        "curriculumTopic": "Balance (how the parts of an artwork work together so they seem equal) and emphasis (the part of an artwork you see first)",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Unit 6: Variety and Unity",
+        "curriculumTopic": "Variety (differences that add interest) and unity (how all the parts work together as a whole), reviewing and combining earlier elements and principles",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Artist's Workshop (every lesson)",
+        "curriculumTopic": "Hands-on making activity in a different concrete medium almost every lesson: drawing, painting, collage, clay sculpture, printmaking, weaving, paper mosaic, paper folding/origami, mobile-making, puppet-making, mask-making, and assemblage from found objects, each run as a Plan, Create, Reflect process with its own materials list",
+        "homaSubject": "art",
+        "homaDomain": "art-exploration",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "art > art-exploration ('Making & exploring') is the correct existing domain for hands-on making; no discrete topic bank exists to point to, same limitation as the other art rows above"
+        }
+      },
+      {
+        "curriculumSubject": "Artist's Workshop, drawing-specific activities",
+        "curriculumTopic": "Observational and representational drawing (still-life drawing, drawing a real place from memory or observation, drawing weather or a scene)",
+        "homaSubject": "art",
+        "homaDomain": "drawing-representation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Student Handbook: Art Techniques",
+        "curriculumTopic": "Step-by-step how-to reference for every medium used in the book: drawing tools (pencil, marker, crayon, oil pastel), painting (mixing colors, tempera, watercolor, crayon resist), clay (pinch pot, sculpture), printmaking (sponge, stencil, foam tray, monoprint), weaving (paper loom), collage, paper mosaic, and paper folding (origami dog and rabbit, 3D paper forms)",
+        "homaSubject": "art",
+        "homaDomain": "art-exploration",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Same domain as the Artist's Workshop row above; kept as a separate mapping row because this is the book's standalone reusable technique reference, not lesson-embedded content"
+        }
+      },
+      {
+        "curriculumSubject": "Student Handbook: Elements of Art / Principles of Design glossary",
+        "curriculumTopic": "Roughly 100-term illustrated art vocabulary glossary, each term paired with one real-world photo example (for example 'balance' next to a photo of the Arc de Triomphe, 'pattern' next to a checkered tablecloth and a soccer ball)",
+        "homaSubject": "art",
+        "homaDomain": "technique-observation",
+        "homaTopicId": null,
+        "status": "partial"
+      },
+      {
+        "curriculumSubject": "Reading skill (one per unit)",
+        "curriculumTopic": "Note Details, Compare and Contrast, Make Inferences, Sequence, Draw Conclusions, and Main Idea, in increasing complexity across the 6 units, applied to a shown artwork or short art-related text",
+        "homaSubject": "literacy",
+        "homaDomain": "reading-comprehension",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "English > Reading Comprehension is an existing, populated Marble-imported domain; this is a genuinely strong, direct fit"
+        }
+      },
+      {
+        "curriculumSubject": "Cross-curricular connections",
+        "curriculumTopic": "Artist biography and cross-cultural connection spreads (for example an artist's life tied to social studies or science, or a comparison of Mexican charro and USA horse-culture art traditions)",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "History > Cultural Studies is an existing Marble-imported content domain and a genuinely strong fit for these spreads"
+        }
+      },
+      {
+        "curriculumSubject": "Student Handbook: Maps of Museums and Art Sites",
+        "curriculumTopic": "World and US maps locating real museums and the birthplaces of featured artists",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography-maps",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "social_studies > geography-maps is an existing authored assessment domain; real-world map reading is squarely inside its scope"
+        }
+      },
+      {
+        "curriculumSubject": "Gallery of Artists",
+        "curriculumTopic": "A 44-artist roster (historical Western masters, folk and self-taught artists, non-Western and international artists, contemporary and student artists) with birth/death dates and in-book page cross-references",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "no_subject",
+        "suggested": {
+          "note": "No Homa domain, Marble-imported or authored, covers art-history/artist-knowledge as its own skill line; the closest neighbors (art's 4 authored domains) are all about the child's own making, drawing, technique, and voice, not knowing facts about artists. Low-value on its own from a single curriculum; worth a founder call if a future art-curriculum ingest flags the same gap a second time, the same treatment the Handwriting Without Tears ingest gave color-name recognition"
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 15,
+      "mapped": 4,
+      "unmapped": 0,
+      "noSubject": 1,
+      "partial": 10
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a weekly calendar anywhere in the sampled pages. Organized as 6 units of 5 lessons each (30 lessons total), every lesson a fixed 2-page spread. No day-by-day or week-by-week schedule is printed; a once- or twice-weekly single-period 'art class' cadence is implied by the format (short, single-topic 2-page lessons meant to be covered in one sitting) but never stated as a number of minutes or a day of the week, so recording an invented cadence here would not be honest",
+    "sessionLengthMinutes": {
+      "note": "Not stated anywhere in the sampled pages. Unlike Get Set for School/Handwriting Without Tears (which at least described activities as short and daily in general terms), this book gives no time language at all for its 2-page lessons. Leaving this unknown rather than guessing"
+    },
+    "weeklyTemplate": "No week-by-week template exists in the source; every lesson instead follows the same fixed 2-page template regardless of unit: a vocabulary-word focus tag (the lesson's Element or Principle), 2 or more fine-art reproductions shown as brief visual examples with a reading-skill-tied question or caption, an 'Artist's Workshop' hands-on activity box (a short materials list plus Plan, Create, Reflect steps), and, roughly every lesson or two, a cross-curricular connection box (Art and Social Studies, Art and Science, Art and Math, Art and Literature, or Art and Drama) featuring a short artist biography or real-world tie-in. Each unit opens with a poem and a short unit-vocabulary list, and closes with a 'Review and Reflect' recap spread",
+    "progressionModel": "developmental-sequential, not spiral: each of the 6 units introduces a new element or principle and builds toward more complex, multi-element composition by Unit 6 (Variety and Unity, which explicitly reviews and combines everything before it), while the paired reading skill sequences in parallel from simplest (Note Details, Unit 1) to more complex (Main Idea, Unit 6)",
+    "reviewRhythm": "A 'Review and Reflect' recap spread closes each of the 6 units (6 across the book). No tests, quizzes, or scores were observed in any sampled page. The Student Handbook's Elements of Art and Principles of Design reference spreads, the roughly 100-term illustrated Glossary, and the 44-artist Gallery of Artists function as an ongoing whole-year reference the child (or a classroom) returns to, not a graded checkpoint",
+    "totalWeeks": null,
+    "notes": "This is a pupil (student) edition, not a teacher's guide: the front matter includes a 'Reading Your Textbook' section written directly to the young reader, explaining how titles, captions, and numbered steps work in the book. It is nonetheless a school-classroom-market book, the same pattern the Get Set for School / Handwriting Without Tears ingest flagged for its own Teacher's Guide: the Student Handbook's Art Safety page states classroom rules (smocks, scissors safety, group cleanup), and the Maps of Museums and Art Sites section implies group field-trip-style extension activity. curriculum-writer should treat this the same way it treats HWT's classroom framing: a light one-child adaptation (a parent reading the pupil pages aloud with the child and gathering the Artist's Workshop materials) rather than a literal transcription of classroom routines."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "guided-art-making-project",
+        "description": "The 'Artist's Workshop' hands-on activity in every lesson: a short materials list followed by numbered Plan, Create, Reflect steps for making one concrete piece in that lesson's medium (a drawing, a painting, a clay piece, a print, a woven mat, a folded-paper form, a mobile, a mask, a puppet, an assemblage), tied to the lesson's element or principle focus.",
+        "recipe": "art-project-instructions",
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "art-project-instructions",
+          "creationPath": "hybrid",
+          "description": "A materials list followed by 3-6 numbered steps for making one concrete art piece, with an optional small inspiration thumbnail and an optional closing reflection question, using the same shell regardless of medium.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "technique-how-to-reference",
+        "description": "The Student Handbook's Art Techniques pages: a bare step-by-step how-to for one medium (mixing colors, tempera painting, watercolor, crayon resist, a clay pinch pot, sponge printing, stencil printing, paper-loom weaving, paper mosaic, origami folding), not tied to a specific project, artist, or reflection question.",
+        "recipe": "art-project-instructions",
+        "status": "no_recipe",
+        "notes": "Same recipe as guided-art-making-project above, using its bare technique-reference variant (materials list and numbered steps only, no thumbnail or reflection box); not a second, separate recipe."
+      },
+      {
+        "type": "elements-principles-vocabulary-cards",
+        "description": "The illustrated glossary and Elements of Art / Principles of Design reference spreads: one art-vocabulary term per card, each paired with a single clean real-world photo example (a soccer ball for pattern, a butterfly for balance, a maple leaf for emphasis).",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "3-part-nomenclature-cards (image+label, image-only, label-only) is a genuinely close fit given how photo-plus-term the source's own glossary style already is, though the source itself is not self-checking the way a 3-part Montessori set is; using the control-card grid alone (image+label) most faithfully reproduces the book's own reference-card feel."
+      },
+      {
+        "type": "artist-biography-and-gallery-card",
+        "description": "Cross-curricular artist-biography spreads (for example a short illustrated life of an artist tied to that lesson's element or principle) and the back-of-book Gallery of Artists roster (44 artists with birth/death dates and page cross-references).",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Usable but not a precise fit: artist-composer-study-card's reflection stem ('When I look at [artist]'s work, I think about...') and 'Where they were from' circle were built for the Charlotte Mason gaze-and-recall picture-study routine, which this book does not use. The card's frame-plus-favorite-work-plus-reflection shape can still be reused for a Harcourt-style artist bio page, just without the CM-specific instructions; curriculum-writer.md's new methodology section says to use it only if the family wants a picture-study-style portfolio alongside their textbook, not as the default."
+      },
+      {
+        "type": "labeled-element-photo-diagram",
+        "description": "Reference spreads that overlay leader lines and labels on a full-color photograph to teach a spatial or compositional concept (for example 'foreground / background / horizon line' on a landscape photo, or 'positive space / negative space' on a photo of a rock arch).",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "Close but not exact: labeled-anatomy-diagram's design patterns assume a B&W line-art scientific illustration with a word bank and three scaffolding levels (fully labeled, numbered, blank), built for science content. The leader-line-and-label mechanic transfers cleanly to a full-color photograph, but the recipe's own binding patterns would need a documented photo variant before this is a precise match. Recording this as a low-urgency future design-pattern addition rather than building a third, near-duplicate labeling recipe."
+      },
+      {
+        "type": "artwork-response-questions",
+        "description": "Short open-ended 'Think About Art' discussion questions tied to a shown artwork and that unit's reading skill (for example 'What lines do you see? How do they make you feel?').",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "These are short discussion prompts embedded in the lesson text, not a standalone printable page format on their own; they fold into the reflection box of art-project-instructions or into ordinary read-aloud discussion. No dedicated recipe gap to flag here on purpose, the same treatment the Handwriting Without Tears ingest gave its two purely physical, non-printable activities."
+      },
+      {
+        "type": "unit-opener-poem-and-vocabulary-list",
+        "description": "Each of the 6 units opens with a short poem and a list of that unit's vocabulary words.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "A simple text page; low enough volume and complexity (6 across the whole book) that a dedicated recipe is not worth building. Existing simple html-page conventions cover it if a family ever wants it printed."
+      },
+      {
+        "type": "museum-and-artist-site-map",
+        "description": "World and US maps in the Student Handbook locating real museums and the birthplaces of featured artists, meant to support field-trip-style extension.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Reference/orientation content built around specific real-world places, not a repeatable materials-studio worksheet type; out of scope for materials-studio the same way the Handwriting Without Tears ingest treated its two hands-on, non-printable readiness activities."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 8,
+      "haveRecipe": 3,
+      "noRecipe": 5
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "Write the elements-and-principles-of-design-art (method_philosophy) and harcourt-art-everywhere-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "art-project-instructions recipe authored and registered this session (SKILL.md Format library row, activity-formats.md registry entry); covers guided-art-making-project and technique-how-to-reference",
+      "impact": "This is the core, highest-volume activity type in the entire curriculum (the Artist's Workshop appears in all 30 lessons, plus the Student Handbook's Art Techniques reference pages) and was a genuine gap: no existing recipe pairs a materials list with numbered how-to steps for an arbitrary hands-on art medium the way this book needs every single lesson.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "taxonomy",
+      "item": "No new taxonomy entries or domains needed. Checked packages/taxonomy/data/topics.json and packages/taxonomy/src/mapping.ts as they exist on this branch: the only Art entry is 'Art > Picture Study & Art Appreciation' (added this session for Blossom & Root Level 0, a Charlotte Mason kindergarten curriculum), whose own description is specifically the CM gaze-then-recall routine, a genuine pedagogy mismatch for this book's direct-instruction, skills-based content. Homa's art subject already has 4 fully authored assessment domains (art-exploration, drawing-representation, technique-observation, artistic-voice) in packages/taxonomy/src/domains.ts that were not built for this ingest and are the correct existing home for Harcourt's elements/principles/technique content, the same way fine_motor > hand-control served as an existing-but-topic-less domain in the Handwriting Without Tears ingest. No mapping.ts edit or topics.json append was needed.",
+      "impact": "None; recorded so a future session does not re-check this same ground or accidentally widen 'Art > Picture Study & Art Appreciation' to cover content it was not designed for",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Added a new 'Elements & Principles of Design / Skills-Based Art' section to curriculum-writer.md's Methodology-aware planning rules, alongside the existing Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, Literature-Based/Classical, and Handwriting Without Tears sections",
+      "impact": "curriculum-writer.md had zero art-specific methodology guidance before this session (its only art content was a few Charlotte Mason picture-study bullets inside the CM section). This lets curriculum-writer apply the method's distinctive rules (organize by element/principle not by artist, rotate concrete media every lesson, use art-project-instructions instead of forcing the CM picture-study routine or artist-composer-study-card's gaze-and-recall reflection prompt) whenever a family uses a published skills-based art textbook, even if the rest of their curriculum follows a different overall philosophy.",
+      "urgency": "medium"
+    },
+    {
+      "category": "product",
+      "item": "No Homa domain (Marble-imported or authored) covers art-history/artist-knowledge as its own skill line, even though this book's 44-artist Gallery of Artists is a real, distinct thing it teaches",
+      "impact": "Low-value on its own from a single curriculum, but worth a founder call if a future art-curriculum ingest flags the same gap a second time; the same low-urgency treatment the Handwriting Without Tears ingest gave color-name recognition",
+      "urgency": "low"
+    }
+  ],
+  "notes": "Real page count, verified directly with pypdf rather than assumed from the filename: harcourt-art-everywhere.pdf is 106 PDF pages (a CamScanner phone scan of the physical hardcover book, mostly two-physical-pages-per-scan spreads), covering the full 208-page physical book: front cover, title/copyright page (authors Jacqueline Chanda and Kristen Pederson Marstaller; consultants Katherina Danko-McGhee and Maria Teresa Garcia-Pedroche; Harcourt School Publishers), a 'Dear Young Artist' dedication, a full table of contents (6 units of 5 lessons each plus a Student Handbook, Gallery of Artists, Glossary, Index of Artists and Artworks, and Index), the complete lesson content, and back-matter Acknowledgments confirming a 2006 copyright (Harcourt, Inc.). No page anywhere in the sampled content states a grade level in so many words; Grade 1 is inferred from two lines of evidence recorded honestly as inference, not fact: (1) internal content evidence, specifically the very simple declarative sentence-level reading text ('Artists join lines to make shapes. What shapes do the lines make?'), the front-matter 'Reading Your Textbook' section written directly to a beginning reader, and the reading-skill sequence starting at 'Note Details' (the simplest comprehension skill) and ending at 'Main Idea', matching the typical Grade 1 scope-and-sequence complexity of Harcourt's own basal reading program; and (2) the publisher's own well-documented series-title convention (Harcourt School Publishers Art, 2005-2006 edition), where 'Art Everywhere' is the Grade 1 volume's title (K is 'Art Is...', Grade 2 is 'Art Together', and so on through the elementary grades). Student-artwork captions scattered through the book label the child artist's own actual grade (for example 'Hannah, grade 2, Student art' and 'Erykah, grade 1, Mouse sculpture'), which does not indicate the book's own target grade, only that the publisher's whole K-6 series draws student exemplars from multiple grades. Sampling covered the front matter and full table of contents (PDF pages 1-10), the Elements of Art / Principles of Design intro and all of Unit 1's four sampled lessons (PDF pages 11-20), Unit 3's close and the start of Unit 4 (PDF pages 41-50), the Student Handbook's own table of contents, Maps of Museums and Art Sites, Art Safety, and the start of Art Techniques (PDF pages 71-80), the rest of Art Techniques (clay, printmaking, weaving, collage, mosaic, paper folding) and the start of the Elements of Art reference spreads (PDF pages 81-90), and the remaining Elements of Art / Principles of Design reference spreads, the full Gallery of Artists (44 artists), and roughly half the Glossary (PDF pages 91-100), plus the rest of the Glossary, the full Index of Artists and Artworks, the full topical Index, and Acknowledgments (PDF pages 101-106, previously verified for the copyright year and total page count). This is representative sampling across the full breadth of the file as instructed, not a page-by-page read of all 106 PDF pages (approximately 208 physical pages). Copyrighted page images, exact artwork reproductions, and the publisher's specific glossary wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new art-project-instructions recipe describes a generic materials-list-plus-numbered-steps pedagogy pattern in Homa's own voice, not a copy of this publisher's specific projects, artwork, or layout."
+}
