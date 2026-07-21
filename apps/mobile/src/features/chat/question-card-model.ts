@@ -161,3 +161,19 @@ export function composeAnswerMessage(
     })
     .join("\n");
 }
+
+/**
+ * Identity of the ask itself, so a card whose questions change resets its
+ * own state. Without this a useState initializer keeps the first card's
+ * answer slots and every tap on a later card silently does nothing.
+ */
+export function cardSignature(card: QuestionCardData): string {
+  return card.questions
+    .map(
+      (question) =>
+        `${question.question} ${question.multiSelect} ${question.options
+          .map((option) => option.label)
+          .join("")}`,
+    )
+    .join("");
+}

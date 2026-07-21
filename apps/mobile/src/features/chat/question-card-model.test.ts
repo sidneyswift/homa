@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
+  cardSignature,
   composeAnswerMessage,
   latestQuestionRequest,
   parseQuestionCardPart,
@@ -255,5 +256,30 @@ describe("latestQuestionRequest", () => {
       ]),
       null,
     );
+  });
+});
+
+describe("cardSignature", () => {
+  // Guards the same dead-tap bug web hit: a card arriving with a different
+  // question count must reset its answer slots, or every tap does nothing.
+  const q = (header: string, labels: string[], multiSelect = false) => ({
+    header,
+    question: `${header}?`,
+    multiSelect,
+    options: labels.map((label) => ({ label, description: null })),
+  });
+
+  it("changes when the question count changes", () => {
+    assert.notEqual(
+      cardSignature({ questions: [q("Subject", ["Phonics"])] }),
+      cardSignature({
+        questions: [q("Subject", ["Phonics"]), q("Days", ["Monday"])],
+      }),
+    );
+  });
+
+  it("is stable for the same ask, so state survives a re-render", () => {
+    const card = { questions: [q("Days", ["Monday", "Friday"], true)] };
+    assert.equal(cardSignature(card), cardSignature(card));
   });
 });

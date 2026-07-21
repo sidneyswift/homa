@@ -6,6 +6,7 @@ import { Card } from "../../components/ui/card";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import {
+  cardSignature,
   composeAnswerMessage,
   type QuestionCardData,
 } from "./question-card-model";
@@ -118,39 +119,64 @@ export function QuestionCard({
   const [answers, setAnswers] = useState<string[][]>(() =>
     card.questions.map(() => []),
   );
+  // Both guards mirror web's question-card.tsx, where clicking the real
+  // card exposed them. A useState initializer runs once, so a card that
+  // later arrives with a different question count left `answers` at the
+  // old length and every tap silently did nothing. Reset during render on
+  // the card's signature, React's documented way to adjust state to a
+  // changed prop.
+  const [signature, setSignature] = useState(() => cardSignature(card));
+  const currentSignature = cardSignature(card);
+  if (signature !== currentSignature) {
+    setSignature(currentSignature);
+    setStep(0);
+    setAnswers(card.questions.map(() => []));
+  }
 
   const total = card.questions.length;
   const question = card.questions[Math.min(step, total - 1)];
   const picked = answers[step] ?? [];
   const spent = !active || onSendAnswers === undefined;
 
-  function commit(next: string[][]) {
-    if (step + 1 < total) {
-      setAnswers(next);
-      setStep(step + 1);
-      return;
-    }
-    onSendAnswers?.(composeAnswerMessage(card.questions, next));
+
+  /**
+   * Every write uses the updater form. Reading `answers` from the render
+   * closure loses a tap: two picks in one batch both start from the same
+   * stale array, so the second overwrites the first and a fast
+   * multi-select silently drops a day.
+   */
+  function updateStep(make: (entry: readonly string[]) => string[]) {
+    setAnswers((current) =>
+      current.map((entry, index) => (index === step ? make(entry) : entry)),
+    );
+  }
+
+  function commit(make: (entry: readonly string[]) => string[]) {
+    // Computed once and used for BOTH the state write and the send, so the
+    // message can never describe a different set of answers than the card
+    // ends up holding.
+    const next = answers.map((entry, index) =>
+      index === step ? make(entry) : entry,
+    );
+    setAnswers(next);
+    if (step + 1 < total) setStep(step + 1);
+    else onSendAnswers?.(composeAnswerMessage(card.questions, next));
   }
 
   function onPick(label: string) {
     if (question.multiSelect) {
-      setAnswers(
-        answers.map((entry, index) =>
-          index === step
-            ? entry.includes(label)
-              ? entry.filter((value) => value !== label)
-              : [...entry, label]
-            : entry,
-        ),
+      updateStep((entry) =>
+        entry.includes(label)
+          ? entry.filter((value) => value !== label)
+          : [...entry, label],
       );
       return;
     }
-    commit(answers.map((entry, index) => (index === step ? [label] : entry)));
+    commit(() => [label]);
   }
 
   function onSkip() {
-    commit(answers.map((entry, index) => (index === step ? [] : entry)));
+    commit(() => []);
   }
 
   if (answeredSummary !== null) {
@@ -305,7 +331,7 @@ export function QuestionCard({
               <Pressable
                 accessibilityRole="button"
                 disabled={picked.length === 0}
-                onPress={() => commit(answers)}
+                onPress={() => commit((entry) => [...entry])}
                 style={({ pressed }) => ({
                   minHeight: 44,
                   borderRadius: radius.pill,
