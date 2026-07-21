@@ -259,6 +259,22 @@ export function MapFlow({ onPhaseChange }: { onPhaseChange?: (phase: FlowPhase) 
     onPhaseChange?.(phase);
   }, [phase, onPhaseChange]);
 
+  // Per-card funnel beacon (map.step_viewed, funnel work 2026-07-20): a
+  // fire-and-forget ping on every real card so per-card drop-off is
+  // measurable for the first time. The server allowlists the step, dedupes
+  // per family, and emits with its own key (the browser cannot write map.*
+  // rows). "loading" and "bootstrap-error" are not cards, so they never
+  // beacon. Best-effort: a failed beacon never touches the flow.
+  useEffect(() => {
+    if (phase === "loading" || phase === "bootstrap-error") return;
+    void fetch("/api/map/step", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ step: phase }),
+      keepalive: true,
+    }).catch(() => {});
+  }, [phase]);
+
   // Focus follows the flow: when a phase without its own autofocused
   // input mounts, move focus to the fresh step content.
   useEffect(() => {
