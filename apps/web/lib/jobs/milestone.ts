@@ -36,27 +36,48 @@ async function childFirstName(familyId: string, childId: string | null): Promise
   return name ? name.split(/\s+/)[0] : null;
 }
 
-function compose(
+/**
+ * Whether the job's label already opens with the child's possessive (or a
+ * generic "your"), so the body template must not prepend it a second time.
+ * start_agent_job's own tool description asks the model for a label like
+ * "Theo's All About Reading plan", so this is the common case, not an edge
+ * case: prod's first two agent_job rows both doubled on it ("Story's
+ * Story's alphabet search-and-find set...").
+ */
+function startsWithPossessive(title: string, childName: string | null): boolean {
+  const normalized = title.trimStart().replace(/’/g, "'");
+  if (childName) {
+    const prefix = `${childName}'s`;
+    if (normalized.toLowerCase().startsWith(prefix.toLowerCase())) {
+      const rest = normalized.slice(prefix.length);
+      if (rest.length === 0 || /^\s/.test(rest)) return true;
+    }
+  }
+  return /^your(\s|$)/i.test(normalized);
+}
+
+export function compose(
   kind: JobMilestoneKind,
   title: string,
   childName: string | null,
 ): { title: string; body: string } {
   const who = childName ? `${childName}'s` : "your";
+  const subject = startsWithPossessive(title, childName) ? title : `${who} ${title}`;
   if (kind === "gate") {
     return {
       title: `First part of ${title} is ready`,
-      body: `Good news: the first part of ${who} ${title} is ready to look over in the Binder. Have a look, and when you are happy, just tell me to keep going and I will build the rest.`,
+      body: `Good news: the first part of ${subject} is ready to look over in the Binder. Have a look, and when you are happy, just tell me to keep going and I will build the rest.`,
     };
   }
   if (kind === "completed") {
     return {
       title: `${title} is all done`,
-      body: `${who} ${title} is finished. Every part is saved in the Binder, ready whenever you are.`,
+      body: `${subject} is finished. Every part is saved in the Binder, ready whenever you are.`,
     };
   }
   return {
     title: `${title} needs a quick look`,
-    body: `The build for ${who} ${title} hit a snag and paused. Everything already built is safe in the Binder. Want me to try the rest again?`,
+    body: `The build for ${subject} hit a snag and paused. Everything already built is safe in the Binder. Want me to try the rest again?`,
   };
 }
 

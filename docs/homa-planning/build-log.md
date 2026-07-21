@@ -41,6 +41,99 @@ all-rejected case loud (rejected_count on lesson.review_ready plus an
 honest line on the review page). Verified by replaying the four real
 rejected pairs: all pass; invented-claim controls still fail.
 
+## 2026-07-21 · Homa can ask the parent to choose, on web only; one founder ruling
+
+Founder ask: check whether an `ask_user_questions` tool already existed in
+eve, and if not, research it and build the backend and the frontend.
+
+**It did not exist.** The nearest neighbours were `ask_for_photo` (one
+question, camera card) and the progress check-in question card (hardcoded
+to check-ins). eve itself ships no elicitation primitive, and nothing in
+this repo suspends a tool call to wait on a click. So the tool follows the
+existing answer-as-message pattern instead: the tool returns the ask, the
+card renders from `part.output`, and her taps come back as an ordinary
+user message. A reload, a typed reply, or an ignored card all resolve
+naturally, with no orphaned pending call.
+
+**Founder ruling recorded this session** (see the reconciliation
+register): `choice-card-web-only`. The one-question-at-a-time stance was
+raised as a possible conflict, because a four-question card appeared to
+contradict it. The founder ruled that the stance came from SMS, where a
+stack of questions arriving as texts is a burden, and was never a claim
+about cognitive load in general. Web may ask up to four; progress
+check-ins keep their own one-per-turn rule, which this does not touch.
+
+**Shipped.** `agent/tools/ask_user_questions.ts` (1 to 4 questions, 2 to 4
+options each, optional multi-select; pure UI contract, no family data and
+no `familyId`), `app/app/question-card.tsx` (stepped card, one question on
+screen at a time, type-instead and skip always present), wiring through
+`message-parts.tsx` and `chat-client.tsx`, and a `question_card` send
+source so a card tap does not clear a half-typed draft.
+
+**The channel gate is structural, not a refusal.** The first version
+refused at execute time on channels with no chat surface, which still
+costs the model a call and a re-plan to learn something knowable before
+the turn starts. eve's `defineDynamic` resolves tools per turn: returning
+`null` from `turn.started` means the tool does not exist for that turn.
+This is the repo's first use of it; every previous channel difference used
+dynamic instructions or an execute-time refusal. Absent on the telnyx
+adapter, `channel:telnyx`, and the `sms`, `email`, `dispatch`, and
+`agent-job` attributes; present everywhere else.
+
+**Two live-silence risks closed.** Mobile renders `null` for any tool it
+does not recognise, so a web-only card would have had Homa ask a question
+mobile parents never see, deadlocking the conversation on an answer that
+cannot arrive. `message-view.tsx` now renders the ask as plain readable
+lines there. Separately, `instructions.md` ended its honesty block with
+"Ask clarifying questions as plain text in your reply," which forbade the
+new tool outright; it now carves out real option-picks and adds the
+stop-and-wait rule, so Homa never calls the tool and re-asks in prose
+underneath.
+
+Guards: `check:chat-ui` covers the card parser, the composed answer
+message, and the channel gate, including a contract test that runs the
+real tool output through the real transcript parser, the seam where a
+backend rename would silently blank the card.
+
+## 2026-07-21 · Cosmo's real machine still stranding work and skewed after the rewrite; self-healing post-commit hook added
+
+Founder ask: fix the two live issues found while checking #homa-inspo for
+new drops after the 2026-07-20 rewrite. Cosmo's real (separate-machine)
+process had synced to the rewritten skill (its ref JSON used the new
+`stages`/`blobUrl` schema) but two failure modes it was rewritten to
+prevent were still happening: (1) a commit dated Jul 16-17 for content
+from a Jul 21 drop, meaning the clock is still ~4 days slow despite
+`session-start.sh`'s clock check; (2) real, complete analysis work
+committed to `cosmo/ingest-20260717-014029` and never turned into a PR,
+so branch protection (which now blocks direct pushes to main) turned it
+into silently lost work instead of a visible pull request. Recovered
+that specific stranded ref in PR #75.
+
+**Root cause of both:** a preflight script only helps if a session
+actually runs it and respects its exit code. Neither failure mode is
+fixable from this repo by patching a remote machine's clock or its
+agent harness, so the fix instead makes both structurally hard to hit
+regardless of what invokes the session: `.cosmo/scripts/session-start.sh`
+now installs `.cosmo/scripts/post-commit-hook.sh` as a real git
+`post-commit` hook. It fires automatically on every commit on any
+`cosmo/ingest-*` branch, with no dependency on the preflight having run:
+it re-dates a commit whenever the local clock disagrees with GitHub's
+HTTP clock by more than 5 minutes (a recursion guard prevents the
+resulting `commit --amend` from re-triggering itself), and it pushes the
+branch and opens the PR itself the moment the first commit lands, so a
+session that stops without an explicit "ship" step still leaves a
+visible, reviewable PR instead of an orphaned branch. Every step is
+best-effort and never fails the underlying commit; a push or `gh`
+failure prints a warning and continues. Verified in an isolated scratch
+git repo (fake `curl`/`gh` shims): no skew leaves the commit untouched
+and pushes without re-creating an existing PR; simulated 4-day skew
+re-dates the commit exactly once (no recursion) and opens exactly one
+PR; a non-`cosmo/ingest-*` branch is a complete no-op.
+
+Session-start.sh's own clock check now also reads GitHub's clock instead
+of Slack's, matching the hook and reducing the dependency surface to one
+service this workflow already needs reachable.
+
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
 Founder ask: review the last 24h of Material Studio work, inventory

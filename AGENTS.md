@@ -54,6 +54,61 @@ records the research comparison behind this rule.
 | **Postgres / Blob / `defineState`** | Durable product truth / durable artifacts / session-only working state. | Family facts and skills in Postgres, PDFs in Blob, a session counter in `defineState`. Never use a skill body, conversation history, or sandbox file as load-bearing state. |
 | **Channel / schedule / UI / subagent** | Transport authentication and delivery / clock-driven activation / parent-visible interaction / genuinely isolated context or privileges. | A new messaging surface is a channel, not a tool. A weekday wake-up is a schedule. Use a subagent only when it needs a different prompt, model, context window, or restricted tool surface; use a skill when optional procedure is enough. |
 
+### Models judge, code verifies (binding, founder ruling 2026-07-21)
+
+Whenever a capability has to turn human language into structured data,
+**a model makes the judgment and deterministic code verifies the result.**
+Never write pattern matching (regex, keyword lists, token-overlap scores,
+alias tables) to decide what a sentence *means*. That is a judgment call,
+and hand-written patterns are bad at it in a way that is invisible until
+you measure.
+
+The split, precisely:
+
+| The model decides | Code decides |
+|---|---|
+| Which skill a sentence describes, which child it is about, how strong the claim is, whether a message reports anything at all | Whether that skill exists, whether the child is in this family, whether the quote really appears in the message, whether the claim is age-plausible, what number the answer produces, idempotency, tenancy, rate limits |
+
+A model proposes; it never has authority. Its output is a **structured
+object validated by a schema** whose fields are enums and ids drawn from
+real catalogs, plus a verbatim quote the code re-checks against the
+source text. If any check fails, the claim is dropped, never softened.
+The scorer, the ledger, and every tenancy rule stay exactly as
+deterministic as before.
+
+**Why this is a law and not a preference.** The child-progress journal
+originally matched a mother's sentence to one of 225 skill lines with
+token-overlap scoring and six hand-written alias rules. It looked safe
+("the model has no scoring authority") and it was tested. In production
+it produced **one** evidence row in the product's lifetime: it rejected
+its own documentation's example sentences, read "she" as a different
+person, treated a capitalized book title as a second human, and recorded
+"struggled to read" as mastery. The safety was illusory. We had not
+avoided judgment, we had encoded bad judgment in a place no eval could
+see, and the failure mode was total silent data loss that nobody noticed
+for months. See `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
+
+Corollaries worth stating, because each one was learned the same way:
+
+- **Do not pre-filter the model's options with the pattern matcher you
+  are replacing.** Pass the whole catalog; a lexical shortlist
+  reintroduces the exact recall failure.
+- **Verify provenance, not phrasing.** "This quote appears verbatim in
+  the transcript" is a real guarantee. "This clause shares 50% of its
+  tokens with that quote" is a guess wearing a number.
+- **Measure the judgment layer against real language**, with fixtures
+  taken from production and from the product's own documentation, and
+  ratchet the number. Deterministic tests below the judgment prove
+  nothing about whether signal ever arrives.
+- **A deterministic component that reliably produces nothing is not the
+  safe choice.** Silence is a failure mode, and it is the one least
+  likely to page anyone.
+
+Exception, narrowly: exact string work that is *verification rather than
+interpretation* stays deterministic and lexical. Checking that a
+delivered SMS contains the exact question we sent is verification. Deciding
+what a mother meant is not.
+
 ### Required decision sequence
 
 1. Write the fleet-wide parent-facing capability as a procedure first.

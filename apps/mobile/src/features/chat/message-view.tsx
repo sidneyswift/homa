@@ -4,8 +4,14 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
-import { memoryChipFor, partIsRenderable, type MemoryChipContent } from "./message-utils";
+import {
+  memoryChipFor,
+  partIsRenderable,
+  type MemoryChipContent,
+} from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { QuestionCard } from "./question-card";
+import { parseQuestionCardPart } from "./question-card-model";
 
 /** Transcript bubbles, the mobile twin of apps/web's message-parts.tsx. */
 
@@ -53,12 +59,26 @@ function MemoryChip({ chip }: { chip: MemoryChipContent }) {
   );
 }
 
+/** Everything the transcript needs to hand a choice card its taps. */
+export interface QuestionCardWiring {
+  /** The one card that may still be answered, from latestQuestionRequest. */
+  activeQuestionPartKey?: string;
+  onSendQuestionAnswers?: (message: string) => void;
+  onQuestionTypeInstead?: () => void;
+  /** partKey -> what she already sent from that card. */
+  questionAnswers?: Record<string, string>;
+}
+
 function MessagePartView({
   part,
+  partKey,
   isUser,
+  questions,
 }: {
   part: EveMessagePart;
+  partKey: string;
   isUser: boolean;
+  questions: QuestionCardWiring;
 }) {
   if (part.type === "text") {
     if (isUser) {
@@ -78,6 +98,23 @@ function MessagePartView({
     return <MarkdownText text={part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
+    const questionCard = parseQuestionCardPart(part);
+    if (questionCard) {
+      // Only the newest unanswered card takes taps; every older one
+      // renders settled so a spent option never looks pressable.
+      const live = partKey === questions.activeQuestionPartKey;
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <QuestionCard
+            card={questionCard}
+            active={live}
+            onSendAnswers={live ? questions.onSendQuestionAnswers : undefined}
+            onTypeInstead={live ? questions.onQuestionTypeInstead : undefined}
+            answeredSummary={questions.questionAnswers?.[partKey] ?? null}
+          />
+        </View>
+      );
+    }
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||
@@ -106,7 +143,13 @@ function MessagePartView({
   return null;
 }
 
-export function MessageView({ message }: { message: EveMessage }) {
+export function MessageView({
+  message,
+  questions = {},
+}: {
+  message: EveMessage;
+  questions?: QuestionCardWiring;
+}) {
   const isUser = message.role === "user";
   if (!message.parts.some(partIsRenderable)) return null;
 
@@ -136,7 +179,15 @@ export function MessageView({ message }: { message: EveMessage }) {
         }}
       >
         {message.parts.map((part, index) => (
-          <MessagePartView key={index} part={part} isUser={isUser} />
+          <MessagePartView
+            key={index}
+            part={part}
+            // Same key latestQuestionRequest builds, so the live card
+            // and only the live card recognises itself.
+            partKey={`${message.id}:${index}`}
+            isUser={isUser}
+            questions={questions}
+          />
         ))}
       </View>
     </View>

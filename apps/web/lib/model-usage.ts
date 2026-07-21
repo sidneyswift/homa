@@ -34,6 +34,9 @@ export const USAGE_SURFACES = [
   "plan_narrative",
   "curriculum",
   "memory_extraction",
+  // The judgment step that reads a parent's message for what it says
+  // about her children (AGENTS.md "Models judge, code verifies").
+  "progress_claim_extraction",
   "embedding",
   "lesson_tone",
   "lesson_synthesis",

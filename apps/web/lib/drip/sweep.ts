@@ -172,10 +172,47 @@ export interface DripPlan {
 }
 
 /**
- * Which families this tick sends to, in one pure pass, so the cadence rule is
- * unit tested alongside the eligibility rules. Eligibility is decided for
- * every family first, then the cap truncates: that way `eligible` reports the
- * true size of the queue rather than just what fit.
+ * Which nudge goes first when the per-tick cap cannot serve everyone.
+ *
+ * Ordered by how close the family already is to value, and by how fast the
+ * nudge goes stale. A family who finished the whole assessment and never
+ * opened the report is one tap away and her report ages every day, so she
+ * leads. The loop-back nudge asks about a plan that is already a week old, so
+ * a few hours changes nothing. The setup nudge is for families who never
+ * reached value at all, and an hour later is no worse for them.
+ *
+ * Without this the cap took whatever five rows Postgres happened to return,
+ * which put the highest-intent group behind the lowest by luck of row order
+ * (seen live 2026-07-21: nine report-unviewed families waited while setup
+ * nudges went out first).
+ */
+const KIND_PRIORITY: Record<Exclude<DripDecision, null>["kind"], number> = {
+  drip_report_unviewed: 0,
+  drip_loop_back: 1,
+  drip_setup_nudge: 2,
+};
+
+/** The moment that made this family eligible, so the oldest wait goes first
+ * inside a nudge. Keeps the queue FIFO within a priority band: nobody sits at
+ * the back forever because newer families keep arriving. */
+function triggerAt(send: PlannedDripSend): number {
+  const { family, decision } = send;
+  if (decision.kind === "drip_report_unviewed") {
+    return family.reportEmailedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  if (decision.kind === "drip_loop_back") {
+    return family.planCreatedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  return family.createdAt.getTime();
+}
+
+/**
+ * Which families this tick sends to, in one pure pass, so the cadence and
+ * priority rules are unit tested alongside the eligibility rules. Eligibility
+ * is decided for every family first, then the queue is ordered, then the cap
+ * truncates: that way `eligible` reports the true size of the queue rather
+ * than just what fit, and the cap always takes the families that most deserve
+ * this tick rather than an arbitrary five.
  */
 export function planDripSends(
   signals: DripSignals[],
@@ -187,11 +224,52 @@ export function planDripSends(
     const decision = chooseDripNudge(family, now);
     if (decision) eligible.push({ family, decision });
   }
+
+  // Highest intent first, then longest wait, then family id purely so the
+  // order is total and reproducible: two runs over the same data must plan
+  // the same sends, or the queue on /admin/drip stops predicting reality.
+  eligible.sort((left, right) => {
+    const byKind = KIND_PRIORITY[left.decision.kind] - KIND_PRIORITY[right.decision.kind];
+    if (byKind !== 0) return byKind;
+    const byWait = triggerAt(left) - triggerAt(right);
+    if (byWait !== 0) return byWait;
+    return left.family.familyId.localeCompare(right.family.familyId);
+  });
+
   return {
     sends: eligible.slice(0, limit),
     eligible: eligible.length,
     capped: eligible.length > limit,
   };
+}
+
+/** Whole days between two moments, floored, for the reason strings. */
+function daysBetween(from: Date, to: Date): number {
+  return Math.max(0, Math.floor((to.getTime() - from.getTime()) / 86_400_000));
+}
+
+/**
+ * Why this family is getting this email, in the founder's words, recorded to
+ * email_sends.meta at send time. Written at SEND time on purpose: the
+ * audience that picked her will have changed by the time anyone asks, so
+ * re-deriving it later would answer a different question.
+ */
+export function dripReason(
+  family: DripSignals,
+  decision: Exclude<DripDecision, null>,
+  now: Date,
+): string {
+  if (decision.kind === "drip_report_unviewed") {
+    const days = family.reportEmailedAt ? daysBetween(family.reportEmailedAt, now) : 0;
+    return `${decision.childName}'s report was emailed ${days}d ago and no report has been opened yet`;
+  }
+  if (decision.kind === "drip_loop_back") {
+    const days = family.planCreatedAt ? daysBetween(family.planCreatedAt, now) : 0;
+    return `said yes to ${decision.childName}'s ${decision.subjectId} plan ${days}d ago, no word back since`;
+  }
+  const days = daysBetween(family.createdAt, now);
+  const stalled = family.profileCompletedAt === null ? "setup never finished" : "no child added";
+  return `signed up ${days}d ago, ${stalled}, no report yet`;
 }
 
 export interface DripSweepResult {
@@ -313,6 +391,13 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       and not coalesce(f.sandbox, false)
       and f.email is not null
       and exists (select 1 from public.family_members m where m.family_id = f.id)
+    -- Deterministic scan. The intent ordering that decides who this tick
+    -- serves happens in planDripSends, because it depends on WHICH nudge each
+    -- family gets and that is decided in TypeScript; expressing it here would
+    -- mean a second copy of the eligibility rules, free to drift from the
+    -- first. This only guarantees the same rows in the same order every run,
+    -- so a capped scan is reproducible instead of arbitrary.
+    order by f.created_at, f.id
     limit ${SWEEP_LIMIT}
   `;
 
@@ -386,6 +471,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         family.firstName,
         `${siteUrl()}/api/map/resume-link?t=${token}`,
         family.familyId,
+        dripReason(family, decision, now),
       );
       if (submission.status === "submitted") setupSent += 1;
     } else if (decision.kind === "drip_report_unviewed") {
@@ -395,6 +481,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         decision.childName,
         `${siteUrl()}/onboarding/r/${decision.reportToken}`,
         family.familyId,
+        dripReason(family, decision, now),
       );
       if (submission.status === "submitted") reportSent += 1;
     } else {
@@ -416,6 +503,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         decision.childName,
         planLabel,
         family.familyId,
+        dripReason(family, decision, now),
       );
       if (submission.status === "submitted") loopBackSent += 1;
     }
@@ -429,5 +517,51 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
     loopBackSent,
     eligible: plan.eligible,
     capped: plan.capped,
+  };
+}
+
+export interface DripQueueEntry {
+  familyId: string;
+  familyFirstName: string | null;
+  kind: Exclude<DripDecision, null>["kind"];
+  reason: string;
+  /** True when this one is inside the current tick's cap. */
+  nextTick: boolean;
+}
+
+export interface DripQueueSnapshot {
+  eligible: number;
+  capped: boolean;
+  considered: number;
+  entries: DripQueueEntry[];
+}
+
+/**
+ * Who the drip would email next, without sending anything. The founder
+ * console reads this so the queue on screen is produced by the same planner
+ * that does the sending: a preview derived from a second implementation
+ * would eventually disagree with the real one, which is worse than no
+ * preview at all.
+ */
+export async function dripQueueSnapshot(
+  now: Date = new Date(),
+  limit = 25,
+): Promise<DripQueueSnapshot> {
+  const signals = await loadDripSignals();
+  const plan = planDripSends(signals, now, Number.MAX_SAFE_INTEGER);
+  const nextTick = new Set(
+    planDripSends(signals, now).sends.map((send) => send.family.familyId),
+  );
+  return {
+    eligible: plan.eligible,
+    capped: plan.eligible > nextTick.size,
+    considered: signals.length,
+    entries: plan.sends.slice(0, limit).map((send) => ({
+      familyId: send.family.familyId,
+      familyFirstName: send.family.firstName,
+      kind: send.decision.kind,
+      reason: dripReason(send.family, send.decision, now),
+      nextTick: nextTick.has(send.family.familyId),
+    })),
   };
 }

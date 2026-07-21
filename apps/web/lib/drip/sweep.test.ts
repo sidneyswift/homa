@@ -211,3 +211,68 @@ test("the cap counts only eligible families, never the ineligible", () => {
   assert.equal(plan.sends[0].family.familyId, "eligible");
   assert.equal(plan.capped, false);
 });
+
+// The per-tick cap decides who waits, so its order is a real product rule,
+// not an implementation detail. Before this, the cap took whatever rows
+// Postgres returned and the highest-intent families could sit behind the
+// lowest (seen live 2026-07-21).
+
+/** A family whose report was emailed and never opened. */
+function withUnopenedReport(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: false,
+    reportEmailedAt: DAYS(4),
+    unviewedChildName: "Mia",
+    unviewedReportToken: "tok",
+    ...overrides,
+  });
+}
+
+test("the cap serves the unopened report before the loop-back and the setup stall", () => {
+  const signals = [
+    base({ familyId: "setup" }),
+    withPlan({ familyId: "loop" }),
+    withUnopenedReport({ familyId: "report" }),
+  ];
+  const plan = planDripSends(signals, NOW, 2);
+  assert.deepEqual(
+    plan.sends.map((send) => send.family.familyId),
+    ["report", "loop"],
+  );
+  assert.equal(plan.eligible, 3);
+  assert.equal(plan.capped, true);
+});
+
+test("inside one nudge, the family who has waited longest goes first", () => {
+  const signals = [
+    withUnopenedReport({ familyId: "newer", reportEmailedAt: DAYS(3) }),
+    withUnopenedReport({ familyId: "oldest", reportEmailedAt: DAYS(9) }),
+    withUnopenedReport({ familyId: "middle", reportEmailedAt: DAYS(6) }),
+  ];
+  assert.deepEqual(
+    planDripSends(signals, NOW, 3).sends.map((send) => send.family.familyId),
+    ["oldest", "middle", "newer"],
+  );
+});
+
+test("the plan is total and reproducible: same input, same order", () => {
+  const signals = [
+    withUnopenedReport({ familyId: "b-family", reportEmailedAt: DAYS(5) }),
+    withUnopenedReport({ familyId: "a-family", reportEmailedAt: DAYS(5) }),
+  ];
+  const first = planDripSends(signals, NOW, 5).sends.map((s) => s.family.familyId);
+  const again = planDripSends([...signals].reverse(), NOW, 5).sends.map((s) => s.family.familyId);
+  assert.deepEqual(first, ["a-family", "b-family"]);
+  assert.deepEqual(again, first);
+});
+
+test("ordering never changes who is eligible, only who goes first", () => {
+  const signals = [base({ familyId: "s" }), withUnopenedReport({ familyId: "r" })];
+  const plan = planDripSends(signals, NOW, 99);
+  assert.equal(plan.eligible, 2);
+  assert.equal(plan.capped, false);
+  assert.equal(plan.sends.length, 2);
+});
