@@ -1,0 +1,435 @@
+{
+  "id": "cur-2026-07-20-blossom-root-early-years-v1",
+  "name": "Blossom & Root Early Years Vol. 1 (Pre-K, First Edition)",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-19T22:51:53-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784515913.275429",
+  "sourceFiles": [
+    {
+      "filename": "br-ey1-early-years-vol1.pdf",
+      "localPath": ".cosmo/inspo-files/br-ey1-early-years-vol1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-early-years-v1/br-ey1-early-years-vol1.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "Charlotte Mason and Waldorf-inspired (publisher's own words; secular, no religious content observed)",
+    "principles": [
+      "The author states her own influences directly in the Parent Guide bio: \"I was inspired by Charlotte Mason and pieces of the Waldorf philosophy on education.\" This is a more explicit dual attribution than the companion Level 0 (Kindergarten) volume, whose four guides mostly self-brand as secular without naming a methodology.",
+      "The curriculum is organized around a named framework the publisher calls \"The Three E's\": Experience (the parent provides field trips, cooking, art and music exposure, living literature), Environment (the parent sets a stage: reading nook, art materials, exploratory stations, dress-up corner), and Engagement (the parent narrates and questions during ordinary daily life, not formal lessons). Every one of the 36 weeks' activities is tagged to one or more of these three E's.",
+      "Free play, indoors and outdoors, is Program Priority #1 and is called \"the priority of the child's day\" ahead of every academic goal.",
+      "\"Focused Flexibility\": the guide explicitly tells parents not to feel pressure to complete every activity every week, to skip what does not click and repeat what does, and states most activities take about 10 minutes with under 30 minutes of prep for an entire week. This is a lighter time commitment than either the Level 0 (Kindergarten) sibling or the CM norms already documented in curriculum-writer.md.",
+      "No worksheets, no letters, no phonics, and no formal reading or writing instruction anywhere in the 36 weeks. This is a genuine structural difference from the Level 0 (Kindergarten) volume, which teaches copywork, phonics, and cursive. At ages 2-4 the guide's literacy goal is exposure only: being read to, a print-rich home, and a writing corner stocked with paper and crayons (Program Priorities #2-4).",
+      "Weekly read-aloud (one picture book per week, 36 total, exactly one per week in list order) with parent-asked \"Engagement Prompts\" (discussion/prediction/retelling questions). This is functionally close to Charlotte Mason narration but is never called narration in this volume, and the child is not asked to retell the story unprompted the way Level 0's guides describe; it is closer to an interactive read-aloud.",
+      "Picture study (4 artists: Van Gogh, Paul Klee, Marc Chagall, Jackson Pollock, one per 9-week term) and composer study (4 composers: Mozart, Rossini, Vivaldi, Strauss, one per 9-week term) use a simple look-and-discuss-and-display method, explicitly NOT the look-hide-recall memory technique the Level 0 sibling's guide teaches. This is a real, sourced difference: the same publisher lengthens the study block (9 weeks per artist/composer here vs. about 4 weeks in Level 0) and drops the memory-recall step as the age band gets younger.",
+      "At least one genuine Waldorf-hallmark technique is directly evidenced: wet-on-wet watercolor painting (soak the paper, then paint on the wet surface), taught explicitly in Week 12's Visual Art activity. No other classic Waldorf hallmarks (eurythmy, form drawing, verses, a strict avoidance of realistic imagery, a fixed rhythm of the day) were observed in the sampled weeks; the Waldorf influence here reads as light and selective, not a full implementation.",
+      "\"Kindness & Connectivity\" is a distinct, named weekly section (present in every sampled week) built around real relational acts: surprising someone with flowers, writing a letter of love, sock puppets that practice manners and feelings talk, donating to charity, starting age-appropriate chores. This is a discrete weekly pillar with no equivalent named section in the Level 0 sibling.",
+      "\"The Kitchen Classroom\" is a second distinct weekly pillar (also present every sampled week): a parent-guide page explicitly calls the kitchen \"the workhorse of the homeschool classroom,\" claiming it teaches math, science, reading, writing, fine motor, history/geography/culture, self-care, responsibility, and health, all through one weekly cooking or baking project.",
+      "Assessment approach: none. No portfolio, no notebook grading, no narration transcript requirement; the closest thing to a checkpoint is a purely social celebration at the end of each 9-week term (a themed party) and an end-of-year photo compilation the child assembles themselves in Week 36.",
+      "Parent role: facilitator, environment-setter, and occasional scribe (the guide says a parent MAY dictate a child's words onto their artwork if the child wants to share, but this is optional and much lighter than Level 0's explicit narration-and-transcription routine).",
+      "Budget-first design: the Master Supply List (guide p.155) is almost entirely household items (paper, crayons, glue, tape, dried beans, an old toothbrush) and the guide explicitly states expensive manipulatives and curated science kits are not required."
+    ],
+    "learningTheory": "developmental-stages",
+    "assessmentApproach": "none-observation-and-free-play",
+    "parentRole": "facilitator-and-environment-setter",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "charlotte-mason",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available). The Level 0 sibling ingestion (cur-2026-07-20-blossom-root-level0) already flagged this exact gap and it is still unresolved as of this session; this ingestion does not duplicate the write proposal, it references the same open gap."
+      },
+      {
+        "topicKey": "waldorf",
+        "topicType": "method_philosophy",
+        "status": "unknown, same DB access limitation. No prior ingestion in this repo has proposed a waldorf entry; curriculum-writer.md also has zero mentions of Waldorf today (grepped, confirmed zero hits before this session)."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "waldorf",
+        "topicType": "method_philosophy",
+        "title": "Waldorf Method (light-touch elements)",
+        "summary": "Genuinely evidenced elements only, scoped narrowly to what this source shows: wet-on-wet watercolor painting technique, unhurried and gentle pacing with minimal formal instruction before age 6-7, beauty and simplicity of materials, and free play as the primary vehicle for early learning. This entry should NOT claim fuller Waldorf hallmarks (eurythmy, form drawing, verses, seasonal festival rhythm, delayed-literacy doctrine) since none were observed in this or any other ingested source; expand only when a source actually demonstrates them."
+      },
+      {
+        "suggestedKey": "blossom-root-early-years-v1-format",
+        "topicType": "method_format",
+        "title": "Blossom & Root Early Years Vol. 1 (Ages 2-4) Format",
+        "summary": "A single 36-week, single-volume Pre-K/toddler curriculum (unlike Level 0's four separate guides of uneven length) organized as one weekly 4-page unit covering Nature Study, Composer Study, Math & Science (the \"3 E's\": Environment/Experience, Engagement), Picture Study, The Arts (visual art, music-making, dramatic play), Kindness & Connectivity, The Kitchen Classroom, and Read-Together Time, plus a blank weekly planner page. Organized into four 9-week terms, each pairing one artist and one composer. No worksheets, no letters, no formal academics; assessment-free. Companion to the already-ingested Level 0 (Kindergarten, cur-2026-07-20-blossom-root-level0), one age level younger."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Read-Together Time",
+        "curriculumTopic": "Weekly read-aloud picture book (36 books total, exactly one per numbered week)",
+        "homaSubject": "literacy",
+        "homaDomain": "literature",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Read-Together Time",
+        "curriculumTopic": "Engagement Prompts: parent-asked discussion, prediction, and retelling questions about the week's book",
+        "homaSubject": "language",
+        "homaDomain": "speaking-listening",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "Close to but not identical to Charlotte Mason narration: the guide never uses the word narration, and the child answers parent questions rather than retelling unprompted."
+        }
+      },
+      {
+        "curriculumSubject": "Read-Together Time / Environment",
+        "curriculumTopic": "Weekly \"literacy-rich environment\" reminder: cozy reading nook, library visits, print-rich space, writing center (present in every sampled week)",
+        "homaSubject": "literacy",
+        "homaDomain": "early-book-skills",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Environment / Experience Opportunities",
+        "curriculumTopic": "Dramatic play / story reenactment (bringing a read-aloud to life through pretend play, e.g. Runaway Bunny, Three Billy Goats Gruff)",
+        "homaSubject": "language",
+        "homaDomain": "oral-storytelling",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Also genuinely touches social_emotional (imaginative play, perspective-taking); primary fit is oral-storytelling since the activity is retelling a known story through action/speech."
+        }
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Counting objects, counting practice (feed-the-monster, apple seeds, hot dogs, goldfish crackers)",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Sorting toys/objects by size, color, or shape",
+        "homaSubject": "math",
+        "homaDomain": "mathematical-thinking",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Shape discernment and recognition (blocks, stamps, cookie cutters)",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Comparison and positional vocabulary (bigger/smaller, more/less, first/second/third/last, taller/shorter)",
+        "homaSubject": "math",
+        "homaDomain": "mathematical-thinking",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Same soft fit the Level 0 sibling ingestion flagged for positional/comparison vocabulary; no dedicated early-spatial-reasoning domain exists yet."
+        }
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Informal measurement (goldfish-cracker length comparisons, tree girth on a nature walk)",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Numeral recognition and number choices (\"one, two, or three slices?\"; speed-sign numerals in Week 36)",
+        "homaSubject": "math",
+        "homaDomain": "number-place-value",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "Five-senses object study (apples, eggs, water) and simple hypothesis-then-test activities",
+        "homaSubject": "science",
+        "homaDomain": "scientific-inquiry",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science with the 3 E's",
+        "curriculumTopic": "States and properties of matter (sink/float, freezing water, dish-soap bubbles)",
+        "homaSubject": "science",
+        "homaDomain": "matter-materials",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Math & Science / Nature Study",
+        "curriculumTopic": "Seasonal change and weather observation (clouds, changing leaves, sun and shadow)",
+        "homaSubject": "science",
+        "homaDomain": "weather-climate",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Plant growth, seeds, trees, gardens, apples",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Animals: baby/adult matching, hibernation, spiders and webs, fish, birds and nests, dirt and soil life",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Environment / Experience Opportunities",
+        "curriculumTopic": "STEM building challenges (build a bird's nest from natural materials, a cardboard box house, a blanket reading tent, bubble mountains)",
+        "homaSubject": "fine_motor",
+        "homaDomain": "building-construction",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Picture Study",
+        "curriculumTopic": "Picture study: 4 artists (Van Gogh, Paul Klee, Marc Chagall, Jackson Pollock), 9 weeks each, look-discuss-display method (no recall technique)",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "Reuses the content domain the Level 0 sibling ingestion added for this exact publisher's picture-study format. Left homaTopicId null on purpose: Level 0's existing topic under this domain (mt_Xp1WkwWozD, \"Picture Study: Observing and Recalling Artwork\") names a memory-recall skill this Pre-K volume deliberately does not use; attaching it here would overstate the activity."
+        }
+      },
+      {
+        "curriculumSubject": "The Arts",
+        "curriculumTopic": "Open-ended visual art exploration (free painting, collage, watercolor, mixed media, texture play); not consistently tied to the week's artist's own technique",
+        "homaSubject": "art",
+        "homaDomain": "art-exploration",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Composer Study",
+        "curriculumTopic": "Composer study: 4 composers (Mozart, Rossini, Vivaldi, Strauss), 9 weeks each, listening plus simple loud/soft, fast/slow, instrument-ID games",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": null,
+        "status": "mapped",
+        "suggested": {
+          "note": "Reuses the content domain the Level 0 sibling ingestion added for this exact publisher's composer-study format."
+        }
+      },
+      {
+        "curriculumSubject": "The Arts",
+        "curriculumTopic": "Active music-making with instruments/shakers, rhythm clapping",
+        "homaSubject": "music",
+        "homaDomain": "rhythm-beat",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "The Arts",
+        "curriculumTopic": "Singing (Twinkle Twinkle, Head Shoulders Knees and Toes, finger plays)",
+        "homaSubject": "music",
+        "homaDomain": "singing",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "The Arts",
+        "curriculumTopic": "Dance and movement to music (freeze dance, animal poses, triangle freeze dancing)",
+        "homaSubject": "gross_motor",
+        "homaDomain": "locomotion",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Also touches music (rhythm-beat, listening-awareness); classified primarily under gross motor since the child's own body movement is the activity."
+        }
+      },
+      {
+        "curriculumSubject": "Kindness & Connectivity",
+        "curriculumTopic": "Relational kindness activities: surprise acts of kindness, letters of love, feelings sock puppets, donating to charity, feelings collages",
+        "homaSubject": "social_emotional",
+        "homaDomain": "empathy-social-awareness",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Kindness & Connectivity",
+        "curriculumTopic": "Introducing age-appropriate household chores and responsibility (Week 13)",
+        "homaSubject": "self_care",
+        "homaDomain": "real-world-responsibility",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "The Kitchen Classroom",
+        "curriculumTopic": "Weekly cooking or baking project with age-appropriate tasks (measuring, pouring, stirring, cutting soft items, reading a recipe)",
+        "homaSubject": "self_care",
+        "homaDomain": "kitchen-cooking",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Program Priorities (#10)",
+        "curriculumTopic": "Familiarity with community helpers (librarian, sanitation workers, construction workers, doctors and nurses) through errands, field trips, and outings",
+        "homaSubject": "social_studies",
+        "homaDomain": "family-community",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Stated as an explicit program priority but not observed as its own dedicated weekly activity slot in the sampled weeks; achieved incidentally through the \"Library Day / Extracurricular Activities\" line on the weekly planner page rather than a scripted lesson."
+        }
+      },
+      {
+        "curriculumSubject": "Environment / Experience Opportunities",
+        "curriculumTopic": "Fine motor craft skills: cutting, gluing, lacing, threading (web lacing plate, Cheerio necklace, paper-plate puppets)",
+        "homaSubject": "fine_motor",
+        "homaDomain": "hand-control",
+        "homaTopicId": null,
+        "status": "mapped"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 26,
+      "mapped": 22,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 4
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Single unified 36-week year, one book, one \"This Week In...\" 4-page unit per week covering every subject together (unlike the Level 0 sibling's four separate guides of uneven length). Suggested pace is a 5-day week but the guide explicitly says it adapts to a 4-day week, evening homeschooling, or multiple children of different ages.",
+    "sessionLengthMinutes": {
+      "most_individual_activities": 10,
+      "weekly_prep_total": 30
+    },
+    "weeklyTemplate": "The guide's own suggested 5-day template (Parent Guide p.153): Monday: Composer study during free play, Picture study, Read-Together Time. Tuesday: Math/Science activity, Art project, Read-Together Time, free play. Wednesday: Kindness & Connectivity, Read-Together Time activity, free play. Thursday: Nature Study, Composer study during free play, Read-Together Time. Friday: Kitchen Classroom, revisit Picture Study, Read-Together Time, free play. Daily constants regardless of schedule: free play and outside time.",
+    "progressionModel": "thematic-spiral, not mastery-linear: the same handful of underlying skills (counting, sorting, five senses, comparison vocabulary, shape recognition) recur weekly in different seasonal or story-themed dress rather than building toward a fixed end-of-year mastery target. Picture study and composer study progress in four fixed 9-week blocks (one artist, one composer, per block).",
+    "reviewRhythm": "None formal. The guide's own \"Focused Flexibility\" section tells parents not to feel pressure to complete every activity. The only checkpoints are purely social: an end-of-term party at week 9 (\"Wild Rumpus Party\"), implied similar parties at weeks 18 and 27, and an end-of-year party plus a child-assembled photo compilation book at week 36.",
+    "totalWeeks": 36,
+    "notes": "Four 9-week terms, each pairing one composer and one artist: Weeks 1-9 Mozart/Van Gogh, Weeks 10-18 Rossini/Paul Klee, Weeks 19-27 Vivaldi/Marc Chagall, Weeks 28-36 Strauss/Jackson Pollock (confirmed directly by reading weeks 1, 9, 10, 18, 19, 28, and 36, and cross-checked against the Master Composer and Picture Study lists on Parent Guide p.154). This is a materially different pacing than the Level 0 (Kindergarten) sibling, whose own principles describe roughly 4-week artist/composer blocks (9 artists and 9 composers across the same 36 weeks): the same publisher gives a younger age band fewer, longer study blocks and drops the look-hide-recall memory technique entirely."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "picture-study-weekly-viewing",
+        "description": "Show the week's painting, let the child look at it, ask what they notice (colors, shapes, subject), display or revisit it through the week. No recall/memory step.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Pure looking-and-talking activity; the source has no printable component here at all. artist-composer-study-card (authored for the Level 0 sibling) exists if a family wants an optional printable portfolio card, but that recipe is scoped \"ages 4-10\" and is not a strong fit for the bottom of this volume's 2-4 age band."
+      },
+      {
+        "type": "composer-study-weekly-listening",
+        "description": "Play the week's composer during a designated listening time; simple engagement games (loud/soft, fast/slow, spot-the-instrument, visualize with a video).",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Pure audio activity, no printable component."
+      },
+      {
+        "type": "open-ended-visual-art-exploration",
+        "description": "Free painting, collage, watercolor, mixed media, texture painting (toothbrush, sandpaper, drizzle), most weeks not tied to the featured artist's specific technique.",
+        "recipe": "dot-marker-activity",
+        "status": "have_recipe",
+        "notes": "The great majority of these weeks are analog craft using real paint and are not printable-shaped. dot-marker-activity is the one existing recipe genuinely age-matched (\"ages 2-4\") for the dabbing/stamping-style weeks (thumbprint sunflowers, seed suns) if a family wants a structured printable variant; it is an optional enhancement, not a literal port of anything in the source."
+      },
+      {
+        "type": "music-making-and-movement",
+        "description": "Instrument play (shakers, pots and spoons), rhythm clapping, singing, freeze dance, animal-pose dance, night walks.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Physical/musical play; no printable component."
+      },
+      {
+        "type": "sensory-and-tactile-play",
+        "description": "Sensory tubs (sand, dirt, water), mud pies, dirt sample collection, playdough impressions with natural materials.",
+        "recipe": "playdough-mat",
+        "status": "have_recipe",
+        "notes": "playdough-mat (\"ages 2-5\") is a genuine age-band match for the shape-formation and dough-impression weeks (e.g. Week 3 shape discernment with cookie cutters) but again is an optional Homa enhancement, not something the source itself prints."
+      },
+      {
+        "type": "nature-walk-observation-log",
+        "description": "Weekly outdoor walk, casual observation, occasional leaf rubbing or cloud-log drawing added to a loose \"nature folder\" (no fixed template).",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "nature-observation-journal (authored for the Level 0 sibling) is the closest existing recipe in spirit, but it is scoped \"ages 4-10\" and this source's own nature-folder practice is deliberately unstructured (a blank page, not a printed template), so treating it as a real match would overstate parity. Left unmatched rather than force-fit."
+      },
+      {
+        "type": "stem-building-challenge",
+        "description": "Build a nest, a cardboard box house, a blanket reading tent, or bubble mountains from household materials.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Physical building activity; no printable component. fine_motor > building-construction (Layer 2) covers the underlying skill without needing a printable format."
+      },
+      {
+        "type": "kindness-connectivity-relational-activity",
+        "description": "Surprise someone with flowers, write a letter of love, make sock puppets to role-play kindness and feelings, donate to charity, feelings-collage from magazine cutouts.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Real-world relational acts and physical crafts using found materials (real magazine photos, real yarn/socks); none of this is a Homa-generated printable."
+      },
+      {
+        "type": "read-aloud-with-engagement-prompts",
+        "description": "One picture book a week plus a short list of parent-facing discussion/prediction/retelling questions.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "This is curriculum-writer content (a weekly book pick plus a short question list), not a materials-studio printable format."
+      },
+      {
+        "type": "kitchen-classroom-cooking-project",
+        "description": "Weekly cooking or baking activity with age-appropriate helper tasks.",
+        "recipe": null,
+        "status": "not_applicable",
+        "notes": "Real cooking; no printable component. self_care > kitchen-cooking (Layer 2) covers the underlying skill."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 10,
+      "haveRecipe": 2,
+      "noRecipe": 0,
+      "notApplicable": 8
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "Write charlotte-mason (still open from the Level 0 sibling ingestion) and the two new rows waldorf (method_philosophy) and blossom-root-early-years-v1-format (method_format) to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) this sandbox does not have. Proposed row content is in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "high"
+    },
+    {
+      "category": "taxonomy",
+      "item": "No taxonomy changes are needed for this curriculum. Every Layer 2 mapping resolved to an already-existing domain: mostly Homa-authored domains (art-exploration, rhythm-beat, singing, empathy-social-awareness, kitchen-cooking, building-construction, early-book-skills, oral-storytelling, hand-control, real-world-responsibility, family-community, locomotion, mathematical-thinking) that already existed in packages/taxonomy/src/domains.ts before this session and currently have zero topics under them, plus a handful of existing Marble-imported domains, plus the two Art/Music content domains (picture-study-appreciation, composer-study-appreciation) the Level 0 sibling ingestion added the day before. Recorded here so the founder can confirm this \"no new taxonomy work\" read is correct rather than assume it silently.",
+      "impact": "None if confirmed correct; if the founder disagrees that reuse is appropriate for any specific row, that row would need re-mapping.",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "No new recipes are needed, and notably the three CM-specific recipes authored for the Level 0 sibling (narration-page, nature-observation-journal, artist-composer-study-card) are a weak fit here: all three are scoped \"ages 4-8\" or \"ages 4-10\", older than most of this volume's 2-4 band, and none of their patterns actually appear in this source (no narration pages, no printed nature-journal template, no printed artist card anywhere in the 157 pages). This volume is close to 100% analog/hands-on by design (Program Priorities explicitly favor real materials over manipulatives and worksheets). The two closest genuinely age-matched existing recipes are dot-marker-activity (\"ages 2-4\") and playdough-mat (\"ages 2-5\"), and even those are optional Homa-side enhancements, not literal ports of anything in the source.",
+      "impact": "Confirms the format library already covers this curriculum's real needs (which are minimal); no action required unless the founder wants Homa to proactively offer toddler-scoped printable reinforcement beyond what the source itself asks for.",
+      "urgency": "low"
+    },
+    {
+      "category": "product",
+      "item": "Minor, low-value optional gap: the source's blank \"Our Plan for the Week\" weekly planner grid page (a generic Monday-Sunday calendar with a checklist sidebar) has no obvious existing recipe match. It is a generic productivity template, not curriculum-specific content, so this is flagged for visibility only, not recommended as a priority build.",
+      "impact": "Negligible; families can use any household planner for this.",
+      "urgency": "low"
+    },
+    {
+      "category": "product",
+      "item": "This volume spans ages 2-4, a wider and younger band than a single Homa grade level typically covers. The source itself gives only light built-in differentiation for the top of that range (occasional \"older children can also...\" asides, e.g. Week 4's tree scavenger hunt graphing extension) and no differentiation at all for the youngest end. Worth a founder judgment call on whether Homa's curriculum-writer should split this into two effective bands (toddler vs. Pre-K) or run it as one band as the publisher does.",
+      "impact": "Affects how curriculum-writer would pace this content if a family cites this specific curriculum by name.",
+      "urgency": "low"
+    }
+  ],
+  "notes": "157 pages total, read in full front matter, back matter, and Master Lists, plus 15 of the 36 weekly units sampled directly across all four terms (weeks 1-13, 18-19, 28, 36) to confirm the term-boundary pattern and check for structural drift; the remaining weeks follow the identical 4-page template confirmed in every sampled instance, so full-page reading of all 144 templated pages would have been reading time without added signal. Companion to the already-ingested Level 0 (Kindergarten, cur-2026-07-20-blossom-root-level0), one age level younger (ages 2-4 vs. Level 0's kindergarten band) and structurally different: one unified 36-week volume rather than four separate guides of uneven length, four 9-week artist/composer blocks rather than roughly nine 4-week blocks, and effectively zero printable worksheets by design (Program Priorities explicitly favor real materials, free play, and household items over manipulatives, worksheets, and screen time). The founder's Slack framing (\"gentle introduction\") is well supported by the text itself: Program Priority #1 is free play, the guide states most activities take about 10 minutes with under 30 minutes of prep for an entire week, and \"Focused Flexibility\" explicitly tells parents not to feel pressure to complete every activity. Both Blossom & Root volumes share the same underlying philosophy (living books, narration/discussion instead of tests, nature study, picture and composer study, no grades) but this volume is the more Waldorf-flavored of the two: it is the only one of the publisher's guides read so far that names Waldorf explicitly and the only one that teaches a genuine Waldorf technique (wet-on-wet watercolor, Week 12). Knowledge-bank writes could not be attempted (see decisionsNeeded, same DB-access limitation the Level 0 sibling ingestion hit); taxonomy needed zero changes (full reuse of existing domains, confirmed for real by reading domains.ts and mapping.ts rather than assumed); recipes needed zero new files (full reuse, and a clear, evidenced finding that this volume needs almost no printables at all); everything else in the skill's post-analysis actions was completed and is recorded honestly above."
+}

@@ -123,8 +123,16 @@ Good and the Beautiful, Peaceful Press, Ambleside Online):
   awareness. Use `[nature-identification-poster]` and nature journal prompts.
 - Copywork from beautiful literature daily. Use `[copy-work-pages]` sourced from the
   family's current read-aloud or a classic poem.
-- Picture study in 4-week artist blocks: one artist per month, child narrates what
-  they see, then creates an art response. Composer study similarly structured.
+- Picture study in artist blocks, child narrates what they see (or, for children
+  too young to narrate reliably, simply discusses what they notice), then creates
+  an art response. Composer study similarly structured. Block length is NOT a
+  fixed "4 weeks": it scales with age. A kindergarten-band CM publisher may run
+  roughly 4-week blocks (9 artists and 9 composers across a 36-week year); the
+  same publisher's Pre-K/toddler volume for the same 36 weeks may instead run
+  four 9-week blocks (one artist and one composer per block) and drop the
+  look-hide-recall memory step entirely, since 2-4 year-olds cannot reliably do
+  it. Check the family's actual guide for its own block length before assuming 4
+  weeks.
 - Narration before written composition for children under 8. Oral narration to the
   parent, who scribes. No formal writing instruction until narration is fluent.
 - Short lessons: 15-20 minutes per subject for ages 4-7, building to 30-45 minutes
@@ -146,6 +154,18 @@ Good and the Beautiful, Peaceful Press, Ambleside Online):
   narrative) and 18 weeks of dedicated nature study. Do not assume every CM science
   block is 36 weeks long; check whether the family's guide describes an alternating
   or condensed schedule before planning a full year.
+- Toddler and Pre-K (ages 2-4) CM programs are often a CM/Waldorf blend, not pure
+  CM: expect the publisher to name both influences directly, to organize the week
+  around three broad buckets (an experience the parent provides, an environment the
+  parent sets up, and an engagement the parent facilitates during ordinary daily
+  life, sometimes literally called "the Three E's"), and to include at least one
+  genuine Waldorf technique such as wet-on-wet watercolor painting. At this age band
+  expect close to zero worksheets or printables of any kind: activities are sensory
+  bins, open-ended process art with real paint, cooking, and free play, not anything
+  materials-studio would generate. Do not force-fit CM recipes like
+  `[narration-page]` or `[nature-observation-journal]` onto a 2-4 curriculum just
+  because the same publisher's older-band guide uses them; check the actual age
+  scoping on each recipe first (most CM recipe formats are written for ages 4-8+).
 
 ### Montessori
 
