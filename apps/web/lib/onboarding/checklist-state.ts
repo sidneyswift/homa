@@ -106,8 +106,10 @@ export async function loadChecklistState(
       join public.children c on c.id = a.child_id
       where a.child_id = ${childId} and c.family_id = ${familyId}
     `,
-    sql<{ id: string }[]>`
-      select r.id
+    // child_reports is keyed by child_id and has no id column of its
+    // own, so the existence check selects the key it actually has.
+    sql<{ child_id: string }[]>`
+      select r.child_id
       from public.child_reports r
       join public.children c on c.id = r.child_id
       where r.child_id = ${childId} and c.family_id = ${familyId}
