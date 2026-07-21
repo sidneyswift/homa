@@ -147,6 +147,10 @@ describe("ProgressView", () => {
           report={null}
           eras={[]}
           kids={PROGRESS_FIXTURE_KIDS}
+          lessons={{
+            recordHref: "/app/child-1/lessons/record",
+            lessons: [],
+          }}
         />
       </AppRouterContext.Provider>,
     );
@@ -160,6 +164,12 @@ describe("ProgressView", () => {
     assert.match(
       html,
       /<a[^>]*href="\/onboarding\?start=child-1"[^>]*>Start Maya(?:&#x27;|')s check-in<\/a>/,
+    );
+    // On a never-assessed child the check-in keeps the top spot; the
+    // recording door waits below it rather than competing.
+    assert.ok(
+      html.indexOf("Start Maya") < html.indexOf('aria-label="Lessons"'),
+      "the first check-in must outrank the recording door when unassessed",
     );
     // Ask HOMA stays as the quieter second door.
     assert.match(html, /Ask HOMA about Maya/);
@@ -196,6 +206,15 @@ describe("ProgressView", () => {
       /<a[^>]*href="\/app\/child-1\/lessons\/record"[^>]*>Record a lesson<\/a>/,
     );
     assert.match(html, /href="\/app\/lessons\/lesson-1"/);
+
+    // Above the chart, not below it. Shipped below first and a founder
+    // could not find it on a scored child: the chart plus a dozen
+    // subject rows put it a full screen down (2026-07-21).
+    assert.ok(
+      html.indexOf('aria-label="Lessons"') <
+        html.indexOf("Every number here comes from your answers"),
+      "the recording door must render above the subject content",
+    );
 
     // Status reads in the parent's words, never a pipeline stage.
     assert.match(html, /Review ready/);
