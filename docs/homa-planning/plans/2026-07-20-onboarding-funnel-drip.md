@@ -568,3 +568,39 @@ says "progress report" per the one-name-per-concept law.
 
 Still dark: `HOMA_DRIP_ENABLED` is unchanged, and the Phase 4 go-live gates
 (unsubscribe secret set, suppression verified live) still stand.
+
+## Session 6 (2026-07-21): drip observability in the founder console
+
+The drip went live at 05:00 UTC and the founder asked to be able to track it:
+what was sent, why, delivered, opened, and did it work.
+
+New `/admin/drip` (nav entry added). Three parts: a per-nudge scorecard
+(sent, delivered, failed, worked, waiting, unsubscribed), the live queue of
+who gets emailed next, and every send with the reason it was picked.
+
+Two honesty rules are baked in, because both were easy to get wrong:
+- **Effect is scored against the nudge's own stated target**
+  (`lib/drip/labels.ts`), and those targets are the same
+  `lib/activation/signals.ts` rungs the drip aims at, so what is measured and
+  what is nudged cannot drift apart.
+- **A nudge sent an hour ago has not failed, it is waiting.** Effect is only
+  scored once the 7-day window closes, and the rate is reported over settled
+  sends with the settled count beside it. All 22 live sends are currently
+  pending, so the page says "too early" rather than 0%.
+
+**Why** is now recorded at send time into the previously unused
+`email_sends.meta` (no migration): "signed up 5d ago, setup never finished,
+no report yet". Written at send time on purpose, since the audience that
+picked her will have changed by the time anyone asks. Also surfaced on the
+family detail page beside each send.
+
+Caught by running the scoring query against live prod: a bounced send had
+written an `email_suppressions` row, and the draft counted it as
+"unsubscribed". A dead mailbox is not a person choosing to stop. Opt-outs now
+count only `reason in ('unsubscribe','stop')`; bounces stay in `failed`. The
+same check proved the bounce-to-suppression pipeline works in production, and
+that there have been zero real opt-outs across 22 sends.
+
+Opens and clicks are deliberately NOT tracked: no pixel, no rewritten links.
+Outcome is measured by what the family did instead, which is unfakeable and
+is the thing we actually care about. Founder decision pending if that changes.
