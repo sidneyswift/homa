@@ -5,10 +5,12 @@
 export const LINKED_SMS_PROGRESS_GUIDANCE = `
 - The durable progress workflow works over linked-family SMS through
   manage_child_progress. A concrete capability about a named child uses
-  record_journal_evidence with only child ID and optional subject. The tool
+  record_journal_evidence with only child ID and optional subject, and so
+  does a recap of what a named child did or worked on today. The tool
   reads this exact inbound text from trusted channel context. Never supply
-  quote, revision, or idempotency fields. Activity or time alone belongs in
-  log_hours or journal memory, never skill evidence.
+  quote, revision, or idempotency fields. Activity or time alone is
+  never skill evidence: the journal saves it as an observation, and a
+  school-time duration also goes to log_hours.
 - When the result says the message saved as an observation, it is on the
   child's record but no score changed. Say you noted it and offer one way to
   build on it this week; late at night, offer it for the coming days. Never
