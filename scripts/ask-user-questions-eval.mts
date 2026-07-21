@@ -233,6 +233,7 @@ async function runLiveEval(): Promise<number> {
   for (const fixture of ASK_USER_QUESTIONS_FIXTURES) {
     let askCount = 0;
     const otherTools = new Set<string>();
+    const asked = new Set<string>();
     const tools = {
       ...alternativeTools(summaryTools, fixture),
       [TOOL_NAME]: choiceEntry,
@@ -247,11 +248,21 @@ async function runLiveEval(): Promise<number> {
         system: `${instructions}\n\n## This family\n\n${fixture.familyBlurb}`,
         prompt: fixture.message,
       });
-      if (result.toolCalls.some((call) => call.toolName === TOOL_NAME)) {
-        askCount += 1;
-      }
       for (const call of result.toolCalls) {
-        if (call.toolName !== TOOL_NAME) otherTools.add(call.toolName);
+        if (call.toolName !== TOOL_NAME) {
+          otherTools.add(call.toolName);
+          continue;
+        }
+        askCount += 1;
+        // The questions themselves, not just that she asked. A count says
+        // a fixture regressed; the wording says why, and a fix guessed
+        // without it is a fix aimed at nothing.
+        const input = call.input as
+          | { questions?: { header?: string; question?: string }[] }
+          | undefined;
+        for (const question of input?.questions ?? []) {
+          asked.add(`${question.header ?? "?"}: ${question.question ?? "?"}`);
+        }
       }
     }
     // Majority, not unanimity: this is a sampled model, and one stray run
@@ -268,7 +279,10 @@ async function runLiveEval(): Promise<number> {
         otherTools.size > 0 ? ` other=[${[...otherTools].join(", ")}]` : ""
       }`,
     );
-    if (!pass) console.log(`      why: ${fixture.why}`);
+    if (!pass) {
+      console.log(`      why: ${fixture.why}`);
+      for (const question of asked) console.log(`      she asked: ${question}`);
+    }
   }
 
   const failed = results.filter((r) => !r.pass);
