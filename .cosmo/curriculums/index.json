@@ -109,6 +109,16 @@
       "mappedPct": 0,
       "gapCount": 2,
       "decisionsCount": 2
+    },
+    {
+      "id": "cur-2026-07-20-blossom-root-level0",
+      "name": "Blossom & Root Level 0 (Kindergarten, Second Edition)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-19T22:50:29-04:00",
+      "methodology": "Charlotte Mason-inspired (publisher self-brands the package as secular)",
+      "mappedPct": 87,
+      "gapCount": 0,
+      "decisionsCount": 5
     }
   ]
 }

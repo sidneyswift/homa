@@ -130,6 +130,11 @@ const MARBLE_TO_HOMA = {
   "Life Skills": "self_care",
   "Learning to Learn": "executive_function",
   "Computing": "computer_science",
+  // Inspo-flywheel addition (2026-07-20): Blossom & Root Level 0 introduced
+  // Marble-style Art and Music enrichment topics; Homa's bank subjects are
+  // "art" and "music" (see packages/core/src/map/content.ts).
+  "Art": "art",
+  "Music": "music",
 };
 
 let unmapped = 0;

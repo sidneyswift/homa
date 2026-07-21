@@ -133,7 +133,19 @@ Good and the Beautiful, Peaceful Press, Ambleside Online):
   objects, nature, art, and narration. Activities should be `[copy-work-pages]`,
   `[nature-identification-poster]`, living book discussions, and hands-on exploration.
 - Format preferences: `[copy-work-pages]`, `[nature-identification-poster]`,
+  `[nature-observation-journal]`, `[narration-page]`, `[artist-composer-study-card]`,
   `[labeled-anatomy-diagram]` for science, `[3-part-nomenclature-cards]` for vocabulary.
+- For kindergarten/early-years CM programs (e.g. Blossom & Root Level 0), history and
+  geography often start "inside out": the child's own personal history and family
+  first, then their home and neighborhood, before any world or timeline history. Use
+  `[narration-page]` for the personal-history pages (illustration plus a
+  parent-transcribed story) rather than jumping straight to historical content.
+- Some early-years CM-inspired publishers split science into two half-year strands
+  that alternate across a 36-week year rather than running one science subject every
+  week: roughly 18 weeks of integrated math-and-science (often as a dramatic-play
+  narrative) and 18 weeks of dedicated nature study. Do not assume every CM science
+  block is 36 weeks long; check whether the family's guide describes an alternating
+  or condensed schedule before planning a full year.
 
 ### Montessori
 

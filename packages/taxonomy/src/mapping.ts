@@ -118,6 +118,18 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // preschool curriculum drops (routines, time, weather, self-care,
   // chores); joins the parked subject with its siblings.
   "Life Skills > Daily Living": { subject: "life_skills", domainId: "daily-living", displayName: "Daily living", kind: "assessment" },
+
+  // Inspo-flywheel addition (2026-07-20): Blossom & Root Level 0 (a
+  // Charlotte Mason-inspired kindergarten curriculum) introduced weekly
+  // picture study and composer study, and Marble has no Art or Music
+  // subject to receive them. Homa already has fully authored "art" and
+  // "music" bank subjects (packages/core/src/map/content.ts) with their
+  // own assessment domains (see domains.ts AUTHORED_DOMAINS); these two
+  // entries add NEW content-kind domains under those same subjects for
+  // Marble-style enrichment topics, deliberately using domain ids that do
+  // not collide with the existing authored ones.
+  "Art > Picture Study & Art Appreciation": { subject: "art", domainId: "picture-study-appreciation", displayName: "Picture study & art appreciation", kind: "content" },
+  "Music > Composer Study & Music Appreciation": { subject: "music", domainId: "composer-study-appreciation", displayName: "Composer study & music appreciation", kind: "content" },
 };
 
 /** Marble's SCREAMING enum → Homa's lowercase TopicKind. */

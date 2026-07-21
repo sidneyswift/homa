@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1634,
+  "topicCount": 1638,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32011,6 +32011,78 @@
         "Describe the water cycle as a continuous loop with no beginning or end"
       ],
       "assessmentPrompt": "Can {{name}} trace the journey of a raindrop \u2014 from the ocean being heated by the Sun, rising as invisible vapour, forming a cloud, and falling back down as rain \u2014 and explain it keeps going round and round?",
+      "standards": []
+    },
+    {
+      "id": "mt_Xp1WkwWozD",
+      "type": "CONCEPTUAL",
+      "subject": "Art",
+      "domain": "Picture Study & Art Appreciation",
+      "name": "Picture Study: Observing and Recalling Artwork",
+      "description": "Understand the Charlotte Mason picture study routine: look closely at one artwork for a few quiet minutes, then describe it from memory, including colors, shapes, subject, and feeling, before learning the artist's name and the artwork's title",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Look at a painting for several minutes without talking, then describe two or three details from memory",
+        "Name a color, shape, or feeling the artwork brings to mind",
+        "Recall the artist's name and the artwork's title after being told them"
+      ],
+      "assessmentPrompt": "After {{name}} studies a painting and it is put away, can they recall at least two details about what they saw?",
+      "standards": []
+    },
+    {
+      "id": "mt_2u99ybq83k",
+      "type": "PROCEDURAL",
+      "subject": "Art",
+      "domain": "Picture Study & Art Appreciation",
+      "name": "Process Art Inspired by an Artist's Technique",
+      "description": "Create open-ended artwork using a material or technique connected to a studied artist, such as painting, wire sculpture, or collage, with the emphasis on exploration and delight rather than copying the artist's exact work",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Use a new material or technique (paint, wire, clay, paper) with guidance from an adult",
+        "Describe what they made and why they chose their colors or shapes",
+        "Complete a piece of art without needing it to look like the artist's original work"
+      ],
+      "assessmentPrompt": "Can {{name}} try a new art material inspired by an artist's technique and talk about what they created?",
+      "standards": []
+    },
+    {
+      "id": "mt_DFIWe5Fe47",
+      "type": "CONCEPTUAL",
+      "subject": "Music",
+      "domain": "Composer Study & Music Appreciation",
+      "name": "Composer Study: Active Listening",
+      "description": "Understand the Charlotte Mason composer study routine: listen closely to a piece of music by one composer over several weeks, noticing instruments, tempo, and mood, then learn a little about the composer's life",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Sit and listen to a piece of music for a few minutes without another activity going on",
+        "Describe whether the music is fast or slow, loud or soft",
+        "Recognize a new piece of music as belonging to a composer studied before"
+      ],
+      "assessmentPrompt": "After listening to several pieces by one composer, can {{name}} recognize another piece by that same composer?",
+      "standards": []
+    },
+    {
+      "id": "mt_OEyTGrh8MA",
+      "type": "CONCEPTUAL",
+      "subject": "Music",
+      "domain": "Composer Study & Music Appreciation",
+      "name": "Identifying Mood and Instruments in Music",
+      "description": "Notice and describe the mood a piece of music creates, such as happy, calm, or exciting, and identify at least one instrument being played, building a foundation for musical listening skills",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Describe how a piece of music makes them feel",
+        "Name at least one instrument they hear in a recording",
+        "Move or respond physically to changes in tempo or mood"
+      ],
+      "assessmentPrompt": "While listening to a new piece of music, can {{name}} say whether it feels fast or slow, and name one instrument they hear?",
       "standards": []
     }
   ]

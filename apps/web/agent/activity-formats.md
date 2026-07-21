@@ -424,3 +424,33 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 4-9. Ten-frames and simple addition for younger; bar models and multi-step for older.
 - **Creation path:** hybrid
 - **Example activity:** `[singapore-workbook-page] Addition to 20 — ten-frame dot manipulation showing 8 + 5 by making 10 first`
+
+### narration-page
+- **Slug:** `[narration-page]`
+- **Name:** Narration page
+- **What it is:** A title/prompt header, a large blank box for the child's own illustration, and wide-ruled lines below for a parent to transcribe the child's spoken words. No answer key.
+- **Best for:** Charlotte Mason narration and journaling, personal reflection prompts, family-history memory pages, science and nature discovery logs.
+- **Subjects:** ELA (narration), Personal & Social Development (journaling), science and nature study (discovery logs)
+- **Ages:** 4-8. A calendar-tracking header row suits science logs; a shaped illustration frame (heart, book) suits milestone pages.
+- **Creation path:** html
+- **Example activity:** `[narration-page] "What happened in the story today?" — illustration box on top, six dictation lines below`
+
+### artist-composer-study-card
+- **Slug:** `[artist-composer-study-card]`
+- **Name:** Artist / composer study card
+- **What it is:** A reusable portfolio card for Charlotte Mason picture study or composer study: name banner, artwork frame or listening icon, a "where they were from" map circle, and a reflection box.
+- **Best for:** Art appreciation, music appreciation, building a running artist/composer portfolio across a school year.
+- **Subjects:** Art (picture study), music (composer study)
+- **Ages:** 4-10. One card per artist or composer, same template reused week to week.
+- **Creation path:** html
+- **Example activity:** `[artist-composer-study-card] Composer study card for Scott Joplin — name banner, "where they were from" circle, and a reflection box`
+
+### nature-observation-journal
+- **Slug:** `[nature-observation-journal]`
+- **Name:** Nature observation journal
+- **What it is:** A weekly nature-notebook page the child fills in with their own drawing and words after time outside: a choice profile, five-senses log, side-by-side comparison, or open discovery layout.
+- **Best for:** Charlotte Mason nature study, outdoor observation journals, seasonal nature walks, wildlife and specimen logging.
+- **Subjects:** Science (nature study, animals, plants)
+- **Ages:** 4-10. Mostly blank for the child's own drawing, never Homa-supplied reference art.
+- **Creation path:** html
+- **Example activity:** `[nature-observation-journal] Five-senses tree log — "I see / I hear / I smell / I feel" prompts beside a drawing box, with a circle to attach a leaf`

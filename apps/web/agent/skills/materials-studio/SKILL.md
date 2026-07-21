@@ -473,6 +473,9 @@ making.
 | Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
 | Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
 | Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
+| Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
+| Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
+| Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
 
 ## Design rules (binding)
 

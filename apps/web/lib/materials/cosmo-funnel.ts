@@ -87,6 +87,11 @@ export const GAP_ALIASES: Record<string, string> = {
   "vocabulary-sidebar": "reading-comprehension-mini-unit",
   "printable-manipulative-set": "manipulatives",
   "dot-marker-activity": "dot-marker-activity",
+  // Blossom & Root Level 0 ingest (2026-07-20) shipped recipes covering
+  // gaps the earlier Early Years Vol. 2 ingest (2026-07-19) had proposed
+  // under different names.
+  "nature-notebook-page": "nature-observation-journal",
+  "picture-study-card": "artist-composer-study-card",
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
