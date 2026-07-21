@@ -29,10 +29,16 @@ function runIcon(kind: TaskRunView["kind"]) {
     case "journal_prompt":
       return <Moon size={16} />;
     case "custom":
+    case "agent_job":
       return <Bell size={16} />;
     default: {
+      // Exhaustiveness stays compile-checked, but the runtime default must
+      // render, not throw: run rows come from the database, so a kind added
+      // by a newer deploy (agent_job, 2026-07-20) reaches older UI code and
+      // a throw here kills the whole page during SSR streaming.
       const exhaustive: never = kind;
-      throw new Error(`unhandled run icon kind: ${String(exhaustive)}`);
+      void exhaustive;
+      return <Bell size={16} />;
     }
   }
 }
@@ -66,8 +72,11 @@ function statusNote(run: TaskRunView): string | null {
     case "running":
       return "Homa is preparing this task now.";
     default: {
+      // Same law as runIcon: database statuses can be newer than this
+      // deploy, and a display-only switch must degrade quietly, not throw.
       const exhaustive: never = run.status;
-      throw new Error(`unhandled run status: ${String(exhaustive)}`);
+      void exhaustive;
+      return null;
     }
   }
 }
