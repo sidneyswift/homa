@@ -57,7 +57,11 @@ owns design-system integration, not general mobile parity.
 
 ## Current native boundaries
 
-- Authentication is email and password. No Google OAuth flow is present in this package.
+- Authentication is Google or email and password. Google runs the
+  browser OAuth flow (`signInWithOAuth` plus `exchangeCodeForSession`)
+  against the same Supabase provider the web app uses, so it needs the
+  app's redirect URLs on the Supabase allow list. Native Google Sign-In
+  (the account-picker sheet, `signInWithIdToken`) is not present.
 - No push-notification configuration is present.
 - Printable artifacts render in chat and open their PDF URL in the system viewer, which can offer platform print or share actions. There is no native in-app print control.
 - New and unfinished families open the web `/onboarding` flow. Native onboarding is not present.
