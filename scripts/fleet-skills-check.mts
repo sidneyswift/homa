@@ -19,7 +19,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const skillsRoot = path.join(repoRoot, "apps/web/agent/skills");
 const toolsRoot = path.join(repoRoot, "apps/web/agent/tools");
 
-const MAX_SIBLING_FILES = 50;
+// File-count cap removed by founder ruling fleet-skill-file-cap-removed
+// (2026-07-20); the byte caps below remain binding.
 const MAX_FILE_BYTES = 512 * 1024;
 const MAX_PACKAGE_BYTES = 2 * 1024 * 1024;
 const EM_DASH = "\u2014";
@@ -171,10 +172,6 @@ function checkPackage(packageName: string, toolNames: Set<string>, packageNames:
   const files = walkPackageFiles(packageDir);
   for (const file of files) checkPathSafety(packageName, file);
 
-  const siblingCount = files.length - 1; // exclude SKILL.md itself
-  if (siblingCount > MAX_SIBLING_FILES) {
-    fail(`${packageName}: ${siblingCount} sibling files exceeds the ${MAX_SIBLING_FILES}-file cap`);
-  }
   const totalBytes = files.reduce((sum, file) => sum + file.bytes, 0);
   if (totalBytes > MAX_PACKAGE_BYTES) {
     fail(`${packageName}: ${totalBytes} bytes exceeds the ${MAX_PACKAGE_BYTES}-byte total package cap`);

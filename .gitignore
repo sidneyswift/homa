@@ -31,3 +31,12 @@ node_modules/
 # Template is canonical on the remote (branch+tag template-archive); local copy stays untracked
 homa-template/
 .output/
+
+# Downloaded inspo originals are copyrighted working copies; durable copies
+# live in Blob (founder ruling inspo-originals-offrepo, 2026-07-20).
+.cosmo/inspo-files/
+.cosmo/inspo-images/
+
+# Python bytecode
+__pycache__/
+*.pyc

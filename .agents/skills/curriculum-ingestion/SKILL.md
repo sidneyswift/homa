@@ -1,21 +1,23 @@
 ---
 name: curriculum-ingestion
-description: Break down a full curriculum or curriculum guide dropped in #homa-inspo into four layers (philosophy, scope & sequence, weekly structure, activity types), map everything to Homa's taxonomy and knowledge_bank, flag gaps, and surface product decisions for Sid. Use when someone drops a complete curriculum — not a single worksheet (use reference-ingestion for that).
+description: Use when a complete curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in #homa-inspo. Breaks it into four layers (philosophy, scope & sequence, weekly structure, activity types), maps everything to Homa's taxonomy and knowledge_bank, flags gaps, and surfaces product decisions for Sid. For a single worksheet or printable, use reference-ingestion instead.
 ---
 
 # Curriculum Ingestion
 
 ## When to use
 
-A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference — it represents a teaching philosophy and a structured plan. Your job: decompose it into four layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
+A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference: it represents a teaching philosophy and a structured plan. Your job: decompose it into four layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
+
+**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically.
 
 ## The four layers
 
 ### Layer 1: Philosophy & Method
 
 Map to `knowledge_bank` entries with `topic_type` values:
-- `method_philosophy` — the curriculum's educational philosophy (e.g. Charlotte Mason, classical, Montessori, eclectic)
-- `method_format` — how it delivers instruction (workbook-based, literature-based, unit-study, hands-on)
+- `method_philosophy`: the curriculum's educational philosophy (e.g. Charlotte Mason, classical, Montessori, eclectic)
+- `method_format`: how it delivers instruction (workbook-based, literature-based, unit-study, hands-on)
 
 Capture:
 - Core principles (3-5 bullet points)
@@ -32,20 +34,20 @@ Produce a mapping table:
 
 | Curriculum subject | Curriculum topic | Homa subject | Homa domain | Homa topic id | Status |
 |---|---|---|---|---|---|
-| Math | Counting to 20 | math | counting-cardinality | math.count-objects-1-20 | ✅ mapped |
-| Math | Telling time | math | — | — | ⚠️ unmapped |
-| Art | Color mixing | — | — | — | ❌ no subject |
+| Math | Counting to 20 | math | counting-cardinality | math.counting-objects-to-20 | ✅ mapped |
+| Math | Telling time | math | (none) | (none) | ⚠️ unmapped |
+| Art | Color mixing | (none) | (none) | (none) | ❌ no subject |
 
 Status values:
-- **✅ mapped** — direct match to existing Homa topic
-- **⚠️ unmapped** — subject/domain exists but no matching topic (suggest a topic slug)
-- **❌ no subject** — Homa has no subject for this area (needs Sid's decision)
-- **🔄 partial** — covers part of a Homa topic or combines multiple topics
+- **✅ mapped**: direct match to existing Homa topic
+- **⚠️ unmapped**: subject/domain exists but no matching topic (suggest a topic slug)
+- **❌ no subject**: Homa has no subject for this area (needs Sid's decision)
+- **🔄 partial**: covers part of a Homa topic or combines multiple topics
 
 For every `⚠️` or `❌`, include a suggested addition:
 ```
 Gap: "telling time" → suggested topic: math.tell-time-hour
-  domain: measurement-data (exists)
+  domain: measurement (exists)
   kind: procedural
   teachingWindowMonths: [60, 84]
 ```
@@ -82,14 +84,22 @@ List every distinct activity type the curriculum uses and cross-reference agains
 | Activity type | Description | Materials-studio recipe | Status |
 |---|---|---|---|
 | Tracing worksheet | Letter/number tracing with guides | html (tracing guide) | ✅ have recipe |
-| Cut-and-sort | Cut pictures, sort into categories | — | ❌ no recipe |
-| Narration page | Blank page with prompt for child to draw/dictate | — | ❌ no recipe |
+| Cut-and-sort | Cut pictures, sort into categories | (none) | ❌ no recipe |
+| Narration page | Blank page with prompt for child to draw/dictate | (none) | ❌ no recipe |
 | Counting mat | Count objects in groups | html or image-direct | ✅ have recipe |
 
-Known materials-studio recipes (from calibration):
+List the actual shipped recipes at analysis time, never from memory (the library grows; 33 recipe files ship today):
+
+```
+ls apps/web/agent/skills/materials-studio/references/recipes/
+```
+
+Match activity types against those filename slugs. The three creation paths are guidance for what a missing recipe would need, not a recipe list:
 - **image-direct**: coloring pages, posters, art-heavy pages, simple worksheets (titles + moderate item counts)
 - **html**: tracing guides, handwriting practice, text-dense pages, math layouts, flash cards, tables
 - **hybrid**: themed worksheets (precise exercises + illustration)
+
+Name every gap as a lowercase multi-word hyphen slug matching `^[a-z0-9]+(-[a-z0-9]+)+$` (the funnel in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else). Note: curriculum analyses record themselves under the synthetic gap `curriculum-sample`, which the materials funnel excludes by design; that is expected, not an error.
 
 For every `❌ no recipe`, describe what the recipe would need:
 ```
@@ -148,7 +158,7 @@ Write to `.cosmo/curriculums/<id>.json`:
         "curriculumTopic": "Counting to 20",
         "homaSubject": "math",
         "homaDomain": "counting-cardinality",
-        "homaTopicId": "math.count-objects-1-20",
+        "homaTopicId": "math.counting-objects-to-20",
         "status": "mapped"
       },
       {
@@ -160,7 +170,7 @@ Write to `.cosmo/curriculums/<id>.json`:
         "status": "unmapped",
         "suggested": {
           "topicSlug": "science.nature-observation",
-          "domain": "life-science",
+          "domain": "organisms-life-processes",
           "kind": "conceptual",
           "teachingWindowMonths": [48, 84]
         }
@@ -220,7 +230,7 @@ Write to `.cosmo/curriculums/<id>.json`:
   "decisionsNeeded": [
     {
       "category": "taxonomy",
-      "item": "Add nature-observation topic to science/life-science domain",
+      "item": "Add nature-observation topic to science/organisms-life-processes domain",
       "impact": "Enables nature study curriculum support",
       "urgency": "medium"
     },
@@ -238,11 +248,11 @@ Write to `.cosmo/curriculums/<id>.json`:
     }
   ],
 
-  "notes": "Strong overlap with existing taxonomy in math and ELA. Main gaps are nature study and art appreciation — CM-specific subjects."
+  "notes": "Strong overlap with existing taxonomy in math and ELA. Main gaps are nature study and art appreciation, CM-specific subjects."
 }
 ```
 
-Update the manifest at `.cosmo/curriculums/index.json`:
+The manifest at `.cosmo/curriculums/index.json` (generated, see below):
 
 ```json
 {
@@ -261,21 +271,21 @@ Update the manifest at `.cosmo/curriculums/index.json`:
 }
 ```
 
-If `index.json` already exists, append to the `curriculums` array.
+The index shown above is the generated shape, not a file you edit: after writing the cur JSON, run `python3 .cosmo/scripts/verify-ingestion.py --regen-index` and it is rebuilt from the individual JSONs. Never hand-edit `index.json`.
 
 ## Post-analysis actions
 
 ### Reply in #homa-inspo thread
 
-Brief acknowledgment to the dropper: what you received and that you're analyzing it. Keep it short — the real output goes to #homa.
+Brief acknowledgment to the dropper: what you received and that you're analyzing it. Keep it short; the real output goes to #homa-dev.
 
-### Post summary to #homa (C0BF3QUABDH)
+### Post summary to #homa-dev (C0BF3QUABDH, `SLACK_DEV_CHANNEL_ID` in the root `.env.example`; automation keys on the ID, not the name)
 
 Structure:
 
 **1. What Homa would learn** (one paragraph)
 
-> "This Charlotte Mason kindergarten guide would teach Homa how CM families structure their days: 15-minute math blocks, daily nature journals, narration instead of testing. It maps cleanly to 18 of our 24 taxonomy topics in math and ELA. The main gaps are nature study (we have no nature-observation topic) and art appreciation (no subject at all). Three activity types — narration pages, nature journal templates, and copywork sheets — would need new materials-studio recipes."
+> "This Charlotte Mason kindergarten guide would teach Homa how CM families structure their days: 15-minute math blocks, daily nature journals, narration instead of testing. It maps cleanly to 18 of our 24 taxonomy topics in math and ELA. The main gaps are nature study (we have no nature-observation topic) and art appreciation (no subject at all). Three activity types (narration pages, nature journal templates, and copywork sheets) would need new materials-studio recipes."
 
 **2. Decisions needed from Sid**
 
@@ -283,17 +293,21 @@ Format as a checklist he can approve/reject inline:
 
 ```
 Taxonomy:
-- [ ] Add `science.nature-observation` topic (life-science domain)
+- [ ] Add `science.nature-observation` topic (organisms-life-processes domain)
 - [ ] Add `art` subject with `art-appreciation` domain
 
 Recipes:
-- [ ] narration-page (html) — blank drawing + lined dictation
-- [ ] nature-journal (hybrid) — observation sketch + notes grid
-- [ ] copywork-sheet (html) — model sentence + tracing lines
+- [ ] narration-page (html): blank drawing + lined dictation
+- [ ] nature-journal (hybrid): observation sketch + notes grid
+- [ ] copywork-sheet (html): model sentence + tracing lines
 
 Knowledge bank:
 - [ ] Add charlotte-mason-k-format (method_format)
 ```
+
+**3. Full analysis link**
+
+Point to the JSON: "Full analysis at `.cosmo/curriculums/cur-2026-07-12-charlotte-mason-k.json`"
 
 ### Write to knowledge bank
 
@@ -311,27 +325,31 @@ Layer 1 (philosophy/method) findings get written to the knowledge bank through t
 
 The gate handles validation, sanitization, and citation resolution. No new write path needed.
 
-### Enrich taxonomy
+### Enrich taxonomy (exact sequence, append-only)
 
-Layer 2 unmapped topics get added directly to `packages/taxonomy/data/topics.json`. Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL", subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`. Run `pnpm --filter @homa/taxonomy validate` after adding. Update topic counts in `packages/taxonomy/data/manifest.json`.
+Layer 2 unmapped topics follow the same binding sequence as reference-ingestion step 8:
+
+1. **Append** entries to the `topics` array in `packages/taxonomy/data/topics.json` and bump its `topicCount` field by the same amount; never re-serialize, re-sort, or dedupe (topic names are legal duplicates across age bands). Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL" (the other MarbleTopicType values are valid when genuinely applicable), subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`.
+2. `subject` and `domain` are both Marble display names, and the pair composed as `<Subject> > <Domain>` (e.g. `Mathematics > Counting & Cardinality`) must exactly match an existing `MARBLE_DOMAIN_MAP` key in `packages/taxonomy/src/mapping.ts`. A genuinely new pair needs a `mapping.ts` edit in the same change.
+3. `pnpm taxonomy:slugs`, then `pnpm taxonomy:progress`, then update `packages/taxonomy/data/manifest.json`: the counts AND the `bytes` + `sha256` entry in `manifest.files` for every touched data file (`shasum -a 256 packages/taxonomy/data/topics.json`). A stale checksum guarantees a red `check:taxonomy`.
+4. `pnpm check:taxonomy` must exit 0 before pushing. There is no `pnpm --filter @homa/taxonomy validate` command; it never existed.
+5. Confirm the `topics.json` diff is insertions only: no existing topic objects deleted or modified, and the topic count (`topicCount` and array length) strictly grew.
 
 ### Add activity formats and recipes
 
 Layer 4 activity types that have `status: "no_recipe"`:
-- Add recipe sections to `apps/web/agent/skills/materials-studio/SKILL.md` (before "Design rules (binding)")
-- Add entries to `apps/web/agent/activity-formats.md`
+- Author a self-contained recipe file at `apps/web/agent/skills/materials-studio/references/recipes/<slug>.md` (plain markdown, `# Title`, no frontmatter, when-to-use, `Great for:` line, creation path, binding `Design patterns` section, worked HTML for html and hybrid paths), plus exactly one row in the Format library index table in that skill's `SKILL.md`. Never write recipe sections into `SKILL.md` itself; PR #57 relocated all recipes to files.
+- If the gap name differs from the shipped recipe filename, add the `GAP_ALIASES` entry in `apps/web/lib/materials/cosmo-funnel.ts` in the same change.
+- Add entries to `apps/web/agent/activity-formats.md`, keeping the exact slug line format the coverage matcher parses: ``- **Slug:** `[<slug>]` ``.
+- Package budget: the file-count cap was removed by founder ruling `fleet-skill-file-cap-removed` (2026-07-20); the 512KB per-file and 2MB per-package byte caps in `check:fleet-skills` remain binding.
 
-Follow the format of existing recipes and registry entries.
+Run `pnpm check:fleet-skills` and `pnpm check:materials` before pushing.
 
 ### Update curriculum writer methodology
 
 If the curriculum introduces a methodology the curriculum writer doesn't know about:
 - Add a methodology note to `apps/web/agent/curriculum-writer.md` explaining how that method structures weeks, sessions, and assessment
 - Examples: Charlotte Mason short-lesson rotation with narration, Montessori three-period lesson structure, classical trivium staging
-
-**3. Full analysis link**
-
-Point to the JSON: "Full analysis at `.cosmo/curriculums/cur-2026-07-12-charlotte-mason-k.json`"
 
 ## Distinguishing from reference-ingestion
 
@@ -342,8 +360,11 @@ Point to the JSON: "Full analysis at `.cosmo/curriculums/cur-2026-07-12-charlott
 | Contains scope & sequence or weekly plans | ✅ | |
 | Contains a stated educational philosophy | ✅ | |
 | It's a screenshot of one printable | | ✅ |
+| Photo of a physical workbook page | | ✅ (printFormat unknown) |
+| Bare product link, no file | | ✅ (capture-or-fail first, then route) |
+| Bulk scrape batch with no per-file Slack message | | ✅ (analysisQuality heuristic, no taste) |
 
-When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's a single page meant to be printed and used, it's a reference.
+When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's a single page meant to be printed and used, it's a reference. A multi-book curriculum wave (e.g. a full grade level dropped as 10 PDFs) is one curriculum analysis per book or coherent set, not 10 reference analyses.
 
 ## File locations
 
@@ -358,16 +379,20 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 | Materials-studio skill | `apps/web/agent/skills/materials-studio/SKILL.md` |
 | Activity format registry | `apps/web/agent/activity-formats.md` |
 | Knowledge bank gate | `apps/web/lib/knowledge/gate.ts` |
-| Knowledge bank schema | `supabase/migrations/20260711031000_knowledge_bank.sql` |
 
 ## Post-ingestion verification
 
-After completing all steps above and confirming the curriculum was fully ingested:
+In order:
 
-1. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji.
-2. This signals to Sid (and the dropper) that the curriculum has been fully ingested through the curriculum-ingestion skill.
-3. Only react AFTER verifying all analysis steps completed successfully.
-4. If any step failed or was skipped, do NOT react with 🚢 — fix the issue first.
+1. Write or update the cur JSON, then regenerate the manifest: `python3 .cosmo/scripts/verify-ingestion.py --regen-index` (never hand-edit `index.json`; the indexed check below fails otherwise).
+2. Run the gate (curriculum mode checks: identity fields, the four layers nonempty, index membership, decisions recorded, and that Layer-4 suggested recipe names are multi-word slugs):
+
+```
+python3 .cosmo/scripts/verify-ingestion.py <cur-id>
+```
+
+3. Send the #homa-dev summary and the thread acknowledgment.
+4. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji **only on exit 0**. If any step failed or was skipped, do NOT react with 🚢; fix the issue first.
 
 The 🚢 emoji is a **verified ingestion marker**. Its presence on a message means "this drop was fully processed through the correct ingestion skill." Its absence means it wasn't.
 
