@@ -20,6 +20,10 @@ function base(overrides: Partial<DripSignals> = {}): DripSignals {
     anyReportViewed: false,
     unviewedChildName: null,
     unviewedReportToken: null,
+    planChildName: null,
+    planSubjectId: null,
+    planCreatedAt: null,
+    closedLoop: false,
     optedOut: false,
     suppressed: false,
     lastDripSentAt: null,
@@ -118,4 +122,63 @@ test("a family with an opened report and full setup gets nothing", () => {
     anyReportViewed: true,
   });
   assert.equal(chooseDripNudge(signals, NOW), null);
+});
+
+function withPlan(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: true,
+    planChildName: "Mia",
+    planSubjectId: "reading",
+    planCreatedAt: DAYS(9),
+    ...overrides,
+  });
+}
+
+test("loop-back nudge fires for a plan with no word back, a week on", () => {
+  assert.deepEqual(chooseDripNudge(withPlan(), NOW), {
+    kind: "drip_loop_back",
+    childName: "Mia",
+    subjectId: "reading",
+  });
+});
+
+test("loop-back nudge does not fire once the parent closed the loop", () => {
+  assert.equal(chooseDripNudge(withPlan({ closedLoop: true }), NOW), null);
+});
+
+test("loop-back nudge waits a full week after the plan", () => {
+  assert.equal(chooseDripNudge(withPlan({ planCreatedAt: DAYS(2) }), NOW), null);
+});
+
+test("loop-back nudge never repeats once sent", () => {
+  assert.equal(
+    chooseDripNudge(withPlan({ sentKinds: ["drip_loop_back"] }), NOW),
+    null,
+  );
+});
+
+test("loop-back nudge needs a real plan to name, never fires without one", () => {
+  assert.equal(chooseDripNudge(withPlan({ planSubjectId: null }), NOW), null);
+});
+
+test("an unopened report outranks the loop-back nudge", () => {
+  const signals = withPlan({
+    anyReportViewed: false,
+    reportEmailedAt: DAYS(3),
+    unviewedChildName: "Mia",
+    unviewedReportToken: "tok-9",
+  });
+  assert.deepEqual(chooseDripNudge(signals, NOW), {
+    kind: "drip_report_unviewed",
+    childName: "Mia",
+    reportToken: "tok-9",
+  });
+});
+
+test("suppression and the 7-day cap silence the loop-back nudge too", () => {
+  assert.equal(chooseDripNudge(withPlan({ suppressed: true }), NOW), null);
+  assert.equal(chooseDripNudge(withPlan({ lastDripSentAt: DAYS(2) }), NOW), null);
 });

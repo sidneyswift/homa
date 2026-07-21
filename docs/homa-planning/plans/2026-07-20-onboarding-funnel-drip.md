@@ -526,3 +526,45 @@ has more children than it does):
 > [Add another child]
 >
 > One at a time is perfectly fine. Turn these off anytime.
+
+## Session 5 (2026-07-20): SMS attribution + the loop-back nudge
+
+Founder asked for both after the activation ladder shipped.
+
+**SMS attribution fixed.** `sms.message_received` never carried a family id
+(231 events, zero attributable), so every inbound text was invisible to any
+per-family metric even though most families text. `emitMapEvent` already
+accepted an `options.familyId`, so the fix passes the id that was already in
+scope: it rides the COLUMN, never the props, so the props contract and the
+MJ-08 registry are unchanged and nothing identifying was added. Historical
+events stay unattributable, which is why the activation ladder keeps reading
+`conversation_messages` (durable, family-scoped, every channel).
+
+**The loop-back nudge**, aimed at the ladder's measured cliff (5 of 36
+families ever told Homa how it went). Audience: said yes to a plan, never
+closed the loop, a full week on. It names the actual plan, so it only fires
+when a plan exists. Shares `lib/activation/signals.ts` with the console, so
+the cliff the console reports and the cliff the drip aims at cannot drift.
+
+Two things caught in verification, both from running the real queries:
+- 13 of 20 plans in production are the whole-month plan (`MONTH_PLAN_SUBJECT`),
+  which is not in the subject bank. Resolving it through `getMapSubject` alone
+  would have silently skipped the majority of the audience. Handled with the
+  same month/subject split `/api/map/cron` makes for the retest email.
+- The funnel's sandbox fence was a negative `not exists`, TRUE for an event
+  whose family id matches no family at all, so orphaned rows from purged
+  anonymous leads counted as families. Fixed to a positive join (shipped with
+  the ladder, PR #68).
+
+Copy gated through `homa-copy-reviewer` then `homa-copy-editor`. The reader
+refused to answer an email that only asked her for work, so it says what Homa
+already did first; the open "what worked and what didn't" became one narrow
+yes/no; and a line reassuring her that not doing the plan was "not a failure"
+was cut for naming a judgment she had not made. The editor pass removed three
+restatements of one idea, named the concrete artifacts, made the CTA its own
+verb-first sentence, and unified the voice to first person. The shared drip
+footer lost its "off switch" metaphor for the actual instruction, and now
+says "progress report" per the one-name-per-concept law.
+
+Still dark: `HOMA_DRIP_ENABLED` is unchanged, and the Phase 4 go-live gates
+(unsubscribe secret set, suppression verified live) still stand.
