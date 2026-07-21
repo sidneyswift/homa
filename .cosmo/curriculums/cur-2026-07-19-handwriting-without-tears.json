@@ -44,13 +44,17 @@
         "suggestedKey": "handwriting-without-tears",
         "topicType": "method_philosophy",
         "title": "Handwriting Without Tears / Learning Without Tears Method",
-        "summary": "A developmental, multisensory approach to teaching letter and number formation. Letters are grouped and taught by shared stroke family (straight lines, Magic C curves, big/little curves, diagonals), not alphabetically. Capitals are taught before lowercase because they are simpler and more uniform. Every stroke is narrated with a small consistent verbal vocabulary (big line, little line, curve) while a parent models and the child copies. Readiness activities build body awareness and the same basic strokes with wooden pieces before any pencil work begins, and a wet-dry-try slate sequence rehearses each letter's motion three sensory ways before paper. Assessment is developmental benchmark and observation, not testing."
+        "summary": "A developmental, multisensory approach to teaching letter and number formation. Letters are grouped and taught by shared stroke family (straight lines, Magic C curves, big/little curves, diagonals), not alphabetically. Capitals are taught before lowercase because they are simpler and more uniform. Every stroke is narrated with a small consistent verbal vocabulary (big line, little line, curve) while a parent models and the child copies. Readiness activities build body awareness and the same basic strokes with wooden pieces before any pencil work begins, and a wet-dry-try slate sequence rehearses each letter's motion three sensory ways before paper. Assessment is developmental benchmark and observation, not testing.",
+        "mergedRowId": "7d072efc-e1bb-4233-af91-8d197b458bc8",
+        "mergedAt": "2026-07-21"
       },
       {
         "suggestedKey": "get-set-for-school-prek-readiness-writing-format",
         "topicType": "method_format",
         "title": "Get Set for School Pre-K Readiness & Writing Teacher's Guide Format",
-        "summary": "A single Pre-K teacher's guide (8th edition, 2021, Learning Without Tears) organized into nine skill sections rather than numbered weeks: Readiness, Drawing, Alphabet Knowledge, Colors & Coloring, Pre-Writing, Writing Capital Letters (all 26), Counting & Numbers, Writing Lowercase Letters (all 26), and a Resources appendix (formation charts, an index, and the research bibliography). Each letter or number gets its own lesson page with a consistent template: a model to look at, guided trace-and-copy practice, a check step, an ELL support note, and a Look What We're Learning skills box (foundation skills, writing, sensory-motor, oral language, vocabulary). No day-by-day or week-by-week calendar is given; pacing is left to the teacher's judgment of the child's readiness. The guide is written for a classroom teacher as much as a homeschool parent (it references classroom routines, circle time, and a classroom environment throughout), which is a real product consideration for how Homa should adapt it for a one-child homeschool setting."
+        "summary": "A single Pre-K teacher's guide (8th edition, 2021, Learning Without Tears) organized into nine skill sections rather than numbered weeks: Readiness, Drawing, Alphabet Knowledge, Colors & Coloring, Pre-Writing, Writing Capital Letters (all 26), Counting & Numbers, Writing Lowercase Letters (all 26), and a Resources appendix (formation charts, an index, and the research bibliography). Each letter or number gets its own lesson page with a consistent template: a model to look at, guided trace-and-copy practice, a check step, an ELL support note, and a Look What We're Learning skills box (foundation skills, writing, sensory-motor, oral language, vocabulary). No day-by-day or week-by-week calendar is given; pacing is left to the teacher's judgment of the child's readiness. The guide is written for a classroom teacher as much as a homeschool parent (it references classroom routines, circle time, and a classroom environment throughout), which is a real product consideration for how Homa should adapt it for a one-child homeschool setting.",
+        "mergedRowId": "484529a8-4a0a-4fd9-a7de-50c1ddfe0fc4",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -307,9 +311,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write the handwriting-without-tears (method_philosophy) and get-set-for-school-prek-readiness-writing-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: handwriting-without-tears=7d072efc-e1bb-4233-af91-8d197b458bc8, get-set-for-school-prek-readiness-writing-format=484529a8-4a0a-4fd9-a7de-50c1ddfe0fc4 Original ask: Write the handwriting-without-tears (method_philosophy) and get-set-for-school-prek-readiness-writing-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "recipe",

@@ -43,13 +43,17 @@
         "suggestedKey": "investigate-then-explain-elementary-science",
         "topicType": "method_philosophy",
         "title": "Investigate-Then-Explain Elementary Science (Published Textbook Inquiry Method)",
-        "summary": "A published-textbook approach to elementary science where every lesson opens with a short hands-on 'Investigate' activity (materials list plus 2-3 numbered steps, observe or test something firsthand) and only afterward gives a brief reading passage that names and explains the concept, never the reverse order. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in front matter and then referenced by name throughout the year, including inside per-lesson 'Science Skill' tip boxes. Chapters close with a three-part review (open prompts, vocabulary matching, numbered skill-application tasks) instead of a test. This is a distinct methodology from both Direct Instruction (no script, no choral response) and Charlotte-Mason-style nature study (the investigate-first sequence is explicit and textbook-driven, not child-led outdoor observation), even though a family may use any of the three for different subjects in the same week."
+        "summary": "A published-textbook approach to elementary science where every lesson opens with a short hands-on 'Investigate' activity (materials list plus 2-3 numbered steps, observe or test something firsthand) and only afterward gives a brief reading passage that names and explains the concept, never the reverse order. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in front matter and then referenced by name throughout the year, including inside per-lesson 'Science Skill' tip boxes. Chapters close with a three-part review (open prompts, vocabulary matching, numbered skill-application tasks) instead of a test. This is a distinct methodology from both Direct Instruction (no script, no choral response) and Charlotte-Mason-style nature study (the investigate-first sequence is explicit and textbook-driven, not child-led outdoor observation), even though a family may use any of the three for different subjects in the same week.",
+        "mergedRowId": "77327db2-70db-4af4-a94f-d0ef6d3803a7",
+        "mergedAt": "2026-07-21"
       },
       {
         "suggestedKey": "harcourt-science-grade1-format",
         "topicType": "method_format",
         "title": "Harcourt Science Grade 1 Pupil Edition Format",
-        "summary": "A Grade 1 elementary science pupil edition (Harcourt School Publishers, copyright 2000, ISBN 0-15-317496-X) organized into 6 units of 2 chapters each (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), split evenly across Life Science, Earth Science, and Physical Science. Every lesson is a fixed Investigate-then-Learn-About spread; every chapter (12 total) closes with a three-part Review; every unit (6 total) closes with Activities for Home or School plus a Unit Wrap Up (Writing/Reading/Computer Center). A combined References back-matter section (Science Handbook, Health Handbook, Glossary, Index) runs roughly 56 pages and serves as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent."
+        "summary": "A Grade 1 elementary science pupil edition (Harcourt School Publishers, copyright 2000, ISBN 0-15-317496-X) organized into 6 units of 2 chapters each (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), split evenly across Life Science, Earth Science, and Physical Science. Every lesson is a fixed Investigate-then-Learn-About spread; every chapter (12 total) closes with a three-part Review; every unit (6 total) closes with Activities for Home or School plus a Unit Wrap Up (Writing/Reading/Computer Center). A combined References back-matter section (Science Handbook, Health Handbook, Glossary, Index) runs roughly 56 pages and serves as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent.",
+        "mergedRowId": "4fd5a357-0f53-49f1-968c-ac89cc17e711",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -62,7 +66,9 @@
         "homaDomain": "the-human-body",
         "homaTopicId": "mt_nwSWPTENmv",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'The Five Senses' topic (age 5-7) is a direct, strong match" }
+        "suggested": {
+          "note": "Homa's 'The Five Senses' topic (age 5-7) is a direct, strong match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 1: Living and Nonliving Things",
@@ -71,7 +77,9 @@
         "homaDomain": "ecosystems-habitats",
         "homaTopicId": "mt_Sa48W7KXB5",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Living, Dead & Never Alive' topic (age 6-7) covers the same living/nonliving distinction, filed under Ecosystems & Habitats rather than Organisms & Life Processes, still a genuine direct match" }
+        "suggested": {
+          "note": "Homa's 'Living, Dead & Never Alive' topic (age 6-7) covers the same living/nonliving distinction, filed under Ecosystems & Habitats rather than Organisms & Life Processes, still a genuine direct match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 2: All About Plants",
@@ -80,7 +88,9 @@
         "homaDomain": "organisms-life-processes",
         "homaTopicId": "mt_6xsEXxKdUX",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'How Plant Parts Work' topic is aged 7-8, a little older than this Grade 1 lesson's likely target age, but the concept is identical" }
+        "suggested": {
+          "note": "Homa's 'How Plant Parts Work' topic is aged 7-8, a little older than this Grade 1 lesson's likely target age, but the concept is identical"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 2: All About Plants",
@@ -89,7 +99,9 @@
         "homaDomain": "organisms-life-processes",
         "homaTopicId": "mt_0B64gfJf7j",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Seeds & Plant Growth' topic (age 6-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Seeds & Plant Growth' topic (age 6-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 2: All About Plants",
@@ -98,7 +110,9 @@
         "homaDomain": "organisms-life-processes",
         "homaTopicId": "mt_lutxvMlkwS",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'What Plants Need to Thrive' topic (age 7-8) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'What Plants Need to Thrive' topic (age 7-8) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 3: All About Animals",
@@ -107,7 +121,9 @@
         "homaDomain": "ecosystems-habitats",
         "homaTopicId": "mt_cM8YS6NXqi",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Habitats & Basic Needs' topic (age 6-8) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Habitats & Basic Needs' topic (age 6-8) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 3: All About Animals",
@@ -116,7 +132,9 @@
         "homaDomain": "insects-minibeasts",
         "homaTopicId": "mt_yR1moI5kX1",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Common minibeasts: naming and recognising' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Common minibeasts: naming and recognising' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 3: All About Animals",
@@ -125,7 +143,9 @@
         "homaDomain": "insects-minibeasts",
         "homaTopicId": "mt_Wr6DDgr_kH",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Caterpillar to butterfly' topic (age 5-7) is a direct, exact match" }
+        "suggested": {
+          "note": "Homa's 'Caterpillar to butterfly' topic (age 5-7) is a direct, exact match"
+        }
       },
       {
         "curriculumSubject": "Unit A, Chapter 3: All About Animals",
@@ -134,7 +154,9 @@
         "homaDomain": "organisms-life-processes",
         "homaTopicId": "mt_4IVWRAZoNC",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Life Cycles of Organisms' topic (age 7-9) is a real but general life-cycle topic; there is no frog- or amphibian-specific life-cycle topic the way there is a dedicated butterfly one" }
+        "suggested": {
+          "note": "Homa's 'Life Cycles of Organisms' topic (age 7-9) is a real but general life-cycle topic; there is no frog- or amphibian-specific life-cycle topic the way there is a dedicated butterfly one"
+        }
       },
       {
         "curriculumSubject": "Unit B, Chapter 1: Plants and Animals Need One Another",
@@ -154,7 +176,9 @@
         "homaDomain": "ecosystems-habitats",
         "homaTopicId": "mt_Fw0bbM1e_g",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Habitat Vocabulary' topic (age 6-8) covers forest, desert, and rainforest habitats directly" }
+        "suggested": {
+          "note": "Homa's 'Habitat Vocabulary' topic (age 6-8) covers forest, desert, and rainforest habitats directly"
+        }
       },
       {
         "curriculumSubject": "Unit B, Chapter 2: A Place to Live",
@@ -163,7 +187,9 @@
         "homaDomain": "ocean-life",
         "homaTopicId": "mt_oAg79ju344",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'What Is the Ocean?' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'What Is the Ocean?' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit C, Chapter 1: Earth's Land",
@@ -172,7 +198,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": "mt_yhhprm7dZK",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Rocks and soil' topic (age 7-8) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Rocks and soil' topic (age 7-8) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit C, Chapter 2: Earth's Air and Water",
@@ -181,7 +209,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": "mt_nRF_VRntrW",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Where water is found on Earth' topic (age 7-8) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Where water is found on Earth' topic (age 7-8) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit C, Chapter 2: Earth's Air and Water",
@@ -190,7 +220,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": null,
         "status": "partial",
-        "suggested": { "note": "Correct domain, but no single existing topic names 'air surrounds the whole Earth' as a standalone Grade 1 concept the way water-location does" }
+        "suggested": {
+          "note": "Correct domain, but no single existing topic names 'air surrounds the whole Earth' as a standalone Grade 1 concept the way water-location does"
+        }
       },
       {
         "curriculumSubject": "Unit D, Chapter 1: Measuring Weather",
@@ -199,7 +231,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": "mt_HZvTriQWTh",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit D, Chapter 1: Measuring Weather",
@@ -208,7 +242,9 @@
         "homaDomain": "weather-climate",
         "homaTopicId": "mt_j7cj9eWN7w",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'What Is Wind?' topic (age 5-7) is an exact title match" }
+        "suggested": {
+          "note": "Homa's 'What Is Wind?' topic (age 5-7) is an exact title match"
+        }
       },
       {
         "curriculumSubject": "Unit D, Chapter 2: The Seasons",
@@ -217,7 +253,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": "mt_go5i87u2b9",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Seasonal changes' topic (age 5-6) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Seasonal changes' topic (age 5-6) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit E, Chapter 1: Investigate Matter",
@@ -226,7 +264,9 @@
         "homaDomain": "matter-materials",
         "homaTopicId": "mt_1JFUNQDwAJ",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'States of Matter Vocabulary' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'States of Matter Vocabulary' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit E, Chapter 1: Investigate Matter",
@@ -239,7 +279,10 @@
           "topicSlug": "science.floating-and-sinking",
           "domain": "matter-materials",
           "kind": "conceptual",
-          "teachingWindowMonths": [60, 84],
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
           "note": "Checked 'float', 'sink', and 'buoyan' across all 564 existing Science topics; zero hits in Matter & Materials (the 5 'float' and 2 'sink' hits elsewhere are all unrelated: sea ice, tectonic plates, orbital mechanics). Added as a genuine new topic this session, see notes."
         }
       },
@@ -250,7 +293,9 @@
         "homaDomain": "matter-materials",
         "homaTopicId": "mt_Pl-nsjYGZ3",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Heating & Cooling Changes' topic (age 7-9) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Heating & Cooling Changes' topic (age 7-9) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit E, Chapter 2: Heat and Light",
@@ -259,7 +304,9 @@
         "homaDomain": "waves-light-sound",
         "homaTopicId": "mt_Oru08pKlxd",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Light & Seeing in the Dark' (age 6-8) and 'How Shadows Form' (age 7-8) topics together are a direct match" }
+        "suggested": {
+          "note": "Homa's 'Light & Seeing in the Dark' (age 6-8) and 'How Shadows Form' (age 7-8) topics together are a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit F, Chapter 1: Pushes and Pulls",
@@ -268,7 +315,9 @@
         "homaDomain": "forces-motion",
         "homaTopicId": "mt_B3W5EfimJw",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Pushes & Pulls' (age 5-6) and 'Forces Vocabulary' (age 5-8) topics together are a direct match" }
+        "suggested": {
+          "note": "Homa's 'Pushes & Pulls' (age 5-6) and 'Forces Vocabulary' (age 5-8) topics together are a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit F, Chapter 1: Pushes and Pulls",
@@ -281,7 +330,10 @@
           "topicSlug": "science.how-wheels-help-objects-move",
           "domain": "forces-motion",
           "kind": "conceptual",
-          "teachingWindowMonths": [60, 84],
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
           "note": "Checked 'wheel', 'simple machine', 'wheel and axle', 'ramp', and 'incline' across all 564 existing Science topics; zero hits anywhere in Science. Added as a genuine new topic this session, see notes."
         }
       },
@@ -292,7 +344,9 @@
         "homaDomain": "forces-motion",
         "homaTopicId": "mt_9NvuqZKNiV",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Magnetic Materials' (age 7-8) and 'Magnetic Poles' (age 7-9) topics together are a direct match" }
+        "suggested": {
+          "note": "Homa's 'Magnetic Materials' (age 7-8) and 'Magnetic Poles' (age 7-9) topics together are a direct match"
+        }
       },
       {
         "curriculumSubject": "Health Handbook",
@@ -301,7 +355,9 @@
         "homaDomain": "the-human-body",
         "homaTopicId": "mt_tiPyEkm4cU",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'How Breathing Works' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'How Breathing Works' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Front matter: Using Science Skills / References: Science Handbook Investigating",
@@ -310,7 +366,9 @@
         "homaDomain": "scientific-inquiry",
         "homaTopicId": "mt_Wa44s-f8Ws",
         "status": "mapped",
-        "suggested": { "note": "Homa's Scientific Inquiry domain (31 topics) covers this closely: 'Simple tests and experiments' (age 5-7), 'Observing with simple equipment' (age 5-7), 'Recording Data' (age 5-7), and 'Asking scientific questions' (age 5-8) together map the whole front-matter skills spread" }
+        "suggested": {
+          "note": "Homa's Scientific Inquiry domain (31 topics) covers this closely: 'Simple tests and experiments' (age 5-7), 'Observing with simple equipment' (age 5-7), 'Recording Data' (age 5-7), and 'Asking scientific questions' (age 5-8) together map the whole front-matter skills spread"
+        }
       }
     ],
     "stats": {
@@ -414,9 +472,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write the investigate-then-explain-elementary-science (method_philosophy) and harcourt-science-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: investigate-then-explain-elementary-science=77327db2-70db-4af4-a94f-d0ef6d3803a7, harcourt-science-grade1-format=4fd5a357-0f53-49f1-968c-ac89cc17e711 Original ask: Write the investigate-then-explain-elementary-science (method_philosophy) and harcourt-science-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "recipe",

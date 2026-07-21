@@ -83,13 +83,17 @@
         "suggestedKey": "charlotte-mason",
         "topicType": "method_philosophy",
         "title": "Charlotte Mason Method",
-        "summary": "Living books over textbooks, short focused lessons, narration as the primary comprehension check instead of tests or worksheets, nature study through direct outdoor observation, picture study and composer study through repeated short exposure to one artist or composer at a time, and habit training alongside academics. Assessment is by portfolio (notebooks) and narration, not scoring."
+        "summary": "Living books over textbooks, short focused lessons, narration as the primary comprehension check instead of tests or worksheets, nature study through direct outdoor observation, picture study and composer study through repeated short exposure to one artist or composer at a time, and habit training alongside academics. Assessment is by portfolio (notebooks) and narration, not scoring.",
+        "mergedRowId": "6c24ca6d-6a70-4a14-b499-345d53d27243",
+        "mergedAt": "2026-07-21"
       },
       {
         "suggestedKey": "blossom-root-level0-format",
         "topicType": "method_format",
         "title": "Blossom & Root Level 0 (Kindergarten) Format",
-        "summary": "A four-guide kindergarten package (Language Arts, Arts and History, Science, Nature Study) plus matching student notebooks, self-branded secular but built on Charlotte Mason methodology. Language Arts and Arts & History each run the full 36-week year; Science ('My Great Space Adventure', an integrated math-and-science dramatic-play narrative with a Captain's Log) and Nature Study ('My Outdoor Classroom') each supply only 18 lessons, and the guides do not state whether these two run on alternating weeks, twice a month, or as two half-year blocks. Companion product to the already-ingested Early Years Vol. 2 (cur-2026-07-19-early-years-v2), one age level up."
+        "summary": "A four-guide kindergarten package (Language Arts, Arts and History, Science, Nature Study) plus matching student notebooks, self-branded secular but built on Charlotte Mason methodology. Language Arts and Arts & History each run the full 36-week year; Science ('My Great Space Adventure', an integrated math-and-science dramatic-play narrative with a Captain's Log) and Nature Study ('My Outdoor Classroom') each supply only 18 lessons, and the guides do not state whether these two run on alternating weeks, twice a month, or as two half-year blocks. Companion product to the already-ingested Early Years Vol. 2 (cur-2026-07-19-early-years-v2), one age level up.",
+        "mergedRowId": "9e14cd53-c484-4c08-a79e-e2e324400474",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -556,9 +560,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write the charlotte-mason (method_philosophy) and blossom-root-level0-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: charlotte-mason=6c24ca6d-6a70-4a14-b499-345d53d27243, blossom-root-level0-format=9e14cd53-c484-4c08-a79e-e2e324400474 Original ask: Write the charlotte-mason (method_philosophy) and blossom-root-level0-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) and live citation-URL resolution over the network; this sandbox has neither, so the write could not be attempted honestly. See notes for the exact proposed row content.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "taxonomy",

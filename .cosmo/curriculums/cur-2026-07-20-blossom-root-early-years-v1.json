@@ -49,13 +49,16 @@
         "suggestedKey": "waldorf",
         "topicType": "method_philosophy",
         "title": "Waldorf Method (light-touch elements)",
-        "summary": "Genuinely evidenced elements only, scoped narrowly to what this source shows: wet-on-wet watercolor painting technique, unhurried and gentle pacing with minimal formal instruction before age 6-7, beauty and simplicity of materials, and free play as the primary vehicle for early learning. This entry should NOT claim fuller Waldorf hallmarks (eurythmy, form drawing, verses, seasonal festival rhythm, delayed-literacy doctrine) since none were observed in this or any other ingested source; expand only when a source actually demonstrates them."
+        "summary": "Genuinely evidenced elements only, scoped narrowly to what this source shows: wet-on-wet watercolor painting technique, unhurried and gentle pacing with minimal formal instruction before age 6-7, beauty and simplicity of materials, and free play as the primary vehicle for early learning. This entry should NOT claim fuller Waldorf hallmarks (eurythmy, form drawing, verses, seasonal festival rhythm, delayed-literacy doctrine) since none were observed in this or any other ingested source; expand only when a source actually demonstrates them.",
+        "skipped": "2026-07-21 backfill: an existing curated seed row (2026-07-11, 'Waldorf at home: rhythm first, screens late, translation is tricky') already occupies the same (method_philosophy, waldorf, lens=method) cell; submitting this narrower note would have superseded it. Kept the curated row."
       },
       {
         "suggestedKey": "blossom-root-early-years-v1-format",
         "topicType": "method_format",
         "title": "Blossom & Root Early Years Vol. 1 (Ages 2-4) Format",
-        "summary": "A single 36-week, single-volume Pre-K/toddler curriculum (unlike Level 0's four separate guides of uneven length) organized as one weekly 4-page unit covering Nature Study, Composer Study, Math & Science (the \"3 E's\": Environment/Experience, Engagement), Picture Study, The Arts (visual art, music-making, dramatic play), Kindness & Connectivity, The Kitchen Classroom, and Read-Together Time, plus a blank weekly planner page. Organized into four 9-week terms, each pairing one artist and one composer. No worksheets, no letters, no formal academics; assessment-free. Companion to the already-ingested Level 0 (Kindergarten, cur-2026-07-20-blossom-root-level0), one age level younger."
+        "summary": "A single 36-week, single-volume Pre-K/toddler curriculum (unlike Level 0's four separate guides of uneven length) organized as one weekly 4-page unit covering Nature Study, Composer Study, Math & Science (the \"3 E's\": Environment/Experience, Engagement), Picture Study, The Arts (visual art, music-making, dramatic play), Kindness & Connectivity, The Kitchen Classroom, and Read-Together Time, plus a blank weekly planner page. Organized into four 9-week terms, each pairing one artist and one composer. No worksheets, no letters, no formal academics; assessment-free. Companion to the already-ingested Level 0 (Kindergarten, cur-2026-07-20-blossom-root-level0), one age level younger.",
+        "mergedRowId": "201652f8-005e-4c11-bf25-5a3a69eadedf",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -402,9 +405,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write charlotte-mason (still open from the Level 0 sibling ingestion) and the two new rows waldorf (method_philosophy) and blossom-root-early-years-v1-format (method_format) to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: blossom-root-early-years-v1-format=201652f8-005e-4c11-bf25-5a3a69eadedf. Skipped: waldorf (pre-existing curated row kept, see knowledgeBankGaps). Original ask: Write charlotte-mason (still open from the Level 0 sibling ingestion) and the two new rows waldorf (method_philosophy) and blossom-root-early-years-v1-format (method_format) to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) this sandbox does not have. Proposed row content is in layer1_philosophy.knowledgeBankGaps above.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "taxonomy",

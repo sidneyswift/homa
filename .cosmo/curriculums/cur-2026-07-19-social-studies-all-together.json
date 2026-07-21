@@ -42,13 +42,17 @@
         "suggestedKey": "reading-skill-integrated-elementary-social-studies",
         "topicType": "method_philosophy",
         "title": "Reading-Skill-Integrated Elementary Social Studies (Published Textbook Comprehension Method)",
-        "summary": "A published-textbook approach to elementary social studies where each unit teaches one named reading-comprehension skill (predict, alike and different, put things in order, find the main idea, recall and retell, use picture clues) through a Vocabulary Preview scene, then applies that same skill in every lesson's closing 'What Did You Learn?' box (2 recall questions plus 1 open reading-skill question). There is no hands-on investigation step anywhere. Distinct recurring feature boxes each carry one job: Citizen Heroes and Meet-the-Person biographies pair a real person's story with a named citizenship trait; Then and Now compares something across time; Map and Globe Skills and Chart and Graph Skills teach one concrete skill each in a small callout; Here and There makes a single world comparison. This is a distinct methodology from Direct Instruction (no script, no choral response), from the sibling Investigate-Then-Explain science pattern (no hands-on materials-list step; the organizing thread is a reading skill, not a process skill), and from Charlotte Mason (feature boxes and a fixed comprehension-check structure carry the content, not living books and free narration), even though a family may use any of these for different subjects in the same week."
+        "summary": "A published-textbook approach to elementary social studies where each unit teaches one named reading-comprehension skill (predict, alike and different, put things in order, find the main idea, recall and retell, use picture clues) through a Vocabulary Preview scene, then applies that same skill in every lesson's closing 'What Did You Learn?' box (2 recall questions plus 1 open reading-skill question). There is no hands-on investigation step anywhere. Distinct recurring feature boxes each carry one job: Citizen Heroes and Meet-the-Person biographies pair a real person's story with a named citizenship trait; Then and Now compares something across time; Map and Globe Skills and Chart and Graph Skills teach one concrete skill each in a small callout; Here and There makes a single world comparison. This is a distinct methodology from Direct Instruction (no script, no choral response), from the sibling Investigate-Then-Explain science pattern (no hands-on materials-list step; the organizing thread is a reading skill, not a process skill), and from Charlotte Mason (feature boxes and a fixed comprehension-check structure carry the content, not living books and free narration), even though a family may use any of these for different subjects in the same week.",
+        "mergedRowId": "db578f7e-d492-46e8-a965-ff796a279f3e",
+        "mergedAt": "2026-07-21"
       },
       {
         "suggestedKey": "social-studies-all-together-grade1-format",
         "topicType": "method_format",
         "title": "Social Studies: All Together Grade 1 Pupil Edition Format",
-        "summary": "A Grade 1 elementary social studies pupil edition (Scott Foresman, an imprint of Pearson Education, copyright 2003, ISBN 0-328-01759-0) organized into 6 units (Time for School; In My Community; Work! Work! Work!; Our Earth, Our Resources; This Is Our Country; Our Country, Our World), each with 4-6 lessons plus recurring feature boxes (Citizen Heroes, Then and Now, Map and Globe Skills, Chart and Graph Skills, Here and There, DK inserts). A front-matter Social Studies Handbook (H2-H14) teaches citizenship vocabulary, problem-solving and decision-making steps, and the five themes of geography once before Unit 1. A back-matter Reference Guide (R2-R28: Atlas, Geography Terms, Picture Glossary, Index) runs as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent, the same as the sibling Harcourt Science volume."
+        "summary": "A Grade 1 elementary social studies pupil edition (Scott Foresman, an imprint of Pearson Education, copyright 2003, ISBN 0-328-01759-0) organized into 6 units (Time for School; In My Community; Work! Work! Work!; Our Earth, Our Resources; This Is Our Country; Our Country, Our World), each with 4-6 lessons plus recurring feature boxes (Citizen Heroes, Then and Now, Map and Globe Skills, Chart and Graph Skills, Here and There, DK inserts). A front-matter Social Studies Handbook (H2-H14) teaches citizenship vocabulary, problem-solving and decision-making steps, and the five themes of geography once before Unit 1. A back-matter Reference Guide (R2-R28: Atlas, Geography Terms, Picture Glossary, Index) runs as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent, the same as the sibling Harcourt Science volume.",
+        "mergedRowId": "665af610-befc-4deb-878d-31414d8b591d",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -543,9 +547,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write the reading-skill-integrated-elementary-social-studies (method_philosophy) and social-studies-all-together-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: reading-skill-integrated-elementary-social-studies=db578f7e-d492-46e8-a965-ff796a279f3e, social-studies-all-together-grade1-format=665af610-befc-4deb-878d-31414d8b591d Original ask: Write the reading-skill-integrated-elementary-social-studies (method_philosophy) and social-studies-all-together-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "recipe",

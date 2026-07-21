@@ -38,13 +38,17 @@
         "suggestedKey": "elements-and-principles-of-design-art",
         "topicType": "method_philosophy",
         "title": "Elements & Principles of Design Skills-Based Art Instruction",
-        "summary": "A published-textbook approach to elementary art that teaches the Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm, unity, variety) as explicit vocabulary, one term per teaching block, building from simple toward complex across a year. Every lesson pairs a hands-on making activity (a different concrete medium and technique almost every time: drawing, painting, clay, printmaking, weaving, paper folding, assemblage) with brief fine-art examples from a broad and diverse artist roster used for quick visual comparison, not slow single-work study. Reading-comprehension skills and cross-curricular connections are woven through every unit, and assessment is an end-of-unit recap rather than a test. This is a distinct methodology from Charlotte Mason picture study: it teaches technique and formal vocabulary directly rather than cultivating quiet, unscripted observation of one artist's work over a block of weeks."
+        "summary": "A published-textbook approach to elementary art that teaches the Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm, unity, variety) as explicit vocabulary, one term per teaching block, building from simple toward complex across a year. Every lesson pairs a hands-on making activity (a different concrete medium and technique almost every time: drawing, painting, clay, printmaking, weaving, paper folding, assemblage) with brief fine-art examples from a broad and diverse artist roster used for quick visual comparison, not slow single-work study. Reading-comprehension skills and cross-curricular connections are woven through every unit, and assessment is an end-of-unit recap rather than a test. This is a distinct methodology from Charlotte Mason picture study: it teaches technique and formal vocabulary directly rather than cultivating quiet, unscripted observation of one artist's work over a block of weeks.",
+        "mergedRowId": "87fc5b14-cf3a-4de7-b0cc-2add5eca79a4",
+        "mergedAt": "2026-07-21"
       },
       {
         "suggestedKey": "harcourt-art-everywhere-format",
         "topicType": "method_format",
         "title": "Harcourt Art Everywhere Pupil Edition Format",
-        "summary": "A 208-page elementary art pupil edition (Harcourt School Publishers Art series, authors Jacqueline Chanda and Kristen Pederson Marstaller, 2006 copyright) organized into 6 units of 5 lessons each (30 lessons), every lesson a fixed 2-page spread: a vocabulary-word focus, 2 or more fine-art reproductions with a reading-skill-tied question, an Artist's Workshop hands-on activity (materials list plus Plan, Create, Reflect steps), and often a cross-curricular connection box. Units close with a Review and Reflect recap. A Student Handbook appendix (roughly 64 pages) holds maps of real museums and artist birthplaces, art-safety rules, step-by-step Art Techniques references for every medium used in the book, full Elements of Art and Principles of Design reference spreads, a 44-artist Gallery of Artists, and a roughly 100-term illustrated Glossary. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent."
+        "summary": "A 208-page elementary art pupil edition (Harcourt School Publishers Art series, authors Jacqueline Chanda and Kristen Pederson Marstaller, 2006 copyright) organized into 6 units of 5 lessons each (30 lessons), every lesson a fixed 2-page spread: a vocabulary-word focus, 2 or more fine-art reproductions with a reading-skill-tied question, an Artist's Workshop hands-on activity (materials list plus Plan, Create, Reflect steps), and often a cross-curricular connection box. Units close with a Review and Reflect recap. A Student Handbook appendix (roughly 64 pages) holds maps of real museums and artist birthplaces, art-safety rules, step-by-step Art Techniques references for every medium used in the book, full Elements of Art and Principles of Design reference spreads, a 44-artist Gallery of Artists, and a roughly 100-term illustrated Glossary. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent.",
+        "mergedRowId": "53e03a38-267b-480f-9aab-a9fb2f87c262",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
@@ -290,9 +294,9 @@
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Write the elements-and-principles-of-design-art (method_philosophy) and harcourt-art-everywhere-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: elements-and-principles-of-design-art=87fc5b14-cf3a-4de7-b0cc-2add5eca79a4, harcourt-art-everywhere-format=53e03a38-267b-480f-9aab-a9fb2f87c262 Original ask: Write the elements-and-principles-of-design-art (method_philosophy) and harcourt-art-everywhere-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
       "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
-      "urgency": "high"
+      "urgency": "resolved"
     },
     {
       "category": "recipe",

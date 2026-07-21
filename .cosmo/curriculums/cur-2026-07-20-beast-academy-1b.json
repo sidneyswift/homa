@@ -12,13 +12,12 @@
       "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-beast-academy-1b/beast-academy-1b.pdf"
     }
   ],
-
   "layer1_philosophy": {
     "methodology": "Book B of the same guided-discovery, comic-narrative Beast Academy series ingested as 1A earlier this session, confirmed directly rather than assumed: the front cover reads 'Beast Academy By Art of Problem Solving MATH 1B' and page 3's own series-overview spread states 'This is Book 1B in the Beast Academy Level 1 series' with the full breakdown (1A: Chapters 1-3; 1B: Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories; 1C: Chapters 7-9; 1D: Chapters 10-12). Every named subsection again opens with a multi-panel comic scene carrying the reasoning before any numbered practice problem, with embedded 'stop sign' questions the child is told to try before reading on (same front-matter instruction as 1A, 'How to Use This Book'). This book wraps the same recurring four-monster cast in a different backdrop than 1A: the front cover art is a pirate market/pirate-ship town (crates, a tall ship, a market stall, a hook-handed pirate character), and the Index lists pirate-themed recurring bit characters not present in 1A's campus setting (Barnacle Barny, Betty Buccaneer, Bony Bill, all under a 'Woodshop'/'Kitchen Table' heading), confirming the comic wrapper changes per book even though the four core monster protagonists and the teaching device stay constant across the series.",
     "principles": [
       "Guided discovery through story, unchanged from 1A: comic panels carry the reasoning (two characters disagreeing about whether 23-7-3 or 23-3-7 gives the right answer and discovering both work, page 128; a 'Math Club Strategies' clubhouse framing recurs as its own visual bit at the start of both Chapter 4's and Chapter 5's Strategies subsections), and the child is told to try the embedded 'stop sign' question before continuing",
       "Deliberately above standard grade-1 difficulty, and by a wider margin than 1A's own above-grade-level content: this book introduces prime and composite numbers through a concrete rectangle-array construction on a grid ('A number is prime if the only two rectangles we can make with it are 1 square thick,' Categories: Prime Numbers, pages 168-169 and 174-177), two-circle Venn-style classification ('Circle Diagrams,' pages 178-195, including placing the numbers 1-9 into a diagram labeled 'prime numbers' and 'even numbers'), and a 4-by-4 magic square where every row, column, and diagonal must sum to 34 (Categories Review, page 197) -- content a typical grade-1 scope-and-sequence defers to grade 3-5, further above grade level than 1A's own two-digit counting and informal transformation geometry",
-      "Tiered, self-marked difficulty carries over unchanged: starred (★) hardest problems close most subsections with a separate hint (never the full solution) in the back-matter Hints section (pages 199-203), for example hint 128 for the magic-square review problem ('Each number from 1 to 15 can only appear once in the highlighted blocks. How can we fill in the highlighted blocks?')",
+      "Tiered, self-marked difficulty carries over unchanged: starred (\u2605) hardest problems close most subsections with a separate hint (never the full solution) in the back-matter Hints section (pages 199-203), for example hint 128 for the magic-square review problem ('Each number from 1 to 15 can only appear once in the highlighted blocks. How can we fill in the highlighted blocks?')",
       "A named 'Math Club Strategies' framing device recurs specifically for the strategy subsections in both Chapter 4 (Addition Strategies, pages 34-51) and Chapter 5 (Subtraction Strategies, pages 126-147), presenting the order property, left-to-right subtraction, part-by-part subtraction, and using addition to check subtraction as things a 'club' of characters figures out together rather than rules stated by a teacher",
       "Puzzle formats reused from 1A's own hexagonal-grid family reappear here with a genuinely different rule: this book's 'Pairs' puzzle asks the child to circle pairs of numbers, already given in a hexagon cluster, that sum to a stated target, with the constraint that circled pairs must sit in touching hexagons and every number must be used exactly once (pages 44-45, 74-79, and again in the Chapter 6 Categories Review, page 196, at a harder 19-hexagon size). This is a third distinct hex-grid mechanic across the two books ingested this session (1A's honeycomb path-tracing, the shipped hive-puzzle recipe's smallest-number-not-adjacent rule, and this book's touching-pair-sum rule), confirming the hex-grid visual family supports more than one constraint type",
       "Answer keys keep teaching the parent, confirmed again directly: the Categories Answers section includes a full aside on magic squares ('Magic squares have been studied for centuries. There are hundreds of different 4-by-4 magic squares, but there is only one way to arrange the numbers 1 through 9 in a grid to make a 3-by-3 magic square if we ignore reflections and rotations. See if you can find it,' page 237) and an explicit note correcting a common student misconception about subtraction order ('Many students are taught that subtracting from left to right is the only way to subtract... But there are lots of ways to subtract that don't involve working from left to right,' page 139)"
@@ -38,11 +37,12 @@
         "suggestedKey": "beast-academy-1b-book-format",
         "topicType": "method_format",
         "title": "Beast Academy Math 1B Book Format",
-        "summary": "Book B of a 4-book Level 1 sequence (1A: Counting, Shapes, Comparing; 1B: Addition, Subtraction, Categories; 1C: Addition & Subtraction, Comparing, Patterns; 1D: Big Numbers, Measurement, Problem Solving), confirmed directly from this book's own page 3 series-overview spread. This book: 3 chapters (Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories), 9 named subsections, 239 physical pages (120 scanned PDF page-images), organized as comic-narrative concept introduction plus numbered practice per subsection, starred hardest problems with separate hints (pages 199-203), and a reasoning-rich answers section (pages 205-237). Written by Jason Batterson; illustrated by Erich Owen and Sarah Leuver per the front-cover credit block. Unlike 1A, a copyright page with ISBN and printing year was not captured in this session's sampled pages, so those specific bibliographic details are not independently reconfirmed for this book (the front cover and page 3 alone were sufficient to confirm title, series position, and author/illustrator credit). This book's comic scenes wrap the same four-monster cast in a pirate-market setting per the front cover art, a different backdrop from 1A's campus/first-day-of-school setting, and introduces a 'Kooky Critters' illustrated trading-card conceit (Speed/Strength/Stamina/Intelligence/Special Ability/HP stat cards for fictional animals) specifically to teach two-circle attribute sorting."
+        "summary": "Book B of a 4-book Level 1 sequence (1A: Counting, Shapes, Comparing; 1B: Addition, Subtraction, Categories; 1C: Addition & Subtraction, Comparing, Patterns; 1D: Big Numbers, Measurement, Problem Solving), confirmed directly from this book's own page 3 series-overview spread. This book: 3 chapters (Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories), 9 named subsections, 239 physical pages (120 scanned PDF page-images), organized as comic-narrative concept introduction plus numbered practice per subsection, starred hardest problems with separate hints (pages 199-203), and a reasoning-rich answers section (pages 205-237). Written by Jason Batterson; illustrated by Erich Owen and Sarah Leuver per the front-cover credit block. Unlike 1A, a copyright page with ISBN and printing year was not captured in this session's sampled pages, so those specific bibliographic details are not independently reconfirmed for this book (the front cover and page 3 alone were sufficient to confirm title, series position, and author/illustrator credit). This book's comic scenes wrap the same four-monster cast in a pirate-market setting per the front cover art, a different backdrop from 1A's campus/first-day-of-school setting, and introduces a 'Kooky Critters' illustrated trading-card conceit (Speed/Strength/Stamina/Intelligence/Special Ability/HP stat cards for fictional animals) specifically to teach two-circle attribute sorting.",
+        "mergedRowId": "9ef1e1a2-fb3e-46fb-b060-497b58c04635",
+        "mergedAt": "2026-07-21"
       }
     ]
   },
-
   "layer2_scope": {
     "mappings": [
       {
@@ -52,7 +52,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_OvyoRo47K-",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Addition as combining or putting together two groups' topic (age 4-6) is a direct match for this subsection's introductory framing." }
+        "suggested": {
+          "note": "Homa's 'Addition as combining or putting together two groups' topic (age 4-6) is a direct match for this subsection's introductory framing."
+        }
       },
       {
         "curriculumSubject": "Chapter 4, + & = (pages 18-33)",
@@ -61,7 +63,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_PgsHGYJMH-",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Representing Addition and Subtraction' topic (age 4-6) covers reading and writing addition equations directly. The both-sides-of-the-equals-sign nuance is a real stretch within this same broad topic rather than a separate skill, the same kind of in-topic stretch 1A recorded for its own 'circle-equidistance' and 'noodle-length' findings." }
+        "suggested": {
+          "note": "Homa's 'Representing Addition and Subtraction' topic (age 4-6) covers reading and writing addition equations directly. The both-sides-of-the-equals-sign nuance is a real stretch within this same broad topic rather than a separate skill, the same kind of in-topic stretch 1A recorded for its own 'circle-equidistance' and 'noodle-length' findings."
+        }
       },
       {
         "curriculumSubject": "Chapter 4, Strategies -- Order (pages 34-41)",
@@ -70,7 +74,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_QCgbiVrwnp",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Addition in any order' topic (age 6-7, described as 'Understand and apply the commutative property of addition') is an exact, direct match." }
+        "suggested": {
+          "note": "Homa's 'Addition in any order' topic (age 6-7, described as 'Understand and apply the commutative property of addition') is an exact, direct match."
+        }
       },
       {
         "curriculumSubject": "Chapter 4, Strategies -- Sum Grids and Pairs puzzles (pages 42-51)",
@@ -79,7 +85,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_m1W6nTQJ2b",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Addition and subtraction within 20' topic (age 6-7) covers the underlying fact-fluency skill directly; the two puzzle formats are practice vehicles for the same skill, not separate skills." }
+        "suggested": {
+          "note": "Homa's 'Addition and subtraction within 20' topic (age 6-7) covers the underlying fact-fluency skill directly; the two puzzle formats are practice vehicles for the same skill, not separate skills."
+        }
       },
       {
         "curriculumSubject": "Chapter 4, Ten (pages 52-81)",
@@ -88,7 +96,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_m1W6nTQJ2b",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Addition and subtraction within 20' topic explicitly names 'making ten' as a strategy in its own description; Homa's 'Ten-Frame Representation' topic (mt_nXD4le6zsX, Number Representation & Place Value domain, age 4-7) is a direct secondary match for the ten-frame/ten-strip representation portion specifically." }
+        "suggested": {
+          "note": "Homa's 'Addition and subtraction within 20' topic explicitly names 'making ten' as a strategy in its own description; Homa's 'Ten-Frame Representation' topic (mt_nXD4le6zsX, Number Representation & Place Value domain, age 4-7) is a direct secondary match for the ten-frame/ten-strip representation portion specifically."
+        }
       },
       {
         "curriculumSubject": "Chapter 5, Taking Away (pages 84-105)",
@@ -97,7 +107,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_zuKAX6lcYR",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Subtraction as taking away or separating' topic (age 4-6) is a direct match for this subsection's core framing; X-Outs is a practice vehicle for the same underlying subtraction-fact skill." }
+        "suggested": {
+          "note": "Homa's 'Subtraction as taking away or separating' topic (age 4-6) is a direct match for this subsection's core framing; X-Outs is a practice vehicle for the same underlying subtraction-fact skill."
+        }
       },
       {
         "curriculumSubject": "Chapter 5, Difference (pages 106-125)",
@@ -110,8 +122,12 @@
           "topicSlug": "math.subtraction-as-difference-comparison",
           "domain": "addition-subtraction",
           "kind": "conceptual",
-          "teachingWindowMonths": [72, 96],
-          "note": "Checked 'difference', 'comparison', and 'compare' across all 511 pre-existing Mathematics topics (before this session's own addition). The closest hits are 'Comparing groups: more or fewer' (age 4-6, Counting & Cardinality domain, about qualitative more/fewer language for two groups rather than computing a numeric difference by subtraction) and 'Numbers on a number line' (age 7-8, about position, not a difference operation). No existing topic names 'subtraction as finding how far apart two numbers are' as a distinct framing from take-away, even though this is a full 20-page subsection here plus a recurring puzzle format (Difference Pyramids) revisited in the same book's own review. A real, moderate-volume gap; not added as a new topic this session to keep additions proportionate against the Circle Diagrams gap below, which is both larger (18 pages) and ties directly to a new, broadly reusable recipe built this session. Recorded here for a future session." }
+          "teachingWindowMonths": [
+            72,
+            96
+          ],
+          "note": "Checked 'difference', 'comparison', and 'compare' across all 511 pre-existing Mathematics topics (before this session's own addition). The closest hits are 'Comparing groups: more or fewer' (age 4-6, Counting & Cardinality domain, about qualitative more/fewer language for two groups rather than computing a numeric difference by subtraction) and 'Numbers on a number line' (age 7-8, about position, not a difference operation). No existing topic names 'subtraction as finding how far apart two numbers are' as a distinct framing from take-away, even though this is a full 20-page subsection here plus a recurring puzzle format (Difference Pyramids) revisited in the same book's own review. A real, moderate-volume gap; not added as a new topic this session to keep additions proportionate against the Circle Diagrams gap below, which is both larger (18 pages) and ties directly to a new, broadly reusable recipe built this session. Recorded here for a future session."
+        }
       },
       {
         "curriculumSubject": "Chapter 5, Strategies (pages 126-147)",
@@ -120,7 +136,9 @@
         "homaDomain": "addition-subtraction",
         "homaTopicId": "mt_ehGS_uVSJv",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Inverse: addition undoes subtraction' topic (age 6-7) is a direct match for the using-addition-to-check portion of this subsection. The specific left-to-right and part-by-part subtraction strategies themselves are not separately named anywhere in the taxonomy (checked 'left to right' and 'part by part': zero hits); Homa's general 'Addition and subtraction strategies' topic (age 6-7, described as 'counting on and counting back') is a loose but not exact fit for these two specific decomposition strategies. Recorded as partial rather than forcing an exact match; a real but narrow gap given the strategies topic already exists at a general level." }
+        "suggested": {
+          "note": "Homa's 'Inverse: addition undoes subtraction' topic (age 6-7) is a direct match for the using-addition-to-check portion of this subsection. The specific left-to-right and part-by-part subtraction strategies themselves are not separately named anywhere in the taxonomy (checked 'left to right' and 'part by part': zero hits); Homa's general 'Addition and subtraction strategies' topic (age 6-7, described as 'counting on and counting back') is a loose but not exact fit for these two specific decomposition strategies. Recorded as partial rather than forcing an exact match; a real but narrow gap given the strategies topic already exists at a general level."
+        }
       },
       {
         "curriculumSubject": "Chapter 6, Odd One Out (pages 150-161)",
@@ -129,7 +147,9 @@
         "homaDomain": "data-statistics",
         "homaTopicId": "mt_xppl18avyY",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Sorting into categories' topic (age 5-6) and its siblings are about classifying objects into GIVEN categories and counting them, not about spotting an unlabeled outlier in a set of four and generating an original justification for why it differs, which is closer to a verbal-reasoning skill than a data-sorting one. A real, moderate-volume gap (a 12-page subsection); not added as a new topic this session to keep additions proportionate. Recorded here for a future session." }
+        "suggested": {
+          "note": "Homa's 'Sorting into categories' topic (age 5-6) and its siblings are about classifying objects into GIVEN categories and counting them, not about spotting an unlabeled outlier in a set of four and generating an original justification for why it differs, which is closer to a verbal-reasoning skill than a data-sorting one. A real, moderate-volume gap (a 12-page subsection); not added as a new topic this session to keep additions proportionate. Recorded here for a future session."
+        }
       },
       {
         "curriculumSubject": "Chapter 6, Categories -- Odd & Even (pages 162-173)",
@@ -138,7 +158,9 @@
         "homaDomain": "multiplication-division",
         "homaTopicId": "mt_0u4KLbvBa1",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Odd and even numbers' topic (age 6-7) is a direct match, including the equal-grouping method this book uses to teach the concept." }
+        "suggested": {
+          "note": "Homa's 'Odd and even numbers' topic (age 6-7) is a direct match, including the equal-grouping method this book uses to teach the concept."
+        }
       },
       {
         "curriculumSubject": "Chapter 6, Categories -- Prime Numbers (pages 168-169, 174-177)",
@@ -147,7 +169,9 @@
         "homaDomain": "multiplication-division",
         "homaTopicId": "mt_y1XCVsIelg",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Prime numbers' topic exists and covers the same vocabulary and concept (prime, composite, establishing whether a number is prime), but is placed at age 9-10; this book introduces the identical concept 2-3 years earlier through a concrete rectangle-array construction the existing topic's description does not mention. Recorded as partial (same underlying concept, real age-band and method gap) rather than adding a new topic, to keep this session's taxonomy additions proportionate against the larger Circle Diagrams gap below." }
+        "suggested": {
+          "note": "Homa's 'Prime numbers' topic exists and covers the same vocabulary and concept (prime, composite, establishing whether a number is prime), but is placed at age 9-10; this book introduces the identical concept 2-3 years earlier through a concrete rectangle-array construction the existing topic's description does not mention. Recorded as partial (same underlying concept, real age-band and method gap) rather than adding a new topic, to keep this session's taxonomy additions proportionate against the larger Circle Diagrams gap below."
+        }
       },
       {
         "curriculumSubject": "Chapter 6, Circle Diagrams (pages 178-195)",
@@ -156,7 +180,9 @@
         "homaDomain": "data-statistics",
         "homaTopicId": "mt_sBmaAWIFPO",
         "status": "mapped",
-        "suggested": { "note": "Checked 'venn', 'circle diagram', and 'classif' across all 511 pre-existing Mathematics topics before adding anything. The only Venn-diagram topics in the taxonomy ('Sets & Venn Diagrams' and 'Venn Diagrams and Counting Outcomes,' both Probability domain) are placed at age 12-14 and are about enumerating outcomes with the product rule, not simple two-attribute sorting for young children; 'Sorting into categories' (age 5-6) covers mutually-exclusive column sorting, not an overlapping-region diagram. This is a genuine, large (18-page, the single biggest subsection in this book), and broadly reusable gap. Added mt_sBmaAWIFPO 'Sorting Into Two-Circle Diagrams' as a new topic this session under the existing Data & Statistics domain (no mapping.ts edit needed), see decisionsNeeded. A matching new recipe (circle-diagram-two-set-sort) was also built this session, see layer4." }
+        "suggested": {
+          "note": "Checked 'venn', 'circle diagram', and 'classif' across all 511 pre-existing Mathematics topics before adding anything. The only Venn-diagram topics in the taxonomy ('Sets & Venn Diagrams' and 'Venn Diagrams and Counting Outcomes,' both Probability domain) are placed at age 12-14 and are about enumerating outcomes with the product rule, not simple two-attribute sorting for young children; 'Sorting into categories' (age 5-6) covers mutually-exclusive column sorting, not an overlapping-region diagram. This is a genuine, large (18-page, the single biggest subsection in this book), and broadly reusable gap. Added mt_sBmaAWIFPO 'Sorting Into Two-Circle Diagrams' as a new topic this session under the existing Data & Statistics domain (no mapping.ts edit needed), see decisionsNeeded. A matching new recipe (circle-diagram-two-set-sort) was also built this session, see layer4."
+        }
       },
       {
         "curriculumSubject": "Chapter 6, Categories Review -- Magic Square (page 197)",
@@ -165,7 +191,9 @@
         "homaDomain": "mathematical-thinking",
         "homaTopicId": "mt_20WfHhnL39",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Hands-On Problem Solving' topic (age 5-6) is a reasonable general fit for a self-contained constraint-satisfaction puzzle, but does not name magic squares or sum-constraint grids specifically. A real but very narrow gap (a single review page); not added as a new topic this session. Recorded here for completeness, the same treatment 1A gave its own single-page capstone-puzzle finding." }
+        "suggested": {
+          "note": "Homa's 'Hands-On Problem Solving' topic (age 5-6) is a reasonable general fit for a self-contained constraint-satisfaction puzzle, but does not name magic squares or sum-constraint grids specifically. A real but very narrow gap (a single review page); not added as a new topic this session. Recorded here for completeness, the same treatment 1A gave its own single-page capstone-puzzle finding."
+        }
       }
     ],
     "stats": {
@@ -176,7 +204,6 @@
       "partial": 4
     }
   },
-
   "layer3_structure": {
     "cadence": "Not stated as a weekly calendar or suggested-class-periods figure anywhere in the sampled pages, unchanged from 1A. This book is a self-paced student workbook; pacing is left entirely to the family.",
     "sessionLengthMinutes": {
@@ -188,7 +215,6 @@
     "totalWeeks": null,
     "notes": "Unlike 1A, this book's own front-matter page 3 shows only the 4-book Level 1 series breakdown (1A/1B/1C/1D chapter lists), not the full 5-level, 20-book series overview 1A's own pages 4-5 displayed; this session did not re-render or re-confirm that wider 5-level spread from 1B's own pages specifically, relying instead on 1A's already-confirmed finding (from the same session) that the wider series is spiral. The 'Math Club Strategies' clubhouse framing recurring across both this book's Strategies subsections (Addition Strategies and Subtraction Strategies) is a book-level structural device not seen in 1A, which had no equivalent named recurring strategy-subsection framing."
   },
-
   "layer4_activities": {
     "activityTypes": [
       {
@@ -296,13 +322,12 @@
       "noRecipe": 5
     }
   },
-
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
-      "item": "Reuse beast-academy-guided-discovery (method_philosophy), already proposed this session by the sibling 1A ingestion, not duplicated. Propose one new row: beast-academy-1b-book-format (method_format). Full proposed content in layer1_philosophy.knowledgeBankGaps above.",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: beast-academy-1b-book-format=9ef1e1a2-fb3e-46fb-b060-497b58c04635 Original ask: Reuse beast-academy-guided-discovery (method_philosophy), already proposed this session by the sibling 1A ingestion, not duplicated. Propose one new row: beast-academy-1b-book-format (method_format). Full proposed content in layer1_philosophy.knowledgeBankGaps above.",
       "impact": "Keeps the knowledge bank from accumulating a duplicate method_philosophy row for the same series ingested twice in one session, while still recording this specific book's own format details (chapter list, page count, pirate theming, Kooky Critters device). The gate at apps/web/lib/knowledge/gate.ts requires a live Postgres connection this sandbox does not have, so the write could not be attempted honestly; recorded as a proposal only, same as 1A.",
-      "urgency": "medium"
+      "urgency": "resolved"
     },
     {
       "category": "recipe",
@@ -341,6 +366,5 @@
       "urgency": "low, informational"
     }
   ],
-
   "notes": "Real page count, verified directly with pypdf and PyMuPDF rather than assumed from the filename: beast-academy-1b.pdf is 120 PDF pages (pypdf confirms zero characters of extractable text on every sampled page, a pure phone-scan PDF with no embedded text layer, same as 1A and every other volume drained this session). Physical page count confirmed from the book's own Index, which lists itself as spanning pages 238-239, and from the book's own Contents page (page 5) which lists Chapter 4 (page 12), Chapter 5 (page 82), Chapter 6 (page 148), Hints (199), Answers (205), and Index (238), a structure fully confirmed against roughly 63 rendered page-images sampled across the full 0-119 PDF-page range (every front-matter page 0-6, an approximately one-in-three sample across the remaining range, plus targeted samples at every subsection boundary named in the Contents, the full Hints section, and multiple Answers-section spreads). Title and series position confirmed directly and unambiguously from the pages themselves at 200 DPI: front cover reads 'Beast Academy By Art of Problem Solving MATH 1B' with author/illustrator credit visible directly on the cover art ('Jason Batterson / Erich Owen / Sarah Leuver'); page 3 states 'This is Book 1B in the Beast Academy Level 1 series' with the full 4-book breakdown (1A: Chapters 1-3; 1B: Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories, highlighted; 1C: Chapters 7-9; 1D: Chapters 10-12), exactly matching this task's framing. Unlike 1A, no copyright page with ISBN or printing year was captured in this session's sampled front matter (pages 0-6 covered cover, page 3 series list, pages 4-5 Contents, and pages 6-7 Characters, with no distinct copyright/ISBN page appearing among them); the PDF's own embedded metadata is CamScanner phone-scan boilerplate with no bibliographic content ('CamScanner 7-19-26 21.45', creation timestamp 2026-07-20T02:03:27Z, about 9.5 minutes before this drop's own Slack ts of 2026-07-20T02:13:01Z, consistent with the file being scanned shortly before it was posted). This session did not assume 1A's ISBN, printing year, or publisher city applied to this book without independent confirmation; those fields are recorded as not-confirmed in the knowledge-bank proposal above rather than guessed. Beast Academy 1B is confirmed as its own complete, different curriculum content from 1A (different chapters: Addition/Subtraction/Categories vs. 1A's Counting/Shapes/Comparing; different comic setting: pirate market vs. campus first-day; new content strand: Categories/classification not present in 1A at all), not a continuation PDF of the same content, per this task's own framing, fully verified by direct page evidence rather than assumed from the task description. No 1C, 1D, or other Beast Academy volume was read, downloaded, or referenced beyond the single confirmatory glance at this book's own page 3 series-overview line needed to describe 1B's place in the sequence. Copyrighted page images and the publisher's specific character designs, names, and exact wording were used only for this session's own analysis and are described here in Homa's own words; the one new taxonomy topic and the one new materials-studio recipe describe generic classification concepts and page-format patterns in Homa's own voice, not a copy of this publisher's specific monster designs, artwork, Kooky Critters card art, or text."
 }
