@@ -84,7 +84,9 @@ describe("welcomeLinesFor", () => {
 
   it("promises nothing that could turn out to be wrong", () => {
     for (const line of welcomeLinesFor(base)) {
-      assert.doesNotMatch(line, /—/);
+      // The em-dash ban, written as an escape so this file does not
+      // itself contain the character every repo scan looks for.
+      assert.doesNotMatch(line, /\u2014/);
       assert.doesNotMatch(line, /behind/i);
     }
   });

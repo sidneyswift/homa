@@ -76,9 +76,14 @@ export function ReportRevealCard({
   active: boolean;
   onOpenReport?: (childId: string) => void;
 }) {
+  // Her answers, not the child's: the reader gate caught the same set of
+  // answers changing owner between this screen and the next one fifteen
+  // seconds later. "Sorting" rather than "placing" because placement is
+  // what a school does to a child, and this parent's defining fear is
+  // being judged as a teacher.
   const lines = [
-    `Reading ${card.childName}'s answers…`,
-    `Placing ${MAP_SUBJECTS.length} subjects…`,
+    `Reading your answers about ${card.childName}…`,
+    `Sorting them across ${MAP_SUBJECTS.length} subjects…`,
     `Finding ${card.childName}'s strengths…`,
   ];
   // A card already in scrollback has been read; only a live reveal
@@ -140,7 +145,6 @@ export function ReportRevealCard({
             </p>
           ))}
         </div>
-        <p className="mt-4 font-hand text-xl text-sage">worth the wait {"✎"}</p>
       </section>
     );
   }
@@ -157,7 +161,7 @@ export function ReportRevealCard({
 
   const skippedLine =
     card.skipped > 0
-      ? `You skipped ${card.skipped}. The map just leaves those edges open.`
+      ? `${card.skipped} are still blank, and that is fine. You can fill them in any time.`
       : null;
 
   return (
@@ -170,7 +174,7 @@ export function ReportRevealCard({
           {card.childName}
         </span>
         <p className="shrink-0 font-mono text-xs text-subtle">
-          {card.mappedSubjects} of {card.totalSubjects} placed
+          {card.mappedSubjects} subjects covered
         </p>
       </div>
       <p className="mt-3 font-display text-lg font-semibold leading-snug text-strong">

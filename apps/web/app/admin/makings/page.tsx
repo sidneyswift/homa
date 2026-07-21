@@ -4,6 +4,7 @@ import { requireFounder } from "../../../lib/admin/gate";
 import { familyDisplayName, timeAgo } from "../../../lib/admin/format";
 import { MAKINGS_TAPER, readFleetMakings } from "../../../lib/onboarding/makings";
 import { mapDb } from "../../../lib/map/db";
+import { LockoutCard } from "../../../components/billing/lockout-card";
 import { EmptyNote, Pill, SectionHead } from "../ui";
 
 /**
@@ -78,6 +79,31 @@ export default async function AdminMakingsPage() {
           <p className="text-xs font-bold uppercase tracking-wide text-subtle">Would be locked out</p>
           <p className="mt-1 font-display text-2xl font-bold text-strong">{wouldLock.length}</p>
           <p className="mt-1 text-xs text-muted">Already past the allowance in this window.</p>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <SectionHead
+          eyebrow="Unreachable by families"
+          title="What the lockout would look like"
+          sub="Nothing constructs this in a live path, and nothing may until the P1 ruling lands. It is here so the conversion moment can be judged while the beats leading to it are still being tuned."
+        />
+        <div className="mt-3">
+          <LockoutCard
+            requested="Mia's fractions worksheet"
+            refillLabel="Monday morning"
+            monthlyUrl="#"
+            endowment={{
+              scoredChildren: ["Mia", "Leo"],
+              artifacts: [
+                "Mia's dinosaur counting page",
+                "Leo's letter sounds mat",
+                "August at a glance",
+              ],
+              memoryCount: 14,
+              hoursLogged: 9,
+            }}
+          />
         </div>
       </div>
 

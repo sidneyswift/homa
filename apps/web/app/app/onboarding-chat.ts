@@ -89,10 +89,16 @@ export function browserTimeZone(): string | null {
  * at once, so the model's own opener arrives as the third line of a
  * conversation that already started.
  *
- * They say nothing that could be wrong. No claim about her family, no
- * promise, no question she has to answer.
+ * They say nothing that could be wrong. No claim about her family, and
+ * no promise about timing: the reader gate caught an earlier line
+ * ("give me a minute") contradicting the six minutes the very next card
+ * quotes, so the product's first sentence was already wrong. The second
+ * line names what actually happens next instead.
  */
 export function welcomeLinesFor(config: OnboardingChatConfig): string[] {
   const greeting = config.parentName ? `Hi ${config.parentName}.` : "Hi.";
-  return [`${greeting} I'm Homa.`, "Give me a minute and I'll know your family."];
+  return [
+    `${greeting} I'm Homa.`,
+    "Answer a few questions and I can start helping with your kids.",
+  ];
 }

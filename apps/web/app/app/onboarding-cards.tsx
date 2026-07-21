@@ -187,7 +187,7 @@ export function ChecklistCard({
     return (
       <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
         <span className="font-semibold text-sage">
-          {complete ? "Questions done" : "Questions open"}
+          {complete ? "Questions done" : "Questions started"}
         </span>
         <span className="truncate text-body">
           {card.childName}
@@ -207,7 +207,11 @@ export function ChecklistCard({
           {card.childName}
         </span>
         <p className="shrink-0 font-mono text-xs text-subtle">
-          {remaining <= 1 ? "almost done" : `about ${minutesLeft} min left`}
+          {remaining <= 1
+            ? "almost done"
+            : answered > 0
+              ? `about ${minutesLeft} min left`
+              : `about ${minutesLeft} min in all`}
         </p>
       </div>
       {/* The hairline, not a rail: on a phone the full rail was a settled
@@ -223,8 +227,8 @@ export function ChecklistCard({
       </div>
       <p className="mt-3 text-sm text-muted">
         {answered > 0
-          ? `Already learned ${answered} ${answered === 1 ? "thing" : "things"} about ${card.childName}. Stop whenever you like.`
-          : `A few taps about ${card.childName}. Even five tells me a lot, and you can stop whenever you like.`}
+          ? `You have told me ${answered} ${answered === 1 ? "thing" : "things"} about ${card.childName} already. Stop whenever you like.`
+          : `Some questions about ${card.childName}. Even five answers tell me a lot, and you can stop whenever you like.`}
       </p>
       <button
         type="button"
