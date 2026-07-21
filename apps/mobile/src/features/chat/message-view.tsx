@@ -4,7 +4,12 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
-import { memoryChipFor, partIsRenderable, type MemoryChipContent } from "./message-utils";
+import {
+  askedQuestionLines,
+  memoryChipFor,
+  partIsRenderable,
+  type MemoryChipContent,
+} from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
 
 /** Transcript bubbles, the mobile twin of apps/web's message-parts.tsx. */
@@ -78,6 +83,28 @@ function MessagePartView({
     return <MarkdownText text={part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
+    const questionLines = askedQuestionLines(part);
+    if (questionLines) {
+      // No tappable card on mobile yet: the ask reads as words so the
+      // parent can see it and type her answer back.
+      return (
+        <View style={{ marginTop: space.sm, gap: 2 }}>
+          {questionLines.map((line, index) => (
+            <Text
+              key={index}
+              style={{
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                lineHeight: fontSize.base * 1.5,
+                color: line.startsWith("· ") ? colors.textMuted : colors.textStrong,
+              }}
+            >
+              {line}
+            </Text>
+          ))}
+        </View>
+      );
+    }
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||

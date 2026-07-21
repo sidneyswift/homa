@@ -85,6 +85,7 @@ import {
   type PlannerOpenSignal,
 } from "./planner-canvas";
 import { SlashComposer } from "./slash-composer";
+import { latestQuestionRequest } from "./question-card";
 import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
@@ -317,6 +318,11 @@ export function ChatClient({
   const [progressAnswers, setProgressAnswers] = useState<Record<string, string>>(
     {},
   );
+  /** Choice-card partKey -> what she sent from it, so the spent card
+   *  reads past tense (live-session state, like progressAnswers). */
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>(
+    {},
+  );
   /** The planner canvas beside the chat: open with a focus (or null for
    *  closed). Opens when a NEW open_planner result streams in, reopens
    *  from any planner card in the transcript, closes with its X. */
@@ -335,6 +341,10 @@ export function ChatClient({
   const progressAnswersMap = useMemo(
     () => new Map(Object.entries(progressAnswers)),
     [progressAnswers],
+  );
+  const questionAnswersMap = useMemo(
+    () => new Map(Object.entries(questionAnswers)),
+    [questionAnswers],
   );
   // Whether dictation fed the current draft, and the modality of the
   // turn in flight (read later by onFinish / the error effect). Refs,
@@ -926,12 +936,18 @@ export function ChatClient({
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
   const activeSnap = busy ? null : latestSnapRequest(agent.data.messages);
+  // The live choice card, if any: only the newest unanswered card takes
+  // taps, and only while the line is free.
+  const activeQuestion = busy
+    ? null
+    : latestQuestionRequest(agent.data.messages);
   const promptSuggestionRailAllowed =
     !busy
     && !recovering
     && promptSuggestionPhase !== "idle"
     && progressInteraction === null
     && activeSnap === null
+    && activeQuestion === null
     && draft.trim().length === 0
     && attachments.staged.length === 0
     && dictation.phase === "idle";
@@ -1036,6 +1052,22 @@ export function ChatClient({
         "sent",
       ),
     );
+  }
+
+  /**
+   * A finished choice card sends its answers as ONE ordinary message.
+   * The card then reads past tense, so a spent option never looks
+   * pressable (the same reader gate the progress cards answer to).
+   */
+  function sendQuestionCardAnswers(partKey: string, text: string): void {
+    if (text.trim().length === 0) {
+      // Everything skipped: nothing to say, so say nothing and give her
+      // the composer instead of sending an empty turn.
+      focusComposer();
+      return;
+    }
+    if (sendMessage(text, { kind: "question_card" }) === "rejected") return;
+    setQuestionAnswers((current) => ({ ...current, [partKey]: text }));
   }
 
   function releaseQueuedProgressAction(
@@ -1274,6 +1306,17 @@ export function ChatClient({
                   }
                   onSnapAddFiles={attachments.addFiles}
                   onSnapTypeInstead={focusComposer}
+                  questionAnswers={questionAnswersMap}
+                  activeQuestionPartKey={
+                    isLiveMessage ? activeQuestion?.partKey : undefined
+                  }
+                  onSendQuestionAnswers={
+                    activeQuestion
+                      ? (text) =>
+                          sendQuestionCardAnswers(activeQuestion.partKey, text)
+                      : undefined
+                  }
+                  onQuestionTypeInstead={focusComposer}
                   onOpenPlanner={setPlannerCanvas}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
