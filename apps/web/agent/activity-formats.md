@@ -484,3 +484,23 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 5-9. A single clear comparison for younger; a comparison plus a written reflection sentence for older.
 - **Creation path:** hybrid (generate_image for the two small illustrations, HTML for the panel frames, labels, and reflection box), or html-only for a text-and-caption-only comparison
 - **Example activity:** `[then-and-now-comparison] How toys have changed: a wooden top labeled "Then" beside a remote-control car labeled "Now," with a reflection question about what stayed the same`
+
+### size-attribute-comparison-page
+- **Slug:** `[size-attribute-comparison-page]`
+- **Name:** Size attribute comparison page
+- **What it is:** A page comparing two or three illustrated items along one physical attribute (length, height, weight, or overall size), where the child circles or colors the correct item ("the longer one," "the heavier one") or draws a new item bigger or smaller than a model. A balance-scale variant compares weight on a seesaw or balance.
+- **Best for:** Pre-number measurement readiness before any unit of measurement is introduced; Singapore-style Pre-K/K comparison lessons (big/small, long/short, tall/short, heavy/light); any early-math curriculum teaching comparative adjectives through paired objects.
+- **Subjects:** Math (measurement readiness, pre-number comparison)
+- **Ages:** 3-6. Two items and one clear attribute for younger; a three-item "circle the biggest" row once the two-item version is solid.
+- **Creation path:** hybrid (generate_image for the compared items, HTML for the instruction line and circle/color prompts), or html-only for a simple two-shape version.
+- **Example activity:** `[size-attribute-comparison-page] Three ribbons of different lengths lined up on a shared baseline; "Circle the longest ribbon."`
+
+### pattern-extension-practice
+- **Slug:** `[pattern-extension-practice]`
+- **Name:** Pattern extension practice
+- **What it is:** A page built around one repeating sequence (an AB pattern like red-blue-red-blue) using colors, shapes, or icons, where the child copies a shown pattern, identifies what comes next, matches the continuation, or creates an original pattern in a blank row.
+- **Best for:** Pre-number pattern and sequence readiness; any early-math curriculum with a dedicated patterns unit (Singapore-style movement/sound/visual pattern lessons, Montessori pattern work, general Pre-K/K "what comes next" pages).
+- **Subjects:** Math (pre-number pattern recognition and sequencing)
+- **Ages:** 3-6. AB (two-element) patterns first; AAB/ABB/ABC variants only once AB is solid.
+- **Creation path:** html (uniform, evenly-spaced shapes or colors) or hybrid when the pattern units are themed illustrations.
+- **Example activity:** `[pattern-extension-practice] A row of red-blue-red-blue-red beads with two blank cells at the end; "Color the beads to finish the pattern."`

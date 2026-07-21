@@ -169,6 +169,16 @@
       "mappedPct": 87,
       "gapCount": 0,
       "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-20-dimensions-math-pka",
+      "name": "Dimensions Math Teacher's Guide PKA (Pre-Kindergarten, Part A, Singapore Math Inc., copyright 2017, first published 2018, ISBN 978-1-947226-28-9)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T21:19:20-04:00",
+      "methodology": "A published Singapore-style Pre-Kindergarten math Teacher's Guide built entirely around the Concrete-Pictorial-Abstract (CPA) progression, stated explicitly in the book's own front matter ('Dimensions Math Curriculum' page): 'Through Concrete-Pictorial-Abstract development, students view the same concepts over time with increasing levels of abstraction.' At the PKA level this means every concept is taught hands-on first (real objects, movement, sound) with no pictorial or abstract representation required yet; the pictorial and abstract stages arrive in later levels of the same series (per the book's own multi-level Scope & Sequence reproduced in its front matter). Every lesson follows a fixed five-part shape: Explore (a whole-class hands-on task), Learn (discuss the corresponding textbook page, narrated through five recurring child characters), Whole Group Play (one game), Small Group Center Play (4-6 rotating stations tagged with recurring icons), and an optional Extend (Play, Learn, or Explore) that deepens or re-applies the same concept, often through a themed storybook read-aloud.",
+      "mappedPct": 65,
+      "gapCount": 6,
+      "decisionsCount": 7
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1643,
+  "topicCount": 1645,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32174,6 +32174,42 @@
         "Notice that some traditions, like a special outfit, a shared meal, or a holiday, are similar even when the details differ across cultures"
       ],
       "assessmentPrompt": "Can {{name}} tell you about one celebration or tradition from a country other than the one they live in?",
+      "standards": []
+    },
+    {
+      "id": "mt_NJz7vT4Bhp",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Data & Statistics",
+      "name": "Sorting and Classifying Objects by One Attribute",
+      "description": "Sort a group of objects into two or more groups based on one observable attribute the child names, such as color, texture, or size, and explain the reason for the sort",
+      "ageRangeStart": 3,
+      "ageRangeEnd": 5,
+      "centrality": 0.01,
+      "evidence": [
+        "Sort a mixed group of objects into two labeled groups by one attribute (for example, soft things and hard things)",
+        "Explain in their own words why an object belongs in the group they placed it in",
+        "Re-sort the same group of objects a different way when given a new attribute to sort by"
+      ],
+      "assessmentPrompt": "If you give {{name}} a mixed group of objects, can they sort them into two groups by one attribute, like color or texture, and tell you why each one belongs there?",
+      "standards": []
+    },
+    {
+      "id": "mt_IOpwXalEo4",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Algebra",
+      "name": "Creating and Extending Simple AB Patterns",
+      "description": "Notice, copy, and extend a simple repeating pattern that alternates two elements, such as colors, sounds, or movements (for example red-blue-red-blue), and create an original AB pattern of their own",
+      "ageRangeStart": 3,
+      "ageRangeEnd": 5,
+      "centrality": 0.01,
+      "evidence": [
+        "Copy a shown AB pattern (for example clap-stomp-clap-stomp) using the same two elements",
+        "Say or point to what comes next when an AB pattern is shown with the ending missing",
+        "Create an original AB pattern using two colors, sounds, or movements of their own choosing"
+      ],
+      "assessmentPrompt": "If you start a simple two-part pattern like clap-stomp-clap-stomp, can {{name}} continue it, and can they make up a new two-part pattern of their own?",
       "standards": []
     }
   ]
