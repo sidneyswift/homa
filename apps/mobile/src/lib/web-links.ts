@@ -10,3 +10,8 @@ function webUrl(path: string): string {
 export function openWebOnboarding(): Promise<void> {
   return Linking.openURL(webUrl("/onboarding"));
 }
+
+/** Billing and account management stay on the web; mobile links out. */
+export function openWebSettings(): Promise<void> {
+  return Linking.openURL(webUrl("/app/settings"));
+}

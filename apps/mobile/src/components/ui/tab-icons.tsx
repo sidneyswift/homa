@@ -48,6 +48,73 @@ export function ChatTabIcon({ color, size }: TabIconProps) {
   );
 }
 
+export function PlannerTabIcon({ color, size }: TabIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 48 48">
+      <Path
+        d="M13 8 L35 8 C39.4 8 43 11.6 43 16 L43 34 C43 38.4 39.4 42 35 42 L13 42 C8.6 42 5 38.4 5 34 L5 16 C5 11.6 8.6 8 13 8 Z"
+        fill="none"
+        stroke={color}
+        strokeWidth={3.2}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M5 18.5 L43 18.5"
+        stroke={color}
+        strokeWidth={3.2}
+        strokeLinecap="round"
+      />
+      <Circle cx="16" cy="27" r="2.4" fill={color} />
+      <Circle cx="24" cy="27" r="2.4" fill={color} />
+      <Circle cx="32" cy="27" r="2.4" fill={color} />
+      <Circle cx="16" cy="34.5" r="2.4" fill={color} />
+      <Circle cx="24" cy="34.5" r="2.4" fill={color} />
+    </Svg>
+  );
+}
+
+export function ProgressTabIcon({ color, size }: TabIconProps) {
+  // Ascending bars, growth framing: progress climbs, never a red dip.
+  return (
+    <Svg width={size} height={size} viewBox="0 0 48 48">
+      <Path
+        d="M9 40 L9 30"
+        stroke={color}
+        strokeWidth={4.2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M19 40 L19 24"
+        stroke={color}
+        strokeWidth={4.2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M29 40 L29 17"
+        stroke={color}
+        strokeWidth={4.2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M39 40 L39 10"
+        stroke={color}
+        strokeWidth={4.2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export function MoreTabIcon({ color, size }: TabIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 48 48">
+      <Circle cx="11" cy="24" r="3.2" fill={color} />
+      <Circle cx="24" cy="24" r="3.2" fill={color} />
+      <Circle cx="37" cy="24" r="3.2" fill={color} />
+    </Svg>
+  );
+}
+
 export function FamilyTabIcon({ color, size }: TabIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 48 48">

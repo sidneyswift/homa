@@ -1,10 +1,18 @@
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { Image, Pressable, Text, View } from "react-native";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontSize, pressScale, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
-import { memoryChipFor, partIsRenderable, type MemoryChipContent } from "./message-utils";
+import {
+  imageUrlFor,
+  memoryChipFor,
+  navCardFor,
+  partIsRenderable,
+  type MemoryChipContent,
+  type NavCardContent,
+} from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
 
 /** Transcript bubbles, the mobile twin of apps/web's message-parts.tsx. */
@@ -100,10 +108,72 @@ function MessagePartView({
       }
       return null;
     }
+    const imageUrl = imageUrlFor(part);
+    if (imageUrl) {
+      return (
+        <Image
+          source={{ uri: imageUrl }}
+          resizeMode="cover"
+          accessibilityLabel="Image Homa made"
+          style={{
+            marginTop: space.sm,
+            width: "100%",
+            aspectRatio: 1,
+            borderRadius: radius.md,
+            backgroundColor: colors.surfaceSunken,
+          }}
+        />
+      );
+    }
+    const nav = navCardFor(part);
+    if (nav) return <NavCard nav={nav} />;
     const chip = memoryChipFor(part);
     if (chip) return <MemoryChip chip={chip} />;
   }
   return null;
+}
+
+/** A tool effect with a native home: tap through to the screen. */
+function NavCard({ nav }: { nav: NavCardContent }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(nav.href)}
+      style={({ pressed }) => ({
+        marginTop: space.sm,
+        alignSelf: "flex-start",
+        flexDirection: "row",
+        alignItems: "baseline",
+        gap: 6,
+        borderRadius: radius.pill,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle,
+        backgroundColor: colors.brandSoft,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        transform: [{ scale: pressed ? pressScale : 1 }],
+      })}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodySemibold,
+          fontSize: fontSize.xs,
+          color: colors.brand,
+        }}
+      >
+        {nav.label}
+      </Text>
+      <Text
+        style={{
+          fontFamily: fontFamilies.body,
+          fontSize: fontSize.xs,
+          color: colors.textBody,
+        }}
+      >
+        {nav.detail}
+      </Text>
+    </Pressable>
+  );
 }
 
 export function MessageView({ message }: { message: EveMessage }) {

@@ -2,7 +2,9 @@ import { Redirect, Tabs } from "expo-router";
 
 import {
   ChatTabIcon,
-  FamilyTabIcon,
+  MoreTabIcon,
+  PlannerTabIcon,
+  ProgressTabIcon,
   TodayTabIcon,
 } from "../../components/ui/tab-icons";
 import { useSession } from "../../features/auth/session-provider";
@@ -10,9 +12,11 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors } from "../../theme/tokens";
 
 /**
- * The signed-in shell: Today, Chat, Family. The session guard here is
- * the mobile twin of proxy.ts route gating; RLS enforces data access
- * no matter what renders.
+ * The signed-in shell: Today, Chat, Planner, Progress, More. Family,
+ * Tasks, Binder, and Settings live behind More; five slots is where an
+ * iOS tab bar stops being scannable. The session guard here is the
+ * mobile twin of proxy.ts route gating; RLS enforces data access no
+ * matter what renders.
  */
 export default function TabsLayout() {
   const { session } = useSession();
@@ -55,11 +59,29 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="family"
+        name="planner"
         options={{
-          title: "Family",
+          title: "Planner",
           tabBarIcon: ({ color, size }) => (
-            <FamilyTabIcon color={color} size={size} />
+            <PlannerTabIcon color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: "Progress",
+          tabBarIcon: ({ color, size }) => (
+            <ProgressTabIcon color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: "More",
+          tabBarIcon: ({ color, size }) => (
+            <MoreTabIcon color={color} size={size} />
           ),
         }}
       />

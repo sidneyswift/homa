@@ -4,19 +4,20 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
 
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
-import { useSession } from "../../features/auth/session-provider";
-import { AddChildForm } from "../../features/family/add-child-form";
-import { useFamilyData } from "../../features/family/use-family-data";
-import { supabase } from "../../lib/supabase";
-import { openWebOnboarding } from "../../lib/web-links";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { ScreenHeader } from "../components/ui/screen-header";
+import { AddChildForm } from "../features/family/add-child-form";
+import { useFamilyData } from "../features/family/use-family-data";
+import { openWebOnboarding } from "../lib/web-links";
+import { fontFamilies } from "../theme/fonts";
+import { colors, fontSize, space } from "../theme/tokens";
 
-/** Family: who Homa knows, plus account actions. */
+/**
+ * Family: who Homa knows. Pushed from the More tab; account actions
+ * (sign out, billing) live in Settings now.
+ */
 export default function FamilyScreen() {
-  const { session } = useSession();
   const { family, children, memberDisplayName, loading, reload } = useFamilyData();
   const setupReady = Boolean(family?.profile_completed_at && children.length > 0);
 
@@ -28,17 +29,8 @@ export default function FamilyScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["top"]}>
+      <ScreenHeader title="Family" />
       <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg }}>
-        <Text
-          style={{
-            fontFamily: fontFamilies.display,
-            fontSize: fontSize.xxl,
-            color: colors.textStrong,
-          }}
-        >
-          Family
-        </Text>
-
         {loading ? (
           <ActivityIndicator color={colors.brand} />
         ) : family ? (
@@ -147,25 +139,6 @@ export default function FamilyScreen() {
           </Text>
         )}
 
-        <View style={{ gap: space.sm }}>
-          {session?.user.email ? (
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.sm,
-                color: colors.textMuted,
-              }}
-            >
-              Signed in as {session.user.email}
-            </Text>
-          ) : null}
-          <Button
-            label="Sign out"
-            variant="secondary"
-            onPress={() => void supabase.auth.signOut()}
-          />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

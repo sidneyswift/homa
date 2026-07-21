@@ -1,6 +1,20 @@
 # Mobile: stop the drift, then pass the web (PROPOSAL, 2026-07-20)
 
-Status: proposed, awaiting founder review. Nothing here is implemented.
+Status update 2026-07-21: the founder directed full parity ("implement
+all the features as web but on mobile"), which effectively ruled D2 as
+all parent surfaces. Shipped on branch `claude/mobile-parity`: five-tab
+shell (Today, Chat, Planner, Progress, More), Planner, Tasks, Progress
+plus per-child, Binder, Lessons, Settings, Family relocation, and chat
+cards for planner, task, and image tool outputs (§1.4's silence gap,
+closed client-side). All new surfaces are read-only where the web write
+path is server-side; changes route to chat, where eve's tools own the
+writes. D1's tool-layer descriptor contract remains open (the client
+now keys off tool names with verified success shapes; the contract is
+still the right long-term fix). D3 to D6 remain open. Nothing below
+this paragraph was edited; §1 numbers describe the pre-parity state.
+Device verification has not happened for any new surface.
+
+Original status: proposed, awaiting founder review.
 Founder decisions are marked D1 to D6. General mobile parity has no owning
 ticket today: M1-17 is design-system integration and the mobile README
 explicitly scopes it away from parity, so this plan is new scope and ships

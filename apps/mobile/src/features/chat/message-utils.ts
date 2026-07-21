@@ -70,6 +70,67 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   return null;
 }
 
+export interface NavCardContent {
+  label: string;
+  detail: string;
+  /** In-app route the card opens (the native twin of the web surface). */
+  href: "/planner" | "/tasks";
+}
+
+/**
+ * Tool effects that now have a native screen link to it, so the tool
+ * call stops rendering as silence (the gap the 2026-07-20 parity plan
+ * calls §1.4). Success shapes verified against the web tool sources.
+ */
+export function navCardFor(part: EveMessagePart): NavCardContent | null {
+  if (part.type !== "dynamic-tool" || part.state !== "output-available") {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (
+    (part.toolName === "open_planner" || part.toolName === "edit_plan") &&
+    output.error === undefined
+  ) {
+    return {
+      label: part.toolName === "edit_plan" ? "Week updated" : "Planner",
+      detail: "See the week",
+      href: "/planner",
+    };
+  }
+  if (
+    (part.toolName === "create_task" && output.created === true) ||
+    (part.toolName === "update_task" && output.updated === true) ||
+    (part.toolName === "delete_task" && output.deleted === true)
+  ) {
+    return {
+      label:
+        part.toolName === "create_task"
+          ? "Task added"
+          : part.toolName === "update_task"
+            ? "Task updated"
+            : "Task removed",
+      detail: "Open tasks",
+      href: "/tasks",
+    };
+  }
+  return null;
+}
+
+/** Generated images render inline, same as web's message-parts.tsx. */
+export function imageUrlFor(part: EveMessagePart): string | null {
+  if (
+    part.type === "dynamic-tool" &&
+    part.state === "output-available" &&
+    part.toolName === "generate_image"
+  ) {
+    const output = (part.output ?? {}) as Record<string, unknown>;
+    if (output.generated === true && typeof output.url === "string") {
+      return output.url;
+    }
+  }
+  return null;
+}
+
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
@@ -86,7 +147,11 @@ export function partIsRenderable(part: EveMessagePart): boolean {
         typeof (output.material ?? output.worksheet)?.previewUrl === "string"
       );
     }
-    return memoryChipFor(part) !== null;
+    return (
+      memoryChipFor(part) !== null ||
+      navCardFor(part) !== null ||
+      imageUrlFor(part) !== null
+    );
   }
   return false;
 }
