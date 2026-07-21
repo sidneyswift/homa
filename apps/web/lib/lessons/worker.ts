@@ -10,6 +10,7 @@ import {
   type LessonClausePair,
   type LessonSegmentText,
 } from "./pairs";
+import { lessonObservedAt } from "./observed-at";
 import {
   assembleLessonTranscript,
   synthesizeLessonReview,
@@ -287,6 +288,7 @@ interface LedgerFanOutResult {
   notes: LessonProgressNote[];
 }
 
+
 /**
  * The trust boundary in motion (§4.5): verify each pair, then ride the
  * SAME journal path chat uses, from runtime.ts so the MJ-08 events
@@ -304,8 +306,7 @@ async function recordVerifiedClauses(input: {
   let observationCount = 0;
   let rejectedCount = 0;
   const flagOn = liveProgressEnabled();
-  const observedAt =
-    input.lesson.finishedAt ?? new Date().toISOString();
+  const observedAt = lessonObservedAt(input.lesson.finishedAt);
 
   for (const pair of input.pairs.slice(0, MAX_LESSON_CLAUSES)) {
     const verdict = verifyLessonClausePair(
