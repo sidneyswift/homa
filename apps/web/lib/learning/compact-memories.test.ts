@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { validateMerge, type ActiveRow } from "./compact-memories";
+import { selectCompactionCandidates, validateMerge, type ActiveRow } from "./compact-memories";
 
 /**
  * Compaction is the one place where a model's output causes durable rows
@@ -174,6 +174,56 @@ describe("validateMerge, kinds stay separate", () => {
 
     assert.equal(verdict.ok, false);
     assert.equal(verdict.ok === false && verdict.reason, "cross-kind");
+  });
+});
+
+describe("selectCompactionCandidates", () => {
+  /** `count` rows for one child and kind. */
+  function group(childId: string | null, kind: string, count: number): ActiveRow[] {
+    return Array.from({ length: count }, () =>
+      row({ child_id: childId, kind, content: `an entry about ${childId ?? "the family"}` }),
+    );
+  }
+
+  it("passes a small store through untouched", () => {
+    const rows = [...group(ALMA, "fact", 5), ...group(ARA, "fact", 4)];
+    assert.deepEqual(selectCompactionCandidates(rows, 120), rows);
+  });
+
+  it("never splits a child-and-kind group, so no merge pair gets stranded", () => {
+    const rows = [
+      ...group(ALMA, "fact", 30),
+      ...group(ARA, "fact", 25),
+      ...group(null, "fact", 20),
+      ...group(ALMA, "what_works", 15),
+    ];
+    const picked = selectCompactionCandidates(rows, 60);
+
+    // Every group present must be present in FULL.
+    const key = (entry: ActiveRow) => `${entry.child_id ?? "family"}:${entry.kind}`;
+    const pickedCounts = new Map<string, number>();
+    for (const entry of picked) pickedCounts.set(key(entry), (pickedCounts.get(key(entry)) ?? 0) + 1);
+    const fullCounts = new Map<string, number>();
+    for (const entry of rows) fullCounts.set(key(entry), (fullCounts.get(key(entry)) ?? 0) + 1);
+
+    for (const [groupKey, count] of pickedCounts) {
+      assert.equal(count, fullCounts.get(groupKey), `group ${groupKey} arrived split`);
+    }
+    assert.ok(picked.length <= 60);
+    assert.ok(picked.length > 0, "a cap of 60 should still fit some whole groups");
+  });
+
+  it("takes the largest groups first, where redundancy concentrates", () => {
+    const rows = [...group(ALMA, "fact", 40), ...group(ARA, "fact", 8)];
+    const picked = selectCompactionCandidates(rows, 45);
+
+    assert.equal(picked.length, 40);
+    assert.ok(picked.every((entry) => entry.child_id === ALMA));
+  });
+
+  it("returns nothing rather than a partial group when none fit", () => {
+    const rows = group(ALMA, "fact", 100);
+    assert.deepEqual(selectCompactionCandidates(rows, 50), []);
   });
 });
 

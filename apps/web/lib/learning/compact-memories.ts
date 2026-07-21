@@ -46,6 +46,56 @@ export const MAX_MERGES_PER_COMPACTION = 6;
 /** Below this many active rows there is nothing worth a model pass. */
 const MIN_ROWS_FOR_COMPACTION = 6;
 
+/**
+ * Ceiling on rows shown to the model in one pass. Storage is unbounded
+ * now, so without this the compaction prompt grows with a family forever,
+ * which is the same shape of bug as the context query that used to take
+ * the oldest 200 rows. The nightly sweep works through the rest.
+ */
+const MAX_ROWS_PER_COMPACTION = 120;
+
+/**
+ * selectCompactionCandidates(rows, cap): ActiveRow[]
+ * Trims to the cap by dropping WHOLE child-and-kind groups, largest first,
+ * never by slicing a group in half.
+ *
+ * That shape is load-bearing: a merge is only ever legal inside one child
+ * and one kind (validateMerge), so a group that survives arrives complete
+ * and no merge opportunity is hidden by the trim. Cutting at an arbitrary
+ * row instead would strand a stale entry in one pass and its correction in
+ * the next, and the pair would never be seen together.
+ */
+export function selectCompactionCandidates(
+  rows: ActiveRow[],
+  cap: number = MAX_ROWS_PER_COMPACTION,
+): ActiveRow[] {
+  if (rows.length <= cap) return rows;
+
+  const groups = new Map<string, ActiveRow[]>();
+  for (const row of rows) {
+    const key = `${row.child_id ?? "family"}:${row.kind}`;
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+
+  // Biggest groups first: redundancy concentrates where entries pile up,
+  // so that is where a bounded pass buys the most.
+  const ordered = [...groups.values()].sort((a, b) => b.length - a.length);
+  const picked: ActiveRow[] = [];
+  for (const group of ordered) {
+    if (picked.length + group.length > cap) continue;
+    picked.push(...group);
+  }
+  // Restore the stable read order the listing depends on.
+  return picked.sort(
+    (a, b) =>
+      (a.child_id ?? "").localeCompare(b.child_id ?? "") ||
+      a.kind.localeCompare(b.kind) ||
+      a.created_at.localeCompare(b.created_at),
+  );
+}
+
 /** Exported for the law tests: these rules are the guarantee, and they are
  *  worth asserting directly rather than only through a live model pass. */
 export interface ActiveRow {
@@ -220,7 +270,17 @@ export async function compactFamilyMemories(
   `;
   const nameById = new Map(children.map((child) => [child.id, child.name]));
 
-  const listing = rows
+  // Bounded, whole groups only. Indices below are into THIS array, and
+  // validateMerge resolves against it too, so the two can never drift.
+  const candidates = selectCompactionCandidates(rows);
+  if (candidates.length < rows.length) {
+    outcome.rejected.push({
+      reason: "truncated",
+      detail: `showed ${candidates.length} of ${rows.length} rows this pass; the rest follow on a later night`,
+    });
+  }
+
+  const listing = candidates
     .map((row, index) => {
       const scope = row.child_id ? (nameById.get(row.child_id) ?? "a child") : "whole family";
       return `${index}. [${row.kind} · ${scope} · saved ${row.created_at.slice(0, 10)}] ${row.content}`;
@@ -263,7 +323,7 @@ export async function compactFamilyMemories(
   const claimed = new Set<string>();
 
   for (const merge of result.object.merges) {
-    const checked = validateMerge(merge, rows);
+    const checked = validateMerge(merge, candidates);
     if (!checked.ok) {
       outcome.rejected.push({ reason: checked.reason, detail: checked.detail });
       continue;
