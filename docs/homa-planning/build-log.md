@@ -3,6 +3,93 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-21 · Chat-first onboarding, phase one: the spine, built behind a flag
+
+Founder ask: build the chat-first onboarding described in
+`plans/2026-07-21-chat-first-onboarding.md`, the whole thing, sequenced by
+judgment rather than by the spec's phase list. Everything below is behind
+`HOMA_CHAT_ONBOARDING`, which is off. With it off, `/onboarding` still
+prerenders statically and every path in this entry is unreachable.
+
+**Where the spec was wrong, and what shipped instead.**
+
+*The onboarding predicate.* §2.2 defines onboardingActive as
+`profile_completed_at IS NULL OR families.context.onboarding.state != 'done'`.
+Read literally, the second clause is true for an ABSENT record, and no
+family has that key today (verified in prod: 46 completed families, zero
+with it). So every completed family would have been marked
+onboarding-active forever, and since the same predicate now exempts a
+family from the door wall, that would have taken the live $19 wall down
+fleet-wide. Shipped predicate: the durable record decides when it exists,
+`profile_completed_at` is the fallback for families predating the flow.
+
+*A lean second chat surface.* §9 lists "the lean onboarding chat surface
+(shared parts with chat-client)" as net-new. `chat-client.tsx` turned out
+to be 1675 lines of incident-hardened machinery: a three-defense stall
+triad, lost-turn recovery matching on exact trimmed text, the Vega
+duplicate-bubble guard, 4am session rotation, and two test files
+asserting against its raw source with regexes. A parallel surface would
+re-implement all of it badly, in the one place a parent has no history
+proving recovery works. §2.8 already requires the two to share a storage
+key and session, so onboarding renders the SAME component with one
+`onboarding` prop. The handoff to `/app` stops being a handoff.
+
+*Generalizing the signup tools.* §2.9 asks to give
+`signup_set_family`/`signup_add_child` a web resolution path. Three things
+block it: `lib/signup-session.ts` refuses any channel that is not SMS and
+is keyed on a phone number, `ensureSignupFamily` unconditionally creates an
+ANONYMOUS family, and `saveFamilyBasicsFromSms` hard-refuses a family with
+any `family_members` row, which an authenticated web user always has (that
+guard exists for founder ruling `card-per-family-primary-parent`). Shipped
+five new narrow tools calling the SAME store functions the SMS path and the
+web routes already call, so a child added in chat is byte-identical to one
+added anywhere else.
+
+**Decisions made without a ruling, all reversible.**
+
+1. The wall bypass is flag-gated, so prod behavior is unchanged until the
+   flow ships. Without the gate, 228 abandoned-funnel families would
+   silently stop being walled.
+2. The arc lives in `agent/skills/onboarding/SKILL.md`, not in
+   `onboarding-mode.ts`. AGENTS.md puts procedure and judgment in a fleet
+   skill and reserves dynamic instructions for what must apply before a
+   skill loads or must be fresh every turn. The mode carries the routing
+   and the directive-reading rule; the skill carries the arc.
+3. `score_child_report` scores and returns, and deliberately does NOT
+   write the report narrative or send the email. Both are slow and would
+   hold the turn open while she watches a still screen. The reveal card
+   finishes them through the existing `/api/map/score` route, which has
+   the 300s function and the `after()` hook built for exactly that, and
+   which is idempotent.
+4. The report opens as its own page rather than an in-chat panel. The
+   SidePanel chassis (§2.7) is not built; the reveal card carries the real
+   numbers inline and the whole report is one tap away.
+5. `MAP_FLOW_STEPS` gains "chat" so the existing per-card funnel compares
+   both flows on one chart. `map.report_viewed` gains a third entry value,
+   "chat", which is what makes the rebuild's central claim measurable: one
+   family in four never opens the emailed link.
+6. The credit meter is counted and shown to the founder at
+   `/admin/makings` and enforced nowhere. No tool reads it. Turning it on
+   supersedes four recorded decisions and needs the §7.5 ruling.
+
+**Two bugs the tests caught before a parent could.**
+`formatHiddenDirective` stripped "/" from values, so `America/Chicago`
+arrived as `AmericaChicago` and would have been saved as a time zone that
+parses as nothing. And the queued-bubble list filtered directives out
+while still passing the filtered index to `removeQueuedMessage`, so with a
+directive queued ahead of her words the X removed the wrong message.
+
+**One bug only running it caught.** `child_reports` has no `id` column;
+it is keyed by `child_id`. The existence check asked for `r.id` and threw
+on every call, which would have made `start_checklist` and
+`score_child_report` fail for every family. A green typecheck said nothing.
+
+**First finding from the shadow meter,** read-only against prod: four
+families made anything in the current Monday-to-Monday window, and the
+busiest made 38 against the specced week-one allowance of 10. Whatever the
+right allowance is, 10 is not obviously it. That number is for the §7.5
+ruling.
+
 ## 2026-07-21 · Homa can ask the parent to choose, on web only; one founder ruling
 
 Founder ask: check whether an `ask_user_questions` tool already existed in
