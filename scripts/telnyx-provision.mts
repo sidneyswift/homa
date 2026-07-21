@@ -350,8 +350,17 @@ async function loadVoiceInstructions(): Promise<string> {
   // this port trims the web-only parts (tools, memory, worksheets) since
   // the hosted assistant has none of them. {{family_context}} resolves at
   // call time via the dynamic-variables webhook (/api/voice/context).
+  // The call-boundary rules (what a call can and cannot do, the honest
+  // worksheet/binder response, the honesty law) live in
+  // apps/web/agent/general-call-instructions.md (voice-materials-bridge
+  // plan Phase 0) and are appended last so they bind hardest.
   const instructionsPath = path.join(REPO_ROOT, "apps/web/agent/instructions.md");
+  const boundaryPath = path.join(
+    REPO_ROOT,
+    "apps/web/agent/general-call-instructions.md",
+  );
   const full = await readFile(instructionsPath, "utf8");
+  const boundary = await readFile(boundaryPath, "utf8");
   const voiceSection = full.split("## What you know each turn")[0];
   return [
     voiceSection.replace(/<!--[\s\S]*?-->/u, "").trim(),
@@ -398,8 +407,8 @@ async function loadVoiceInstructions(): Promise<string> {
     "  its way in one short sentence. If they decline, keep helping and",
     "  drop it; a second pitch in one call reads as pushy. Never bring",
     "  up payment or pricing on a call.",
-    "- You cannot make worksheets on a call yet; offer them for the next",
-    "  web visit instead.",
+    "- What a call can and cannot do is bound by the rules at the end of",
+    "  these instructions; they beat everything above them.",
     "- You CAN save durable facts with the remember tool, and for a linked",
     "  family you should: the moment the parent shares something worth",
     "  keeping (family rhythm, a child's new obsession, what worked for",
@@ -431,6 +440,8 @@ async function loadVoiceInstructions(): Promise<string> {
     "    read the email body aloud. After the tool succeeds, confirm in one",
     "    sentence. If it returns an error, tell the parent plainly and never",
     "    pretend it worked.",
+    "",
+    boundary.replace(/<!--[\s\S]*?-->/u, "").trim(),
   ].join("\n");
 }
 
