@@ -172,10 +172,47 @@ export interface DripPlan {
 }
 
 /**
- * Which families this tick sends to, in one pure pass, so the cadence rule is
- * unit tested alongside the eligibility rules. Eligibility is decided for
- * every family first, then the cap truncates: that way `eligible` reports the
- * true size of the queue rather than just what fit.
+ * Which nudge goes first when the per-tick cap cannot serve everyone.
+ *
+ * Ordered by how close the family already is to value, and by how fast the
+ * nudge goes stale. A family who finished the whole assessment and never
+ * opened the report is one tap away and her report ages every day, so she
+ * leads. The loop-back nudge asks about a plan that is already a week old, so
+ * a few hours changes nothing. The setup nudge is for families who never
+ * reached value at all, and an hour later is no worse for them.
+ *
+ * Without this the cap took whatever five rows Postgres happened to return,
+ * which put the highest-intent group behind the lowest by luck of row order
+ * (seen live 2026-07-21: nine report-unviewed families waited while setup
+ * nudges went out first).
+ */
+const KIND_PRIORITY: Record<Exclude<DripDecision, null>["kind"], number> = {
+  drip_report_unviewed: 0,
+  drip_loop_back: 1,
+  drip_setup_nudge: 2,
+};
+
+/** The moment that made this family eligible, so the oldest wait goes first
+ * inside a nudge. Keeps the queue FIFO within a priority band: nobody sits at
+ * the back forever because newer families keep arriving. */
+function triggerAt(send: PlannedDripSend): number {
+  const { family, decision } = send;
+  if (decision.kind === "drip_report_unviewed") {
+    return family.reportEmailedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  if (decision.kind === "drip_loop_back") {
+    return family.planCreatedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  return family.createdAt.getTime();
+}
+
+/**
+ * Which families this tick sends to, in one pure pass, so the cadence and
+ * priority rules are unit tested alongside the eligibility rules. Eligibility
+ * is decided for every family first, then the queue is ordered, then the cap
+ * truncates: that way `eligible` reports the true size of the queue rather
+ * than just what fit, and the cap always takes the families that most deserve
+ * this tick rather than an arbitrary five.
  */
 export function planDripSends(
   signals: DripSignals[],
@@ -187,6 +224,18 @@ export function planDripSends(
     const decision = chooseDripNudge(family, now);
     if (decision) eligible.push({ family, decision });
   }
+
+  // Highest intent first, then longest wait, then family id purely so the
+  // order is total and reproducible: two runs over the same data must plan
+  // the same sends, or the queue on /admin/drip stops predicting reality.
+  eligible.sort((left, right) => {
+    const byKind = KIND_PRIORITY[left.decision.kind] - KIND_PRIORITY[right.decision.kind];
+    if (byKind !== 0) return byKind;
+    const byWait = triggerAt(left) - triggerAt(right);
+    if (byWait !== 0) return byWait;
+    return left.family.familyId.localeCompare(right.family.familyId);
+  });
+
   return {
     sends: eligible.slice(0, limit),
     eligible: eligible.length,
@@ -342,6 +391,13 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       and not coalesce(f.sandbox, false)
       and f.email is not null
       and exists (select 1 from public.family_members m where m.family_id = f.id)
+    -- Deterministic scan. The intent ordering that decides who this tick
+    -- serves happens in planDripSends, because it depends on WHICH nudge each
+    -- family gets and that is decided in TypeScript; expressing it here would
+    -- mean a second copy of the eligibility rules, free to drift from the
+    -- first. This only guarantees the same rows in the same order every run,
+    -- so a capped scan is reproducible instead of arbitrary.
+    order by f.created_at, f.id
     limit ${SWEEP_LIMIT}
   `;
 
