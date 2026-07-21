@@ -44,6 +44,7 @@
     "atlas:index": "tsx scripts/curriculum-atlas-index.mts",
     "dev": "turbo run dev",
     "eval:journaling-trigger": "tsx scripts/journaling-trigger-eval.mts",
+    "eval:claim-extraction": "tsx scripts/claim-extraction-eval.mts",
     "eval:progress-check-in": "tsx scripts/progress-check-in-answer-model-eval.mts",
     "eval:prompt-suggestions": "tsx scripts/prompt-suggestions-eval.mts",
     "eval:prompt-suggestions:judge-fallback-sweep": "tsx scripts/prompt-suggestions-eval.mts --judge-fallback-sweep",
