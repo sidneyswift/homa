@@ -8,6 +8,8 @@ import { getChildProgressView } from "../../../../lib/child-progress";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { loadChildProgressPageState } from "../../../../lib/child-progress/page-state";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
+import { lessonListenEnabled } from "../../../../lib/lessons/flag";
+import { listLessonsForChild } from "../../../../lib/lessons/store";
 import { getTrajectoryEvidence } from "../../../../lib/map/store";
 import {
   buildTrajectoryEras,
@@ -40,18 +42,25 @@ export default async function ChildProgressPage({
   const child = data.children.find((entry) => entry.id === childId);
   if (!child) notFound();
 
-  const pageState = await loadChildProgressPageState(
-    {
-      familyId: data.family.id,
-      child: {
-        id: child.id,
-        name: child.name,
-        birthDate: child.birth_month,
+  // Lessons load alongside the view: both need only the family and the
+  // child already re-scoped above, so neither waits on the other.
+  const [pageState, lessons] = await Promise.all([
+    loadChildProgressPageState(
+      {
+        familyId: data.family.id,
+        child: {
+          id: child.id,
+          name: child.name,
+          birthDate: child.birth_month,
+        },
+        timeZone: effectiveTimeZone(data.family.time_zone),
       },
-      timeZone: effectiveTimeZone(data.family.time_zone),
-    },
-    { loadView: getChildProgressView },
-  );
+      { loadView: getChildProgressView },
+    ),
+    lessonListenEnabled()
+      ? listLessonsForChild(data.family.id, child.id, 5)
+      : Promise.resolve([]),
+  ]);
   if (pageState.status === "unavailable") {
     console.error(
       "Live Progress could not load.",
@@ -92,6 +101,18 @@ export default async function ChildProgressPage({
         name: entry.name,
         avatarUrl: entry.avatar_url,
       }))}
+      lessons={
+        lessonListenEnabled()
+          ? {
+              recordHref: `/app/${child.id}/lessons/record`,
+              lessons: lessons.map((lesson) => ({
+                id: lesson.id,
+                status: lesson.status,
+                startedAt: lesson.startedAt,
+              })),
+            }
+          : null
+      }
     />
   );
 }

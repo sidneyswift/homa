@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
-import { getMyChildren, getMyFamily } from "../../../../../../lib/family";
-import { lessonListenEnabled } from "../../../../../../lib/lessons/flag";
-import { listLessonsForChild } from "../../../../../../lib/lessons/store";
-import { PageColumn } from "../../../../../../components/dashboard/page-column";
+import { getMyChildren, getMyFamily } from "../../../../../lib/family";
+import { lessonListenEnabled } from "../../../../../lib/lessons/flag";
+import { listLessonsForChild } from "../../../../../lib/lessons/store";
+import { PageColumn } from "../../../../../components/dashboard/page-column";
 import { LessonRecorder } from "./recorder";
 
 /**
- * /app/kids/[childId]/lessons/record: the recording door (plan
- * 2026-07-13-lesson-listen.md §4.2, entry ruling §7 Q5). The child is
+ * /app/[childId]/lessons/record: the recording door (plan
+ * 2026-07-13-lesson-listen.md §4.2, entry ruling §7 Q5). It sat under
+ * /app/kids until that surface retired; it now shares a shape with
+ * /app/[childId]/progress, the page whose card opens it. The child is
  * looked up inside the caller's own family, so a foreign id is a 404.
  * Consent state rides in as a prop; the API routes re-check the stamp
  * on every call regardless.

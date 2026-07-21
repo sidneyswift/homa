@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 
-import { prepareChildPhotoForUpload } from "../../../../../../lib/child-photo-prepare";
-import { KidAvatar } from "../../../../../../components/dashboard/kid-avatar";
+import { prepareChildPhotoForUpload } from "../../../../../lib/child-photo-prepare";
+import { KidAvatar } from "../../../../../components/dashboard/kid-avatar";
 import { agreeLessonAudioConsentAction } from "./actions";
 
 /**
@@ -523,7 +523,7 @@ export function LessonRecorder({
                   <Link
                     key={kid.id}
                     replace
-                    href={`/app/kids/${kid.id}/lessons/record`}
+                    href={`/app/${kid.id}/lessons/record`}
                     aria-current={current ? "page" : undefined}
                     className={
                       current

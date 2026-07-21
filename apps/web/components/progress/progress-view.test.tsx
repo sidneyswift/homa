@@ -168,4 +168,60 @@ describe("ProgressView", () => {
     assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);
     assert.doesNotMatch(html, /Subject by subject/);
   });
+
+  it("carries the lesson recording door and this child's reviews", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          lessons={{
+            recordHref: "/app/child-1/lessons/record",
+            lessons: [
+              { id: "lesson-1", status: "ready", startedAt: "2026-07-18T15:00:00.000Z" },
+              { id: "lesson-2", status: "transcribing", startedAt: "2026-07-17T15:00:00.000Z" },
+              { id: "lesson-3", status: "failed", startedAt: "2026-07-16T15:00:00.000Z" },
+            ],
+          }}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    assert.match(html, /aria-label="Lessons"/);
+    assert.match(
+      html,
+      /<a[^>]*href="\/app\/child-1\/lessons\/record"[^>]*>Record a lesson<\/a>/,
+    );
+    assert.match(html, /href="\/app\/lessons\/lesson-1"/);
+
+    // Status reads in the parent's words, never a pipeline stage.
+    assert.match(html, /Review ready/);
+    assert.match(html, /Review on the way/);
+    assert.match(html, /Homa couldn(?:&#x27;|')t finish/);
+    assert.doesNotMatch(html, /transcribing/);
+  });
+
+  it("offers no recording door when the caller passes no lessons", () => {
+    // Both the flag-off page and the founder console's read-only mirror
+    // land here: a mirror must never offer to start a recording.
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          deeperChecks={false}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    assert.doesNotMatch(html, /aria-label="Lessons"/);
+    assert.doesNotMatch(html, /Record a lesson/);
+    assert.doesNotMatch(html, /lessons\/record/);
+  });
 });
