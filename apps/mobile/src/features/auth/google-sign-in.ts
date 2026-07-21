@@ -2,6 +2,7 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
 import { supabase } from "../../lib/supabase";
+import type { SignInFlowResult } from "./sign-in-result";
 
 /**
  * Browser-based Google sign-in, the mobile twin of the web flow in
@@ -36,15 +37,7 @@ import { supabase } from "../../lib/supabase";
  */
 const REDIRECT_URL = "homa://auth/callback";
 
-export type GoogleSignInResult =
-  /** Session established. SessionProvider takes it from here. */
-  | { status: "signed-in" }
-  /** The parent closed the browser, or backed out at Google. */
-  | { status: "dismissed" }
-  /** Something actually broke. `reason` is for logs, never for parents. */
-  | { status: "failed"; reason: string };
-
-export async function signInWithGoogle(): Promise<GoogleSignInResult> {
+export async function signInWithGoogle(): Promise<SignInFlowResult> {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { redirectTo: REDIRECT_URL, skipBrowserRedirect: true },

@@ -9,15 +9,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import * as AppleAuthentication from "expo-apple-authentication";
+
 import { GoogleGlyph } from "../../components/brand/google-glyph";
 import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { TextField } from "../../components/ui/text-field";
-import {
-  signInWithGoogle,
-  type GoogleSignInResult,
-} from "../../features/auth/google-sign-in";
+import { signInWithApple } from "../../features/auth/apple-sign-in";
+import { signInWithGoogle } from "../../features/auth/google-sign-in";
+import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
@@ -32,16 +33,17 @@ import { colors, fontSize, space } from "../../theme/tokens";
  */
 
 /**
- * Turns a non-success Google result into what the parent reads, or null
- * to stay quiet. Two cases arrive here and they are not the same: a
- * parent who closed the browser already knows why they are back, while a
- * parent whose exchange failed is looking at a screen that did nothing.
+ * Turns a non-success Google or Apple result into what the parent
+ * reads, or null to stay quiet. Two cases arrive here and they are not
+ * the same: a parent who closed the sheet already knows why they are
+ * back, while a parent whose sign-in failed is looking at a screen that
+ * did nothing.
  *
  * TODO(founder): decide the copy and which cases speak. Voice laws in
  * AGENTS.md apply: reassure before inform, offers never commands, no
  * red or "failed" framing, no em dash.
  */
-function describeGoogleFailure(result: GoogleSignInResult): string | null {
+function describeSignInFailure(result: SignInFlowResult): string | null {
   if (result.status === "dismissed") return null;
   return "That didn't go through. You can try again when you're ready.";
 }
@@ -51,22 +53,27 @@ export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
-  const [googlePending, setGooglePending] = useState(false);
+  const [oauthPending, setOauthPending] = useState<"google" | "apple" | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   if (session) return <Redirect href="/" />;
 
-  async function continueWithGoogle() {
+  async function continueWith(
+    provider: "google" | "apple",
+    flow: () => Promise<SignInFlowResult>,
+  ) {
     setError(null);
-    setGooglePending(true);
-    const result = await signInWithGoogle();
-    setGooglePending(false);
+    setOauthPending(provider);
+    const result = await flow();
+    setOauthPending(null);
     // Success: SessionProvider picks up the session and this screen redirects.
     if (result.status === "signed-in") return;
     if (result.status === "failed") {
-      console.error("mobile google signin failed:", result.reason);
+      console.error(`mobile ${provider} signin failed:`, result.reason);
     }
-    setError(describeGoogleFailure(result));
+    setError(describeSignInFailure(result));
   }
 
   async function submit() {
@@ -119,13 +126,37 @@ export default function SignInScreen() {
           </View>
 
           <Card style={{ gap: space.md }}>
+            {Platform.OS === "ios" ? (
+              // Apple's own button component, required look per their
+              // branding rules; height and width must be explicit or it
+              // does not render. Sits first: guideline 4.8 wants it no
+              // less prominent than Google.
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={
+                  AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+                }
+                buttonStyle={
+                  AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                }
+                cornerRadius={26}
+                style={{ width: "100%", height: 52 }}
+                onPress={() => {
+                  if (oauthPending || pending) return;
+                  void continueWith("apple", signInWithApple);
+                }}
+              />
+            ) : null}
             <Button
-              label={googlePending ? "Opening Google\u2026" : "Continue with Google"}
+              label={
+                oauthPending === "google"
+                  ? "Opening Google\u2026"
+                  : "Continue with Google"
+              }
               variant="secondary"
               size="lg"
               icon={<GoogleGlyph />}
-              onPress={() => void continueWithGoogle()}
-              disabled={googlePending || pending}
+              onPress={() => void continueWith("google", signInWithGoogle)}
+              disabled={oauthPending !== null || pending}
             />
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
@@ -175,7 +206,7 @@ export default function SignInScreen() {
             <Button
               label={pending ? "One moment\u2026" : "Sign in"}
               onPress={() => void submit()}
-              disabled={pending || googlePending}
+              disabled={pending || oauthPending !== null}
               size="lg"
             />
           </Card>

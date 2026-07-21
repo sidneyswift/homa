@@ -57,11 +57,15 @@ owns design-system integration, not general mobile parity.
 
 ## Current native boundaries
 
-- Authentication is Google or email and password. Google runs the
-  browser OAuth flow (`signInWithOAuth` plus `exchangeCodeForSession`)
-  against the same Supabase provider the web app uses, so it needs the
-  app's redirect URLs on the Supabase allow list. Native Google Sign-In
-  (the account-picker sheet, `signInWithIdToken`) is not present.
+- Authentication is Apple, Google, or email and password. Google runs
+  the browser OAuth flow (`signInWithOAuth` plus
+  `exchangeCodeForSession`) against the same Supabase provider the web
+  app uses, so it needs the app's redirect URLs on the Supabase allow
+  list. Apple is the native sheet (`expo-apple-authentication` plus
+  `signInWithIdToken`), required next to Google by App Review 4.8; it
+  needs the bundle ID under the Apple provider's Client IDs in
+  Supabase. Native Google Sign-In (the account-picker sheet) is not
+  present.
 - No push-notification configuration is present.
 - Printable artifacts render in chat and open their PDF URL in the system viewer, which can offer platform print or share actions. There is no native in-app print control.
 - New and unfinished families open the web `/onboarding` flow. Native onboarding is not present.

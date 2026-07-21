@@ -1,0 +1,54 @@
+import * as AppleAuthentication from "expo-apple-authentication";
+
+import { supabase } from "../../lib/supabase";
+import type { SignInFlowResult } from "./sign-in-result";
+
+/**
+ * Native Sign in with Apple: the system account sheet, then the identity
+ * token goes straight to Supabase (`signInWithIdToken`), no browser hop.
+ * Exists because App Review guideline 4.8 requires an equivalent
+ * privacy-preserving option next to Google sign-in, and because it is
+ * the nicest flow on the platform anyway.
+ *
+ * Config this depends on: `usesAppleSignIn` plus the plugin in app.json
+ * (the entitlement), and the app's bundle ID registered under the Apple
+ * provider's Client IDs in the Supabase dashboard. This is the
+ * documented Supabase Expo pattern: no manual nonce, Supabase validates
+ * the token's audience against those Client IDs.
+ */
+export async function signInWithApple(): Promise<SignInFlowResult> {
+  let credential: AppleAuthentication.AppleAuthenticationCredential;
+  try {
+    credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "ERR_REQUEST_CANCELED"
+    ) {
+      return { status: "dismissed" };
+    }
+    return {
+      status: "failed",
+      reason: error instanceof Error ? error.message : "apple sheet failed",
+    };
+  }
+
+  if (!credential.identityToken) {
+    return { status: "failed", reason: "no identity token" };
+  }
+
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: "apple",
+    token: credential.identityToken,
+  });
+  if (error) return { status: "failed", reason: error.message };
+
+  return { status: "signed-in" };
+}
