@@ -207,6 +207,11 @@ export function ProgressView({
     needsConfirm: tile.needsConfirm,
   }));
 
+  // A child with no subjects and no report has never been assessed, so
+  // the first check-in stays the page's one ask and the recording door
+  // waits below it. Every other child sees the door up top.
+  const neverAssessed = view.subjects.length === 0 && report === null;
+
   return (
     <PageColumn>
       <div className="mx-auto w-full max-w-[var(--container-md)]">
@@ -239,6 +244,13 @@ export function ProgressView({
           </div>
           <KidSwitcher kids={kids} currentChildId={view.childId} />
         </header>
+
+        {/* Directly under the header, where a parent looking for it will
+            find it. It shipped below the chart first and was invisible
+            in practice (2026-07-21): on a scored child the chart plus a
+            dozen subject rows push it a full screen down, with nothing
+            above hinting it exists. */}
+        {lessons && !neverAssessed ? <LessonsCard card={lessons} /> : null}
 
         {view.subjects.length === 0 ? (
           <div className="mt-7">
@@ -295,11 +307,7 @@ export function ProgressView({
           </div>
         )}
 
-        {/* The recording door sits under the progress it feeds, not
-            above it: on an unassessed child the first check-in is the
-            ask, and two primary buttons competing at the top would
-            blunt both. */}
-        {lessons ? <LessonsCard card={lessons} /> : null}
+        {lessons && neverAssessed ? <LessonsCard card={lessons} /> : null}
       </div>
     </PageColumn>
   );
