@@ -456,6 +456,13 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   manage_child_progress: "updating progress…",
   open_planner: "opening the planner…",
   edit_plan: "updating the planner…",
+  add_child: "adding them…",
+  save_family_basics: "saving what you told me…",
+  save_homeschool_profile: "saving what you told me…",
+  start_checklist: "getting the questions ready…",
+  // The one wait that is worth narrating rather than labelling. The
+  // reveal card takes over from here and says the rest.
+  score_child_report: "reading the answers…",
 };
 
 /** The skill whose load marks a material build starting; the studio

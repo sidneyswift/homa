@@ -149,3 +149,56 @@ export async function beginOnboarding(familyId: string): Promise<OnboardingRecor
 export async function completeOnboarding(familyId: string): Promise<OnboardingRecord> {
   return writeOnboardingRecord(familyId, { state: "done" });
 }
+
+export interface FamilyBasicsInput {
+  /** What she wants Homa to call her. */
+  callMeName?: string;
+  /** The family's own name for itself, editable later. */
+  familyName?: string;
+  /** Two-letter US state; drives which homeschool rules Homa follows. */
+  usState?: string;
+  /** IANA zone, captured silently from the browser and confirmed lightly. */
+  timeZone?: string;
+}
+
+/**
+ * saveFamilyBasics(familyId, input): the micro-gather's one write.
+ *
+ * Deliberately NOT lib/map/store.ts saveFamilySetup, which is the
+ * settings form's writer: that one sets parent_avatar_url and the address
+ * columns unconditionally, so calling it with the two fields a
+ * conversation actually collects would blank a photo she had already
+ * uploaded. Every column here coalesces, so a field she did not mention
+ * keeps whatever it had.
+ *
+ * profile_completed_at is stamped once and never moved. It is what makes
+ * /app reachable, and while the onboarding record says active it does NOT
+ * end onboarding, because the record outranks the stamp.
+ */
+export async function saveFamilyBasics(
+  familyId: string,
+  input: FamilyBasicsInput,
+): Promise<{ savedFields: string[] }> {
+  const sql = mapDb();
+  const callMeName = input.callMeName?.trim() || null;
+  const familyName = input.familyName?.trim() || null;
+  const usState = input.usState?.trim().toUpperCase() || null;
+  const timeZone = input.timeZone?.trim() || null;
+  await sql`
+    update public.families set
+      name = coalesce(${familyName}, name),
+      first_name = coalesce(${callMeName}, first_name),
+      parent_display_name = coalesce(${callMeName}, parent_display_name),
+      us_state = coalesce(${usState}, us_state),
+      time_zone = coalesce(${timeZone}, time_zone),
+      profile_completed_at = coalesce(profile_completed_at, now()),
+      updated_at = now()
+    where id = ${familyId}
+  `;
+  const savedFields: string[] = [];
+  if (callMeName) savedFields.push("callMeName");
+  if (familyName) savedFields.push("familyName");
+  if (usState) savedFields.push("usState");
+  if (timeZone) savedFields.push("timeZone");
+  return { savedFields };
+}

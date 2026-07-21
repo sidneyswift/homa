@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { onboardingModeMarkdown } from "./onboarding-mode";
+import { onboardingModeMarkdown } from "../../agent/instructions/onboarding-mode";
 
 /**
  * Routing fixtures for onboarding mode
