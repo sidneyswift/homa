@@ -454,3 +454,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 4-10. Mostly blank for the child's own drawing, never Homa-supplied reference art.
 - **Creation path:** html
 - **Example activity:** `[nature-observation-journal] Five-senses tree log — "I see / I hear / I smell / I feel" prompts beside a drawing box, with a circle to attach a leaf`
+
+### letter-number-formation-practice
+- **Slug:** `[letter-number-formation-practice]`
+- **Name:** Letter & number formation practice
+- **What it is:** One letter or digit per page: a bold model with a plain-language stroke cue underneath, a formation box (a single box for capitals and digits, a three-band ceiling/chair-rail/floor box for lowercase), a row of trace repetitions that fade from full model to blank, and a starting dot at the stroke's exact starting point.
+- **Best for:** Developmental or multisensory handwriting curricula that teach letters and numbers stroke by stroke in a shared-shape teaching order (not alphabet or count order), pre-writing stroke practice before real letters begin.
+- **Subjects:** ELA (handwriting), math (number formation)
+- **Ages:** 3-6. Larger boxes and fewer repetitions for younger; smaller boxes and more repetitions for older.
+- **Creation path:** html (exact box geometry and baseline placement are critical)
+- **Example activity:** `[letter-number-formation-practice] Capital letter T: "Big line down, little line across the top," four trace boxes fading to one blank box`

@@ -476,6 +476,7 @@ making.
 | Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
 | Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
 | Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
+| Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
 
 ## Design rules (binding)
 

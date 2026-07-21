@@ -107,9 +107,10 @@ literature-based approach), structure weeks around the reading selection:
 ## Methodology-aware planning rules
 
 When a parent identifies their teaching methodology or curriculum approach, apply
-these rules to shape the entire curriculum. These are synthesized from 11 curriculum
+these rules to shape the entire curriculum. These are synthesized from 12 curriculum
 analyses (The Good and the Beautiful, Harcourt Trophies, Hometessori Primary, 
-Homeschool Languages Spanish, Write on Track, Teach Your Child to Read in 100 Easy
+Homeschool Languages Spanish, Write on Track, Get Set for School / Handwriting
+Without Tears, Teach Your Child to Read in 100 Easy
 Lessons, Peaceful Press Early Years, Playing Preschool Year 1 and Year 2).
 
 ### Charlotte Mason
@@ -301,3 +302,38 @@ or "classical conversations":
   selections and a moral/character education emphasis.
 - Art and poetry appreciation woven into language arts, not separate subjects.
 - Nature study (Charlotte Mason influence) in many classical curricula.
+
+### Handwriting Without Tears / Learning Without Tears (Developmental Letter Formation)
+
+When a family says "we use Handwriting Without Tears", "we use Learning Without
+Tears", or uses Get Set for School:
+
+- Teach letters and numbers in stroke-family order, never alphabetical or counting
+  order. Group by the strokes that build the shape: straight vertical and horizontal
+  letters first, then round "Magic C" letters, then big-and-little-curve letters,
+  then diagonals. Lowercase letters get their own, different grouping from capitals.
+- Capitals before lowercase, always. Capitals are one size and start at the top every
+  time, which is the easier shape for a young child to control first.
+- Narrate every stroke with the same small, consistent vocabulary: line, curve, big,
+  little, up, down, across, around. Say the same words for the same stroke on every
+  letter so the words themselves become the cue.
+- Formation practice, not copywork, is the core activity at this stage: one letter or
+  digit per page, a model to trace that fades from full support to a blank
+  independent-write box, never a full sentence or passage to copy. Use
+  `[letter-number-formation-practice]` for capitals, lowercase, and digits, and for
+  pre-writing stroke practice (straight lines, curves, shapes) before real letters
+  begin.
+- Readiness comes before paper. For young or brand-new writers, suggest hands-on
+  stroke-shape play (building letters out of found materials like craft sticks or
+  pipe cleaners, or simply "writing" the letter in the air or in a tray of sand)
+  before the first formation-practice page for that letter, if the family has not
+  already covered it.
+- Numbers use the same treatment as letters: one digit per page, its own stroke cue,
+  and a matching "starting corner" convention consistent with the letters.
+- Assessment is by developmental benchmark, not test score. Do not suggest quizzes or
+  graded worksheets for this method; a completed formation-practice page with
+  consistent stroke direction is itself the evidence of progress.
+- Format preferences: `[letter-number-formation-practice]` for letters, numbers, and
+  pre-writing strokes; `[tracing-guide]` for name-writing practice once individual
+  letters are secure; `[number-practice-page]` once a child is ready to combine digit
+  formation with counting and cardinality on the same page.
