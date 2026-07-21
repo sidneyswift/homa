@@ -1,8 +1,12 @@
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
+
+import { LOOP_BACK_EVENTS } from "../activation/signals";
 import { emailHash } from "../email/hash";
 import { suppressedHashesForDrip } from "../email/suppression";
 import { mapDb } from "../map/db";
 import {
   siteUrl,
+  submitDripLoopBack,
   submitDripReportUnviewed,
   submitDripSetupNudge,
   type HomaEmailSubmission,
@@ -17,10 +21,13 @@ import { mintLinkToken } from "../map/store";
  *
  * The eligibility is a pure function (chooseDripNudge) so the rules are unit
  * tested; the SQL only gathers signals and applies the non-negotiable fences
- * (sandbox out, email required, a real member). Two audiences ship in the
- * sweep, both unambiguous and mutually exclusive:
+ * (sandbox out, email required, a real member). Three audiences ship in the
+ * sweep, each unambiguous:
  *   - setup nudge: signed up, no report yet (setup unfinished, or no kid).
  *   - report unviewed: a report was emailed and the family never opened any.
+ *   - loop back: they said yes to a plan and never told Homa how it went.
+ *     Aimed at the activation ladder's measured cliff (lib/activation
+ *     /signals.ts), because those replies tune everything Homa makes next.
  * The add-a-kid nudge template exists (email.ts) for the founder preview but
  * is NOT in the automated audience: it must never guess a family has more
  * children than it does, so it waits on a durable more-kids signal.
@@ -36,6 +43,10 @@ import { mintLinkToken } from "../map/store";
 const GLOBAL_CAP_MS = 7 * 24 * 60 * 60 * 1000;
 const SETUP_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const REPORT_MIN_AGE_MS = 48 * 60 * 60 * 1000;
+/** A full week after the parent said yes: long enough that "did they start
+ * it" is a fair question, and it makes the email's "four weeks" framing
+ * true rather than premature. */
+const LOOP_BACK_MIN_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SWEEP_LIMIT = 200;
 
 export interface DripSignals {
@@ -53,6 +64,14 @@ export interface DripSignals {
   anyReportViewed: boolean;
   unviewedChildName: string | null;
   unviewedReportToken: string | null;
+  /** The most recent plan the parent said yes to, and when. Null when the
+   * family has no plan, which is the only state the loop-back nudge can
+   * honestly address: it names the plan, so it must exist. */
+  planChildName: string | null;
+  planSubjectId: string | null;
+  planCreatedAt: Date | null;
+  /** The parent has told Homa how something went at least once. */
+  closedLoop: boolean;
   /** The family turned proactive email off (journal_opt_out_at set, from an
    * inbound "stop"). Cleared by "start", so it reads current state. */
   optedOut: boolean;
@@ -66,6 +85,7 @@ export interface DripSignals {
 export type DripDecision =
   | { kind: "drip_setup_nudge" }
   | { kind: "drip_report_unviewed"; childName: string; reportToken: string }
+  | { kind: "drip_loop_back"; childName: string; subjectId: string }
   | null;
 
 /**
@@ -99,6 +119,24 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
     };
   }
 
+  // The loop-back nudge, aimed at the activation ladder's measured cliff:
+  // a plan the parent said yes to, and no word back about how it went. It
+  // names the plan, so it only fires when a plan actually exists.
+  const loopBackEligible =
+    signals.planChildName !== null &&
+    signals.planSubjectId !== null &&
+    signals.planCreatedAt !== null &&
+    !signals.closedLoop &&
+    !signals.sentKinds.includes("drip_loop_back") &&
+    now.getTime() - signals.planCreatedAt.getTime() >= LOOP_BACK_MIN_AGE_MS;
+  if (loopBackEligible) {
+    return {
+      kind: "drip_loop_back",
+      childName: signals.planChildName as string,
+      subjectId: signals.planSubjectId as string,
+    };
+  }
+
   const setupEligible =
     !signals.hasReport &&
     (signals.profileCompletedAt === null || !signals.hasKid) &&
@@ -114,6 +152,7 @@ export interface DripSweepResult {
   considered: number;
   setupSent: number;
   reportSent: number;
+  loopBackSent: number;
 }
 
 function toDate(value: unknown): Date | null {
@@ -140,6 +179,10 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       report_emailed_at: string | null;
       unviewed_child_name: string | null;
       unviewed_token: string | null;
+      plan_child_name: string | null;
+      plan_subject_id: string | null;
+      plan_created_at: string | null;
+      closed_loop: boolean;
       opted_out: boolean;
       last_drip_sent_at: string | null;
       sent_kinds: string[];
@@ -179,6 +222,28 @@ async function loadDripSignals(): Promise<DripSignals[]> {
         where c.family_id = f.id and r.emailed_at is not null and r.viewed_at is null
         order by r.emailed_at limit 1
       ) as unviewed_token,
+      (
+        select c.name from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_child_name,
+      (
+        select p.subject_id from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_subject_id,
+      (
+        select p.created_at from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_created_at,
+      exists (
+        select 1 from public.events e
+        where e.family_id = f.id and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
+      ) as closed_loop,
       f.journal_opt_out_at is not null as opted_out,
       (
         select max(es.created_at) from public.email_sends es
@@ -212,6 +277,10 @@ async function loadDripSignals(): Promise<DripSignals[]> {
     anyReportViewed: row.any_report_viewed,
     unviewedChildName: row.unviewed_child_name,
     unviewedReportToken: row.unviewed_token,
+    planChildName: row.plan_child_name,
+    planSubjectId: row.plan_subject_id,
+    planCreatedAt: toDate(row.plan_created_at),
+    closedLoop: row.closed_loop,
     optedOut: row.opted_out,
     suppressed: false,
     lastDripSentAt: toDate(row.last_drip_sent_at),
@@ -252,6 +321,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
   const signals = await loadDripSignals();
   let setupSent = 0;
   let reportSent = 0;
+  let loopBackSent = 0;
 
   for (const family of signals) {
     const decision = chooseDripNudge(family, now);
@@ -268,7 +338,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         family.familyId,
       );
       if (submission.status === "submitted") setupSent += 1;
-    } else {
+    } else if (decision.kind === "drip_report_unviewed") {
       submission = await submitDripReportUnviewed(
         family.email,
         family.firstName,
@@ -277,8 +347,35 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         family.familyId,
       );
       if (submission.status === "submitted") reportSent += 1;
+    } else {
+      // Most plans in production are the whole-month plan, which has no
+      // single subject and is NOT in the subject bank: resolving it through
+      // getMapSubject alone would silently skip the majority of this
+      // audience. Same split the retest email makes in /api/map/cron.
+      const isMonth = decision.subjectId === MONTH_PLAN_SUBJECT;
+      const subjectName = isMonth
+        ? null
+        : getMapSubject(decision.subjectId)?.displayName;
+      // An unknown subject id must never reach a parent as a raw slug.
+      if (!isMonth && !subjectName) continue;
+      const planLabel = isMonth
+        ? "this month's plan"
+        : `the ${(subjectName as string).toLowerCase()} plan`;
+      submission = await submitDripLoopBack(
+        family.email,
+        decision.childName,
+        planLabel,
+        family.familyId,
+      );
+      if (submission.status === "submitted") loopBackSent += 1;
     }
   }
 
-  return { skipped: false, considered: signals.length, setupSent, reportSent };
+  return {
+    skipped: false,
+    considered: signals.length,
+    setupSent,
+    reportSent,
+    loopBackSent,
+  };
 }

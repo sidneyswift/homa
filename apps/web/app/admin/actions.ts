@@ -33,6 +33,7 @@ import { mapDb } from "../../lib/map/db";
 import {
   siteUrl,
   submitDripAddKid,
+  submitDripLoopBack,
   submitDripReportUnviewed,
   submitDripSetupNudge,
 } from "../../lib/map/email";
@@ -417,7 +418,7 @@ export interface DripPreviewState {
   sent?: string;
 }
 
-const DRIP_PREVIEW_KINDS = new Set(["setup", "report", "add_kid"]);
+const DRIP_PREVIEW_KINDS = new Set(["setup", "report", "loop_back", "add_kid"]);
 
 export async function sendDripPreviewAction(
   _prev: DripPreviewState,
@@ -438,7 +439,9 @@ export async function sendDripPreviewAction(
       ? await submitDripSetupNudge(to, null, `${site}/onboarding`)
       : kind === "report"
         ? await submitDripReportUnviewed(to, null, "Sam", `${site}/onboarding`)
-        : await submitDripAddKid(to, null, "Sam", `${site}/app`);
+        : kind === "loop_back"
+          ? await submitDripLoopBack(to, "Sam", "the reading plan")
+          : await submitDripAddKid(to, null, "Sam", `${site}/app`);
 
   if (submission.status !== "submitted") {
     return { error: "That preview didn't send. Check RESEND_API_KEY, then try again." };

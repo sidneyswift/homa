@@ -48,7 +48,8 @@ export type EmailLedgerKind =
   // kinds exist now so the founder preview and the dark sweep both record.
   | "drip_setup_nudge"
   | "drip_report_unviewed"
-  | "drip_add_kid";
+  | "drip_add_kid"
+  | "drip_loop_back";
 
 interface EmailLedger {
   kind: EmailLedgerKind;
@@ -636,7 +637,7 @@ export async function sendBandReadyEmail(
  * before dripEnabled() is ever true.
  */
 const DRIP_OUTER_NOTE =
-  "We email you about your family's homeschool: your child's reports, a nudge to pick up where you left off, and news when there is new progress to see. No marketing. Every kind has an off switch.";
+  "I email you about your family's homeschool: your child's progress report, a note when something is ready, and the occasional check-in. No marketing. Reply with the word stop to end any of them.";
 
 /** List-Unsubscribe headers for a proactive email (RFC 2369 + RFC 8058
  * one-click). The mailto path always works (an inbound "unsubscribe" reply
@@ -706,6 +707,48 @@ export async function submitDripReportUnviewed(
     cta: { label: `Open ${childName}'s report`, url: reportUrl },
     footerNote:
       "If now isn't the time, it will be here whenever you are. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * The loop-back nudge: a family said yes to a plan and never told Homa how
+ * it went. Aimed at the measured cliff in the activation ladder (5 of 36
+ * families on 2026-07-20), because those replies are what tune everything
+ * Homa makes next.
+ *
+ * Copy gated 2026-07-20 through homa-copy-reviewer then homa-copy-editor.
+ * Reader calls that shaped it: say what Homa already did BEFORE asking for
+ * anything, ask one narrow question instead of "what worked and what
+ * didn't", and never reassure her that not doing it is "not a failure"
+ * (that names a judgment she had not made). Editor calls: each fact once,
+ * name the real artifacts, and the CTA is its own verb-first sentence.
+ * There is no button on purpose: the reply IS the action, and a button
+ * beside a reply instruction read as two competing doors.
+ */
+export async function submitDripLoopBack(
+  to: string,
+  childName: string,
+  /** The plan named the way a parent would say it: "this month's plan" or
+   * "the phonics plan". Built by the caller, because the whole-month plan
+   * has no subject to look up. */
+  planLabel: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  return submit({
+    ledger: { kind: "drip_loop_back", familyId },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `Did ${childName} start ${planLabel}?`,
+    preview: "Your answer shapes the next worksheet.",
+    heading: `${childName}'s plan is saved`,
+    bodyLines: [
+      "You said yes to it, and I built all four weeks of activities.",
+      `Did ${childName} start any of it yet? Either answer helps.`,
+      "Your answer decides what I make next: the worksheets, the activities, the pace.",
+      "Reply to this email with one line.",
+    ],
+    footerNote: "Want these to stop? Reply with the word stop.",
     outerNote: DRIP_OUTER_NOTE,
   });
 }

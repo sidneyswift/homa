@@ -104,6 +104,7 @@ export async function GET(request: Request): Promise<Response> {
     considered: 0,
     setupSent: 0,
     reportSent: 0,
+    loopBackSent: 0,
   };
 
   try {

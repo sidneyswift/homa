@@ -377,10 +377,19 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   if (!inboundReceipt.claimed) return;
 
   // Best-effort analytics (law #3). No phone number, no content in props.
-  await emitMapEvent("sms.message_received", {
-    media_count: attachments.length,
-    linked_family: familyId !== null,
-  });
+  // The family id rides the COLUMN, never the props, so the props contract
+  // is unchanged and still carries nothing identifying. Without it every
+  // inbound text was unattributable (231 events, zero countable per family),
+  // which made SMS invisible to the activation ladder even though most
+  // families text (funnel work 2026-07-20). Null for a stranger, as before.
+  await emitMapEvent(
+    "sms.message_received",
+    {
+      media_count: attachments.length,
+      linked_family: familyId !== null,
+    },
+    { familyId },
+  );
 
   // A stranger texting IS a lead (lead-funnel-plan LF-2): save the
   // number before anything else can fail. Fire-and-forget by design.

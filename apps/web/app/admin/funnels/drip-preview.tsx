@@ -16,12 +16,14 @@ const INITIAL_STATE: DripPreviewState = { error: null };
 const PREVIEWS: { kind: string; label: string; note: string }[] = [
   { kind: "setup", label: "Setup nudge", note: "signed up, no report yet" },
   { kind: "report", label: "Report ready", note: "emailed, never opened" },
+  { kind: "loop_back", label: "How did it go", note: "said yes to a plan, never replied" },
   { kind: "add_kid", label: "Add a kid", note: "one kid, room for more" },
 ];
 
 const SENT_LABEL: Record<string, string> = {
   setup: "Setup nudge",
   report: "Report ready",
+  loop_back: "How did it go",
   add_kid: "Add a kid",
 };
 
