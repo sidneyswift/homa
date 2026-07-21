@@ -6,9 +6,12 @@ import { z } from "zod";
  * parent's call, she asks with tappable options instead of a paragraph
  * of questions. Web chat renders the output as a stepped card, one
  * question on screen at a time (question-card.tsx), and the parent's
- * taps come back as an ordinary message.
+ * taps come back as an ordinary message. The Expo app arrives on this
+ * same "web" channel and draws its own twin of that card
+ * (apps/mobile/src/features/chat/question-card.tsx), so both screens
+ * compose the identical answer message.
  *
- * Web only, on purpose (founder ruling 2026-07-21). The one-question-
+ * Screens only, on purpose (founder ruling 2026-07-21). The one-question-
  * at-a-time rule that governs progress check-ins came from SMS, where
  * a stack of questions in a text thread is a burden and no card can
  * render anyway. On a screen a short set of real options is lighter
