@@ -40,8 +40,11 @@ describe("ProgressView", () => {
     );
 
     // The bare header: freshness line and title, no intro sentence.
+    // The line dates the visit (rendered with the real clock here), not
+    // the newest evidence: no fixed date to assert, only the shape.
     assert.match(html, /Maya(?:&#x27;|')s progress/);
-    assert.match(html, /Updated Jul 11, 2026/);
+    assert.match(html, /As of [A-Z][a-z]{2} \d{1,2}, \d{4}/);
+    assert.doesNotMatch(html, /Updated Jul 1[12], 2026/);
     assert.doesNotMatch(html, /skills you have shared/i);
     assert.doesNotMatch(html, /Latest information/i);
     assert.match(
