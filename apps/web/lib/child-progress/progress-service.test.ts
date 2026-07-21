@@ -949,7 +949,10 @@ describe("child progress evidence service", () => {
         [
           {
             itemId: "literacy.emergent-reader",
-            answer: "easily",
+            // Unqualified "can read an early chapter book": the parent
+            // named no independence cue, so the conservative tier
+            // applies (founder ruling `progress-signal-capture-v2` D4).
+            answer: "getting_there",
           },
           {
             itemId: "literacy.retells-story",
