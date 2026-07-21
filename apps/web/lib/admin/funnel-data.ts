@@ -1,3 +1,5 @@
+import { MAP_FLOW_STEPS, type MapFlowStep } from "@homa/core";
+
 import { adminDb } from "./db";
 
 /**
@@ -38,13 +40,37 @@ export interface CohortRow {
   activeByWeek: (number | null)[];
 }
 
+export interface StepStage {
+  step: MapFlowStep;
+  label: string;
+  count: number;
+}
+
 export interface FunnelData {
   windowDays: number;
   stages: FunnelStage[];
+  stepFunnel: StepStage[];
   stuck: { accountNoSetup: StuckFamily[]; setupNoReport: StuckFamily[] };
   pipeline: PipelineNode[];
   cohorts: CohortRow[];
 }
+
+/** Friendly names for the onboarding cards, in MAP_FLOW_STEPS order. The
+ * per-card funnel reads these so drop-off between two adjacent cards is
+ * visible for the first time (funnel work 2026-07-20). */
+const STEP_LABELS: Record<MapFlowStep, string> = {
+  parent: "Account (email/password)",
+  family: "Create your family",
+  homeschool: "About your homeschool",
+  kids: "Add your kids",
+  preparing: "Preparing the questionnaire",
+  checklist: "The questionnaire",
+  extras: "Extras",
+  "next-kid": "Next-kid choice",
+  scoring: "Scoring",
+  deepdive: "Deep dive",
+  hub: "Hub",
+};
 
 const FUNNEL_EVENTS: { key: string; name: string; event: string }[] = [
   // map.started often fires when the signup screen opens (session bootstrap),
@@ -76,6 +102,20 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
         where f.id = e.family_id and (f.sandbox or coalesce(f.status, 'open') = 'deleted')
       )
     group by e.name
+  `;
+  // Per-card onboarding funnel from map.step_viewed (funnel work
+  // 2026-07-20): one row per family per card reached, so this reads the
+  // real per-card drop-off. Same sandbox fence as the event funnel above.
+  const stepCounts = await sql<{ step: string; n: number }[]>`
+    select e.props->>'step' as step, count(distinct e.family_id)::int as n
+    from public.events e
+    where e.name = 'map.step_viewed'
+      and e.created_at >= now() - ${interval}::interval
+      and not exists (
+        select 1 from public.families f
+        where f.id = e.family_id and (f.sandbox or coalesce(f.status, 'open') = 'deleted')
+      )
+    group by e.props->>'step'
   `;
   const accountNoSetup = await sql<{ id: string; name: string; created_at: string }[]>`
     select f.id, f.name, f.created_at::text as created_at
@@ -139,6 +179,13 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     count: countsBy.get(stage.event) ?? 0,
   }));
 
+  const stepCountsBy = new Map(stepCounts.map((row) => [row.step, row.n]));
+  const stepFunnel: StepStage[] = MAP_FLOW_STEPS.map((step) => ({
+    step,
+    label: STEP_LABELS[step],
+    count: stepCountsBy.get(step) ?? 0,
+  }));
+
   const runBy = new Map(runRows.map((row) => [row.status, row.n]));
   const delBy = new Map(deliveryRows.map((row) => [row.status, row.n]));
   const runsTotal = runRows.reduce((sum, row) => sum + row.n, 0);
@@ -191,6 +238,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
   return {
     windowDays,
     stages,
+    stepFunnel,
     stuck: {
       accountNoSetup: accountNoSetup.map((row) => ({
         id: row.id,

@@ -42,7 +42,13 @@ export type EmailLedgerKind =
   | "retest"
   | "band_ready"
   | "family_invite"
-  | "admin_digest";
+  | "admin_digest"
+  // The onboarding drip (funnel work 2026-07-20). DARK until the copy
+  // clears review and compliance lands (lib/drip/flag.ts). The ledger
+  // kinds exist now so the founder preview and the dark sweep both record.
+  | "drip_setup_nudge"
+  | "drip_report_unviewed"
+  | "drip_add_kid";
 
 interface EmailLedger {
   kind: EmailLedgerKind;
@@ -618,6 +624,101 @@ export async function sendBandReadyEmail(
     ],
     cta: { label: `Start ${childName}'s questionnaire`, url },
     footerNote: "Everything you shared is already saved.",
+  });
+}
+
+/**
+ * The onboarding drip's shared standing promise (Appendix A1 of the funnel
+ * plan): the revised "we email you about your family's homeschool" line
+ * rides the drip emails ONLY. The other transactional emails keep their
+ * current footer until this revision clears copy review, so nothing else
+ * changes its promise in this pass. DRAFT copy: gate through
+ * homa-copy-reviewer then homa-copy-editor, and wire the "stop" opt-out,
+ * before dripEnabled() is ever true.
+ */
+const DRIP_OUTER_NOTE =
+  "We email you about your family's homeschool: your reports, a reminder to finish what you started, and the occasional nudge when there's new progress to see. No marketing. Every kind has an off switch.";
+
+/** Nudge for a family that signed up but never reached a report: setup
+ * unfinished, or no child added yet (Appendix A2). Resume link. */
+export async function submitDripSetupNudge(
+  to: string,
+  firstName: string | null,
+  resumeUrl: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_setup_nudge", familyId },
+    to,
+    subject: firstName
+      ? `Pick up where you left off, ${firstName}`
+      : "Pick up where you left off",
+    preview: "Everything you entered is saved. Five quiet minutes finishes it.",
+    heading: "Your family setup is saved",
+    bodyLines: [
+      `${hi}you started setting up your family on Homa, and everything you entered is saved.`,
+      "Whenever you have five quiet minutes, you can add your first child and Homa builds a free progress report tuned to their age.",
+    ],
+    cta: { label: "Continue where you left off", url: resumeUrl },
+    footerNote: "No rush. You can turn these reminders off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** Nudge for a family whose report was emailed but never opened
+ * (Appendix A3). The durable per-report token, never the single-slot
+ * resume link, so it cannot collide with another email's link. */
+export async function submitDripReportUnviewed(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  reportUrl: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_report_unviewed", familyId },
+    to,
+    subject: `${childName}'s progress report is ready to open`,
+    preview: `${childName}'s report is finished and waiting for you.`,
+    heading: `${childName}'s report is ready`,
+    bodyLines: [
+      `${hi}${childName}'s report is finished and waiting for you. It shows in plain language where ${childName} is shining and where a little practice helps.`,
+    ],
+    cta: { label: `Open ${childName}'s report`, url: reportUrl },
+    footerNote:
+      "If now isn't the time, it will be here whenever you are. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** Nudge for a one-kid family with evidence of more children (Appendix
+ * A4). Never inferred: the sweep only sends this when a durable signal
+ * proves more kids exist, so it can preview here but stays out of the
+ * automated audience until that join lands. */
+export async function submitDripAddKid(
+  to: string,
+  firstName: string | null,
+  firstKid: string,
+  addKidUrl: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_add_kid", familyId },
+    to,
+    subject: firstName
+      ? `Add the rest of your crew, ${firstName}`
+      : "Add the rest of your crew",
+    preview: `${firstKid}'s report is set. Adding another takes a few minutes.`,
+    heading: "Add another child whenever you like",
+    bodyLines: [
+      `${hi}${firstKid}'s report is set. When you're ready, you can add another child and Homa builds theirs the same way, tuned to their own age.`,
+    ],
+    cta: { label: "Add another child", url: addKidUrl },
+    footerNote: "One at a time is perfectly fine. Turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
   });
 }
 

@@ -5,6 +5,7 @@ import { requireFounder } from "../../../lib/admin/gate";
 import { getFunnelData } from "../../../lib/admin/funnel-data";
 import { familyDisplayName, percent, timeAgo } from "../../../lib/admin/format";
 import { EmptyNote, Pill, SectionHead } from "../ui";
+import { DripPreview } from "./drip-preview";
 
 /**
  * /admin/funnels: two conveyor belts (lab direction 4). The human funnel
@@ -17,9 +18,14 @@ import { EmptyNote, Pill, SectionHead } from "../ui";
 export const metadata: Metadata = { title: "Funnels" };
 
 export default async function AdminFunnelsPage() {
-  await requireFounder();
+  const founder = await requireFounder();
   const data = await getFunnelData(28);
   const max = Math.max(...data.stages.map((stage) => stage.count), 1);
+  // Only cards anyone has reached yet: the event just shipped, so most read
+  // zero until families flow through. An empty list says so rather than
+  // printing eleven zero-rows.
+  const reachedSteps = data.stepFunnel.filter((step) => step.count > 0);
+  const stepMax = Math.max(...reachedSteps.map((step) => step.count), 1);
 
   return (
     <div>
@@ -70,6 +76,56 @@ export default async function AdminFunnelsPage() {
           );
         })}
       </div>
+
+      <SectionHead
+        eyebrow="Humans"
+        title="Per onboarding card"
+        sub="Distinct families that reached each card, from map.step_viewed. This is where per-card drop-off finally shows up; the account card is the first one after signup."
+      />
+      {reachedSteps.length === 0 ? (
+        <EmptyNote>
+          No per-card data yet. This fills in as families move through onboarding
+          after the map.step_viewed beacon ships.
+        </EmptyNote>
+      ) : (
+        <div className="mt-3 flex flex-col gap-1.5">
+          {reachedSteps.map((step, index) => {
+            const previous = index > 0 ? reachedSteps[index - 1].count : null;
+            return (
+              <div key={step.step}>
+                <div className="grid grid-cols-[minmax(120px,200px)_1fr_60px] items-center gap-3 rounded-md border border-border-subtle bg-card px-3.5 py-2 shadow-sm">
+                  <span>
+                    <span className="text-sm font-bold text-strong">{step.label}</span>
+                    <span className="block font-mono text-[0.62rem] text-subtle">{step.step}</span>
+                  </span>
+                  <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                    <span
+                      className="block h-full rounded-md"
+                      style={{
+                        width: `${Math.max(2, Math.round((step.count / stepMax) * 100))}%`,
+                        background: "linear-gradient(90deg, var(--sage-300), var(--sage-500))",
+                      }}
+                    />
+                  </span>
+                  <span className="text-right font-mono text-sm font-bold text-strong">{step.count}</span>
+                </div>
+                {previous !== null && previous > 0 ? (
+                  <p className="ml-[calc(min(200px,30%)+12px)] py-0.5 text-[0.7rem] text-subtle">
+                    {percent(step.count, previous)} of the previous card
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <SectionHead
+        eyebrow="Onboarding drip"
+        title="Nudge previews (off by default)"
+        sub="The stage-aware drip is wired but dark. Preview each nudge in your own inbox before it ships to anyone."
+      />
+      <DripPreview founderEmail={founder.email} />
 
       <SectionHead
         eyebrow="Parked right now"

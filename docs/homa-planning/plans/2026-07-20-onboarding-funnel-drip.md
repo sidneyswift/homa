@@ -391,11 +391,46 @@ Guards run green: `check:events`, `check:isolation`, `typecheck` (the four
 `rasterize-pdf` errors are a pre-existing local missing-dep gap, unrelated),
 `lint` (0 errors), and the 21 core events unit tests.
 
-Not yet done (documented follow-ups, not regressions): surfacing the new
-`map.step_viewed` per-card funnel on `/admin/funnels` (the event is now
-captured and queryable; the visualization is additive), and everything in
-Phase 3/4 (the drip and its compliance), which stays blocked on the copy in
-Appendix A and founder sign-off to send.
+Session 3 (2026-07-20, drip dark + per-card view). Founder approved
+building both, stacked on the Session 2 branch.
+
+The drip (Phase 3), wired DARK:
+- `lib/drip/flag.ts` `dripEnabled()` reads `HOMA_DRIP_ENABLED` and is false
+  unless the value is exactly "true", so nothing reaches a real family
+  until the copy clears review and compliance lands.
+- `lib/drip/sweep.ts`: a pure `chooseDripNudge(signals, now)` (unit tested,
+  11 cases) plus `runDripSweep()`. Two audiences ship, mutually exclusive:
+  setup nudge (signed up, no report: setup unfinished or no kid) and
+  report-unviewed (a report emailed, family never opened one). Caps: one
+  drip email per family per 7 days, each kind once ever, any `email.opt_out`
+  stops everything, every rule re-checked at send. The add-a-kid nudge
+  template exists for preview but is NOT in the automated audience (never
+  guess a family has more kids). Validated against prod: the query resolves
+  the real ~8 setup-stall and ~9 report-unviewed families, and correctly
+  leaves the kid-no-report families to the legacy 24h reminder.
+- `lib/map/email.ts`: three new `EmailLedgerKind`s + submit functions; the
+  revised A1 promise rides the drip footer ONLY (other emails unchanged).
+- `/api/map/cron`: `runDripSweep()` runs only under `dripEnabled()`,
+  heartbeated with the other loops.
+- Founder preview: `sendDripPreviewAction` (admin, founder-gated) sends any
+  nudge to the founder's own inbox, does NOT read the flag, carries no
+  family_id, so it can never touch a real family's dedupe or cap.
+
+Per-card funnel (Phase 2 visualization):
+- `lib/admin/funnel-data.ts` `stepFunnel` counts distinct families per
+  `map.step_viewed` step (sandbox-fenced), and `/admin/funnels` renders the
+  per-card bars plus the drip preview panel.
+
+Guards green again: typecheck, lint (0 errors), `check:events`,
+`check:isolation`, the 11 drip unit tests, and the two new SQL queries
+executed read-only against prod.
+
+Still blocked before the drip can be un-darkened (Phase 4, none shipped):
+List-Unsubscribe header + one-click opt-out, a suppression list honored on
+bounce/complaint, wiring inbound "stop" to a drip opt-out, the A1 promise
+and privacy copy passing `homa-copy-reviewer`/`homa-copy-editor`, and the
+per-send `link_tokens` table before any multi-email sequence. The drip
+stays off until these land and the founder gives the go.
 
 ## Appendix A. Email drafts for review (not shipped)
 
