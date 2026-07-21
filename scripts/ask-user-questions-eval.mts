@@ -14,13 +14,12 @@
  * catch. Alternative tools carry a permissive schema and a stub result:
  * routing is decided on descriptions, and nothing here touches a database.
  *
- * Known bias, stated because it decides how to read a score: stub results
- * carry no data, and an agent that learns nothing is likelier to fall back
- * on asking. That makes the positives EASIER than production and the
- * negatives HARDER, so the negatives are the load-bearing half. A green
- * positive is weak evidence; an over-call on a negative is strong evidence
- * of a real problem, because production would have handed Homa real facts
- * and given her less reason to ask.
+ * Tool results are per-fixture and realistic: get_children returns that
+ * family's actual roster, and a scenario's lookups return that scenario's
+ * facts. An earlier version answered every lookup with "no result", which
+ * biased the whole eval toward the card, because an agent that learns
+ * nothing falls back on asking. Fixtures now teach Homa what production
+ * would have taught her, so a positive and a negative are equally fair.
  */
 
 import { readFileSync } from "node:fs";
@@ -35,6 +34,7 @@ import askUserQuestionsDynamic from "../apps/web/agent/tools/ask_user_questions"
 import {
   ASK_USER_QUESTIONS_FAILURE_MODES,
   ASK_USER_QUESTIONS_FIXTURES,
+  DEFAULT_TOOL_RESULT,
   type AskUserQuestionsFixture,
 } from "./fixtures/ask-user-questions";
 
@@ -140,23 +140,43 @@ function fixtureErrors(): string[] {
   return errors;
 }
 
-function alternativeTools(): Record<string, ReturnType<typeof tool>> {
+function loadSummaryTools(): SummaryTool[] {
   const summary = JSON.parse(readFileSync(summaryUrl, "utf8")) as {
     tools: SummaryTool[];
   };
+  return summary.tools.filter((entry) => entry.name !== TOOL_NAME);
+}
+
+/**
+ * The alternative tools for ONE fixture, answering with that scenario's
+ * facts. Homa is required to gather context before offering options, so
+ * the turn has to be able to continue past a lookup; answering every
+ * lookup with nothing would starve her into asking and quietly rig the
+ * eval toward the card.
+ */
+function alternativeTools(
+  summaryTools: readonly SummaryTool[],
+  fixture: AskUserQuestionsFixture,
+): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
-  for (const entry of summary.tools) {
-    if (entry.name === TOOL_NAME) continue;
+  const roster = {
+    ok: true,
+    children: fixture.children.map((child) => ({
+      id: child.id,
+      name: child.name,
+      age: child.age,
+    })),
+  };
+  for (const entry of summaryTools) {
+    const scripted = fixture.toolResults?.[entry.name];
+    const result =
+      entry.name === "get_children"
+        ? roster
+        : scripted ?? DEFAULT_TOOL_RESULT;
     tools[entry.name] = tool({
       description: entry.description,
       inputSchema: z.object({}).loose(),
-      // Stubbed so the turn can continue past a lookup. Homa is required
-      // to gather context before she offers options (instructions.md
-      // sends her to open_planner before touching a plan), so judging
-      // only her first move scores correct behavior as a miss.
-      execute: async () => ({
-        note: "Eval harness: no result. Proceed with what you know.",
-      }),
+      execute: async () => result,
     });
   }
   return tools;
@@ -183,11 +203,11 @@ async function runLiveEval(): Promise<number> {
     Number(process.env.HOMA_ASK_EVAL_REPEATS ?? DEFAULT_REPEATS),
   );
   let instructions: string;
-  let alternatives: Record<string, ReturnType<typeof tool>>;
+  let summaryTools: SummaryTool[];
   const choiceTool = resolveChoiceTool();
   try {
     instructions = readFileSync(instructionsUrl, "utf8");
-    alternatives = alternativeTools();
+    summaryTools = loadSummaryTools();
   } catch (error) {
     console.error(
       `Could not load the real tool surface (${(error as Error).message}).`,
@@ -196,13 +216,10 @@ async function runLiveEval(): Promise<number> {
     return 1;
   }
 
-  const tools = {
-    ...alternatives,
-    [TOOL_NAME]: tool({
-      description: choiceTool.description,
-      inputSchema: choiceTool.inputSchema as never,
-    }),
-  };
+  const choiceEntry = tool({
+    description: choiceTool.description,
+    inputSchema: choiceTool.inputSchema as never,
+  });
 
   const results: {
     fixture: AskUserQuestionsFixture;
@@ -216,6 +233,10 @@ async function runLiveEval(): Promise<number> {
   for (const fixture of ASK_USER_QUESTIONS_FIXTURES) {
     let askCount = 0;
     const otherTools = new Set<string>();
+    const tools = {
+      ...alternativeTools(summaryTools, fixture),
+      [TOOL_NAME]: choiceEntry,
+    };
     for (let run = 0; run < repeats; run += 1) {
       const result = await generateText({
         model: HOMA_MODEL,
