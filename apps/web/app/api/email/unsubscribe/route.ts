@@ -53,8 +53,8 @@ export async function GET(request: Request): Promise<Response> {
   const action = `/api/email/unsubscribe?t=${encodeURIComponent(token)}`;
   return page(
     "Unsubscribe",
-    `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">Turn off onboarding reminders?</h1>
-     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0 0 20px;">You'll stop getting the reminders about finishing setup and opening your report. Emails you ask for, like a report you request, still come through.</p>
+    `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">Turn off these reminders?</h1>
+     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0 0 20px;">You'll stop getting the reminders about finishing setup and opening your report. Emails you ask for, like a report, still come through.</p>
      <form method="post" action="${action}">
        <button type="submit" style="display:inline-block;background:#E7602F;color:#ffffff;border:none;border-radius:999px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer;">Turn off reminders</button>
      </form>`,
@@ -74,6 +74,6 @@ export async function POST(request: Request): Promise<Response> {
   return page(
     "Unsubscribed",
     `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">Done</h1>
-     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0;">You won't get onboarding reminders anymore. Anything you ask Homa for still reaches you.</p>`,
+     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0;">You won't get these reminders anymore. Anything you ask Homa for still reaches you.</p>`,
   );
 }

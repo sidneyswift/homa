@@ -636,7 +636,7 @@ export async function sendBandReadyEmail(
  * before dripEnabled() is ever true.
  */
 const DRIP_OUTER_NOTE =
-  "We email you about your family's homeschool: your reports, a reminder to finish what you started, and the occasional nudge when there's new progress to see. No marketing. Every kind has an off switch.";
+  "We email you about your family's homeschool: your child's reports, a nudge to pick up where you left off, and news when there is new progress to see. No marketing. Every kind has an off switch.";
 
 /** List-Unsubscribe headers for a proactive email (RFC 2369 + RFC 8058
  * one-click). The mailto path always works (an inbound "unsubscribe" reply
@@ -670,13 +670,13 @@ export async function submitDripSetupNudge(
     subject: firstName
       ? `Pick up where you left off, ${firstName}`
       : "Pick up where you left off",
-    preview: "Everything you entered is saved. Five quiet minutes finishes it.",
-    heading: "Your family setup is saved",
+    preview: "A free report on your child, from a few quick questions.",
+    heading: "Your setup is saved",
     bodyLines: [
-      `${hi}you started setting up your family on Homa, and everything you entered is saved.`,
-      "Whenever you have five quiet minutes, you can add your first child and Homa builds a free progress report tuned to their age.",
+      `${hi}you started setting up your family on Homa, and it is all here whenever you are ready.`,
+      "Add your first child and answer a few questions about what you have seen them do. Homa builds a free report on where they are, written for their age, in about five minutes.",
     ],
-    cta: { label: "Continue where you left off", url: resumeUrl },
+    cta: { label: "Add your first child", url: resumeUrl },
     footerNote: "No rush. You can turn these reminders off anytime.",
     outerNote: DRIP_OUTER_NOTE,
   });
@@ -698,10 +698,10 @@ export async function submitDripReportUnviewed(
     headers: unsubscribeHeaders(to),
     to,
     subject: `${childName}'s progress report is ready to open`,
-    preview: `${childName}'s report is finished and waiting for you.`,
+    preview: `It starts with what ${childName} already does well.`,
     heading: `${childName}'s report is ready`,
     bodyLines: [
-      `${hi}${childName}'s report is finished and waiting for you. It shows in plain language where ${childName} is shining and where a little practice helps.`,
+      `${hi}${childName}'s report is ready and waiting for you. Written in plain language, it opens with what ${childName} is already doing well, and gently points to what you might explore next.`,
     ],
     cta: { label: `Open ${childName}'s report`, url: reportUrl },
     footerNote:
@@ -727,12 +727,12 @@ export async function submitDripAddKid(
     headers: unsubscribeHeaders(to),
     to,
     subject: firstName
-      ? `Add the rest of your crew, ${firstName}`
-      : "Add the rest of your crew",
-    preview: `${firstKid}'s report is set. Adding another takes a few minutes.`,
+      ? `Ready to add the next child, ${firstName}?`
+      : "Ready to add the next child?",
+    preview: "Adding another takes just a few minutes.",
     heading: "Add another child whenever you like",
     bodyLines: [
-      `${hi}${firstKid}'s report is set. When you're ready, you can add another child and Homa builds theirs the same way, tuned to their own age.`,
+      `${hi}${firstKid}'s report is set. When you're ready, add another child and Homa builds theirs the same way, written for their own age.`,
     ],
     cta: { label: "Add another child", url: addKidUrl },
     footerNote: "One at a time is perfectly fine. Turn these off anytime.",
