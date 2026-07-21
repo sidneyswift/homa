@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getMyFamily } from "../../../../../../lib/family";
-import { setLessonAudioConsent } from "../../../../../../lib/family-profile";
-import { emitMapEvent } from "../../../../../../lib/map/events";
-import { createSupabaseServerClient } from "../../../../../../lib/supabase/server";
+import { getMyFamily } from "../../../../../lib/family";
+import { setLessonAudioConsent } from "../../../../../lib/family-profile";
+import { emitMapEvent } from "../../../../../lib/map/events";
+import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
 
 /**
  * The lesson listen consent screen's agree button (LL-0, ruling

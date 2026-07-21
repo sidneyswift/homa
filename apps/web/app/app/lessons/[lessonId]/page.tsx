@@ -359,6 +359,8 @@ export default async function LessonReviewPage({
   );
 }
 
+/** Back to where the recording door now lives: Progress, not the
+ *  retired kid card. */
 function BackToKid({
   childId,
   childName,
@@ -368,10 +370,10 @@ function BackToKid({
 }) {
   return (
     <Link
-      href={`/app/kids/${childId}`}
+      href={`/app/${childId}/progress`}
       className="text-sm font-medium text-muted transition-colors hover:text-strong"
     >
-      {"\u2190"} Back to {childName}&apos;s page
+      {"\u2190"} Back to {childName}&apos;s progress
     </Link>
   );
 }

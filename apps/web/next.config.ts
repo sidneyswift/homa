@@ -100,6 +100,14 @@ const nextConfig: NextConfig = {
       // keeps the legacy report available during rollout.
       { source: "/app/home", destination: "/app/progress", permanent: false },
       { source: "/app/dashboard", destination: "/app/progress", permanent: false },
+      // The recording door moved off the retired kid card onto Progress
+      // (2026-07-20), so it left /app/kids too. A parent who kept the
+      // old URL open through a lesson lands on the same recorder.
+      {
+        source: "/app/kids/:childId/lessons/record",
+        destination: "/app/:childId/lessons/record",
+        permanent: false,
+      },
     ];
   },
 };

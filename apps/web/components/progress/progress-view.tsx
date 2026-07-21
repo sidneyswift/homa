@@ -16,6 +16,7 @@ import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
+import { LessonsCard, type ProgressLessonsCardData } from "./lessons-card";
 import { ProgressMap } from "./progress-map";
 import { ProgressSubjects } from "./progress-subjects";
 import type { SubjectDoorRow } from "./subject-door-context";
@@ -154,6 +155,7 @@ export function ProgressView({
   report,
   eras,
   kids,
+  lessons = null,
   deeperChecks = true,
 }: {
   view: ChildProgressView;
@@ -171,6 +173,10 @@ export function ProgressView({
   eras: TrajectoryEra[];
   /** The family's kids in family order (drives the switcher's tones). */
   kids: ProgressViewKid[];
+  /** The lesson-listen door and this child's latest reviews. Null while
+   * the flag is off, and absent on read-only mirrors, which have no
+   * business offering a recording door. */
+  lessons?: ProgressLessonsCardData | null;
   /** False on read-only mirrors (the founder console): the subject
    * panel's deep-dive door walks the family's own flow, so only her
    * session offers it. */
@@ -288,6 +294,12 @@ export function ProgressView({
             </div>
           </div>
         )}
+
+        {/* The recording door sits under the progress it feeds, not
+            above it: on an unassessed child the first check-in is the
+            ask, and two primary buttons competing at the top would
+            blunt both. */}
+        {lessons ? <LessonsCard card={lessons} /> : null}
       </div>
     </PageColumn>
   );
