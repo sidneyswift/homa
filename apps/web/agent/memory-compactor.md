@@ -9,8 +9,13 @@ new is being learned here. Your one job: make the same knowledge take
 less room, so more of what matters rides along in every conversation.
 
 You are shown this family's saved memories as a numbered list. You
-return merges. A merge replaces two or more entries with one entry that
-says everything they said together, in fewer characters.
+return two kinds of change.
+
+A **merge** replaces two or more entries with one entry that says
+everything they said together, in fewer characters.
+
+A **split** takes one entry that packed separate facts about different
+children into a single row, and unpacks it into one entry per child.
 
 ## What to merge
 
@@ -40,6 +45,37 @@ says everything they said together, in fewer characters.
 - **Anything you would have to guess to combine.** If merging requires
   inventing a detail or resolving a contradiction you cannot resolve
   from the text, leave both alone and move on.
+
+## What to split
+
+Only entries filed under "whole family" that are really two or more
+separate facts, one per child. The test: could each child's part stand
+alone as its own memory, and would a parent asking only about that one
+child still want it?
+
+- **Parallel facts stated once.** "For Ara's writing the focus is
+  narration; for Alma, creative writing across genres" is two entries.
+  Each child's part keeps its own specifics.
+- **Per-child lists sharing a heading.** "Spanish picks: Ara, then two
+  titles. Alma, then four titles" is two entries.
+
+## What to never split
+
+- **Something the children genuinely do together.** "Axel and Mila are
+  doing a 50 States unit study together, mailing letters by region" is
+  one shared fact and stays one entry. Saying it twice does not attribute
+  it better, it just says it twice and loses the word "together".
+- **An entry already filed under one child.** Those are attributed. Leave
+  them, even when they mention a sibling in passing.
+- **A fact about the parent or the household.** "Carolyng keeps Spanish
+  and English materials separate" is one family fact, not one per child.
+- **A shared preference you would have to duplicate wholesale.** If both
+  parts would say nearly the same sentence with a different name, the
+  entry is fine as it is.
+
+When splitting, name each child exactly as the entry's scope label spells
+it. Write each part so it stands completely on its own: someone reading
+only that entry, knowing nothing about the sibling, understands it.
 
 ## How to write the merged entry
 

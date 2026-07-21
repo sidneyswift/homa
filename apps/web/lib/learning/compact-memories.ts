@@ -43,6 +43,16 @@ import { embedText } from "./embeddings";
  *  posture). A store needing more than this gets the rest next run. */
 export const MAX_MERGES_PER_COMPACTION = 6;
 
+/** One run may unpack at most this many rows into per-child entries. */
+export const MAX_SPLITS_PER_COMPACTION = 4;
+
+/**
+ * A split may grow the store, since the shared framing gets restated once
+ * per child. Past this multiple of the original it is duplication, not
+ * attribution, and the row is better left whole.
+ */
+const MAX_SPLIT_GROWTH_RATIO = 1.6;
+
 /** Below this many active rows there is nothing worth a model pass. */
 const MIN_ROWS_FOR_COMPACTION = 6;
 
@@ -110,12 +120,18 @@ export type MergeVerdict =
   | { ok: true; targets: ActiveRow[]; childId: string | null }
   | { ok: false; reason: string; detail: string };
 
+export type SplitVerdict =
+  | { ok: true; source: ActiveRow; parts: { content: string; childId: string }[] }
+  | { ok: false; reason: string; detail: string };
+
 export interface CompactionOutcome {
   familyId: string;
   /** Merges the model proposed. */
   proposed: number;
   /** Merges that survived validation and were written. */
   applied: { content: string; replaced: number }[];
+  /** Packed rows unpacked into one entry per child. */
+  unpacked: { from: string; into: string[] }[];
   /** Proposals rejected, with the rule that rejected them. */
   rejected: { reason: string; detail: string }[];
   charsBefore: number;
@@ -143,6 +159,33 @@ const compactionSchema = z.object({
     )
     .max(MAX_MERGES_PER_COMPACTION)
     .describe("Groups of entries that say the same thing. An empty array is a correct answer."),
+  splits: z
+    .array(
+      z.object({
+        entry: z.number().int().min(0).describe("Number of the entry to unpack."),
+        parts: z
+          .array(
+            z.object({
+              childName: z
+                .string()
+                .min(1)
+                .max(60)
+                .describe("Exactly one child's name, spelled as the list shows it."),
+              content: z
+                .string()
+                .min(4)
+                .max(MEMORY_ENTRY_MAX_CHARS)
+                .describe("That child's fact alone, standing on its own without the others."),
+            }),
+          )
+          .min(2)
+          .max(4),
+      }),
+    )
+    .max(MAX_SPLITS_PER_COMPACTION)
+    .describe(
+      "Entries holding separate facts about different children, one row per child. Only for separate facts, never for something the children genuinely do together. An empty array is a correct answer.",
+    ),
 });
 
 let cachedPrompt: string | null = null;
@@ -226,6 +269,79 @@ export function validateMerge(
 }
 
 /**
+ * Validates one proposed split: an entry holding separate facts about
+ * different children, unpacked into one row per child.
+ *
+ * Attribution is the entire point, so the rules are strict about it. Each
+ * part must name exactly one child who is really in THIS family, resolved
+ * against rows we loaded, never against a name the model supplied. Two
+ * parts may not claim the same child, or the "split" is just a rewrite.
+ *
+ * The growth guard is what keeps this honest: unpacking restates shared
+ * framing once per child, and past MAX_SPLIT_GROWTH_RATIO that is
+ * duplication wearing attribution's clothes. A genuinely joint fact
+ * ("Axel and Mila are doing a 50 States unit together") fails it naturally,
+ * because saying it twice costs far more than saying it once.
+ */
+export function validateSplit(
+  split: { entry: number; parts: { childName: string; content: string }[] },
+  rows: ActiveRow[],
+  childIdByName: Map<string, string>,
+): SplitVerdict {
+  const source = rows[split.entry];
+  if (!source) {
+    return { ok: false, reason: "unknown-entry", detail: `no entry numbered ${split.entry}` };
+  }
+  // A row already filed to one child is attributed; unpacking it would
+  // move facts out from under that child. Only unfiled rows are candidates.
+  if (source.child_id !== null) {
+    return {
+      ok: false,
+      reason: "already-attributed",
+      detail: "entry is already filed under one child",
+    };
+  }
+
+  const parts: { content: string; childId: string }[] = [];
+  const claimedChildren = new Set<string>();
+  for (const part of split.parts) {
+    const childId = childIdByName.get(part.childName.trim().toLowerCase());
+    if (!childId) {
+      return {
+        ok: false,
+        reason: "unknown-child",
+        detail: `"${part.childName}" is not a child in this family`,
+      };
+    }
+    if (claimedChildren.has(childId)) {
+      return {
+        ok: false,
+        reason: "duplicate-child",
+        detail: `two parts both claim ${part.childName}`,
+      };
+    }
+    const content = part.content.trim();
+    const blocked = scanMemoryContent(content);
+    if (blocked) {
+      return { ok: false, reason: "blocked-by-scan", detail: blocked };
+    }
+    claimedChildren.add(childId);
+    parts.push({ content, childId });
+  }
+
+  const grown = parts.reduce((total, part) => total + part.content.length, 0);
+  if (grown > source.content.length * MAX_SPLIT_GROWTH_RATIO) {
+    return {
+      ok: false,
+      reason: "no-saving",
+      detail: `parts total ${grown} against an original of ${source.content.length}, past the ${MAX_SPLIT_GROWTH_RATIO}x growth guard; likely a genuinely shared fact`,
+    };
+  }
+
+  return { ok: true, source, parts };
+}
+
+/**
  * Runs one compaction pass over a family's active memories.
  *
  * familyId always arrives from a server-side sweep over our own rows,
@@ -253,6 +369,7 @@ export async function compactFamilyMemories(
     familyId,
     proposed: 0,
     applied: [],
+    unpacked: [],
     rejected: [],
     charsBefore,
     charsAfter: charsBefore,
@@ -269,6 +386,11 @@ export async function compactFamilyMemories(
     select id, name from public.children where family_id = ${familyId}
   `;
   const nameById = new Map(children.map((child) => [child.id, child.name]));
+  // Resolves a model-supplied name to an id INSIDE this family only, so a
+  // split can never file a fact under a child who is not theirs.
+  const childIdByName = new Map(
+    children.map((child) => [child.name.trim().toLowerCase(), child.id]),
+  );
 
   // Bounded, whole groups only. Indices below are into THIS array, and
   // validateMerge resolves against it too, so the two can never drift.
@@ -291,7 +413,7 @@ export async function compactFamilyMemories(
     model,
     system: compactorPrompt(),
     prompt: [
-      "This family's saved memories, numbered. Return merges only.",
+      "This family's saved memories, numbered. Return merges and splits.",
       "",
       listing,
     ].join("\n"),
@@ -316,7 +438,7 @@ export async function compactFamilyMemories(
     durationMs: Date.now() - started,
   });
 
-  outcome.proposed = result.object.merges.length;
+  outcome.proposed = result.object.merges.length + result.object.splits.length;
 
   // A row may only be claimed by one merge; a second claim on the same row
   // would supersede it twice and lose the first merge's meaning.
@@ -369,14 +491,75 @@ export async function compactFamilyMemories(
     outcome.applied.push({ content, replaced: checked.targets.length });
   }
 
+  // Splits run after merges and honour the same claim set, so a row cannot
+  // be merged away and unpacked in the same pass.
+  for (const split of result.object.splits) {
+    const checked = validateSplit(split, candidates, childIdByName);
+    if (!checked.ok) {
+      outcome.rejected.push({ reason: checked.reason, detail: checked.detail });
+      continue;
+    }
+    if (claimed.has(checked.source.id)) {
+      outcome.rejected.push({
+        reason: "overlapping",
+        detail: "a merge in this run already claimed this entry",
+      });
+      continue;
+    }
+
+    if (options?.dryRun) {
+      claimed.add(checked.source.id);
+      outcome.unpacked.push({
+        from: checked.source.content,
+        into: checked.parts.map((part) => part.content),
+      });
+      continue;
+    }
+
+    const embedded = await Promise.all(
+      checked.parts.map(async (part) => ({
+        ...part,
+        embedding: await embedText(part.content, { familyId }),
+      })),
+    );
+
+    await sql.begin(async (tx) => {
+      for (const part of embedded) {
+        await tx`
+          insert into public.family_memories
+            (family_id, child_id, kind, content, source, embedding)
+          values
+            (${familyId}, ${part.childId}, ${checked.source.kind}, ${part.content},
+             'homa', ${part.embedding})
+        `;
+      }
+      await tx`
+        update public.family_memories
+        set superseded_at = now()
+        where family_id = ${familyId}
+          and id = ${checked.source.id}
+          and superseded_at is null
+      `;
+    });
+
+    claimed.add(checked.source.id);
+    outcome.unpacked.push({
+      from: checked.source.content,
+      into: checked.parts.map((part) => part.content),
+    });
+  }
+
   if (options?.dryRun) {
     // Nothing was written, so project what the store WOULD weigh: every
     // merged entry in, every row it claimed out.
     const replaced = rows.filter((row) => claimed.has(row.id));
-    outcome.charsAfter =
-      charsBefore -
-      memoryUsageChars(replaced) +
-      outcome.applied.reduce((sum, entry) => sum + entry.content.length, 0);
+    const written =
+      outcome.applied.reduce((sum, entry) => sum + entry.content.length, 0) +
+      outcome.unpacked.reduce(
+        (sum, entry) => sum + entry.into.reduce((parts, part) => parts + part.length, 0),
+        0,
+      );
+    outcome.charsAfter = charsBefore - memoryUsageChars(replaced) + written;
     outcome.durationMs = Date.now() - started;
     return outcome;
   }
@@ -390,10 +573,11 @@ export async function compactFamilyMemories(
   outcome.charsAfter = after[0]?.total ?? 0;
   outcome.durationMs = Date.now() - started;
 
-  if (outcome.applied.length > 0) {
+  if (outcome.applied.length > 0 || outcome.unpacked.length > 0) {
     await emitMapEvent("memory.compacted", {
       family_id: familyId,
       merges: outcome.applied.length,
+      splits: outcome.unpacked.length,
       chars_before: charsBefore,
       chars_after: outcome.charsAfter,
     });
