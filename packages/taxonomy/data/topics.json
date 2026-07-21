@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1645,
+  "topicCount": 1646,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32210,6 +32210,24 @@
         "Create an original AB pattern using two colors, sounds, or movements of their own choosing"
       ],
       "assessmentPrompt": "If you start a simple two-part pattern like clap-stomp-clap-stomp, can {{name}} continue it, and can they make up a new two-part pattern of their own?",
+      "standards": []
+    },
+    {
+      "id": "mt_bBYrc2wj0h",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Geometry",
+      "name": "Matching Shapes by Spin or Flip",
+      "description": "Recognize when a shape is the same shape rotated (spun) or reflected (flipped) rather than a different shape, and find which of several rotated or reflected shapes matches a given shape, without using coordinates, degrees, or formal transformation vocabulary",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Point to which of several rotated versions of a shape is turned to match a given shape",
+        "Identify that a shape flipped over (reflected) is still the same shape, just mirrored, not a different shape",
+        "Break a compound shape into recognizable parts to make spotting a rotated or flipped match easier"
+      ],
+      "assessmentPrompt": "If you turn or flip over a cutout shape, can {{name}} still tell it's the same shape as before, and can they find its match among a few rotated or flipped copies?",
       "standards": []
     }
   ]

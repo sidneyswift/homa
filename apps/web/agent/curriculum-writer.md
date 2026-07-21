@@ -258,6 +258,63 @@ When a family says "Singapore Math", "Dimensions Math", "Primary Mathematics", o
 - Format preferences: `[number-practice-page]`, `[counting-mat]`, `[themed-worksheet]`,
   `[notes-and-practice-bundle]`, `[cross-number-puzzle]` for challenge work.
 
+### Advanced / Accelerated Comic-Narrative Math (Beast Academy)
+
+When a family says "Beast Academy" or "Art of Problem Solving" (AoPS), or
+wants noticeably harder, puzzle-driven math than a standard grade-level
+workbook: this is a different shape from Singapore Math above even though
+both are ability-grouped, guided-discovery math programs. Beast Academy
+is deliberately above grade level (its own grade-1 book routinely reaches
+two-digit counting-with-grouping, transformation geometry, and named
+polyomino puzzles that most grade-1 scope-and-sequences push to grade 2-4)
+and teaches almost entirely through a recurring cast of characters rather
+than direct instruction.
+
+- Guided discovery over direct instruction, delivered as story. A short
+  comic-strip scene (illustrated characters trading dialogue) introduces
+  or works through the idea conversationally before any practice problem
+  appears; the child reads the characters reasoning it out, not a
+  teacher stating a rule. Reserve `[comic-narrative-math-page]` for this
+  beat and do not collapse it into a bare instruction line.
+- Genuinely harder content than the grade level implies, by design, not
+  by accident. Do not soften a Beast-Academy-flavored request back down
+  to standard grade-level difficulty; the family chose this program
+  because they want the stretch. Expect puzzle formats a typical
+  grade-level workbook would not introduce for years: shape decomposition
+  into named pieces, informal transformation geometry (recognizing a
+  "spin" or "flip" of a shape), multi-constraint logic puzzles, and
+  distance/comparison reasoning that foreshadows later geometry.
+- Tiered difficulty on every practice set, marked plainly. Most problems
+  are grade-appropriate-and-up; a small number of starred "hardest"
+  problems close each section, each with a corresponding hint (never the
+  full solution) available separately from the practice page itself.
+  When building practice, offer the same shape: a base set, then one or
+  two clearly marked harder extension problems, not hidden inline.
+  `[hive-puzzle]` and `[cross-number-puzzle]` are Beast-Academy-style
+  self-checking constraint puzzles already in the format library for
+  this tier.
+- Play and games carry real content. Dice games, card games, and simple
+  board-path games are named teaching tools for subitizing and number
+  sense, not filler; suggest one when a family's Beast-Academy-flavored
+  session wants a lower-pressure practice rep instead of another
+  worksheet page.
+- Answer keys teach the parent, not just check the child. A Beast
+  Academy-style answer page explains WHY (e.g. why a 7 comes up more
+  often than a 12 on two dice, why a straight path is the shortest
+  distance between two points), so a parent could explain the reasoning
+  back to the child. Carry that habit into any answer key or hint text
+  generated for this methodology: state the reasoning, not just the
+  correct value.
+- Assessment stays inside the practice sets themselves (no separate
+  formal test in the base curriculum); do not suggest quizzes unless the
+  family asks for one.
+- Format preferences: `[comic-narrative-math-page]` for concept
+  introduction, `[number-practice-page]` and `[size-attribute-comparison-page]`
+  for base counting/comparison practice, `[hive-puzzle]` and
+  `[cross-number-puzzle]` for starred/challenge problems, `[maze-puzzle-practice]`
+  for path-tracing logic puzzles, `[pattern-extension-practice]` for
+  pattern units.
+
 ### Balanced Literacy
 
 (See dedicated section above for full details. Summary for quick reference:)

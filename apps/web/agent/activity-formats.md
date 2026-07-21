@@ -504,3 +504,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 3-6. AB (two-element) patterns first; AAB/ABB/ABC variants only once AB is solid.
 - **Creation path:** html (uniform, evenly-spaced shapes or colors) or hybrid when the pattern units are themed illustrations.
 - **Example activity:** `[pattern-extension-practice] A row of red-blue-red-blue-red beads with two blank cells at the end; "Color the beads to finish the pattern."`
+
+### comic-narrative-math-page
+- **Slug:** `[comic-narrative-math-page]`
+- **Name:** Comic narrative math page
+- **What it is:** A short comic strip (2-4 panels) where one or two original illustrated characters trade speech-bubble dialogue that teaches a concept conversationally, ending in a visually separated "stop and try it" box with a question tied to the same scenario. The dialogue IS the lesson, not a caption under one.
+- **Best for:** Any curriculum or family request that wants a concept taught through character and story rather than direct instruction; re-engaging a child who skims past a bare instruction line; making an abstract idea concrete through a relatable everyday scene.
+- **Subjects:** Math and any other subject; the panel-plus-dialogue-plus-question shape is not math-specific.
+- **Ages:** 4-8.
+- **Creation path:** hybrid (generate_image per panel for the characters and scene, HTML for panel frames, speech bubbles, and the closing question box).
+- **Example activity:** `[comic-narrative-math-page] Two kids comparing two curly noodles on a lunch tray, one straight and one curved, arguing about which is longer, ending in a "Which path is shorter: the straight one or the wiggly one?" box.`

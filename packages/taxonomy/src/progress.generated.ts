@@ -456,6 +456,7 @@ export const GENERATED_PROGRESS_TAXONOMY_TOPICS = [
   {"id":"math.long-multiplication","subject":"math","domain":"multiplication-division","name":"Long multiplication","teachingWindowMonths":[108,120]},
   {"id":"math.long-multiplication-age-10","subject":"math","domain":"multiplication-division","name":"Long multiplication (age 10+)","teachingWindowMonths":[120,132]},
   {"id":"math.making-sense-of-problems","subject":"math","domain":"mathematical-thinking","name":"Making Sense of Problems","teachingWindowMonths":[60,72]},
+  {"id":"math.matching-shapes-by-spin-or-flip","subject":"math","domain":"geometry","name":"Matching Shapes by Spin or Flip","teachingWindowMonths":[60,84]},
   {"id":"math.mathematical-precision","subject":"math","domain":"mathematical-thinking","name":"Mathematical Precision","teachingWindowMonths":[96,108]},
   {"id":"math.measurable-attributes-of-objects","subject":"math","domain":"measurement","name":"Measurable Attributes of Objects","teachingWindowMonths":[48,72]},
   {"id":"math.measurement-conversions","subject":"math","domain":"measurement","name":"Measurement Conversions","teachingWindowMonths":[120,132]},

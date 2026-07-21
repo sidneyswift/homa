@@ -151,6 +151,16 @@
       "decisionsCount": 2
     },
     {
+      "id": "cur-2026-07-20-beast-academy-1a",
+      "name": "Beast Academy Math 1A (Grade 1, Book A of 4: Counting, Shapes, Comparing; Art of Problem Solving / AoPS Incorporated, copyright 2021, 2022 printing, ISBN 978-1-934124-69-7)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T21:37:11-04:00",
+      "methodology": "A published, deliberately above-grade-level Grade 1 math curriculum delivered through a recurring comic-strip narrative rather than direct instruction. The book's own front matter states the mission plainly: 'A comprehensive, rigorous, and engaging curriculum for aspiring math beasts.' Every named subsection opens with a multi-panel comic scene (speech-bubble dialogue between four recurring monster-student characters, plus a teacher character 'Ms. Q.' and other school-staff characters) that discusses or discovers the math idea conversationally before any numbered practice problem appears; the 'How to Use This Book' front-matter spread (pages 8-11) explains this explicitly to the child reader: 'Some pages are written like a comic book... The comics follow the math adventures of these four little monsters at Beast Academy,' and instructs the child to stop at embedded 'stop sign' questions and try to answer them before reading on. Difficulty is tiered and marked plainly: most numbered problems are grade-level-and-up, and a smaller number of starred (\u2605) 'hardest' problems close most practice sections, each with a separate hint in the back-matter Hints section (pages 183-186) rather than the full solution. The book is written in second person directly to the child reader ('you'), not scripted for a classroom teacher.",
+      "mappedPct": 58,
+      "gapCount": 8,
+      "decisionsCount": 8
+    },
+    {
       "id": "cur-2026-07-20-blossom-root-early-years-v1",
       "name": "Blossom & Root Early Years Vol. 1 (Pre-K, First Edition)",
       "droppedBy": "carolyng",
