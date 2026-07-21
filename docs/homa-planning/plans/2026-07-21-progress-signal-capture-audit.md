@@ -542,14 +542,17 @@ granular and real-time, no corner-cutting.
   script's honesty line predates that date). Founder to confirm whether it
   shipped from an unmerged branch or was applied directly to the hosted
   Telnyx assistant outside git, before voice-bridge work starts.
-- **D7. RULED (via the fan-out question): fan-out ships as designed;
-  taxonomy authoring stays its own tracked effort.** Per-child calls on
-  collective recaps, deterministic age-plausibility gates from the bank's
-  typical-age data, observation-tier entry, and the name-every-child
-  corrective reply. Geography/social-studies topic authoring and the
-  walk-topic graduation path are tracked as a separate content project and
-  do not gate this build. Prerequisite bug fix: fold childId/subjectId into
-  the operation idempotency key so same-child same-turn calls stop refusing.
+- **D7. RULED (via the fan-out question, amended same day): fan-out ships
+  as designed, AND taxonomy authoring joins this build.** Per-child calls
+  on collective recaps, deterministic age-plausibility gates from the
+  bank's typical-age data, observation-tier entry, and the name-every-child
+  corrective reply. The founder initially left taxonomy authoring as a
+  separate effort, then amended later the same day: geography and
+  social-studies assessable-topic authoring plus the walk-topic graduation
+  path are IN scope, run as a parallel content track alongside the code
+  work so age-differentiated landing spots exist when fan-out ships.
+  Prerequisite bug fix: fold childId/subjectId into the operation
+  idempotency key so same-child same-turn calls stop refusing.
 - **D8. RULED (inside the bridges question): all five bridges.** Planner
   skill-linkage + check-off signals, worksheet created/completed tiers,
   plan-edit completion preservation, child-scoped hours as observations
@@ -576,6 +579,13 @@ granular and real-time, no corner-cutting.
 6. **Follow-up rail** (D5) + evening-prompt offer and targeting (D2).
 7. **Bridges** (D8) + fan-out (D7), feeding the capped follow-up queue.
 8. **Family simulator** (D9) grows alongside 5-7.
+
+Parallel content track, starting alongside step 2 (D7 amendment,
+2026-07-21): author geography and social-studies assessable taxonomy
+topics (teaching windows spanning roughly 36-140 months, complementing
+the bank anchors) and implement the walk-topic graduation path, so
+fan-out signals have age-differentiated landing spots by the time step 7
+ships. Content review bar applies (founder-gated, like material anchors).
 
 ## 6. Open questions carried over, not yet resolved
 

@@ -26,7 +26,20 @@ bridges (planner, worksheets, plan-edit preservation, hours, photos),
 per-child fan-out with deterministic age gates, and an evals-first build
 order (baseline the broken system, then land every fix with numbers).
 Open: the D6 voice Phase-0 discrepancy (founder to confirm where that
-shipped); taxonomy topic authoring tracked as its own content effort.
+shipped). Taxonomy topic authoring was first left as its own content
+effort, then the founder amended the ruling later the same day: it joins
+this build as a parallel content track.
+
+Found and fixed the same day, in passing: the lesson-listen trust gate
+rejected 100% of honest clause pairs (a real lesson produced a healthy
+review and zero progress writes, silently). The 0.5 clause-to-excerpt
+overlap floor was calibrated for journal text; lesson dialogue splits
+meaning across speakers. PR #84 grounds the clause in its verbatim-
+verified segment, tightens excerpt provenance to the claimed segment,
+adds number-word aliases to the shared tokenizer, and makes the
+all-rejected case loud (rejected_count on lesson.review_ready plus an
+honest line on the review page). Verified by replaying the four real
+rejected pairs: all pass; invented-claim controls still fail.
 
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
