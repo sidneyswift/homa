@@ -108,7 +108,7 @@
         "homaSubject": "social_studies",
         "homaDomain": "geography",
         "homaTopicId": "mt_NlyT4Xzzr2",
-        "status": "unmapped",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "social_studies.reading-a-map-key-and-directions",
           "domain": "geography",
@@ -117,7 +117,7 @@
             60,
             84
           ],
-          "note": "Checked 'map', 'globe', and 'compass' across all 93 pre-existing History (social_studies) topics; the only 'map' hits are Ancient Egypt/Greece/Rome content-domain topics about historical maps, not a basic map-reading skill. Added as a genuine new topic this session, see notes."
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_NlyT4Xzzr2 already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. Checked 'map', 'globe', and 'compass' across all 93 pre-existing History (social_studies) topics; the only 'map' hits are Ancient Egypt/Greece/Rome content-domain topics about historical maps, not a basic map-reading skill."
         }
       },
       {
@@ -126,7 +126,7 @@
         "homaSubject": "social_studies",
         "homaDomain": "geography",
         "homaTopicId": "mt_Dan03VC4Li",
-        "status": "unmapped",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "social_studies.kinds-of-communities-city-town-farm",
           "domain": "geography",
@@ -135,7 +135,7 @@
             60,
             84
           ],
-          "note": "No existing Homa topic compares community types (city/town/farm); the four-directions half of this lesson is covered by the new 'Reading a Map' topic above. Added as a genuine new topic this session, see notes."
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_Dan03VC4Li already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. No existing Homa topic before this session compared community types (city/town/farm); the four-directions half of this lesson is covered by the 'Reading a Map' topic above."
         }
       },
       {
@@ -144,7 +144,7 @@
         "homaSubject": "social_studies",
         "homaDomain": "cultural-studies",
         "homaTopicId": "mt_OWl0pyMgMJ",
-        "status": "unmapped",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "social_studies.celebrations-and-traditions-around-the-world",
           "domain": "cultural-studies",
@@ -153,7 +153,7 @@
             60,
             84
           ],
-          "note": "Checked 'culture', 'tradition', and 'holiday' across all 93 pre-existing History (social_studies) topics; the closest existing hit is PSD's 'The world contains many cultures, traditions' (age 9-11), pitched well above Grade 1. Added as a genuine new topic this session, see notes."
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_OWl0pyMgMJ already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. Checked 'culture', 'tradition', and 'holiday' across all 93 pre-existing History (social_studies) topics; the closest existing hit is PSD's 'The world contains many cultures, traditions' (age 9-11), pitched well above Grade 1."
         }
       },
       {
@@ -434,8 +434,8 @@
     ],
     "stats": {
       "totalCurriculumTopics": 32,
-      "mapped": 16,
-      "unmapped": 3,
+      "mapped": 19,
+      "unmapped": 0,
       "noSubject": 0,
       "partial": 13
     }
@@ -463,9 +463,9 @@
       {
         "type": "lesson-comprehension-check",
         "description": "The fixed 'What Did You Learn?' box closing every lesson (28 across the book): 2 literal recall questions plus a 3rd open 'Think and Share' or 'Write and Share' question practicing that unit's named reading-comprehension skill.",
-        "recipe": null,
-        "status": "no_recipe",
-        "notes": "A simple recurring text box, not something a family would typically ask Homa to regenerate as a standalone printable; Homa's lesson-planner surfaces the questions directly alongside the lesson content rather than re-creating the textbook page. Same treatment the Harcourt Science ingest gave its own 'Learn About' reading passage and the Harcourt Art Everywhere ingest gave its unit-opener text: no dedicated recipe gap flagged on purpose."
+        "recipe": "lesson-comprehension-check",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: this recurring closer box turned out to be a genuine, repeatable format shared across published elementary textbooks generally (28 occurrences in this book alone), not a one-off. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/lesson-comprehension-check.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry, checked first against checklist-assessment, guided-notes, and structured-outline, none of which cover a fixed recall-plus-open-question lesson closer."
       },
       {
         "type": "citizen-hero-and-meet-the-person-biography",
@@ -491,9 +491,9 @@
       {
         "type": "chart-and-graph-skill-practice",
         "description": "The recurring 'Chart and Graph Skills' callout (5 across the book: Read a Calendar, Read a Time Line, Read a Diagram, Read a Bar Graph): a small chart, timeline, diagram, or bar graph with 1-2 practice questions, separate from the lesson's own comprehension check.",
-        "recipe": null,
-        "status": "no_recipe",
-        "notes": "A small recurring skill callout rather than a full standalone page in the source; similar low-volume-per-instance treatment to the lesson-comprehension-check above. Where a family wants a standalone bar-graph or timeline practice page, Homa's existing math recipes (for example number-practice-page conventions) and the 'Picture & Bar Graphs' taxonomy topic already cover the underlying skill; no dedicated new recipe flagged for the small in-lesson callout box itself."
+        "recipe": "chart-and-graph-skill-practice",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: on reflection this is a genuinely cross-subject, evergreen data-literacy skill (math, science, and social studies all use it), not a one-book callout, so it earned its own recipe rather than staying deferred. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/chart-and-graph-skill-practice.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry, checked first against singapore-workbook-page and guided-notes, neither of which teaches a chart/graph/calendar/diagram reading skill with a worked example and practice questions."
       },
       {
         "type": "here-and-there-world-comparison",
@@ -540,8 +540,8 @@
     ],
     "stats": {
       "totalActivityTypes": 12,
-      "haveRecipe": 8,
-      "noRecipe": 4
+      "haveRecipe": 10,
+      "noRecipe": 2
     }
   },
   "decisionsNeeded": [
@@ -580,6 +580,18 @@
       "item": "Added a new 'Published Elementary Social Studies Textbook (Reading-Skill-Integrated, e.g. Scott Foresman Social Studies)' section to curriculum-writer.md's Methodology-aware planning rules, alongside the existing Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, Literature-Based/Classical, Handwriting Without Tears, Elements & Principles of Design, and Published Elementary Science Textbook sections",
       "impact": "curriculum-writer.md had no section describing a reading-comprehension-skill-driven, published-textbook social studies methodology before this session; the sibling Published Elementary Science Textbook section (from the Harcourt Science ingest earlier this session) is explicitly hands-on-investigation-first and does not describe this book's reading-skill-first pattern at all. This lets curriculum-writer apply the method's distinctive rules (name the unit's reading skill, keep the three-part What-Did-You-Learn box intact, keep each recurring feature box's own job separate rather than merging them) whenever a family uses a published reading-skill-integrated social studies textbook.",
       "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the 3 mappings above for 'Reading a Map: Map Key and Four Directions' (mt_NlyT4Xzzr2), 'Kinds of Communities: City, Town, and Farm' (mt_Dan03VC4Li), and 'Celebrations and Traditions Around the World' (mt_OWl0pyMgMJ) already carried their real homaTopicId values but still read status 'unmapped' from before the topics were added. Flipped all 3 to 'mapped'; layer2_scope.stats updated (mapped 16 -> 19, unmapped 3 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done earlier this session.",
+      "impact": "This curriculum now correctly reads as fully mapped for its map-skills, community-types, and celebrations lessons instead of falsely showing 3 open taxonomy gaps that were actually closed already.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21: two more recipes graduated this session covering gaps this curriculum flagged: lesson-comprehension-check.md (the 'What Did You Learn?' lesson closer, 28 occurrences) and chart-and-graph-skill-practice.md (the 'Chart and Graph Skills' callout, 5 occurrences). Both checked first against existing recipes (checklist-assessment, guided-notes, structured-outline for the former; singapore-workbook-page, guided-notes for the latter) and found genuinely uncovered. Format library rows added to materials-studio SKILL.md, activity-formats.md entries added, this curriculum's layer4_activities flipped from no_recipe to have_recipe for both.",
+      "impact": "layer4_activities.stats now reads haveRecipe 10 / noRecipe 2 (was 8 / 4). Both formats are subject-agnostic and evergreen, so future curriculum ingests with the same recurring boxes reuse these instead of re-flagging the gap.",
+      "urgency": "resolved"
     }
   ],
   "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: social-studies-all-together-pt1.pdf is 120 PDF pages, social-studies-all-together-pt2.pdf is 43 PDF pages (163 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 163 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows printed pages 214-215 (the end of Unit 5 Lesson 5, 'We Celebrate Holidays,' Martin Luther King Jr. Day and Presidents' Day content), and pt2's first rendered spread (PDF page 1) shows printed page 216 ('Meet Abraham Lincoln,' the very next content), with no missing or repeated printed page numbers at the seam. Front cover (pt1 page 1) reads 'SOCIAL STUDIES, Scott Foresman, All Together' with three puppet characters (a firefighter, a chef, and a third community-helper figure); the title page (pt1 page 2) confirms 'All Together' as this specific volume's own title within the Scott Foresman Social Studies series (program authors including Dr. Candy Dawson Boyd and Dr. Geneva Gay), not a Harcourt-branded book despite two sibling Grade 1 Harcourt volumes (Harcourt Art Everywhere, Harcourt Science) arriving in the same drop wave; the copyright page (pt1 page 3) confirms 'Copyright (c) 2003 by Pearson Education, Inc.,' ISBN 0-328-01759-0. Full table of contents sampled directly (pt1 pages 3-6): 6 units (Unit 1 Time for School; Unit 2 In My Community; Unit 3 Work! Work! Work!; Unit 4 Our Earth, Our Resources; Unit 5 This Is Our Country; Unit 6 Our Country, Our World), Reference Guide (Atlas R2, Geography Terms R10, Picture Glossary R12, Index R24). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the two sibling Harcourt Grade 1 volumes' own findings: (1) the 'Citizen Heroes: Ruby Bridges Hall' biography states directly 'Ruby was six years old when she began first grade,' presented as a same-age peer figure for the reader; (2) every lesson's reading passage uses very short, simple declarative sentences ('My neighborhood is part of a community. A community is a group of people and the place where they live.'; 'I have jobs at school. My big job is to learn.'), consistent with an early-elementary supported reader, the same reading level the sibling Harcourt Science and Harcourt Art Everywhere Grade 1 volumes show; (3) every lesson's 'What Did You Learn?' box requires full sentence-level comprehension responses (recall questions plus an open Think-and-Share or Write-and-Share question), a demand level well beyond a Kindergarten book; (4) cross-referencing this curriculum's own content against Homa's taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (Rules and agreements exist 5-7, Needs & Wants 5-7, Goods & Services 5-7, Buyers & Sellers 5-7, Local weather patterns 5-6), consistent with a 6-7-year-old reader, the same age cluster the sibling volumes' own Grade 1 findings showed. Unlike the Harcourt Art series (where 'Art Everywhere' vs other subtitles distinguishes grade level directly in the cover title), this book's cover reads only 'Social Studies, All Together' with no explicit numeral, so grade level rests entirely on the internal content evidence above, the same situation the sibling Harcourt Science volume was in. Sampling covered the front cover, title page, copyright page, full table of contents, and front-matter Social Studies Handbook (pt1 PDF pages 1-16); Unit 1's full lesson set and Citizen Heroes: Ruby Bridges Hall (pt1 pages 17-40); Unit 2's Vocabulary Preview, Different Kinds of Communities, Chinese New Year DK insert, and End with a Poem (pt1 pages 46-53, 66, 74, 80-81); Unit 3's Welcome to Job Day, Interview with a Farmer, and From Place to Place (pt1 pages 108-109, 116-117, 124-125); Unit 4's Begin with a Song and Our Earth's Resources (pt1 pages 90, 144-145, 156-157); Unit 5's Meet Benjamin Franklin, We Celebrate Holidays, Symbols in Our Country, and Choosing Our Country's Leaders (pt1 pages 110, 115-119); the Unit 5/pt2 seam and Meet Abraham Lincoln (pt2 pages 0-1); Choosing Our Country's Leaders continuation (pt2 page 1); Unit 6's Begin with a Song, Eleanor Roosevelt, How Things Have Changed, and Telephones DK insert (pt2 pages 3-4, 8, 13, 17); Kay's Grandparents Reading Social Studies feature and Meet Mae Jemison (pt2 pages 20, 22); and the back-matter Atlas, Picture Glossary, Index, and Credits (pt2 pages 30, 35, 40, 42). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 163 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics, the then-and-now-comparison recipe, and the curriculum-writer methodology section describe generic elementary-social-studies concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."

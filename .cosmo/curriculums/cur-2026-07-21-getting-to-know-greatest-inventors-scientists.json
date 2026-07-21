@@ -106,15 +106,15 @@
         "curriculumSubject": "Bell volume",
         "curriculumTopic": "Deaf education and visible speech: elocution, hearing impairments, a symbol system for producing speech sounds, teaching deaf students",
         "homaSubject": "science",
-        "homaDomain": null,
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaDomain": "the-human-body",
+        "homaTopicId": "mt_MsYH5Mpe4X",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "science.how-hearing-differences-shape-communication",
           "domain": "the-human-body",
           "kind": "conceptual",
           "teachingWindowMonths": [72, 108],
-          "note": "Checked 'deaf', 'hearing', 'disability', 'senses' across the taxonomy: Science > The Human Body has 'The Five Senses' (5-7) but nothing on hearing differences, deafness, or accessible communication, and Personal & Social Development's empathy domain has no disability-awareness topic. A real gap the book treats at length, but narrow relative to this drop's inventor-biography gap; recorded for a future session rather than added, to keep additions proportionate at one per drop."
+          "note": "RESOLVED 2026-07-21: added mt_MsYH5Mpe4X 'Hearing Differences and Visible Speech: Alexander Graham Bell' to Science > The Human Body (age 6-9, CONCEPTUAL), the same domain and age band this note originally suggested. Chose Science > The Human Body over Personal & Social Development's empathy domain and over social_studies: this content is fundamentally about hearing as a sense and the communication system Bell invented for it, the same 'Getting to Know an Inventor' biography-through-a-real-figure pattern as the sibling mt_Rk8pWn2Vq5 topic, and The Human Body already has a 'The Five Senses' sibling topic at a neighboring age band. Checked 'deaf', 'hearing', 'disability', 'senses' across the taxonomy before adding: Science > The Human Body had 'The Five Senses' (5-7) but nothing on hearing differences, deafness, or accessible communication."
         }
       },
       {
@@ -131,8 +131,8 @@
     ],
     "stats": {
       "totalCurriculumTopics": 7,
-      "mapped": 3,
-      "unmapped": 1,
+      "mapped": 4,
+      "unmapped": 0,
       "noSubject": 0,
       "partial": 3
     }
@@ -174,15 +174,15 @@
       {
         "type": "invention-timeline-page",
         "description": "A one-page life-and-inventions timeline (Edison: vote recorder to phonograph to light bulb to power station; Bell: visible speech to telephone to hydrofoil), rebuilding the book's iteration arc after reading.",
-        "recipe": null,
-        "status": "no_recipe",
+        "recipe": "biography-timeline-page",
+        "status": "have_recipe",
         "suggestedRecipe": {
           "name": "biography-timeline-page",
           "creationPath": "html",
           "description": "Same person-timeline scaffold recorded by the sibling artists-drop analysis: 5-8 event boxes with year line, one-sentence event, and sketch frame. One shared recipe serves artists, composers, and inventors.",
           "complexity": "low"
         },
-        "notes": "Same genuine, keyword-checked gap as the artists drop, deliberately recorded under the same slug so the funnel counts one shared gap instead of three fragmingly-named ones. Not built this session; see the artists analysis for the proportionality reasoning."
+        "notes": "RESOLVED 2026-07-21: built as one shared recipe covering all three sibling gaps (this file's invention-timeline-page, the artists drop's artist-biography-timeline-page, and the composers drop's biography-timeline-page), exactly as this note anticipated. The recipe adds an invention-progression mode alongside the default life-events mode specifically to serve this book's Edison/Bell invention-arc use case (tracing the invention's own timeline rather than a person's life). New recipe file at apps/web/agent/skills/materials-studio/references/recipes/biography-timeline-page.md, a Format library row in materials-studio SKILL.md, an activity-formats.md entry, and GAP_ALIASES entries in apps/web/lib/materials/cosmo-funnel.ts mapping this file's and the artists drop's gap slugs onto the shared recipe name."
       },
       {
         "type": "how-it-works-explainer-page",
@@ -194,8 +194,8 @@
     ],
     "stats": {
       "totalActivityTypes": 5,
-      "haveRecipe": 3,
-      "noRecipe": 2
+      "haveRecipe": 4,
+      "noRecipe": 1
     }
   },
   "decisionsNeeded": [
@@ -207,15 +207,21 @@
     },
     {
       "category": "taxonomy",
-      "item": "One real gap recorded but NOT added: hearing differences and accessible communication (deafness, visible speech, disability awareness), suggested as science.how-hearing-differences-shape-communication under Science > The Human Body. Full note in layer2_scope.",
-      "impact": "The Bell volume spends roughly a third of its pages here and no Homa topic touches it; a future session (or a founder call on whether it belongs in science vs personal development) can add it.",
-      "urgency": "low"
+      "item": "RESOLVED 2026-07-21: added mt_MsYH5Mpe4X 'Hearing Differences and Visible Speech: Alexander Graham Bell' (Science > The Human Body, age 6-9, CONCEPTUAL, no mapping.ts edit needed), exactly the topic this entry had recorded but deferred. Distinct from and does not duplicate mt_Rk8pWn2Vq5 'Getting to Know an Inventor' above: that topic is about invention-as-a-process (trial and error, patents) generically, while this one is specifically about hearing differences, deaf education, and Bell's invented 'visible speech' symbol system. Chose Science > The Human Body over Personal & Social Development's empathy domain and over social_studies, reasoning recorded in layer2_scope.mappings.",
+      "impact": "The Bell volume spends roughly a third of its pages here; Homa can now assess and plan for hearing differences and accessible communication at Grade 1-3.",
+      "urgency": "resolved"
     },
     {
       "category": "recipe",
       "item": "Edited apps/web/agent/skills/materials-studio/references/recipes/artist-composer-study-card.md to add an Inventor Study variant (header tag, invention-sketch frame, favorite-invention box) as a documented pattern, not a duplicate recipe file.",
       "impact": "One card recipe now serves artist, composer, and inventor study rotations, keeping portfolio sets cohesive across subjects.",
       "urgency": "low, recorded for traceability"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21: new recipe file biography-timeline-page.md built this session, covering this file's invention-timeline-page gap plus the sibling artists and composers drops' own timeline gaps as one shared recipe (life-events mode for artists/composers, invention-progression mode for this book's Edison and Bell arcs). Format library row added to materials-studio SKILL.md, activity-formats.md entry added, GAP_ALIASES entries added in cosmo-funnel.ts.",
+      "impact": "layer4_activities.stats now reads haveRecipe 4 / noRecipe 1 (was 3 / 2). One recipe serves all three Getting to Know biography drops instead of three near-duplicate files.",
+      "urgency": "resolved"
     },
     {
       "category": "knowledge_bank",

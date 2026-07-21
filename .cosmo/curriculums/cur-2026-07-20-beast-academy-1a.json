@@ -239,9 +239,9 @@
       {
         "type": "honeycomb-number-path-puzzle",
         "description": "Fill empty hexagons in a tessellated grid with numbers so that consecutive numbers form an unbroken path connecting every hexagon (a sequential path-tracing puzzle), plus a simpler variant that just fills missing numbers into a straight row of hexagons.",
-        "recipe": null,
-        "status": "no_recipe",
-        "notes": "Checked the existing 'hive-puzzle' recipe carefully before flagging this as a gap, since it is explicitly documented as 'Derived from Beast Academy's Hive Puzzles' and uses the same hexagonal-grid visual language. It is NOT a match: hive-puzzle's own mechanic is a constraint-satisfaction rule ('each hexagon contains the smallest number not appearing in any adjacent hexagon,' closer to graph-coloring/Sudoku logic), always image-direct, targeted at grades 2-5. Honeycomb Paths is a different, younger-audience mechanic (sequential sequence-tracing, not a coloring constraint), simple enough for a lightweight html path (plain text-in-hexagon cells, no illustration precision needed), and appropriate for Grade 1. A real, moderate-volume gap (a whole named 4-page subsection, pages 58-61, thematically continuous with the 2-page 'Counting to 100' subsection immediately before it). Not built this session to keep this session's recipe additions proportionate (one new recipe, see comic-narrative-math-page below, was judged the stronger and more broadly justified addition); recorded here as a natural future extension of hive-puzzle's existing hexagonal-grid approach for a younger, path-tracing variant."
+        "recipe": "hive-puzzle",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: added as a third variant ('Path') on the existing hive-puzzle.md recipe rather than a new file, exactly the future extension this note anticipated. Kept hive-puzzle's shared tessellated-hexagon, image-direct, 6-9-puzzles-per-page shell; only the fill rule differs from the base smallest-number-not-adjacent rule and the Pairs touching-sum variant. Genuinely a third, distinct constraint (connected sequential path-completion, not deduction-by-elimination or pair-summing), so it earned its own named variant inside the file rather than being folded silently into an existing one. No new recipe file, no new SKILL.md Format library row (hive-puzzle already has one); design-patterns section of hive-puzzle.md updated."
       },
       {
         "type": "shape-naming-by-property",
@@ -316,8 +316,8 @@
     ],
     "stats": {
       "totalActivityTypes": 15,
-      "haveRecipe": 7,
-      "noRecipe": 8
+      "haveRecipe": 8,
+      "noRecipe": 7
     }
   },
   "decisionsNeeded": [
@@ -335,8 +335,8 @@
     },
     {
       "category": "recipe",
-      "item": "Four real activity-type gaps found but NOT built into recipes this session, to keep additions proportionate: honeycomb-number-path-puzzle (adjacent to but mechanically distinct from the existing Beast-Academy-derived hive-puzzle recipe; a natural future extension of it for a younger, sequential-path-tracing variant), shape-composition-and-splitting (connect-the-dots geometric decomposition into a target shape count/type), tetromino-polyomino-matching (narrower, combinatorial-geometry-specific), and concentric-circle-distance-comparison (narrow, single short subsection). Full descriptions in layer4_activities.activityTypes above.",
-      "impact": "Honeycomb-number-path-puzzle and shape-composition-and-splitting are the strongest candidates for a future session if more geometry-and-puzzle-forward curricula (Beast Academy 1B-1D, or similar) get ingested and the same gaps recur; tetromino-polyomino-matching and concentric-circle-distance-comparison are lower priority, narrower in scope.",
+      "item": "RESOLVED 2026-07-21 for honeycomb-number-path-puzzle: added as a third variant ('Path') on the existing hive-puzzle.md recipe, distinct from the base smallest-number-not-adjacent rule and the Pairs touching-sum variant. Three other real activity-type gaps remain intentionally NOT built into recipes, per this task's own recorded low-value/narrow scoping: shape-composition-and-splitting (connect-the-dots geometric decomposition into a target shape count/type), tetromino-polyomino-matching (narrower, combinatorial-geometry-specific), and concentric-circle-distance-comparison (narrow, single short subsection). Full descriptions in layer4_activities.activityTypes above.",
+      "impact": "Honeycomb-number-path-puzzle no longer blocks Beast Academy 1A path-puzzle content. shape-composition-and-splitting remains the strongest candidate for a future session if more geometry-and-puzzle-forward curricula recur; tetromino-polyomino-matching and concentric-circle-distance-comparison stay lower priority, narrower in scope.",
       "urgency": "low, informational"
     },
     {

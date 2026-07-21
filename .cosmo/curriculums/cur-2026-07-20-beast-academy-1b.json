@@ -304,9 +304,9 @@
       {
         "type": "magic-square-puzzle",
         "description": "A 4-by-4 grid where the child fills missing numbers 1-16 so every row, column, and diagonal sums to the same target (34), with a historical aside on magic squares in the Answers section (page 197, answer commentary page 237).",
-        "recipe": null,
-        "status": "no_recipe",
-        "notes": "Genuine but very narrow gap: a single review-page appearance. Not built this session; recorded for completeness."
+        "recipe": "magic-square-puzzle",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: on reflection this is a well-known, evergreen enrichment-math format used far beyond this one review page or Beast Academy generally, so it earned its own recipe rather than staying deferred. Checked cross-number-puzzle and decimal-path-puzzle first: cross-number's sums live outside the grid at row/column edges (or as embedded operators), and only that row or column has to satisfy its own constraint, while a magic square has no edge labels at all and every row, column, AND both diagonals inside the same grid must independently reach the identical target, a genuinely distinct constraint. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/magic-square-puzzle.md (html path, matching cross-number-puzzle's cell geometry), a Format library row in materials-studio SKILL.md, and an activity-formats.md entry, including the optional historical-aside pattern this book's own Answers section models."
       },
       {
         "type": "hands-on-games-and-play",
@@ -318,8 +318,8 @@
     ],
     "stats": {
       "totalActivityTypes": 14,
-      "haveRecipe": 9,
-      "noRecipe": 5
+      "haveRecipe": 10,
+      "noRecipe": 4
     }
   },
   "decisionsNeeded": [
@@ -343,8 +343,8 @@
     },
     {
       "category": "recipe",
-      "item": "Four real activity-type gaps found but NOT built into recipes this session, to keep additions proportionate: difference-pyramid-puzzle, x-outs-puzzle, prime-composite-rectangle-array, and magic-square-puzzle. Full descriptions in layer4_activities.activityTypes above.",
-      "impact": "prime-composite-rectangle-array is the strongest candidate for a future session, tied directly to the recorded taxonomy gap on the same content; the other three are narrower, single- or double-subsection findings.",
+      "item": "RESOLVED 2026-07-21 for magic-square-puzzle: built as a new recipe file, magic-square-puzzle.md, since it is a well-known, evergreen enrichment-math format used far beyond this one review page. Three other real activity-type gaps remain intentionally NOT built into recipes, per this task's own recorded low-value/narrow scoping: difference-pyramid-puzzle, x-outs-puzzle, and prime-composite-rectangle-array. Full descriptions in layer4_activities.activityTypes above.",
+      "impact": "magic-square-puzzle no longer blocks Beast Academy 1B or any other curriculum's magic-square content. prime-composite-rectangle-array remains the strongest candidate for a future session, tied directly to the recorded taxonomy gap on the same content; the other two stay narrower, single- or double-subsection findings.",
       "urgency": "low, informational"
     },
     {

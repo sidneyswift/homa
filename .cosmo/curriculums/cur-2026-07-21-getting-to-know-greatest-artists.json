@@ -152,15 +152,15 @@
       {
         "type": "artist-biography-timeline-page",
         "description": "A one-page life timeline for the studied artist: 5-8 event boxes in birth-to-legacy order, each pairing a year, a one-line event, and a small drawing frame, letting the child rebuild the book's chronological arc after reading.",
-        "recipe": null,
-        "status": "no_recipe",
+        "recipe": "biography-timeline-page",
+        "status": "have_recipe",
         "suggestedRecipe": {
           "name": "biography-timeline-page",
           "creationPath": "html",
           "description": "Horizontal or vertical timeline scaffold: name banner, 5-8 evenly spaced event boxes with a year line, a one-sentence event line, and a small sketch frame per box. Reusable for any studied person (artist, composer, inventor, historical figure).",
           "complexity": "low"
         },
-        "notes": "Genuine gap, keyword-checked: no shipped recipe covers a person-timeline page (then-and-now-comparison is a two-state contrast, structured-outline is prose scaffolding). Not built this session to keep recipe additions proportionate across the three same-day Venezia drops (one new recipe total, built for the composers drop where the gap is sharpest); recorded for a future session. Reusable across all three drops and any biography study."
+        "notes": "RESOLVED 2026-07-21: built as one shared recipe covering all three sibling gaps (this file's artist-biography-timeline-page, the composers drop's biography-timeline-page, and the inventors drop's invention-timeline-page), exactly as this note anticipated. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/biography-timeline-page.md, a Format library row in materials-studio SKILL.md, and an activity-formats.md entry. This gap's own slug differs from the shared recipe filename, so a GAP_ALIASES entry ('artist-biography-timeline-page' -> 'biography-timeline-page') was added in apps/web/lib/materials/cosmo-funnel.ts in the same change."
       },
       {
         "type": "in-the-style-of-art-project",
@@ -179,8 +179,8 @@
     ],
     "stats": {
       "totalActivityTypes": 5,
-      "haveRecipe": 3,
-      "noRecipe": 2
+      "haveRecipe": 4,
+      "noRecipe": 1
     }
   },
   "decisionsNeeded": [
@@ -204,9 +204,9 @@
     },
     {
       "category": "recipe",
-      "item": "One genuine recipe gap recorded but NOT built from this drop: biography-timeline-page (html, low complexity). Full description in layer4_activities.",
-      "impact": "Reusable for every studied person across all three Venezia drops and any biography-anchored study; the strongest candidate for a future session's build.",
-      "urgency": "low"
+      "item": "RESOLVED 2026-07-21: biography-timeline-page.md built this session (html, low complexity), covering this drop's own artist-biography-timeline-page gap plus the sibling composers and inventors drops' timeline gaps as one shared recipe, with a life-events mode (used here) and an invention-progression mode (for the inventors drop). Format library row added to materials-studio SKILL.md, activity-formats.md entry added, and a GAP_ALIASES entry ('artist-biography-timeline-page' -> 'biography-timeline-page') added in apps/web/lib/materials/cosmo-funnel.ts since this drop's own gap slug differs from the shared filename.",
+      "impact": "Reusable for every studied person across all three Venezia drops and any biography-anchored study; layer4_activities.stats now reads haveRecipe 4 / noRecipe 1 (was 3 / 2).",
+      "urgency": "resolved"
     },
     {
       "category": "process",

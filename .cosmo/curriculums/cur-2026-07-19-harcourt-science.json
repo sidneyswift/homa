@@ -273,8 +273,8 @@
         "curriculumTopic": "What Objects Sink or Float? (predict, then test, floaters and sinkers, shape affects floating)",
         "homaSubject": "science",
         "homaDomain": "matter-materials",
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaTopicId": "mt_vgB4oY7Qyl",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "science.floating-and-sinking",
           "domain": "matter-materials",
@@ -283,7 +283,7 @@
             60,
             84
           ],
-          "note": "Checked 'float', 'sink', and 'buoyan' across all 564 existing Science topics; zero hits in Matter & Materials (the 5 'float' and 2 'sink' hits elsewhere are all unrelated: sea ice, tectonic plates, orbital mechanics). Added as a genuine new topic this session, see notes."
+          "note": "RESOLVED 2026-07-21: mt_vgB4oY7Qyl 'Floating and Sinking' already exists in topics.json (added earlier this session, see decisionsNeeded); this mapping was stale bookkeeping and is now backfilled to the real topic id. Checked 'float', 'sink', and 'buoyan' across all 564 existing Science topics; zero hits in Matter & Materials (the 5 'float' and 2 'sink' hits elsewhere are all unrelated: sea ice, tectonic plates, orbital mechanics)."
         }
       },
       {
@@ -324,8 +324,8 @@
         "curriculumTopic": "How Do Wheels Help Objects Move?",
         "homaSubject": "science",
         "homaDomain": "forces-motion",
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaTopicId": "mt_akAzChSPGT",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "science.how-wheels-help-objects-move",
           "domain": "forces-motion",
@@ -334,7 +334,7 @@
             60,
             84
           ],
-          "note": "Checked 'wheel', 'simple machine', 'wheel and axle', 'ramp', and 'incline' across all 564 existing Science topics; zero hits anywhere in Science. Added as a genuine new topic this session, see notes."
+          "note": "RESOLVED 2026-07-21: mt_akAzChSPGT 'How Wheels Help Objects Move' already exists in topics.json (added earlier this session, see decisionsNeeded); this mapping was stale bookkeeping and is now backfilled to the real topic id. Checked 'wheel', 'simple machine', 'wheel and axle', 'ramp', and 'incline' across all 564 existing Science topics; zero hits anywhere in Science before this session's addition."
         }
       },
       {
@@ -373,8 +373,8 @@
     ],
     "stats": {
       "totalCurriculumTopics": 27,
-      "mapped": 22,
-      "unmapped": 2,
+      "mapped": 24,
+      "unmapped": 0,
       "noSubject": 0,
       "partial": 3
     }
@@ -487,6 +487,12 @@
       "item": "Added 2 new Science topics this session, both append-only, no mapping.ts edit needed (both domains already existed in MARBLE_DOMAIN_MAP): mt_vgB4oY7Qyl 'Floating and Sinking' (Matter & Materials, age 5-7) for Unit E's 'What Objects Sink or Float?' lesson, and mt_akAzChSPGT 'How Wheels Help Objects Move' (Forces & Motion, age 5-7) for Unit F's 'How Do Wheels Help Objects Move?' lesson. Checked all 564 pre-existing Science topics by keyword ('float', 'sink', 'buoyan', 'wheel', 'simple machine', 'ramp', 'incline') before concluding these were genuine gaps, not assumed ones. Every other lesson and back-matter section in this curriculum mapped to an existing topic (22 of 27 catalogued rows mapped directly, 3 partial, 2 unmapped, 0 no-subject), confirming the task brief's expectation that Science's existing 564-topic depth would make this curriculum map far more cleanly than the Art ingests did.",
       "impact": "topics.json grew from 1638 to 1640 topics (insertions only, verified by diff); packages/taxonomy/data/manifest.json counts and topics.json bytes/sha256 updated to match; pnpm taxonomy:slugs, pnpm taxonomy:progress, and pnpm check:taxonomy all re-run and green.",
       "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the two mappings above (mt_vgB4oY7Qyl Floating and Sinking, mt_akAzChSPGT How Wheels Help Objects Move) were still recorded as status 'unmapped' with homaTopicId null in layer2_scope.mappings even though both real topics already existed in topics.json from this same curriculum's own ingestion. Backfilled both homaTopicId fields and flipped status to 'mapped'; layer2_scope.stats updated (mapped 22 -> 24, unmapped 2 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done.",
+      "impact": "This curriculum now correctly reads as fully mapped for these two lessons instead of falsely showing an open taxonomy gap that was actually closed weeks ago.",
+      "urgency": "resolved"
     },
     {
       "category": "method",

@@ -554,3 +554,43 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 2-6 for saying along; 5-8 for jump-rope and clapping-game chants
 - **Creation path:** html (precise typography for cues and line breaks; optional hybrid for one small spot illustration). Traditional public-domain or family-created chants only, never a published compiler's arrangement.
 - **Example activity:** `[chant-and-rhyme-card] "One potato, two potato" counting-out chant with "(tap fists on each potato)" action hints and a parent footer on letting the child join in over several days.`
+
+### biography-timeline-page
+- **Slug:** `[biography-timeline-page]`
+- **Name:** Biography timeline page
+- **What it is:** A chronological strip of 5-8 labeled event boxes, each pairing a year or age with a one-line event and a small illustration, connected by a single line so the sequence reads as forward time. A life-events mode follows a real person's own biographical milestones; an invention-progression mode follows an invention or technology's own timeline instead of a person's life.
+- **Best for:** Biography study of an artist, composer, inventor, or scientist; any curriculum wanting the progression of a technology or invention shown rather than told. Recurred independently across three Getting to Know biography drops (artists, composers, inventors and scientists) this session.
+- **Subjects:** Art, music, science, history (biography and invention history)
+- **Ages:** 6-10.
+- **Creation path:** hybrid (generate_image per event for the small illustrations, HTML for the boxes, connecting line, and labels), or html-only for a text-and-caption-only timeline.
+- **Example activity:** `[biography-timeline-page] Alexander Graham Bell's life: born 1847, taught deaf students and invented visible speech in the 1870s, patented the telephone in 1876, founded a school for the deaf, died 1922.`
+
+### chart-and-graph-skill-practice
+- **Slug:** `[chart-and-graph-skill-practice]`
+- **Name:** Chart and graph skill practice
+- **What it is:** A page teaching one concrete data-reading skill (read a calendar, read a timeline, read a labeled diagram, or read a bar graph): a small worked example models the reading move, then the child answers 2-4 practice questions about a second, independent version of the same display.
+- **Best for:** Cross-subject data literacy: math data & statistics, science process diagrams, social studies chart-reading lessons. An evergreen skill that recurs across every subject, confirmed recurring 5 times in one social studies textbook alone.
+- **Subjects:** Math (data & statistics), science (process diagrams), social studies (chart and calendar reading)
+- **Ages:** 6-10.
+- **Creation path:** html (grid, axis, and tick-mark precision are the point).
+- **Example activity:** `[chart-and-graph-skill-practice] Reading a bar graph: a worked example showing 4 books read on Tuesday, then a practice bar graph of a different week with 3 questions about specific days.`
+
+### lesson-comprehension-check
+- **Slug:** `[lesson-comprehension-check]`
+- **Name:** Lesson comprehension check
+- **What it is:** A fixed "What Did You Learn?" box that closes a taught lesson with exactly 2 literal recall questions plus 1 open "Think and Share" or "Write and Share" question tied to the lesson's actual target skill.
+- **Best for:** Any subject that ends a taught lesson or a read passage with a quick recall-plus-application close. A fixed, recurring feature box in published elementary textbooks (28 occurrences in one social studies book alone), but the shape is subject-agnostic.
+- **Subjects:** Any subject with a taught lesson or read passage (social studies, science, ELA, history)
+- **Ages:** 6-11.
+- **Creation path:** html (a short, precise box; no illustration budget needed).
+- **Example activity:** `[lesson-comprehension-check] Closes a lesson on river crossings: "What did the pioneers use to cross the river?", "Why did the town build a bridge there?", and "How would your family cross a river if there were no bridge nearby?"`
+
+### magic-square-puzzle
+- **Slug:** `[magic-square-puzzle]`
+- **Name:** Magic square puzzle
+- **What it is:** An n-by-n grid (commonly 3x3 or 4x4) where the child fills in missing numbers so every row, every column, AND both diagonals sum to the same stated target. Some cells are given, some blank. Self-checking by constraint satisfaction, and distinct from cross-number-puzzle's edge-labeled row/column sums.
+- **Best for:** Addition fluency, logical reasoning; a well-known, evergreen enrichment-math format used far beyond any one curriculum.
+- **Subjects:** Math (addition fluency, logical reasoning)
+- **Ages:** 7-11. A 3x3 with more given cells for younger; a 3x3 with fewer givens or a 4x4 for older.
+- **Creation path:** html (precise grid layout and borders, matching cross-number-puzzle's cell geometry).
+- **Example activity:** `[magic-square-puzzle] A 3x3 grid where every row, column, and diagonal must sum to 15, with 5 of the 9 cells already filled in.`

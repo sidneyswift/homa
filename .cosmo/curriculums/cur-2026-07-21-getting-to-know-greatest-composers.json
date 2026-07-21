@@ -85,14 +85,14 @@
         "curriculumTopic": "Musical form basics taught in context: what a symphony is (four movements), theme and variation as a game with the audience, a chorus added to a symphony (the Ninth)",
         "homaSubject": "music",
         "homaDomain": "composer-study-appreciation",
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaTopicId": "mt_qPM8rMxYFD",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "music.musical-form-symphony-movements-themes",
           "domain": "composer-study-appreciation",
           "kind": "conceptual",
           "teachingWindowMonths": [72, 108],
-          "note": "Checked 'symphony', 'orchestra', 'movement', 'theme', 'instrument' across the taxonomy: the only music topics are the two appreciation topics above, and the reserved music assessment domains (rhythm-beat, singing, listening-awareness, instrument-notation, ensemble-performance in packages/taxonomy/src/domains.ts) are assessment-kind homes, not topics.json content. Form vocabulary (symphony, movement, theme) is a real gap this book teaches directly, but narrower than the composer-biography gap filled this session; recorded for a future session to keep additions proportionate at one per drop."
+          "note": "RESOLVED 2026-07-21: added mt_qPM8rMxYFD 'Musical Form: Movements, Themes, and Variations' to Music > Composer Study & Music Appreciation (age 6-9, CONCEPTUAL), exactly the topic and domain this entry had recorded but deferred, with Beethoven's Fifth, Sixth, and Ninth named directly in the description and evidence, matching this book's own teaching examples. No mapping.ts edit needed (domain already existed, non-colliding with the reserved music assessment domains rhythm-beat/singing/listening-awareness/instrument-notation/ensemble-performance)."
         }
       },
       {
@@ -120,8 +120,8 @@
     ],
     "stats": {
       "totalCurriculumTopics": 6,
-      "mapped": 3,
-      "unmapped": 1,
+      "mapped": 4,
+      "unmapped": 0,
       "noSubject": 0,
       "partial": 2
     }
@@ -169,21 +169,21 @@
       {
         "type": "biography-timeline-page",
         "description": "A one-page life timeline (Bonn childhood, Vienna, growing deafness, the Ninth), rebuilding the book's arc after reading.",
-        "recipe": null,
-        "status": "no_recipe",
+        "recipe": "biography-timeline-page",
+        "status": "have_recipe",
         "suggestedRecipe": {
           "name": "biography-timeline-page",
           "creationPath": "html",
           "description": "Same shared person-timeline scaffold recorded by both sibling analyses; one recipe would serve artists, composers, and inventors.",
           "complexity": "low"
         },
-        "notes": "Same shared, deliberately identically-slugged gap as the sibling drops; not built this session, see the artists analysis for the proportionality reasoning."
+        "notes": "RESOLVED 2026-07-21: built as one shared recipe covering all three sibling gaps (this file's biography-timeline-page, the artists drop's artist-biography-timeline-page, and the inventors drop's invention-timeline-page), exactly as this note anticipated. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/biography-timeline-page.md, a Format library row in materials-studio SKILL.md, and an activity-formats.md entry. This gap slug matches the recipe filename exactly, so no GAP_ALIASES entry was needed for this drop (the artists and inventors drops needed one each, since their own gap slugs differ from the shared filename)."
       }
     ],
     "stats": {
       "totalActivityTypes": 4,
-      "haveRecipe": 2,
-      "noRecipe": 2
+      "haveRecipe": 3,
+      "noRecipe": 1
     }
   },
   "decisionsNeeded": [
@@ -195,15 +195,21 @@
     },
     {
       "category": "taxonomy",
-      "item": "One real gap recorded but NOT added: musical form basics (symphony, movements, theme and variation), suggested as music.musical-form-symphony-movements-themes. Full note in layer2_scope.",
-      "impact": "The book teaches this directly and no topic covers it; a natural add when more composer volumes or a music-theory resource lands.",
-      "urgency": "low"
+      "item": "RESOLVED 2026-07-21: added mt_qPM8rMxYFD 'Musical Form: Movements, Themes, and Variations' to Music > Composer Study & Music Appreciation (age 6-9, CONCEPTUAL), exactly the topic and domain this entry had recorded but deferred, naming Beethoven's Fifth, Sixth, and Ninth Symphonies directly as this book itself teaches them.",
+      "impact": "The book teaches this directly; Homa can now assess and plan for symphony form vocabulary (movements, theme-and-variation, an added choral finale) at Grade 1-3.",
+      "urgency": "resolved"
     },
     {
       "category": "recipe",
       "item": "One new recipe built this session from this drop: composer-listening-guide (html), with its SKILL.md Format library row and activity-formats.md entry. The gap slug and recipe filename match, so no GAP_ALIASES entry is needed.",
       "impact": "materials-studio previously had zero listening-oriented formats; composer-study families (the CM rotation is already a planned Homa methodology) get a per-piece companion page that pairs with the existing artist-composer-study-card.",
       "urgency": "low, recorded for traceability"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21: new recipe file biography-timeline-page.md built this session, covering this file's biography-timeline-page gap as one shared recipe with the sibling artists and inventors drops (life-events mode). Format library row added to materials-studio SKILL.md, activity-formats.md entry added.",
+      "impact": "layer4_activities.stats now reads haveRecipe 3 / noRecipe 1 (was 2 / 2). One recipe serves all three Getting to Know biography drops.",
+      "urgency": "resolved"
     },
     {
       "category": "knowledge_bank",

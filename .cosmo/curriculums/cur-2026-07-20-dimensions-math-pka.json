@@ -49,9 +49,9 @@
         "curriculumSubject": "Chapter 1, Lessons 1-3: Red and Blue / Yellow and Green / Color Review",
         "curriculumTopic": "Sort and classify objects by color (red, blue, yellow, green), naming the color as the sorting reason",
         "homaSubject": "math",
-        "homaDomain": null,
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaDomain": "data-statistics",
+        "homaTopicId": "mt_NJz7vT4Bhp",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "math.sorting-and-classifying-objects-by-one-attribute",
           "domain": "data-statistics",
@@ -60,7 +60,7 @@
             36,
             60
           ],
-          "note": "Checked 'sort' and 'classif' across all 508 pre-existing Mathematics topics before adding anything; the only hits were 'Sorting into categories' (Data & Statistics, age 5-6 and 6-8) and 'Sorting 2-D and 3-D shapes' (Geometry, age 6-7), all noticeably older than Pre-K and either data-categorization- or shape-specific, not general attribute sorting. Added mt_NJz7vT4Bhp as a genuine new topic this session under the existing Data & Statistics domain (no mapping.ts edit needed), see decisionsNeeded."
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_NJz7vT4Bhp ('Sorting and Classifying Objects by One Attribute') already exists in topics.json from this same curriculum's own earlier ingestion, and is already the homaTopicId used by the Lessons 4-6 (texture) and Lesson 9 (sort into two groups) mappings below; this color-sorting mapping was simply never backfilled to point at it. Checked 'sort' and 'classif' across all 508 pre-existing Mathematics topics before adding anything; the only hits were 'Sorting into categories' (Data & Statistics, age 5-6 and 6-8) and 'Sorting 2-D and 3-D shapes' (Geometry, age 6-7), all noticeably older than Pre-K and either data-categorization- or shape-specific, not general attribute sorting."
         }
       },
       {
@@ -133,9 +133,9 @@
         "curriculumSubject": "Chapter 3, Lessons 1-3: Movement Patterns / Sound Patterns / Create Patterns",
         "curriculumTopic": "Notice, copy, and create simple AB patterns using body movements, sounds, or objects (for example clap-stomp-clap-stomp, or a two-color bead sequence)",
         "homaSubject": "math",
-        "homaDomain": null,
-        "homaTopicId": null,
-        "status": "unmapped",
+        "homaDomain": "algebra-patterns",
+        "homaTopicId": "mt_IOpwXalEo4",
+        "status": "mapped",
         "suggested": {
           "topicSlug": "math.creating-and-extending-simple-ab-patterns",
           "domain": "algebra-patterns",
@@ -144,7 +144,7 @@
             36,
             60
           ],
-          "note": "Checked 'pattern' across all 508 pre-existing Mathematics topics; every hit (Mathematical Thinking 'Spotting mathematical patterns' age 5-6, Geometry 'Patterns & Sequences' age 6-7, Mathematical Thinking 'Shape patterns' age 6-7, Geometry 'Shape patterns' age 9-10, Algebra 'Number Pattern Relationships' age 10-11) is older than Pre-K and either about spotting/generalizing an existing pattern or specifically shape- or number-based, not creating a simple two-element AB pattern with movement or sound. Added mt_IOpwXalEo4 as a genuine new topic this session under the existing Algebra domain (algebra-patterns, no mapping.ts edit needed), see decisionsNeeded."
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_IOpwXalEo4 ('Creating and Extending Simple AB Patterns') already exists in topics.json from this same curriculum's own earlier ingestion; this mapping was simply never backfilled to point at it. Checked 'pattern' across all 508 pre-existing Mathematics topics; every hit (Mathematical Thinking 'Spotting mathematical patterns' age 5-6, Geometry 'Patterns & Sequences' age 6-7, Mathematical Thinking 'Shape patterns' age 6-7, Geometry 'Shape patterns' age 9-10, Algebra 'Number Pattern Relationships' age 10-11) is older than Pre-K and either about spotting/generalizing an existing pattern or specifically shape- or number-based, not creating a simple two-element AB pattern with movement or sound."
         }
       },
       {
@@ -315,8 +315,8 @@
     ],
     "stats": {
       "totalCurriculumTopics": 23,
-      "mapped": 15,
-      "unmapped": 2,
+      "mapped": 17,
+      "unmapped": 0,
       "noSubject": 0,
       "partial": 6
     }
@@ -474,6 +474,12 @@
       "item": "No curriculum-writer.md edit made this session. Checked first, per this ingestion's own instructions: apps/web/agent/curriculum-writer.md already has a 'Singapore Math (CPA Progression)' section (lines 237-256) that accurately covers the CPA law, the PreK-K-is-concrete rule, number bonds, three-tier scaffolding, bar models, and mental math strategies, all consistent with what this specific book's front matter independently describes.",
       "impact": "This book's own format-level details not currently captured there (the five-part Explore/Learn/Whole-Group-Play/Small-Group-Center-Play/Extend lesson shape, optional-snack tie-ins, the five-recurring-character device) are optional enrichments, not a missing methodology; the existing section is already correct and sufficient for curriculum-writer to plan Singapore Math content. Not adding an unrequested section keeps this session's product-file changes proportionate to what was actually missing.",
       "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the two mappings above for 'Sort and classify objects by color' (mt_NJz7vT4Bhp) and 'Notice, copy, and create simple AB patterns' (mt_IOpwXalEo4) already carried the real homaTopicId values used by their sibling mappings elsewhere in this same file (Lessons 4-6 and Lesson 9 for the color one; both new topics were added by this curriculum's own earlier ingestion) but still read status 'unmapped'. Flipped both to 'mapped'; layer2_scope.stats updated (mapped 15 -> 17, unmapped 2 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done. Separately confirmed this curriculum's color-sorting content is distinct from, and correctly stays mapped to, the sorting/classification topic here, not the new color-naming-vocabulary topic added elsewhere this session (English > Speaking & Listening): sorting by color as an attribute and naming a color by sight are two different skills, and this book teaches the former.",
+      "impact": "This curriculum now correctly reads as fully mapped for its color-sorting and pattern-creation lessons instead of falsely showing 2 open taxonomy gaps that were actually closed already.",
+      "urgency": "resolved"
     }
   ],
   "notes": "Real page count, verified directly with pypdf and PyMuPDF rather than assumed from the filename: dimensions-math-pka-tg.pdf is 116 PDF pages, each a scanned two-page spread of the physical spiral-bound book (except the single-page front and back cover images), so roughly 230 printed-book page-faces total; pypdf's extract_text returned zero characters of real content on all 116 pages, confirming this is a pure CamScanner-style phone scan of the physical book with no embedded text layer, the same situation as every other volume drained this session. All reading was done visually from PyMuPDF-rendered page images (34 pages sampled at even intervals across the full 1-116 range, roughly one in every 3-4 pages), not from extracted text. Grade/part confirmed directly and unambiguously from the pages themselves, not assumed from the drain order: the front cover reads 'Dimensions Math Teacher's Guide PKA' with a 'Dimensions Math Workbook PKA' insert visible on the same cover; the title page repeats 'Dimensions Math Teacher's Guide PKA'; the copyright page (page ii) states 'Dimensions Math Teacher's Guide Pre-Kindergarten A,' ISBN 978-1-947226-28-9, 'Published by Singapore Math Inc.,' 'First published 2018,' 'Reprinted 2019, 2020, 2021, 2023, 2025,' 'Copyright (c) 2017 by Singapore Math Inc.' The book's own multi-level Scope & Sequence chart (front matter) independently confirms PKA precedes PKB, which precedes KA/KB, which precede 1A/1B and onward, placing this specific volume at the very start of the whole Dimensions Math Pre-K through Grade 5 series. Full table of contents sampled directly (front matter pages iii-vi): 7 chapters (Match, Sort, and Classify; Compare Objects; Patterns; Numbers to 5 - Part 1; Numbers to 5 - Part 2; Numbers to 10 - Part 1; Numbers to 10 - Part 2), 63 lessons total (10+5+4+14+8+13+9), plus a Resources section ('Blackline Masters for PKA,' page 201). Sampling covered the front and back covers, title page, copyright page, full table of contents, the 'Dimensions Math Curriculum' pedagogy page, the 'Dimensions Math Program Materials' and 'Online Resources' pages, the full multi-level Scope & Sequence chart (PKA through at least 3B), the 'Using the Teacher's Guide' explainer page; Chapter 1's Chapter Opener, Lesson 5 (Rough, Bumpy, and Smooth), and Lesson 10 Practice; Chapter 2's Chapter Opener and Lesson 5 Practice; Chapter 3's Lesson 1 (Movement Patterns); Chapter 4's Overview page (with its stated 'Suggested number of class periods: 14-15'), Lesson 2, Lesson 7, and Lesson 12; Chapter 5's Lesson 2 and Lesson 7; Chapter 6's Materials/Blackline-Masters page, Lesson 1, Lesson 4, and Lesson 9, plus two spreads of reproduced Workbook Pages; Chapter 7's Lesson 1, Lesson 6, and Lesson 9 (including its own Workbook Pages spread); and the back-matter 'Blackline Masters for PKA' cross-reference table across both of its pages. This is representative sampling across the full breadth of the book as instructed, not a page-by-page read of all 116 PDF pages. Copyrighted page images and the publisher's specific illustrations, character names, and exact wording were used only for this session's own analysis and are described here in Homa's own words; the two new taxonomy topics, the two new materials-studio recipes, and every activity-type description describe generic early-math concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific characters, artwork, or text."

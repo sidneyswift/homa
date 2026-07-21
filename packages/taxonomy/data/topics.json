@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1658,
+  "topicCount": 1661,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32444,6 +32444,60 @@
       "Fill in the final rhyming word when a well-known rhyme pauses before it"
     ],
     "assessmentPrompt": "When you start a rhyme or chant {{name}} knows well, do they join in, clap along, or finish the rhyming word on their own?",
+    "standards": []
+  },
+  {
+    "id": "mt_xYlY6CjGN4",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Speaking & Listening",
+    "name": "Naming Colors by Sight",
+    "description": "Look at an object or color swatch and say its color name aloud (red, blue, yellow, green, orange, purple, pink, black, white, brown), and point to an object of a named color on request; a receptive and expressive vocabulary skill, distinct from sorting or matching objects by color as an attribute",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Point to or hold up an object of a named color when asked (receptive)",
+      "Say the correct color name aloud when shown a color swatch or object (expressive)",
+      "Use a color name spontaneously to describe an object without being prompted"
+    ],
+    "assessmentPrompt": "Can {{name}} say the name of a color when shown it, and point to an object of that color when you name it?",
+    "standards": []
+  },
+  {
+    "id": "mt_qPM8rMxYFD",
+    "type": "CONCEPTUAL",
+    "subject": "Music",
+    "domain": "Composer Study & Music Appreciation",
+    "name": "Musical Form: Movements, Themes, and Variations",
+    "description": "Learn that a long piece like a symphony is built from movements, that a composer develops a musical idea through theme-and-variation, and that some works add unusual features like a sung finale, understood through listening to real pieces such as Beethoven's Fifth, Sixth 'Pastoral', and Ninth Symphonies",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a movement as one of the several parts a symphony is divided into",
+      "Describe in simple words what happens when a composer 'varies' a musical theme",
+      "Recognize that adding singers to a symphony's finale, as Beethoven did in his Ninth, was unusual for its time"
+    ],
+    "assessmentPrompt": "Can {{name}} explain what a symphony's movements are and describe one way a composer changes a musical theme through the piece?",
+    "standards": []
+  },
+  {
+    "id": "mt_MsYH5Mpe4X",
+    "type": "CONCEPTUAL",
+    "subject": "Science",
+    "domain": "The Human Body",
+    "name": "Hearing Differences and Visible Speech: Alexander Graham Bell",
+    "description": "Learn through Alexander Graham Bell's life how some people experience the world through touch and sight instead of sound, what deaf education is, and how Bell invented 'visible speech,' a symbol system that showed the mouth and throat movements for making each speech sound so deaf students could learn to speak",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Explain in simple words what it means for a person to be deaf or hard of hearing",
+      "Describe what visible speech was and what problem it tried to solve",
+      "Name Alexander Graham Bell as someone who worked in deaf education before he is known for the telephone"
+    ],
+    "assessmentPrompt": "Can {{name}} explain what visible speech was and why Alexander Graham Bell created it to help deaf students learn to speak?",
     "standards": []
   }
 ]

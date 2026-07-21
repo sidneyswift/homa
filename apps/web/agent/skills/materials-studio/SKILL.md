@@ -486,6 +486,10 @@ making.
 | Comic narrative math page | teach a concept through 2-4 comic panels of character dialogue, ending in a story-linked question | comic-narrative-math-page |
 | Circle diagram two-set sort | sort items into two overlapping circles so both-attribute and neither-attribute items have a real home | circle-diagram-two-set-sort |
 | Picture bingo board | give a family several shuffled boards from one shared item pool for a caller-led recall game | picture-bingo-board |
+| Biography timeline page | show 5-8 chronological events in a real person's life, or an invention's progression, as connected labeled boxes | biography-timeline-page |
+| Chart and graph skill practice | teach one concrete data-reading skill (calendar, timeline, bar graph, diagram) with a worked example plus practice questions | chart-and-graph-skill-practice |
+| Lesson comprehension check | close a taught lesson with 2 recall questions plus 1 open think-and-share question | lesson-comprehension-check |
+| Magic square puzzle | drill addition fluency in a self-checking grid where every row, column, and diagonal sums to the same target | magic-square-puzzle |
 
 ## Design rules (binding)
 

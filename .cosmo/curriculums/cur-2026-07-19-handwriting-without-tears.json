@@ -101,12 +101,12 @@
       {
         "curriculumSubject": "Colors & Coloring",
         "curriculumTopic": "Naming and recognizing colors",
-        "homaSubject": null,
-        "homaDomain": null,
-        "homaTopicId": null,
-        "status": "no_subject",
+        "homaSubject": "language",
+        "homaDomain": "speaking-listening",
+        "homaTopicId": "mt_xYlY6CjGN4",
+        "status": "mapped",
         "suggested": {
-          "note": "No taxonomy domain anywhere (Marble-imported or Homa-authored) covers color-name recognition as its own skill; it usually rides along inside art or early-math content without a dedicated home. Not urgent enough on its own to warrant a new domain; flagged for a founder call if it recurs across other early-years ingests"
+          "note": "RESOLVED 2026-07-21: two independent curricula this session (this one and Dimensions Math PKA) flagged color-related content, but on closer reading they are two different skills: PKA teaches sorting/classifying objects BY color as an attribute (already covered by the existing 'Sorting and Classifying Objects by One Attribute' topic), while this book teaches naming individual colors by sight, a receptive/expressive vocabulary skill. Confirmed by full-text search that zero existing topics taught color-naming before this session (the only 'color' hits anywhere in the taxonomy were color physics at age 11-12, animal camouflage, and the two sorting/pattern topics that use color only as an example attribute). Added mt_xYlY6CjGN4 'Naming Colors by Sight' under English > Speaking & Listening (subject 'language'), an existing non-reserved Marble-origin domain already populated with other age 3-6 oral-language topics (for example 'Joining In with Rhymes and Chants,' age 3-6); explicitly avoided the RESERVED language-subject AUTHORED_DOMAINS (early-talk, speech-clarity, oral-storytelling), which belong to a separate hand-authored milestone bank. No mapping.ts edit needed, no collision."
         }
       },
       {
@@ -221,9 +221,9 @@
     ],
     "stats": {
       "totalCurriculumTopics": 15,
-      "mapped": 11,
+      "mapped": 12,
       "unmapped": 0,
-      "noSubject": 1,
+      "noSubject": 0,
       "partial": 2,
       "notPresent": 1
     }
@@ -340,10 +340,10 @@
       "urgency": "low"
     },
     {
-      "category": "product",
-      "item": "No taxonomy domain (Marble-imported or Homa-authored) covers color-name recognition as its own skill line; it currently has nowhere to be scored even though it is a real, distinct Pre-K skill this guide teaches directly (the Colors & Coloring section)",
-      "impact": "Low-value on its own from a single curriculum, but worth a founder call if a future early-years ingest flags the same gap a second time",
-      "urgency": "low"
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21: added mt_xYlY6CjGN4 'Naming Colors by Sight' (English > Speaking & Listening, subject 'language', age 3-5, PROCEDURAL) to cover this book's Colors & Coloring section, a genuine gap independently confirmed by full-text search (zero existing topics named individual colors; the only prior 'color' hits were color physics at age 11-12, animal camouflage, and two sorting/pattern topics using color only as an example attribute). Distinguished this from Dimensions Math PKA's 'sort objects by color' content, which is a different skill (attribute-based sorting) already covered by the existing sorting/classification topic; that curriculum's mapping was left as-is. No mapping.ts edit needed: English > Speaking & Listening already exists in MARBLE_DOMAIN_MAP, non-colliding with the RESERVED language-subject AUTHORED_DOMAINS (early-talk, speech-clarity, oral-storytelling). topics.json append-only diff verified, manifest.json bytes/sha256 updated, pnpm check:taxonomy green.",
+      "impact": "Homa can now assess and plan for basic color-naming vocabulary at ages 3-5, the youngest age band any topic in the taxonomy covers.",
+      "urgency": "resolved"
     }
   ],
   "notes": "Real page counts, verified directly rather than assumed from the filenames: hwt-pt1.pdf is 120 PDF pages (a CamScanner phone scan of physical book spreads, some early pages scanned two or three times by accident) covering physical book pages 1 through 229; hwt-pt2.pdf is 24 PDF pages covering physical book pages 230 through the end of the book (roughly page 276, including the blank Notes pages at the very back). The two PDFs are confirmed to be ONE continuous book split across two Slack uploads, not two different books, grade levels, or editions: pt2's very first lesson page (capital/lowercase E) picks up exactly where pt1's last lesson page (capital/lowercase I) leaves off, mid-way through the same 'Transition Group' of the guide's own Lowercase Teaching Order, and every page in both files carries the identical footer ('Readiness & Writing PreK Teacher's Guide' / '(c) 2021 Learning Without Tears'). The book itself is titled 'Get Set for School (r) by Learning Without Tears: Readiness & Writing Pre-K Teacher's Guide', 8th edition, copyright 2021 Learning Without Tears, the modern rebrand of the company Aless knows as Handwriting Without Tears; this is that company's current Pre-K handwriting-and-readiness volume, not a book with 'Handwriting Without Tears' literally on its cover. It is a school-market teacher's guide (references classroom routines and circle time throughout) rather than a homeschool-authored curriculum, which is worth keeping in mind anywhere Homa adapts its activities for a single child at home. Sampling covered the front matter and table of contents (pt1 pages 1-10), the Readiness section including Wood Piece Play, Mat Man, and pencil-grip guidance (pt1 pages 21-30), the Pre-Writing-to-Capital-Letters transition and the Developmental Teaching stroke-family order (pt1 pages 61-70), the Counting & Numbers section (pt1 pages 91-100), the end of Writing Capital Letters into the start of Writing Lowercase Letters (pt1 pages 111-120), the remainder of Writing Lowercase Letters through the alphabet's end (pt2 pages 1-8), and the Resources section: Help Me Write My Name, the full index, the References bibliography, and the Capital/Lowercase/Number Formation Charts (pt2 pages 17-24). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 144 combined PDF pages. Copyrighted page images and exact proprietary wording (letter mnemonics, Number Stories text, trademarked terms like Mat Man and Wet-Dry-Try) were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new letter-number-formation-practice recipe describes a generic box-and-stroke-cue pedagogy pattern in Homa's own voice, not a copy of this publisher's specific letters, mnemonics, or illustrations."
