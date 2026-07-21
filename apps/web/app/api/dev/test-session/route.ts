@@ -32,6 +32,12 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  *    caller who just asked for it, so a walk can sign back in on a
  *    second device. It is never stored anywhere by this route.
  *
+ * You usually only need this ONCE. To walk the flow again as the same
+ * account, use /dev/reset, which deletes the family and gives this
+ * login a fresh one; that is the loop worth bookmarking. Use this route
+ * when you want a genuinely separate account (two families side by
+ * side, a second device signing in).
+ *
  * Deleting what it makes: `tsx scripts/delete-test-families.mts`
  * (dry run by default, --apply to retire), or the family file in the
  * founder console.
