@@ -28,6 +28,7 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
 import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
+import { latestQuestionRequest } from "./question-card-model";
 
 /**
  * The chat surface, the mobile twin of apps/web/app/app/chat-client.tsx:
@@ -56,6 +57,9 @@ import { BusyBubble, MessageView } from "./message-view";
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
+
+/** Where a send came from. A card tap is not typing; see sendMessage. */
+type ChatSendSource = "composer" | "card";
 
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
@@ -112,6 +116,11 @@ export function ChatSession({
   }));
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const composerRef = useRef<TextInput>(null);
+  /** Choice card partKey -> the message her taps sent from that card. */
+  const [questionAnswers, setQuestionAnswers] = useState<
+    Record<string, string>
+  >({});
   /** Last moment the stream showed signs of life (0 = none yet). */
   const lastStreamActivityRef = useRef(0);
   /** Messages sent while a turn was running; flushed as one message the
@@ -292,6 +301,7 @@ export function ChatSession({
         setArchived(nextArchived);
         archivedRef.current = nextArchived;
         setLiveTimes({});
+        setQuestionAnswers({});
         void saveChat(storageKey, {
           archived: nextArchived,
           events: [],
@@ -346,10 +356,13 @@ export function ChatSession({
     };
   }, [agentStop, busy]);
 
-  function sendMessage(text: string) {
+  function sendMessage(text: string, source: ChatSendSource = "composer") {
     const message = text.trim();
     if (message.length === 0) return;
-    setDraft("");
+    // A tap on a card is not typing, so it leaves whatever she had
+    // half-written in the composer alone (the web twin's send policy,
+    // apps/web/app/app/chat-send-policy.ts).
+    if (source === "composer") setDraft("");
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
     // composer and goes out the moment the line is free.
@@ -373,6 +386,26 @@ export function ChatSession({
     void agent.send({ message: outgoing });
   }
 
+  function focusComposer() {
+    composerRef.current?.focus();
+  }
+
+  /**
+   * A finished choice card sends its answers as ONE ordinary message.
+   * The card then reads past tense, so a spent option never looks
+   * pressable.
+   */
+  function sendQuestionCardAnswers(partKey: string, text: string) {
+    if (text.trim().length === 0) {
+      // Nothing to say, so say nothing and give her the composer
+      // instead of sending an empty turn.
+      focusComposer();
+      return;
+    }
+    sendMessage(text, "card");
+    setQuestionAnswers((current) => ({ ...current, [partKey]: text }));
+  }
+
   /** The manual fresh start: archive what is on screen, rotate the
    *  session, keep every word visible above. Nothing is erased. */
   function startNewChat() {
@@ -385,6 +418,9 @@ export function ChatSession({
     archivedRef.current = nextArchived;
     setLiveTimes({});
     setQueued([]);
+    // The answered-card summaries belong to the session that just went
+    // to the archive; the archived cards render settled on their own.
+    setQuestionAnswers({});
     void saveChat(storageKey, {
       archived: nextArchived,
       events: [],
@@ -402,6 +438,12 @@ export function ChatSession({
     liveTimes,
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // The live choice card, if any: only the newest unanswered card takes
+  // taps, and only while the line is free. Identity, not message id,
+  // because eve ids restart with each session and the archive above can
+  // hold a card whose id matches this one's.
+  const liveMessageSet = new Set(messages);
+  const activeQuestion = busy ? null : latestQuestionRequest(messages);
   // The chips return whenever a session has no words in it yet: the
   // first run, a fresh morning over yesterday's scrollback, and right
   // after "Start a new chat".
@@ -466,7 +508,21 @@ export function ChatSession({
               item.kind === "separator" ? (
                 <DaySeparator key={item.key} label={item.label} />
               ) : (
-                <MessageView key={item.key} message={item.message} />
+                <MessageView
+                  key={item.key}
+                  message={item.message}
+                  questions={{
+                    activeQuestionPartKey: liveMessageSet.has(item.message)
+                      ? activeQuestion?.partKey
+                      : undefined,
+                    onSendQuestionAnswers: activeQuestion
+                      ? (text) =>
+                          sendQuestionCardAnswers(activeQuestion.partKey, text)
+                      : undefined,
+                    onQuestionTypeInstead: focusComposer,
+                    questionAnswers,
+                  }}
+                />
               ),
             )}
             {showSuggestions ? (
@@ -608,6 +664,7 @@ export function ChatSession({
         }}
       >
         <TextInput
+          ref={composerRef}
           value={draft}
           onChangeText={setDraft}
           placeholder={"Tell Homa about your day\u2026"}
