@@ -23,6 +23,11 @@ import {
   PlannerCard,
   type PlannerOpenSignal,
 } from "./planner-canvas";
+import {
+  parseQuestionCardPart,
+  QuestionCard,
+  type QuestionCardData,
+} from "./question-card";
 import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
 import { WorkedForLine, workedForSteps } from "./worked-for";
 
@@ -111,6 +116,7 @@ type AssistantItem =
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "chip"; chip: MemoryChipContent }
   | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
+  | { kind: "questions"; card: QuestionCardData; sourceActionKey: string }
   | { kind: "planner"; signal: PlannerOpenSignal }
   | SourcedProgressAssistantItem;
 
@@ -142,6 +148,15 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({
         kind: "snap",
         card: snapCard,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
+    const questionCard = parseQuestionCardPart(part);
+    if (questionCard) {
+      items.push({
+        kind: "questions",
+        card: questionCard,
         sourceActionKey: `${message.id}:${partIndex}`,
       });
       continue;
@@ -181,6 +196,10 @@ function AssistantItemView({
   activeSnapPartKey,
   onSnapAddFiles,
   onSnapTypeInstead,
+  activeQuestionPartKey,
+  onSendQuestionAnswers,
+  onQuestionTypeInstead,
+  questionAnswers,
   childNameById,
   onOpenPlanner,
 }: {
@@ -193,6 +212,10 @@ function AssistantItemView({
   activeSnapPartKey?: string;
   onSnapAddFiles?: (files: readonly File[]) => void;
   onSnapTypeInstead?: () => void;
+  activeQuestionPartKey?: string;
+  onSendQuestionAnswers?: (message: string) => void;
+  onQuestionTypeInstead?: () => void;
+  questionAnswers?: ReadonlyMap<string, string>;
   childNameById?: ReadonlyMap<string, string>;
   onOpenPlanner?: (signal: PlannerOpenSignal) => void;
 }) {
@@ -229,6 +252,24 @@ function AssistantItemView({
               ? onSnapTypeInstead
               : undefined
           }
+        />
+      );
+    case "questions":
+      return (
+        <QuestionCard
+          card={item.card}
+          active={item.sourceActionKey === activeQuestionPartKey}
+          onSendAnswers={
+            item.sourceActionKey === activeQuestionPartKey
+              ? onSendQuestionAnswers
+              : undefined
+          }
+          onTypeInstead={
+            item.sourceActionKey === activeQuestionPartKey
+              ? onQuestionTypeInstead
+              : undefined
+          }
+          answeredSummary={questionAnswers?.get(item.sourceActionKey) ?? null}
         />
       );
     case "planner":
@@ -301,6 +342,10 @@ export function MessageView({
   activeSnapPartKey,
   onSnapAddFiles,
   onSnapTypeInstead,
+  activeQuestionPartKey,
+  onSendQuestionAnswers,
+  onQuestionTypeInstead,
+  questionAnswers,
   onOpenPlanner,
 }: {
   message: EveMessage;
@@ -323,6 +368,12 @@ export function MessageView({
   activeSnapPartKey?: string;
   onSnapAddFiles?: (files: readonly File[]) => void;
   onSnapTypeInstead?: () => void;
+  /** The one choice card still answerable, plus its handlers. */
+  activeQuestionPartKey?: string;
+  onSendQuestionAnswers?: (message: string) => void;
+  onQuestionTypeInstead?: () => void;
+  /** Choice-card partKey -> what she sent, for spent cards. */
+  questionAnswers?: ReadonlyMap<string, string>;
   /** Reopens the planner canvas from a transcript planner card. */
   onOpenPlanner?: (signal: PlannerOpenSignal) => void;
 }) {
@@ -373,6 +424,10 @@ export function MessageView({
           activeSnapPartKey={activeSnapPartKey}
           onSnapAddFiles={onSnapAddFiles}
           onSnapTypeInstead={onSnapTypeInstead}
+          activeQuestionPartKey={activeQuestionPartKey}
+          onSendQuestionAnswers={onSendQuestionAnswers}
+          onQuestionTypeInstead={onQuestionTypeInstead}
+          questionAnswers={questionAnswers}
           childNameById={childNameById}
           onOpenPlanner={onOpenPlanner}
         />
