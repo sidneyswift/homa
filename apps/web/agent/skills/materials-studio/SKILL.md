@@ -478,6 +478,7 @@ making.
 | Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
 | Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
 | Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, a bare technique-reference card, or a published science textbook's "Investigate" activity | art-project-instructions |
+| Then and now comparison | compare something from the past against today in two labeled panels with a reflection question | then-and-now-comparison |
 
 ## Design rules (binding)
 

@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1640,
+  "topicCount": 1643,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32120,6 +32120,60 @@
         "Identify wheels on everyday objects (wagons, bikes, cars, office chairs) and explain what job the wheels do"
       ],
       "assessmentPrompt": "Can {{name}} explain why a wagon with wheels is easier to pull than a box without wheels?",
+      "standards": []
+    },
+    {
+      "id": "mt_NlyT4Xzzr2",
+      "type": "PROCEDURAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Reading a Map: Map Key and Four Directions",
+      "description": "Read a simple map by using its map key to identify what a symbol or picture stands for, and use the four cardinal directions (north, south, east, west) to describe where one place is relative to another on the map",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Use a map key to say what a symbol or picture on a simple map stands for",
+        "Point to or name which direction (north, south, east, west) one place on a map is from another",
+        "Follow a simple route on a map from one landmark to another using the map key and directions"
+      ],
+      "assessmentPrompt": "If you show {{name}} a simple map with a key, can they use the key to say what a symbol means and point out which direction one place is from another?",
+      "standards": []
+    },
+    {
+      "id": "mt_Dan03VC4Li",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Kinds of Communities: City, Town, and Farm",
+      "description": "Compare different kinds of communities where people live and work, such as a city, a town, and a farm community, noticing how the size, buildings, and jobs differ between them",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Describe at least one way a city community is different from a town or farm community",
+        "Sort pictures of homes or streets into the kind of community they most likely belong to",
+        "Explain that their own neighborhood is part of a larger community"
+      ],
+      "assessmentPrompt": "Can {{name}} tell you one way that living in a city is different from living on a farm or in a small town?",
+      "standards": []
+    },
+    {
+      "id": "mt_OWl0pyMgMJ",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Cultural Studies",
+      "name": "Celebrations and Traditions Around the World",
+      "description": "Recognize that families and communities around the world have their own celebrations, foods, and traditions, and describe at least one custom from a country other than their own",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name a celebration or tradition from a country other than their own",
+        "Describe a custom, food, or object connected to a family tradition",
+        "Notice that some traditions, like a special outfit, a shared meal, or a holiday, are similar even when the details differ across cultures"
+      ],
+      "assessmentPrompt": "Can {{name}} tell you about one celebration or tradition from a country other than the one they live in?",
       "standards": []
     }
   ]

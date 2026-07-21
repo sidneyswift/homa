@@ -460,3 +460,80 @@ structure rather than a nature-study or unit-study rhythm:
   labeled plant-parts or body-systems diagrams; `[3-part-nomenclature-cards]`
   for the glossary; `[foldable]` for Unit Wrap Up writing prompts that ask
   for a flap or pull book.
+
+### Published Elementary Social Studies Textbook (Reading-Skill-Integrated, e.g. Scott Foresman Social Studies)
+
+When a family uses a published, grade-level school-market social studies
+textbook (Scott Foresman's "Social Studies" series, or any program that
+teaches a reading-comprehension skill through social studies content rather
+than through a hands-on investigation), plan around this structure. It is a
+different shape from the Investigate-Then-Explain science pattern above:
+there is no materials-list hands-on step at all, and the organizing thread
+is a named reading skill, not a process skill.
+
+- Read before checking. Each unit opens with a "Vocabulary Preview": one
+  illustrated scene labeled with that unit's key terms (for example a city
+  street scene labeled "neighborhood," "community," "law," "leader,"
+  "state," "continent," "ocean"), and names one "Reading Social Studies"
+  target skill for the whole unit (Use Picture Clues, Alike and Different,
+  Put Things in Order, Find the Main Idea, Recall and Retell, Predict).
+  Every lesson in that unit is short (1-2 pages), plain declarative
+  sentences, one or two bolded vocabulary words, built to practice that
+  unit's named reading skill on social studies content, not to teach a
+  process skill the way a science textbook does.
+- Every lesson closes with a fixed "What Did You Learn?" box: two literal
+  recall questions, then a third "Think and Share" or "Write and Share"
+  open-ended question that is usually the actual reading-skill practice
+  (predicting, comparing, sequencing, summarizing). Do not compress this to
+  a single quiz format, and do not drop the third open question, it carries
+  the unit's actual reading-skill target.
+- Recurring feature boxes interleave with the plain lesson content and each
+  has its own job, keep them distinct rather than folding them into the
+  main lesson: "Citizen Heroes" or "Meet [Person]" biography spreads pair a
+  short real person's story with one named citizenship trait (caring,
+  respect, responsibility, fairness, honesty, courage) and a reflection
+  question; "Then and Now" compares something across time (community,
+  toys, a country's flag) in two small panels; "Map and Globe Skills" and
+  "Chart and Graph Skills" teach one concrete skill (use a map key, use
+  four directions, follow a route, read a time line, read a bar graph) in
+  a small callout, separate from the lesson's own comprehension check;
+  "Here and There" makes one specific comparison to another place in the
+  world (money, an endangered species, a custom). Keep each box's own
+  question and its own skill separate from the lesson's "What Did You
+  Learn?" box rather than merging them.
+- Units close with a poem, song, or folktale tied to the unit's theme, then
+  a Unit Review. A dedicated front-matter "Social Studies Handbook" (short
+  citizenship-trait definitions, the five themes of geography) and a
+  back-matter "Reference Guide" (atlas maps, geography terms, a picture
+  glossary with one photo example and a page citation per term) function as
+  ongoing whole-year references, not weekly content to schedule, the same
+  way a science textbook's Science Handbook and Glossary do.
+- Assessment is the lesson's own "What Did You Learn?" box and the Unit
+  Review; do not suggest additional quizzes or graded worksheets unless the
+  family asks for one.
+- This is a different shape from Direct Instruction (no script, no choral
+  response), from the Investigate-Then-Explain science pattern above (no
+  hands-on materials-list step; the organizing thread is a named reading
+  skill, not a process skill), and from Charlotte Mason (feature boxes and
+  a fixed unit structure carry the content, not living books and free
+  narration), even though a family may use any of these for different
+  subjects in the same week.
+- Map to Homa's `social_studies` subject. Community, jobs, goods and
+  services, needs and wants, and money content map cleanly onto Homa's
+  existing `life_skills` subject (`Money & Finance`, `Entrepreneurship`
+  domains) rather than social_studies, that overlap is expected, not a
+  gap. Ancient-history-flavored `social_studies` domains (`ancient-egypt`,
+  `ancient-greece-rome`, `medieval-times`) do not apply to this grade band
+  at all; look instead at `geography` and `cultural-studies` for the
+  closest existing homes for map-skills and world-culture content, and
+  flag community-civics content (national symbols, local leaders and
+  laws, voting) that has no existing topic as a real gap rather than
+  forcing it into an ancient-history domain.
+- Format preferences: `[labeled-anatomy-diagram]` for map-key and
+  four-directions practice and for labeled world/country maps (its own
+  "Great for" line already names geography and map labeling);
+  `[nomenclature-cards]` for the picture glossary and for a national
+  symbols reference set; `[artist-composer-study-card]` reused with
+  adapted labels (not the CM-style prompts) for "Citizen Heroes" and
+  "Meet [Person]" biography spreads; `[then-and-now-comparison]` for
+  "Then and Now" boxes.

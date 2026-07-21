@@ -474,3 +474,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 5-10. Fewer, larger steps for younger; more steps and a reflection prompt (or skill-tip callout, for science) tied to the family's own comprehension-skill or process-skills vocabulary for older.
 - **Creation path:** hybrid (generate_image for the inspiration thumbnail, HTML for the materials list and steps) or html-only for the bare technique-reference variant
 - **Example activity:** `[art-project-instructions] Paper-plate weaving: materials list, five numbered steps, and a reflection question about the pattern the child made`
+
+### then-and-now-comparison
+- **Slug:** `[then-and-now-comparison]`
+- **Name:** Then and now comparison
+- **What it is:** A two-panel page comparing something from the past against today ("Then"/"Now", "Long Ago"/"Today", "First"/"Now"), each panel with a small illustration and a one- or two-sentence caption, plus a reflection question asking the child to name what changed.
+- **Best for:** Elementary social studies units on communities, chores, toys, transportation, or national symbols across time; science units comparing an early tool or invention to its modern form; any curriculum with a recurring "then and now" or "long ago and today" feature box.
+- **Subjects:** Social studies (communities and change over time), Science (tools and inventions over time)
+- **Ages:** 5-9. A single clear comparison for younger; a comparison plus a written reflection sentence for older.
+- **Creation path:** hybrid (generate_image for the two small illustrations, HTML for the panel frames, labels, and reflection box), or html-only for a text-and-caption-only comparison
+- **Example activity:** `[then-and-now-comparison] How toys have changed: a wooden top labeled "Then" beside a remote-control car labeled "Now," with a reflection question about what stayed the same`

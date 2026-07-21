@@ -131,6 +131,16 @@
       "decisionsCount": 8
     },
     {
+      "id": "cur-2026-07-19-social-studies-all-together",
+      "name": "Social Studies: All Together (Grade 1, Scott Foresman / Pearson Education pupil edition, copyright 2003)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T19:59:19-04:00",
+      "methodology": "A published, reading-skill-integrated elementary social studies textbook. Each of its 6 units opens with a 'Vocabulary Preview' (one large illustrated scene labeled with the unit's key terms) and names one 'Reading Social Studies' target comprehension skill for the whole unit (Use Picture Clues, Alike and Different, Put Things in Order, Find the Main Idea, Recall and Retell, Predict). Every lesson is short (1-2 pages, a few short declarative sentences, 1-2 bolded vocabulary words) and closes with a fixed 'What Did You Learn?' box: two literal recall questions plus a third open 'Think and Share' or 'Write and Share' question that is usually the actual practice of that unit's named reading skill. Unlike the sibling Harcourt Science volume in this drop wave, there is no hands-on 'Investigate' step anywhere and no fixed process-skills vocabulary; the organizing thread is a reading-comprehension skill applied to social studies content, not a science process skill applied through experimentation.",
+      "mappedPct": 28,
+      "gapCount": 4,
+      "decisionsCount": 6
+    },
+    {
       "id": "cur-2026-07-19-teach-child-read-100-lessons",
       "name": "Teach Your Child to Read in 100 Easy Lessons (Siegfried Engelmann) \u2014 Parts 1 & 2",
       "droppedBy": "aless",
