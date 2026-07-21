@@ -78,6 +78,12 @@ import {
   PromptSuggestionRail,
   type PromptSuggestionPhase,
 } from "./prompt-suggestion-rail";
+import {
+  latestPlannerOpen,
+  planEditCount,
+  PlannerCanvasPanel,
+  type PlannerOpenSignal,
+} from "./planner-canvas";
 import { SlashComposer } from "./slash-composer";
 import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
@@ -311,6 +317,16 @@ export function ChatClient({
   const [progressAnswers, setProgressAnswers] = useState<Record<string, string>>(
     {},
   );
+  /** The planner canvas beside the chat: open with a focus (or null for
+   *  closed). Opens when a NEW open_planner result streams in, reopens
+   *  from any planner card in the transcript, closes with its X. */
+  const [plannerCanvas, setPlannerCanvas] = useState<PlannerOpenSignal | null>(
+    null,
+  );
+  /** The newest open_planner part already acted on. Starts undefined so
+   *  the first pass records whatever a restored session carries WITHOUT
+   *  opening it: a mid-day reload should not throw the panel back up. */
+  const handledPlannerPartKeyRef = useRef<string | null | undefined>(undefined);
   const turnStartedAtRef = useRef<number | null>(null);
   const childNameById = useMemo(
     () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
@@ -942,6 +958,22 @@ export function ChatClient({
     focusChatComposerInput(composerFormRef.current);
   }, []);
 
+  // Canvas auto-open: a NEW open_planner result opens the panel with the
+  // tool's own focus. The first pass only records what a restored
+  // session already carried, so a reload never re-throws the panel up;
+  // the transcript's planner cards reopen it on purpose instead.
+  const planEditsSeen = planEditCount(agent.data.messages);
+  useEffect(() => {
+    const latest = latestPlannerOpen(agent.data.messages);
+    if (handledPlannerPartKeyRef.current === undefined) {
+      handledPlannerPartKeyRef.current = latest?.partKey ?? null;
+      return;
+    }
+    if (!latest || latest.partKey === handledPlannerPartKeyRef.current) return;
+    handledPlannerPartKeyRef.current = latest.partKey;
+    setPlannerCanvas(latest.signal);
+  }, [agent.data.messages]);
+
   function updateProgressActionLifecycle(
     next: ProgressActionLifecycleState,
   ): void {
@@ -1163,8 +1195,11 @@ export function ChatClient({
 
   return (
     // 3.5rem is the frame's phone top bar (h-14); on desktop the sidebar
-    // sits beside this column, so the full viewport height is ours.
-    <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
+    // sits beside this column, so the full viewport height is ours. The
+    // planner canvas, when open, shares this row on desktop (the chat
+    // column narrows) and overlays the phone.
+    <div className="flex h-[calc(100dvh-3.5rem)] lg:h-dvh">
+    <div className="flex h-full min-w-0 flex-1 flex-col">
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main
@@ -1239,6 +1274,7 @@ export function ChatClient({
                   }
                   onSnapAddFiles={attachments.addFiles}
                   onSnapTypeInstead={focusComposer}
+                  onOpenPlanner={setPlannerCanvas}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
                   }
@@ -1568,6 +1604,14 @@ export function ChatClient({
           onClose={() => setWallOpen(false)}
         />
       ) : null}
+    </div>
+    {plannerCanvas ? (
+      <PlannerCanvasPanel
+        childId={plannerCanvas.childId}
+        refreshSignal={planEditsSeen}
+        onClose={() => setPlannerCanvas(null)}
+      />
+    ) : null}
     </div>
   );
 }

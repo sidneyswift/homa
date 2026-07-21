@@ -54,7 +54,7 @@ const FAKE_ELIGIBLE_V2_CHILD: BriefV2Context["children"][number] = {
   subjectKeys: [],
   frontierDomains: [],
   currentWorkFacts: [],
-  frontierFacts: [],
+  frontierFacts: ['named frontier: "Reads a short book on their own"'],
   candidates: [{
     id: "knowledge-1",
     topicType: "subject",
@@ -171,7 +171,7 @@ describe("buildTaskMessage", () => {
     assert.match(message, /output only the accepted stored draft/);
   });
 
-  it("rejects a pinned v2 run with no eligible candidate before returning a model prompt", async () => {
+  it("rejects a pinned v2 run with no anchorable candidate before returning a model prompt", async () => {
     for (const children of [
       [],
       [{
@@ -183,6 +183,18 @@ describe("buildTaskMessage", () => {
         currentWorkFacts: [],
         frontierFacts: [],
         candidates: [],
+      }],
+      // A candidate with no frontier, no current work, and no observation is
+      // not an anchorable brief: the model would stall (2026-07-20 field trace).
+      [{
+        id: "child-1",
+        name: "Nova",
+        stage: "early_years",
+        subjectKeys: [],
+        frontierDomains: [],
+        currentWorkFacts: [],
+        frontierFacts: [],
+        candidates: [FAKE_ELIGIBLE_V2_CHILD.candidates[0]],
       }],
     ]) {
       await assert.rejects(

@@ -31,6 +31,7 @@ import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
 import { foldFamilyDataIntoTx } from "../family-fold";
+import { dashboardPlanFromRow, type DashboardPlan } from "../plan-week";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import {
   SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
@@ -41,6 +42,7 @@ import {
 } from "../subject-lessons/summary-filter";
 import type { SubjectLessonSummary } from "../subject-lessons/types";
 import { mapDb, type DbJson } from "./db";
+import { applyPlanEdits, describePlanEdits, type PlanEdit } from "./plan-edits";
 import {
   cleanProfileFocus,
   cleanProfileInterests,
@@ -682,6 +684,126 @@ export async function getReportTokenForChild(
     where child_id = ${childId} and revoked_at is null and token is not null
   `;
   return rows[0]?.token ?? null;
+}
+
+/**
+ * The week board as agent tools see it: every child in the family (or
+ * one child when narrowed), their report tokens, and their stored plans.
+ * Server connection with the explicit family predicate as the wall, the
+ * same trust basis as savePlanProgress above: familyId arrives from the
+ * session's authenticated attributes, never from the model.
+ */
+export interface PlanBoardChild {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  reportToken: string | null;
+}
+
+export async function getPlanBoard(
+  familyId: string,
+  childId?: string | null,
+): Promise<{ children: PlanBoardChild[]; plans: DashboardPlan[] } | null> {
+  const sql = mapDb();
+  const children = await sql<
+    { id: string; name: string; avatar_url: string | null; token: string | null }[]
+  >`
+    select c.id, c.name, c.avatar_url, r.token
+    from public.children c
+    left join public.child_reports r on r.child_id = c.id and r.revoked_at is null
+    where c.family_id = ${familyId}
+    order by c.created_at
+  `;
+  const scoped = childId
+    ? children.filter((child) => child.id === childId)
+    : children;
+  if (childId && scoped.length === 0) return null;
+  const childIds = scoped.map((child) => child.id);
+  const planRows =
+    childIds.length === 0
+      ? []
+      : await sql<
+          {
+            child_id: string;
+            subject_id: string;
+            plan: FourWeekPlan;
+            progress: Record<string, boolean> | null;
+            retest_at: string;
+          }[]
+        >`
+          select p.child_id, p.subject_id, p.plan, p.progress,
+                 to_char(p.retest_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as retest_at
+          from public.child_plans p
+          join public.children c on c.id = p.child_id
+          where p.child_id in ${sql(childIds)} and c.family_id = ${familyId}
+        `;
+  return {
+    children: scoped.map((child) => ({
+      id: child.id,
+      name: child.name,
+      avatarUrl: child.avatar_url,
+      reportToken: child.token,
+    })),
+    plans: planRows.flatMap((row) => {
+      const shaped = dashboardPlanFromRow(row);
+      return shaped ? [shaped] : [];
+    }),
+  };
+}
+
+export type EditPlanOutcome =
+  | { status: "applied"; summary: string; plan: FourWeekPlan; added: number; replaced: number; removed: number }
+  | { status: "unknown_child" }
+  | { status: "no_plan" }
+  | { status: "invalid_edit"; note: string };
+
+/**
+ * Applies activity edits to one stored plan (the edit_plan agent tool's
+ * write). Atomic per batch: plan-edits.ts validates every edit against
+ * the copy before anything is written, and the one UPDATE writes plan
+ * and remapped progress together so checks can never point at moved
+ * activities.
+ */
+export async function editPlanActivities(
+  familyId: string,
+  childId: string,
+  subjectId: string,
+  edits: readonly PlanEdit[],
+): Promise<EditPlanOutcome> {
+  if (!(await childBelongsToFamily(childId, familyId))) {
+    return { status: "unknown_child" };
+  }
+  const sql = mapDb();
+  const rows = await sql<
+    { id: string; plan: FourWeekPlan; progress: Record<string, boolean> | null }[]
+  >`
+    select id, plan, progress
+    from public.child_plans
+    where child_id = ${childId} and subject_id = ${subjectId}
+  `;
+  const row = rows[0];
+  if (!row) return { status: "no_plan" };
+
+  const applied = applyPlanEdits(row.plan, row.progress ?? {}, edits);
+  if (!applied.ok) {
+    return { status: "invalid_edit", note: applied.failure.note };
+  }
+  await sql`
+    update public.child_plans
+    set plan = ${sql.json(applied.result.plan as unknown as DbJson)},
+        progress = ${sql.json(applied.result.progress as unknown as DbJson)},
+        updated_at = now()
+    where id = ${row.id}
+  `;
+  await touchFamily(familyId);
+  return {
+    status: "applied",
+    summary: describePlanEdits(edits),
+    plan: applied.result.plan,
+    added: applied.result.added,
+    replaced: applied.result.replaced,
+    removed: applied.result.removed,
+  };
 }
 
 /** True when this child already has a stored plan for the subject. The
