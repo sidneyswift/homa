@@ -308,12 +308,23 @@ than direct instruction.
 - Assessment stays inside the practice sets themselves (no separate
   formal test in the base curriculum); do not suggest quizzes unless the
   family asks for one.
+- Classification and number-property reasoning is its own recurring
+  strand, not just shapes and arithmetic. Beast Academy's "Categories"
+  content (odd one out with a stated reason, odd/even by splitting into
+  equal groups, prime vs. composite discovered by drawing rectangles on a
+  grid rather than being told a definition, sorting numbers or items into
+  two overlapping circles when something can belong to both categories at
+  once) shows up starting at Level 1 Book B, well before a typical
+  scope-and-sequence introduces prime numbers or Venn-style sorting.
+  Treat a request in this shape as wanting the discovery version (draw
+  it out, notice the pattern) over a stated rule.
 - Format preferences: `[comic-narrative-math-page]` for concept
   introduction, `[number-practice-page]` and `[size-attribute-comparison-page]`
   for base counting/comparison practice, `[hive-puzzle]` and
   `[cross-number-puzzle]` for starred/challenge problems, `[maze-puzzle-practice]`
   for path-tracing logic puzzles, `[pattern-extension-practice]` for
-  pattern units.
+  pattern units, `[circle-diagram-two-set-sort]` for the Categories
+  classification strand.
 
 ### Balanced Literacy
 

@@ -161,6 +161,16 @@
       "decisionsCount": 8
     },
     {
+      "id": "cur-2026-07-20-beast-academy-1b",
+      "name": "Beast Academy Math 1B (Grade 1, Book B of 4: Addition, Subtraction, Categories; Art of Problem Solving)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T22:13:01-04:00",
+      "methodology": "Book B of the same guided-discovery, comic-narrative Beast Academy series ingested as 1A earlier this session, confirmed directly rather than assumed: the front cover reads 'Beast Academy By Art of Problem Solving MATH 1B' and page 3's own series-overview spread states 'This is Book 1B in the Beast Academy Level 1 series' with the full breakdown (1A: Chapters 1-3; 1B: Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories; 1C: Chapters 7-9; 1D: Chapters 10-12). Every named subsection again opens with a multi-panel comic scene carrying the reasoning before any numbered practice problem, with embedded 'stop sign' questions the child is told to try before reading on (same front-matter instruction as 1A, 'How to Use This Book'). This book wraps the same recurring four-monster cast in a different backdrop than 1A: the front cover art is a pirate market/pirate-ship town (crates, a tall ship, a market stall, a hook-handed pirate character), and the Index lists pirate-themed recurring bit characters not present in 1A's campus setting (Barnacle Barny, Betty Buccaneer, Bony Bill, all under a 'Woodshop'/'Kitchen Table' heading), confirming the comic wrapper changes per book even though the four core monster protagonists and the teaching device stay constant across the series.",
+      "mappedPct": 69,
+      "gapCount": 5,
+      "decisionsCount": 7
+    },
+    {
       "id": "cur-2026-07-20-blossom-root-early-years-v1",
       "name": "Blossom & Root Early Years Vol. 1 (Pre-K, First Edition)",
       "droppedBy": "carolyng",

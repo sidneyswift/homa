@@ -638,6 +638,7 @@ export const GENERATED_PROGRESS_TAXONOMY_TOPICS = [
   {"id":"math.sorting-data-into-categories","subject":"math","domain":"data-statistics","name":"Sorting Data into Categories","teachingWindowMonths":[72,96]},
   {"id":"math.sorting-into-categories","subject":"math","domain":"data-statistics","name":"Sorting into categories","teachingWindowMonths":[60,72]},
   {"id":"math.sorting-into-categories-age-6","subject":"math","domain":"data-statistics","name":"Sorting into categories (age 6+)","teachingWindowMonths":[72,96]},
+  {"id":"math.sorting-into-two-circle-diagrams","subject":"math","domain":"data-statistics","name":"Sorting Into Two-Circle Diagrams","teachingWindowMonths":[72,96]},
   {"id":"math.splitting-shapes-into-equal-parts-age-7","subject":"math","domain":"fractions","name":"Splitting shapes into equal parts (age 7+)","teachingWindowMonths":[84,96]},
   {"id":"math.spotting-mathematical-patterns","subject":"math","domain":"mathematical-thinking","name":"Spotting mathematical patterns","teachingWindowMonths":[60,72]},
   {"id":"math.square-and-cube-numbers","subject":"math","domain":"multiplication-division","name":"Square and cube numbers","teachingWindowMonths":[108,120]},

@@ -21,3 +21,14 @@ Design patterns (all binding for hive-puzzle):
   constraint rule.
 - **Difficulty progression**: early puzzles have more given numbers,
   later puzzles fewer.
+- **Touching-pair-sum variant ("Pairs")**: instead of filling blank
+  hexagons, every hexagon already holds a given number. The child circles
+  pairs of numbers that add up to a stated target, with two binding
+  constraints: circled pairs must sit in hexagons that touch each other,
+  and every number in the cluster must end up part of exactly one pair
+  (no leftovers). Confirmed directly from Beast Academy 1B (Art of
+  Problem Solving), pages 44-45 and 74-79 (target sums 7-12, addition
+  chapter) and page 196 (target sums 9 or 19, review section, a larger
+  19-hexagon cluster). This is a genuinely different constraint from the
+  smallest-number-not-adjacent rule above, not a restatement of it: the
+  child is pairing existing numbers by sum, not deducing a missing one.

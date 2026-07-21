@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1646,
+  "topicCount": 1647,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32228,6 +32228,24 @@
         "Break a compound shape into recognizable parts to make spotting a rotated or flipped match easier"
       ],
       "assessmentPrompt": "If you turn or flip over a cutout shape, can {{name}} still tell it's the same shape as before, and can they find its match among a few rotated or flipped copies?",
+      "standards": []
+    },
+    {
+      "id": "mt_sBmaAWIFPO",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Data & Statistics",
+      "name": "Sorting Into Two-Circle Diagrams",
+      "description": "Place items, numbers, or words into a two-circle diagram based on whether they have one of two named attributes, both (the overlapping middle), or neither (outside both circles), without formal set vocabulary such as union or intersection and without counting outcomes",
+      "ageRangeStart": 6,
+      "ageRangeEnd": 8,
+      "centrality": 0.01,
+      "evidence": [
+        "Place a number or picture card in the left circle, the right circle, the overlapping middle, or outside both circles based on whether it has each of two named attributes (for example, flies, swims)",
+        "Complete a two-circle diagram already labeled with two categories (such as perfect squares and odd numbers) by placing the numbers 1 to 9 in the correct region, including the overlap",
+        "Explain why an item that has both attributes goes in the overlapping middle section, and why an item with neither attribute goes outside both circles"
+      ],
+      "assessmentPrompt": "If you show {{name}} two labeled circles that overlap in the middle, can they figure out where a picture or number belongs, including something that fits both labels or neither one?",
       "standards": []
     }
   ]

@@ -514,3 +514,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 4-8.
 - **Creation path:** hybrid (generate_image per panel for the characters and scene, HTML for panel frames, speech bubbles, and the closing question box).
 - **Example activity:** `[comic-narrative-math-page] Two kids comparing two curly noodles on a lunch tray, one straight and one curved, arguing about which is longer, ending in a "Which path is shorter: the straight one or the wiggly one?" box.`
+
+### circle-diagram-two-set-sort
+- **Slug:** `[circle-diagram-two-set-sort]`
+- **Name:** Circle diagram two-set sort
+- **What it is:** Two large overlapping circles, each labeled with one category, where the child places items, numbers, or words into one circle only, the other circle only, the overlapping middle (both attributes), or outside both circles (neither attribute). The overlap is the point: some items genuinely belong to both categories at once, unlike a mutually-exclusive column sort.
+- **Best for:** Classifying numbers by two properties at once (odd vs. even, perfect square vs. prime), sorting words or letters by two rules, science classification by two traits (flies vs. swims), and any two-rule sort where an item can qualify for both.
+- **Subjects:** Math (number properties), science (classification), ELA (vocabulary categories)
+- **Ages:** 6-9.
+- **Creation path:** html for plain number/word/letter sorts, hybrid when items are illustrated attribute cards.
+- **Example activity:** `[circle-diagram-two-set-sort] Numbers 1-9 to place in a diagram labeled "perfect squares" and "odd numbers," where 1 and 9 belong in the overlap and 2, 4, 6, 8 belong outside both.`

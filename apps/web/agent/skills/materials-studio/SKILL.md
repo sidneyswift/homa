@@ -482,6 +482,7 @@ making.
 | Size attribute comparison page | compare two or three items along one physical attribute and circle, color, or draw the answer | size-attribute-comparison-page |
 | Pattern extension practice | copy, continue, choose, or create a simple repeating AB pattern | pattern-extension-practice |
 | Comic narrative math page | teach a concept through 2-4 comic panels of character dialogue, ending in a story-linked question | comic-narrative-math-page |
+| Circle diagram two-set sort | sort items into two overlapping circles so both-attribute and neither-attribute items have a real home | circle-diagram-two-set-sort |
 
 ## Design rules (binding)
 
