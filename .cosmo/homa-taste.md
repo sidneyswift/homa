@@ -329,3 +329,10 @@ _No explicit anti-signals yet. Inferring from the positive signals:_
 4. Homeschool Languages Spanish — bilingual track
 5. Good and the Beautiful — literature-based LA (possibly for older grades)
 Plus Montessori materials/methods as supplemental activities across subjects.
+
+### Aless, 2026-07-20
+- Dropped: Getting to Know the World's Greatest Inventors and Scientists (ref-2026-07-20-inventors-scientists)
+- Signal: continuing the Mike Venezia "Getting to Know" series, third book that day (artists, composers, now inventors/scientists), confirming strong interest in biography-based learning across subjects
+- Signal: values narrative-driven education that introduces famous historical figures through humor and storytelling rather than dry facts
+- Signal: cross-subject pattern emerging: art history + music history + science history = a "famous people" study unit spanning multiple disciplines
+- Signal: prefers book-length references that model the pedagogical approach (read-aloud + visual) rather than single-page worksheets for this type of content

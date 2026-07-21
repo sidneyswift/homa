@@ -144,7 +144,7 @@ ls apps/web/agent/skills/materials-studio/references/recipes/
 Never match against a remembered list; the library grows and any hardcoded list in prose goes stale (33 recipe files ship today).
 
 - **Which existing recipe would produce this?** Record filename slugs in `recipeMatch.matchedRecipes`.
-- **What patterns have no recipe?** Record in `recipeMatch.gaps`. **Gap names must be lowercase multi-word hyphen slugs** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). The coverage tracker in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else. Free-prose description goes in `notes`.
+- **What patterns have no recipe?** Record in `recipeMatch.gaps` as an array of `{"name": "<slug>", "notes": "<free prose>"}` objects. **The key is `name`, not `slug`** (a ref that used `slug` instead of `name` shipped once and its gaps silently vanished from coverage tracking; the field name in the object is not a stylistic choice, it is the exact key `apps/web/lib/materials/cosmo-funnel.ts`'s `extractGapSlugs` reads). **The `name` value must be a lowercase multi-word hyphen slug** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). Anything else, wrong key or wrong shape, is silently dropped by the coverage tracker. Free-prose description goes in `notes`.
 - If a gap later graduates under a different recipe name, a `GAP_ALIASES` entry in `apps/web/lib/materials/cosmo-funnel.ts` must be added in the same change that ships the recipe.
 
 ### 5. Update taste signals

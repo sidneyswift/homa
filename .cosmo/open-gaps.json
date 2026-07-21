@@ -267,6 +267,17 @@
       "recordedOn": "2026-07-20"
     },
     {
+      "slug": "invention-exploration-spread",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-20-inventors-scientists"
+      ],
+      "refCount": 1,
+      "reason": "side-by-side invention diagram plus guided questions layout; no shipped recipe yet",
+      "recordedBy": "recovery-2026-07-21",
+      "recordedOn": "2026-07-21"
+    },
+    {
       "slug": "language-home-supplement",
       "kind": "recipe-missing",
       "refs": [
@@ -329,6 +340,17 @@
       ],
       "refCount": 1,
       "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "maze-puzzle-practice",
+      "kind": "registry-missing",
+      "refs": [
+        "ref-2026-07-17-ba-3aanglemazes"
+      ],
+      "refCount": 1,
+      "reason": "recipe file shipped but activity-formats.md entry missing",
       "recordedBy": "ingestion-audit",
       "recordedOn": "2026-07-20"
     },
@@ -509,6 +531,28 @@
       "recordedOn": "2026-07-20"
     },
     {
+      "slug": "scientist-biography-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-20-inventors-scientists"
+      ],
+      "refCount": 1,
+      "reason": "single-page inventor/scientist profile with portrait, key facts sidebar, cartoon illustration; a reading + science-history format with no shipped recipe yet",
+      "recordedBy": "recovery-2026-07-21",
+      "recordedOn": "2026-07-21"
+    },
+    {
+      "slug": "scientist-study-packet",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-20-inventors-scientists"
+      ],
+      "refCount": 1,
+      "reason": "multi-page unit: biography reading + invention diagram + timeline + hands-on experiment; no shipped recipe yet",
+      "recordedBy": "recovery-2026-07-21",
+      "recordedOn": "2026-07-21"
+    },
+    {
       "slug": "scope-sequence-chart",
       "kind": "recipe-missing",
       "refs": [
@@ -681,17 +725,6 @@
       ],
       "refCount": 1,
       "reason": "backlog, no shipped recipe or alias yet",
-      "recordedBy": "ingestion-audit",
-      "recordedOn": "2026-07-20"
-    },
-    {
-      "slug": "maze-puzzle-practice",
-      "kind": "registry-missing",
-      "refs": [
-        "ref-2026-07-17-ba-3aanglemazes"
-      ],
-      "refCount": 1,
-      "reason": "recipe file shipped but activity-formats.md entry missing",
       "recordedBy": "ingestion-audit",
       "recordedOn": "2026-07-20"
     }

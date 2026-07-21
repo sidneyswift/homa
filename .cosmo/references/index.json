@@ -1619,6 +1619,15 @@
       "subject": "multi-subject",
       "domain": "preschool-integrated",
       "format": "activity-collection"
+    },
+    {
+      "id": "ref-2026-07-20-inventors-scientists",
+      "title": "Getting to Know the World's Greatest Inventors and Scientists (Mike Venezia series, 33 scanned pages)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:41:53-04:00",
+      "subject": "science",
+      "domain": "science-history",
+      "format": "educational-biography-book"
     }
   ]
 }
