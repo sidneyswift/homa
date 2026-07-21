@@ -94,6 +94,11 @@ jobs:
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
 
+      # Fixture hygiene only, no model call. The paid routing eval is
+      # pnpm eval:ask-user-questions, run by hand.
+      - name: Choice-card routing fixtures
+        run: pnpm check:ask-user-questions
+
       - name: Materials checks (page shell pagination, packet bodies, binder model)
         run: pnpm check:materials
 

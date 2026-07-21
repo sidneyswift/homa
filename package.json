@@ -73,7 +73,9 @@
     "telnyx:curriculum:provision": "tsx scripts/telnyx-curriculum-provision.mts",
     "telnyx:provision": "tsx scripts/telnyx-provision.mts",
     "telnyx:transcripts:sync": "tsx scripts/telnyx-transcripts-sync.mts",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "check:ask-user-questions": "tsx scripts/ask-user-questions-eval.mts --check-fixtures",
+    "eval:ask-user-questions": "tsx scripts/ask-user-questions-eval.mts"
   },
   "devDependencies": {
     "postgres": "^3.4.9",
