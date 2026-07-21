@@ -32,9 +32,9 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  *    caller who just asked for it, so a walk can sign back in on a
  *    second device. It is never stored anywhere by this route.
  *
- * Deleting what it makes: the family file in the founder console deletes
- * a sandbox family, or pass the returned familyId to
- * scripts/delete-test-family.mts.
+ * Deleting what it makes: `tsx scripts/delete-test-families.mts`
+ * (dry run by default, --apply to retire), or the family file in the
+ * founder console.
  */
 
 function devTestSessionsEnabled(): boolean {
