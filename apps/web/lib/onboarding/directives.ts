@@ -47,7 +47,9 @@ export type DirectiveName =
   /** A checklist takeover finished or was exited. */
   | "checklist_complete"
   /** A panel was opened from a card and the conversation should react. */
-  | "panel_opened";
+  | "panel_opened"
+  /** A facts card was filled in and saved itself. */
+  | "details_saved";
 
 export interface HiddenDirective {
   name: string;

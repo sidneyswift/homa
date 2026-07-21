@@ -67,6 +67,7 @@ const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
   save_family_basics: { icon: PenLine, label: "Saved your family's basics" },
   save_homeschool_profile: { icon: PenLine, label: "Saved how you homeschool" },
   start_checklist: { icon: ListChecks, label: "Opened the questions" },
+  ask_for_details: { icon: PenLine, label: "Asked for a few details" },
   score_child_report: { icon: Sparkles, label: "Built the progress report" },
 };
 

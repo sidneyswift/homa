@@ -36,6 +36,11 @@ import {
   type ChecklistCardData,
   type ReportCardData,
 } from "./onboarding-cards";
+import {
+  DetailCard,
+  parseDetailCardPart,
+  type DetailCardData,
+} from "./detail-card";
 import { ReportRevealCard } from "./report-reveal-card";
 import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
 import { WorkedForLine, workedForSteps } from "./worked-for";
@@ -149,6 +154,7 @@ type AssistantItem =
   | { kind: "planner"; signal: PlannerOpenSignal }
   | { kind: "checklist"; card: ChecklistCardData; sourceActionKey: string }
   | { kind: "report"; card: ReportCardData; sourceActionKey: string }
+  | { kind: "details"; card: DetailCardData; sourceActionKey: string }
   | SourcedProgressAssistantItem;
 
 function assistantItems(message: EveMessage): AssistantItem[] {
@@ -202,6 +208,15 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({
         kind: "checklist",
         card: checklistCard,
+        sourceActionKey: `${message.id}:${partIndex}`,
+      });
+      continue;
+    }
+    const detailCard = parseDetailCardPart(part);
+    if (detailCard) {
+      items.push({
+        kind: "details",
+        card: detailCard,
         sourceActionKey: `${message.id}:${partIndex}`,
       });
       continue;
@@ -280,6 +295,8 @@ function AssistantItemView({
   onOpenChecklist,
   activeReportPartKey,
   onOpenReport,
+  activeDetailPartKey,
+  onDetailsSaved,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
@@ -300,6 +317,8 @@ function AssistantItemView({
   onOpenChecklist?: (childId: string) => void;
   activeReportPartKey?: string;
   onOpenReport?: (childId: string) => void;
+  activeDetailPartKey?: string;
+  onDetailsSaved?: (summary: string) => void;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -328,6 +347,16 @@ function AssistantItemView({
           active={item.sourceActionKey === activeChecklistPartKey}
           onOpen={
             item.sourceActionKey === activeChecklistPartKey ? onOpenChecklist : undefined
+          }
+        />
+      );
+    case "details":
+      return (
+        <DetailCard
+          card={item.card}
+          active={item.sourceActionKey === activeDetailPartKey}
+          onSaved={
+            item.sourceActionKey === activeDetailPartKey ? onDetailsSaved : undefined
           }
         />
       );
@@ -453,6 +482,8 @@ export function MessageView({
   onOpenChecklist,
   activeReportPartKey,
   onOpenReport,
+  activeDetailPartKey,
+  onDetailsSaved,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -488,6 +519,9 @@ export function MessageView({
   /** The one report reveal that may still open the report. */
   activeReportPartKey?: string;
   onOpenReport?: (childId: string) => void;
+  /** The one facts card still accepting answers. */
+  activeDetailPartKey?: string;
+  onDetailsSaved?: (summary: string) => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -551,6 +585,8 @@ export function MessageView({
           onOpenChecklist={onOpenChecklist}
           activeReportPartKey={activeReportPartKey}
           onOpenReport={onOpenReport}
+          activeDetailPartKey={activeDetailPartKey}
+          onDetailsSaved={onDetailsSaved}
         />
       ))}
     </div>
@@ -581,6 +617,7 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   save_family_basics: "saving what you told me…",
   save_homeschool_profile: "saving what you told me…",
   start_checklist: "getting the questions ready…",
+  ask_for_details: "putting up a few fields…",
   // The one wait that is worth narrating rather than labelling. The
   // reveal card takes over from here and says the rest.
   score_child_report: "reading the answers…",

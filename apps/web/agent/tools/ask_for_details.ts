@@ -1,0 +1,71 @@
+import { defineDynamic, defineTool } from "eve/tools";
+import { z } from "zod";
+
+/**
+ * The facts card: when Homa needs a small set of exact facts, she puts
+ * up the fields instead of asking for them in a paragraph.
+ *
+ * This is the deterministic half of the card loop
+ * (plans/2026-07-21-chat-first-onboarding.md §1). Asking "what should I
+ * call you, and which state are you in, and tell me about your child" in
+ * prose is what makes a conversation feel like a form: three questions
+ * to hold in her head, typed back in an order she has to invent, and
+ * every one of them a chance to answer half. The card takes them in one
+ * pass, saves as she fills it, and costs no model turn to do it.
+ *
+ * It is a UI contract and nothing else. No family data is read, nothing
+ * is written, and no familyId is touched here: the card posts to its own
+ * authenticated route, exactly as the checklist's taps already do. Same
+ * pattern as ask_for_photo and ask_user_questions.
+ *
+ * Web only, structurally. On SMS and the server-originated channels
+ * there is no card to render, so the tool does not exist rather than
+ * refusing and costing a call to find out. Those channels keep the plain
+ * ask that instructions.md already asks for.
+ */
+
+const NO_CARD_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job", "subject_lesson"]);
+
+const askForDetails = defineTool({
+  description:
+    "Put up a small card of fields for facts you need exactly right, instead of asking for them in a paragraph. Use 'family_basics' once, early, for what to call her and which state she is in. Use 'child' when she mentions a child Homa does not have yet. She fills it in and it saves itself; you will hear what she entered. Do not ask for the same facts in text as well, and do not use this for anything you can simply ask about in conversation.",
+  inputSchema: z.object({
+    kind: z
+      .enum(["family_basics", "child"])
+      .describe(
+        "family_basics: what to call her, and her state. child: one child's name and birthday.",
+      ),
+    intro: z
+      .string()
+      .max(120)
+      .optional()
+      .describe(
+        "One short line above the fields, in your voice, if it genuinely helps. Usually leave it out: the fields speak for themselves and narrating them reads as a form.",
+      ),
+  }),
+  async execute(input) {
+    return {
+      asked: true,
+      kind: input.kind,
+      intro: input.intro ?? null,
+      note:
+        "The card is on her screen and this turn is over. Write NOTHING after this: no question, no instruction, and above all not a line about the card itself. \"I'll wait for you to fill that in\" and \"just pop those in below\" are the exact sentences to avoid, because she can see the fields and the card is still sitting there in her scrollback afterwards saying something she already did. It saves itself, and you will hear what she entered.",
+    };
+  },
+});
+
+export default defineDynamic({
+  events: {
+    "turn.started": (_event, ctx) => {
+      const adapterName = ctx.channel.metadata?.adapterName;
+      if (adapterName === "telnyx" || ctx.channel.kind === "channel:telnyx") {
+        return null;
+      }
+      const channel = (
+        ctx.session.auth.current?.attributes as { channel?: string } | undefined
+      )?.channel;
+      if (channel !== undefined && NO_CARD_CHANNELS.has(channel)) return null;
+      return askForDetails;
+    },
+  },
+});

@@ -23,6 +23,7 @@ import {
   latestReportReveal,
 } from "./onboarding-cards";
 import { ChecklistTakeover } from "./checklist-takeover";
+import { latestDetailRequest } from "./detail-card";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import {
   archiveFromServerHistory,
@@ -1058,6 +1059,18 @@ export function ChatClient({
     window.location.assign(`/app/${childId}/report`);
   }, []);
 
+  // A filled facts card hands the conversation back. It goes through the
+  // directive lane, not as her message: she did not type this, and a
+  // summary of her own form arriving as her chat bubble is exactly the
+  // failure the lane exists to prevent. The values are a hint only, so
+  // Homa reacts to the right person; family context carries the truth.
+  const handleDetailsSaved = useCallback((summary: string) => {
+    sendMessageRef.current?.(
+      formatHiddenDirective("details_saved", { summary }),
+      { kind: "directive" },
+    );
+  }, []);
+
   // Canvas auto-open: a NEW open_planner result opens the panel with the
   // tool's own focus. The first pass only records what a restored
   // session already carried, so a reload never re-throws the panel up;
@@ -1076,6 +1089,9 @@ export function ChatClient({
     ? null
     : latestChecklistRequest(agent.data.messages);
   const activeReport = latestReportReveal(agent.data.messages);
+  // The one facts card still taking answers. Inert while a turn runs,
+  // same as every other live card.
+  const activeDetail = busy ? null : latestDetailRequest(agent.data.messages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -1484,6 +1500,10 @@ export function ChatClient({
                     isLiveMessage ? activeReport?.partKey : undefined
                   }
                   onOpenReport={openChildReport}
+                  activeDetailPartKey={
+                    isLiveMessage ? activeDetail?.partKey : undefined
+                  }
+                  onDetailsSaved={handleDetailsSaved}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
                   }
