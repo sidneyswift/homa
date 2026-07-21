@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
+  cardSignature,
   composeAnswerMessage,
   latestQuestionRequest,
   parseQuestionCardPart,
@@ -192,5 +193,38 @@ describe("latestQuestionRequest", () => {
       ]),
       null,
     );
+  });
+});
+
+describe("cardSignature", () => {
+  // The reset key behind a dead-tap bug found by clicking the real card:
+  // useState's initializer runs once, so a card arriving with a different
+  // question count left the answer slots at the old length and every tap
+  // silently did nothing. The signature has to notice that change.
+  const one = { questions: [question("Subject", ["Phonics"])] };
+  const two = {
+    questions: [question("Subject", ["Phonics"]), question("Days", ["Monday"])],
+  };
+
+  it("changes when the question count changes", () => {
+    assert.notEqual(cardSignature(one), cardSignature(two));
+  });
+
+  it("changes when the options change under the same question", () => {
+    assert.notEqual(
+      cardSignature({ questions: [question("Subject", ["Phonics"])] }),
+      cardSignature({ questions: [question("Subject", ["Reading aloud"])] }),
+    );
+  });
+
+  it("changes when multi-select flips", () => {
+    assert.notEqual(
+      cardSignature({ questions: [question("Days", ["Monday"], false)] }),
+      cardSignature({ questions: [question("Days", ["Monday"], true)] }),
+    );
+  });
+
+  it("is stable for the same ask, so state survives a re-render", () => {
+    assert.equal(cardSignature(two), cardSignature(two));
   });
 });
