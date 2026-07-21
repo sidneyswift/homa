@@ -824,6 +824,9 @@ export const EVENT_SCHEMAS = {
     child_id: z.uuid(),
     evidence_count: z.number().int().min(0),
     observation_count: z.number().int().min(0),
+    // Pairs the trust gate turned away: nonzero with zero evidence and
+    // zero observations is the silent-loss signal (2026-07-21 replay).
+    rejected_count: z.number().int().min(0),
     moment_count: z.number().int().min(0),
     // Segments with tone notes over total: the PMF read's "was the
     // tone lane deaf" signal (plan §4.7).
