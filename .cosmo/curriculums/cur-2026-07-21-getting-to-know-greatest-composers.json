@@ -91,7 +91,10 @@
           "topicSlug": "music.musical-form-symphony-movements-themes",
           "domain": "composer-study-appreciation",
           "kind": "conceptual",
-          "teachingWindowMonths": [72, 108],
+          "teachingWindowMonths": [
+            72,
+            108
+          ],
           "note": "RESOLVED 2026-07-21: added mt_qPM8rMxYFD 'Musical Form: Movements, Themes, and Variations' to Music > Composer Study & Music Appreciation (age 6-9, CONCEPTUAL), exactly the topic and domain this entry had recorded but deferred, with Beethoven's Fifth, Sixth, and Ninth named directly in the description and evidence, matching this book's own teaching examples. No mapping.ts edit needed (domain already existed, non-colliding with the reserved music assessment domains rhythm-beat/singing/listening-awareness/instrument-notation/ensemble-performance)."
         }
       },
@@ -157,7 +160,7 @@
         "type": "composer-listening-guide",
         "description": "A one-page per-piece listening companion operationalizing exactly what this book does in prose: piece name and composer, 'listen for this' callout (the four-note theme), 3-5 ordered moment boxes the child checks or draws as the music reaches them (the Pastoral's brook, storm, and thankful song), and a how-did-it-feel response line.",
         "recipe": "composer-listening-guide",
-        "status": "no_recipe",
+        "status": "have_recipe",
         "suggestedRecipe": {
           "name": "composer-listening-guide",
           "creationPath": "html",
@@ -182,8 +185,8 @@
     ],
     "stats": {
       "totalActivityTypes": 4,
-      "haveRecipe": 3,
-      "noRecipe": 1
+      "haveRecipe": 4,
+      "noRecipe": 0
     }
   },
   "decisionsNeeded": [

@@ -478,7 +478,7 @@
         "type": "then-and-now-comparison",
         "description": "The recurring 'Then and Now' feature (4 across the book: 'How a Community Changed,' 'Changing Toys,' 'Our Country's Flag,' plus the Unit 6 grandparent-interview lesson 'How Things Have Changed'): two small panels, one showing something from the past and one showing the same thing today, each with a short caption, plus a comparison question.",
         "recipe": "then-and-now-comparison",
-        "status": "no_recipe",
+        "status": "have_recipe",
         "notes": "Genuine gap, built this session: no existing recipe covers a two-panel before/after time comparison (classification-sorting-mat is a category sort, not a time comparison; guided-notes is a notes layout, not an image comparison). Recurs 4 times in this book alone and is a common pattern across elementary social studies and science curricula generally (community change, invention history, life-cycle before/after), so building the recipe now rather than deferring it. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/then-and-now-comparison.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry."
       },
       {
@@ -540,8 +540,8 @@
     ],
     "stats": {
       "totalActivityTypes": 12,
-      "haveRecipe": 10,
-      "noRecipe": 2
+      "haveRecipe": 11,
+      "noRecipe": 1
     }
   },
   "decisionsNeeded": [
