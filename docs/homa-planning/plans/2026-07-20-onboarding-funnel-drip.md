@@ -425,12 +425,46 @@ Guards green again: typecheck, lint (0 errors), `check:events`,
 `check:isolation`, the 11 drip unit tests, and the two new SQL queries
 executed read-only against prod.
 
-Still blocked before the drip can be un-darkened (Phase 4, none shipped):
-List-Unsubscribe header + one-click opt-out, a suppression list honored on
-bounce/complaint, wiring inbound "stop" to a drip opt-out, the A1 promise
-and privacy copy passing `homa-copy-reviewer`/`homa-copy-editor`, and the
-per-send `link_tokens` table before any multi-email sequence. The drip
-stays off until these land and the founder gives the go.
+Session 4 (2026-07-20, Phase 4 compliance). Built the machinery that must
+exist before the drip can be un-darkened. Stacked on the Session 3 branch.
+
+- Suppression store: `email_suppressions` (additive migration, applied to
+  prod; deny-all server-only like email_sends, isolation guard covers it).
+  Keyed by the sha256 the ledger already stores. Scope `drip` (unsubscribe,
+  "stop") vs `all` (hard bounce, complaint). `lib/email/suppression.ts` is
+  best-effort by the ledger's law: a read failure fails open, never
+  silencing or breaking a send.
+- Unsubscribe: `lib/email/unsubscribe-token.ts` mints a stateless HMAC token
+  of the address hash (no raw address in the URL), gated on
+  `EMAIL_UNSUBSCRIBE_SECRET`. `/api/email/unsubscribe` GET renders a
+  scanner-safe confirmation page (never mutates); POST suppresses, serving
+  both the page button and RFC 8058 one-click.
+- List-Unsubscribe: drip emails now carry `List-Unsubscribe` (https + mailto)
+  and `List-Unsubscribe-Post: One-Click`; the mailto path always works, the
+  https path appears only when the secret is set.
+- Bounce/complaint: the existing Resend webhook now writes an `all`
+  suppression on `email.bounced`/`email.complained` (best-effort).
+- Inbound "stop"/"start": now also writes/lifts a `drip` suppression, and
+  the sweep's opt-out signal moved to `journal_opt_out_at` (accurate on
+  re-opt-in) plus the suppression store, replacing the ambiguous
+  `email.opt_out` event check from Session 3.
+- Tests: unsubscribe-token round-trip/tamper/no-secret (6) and a
+  suppression case in the sweep tests. Guards green: typecheck, lint,
+  `check:events`, `check:isolation` (with the new table), 18 unit tests.
+
+Copy gate cleared (2026-07-20). The A1 promise, all three nudges, and the
+unsubscribe page ran through `homa-copy-reviewer` (the ICP read) then
+`homa-copy-editor` (the rulebook), and the accepted fixes shipped: the
+reserved-word "progress" collision in the setup email is gone, the report
+email no longer opens on a strengths-vs-practice verdict (it leads with what
+the child already does well), the setup ask is front-loaded, and the "crew"
+metaphor and the "onboarding" tech-speak are out.
+
+Still blocked before the founder flips `HOMA_DRIP_ENABLED` (config, not
+code): setting `EMAIL_UNSUBSCRIBE_SECRET` and confirming the Resend webhook
+secret is live. A `link_tokens` table is only needed if the drip later grows
+past one-nudge-per-audience into true multi-step sequences. It is not
+required for what is here. Then the founder's go.
 
 ## Appendix A. Email drafts for review (not shipped)
 
