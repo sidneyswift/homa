@@ -48,7 +48,7 @@ export const WORLD_CONFIG: WorldConfig = {
       linger: 0.3,
       eyebrow: "Always in your pocket",
       title: "Text her like a friend.",
-      body: "Ask for a worksheet, a reset after a rough morning, or what to work on this week. Homa already knows where each child is.",
+      body: "Ask for a worksheet, a reset after a rough morning, or what to work on this week. Homa already knows what each child is working on.",
       tags: ["Text message", "Web chat", "Phone friendly"],
     },
     {
@@ -90,7 +90,7 @@ export const WORLD_CONFIG: WorldConfig = {
       linger: 0.35,
       eyebrow: "See it working",
       title: "Growth you can actually see.",
-      body: "Teach like always. Homa listens, keeps the evidence, and turns real days into a progress report you can share.",
+      body: "Teach like always. When you choose to record a lesson, Homa listens, writes the review, and keeps the record for you.",
       tags: ["Progress report", "Lesson reviews"],
     },
     {
