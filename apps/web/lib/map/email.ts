@@ -6,7 +6,7 @@ import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id
 import { escapeHtml } from "../html-escape";
 import type { TaskDeliveryVersion } from "../tasks/delivery-version";
 import { validateResearchBriefFormat } from "../tasks/research-brief-format";
-import { mapDb } from "./db";
+import { mapDb, type DbJson } from "./db";
 
 /**
  * Transactional email for the map flow, sent through Resend's REST API
@@ -54,6 +54,10 @@ export type EmailLedgerKind =
 interface EmailLedger {
   kind: EmailLedgerKind;
   familyId?: string | null;
+  /** Written to email_sends.meta. The drip records WHY this family was
+   * picked, in the founder's words, so /admin/drip can answer "why did she
+   * get this?" without re-deriving an audience that has since changed. */
+  meta?: Record<string, unknown>;
 }
 
 interface SendArgs {
@@ -176,7 +180,7 @@ async function recordEmailSend(
   try {
     const sql = mapDb();
     await sql`
-      insert into public.email_sends (family_id, kind, to_hash, status, provider_message_id, error)
+      insert into public.email_sends (family_id, kind, to_hash, status, provider_message_id, error, meta)
       values (
         ${ledger.familyId ?? null},
         ${ledger.kind},
@@ -185,7 +189,8 @@ async function recordEmailSend(
         ${submission.status === "submitted"
           ? submission.providerSubmissionId
           : null},
-        ${error ?? null}
+        ${error ?? null},
+        ${sql.json((ledger.meta ?? {}) as unknown as DbJson)}
       )
     `;
   } catch (ledgerError) {
@@ -662,10 +667,11 @@ export async function submitDripSetupNudge(
   firstName: string | null,
   resumeUrl: string,
   familyId?: string,
+  reason?: string,
 ): Promise<HomaEmailSubmission> {
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
-    ledger: { kind: "drip_setup_nudge", familyId },
+    ledger: { kind: "drip_setup_nudge", familyId, meta: reason ? { reason } : {} },
     headers: unsubscribeHeaders(to),
     to,
     subject: firstName
@@ -692,10 +698,11 @@ export async function submitDripReportUnviewed(
   childName: string,
   reportUrl: string,
   familyId?: string,
+  reason?: string,
 ): Promise<HomaEmailSubmission> {
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
-    ledger: { kind: "drip_report_unviewed", familyId },
+    ledger: { kind: "drip_report_unviewed", familyId, meta: reason ? { reason } : {} },
     headers: unsubscribeHeaders(to),
     to,
     subject: `${childName}'s progress report is ready to open`,
@@ -734,9 +741,10 @@ export async function submitDripLoopBack(
    * has no subject to look up. */
   planLabel: string,
   familyId?: string,
+  reason?: string,
 ): Promise<HomaEmailSubmission> {
   return submit({
-    ledger: { kind: "drip_loop_back", familyId },
+    ledger: { kind: "drip_loop_back", familyId, meta: reason ? { reason } : {} },
     headers: unsubscribeHeaders(to),
     to,
     subject: `Did ${childName} start ${planLabel}?`,
