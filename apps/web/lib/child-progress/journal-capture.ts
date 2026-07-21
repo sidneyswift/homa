@@ -49,22 +49,25 @@ async function loadFamilyChildren(
   familyId: string,
 ): Promise<ClaimChild[]> {
   const sql = mapDb();
+  // to_char in SQL, matching every other birth_month read in this
+  // codebase: the column is a DATE, so the driver hands back a Date
+  // object and ageInMonths (which splits a string) throws on it.
   const rows = await sql<
-    { id: string; name: string; birth_month: string | null }[]
+    { id: string; name: string; birth_date: string | null }[]
   >`
-    select id, name, birth_month
+    select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_date
     from public.children
     where family_id = ${familyId}
     order by created_at
   `;
   const now = new Date();
   return rows.flatMap((row) => {
-    if (!row.birth_month) return [];
+    if (!row.birth_date) return [];
     return [
       {
         childId: row.id,
         name: row.name,
-        ageMonths: ageInMonths(row.birth_month, now),
+        ageMonths: ageInMonths(row.birth_date, now),
       },
     ];
   });
