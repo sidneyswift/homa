@@ -1,34 +1,27 @@
 import type { Metadata } from "next";
 
 import { requireFounder } from "../../../lib/admin/gate";
-import { familyDisplayName, timeAgo } from "../../../lib/admin/format";
-import { MAKINGS_TAPER, readFleetMakings } from "../../../lib/onboarding/makings";
+import { familyDisplayName } from "../../../lib/admin/format";
+import { readFleetMakings } from "../../../lib/onboarding/makings";
 import { mapDb } from "../../../lib/map/db";
-import { LockoutCard } from "../../../components/billing/lockout-card";
-import { EmptyNote, Pill, SectionHead } from "../ui";
+import { EmptyNote, SectionHead } from "../ui";
 
 /**
- * /admin/makings: the meter, shadowed
- * (plans/2026-07-21-chat-first-onboarding.md §7.2).
+ * /admin/makings: what families actually make in a week.
  *
- * Nothing on this page is enforced anywhere. It answers one question
- * before anyone decides anything: if the meter were on at the specced
- * taper, which families would hit it, and when?
+ * Counting, not metering. No allowance, no projected cutoff, no limit
+ * anywhere in the code behind this page. Whether there should ever be
+ * one is an open question
+ * (docs/homa-planning/plans/2026-07-21-onboarding-open-decisions.md), and
+ * putting a number on screen before it is answered would quietly turn a
+ * guess into the default.
  *
- * That matters because turning the meter on supersedes four recorded
- * decisions, and a ruling that size deserves real numbers rather than a
- * guess about what a week's allowance should be. If most families never
- * come near the cap, the cap is theatre. If the busiest families hit it
- * on day two, the taper is wrong and the free period never installs a
- * rhythm.
+ * The point of the page is the shape of the list: how far apart the
+ * busiest and the typical family are, and whether a week is even the
+ * right unit. That is what any later decision needs.
  */
 
-export const metadata: Metadata = { title: "Makings (shadow)" };
-
-function formatWhen(iso: string | null): string {
-  if (!iso) return "not at this pace";
-  return timeAgo(iso);
-}
+export const metadata: Metadata = { title: "What families make" };
 
 export default async function AdminMakingsPage() {
   await requireFounder();
@@ -43,121 +36,98 @@ export default async function AdminMakingsPage() {
     for (const row of rows) names.set(row.id, row.name);
   }
 
-  const counted = readings.filter((reading) => reading.exemption === null);
-  const wouldLock = counted.filter((reading) => reading.remaining === 0);
-  const median = counted.length
-    ? [...counted].sort((a, b) => a.used - b.used)[Math.floor(counted.length / 2)].used
-    : 0;
+  // Exempt, trialing and test families are read separately: their
+  // behavior cannot stand in for a family deciding whether to pay.
+  const counted = readings.filter((reading) => reading.excluded === null);
+  const sorted = counted.map((reading) => reading.made).sort((a, b) => a - b);
+  const median = sorted.length > 0 ? sorted[Math.floor(sorted.length / 2)] : 0;
+  const busiest = sorted.length > 0 ? sorted[sorted.length - 1] : 0;
+  const total = counted.reduce((sum, reading) => sum + reading.made, 0);
+
+  const tiles = [
+    {
+      label: "Families making",
+      value: counted.length,
+      note: "Excludes exempt, trialing, test.",
+    },
+    { label: "Median", value: median, note: "The typical family's week." },
+    { label: "Busiest", value: busiest, note: "The most any one family made." },
+    { label: "Total made", value: total, note: "Across counted families." },
+  ];
 
   return (
     <div>
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
-        Founder · the meter, shadowed
+        Founder · what families make
       </p>
       <h1 className="mt-1 font-display text-2xl font-bold text-strong">
-        What the meter would say this week
+        This week, Monday to Monday
       </h1>
       <p className="mt-1 max-w-2xl text-sm text-muted">
-        Nothing here is enforced. No tool reads it, no family sees it. It counts the artifacts each
-        family made in the current Monday-to-Monday window against the specced allowance
-        ({MAKINGS_TAPER.join(" then ")} a week), so the ruling that turns the meter on can arrive
-        with real numbers instead of a guess.
+        Artifacts each family made: worksheets, coloring pages, lesson worksheets, month
+        plans. Revisions of the same thing count once. Nothing here limits anything, and
+        no number on this page is enforced anywhere in the product.
       </p>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-border-subtle bg-card p-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-subtle">Families making</p>
-          <p className="mt-1 font-display text-2xl font-bold text-strong">{counted.length}</p>
-          <p className="mt-1 text-xs text-muted">Excludes exempt, trialing, and sandbox.</p>
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-card p-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-subtle">Median made</p>
-          <p className="mt-1 font-display text-2xl font-bold text-strong">{median}</p>
-          <p className="mt-1 text-xs text-muted">The number the allowance should be sized against.</p>
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-card p-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-subtle">Would be locked out</p>
-          <p className="mt-1 font-display text-2xl font-bold text-strong">{wouldLock.length}</p>
-          <p className="mt-1 text-xs text-muted">Already past the allowance in this window.</p>
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <SectionHead
-          eyebrow="Unreachable by families"
-          title="What the lockout would look like"
-          sub="Nothing constructs this in a live path, and nothing may until the P1 ruling lands. It is here so the conversion moment can be judged while the beats leading to it are still being tuned."
-        />
-        <div className="mt-3">
-          <LockoutCard
-            requested="Mia's fractions worksheet"
-            refillLabel="on Monday morning"
-            monthlyUrl="#"
-            endowment={{
-              scoredChildren: ["Mia", "Leo"],
-              artifacts: [
-                "Mia's dinosaur counting page",
-                "Leo's letter sounds mat",
-                "August at a glance",
-              ],
-              memoryCount: 14,
-              hoursLogged: 9,
-            }}
-          />
-        </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-4">
+        {tiles.map((tile) => (
+          <div
+            key={tile.label}
+            className="rounded-lg border border-border-subtle bg-card p-4"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-subtle">
+              {tile.label}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-strong">
+              {tile.value}
+            </p>
+            <p className="mt-1 text-xs text-muted">{tile.note}</p>
+          </div>
+        ))}
       </div>
 
       <div className="mt-8">
         <SectionHead
           eyebrow="Per family"
-          title="This window"
-          sub="Busiest first. A predicted date assumes the pace they have kept since Monday."
+          title="Busiest first"
+          sub="Their week counts from that family's own signup, so a first week reads differently from a sixth."
         />
         {readings.length === 0 ? (
           <EmptyNote>Nobody has made anything since Monday.</EmptyNote>
         ) : (
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[46rem] text-sm">
+            <table className="w-full min-w-[40rem] text-sm">
               <thead>
                 <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wide text-subtle">
                   <th className="py-2 pr-3 font-semibold">Family</th>
-                  <th className="py-2 pr-3 font-semibold">Week</th>
+                  <th className="py-2 pr-3 font-semibold">Their week</th>
                   <th className="py-2 pr-3 font-semibold">Made</th>
-                  <th className="py-2 pr-3 font-semibold">Allowance</th>
-                  <th className="py-2 pr-3 font-semibold">Would run out</th>
-                  <th className="py-2 font-semibold">Status</th>
+                  <th className="py-2 font-semibold">What</th>
                 </tr>
               </thead>
               <tbody>
-                {readings.map((reading) => {
-                  const name = names.get(reading.familyId) ?? "";
-                  return (
-                    <tr key={reading.familyId} className="border-b border-border-subtle/60">
-                      <td className="py-2 pr-3 text-strong">
-                        {familyDisplayName(name)}
-                      </td>
-                      <td className="py-2 pr-3 font-mono text-xs text-muted">
-                        {reading.weekIndex + 1}
-                      </td>
-                      <td className="py-2 pr-3 font-mono text-strong">{reading.used}</td>
-                      <td className="py-2 pr-3 font-mono text-muted">{reading.allowance}</td>
-                      <td className="py-2 pr-3 text-muted">
-                        {reading.exemption
-                          ? "n/a"
-                          : formatWhen(reading.predictedLockoutAt)}
-                      </td>
-                      <td className="py-2">
-                        {reading.exemption ? (
-                          <Pill tone="stone">{reading.exemption.replace("_", " ")}</Pill>
-                        ) : reading.remaining === 0 ? (
-                          <Pill tone="gold">at the cap</Pill>
-                        ) : (
-                          <Pill tone="sage">{reading.remaining} left</Pill>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {readings.map((reading) => (
+                  <tr key={reading.familyId} className="border-b border-border-subtle/60">
+                    <td className="py-2 pr-3 text-strong">
+                      {familyDisplayName(names.get(reading.familyId) ?? "")}
+                      {reading.excluded ? (
+                        <span className="ml-2 text-xs text-subtle">
+                          {reading.excluded.replace("_", " ")}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs text-muted">
+                      {reading.weekIndex + 1}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-strong">{reading.made}</td>
+                    <td className="py-2 text-xs text-muted">
+                      {reading.titles.slice(0, 3).join(" · ")}
+                      {reading.titles.length > 3
+                        ? ` and ${reading.titles.length - 3} more`
+                        : ""}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
