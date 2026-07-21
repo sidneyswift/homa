@@ -3,6 +3,45 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-21 · Cosmo's real machine still stranding work and skewed after the rewrite; self-healing post-commit hook added
+
+Founder ask: fix the two live issues found while checking #homa-inspo for
+new drops after the 2026-07-20 rewrite. Cosmo's real (separate-machine)
+process had synced to the rewritten skill (its ref JSON used the new
+`stages`/`blobUrl` schema) but two failure modes it was rewritten to
+prevent were still happening: (1) a commit dated Jul 16-17 for content
+from a Jul 21 drop, meaning the clock is still ~4 days slow despite
+`session-start.sh`'s clock check; (2) real, complete analysis work
+committed to `cosmo/ingest-20260717-014029` and never turned into a PR,
+so branch protection (which now blocks direct pushes to main) turned it
+into silently lost work instead of a visible pull request. Recovered
+that specific stranded ref in PR #75.
+
+**Root cause of both:** a preflight script only helps if a session
+actually runs it and respects its exit code. Neither failure mode is
+fixable from this repo by patching a remote machine's clock or its
+agent harness, so the fix instead makes both structurally hard to hit
+regardless of what invokes the session: `.cosmo/scripts/session-start.sh`
+now installs `.cosmo/scripts/post-commit-hook.sh` as a real git
+`post-commit` hook. It fires automatically on every commit on any
+`cosmo/ingest-*` branch, with no dependency on the preflight having run:
+it re-dates a commit whenever the local clock disagrees with GitHub's
+HTTP clock by more than 5 minutes (a recursion guard prevents the
+resulting `commit --amend` from re-triggering itself), and it pushes the
+branch and opens the PR itself the moment the first commit lands, so a
+session that stops without an explicit "ship" step still leaves a
+visible, reviewable PR instead of an orphaned branch. Every step is
+best-effort and never fails the underlying commit; a push or `gh`
+failure prints a warning and continues. Verified in an isolated scratch
+git repo (fake `curl`/`gh` shims): no skew leaves the commit untouched
+and pushes without re-creating an existing PR; simulated 4-day skew
+re-dates the commit exactly once (no recursion) and opens exactly one
+PR; a non-`cosmo/ingest-*` branch is a complete no-op.
+
+Session-start.sh's own clock check now also reads GitHub's clock instead
+of Slack's, matching the hook and reducing the dependency surface to one
+service this workflow already needs reachable.
+
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
 Founder ask: review the last 24h of Material Studio work, inventory
