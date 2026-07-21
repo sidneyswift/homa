@@ -102,3 +102,40 @@ export function welcomeLinesFor(config: OnboardingChatConfig): string[] {
     "A few answers about your kids and I can start helping you teach them.",
   ];
 }
+
+/**
+ * The kickoff's durable lock.
+ *
+ * The three in-memory locks (a ref, a live session with messages,
+ * server history) all die with the component. A remount recreates every
+ * one of them, and a remount is not exotic: React's development strict
+ * mode does it on every mount, a fast refresh does it, and so does any
+ * parent that moves the subtree. What she sees when it happens is Homa
+ * saying hello twice, which reads as Homa forgetting she already had.
+ *
+ * Keyed by family rather than by browser, so a second family on a shared
+ * laptop still gets its own opening, and a cleared store costs one extra
+ * hello rather than silence.
+ */
+export function kickoffStorageKey(familyId: string): string {
+  return `homa-onboarding-kickoff-${familyId}`;
+}
+
+export function kickoffAlreadySent(familyId: string): boolean {
+  try {
+    return window.localStorage.getItem(kickoffStorageKey(familyId)) !== null;
+  } catch {
+    // Private mode, a full quota, a blocked store: fall back to the
+    // in-memory locks rather than refusing to open the conversation.
+    return false;
+  }
+}
+
+export function markKickoffSent(familyId: string): void {
+  try {
+    window.localStorage.setItem(kickoffStorageKey(familyId), String(Date.now()));
+  } catch {
+    // Same posture: the worst case is one repeated hello, never a
+    // conversation that never starts.
+  }
+}

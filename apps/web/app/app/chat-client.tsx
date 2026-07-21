@@ -12,7 +12,9 @@ import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
   browserTimeZone,
+  kickoffAlreadySent,
   kickoffDirectiveFor,
+  markKickoffSent,
   welcomeLinesFor,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
@@ -64,7 +66,12 @@ import {
   RECORDING_HINT_MESSAGE,
   useDictation,
 } from "./dictation";
-import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
+import {
+  busyLabel,
+  countLastTurnToolCalls,
+  messageRendersSomething,
+  MessageView,
+} from "./message-parts";
 import {
   beginProgressAction,
   createProgressActionLifecycleState,
@@ -974,6 +981,30 @@ export function ChatClient({
     ),
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // Whether SHE has said anything visible yet. Two different bugs live
+  // here, and they pull in opposite directions.
+  //
+  // The opening directive is a transcript item that renders nothing, and
+  // so is a turn that died before writing a word. Counting either as
+  // "the conversation has started" hid the welcome behind an invisible
+  // message and left a brand new parent looking at an empty screen
+  // during the slowest turn the product runs.
+  //
+  // But counting Homa's own opener retires the welcome the instant it
+  // arrives, so the two lines flash and vanish. They are not a
+  // placeholder for her reply, they are the first two lines OF the
+  // conversation, and her reply is meant to land underneath them as the
+  // third. So the welcome stays until the parent herself speaks, which
+  // is the moment it has done its job.
+  const hasParentMessage = transcript.some(
+    (item) =>
+      item.kind === "message" &&
+      item.message.role === "user" &&
+      messageRendersSomething(item.message),
+  );
+  const hasVisibleMessages = transcript.some(
+    (item) => item.kind === "message" && messageRendersSomething(item.message),
+  );
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions =
@@ -1058,25 +1089,34 @@ export function ChatClient({
   }, [agent.data.messages]);
 
   // The opening machine message (plans/2026-07-21-chat-first-onboarding.md
-  // §2.4.4). Idempotence has three locks, because a doubled kickoff
-  // means Homa says hello twice and reads as forgetting she already had.
+  // §2.4.4). Idempotence has four locks, because a doubled kickoff means
+  // Homa says hello twice and reads as forgetting she already had.
   //   1. A ref, for a re-render inside this mount.
   //   2. A live session that already carries messages, for a remount
   //      over a conversation in progress.
   //   3. Server history for this family, for a remount on a new device
   //      or after the 4am rotation, where nothing local survives.
+  //   4. A localStorage flag keyed by family, because the first three
+  //      all die with the component and a remount is not exotic: strict
+  //      mode does it every mount in development, and it double-fired
+  //      here on the first real walk.
   // A visit whose gap is short enough to be a pause sends nothing at
   // all: she gets her screen back, not a greeting.
   useEffect(() => {
     if (!onboarding || kickoffSentRef.current) return;
     if (agent.data.messages.length > 0) return;
     if (archived.length > 0 && onboarding.firstVisit) return;
+    if (kickoffAlreadySent(onboarding.familyId)) {
+      kickoffSentRef.current = true;
+      return;
+    }
     const directive = kickoffDirectiveFor(onboarding, browserTimeZone());
     if (directive === null) {
       kickoffSentRef.current = true;
       return;
     }
     kickoffSentRef.current = true;
+    markKickoffSent(onboarding.familyId);
     sendMessageRef.current?.(directive, { kind: "directive" });
     // Sending exactly once per mount, gated on its own ref: re-running
     // when messages arrive is the doubled-hello bug.
@@ -1343,7 +1383,7 @@ export function ChatClient({
           aria-hidden="true"
           className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
         />
-        {!hasAnyMessages && onboarding ? (
+        {!hasParentMessage && onboarding ? (
           /* The pre-warmed welcome: two deterministic lines on screen
              before any model call can return. The first turn of a brand
              new family is the slowest turn the product runs, and these
@@ -1362,7 +1402,8 @@ export function ChatClient({
               </p>
             ))}
           </div>
-        ) : !hasAnyMessages ? (
+        ) : null}
+        {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}

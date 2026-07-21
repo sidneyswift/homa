@@ -235,6 +235,31 @@ function assistantItems(message: EveMessage): AssistantItem[] {
   return items;
 }
 
+/**
+ * messageRendersSomething(message): would this message put anything on
+ * screen at all?
+ *
+ * Exported because the welcome has to know. A hidden directive and a
+ * turn that died before writing anything both produce a transcript item
+ * that renders null, and counting those as "the conversation has
+ * started" hid the opening lines behind nothing and left a brand new
+ * parent staring at an empty screen. The logic lives here, next to the
+ * renderer whose behavior it has to match, rather than being guessed at
+ * by the caller.
+ */
+export function messageRendersSomething(message: EveMessage): boolean {
+  if (message.role === "user") {
+    const text = message.parts
+      .map((part) => (part.type === "text" ? part.text : ""))
+      .join("")
+      .trim();
+    if (isHiddenDirective(text)) return false;
+    const { visibleText, markers } = parseAttachmentMarkers(text);
+    return visibleText.length > 0 || markers.length > 0;
+  }
+  return assistantItems(message).length > 0 || workedForSteps(message).length > 0;
+}
+
 function AssistantItemView({
   item,
   onSendSuggestion,
