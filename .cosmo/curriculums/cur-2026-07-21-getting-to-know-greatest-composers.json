@@ -1,0 +1,222 @@
+{
+  "id": "cur-2026-07-21-getting-to-know-greatest-composers",
+  "name": "Getting to Know the World's Greatest Composers: Ludwig van Beethoven (single complete volume by Mike Venezia)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T21:45:57-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784598357.538249",
+  "sourceFiles": [
+    {
+      "filename": "getting-to-know-greatest-composers.pdf",
+      "localPath": ".cosmo/inspo-files/getting-to-know-greatest-composers.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-21-getting-to-know-greatest-composers/getting-to-know-greatest-composers.pdf"
+    }
+  ],
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, the closest call of the three same-evening Venezia drops, decided on the skills' own rules with Aless's one-word 'Curriculum' message weighed as a founder signal rather than an automatic override. Against curriculum: unlike the sibling drops this is a SINGLE 32-page trade biography, and a lone bound book with no scope-and-sequence resembles the toddler-activity-book precedent that went reference. For curriculum, and decisive: (1) this drop is the third file of one coherent same-hour wave of the same series family, and the curriculum skill's multi-book-wave rule analyzes a coherent set per drop rather than fragmenting the wave across two different skills with two different output shapes; (2) what Homa needs from this book is Layer-1/Layer-2 material (the composer-study methodology and its fit to the Music > Composer Study & Music Appreciation domain added earlier this session), not a per-page layout/print-format analysis of a book nobody will print; (3) the book itself carries real embedded listening pedagogy (what to listen for, movement by movement), which is method content, not printable-reference content. Aless's 'Curriculum' note agrees with this ruling, and it was treated as evidence about intended product use (a composer-study spine), not as the reason. If a future single-volume Venezia drop arrives outside a wave, reference routing with a method note would also be defensible; this one is curriculum."
+  },
+  "layer1_philosophy": {
+    "methodology": "Biography-driven music appreciation: 'Getting to Know the World's Greatest Composers: Ludwig van Beethoven', written and illustrated by Mike Venezia, Children's Press (A Division of Grolier Publishing, New York/London/Hong Kong/Sydney, Danbury Connecticut), with a credited subject-expert consultant: Donald Freund, Professor of Composition, Indiana University School of Music. Identity verified directly from the cover and title page renders. Same core Venezia recipe as the artists volumes (humor plus real images plus simple prose, 32 standalone pages, no activities), adapted to music: since the subject's works cannot be printed on a page, the reproductions here are portraits, period paintings and prints, photographs, and sheet-music motifs on the endpapers, and the book compensates with explicit listening guidance woven through the prose, telling the child what to listen for in specific named works.",
+    "principles": [
+      "The same humor-first on-ramp: the cover gag has an orchestra player picking up Beethoven's ear trumpet by mistake; interior panels imagine neighbors complaining about the racket and fans mobbing Ludwig in Vienna ('as popular as any rock star today')",
+      "Music is described by its feeling and its craft, not just named: Beethoven's best-known pieces are contrasted with the light, cheerful court music people expected ('loud and exciting, and often beautiful enough to give you goose bumps'), and the book teaches real structural vocabulary in context: a symphony 'usually has four parts, or movements', bigger orchestras, moods, and a theme that can be changed, disguised, or played in part to keep the audience guessing",
+      "Specific works get specific listening guidance: the Fifth Symphony's famous theme is 'only four notes long... you can hear them in the beginning', and the Sixth (Pastoral) is walked through as a story in sound: arriving in the countryside, a brook, villagers, a thunderstorm, a shepherd's thankful song, with the aside that Beethoven copied actual bird songs from nightingales, quails, and cuckoos",
+      "The life explains the work, told plainly including the hard parts: a harsh father who overworked a four-year-old at the keyboard, his mother's death, supporting his brothers, and deafness treated at length: hiding it, the letter to his brothers, composing while unable to hear, the Ninth's choral finale written when fully deaf",
+      "Historical context frames the person: the Age of Enlightenment, respect for everyday people over kings, Napoleon and the Eroica, Vienna as Europe's musical capital, Mozart and Haydn as the connecting cast",
+      "The book bridges to real listening rather than to museums: the closing page tells families Beethoven's music is easy to find on the radio and at the library on CD or cassette, and that a recording of the Fifth Symphony flew on Voyager 2 'as a sample of what human beings are all about'"
+    ],
+    "learningTheory": "Same exposure-and-affection model as the sibling drops: love one composer as a person through story, then meet the actual music with a few concrete things to listen for. No protocol, no prerequisites; the volume is standalone within an unordered series. The embedded what-to-listen-for guidance makes this the most directly teachable volume of the three drops: it hands the parent a ready-made active-listening script for at least three named works.",
+    "assessmentApproach": "None: no questions, activities, or quizzes anywhere in the volume. Any narration or listening-response work comes from the family's own method.",
+    "parentRole": "Reader-aloud and listening companion: the text is written to the child at a grade 2-3 level, and the closing page explicitly sends the family to find recordings, making the parent the supplier of the actual music the book can only describe.",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "biography-driven-appreciation",
+        "topicType": "method_philosophy",
+        "status": "proposed this session by the sibling artists-drop analysis (cur-2026-07-21-getting-to-know-greatest-artists), written to cover the artist, composer, and inventor variants in one row; reused here, not duplicated."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "venezia-getting-to-know-composers-format",
+        "topicType": "method_format",
+        "title": "Getting to Know the World's Greatest Composers Format (Mike Venezia)",
+        "summary": "32-page standalone picture-book composer biographies, one composer per volume, written and illustrated by Mike Venezia (Children's Press / Grolier) with a credited composition-professor consultant. Same humor-plus-real-images recipe as the artists series, adapted to music: portraits and period art instead of artwork reproductions, sheet-music endpapers, and explicit in-prose listening guidance for named works (the Fifth's four-note theme, the Pastoral's five-scene story, the Ninth's choral finale). Closes by sending families to real recordings (radio, library, Voyager 2 aside) rather than museums. This drop: the Ludwig van Beethoven volume, complete."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Getting to know one composer: who Beethoven was, when and where he lived, why he matters, and which works are his",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": "mt_Jf6yBw4Xn2",
+        "status": "mapped",
+        "suggested": {
+          "note": "Genuine gap filled this session. Checked the Music > Composer Study & Music Appreciation domain's 2 pre-existing topics before adding: mt_DFIWe5Fe47 is the CM active-listening routine and mt_OEyTGrh8MA is mood-and-instrument identification, and neither names knowing the composer as a person (life story, era, signature works) as the learning target. Also checked 'composer', 'biograph', 'famous' across all 1654 pre-existing topics: no other music hits. Added mt_Jf6yBw4Xn2 'Getting to Know a Composer: Life and Signature Works' (Music > Composer Study & Music Appreciation, age 6-9, CONCEPTUAL) under the existing MARBLE_DOMAIN_MAP pair, no mapping.ts edit needed."
+        }
+      },
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Active listening with something to listen for: the Fifth's four-note theme and its transformations, the Pastoral's five-scene story, bird songs in the score",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": "mt_DFIWe5Fe47",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Composer Study: Active Listening' (4-7) is a direct match for the book's embedded listening guidance; the book skews slightly older (6-9) but the routine is the same. This mapping is what the new composer-listening-guide recipe (layer4) operationalizes."
+        }
+      },
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Describing the mood of music and noticing the orchestra: goose bumps vs light court music, powerful heroic sounds, bigger orchestras and exciting moods",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": "mt_OEyTGrh8MA",
+        "status": "mapped",
+        "suggested": {
+          "note": "'Identifying Mood and Instruments in Music' (4-7) directly covers the book's mood-vocabulary thread."
+        }
+      },
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Musical form basics taught in context: what a symphony is (four movements), theme and variation as a game with the audience, a chorus added to a symphony (the Ninth)",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "music.musical-form-symphony-movements-themes",
+          "domain": "composer-study-appreciation",
+          "kind": "conceptual",
+          "teachingWindowMonths": [72, 108],
+          "note": "Checked 'symphony', 'orchestra', 'movement', 'theme', 'instrument' across the taxonomy: the only music topics are the two appreciation topics above, and the reserved music assessment domains (rhythm-beat, singing, listening-awareness, instrument-notation, ensemble-performance in packages/taxonomy/src/domains.ts) are assessment-kind homes, not topics.json content. Form vocabulary (symphony, movement, theme) is a real gap this book teaches directly, but narrower than the composer-biography gap filled this session; recorded for a future session to keep additions proportionate at one per drop."
+        }
+      },
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Deafness and composing: hearing loss, vibration, writing music while unable to hear it",
+        "homaSubject": "science",
+        "homaDomain": "waves-light-sound",
+        "homaTopicId": "mt_VBl1T1sFCM",
+        "status": "partial",
+        "suggested": {
+          "note": "'Vibrations & Sound' (6-9) partially covers the physical-science side; the disability-and-creative-work side is the same unfilled gap the sibling inventors analysis recorded from the Bell volume (science.how-hearing-differences-shape-communication), deliberately referenced here rather than duplicated under a second slug."
+        }
+      },
+      {
+        "curriculumSubject": "Whole volume",
+        "curriculumTopic": "Historical context: the Age of Enlightenment, Napoleon and the Eroica, Vienna as Europe's musical capital, Mozart and Haydn",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_VXcua6-txq",
+        "status": "partial",
+        "suggested": {
+          "note": "History > Historical Thinking vocabulary (6-10) loosely covers the era framing; no topic covers the Enlightenment or classical-era Europe specifically. Same treatment as the sibling drops' context threads."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 6,
+      "mapped": 3,
+      "unmapped": 1,
+      "noSubject": 0,
+      "partial": 2
+    }
+  },
+  "layer3_structure": {
+    "cadence": "None stated: a trade picture book with no lesson structure. Natural unit is one composer-study block (the CM rotation Homa's curriculum-writer already describes runs roughly 4-week composer blocks, 9 composers across 36 weeks), with the book read across the block while the family listens to the named works.",
+    "sessionLengthMinutes": {
+      "note": "Not stated. Full volume reads aloud in roughly 15-20 minutes; pairing a few pages with one listening session fits CM-style 10-15 minute lessons."
+    },
+    "weeklyTemplate": "None in the source. Internal rhythm: birth and family, harsh early training, Vienna and the greats (Mozart, Haydn), growing fame, deafness, the late masterworks, legacy and where to hear the music today.",
+    "progressionModel": "Standalone volume in an unordered series; within the volume, strictly chronological biography with listening guidance attached to works at the point the life story reaches them.",
+    "reviewRhythm": "None; no questions or activities in the book.",
+    "totalWeeks": null,
+    "notes": "PDF structure verified page by page: 17 CamScanner spread-scan pages covering one complete 32-page volume (cover page 0, title page 1 with the Freund consultant credit, portrait and birth-in-Bonn opening at page 2, closing page 16 rendering the book's own page 32 with the Voyager 2 aside). All 17 pages rendered and reviewed; unlike the sibling drops, this file contains exactly one book, so the 'compilation' framing in the task did not survive contact with the pages and is corrected here."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "read-aloud-biography-spread",
+        "description": "The book's native activity: read a spread aloud, look at the period art and gag panels. Not a printable.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Out of scope for materials-studio by nature; recorded for census completeness only, no suggestedRecipe on purpose. Same ruling as both sibling drops."
+      },
+      {
+        "type": "composer-study-portfolio-card",
+        "description": "One card per studied composer for a rotation binder: name banner, where-they-were-from circle, enlarged reflection box with the listening stem sentence.",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Direct, confirmed fit: the shipped recipe's composer variant (music-note header tag, no artwork frame, enlarged reflection box) covers this exactly as written."
+      },
+      {
+        "type": "composer-listening-guide",
+        "description": "A one-page per-piece listening companion operationalizing exactly what this book does in prose: piece name and composer, 'listen for this' callout (the four-note theme), 3-5 ordered moment boxes the child checks or draws as the music reaches them (the Pastoral's brook, storm, and thankful song), and a how-did-it-feel response line.",
+        "recipe": "composer-listening-guide",
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "composer-listening-guide",
+          "creationPath": "html",
+          "description": "Per-piece active-listening scaffold: title block, listen-for callout, ordered moment boxes with checkbox and sketch space, feeling-response line. Built this session.",
+          "complexity": "low"
+        },
+        "notes": "Genuine, keyword-checked gap, and the single sharpest one across all three Venezia drops, so this is where the wave's one new recipe was spent: checked all 44 shipped recipes and none supports listening at all (artist-composer-study-card is a per-composer portfolio card with one reflection stem, not a per-piece guide with ordered moments; daily-rhythm-cards and visual-schedule-cards are routine schedulers). New recipe file built this session at apps/web/agent/skills/materials-studio/references/recipes/composer-listening-guide.md with a Format library row in materials-studio SKILL.md and an activity-formats.md entry, named identically to this gap slug so no GAP_ALIASES entry is needed. Directly serves the existing mt_DFIWe5Fe47 active-listening topic and the CM composer-study rotation the curriculum-writer already plans."
+      },
+      {
+        "type": "biography-timeline-page",
+        "description": "A one-page life timeline (Bonn childhood, Vienna, growing deafness, the Ninth), rebuilding the book's arc after reading.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "biography-timeline-page",
+          "creationPath": "html",
+          "description": "Same shared person-timeline scaffold recorded by both sibling analyses; one recipe would serve artists, composers, and inventors.",
+          "complexity": "low"
+        },
+        "notes": "Same shared, deliberately identically-slugged gap as the sibling drops; not built this session, see the artists analysis for the proportionality reasoning."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 4,
+      "haveRecipe": 2,
+      "noRecipe": 2
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "Added 1 new Music topic this session, append-only under the existing pair Music > Composer Study & Music Appreciation (no mapping.ts edit): mt_Jf6yBw4Xn2 'Getting to Know a Composer: Life and Signature Works' (age 6-9, CONCEPTUAL). One of exactly three topics added across the three same-day Venezia drops.",
+      "impact": "Completes the composer-study strand the CM ingestion opened earlier this session: the domain now covers the listening routine, mood/instrument noticing, and knowing the composer as a person.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "One real gap recorded but NOT added: musical form basics (symphony, movements, theme and variation), suggested as music.musical-form-symphony-movements-themes. Full note in layer2_scope.",
+      "impact": "The book teaches this directly and no topic covers it; a natural add when more composer volumes or a music-theory resource lands.",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "One new recipe built this session from this drop: composer-listening-guide (html), with its SKILL.md Format library row and activity-formats.md entry. The gap slug and recipe filename match, so no GAP_ALIASES entry is needed.",
+      "impact": "materials-studio previously had zero listening-oriented formats; composer-study families (the CM rotation is already a planned Homa methodology) get a per-piece companion page that pairs with the existing artist-composer-study-card.",
+      "urgency": "low, recorded for traceability"
+    },
+    {
+      "category": "knowledge_bank",
+      "item": "One proposal recorded in knowledgeBankGaps: venezia-getting-to-know-composers-format (method_format); the shared method_philosophy row is proposed once by the artists analysis. No live DB writes attempted from this sandbox.",
+      "impact": "Gives the curriculum-writer the composer-variant specifics (listening guidance in prose, recordings bridge instead of museum lists).",
+      "urgency": "medium"
+    },
+    {
+      "category": "process",
+      "item": "Aless annotated this drop with the single word 'Curriculum'. This analysis routed it to curriculum-ingestion on the skills' own rules and recorded her note as a founder signal about intended product use (composer-study spine); see the routing block for the full reasoning including why reference routing was considered and rejected.",
+      "impact": "Keeps the founder-signal handling transparent for the reconciliation index; no ruling conflict to log since the analysis and the signal agree.",
+      "urgency": "low, informational"
+    }
+  ],
+  "notes": "Identity fully verified from the pages: cover and title page read 'GETTING TO KNOW THE WORLD'S GREATEST COMPOSERS / LUDWIG VAN BEETHOVEN / WRITTEN AND ILLUSTRATED BY MIKE VENEZIA', title page adds 'CONSULTANT Donald Freund, Professor of Composition, Indiana University School of Music' and the Children's Press / Grolier imprint block. Real counts: 17 CamScanner spread-scan PDF pages, all 17 rendered and reviewed, covering exactly ONE complete 32-page volume, not a multi-book compilation; the task briefing's 'compilation' assumption is corrected by direct page evidence (cover at page 0, the book's own printed page 32 with the Voyager 2 closing aside at PDF page 16). Embedded PDF metadata is CamScanner boilerplate ('CamScanner 7-20-26 21.42', created 2026-07-21T01:44:26Z, about 91 seconds before this drop's Slack ts of 2026-07-21T01:45:57Z). Date bookkeeping: id date is the UTC date of the ts; droppedAt is the same instant in America/New_York (2026-07-20T21:45:57-04:00), previous evening by local calendar, the same pattern as both sibling drops. This was the last drop of the three-file same-evening Venezia wave (4 minutes after the inventors drop). Copyright law honored: the book's art and text were viewed for analysis only and are described here in Homa's own words; the new composer-listening-guide recipe encodes the generic listening-scaffold pattern, not this publisher's text, characters, or artwork."
+}

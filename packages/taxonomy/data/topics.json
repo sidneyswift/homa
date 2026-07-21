@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1654,
+  "topicCount": 1657,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32373,6 +32373,60 @@
       ],
       "assessmentPrompt": "Can {{name}} describe a familiar place using at least one of the Five Themes of Geography, like where it is located or how people get there?",
       "standards": []
-    }
-  ]
+    },
+  {
+    "id": "mt_Hq3vTz8Kd1",
+    "type": "CONCEPTUAL",
+    "subject": "Art",
+    "domain": "Picture Study & Art Appreciation",
+    "name": "Getting to Know an Artist: Life and Famous Works",
+    "description": "Learn about one artist as a person through an accessible biography: when and where they lived, key events in their life, why they became famous, and which well-known works are theirs, connecting at least one life event to a specific artwork",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied artist and tell one true fact about their life, such as where they lived or what era they worked in",
+      "Point to or name at least one famous work by a studied artist",
+      "Retell one connection between the artist's life and their work, for example a place they loved appearing in their paintings"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you something true about a studied artist's life and name one of their famous works?",
+    "standards": []
+  },
+  {
+    "id": "mt_Rk8pWn2Vq5",
+    "type": "CONCEPTUAL",
+    "subject": "Science",
+    "domain": "Scientific Inquiry",
+    "name": "Getting to Know an Inventor: How Inventions Happen",
+    "description": "Learn about one inventor or scientist through an accessible biography and understand invention as a process: trying ideas, failing and learning from failure, testing many materials or designs, and protecting a finished invention with a patent",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied inventor and the invention they are best known for",
+      "Retell one story of the inventor failing or testing many ideas before succeeding",
+      "Explain in simple words why an inventor patents an invention"
+    ],
+    "assessmentPrompt": "Can {{name}} name a studied inventor's famous invention and retell how many tries or failures it took to get there?",
+    "standards": []
+  },
+  {
+    "id": "mt_Jf6yBw4Xn2",
+    "type": "CONCEPTUAL",
+    "subject": "Music",
+    "domain": "Composer Study & Music Appreciation",
+    "name": "Getting to Know a Composer: Life and Signature Works",
+    "description": "Learn about one composer as a person through an accessible biography: when and where they lived, key events in their life, why they matter, and which well-known pieces are theirs, connecting at least one life event to a specific piece of music",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied composer and tell one true fact about their life",
+      "Name or recognize at least one famous piece by a studied composer",
+      "Retell one connection between the composer's life and their music, for example nature sounds appearing in a symphony about the countryside"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you something true about a studied composer's life and name one piece of music they wrote?",
+    "standards": []
+  }
+]
 }

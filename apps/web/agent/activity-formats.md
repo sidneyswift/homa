@@ -440,10 +440,20 @@ The curriculum writer loads this to recommend buildable activities.
 - **Name:** Artist / composer study card
 - **What it is:** A reusable portfolio card for Charlotte Mason picture study or composer study: name banner, artwork frame or listening icon, a "where they were from" map circle, and a reflection box.
 - **Best for:** Art appreciation, music appreciation, building a running artist/composer portfolio across a school year.
-- **Subjects:** Art (picture study), music (composer study)
-- **Ages:** 4-10. One card per artist or composer, same template reused week to week.
+- **Subjects:** Art (picture study), music (composer study), science (inventor and scientist study)
+- **Ages:** 4-10. One card per artist, composer, or inventor, same template reused week to week.
 - **Creation path:** html
 - **Example activity:** `[artist-composer-study-card] Composer study card for Scott Joplin — name banner, "where they were from" circle, and a reflection box`
+
+### composer-listening-guide
+- **Slug:** `[composer-listening-guide]`
+- **Name:** Composer listening guide
+- **What it is:** A one-page active-listening companion for a single piece of music: a listen-for callout naming one concrete hook, 3-5 ordered moment boxes the child checks or sketches as the music reaches them, and a feeling-response line.
+- **Best for:** Composer study rotations, Charlotte Mason music appreciation, first classical-music listening sessions, program music with a built-in story.
+- **Subjects:** Music (composer study, music appreciation)
+- **Ages:** 5-10. One piece per page; no music notation anywhere.
+- **Creation path:** html
+- **Example activity:** `[composer-listening-guide] Listening guide for Beethoven's Pastoral Symphony: listen for the bird calls, then catch the brook, the storm, and the shepherd's thankful song`
 
 ### nature-observation-journal
 - **Slug:** `[nature-observation-journal]`

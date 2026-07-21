@@ -7,8 +7,9 @@ rotation: name banner, a frame for the artwork or a listening icon, a
 Designed to be collected into a running binder across the school year.
 
 Great for: ages 4-10, Charlotte Mason picture study and composer study,
-art appreciation, music appreciation, portfolio-building across a
-36-week rotation of artists or composers. Pairs with the picture-study
+art appreciation, music appreciation, inventor and scientist biography
+study, portfolio-building across a 36-week rotation of artists,
+composers, or inventors. Pairs with the picture-study
 routine of gazing at one work for a few quiet minutes, hiding it, and
 recalling details from memory before the child fills in the card.
 
@@ -19,27 +20,31 @@ as one cohesive collection, not a pile of mismatched pages.
 Design patterns (all binding for artist-composer-study-card):
 
 - **Header tag**: a small palette icon and "Artist Study" label for a
-  picture-study card, or a music-note icon and "Composer Study" label for
-  a listening card.
+  picture-study card, a music-note icon and "Composer Study" label for
+  a listening card, or a lightbulb icon and "Inventor Study" label for an
+  inventor or scientist card (the same biography-study rotation applied to
+  science: one card per studied inventor).
 - **Name banner**: the artist or composer's full name in large, decorative
   type (`font-size: 32px; font-weight: 700;`), centered or left-aligned
   below the header tag.
-- **Artwork/portrait frame** (artist card only): an ornate or scalloped
-  bordered box, left blank for a printed photo of the artwork or the
-  child's own sketch of it to be glued in. Composer cards skip this box;
-  use the extra space to enlarge the reflection box instead.
+- **Artwork/portrait frame** (artist and inventor cards): an ornate or
+  scalloped bordered box, left blank for a printed photo of the artwork or
+  the child's own sketch of it to be glued in; on an inventor card the
+  frame holds the child's sketch of the invention instead. Composer cards
+  skip this box; use the extra space to enlarge the reflection box instead.
 - **"Where they were from" circle**: a circular bordered frame with the
   caption "Where they were from," left blank for a glued-in map clipping
   or photo.
-- **Favorite-work box** (artist card only): a small bordered box labeled
-  "My favorite work by this artist," for the child to draw or glue their
-  pick.
+- **Favorite-work box** (artist and inventor cards): a small bordered box
+  labeled "My favorite work by this artist" or "My favorite invention," for
+  the child to draw or glue their pick.
 - **Reflection box**: a wide bordered box at the bottom with a stem
   sentence in the child's voice: "When I look at [artist]'s work, I
-  think about..." for artists, or "When I listen to their music, I think
-  about..." for composers. Leave the rest blank for dictation or drawing.
-- **One card per person**: never combine two artists or two composers on
-  one card. The set is meant to be collected, not condensed.
+  think about..." for artists, "When I listen to their music, I think
+  about..." for composers, or "The cleverest thing they made was..." for
+  inventors. Leave the rest blank for dictation or drawing.
+- **One card per person**: never combine two artists, composers, or
+  inventors on one card. The set is meant to be collected, not condensed.
 - **Consistent template, changing name**: every card in a rotation uses
   the identical layout; only the name, header tag, and (for artists) the
   frame content change week to week.

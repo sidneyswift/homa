@@ -460,6 +460,41 @@ planning implications:
   textbook, not as the default artist reference (its reflection prompt is written
   for CM's gaze-and-recall routine, which this methodology does not use).
 
+### Biography-Driven Appreciation Study (Getting to Know series, Mike Venezia)
+
+When a family owns or mentions the "Getting to Know the World's Greatest
+Artists / Composers / Inventors & Scientists" picture-book biographies, or asks
+for artist, composer, or inventor study without a strict Charlotte Mason
+protocol, plan around the biography as the spine:
+
+- One studied person per block. Each 32-page volume is standalone and the
+  series has no order, so sequence blocks by the child's interest, an upcoming
+  museum visit, or era. A volume reads aloud in 15-20 minutes or spreads
+  across a block a few pages per sitting.
+- The method is exposure and affection, not analysis: the child meets the
+  person through humor and story, sees or hears the real works, and connects
+  life events to specific works (the bus accident to the painting, deafness to
+  the Ninth Symphony, the failed vote recorder to the patent lesson). Do not
+  bolt the CM look-hide-recall routine onto these books unless the family is
+  separately running strict CM picture study; the books themselves prescribe
+  no protocol.
+- Always plan the real-works bridge the books end on: artists volumes send
+  the family to museums, the composers volumes to recordings (radio, library,
+  streaming), the inventor volumes to the devices around the house. A block is
+  incomplete without at least one session with the real works.
+- Standard block outputs: `[artist-composer-study-card]` (one per studied
+  person; artist, composer, and inventor variants all documented in the
+  recipe), `[composer-listening-guide]` for each listened piece in a composer
+  block, `[art-project-instructions]` for an in-the-style-of response in an
+  artist block, and `[nomenclature-cards]` for the bolded vocabulary in the
+  newer Scholastic inventor volumes (which add a glossary and index).
+- Map progress to the content topics for knowing the person (Art > Picture
+  Study & Art Appreciation, Music > Composer Study & Music Appreciation,
+  Science > Scientific Inquiry's inventor topic), plus the listening topics
+  for composer blocks. Never print or reproduce the books' own artwork or
+  cartoons in generated materials; the works are copyrighted, so generated
+  pages use Homa's own words and original imagery only.
+
 ### Published Elementary Science Textbook (Investigate-Then-Explain, e.g. Harcourt Science)
 
 When a family uses a published, grade-level school-market science textbook

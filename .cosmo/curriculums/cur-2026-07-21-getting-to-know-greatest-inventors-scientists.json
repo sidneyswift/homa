@@ -1,0 +1,228 @@
+{
+  "id": "cur-2026-07-21-getting-to-know-greatest-inventors-scientists",
+  "name": "Getting to Know the World's Greatest Inventors & Scientists compilation (2 complete volumes by Mike Venezia: Thomas Edison, Alexander Graham Bell)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T21:41:53-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784598113.867139",
+  "sourceFiles": [
+    {
+      "filename": "getting-to-know-greatest-inventors-scientists.pdf",
+      "localPath": ".cosmo/inspo-files/getting-to-know-greatest-inventors-scientists.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-21-getting-to-know-greatest-inventors-scientists/getting-to-know-greatest-inventors-scientists.pdf"
+    }
+  ],
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, not reference, on the same grounds as the sibling artists drop analyzed minutes earlier this session: a coherent multi-book set (2 complete volumes of one series) carrying a consistent, nameable teaching method, with zero printable pages. The curriculum skill's multi-book-wave rule (one curriculum analysis per coherent set) applies, and the four-layer shape is what captures the method and taxonomy fit; the reference skill's per-page dimensions would mostly read 'not applicable' for a bound trade book. Ruled independently but consistently with drop 1."
+  },
+  "layer1_philosophy": {
+    "methodology": "Biography-driven science and invention appreciation: the 'Getting to Know the World's Greatest Inventors & Scientists' series, written and illustrated by Mike Venezia, in the later Scholastic edition (both covers carry the SCHOLASTIC imprint bar and the series badge 'GETTING TO KNOW THE WORLD'S GREATEST INVENTORS & SCIENTISTS'). Same core Venezia recipe as the artists series ingested from the sibling drop: 32-page standalone biography per volume, humorous cartoon gag panels with speech bubbles, simple warm prose, and real images, here archival photographs and period prints instead of artwork reproductions. This newer edition adds explicit literacy scaffolding the older artists volumes lack: key vocabulary bolded in the running text (laboratory, phonograph, telegraph, Morse code, filament, vacuum, incandescent, patent, elocution, hearing impairment), a closing Glossary with phonetic respellings and child-friendly definitions, and a full Index. The Bell volume's copyright block credits a reading consultant (Nanci R. Vargus, Ed.D.) and a content consultant, and each volume carries a subtitle ('Thomas Edison: Inventor with a Lot of Bright Ideas', 'Alexander Graham Bell: Setting the Tone for Communication').",
+    "principles": [
+      "The same humor-first on-ramp as the artists series, aimed at invention: the Edison cover gag is a spouse begging Edison to turn off his new idea so she can sleep; the Bell cover gag answers 'Mr. Watson, come here' with a hold-message joke; interior panels imagine Menlo Park singalongs and Watson exasperated by Bell's wild ideas",
+      "Invention is taught as a process, not a lightning bolt: both volumes dwell on failures and iteration (Edison's vote recorder that nobody wanted, thousands of filament materials tested for a year, Bell's talking-machine experiments with his brother, patent fights defended in court), with the explicit lesson that failure teaches ('He considered his failure to be a good lesson... he would never invent anything unless people really wanted it')",
+      "Real STEM concepts arrive embedded in the life story at a 6-to-9-year-old level: how a telegraph sends coded electrical pulses, why a filament in a vacuum glows without burning, what a patent legally protects, how visible speech encoded sounds for deaf students, vibrations as the basis of sound and the telephone",
+      "Primary-source imagery over illustration: archival photographs (young Edison as a news butcher, Menlo Park interior, Watson's portrait, Bell opening the New York line), period prints, and product ephemera (an Edison Phonograph poster) give the child real historical evidence the way the artists volumes give real paintings",
+      "Disability and difference are handled directly and respectfully: Edison's partial deafness and school struggles ('his teacher thought he was just a confused, mixed-up, hopeless student', taught at home by his mother), Bell's lifelong work with deaf students, his deaf mother and wife Mabel, and visible speech, teaching that great work and disability coexist",
+      "Literacy scaffolding is deliberate in this edition: bolded vocabulary in context, then the same words in a phonetic glossary, then an index, letting a family use one volume simultaneously as a read-aloud, a vocabulary lesson, and a first research text"
+    ],
+    "learningTheory": "Same exposure-and-affection model as the artists series (love one great figure at a time through story), with an added informational-text layer: the Scholastic edition's bold-vocab, glossary, and index structure assumes children learn to navigate nonfiction conventions by using them on a high-interest subject. Volumes are standalone with no prescribed order or prerequisites.",
+    "assessmentApproach": "None in either volume: no questions, activities, or quizzes. The glossary and index are reference scaffolds, not assessments.",
+    "parentRole": "Reader-aloud for the younger band, with a genuine early-independent-research role for confident readers: the index and glossary let an 8-to-9-year-old look things up alone, which the older artists-series volumes do not support.",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "biography-driven-appreciation",
+        "topicType": "method_philosophy",
+        "status": "proposed this session by the sibling artists-drop analysis (cur-2026-07-21-getting-to-know-greatest-artists), written to cover the artist, composer, and inventor variants in one row; reused here, not duplicated."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "venezia-getting-to-know-inventors-format",
+        "topicType": "method_format",
+        "title": "Getting to Know the World's Greatest Inventors & Scientists Format (Mike Venezia, Scholastic edition)",
+        "summary": "32-page standalone picture-book biographies of inventors and scientists, one figure per volume, same humor-plus-real-images Venezia recipe as the artists series but with archival photographs instead of artworks and a newer edition's literacy scaffolds: subtitled volumes, key vocabulary bolded in context, closing phonetic glossary, full index, credited reading and content consultants. This compilation: Thomas Edison (Inventor with a Lot of Bright Ideas) and Alexander Graham Bell (Setting the Tone for Communication). STEM concepts (circuits, telegraph coding, patents, sound vibrations) are taught inside the life narrative; invention is framed as iteration through failure."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Both volumes (whole series)",
+        "curriculumTopic": "Getting to know one inventor or scientist at a time: who they were, how they worked (experiments, failures, patents, laboratories), and what they invented",
+        "homaSubject": "science",
+        "homaDomain": "scientific-inquiry",
+        "homaTopicId": "mt_Rk8pWn2Vq5",
+        "status": "mapped",
+        "suggested": {
+          "note": "Genuine gap filled this session. Checked 'inventor', 'invention', 'scientist', 'patent', 'biograph', 'famous' across all 1654 pre-existing topics: zero hits for inventor or invention anywhere, and the only how-science-works topics in Science > Scientific Inquiry are procedural experiment topics (mt_Wa44s-f8Ws 'Simple tests and experiments' 5-7, mt_QrVF5n7vci 'Could there be another explanation?' 7-9) with no history-of-science or biography content. Added mt_Rk8pWn2Vq5 'Getting to Know an Inventor: How Inventions Happen' (Science > Scientific Inquiry, age 6-9, CONCEPTUAL) under the existing MARBLE_DOMAIN_MAP pair, no mapping.ts edit needed. A dedicated history-of-science domain was considered and rejected as disproportionate for a 2-book drop; the reserved assessment-domain ids in packages/taxonomy/src/domains.ts were checked and none collide (they cover art/music/social_studies assessment, not science)."
+        }
+      },
+      {
+        "curriculumSubject": "Edison volume",
+        "curriculumTopic": "Electric light and power: filaments, vacuum bulbs, incandescent light, wiring 25 buildings from the first power station, batteries and electric cars",
+        "homaSubject": "science",
+        "homaDomain": "energy",
+        "homaTopicId": "mt_9nxyFoYD_b",
+        "status": "partial",
+        "suggested": {
+          "note": "Science > Energy has 'What uses electricity at home' (8-9), 'Naming types of energy' (7-9), and circuit topics at 8+; the book's filament-in-a-vacuum and city-power narrative sits alongside these rather than exactly inside any one, and at a slightly younger band. Real overlap, no exact topic; recorded as partial rather than adding a duplicate-flavored topic."
+        }
+      },
+      {
+        "curriculumSubject": "Edison volume",
+        "curriculumTopic": "Telegraph and Morse code: coded messages over a wire, Edison's years as a telegraph operator, improving multi-message telegraphy",
+        "homaSubject": "science",
+        "homaDomain": "waves-light-sound",
+        "homaTopicId": "mt_ZL9qVVnpwN",
+        "status": "mapped",
+        "suggested": {
+          "note": "Science > Waves, Light & Sound 'Communication with Light & Sound' (6-7) directly covers sending messages with coded signals; age band matches the read-aloud audience."
+        }
+      },
+      {
+        "curriculumSubject": "Edison volume",
+        "curriculumTopic": "Phonograph and recorded sound: the first machine to record and play back a voice",
+        "homaSubject": "science",
+        "homaDomain": "waves-light-sound",
+        "homaTopicId": "mt_VBl1T1sFCM",
+        "status": "partial",
+        "suggested": {
+          "note": "'Vibrations & Sound' (6-9) covers the underlying concept; recording and playback specifically are not named by any topic. Close enough to teach against, recorded as partial."
+        }
+      },
+      {
+        "curriculumSubject": "Bell volume",
+        "curriculumTopic": "Sound as vibration and the telephone: feeling vibrations through wheat stalks and ear tubes, converting sound into electrical impulses over a copper wire, 'Mr. Watson, come here'",
+        "homaSubject": "science",
+        "homaDomain": "waves-light-sound",
+        "homaTopicId": "mt_VBl1T1sFCM",
+        "status": "mapped",
+        "suggested": {
+          "note": "'Vibrations & Sound' (6-9) is a direct match for the book's core science thread, and 'Communication with Light & Sound' (6-7) matches the telephone-as-communication frame as a secondary hit."
+        }
+      },
+      {
+        "curriculumSubject": "Bell volume",
+        "curriculumTopic": "Deaf education and visible speech: elocution, hearing impairments, a symbol system for producing speech sounds, teaching deaf students",
+        "homaSubject": "science",
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "science.how-hearing-differences-shape-communication",
+          "domain": "the-human-body",
+          "kind": "conceptual",
+          "teachingWindowMonths": [72, 108],
+          "note": "Checked 'deaf', 'hearing', 'disability', 'senses' across the taxonomy: Science > The Human Body has 'The Five Senses' (5-7) but nothing on hearing differences, deafness, or accessible communication, and Personal & Social Development's empathy domain has no disability-awareness topic. A real gap the book treats at length, but narrow relative to this drop's inventor-biography gap; recorded for a future session rather than added, to keep additions proportionate at one per drop."
+        }
+      },
+      {
+        "curriculumSubject": "Both volumes",
+        "curriculumTopic": "Historical context of the late 1800s: railroads, newspapers, gas lamps before electric light, telegraph offices, the pace of technological change",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_VXcua6-txq",
+        "status": "partial",
+        "suggested": {
+          "note": "History > Historical Thinking vocabulary (6-10) loosely covers then-vs-now technological change framing; no topic covers the industrial era specifically. Recorded honestly."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 7,
+      "mapped": 3,
+      "unmapped": 1,
+      "noSubject": 0,
+      "partial": 3
+    }
+  },
+  "layer3_structure": {
+    "cadence": "None stated: trade picture books with no lesson structure or schedule. Natural unit is one volume per inventor-study block, mirroring the artist-study rotation pattern; the glossary and index also support short repeated dip-in sessions rather than a single read-through.",
+    "sessionLengthMinutes": {
+      "note": "Not stated. Full volume reads aloud in roughly 15-20 minutes."
+    },
+    "weeklyTemplate": "None in the source. Internal rhythm per volume: birth and childhood struggle, formative work years, the famous invention told as an iterative story, later inventions and legacy, then Glossary and Index.",
+    "progressionModel": "None across volumes: standalone, unordered. Within a volume, strictly chronological biography with embedded concept explainers at the point the story needs them.",
+    "reviewRhythm": "None; no questions or activities. The glossary and index function as self-serve review scaffolds, not assessments.",
+    "totalWeeks": null,
+    "notes": "PDF structure verified page by page: 33 CamScanner spread-scan pages covering 2 complete volumes: Thomas Edison (PDF pages 0-15; page 0 and 1 are near-duplicate cover shots) and Alexander Graham Bell (16-32, ending on the Glossary and Index page). The Edison volume's own closing glossary/index spread was not distinctly captured in the scan (the file jumps from Edison's last prose spread to the Bell cover), noted honestly rather than assumed absent from the physical book; the Bell volume's glossary and index were captured and read in full."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "read-aloud-biography-spread",
+        "description": "The series' native activity: read a spread aloud, look at the archival photos, react to the gag panel. The book itself, not a printable.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Out of scope for materials-studio by nature; recorded for census completeness only, no suggestedRecipe on purpose. Same ruling as the sibling artists drop."
+      },
+      {
+        "type": "inventor-study-portfolio-card",
+        "description": "One card per studied inventor for a rotation binder: name banner, portrait or invention-sketch frame, where-they-were-from circle, favorite-invention box, reflection box.",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Covered after a pattern edit made this session: the shipped artist-composer-study-card recipe documented only Artist Study and Composer Study header variants, with artist-only frame rules. Edited the recipe file (update, not a duplicate recipe, per the skills' own guidance) to add an Inventor Study variant: lightbulb icon header tag, invention-sketch frame, and a 'My favorite invention' box, sourced directly from this drop's use case. The card template itself is unchanged, so existing sets stay cohesive."
+      },
+      {
+        "type": "science-vocabulary-practice",
+        "description": "Working the bolded glossary words (laboratory, telegraph, patent, filament, vacuum, vibration) after reading: word-to-definition or word-to-picture practice.",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "Direct fit: nomenclature-cards covers term/picture/definition vocabulary work, and cloze-story covers the same words in running text as a secondary option. The book's own phonetic-respelling glossary style is a nice model for card backs."
+      },
+      {
+        "type": "invention-timeline-page",
+        "description": "A one-page life-and-inventions timeline (Edison: vote recorder to phonograph to light bulb to power station; Bell: visible speech to telephone to hydrofoil), rebuilding the book's iteration arc after reading.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "biography-timeline-page",
+          "creationPath": "html",
+          "description": "Same person-timeline scaffold recorded by the sibling artists-drop analysis: 5-8 event boxes with year line, one-sentence event, and sketch frame. One shared recipe serves artists, composers, and inventors.",
+          "complexity": "low"
+        },
+        "notes": "Same genuine, keyword-checked gap as the artists drop, deliberately recorded under the same slug so the funnel counts one shared gap instead of three fragmingly-named ones. Not built this session; see the artists analysis for the proportionality reasoning."
+      },
+      {
+        "type": "how-it-works-explainer-page",
+        "description": "A simple labeled diagram of the studied invention (how a telegraph clicks a coded message, how a filament glows in a vacuum, how a voice vibrates a wire), matching the books' embedded concept explainers.",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "Loose but honest fit: labeled-anatomy-diagram's label-the-parts scaffold works for a device as well as a body; guided-notes is a secondary fit for an older child. No new recipe warranted."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 5,
+      "haveRecipe": 3,
+      "noRecipe": 2
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "Added 1 new Science topic this session, append-only under the existing pair Science > Scientific Inquiry (no mapping.ts edit): mt_Rk8pWn2Vq5 'Getting to Know an Inventor: How Inventions Happen' (age 6-9, CONCEPTUAL). One of exactly three topics added across the three same-day Venezia drops.",
+      "impact": "The taxonomy had zero inventor, invention, or history-of-science coverage at any age; inventor-study blocks and these books' content can now be tracked.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "One real gap recorded but NOT added: hearing differences and accessible communication (deafness, visible speech, disability awareness), suggested as science.how-hearing-differences-shape-communication under Science > The Human Body. Full note in layer2_scope.",
+      "impact": "The Bell volume spends roughly a third of its pages here and no Homa topic touches it; a future session (or a founder call on whether it belongs in science vs personal development) can add it.",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "Edited apps/web/agent/skills/materials-studio/references/recipes/artist-composer-study-card.md to add an Inventor Study variant (header tag, invention-sketch frame, favorite-invention box) as a documented pattern, not a duplicate recipe file.",
+      "impact": "One card recipe now serves artist, composer, and inventor study rotations, keeping portfolio sets cohesive across subjects.",
+      "urgency": "low, recorded for traceability"
+    },
+    {
+      "category": "knowledge_bank",
+      "item": "One proposal recorded in knowledgeBankGaps: venezia-getting-to-know-inventors-format (method_format). The shared method_philosophy row is proposed once by the sibling artists analysis and reused here. No live DB writes attempted from this sandbox.",
+      "impact": "Names the Scholastic edition's literacy scaffolding (bold vocab, glossary, index) so the curriculum-writer can lean on it when planning vocabulary work around these books.",
+      "urgency": "medium"
+    }
+  ],
+  "notes": "Identity fully verified from the pages: both covers and title pages carry the series badge 'GETTING TO KNOW THE WORLD'S GREATEST INVENTORS & SCIENTISTS', the Venezia credit, the volume subtitles, and the SCHOLASTIC imprint bar, distinguishing this newer series edition from the older Children's Press artists volumes in the sibling drop. Real counts: 33 CamScanner spread-scan PDF pages, all 33 rendered and reviewed: Thomas Edison pages 0-15 (pages 0 and 1 are two shots of the same cover), Alexander Graham Bell pages 16-32 ending with the captured Glossary and Index. The Bell copyright block credits reading consultant Nanci R. Vargus, Ed.D. and a content consultant, plus Library of Congress cataloging; a printing-year line was not legible at contact-sheet resolution and is recorded as unconfirmed rather than guessed. Embedded PDF metadata is CamScanner boilerplate ('CamScanner 7-20-26 20.34', created 2026-07-21T01:40:25Z, about 90 seconds before this drop's Slack ts of 2026-07-21T01:41:53Z). Date bookkeeping: id date is the UTC date of the ts; droppedAt is the same instant in America/New_York (2026-07-20T21:41:53-04:00), previous evening by local calendar. IMPORTANT: a stale Cosmo reply exists on this drop's Slack thread from a prior session that produced no persisted analysis anywhere in git; per this task's instruction it was not trusted, and every claim here was verified from this session's own page renders. This drop landed 19 seconds after Aless re-dropped the artists file, part of one same-evening wave of three Venezia drops. Copyright law honored: archival photographs and Venezia's art were viewed for analysis only; nothing derived from them enters the product."
+}

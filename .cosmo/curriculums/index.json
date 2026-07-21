@@ -199,6 +199,36 @@
       "mappedPct": 65,
       "gapCount": 6,
       "decisionsCount": 7
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-artists",
+      "name": "Getting to Know the World's Greatest Artists compilation (6 complete volumes by Mike Venezia: Henri Rousseau, Frida Kahlo, Da Vinci, Monet, Pierre Auguste Renoir, Michelangelo)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T20:36:43-04:00",
+      "methodology": "Biography-driven art appreciation: the 'Getting to Know the World's Greatest Artists' series, written AND illustrated by Mike Venezia, published by Children's Press (Chicago; later volumes by Children's Press / A Division of Grolier Publishing, Danbury, Connecticut). Identity verified directly from the pages, not assumed from the filename: every one of the 6 front covers carries the series badge 'GETTING TO KNOW THE WORLD'S GREATEST ARTISTS' and the credit 'WRITTEN AND ILLUSTRATED BY MIKE VENEZIA', and every title page repeats both. Consultants are credited on some title pages (Monet: consultant Sara Mollman Underhill; Renoir and Michelangelo: consultant Meg Moss). Each volume is a complete, standalone 32-page picture-book biography of one artist that alternates three ingredients on nearly every spread: full-color reproductions of the artist's real works with complete scholarly captions (title, date, medium, dimensions, museum), Venezia's own humorous cartoon gag panels with speech bubbles reacting to the artist's life, and 2 to 6 sentences of very simple, warm prose per page.",
+      "mappedPct": 33,
+      "gapCount": 2,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-composers",
+      "name": "Getting to Know the World's Greatest Composers: Ludwig van Beethoven (single complete volume by Mike Venezia)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:45:57-04:00",
+      "methodology": "Biography-driven music appreciation: 'Getting to Know the World's Greatest Composers: Ludwig van Beethoven', written and illustrated by Mike Venezia, Children's Press (A Division of Grolier Publishing, New York/London/Hong Kong/Sydney, Danbury Connecticut), with a credited subject-expert consultant: Donald Freund, Professor of Composition, Indiana University School of Music. Identity verified directly from the cover and title page renders. Same core Venezia recipe as the artists volumes (humor plus real images plus simple prose, 32 standalone pages, no activities), adapted to music: since the subject's works cannot be printed on a page, the reproductions here are portraits, period paintings and prints, photographs, and sheet-music motifs on the endpapers, and the book compensates with explicit listening guidance woven through the prose, telling the child what to listen for in specific named works.",
+      "mappedPct": 50,
+      "gapCount": 2,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-inventors-scientists",
+      "name": "Getting to Know the World's Greatest Inventors & Scientists compilation (2 complete volumes by Mike Venezia: Thomas Edison, Alexander Graham Bell)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:41:53-04:00",
+      "methodology": "Biography-driven science and invention appreciation: the 'Getting to Know the World's Greatest Inventors & Scientists' series, written and illustrated by Mike Venezia, in the later Scholastic edition (both covers carry the SCHOLASTIC imprint bar and the series badge 'GETTING TO KNOW THE WORLD'S GREATEST INVENTORS & SCIENTISTS'). Same core Venezia recipe as the artists series ingested from the sibling drop: 32-page standalone biography per volume, humorous cartoon gag panels with speech bubbles, simple warm prose, and real images, here archival photographs and period prints instead of artwork reproductions. This newer edition adds explicit literacy scaffolding the older artists volumes lack: key vocabulary bolded in the running text (laboratory, phonograph, telegraph, Morse code, filament, vacuum, incandescent, patent, elocution, hearing impairment), a closing Glossary with phonetic respellings and child-friendly definitions, and a full Index. The Bell volume's copyright block credits a reading consultant (Nanci R. Vargus, Ed.D.) and a content consultant, and each volume carries a subtitle ('Thomas Edison: Inventor with a Lot of Bright Ideas', 'Alexander Graham Bell: Setting the Tone for Communication').",
+      "mappedPct": 43,
+      "gapCount": 2,
+      "decisionsCount": 4
     }
   ]
 }

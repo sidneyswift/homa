@@ -886,6 +886,7 @@ export const GENERATED_PROGRESS_TAXONOMY_TOPICS = [
   {"id":"science.gas-exchange-and-breathing","subject":"science","domain":"organisms-life-processes","name":"Gas Exchange & Breathing","teachingWindowMonths":[144,156]},
   {"id":"science.genetic-mutation","subject":"science","domain":"ecosystems-habitats","name":"Genetic Mutation","teachingWindowMonths":[144,168]},
   {"id":"science.geography-and-local-weather","subject":"science","domain":"weather-climate","name":"Geography & Local Weather","teachingWindowMonths":[84,108]},
+  {"id":"science.getting-to-know-an-inventor-how-inventions-happen","subject":"science","domain":"scientific-inquiry","name":"Getting to Know an Inventor: How Inventions Happen","teachingWindowMonths":[72,108]},
   {"id":"science.global-wind-patterns","subject":"science","domain":"weather-climate","name":"Global Wind Patterns","teachingWindowMonths":[132,156]},
   {"id":"science.gravity-and-falling-objects","subject":"science","domain":"forces-motion","name":"Gravity & Falling Objects","teachingWindowMonths":[108,132]},
   {"id":"science.greenhouse-gas-science","subject":"science","domain":"weather-climate","name":"Greenhouse Gas Science","teachingWindowMonths":[132,144]},
