@@ -81,7 +81,11 @@ demonstrated or visibly struggled with, emit a pair:
   grammatical subject ("Emma read the whole page aloud without help",
   "Emma could not borrow from the tens place yet"). Use words from the
   excerpt wherever possible.
-- excerpt: the verbatim transcript words backing it, copied exactly.
+- excerpt: the verbatim transcript words backing it, copied exactly,
+  spanning the whole exchange: include the parent's question or
+  framing AND the child's response. A bare fragment of the child's
+  speech ("four, five.") is never enough on its own; quote the words
+  around it that carry the moment's meaning.
 - segmentSeq: the segment the excerpt came from.
 Only the child's own demonstrated ability counts: not the parent's
 teaching, not tone, not effort. Fewer honest pairs beat many loose

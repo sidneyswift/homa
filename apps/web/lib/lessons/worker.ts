@@ -8,6 +8,7 @@ import {
   verifyLessonClausePair,
   MAX_LESSON_CLAUSES,
   type LessonClausePair,
+  type LessonSegmentText,
 } from "./pairs";
 import {
   assembleLessonTranscript,
@@ -199,7 +200,10 @@ export async function runLessonAnalysis(
     const ledger = await recordVerifiedClauses({
       lesson,
       childName,
-      transcript,
+      segments: processed.map((segment) => ({
+        seq: segment.seq,
+        transcript: segment.transcript,
+      })),
       pairs: insights.clausePairs,
     });
 
@@ -215,11 +219,16 @@ export async function runLessonAnalysis(
     const toneCovered = processed.filter(
       (segment) => parseToneNotes(segment.toneNotes) !== null,
     ).length;
+    // rejected_count makes gate loss visible: pairs existed but the
+    // trust gate turned every one away (the 2026-07-21 silent-failure
+    // class, where a healthy review shipped and the ledger gained
+    // nothing with no error anywhere).
     await emitMapEvent("lesson.review_ready", {
       family_id: familyId,
       child_id: lesson.childId,
       evidence_count: ledger.evidenceCount,
       observation_count: ledger.observationCount,
+      rejected_count: ledger.rejectedCount,
       moment_count: insights.moments.length,
       tone_coverage:
         processed.length === 0 ? 0 : toneCovered / processed.length,
@@ -274,6 +283,7 @@ export interface LessonProgressNote {
 interface LedgerFanOutResult {
   evidenceCount: number;
   observationCount: number;
+  rejectedCount: number;
   notes: LessonProgressNote[];
 }
 
@@ -286,12 +296,13 @@ interface LedgerFanOutResult {
 async function recordVerifiedClauses(input: {
   lesson: LessonRecordingRow;
   childName: string;
-  transcript: string;
+  segments: readonly LessonSegmentText[];
   pairs: LessonClausePair[];
 }): Promise<LedgerFanOutResult> {
   const notes: LessonProgressNote[] = [];
   let evidenceCount = 0;
   let observationCount = 0;
+  let rejectedCount = 0;
   const flagOn = liveProgressEnabled();
   const observedAt =
     input.lesson.finishedAt ?? new Date().toISOString();
@@ -299,10 +310,11 @@ async function recordVerifiedClauses(input: {
   for (const pair of input.pairs.slice(0, MAX_LESSON_CLAUSES)) {
     const verdict = verifyLessonClausePair(
       pair,
-      input.transcript,
+      input.segments,
       input.childName,
     );
     if (!verdict.ok) {
+      rejectedCount += 1;
       notes.push({ ...pair, outcome: "rejected" });
       continue;
     }
@@ -345,11 +357,12 @@ async function recordVerifiedClauses(input: {
         notes.push({ ...pair, outcome: "observation" });
         break;
       default:
+        rejectedCount += 1;
         notes.push({ ...pair, outcome: "rejected" });
         break;
     }
   }
-  return { evidenceCount, observationCount, notes };
+  return { evidenceCount, observationCount, rejectedCount, notes };
 }
 
 /** The review row keeps the verified pairs and their outcomes so the

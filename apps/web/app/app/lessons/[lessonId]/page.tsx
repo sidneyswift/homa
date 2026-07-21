@@ -152,6 +152,9 @@ export default async function LessonReviewPage({
   const observationNotes = insights.progressNotes.filter(
     (note) => note.outcome === "observation",
   );
+  const rejectedNotes = insights.progressNotes.filter(
+    (note) => note.outcome === "rejected",
+  );
   const mediaBySeq = new Map(
     media
       .filter((item) => item.capturedDuringSeq !== null)
@@ -275,6 +278,21 @@ export default async function LessonReviewPage({
               Homa wasn&apos;t sure about: {insights.openQuestions.join(" ")}
             </p>
           ) : null}
+        </section>
+      ) : null}
+
+      {ledgerNotes.length === 0 &&
+      observationNotes.length === 0 &&
+      rejectedNotes.length > 0 ? (
+        // The honest line for the all-rejected case (2026-07-21): a
+        // review without it reads as if the lesson updated progress
+        // when nothing was written anywhere.
+        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
+          <p className="text-sm text-muted">
+            Your lesson and this review are saved. Homa heard skill
+            moments but could not tie them to the recording clearly
+            enough to update {childName}&apos;s progress this time.
+          </p>
         </section>
       ) : null}
 
