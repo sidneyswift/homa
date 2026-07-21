@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1647,
+  "topicCount": 1654,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32246,6 +32246,132 @@
         "Explain why an item that has both attributes goes in the overlapping middle section, and why an item with neither attribute goes outside both circles"
       ],
       "assessmentPrompt": "If you show {{name}} two labeled circles that overlap in the middle, can they figure out where a picture or number belongs, including something that fits both labels or neither one?",
+      "standards": []
+    },
+    {
+      "id": "mt_0Mc3ItywUx",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Community Laws and Local Leaders",
+      "description": "Understand that a community has laws (rules everyone must follow to keep people safe and fair) and elected leaders such as a mayor who help run the community and make decisions for everyone who lives there",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Give an example of a community law, like stopping at a red light or not littering, and explain why it helps everyone",
+        "Identify the mayor as a leader who helps run their town or city",
+        "Explain that laws and leaders exist to keep the community safe and fair for everyone, not just to give orders"
+      ],
+      "assessmentPrompt": "Can {{name}} name one rule their community has and explain why it helps keep people safe?",
+      "standards": []
+    },
+    {
+      "id": "mt_V6t7XCmgVm",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Nested Address: Neighborhood to World",
+      "description": "Understand that a home address nests inside larger and larger places, from neighborhood to community to state to country to world, and place their own address inside that sequence",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Say their own neighborhood, community, state, and country in order from smallest to largest",
+        "Explain that their home sits inside all of these places at the same time, not just one",
+        "Point to their own community on a simple map, then to their state, then to their country"
+      ],
+      "assessmentPrompt": "Can {{name}} name the neighborhood, community, state, and country they live in, in order from smallest to biggest?",
+      "standards": []
+    },
+    {
+      "id": "mt_Nf4ZmHeiA1",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "How Transportation Moves People and Goods",
+      "description": "Recognize the different kinds of transportation (cars, trucks, planes, bikes, boats, trains) and understand that transportation moves both people and goods from one place to another",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name several kinds of transportation and describe what each one usually carries or where it usually travels",
+        "Explain that trucks and trains often carry goods (things people buy and use) rather than passengers",
+        "Choose a sensible type of transportation for a given trip, like a plane for a trip across the ocean or a bike for a trip around the block"
+      ],
+      "assessmentPrompt": "Can {{name}} name two different kinds of transportation and explain what each one is good for moving?",
+      "standards": []
+    },
+    {
+      "id": "mt_afpN0KFTC4",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Colonial & Revolutionary America",
+      "name": "The 13 Colonies and Becoming Free from England",
+      "description": "Understand at a simple level that the 13 colonies were once ruled by England, and that real historical figures helped the colonies become their own free country, without expecting names or dates memorized in depth at this age",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Retell in simple words that America used to be ruled by England, and that people worked together to become free",
+        "Name at least one real historical figure connected to this story when introduced to one in a read-aloud or lesson",
+        "Recognize that this is a true story about real people, not a fictional tale"
+      ],
+      "assessmentPrompt": "After hearing the story of the 13 colonies, can {{name}} retell in their own words that America used to be ruled by England and became its own free country?",
+      "standards": []
+    },
+    {
+      "id": "mt_gBfzT4pAFC",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Symbols of the United States",
+      "description": "Recognize national symbols that stand for the United States, such as the flag, the bald eagle, the Statue of Liberty, the Liberty Bell, and the Washington Monument, and understand that each one stands for an idea about the country",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Identify the American flag by sight and name at least one other national symbol",
+        "Explain in simple words that a symbol like the flag or the bald eagle stands for the whole country, not just one place",
+        "Recognize a picture of the Statue of Liberty, the Liberty Bell, or the Washington Monument when shown one"
+      ],
+      "assessmentPrompt": "Can {{name}} point out the American flag and name one other symbol that stands for the United States?",
+      "standards": []
+    },
+    {
+      "id": "mt_X1pNsoH2At",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Voting to Choose Leaders",
+      "description": "Understand at a simple level that adult citizens vote to choose their leaders, that each citizen gets one vote, and that whoever gets the most votes wins the election",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Explain in simple words that voting is how people choose their leaders",
+        "State that each person gets one vote, not more, when voting",
+        "Participate in a simple classroom or family vote and understand that the choice with the most votes wins"
+      ],
+      "assessmentPrompt": "After a simple class or family vote, can {{name}} explain that the choice with the most votes is the one that wins?",
+      "standards": []
+    },
+    {
+      "id": "mt_8AmmZLjcvK",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "The Five Themes of Geography",
+      "description": "Recognize the Five Themes of Geography as a named framework for thinking about a place: Location (where it is), Place (what it is like), Movement (how people and things travel to and from it), Region (what makes it part of a larger area), and Human-Environment Interaction (how people and the place change each other)",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name at least two of the Five Themes of Geography when introduced to the framework",
+        "Describe a familiar place using one of the five themes, for example where it is located or how people travel there",
+        "Give an example of a person changing a place or a place affecting how people live there, as a simple instance of human-environment interaction"
+      ],
+      "assessmentPrompt": "Can {{name}} describe a familiar place using at least one of the Five Themes of Geography, like where it is located or how people get there?",
       "standards": []
     }
   ]

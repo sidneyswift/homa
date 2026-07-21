@@ -52,7 +52,6 @@
       }
     ]
   },
-
   "layer2_scope": {
     "mappings": [
       {
@@ -62,7 +61,9 @@
         "homaDomain": "friendship-cooperation",
         "homaTopicId": "mt_w4nSIDhIgC",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Roles in a Group' topic (age 7-9) is the closest existing match but skews slightly older and is about group dynamics rather than simply naming the groups (team, family) a child belongs to; a reasonable partial fit, not an exact one" }
+        "suggested": {
+          "note": "Homa's 'Roles in a Group' topic (age 7-9) is the closest existing match but skews slightly older and is about group dynamics rather than simply naming the groups (team, family) a child belongs to; a reasonable partial fit, not an exact one"
+        }
       },
       {
         "curriculumSubject": "Unit 1, Lesson 2: Home and School / Citizen Heroes: Ruby Bridges Hall",
@@ -71,7 +72,9 @@
         "homaDomain": "responsible-decision-making",
         "homaTopicId": "mt_Wc6cOTQ1bA",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Right and Wrong Choices' topic (age 5-7) is the closest existing conceptual match for courage-as-a-value, but Homa has no biography-of-a-real-historical-person topic anywhere in its taxonomy; the book's own teaching vehicle (a named real person's story) has no direct equivalent" }
+        "suggested": {
+          "note": "Homa's 'Right and Wrong Choices' topic (age 5-7) is the closest existing conceptual match for courage-as-a-value, but Homa has no biography-of-a-real-historical-person topic anywhere in its taxonomy; the book's own teaching vehicle (a named real person's story) has no direct equivalent"
+        }
       },
       {
         "curriculumSubject": "Unit 1, Lesson 3: Rules We Follow",
@@ -80,7 +83,9 @@
         "homaDomain": "responsible-decision-making",
         "homaTopicId": "mt_rkrG2w7WXI",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Rules and agreements exist' topic (age 5-7) is a direct, strong match" }
+        "suggested": {
+          "note": "Homa's 'Rules and agreements exist' topic (age 5-7) is a direct, strong match"
+        }
       },
       {
         "curriculumSubject": "Unit 1, Lesson 4: Learning About My School / Then and Now: Things We Use",
@@ -89,7 +94,9 @@
         "homaDomain": "historical-thinking",
         "homaTopicId": "mt_9REmUc8r4D",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Evidence from the Past' topic (age 6-7) is about reasoning from historical evidence generally; it is a real but imperfect fit for this book's simpler 'this used to be different, now it is different' comparison pattern, which has no dedicated topic anywhere in Homa's taxonomy" }
+        "suggested": {
+          "note": "Homa's 'Evidence from the Past' topic (age 6-7) is about reasoning from historical evidence generally; it is a real but imperfect fit for this book's simpler 'this used to be different, now it is different' comparison pattern, which has no dedicated topic anywhere in Homa's taxonomy"
+        }
       },
       {
         "curriculumSubject": "Unit 2, Lesson 1: Welcome to My Neighborhood / Map and Globe Skills: Use a Map Key",
@@ -102,7 +109,10 @@
           "topicSlug": "social_studies.reading-a-map-key-and-directions",
           "domain": "geography",
           "kind": "procedural",
-          "teachingWindowMonths": [60, 84],
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
           "note": "Checked 'map', 'globe', and 'compass' across all 93 pre-existing History (social_studies) topics; the only 'map' hits are Ancient Egypt/Greece/Rome content-domain topics about historical maps, not a basic map-reading skill. Added as a genuine new topic this session, see notes."
         }
       },
@@ -117,7 +127,10 @@
           "topicSlug": "social_studies.kinds-of-communities-city-town-farm",
           "domain": "geography",
           "kind": "conceptual",
-          "teachingWindowMonths": [60, 84],
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
           "note": "No existing Homa topic compares community types (city/town/farm); the four-directions half of this lesson is covered by the new 'Reading a Map' topic above. Added as a genuine new topic this session, see notes."
         }
       },
@@ -132,7 +145,10 @@
           "topicSlug": "social_studies.celebrations-and-traditions-around-the-world",
           "domain": "cultural-studies",
           "kind": "conceptual",
-          "teachingWindowMonths": [60, 84],
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
           "note": "Checked 'culture', 'tradition', and 'holiday' across all 93 pre-existing History (social_studies) topics; the closest existing hit is PSD's 'The world contains many cultures, traditions' (age 9-11), pitched well above Grade 1. Added as a genuine new topic this session, see notes."
         }
       },
@@ -140,11 +156,11 @@
         "curriculumSubject": "Unit 2, Lesson 4: Community Laws and Leaders / Citizen Heroes: Jane Addams",
         "curriculumTopic": "Communities have laws (rules everyone must follow) and elected leaders (like a mayor) who help run the community",
         "homaSubject": "social_emotional",
-        "homaDomain": "responsible-decision-making",
-        "homaTopicId": null,
-        "status": "no_subject",
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_0Mc3ItywUx",
+        "status": "mapped",
         "suggested": {
-          "note": "No existing Homa topic names community laws or an elected local leader specifically (closest is the general 'Rules and agreements exist', already mapped to Lesson 3 above); recording as a real gap rather than forcing a second mapping onto the same topic, see decisionsNeeded for why no new topic was added this session"
+          "note": "Resolved 2026-07-21: mapped to new topic mt_0Mc3ItywUx (Community Laws and Local Leaders), in the new History > Civic Life domain (packages/taxonomy/src/mapping.ts), a content-kind domain deliberately using a different id from the reserved AUTHORED_DOMAINS civics-government assessment domain, so no collision. See the architecture-question entry in decisionsNeeded for the full reasoning."
         }
       },
       {
@@ -152,10 +168,10 @@
         "curriculumTopic": "A child's address nests inside a neighborhood, inside a community, inside a state, inside a country, inside the world",
         "homaSubject": "social_studies",
         "homaDomain": "geography",
-        "homaTopicId": null,
-        "status": "no_subject",
+        "homaTopicId": "mt_V6t7XCmgVm",
+        "status": "mapped",
         "suggested": {
-          "note": "No existing Homa topic teaches the nested neighborhood-community-state-country-world address structure; recording as a real gap, see decisionsNeeded"
+          "note": "Resolved 2026-07-21: mapped to new topic mt_V6t7XCmgVm (Nested Address: Neighborhood to World), in the existing History > Geography content domain (already safe, no collision, no code change needed beyond the topic itself)."
         }
       },
       {
@@ -165,7 +181,9 @@
         "homaDomain": "money-finance",
         "homaTopicId": "mt_asRwlPZXC3",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Jobs People Do' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Jobs People Do' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit 3, Lesson 2: Needs and Wants / Then and Now: Changing Toys",
@@ -174,7 +192,9 @@
         "homaDomain": "money-finance",
         "homaTopicId": "mt__ab4knIaSL",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Needs & Wants' topic (age 5-7) is a direct, exact match" }
+        "suggested": {
+          "note": "Homa's 'Needs & Wants' topic (age 5-7) is a direct, exact match"
+        }
       },
       {
         "curriculumSubject": "Unit 3, Lesson 3: Spending and Saving / Here and There: Money Around the World",
@@ -183,7 +203,9 @@
         "homaDomain": "money-finance",
         "homaTopicId": "mt_zrCyqhngYm",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Saving Money' topic (age 5-7) is a direct match for the spending/saving half; 'Money Around the World' has no exact match (closest is 'Global Trade' at age 9-11, too old), a minor partial gap not worth a dedicated new topic on its own" }
+        "suggested": {
+          "note": "Homa's 'Saving Money' topic (age 5-7) is a direct match for the spending/saving half; 'Money Around the World' has no exact match (closest is 'Global Trade' at age 9-11, too old), a minor partial gap not worth a dedicated new topic on its own"
+        }
       },
       {
         "curriculumSubject": "Unit 3, Lesson 4: Welcome to Job Day! (goods, services, tools)",
@@ -192,7 +214,9 @@
         "homaDomain": "entrepreneurship",
         "homaTopicId": "mt_RgQxPddV8v",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Goods & Services' topic (age 5-7) is a direct, exact match" }
+        "suggested": {
+          "note": "Homa's 'Goods & Services' topic (age 5-7) is a direct, exact match"
+        }
       },
       {
         "curriculumSubject": "Unit 3, Lesson 5: Interview with a Farmer / Map and Globe Skills: Follow a Route",
@@ -201,17 +225,19 @@
         "homaDomain": "money-finance",
         "homaTopicId": "mt_asRwlPZXC3",
         "status": "partial",
-        "suggested": { "note": "Folded into the 'Jobs People Do' mapping above rather than counted as a second gap; the interview-dialogue teaching format itself (two named speakers, Q-and-A) has no format equivalent in materials-studio, see Layer 4" }
+        "suggested": {
+          "note": "Folded into the 'Jobs People Do' mapping above rather than counted as a second gap; the interview-dialogue teaching format itself (two named speakers, Q-and-A) has no format equivalent in materials-studio, see Layer 4"
+        }
       },
       {
         "curriculumSubject": "Unit 3, Lesson 6: From Place to Place",
         "curriculumTopic": "Transportation (cars, trucks, planes, bikes, boats) moves people and goods from place to place",
         "homaSubject": "social_studies",
         "homaDomain": "geography",
-        "homaTopicId": null,
-        "status": "no_subject",
+        "homaTopicId": "mt_Nf4ZmHeiA1",
+        "status": "mapped",
         "suggested": {
-          "note": "Checked 'transportation', 'vehicle', and 'travel' across the full taxonomy; zero hits anywhere. A real gap, but a single-lesson, lower-priority one (this book's only transportation content); recording rather than adding a third new Geography topic this session, see decisionsNeeded"
+          "note": "Resolved 2026-07-21: mapped to new topic mt_Nf4ZmHeiA1 (How Transportation Moves People and Goods), in the existing History > Geography content domain."
         }
       },
       {
@@ -221,7 +247,9 @@
         "homaDomain": "earths-systems",
         "homaTopicId": "mt_HZvTriQWTh",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit 4, Lesson 2: Looking at Our Land and Water / Map and Globe Skills: Locate Land and Water",
@@ -230,7 +258,9 @@
         "homaDomain": "geography",
         "homaTopicId": "mt_NlyT4Xzzr2",
         "status": "partial",
-        "suggested": { "note": "Folded into the new 'Reading a Map: Map Key and Four Directions' topic above; naming and locating the continents and oceans specifically (as opposed to reading a map's key and directions) is a related but distinct skill with no existing topic, a minor gap not worth a fourth new topic this session" }
+        "suggested": {
+          "note": "Folded into the new 'Reading a Map: Map Key and Four Directions' topic above; naming and locating the continents and oceans specifically (as opposed to reading a map's key and directions) is a related but distinct skill with no existing topic, a minor gap not worth a fourth new topic this session"
+        }
       },
       {
         "curriculumSubject": "Unit 4, Lesson 3: Our Earth's Resources",
@@ -239,7 +269,9 @@
         "homaDomain": "weather-climate",
         "homaTopicId": "mt_VI5kdtf28e",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Natural resources' topic (age 9-10) is the only existing match and is pitched noticeably older than this Grade 1 lesson's simple land/water/air/trees framing; a real but imperfect fit" }
+        "suggested": {
+          "note": "Homa's 'Natural resources' topic (age 9-10) is the only existing match and is pitched noticeably older than this Grade 1 lesson's simple land/water/air/trees framing; a real but imperfect fit"
+        }
       },
       {
         "curriculumSubject": "Unit 4, Lesson 5: Caring for Our Resources / Here and There: Endangered Animals",
@@ -248,7 +280,9 @@
         "homaDomain": "animals-of-the-world",
         "homaTopicId": "mt_5S4byWDX6n",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Endangered & Extinct Species' topic (age 9-11) is the closest match for the endangered-animals half but is pitched older; recycling/reducing waste itself has no existing Homa topic anywhere" }
+        "suggested": {
+          "note": "Homa's 'Endangered & Extinct Species' topic (age 9-11) is the closest match for the endangered-animals half but is pitched older; recycling/reducing waste itself has no existing Homa topic anywhere"
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 1: Native Americans / Chart and Graph Skills: Read a Diagram",
@@ -257,7 +291,9 @@
         "homaDomain": "historical-thinking",
         "homaTopicId": "mt_2GDBmKCJxs",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Different Accounts of the Same Event' topic (age 6-8) is a loose fit at best; Homa's taxonomy has no dedicated Native American history content anywhere, a real content gap this session did not attempt to fill given the sensitivity and depth a good treatment would need" }
+        "suggested": {
+          "note": "Homa's 'Different Accounts of the Same Event' topic (age 6-8) is a loose fit at best; Homa's taxonomy has no dedicated Native American history content anywhere, a real content gap this session did not attempt to fill given the sensitivity and depth a good treatment would need"
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 2: Early Travelers to America / Map and Globe Skills: Use a History Map",
@@ -266,25 +302,31 @@
         "homaDomain": "historical-thinking",
         "homaTopicId": "mt_9REmUc8r4D",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Evidence from the Past' topic (age 6-7) is a loose fit; this is specific historical-figure content Homa's taxonomy does not otherwise cover for this age band" }
+        "suggested": {
+          "note": "Homa's 'Evidence from the Past' topic (age 6-7) is a loose fit; this is specific historical-figure content Homa's taxonomy does not otherwise cover for this age band"
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 3: The Colonies Become Free / Meet Benjamin Franklin",
         "curriculumTopic": "The 13 colonies became free from England; real historical figures helped make this happen",
         "homaSubject": "social_studies",
-        "homaDomain": "historical-thinking",
-        "homaTopicId": null,
-        "status": "no_subject",
-        "suggested": { "note": "No existing Homa topic covers early American history at any age; a real content gap outside this session's scope, see decisionsNeeded" }
+        "homaDomain": "colonial-revolutionary-america",
+        "homaTopicId": "mt_afpN0KFTC4",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_afpN0KFTC4 (The 13 Colonies and Becoming Free from England), in the new History > Colonial & Revolutionary America domain, following the same period-content pattern as the existing ancient-egypt/ancient-greece-rome/medieval-times domains."
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 4: Symbols in Our Country",
         "curriculumTopic": "The United States has symbols that stand for the country: the flag, the bald eagle, the Statue of Liberty, the Liberty Bell, the Washington Monument, and others",
         "homaSubject": "social_studies",
-        "homaDomain": "cultural-studies",
-        "homaTopicId": null,
-        "status": "no_subject",
-        "suggested": { "note": "Checked 'flag', 'symbol', 'eagle', and 'liberty' across the full taxonomy; zero relevant hits (the few 'symbol' and 'flag' hits are all Science animal-camouflage or Math notation topics). A genuine, well-evidenced gap; recording rather than adding a topic this session, see decisionsNeeded for why" }
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_gBfzT4pAFC",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_gBfzT4pAFC (Symbols of the United States), in the new History > Civic Life domain."
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 5: We Celebrate Holidays / Meet Abraham Lincoln",
@@ -293,16 +335,20 @@
         "homaDomain": "cultural-studies",
         "homaTopicId": "mt_OWl0pyMgMJ",
         "status": "partial",
-        "suggested": { "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; this lesson is specifically about US national/patriotic holidays rather than world traditions, a related but not identical fit" }
+        "suggested": {
+          "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; this lesson is specifically about US national/patriotic holidays rather than world traditions, a related but not identical fit"
+        }
       },
       {
         "curriculumSubject": "Unit 5, Lesson 6: Choosing Our Country's Leaders",
         "curriculumTopic": "Adult citizens vote to choose their leaders; each citizen votes once, and whoever gets the most votes wins",
         "homaSubject": "social_studies",
-        "homaDomain": "historical-thinking",
-        "homaTopicId": null,
-        "status": "no_subject",
-        "suggested": { "note": "Checked 'vote' and 'election' across the full taxonomy; the only hit is Ancient Greece & Rome's 'Athenian Democracy' (age 7-9), about the structure of ancient Athenian government, not the simple modern-day 'everyone votes once, most votes wins' concept this Grade 1 lesson teaches. A genuine gap; see decisionsNeeded" }
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_X1pNsoH2At",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_X1pNsoH2At (Voting to Choose Leaders), in the new History > Civic Life domain, distinct from Ancient Greece & Rome's unrelated Athenian Democracy topic."
+        }
       },
       {
         "curriculumSubject": "Unit 6, Lesson 1: Visiting the Market / Thinking Skills: Make a Decision",
@@ -311,7 +357,9 @@
         "homaDomain": "entrepreneurship",
         "homaTopicId": "mt_SbEaQnMQoD",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Buyers & Sellers' topic (age 5-7) is a direct match" }
+        "suggested": {
+          "note": "Homa's 'Buyers & Sellers' topic (age 5-7) is a direct match"
+        }
       },
       {
         "curriculumSubject": "Unit 6, Lesson 2: How Things Have Changed",
@@ -320,7 +368,9 @@
         "homaDomain": "historical-thinking",
         "homaTopicId": "mt_9REmUc8r4D",
         "status": "partial",
-        "suggested": { "note": "Same 'Evidence from the Past' partial fit as the other Then-and-Now-style lessons above; folded in rather than counted as a fourth separate gap" }
+        "suggested": {
+          "note": "Same 'Evidence from the Past' partial fit as the other Then-and-Now-style lessons above; folded in rather than counted as a fourth separate gap"
+        }
       },
       {
         "curriculumSubject": "Unit 6, Lesson 3: Inventors and Inventions / DK: Telephones",
@@ -329,7 +379,9 @@
         "homaDomain": "entrepreneurship",
         "homaTopicId": "mt_CrGnpVjnk8",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Making Something to Sell' topic (age 5-7) is the closest existing match for the idea of inventing/making something new, though it is framed around entrepreneurship rather than invention history specifically; a loose but real fit" }
+        "suggested": {
+          "note": "Homa's 'Making Something to Sell' topic (age 5-7) is the closest existing match for the idea of inventing/making something new, though it is framed around entrepreneurship rather than invention history specifically; a loose but real fit"
+        }
       },
       {
         "curriculumSubject": "Unit 6, Lesson 4: How Travel Has Changed / Chart and Graph Skills: Read a Bar Graph",
@@ -338,7 +390,9 @@
         "homaDomain": "data-statistics",
         "homaTopicId": "mt_VhBH8wrFC6",
         "status": "mapped",
-        "suggested": { "note": "Homa's 'Picture & Bar Graphs' topic (age 7-8) is a direct match for the bar-graph half of this lesson" }
+        "suggested": {
+          "note": "Homa's 'Picture & Bar Graphs' topic (age 7-8) is a direct match for the bar-graph half of this lesson"
+        }
       },
       {
         "curriculumSubject": "Unit 6, Lesson 5: Life Around the World",
@@ -347,7 +401,9 @@
         "homaDomain": "cultural-studies",
         "homaTopicId": "mt_OWl0pyMgMJ",
         "status": "mapped",
-        "suggested": { "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; close enough in spirit (comparing daily life and customs across countries) to count as mapped rather than partial" }
+        "suggested": {
+          "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; close enough in spirit (comparing daily life and customs across countries) to count as mapped rather than partial"
+        }
       },
       {
         "curriculumSubject": "Reference Guide: Picture Glossary",
@@ -356,27 +412,30 @@
         "homaDomain": "historical-thinking",
         "homaTopicId": "mt_VXcua6-txq",
         "status": "partial",
-        "suggested": { "note": "Homa's 'Vocabulary: historical thinking' topic (age 6-10) is the closest single-topic match for a general social-studies-vocabulary concept, though it does not cover the full breadth of this specific 90-term glossary (community, economics, geography, and civics terms alike)" }
+        "suggested": {
+          "note": "Homa's 'Vocabulary: historical thinking' topic (age 6-10) is the closest single-topic match for a general social-studies-vocabulary concept, though it does not cover the full breadth of this specific 90-term glossary (community, economics, geography, and civics terms alike)"
+        }
       },
       {
         "curriculumSubject": "Front matter: Social Studies Handbook, Building Geography Skills",
         "curriculumTopic": "The Five Themes of Geography (Location, Place, Movement, Region, and how places and people change each other)",
         "homaSubject": "social_studies",
         "homaDomain": "geography",
-        "homaTopicId": null,
-        "status": "no_subject",
-        "suggested": { "note": "No existing Homa topic teaches the five themes of geography as a named framework; a real gap, but a front-matter framework rather than a lesson-level concept, lower priority than the lesson-level gaps above, see decisionsNeeded" }
+        "homaTopicId": "mt_8AmmZLjcvK",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_8AmmZLjcvK (The Five Themes of Geography), in the existing History > Geography content domain."
+        }
       }
     ],
     "stats": {
       "totalCurriculumTopics": 32,
-      "mapped": 9,
+      "mapped": 16,
       "unmapped": 3,
-      "noSubject": 7,
+      "noSubject": 0,
       "partial": 13
     }
   },
-
   "layer3_structure": {
     "cadence": "Not stated as a weekly calendar anywhere in the sampled pages. Organized as 6 units of 4-6 lessons each (28 lessons total), each lesson 1-2 pages. No day-by-day or week-by-week schedule is printed anywhere, unlike Homa's own weekly-template curricula; a single-lesson-per-sitting cadence is implied by the format but never stated as a number of minutes or a day of the week, so recording an invented cadence here would not be honest, the same treatment the sibling Harcourt Science volume gave its own untimed lesson format",
     "sessionLengthMinutes": {
@@ -388,7 +447,6 @@
     "totalWeeks": null,
     "notes": "Front matter includes a dedicated 'Social Studies Handbook' (pages H2-H14, its own separate page numbering before Unit 1 begins) covering citizenship vocabulary with photos (respect, caring, responsibility, fairness, honesty, courage), a 6-step problem-solving process and a 5-step decision-making process under 'Citizenship in Action,' the Five Themes of Geography illustrated with one shared example (a school building), and a Map and Globe Skills Review page (using a zoo map to practice near/far/between). This is the same front-loaded-skills-vocabulary pattern the sibling Harcourt Science volume uses for its own process-skills spread, adapted to citizenship and geography vocabulary instead of science process skills. Like the Harcourt Science and Harcourt Art Everywhere volumes in this drop wave, this is a school-classroom-market book (the front cover shows three puppet characters representing a firefighter, a chef, and another community helper; 'Citizen Heroes: Learning About Each Other' and several lesson photos show a full classroom of children); curriculum-writer should treat this the same way, a light one-adult, one-child adaptation of the comprehension-check and feature-box content rather than a literal transcription of classroom group routines."
   },
-
   "layer4_activities": {
     "activityTypes": [
       {
@@ -482,7 +540,6 @@
       "noRecipe": 4
     }
   },
-
   "decisionsNeeded": [
     {
       "category": "knowledge_bank",
@@ -504,15 +561,15 @@
     },
     {
       "category": "taxonomy",
-      "item": "IMPORTANT ARCHITECTURE FINDING, not acted on this session: packages/taxonomy/src/domains.ts already registers 4 AUTHORED_DOMAINS reserved for exactly this kind of content, all under subject social_studies: family-community, geography-maps, civics-government, and economics-money (kind: assessment). None of them has ever had a topics.json entry (confirmed by grep across the whole file). They are NOT orphaned, though: packages/core/src/map/item-domains.ts and packages/core/src/map/content.ts already assign 13 real, live, hand-authored developmental-milestone bank items to these exact same domain ids (for example social_studies.helpers 'Knows what community helpers do: firefighter, doctor, mail carrier' at 54 months, under family-community; social_studies.city-state 'Names their city, state, and country' at 90 months, under geography-maps; social_studies.government-branches at 150 months, under civics-government). This is a SEPARATE content pipeline from the Marble-imported topics.json/skill-graph system this curriculum-ingestion skill is scoped to edit. I could not simply add new topics.json entries pointing at these existing domain ids: marbleDomains() in domains.ts derives a domain-registry entry per unique MARBLE_DOMAIN_MAP domainId, so wiring a new 'History > X' pair to an id like geography-maps would create a SECOND registry entry with that same id (one marble-origin, one homa-origin already there), which fails the 'domain ids are unique' check in check:taxonomy. I did not attempt to resolve this collision or migrate/rename either system; it is a genuine cross-system architecture question, not a routine append. This is exactly why the 3 new topics above landed under the existing content-kind Geography and Cultural Studies domains instead: it was the only append-only path available without either a collision or inventing a confusingly-named fourth concept for the same idea.",
-      "impact": "Two of the real per-lesson gaps below (community laws and leaders; national symbols; voting) have no clean topics.json home right now for exactly this reason: the semantically correct domain (civics-government) already exists but cannot be safely populated via the append-only topics.json path without either a founder decision to resolve the id collision, or accepting a topic under a less precise existing domain the way the 3 additions above did.",
-      "urgency": "medium, worth a founder or engineering decision before the next social-studies-flavored curriculum drop hits the same wall"
+      "item": "RESOLVED 2026-07-21 (before merge): the architecture finding below was surfaced but not acted on when this curriculum was first ingested. packages/taxonomy/src/domains.ts reserves 4 AUTHORED_DOMAINS for social_studies (family-community, geography-maps, civics-government, economics-money), already populated by a separate hand-authored milestone bank (packages/core/src/map/content.ts / item-domains.ts), not by the Marble-imported topics.json this skill edits. The fix: added two NEW content-kind MARBLE_DOMAIN_MAP entries with deliberately non-colliding ids, following the exact pattern already used for Geography and Cultural Studies earlier in this same ingest and for Art/Music in a sibling curriculum this session: 'History > Civic Life' -> domainId civic-life, and 'History > Colonial & Revolutionary America' -> domainId colonial-revolutionary-america (packages/taxonomy/src/mapping.ts). Neither collides with the reserved assessment-kind ids; check:taxonomy's 'domain ids are unique' check confirms 110 domains, 0 duplicates. This did not require resolving the deeper dual-pipeline question (whether the Marble and hand-authored bank systems should ever converge); it sidesteps the collision the same safe way the original session did for the 3 topics that already shipped.",
+      "impact": "Unblocks all 7 real per-lesson gaps that were previously left no_subject (see the next entry below, also resolved). Establishes civic-life and colonial-revolutionary-america as the durable home for this kind of Grade K-2 civics/early-American-history content in future curriculum ingests, so the next social-studies-flavored drop does not have to re-derive this.",
+      "urgency": "resolved"
     },
     {
       "category": "taxonomy",
-      "item": "Real per-lesson gaps recorded as status no_subject in layer2_scope but NOT filled with a new topic this session, given the architecture question above and to keep this session's taxonomy addition proportionate: community laws and local leaders (Unit 2 Lesson 4), the nested neighborhood-community-state-country-world address structure (Unit 2 Lesson 5), transportation (Unit 3 Lesson 6), the five themes of geography as a named framework (front matter), early American colonial history and named historical figures (Unit 5 Lessons 3), national symbols (Unit 5 Lesson 4), and voting/choosing leaders as a simple civic action distinct from ancient Athenian democracy (Unit 5 Lesson 6)",
-      "impact": "These are genuine, well-checked gaps (each was searched by keyword across the full taxonomy before being recorded), not assumed ones. Recording them here keeps the backlog honest without over-adding topics in one session; a founder call on the civics-government domain question above would likely unblock several of these at once.",
-      "urgency": "medium"
+      "item": "RESOLVED 2026-07-21 (before merge): all 7 gaps below are now mapped, using the new domains from the entry above. New topics appended to packages/taxonomy/data/topics.json (1647 -> 1654, append-only, verified insertion-only diff and independently recomputed sha256): community laws and local leaders (mt_0Mc3ItywUx, Civic Life), nested address neighborhood-to-world (mt_V6t7XCmgVm, Geography), transportation moves people and goods (mt_Nf4ZmHeiA1, Geography), the 13 colonies and becoming free from England (mt_afpN0KFTC4, Colonial & Revolutionary America), symbols of the United States (mt_gBfzT4pAFC, Civic Life), voting to choose leaders (mt_X1pNsoH2At, Civic Life), and the Five Themes of Geography (mt_8AmmZLjcvK, Geography). layer2_scope.mappings and .stats updated to reflect mapped status for all 7; 0 no_subject remain for this curriculum. pnpm check:taxonomy, check:fleet-skills, and check:materials all green after the change; verify-ingestion.py cur-2026-07-19-social-studies-all-together re-run and exits 0.",
+      "impact": "Homa can now assess and plan for community civics, national symbols, voting, and early American history at Grade K-2, none of which had any prior taxonomy coverage.",
+      "urgency": "resolved"
     },
     {
       "category": "method",
@@ -521,6 +578,5 @@
       "urgency": "medium"
     }
   ],
-
   "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: social-studies-all-together-pt1.pdf is 120 PDF pages, social-studies-all-together-pt2.pdf is 43 PDF pages (163 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 163 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows printed pages 214-215 (the end of Unit 5 Lesson 5, 'We Celebrate Holidays,' Martin Luther King Jr. Day and Presidents' Day content), and pt2's first rendered spread (PDF page 1) shows printed page 216 ('Meet Abraham Lincoln,' the very next content), with no missing or repeated printed page numbers at the seam. Front cover (pt1 page 1) reads 'SOCIAL STUDIES, Scott Foresman, All Together' with three puppet characters (a firefighter, a chef, and a third community-helper figure); the title page (pt1 page 2) confirms 'All Together' as this specific volume's own title within the Scott Foresman Social Studies series (program authors including Dr. Candy Dawson Boyd and Dr. Geneva Gay), not a Harcourt-branded book despite two sibling Grade 1 Harcourt volumes (Harcourt Art Everywhere, Harcourt Science) arriving in the same drop wave; the copyright page (pt1 page 3) confirms 'Copyright (c) 2003 by Pearson Education, Inc.,' ISBN 0-328-01759-0. Full table of contents sampled directly (pt1 pages 3-6): 6 units (Unit 1 Time for School; Unit 2 In My Community; Unit 3 Work! Work! Work!; Unit 4 Our Earth, Our Resources; Unit 5 This Is Our Country; Unit 6 Our Country, Our World), Reference Guide (Atlas R2, Geography Terms R10, Picture Glossary R12, Index R24). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the two sibling Harcourt Grade 1 volumes' own findings: (1) the 'Citizen Heroes: Ruby Bridges Hall' biography states directly 'Ruby was six years old when she began first grade,' presented as a same-age peer figure for the reader; (2) every lesson's reading passage uses very short, simple declarative sentences ('My neighborhood is part of a community. A community is a group of people and the place where they live.'; 'I have jobs at school. My big job is to learn.'), consistent with an early-elementary supported reader, the same reading level the sibling Harcourt Science and Harcourt Art Everywhere Grade 1 volumes show; (3) every lesson's 'What Did You Learn?' box requires full sentence-level comprehension responses (recall questions plus an open Think-and-Share or Write-and-Share question), a demand level well beyond a Kindergarten book; (4) cross-referencing this curriculum's own content against Homa's taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (Rules and agreements exist 5-7, Needs & Wants 5-7, Goods & Services 5-7, Buyers & Sellers 5-7, Local weather patterns 5-6), consistent with a 6-7-year-old reader, the same age cluster the sibling volumes' own Grade 1 findings showed. Unlike the Harcourt Art series (where 'Art Everywhere' vs other subtitles distinguishes grade level directly in the cover title), this book's cover reads only 'Social Studies, All Together' with no explicit numeral, so grade level rests entirely on the internal content evidence above, the same situation the sibling Harcourt Science volume was in. Sampling covered the front cover, title page, copyright page, full table of contents, and front-matter Social Studies Handbook (pt1 PDF pages 1-16); Unit 1's full lesson set and Citizen Heroes: Ruby Bridges Hall (pt1 pages 17-40); Unit 2's Vocabulary Preview, Different Kinds of Communities, Chinese New Year DK insert, and End with a Poem (pt1 pages 46-53, 66, 74, 80-81); Unit 3's Welcome to Job Day, Interview with a Farmer, and From Place to Place (pt1 pages 108-109, 116-117, 124-125); Unit 4's Begin with a Song and Our Earth's Resources (pt1 pages 90, 144-145, 156-157); Unit 5's Meet Benjamin Franklin, We Celebrate Holidays, Symbols in Our Country, and Choosing Our Country's Leaders (pt1 pages 110, 115-119); the Unit 5/pt2 seam and Meet Abraham Lincoln (pt2 pages 0-1); Choosing Our Country's Leaders continuation (pt2 page 1); Unit 6's Begin with a Song, Eleanor Roosevelt, How Things Have Changed, and Telephones DK insert (pt2 pages 3-4, 8, 13, 17); Kay's Grandparents Reading Social Studies feature and Meet Mae Jemison (pt2 pages 20, 22); and the back-matter Atlas, Picture Glossary, Index, and Credits (pt2 pages 30, 35, 40, 42). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 163 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics, the then-and-now-comparison recipe, and the curriculum-writer methodology section describe generic elementary-social-studies concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."
 }

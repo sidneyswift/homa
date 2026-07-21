@@ -96,6 +96,20 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // Marble domains instead of widening the vocabulary.
   "History > Geography": { subject: "social_studies", domainId: "geography", displayName: "Geography", kind: "content" },
   "History > Cultural Studies": { subject: "social_studies", domainId: "cultural-studies", displayName: "Cultural studies", kind: "content" },
+  // Inspo-flywheel addition (2026-07-21): Social Studies: All Together
+  // (Scott Foresman, Grade 1) surfaced 7 real gaps that semantically belong
+  // under the AUTHORED_DOMAINS civics-government/family-community/
+  // geography-maps ids (domains.ts), but those are RESERVED assessment-kind
+  // domains already populated by the hand-authored milestone bank
+  // (packages/core/src/map/content.ts / item-domains.ts), a separate
+  // pipeline from this Marble-imported one. Wiring a new content-kind entry
+  // to one of those same ids would create a duplicate domain id and fail
+  // check:taxonomy's "domain ids are unique" check. These two new ids are
+  // deliberately DIFFERENT from the reserved ones, following the same
+  // non-colliding pattern already used above for Geography/Cultural
+  // Studies and for Art/Music elsewhere in this session.
+  "History > Civic Life": { subject: "social_studies", domainId: "civic-life", displayName: "Civic life", kind: "content" },
+  "History > Colonial & Revolutionary America": { subject: "social_studies", domainId: "colonial-revolutionary-america", displayName: "Colonial & Revolutionary America", kind: "content" },
 
   // Personal & Social Development (6 domains) → social_emotional
   "Personal & Social Development > Emotional Literacy": { subject: "social_emotional", domainId: "emotional-literacy", displayName: "Emotional literacy", kind: "assessment" },
