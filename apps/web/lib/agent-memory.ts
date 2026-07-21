@@ -23,12 +23,30 @@ export interface MemoryRow {
   created_at: string;
 }
 
-/** Total budget across a family's long-term rows (facts + what-works). When
- *  an add would cross it, the tool returns current entries and asks the
- *  model to consolidate in the same turn instead of silently dropping. */
+/**
+ * Budget for the memories PINNED into the prompt each turn.
+ *
+ * This bounds prompt cost, not storage. Every character here is re-injected
+ * on every turn of every channel, which is the whole reason a limit exists.
+ * Storage is unbounded (founder ruling 2026-07-20, memory-render-time-budget):
+ * a write is never refused for space, because a fact a parent told Homa and
+ * Homa dropped is worse than a fact she has to search for. Anything past the
+ * budget stays in family_memories, findable through recall and visible in the
+ * founder Brain view. selectPinnedMemories below decides what makes the cut.
+ *
+ * Cause: the old write-time gate meant a full family lost facts outright on
+ * the two paths that cannot consolidate, voice and the background extraction
+ * loops. See build-log 2026-07-20.
+ */
 export const FAMILY_MEMORY_CHAR_BUDGET = 4000;
 
-/** Hard cap per entry; mirrors the DB check constraint (500). */
+/** Compaction wakes when a family's active memories cross this share of the
+ *  pinned budget, so merging happens off the critical path and well before
+ *  anything would be pushed out of the prompt. */
+export const MEMORY_COMPACTION_TRIGGER_RATIO = 0.8;
+
+/** Hard cap per entry. The DB check constraint (1 to 500) is the backstop;
+ *  this tighter cap is what the write paths actually enforce. */
 export const MEMORY_ENTRY_MAX_CHARS = 300;
 
 // Invisible/bidi characters that hide payloads from human review.
@@ -63,9 +81,81 @@ export function scanMemoryContent(content: string): string | null {
   return null;
 }
 
-/** Sum of stored characters that count against the family budget. */
+/** Sum of stored characters across the given rows. Against
+ *  FAMILY_MEMORY_CHAR_BUDGET this reads as "would all of it fit in the
+ *  prompt", which is what the compaction trigger and the Brain view ask. */
 export function memoryUsageChars(rows: Pick<MemoryRow, "content">[]): number {
   return rows.reduce((total, row) => total + row.content.length, 0);
+}
+
+/** Postgres hands back "2026-07-19 12:34:56.789+00", which Date.parse reads
+ *  but string comparison would not order safely across formats. */
+function memoryCreatedAtMs(row: MemoryRow): number {
+  const parsed = Date.parse(row.created_at);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export interface PinnedMemorySelection {
+  /** Rendered into this turn's context block, oldest first so the story of
+   *  a child reads in order. */
+  pinned: MemoryRow[];
+  /** Stored and searchable through recall, just not injected this turn. */
+  overflow: MemoryRow[];
+  pinnedChars: number;
+}
+
+/**
+ * scoreMemoryForPinning(row, focusChildId): number
+ * Higher wins a place in the prompt. Ties break deterministically on id, so
+ * the pinned set never flickers between turns for unrelated reasons.
+ *
+ * PLACEHOLDER: pure recency, pending the founder's ranking rule. Recency
+ * alone is the naive answer and it has a specific failure mode worth
+ * fixing: a chatty week about one child evicts a quieter sibling entirely,
+ * and hard-won what_works insight loses to routine facts.
+ */
+function scoreMemoryForPinning(row: MemoryRow, focusChildId: string | null): number {
+  // TODO(founder): replace with the real rule. See the note in this PR.
+  void focusChildId;
+  return memoryCreatedAtMs(row);
+}
+
+/**
+ * selectPinnedMemories(rows, options): PinnedMemorySelection
+ * Splits a family's active memories into the set that rides in the prompt
+ * and the set that stays searchable. Greedy fill by score: a high-scoring
+ * entry that does not fit yields to shorter ones behind it rather than
+ * stranding the remaining space.
+ *
+ * Never throws and never drops: every input row lands in exactly one of
+ * pinned or overflow.
+ */
+export function selectPinnedMemories(
+  rows: MemoryRow[],
+  options?: { focusChildId?: string | null; budget?: number },
+): PinnedMemorySelection {
+  const budget = options?.budget ?? FAMILY_MEMORY_CHAR_BUDGET;
+  const focusChildId = options?.focusChildId ?? null;
+
+  const ranked = [...rows].sort((a, b) => {
+    const delta = scoreMemoryForPinning(b, focusChildId) - scoreMemoryForPinning(a, focusChildId);
+    return delta !== 0 ? delta : a.id.localeCompare(b.id);
+  });
+
+  const pinned: MemoryRow[] = [];
+  const overflow: MemoryRow[] = [];
+  let used = 0;
+  for (const row of ranked) {
+    if (used + row.content.length <= budget) {
+      pinned.push(row);
+      used += row.content.length;
+    } else {
+      overflow.push(row);
+    }
+  }
+
+  pinned.sort((a, b) => memoryCreatedAtMs(a) - memoryCreatedAtMs(b));
+  return { pinned, overflow, pinnedChars: used };
 }
 
 /**

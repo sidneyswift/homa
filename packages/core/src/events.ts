@@ -582,6 +582,16 @@ export const EVENT_SCHEMAS = {
     skipped: z.number().int().min(0),
     messages_reviewed: z.number().int().min(0),
   }),
+  // Background compaction merged overlapping entries (founder ruling
+  // 2026-07-20, memory-render-time-budget). Counts only, never content:
+  // chars_before and chars_after are what tell us the pass earned its
+  // keep, since a run that shrinks nothing should not be running.
+  "memory.compacted": z.object({
+    family_id: z.uuid(),
+    merges: z.number().int().min(0),
+    chars_before: z.number().int().min(0),
+    chars_after: z.number().int().min(0),
+  }),
   // A parent removed a saved memory from /home (the undo surface).
   "memory.forgotten": z.object({
     family_id: z.uuid(),

@@ -34,6 +34,9 @@ export const USAGE_SURFACES = [
   "plan_narrative",
   "curriculum",
   "memory_extraction",
+  // Distinct from "compaction" above, which is eve compacting a long
+  // conversation. This one merges a family's saved memories.
+  "memory_compaction",
   "embedding",
   "lesson_tone",
   "lesson_synthesis",

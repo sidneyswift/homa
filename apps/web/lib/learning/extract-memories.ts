@@ -18,7 +18,6 @@ import { saveFamilyMemory } from "./save-memory";
  * background writes are never more powerful than foreground ones:
  *
  *   - injection scan on every entry (scanMemoryContent, M2-14 floor),
- *   - the family character budget (stop saving when full, never evict),
  *   - exact-content dedupe against existing rows,
  *   - a hard cap of entries per run (delta guard, M2-13 posture),
  *   - child attribution only by exact name match inside THIS family.

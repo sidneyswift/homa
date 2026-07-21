@@ -1,9 +1,4 @@
-import {
-  FAMILY_MEMORY_CHAR_BUDGET,
-  MEMORY_CONFLICT_MAX_DISTANCE,
-  memoryUsageChars,
-  scanMemoryContent,
-} from "../agent-memory";
+import { MEMORY_CONFLICT_MAX_DISTANCE, scanMemoryContent } from "../agent-memory";
 import { mapDb } from "../map/db";
 import { embedText } from "./embeddings";
 
@@ -14,7 +9,6 @@ import { embedText } from "./embeddings";
  * is never more powerful than a foreground one:
  *
  *   - injection scan (scanMemoryContent, the M2-14 floor),
- *   - the family character budget (refuse when full, never evict),
  *   - exact-content dedupe,
  *   - child attribution only for a child inside THIS family (by id or by
  *     exact case-insensitive name).
@@ -51,7 +45,7 @@ export type SaveMemoryResult =
     }
   | {
       saved: false;
-      reason: "too-short" | "blocked-by-scan" | "duplicate" | "budget-full" | "unknown-child";
+      reason: "too-short" | "blocked-by-scan" | "duplicate" | "unknown-child";
     };
 
 export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemoryResult> {
@@ -77,9 +71,6 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
 
   if (memories.some((row) => row.content === content)) {
     return { saved: false, reason: "duplicate" };
-  }
-  if (memoryUsageChars(memories) + content.length > FAMILY_MEMORY_CHAR_BUDGET) {
-    return { saved: false, reason: "budget-full" };
   }
 
   let childId: string | null = null;

@@ -3,12 +3,10 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
-  FAMILY_MEMORY_CHAR_BUDGET,
   MEMORY_ENTRY_MAX_CHARS,
   MEMORY_KINDS,
   findConflictingMemories,
   memoryConflictNote,
-  memoryUsageChars,
   scanMemoryContent,
   type MemoryConflictCandidate,
 } from "../../lib/agent-memory";
@@ -68,8 +66,6 @@ export default defineTool({
           "blocked-by-scan":
             "That reads like an instruction, not a fact about the family. Rephrase it as a plain fact.",
           duplicate: "Already saved (no duplicate added).",
-          "budget-full":
-            "Memory is full. Consolidate now: forget stale or overlapping entries, then retry this save in the same turn.",
           "unknown-child":
             "That child id is not in this family. Use an id from the family context block.",
         };
@@ -122,15 +118,6 @@ export default defineTool({
     const rows = existing ?? [];
     if (rows.some((row) => row.content === input.content)) {
       return { saved: true, done: true, note: "Already saved (no duplicate added)." };
-    }
-
-    const usage = memoryUsageChars(rows);
-    if (usage + input.content.length > FAMILY_MEMORY_CHAR_BUDGET) {
-      return {
-        saved: false,
-        note: `Memory is at ${usage.toLocaleString()} of ${FAMILY_MEMORY_CHAR_BUDGET.toLocaleString()} characters and this entry will not fit. Consolidate now: forget stale or overlapping entries (see current_memories), then retry this save in the same turn.`,
-        current_memories: rows.map((row) => row.content),
-      };
     }
 
     // Best-effort semantic index; null just means FTS-only for this row.

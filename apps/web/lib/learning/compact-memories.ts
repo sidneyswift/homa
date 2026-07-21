@@ -1,0 +1,381 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+import { generateObject } from "ai";
+import { z } from "zod";
+
+import { HOMA_MODEL } from "../../agent/model";
+import {
+  FAMILY_MEMORY_CHAR_BUDGET,
+  MEMORY_COMPACTION_TRIGGER_RATIO,
+  MEMORY_ENTRY_MAX_CHARS,
+  memoryUsageChars,
+  scanMemoryContent,
+} from "../agent-memory";
+import { mapDb } from "../map/db";
+import { emitMapEvent } from "../map/events";
+import { gatewayAttribution, recordModelUsage } from "../model-usage";
+import { embedText } from "./embeddings";
+
+/**
+ * Memory compaction: the background pass that keeps a family's saved
+ * memories worth carrying (founder ruling 2026-07-20,
+ * memory-render-time-budget, and the 80% high-water trigger alongside it).
+ *
+ * Why this exists as a background job and not an in-turn scramble: the old
+ * design asked the chat agent to consolidate mid-conversation, at the exact
+ * moment a parent was waiting on a reply, on the one channel that could
+ * even attempt it. It never once ran in production. Every family that
+ * accumulated overlapping entries just kept them, so the prompt filled with
+ * the same fact restated four times as a skill firmed up.
+ *
+ * Shape mirrors extract-memories.ts: one structured model pass, then
+ * deterministic guarded writes. The model proposes; this module decides.
+ * Nothing the model returns is trusted as an identifier: it sees indices
+ * into a list WE built from THIS family's rows, so it cannot name another
+ * family's memory even if it tries.
+ *
+ * Lossless by construction. Replaced rows are superseded, never deleted,
+ * so a bad merge is visible in the Brain view and recoverable.
+ */
+
+/** One run may collapse at most this many groups (delta guard, M2-13
+ *  posture). A store needing more than this gets the rest next run. */
+export const MAX_MERGES_PER_COMPACTION = 6;
+
+/** Below this many active rows there is nothing worth a model pass. */
+const MIN_ROWS_FOR_COMPACTION = 6;
+
+/** Exported for the law tests: these rules are the guarantee, and they are
+ *  worth asserting directly rather than only through a live model pass. */
+export interface ActiveRow {
+  id: string;
+  child_id: string | null;
+  kind: string;
+  content: string;
+  created_at: string;
+}
+
+export type MergeVerdict =
+  | { ok: true; targets: ActiveRow[]; childId: string | null }
+  | { ok: false; reason: string; detail: string };
+
+export interface CompactionOutcome {
+  familyId: string;
+  /** Merges the model proposed. */
+  proposed: number;
+  /** Merges that survived validation and were written. */
+  applied: { content: string; replaced: number }[];
+  /** Proposals rejected, with the rule that rejected them. */
+  rejected: { reason: string; detail: string }[];
+  charsBefore: number;
+  charsAfter: number;
+  model: string;
+  durationMs: number;
+}
+
+const compactionSchema = z.object({
+  merges: z
+    .array(
+      z.object({
+        replaces: z
+          .array(z.number().int().min(0))
+          .min(2)
+          .max(6)
+          .describe("Numbers of the entries this replaces, from the list shown."),
+        content: z
+          .string()
+          .min(4)
+          .max(MEMORY_ENTRY_MAX_CHARS)
+          .describe("One compact self-contained sentence saying everything they said."),
+        kind: z.enum(["fact", "what_works"]),
+      }),
+    )
+    .max(MAX_MERGES_PER_COMPACTION)
+    .describe("Groups of entries that say the same thing. An empty array is a correct answer."),
+});
+
+let cachedPrompt: string | null = null;
+
+/** agent/memory-compactor.md; cwd is apps/web under the Next server. */
+function compactorPrompt(): string {
+  if (cachedPrompt) return cachedPrompt;
+  cachedPrompt = readFileSync(path.join(process.cwd(), "agent", "memory-compactor.md"), "utf8");
+  return cachedPrompt;
+}
+
+export function compactionModel(): string {
+  return process.env.HOMA_COMPACTION_MODEL ?? HOMA_MODEL;
+}
+
+/** The character count past which a family earns a compaction pass. */
+export function compactionThresholdChars(): number {
+  return Math.floor(FAMILY_MEMORY_CHAR_BUDGET * MEMORY_COMPACTION_TRIGGER_RATIO);
+}
+
+/**
+ * Validates one proposed merge against every rule that must hold no
+ * matter what the model returned. Returns the rows to supersede, or a
+ * rejection reason.
+ *
+ * The multi-kid law is enforced HERE and not in the prompt, because a
+ * prompt is guidance and this is a guarantee: a merge that spans two
+ * children, or folds a child's fact into a family-wide one, cannot be
+ * written no matter how the model was asked.
+ */
+export function validateMerge(
+  merge: { replaces: number[]; content: string; kind: string },
+  rows: ActiveRow[],
+): MergeVerdict {
+  const unique = [...new Set(merge.replaces)];
+  if (unique.length < 2) {
+    return { ok: false, reason: "too-few", detail: "a merge must replace at least two entries" };
+  }
+  const targets: ActiveRow[] = [];
+  for (const index of unique) {
+    const row = rows[index];
+    // Out of range means the model invented a number. Every id we write
+    // comes from this array, so an invented index simply has nothing
+    // behind it and the whole merge is dropped.
+    if (!row) {
+      return { ok: false, reason: "unknown-entry", detail: `no entry numbered ${index}` };
+    }
+    targets.push(row);
+  }
+
+  const childIds = new Set(targets.map((row) => row.child_id));
+  if (childIds.size > 1) {
+    return {
+      ok: false,
+      reason: "cross-child",
+      detail: "merge spanned more than one child, or mixed a child with the whole family",
+    };
+  }
+  const kinds = new Set(targets.map((row) => row.kind));
+  if (kinds.size > 1 || !kinds.has(merge.kind)) {
+    return { ok: false, reason: "cross-kind", detail: "merge mixed fact with what_works" };
+  }
+
+  const blocked = scanMemoryContent(merge.content);
+  if (blocked) {
+    return { ok: false, reason: "blocked-by-scan", detail: blocked };
+  }
+
+  // The whole point is fewer characters. A merge that does not shrink the
+  // store is churn: it supersedes real rows and buys nothing.
+  const before = memoryUsageChars(targets);
+  if (merge.content.length >= before) {
+    return {
+      ok: false,
+      reason: "no-saving",
+      detail: `merged entry (${merge.content.length}) is not shorter than the ${targets.length} it replaces (${before})`,
+    };
+  }
+
+  return { ok: true, targets, childId: targets[0].child_id };
+}
+
+/**
+ * Runs one compaction pass over a family's active memories.
+ *
+ * familyId always arrives from a server-side sweep over our own rows,
+ * never from model output. Safe to call on a family that needs nothing:
+ * it returns an empty outcome without writing.
+ */
+export async function compactFamilyMemories(
+  familyId: string,
+  options?: { dryRun?: boolean },
+): Promise<CompactionOutcome> {
+  const sql = mapDb();
+  const model = compactionModel();
+  const started = Date.now();
+
+  const rows = await sql<ActiveRow[]>`
+    select id, child_id, kind, content, created_at::text as created_at
+    from public.family_memories
+    where family_id = ${familyId} and kind in ('fact', 'what_works')
+      and superseded_at is null
+    order by child_id nulls first, kind, created_at
+  `;
+
+  const charsBefore = memoryUsageChars(rows);
+  const outcome: CompactionOutcome = {
+    familyId,
+    proposed: 0,
+    applied: [],
+    rejected: [],
+    charsBefore,
+    charsAfter: charsBefore,
+    model,
+    durationMs: 0,
+  };
+  if (rows.length < MIN_ROWS_FOR_COMPACTION) {
+    outcome.durationMs = Date.now() - started;
+    return outcome;
+  }
+
+  // Child names, so the model can keep the merged entry reading naturally.
+  const children = await sql<{ id: string; name: string }[]>`
+    select id, name from public.children where family_id = ${familyId}
+  `;
+  const nameById = new Map(children.map((child) => [child.id, child.name]));
+
+  const listing = rows
+    .map((row, index) => {
+      const scope = row.child_id ? (nameById.get(row.child_id) ?? "a child") : "whole family";
+      return `${index}. [${row.kind} · ${scope} · saved ${row.created_at.slice(0, 10)}] ${row.content}`;
+    })
+    .join("\n");
+
+  const result = await generateObject({
+    model,
+    system: compactorPrompt(),
+    prompt: [
+      "This family's saved memories, numbered. Return merges only.",
+      "",
+      listing,
+    ].join("\n"),
+    schema: compactionSchema,
+    maxOutputTokens: 2000,
+    maxRetries: 1,
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(familyId, "memory_compaction"),
+      },
+    },
+  });
+
+  await recordModelUsage({
+    familyId,
+    surface: "memory_compaction",
+    model,
+    modality: "text",
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    durationMs: Date.now() - started,
+  });
+
+  outcome.proposed = result.object.merges.length;
+
+  // A row may only be claimed by one merge; a second claim on the same row
+  // would supersede it twice and lose the first merge's meaning.
+  const claimed = new Set<string>();
+
+  for (const merge of result.object.merges) {
+    const checked = validateMerge(merge, rows);
+    if (!checked.ok) {
+      outcome.rejected.push({ reason: checked.reason, detail: checked.detail });
+      continue;
+    }
+    if (checked.targets.some((row) => claimed.has(row.id))) {
+      outcome.rejected.push({
+        reason: "overlapping",
+        detail: "another merge in this run already claimed one of these entries",
+      });
+      continue;
+    }
+
+    const content = merge.content.trim();
+
+    if (options?.dryRun) {
+      checked.targets.forEach((row) => claimed.add(row.id));
+      outcome.applied.push({ content, replaced: checked.targets.length });
+      continue;
+    }
+
+    const embedding = await embedText(content, { familyId });
+    const targetIds = checked.targets.map((row) => row.id);
+
+    // Insert and supersede together: a crash between them would either
+    // duplicate the knowledge or drop it, and both are worse than nothing.
+    await sql.begin(async (tx) => {
+      await tx`
+        insert into public.family_memories
+          (family_id, child_id, kind, content, source, embedding)
+        values
+          (${familyId}, ${checked.childId}, ${merge.kind}, ${content}, 'homa', ${embedding})
+      `;
+      await tx`
+        update public.family_memories
+        set superseded_at = now()
+        where family_id = ${familyId}
+          and id = any(${targetIds}::uuid[])
+          and superseded_at is null
+      `;
+    });
+
+    checked.targets.forEach((row) => claimed.add(row.id));
+    outcome.applied.push({ content, replaced: checked.targets.length });
+  }
+
+  if (options?.dryRun) {
+    // Nothing was written, so project what the store WOULD weigh: every
+    // merged entry in, every row it claimed out.
+    const replaced = rows.filter((row) => claimed.has(row.id));
+    outcome.charsAfter =
+      charsBefore -
+      memoryUsageChars(replaced) +
+      outcome.applied.reduce((sum, entry) => sum + entry.content.length, 0);
+    outcome.durationMs = Date.now() - started;
+    return outcome;
+  }
+
+  const after = await sql<{ total: number | null }[]>`
+    select sum(char_length(content))::int as total
+    from public.family_memories
+    where family_id = ${familyId} and kind in ('fact', 'what_works')
+      and superseded_at is null
+  `;
+  outcome.charsAfter = after[0]?.total ?? 0;
+  outcome.durationMs = Date.now() - started;
+
+  if (outcome.applied.length > 0) {
+    await emitMapEvent("memory.compacted", {
+      family_id: familyId,
+      merges: outcome.applied.length,
+      chars_before: charsBefore,
+      chars_after: outcome.charsAfter,
+    });
+  }
+  return outcome;
+}
+
+/**
+ * Finds every family whose saved memories crossed the high-water mark and
+ * compacts them. Exact by construction: the threshold is computed in SQL
+ * over the live rows, so there is no marker column to drift out of sync
+ * with reality and nothing to backfill.
+ *
+ * One family failing never stops the sweep.
+ */
+export async function sweepMemoryCompaction(options?: {
+  limit?: number;
+}): Promise<CompactionOutcome[]> {
+  const sql = mapDb();
+  const threshold = compactionThresholdChars();
+  const limit = options?.limit ?? 20;
+
+  const due = await sql<{ family_id: string }[]>`
+    select family_id
+    from public.family_memories
+    where kind in ('fact', 'what_works') and superseded_at is null
+    group by family_id
+    having sum(char_length(content)) >= ${threshold}
+    order by sum(char_length(content)) desc
+    limit ${limit}
+  `;
+
+  const outcomes: CompactionOutcome[] = [];
+  for (const row of due) {
+    try {
+      outcomes.push(await compactFamilyMemories(row.family_id));
+    } catch (error) {
+      console.error(
+        `memory compaction failed for ${row.family_id}:`,
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
+  }
+  return outcomes;
+}

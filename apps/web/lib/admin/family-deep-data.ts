@@ -6,6 +6,7 @@ import {
 import { getChildProgressView } from "../child-progress/runtime";
 import type { ChildProgressView } from "../child-progress/types";
 import { getTrajectoryEvidence } from "../map/store";
+import { selectPinnedMemories } from "../agent-memory";
 import { adminDb } from "./db";
 
 /**
@@ -191,6 +192,9 @@ export interface FamilyMemoryRow {
   sessionId: string | null;
   supersededAt: string | null;
   createdAt: string;
+  /** Rides in the per-turn prompt. False means stored and searchable
+   *  through recall, just not injected. Always false once superseded. */
+  pinned: boolean;
 }
 
 export interface FamilyObservationRow {
@@ -208,7 +212,12 @@ export interface FamilyObservationRow {
 export interface FamilyBrain {
   memories: FamilyMemoryRow[];
   observations: FamilyObservationRow[];
+  /** Everything Homa currently knows (unbounded). */
   activeChars: number;
+  /** The slice that fits in a turn's prompt, capped by
+   *  FAMILY_MEMORY_CHAR_BUDGET. Equals activeChars until a family
+   *  outgrows the budget. */
+  pinnedChars: number;
   latestSnapshot: {
     content: string;
     channel: string | null;
@@ -223,6 +232,7 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
   const memories = await sql<
     {
       id: string;
+      child_id: string | null;
       child_name: string | null;
       kind: string;
       content: string;
@@ -232,7 +242,7 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
       created_at: string;
     }[]
   >`
-    select m.id, c.name as child_name, m.kind, m.content, m.source,
+    select m.id, m.child_id, c.name as child_name, m.kind, m.content, m.source,
            m.session_id, m.superseded_at::text as superseded_at,
            m.created_at::text as created_at
     from public.family_memories m
@@ -282,9 +292,22 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
     order by created_at desc
     limit 8
   `;
-  const activeChars = memories
-    .filter((row) => row.superseded_at === null)
-    .reduce((sum, row) => sum + row.content.length, 0);
+  // Two different numbers now, and the difference is the point: activeChars
+  // is everything Homa knows, pinnedChars is the slice that rides in the
+  // prompt this turn. Storage is unbounded; only the prompt is budgeted.
+  const activeRows = memories.filter((row) => row.superseded_at === null);
+  const activeChars = activeRows.reduce((sum, row) => sum + row.content.length, 0);
+  const pinnedSelection = selectPinnedMemories(
+    activeRows.map((row) => ({
+      id: row.id,
+      child_id: row.child_id,
+      kind: row.kind,
+      content: row.content,
+      source: row.source,
+      created_at: row.created_at,
+    })),
+  );
+  const pinnedIds = new Set(pinnedSelection.pinned.map((row) => row.id));
   return {
     memories: memories.map((row) => ({
       id: row.id,
@@ -295,6 +318,7 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
       sessionId: row.session_id,
       supersededAt: row.superseded_at,
       createdAt: row.created_at,
+      pinned: pinnedIds.has(row.id),
     })),
     observations: observations.map((row) => ({
       id: row.id,
@@ -308,6 +332,7 @@ export async function getFamilyBrain(familyId: string): Promise<FamilyBrain> {
       createdAt: row.created_at,
     })),
     activeChars,
+    pinnedChars: pinnedSelection.pinnedChars,
     latestSnapshot: snapshotRows[0]
       ? {
           content: snapshotRows[0].content,
