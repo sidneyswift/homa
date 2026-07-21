@@ -22,6 +22,9 @@ import {
   type FamilyContextRows,
   type MemberRow,
 } from "../../lib/family-context";
+import { loadFamilyChecklistStates } from "../../lib/onboarding/checklist-state";
+import { renderOnboardingContext } from "../../lib/onboarding/context-line";
+import { loadOnboardingState } from "../../lib/onboarding/store";
 import { recordContextSnapshot } from "../../lib/observability/agent-trace";
 import { isSlimMorningBriefDispatchContext } from "../../lib/tasks/brief-context";
 
@@ -108,6 +111,9 @@ interface FamilyContextInstructionAttributes {
    *  actually focused on the right child. */
   childId?: string;
   memberName?: string;
+  /** Stamped by the eve channel's auth walk from the family row, never
+   *  by the client (plans/2026-07-21-chat-first-onboarding.md §2.2). */
+  onboardingActive?: string;
   episodeId?: string;
   continuityContext?: string;
   taskKind?: string;
@@ -262,6 +268,31 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
+    // Chat-first onboarding: where this family actually is, recomputed
+    // every turn. Only assembled for a session the auth walk marked as
+    // onboarding, so an ordinary /app turn pays nothing for it.
+    let onboardingContext = "";
+    if (attributes?.familyId && attributes.onboardingActive === "true") {
+      try {
+        const [state, children] = await Promise.all([
+          loadOnboardingState(attributes.familyId),
+          loadFamilyChecklistStates(attributes.familyId),
+        ]);
+        onboardingContext =
+          renderOnboardingContext({
+            record: state?.record ?? null,
+            children,
+          }) ?? "";
+      } catch (error) {
+        // Family context is the reliable floor here too. Losing the
+        // onboarding line costs Homa some tact; it must never cost her
+        // the family.
+        console.error(
+          "family context: onboarding state load failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     let continuityContext = attributes?.continuityContext ?? "";
     if (attributes?.familyId && continuityContext.length === 0) {
       try {
@@ -279,7 +310,12 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
-    const markdown = [familyContext, progressContext, continuityContext]
+    const markdown = [
+      familyContext,
+      progressContext,
+      onboardingContext,
+      continuityContext,
+    ]
       .filter((block) => block.length > 0)
       .join("\n\n");
     // Flight recorder (founder deep view): what this turn actually

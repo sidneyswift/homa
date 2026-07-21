@@ -99,6 +99,23 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Planner updated", detail: output.summary };
   }
+  // The receipt fan's own chip
+  // (plans/2026-07-21-chat-first-onboarding.md §6.4). Logging hours is
+  // the keystone habit, and until now it was the only named effect in
+  // the product that left no visible trace: she typed a sentence about
+  // her day and got a paragraph back, with nothing to show that it
+  // landed anywhere. The chip is the proof the loop is worth repeating.
+  if (
+    part.toolName === "log_hours" &&
+    output.logged === true &&
+    typeof output.subject === "string" &&
+    typeof output.minutes === "number"
+  ) {
+    return {
+      label: "Hours logged",
+      detail: `${output.subject}, ${output.minutes} min`,
+    };
+  }
   return null;
 }
 

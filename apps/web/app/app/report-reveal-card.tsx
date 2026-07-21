@@ -37,6 +37,23 @@ const LINE_STAGGER_MS = 700;
 /** Two staggers plus a breath, the scoring step's own floor. */
 const MINIMUM_HOLD_MS = LINE_STAGGER_MS * 2 + 800;
 
+/**
+ * The reveal's own view beacon, on the same route the report page uses.
+ * entry "chat" is what makes the rebuild's central claim measurable: one
+ * family in four never opened the emailed link, and this is the field
+ * that says whether being shown the report beats being sent it.
+ */
+function beaconChatReveal(token: string): void {
+  void fetch("/api/map/report-viewed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, entry: "chat" }),
+    keepalive: true,
+  }).catch(() => {
+    // Analytics never surface to her.
+  });
+}
+
 function finalizeReport(childId: string): void {
   void fetch("/api/map/score", {
     method: "POST",
@@ -76,7 +93,10 @@ export function ReportRevealCard({
     if (finalizedRef.current) return;
     finalizedRef.current = true;
     if (!card.alreadyScored) finalizeReport(card.childId);
-  }, [card.childId, card.alreadyScored]);
+    // Only a live reveal counts as a view. A card scrolled past in
+    // yesterday's transcript is scrollback, not a reading.
+    if (active) beaconChatReveal(card.token);
+  }, [card.childId, card.alreadyScored, card.token, active]);
 
   useEffect(() => {
     if (revealed) return;

@@ -15,7 +15,7 @@ import { getReportEventIdsByToken } from "../../../../lib/map/store";
  */
 const beaconSchema = z.object({
   token: z.string().min(16).max(160),
-  entry: z.enum(["instant", "link"]),
+  entry: z.enum(["instant", "link", "chat"]),
 });
 
 /** Two views of one report inside this window are one visit (live

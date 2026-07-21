@@ -152,7 +152,12 @@ export const EVENT_SCHEMAS = {
   "map.report_viewed": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    entry: z.enum(["instant", "link"]),
+    // "instant" is the report page straight out of the card flow,
+    // "link" is the emailed copy, and "chat" is the reveal landing
+    // inside the conversation (chat-first onboarding). The whole claim
+    // of that rebuild is that a report she is shown beats a report she
+    // is emailed, and this is the field that settles it.
+    entry: z.enum(["instant", "link", "chat"]),
   }),
   // Fired once per family per onboarding card reached (map-flow.tsx phase
   // transitions, beaconed through /api/map/step). The step is a UI phase
