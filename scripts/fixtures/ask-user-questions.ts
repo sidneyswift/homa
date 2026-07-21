@@ -24,6 +24,7 @@ export const ASK_USER_QUESTIONS_FAILURE_MODES = [
   "already_answered",
   "only_one_real_option",
   "emotional_moment",
+  "homa_could_settle_it",
 ] as const;
 
 export type AskUserQuestionsFailureMode =
@@ -43,17 +44,9 @@ export interface AskUserQuestionsFixture {
 }
 
 export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
-  // Positives: a real fork, where every option is one Homa could act on
-  // this turn and picking wrong wastes the parent's time.
-  {
-    id: "positive-approach-fork",
-    familyBlurb: "Maya is 7. No Spanish on the planner yet.",
-    message:
-      "I want to start Spanish with Maya but I have no idea how to begin.",
-    expect: "ask",
-    why:
-      "Immersion, vocabulary drilling, and songs-and-stories are genuinely different starts, all buildable, and the wrong guess wastes her week.",
-  },
+  // Positives, under the reluctant doctrine (founder ruling 2026-07-21,
+  // build first and card rarely): only a fact Homa cannot research, pick
+  // well herself, or infer from the family block.
   {
     id: "positive-which-child",
     familyBlurb: "Three children: Maya is 7, Jordan is 9, Skye is 4.",
@@ -63,17 +56,41 @@ export const ASK_USER_QUESTIONS_FIXTURES: readonly AskUserQuestionsFixture[] = [
       "A reading page for a 4 year old and a 9 year old share nothing, and the family has three children with no clue in the message.",
   },
   {
-    id: "positive-week-shape",
+    id: "positive-which-curriculum",
+    familyBlurb:
+      "Jordan is 9. The family owns two science curriculums and is partway through both: Blossom & Root Year 2 and Elemental Science.",
+    message: "Can you pull up tomorrow's science lesson for Jordan?",
+    expect: "ask",
+    why:
+      "Which of the two they mean is a fact about their household that no research or good judgment can recover.",
+  },
+
+  // Negatives: each is a plausible over-call.
+  // The two below were written as positives and failed 0/3, because Homa
+  // researched and proposed instead of asking. The founder ruled that
+  // behavior correct (build first, card rarely), so the fixtures were
+  // wrong, not Homa. They now defend the doctrine they violated.
+  {
+    id: "negative-approach-fork",
+    familyBlurb: "Maya is 7. No Spanish on the planner yet.",
+    message:
+      "I want to start Spanish with Maya but I have no idea how to begin.",
+    expect: "no_ask",
+    why:
+      "Homa can research how Spanish is usually started and propose one way; handing back a menu makes the parent do the deciding she came here to avoid.",
+    failureMode: "homa_could_settle_it",
+  },
+  {
+    id: "negative-week-shape",
     familyBlurb:
       "Jordan is 9. The planner has a light week: two math activities, nothing else.",
     message:
       "We suddenly have a free week because co-op is cancelled. What should we do with it?",
-    expect: "ask",
+    expect: "no_ask",
     why:
-      "Going deeper on what is already planned versus starting something new are both good and lead to different work.",
+      "She asked for a suggestion, so Homa reads the planner and offers one; a card would return the question to her unanswered.",
+    failureMode: "homa_could_settle_it",
   },
-
-  // Negatives: each is a plausible over-call.
   {
     id: "negative-yes-no",
     familyBlurb: "Skye is 4. A counting page was just made.",

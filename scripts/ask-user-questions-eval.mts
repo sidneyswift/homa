@@ -40,8 +40,11 @@ import {
 
 const TOOL_NAME = "ask_user_questions";
 const FIXTURE_CHECK_ARGUMENT = "--check-fixtures";
-const MIN_POSITIVES = 3;
-const MIN_NEGATIVES = 5;
+// Deliberately low: under the reluctant doctrine (founder ruling
+// 2026-07-21) genuine card moments are rare, and inventing a third
+// positive to hit a quota would encode a preference the product rejects.
+const MIN_POSITIVES = 2;
+const MIN_NEGATIVES = 6;
 /** Enough turns to look something up and then decide. */
 const MAX_STEPS = 6;
 /** Runs per fixture. One sample from a sampled model is a coin flip, and
