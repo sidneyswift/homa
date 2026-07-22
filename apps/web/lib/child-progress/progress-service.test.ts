@@ -1388,7 +1388,10 @@ describe("child progress evidence service", () => {
     );
   });
 
-  it("renders taxonomy walk evidence without changing MapScores", async () => {
+  it("scores taxonomy walk evidence, since abilities are one catalog", async () => {
+    // Reversed 2026-07-21 (founder ruling, "one abilities map"): a walk
+    // answer used to render as a topic and move nothing, so a 45-minute
+    // sitting could not shift a single number.
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
     const service = createService(repository);
@@ -1407,7 +1410,7 @@ describe("child progress evidence service", () => {
     });
 
     assert.equal(result.status, "recorded");
-    assert.equal(repository.liveView?.scores.observationCount, 0);
+    assert.equal(repository.liveView?.scores.observationCount, 1);
     assert.equal(
       repository.liveView?.subjects.some((subject) =>
         subject.domains.some((domain) =>

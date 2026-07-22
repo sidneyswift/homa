@@ -122,6 +122,11 @@ export async function extractProgressClaims(
         `(${child.ageMonths} months)`,
     )
     .join("\n");
+  // The band is scoped from the oldest child so every child in the
+  // roster is covered; the below-age reach is generous by design.
+  const oldestAgeMonths = Math.max(
+    ...input.children.map((child) => child.ageMonths),
+  );
   const startedAt = Date.now();
 
   try {
@@ -129,9 +134,14 @@ export async function extractProgressClaims(
       model: HOMA_MODEL,
       schema: extractedClaimsSchema,
       system: EXTRACTION_SYSTEM,
+      // Catalog FIRST, deliberately. It is the largest and most stable
+      // block, and it is bucketed by age, so putting it ahead of the
+      // per-family roster lets the provider cache the prefix across
+      // every family with a child in the same year. Roster and message
+      // (the parts that change every call) follow it.
       prompt: [
+        `<skill_catalog>\n${renderSkillCatalog(oldestAgeMonths)}\n</skill_catalog>`,
         `<children>\n${roster}\n</children>`,
-        `<skill_catalog>\n${renderSkillCatalog()}\n</skill_catalog>`,
         `<message>\n${input.message.slice(0, 8_000)}\n</message>`,
       ].join("\n\n"),
       maxOutputTokens: 4_000,
