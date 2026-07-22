@@ -29,13 +29,19 @@ export default defineSchedule({
         try {
           const outcomes = await sweepMemoryCompaction();
           const merged = outcomes.reduce((sum, outcome) => sum + outcome.applied.length, 0);
+          const unpacked = outcomes.reduce((sum, outcome) => sum + outcome.unpacked.length, 0);
+          // Splits can legitimately GROW the store (attribution costs a
+          // restated clause per child), so reclaimed characters alone
+          // reads as failure on a night that was mostly unpacking. Log
+          // both counts next to it or the number lies.
           const reclaimed = outcomes.reduce(
             (sum, outcome) => sum + (outcome.charsBefore - outcome.charsAfter),
             0,
           );
           if (outcomes.length > 0) {
             console.log(
-              `memory compaction: ${outcomes.length} families, ${merged} merges, ${reclaimed} characters reclaimed`,
+              `memory compaction: ${outcomes.length} families, ${merged} merges, ` +
+                `${unpacked} splits, ${reclaimed} characters reclaimed`,
             );
           }
         } catch (error) {
