@@ -49,7 +49,7 @@ const askForDetails = defineTool({
       kind: input.kind,
       intro: input.intro ?? null,
       note:
-        "END TURN. Emit no text after this tool call. The fields are visible to her and the card saves itself; her entries arrive as the next message. Any sentence here is either narrating a card she can already see or asking for what it already asks.",
+        "END TURN. Emit no text after this tool call. The fields are visible to her and the card saves itself; her entries arrive as the next message. Any sentence here is either narrating a card she can already see or asking for what it already asks. If you had something to say, it belonged BEFORE this call: a card with nothing above it reads as a form, not a conversation.",
     };
   },
 });

@@ -310,6 +310,7 @@ function AssistantItemView({
   onOpenReport,
   activeDetailPartKey,
   onDetailsSaved,
+  dockedDetailPartKey,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
@@ -332,6 +333,7 @@ function AssistantItemView({
   onOpenReport?: (childId: string) => void;
   activeDetailPartKey?: string;
   onDetailsSaved?: (summary: string) => void;
+  dockedDetailPartKey?: string;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -364,6 +366,10 @@ function AssistantItemView({
         />
       );
     case "details":
+      // Docked: the composer is rendering it, so the transcript renders
+      // nothing. Two copies of one question is the confusion this whole
+      // change exists to remove.
+      if (item.sourceActionKey === dockedDetailPartKey) return null;
       return (
         <DetailCard
           card={item.card}
@@ -497,6 +503,7 @@ export function MessageView({
   onOpenReport,
   activeDetailPartKey,
   onDetailsSaved,
+  dockedDetailPartKey,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -535,6 +542,8 @@ export function MessageView({
   /** The one facts card still accepting answers. */
   activeDetailPartKey?: string;
   onDetailsSaved?: (summary: string) => void;
+  /** The facts card the composer is currently standing in for. */
+  dockedDetailPartKey?: string;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -600,6 +609,7 @@ export function MessageView({
           onOpenReport={onOpenReport}
           activeDetailPartKey={activeDetailPartKey}
           onDetailsSaved={onDetailsSaved}
+          dockedDetailPartKey={dockedDetailPartKey}
         />
       ))}
     </div>
@@ -738,9 +748,9 @@ function activeCreateIsAFix(message: EveMessage): boolean {
 /** The label for a gap between parts (model reasoning, a finished
  *  tool, a step boundary): the build phase when a material is in
  *  flight, plain "thinking…" otherwise. */
-function gapLabel(message: EveMessage): string {
+function gapLabel(message: EveMessage, generic: string): string {
   const phase = materialsBuildPhase(message);
-  return phase ? materialsPhaseLabel(phase) : "thinking…";
+  return phase ? materialsPhaseLabel(phase) : generic;
 }
 
 /**
@@ -761,11 +771,30 @@ function gapLabel(message: EveMessage): string {
  * when the turn's own tool parts show a material in flight; everything
  * else keeps the old labels.
  */
-export function busyLabel(messages: readonly EveMessage[]): string | null {
+/**
+ * The generic wait, in her language, escalating with the clock.
+ *
+ * "thinking…" held for twenty five seconds stops reading as thought and
+ * starts reading as a hang. Each of these is true of any turn at the
+ * moment it appears, which is the constraint: a wait label may never
+ * claim work that is not happening, so none of them names a step.
+ */
+export function genericBusyLabel(seconds: number): string {
+  if (seconds < 5) return "thinking…";
+  if (seconds < 15) return "working on it…";
+  if (seconds < 45) return "still working…";
+  return "this one is taking a while…";
+}
+
+export function busyLabel(
+  messages: readonly EveMessage[],
+  seconds = 0,
+): string | null {
+  const generic = genericBusyLabel(seconds);
   const last = messages.at(-1);
-  if (!last || last.role !== "assistant") return "thinking…";
+  if (!last || last.role !== "assistant") return generic;
   const part = last.parts.at(-1);
-  if (!part) return "thinking…";
+  if (!part) return generic;
   if (part.type === "dynamic-tool") {
     if (part.state === "input-streaming" || part.state === "input-available") {
       // A create call redoing a flagged page keeps the fixing label she
@@ -773,13 +802,13 @@ export function busyLabel(messages: readonly EveMessage[]): string | null {
       if (isCreateToolName(part.toolName) && activeCreateIsAFix(last)) {
         return materialsPhaseLabel("revising");
       }
-      return TOOL_STATUS_LABELS[part.toolName] ?? "working on it…";
+      return TOOL_STATUS_LABELS[part.toolName] ?? generic;
     }
     // Tool finished; the model is composing what comes next.
-    return gapLabel(last);
+    return gapLabel(last, generic);
   }
   if (part.type === "text") {
-    if (part.text.trim().length === 0) return gapLabel(last);
+    if (part.text.trim().length === 0) return gapLabel(last, generic);
     // A streaming text block with content is already visible; no extra line.
     if (part.state === "streaming") return null;
     // A completed sentence with the turn still going: only a material
@@ -789,7 +818,7 @@ export function busyLabel(messages: readonly EveMessage[]): string | null {
     return phase ? materialsPhaseLabel(phase) : null;
   }
   // Reasoning parts and step boundaries: the long quiet stretches.
-  return gapLabel(last);
+  return gapLabel(last, generic);
 }
 
 /** Tool calls in the latest assistant message (chat.turn_completed prop). */

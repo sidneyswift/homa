@@ -90,10 +90,17 @@ function browserTimeZone(): string | undefined {
 export function DetailCard({
   card,
   active,
+  docked = false,
   onSaved,
 }: {
   card: DetailCardData;
   active: boolean;
+  /** True when this is standing in for the composer rather than sitting
+   *  in the transcript. It takes the composer's own geometry so the swap
+   *  reads as one object changing shape, and it drops the eyebrow, which
+   *  is a transcript affordance and pure noise at the bottom of the
+   *  screen where she is already looking. */
+  docked?: boolean;
   /** Hands the conversation back, with what she actually entered. */
   onSaved?: (summary: string) => void;
 }) {
@@ -167,16 +174,24 @@ export function DetailCard({
 
   return (
     <section
-      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      className={
+        docked
+          ? "w-full rounded-[22px] border border-border-subtle bg-card px-4 pb-4 pt-4 shadow-md"
+          : "w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      }
       aria-label={isBasics ? "About you" : "About your child"}
     >
-      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
-        <Logo size={15} variant="mark" />
-        {isBasics ? "About you" : "About your child"}
-      </p>
-      {card.intro ? <p className="mt-2 text-sm text-muted">{card.intro}</p> : null}
+      {docked ? null : (
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
+          <Logo size={15} variant="mark" />
+          {isBasics ? "About you" : "About your child"}
+        </p>
+      )}
+      {card.intro ? (
+        <p className={`text-sm text-muted ${docked ? "" : "mt-2"}`}>{card.intro}</p>
+      ) : null}
 
-      <div className="mt-3.5 flex flex-col gap-3">
+      <div className={`flex flex-col gap-3 ${docked ? "" : "mt-3.5"}`}>
         {isBasics ? (
           <>
             <label className="block">

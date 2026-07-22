@@ -726,6 +726,43 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 }
 
 /* ============================================================================
+   Chat busy label (/chat, ChatClient). A slow light passes left to right
+   across the wait text, so a long turn reads as working rather than as
+   stuck. Text-clipped gradient, no layout and no repaint of anything
+   around it; the label still says what is happening, so the shimmer adds
+   liveness and never carries meaning. Tokens only: the sweep travels
+   between the same two text colors the rest of the surface uses.
+   ========================================================================= */
+@keyframes chat-busy-shimmer {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+.chat-busy-label {
+  background-image: linear-gradient(
+    100deg,
+    var(--text-muted) 0%,
+    var(--text-muted) 40%,
+    var(--text-strong) 50%,
+    var(--text-muted) 60%,
+    var(--text-muted) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: chat-busy-shimmer 2600ms var(--ease-in-out) infinite;
+}
+@media (prefers-reduced-motion: reduce), print {
+  .chat-busy-label {
+    animation: none;
+    background-image: none;
+    color: var(--text-muted);
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* ============================================================================
    Chat dictation dot (/chat, DictationRow). A soft brand-dot breath while
    the mic is live, so "recording" is visible without a meter. Opacity +
    scale only; loops on purpose (ambient state, not an entrance); goes

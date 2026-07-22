@@ -21,8 +21,8 @@ import {
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
+import { DetailCard, latestDetailRequest } from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
-import { latestDetailRequest } from "./detail-card";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import {
   archiveFromServerHistory,
@@ -1067,9 +1067,42 @@ export function ChatClient({
     ? null
     : latestChecklistRequest(agent.data.messages);
   const activeReport = latestReportReveal(agent.data.messages);
+  // The composer becomes the card (founder note, 2026-07-21 walk).
+  //
+  // A card floating in the transcript with a message box under it asks
+  // her to work out which one is the question. There is only ever one
+  // place to answer, so the box turns into the card and turns back when
+  // the card is done. It also means the card is always where her thumb
+  // already is, which on a phone is the whole ballgame.
+  //
+  // Only cards that ASK dock here. The report reveal is something to
+  // read, not something to answer, so it stays in the transcript where
+  // she can scroll back to it.
+  // Progressive chrome (founder note, 2026-07-21 walk). A brand new
+  // conversation opens as close to bare as it can: Homa's words, and
+  // nothing else. Every affordance appears at the moment it first means
+  // something, rather than sitting there from the start looking like a
+  // form she has to fill in.
+  //
+  // The day separator is the first to go. It separates two days, and on
+  // the opening screen there is no day before it to separate from, so it
+  // is a rule with nothing on the other side of it.
+  const suppressLeadingSeparator = Boolean(onboarding) && archived.length === 0;
+  // Everything before the first real message is a rule with nothing on
+  // the other side of it. Computed once rather than tracked with a flag
+  // during the map, which the React Compiler rejects and which breaks
+  // silently the moment the list is rendered twice.
+  const firstMessageIndex = transcript.findIndex((item) => item.kind === "message");
   // The one facts card still taking answers. Inert while a turn runs,
   // same as every other live card.
   const activeDetail = busy ? null : latestDetailRequest(agent.data.messages);
+  const dockedDetail = activeDetail;
+  // The composer appears when there is something to reply to. Before
+  // Homa has said anything there is not, and while a card is docked the
+  // card IS the input. Outside onboarding nothing changes: the box is
+  // always there, exactly as it has always been.
+  const showComposer =
+    dockedDetail === null && (!onboarding || hasVisibleMessages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -1388,7 +1421,7 @@ export function ChatClient({
           </div>
         ) : (
           <>
-            {transcript.map((item) => {
+            {transcript.map((item, itemIndex) => {
               // Dim rule: everything above the live snap card steps
               // back; the card's own message stays full strength.
               const dimmed =
@@ -1396,6 +1429,9 @@ export function ChatClient({
                 (item.kind === "separator" ||
                   item.message !== activeSnap.message);
               if (item.kind === "separator") {
+                if (suppressLeadingSeparator && itemIndex < firstMessageIndex) {
+                  return null;
+                }
                 return (
                   <div
                     key={item.key}
@@ -1461,6 +1497,9 @@ export function ChatClient({
                   activeDetailPartKey={
                     isLiveMessage ? activeDetail?.partKey : undefined
                   }
+                  dockedDetailPartKey={
+                    isLiveMessage ? dockedDetail?.partKey : undefined
+                  }
                   onDetailsSaved={handleDetailsSaved}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
@@ -1511,20 +1550,28 @@ export function ChatClient({
             })}
           </>
         )}
-        {busy && busyLabel(agent.data.messages) ? (
+        {busy && busyLabel(agent.data.messages, busySeconds) ? (
           // The mark bobs while Homa thinks, so the wait is never a blank
           // page (tester ask, evidence memo 1; MJ-06). Goes still under
-          // reduced motion; the label still reads what is happening. Flat
-          // on the page like the replies, with elapsed seconds so long
-          // tool runs read as progress.
-          <div className="flex items-center gap-2.5 text-muted">
-            <span className="chat-think-mark inline-flex" aria-hidden="true">
+          // reduced motion; the label still reads what is happening.
+          //
+          // The clock leads. It is the part that actually moves every
+          // second, so it anchors the row and the words become the thing
+          // that changes occasionally rather than the thing being stared
+          // at. The label shimmers and escalates with the same clock, so
+          // twenty five seconds reads as work rather than as a hang.
+          <div className="flex items-baseline gap-2.5 text-muted">
+            <span className="chat-think-mark inline-flex self-center" aria-hidden="true">
               <Logo size={20} variant="mark" />
             </span>
-            <span>{busyLabel(agent.data.messages)}</span>
             {busySeconds > 0 ? (
-              <span className="text-sm text-subtle">· {busySeconds}s</span>
+              <span className="font-mono text-sm tabular-nums text-subtle">
+                {busySeconds}s
+              </span>
             ) : null}
+            <span className="chat-busy-label">
+              {busyLabel(agent.data.messages, busySeconds)}
+            </span>
           </div>
         ) : null}
         {queuedParentMessages.length > 0 ? (
@@ -1613,7 +1660,11 @@ export function ChatClient({
           the About tag, mic, send). Typing stays enabled while Homa
           works, and sending mid-turn queues; staged files hold Send
           until the line is free (the queue stays text-only). */}
-      <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3 sm:px-6">
+      <footer
+        className={`bg-page px-4 pb-5 pt-3 sm:px-6 ${
+          showComposer || dockedDetail ? "border-t border-border-subtle" : ""
+        }`}
+      >
         {showSuggestions ? (
           // The chips dock quietly by the keyboard (D1 steal, founder
           // pick) instead of floating mid-transcript.
@@ -1630,7 +1681,27 @@ export function ChatClient({
             ))}
           </div>
         ) : null}
-        <div className="mx-auto w-full max-w-[780px] rounded-[22px] shadow-md">
+        {dockedDetail ? (
+          // The morph: same width, same corner radius, same shadow and
+          // the same spot on screen the box occupied a second ago, so it
+          // reads as one object changing shape rather than two objects
+          // swapping.
+          <div className="mx-auto w-full max-w-[780px]">
+            <DetailCard
+              card={dockedDetail.card}
+              active
+              docked
+              onSaved={(summary) =>
+                sendMessage(summary, { kind: "card_answer" })
+              }
+            />
+          </div>
+        ) : null}
+        <div
+          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
+            showComposer ? "" : "hidden"
+          }`}
+        >
           {showPromptSuggestionRail ? (
             <PromptSuggestionRail
               phase={promptSuggestionPhase}

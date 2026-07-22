@@ -6,6 +6,10 @@ export type ChatSendSource =
   | { kind: "composer" }
   | { kind: "progress_card"; progressActionKey: string }
   | { kind: "question_card" }
+  /** A card the composer was standing in for. Her entries go out as an
+   *  ordinary message so Homa reacts to them, but nothing about it came
+   *  from the composer, so the draft is left alone. */
+  | { kind: "card_answer" }
   /**
    * A machine message the client says on the parent's behalf: the
    * onboarding kickoff, the resume pickup, a checklist handoff. It
@@ -51,7 +55,9 @@ export function prepareChatSend(input: {
   // A tap on a card is not typing: it stays a text turn and it leaves
   // whatever she had half-written in the composer alone.
   const fromCard =
-    input.source.kind === "progress_card" || input.source.kind === "question_card";
+    input.source.kind === "progress_card" ||
+    input.source.kind === "question_card" ||
+    input.source.kind === "card_answer";
   // A directive is not typing either, and it is not hers. It touches
   // neither her draft nor the voice flag. The lane is decided by the
   // marker grammar rather than by the caller's say-so, so a caller that
