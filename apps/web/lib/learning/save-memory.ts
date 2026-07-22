@@ -1,4 +1,4 @@
-import { MEMORY_CONFLICT_MAX_DISTANCE, scanMemoryContent } from "../agent-memory";
+import { scanMemoryContent } from "../agent-memory";
 import { mapDb } from "../map/db";
 import { embedText } from "./embeddings";
 
@@ -37,11 +37,6 @@ export type SaveMemoryResult =
   | {
       saved: true;
       childId: string | null;
-      /** Active memories the new fact sits semantically close to (same
-       * child or family-wide only, never a sibling's), closest first.
-       * The caller decides whether to surface them; empty when the
-       * embedding was unavailable. */
-      conflicts: string[];
     }
   | {
       saved: false;
@@ -86,24 +81,6 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
   // Best-effort semantic index; null just means FTS-only for this row.
   const embedding = await embedText(content, { familyId: input.familyId });
 
-  // Contradiction guardrail (see agent-memory.ts): find active rows the
-  // new fact sits close to BEFORE inserting it, scoped to the same child
-  // plus family-wide rows so one sibling's fact never flags another's.
-  // Distance runs in Postgres; only matching contents come back.
-  let conflicts: string[] = [];
-  if (embedding) {
-    const close = await sql<{ content: string }[]>`
-      select content from public.family_memories
-      where family_id = ${input.familyId} and superseded_at is null
-        and kind in ('fact', 'what_works') and embedding is not null
-        and (child_id is null or child_id = ${childId})
-        and (embedding <=> ${embedding}::extensions.vector(1536)) < ${MEMORY_CONFLICT_MAX_DISTANCE}
-      order by embedding <=> ${embedding}::extensions.vector(1536)
-      limit 2
-    `;
-    conflicts = close.map((row) => row.content);
-  }
-
   await sql`
     insert into public.family_memories
       (family_id, child_id, kind, content, source, embedding, session_id)
@@ -111,5 +88,5 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
       (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
        ${embedding}, ${input.sessionId ?? null})
   `;
-  return { saved: true, childId, conflicts };
+  return { saved: true, childId };
 }

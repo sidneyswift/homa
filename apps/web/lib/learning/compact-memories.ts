@@ -367,6 +367,63 @@ export function validateSplit(
   return { ok: true, source, parts };
 }
 
+export type CompactionProposal = z.infer<typeof compactionSchema>;
+
+/**
+ * proposeCompaction(rows, nameById, familyId)
+ * The JUDGMENT step, isolated from all I/O on purpose (AGENTS.md "Models
+ * judge, code verifies"): rows in, proposals out, no database, no writes.
+ *
+ * Keeping this separable is what makes the judgment measurable. The eval
+ * (scripts/memory-compaction-eval.mts) calls it directly with fixture
+ * rows, so accuracy is scored against real production language instead of
+ * being assumed from the fact that the validators below have tests.
+ *
+ * Nothing here is trusted. Every proposal goes through validateMerge or
+ * validateSplit before it can touch a row.
+ */
+export async function proposeCompaction(
+  rows: ActiveRow[],
+  nameById: Map<string, string>,
+  familyId: string,
+) {
+  const listing = rows
+    .map((row, index) => {
+      const scope = row.child_id ? (nameById.get(row.child_id) ?? "a child") : "whole family";
+      return `${index}. [${row.kind} · ${scope} · saved ${row.created_at.slice(0, 10)}] ${row.content}`;
+    })
+    .join("\n");
+
+  return generateObject({
+    model: compactionModel(),
+    system: compactorPrompt(),
+    prompt: [
+      "This family's saved memories, numbered. Return merges and splits.",
+      "",
+      listing,
+    ].join("\n"),
+    schema: compactionSchema,
+    // Generous on purpose. Sonnet 5 thinks before it answers, and that
+    // reasoning comes out of the SAME output budget: a 2,000 cap was
+    // spent entirely on thinking (1,999 tokens) and returned no object
+    // at all, failing as finishReason "length". Compaction reads a whole
+    // family's store and weighs entries against each other, which is
+    // exactly the shape of task that thinks for a while.
+    maxOutputTokens: 12000,
+    // Structured output on this task is not reliably one-shot: observed
+    // failing twice in a row locally against a real family store, once on
+    // budget and once returning unparseable text with finishReason "stop".
+    // Nothing waits on this pass, so spend the retries.
+    maxRetries: 3,
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(familyId, "memory_compaction"),
+      },
+    },
+  });
+}
+
 /**
  * Runs one compaction pass over a family's active memories.
  *
@@ -428,41 +485,7 @@ export async function compactFamilyMemories(
     });
   }
 
-  const listing = candidates
-    .map((row, index) => {
-      const scope = row.child_id ? (nameById.get(row.child_id) ?? "a child") : "whole family";
-      return `${index}. [${row.kind} · ${scope} · saved ${row.created_at.slice(0, 10)}] ${row.content}`;
-    })
-    .join("\n");
-
-  const result = await generateObject({
-    model,
-    system: compactorPrompt(),
-    prompt: [
-      "This family's saved memories, numbered. Return merges and splits.",
-      "",
-      listing,
-    ].join("\n"),
-    schema: compactionSchema,
-    // Generous on purpose. Sonnet 5 thinks before it answers, and that
-    // reasoning comes out of the SAME output budget: a 2,000 cap was
-    // spent entirely on thinking (1,999 tokens) and returned no object
-    // at all, failing as finishReason "length". Compaction reads a whole
-    // family's store and weighs entries against each other, which is
-    // exactly the shape of task that thinks for a while.
-    maxOutputTokens: 12000,
-    // Structured output on this task is not reliably one-shot: observed
-    // failing twice in a row locally against a real family store, once on
-    // budget and once returning unparseable text with finishReason "stop".
-    // Nothing waits on this pass, so spend the retries.
-    maxRetries: 3,
-    providerOptions: {
-      gateway: {
-        disallowPromptTraining: true,
-        ...gatewayAttribution(familyId, "memory_compaction"),
-      },
-    },
-  });
+  const result = await proposeCompaction(candidates, nameById, familyId);
 
   await recordModelUsage({
     familyId,

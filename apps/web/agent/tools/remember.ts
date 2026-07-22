@@ -5,10 +5,7 @@ import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-d
 import {
   MEMORY_ENTRY_MAX_CHARS,
   MEMORY_KINDS,
-  findConflictingMemories,
-  memoryConflictNote,
   scanMemoryContent,
-  type MemoryConflictCandidate,
 } from "../../lib/agent-memory";
 import { saveFamilyMemory } from "../../lib/learning/save-memory";
 import { embedText } from "../../lib/learning/embeddings";
@@ -79,7 +76,7 @@ export default defineTool({
         saved: true,
         done: true,
         content: input.content,
-        note: `Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.${memoryConflictNote(result.conflicts)}`,
+        note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
       };
     }
 
@@ -123,30 +120,6 @@ export default defineTool({
     // Best-effort semantic index; null just means FTS-only for this row.
     const embedding = await embedText(input.content, { familyId });
 
-    // Contradiction guardrail (agent-memory.ts): fetch embeddings only
-    // for rows the scope rule can match (this child's plus family-wide;
-    // a sibling's rows never load), compare in JS since the RLS client
-    // has no vector operators, and carry any hits into the note below.
-    let conflicts: string[] = [];
-    if (embedding) {
-      const scopeFilter = input.childId
-        ? `child_id.is.null,child_id.eq.${input.childId}`
-        : "child_id.is.null";
-      const { data: candidates } = await db
-        .from("family_memories")
-        .select("content, child_id, embedding")
-        .eq("family_id", familyId)
-        .is("superseded_at", null)
-        .in("kind", [...MEMORY_KINDS])
-        .or(scopeFilter)
-        .not("embedding", "is", null);
-      conflicts = findConflictingMemories(
-        embedding,
-        input.childId ?? null,
-        (candidates ?? []) as MemoryConflictCandidate[],
-      );
-    }
-
     const { error: insertError } = await db.from("family_memories").insert({
       family_id: familyId,
       child_id: input.childId ?? null,
@@ -164,7 +137,7 @@ export default defineTool({
       saved: true,
       done: true,
       content: input.content,
-      note: `Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.${memoryConflictNote(conflicts)}`,
+      note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
     };
   },
 });

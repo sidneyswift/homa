@@ -134,3 +134,74 @@ describe("compaction trigger", () => {
     assert.ok(threshold - gomesChars < 150, "and should be about one memory away");
   });
 });
+
+/**
+ * The sibling-fairness floor. This is the rule the founder asked for by
+ * name: "should a busy week about one child push a quieter sibling out of
+ * Homa's head?" Pure ranking says yes, which is why ranking alone is not
+ * the answer.
+ */
+describe("selectPinnedMemories, no child gets crowded out", () => {
+  const LOUD = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const QUIET = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
+  function forChild(childId: string, count: number, day: string): MemoryRow[] {
+    return Array.from({ length: count }, (_, index) =>
+      memory({
+        child_id: childId,
+        content: `${childId.slice(0, 4)}-${index} ${"x".repeat(180)}`,
+        created_at: `${day} 12:00:${String(index).padStart(2, "0")}+00`,
+      }),
+    );
+  }
+
+  it("keeps a quiet sibling pinned when the other child floods the store", () => {
+    const rows = [
+      ...forChild(QUIET, 3, "2026-05-01"),
+      ...forChild(LOUD, 40, "2026-07-20"),
+    ];
+    const { pinned } = selectPinnedMemories(rows);
+
+    const quietPinned = pinned.filter((row) => row.child_id === QUIET);
+    assert.ok(quietPinned.length > 0, "the quiet sibling was pushed out of the prompt entirely");
+    assert.equal(quietPinned.length, 3, "all three of the quiet child's rows should fit their floor");
+  });
+
+  it("still fills the budget rather than hoarding the floor", () => {
+    const rows = [...forChild(QUIET, 3, "2026-05-01"), ...forChild(LOUD, 40, "2026-07-20")];
+    const { pinnedChars } = selectPinnedMemories(rows);
+    assert.ok(pinnedChars > FAMILY_MEMORY_CHAR_BUDGET * 0.9, `only used ${pinnedChars}`);
+    assert.ok(pinnedChars <= FAMILY_MEMORY_CHAR_BUDGET);
+  });
+
+  it("gives the turn's focus child priority in the open pass", () => {
+    const rows = [...forChild(QUIET, 10, "2026-05-01"), ...forChild(LOUD, 10, "2026-05-01")];
+    const focused = selectPinnedMemories(rows, { focusChildId: QUIET, budget: 1200 });
+    const unfocused = selectPinnedMemories(rows, { focusChildId: LOUD, budget: 1200 });
+
+    const quietWhenFocused = focused.pinned.filter((r) => r.child_id === QUIET).length;
+    const quietWhenNot = unfocused.pinned.filter((r) => r.child_id === QUIET).length;
+    assert.ok(
+      quietWhenFocused >= quietWhenNot,
+      "focusing a child should never reduce that child's presence",
+    );
+  });
+
+  it("still loses nothing: every row lands in exactly one bucket", () => {
+    const rows = [...forChild(QUIET, 12, "2026-05-01"), ...forChild(LOUD, 40, "2026-07-20")];
+    const { pinned, overflow } = selectPinnedMemories(rows);
+    const ids = new Set([...pinned, ...overflow].map((r) => r.id));
+    assert.equal(ids.size, rows.length);
+    assert.equal(pinned.length + overflow.length, rows.length);
+  });
+
+  it("prefers hard-won what_works over a same-age routine fact", () => {
+    const rows = [
+      memory({ child_id: LOUD, kind: "fact", content: `f ${"x".repeat(300)}`, created_at: "2026-07-01 12:00:00+00" }),
+      memory({ child_id: LOUD, kind: "what_works", content: `w ${"y".repeat(300)}`, created_at: "2026-07-01 12:00:00+00" }),
+    ];
+    const { pinned } = selectPinnedMemories(rows, { budget: 310 });
+    assert.equal(pinned.length, 1);
+    assert.equal(pinned[0].kind, "what_works");
+  });
+});

@@ -105,27 +105,77 @@ export interface PinnedMemorySelection {
 }
 
 /**
+ * Share of the budget reserved for per-child guarantees before anything
+ * competes openly. Half: enough that no child can be crowded out, not so
+ * much that family-wide rhythm facts lose their place.
+ */
+const MEMORY_CHILD_FLOOR_SHARE = 0.5;
+
+/**
  * scoreMemoryForPinning(row, focusChildId): number
- * Higher wins a place in the prompt. Ties break deterministically on id, so
- * the pinned set never flickers between turns for unrelated reasons.
+ * Higher wins a place in the prompt. Ordering only, never authority: the
+ * budget decides how much rides, this decides what rides first.
  *
- * PLACEHOLDER: pure recency, pending the founder's ranking rule. Recency
- * alone is the naive answer and it has a specific failure mode worth
- * fixing: a chatty week about one child evicts a quieter sibling entirely,
- * and hard-won what_works insight loses to routine facts.
+ * Recency is the spine, because a newer fact about a child is usually the
+ * truer one. Two adjustments, each earned:
+ *
+ *   - what_works outranks fact at equal age. A fact ("Alma has read The
+ *     Hobbit") is re-learnable from a conversation; hard-won teaching
+ *     signal ("beat your own record framing, no countdown") is not.
+ *   - the turn's focus child outranks everyone else's rows, because the
+ *     parent is talking about that child right now.
+ *
+ * Deliberately NOT a model call. This runs on every turn of every channel,
+ * and it has to return the same answer for the same store, or Homa knows
+ * something on Monday and not on Tuesday. Judgment about what a memory is
+ * WORTH belongs at write time, once, carried on the row. See the note on
+ * selectPinnedMemories.
  */
 function scoreMemoryForPinning(row: MemoryRow, focusChildId: string | null): number {
-  // TODO(founder): replace with the real rule. See the note in this PR.
-  void focusChildId;
-  return memoryCreatedAtMs(row);
+  const DAY = 24 * 60 * 60 * 1000;
+  let score = memoryCreatedAtMs(row) / DAY;
+  if (row.kind === "what_works") score += 30;
+  if (focusChildId && row.child_id === focusChildId) score += 60;
+  return score;
+}
+
+/** Greedy fill in score order, skipping rows already taken. Returns what
+ *  fit and what it cost. Shared by the floor pass and the open pass. */
+function fillFrom(
+  ranked: MemoryRow[],
+  taken: Set<string>,
+  room: number,
+): { picked: MemoryRow[]; used: number } {
+  const picked: MemoryRow[] = [];
+  let used = 0;
+  for (const row of ranked) {
+    if (taken.has(row.id)) continue;
+    if (used + row.content.length > room) continue;
+    picked.push(row);
+    used += row.content.length;
+    taken.add(row.id);
+  }
+  return { picked, used };
 }
 
 /**
  * selectPinnedMemories(rows, options): PinnedMemorySelection
  * Splits a family's active memories into the set that rides in the prompt
- * and the set that stays searchable. Greedy fill by score: a high-scoring
- * entry that does not fit yields to shorter ones behind it rather than
- * stranding the remaining space.
+ * and the set that stays searchable.
+ *
+ * Two passes, and the first one is the point:
+ *
+ *   1. **Per-child floor.** Half the budget is split evenly among the
+ *      children who have memories, and each child's best rows fill their
+ *      own share first. This is what stops a chatty fortnight about one
+ *      child from pushing a quieter sibling out of Homa's head entirely.
+ *      Without it, pure ranking makes the loudest child the only child,
+ *      which is the multi-kid failure the whole product exists to avoid.
+ *   2. **Open fill.** Everything left over, family-wide rows included,
+ *      competes for the remainder by score.
+ *
+ * Greedy within each pass: a long row that does not fit yields to shorter
+ * ones behind it rather than stranding the space.
  *
  * Never throws and never drops: every input row lands in exactly one of
  * pinned or overflow.
@@ -142,110 +192,55 @@ export function selectPinnedMemories(
     return delta !== 0 ? delta : a.id.localeCompare(b.id);
   });
 
+  const childIds = [...new Set(rows.map((row) => row.child_id).filter((id): id is string => id !== null))];
+  const taken = new Set<string>();
   const pinned: MemoryRow[] = [];
-  const overflow: MemoryRow[] = [];
   let used = 0;
-  for (const row of ranked) {
-    if (used + row.content.length <= budget) {
-      pinned.push(row);
-      used += row.content.length;
-    } else {
-      overflow.push(row);
+
+  if (childIds.length > 0) {
+    const perChild = Math.floor((budget * MEMORY_CHILD_FLOOR_SHARE) / childIds.length);
+    // Stable order so the floor pass cannot vary with row arrival order.
+    for (const childId of [...childIds].sort()) {
+      const mine = ranked.filter((row) => row.child_id === childId);
+      const { picked, used: spent } = fillFrom(mine, taken, perChild);
+      pinned.push(...picked);
+      used += spent;
     }
   }
 
+  const open = fillFrom(ranked, taken, budget - used);
+  pinned.push(...open.picked);
+  used += open.used;
+
+  const overflow = rows.filter((row) => !taken.has(row.id));
   pinned.sort((a, b) => memoryCreatedAtMs(a) - memoryCreatedAtMs(b));
   return { pinned, overflow, pinnedChars: used };
 }
 
-/**
- * Contradiction guardrail for saves. When a new fact lands semantically
- * close to an active memory, the save still succeeds but the tool result
- * names the older entry so the model can retire it with forget in the
- * same turn. Cause: "Story can already count to 3 easily" and "Story can
- * count to about 50" both rendered into every prompt (2026-07-10).
+/*
+ * The contradiction guardrail lived here until 2026-07-21 and is gone on
+ * purpose. It decided "does this new fact supersede that old one", a
+ * judgment about meaning, using one scalar: cosine distance under 0.5,
+ * calibrated on a single observed pair. AGENTS.md "Models judge, code
+ * verifies" names that shape exactly: a guess wearing a number.
  *
- * Threshold calibrated on that real pair: the two counting facts sit at
- * cosine distance 0.42 while unrelated same-family pairs measured 0.58
- * and up, so 0.5 splits them with margin on both sides. A false flag
- * costs one harmless sentence in a tool note; a miss is just the old
- * status quo.
+ * Measured against the rows compaction merged on 2026-07-21 (a labelled
+ * set, since they were merged for saying the same thing): true-conflict
+ * distances ran 0.307 to 0.537, straddling the threshold, and 5 of 28
+ * Gomes rows had no embedding at all, so they were invisible to it. Worse,
+ * when it DID fire correctly (Ara's two reading-pace rows at 0.402) its
+ * only output was advisory prose to a model mid-conversation, and that
+ * duplicate pair still sat in every prompt for eleven days. Fleet-wide it
+ * produced two superseded rows in the product's lifetime.
+ *
+ * Nothing replaces it here, because the replacement already exists and is
+ * better placed: compaction (lib/learning/compact-memories.ts) proposes
+ * merges with a model over the whole store and verifies them in code, off
+ * the critical path with no parent waiting. It caught every pair this
+ * guardrail missed. The agent also sees the family's whole memory list in
+ * context every turn, so it never needed embedding math to notice a
+ * duplicate; instructions.md tells it to forget the superseded one.
  */
-export const MEMORY_CONFLICT_MAX_DISTANCE = 0.5;
-const MEMORY_CONFLICT_MAX_RESULTS = 2;
-
-export interface MemoryConflictCandidate {
-  content: string;
-  child_id: string | null;
-  /** pgvector literal ("[0.1,...]") as both drivers return it, or null
-   * when the row was saved without an embedding. */
-  embedding: string | null;
-}
-
-function parseVectorLiteral(literal: string): number[] | null {
-  const inner = literal.trim().replace(/^\[/, "").replace(/\]$/, "");
-  if (inner.length === 0) return null;
-  const values = inner.split(",").map(Number);
-  return values.some((value) => !Number.isFinite(value)) ? null : values;
-}
-
-function cosineDistance(a: number[], b: number[]): number {
-  let dot = 0;
-  let normA = 0;
-  let normB = 0;
-  for (let i = 0; i < a.length; i += 1) {
-    dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
-  }
-  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-  if (denominator === 0) return 1;
-  return 1 - dot / denominator;
-}
-
-/**
- * findConflictingMemories(newEmbedding, newChildId, candidates): string[]
- * Returns the contents of active memories the new fact likely contradicts,
- * closest first. Scope rule (multi-kid law): a child-scoped fact is only
- * compared against that same child's rows and family-wide rows, so one
- * sibling's counting fact can never flag another's. Best-effort by
- * design: no embedding on either side means no comparison.
- */
-export function findConflictingMemories(
-  newEmbedding: string | null,
-  newChildId: string | null,
-  candidates: MemoryConflictCandidate[],
-): string[] {
-  if (!newEmbedding) return [];
-  const target = parseVectorLiteral(newEmbedding);
-  if (!target) return [];
-
-  const scored: Array<{ content: string; distance: number }> = [];
-  for (const candidate of candidates) {
-    const sameScope =
-      candidate.child_id === null ||
-      (newChildId !== null && candidate.child_id === newChildId);
-    if (!sameScope || !candidate.embedding) continue;
-    const vector = parseVectorLiteral(candidate.embedding);
-    if (!vector || vector.length !== target.length) continue;
-    const distance = cosineDistance(target, vector);
-    if (distance < MEMORY_CONFLICT_MAX_DISTANCE) {
-      scored.push({ content: candidate.content, distance });
-    }
-  }
-  return scored
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, MEMORY_CONFLICT_MAX_RESULTS)
-    .map((entry) => entry.content);
-}
-
-/** The sentence a save result carries when conflicts were found; empty
- * string when there is nothing to say. */
-export function memoryConflictNote(conflicts: string[]): string {
-  if (conflicts.length === 0) return "";
-  const listed = conflicts.map((content) => `"${content}"`).join("; ");
-  return ` This may contradict an older memory: ${listed}. If the new fact replaces it, call forget with a distinctive phrase from the old one in this same turn; if both are genuinely true, leave both.`;
-}
 
 /**
  * formatMemoriesForContext(rows, childNamesById): string
