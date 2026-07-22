@@ -132,6 +132,11 @@ export default function WorldV3Page() {
                 <span className="w3-nm">Motor skills</span>
                 <span className="w3-grow">new this week</span>
               </div>
+              {/* Low-information strip by design: this is where the photo chip
+                  lands, so no subject row is ever covered. */}
+              <div className="w3-card-foot">
+                <span>Updated today</span>
+              </div>
             </div>
             <div className="w3-photo-chip w3-pc-br">
               {/* Contained photo chips render at chip size, never upscaled. */}
@@ -558,11 +563,14 @@ const CSS = `
 .w3-beat-media{position:relative;}
 /* Stacked layout: the photo chips hang off the media's corner, so the copy
    below needs clearance or the chip lands on the eyebrow. */
-@media (max-width:819px){ .w3-beat-media{margin-bottom:38px;} }
+@media (max-width:819px){ .w3-beat-media{margin-bottom:86px;} }
 .w3-photo-chip{position:absolute; width:clamp(110px,22vw,190px); border-radius:16px;
   box-shadow:var(--w3-shadow-lg); border:4px solid var(--surface,#fff); overflow:hidden; transform:rotate(-4deg);}
 .w3-photo-chip img{width:100%; display:block;}
-.w3-pc-br{right:-8px; bottom:-26px; transform:rotate(4deg);}
+.w3-pc-br{right:-10px; bottom:-74px; transform:rotate(4deg);}
+.w3-card-foot{display:flex; align-items:center; padding:10px 18px 12px;
+  border-top:1px solid var(--w3-line);}
+.w3-card-foot span{font-size:.7rem; color:var(--text-subtle,#9C9186);}
 .w3-pc-tr{right:-4px; top:-24px;}
 /* Bottom-left on the worksheet beat so the photo overlaps the page corner
    without covering a single answer box. */
