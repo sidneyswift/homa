@@ -3,6 +3,48 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Two undefined colour tokens live in production; fixed, plus a guard for the class
+
+**Status: FIXED in `84d8cbf`, on branch `claude/chat-first-onboarding-65b569`,
+NOT YET DEPLOYED.** The branch is unpushed and the founder has not asked for
+a PR, so this is escalated in-reply rather than shipped. Nothing about the
+fix waits on a ruling; it waits on a push.
+
+Found while checking why a position dot on the new facts card was
+invisible. `bg-border-default` turned out not to be a class at all.
+`globals.css` declares only `--color-border` and `--color-border-subtle`,
+so Tailwind emits no rule for it.
+
+Two live instances, both parent-visible:
+
+- `border-border-default`, 31 uses. Falls back to `currentColor`, so
+  material-card's page arrows, the binder's filter pills, empty states and
+  dashed drop targets, and most of `/admin` have been drawing a near-black
+  1px edge on warm cream where stone-300 was intended.
+- `text-sage-700`, 1 use, the "What worked" bullet on the lesson page.
+  `--sage-700` is in the palette but was never lifted into `@theme`, so the
+  bullet renders body-coloured.
+
+Both now name the declared tokens (`border-border`, `text-sage`). No design
+change: this is the colour each author already asked for.
+
+**Decided alone:** that the missing-token failure needs a guard, not just a
+fix. An undefined colour token fails silently and completely, since it
+compiles, lints, typechecks and renders, and a screenshot reads the result
+as a design choice. Nothing in the toolchain has an opinion, and the
+`_adherence.oxlintrc.json` rules catch raw hex and raw px but not this.
+`pnpm check:design-tokens` (`scripts/design-tokens-check.mts`, wired into
+CI) now fails on any colour utility whose token is not declared. It
+inspects only classes reaching into Homa's own vocabulary, keyed on the
+first segment of a real token, which is what lets it catch
+`border-border-default` while leaving `border-dashed` alone.
+
+Method note, because the detection matters more than the fix: this was
+invisible to reading the code and invisible to screenshots. It surfaced
+only by reading `getComputedStyle` in the running app and then searching
+the compiled stylesheet for the class. For anything colour-shaped, check
+what the browser resolved, not what the source says.
+
 ## 2026-07-21 · Founder ruling: no deterministic welcome, Homa opens herself
 
 Walked live on the dev server, founder verdict on the pre-warmed
