@@ -1,0 +1,598 @@
+{
+  "id": "cur-2026-07-19-social-studies-all-together",
+  "name": "Social Studies: All Together (Grade 1, Scott Foresman / Pearson Education pupil edition, copyright 2003)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T19:59:19-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784505559.533999",
+  "sourceFiles": [
+    {
+      "filename": "social-studies-all-together-pt1.pdf",
+      "localPath": ".cosmo/inspo-files/social-studies-all-together-pt1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt1/social-studies-all-together-pt1.pdf"
+    },
+    {
+      "filename": "social-studies-all-together-pt2.pdf",
+      "localPath": ".cosmo/inspo-files/social-studies-all-together-pt2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt2/social-studies-all-together-pt2.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "A published, reading-skill-integrated elementary social studies textbook. Each of its 6 units opens with a 'Vocabulary Preview' (one large illustrated scene labeled with the unit's key terms) and names one 'Reading Social Studies' target comprehension skill for the whole unit (Use Picture Clues, Alike and Different, Put Things in Order, Find the Main Idea, Recall and Retell, Predict). Every lesson is short (1-2 pages, a few short declarative sentences, 1-2 bolded vocabulary words) and closes with a fixed 'What Did You Learn?' box: two literal recall questions plus a third open 'Think and Share' or 'Write and Share' question that is usually the actual practice of that unit's named reading skill. Unlike the sibling Harcourt Science volume in this drop wave, there is no hands-on 'Investigate' step anywhere and no fixed process-skills vocabulary; the organizing thread is a reading-comprehension skill applied to social studies content, not a science process skill applied through experimentation.",
+    "principles": [
+      "6 units, each opening with a 'Begin with a Song' (lyrics set to a familiar tune, for example 'We Go to School' sung to 'The Farmer in the Dell'), then a Vocabulary Preview scene, then a named 'Reading Social Studies' target skill taught in a short worked example before the unit's lessons begin: Unit 1 Time for School (Use Picture Clues), Unit 2 In My Community (Alike and Different), Unit 3 Work! Work! Work! (Put Things in Order), Unit 4 Our Earth, Our Resources (Find the Main Idea), Unit 5 This Is Our Country (Recall and Retell), Unit 6 Our Country, Our World (Predict)",
+      "Every lesson (28 across the book) is 1-2 pages of plain declarative text with 1-2 bolded vocabulary words defined in-line (for example 'A community is a group of people and the place where they live'), almost always paired with photographs of real children and real places rather than illustration, and closes with a fixed 'What Did You Learn?' box: 2 literal recall questions, then a 3rd 'Think and Share' or 'Write and Share' open question that practices that unit's named reading skill",
+      "A dense rotation of named recurring feature boxes interleaves with the plain lesson content, each with its own distinct job: 'Citizen Heroes' and 'Meet [Person]' Read-Together Biography spreads pair a short real person's story (Ruby Bridges Hall, Mary McLeod Bethune, Jane Addams, Clara Barton, George Washington Carver, Benjamin Franklin, Abraham Lincoln, Eleanor Roosevelt, Mae Jemison, and others) with one named citizenship trait (caring, respect, responsibility, fairness, honesty, courage) and a reflection question; 'Then and Now' compares something across time (a community, toys, a country's flag) in two small panels; 'Map and Globe Skills' and 'Chart and Graph Skills' teach one concrete skill in a small callout separate from the lesson (use a map key, use four directions, follow a route, locate land and water, use a history map, read a calendar, read a time line, read a bar graph, read a diagram); 'Here and There' makes one specific comparison to another place in the world (money around the world, endangered animals, when it is time to leave for school); DK (Dorling Kindersley) inserts are a real-world photo-essay page on one topic (Chinese New Year, telephones, big wheeled vehicles)",
+      "A dedicated front-matter 'Social Studies Handbook' (H2-H14, unpaginated with the main book) teaches citizenship vocabulary (respect, caring, responsibility, fairness, honesty, courage, each with a one-line kid-facing definition and photo), a 6-step problem-solving process and a 5-step decision-making process under 'Citizenship in Action', the Five Themes of Geography (Location, Place, Movement, Region, Human-Environment Interaction, called 'Places and People Change Each Other' here) illustrated with one shared example (a school), and a Map and Globe Skills Review page, all taught once before Unit 1 begins the same way the sibling Harcourt Science volume front-loads its process-skills vocabulary",
+      "Each unit closes with an 'End with a Poem' (or Song, Legend, or Folktale) tied to the unit's theme, then a Unit Review, then a 'Discovery Channel School' page (a television-themed spread naming a companion video segment, for example 'Jobs in Your Community' or 'Weather Report'; not itself a printable activity)",
+      "A combined back-matter 'Reference Guide' (R2-R28) functions as an ongoing whole-year reference the same way the sibling Harcourt Science volume's References section does: an Atlas (satellite photo of Earth, world map, United States map, all-50-states map), a short Geography Terms glossary, a Picture Glossary (roughly 90 terms A-Z, each with one photo example and a page cross-reference back into the lesson content, for example 'community: A group of people and the place where they live. My community is the United States of America. (page 16)'), and an Index"
+    ],
+    "learningTheory": "reading-comprehension-skill-integrated, explain-then-practice (the lesson states the concept directly in a few plain sentences, then the child immediately practices a named comprehension skill, predict, sequence, compare, find the main idea, recall and retell, on that same content in the closing 'What Did You Learn?' box), distinct from the sibling Harcourt Science volume's hands-on-first investigate-then-explain sequence: there is no materials-list activity step anywhere in this book",
+    "assessmentApproach": "lesson-ending-comprehension-check ('What Did You Learn?': 2 recall questions plus 1 open Think-and-Share or Write-and-Share reading-skill question) plus a Unit Review at the close of each of the 6 units; no separate tests, quizzes, or scores observed in any sampled page. The Reference Guide (Atlas, Geography Terms, Picture Glossary, Index) functions as an ongoing reference the child returns to, not a graded checkpoint, the same pattern as the sibling Harcourt Science volume",
+    "parentRole": "facilitator-and-co-reader (reads or shares the short lesson text, asks the closing What Did You Learn? questions aloud, and helps the child connect Citizen Heroes and Here and There features to their own community)",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "reading-skill-integrated-elementary-social-studies",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available). apps/web/agent/curriculum-writer.md's Methodology-aware planning rules section had a Published Elementary Science Textbook (Investigate-Then-Explain) section from the sibling Harcourt Science ingest this session, but nothing describing a reading-comprehension-skill-driven social studies textbook before this session, so this is very likely a genuine first entry for this method, independent of whatever the knowledge_bank table itself holds"
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "reading-skill-integrated-elementary-social-studies",
+        "topicType": "method_philosophy",
+        "title": "Reading-Skill-Integrated Elementary Social Studies (Published Textbook Comprehension Method)",
+        "summary": "A published-textbook approach to elementary social studies where each unit teaches one named reading-comprehension skill (predict, alike and different, put things in order, find the main idea, recall and retell, use picture clues) through a Vocabulary Preview scene, then applies that same skill in every lesson's closing 'What Did You Learn?' box (2 recall questions plus 1 open reading-skill question). There is no hands-on investigation step anywhere. Distinct recurring feature boxes each carry one job: Citizen Heroes and Meet-the-Person biographies pair a real person's story with a named citizenship trait; Then and Now compares something across time; Map and Globe Skills and Chart and Graph Skills teach one concrete skill each in a small callout; Here and There makes a single world comparison. This is a distinct methodology from Direct Instruction (no script, no choral response), from the sibling Investigate-Then-Explain science pattern (no hands-on materials-list step; the organizing thread is a reading skill, not a process skill), and from Charlotte Mason (feature boxes and a fixed comprehension-check structure carry the content, not living books and free narration), even though a family may use any of these for different subjects in the same week.",
+        "mergedRowId": "db578f7e-d492-46e8-a965-ff796a279f3e",
+        "mergedAt": "2026-07-21"
+      },
+      {
+        "suggestedKey": "social-studies-all-together-grade1-format",
+        "topicType": "method_format",
+        "title": "Social Studies: All Together Grade 1 Pupil Edition Format",
+        "summary": "A Grade 1 elementary social studies pupil edition (Scott Foresman, an imprint of Pearson Education, copyright 2003, ISBN 0-328-01759-0) organized into 6 units (Time for School; In My Community; Work! Work! Work!; Our Earth, Our Resources; This Is Our Country; Our Country, Our World), each with 4-6 lessons plus recurring feature boxes (Citizen Heroes, Then and Now, Map and Globe Skills, Chart and Graph Skills, Here and There, DK inserts). A front-matter Social Studies Handbook (H2-H14) teaches citizenship vocabulary, problem-solving and decision-making steps, and the five themes of geography once before Unit 1. A back-matter Reference Guide (R2-R28: Atlas, Geography Terms, Picture Glossary, Index) runs as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent, the same as the sibling Harcourt Science volume.",
+        "mergedRowId": "665af610-befc-4deb-878d-31414d8b591d",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Unit 1, Lesson 1: Getting to Know Andrew",
+        "curriculumTopic": "I belong to many groups (team, family). A group is made up of people or things",
+        "homaSubject": "social_emotional",
+        "homaDomain": "friendship-cooperation",
+        "homaTopicId": "mt_w4nSIDhIgC",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Roles in a Group' topic (age 7-9) is the closest existing match but skews slightly older and is about group dynamics rather than simply naming the groups (team, family) a child belongs to; a reasonable partial fit, not an exact one"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 1, Lesson 2: Home and School / Citizen Heroes: Ruby Bridges Hall",
+        "curriculumTopic": "A real person's story (Ruby Bridges was six and in first grade when she integrated her school) tied to the citizenship trait of courage",
+        "homaSubject": "social_emotional",
+        "homaDomain": "responsible-decision-making",
+        "homaTopicId": "mt_Wc6cOTQ1bA",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Right and Wrong Choices' topic (age 5-7) is the closest existing conceptual match for courage-as-a-value, but Homa has no biography-of-a-real-historical-person topic anywhere in its taxonomy; the book's own teaching vehicle (a named real person's story) has no direct equivalent"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 1, Lesson 3: Rules We Follow",
+        "curriculumTopic": "Rules help keep us safe and treat each other fairly, at school and at home",
+        "homaSubject": "social_emotional",
+        "homaDomain": "responsible-decision-making",
+        "homaTopicId": "mt_rkrG2w7WXI",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Rules and agreements exist' topic (age 5-7) is a direct, strong match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 1, Lesson 4: Learning About My School / Then and Now: Things We Use",
+        "curriculumTopic": "Schools and the tools people use have changed over time",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_9REmUc8r4D",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Evidence from the Past' topic (age 6-7) is about reasoning from historical evidence generally; it is a real but imperfect fit for this book's simpler 'this used to be different, now it is different' comparison pattern, which has no dedicated topic anywhere in Homa's taxonomy"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2, Lesson 1: Welcome to My Neighborhood / Map and Globe Skills: Use a Map Key",
+        "curriculumTopic": "A map key tells what symbols and pictures on a map stand for",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_NlyT4Xzzr2",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "social_studies.reading-a-map-key-and-directions",
+          "domain": "geography",
+          "kind": "procedural",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_NlyT4Xzzr2 already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. Checked 'map', 'globe', and 'compass' across all 93 pre-existing History (social_studies) topics; the only 'map' hits are Ancient Egypt/Greece/Rome content-domain topics about historical maps, not a basic map-reading skill."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2, Lesson 2: Different Kinds of Communities / Map and Globe Skills: Use Four Directions",
+        "curriculumTopic": "A city, a town, and a farm community differ in size, buildings, and jobs; maps use north, south, east, and west",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_Dan03VC4Li",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "social_studies.kinds-of-communities-city-town-farm",
+          "domain": "geography",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_Dan03VC4Li already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. No existing Homa topic before this session compared community types (city/town/farm); the four-directions half of this lesson is covered by the 'Reading a Map' topic above."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2, Lesson 3: Special Things We Do / DK: Chinese New Year / Citizen Heroes: Learning About Each Other",
+        "curriculumTopic": "Families and communities have their own customs and celebrations; different countries celebrate in different ways",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": "mt_OWl0pyMgMJ",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "social_studies.celebrations-and-traditions-around-the-world",
+          "domain": "cultural-studies",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_OWl0pyMgMJ already exists in topics.json from this same curriculum's own earlier ingestion; this mapping still read 'unmapped' even though the real topic id was already recorded here. Flipped status to 'mapped'. Checked 'culture', 'tradition', and 'holiday' across all 93 pre-existing History (social_studies) topics; the closest existing hit is PSD's 'The world contains many cultures, traditions' (age 9-11), pitched well above Grade 1."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2, Lesson 4: Community Laws and Leaders / Citizen Heroes: Jane Addams",
+        "curriculumTopic": "Communities have laws (rules everyone must follow) and elected leaders (like a mayor) who help run the community",
+        "homaSubject": "social_emotional",
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_0Mc3ItywUx",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_0Mc3ItywUx (Community Laws and Local Leaders), in the new History > Civic Life domain (packages/taxonomy/src/mapping.ts), a content-kind domain deliberately using a different id from the reserved AUTHORED_DOMAINS civics-government assessment domain, so no collision. See the architecture-question entry in decisionsNeeded for the full reasoning."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 2, Lesson 5: Where in the World Do I Live? / Citizen Heroes: Sam Houston",
+        "curriculumTopic": "A child's address nests inside a neighborhood, inside a community, inside a state, inside a country, inside the world",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_V6t7XCmgVm",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_V6t7XCmgVm (Nested Address: Neighborhood to World), in the existing History > Geography content domain (already safe, no collision, no code change needed beyond the topic itself)."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 1: Ben's Jobs / Chart and Graph Skills: Use a Chart",
+        "curriculumTopic": "A job is work a person does; some jobs use tools, some earn money by making goods, some by providing a service",
+        "homaSubject": "life_skills",
+        "homaDomain": "money-finance",
+        "homaTopicId": "mt_asRwlPZXC3",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Jobs People Do' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 2: Needs and Wants / Then and Now: Changing Toys",
+        "curriculumTopic": "A need is something people must have to live; a want is something people would like to have but do not need",
+        "homaSubject": "life_skills",
+        "homaDomain": "money-finance",
+        "homaTopicId": "mt__ab4knIaSL",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Needs & Wants' topic (age 5-7) is a direct, exact match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 3: Spending and Saving / Here and There: Money Around the World",
+        "curriculumTopic": "People choose to spend money now or save it for later; different countries use different money",
+        "homaSubject": "life_skills",
+        "homaDomain": "money-finance",
+        "homaTopicId": "mt_zrCyqhngYm",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Saving Money' topic (age 5-7) is a direct match for the spending/saving half; 'Money Around the World' has no exact match (closest is 'Global Trade' at age 9-11, too old), a minor partial gap not worth a dedicated new topic on its own"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 4: Welcome to Job Day! (goods, services, tools)",
+        "curriculumTopic": "Some workers earn money by growing or making goods; some by having a service job that helps people meet their wants and needs",
+        "homaSubject": "life_skills",
+        "homaDomain": "entrepreneurship",
+        "homaTopicId": "mt_RgQxPddV8v",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Goods & Services' topic (age 5-7) is a direct, exact match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 5: Interview with a Farmer / Map and Globe Skills: Follow a Route",
+        "curriculumTopic": "Growing a crop (peanuts) takes several steps over time: plant, care for, harvest",
+        "homaSubject": "life_skills",
+        "homaDomain": "money-finance",
+        "homaTopicId": "mt_asRwlPZXC3",
+        "status": "partial",
+        "suggested": {
+          "note": "Folded into the 'Jobs People Do' mapping above rather than counted as a second gap; the interview-dialogue teaching format itself (two named speakers, Q-and-A) has no format equivalent in materials-studio, see Layer 4"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 3, Lesson 6: From Place to Place",
+        "curriculumTopic": "Transportation (cars, trucks, planes, bikes, boats) moves people and goods from place to place",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_Nf4ZmHeiA1",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_Nf4ZmHeiA1 (How Transportation Moves People and Goods), in the existing History > Geography content domain."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 4, Lesson 1: Different Kinds of Weather / Chart and Graph Skills: Read a Time Line",
+        "curriculumTopic": "Weather changes day to day and season to season; pen pals in different states compare their local weather",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": "mt_HZvTriQWTh",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 4, Lesson 2: Looking at Our Land and Water / Map and Globe Skills: Locate Land and Water",
+        "curriculumTopic": "Maps and globes show land and water; the world has 7 continents and 5 (or 4, depending on convention) oceans",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_NlyT4Xzzr2",
+        "status": "partial",
+        "suggested": {
+          "note": "Folded into the new 'Reading a Map: Map Key and Four Directions' topic above; naming and locating the continents and oceans specifically (as opposed to reading a map's key and directions) is a related but distinct skill with no existing topic, a minor gap not worth a fourth new topic this session"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 4, Lesson 3: Our Earth's Resources",
+        "curriculumTopic": "A natural resource is a useful thing that comes from nature (land, water, air, trees)",
+        "homaSubject": "science",
+        "homaDomain": "weather-climate",
+        "homaTopicId": "mt_VI5kdtf28e",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Natural resources' topic (age 9-10) is the only existing match and is pitched noticeably older than this Grade 1 lesson's simple land/water/air/trees framing; a real but imperfect fit"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 4, Lesson 5: Caring for Our Resources / Here and There: Endangered Animals",
+        "curriculumTopic": "People can reuse, recycle, and reduce waste to care for the Earth's resources; some animals are endangered",
+        "homaSubject": "science",
+        "homaDomain": "animals-of-the-world",
+        "homaTopicId": "mt_5S4byWDX6n",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Endangered & Extinct Species' topic (age 9-11) is the closest match for the endangered-animals half but is pitched older; recycling/reducing waste itself has no existing Homa topic anywhere"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 1: Native Americans / Chart and Graph Skills: Read a Diagram",
+        "curriculumTopic": "Native American peoples (for example the Lenape) lived in America long before European settlers arrived, with their own homes, food, and ways of life",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_2GDBmKCJxs",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Different Accounts of the Same Event' topic (age 6-8) is a loose fit at best; Homa's taxonomy has no dedicated Native American history content anywhere, a real content gap this session did not attempt to fill given the sensitivity and depth a good treatment would need"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 2: Early Travelers to America / Map and Globe Skills: Use a History Map",
+        "curriculumTopic": "Christopher Columbus sailed from Spain in 1492 and landed near North America; countries send explorers to find new places",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_9REmUc8r4D",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Evidence from the Past' topic (age 6-7) is a loose fit; this is specific historical-figure content Homa's taxonomy does not otherwise cover for this age band"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 3: The Colonies Become Free / Meet Benjamin Franklin",
+        "curriculumTopic": "The 13 colonies became free from England; real historical figures helped make this happen",
+        "homaSubject": "social_studies",
+        "homaDomain": "colonial-revolutionary-america",
+        "homaTopicId": "mt_afpN0KFTC4",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_afpN0KFTC4 (The 13 Colonies and Becoming Free from England), in the new History > Colonial & Revolutionary America domain, following the same period-content pattern as the existing ancient-egypt/ancient-greece-rome/medieval-times domains."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 4: Symbols in Our Country",
+        "curriculumTopic": "The United States has symbols that stand for the country: the flag, the bald eagle, the Statue of Liberty, the Liberty Bell, the Washington Monument, and others",
+        "homaSubject": "social_studies",
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_gBfzT4pAFC",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_gBfzT4pAFC (Symbols of the United States), in the new History > Civic Life domain."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 5: We Celebrate Holidays / Meet Abraham Lincoln",
+        "curriculumTopic": "The country celebrates holidays (Presidents' Day, Martin Luther King Jr. Day, Memorial Day, Veterans Day) to honor people and events",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": "mt_OWl0pyMgMJ",
+        "status": "partial",
+        "suggested": {
+          "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; this lesson is specifically about US national/patriotic holidays rather than world traditions, a related but not identical fit"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 5, Lesson 6: Choosing Our Country's Leaders",
+        "curriculumTopic": "Adult citizens vote to choose their leaders; each citizen votes once, and whoever gets the most votes wins",
+        "homaSubject": "social_studies",
+        "homaDomain": "civic-life",
+        "homaTopicId": "mt_X1pNsoH2At",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_X1pNsoH2At (Voting to Choose Leaders), in the new History > Civic Life domain, distinct from Ancient Greece & Rome's unrelated Athenian Democracy topic."
+        }
+      },
+      {
+        "curriculumSubject": "Unit 6, Lesson 1: Visiting the Market / Thinking Skills: Make a Decision",
+        "curriculumTopic": "Buyers and sellers meet at a market; a buyer makes decisions about what to buy",
+        "homaSubject": "life_skills",
+        "homaDomain": "entrepreneurship",
+        "homaTopicId": "mt_SbEaQnMQoD",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Buyers & Sellers' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 6, Lesson 2: How Things Have Changed",
+        "curriculumTopic": "Grandparents describe how work and things at home have changed since they were young (typewriters to computers, scanning instead of punching buttons)",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_9REmUc8r4D",
+        "status": "partial",
+        "suggested": {
+          "note": "Same 'Evidence from the Past' partial fit as the other Then-and-Now-style lessons above; folded in rather than counted as a fourth separate gap"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 6, Lesson 3: Inventors and Inventions / DK: Telephones",
+        "curriculumTopic": "Inventors created new tools (the telephone) that changed how people communicate; inventions themselves change and improve over time",
+        "homaSubject": "life_skills",
+        "homaDomain": "entrepreneurship",
+        "homaTopicId": "mt_CrGnpVjnk8",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Making Something to Sell' topic (age 5-7) is the closest existing match for the idea of inventing/making something new, though it is framed around entrepreneurship rather than invention history specifically; a loose but real fit"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 6, Lesson 4: How Travel Has Changed / Chart and Graph Skills: Read a Bar Graph",
+        "curriculumTopic": "Ways of traveling have changed over time; a bar graph can show and compare information",
+        "homaSubject": "math",
+        "homaDomain": "data-statistics",
+        "homaTopicId": "mt_VhBH8wrFC6",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Picture & Bar Graphs' topic (age 7-8) is a direct match for the bar-graph half of this lesson"
+        }
+      },
+      {
+        "curriculumSubject": "Unit 6, Lesson 5: Life Around the World",
+        "curriculumTopic": "Children in different countries live different daily lives, with their own homes, foods, and school days",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": "mt_OWl0pyMgMJ",
+        "status": "mapped",
+        "suggested": {
+          "note": "Folded into the new 'Celebrations and Traditions Around the World' topic above; close enough in spirit (comparing daily life and customs across countries) to count as mapped rather than partial"
+        }
+      },
+      {
+        "curriculumSubject": "Reference Guide: Picture Glossary",
+        "curriculumTopic": "Roughly 90 social studies vocabulary terms A-Z, each with one photo example and a page cross-reference back into the lesson content",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_VXcua6-txq",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Vocabulary: historical thinking' topic (age 6-10) is the closest single-topic match for a general social-studies-vocabulary concept, though it does not cover the full breadth of this specific 90-term glossary (community, economics, geography, and civics terms alike)"
+        }
+      },
+      {
+        "curriculumSubject": "Front matter: Social Studies Handbook, Building Geography Skills",
+        "curriculumTopic": "The Five Themes of Geography (Location, Place, Movement, Region, and how places and people change each other)",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": "mt_8AmmZLjcvK",
+        "status": "mapped",
+        "suggested": {
+          "note": "Resolved 2026-07-21: mapped to new topic mt_8AmmZLjcvK (The Five Themes of Geography), in the existing History > Geography content domain."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 32,
+      "mapped": 19,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 13
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a weekly calendar anywhere in the sampled pages. Organized as 6 units of 4-6 lessons each (28 lessons total), each lesson 1-2 pages. No day-by-day or week-by-week schedule is printed anywhere, unlike Homa's own weekly-template curricula; a single-lesson-per-sitting cadence is implied by the format but never stated as a number of minutes or a day of the week, so recording an invented cadence here would not be honest, the same treatment the sibling Harcourt Science volume gave its own untimed lesson format",
+    "sessionLengthMinutes": {
+      "note": "Not stated anywhere in the sampled pages. No time language (minutes, 'short lesson', daily/weekly) was found for any lesson, unit, or feature box. Leaving this unknown rather than guessing"
+    },
+    "weeklyTemplate": "No week-by-week template exists in the source. Every lesson instead follows the same fixed shape regardless of unit: 1-2 pages of plain declarative text with 1-2 bolded vocabulary words, closing with a 'What Did You Learn?' box (2 recall questions plus 1 open reading-skill question). Each unit opens with a Begin-with-a-Song page, a Vocabulary Preview scene, and a worked example of that unit's named 'Reading Social Studies' target skill, and closes with an End-with-a-Poem/Song/Folktale page, a Unit Review, and a Discovery Channel School tie-in page. Recurring feature boxes (Citizen Heroes, Meet-the-Person biographies, Then and Now, Map and Globe Skills, Chart and Graph Skills, Here and There, DK inserts) appear roughly once or twice per lesson, each doing one distinct job rather than blending into the main lesson text",
+    "progressionModel": "unit-parallel rather than a single spiraling thread: the 6 units move through mostly independent social studies strands (self and school, community, work and economics, earth and resources, national civics and history, world comparison) with light internal buildup inside each unit (for example Unit 2 moves from 'what is a neighborhood' to 'kinds of communities' to 'community customs' to 'laws and leaders' to 'where my community fits in the world') but does not spiral concepts back across units the way a Charlotte Mason or classical program does; reads as a single-pass survey across six broad social studies strands for the grade, the same shape the sibling Harcourt Science volume takes across its own three science branches",
+    "reviewRhythm": "Every lesson closes with its own 'What Did You Learn?' comprehension check (2 recall questions plus 1 open reading-skill question). Each of the 6 units additionally closes with a Unit Review. No tests, quizzes, or scores were observed in any sampled page. The Social Studies Handbook and the Reference Guide (Atlas, Geography Terms, Picture Glossary, Index) function as ongoing whole-year references the child returns to, not graded checkpoints",
+    "totalWeeks": null,
+    "notes": "Front matter includes a dedicated 'Social Studies Handbook' (pages H2-H14, its own separate page numbering before Unit 1 begins) covering citizenship vocabulary with photos (respect, caring, responsibility, fairness, honesty, courage), a 6-step problem-solving process and a 5-step decision-making process under 'Citizenship in Action,' the Five Themes of Geography illustrated with one shared example (a school building), and a Map and Globe Skills Review page (using a zoo map to practice near/far/between). This is the same front-loaded-skills-vocabulary pattern the sibling Harcourt Science volume uses for its own process-skills spread, adapted to citizenship and geography vocabulary instead of science process skills. Like the Harcourt Science and Harcourt Art Everywhere volumes in this drop wave, this is a school-classroom-market book (the front cover shows three puppet characters representing a firefighter, a chef, and another community helper; 'Citizen Heroes: Learning About Each Other' and several lesson photos show a full classroom of children); curriculum-writer should treat this the same way, a light one-adult, one-child adaptation of the comprehension-check and feature-box content rather than a literal transcription of classroom group routines."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "vocabulary-preview-labeled-scene",
+        "description": "The 2-page 'Vocabulary Preview' that opens every unit (6 across the book): one large illustrated scene (a city street, a farm, a country landscape) with the unit's key vocabulary terms labeled on circular callouts pointing to relevant parts of the scene (for example 'neighborhood,' 'community,' 'law,' 'leader,' 'state,' 'continent,' 'ocean').",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "labeled-anatomy-diagram's own 'Great for' line already names 'geography (map labeling)' alongside body systems and plant parts, and its leader-line-plus-word-bank shape (or the fully-labeled reference variant, since this feature has no blank/testing version in the source) is a strong fit for a big labeled vocabulary scene."
+      },
+      {
+        "type": "lesson-comprehension-check",
+        "description": "The fixed 'What Did You Learn?' box closing every lesson (28 across the book): 2 literal recall questions plus a 3rd open 'Think and Share' or 'Write and Share' question practicing that unit's named reading-comprehension skill.",
+        "recipe": "lesson-comprehension-check",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: this recurring closer box turned out to be a genuine, repeatable format shared across published elementary textbooks generally (28 occurrences in this book alone), not a one-off. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/lesson-comprehension-check.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry, checked first against checklist-assessment, guided-notes, and structured-outline, none of which cover a fixed recall-plus-open-question lesson closer."
+      },
+      {
+        "type": "citizen-hero-and-meet-the-person-biography",
+        "description": "The recurring 'Citizen Heroes' and 'Meet [Person]' Read-Together Biography spreads (roughly 16 across the book): a short real person's story (photo, a US-location map, 2-3 paragraphs) paired with one named citizenship trait (caring, respect, responsibility, fairness, honesty, courage) and a closing reflection question ('Courage in Action,' 'Honesty in Action,' or 'Think and Share').",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Same treatment the Harcourt Science ingest recorded for its own scientist/engineer biography Links: usable but not a precise fit. artist-composer-study-card's frame-plus-bio-plus-reflection shape reuses cleanly for a citizen-hero bio, but its reflection stem and 'Where they were from' circle are written for CM-style artist study, not a citizenship-trait biography. curriculum-writer.md's new methodology section says to adapt the labels rather than use it unedited; no recipe file edit made this session for this pattern, consistent with the Harcourt Science precedent of not editing a recipe for a lower-priority reuse."
+      },
+      {
+        "type": "then-and-now-comparison",
+        "description": "The recurring 'Then and Now' feature (4 across the book: 'How a Community Changed,' 'Changing Toys,' 'Our Country's Flag,' plus the Unit 6 grandparent-interview lesson 'How Things Have Changed'): two small panels, one showing something from the past and one showing the same thing today, each with a short caption, plus a comparison question.",
+        "recipe": "then-and-now-comparison",
+        "status": "have_recipe",
+        "notes": "Genuine gap, built this session: no existing recipe covers a two-panel before/after time comparison (classification-sorting-mat is a category sort, not a time comparison; guided-notes is a notes layout, not an image comparison). Recurs 4 times in this book alone and is a common pattern across elementary social studies and science curricula generally (community change, invention history, life-cycle before/after), so building the recipe now rather than deferring it. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/then-and-now-comparison.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry."
+      },
+      {
+        "type": "map-and-globe-skill-practice",
+        "description": "The recurring 'Map and Globe Skills' callout (6 across the book: Use a Map Key, Use Four Directions, Follow a Route, Locate Land and Water, Use a History Map, plus the front-matter Map and Globe Skills Review): a small map or globe illustration with a map key or compass rose, and 1-2 practice questions.",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "Same recipe as the vocabulary-preview scene above (its 'Great for' line explicitly covers map labeling); the leader-line-plus-word-bank shape works for labeling map-key symbols or compass directions, and the three built-in scaffolding levels (fully labeled, numbered with word bank, blank for testing) map cleanly onto reference vs. practice vs. assessment versions of a map skill page."
+      },
+      {
+        "type": "chart-and-graph-skill-practice",
+        "description": "The recurring 'Chart and Graph Skills' callout (5 across the book: Read a Calendar, Read a Time Line, Read a Diagram, Read a Bar Graph): a small chart, timeline, diagram, or bar graph with 1-2 practice questions, separate from the lesson's own comprehension check.",
+        "recipe": "chart-and-graph-skill-practice",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: on reflection this is a genuinely cross-subject, evergreen data-literacy skill (math, science, and social studies all use it), not a one-book callout, so it earned its own recipe rather than staying deferred. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/chart-and-graph-skill-practice.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry, checked first against singapore-workbook-page and guided-notes, neither of which teaches a chart/graph/calendar/diagram reading skill with a worked example and practice questions."
+      },
+      {
+        "type": "here-and-there-world-comparison",
+        "description": "The recurring 'Here and There' feature (3 across the book: Money Around the World, Endangered Animals, It Is Time to Leave) making one specific comparison between the child's own world and another place, with a short caption and photo.",
+        "recipe": "nature-identification-poster",
+        "status": "have_recipe",
+        "notes": "A loose fit reused with a caveat: nature-identification-poster's labeled-grid-of-images shape works for a simple side-by-side world comparison (for example different countries' coins, or animals from different places), though the recipe's own framing is nature-study-specific. Low volume (3 instances) and low urgency; no recipe file edit made this session."
+      },
+      {
+        "type": "dk-real-world-photo-essay",
+        "description": "The DK (Dorling Kindersley) inserts (3 across the book: Chinese New Year, Telephones, Big Wheels): a full-color real-world photo essay on one topic with short captions per photo, distinct from the book's own illustrated lesson style.",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "A real-photograph-plus-caption grid is the closest fit; nomenclature-cards' 'realistic imagery preferred over cartoon' design pattern and image-plus-label shape reuse reasonably, though this book's own DK pages read more like a magazine layout than a card set. Low volume (3 instances); no recipe file edit made this session."
+      },
+      {
+        "type": "national-symbols-reference",
+        "description": "The 'Symbols in Our Country' lesson's photo-plus-caption arrangement (Washington Monument, Statue of Liberty, Liberty Bell, Bald Eagle, Gateway Arch, Alamo, and the country's motto on a coin), each symbol with a one-sentence explanation of what it stands for.",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "nomenclature-cards' labeled-image-card-grid shape is a strong fit for a set of national-symbol reference cards (image, name, and what it stands for), the same way the Harcourt Science ingest reused this recipe for its glossary. No recipe file edit needed."
+      },
+      {
+        "type": "picture-glossary-reference-card",
+        "description": "The back-matter Picture Glossary: roughly 90 terms A-Z, each paired with one clean real-world photo example and a page cross-reference back into the lesson content (for example 'flag: A symbol that stands for a country. The American flag is a symbol of our country. (page 16)').",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "Same reasoning as the Harcourt Science ingest's glossary mapping and this book's own national-symbols mapping above: the control-card grid (image plus label) most faithfully reproduces this book's own term-plus-photo reference-card style."
+      },
+      {
+        "type": "world-map-and-atlas-reference",
+        "description": "The back-matter Atlas: a labeled world map (7 continents, oceans), a United States map, and an all-50-states map, each with region names as leader-line labels.",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "Folded into the same map-labeling use of labeled-anatomy-diagram as the vocabulary-preview scene and Map and Globe Skills callouts above; not counted as a fourth separate mapping."
+      },
+      {
+        "type": "interview-dialogue-page",
+        "description": "The low-volume 'Interview with a Farmer' lesson: a Q-and-A dialogue between two named speakers (a child and an adult) with photos, distinct from the book's own third-person lesson-text style.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "A single instance in this book (the grandparent conversation in 'How Things Have Changed' is similar but reads as free-flowing narration, not a labeled Q-and-A). Too low-volume to justify a dedicated recipe on its own, the same treatment the Harcourt Science ingest gave its own low-volume career-biography Links pattern; social-narrative's first-person format is the closest existing recipe if a family specifically requests this shape, though it is not a precise fit."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 12,
+      "haveRecipe": 11,
+      "noRecipe": 1
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: reading-skill-integrated-elementary-social-studies=db578f7e-d492-46e8-a965-ff796a279f3e, social-studies-all-together-grade1-format=665af610-befc-4deb-878d-31414d8b591d Original ask: Write the reading-skill-integrated-elementary-social-studies (method_philosophy) and social-studies-all-together-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "New recipe file then-and-now-comparison.md added this session (apps/web/agent/skills/materials-studio/references/recipes/then-and-now-comparison.md), plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry",
+      "impact": "The Then and Now feature recurs 4 times in this book alone and is a common pattern across elementary social studies and science curricula generally (community change, invention history, before/after comparisons); this closes a genuine, repeatable format gap rather than forcing the pattern into an unrelated existing recipe.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Added 3 new social_studies topics this session, all append-only under existing MARBLE_DOMAIN_MAP pairs (History > Geography, History > Cultural Studies), no mapping.ts edit needed: mt_NlyT4Xzzr2 'Reading a Map: Map Key and Four Directions' (Geography, age 5-7), mt_Dan03VC4Li 'Kinds of Communities: City, Town, and Farm' (Geography, age 5-7), mt_OWl0pyMgMJ 'Celebrations and Traditions Around the World' (Cultural Studies, age 5-7). topics.json grew from 1640 to 1643 topics (insertions only, verified by diff); packages/taxonomy/data/manifest.json counts and topics.json bytes/sha256 updated to match; pnpm taxonomy:slugs, pnpm taxonomy:progress, and pnpm check:taxonomy all re-run and green.",
+      "impact": "History (social_studies) had zero coverage below age 9 for basic map skills, community types, or world traditions before this session; these three additions give Homa a foothold for exactly the content this Grade 1 curriculum, and likely most Grade K-2 social studies curricula, actually teaches.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (before merge): the architecture finding below was surfaced but not acted on when this curriculum was first ingested. packages/taxonomy/src/domains.ts reserves 4 AUTHORED_DOMAINS for social_studies (family-community, geography-maps, civics-government, economics-money), already populated by a separate hand-authored milestone bank (packages/core/src/map/content.ts / item-domains.ts), not by the Marble-imported topics.json this skill edits. The fix: added two NEW content-kind MARBLE_DOMAIN_MAP entries with deliberately non-colliding ids, following the exact pattern already used for Geography and Cultural Studies earlier in this same ingest and for Art/Music in a sibling curriculum this session: 'History > Civic Life' -> domainId civic-life, and 'History > Colonial & Revolutionary America' -> domainId colonial-revolutionary-america (packages/taxonomy/src/mapping.ts). Neither collides with the reserved assessment-kind ids; check:taxonomy's 'domain ids are unique' check confirms 110 domains, 0 duplicates. This did not require resolving the deeper dual-pipeline question (whether the Marble and hand-authored bank systems should ever converge); it sidesteps the collision the same safe way the original session did for the 3 topics that already shipped.",
+      "impact": "Unblocks all 7 real per-lesson gaps that were previously left no_subject (see the next entry below, also resolved). Establishes civic-life and colonial-revolutionary-america as the durable home for this kind of Grade K-2 civics/early-American-history content in future curriculum ingests, so the next social-studies-flavored drop does not have to re-derive this.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (before merge): all 7 gaps below are now mapped, using the new domains from the entry above. New topics appended to packages/taxonomy/data/topics.json (1647 -> 1654, append-only, verified insertion-only diff and independently recomputed sha256): community laws and local leaders (mt_0Mc3ItywUx, Civic Life), nested address neighborhood-to-world (mt_V6t7XCmgVm, Geography), transportation moves people and goods (mt_Nf4ZmHeiA1, Geography), the 13 colonies and becoming free from England (mt_afpN0KFTC4, Colonial & Revolutionary America), symbols of the United States (mt_gBfzT4pAFC, Civic Life), voting to choose leaders (mt_X1pNsoH2At, Civic Life), and the Five Themes of Geography (mt_8AmmZLjcvK, Geography). layer2_scope.mappings and .stats updated to reflect mapped status for all 7; 0 no_subject remain for this curriculum. pnpm check:taxonomy, check:fleet-skills, and check:materials all green after the change; verify-ingestion.py cur-2026-07-19-social-studies-all-together re-run and exits 0.",
+      "impact": "Homa can now assess and plan for community civics, national symbols, voting, and early American history at Grade K-2, none of which had any prior taxonomy coverage.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "method",
+      "item": "Added a new 'Published Elementary Social Studies Textbook (Reading-Skill-Integrated, e.g. Scott Foresman Social Studies)' section to curriculum-writer.md's Methodology-aware planning rules, alongside the existing Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, Literature-Based/Classical, Handwriting Without Tears, Elements & Principles of Design, and Published Elementary Science Textbook sections",
+      "impact": "curriculum-writer.md had no section describing a reading-comprehension-skill-driven, published-textbook social studies methodology before this session; the sibling Published Elementary Science Textbook section (from the Harcourt Science ingest earlier this session) is explicitly hands-on-investigation-first and does not describe this book's reading-skill-first pattern at all. This lets curriculum-writer apply the method's distinctive rules (name the unit's reading skill, keep the three-part What-Did-You-Learn box intact, keep each recurring feature box's own job separate rather than merging them) whenever a family uses a published reading-skill-integrated social studies textbook.",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the 3 mappings above for 'Reading a Map: Map Key and Four Directions' (mt_NlyT4Xzzr2), 'Kinds of Communities: City, Town, and Farm' (mt_Dan03VC4Li), and 'Celebrations and Traditions Around the World' (mt_OWl0pyMgMJ) already carried their real homaTopicId values but still read status 'unmapped' from before the topics were added. Flipped all 3 to 'mapped'; layer2_scope.stats updated (mapped 16 -> 19, unmapped 3 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done earlier this session.",
+      "impact": "This curriculum now correctly reads as fully mapped for its map-skills, community-types, and celebrations lessons instead of falsely showing 3 open taxonomy gaps that were actually closed already.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21: two more recipes graduated this session covering gaps this curriculum flagged: lesson-comprehension-check.md (the 'What Did You Learn?' lesson closer, 28 occurrences) and chart-and-graph-skill-practice.md (the 'Chart and Graph Skills' callout, 5 occurrences). Both checked first against existing recipes (checklist-assessment, guided-notes, structured-outline for the former; singapore-workbook-page, guided-notes for the latter) and found genuinely uncovered. Format library rows added to materials-studio SKILL.md, activity-formats.md entries added, this curriculum's layer4_activities flipped from no_recipe to have_recipe for both.",
+      "impact": "layer4_activities.stats now reads haveRecipe 10 / noRecipe 2 (was 8 / 4). Both formats are subject-agnostic and evergreen, so future curriculum ingests with the same recurring boxes reuse these instead of re-flagging the gap.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: social-studies-all-together-pt1.pdf is 120 PDF pages, social-studies-all-together-pt2.pdf is 43 PDF pages (163 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 163 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows printed pages 214-215 (the end of Unit 5 Lesson 5, 'We Celebrate Holidays,' Martin Luther King Jr. Day and Presidents' Day content), and pt2's first rendered spread (PDF page 1) shows printed page 216 ('Meet Abraham Lincoln,' the very next content), with no missing or repeated printed page numbers at the seam. Front cover (pt1 page 1) reads 'SOCIAL STUDIES, Scott Foresman, All Together' with three puppet characters (a firefighter, a chef, and a third community-helper figure); the title page (pt1 page 2) confirms 'All Together' as this specific volume's own title within the Scott Foresman Social Studies series (program authors including Dr. Candy Dawson Boyd and Dr. Geneva Gay), not a Harcourt-branded book despite two sibling Grade 1 Harcourt volumes (Harcourt Art Everywhere, Harcourt Science) arriving in the same drop wave; the copyright page (pt1 page 3) confirms 'Copyright (c) 2003 by Pearson Education, Inc.,' ISBN 0-328-01759-0. Full table of contents sampled directly (pt1 pages 3-6): 6 units (Unit 1 Time for School; Unit 2 In My Community; Unit 3 Work! Work! Work!; Unit 4 Our Earth, Our Resources; Unit 5 This Is Our Country; Unit 6 Our Country, Our World), Reference Guide (Atlas R2, Geography Terms R10, Picture Glossary R12, Index R24). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the two sibling Harcourt Grade 1 volumes' own findings: (1) the 'Citizen Heroes: Ruby Bridges Hall' biography states directly 'Ruby was six years old when she began first grade,' presented as a same-age peer figure for the reader; (2) every lesson's reading passage uses very short, simple declarative sentences ('My neighborhood is part of a community. A community is a group of people and the place where they live.'; 'I have jobs at school. My big job is to learn.'), consistent with an early-elementary supported reader, the same reading level the sibling Harcourt Science and Harcourt Art Everywhere Grade 1 volumes show; (3) every lesson's 'What Did You Learn?' box requires full sentence-level comprehension responses (recall questions plus an open Think-and-Share or Write-and-Share question), a demand level well beyond a Kindergarten book; (4) cross-referencing this curriculum's own content against Homa's taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (Rules and agreements exist 5-7, Needs & Wants 5-7, Goods & Services 5-7, Buyers & Sellers 5-7, Local weather patterns 5-6), consistent with a 6-7-year-old reader, the same age cluster the sibling volumes' own Grade 1 findings showed. Unlike the Harcourt Art series (where 'Art Everywhere' vs other subtitles distinguishes grade level directly in the cover title), this book's cover reads only 'Social Studies, All Together' with no explicit numeral, so grade level rests entirely on the internal content evidence above, the same situation the sibling Harcourt Science volume was in. Sampling covered the front cover, title page, copyright page, full table of contents, and front-matter Social Studies Handbook (pt1 PDF pages 1-16); Unit 1's full lesson set and Citizen Heroes: Ruby Bridges Hall (pt1 pages 17-40); Unit 2's Vocabulary Preview, Different Kinds of Communities, Chinese New Year DK insert, and End with a Poem (pt1 pages 46-53, 66, 74, 80-81); Unit 3's Welcome to Job Day, Interview with a Farmer, and From Place to Place (pt1 pages 108-109, 116-117, 124-125); Unit 4's Begin with a Song and Our Earth's Resources (pt1 pages 90, 144-145, 156-157); Unit 5's Meet Benjamin Franklin, We Celebrate Holidays, Symbols in Our Country, and Choosing Our Country's Leaders (pt1 pages 110, 115-119); the Unit 5/pt2 seam and Meet Abraham Lincoln (pt2 pages 0-1); Choosing Our Country's Leaders continuation (pt2 page 1); Unit 6's Begin with a Song, Eleanor Roosevelt, How Things Have Changed, and Telephones DK insert (pt2 pages 3-4, 8, 13, 17); Kay's Grandparents Reading Social Studies feature and Meet Mae Jemison (pt2 pages 20, 22); and the back-matter Atlas, Picture Glossary, Index, and Credits (pt2 pages 30, 35, 40, 42). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 163 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics, the then-and-now-comparison recipe, and the curriculum-writer methodology section describe generic elementary-social-studies concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."
+}

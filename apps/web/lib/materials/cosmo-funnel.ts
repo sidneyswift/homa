@@ -87,6 +87,18 @@ export const GAP_ALIASES: Record<string, string> = {
   "vocabulary-sidebar": "reading-comprehension-mini-unit",
   "printable-manipulative-set": "manipulatives",
   "dot-marker-activity": "dot-marker-activity",
+  // Blossom & Root Level 0 ingest (2026-07-20) shipped recipes covering
+  // gaps the earlier Early Years Vol. 2 ingest (2026-07-19) had proposed
+  // under different names.
+  "nature-notebook-page": "nature-observation-journal",
+  "picture-study-card": "artist-composer-study-card",
+  // Mike Venezia Getting to Know trio (2026-07-21 curriculum-gap
+  // graduation): artists and inventors-scientists each flagged the same
+  // life-events-timeline shape under their own subject-specific name; both
+  // shipped as one shared recipe, biography-timeline-page, with a
+  // life-events mode and an invention-progression mode.
+  "artist-biography-timeline-page": "biography-timeline-page",
+  "invention-timeline-page": "biography-timeline-page",
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {

@@ -473,6 +473,23 @@ making.
 | Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
 | Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
 | Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
+| Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
+| Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
+| Composer listening guide | give the child one thing to listen for and ordered moments to catch while a real piece of music plays | composer-listening-guide |
+| Chant and rhyme card | print a traditional chant, nursery rhyme, or fingerplay as a large-type say-aloud card with leader/everyone and clap cues | chant-and-rhyme-card |
+| Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
+| Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
+| Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, a bare technique-reference card, or a published science textbook's "Investigate" activity | art-project-instructions |
+| Then and now comparison | compare something from the past against today in two labeled panels with a reflection question | then-and-now-comparison |
+| Size attribute comparison page | compare two or three items along one physical attribute and circle, color, or draw the answer | size-attribute-comparison-page |
+| Pattern extension practice | copy, continue, choose, or create a simple repeating AB pattern | pattern-extension-practice |
+| Comic narrative math page | teach a concept through 2-4 comic panels of character dialogue, ending in a story-linked question | comic-narrative-math-page |
+| Circle diagram two-set sort | sort items into two overlapping circles so both-attribute and neither-attribute items have a real home | circle-diagram-two-set-sort |
+| Picture bingo board | give a family several shuffled boards from one shared item pool for a caller-led recall game | picture-bingo-board |
+| Biography timeline page | show 5-8 chronological events in a real person's life, or an invention's progression, as connected labeled boxes | biography-timeline-page |
+| Chart and graph skill practice | teach one concrete data-reading skill (calendar, timeline, bar graph, diagram) with a worked example plus practice questions | chart-and-graph-skill-practice |
+| Lesson comprehension check | close a taught lesson with 2 recall questions plus 1 open think-and-share question | lesson-comprehension-check |
+| Magic square puzzle | drill addition fluency in a self-checking grid where every row, column, and diagonal sums to the same target | magic-square-puzzle |
 
 ## Design rules (binding)
 

@@ -1,0 +1,93 @@
+{
+  "id": "ref-2026-07-20-outdoor-toddler-activity-book",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T22:51:58-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784515918.862889",
+  "format": "activity-idea-book",
+  "title": "The Outdoor Toddler Activity Book: 100+ Fun Early Learning Activities for Outside Play",
+  "publisher": "Rockridge Press (a Callisto Media imprint), verified via web search, not printed anywhere in the captured file",
+  "author": "Krissy Bonning-Gould",
+  "gradeLevel": "Toddler (ages 1-3)",
+  "pageCount": 176,
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-20-outdoor-toddler-activity-book/outdoor-toddler-activity-book.pdf",
+  "localPath": ".cosmo/inspo-files/outdoor-toddler-activity-book.pdf",
+  "captureCompleteness": "partial: the PDF is a single CamScanner phone photo of the book's front cover (595x842pt canvas, one page, confirmed directly with pypdf and PyMuPDF, both agree on page count 1), not any interior page. No commentary was left on the drop.",
+  "analysisQuality": "full",
+  "overview": "Aless captured only the cover of this book, not any interior page, so this analysis combines (a) direct visual inspection of the actual captured cover image and (b) real, verified bibliographic facts about the published book from web search (publisher, page count, chapter structure, described features), clearly kept separate below from anything actually seen in the captured file. This is a real, identifiable, currently-in-print title (ISBN 9781641523516), not a guess from the filename alone. Verified via web search: 176 pages, published by Rockridge Press (a Callisto Media imprint specializing in parenting/activity guides, the same house behind similarly-branded 'Toddler Activity Book' titles), organized into an intro chapter ('Outdoor Fun': toolbox, benefits of outdoor play, toddler development notes, how to use the book) plus 5 themed activity chapters: Make It Messy (mud-print patterns, a mud-pie bakery, digging for worms, a squishy sensory walk, a snow volcano among its named activities), Run, Jump, and Play, Embrace Nature, Get Wet, and Outdoor Art. Each activity is described as carrying a bold skill-tag icon (problem-solving, mindfulness, shapes and letters, sorting, patterns, and more), a 'Caution!' label on activities needing closer supervision, and tips plus developmental-milestone context by stage. None of this interior structure was independently confirmed from the captured file itself; it is reported here as verified public bibliographic and marketing information, sourced and dated in the Sources note below, not as a page-by-page read the way Drop 1 and Drop 3 in this session were.",
+  "layout": {
+    "structure": "unknown for the interior (no interior page captured); the cover itself is a single full-bleed illustrated composition: title lettering across the top two-thirds, a tree-and-toddlers illustration filling the bottom two-thirds, author credit along the bottom edge",
+    "spacing": "unknown for the interior; the cover is airy, with the title and single illustration as the only two elements",
+    "visualHierarchy": "title-dominant on the cover (large three-line title in bold blue lettering above the illustration)",
+    "whiteSpaceRatio": "unknown for the interior; not meaningfully measurable from a single cover photo",
+    "flowDirection": "top-down on the cover (title, then subtitle, then illustration, then author)",
+    "notes": "Only the front cover was captured, confirmed by both pypdf and PyMuPDF reporting exactly one PDF page at 595x842pt (an A4-shaped CamScanner export canvas for the phone photo, not the physical book's actual trim size). Every claim above describes the cover photo directly; no interior layout claim is made anywhere in this ref without saying so."
+  },
+  "skillTargeting": {
+    "subject": "multi-subject",
+    "domain": "toddler-outdoor-integrated",
+    "topics": [
+      { "id": "gross_motor.runs-climbs", "kind": "procedural", "mapped": true, "note": "Matches the 'Run, Jump, and Play' chapter directly; typicalMonths 28 sits inside this book's stated 1-3yo range." },
+      { "id": "fine_motor.tower-4", "kind": "procedural", "mapped": true, "note": "Loose match for the hands-on building/manipulating implied by 'Make It Messy' (mud-pie bakery, digging) and 'Get Wet' chapters; typicalMonths 28." },
+      { "id": "art.happy-making", "kind": "procedural", "mapped": true, "note": "Direct match for the 'Outdoor Art' chapter; typicalMonths 30 ('the doing matters more than the result' is exactly the toddler-art framing this chapter implies)." },
+      { "id": "science.notices-nature", "kind": "conceptual", "mapped": true, "note": "Direct match for the 'Embrace Nature' chapter (digging for worms, outdoor exploration); typicalMonths 30." },
+      { "id": "executive_function.focus-5", "kind": "meta", "mapped": true, "note": "Loose match for the book's own claimed 'problem-solving' skill-tag icon; typicalMonths 30. Not a confident exact match since the book's real problem-solving activities were not directly read." }
+    ],
+    "unmappedSkills": [
+      "math.shape-pattern-recognition-toddler",
+      "ela.letter-shape-recognition-toddler",
+      "social_emotional.mindfulness-toddler"
+    ],
+    "notes": "Mapped against packages/core/src/map/content.ts (the authored developmental-milestone bank, the correct pipeline for gross_motor/fine_motor/art/science/executive_function/social_emotional at this age, the same pipeline this session's Drop 1 found is the right one for spanish rather than topics.json), checked fresh this session. The book's own marketed skill-icon system (problem-solving, mindfulness, shapes and letters, sorting, patterns) is broader than what the milestone bank covers at toddler age: grep across every math.* and ela/literacy.* bank item found zero entries mentioning 'shape' or 'pattern,' and the closest social_emotional item at this age (social_emotional.notices-upset, 30mo, about noticing others' emotions) is not really the same thing as a 'mindfulness' activity (a sensory or breathing exercise). These three are recorded as genuine unmapped gaps rather than forced into a loose match; packages/taxonomy/data/topics.json's Mathematics and English topics were not individually checked for a toddler-age (12-36mo) shape or pattern topic given this session's time budget across three drops, so that specific negative (no Marble-side coverage either) is reported as likely, not fully verified, and is honestly flagged as such rather than asserted."
+  },
+  "difficulty": {
+    "ageBandMonths": [12, 36],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "notes": "Every activity in a book pitched at ages 1-3 assumes full adult facilitation and supervision by design (the book's own 'Caution!' labels make this explicit per the verified marketing description). 'Multi-skill' describes the book as a whole (100+ activities spanning gross motor, fine motor, art, science, and executive-function skill tags per its own claimed icon system), not any single activity, which is not directly confirmed to be single-skill or layered without reading one."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "cover only: four illustrated, diverse toddlers playing with yarn and pom-poms under a tree, generic marketing art with no confirmed recurring names or roles inside the book"
+    ],
+    "visualStyle": "cover: soft, rounded gouache-style children's-book illustration; interior style not confirmed (no interior page captured)",
+    "colorPalette": "cover: full-color (blue sky, green grass, warm-toned character skin tones); interior color usage not confirmed",
+    "appealDrivers": [
+      "permission to get messy: the chapter title 'Make It Messy' and activities like a mud-pie bakery and digging for worms signal to a hesitant parent that mess is the point, not an accident",
+      "a large stated activity count ('100+') as a value promise",
+      "diverse, ordinary-looking toddler characters on the cover rather than a single idealized child",
+      "outdoor/nature setting as the organizing idea across all five chapters, not a fictional theme"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "not applicable to the source: this is a bound retail paperback (Rockridge Press / Callisto Media) meant to be read by a parent, not a home-printed worksheet packet; the captured PDF's 595x842pt canvas is the CamScanner phone-photo export size, not the book's physical trim size, and is not meaningful as a print-format finding",
+    "orientation": "portrait (cover)",
+    "margins": "unknown, not confirmed (no interior page captured)",
+    "inkDensity": "unknown, not confirmed (no interior page captured)",
+    "colorRequirement": "unknown for the interior; the cover itself is full-color, but Rockridge/Callisto activity-book interiors commonly mix spot-color icons with black-and-white body text, unconfirmed here since no interior page was captured",
+    "notes": "This whole dimension is honestly limited: the book is not itself a printable/reproducible worksheet source the way Drop 1 and Drop 3 in this session are. If Homa generates a page inspired by this book's activities, the relevant output format is art-project-instructions (materials list plus numbered steps), whose own print-format conventions (not this book's) would apply."
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["art-project-instructions"],
+    "gaps": [],
+    "notes": "Every named activity this session could verify (mud-print patterns, a mud-pie bakery, digging for worms, a sensory walk, a snow volcano, and the book's general 'materials plus numbered steps for one hands-on outdoor activity' shape implied by its own described format) matches the existing art-project-instructions recipe directly: it already explicitly supports 'a folded-paper form, a mobile, a mask, a puppet, an assemblage' and any 'make something' activity needing the same materials-list-plus-numbered-steps shell regardless of medium, which covers outdoor sensory and nature play just as well as an indoor craft. No new recipe or gap is needed for this drop. The book's own developmental-milestone skill-icon system (problem-solving, mindfulness, shapes/letters, sorting, patterns per activity) is a curriculum-writer-level judgment aid, not a print format, and was not chased into a recipe or subjects-file edit given how little of the actual interior content this session could verify firsthand; recorded as a decisionsNeeded-style note instead of an unsupported graduation write."
+  },
+  "stages": {
+    "captured": "2026-07-21T03:34:58Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": { "kind": "none", "targets": [], "commit": null },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "sources": [
+    "https://www.amazon.com/Outdoor-Toddler-Activity-Book-Activities/dp/1641523514",
+    "https://www.barnesandnoble.com/w/the-outdoor-toddler-activity-book-krissy-bonning-gould/1130471257",
+    "https://www.goodreads.com/book/show/44540675-the-outdoor-toddler-activity-book"
+  ],
+  "notes": "Same id-versus-droppedAt one-day offset already documented in Drop 1 of this session and worth repeating here since it recurs: Slack ts 1784515918.862889 is 2026-07-20T02:51:58 UTC (matching this ref's given id date) but 2026-07-19T22:51:58-04:00 in America/New_York (the correct droppedAt value per this skill's law 5). 'captured' in stages reflects this checkout's local file mtime, not a fresh download performed this session; the file and its Blob URL were already staged before this session began. Given the source material available (a cover photo plus verifiable public bibliographic facts, not the book's actual interior pages), this ref cannot honestly claim the same page-by-page depth as Drop 1 or Drop 3 in this session; every claim above is labeled as either directly confirmed from the captured cover, sourced from a cited public listing, or explicitly unconfirmed. No Slack commentary was left on this drop."
+}

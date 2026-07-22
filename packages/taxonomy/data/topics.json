@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1634,
+  "topicCount": 1661,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32012,6 +32012,493 @@
       ],
       "assessmentPrompt": "Can {{name}} trace the journey of a raindrop \u2014 from the ocean being heated by the Sun, rising as invisible vapour, forming a cloud, and falling back down as rain \u2014 and explain it keeps going round and round?",
       "standards": []
+    },
+    {
+      "id": "mt_Xp1WkwWozD",
+      "type": "CONCEPTUAL",
+      "subject": "Art",
+      "domain": "Picture Study & Art Appreciation",
+      "name": "Picture Study: Observing and Recalling Artwork",
+      "description": "Understand the Charlotte Mason picture study routine: look closely at one artwork for a few quiet minutes, then describe it from memory, including colors, shapes, subject, and feeling, before learning the artist's name and the artwork's title",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Look at a painting for several minutes without talking, then describe two or three details from memory",
+        "Name a color, shape, or feeling the artwork brings to mind",
+        "Recall the artist's name and the artwork's title after being told them"
+      ],
+      "assessmentPrompt": "After {{name}} studies a painting and it is put away, can they recall at least two details about what they saw?",
+      "standards": []
+    },
+    {
+      "id": "mt_2u99ybq83k",
+      "type": "PROCEDURAL",
+      "subject": "Art",
+      "domain": "Picture Study & Art Appreciation",
+      "name": "Process Art Inspired by an Artist's Technique",
+      "description": "Create open-ended artwork using a material or technique connected to a studied artist, such as painting, wire sculpture, or collage, with the emphasis on exploration and delight rather than copying the artist's exact work",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Use a new material or technique (paint, wire, clay, paper) with guidance from an adult",
+        "Describe what they made and why they chose their colors or shapes",
+        "Complete a piece of art without needing it to look like the artist's original work"
+      ],
+      "assessmentPrompt": "Can {{name}} try a new art material inspired by an artist's technique and talk about what they created?",
+      "standards": []
+    },
+    {
+      "id": "mt_DFIWe5Fe47",
+      "type": "CONCEPTUAL",
+      "subject": "Music",
+      "domain": "Composer Study & Music Appreciation",
+      "name": "Composer Study: Active Listening",
+      "description": "Understand the Charlotte Mason composer study routine: listen closely to a piece of music by one composer over several weeks, noticing instruments, tempo, and mood, then learn a little about the composer's life",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Sit and listen to a piece of music for a few minutes without another activity going on",
+        "Describe whether the music is fast or slow, loud or soft",
+        "Recognize a new piece of music as belonging to a composer studied before"
+      ],
+      "assessmentPrompt": "After listening to several pieces by one composer, can {{name}} recognize another piece by that same composer?",
+      "standards": []
+    },
+    {
+      "id": "mt_OEyTGrh8MA",
+      "type": "CONCEPTUAL",
+      "subject": "Music",
+      "domain": "Composer Study & Music Appreciation",
+      "name": "Identifying Mood and Instruments in Music",
+      "description": "Notice and describe the mood a piece of music creates, such as happy, calm, or exciting, and identify at least one instrument being played, building a foundation for musical listening skills",
+      "ageRangeStart": 4,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Describe how a piece of music makes them feel",
+        "Name at least one instrument they hear in a recording",
+        "Move or respond physically to changes in tempo or mood"
+      ],
+      "assessmentPrompt": "While listening to a new piece of music, can {{name}} say whether it feels fast or slow, and name one instrument they hear?",
+      "standards": []
     }
-  ]
+,
+    {
+      "id": "mt_vgB4oY7Qyl",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Matter & Materials",
+      "name": "Floating and Sinking",
+      "description": "Predict then test whether everyday objects float or sink in water, and notice that shape as well as material affects whether an object floats, not size or weight alone",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Sort a set of everyday objects into floats and sinks after testing each one in water",
+        "Predict whether an object will float or sink before testing it, then check the prediction",
+        "Notice that changing an object's shape (for example flattening a ball of clay into a boat) can change whether it floats"
+      ],
+      "assessmentPrompt": "If you give {{name}} a small object and ask whether it will float or sink in water, can they make a prediction and then test it to find out?",
+      "standards": []
+    },
+    {
+      "id": "mt_akAzChSPGT",
+      "type": "CONCEPTUAL",
+      "subject": "Science",
+      "domain": "Forces & Motion",
+      "name": "How Wheels Help Objects Move",
+      "description": "Understand that wheels turning on an axle make objects easier to move than sliding the same object directly across a surface, comparing how far or how easily a wheeled object moves compared to one without wheels",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Compare pushing a toy with wheels to pushing the same toy without wheels, and describe which is easier",
+        "Explain in their own words that a wheel turns on an axle to help something move",
+        "Identify wheels on everyday objects (wagons, bikes, cars, office chairs) and explain what job the wheels do"
+      ],
+      "assessmentPrompt": "Can {{name}} explain why a wagon with wheels is easier to pull than a box without wheels?",
+      "standards": []
+    },
+    {
+      "id": "mt_NlyT4Xzzr2",
+      "type": "PROCEDURAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Reading a Map: Map Key and Four Directions",
+      "description": "Read a simple map by using its map key to identify what a symbol or picture stands for, and use the four cardinal directions (north, south, east, west) to describe where one place is relative to another on the map",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Use a map key to say what a symbol or picture on a simple map stands for",
+        "Point to or name which direction (north, south, east, west) one place on a map is from another",
+        "Follow a simple route on a map from one landmark to another using the map key and directions"
+      ],
+      "assessmentPrompt": "If you show {{name}} a simple map with a key, can they use the key to say what a symbol means and point out which direction one place is from another?",
+      "standards": []
+    },
+    {
+      "id": "mt_Dan03VC4Li",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Kinds of Communities: City, Town, and Farm",
+      "description": "Compare different kinds of communities where people live and work, such as a city, a town, and a farm community, noticing how the size, buildings, and jobs differ between them",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Describe at least one way a city community is different from a town or farm community",
+        "Sort pictures of homes or streets into the kind of community they most likely belong to",
+        "Explain that their own neighborhood is part of a larger community"
+      ],
+      "assessmentPrompt": "Can {{name}} tell you one way that living in a city is different from living on a farm or in a small town?",
+      "standards": []
+    },
+    {
+      "id": "mt_OWl0pyMgMJ",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Cultural Studies",
+      "name": "Celebrations and Traditions Around the World",
+      "description": "Recognize that families and communities around the world have their own celebrations, foods, and traditions, and describe at least one custom from a country other than their own",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name a celebration or tradition from a country other than their own",
+        "Describe a custom, food, or object connected to a family tradition",
+        "Notice that some traditions, like a special outfit, a shared meal, or a holiday, are similar even when the details differ across cultures"
+      ],
+      "assessmentPrompt": "Can {{name}} tell you about one celebration or tradition from a country other than the one they live in?",
+      "standards": []
+    },
+    {
+      "id": "mt_NJz7vT4Bhp",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Data & Statistics",
+      "name": "Sorting and Classifying Objects by One Attribute",
+      "description": "Sort a group of objects into two or more groups based on one observable attribute the child names, such as color, texture, or size, and explain the reason for the sort",
+      "ageRangeStart": 3,
+      "ageRangeEnd": 5,
+      "centrality": 0.01,
+      "evidence": [
+        "Sort a mixed group of objects into two labeled groups by one attribute (for example, soft things and hard things)",
+        "Explain in their own words why an object belongs in the group they placed it in",
+        "Re-sort the same group of objects a different way when given a new attribute to sort by"
+      ],
+      "assessmentPrompt": "If you give {{name}} a mixed group of objects, can they sort them into two groups by one attribute, like color or texture, and tell you why each one belongs there?",
+      "standards": []
+    },
+    {
+      "id": "mt_IOpwXalEo4",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Algebra",
+      "name": "Creating and Extending Simple AB Patterns",
+      "description": "Notice, copy, and extend a simple repeating pattern that alternates two elements, such as colors, sounds, or movements (for example red-blue-red-blue), and create an original AB pattern of their own",
+      "ageRangeStart": 3,
+      "ageRangeEnd": 5,
+      "centrality": 0.01,
+      "evidence": [
+        "Copy a shown AB pattern (for example clap-stomp-clap-stomp) using the same two elements",
+        "Say or point to what comes next when an AB pattern is shown with the ending missing",
+        "Create an original AB pattern using two colors, sounds, or movements of their own choosing"
+      ],
+      "assessmentPrompt": "If you start a simple two-part pattern like clap-stomp-clap-stomp, can {{name}} continue it, and can they make up a new two-part pattern of their own?",
+      "standards": []
+    },
+    {
+      "id": "mt_bBYrc2wj0h",
+      "type": "PROCEDURAL",
+      "subject": "Mathematics",
+      "domain": "Geometry",
+      "name": "Matching Shapes by Spin or Flip",
+      "description": "Recognize when a shape is the same shape rotated (spun) or reflected (flipped) rather than a different shape, and find which of several rotated or reflected shapes matches a given shape, without using coordinates, degrees, or formal transformation vocabulary",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Point to which of several rotated versions of a shape is turned to match a given shape",
+        "Identify that a shape flipped over (reflected) is still the same shape, just mirrored, not a different shape",
+        "Break a compound shape into recognizable parts to make spotting a rotated or flipped match easier"
+      ],
+      "assessmentPrompt": "If you turn or flip over a cutout shape, can {{name}} still tell it's the same shape as before, and can they find its match among a few rotated or flipped copies?",
+      "standards": []
+    },
+    {
+      "id": "mt_sBmaAWIFPO",
+      "type": "CONCEPTUAL",
+      "subject": "Mathematics",
+      "domain": "Data & Statistics",
+      "name": "Sorting Into Two-Circle Diagrams",
+      "description": "Place items, numbers, or words into a two-circle diagram based on whether they have one of two named attributes, both (the overlapping middle), or neither (outside both circles), without formal set vocabulary such as union or intersection and without counting outcomes",
+      "ageRangeStart": 6,
+      "ageRangeEnd": 8,
+      "centrality": 0.01,
+      "evidence": [
+        "Place a number or picture card in the left circle, the right circle, the overlapping middle, or outside both circles based on whether it has each of two named attributes (for example, flies, swims)",
+        "Complete a two-circle diagram already labeled with two categories (such as perfect squares and odd numbers) by placing the numbers 1 to 9 in the correct region, including the overlap",
+        "Explain why an item that has both attributes goes in the overlapping middle section, and why an item with neither attribute goes outside both circles"
+      ],
+      "assessmentPrompt": "If you show {{name}} two labeled circles that overlap in the middle, can they figure out where a picture or number belongs, including something that fits both labels or neither one?",
+      "standards": []
+    },
+    {
+      "id": "mt_0Mc3ItywUx",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Community Laws and Local Leaders",
+      "description": "Understand that a community has laws (rules everyone must follow to keep people safe and fair) and elected leaders such as a mayor who help run the community and make decisions for everyone who lives there",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Give an example of a community law, like stopping at a red light or not littering, and explain why it helps everyone",
+        "Identify the mayor as a leader who helps run their town or city",
+        "Explain that laws and leaders exist to keep the community safe and fair for everyone, not just to give orders"
+      ],
+      "assessmentPrompt": "Can {{name}} name one rule their community has and explain why it helps keep people safe?",
+      "standards": []
+    },
+    {
+      "id": "mt_V6t7XCmgVm",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "Nested Address: Neighborhood to World",
+      "description": "Understand that a home address nests inside larger and larger places, from neighborhood to community to state to country to world, and place their own address inside that sequence",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Say their own neighborhood, community, state, and country in order from smallest to largest",
+        "Explain that their home sits inside all of these places at the same time, not just one",
+        "Point to their own community on a simple map, then to their state, then to their country"
+      ],
+      "assessmentPrompt": "Can {{name}} name the neighborhood, community, state, and country they live in, in order from smallest to biggest?",
+      "standards": []
+    },
+    {
+      "id": "mt_Nf4ZmHeiA1",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "How Transportation Moves People and Goods",
+      "description": "Recognize the different kinds of transportation (cars, trucks, planes, bikes, boats, trains) and understand that transportation moves both people and goods from one place to another",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name several kinds of transportation and describe what each one usually carries or where it usually travels",
+        "Explain that trucks and trains often carry goods (things people buy and use) rather than passengers",
+        "Choose a sensible type of transportation for a given trip, like a plane for a trip across the ocean or a bike for a trip around the block"
+      ],
+      "assessmentPrompt": "Can {{name}} name two different kinds of transportation and explain what each one is good for moving?",
+      "standards": []
+    },
+    {
+      "id": "mt_afpN0KFTC4",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Colonial & Revolutionary America",
+      "name": "The 13 Colonies and Becoming Free from England",
+      "description": "Understand at a simple level that the 13 colonies were once ruled by England, and that real historical figures helped the colonies become their own free country, without expecting names or dates memorized in depth at this age",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Retell in simple words that America used to be ruled by England, and that people worked together to become free",
+        "Name at least one real historical figure connected to this story when introduced to one in a read-aloud or lesson",
+        "Recognize that this is a true story about real people, not a fictional tale"
+      ],
+      "assessmentPrompt": "After hearing the story of the 13 colonies, can {{name}} retell in their own words that America used to be ruled by England and became its own free country?",
+      "standards": []
+    },
+    {
+      "id": "mt_gBfzT4pAFC",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Symbols of the United States",
+      "description": "Recognize national symbols that stand for the United States, such as the flag, the bald eagle, the Statue of Liberty, the Liberty Bell, and the Washington Monument, and understand that each one stands for an idea about the country",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Identify the American flag by sight and name at least one other national symbol",
+        "Explain in simple words that a symbol like the flag or the bald eagle stands for the whole country, not just one place",
+        "Recognize a picture of the Statue of Liberty, the Liberty Bell, or the Washington Monument when shown one"
+      ],
+      "assessmentPrompt": "Can {{name}} point out the American flag and name one other symbol that stands for the United States?",
+      "standards": []
+    },
+    {
+      "id": "mt_X1pNsoH2At",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Civic Life",
+      "name": "Voting to Choose Leaders",
+      "description": "Understand at a simple level that adult citizens vote to choose their leaders, that each citizen gets one vote, and that whoever gets the most votes wins the election",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Explain in simple words that voting is how people choose their leaders",
+        "State that each person gets one vote, not more, when voting",
+        "Participate in a simple classroom or family vote and understand that the choice with the most votes wins"
+      ],
+      "assessmentPrompt": "After a simple class or family vote, can {{name}} explain that the choice with the most votes is the one that wins?",
+      "standards": []
+    },
+    {
+      "id": "mt_8AmmZLjcvK",
+      "type": "CONCEPTUAL",
+      "subject": "History",
+      "domain": "Geography",
+      "name": "The Five Themes of Geography",
+      "description": "Recognize the Five Themes of Geography as a named framework for thinking about a place: Location (where it is), Place (what it is like), Movement (how people and things travel to and from it), Region (what makes it part of a larger area), and Human-Environment Interaction (how people and the place change each other)",
+      "ageRangeStart": 5,
+      "ageRangeEnd": 7,
+      "centrality": 0.01,
+      "evidence": [
+        "Name at least two of the Five Themes of Geography when introduced to the framework",
+        "Describe a familiar place using one of the five themes, for example where it is located or how people travel there",
+        "Give an example of a person changing a place or a place affecting how people live there, as a simple instance of human-environment interaction"
+      ],
+      "assessmentPrompt": "Can {{name}} describe a familiar place using at least one of the Five Themes of Geography, like where it is located or how people get there?",
+      "standards": []
+    },
+  {
+    "id": "mt_Hq3vTz8Kd1",
+    "type": "CONCEPTUAL",
+    "subject": "Art",
+    "domain": "Picture Study & Art Appreciation",
+    "name": "Getting to Know an Artist: Life and Famous Works",
+    "description": "Learn about one artist as a person through an accessible biography: when and where they lived, key events in their life, why they became famous, and which well-known works are theirs, connecting at least one life event to a specific artwork",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied artist and tell one true fact about their life, such as where they lived or what era they worked in",
+      "Point to or name at least one famous work by a studied artist",
+      "Retell one connection between the artist's life and their work, for example a place they loved appearing in their paintings"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you something true about a studied artist's life and name one of their famous works?",
+    "standards": []
+  },
+  {
+    "id": "mt_Rk8pWn2Vq5",
+    "type": "CONCEPTUAL",
+    "subject": "Science",
+    "domain": "Scientific Inquiry",
+    "name": "Getting to Know an Inventor: How Inventions Happen",
+    "description": "Learn about one inventor or scientist through an accessible biography and understand invention as a process: trying ideas, failing and learning from failure, testing many materials or designs, and protecting a finished invention with a patent",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied inventor and the invention they are best known for",
+      "Retell one story of the inventor failing or testing many ideas before succeeding",
+      "Explain in simple words why an inventor patents an invention"
+    ],
+    "assessmentPrompt": "Can {{name}} name a studied inventor's famous invention and retell how many tries or failures it took to get there?",
+    "standards": []
+  },
+  {
+    "id": "mt_Jf6yBw4Xn2",
+    "type": "CONCEPTUAL",
+    "subject": "Music",
+    "domain": "Composer Study & Music Appreciation",
+    "name": "Getting to Know a Composer: Life and Signature Works",
+    "description": "Learn about one composer as a person through an accessible biography: when and where they lived, key events in their life, why they matter, and which well-known pieces are theirs, connecting at least one life event to a specific piece of music",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a studied composer and tell one true fact about their life",
+      "Name or recognize at least one famous piece by a studied composer",
+      "Retell one connection between the composer's life and their music, for example nature sounds appearing in a symphony about the countryside"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you something true about a studied composer's life and name one piece of music they wrote?",
+    "standards": []
+  },
+  {
+    "id": "mt_6VIt9iNslV",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Speaking & Listening",
+    "name": "Joining In with Rhymes and Chants",
+    "description": "Join in with familiar rhymes, chants, and fingerplays said aloud together: echo a line after a leader, take the answering part in a call-and-response chant, keep a steady clap or tap while chanting, and supply the rhyming word when a familiar verse pauses",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 6,
+    "centrality": 0.01,
+    "evidence": [
+      "Join in on the repeated or answering lines of a familiar chant without being fed the words",
+      "Clap or tap along with the beat of a chant for at least one verse",
+      "Fill in the final rhyming word when a well-known rhyme pauses before it"
+    ],
+    "assessmentPrompt": "When you start a rhyme or chant {{name}} knows well, do they join in, clap along, or finish the rhyming word on their own?",
+    "standards": []
+  },
+  {
+    "id": "mt_xYlY6CjGN4",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Speaking & Listening",
+    "name": "Naming Colors by Sight",
+    "description": "Look at an object or color swatch and say its color name aloud (red, blue, yellow, green, orange, purple, pink, black, white, brown), and point to an object of a named color on request; a receptive and expressive vocabulary skill, distinct from sorting or matching objects by color as an attribute",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Point to or hold up an object of a named color when asked (receptive)",
+      "Say the correct color name aloud when shown a color swatch or object (expressive)",
+      "Use a color name spontaneously to describe an object without being prompted"
+    ],
+    "assessmentPrompt": "Can {{name}} say the name of a color when shown it, and point to an object of that color when you name it?",
+    "standards": []
+  },
+  {
+    "id": "mt_qPM8rMxYFD",
+    "type": "CONCEPTUAL",
+    "subject": "Music",
+    "domain": "Composer Study & Music Appreciation",
+    "name": "Musical Form: Movements, Themes, and Variations",
+    "description": "Learn that a long piece like a symphony is built from movements, that a composer develops a musical idea through theme-and-variation, and that some works add unusual features like a sung finale, understood through listening to real pieces such as Beethoven's Fifth, Sixth 'Pastoral', and Ninth Symphonies",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Name a movement as one of the several parts a symphony is divided into",
+      "Describe in simple words what happens when a composer 'varies' a musical theme",
+      "Recognize that adding singers to a symphony's finale, as Beethoven did in his Ninth, was unusual for its time"
+    ],
+    "assessmentPrompt": "Can {{name}} explain what a symphony's movements are and describe one way a composer changes a musical theme through the piece?",
+    "standards": []
+  },
+  {
+    "id": "mt_MsYH5Mpe4X",
+    "type": "CONCEPTUAL",
+    "subject": "Science",
+    "domain": "The Human Body",
+    "name": "Hearing Differences and Visible Speech: Alexander Graham Bell",
+    "description": "Learn through Alexander Graham Bell's life how some people experience the world through touch and sight instead of sound, what deaf education is, and how Bell invented 'visible speech,' a symbol system that showed the mouth and throat movements for making each speech sound so deaf students could learn to speak",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Explain in simple words what it means for a person to be deaf or hard of hearing",
+      "Describe what visible speech was and what problem it tried to solve",
+      "Name Alexander Graham Bell as someone who worked in deaf education before he is known for the telephone"
+    ],
+    "assessmentPrompt": "Can {{name}} explain what visible speech was and why Alexander Graham Bell created it to help deaf students learn to speak?",
+    "standards": []
+  }
+]
 }

@@ -28,3 +28,17 @@ Design patterns (all binding for cross-number-puzzle):
   (`border: 1.5px solid #6b6259; border-radius: 6px; padding: 12px;
   font-size: 13px;`).
 - **Answer key**: on a separate page (or upside-down at bottom).
+- **Embedded-operator plus-shaped variant**: instead of sum/product
+  constraints shown at the edges, the grid itself is a 5x5 plus-sign
+  shape (a center cell with an arm of cells in each of the four
+  directions) where the `+`, `-`, and `=` symbols occupy their own cells
+  interleaved with the number cells, so the same grid reads as one
+  horizontal equation and one vertical equation crossing at a shared
+  number. Confirmed directly from Beast Academy 1B (Art of Problem
+  Solving), pages 144-147 and 224-231: e.g. a grid reading `19 - _ = _`
+  across the top row and `19 - 6 - _ = 10` down a column, sharing the
+  `19`. Some cells are given, the rest blank; a few of the hardest
+  puzzles per page are starred. Build the operator and equals cells with
+  the same square dimensions as the number cells
+  (`font-size: 20px; font-weight: 700; color: #6b6259;`) so the grid
+  reads as one continuous lattice, not numbers-with-decorations.

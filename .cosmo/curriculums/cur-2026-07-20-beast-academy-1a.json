@@ -1,0 +1,374 @@
+{
+  "id": "cur-2026-07-20-beast-academy-1a",
+  "name": "Beast Academy Math 1A (Grade 1, Book A of 4: Counting, Shapes, Comparing; Art of Problem Solving / AoPS Incorporated, copyright 2021, 2022 printing, ISBN 978-1-934124-69-7)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T21:37:11-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784511431.317679",
+  "sourceFiles": [
+    {
+      "filename": "beast-academy-1a.pdf",
+      "localPath": ".cosmo/inspo-files/beast-academy-1a.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-beast-academy-1a/beast-academy-1a.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "A published, deliberately above-grade-level Grade 1 math curriculum delivered through a recurring comic-strip narrative rather than direct instruction. The book's own front matter states the mission plainly: 'A comprehensive, rigorous, and engaging curriculum for aspiring math beasts.' Every named subsection opens with a multi-panel comic scene (speech-bubble dialogue between four recurring monster-student characters, plus a teacher character 'Ms. Q.' and other school-staff characters) that discusses or discovers the math idea conversationally before any numbered practice problem appears; the 'How to Use This Book' front-matter spread (pages 8-11) explains this explicitly to the child reader: 'Some pages are written like a comic book... The comics follow the math adventures of these four little monsters at Beast Academy,' and instructs the child to stop at embedded 'stop sign' questions and try to answer them before reading on. Difficulty is tiered and marked plainly: most numbered problems are grade-level-and-up, and a smaller number of starred (\u2605) 'hardest' problems close most practice sections, each with a separate hint in the back-matter Hints section (pages 183-186) rather than the full solution. The book is written in second person directly to the child reader ('you'), not scripted for a classroom teacher.",
+    "principles": [
+      "Guided discovery through story, not direct instruction: the comic panels themselves carry the math reasoning (two characters noticing a pattern, arguing about which noodle is longer, working out why dice roll certain sums more often), and the child is told explicitly to try answering the embedded 'stop sign' question before continuing, rather than being told a rule to apply",
+      "Deliberately above standard grade-1 difficulty by design, confirmed directly from sampled content rather than assumed from the 'Grade 1' label: this single book alone contains two-color rows-of-ten counting into the 60s-70s (Counting: More Than 20, page 65), informal transformation geometry with the vocabulary 'reflection' for a flipped shape (Spins & Flips, page 89), decomposing a hexagon into six congruent triangles and identifying which two named tetrominoes combine into a compound shape (Splitting Shapes / Combining Shapes, pages 112-119), a circle-as-equidistant-points definition used to reason about which of two distances is greater (Comparing: Circles, pages 176-177), and closing capstone puzzles that require tracing an unbroken path through a grid of numbered squares in a fixed visiting order and constructing three distinct tilted squares from dots on a grid (page 180) -- content a typical grade-1 scope-and-sequence defers to grade 2-4",
+      "Tiered, self-marked difficulty: the front matter states plainly 'Some problems and puzzles let you practice the basics. But some of the practice is really challenging' and 'The hardest problems are marked with a \u2605. Every problem marked with a \u2605 has a hint. Hints begin on page 183,' so a family or Homa generating Beast-Academy-style practice should offer a base set plus a small, clearly separated harder extension, not blend the two",
+      "A recurring cast of four little monster characters (per the book's own 'Beast Academy Books' page: 'Follow the adventures of four little monsters through all five levels of the Beast Academy series') carries every comic scene across the whole five-level, twenty-book series, plus named recurring adults (Ms. Q. the math teacher, Ms. Levans the woodshop teacher, Captain Kraken, Mr. Wriggles, the unnamed multi-headed Headmaster). This book's own 'Characters' page (page 6-7) introduces them by name and one defining trait each",
+      "Play and games are named teaching tools, not filler: 'Hand-Sums' (a two-player finger-flashing addition-practice game, page 38), 'Pick Your Pony' and 'Four in a Row' (dice games taught with explicit rules, referenced pages 34-35), all built to build subitizing and number sense through repetition without another worksheet page",
+      "Answer keys teach the parent, not just check the child: the back-matter Answers section (pages 187-213) routinely explains WHY an answer is correct, not just what it is, for example an explicit aside on why rolling a 7 with two dice happens roughly six times as often as rolling a 12 (page 189, 'There are 6 different ways to roll a 7, but the only way to roll a 12 is with two sixes!'), or why a straight line is the shortest path between two points as a lead-in to the noodle-length comic scenario (page 165 in the story, echoed with reasoning in the Answers section)"
+    ],
+    "learningTheory": "Guided discovery / productive struggle rather than a stated formal developmental-stage framework: the child is walked through noticing a pattern or working out a puzzle via the comic dialogue and 'stop sign' questions before any rule is stated, and the front matter tells the child directly not to worry about solving every starred problem ('Don't worry if you can't solve every problem... You can learn a lot just by working on a hard problem or puzzle'). Progression within this single book (1A) is linear and cumulative: Chapter 1 (Counting) precedes Chapter 2 (Shapes) precedes Chapter 3 (Comparing), each subsection building directly on the prior one within its chapter (Names, then Spins & Flips, then Apart & Together within Shapes; One for One, then More or Less, then Lengths within Comparing). Across the wider series it is explicitly spiral: the front-matter 'Beast Academy Books' overview (page 4-5) shows Shapes reappearing at Level 3 ('3A: Shapes, Skip-Counting, Perimeter & Area') and Level 4 ('4A: Shapes, Multiplication, Exponents') with growing depth, the same revisit-with-more-depth structure noted for the sibling Dimensions Math and Harcourt volumes drained earlier this session, though Beast Academy's revisits climb noticeably faster and higher (by Level 3-4 the same 'Shapes' strand is paired with multiplication, exponents, and perimeter/area, well beyond this book's own dot-connecting and tetromino content).",
+    "assessmentApproach": "No formal test anywhere in this specific book (the front matter's own Contents lists only Hints, Answers, and Index after the three content chapters, no test section). Assessment is continuous and self-checking: numbered practice problems throughout each subsection, a small set of starred hardest problems per subsection with a separate hint (never the full solution), and a back-matter Answers section a parent can use to check work and, notably, to understand and re-explain the reasoning behind an answer, not just confirm a number.",
+    "parentRole": "Different from the classroom-teacher-language pattern found in this session's other published-curriculum drops (Dimensions Math, Harcourt Science, Harcourt Art, Scott Foresman Social Studies), all of which were written in second person TO a teacher ('have students...'). This book is written in second person directly TO THE CHILD as an independent (or nearly independent) reader: 'You will find gray boxes on some pages... You may need help reading this book... but you shouldn't just read this book, you can play along... It's fun reading with someone else. That's ok!' (How to Use This Book, pages 8-11). The parent's role is reading support and encouragement for a not-yet-fully-independent reader, plus using the Answers section's own explanations to help re-explain a concept, rather than delivering a scripted lesson. curriculum-writer should treat any Beast-Academy-flavored request as a self-paced student workbook a family works through together, not a lesson plan a parent teaches from.",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "beast-academy-guided-discovery",
+        "topicType": "method_philosophy",
+        "title": "Beast Academy Guided-Discovery Math (Art of Problem Solving)",
+        "summary": "An above-grade-level, comic-narrative math methodology (Art of Problem Solving's Beast Academy series) that teaches through recurring illustrated characters discovering ideas conversationally rather than direct instruction, with tiered starred hardest problems, separate hints, and reasoning-rich answer keys. Genuinely new to Homa: unlike this session's Dimensions Math ingest (which found Singapore Math CPA already documented in curriculum-writer.md), a full-text search of curriculum-writer.md before this session's edit found no mention of Beast Academy, Art of Problem Solving, AoPS, comic-format math, or gifted/advanced-pace math methodology anywhere.",
+        "mergedRowId": "3e1bda52-86e3-4eb4-9d04-5376949b6380",
+        "mergedAt": "2026-07-21"
+      },
+      {
+        "suggestedKey": "beast-academy-1a-book-format",
+        "topicType": "method_format",
+        "title": "Beast Academy Math 1A Book Format",
+        "summary": "Book A of a 4-book Level 1 sequence (1A: Counting, Shapes, Comparing; 1B: Addition, Subtraction, Categories; 1C: Addition & Subtraction, Comparing, Patterns; 1D: Big Numbers, Measurement, Problem Solving), itself the first of 5 levels (Level 1 through Level 5, 4 books each) in the wider Beast Academy series. This book: 3 chapters, 9 named subsections, 215 physical pages (110 scanned PDF page-images, each a two-page spread except covers), organized as comic-narrative concept introduction plus numbered practice per subsection, starred hardest problems with separate hints (pages 183-186), and a reasoning-rich answers section (pages 187-213). ISBN 978-1-934124-69-7, published by AoPS Incorporated, San Diego CA, copyright 2021, 2022 printing. Written by Jason Batterson; illustrated by Erich Owen and Sarah Leuver, additional illustrations by Paul Cox, colored by Greta Selman.",
+        "mergedRowId": "70baaea9-3238-465b-a3c3-bca88fffe503",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Chapter 1, First Day (pages 14-25)",
+        "curriculumTopic": "Count items in a large illustrated campus-map scene, then count small groups of whimsically-named creatures (chipmonkeys, rhinocerabbits, alligophers, porcupumas) scattered in irregular, non-grid arrangements, up to about 19 at a time, with an explicit 'keep track by circling or checking off what you've counted' strategy tip",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_WcfaSfVT33",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'One-to-one counting' topic (age 4-6) is a direct match for careful one-by-one counting of a scattered, irregular set; the specific keep-track-while-counting strategy is a technique within that skill, not a separate one."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 1, Campus Tour (pages 26-43)",
+        "curriculumTopic": "Recognize a small quantity from a dice-pattern, playing-card-suit pattern, finger count, or ten-frame arrangement 'without counting them,' explicitly framed as getting faster at spotting a number by its shape rather than counting one-by-one; ten-frame introduction (page 41) and a numeral-shape/finger/card counting-groups sequence (pages 27-39)",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_pAcaehday5",
+        "status": "partial",
+        "suggested": {
+          "note": "Checked 'subitiz' across all 510 pre-existing Mathematics topics before this session's addition: zero hits, matching the same finding this session's Dimensions Math ingest made for its own dice/card subitizing content. Homa's 'Representing numbers with objects' topic (age 4-6) and 'Ten Frame Representation' topic (mt_u1c7g0x5k3, age 4-7, used for the ten-frame portion specifically) are reasonable but not exact fits; 'recognize a quantity by its shape without counting' is not named as its own skill anywhere in the taxonomy. Not added as a new topic this session to keep additions proportionate, given the prior session's own restraint on the identical finding; recorded here so a future session does not need to re-check."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 1, One Hundred (pages 44-67)",
+        "curriculumTopic": "Fill in missing numbers while counting to 100, count by tens, spot patterns in a hundred chart, and complete 'Honeycomb Path' puzzles (fill empty hexagons so consecutive numbers trace an unbroken path across every hexagon); also a two-color rows-of-ten counting grid extending into the 60s-70s (Counting: More Than 20, page 65)",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_M5PPDJStGm",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Rote counting to 100' topic (age 5-6) and 'Reading and writing numbers to 100' topic (Number Representation & Place Value, mt_x8TshvbbQT, age 5-6) together cover the numeral-sequence and counting-to-100 half of this content directly. The Honeycomb Path puzzle mechanic itself (place sequential numbers so they trace a connected path through a hex grid, a genuine logic/spatial-reasoning task layered on top of the counting content) has no distinct topic name in the taxonomy; recorded as partial rather than forcing a full match."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Names (pages 70-83)",
+        "curriculumTopic": "Name and recognize 2-D shapes (triangle, square, circle, and others), including a conversational bit about what makes a shape a triangle (the defining property, not just its appearance) via a character named 'Mr. T'",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": "mt_KJeEeTutJI",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's '2-D shapes' topic (age 4-6, CCSS K.G.2 / UK Y1) is a direct match for naming common shapes; this subsection stays at the naming/recognition level rather than moving into formal property analysis (side-counting, symmetry), so the older 'age 6+' property-focused sibling topic was not needed."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Spins & Flips (pages 84-105)",
+        "curriculumTopic": "Recognize whether a shape has been rotated ('spun') or reflected ('flipped') and is therefore still the same shape, find which of several rotated or flipped shapes matches a given shape, and use the strategy of splitting a compound shape into recognizable parts to make a rotated or flipped match easier to spot. Uses the actual vocabulary word 'reflection.'",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": "mt_bBYrc2wj0h",
+        "status": "mapped",
+        "suggested": {
+          "note": "Checked 'reflect', 'rotat', 'transform', 'flip', 'spin', 'turn', and 'mirror' across all 510 pre-existing Mathematics topics before adding anything. The only near hits were 'Position, direction, and movement' (age 6-7) and 'Turns & Directions' (age 5-6), both about describing navigational movement and turn vocabulary (quarter/half/whole turns for following directions), not about recognizing when a 2-D shape's identity is preserved under a rotation or reflection for matching purposes; and 'Transformations on a grid' (age 8-12), which requires coordinate-grid mechanics far beyond this book's informal, non-coordinate matching task. This is a genuine, whole-subsection (21-page) gap. Added mt_bBYrc2wj0h 'Matching Shapes by Spin or Flip' as a new topic this session under the existing Geometry domain (no mapping.ts edit needed), see decisionsNeeded."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Apart & Together -- composing/splitting (pages 106-113)",
+        "curriculumTopic": "Combine two simple shapes into a new shape (a triangle roof plus a square body makes a house), and split a given polygon into named smaller shapes by connecting marked dots (a square into two triangles, a hexagon into six congruent triangles, a pentagon into a square and a triangle)",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": "mt_MqqR7VUoz1",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Composing Shapes' topic (age 6-7, CCSS 1.G.2, whose own evidence line already includes 'Decompose a composite shape and describe which simpler shapes make it up') and 'Combining Simple Shapes' topic (age 5-6, CCSS K.G.6) together are a direct, strong fit for this subsection's core skill."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Apart & Together -- tetrominoes (pages 114-119)",
+        "curriculumTopic": "Identify which two named tetromino pieces (four-square polyomino shapes) combine to form a given compound shape, by coloring in one of the two tetrominoes within it; includes finding more than one valid decomposition of the same shape",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": "mt_MqqR7VUoz1",
+        "status": "partial",
+        "suggested": {
+          "note": "Checked 'tetromino' and 'polyomino' across all 510 pre-existing Mathematics topics: zero hits. The general composing/decomposing-shapes skill above is a real but loose fit; the specific polyomino vocabulary and the multi-piece, constraint-style puzzle format (find which two OF SEVERAL possible pieces fit, sometimes more than one valid answer) is more specific than that topic's own evidence lines describe. A real, narrow gap (6 pages); not added as a new topic this session to keep additions proportionate, recorded for a future session."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, One for One (pages 124-141)",
+        "curriculumTopic": "Use one-to-one matching between two groups (desks and students) to determine whether the groups are equal, and introduce the words 'equal,' 'more,' and 'fewer' for the result of that comparison",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt__h7hvT4tEb",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Comparing groups: more or fewer' topic (age 4-6, CCSS K.CC.6, whose own evidence line names 'Use one-to-one matching to compare two groups' and the exact vocabulary 'equal to') is a direct, strong match."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, More or Less (pages 142-161)",
+        "curriculumTopic": "Order and compare two-digit numbers up to 99 using the <, >, and = symbols, including multi-blank problems where several digits must be filled in so a chain of numbers stays in order",
+        "homaSubject": "math",
+        "homaDomain": "number-place-value",
+        "homaTopicId": "mt_U0waNfD8PB",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Comparing and ordering numbers' topic (age 6-7, CCSS 1.NBT.3, whose own description is literally 'Compare and order two-digit numbers using the symbols >, =, and <') is an exact, direct match. This is a stronger fit than the single-digit-only 'Two written numerals between 1 and 10' topic used for a similar but narrower Dimensions Math finding earlier this session."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, Lengths -- City Walks & noodles (pages 162-175)",
+        "curriculumTopic": "Compare the length of two paths or objects (curved vs. straight noodles on a lunch tray, walking routes on a city map) without a ruler, including the idea that a straight line is the shortest path between two points",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": "mt_uhuxX8sg9f",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Comparing Lengths & Heights' topic (age 4-6) is a direct match for comparative, non-numerical length reasoning; the 'shortest path between two points' framing is a real conceptual stretch within this same broad skill, not a separate one."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, Lengths -- Circles (pages 176-180)",
+        "curriculumTopic": "Use the definition 'every point on a circle is the same distance from its center' to compare distances (which of several points is closest to a marked center point among nested circles), including a hand-drawn paperclip-and-two-pencils compass construction",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "math.circles-as-equidistant-points-for-distance-comparison",
+          "domain": "geometry",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "Checked 'circle' and 'equidist' across all 510 pre-existing Mathematics topics. '2-D shapes' (age 4-6) only covers naming/recognizing a circle by sight; 'Parts of a circle' (age 10-11) is a much older, vocabulary-focused topic (radius, diameter) with a different framing entirely. No existing topic covers using a circle's equidistance property as a distance-comparison tool. A real but narrow gap (about 5 pages, one short subsection); not added as a new topic this session to keep additions proportionate given the Spins & Flips addition above already covers this chapter's largest gap. Recorded here rather than forced into an unrelated topic."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, The Beginning -- capstone puzzles (page 180)",
+        "curriculumTopic": "Trace a path through a grid that crosses every square exactly once, visiting a set of numbered squares in order, moving only up/down/left/right; and construct three different tilted squares using corners chosen from a field of dots",
+        "homaSubject": "math",
+        "homaDomain": "mathematical-thinking",
+        "homaTopicId": "mt_WkKkb7W9Qd",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Making Sense of Problems' and 'Hands-On Problem Solving' topics (both age 5-6) are reasonable general fits for a self-contained logic/construction puzzle, but neither names the specific skills involved (constrained path-tracing through a grid; recognizing a tilted square from scattered dots). A real but low-volume gap (two problems on one page, both starred/hardest-tier); recorded as partial rather than forcing an exact match or adding a new topic for two problems."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 12,
+      "mapped": 7,
+      "unmapped": 1,
+      "noSubject": 0,
+      "partial": 4
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a weekly calendar or a suggested-class-periods figure anywhere in the sampled pages (unlike the sibling Dimensions Math Teacher's Guide drained earlier this session, which stated 'Suggested number of class periods' per chapter). This book is a self-paced student workbook, not a scheduled teacher's guide; pacing is left entirely to the family.",
+    "sessionLengthMinutes": {
+      "note": "Not stated anywhere in the sampled pages. No minute-based time language was found for any lesson, subsection, or activity."
+    },
+    "weeklyTemplate": "No week-by-week or day-by-day template exists in the source. Content flows continuously: each chapter opens with a full-page illustrated Chapter Opener scene, then moves through 3-4 named subsections in a fixed shape (a multi-panel comic scene with embedded 'stop sign' questions, then a short expository 'mini page' when a standalone concept needs explaining outside the story, such as the Zero page or the Ten Frames page, then numbered Practice problem sets, with starred hardest problems closing most sections), and the book ends with a 'The Beginning' capstone subsection, then the shared back-matter Hints, Answers, and Index sections.",
+    "progressionModel": "Linear and cumulative within this book: Chapter 1 (Counting) precedes Chapter 2 (Shapes) precedes Chapter 3 (Comparing), and each chapter's own subsections build on one another (within Shapes: Names, then Spins & Flips, then Apart & Together; within Comparing: One for One, then More or Less, then Lengths). Also linear across the 4-book Level 1 series this book belongs to (1A: Counting/Shapes/Comparing, then 1B: Addition/Subtraction/Categories, then 1C: Addition & Subtraction/Comparing/Patterns, then 1D: Big Numbers/Measurement/Problem Solving, per the book's own series overview page 3). Spiral across the wider 5-level series (per the book's own 'Beast Academy Books' overview, pages 4-5): Shapes reappears at Level 3 (paired with skip-counting, perimeter & area) and Level 4 (paired with multiplication, exponents), each time with more depth, the same revisit-with-growing-depth pattern noted in this session's Dimensions Math and Harcourt ingests, though this series climbs to more advanced pairings faster.",
+    "reviewRhythm": "No formal test, quiz, or graded checkpoint anywhere in this book. Each named subsection's numbered practice problems function as ongoing low-stakes review; a small number of starred 'hardest' problems close most subsections with a separate hint (never the full solution) in the back-matter Hints section (pages 183-186); a reasoning-rich Answers section (pages 187-213) lets a parent check work and understand why an answer is correct, not just what it is.",
+    "totalWeeks": null,
+    "notes": "The front matter includes a 'Beast Academy Books' series overview (pages 4-5) showing all 5 levels x 4 books = 20 total books in the series with their chapter breakdowns, useful context for any future ingestion of a sibling Beast Academy volume but not itself 1A content. The book explicitly is NOT a classroom teacher's guide (contrast with this session's Dimensions Math, Harcourt Science, Harcourt Art, and Scott Foresman Social Studies drops, all written in classroom-teacher second person): it speaks directly to the child reader throughout, and its own How to Use This Book section anticipates the child needing help reading it from a parent, framing that help positively ('It's fun reading with someone else. That's ok!')."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "spot-and-count-illustrated-scene",
+        "description": "The Chapter 1 opener (pages 14-15): one large, detailed illustrated town/campus map with numerous small circular vignette insets of characters doing things, tied to the guiding question 'How many things can you find to count on your first day in Beast Academy?' An open-ended 'find and count things in a busy scene' format.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "A single-instance opening splash page, not a recurring format across the book (only appears once, at the very start), the same treatment this session's Dimensions Math ingest gave its own single-instance 'chapter-opener-illustrated-scene.' Not flagged as an urgent gap; recorded for completeness."
+      },
+      {
+        "type": "irregular-object-counting",
+        "description": "Count small groups (up to about 19) of whimsically-named creatures scattered in irregular, non-grid arrangements across a page, with a 'keep track as you count' tip.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "number-practice-page's object-counting zone is a reasonable, loose fit for irregular-arrangement counting practice, though its own worked examples lean toward a tidier row/grid layout than this book's deliberately scattered arrangements."
+      },
+      {
+        "type": "subitizing-pattern-recognition",
+        "description": "Recognize a small quantity from a dice-pattern, playing-card pattern, raised-finger count, or ten-frame arrangement without counting one-by-one, explicitly framed as a speed/pattern-recognition skill.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "Same loose reuse this session's Dimensions Math ingest found for its own dice/card subitizing content: number-practice-page's ten-frame section is a purpose-built match for the ten-frame portion, and its counting zones cover the dice/card portion loosely."
+      },
+      {
+        "type": "two-color-grouped-counting-grid",
+        "description": "A rows-of-ten grid of purple and green dots the child counts by color and totals, extending counting practice into the 60s-70s.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "Same format and same loose reuse this session's Dimensions Math ingest documented for its own 'Counting More Than 20' content."
+      },
+      {
+        "type": "honeycomb-number-path-puzzle",
+        "description": "Fill empty hexagons in a tessellated grid with numbers so that consecutive numbers form an unbroken path connecting every hexagon (a sequential path-tracing puzzle), plus a simpler variant that just fills missing numbers into a straight row of hexagons.",
+        "recipe": "hive-puzzle",
+        "status": "have_recipe",
+        "notes": "RESOLVED 2026-07-21: added as a third variant ('Path') on the existing hive-puzzle.md recipe rather than a new file, exactly the future extension this note anticipated. Kept hive-puzzle's shared tessellated-hexagon, image-direct, 6-9-puzzles-per-page shell; only the fill rule differs from the base smallest-number-not-adjacent rule and the Pairs touching-sum variant. Genuinely a third, distinct constraint (connected sequential path-completion, not deduction-by-elimination or pair-summing), so it earned its own named variant inside the file rather than being folded silently into an existing one. No new recipe file, no new SKILL.md Format library row (hive-puzzle already has one); design-patterns section of hive-puzzle.md updated."
+      },
+      {
+        "type": "shape-naming-by-property",
+        "description": "A short comic scene introducing shape names conversationally, including a bit about what makes a triangle a triangle (a defining property, not just appearance), via a character literally named 'Mr. T.'",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Not a meaningful gap: this is ordinary shape-naming content buildable directly on the html path without a dedicated named recipe, and (once comic-narrative-math-page exists, see below) the comic-scene portion of this content is exactly what that new recipe is for."
+      },
+      {
+        "type": "shape-transformation-matching",
+        "description": "Find which of several rotated or reflected ('spun' or 'flipped') versions of a shape matches a given shape, sometimes after mentally splitting the shape into recognizable parts to make the match easier to spot.",
+        "recipe": "matching-visual-discrimination",
+        "status": "have_recipe",
+        "notes": "A loose fit reused with a caveat, the same treatment this session's Dimensions Math ingest gave its own 'numeral-recognition-search' finding: matching-visual-discrimination's visual-scanning, find-the-match design pattern reasonably covers this task, though its own worked examples are static pair-matching rather than mental-rotation/reflection matching."
+      },
+      {
+        "type": "shape-composition-and-splitting",
+        "description": "Connect marked dots to split a polygon into named smaller shapes (a square into two triangles, a hexagon into six congruent triangles, a pentagon into a square and a triangle), or combine two simple shapes into a new one (a triangle roof plus a square body makes a house).",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Genuine gap: no existing recipe covers a connect-the-dots geometric decomposition task with a specific target shape count and type. A real, moderate-volume gap (an 8-page subsection, pages 106-113); not built this session to keep recipe additions proportionate, recorded for a future session."
+      },
+      {
+        "type": "tetromino-polyomino-matching",
+        "description": "Color in one of two named tetromino pieces that combine to form a given compound shape, sometimes with more than one valid decomposition to find.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Genuine but narrow gap: specific to combinatorial-geometry enrichment content (6 pages, 114-119), not broadly reusable across typical early-math curricula the way size-attribute-comparison-page or pattern-extension-practice were found to be earlier this session. Not built this session; recorded for a future session if more Beast Academy or similar combinatorial-geometry content is ingested."
+      },
+      {
+        "type": "length-comparison-straight-vs-curved",
+        "description": "Compare the length of two items (curved vs. straight noodles, walking-route paths on a map) without a ruler, including the idea that a straight line is the shortest path between two points.",
+        "recipe": "size-attribute-comparison-page",
+        "status": "have_recipe",
+        "notes": "A direct, strong fit: this is exactly the 'compare two or three illustrated items along one physical attribute' shape size-attribute-comparison-page already covers, built during this session's own Dimensions Math ingest."
+      },
+      {
+        "type": "concentric-circle-distance-comparison",
+        "description": "Mark which of several points is closest to a center point, using nested (concentric) circles as a visual distance-comparison tool.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Genuine but narrow gap: a single short subsection (5 pages, 176-180). Not built this session; existing size-attribute-comparison-page does not cover the concentric-rings mechanic (it compares discrete items side by side, not points relative to nested circles)."
+      },
+      {
+        "type": "two-digit-number-ordering-with-symbols",
+        "description": "Order and compare two-digit numbers using <, >, and = symbols, including multi-blank fill-in problems where digits must be chosen so a whole chain of numbers stays correctly ordered.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "Coverable as a straightforward fill-in-the-blank numeric worksheet within number-practice-page's existing flexibility; no dedicated recipe needed for this specific variant."
+      },
+      {
+        "type": "comic-narrative-math-page",
+        "description": "The book's own defining, pervasive format, recurring on the large majority of its pages: 2-4 comic panels of illustrated character dialogue that teach or discover a math idea conversationally, ending in an embedded 'stop sign' question tied directly to the same scenario the characters just discussed.",
+        "recipe": "comic-narrative-math-page",
+        "status": "no_recipe",
+        "notes": "Genuine, well-justified gap, checked directly against all 41 shipped recipes rather than assumed: narration-page (blank drawing box plus dictation lines, no dialogue or panels) and social-narrative (single first-person narrator, no back-and-forth dialogue or embedded question) are the closest existing formats and neither is a match. New recipe file built this session at apps/web/agent/skills/materials-studio/references/recipes/comic-narrative-math-page.md, using Homa-original characters (never Beast Academy's specific copyrighted monster designs or names, per this skill's copyright law), with a Format library row in materials-studio SKILL.md and an activity-formats.md entry. This is the single most broadly reusable and most central finding of this ingestion: the comic-scene-plus-embedded-question shape recurs across virtually every subsection of the book and is explicitly named by the book's own front matter as its defining teaching device."
+      },
+      {
+        "type": "capstone-path-and-construction-logic-puzzles",
+        "description": "The book's closing starred puzzles (page 180): trace an unbroken path through a grid crossing every square exactly once while visiting numbered squares in a fixed order (4-directional moves only), and construct three distinct tilted squares from a field of dots.",
+        "recipe": "maze-puzzle-practice",
+        "status": "have_recipe",
+        "notes": "A loose fit reused with a caveat: maze-puzzle-practice's start/finish, decision-point, self-checking-path shape reasonably covers the grid-path-tracing puzzle, though its own design is a branching right/wrong-answer maze rather than a single required Hamiltonian-style path with waypoints; the dot-grid tilted-square construction puzzle is closer to the shape-composition-and-splitting gap above and is not really covered by any existing recipe on its own."
+      },
+      {
+        "type": "hands-on-games-and-play",
+        "description": "Named two-player games taught with explicit rules (Hand-Sums, a finger-flashing addition game; Pick Your Pony and Four in a Row, dice games) used as a lower-pressure alternative to worksheet practice for the same subitizing and number-sense skills.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Not a printable at all, the same treatment this session's Dimensions Math ingest gave its own 'whole-group-and-small-group-center-play' finding: these are teacher/parent-facilitated hands-on games, out of scope for materials-studio, which generates printable pages. Recorded for completeness of the activity-type census, not as a recipe gap."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 15,
+      "haveRecipe": 8,
+      "noRecipe": 7
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: beast-academy-guided-discovery=3e1bda52-86e3-4eb4-9d04-5376949b6380, beast-academy-1a-book-format=70baaea9-3238-465b-a3c3-bca88fffe503 Original ask: Write two proposed knowledge_bank rows via the gate at apps/web/lib/knowledge/gate.ts: beast-academy-guided-discovery (method_philosophy) and beast-academy-1a-book-format (method_format). Full proposed content in layer1_philosophy.knowledgeBankGaps above.",
+      "impact": "Unlike this session's Dimensions Math ingest (which found Singapore Math CPA already documented), Beast Academy is genuinely new to Homa: curriculum-writer.md had zero mentions of Beast Academy, Art of Problem Solving, AoPS, or comic-format/advanced-pace math before this session's edit. The gate requires a live Postgres connection (mapDb()) this sandbox does not have, so the write could not be attempted honestly; recorded as a proposal only.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "One new recipe file added this session: comic-narrative-math-page.md (apps/web/agent/skills/materials-studio/references/recipes/comic-narrative-math-page.md), with a Format library row in materials-studio SKILL.md and an activity-formats.md entry. Gap slug matches the recipe filename exactly, so no GAP_ALIASES entry was needed in apps/web/lib/materials/cosmo-funnel.ts.",
+      "impact": "This is the book's own defining, pervasive format (comic dialogue panels plus an embedded story-linked question), checked directly against narration-page and social-narrative (the two closest existing formats) and confirmed as a genuine gap. Broadly reusable well beyond this one book: any curriculum or family request wanting a concept taught through character and story rather than a bare instruction line can use it, across subjects, not just math.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21 for honeycomb-number-path-puzzle: added as a third variant ('Path') on the existing hive-puzzle.md recipe, distinct from the base smallest-number-not-adjacent rule and the Pairs touching-sum variant. Three other real activity-type gaps remain intentionally NOT built into recipes, per this task's own recorded low-value/narrow scoping: shape-composition-and-splitting (connect-the-dots geometric decomposition into a target shape count/type), tetromino-polyomino-matching (narrower, combinatorial-geometry-specific), and concentric-circle-distance-comparison (narrow, single short subsection). Full descriptions in layer4_activities.activityTypes above.",
+      "impact": "Honeycomb-number-path-puzzle no longer blocks Beast Academy 1A path-puzzle content. shape-composition-and-splitting remains the strongest candidate for a future session if more geometry-and-puzzle-forward curricula recur; tetromino-polyomino-matching and concentric-circle-distance-comparison stay lower priority, narrower in scope.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "recipe",
+      "item": "IMPORTANT FINDING, not a gap requiring action: checked whether the existing 'hive-puzzle' recipe (explicitly documented as 'Derived from Beast Academy's Hive Puzzles') already covered this book's Honeycomb Path puzzles, given the shared hexagonal-grid visual language and shared publisher. It does not: hive-puzzle's own mechanic is a constraint-satisfaction rule (smallest number not adjacent to itself), always image-direct, targeted at grades 2-5; Honeycomb Paths is a sequential path-tracing puzzle appropriate for Grade 1 and simple enough for html. Recorded honestly per this session's own instruction not to assume a superficial visual match is a real one.",
+      "impact": "Confirms Homa's materials-studio already has some genuine, deliberate Beast Academy-derived puzzle coverage (hive-puzzle) from a prior, unrelated session, useful context for any future Beast Academy ingestion.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Added 1 new Mathematics topic this session, append-only under the existing MARBLE_DOMAIN_MAP pair Mathematics > Geometry, no mapping.ts edit needed: mt_bBYrc2wj0h 'Matching Shapes by Spin or Flip' (Geometry, age 5-7). topics.json grew from 1645 to 1646 topics (insertions only, confirmed by diff: 19 insertions, 1 changed line for the topicCount field, 0 deletions of any existing topic). packages/taxonomy/data/manifest.json counts.topics, counts.topicsBySubject.Mathematics, and the topics.json bytes/sha256 entry in manifest.files were all updated to match; pnpm taxonomy:slugs (1 added, 1645 kept), pnpm taxonomy:progress, and pnpm check:taxonomy were all re-run and are green (1646 topics, 108 domains, 0 errors, 0 warnings).",
+      "impact": "Mathematics had zero coverage for recognizing a shape as the same shape rotated or reflected (a pre-formal-transformation-geometry skill) before this session, despite this being a full 21-page subsection (Spins & Flips) of this one book and a common feature of early-elementary shape work generally, not just this book.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Explicitly checked packages/taxonomy/src/domains.ts for an AUTHORED_DOMAINS collision risk in mathematics before adding anything, the same check this session's Dimensions Math ingest performed and confirmed clean. Result unchanged: AUTHORED_DOMAINS has zero entries for subject 'math' or any mathematics-adjacent subject; every Mathematics domain comes exclusively from MARBLE_DOMAIN_MAP. Verified fresh rather than trusting the prior finding blindly, per this session's own instruction.",
+      "impact": "No architecture blocker for this ingestion. pnpm check:taxonomy's 'domain ids are unique' check passed with no special handling needed.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Real per-subsection gaps recorded as status partial or unmapped in layer2_scope but NOT filled with a new topic this session, to keep this session's taxonomy addition proportionate: subitizing/pattern-recognition-without-counting as its own named skill (Campus Tour), the Honeycomb Path puzzle's sequential path-tracing mechanic layered on top of counting-to-100 (One Hundred), tetromino/polyomino vocabulary and multi-piece decomposition as distinct from general shape composing (Apart & Together), circles-as-equidistant-points used for distance comparison (Lengths: Circles), and constrained grid path-tracing plus tilted-square construction as distinct problem-solving sub-skills (The Beginning capstone).",
+      "impact": "These are genuine, keyword-checked gaps (each was searched across the relevant pre-existing Mathematics topics before being recorded as partial or unmapped rather than mapped), not assumed ones. All are narrower or lower-volume than the Spins & Flips gap that was filled, so recording them here keeps the backlog honest without over-adding topics in one session.",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Added a new 'Advanced / Accelerated Comic-Narrative Math (Beast Academy)' section to apps/web/agent/curriculum-writer.md, placed directly after the existing Singapore Math section. Checked first, per this ingestion's own instructions: full-text search of the file before editing found no existing mention of Beast Academy, Art of Problem Solving, AoPS, comic-narrative math, or a general 'advanced/gifted math' section anywhere, so this is a genuinely new methodology note, not a duplicate.",
+      "impact": "curriculum-writer can now plan Beast-Academy-flavored sessions correctly: guided-discovery-through-story delivery, genuinely above-grade-level content that should not be softened back to standard grade level, tiered starred-problem difficulty, games as real teaching tools, and reasoning-rich answer keys, with format preferences naming comic-narrative-math-page, hive-puzzle, cross-number-puzzle, and other relevant existing recipes.",
+      "urgency": "low, informational"
+    }
+  ],
+  "notes": "Real page count, verified directly with pypdf and PyMuPDF rather than assumed from the filename: beast-academy-1a.pdf is 110 PDF pages, each a scanned two-page spread of the physical spiral-bound-style book, matching the book's own stated 215 physical pages (front matter through Index, per the book's own page numbering and Table of Contents, which lists Index at page 214-215). pypdf's extract_text returned zero characters of real content on every sampled page, confirming this is a pure phone-scan PDF with no embedded text layer, the same situation as every other volume drained this session; all reading was done visually from PyMuPDF-rendered page images (roughly 55 pages sampled: an even one-in-three sample across the full 0-109 PDF-page range, plus every front-matter page and every back-matter page, plus targeted samples of Chapter 2 and Chapter 3 content and the Hints/Answers sections). Title, publisher, and edition confirmed directly and unambiguously from the pages themselves: front cover reads 'Beast Academy... By Art of Problem Solving... MATH 1A'; copyright page (page 2) states (c)2021 AoPS Incorporated, published by AoPS Incorporated (San Diego, CA 92128), ISBN 978-1-934124-69-7, 2022 Printing, written by Jason Batterson, illustrated by Erich Owen and Sarah Leuver, additional illustrations by Paul Cox, colored by Greta Selman; page 3 states 'This is Book 1A in the Beast Academy Level 1 series' with the full 4-book breakdown (1A/1B/1C/1D) and page 5's full Table of Contents confirms the exact chapter and subsection structure used throughout this analysis (Chapter 1: Counting -- First Day p.14, Campus Tour p.26, One Hundred p.44; Chapter 2: Shapes -- Names p.70, Spins & Flips p.84, Apart & Together p.106; Chapter 3: Comparing -- One for One p.124, More or Less p.142, Lengths p.162, The Beginning p.181; then Hints p.183, Answers p.187, Index p.214). Beast Academy 1A is a DIFFERENT publisher and series from the Singapore Math Inc. / Dimensions Math volume drained earlier this session (confirmed on sight: different publisher name on the copyright page, entirely different visual style and pedagogy), per this task's own framing; the two were not conflated at any point. Confirmed this is its own complete curriculum (Book A of the 4-book Level 1 series, covering Chapters 1-3 of the wider 12-chapter Level 1 sequence shown on page 3), not paired with Beast Academy 1B, which per this task's instructions a separate concurrent agent is handling independently; no 1B-related files were touched, read in depth, or referenced beyond the single confirmatory glance at the series-overview page needed to describe 1A's own place in the sequence. The comic-narrative, mascot-driven, deliberately-above-grade-level characterization given in this task's framing is fully confirmed by direct page evidence, not merely assumed: see layer1_philosophy.principles above for the specific pages and quotes supporting each element (comic format explained on pages 8-11, four-monster-plus-staff character roster on pages 6-7, above-grade-level content on pages 65, 89, 112-119, 176-177, and 180, tiered starred/hint system on pages 10-11 and 183-186, reasoning-rich answer key on page 189). Copyrighted page images and the publisher's specific character designs, names, and exact wording were used only for this session's own analysis and are described here in Homa's own words; the one new taxonomy topic and the one new materials-studio recipe describe generic early-math concepts and page-format patterns in Homa's own voice and use Homa-original characters, not a copy of this publisher's specific monster designs, artwork, or text."
+}
