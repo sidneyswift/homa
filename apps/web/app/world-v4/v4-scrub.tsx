@@ -101,9 +101,12 @@ export function V4Scrub() {
           const from = parseFloat(w.dataset.from || "0");
           const to = parseFloat(w.dataset.to || "1");
           const fade = parseFloat(w.dataset.fade || "0.12");
-          // Ramp up over `fade`, hold, ramp down over `fade`.
-          const inW = clamp((p - from) / fade);
-          const outW = 1 - clamp((p - (to - fade)) / fade);
+          // Ramp up over `fade`, hold, ramp down over `fade`. A waypoint that
+          // starts the scene is already fully in at progress 0 (otherwise the
+          // page opens with invisible copy), and one that runs to the end
+          // never fades back out.
+          const inW = from <= 0 ? 1 : clamp((p - from) / fade);
+          const outW = to >= 1 ? 1 : 1 - clamp((p - (to - fade)) / fade);
           w.style.setProperty("--w", String(Math.min(inW, outW)));
         }
       }
