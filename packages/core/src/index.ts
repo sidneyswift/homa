@@ -63,6 +63,11 @@ export {
   type MapQuestionPlan,
 } from "./map/bank";
 
+export {
+  getScorableItem,
+  isTaxonomyScorable,
+  taxonomyScorableItems,
+} from "./map/scorable";
 export { PERSONALIZATION_EXCEPTION_IDS, personalizeStatement } from "./map/personalize";
 
 export { reportStaleness, type ReportStaleness } from "./map/staleness";
