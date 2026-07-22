@@ -115,6 +115,20 @@ describe("isNarratedPause", () => {
     }
   });
 
+  it("catches the standing offer", () => {
+    // "I'm here whenever you're ready." Addressed to her, warm, and
+    // still a whole message about Homa doing nothing. The card under it
+    // is already the invitation.
+    for (const text of [
+      "I'm here whenever you're ready.",
+      "I am here when you are.",
+      "I'll be here whenever you want to pick this up.",
+      "I'm right here.",
+    ]) {
+      assert.equal(isNarratedPause(text), true, text);
+    }
+  });
+
   it("leaves real replies alone, including ones that open with I'll", () => {
     for (const text of [
       "I'll make Mia a worksheet for that tomorrow.",

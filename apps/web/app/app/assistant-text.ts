@@ -102,16 +102,34 @@ const NARRATED_PAUSE =
 const THIRD_PERSON_WAIT =
   /\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|hold(?:s|ing)|standing by|listening)\b[^.]{0,80}\b(?:her|him|them|she|he|they|the parent|the user)\b|\b(?:her|his|their|she|he|they|the parent|the user)\b[^.]{0,80}\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|standing by)\b/;
 
+/**
+ * The standing offer: "I'm here whenever you're ready."
+ *
+ * Addressed to her, so it is not third-person narration, and warm enough
+ * that it looks harmless. It is still a whole message about Homa doing
+ * nothing, which is what this rule has always been for: the doc above
+ * already counts "I'll wait here while you fill that in" as one, and the
+ * only difference is "I'm here" against "I'll be here". The card under
+ * it is already the invitation.
+ */
+const STANDING_OFFER = /^i(?:'|’)?(?:m| am|ll be| will be)\s+(?:right\s+)?here\b/;
+
 export function isNarratedPause(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length === 0 || trimmed.length > 140) return false;
   // One sentence. Two means she said something real alongside it.
   if (trimmed.split(/[.!?]\s+\S/).length > 1) return false;
   const lower = trimmed.toLowerCase();
-  // The whole-part and one-sentence guards above are what make the
-  // second rule safe. Inside that frame, a message whose entire content
-  // is Homa waiting on someone else was never going to be worth reading.
-  return NARRATED_PAUSE.test(lower) || THIRD_PERSON_WAIT.test(lower);
+  // The whole-part and one-sentence guards above are what make these
+  // safe. Inside that frame, a message whose entire content is Homa
+  // waiting was never going to be worth reading, so the cost of
+  // over-reaching is one bland line dropped and the cost of
+  // under-reaching is narration on a parent's screen.
+  return (
+    NARRATED_PAUSE.test(lower) ||
+    THIRD_PERSON_WAIT.test(lower) ||
+    STANDING_OFFER.test(lower)
+  );
 }
 
 /**
