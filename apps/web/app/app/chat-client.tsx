@@ -1047,6 +1047,16 @@ export function ChatClient({
   const activeQuestion = busy
     ? null
     : latestQuestionRequest(agent.data.messages);
+  // Computed here, above the rail gate that reads them; the docking
+  // logic further down shares these same values.
+  // The one checklist card that may still open the questions, and the
+  // one report reveal that may still open the report. Same rule as the
+  // snap card: newest, nothing from her after it, and only while the
+  // line is free.
+  const activeChecklist = busy
+    ? null
+    : latestChecklistRequest(agent.data.messages);
+  const activeReport = latestReportReveal(agent.data.messages);
   const promptSuggestionRailAllowed =
     !busy
     && !recovering
@@ -1054,6 +1064,18 @@ export function ChatClient({
     && progressInteraction === null
     && activeSnap === null
     && activeQuestion === null
+    // Never during onboarding. The arc has exactly one next thing at
+    // every beat, and the rail is a second voice proposing a different
+    // one: the founder's walk ended on a card saying "Start the
+    // questions", a chip saying "Explain next step", and an open box,
+    // three answers to what-do-I-do-now. The rail also knew the word
+    // "step", which the mode bans Homa herself from saying.
+    && onboarding === null
+    // And never while any card holds the floor, onboarding or not. The
+    // list knew snap and question cards but was never taught the
+    // checklist invite or the report reveal.
+    && activeChecklist === null
+    && activeReport === null
     && draft.trim().length === 0
     && attachments.staged.length === 0
     && dictation.phase === "idle";
@@ -1106,14 +1128,6 @@ export function ChatClient({
   const queuedParentMessages = queued
     .map((entry, index) => ({ entry, index }))
     .filter(({ entry }) => entry.lane !== "directive");
-  // The one checklist card that may still open the questions, and the
-  // one report reveal that may still open the report. Same rule as the
-  // snap card: newest, nothing from her after it, and only while the
-  // line is free.
-  const activeChecklist = busy
-    ? null
-    : latestChecklistRequest(agent.data.messages);
-  const activeReport = latestReportReveal(agent.data.messages);
   // The composer becomes the card (founder note, 2026-07-21 walk).
   //
   // A card floating in the transcript with a message box under it asks
