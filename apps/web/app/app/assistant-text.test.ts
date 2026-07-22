@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import {
   isNarratedPause,
   isStageDirection,
+  stripTrailingNarration,
   visibleAssistantTexts,
 } from "./assistant-text";
 
@@ -217,5 +218,54 @@ describe("the render path uses the same predicates", () => {
       "utf8",
     );
     assert.match(source, /isNarratedPause\(trimmed\)/);
+    // And the paragraph-level strip, added when the fifth variant rode
+    // as paragraph two of a real reply and the whole-part predicates
+    // above could not reach it.
+    assert.match(source, /stripTrailingNarration\(part\.text\)/);
+  });
+});
+
+describe("stripTrailingNarration", () => {
+  it("cuts the shipped fifth variant off the end of a real reply", () => {
+    // "Take your time, I'm here whenever you're ready." rode as
+    // paragraph two under real content, inside ONE part, where the
+    // whole-part predicates can never reach.
+    assert.equal(
+      stripTrailingNarration(
+        "Now, tell me about your kids.\n\nTake your time, I'm here whenever you're ready.",
+      ),
+      "Now, tell me about your kids.",
+    );
+  });
+
+  it("cuts several trailing pause paragraphs, not just one", () => {
+    assert.equal(
+      stripTrailingNarration(
+        "Saved.\n\nI'll wait here while you fill that in.\n\n(waiting for her response)",
+      ),
+      "Saved.",
+    );
+  });
+
+  it("leaves a pause-shaped sentence in the middle alone", () => {
+    // Real content follows it, and cutting a middle paragraph can change
+    // what the reply means. Better one odd line than a hole.
+    const text = "I'm here whenever you're ready.\n\nAlso, PA has a filing deadline in June.";
+    assert.equal(stripTrailingNarration(text), text);
+  });
+
+  it("leaves a reply with no narration untouched", () => {
+    const text = "Story, three years old.\n\nWhat is Story into these days?";
+    assert.equal(stripTrailingNarration(text), text);
+  });
+
+  it("empties a part that was narration all the way down", () => {
+    assert.equal(
+      stripTrailingNarration("(waiting for her response)").trim(),
+      "(waiting for her response)",
+    );
+    // A single-paragraph part is left for the whole-part predicates,
+    // which already drop it. This function only ever cuts paragraph two
+    // onward, so it can never turn a message into nothing by itself.
   });
 });

@@ -4,7 +4,11 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { Logo } from "../../components/brand/Logo";
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
-import { isNarratedPause, isStageDirection } from "./assistant-text";
+import {
+  isNarratedPause,
+  isStageDirection,
+  stripTrailingNarration,
+} from "./assistant-text";
 import { isHiddenDirective } from "../../lib/onboarding/directives";
 import {
   AttachmentReceiptChips,
@@ -174,7 +178,10 @@ function assistantItems(message: EveMessage): AssistantItem[] {
   const shownText = new Set<string>();
   for (const [partIndex, part] of message.parts.entries()) {
     if (part.type === "text") {
-      const trimmed = part.text.trim();
+      // Trailing narration goes first: "Take your time, I'm here
+      // whenever you're ready." shipped as paragraph two of a real
+      // reply, where the whole-part predicates below can never reach.
+      const trimmed = stripTrailingNarration(part.text).trim();
       if (trimmed.length === 0) continue;
       // Homa narrating her own silence is not something to show a
       // parent, wrapped in asterisks or not. Both checks live here
@@ -186,7 +193,7 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       const key = trimmed.replace(/\s+/g, " ");
       if (shownText.has(key)) continue;
       shownText.add(key);
-      items.push({ kind: "text", text: part.text });
+      items.push({ kind: "text", text: trimmed });
       continue;
     }
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;

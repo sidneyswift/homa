@@ -112,7 +112,14 @@ const THIRD_PERSON_WAIT =
  * only difference is "I'm here" against "I'll be here". The card under
  * it is already the invitation.
  */
-const STANDING_OFFER = /^i(?:'|’)?(?:m| am|ll be| will be)\s+(?:right\s+)?here\b/;
+// The optional prefix is what the fifth shipped variant taught: "Take
+// your time, I'm here whenever you're ready." defeats a ^ anchor with
+// three words of courtesy. The courtesy words are enumerated, not
+// wildcarded, so a sentence that says something real before offering to
+// exist ("Saved. I'm here if anything looks wrong") is not eaten by an
+// open-ended prefix.
+const STANDING_OFFER =
+  /^(?:(?:take your time|no rush|no hurry|whenever you(?:'|’)?re ready)[,.!]?\s+)?i(?:'|’)?(?:m| am|ll be| will be)\s+(?:right\s+)?here\b/;
 
 export function isNarratedPause(text: string): boolean {
   const trimmed = text.trim();
@@ -133,24 +140,51 @@ export function isNarratedPause(text: string): boolean {
 }
 
 /**
+ * stripTrailingNarration(text): one text part with any TRAILING
+ * narrated-wait paragraphs removed.
+ *
+ * The fifth variant to reach a screen was "Take your time, I'm here
+ * whenever you're ready.", and it did not arrive alone: it rode as the
+ * second paragraph under a real sentence, inside one part. A filter
+ * that only judges whole parts can never touch that, however good its
+ * predicates get, so this judges the paragraphs.
+ *
+ * Trailing only, on purpose. A pause line at the END of a reply is the
+ * model signing off by describing its own idleness, and cutting it
+ * cannot change the meaning of what came before. A pause-shaped
+ * sentence in the MIDDLE has real content after it that might lean on
+ * it, so it stays: better one odd line than a reply with a hole in it.
+ */
+export function stripTrailingNarration(text: string): string {
+  const paragraphs = text.split(/\n{2,}/);
+  while (paragraphs.length > 1) {
+    const last = paragraphs[paragraphs.length - 1].trim();
+    if (!isStageDirection(last) && !isNarratedPause(last)) break;
+    paragraphs.pop();
+  }
+  return paragraphs.join("\n\n");
+}
+
+/**
  * visibleAssistantTexts(texts): the text parts of one assistant message
  * that should actually render, in order.
  *
  * Drops exact repeats of something already shown in the same message,
- * and drops stage directions outright.
+ * drops stage directions outright, and trims narrated waiting off the
+ * end of a part that also says something real.
  */
 export function visibleAssistantTexts(texts: readonly string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const text of texts) {
-    const trimmed = text.trim();
+    const trimmed = stripTrailingNarration(text).trim();
     if (trimmed.length === 0) continue;
     if (isStageDirection(trimmed)) continue;
     if (isNarratedPause(trimmed)) continue;
     const key = trimmed.replace(/\s+/g, " ");
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push(text);
+    out.push(trimmed);
   }
   return out;
 }
