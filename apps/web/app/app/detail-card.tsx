@@ -121,6 +121,34 @@ export interface DetailField {
   autoComplete?: string;
 }
 
+/**
+ * The name token. Any string here may contain {name}, and it is replaced
+ * with the child's name as she typed it.
+ *
+ * This exists because one question at a time means her earlier answers
+ * are off screen. By the birthday step the name input is gone, so a
+ * pronoun has nothing visible to point at even though she supplied the
+ * word herself a tap ago. Saying the name back is also the cheapest
+ * proof that Homa was listening.
+ *
+ * A token in plain strings rather than a function per label, so FIELDS
+ * stays a table of readable copy that can be found by searching for the
+ * words a parent saw. A test asserts no literal {name} ever reaches the
+ * screen, which is what makes the stringly-typed part safe.
+ */
+export const NAME_TOKEN = "{name}";
+
+export function withChildName(
+  text: string,
+  values: Record<string, string>,
+): string {
+  // Unreachable in practice: the ready check will not let her past the
+  // name step while it is blank. It reads correctly anyway if it ever
+  // fires, which is the point of a fallback.
+  const name = values.childName?.trim() || "your child";
+  return text.split(NAME_TOKEN).join(name);
+}
+
 export const FIELDS: Record<DetailCardKind, DetailField[]> = {
   family_basics: [
     {
@@ -137,11 +165,32 @@ export const FIELDS: Record<DetailCardKind, DetailField[]> = {
     },
   ],
   child: [
-    { key: "childName", label: "What is their name?", kind: "text" },
+    {
+      key: "childName",
+      // Names the subject, because nothing else on this card does. The
+      // eyebrow that used to ("About your child") is dropped in docked
+      // mode, and docked is the only mode a live card is ever in, so
+      // "What is their name?" arrived pointing at nobody. The nearest
+      // human in the conversation was the parent herself.
+      //
+      // "first name" and not "name": one name per concept, and the rest
+      // of the product already calls this datum a first name.
+      label: "What is your child's first name?",
+      // Not decoration. This value becomes the name Homa uses in every
+      // question, report line and printable from here on, so the moment
+      // to say a nickname is allowed is before she types the one on the
+      // birth certificate.
+      hint: "A nickname is fine.",
+      kind: "text",
+    },
     {
       key: "birthDate",
-      label: "When were they born?",
-      hint: "The real date, so the questions match their age in months.",
+      label: `When was ${NAME_TOKEN} born?`,
+      // "the questions I ask", not "the questions": she has not been
+      // shown a checklist yet, so the definite article pointed at
+      // something she had never seen. "Their" is fine here, and only
+      // here, because the label above it now says the name.
+      hint: "The real date. Their age in months decides which questions I ask.",
       kind: "date",
     },
   ],
@@ -285,7 +334,9 @@ export function DetailCard({
         className={`flex min-h-[5.5rem] flex-col justify-center ${docked ? "" : "mt-3.5"}`}
       >
         <label className="block" key={field.key}>
-          <span className="text-sm font-medium text-strong">{field.label}</span>
+          <span className="text-sm font-medium text-strong">
+            {withChildName(field.label, values)}
+          </span>
           {field.kind === "state" ? (
             <select
               autoFocus
@@ -318,7 +369,9 @@ export function DetailCard({
             />
           )}
           {field.hint ? (
-            <span className="mt-1 block text-xs text-subtle">{field.hint}</span>
+            <span className="mt-1 block text-xs text-subtle">
+              {withChildName(field.hint, values)}
+            </span>
           ) : null}
         </label>
       </div>
@@ -331,7 +384,18 @@ export function DetailCard({
         onClick={advance}
         className="mt-3 flex min-h-12 w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? "Saving…" : isLast ? (isBasics ? "That's me" : "Add them") : "Next"}
+        {/* "Add Ivy", not "Add them": the last unbound pronoun on the
+            screen, and a plural one, so it also read as though the button
+            added more than one child. The product already builds a button
+            label from the typed name on the card flow, after the founder
+            hit the same confusion there. */}
+        {saving
+          ? "Saving…"
+          : isLast
+            ? isBasics
+              ? "That's me"
+              : withChildName(`Add ${NAME_TOKEN}`, values)
+            : "Next"}
       </button>
 
       {fields.length > 1 ? (

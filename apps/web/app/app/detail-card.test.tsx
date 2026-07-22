@@ -5,6 +5,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   DetailCard,
   FIELDS,
+  NAME_TOKEN,
+  withChildName,
   spokenDate,
   type DetailCardKind,
 } from "./detail-card";
@@ -23,6 +25,17 @@ function renderCard(kind: DetailCardKind): string {
 
 function countInputs(html: string): number {
   return (html.match(/<(input|select|textarea)\b/gu) ?? []).length;
+}
+
+/** Static markup escapes the apostrophe in "your child's", so a copy
+ *  string has to be escaped the same way before it can be looked for. */
+function asRendered(text: string): string {
+  return text
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;")
+    .replace(/'/gu, "&#x27;");
 }
 
 describe("one input per question", () => {
@@ -54,12 +67,81 @@ describe("one input per question", () => {
     // in a way that skipped a child's name and went straight to the
     // birthday, because the docked card holds a stable tree position.
     const html = renderCard("child");
-    assert.ok(html.includes(FIELDS.child[0].label), "did not open on step one");
-    assert.ok(!html.includes(FIELDS.child[1].label), "showed a later step too");
+    assert.ok(
+      html.includes(asRendered(FIELDS.child[0].label)),
+      "did not open on step one",
+    );
+    assert.ok(
+      !html.includes(asRendered(withChildName(FIELDS.child[1].label, {}))),
+      "showed a later step too",
+    );
   });
 
   it("labels the button Next until the last question", () => {
     assert.ok(renderCard("child").includes("Next"));
+  });
+});
+
+describe("every question says who it is about", () => {
+  // The founder walked onboarding and asked, of the first child question,
+  // "whos name?". She had just given her OWN name and state, so the only
+  // person named in the conversation was her. The card's one antecedent,
+  // the "About your child" eyebrow, is hidden whenever the card is docked,
+  // and every live card is docked. So the question carried nothing.
+  it("names the subject on the first child question", () => {
+    const html = renderCard("child");
+    assert.ok(
+      /your child/iu.test(html),
+      "the first child question does not say whose name it wants",
+    );
+  });
+
+  it("never opens a child question on a bare pronoun", () => {
+    // "What is their name?" and "When were they born?" both failed this.
+    for (const field of FIELDS.child) {
+      assert.ok(
+        !/^(what|when|where|who|how)\s+(is|are|was|were)\s+(their|they|them)\b/iu.test(
+          field.label,
+        ),
+        `"${field.label}" leads with an unbound pronoun`,
+      );
+    }
+  });
+
+  it("never leaks the raw token to the screen", () => {
+    // The token is the price of keeping FIELDS as plain greppable copy.
+    // This is what makes that price safe: a typo in {name} shows up here
+    // rather than on a parent's screen.
+    for (const kind of KINDS) {
+      assert.ok(
+        !renderCard(kind).includes(NAME_TOKEN),
+        `${kind} rendered a literal ${NAME_TOKEN}`,
+      );
+    }
+  });
+
+  it("substitutes the name she typed", () => {
+    assert.equal(
+      withChildName(`When was ${NAME_TOKEN} born?`, { childName: "Ivy" }),
+      "When was Ivy born?",
+    );
+    assert.equal(
+      withChildName(`Add ${NAME_TOKEN}`, { childName: "  Ivy  " }),
+      "Add Ivy",
+    );
+  });
+
+  it("still reads correctly with no name to substitute", () => {
+    // Unreachable while the ready check holds, which is exactly why it
+    // has to be checked here instead of noticed in production.
+    assert.equal(
+      withChildName(`When was ${NAME_TOKEN} born?`, {}),
+      "When was your child born?",
+    );
+    assert.equal(
+      withChildName(`When was ${NAME_TOKEN} born?`, { childName: "   " }),
+      "When was your child born?",
+    );
   });
 });
 
