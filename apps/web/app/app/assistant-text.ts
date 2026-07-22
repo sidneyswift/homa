@@ -46,7 +46,25 @@ export function isStageDirection(text: string): boolean {
   // Third-person narration about herself, which is the tell. A wrapped
   // aside addressed to the parent ("you can change this later") is not
   // one of these and stays.
-  return /^(waits?|pauses?|says? nothing|stays? (quiet|silent)|silent|no (reply|response)|listening|thinking)\b/.test(
+  //
+  // Gerunds included after "(waiting for her response)" reached a parent
+  // on the opening turn: the list read `waits?`, which matches "wait"
+  // and "waits" and not the form a model actually reaches for when it is
+  // describing something ongoing. Every verb here now carries its -ing.
+  if (
+    /^(wait(s|ing)?|await(s|ing)?|paus(e|es|ing)|say(s|ing)? nothing|stay(s|ing)? (quiet|silent)|remain(s|ing) (quiet|silent)|silent|no (reply|response)|listen(s|ing)|think(s|ing)|hold(s|ing)|standing by)\b/.test(
+      inner,
+    )
+  ) {
+    return true;
+  }
+  // Turn-taking narration that does not open on the verb: anything about
+  // whose turn it is, said about her rather than to her. Homa speaks to
+  // the parent as "you", so a wrapped aside calling her "her" or "she"
+  // is describing the conversation from outside it. Scoped to
+  // turn-taking words on purpose, because "her" inside an aside can
+  // legitimately mean a daughter ("(her reading is coming along)").
+  return /\b(her|she|the parent|the user)\b[^.]*\b(response|responds?|repl(y|ies|ied)|answer(s|ed)?|turn|input)\b/.test(
     inner,
   );
 }

@@ -28,6 +28,35 @@ describe("isStageDirection", () => {
     }
   });
 
+  it("catches the gerund forms", () => {
+    // "(waiting for her response)" reached a parent on the opening turn.
+    // The list read `waits?`, which matches "wait" and "waits" and not
+    // the form a model reaches for when describing something ongoing.
+    for (const text of [
+      "(waiting for her response)",
+      "*(waiting for her response)*",
+      "_awaiting her reply_",
+      "(listening)",
+      "(pausing while she reads)",
+      "(holding while the card is up)",
+      "(standing by)",
+    ]) {
+      assert.equal(isStageDirection(text), true, text);
+    }
+  });
+
+  it("catches turn-taking narration that does not open on the verb", () => {
+    // Homa speaks to the parent as "you". A wrapped aside calling her
+    // "her" or "she" is describing the conversation from outside it.
+    for (const text of [
+      "(her response will come through the card)",
+      "(she has not replied yet)",
+      "(the parent will answer next)",
+    ]) {
+      assert.equal(isStageDirection(text), true, text);
+    }
+  });
+
   it("leaves a real aside to the parent alone", () => {
     // Wrapped, but addressed to HER, which is allowed.
     for (const text of [
@@ -36,6 +65,10 @@ describe("isStageDirection", () => {
       "*Mia* is doing well",
       "That's saved.",
       "(PA it is)",
+      // "her" inside an aside can mean a daughter, so the turn-taking
+      // rule has to be about turn-taking and nothing else.
+      "(her reading is coming along)",
+      "(she loves dinosaurs right now)",
     ]) {
       assert.equal(isStageDirection(text), false, text);
     }
