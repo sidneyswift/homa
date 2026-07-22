@@ -3,6 +3,67 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Founder rulings: keep their voice, and the kid standing chip comes off
+
+Two decisions out of the celebration-system research round
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`, seven
+decisions posed, these two ruled on the spot).
+
+**D1, keep their voice. Ruled yes, and NOT opt-in.** Lesson audio
+deletes on a 30-day timer today, a deliberate privacy commitment in the
+lesson-listen migration; transcripts and rows persist, only the raw
+audio goes. The question was whether a parent may keep a trimmed clip
+of their child working something out past that timer. The founder ruled
+yes and went further than the proposal: "If there's a good clip, let's
+save it for them. They don't need to opt in."
+
+So Homa keeps it on her behalf. That is a real change to a stated
+privacy posture, so the boundary is drawn tight and the honesty
+obligations sit on the retention side, not the deletion side: the model
+judges which clip is worth keeping, code verifies it is this family's
+lesson and the CHILD's own utterance with no sibling present and no
+frustrated beat, the clip is bounded and trimmed, the parent is TOLD
+plainly in the lesson review that Homa kept it, one tap deletes it, and
+it dies with the lesson, the child, or the family. An auto-keep the
+parent is never told about would be a silent retention change, which is
+the one shape this ruling does not authorize.
+
+Time pressure was the reason this got asked first: deletion is one-way,
+so every week the question stayed open destroyed another cohort of the
+best material this product will ever hold.
+
+**D7, the kid standing chip. Removed.** `kid-pill.tsx` put one of
+"Ahead ✦" (gold), "On track" (sage), or "Growing right now" (sky) on
+the per-kid page header, computed from how many of that child's
+subjects scored ahead or growing. It broke no rule the codebase states:
+`BANNED_WORDS` (`packages/core/src/map/copy-laws.ts`) covers "behind"
+but not "ahead", and the narrative gate that enforces it only ever runs
+over model-composed prose, never over a hand-coded chip. That is
+precisely why it was posed as a decision rather than fixed on sight.
+
+The hazard is placement, not vocabulary. The sibling switcher renders
+directly beneath the chip in `kid-view.tsx`, so a mother of two reached
+gold "Ahead ✦" and sky "Growing right now" one tap apart in the same
+spot on the page, and Homa had performed the comparison for her. It was
+also frequently backwards: age bands ask older children harder
+questions while implied closure pushes the other way, so in a rendered
+two-kid case the nine year old drew the softer label and the seven year
+old drew gold. A ranked whole-child label is not merely a comparison,
+it is an unreliable one.
+
+The founder could not picture the problem from the description ("I'm
+not visualizing the problem correctly, so just fix whatever you think
+needs to be fixed"), so it was rendered as two sibling headers one tap
+apart before the fix landed. Scope of the cut is narrow: the
+getting-started chips stay ("Opens at age 2", "Checklist ready", "Just
+getting started"), because those are states rather than judgments, and
+the per-SUBJECT badges inside one child's own page keep the full
+vocabulary, because comparing a child's math to that same child's
+reading is the comparison a mother came here to make and it never
+leaves the child. Once a child is genuinely under way the header now
+says nothing, and the subjects below it carry the real answer in the
+report's own sentences.
+
 ## 2026-07-21 · Third stranded Cosmo commit judged superseded and archived, not merged
 
 After both stranded commits on fix/handwrytten-sender were recovered
