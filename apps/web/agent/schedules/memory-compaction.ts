@@ -38,12 +38,17 @@ export default defineSchedule({
             (sum, outcome) => sum + (outcome.charsBefore - outcome.charsAfter),
             0,
           );
-          if (outcomes.length > 0) {
-            console.log(
-              `memory compaction: ${outcomes.length} families, ${merged} merges, ` +
-                `${unpacked} splits, ${reclaimed} characters reclaimed`,
-            );
-          }
+          // Logged even when nothing was due. A silent night is
+          // indistinguishable from a flag that never took effect or a
+          // schedule that never fired, and "a component that reliably
+          // produces nothing" is the failure mode AGENTS.md warns is
+          // least likely to page anyone. The flag went on 2026-07-22
+          // with zero families over the threshold, so the very first
+          // live run is exactly that silent case.
+          console.log(
+            `memory compaction: ${outcomes.length} families due, ${merged} merges, ` +
+              `${unpacked} splits, ${reclaimed} characters reclaimed`,
+          );
         } catch (error) {
           // A failed sweep is a quiet night, never a broken deploy: the
           // next run recomputes who is due from live rows.
