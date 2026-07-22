@@ -1529,6 +1529,32 @@ export function ChatClient({
         ) : (
           <>
             {transcript.map((item, itemIndex) => {
+              // One row for one turn (founder note, 2026-07-22: the mark
+              // "starts at one spot, then moves down a little bit and
+              // then moves back up when it answers").
+              //
+              // Measured: the mark sat at 305, jumped to 329, came back
+              // to 305. The 24 is exactly the transcript's gap-6, which
+              // is the giveaway. Mid-turn the assistant message mounts
+              // carrying only a tool call, so it renders its bare
+              // "Worked on it" eyebrow ABOVE the busy row, and for a
+              // beat two rows both say Homa is working. Then text
+              // streams, busyLabel goes null, the busy row leaves, and
+              // everything springs back.
+              //
+              // While the busy row is up it IS her presence, so a
+              // message with nothing to show yet renders nothing. It
+              // comes back the moment it has words, or when the turn
+              // ends and the eyebrow becomes an honest receipt.
+              if (
+                busy &&
+                item.kind === "message" &&
+                itemIndex === transcript.length - 1 &&
+                item.message.role === "assistant" &&
+                !messageSaysSomething(item.message)
+              ) {
+                return null;
+              }
               // Dim rule: everything above the live snap card steps
               // back; the card's own message stays full strength.
               const dimmed =

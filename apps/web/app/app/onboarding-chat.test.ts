@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import { parseHiddenDirective } from "../../lib/onboarding/directives";
@@ -166,6 +167,48 @@ describe("kickoffLockIsStale", () => {
     assert.equal(
       kickoffLockIsStale({ liveMessageCount: 0, archivedCount: 12 }),
       false,
+    );
+  });
+});
+
+describe("one row while Homa works", () => {
+  // Founder, 2026-07-22, on the opening turn: the mark "starts at one
+  // spot, then moves down a little bit and then moves back up when it
+  // answers."
+  //
+  // Measured on a live turn: the mark sat at y=305, jumped to 329, came
+  // back to 305. The 24 is exactly the transcript's gap-6, which is what
+  // names the cause. Mid-turn the assistant message mounts carrying only
+  // a tool call, so it renders its bare "Worked on it" eyebrow ABOVE the
+  // busy row and two rows both say Homa is working. When text starts
+  // streaming busyLabel returns null, the busy row leaves, and the layout
+  // springs back.
+  //
+  // A source check, because the bug only exists in the composition of
+  // the transcript map and the busy row, which no unit can see.
+  it("skips the in-flight message that has nothing to show yet", () => {
+    const source = readFileSync(
+      new URL("./chat-client.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(
+      source,
+      /busy &&\s*item\.kind === "message" &&\s*itemIndex === transcript\.length - 1 &&\s*item\.message\.role === "assistant" &&\s*!messageSaysSomething\(item\.message\)/u,
+    );
+  });
+
+  it("still renders the eyebrow once the turn is over", () => {
+    // The skip is gated on `busy` on purpose: when the turn ends, a
+    // message whose only content was tool calls becomes an honest
+    // receipt for work that really happened, and must come back.
+    const source = readFileSync(
+      new URL("./chat-client.tsx", import.meta.url),
+      "utf8",
+    );
+    const skip = source.slice(source.indexOf("One row for one turn"));
+    assert.ok(
+      skip.slice(0, 1400).includes("busy &&"),
+      "the skip is not gated on busy, so finished turns would vanish too",
     );
   });
 });
