@@ -9,7 +9,7 @@ import { W3Reveal } from "./reveal";
  * from the founder-approved mock saved at
  * docs/homa-design/explorations/2026-07-22-landing-v3-composition-mock.html.
  * The system: contained media on the cream page (never full-bleed photos),
- * real product UI as the literal proof (report card, practice page, planner
+ * real product UI as the literal proof (report card, worksheet, planner
  * board, morning note), photos demoted to small tilted chips, text position
  * varying per beat, and one living character (the logo mark itself, one
  * instance per view, with a job in every scene). Copy passed both copy gates
@@ -166,7 +166,7 @@ export default function WorldV3Page() {
         </div>
       </section>
 
-      {/* Beat 3: the practice page. Media right, text left. */}
+      {/* Beat 3: the worksheet. Media right, text left. */}
       <section style={{ background: "var(--bg-page-warm, #F7EFE2)" }}>
         <div className="w3-beat w3-media-right" data-w3-reveal>
           <div className="w3-beat-media">
@@ -320,7 +320,7 @@ export default function WorldV3Page() {
               </svg>
               Morning note
             </div>
-            <p>Maya narrates everything she plays. Tomorrow&apos;s practice page turns that into a story.</p>
+            <p>Maya narrates everything she plays. Tomorrow&apos;s worksheet turns that into a story.</p>
           </div>
           <ul className="w3-chips" style={{ marginTop: 18 }}>
             <li className="w3-chip-night">Text</li>
