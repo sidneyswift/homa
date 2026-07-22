@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1661,
+  "topicCount": 1721,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -32498,6 +32498,1086 @@
       "Name Alexander Graham Bell as someone who worked in deaf education before he is known for the telephone"
     ],
     "assessmentPrompt": "Can {{name}} explain what visible speech was and why Alexander Graham Bell created it to help deaf students learn to speak?",
+    "standards": []
+  },
+  {
+    "id": "mt_zdQ6bzwi7w",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Position words for everyday things",
+    "description": "Uses position words like in, on, under, next to, and in back of to say where things and people are.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Puts a toy in, on, under, or in back of something when asked, without the parent pointing",
+      "Uses position words on their own during play or while helping, like 'my shoe is under the bed'",
+      "Answers 'where is it?' questions with a position word instead of only pointing"
+    ],
+    "assessmentPrompt": "During play, if you ask {{name}} to put the bear under the chair or next to the lamp, do they get the spot right without you pointing?",
+    "standards": []
+  },
+  {
+    "id": "mt_VDtbDlFFpt",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Knowing the places in their day",
+    "description": "Names the familiar places in their life, like home, the park, the store, and the library, and knows what happens at each one.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Recognizes and names a familiar place on arrival, like 'we're at the library!'",
+      "Tells what people do at a familiar place, like buying food at the grocery store",
+      "Picks out a familiar place in a photo, like their own house or grandma's porch"
+    ],
+    "assessmentPrompt": "When you pull into the grocery store parking lot, can {{name}} tell you where you are and what you will do there?",
+    "standards": []
+  },
+  {
+    "id": "mt_ymkaLpmsfI",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Pictures stand for real places",
+    "description": "Understands that a photo, drawing, or toy layout can stand for a real place, which is the idea every map is built on.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to their own room or house in a photo or simple drawing",
+      "Sets up blocks or a dollhouse as 'our street' or 'the store' and keeps the pretend layout consistent",
+      "Uses a quick sketch of a room with an X on it to find something hidden at that spot"
+    ],
+    "assessmentPrompt": "If you drew a quick picture of their bedroom and marked an X where you hid a sticker, could {{name}} use the picture to find it?",
+    "standards": []
+  },
+  {
+    "id": "mt_s7spKtOztv",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Drawing a first map of a familiar place",
+    "description": "Draws or builds a simple map of a place they know well, like their bedroom or backyard, with the big things in roughly the right spots.",
+    "ageRangeStart": 4,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Draws a bird's-eye style picture of a room or yard with two or three real features placed roughly right",
+      "Explains what each part of their drawing stands for, like 'this is the door, this is my bed'",
+      "Builds the layout of a familiar place with blocks or toys and can walk you through it"
+    ],
+    "assessmentPrompt": "If {{name}} drew a map of your kitchen or backyard, would the big things end up in roughly the right spots?",
+    "standards": []
+  },
+  {
+    "id": "mt_pUjHvXqboD",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "What maps and globes are",
+    "description": "Knows a map is a flat drawing of a place that shows where things are, and a globe is a round model of the whole Earth.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Says in their own words what a map is for and what a globe is",
+      "Picks the globe when asked which one shows the real shape of the Earth",
+      "Knows that a map of a real park shows real paths and real playgrounds, not pretend ones"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you what a globe is and how it is different from a map?",
+    "standards": []
+  },
+  {
+    "id": "mt_mo3BwwKKhY",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Reading map symbols and colors",
+    "description": "Knows that map colors and little symbols stand for real things, like blue for water, and can use a simple picture key to find places.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to the water on an unfamiliar map because it is blue",
+      "Uses the picture key on a park or zoo map to find something, like the playground or restrooms",
+      "Explains what a map symbol stands for, like a tent meaning a campground"
+    ],
+    "assessmentPrompt": "On a zoo or park map, can {{name}} use the little pictures in the key to find the restrooms or the playground?",
+    "standards": []
+  },
+  {
+    "id": "mt_FD0dkcG2QI",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Landform and water words",
+    "description": "Names common landforms and bodies of water, like mountain, hill, river, lake, island, and coast, in pictures and in real life.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Names landforms in photos or out the car window, like a mountain, a river, or an island",
+      "Explains a difference between two of them, like how a lake is different from a river",
+      "Spots a mountain range or a big river on a picture map or in an atlas"
+    ],
+    "assessmentPrompt": "Looking at photos of a mountain, a river, and an island, can {{name}} name each one and say how a lake is different from a river?",
+    "standards": []
+  },
+  {
+    "id": "mt_DREIrKwr1w",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "North, south, east, and west on a map",
+    "description": "Knows the four main directions and uses the compass rose on a map to say which way one place is from another.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to the compass rose on a map and names all four directions",
+      "Says which direction one labeled place is from another, like 'the lake is north of the school'",
+      "Follows a spoken direction like 'move two squares east' in a grid game"
+    ],
+    "assessmentPrompt": "Looking at a simple map together, could {{name}} use the compass rose to tell you which direction the park is from the school?",
+    "standards": []
+  },
+  {
+    "id": "mt_NDkJ8wq83H",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Finding their state and the United States on a map",
+    "description": "Finds the United States on a world map or globe and their own state on a United States map, and starts to recognize the state's shape.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Puts a finger on the United States on a world map or globe",
+      "Finds their own state on a labeled United States map",
+      "Recognizes their state's outline, like in a puzzle or on a sticker"
+    ],
+    "assessmentPrompt": "On a United States map, can {{name}} put a finger on your state, and then find the whole country on a globe?",
+    "standards": []
+  },
+  {
+    "id": "mt_l8dcaB8ZTE",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "First look at continents and oceans",
+    "description": "Knows the Earth's land comes in a few very big pieces called continents and its water in very big oceans, and can find their own continent on a globe.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains that a continent is a very big piece of land with many countries on it",
+      "Finds their own continent on a globe or world map",
+      "Names an ocean and points to it, like the ocean closest to where the family lives"
+    ],
+    "assessmentPrompt": "Spinning a globe together, can {{name}} find the continent you live on and point to an ocean near it?",
+    "standards": []
+  },
+  {
+    "id": "mt_au5UXau1fa",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Giving directions to a familiar place",
+    "description": "Describes how to get from one familiar place to another in order, using turns and landmarks, like a little navigator.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Gives the steps from home to a familiar place in order, like 'go past the church, then turn at the gas station'",
+      "Uses left, right, and landmarks while giving directions",
+      "Plays navigator on a walk or drive and calls a turn before you reach it"
+    ],
+    "assessmentPrompt": "On the way to a friend's house or the park, can {{name}} play navigator and tell you each turn before you get to it?",
+    "standards": []
+  },
+  {
+    "id": "mt_kbtAEEy0ml",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Making a map with a title, key, and compass rose",
+    "description": "Draws a map of a real or imagined place that includes a title, a key with symbols, and a compass rose that another person could actually use.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Their map has a title, a key with at least three symbols, and a compass rose",
+      "Another family member can use the map to find something, like a hidden treat",
+      "Explains why they chose their symbols and where north is on their map"
+    ],
+    "assessmentPrompt": "If {{name}} made a treasure map of your yard, would it have a key and a compass rose that someone else could really follow?",
+    "standards": []
+  },
+  {
+    "id": "mt_tmlIQ6rSZR",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Drawing their neighborhood from memory",
+    "description": "Holds a mental map of their own neighborhood and can draw or describe it from memory with real landmarks in roughly the right relationship.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Draws their street from memory with four or more real landmarks placed sensibly",
+      "Describes what you would pass walking from home to a familiar spot, in the right order",
+      "Adds new places to their mental map after a visit, like a new neighbor's house"
+    ],
+    "assessmentPrompt": "Without looking outside, could {{name}} draw your street and put the mailbox, the neighbors' houses, and the corner in roughly the right spots?",
+    "standards": []
+  },
+  {
+    "id": "mt_mJ0aVkSWhS",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Using a real map on an outing",
+    "description": "Uses a real trail, zoo, or road map during an outing: finds where the family is, tracks progress, and predicts what comes next.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Finds the 'you are here' spot or the family's current location on the map",
+      "Turns or orients the map so it lines up with what is around them",
+      "Leads the family to a spot they picked, checking the map along the way"
+    ],
+    "assessmentPrompt": "At the zoo or on a hiking trail, can {{name}} hold the map and lead the family to the spot they picked?",
+    "standards": []
+  },
+  {
+    "id": "mt_lI7wf8ih8n",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Finding places with a letter and number grid",
+    "description": "Uses the letters and numbers along a map's edges, like B-4, to find a place from an index or to tell someone where a place is.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Finds the right square when given a reference like C-3 from a map index",
+      "Gives the grid reference for a place they found on the map",
+      "Wins at grid games like battleship-style guessing using letter and number pairs"
+    ],
+    "assessmentPrompt": "In a road atlas or on a park map, if the index says the lake is in C-3, can {{name}} find it?",
+    "standards": []
+  },
+  {
+    "id": "mt_jDfgNLxr2v",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "In-between directions like northeast",
+    "description": "Uses the four in-between directions, northeast, southeast, southwest, and northwest, to describe where places are on a map.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Names all eight points on a compass rose",
+      "Makes statements like 'that state is northeast of ours' from a United States map",
+      "Writes or follows treasure-hunt clues that use in-between directions"
+    ],
+    "assessmentPrompt": "Looking at a United States map, can {{name}} tell you which state is northeast of yours?",
+    "standards": []
+  },
+  {
+    "id": "mt_EWlymIvKkT",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Using a map scale to judge distance",
+    "description": "Knows the scale bar shows how much a map shrinks the real world, and uses it to estimate the real distance between two places.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Says which of two maps shows a bigger piece of the world, like a town map versus a country map",
+      "Uses the scale bar with a ruler or string to estimate the miles between two towns",
+      "Explains why their whole town can be a tiny dot on a world map"
+    ],
+    "assessmentPrompt": "Using the scale bar on a state map, could {{name}} estimate about how many miles it is from your town to a nearby city?",
+    "standards": []
+  },
+  {
+    "id": "mt_8KVp5LWsdz",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Finding the 50 states on a map",
+    "description": "Builds a growing collection of states they can name and find on a United States map, and knows states group into regions like the coasts and the middle.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to ten or more states by name on a United States map or places them in a states puzzle",
+      "Names the states that touch their own state",
+      "Says roughly where a named state sits, like on the west coast or in the middle of the country"
+    ],
+    "assessmentPrompt": "In a 50 states puzzle or map game, about how many states can {{name}} place or point to by name?",
+    "standards": []
+  },
+  {
+    "id": "mt_9YPFucOerr",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Equator, poles, and hemispheres",
+    "description": "Finds the equator and the North and South Poles on a globe, and uses the equator and prime meridian to name the four hemispheres.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Runs a finger along the equator and points to both poles on a globe",
+      "Says which hemisphere the family lives in and why",
+      "Explains that the equator and prime meridian split the Earth into halves"
+    ],
+    "assessmentPrompt": "On a globe, can {{name}} trace the equator and tell you which hemisphere your family lives in?",
+    "standards": []
+  },
+  {
+    "id": "mt_QJ9js12Uv8",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Physical maps and political maps",
+    "description": "Knows that different maps answer different questions: physical maps show land and water shapes, political maps show borders, states, and cities.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Picks the right map to answer a question, like a physical map for 'where are the mountains' and a political map for 'which states touch ours'",
+      "Explains what the colors mean on each kind of map",
+      "Finds the same place on both kinds of map"
+    ],
+    "assessmentPrompt": "With a physical map and a political map of the United States side by side, can {{name}} tell you what each one is best for?",
+    "standards": []
+  },
+  {
+    "id": "mt_sJxWSurj1t",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Geography & Maps",
+    "name": "Latitude and longitude basics",
+    "description": "Understands that latitude and longitude lines make a grid over the whole Earth, and uses whole-degree coordinates to get close to a place on a map or globe.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains that latitude tells how far north or south of the equator a place is, and longitude how far east or west of the prime meridian",
+      "Uses rough whole-degree coordinates to land near a named city on a labeled map or globe",
+      "Gives the approximate latitude of their home, like 'we are around 40 north'"
+    ],
+    "assessmentPrompt": "On a globe with grid lines, can {{name}} use latitude and longitude numbers to get close to a city you name?",
+    "standards": []
+  },
+  {
+    "id": "mt_cFjXzXsCRs",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Following rules at home",
+    "description": "Knows a few everyday family rules and follows them with a simple reminder, like washing hands before dinner or holding hands in the parking lot.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Says a family rule in their own words when you ask, like 'we put toys away before bed'",
+      "Follows a familiar routine rule with one reminder or less",
+      "Accepts a simple rule for a new game or place when you explain it"
+    ],
+    "assessmentPrompt": "When you remind {{name}} of a familiar family rule, like putting shoes by the door, do they usually follow it?",
+    "standards": []
+  },
+  {
+    "id": "mt_tMheCJ1FJs",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Why rules exist",
+    "description": "Can say what a rule is for: keeping people safe, keeping things fair, or helping everyone get along.",
+    "ageRangeStart": 4,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains why a rule exists when you ask, like 'we hold hands so cars can see us'",
+      "Tells you what could happen if nobody followed a rule, like everyone talking at once",
+      "Suggests a sensible rule for a new situation, like a rule for sharing a new toy"
+    ],
+    "assessmentPrompt": "If you asked {{name}} why your family has a rule like holding hands in the parking lot, could they tell you what the rule is for?",
+    "standards": []
+  },
+  {
+    "id": "mt_7GZlFti3l6",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Fair ways to decide",
+    "description": "Uses simple fair methods, like taking turns, drawing straws, or rock paper scissors, and accepts the result even when it does not go their way.",
+    "ageRangeStart": 4,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Suggests a fair method when two people want the same thing, like flipping a coin",
+      "Accepts the outcome of a fair method calmly most of the time",
+      "Waits for their turn in a game with a clear turn order"
+    ],
+    "assessmentPrompt": "When {{name}} and a friend both want the same thing, can they use a fair method like taking turns and stick with the result?",
+    "standards": []
+  },
+  {
+    "id": "mt_YdMhWNFFg5",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Who is in charge and why",
+    "description": "Knows who is in charge in different places, like a parent at home, a coach at practice, or a librarian at the library, and what that person is responsible for.",
+    "ageRangeStart": 4,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Names who is in charge in a familiar place, like the library or swim lesson",
+      "Says one thing that person is responsible for, like keeping swimmers safe",
+      "Goes to the right adult for help in different settings"
+    ],
+    "assessmentPrompt": "If you asked {{name}} who is in charge at the library or the pool and what that person's job is, could they answer?",
+    "standards": []
+  },
+  {
+    "id": "mt_6wG4q6R4kn",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Voting to decide together",
+    "description": "Takes part in a family or group vote, understands that each person gets one vote and the most votes win, and goes along with the result.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Casts a vote when the family decides something together, like which movie to watch",
+      "Explains that the choice with the most votes wins",
+      "Accepts the group's choice even when they voted for something else"
+    ],
+    "assessmentPrompt": "If your family voted on Friday's dinner, could {{name}} explain why the winning choice won and go along with it?",
+    "standards": []
+  },
+  {
+    "id": "mt_fVB36VaHXr",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Being a good neighbor",
+    "description": "Pitches in to help family, neighbors, and their community, and can say why helping others matters.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Does small helpful jobs without being paid, like carrying in groceries or feeding a neighbor's cat",
+      "Notices when someone nearby needs help and offers",
+      "Says why helping matters in their own words, like 'it makes our street nicer'"
+    ],
+    "assessmentPrompt": "Has {{name}} recently helped a neighbor or family member on their own, like carrying something heavy or checking on a pet?",
+    "standards": []
+  },
+  {
+    "id": "mt_66AJUvXDbb",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Rules at home, laws in town",
+    "description": "Explains that laws are rules for a whole town or country that everyone must follow, and gives examples like stopping at red lights or wearing a seatbelt.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Names a law that is different from a family rule, like stopping at stop signs",
+      "Explains that laws apply to everyone, even grown-ups",
+      "Says what a law is for, like seatbelts keeping people safe in a crash"
+    ],
+    "assessmentPrompt": "Could {{name}} tell you the difference between a family rule, like bedtime, and a law, like wearing a seatbelt?",
+    "standards": []
+  },
+  {
+    "id": "mt_SlG5sHdOgd",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Solving problems together",
+    "description": "Joins a group effort to solve a shared problem, like planning family chores or a neighborhood cleanup, and can tell how working together got it done.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Takes a real role in a group effort, like planning, gathering supplies, or doing a job",
+      "Explains how the group divided up the work",
+      "Says why the job was easier together than alone"
+    ],
+    "assessmentPrompt": "Has {{name}} joined a group effort like a family project or a cleanup and been able to tell you how the group pulled it off?",
+    "standards": []
+  },
+  {
+    "id": "mt_mRc88GtMPn",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "What a government does",
+    "description": "Explains that a government is the group of people who make and carry out laws for a community, and names things it provides, like police, fire protection, roads, parks, and libraries.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Says in their own words what a government is",
+      "Names two or three things the local government provides, like the park or the fire station",
+      "Connects a service to why the community needs it, like firefighters keeping houses safe"
+    ],
+    "assessmentPrompt": "If you asked {{name}} what a government is and what it does for your town, could they name a couple of real examples?",
+    "standards": []
+  },
+  {
+    "id": "mt_lBmfRhQMgm",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Mayor, governor, president",
+    "description": "Knows that a mayor leads a city, a governor leads a state, and the president leads the country, and can match each leader to the right level.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Matches mayor, governor, and president to city, state, and country",
+      "Names the current president, and the governor or mayor with a little help",
+      "Says one thing one of these leaders does, like the mayor helping run the city"
+    ],
+    "assessmentPrompt": "Could {{name}} tell you which leader goes with your city, which goes with your state, and which goes with the country?",
+    "standards": []
+  },
+  {
+    "id": "mt_HAl2M1j0i4",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Rights and responsibilities",
+    "description": "Tells the difference between rights, things every person is free to do, and responsibilities, things a person should do for others, and gives an example of each.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Gives an example of a right, like saying what you think or practicing your religion",
+      "Gives an example of a responsibility, like following laws or telling the truth",
+      "Explains that rights come with responsibilities, like listening while others speak"
+    ],
+    "assessmentPrompt": "If you asked {{name}} for one right people have and one responsibility that goes with it, could they give you real examples?",
+    "standards": []
+  },
+  {
+    "id": "mt_8LKYVHrxEF",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Elections choose our leaders",
+    "description": "Explains that citizens choose leaders like the mayor and president by voting in elections, and that leaders change when they lose an election.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains that grown-ups vote to pick leaders like the president",
+      "Says that the person with the most votes becomes the leader",
+      "Knows leaders serve for a set time and then there is another election"
+    ],
+    "assessmentPrompt": "If you asked {{name}} how a person becomes president or mayor, would they say that people vote for them?",
+    "standards": []
+  },
+  {
+    "id": "mt_fW5G0ZX2Th",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Town, state, and country governments",
+    "description": "Explains that their town sits inside a state, the state sits inside the country, and each layer has its own government doing different jobs.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Says that the town, the state, and the country each have their own government",
+      "Gives an example of something each layer handles, like the town fixing local roads",
+      "Explains that a state holds many towns and the country holds many states"
+    ],
+    "assessmentPrompt": "Could {{name}} explain that your town, your state, and the country each have their own government with different jobs?",
+    "standards": []
+  },
+  {
+    "id": "mt_0lRFDwUDPH",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Groups of people make our laws",
+    "description": "Explains that laws are made by groups of elected people, like a city council or Congress, who discuss and vote, not by one person deciding alone.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Says that groups like a city council or Congress make laws by voting",
+      "Explains why a group deciding is fairer than one person deciding alone",
+      "Names a step in making a law, like an idea being discussed and then voted on"
+    ],
+    "assessmentPrompt": "If you asked {{name}} who makes the laws, would they describe a group of elected people voting rather than one boss deciding?",
+    "standards": []
+  },
+  {
+    "id": "mt_djMSIwY9I9",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "What good citizens do",
+    "description": "Describes and practices the habits of a good citizen: telling the truth, following laws, helping the community, and learning about issues before forming an opinion.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Names habits of a good citizen, like honesty, fairness, and helping out",
+      "Points to a real person, past or present, who showed good citizenship and says why",
+      "Practices one of the habits, like joining a community cleanup or a food drive"
+    ],
+    "assessmentPrompt": "Could {{name}} describe what makes someone a good citizen and point to one example from real life or history?",
+    "standards": []
+  },
+  {
+    "id": "mt_6EP5dW4s36",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Talking through rule disagreements",
+    "description": "During a disagreement about a rule, like screen time or game rules, states the other side's reasons fairly and looks for a solution both sides can accept.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Restates the other person's reasons fairly before arguing their own side",
+      "Offers a compromise both sides could live with",
+      "Stays respectful during the disagreement, even when they feel strongly"
+    ],
+    "assessmentPrompt": "When {{name}} disagrees with a rule, can they explain your reasons fairly and suggest a compromise instead of only arguing their side?",
+    "standards": []
+  },
+  {
+    "id": "mt_PZUjJqkoqA",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "The three branches of government",
+    "description": "Names the three branches of government and matches each to its basic job: making laws, carrying out laws, and judging whether laws were followed.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Names the three branches, in their own words or with the formal names",
+      "Matches each branch to its job: makes laws, carries them out, judges cases",
+      "Gives an example of one branch at work, like Congress voting on a law"
+    ],
+    "assessmentPrompt": "Could {{name}} name the three parts of our government and say what job each one does?",
+    "standards": []
+  },
+  {
+    "id": "mt_uOOChmotcy",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Civics & Government",
+    "name": "Changing unfair rules",
+    "description": "Explains that when a rule or law seems unfair there are fair ways to change it, like asking the rule maker, gathering signatures, or voting, and gives a real example.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Proposes a fair way to change a rule they disagree with instead of just breaking it",
+      "Tells the story of a real law that people worked to change, like unfair segregation laws",
+      "Explains the difference between breaking a rule and working to change it"
+    ],
+    "assessmentPrompt": "If {{name}} thought a rule was unfair, would they suggest a fair way to change it, and could they name a time in history when people changed an unfair law?",
+    "standards": []
+  },
+  {
+    "id": "mt_4Y2bNfGwL2",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Money buys things",
+    "description": "Knows that things at a store cost money, and that people pay before taking something home.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 5,
+    "centrality": 0.01,
+    "evidence": [
+      "Hands over money or pretend money to pay during play shopping",
+      "Says something needs to be paid for at the store before it goes home",
+      "Knows the difference between taking something and buying it"
+    ],
+    "assessmentPrompt": "When you play store or shop together, does {{name}} know that we pay money for things before taking them home?",
+    "standards": []
+  },
+  {
+    "id": "mt_XCbBT9eUQT",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Sorting wants from needs",
+    "description": "Tells the difference between things a family needs, like food and a warm coat, and things that are fun to want, like toys and treats.",
+    "ageRangeStart": 4,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Sorts picture cards or grocery items into needs and wants",
+      "Names food, clothes, and a home as things every family needs",
+      "Accepts that a toy is a want, even a really exciting one"
+    ],
+    "assessmentPrompt": "If you named a few items, could {{name}} tell you which ones a family needs and which ones are wants?",
+    "standards": []
+  },
+  {
+    "id": "mt_AXQYZSbVeV",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Choosing when you can't have both",
+    "description": "When two things are wanted but only one is possible, picks one and can say why in simple words.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Picks one option when offered a choice of two treats or activities and sticks with it",
+      "Gives a simple reason for the pick",
+      "Understands that money spent on one thing cannot also buy the other thing"
+    ],
+    "assessmentPrompt": "When {{name}} can only pick one of two things they want, can they choose and tell you why?",
+    "standards": []
+  },
+  {
+    "id": "mt_3gpTNGtype",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Naming the coins",
+    "description": "Recognizes a penny, nickel, dime, and quarter by sight and calls each by its name.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to the right coin when asked for a penny, nickel, dime, or quarter",
+      "Names a coin you hold up, most of the time",
+      "Notices features like color and size that tell coins apart"
+    ],
+    "assessmentPrompt": "If you laid out a penny, nickel, dime, and quarter, could {{name}} name each one?",
+    "standards": []
+  },
+  {
+    "id": "mt_VvH7nyzkQQ",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "How people earn money",
+    "description": "Understands that people earn money by working, and can name some jobs and what people do in them.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 7,
+    "centrality": 0.01,
+    "evidence": [
+      "Says that money comes from working, not just from the bank machine",
+      "Names a few jobs and what each person does to earn money",
+      "Connects a family member's work with money for the family"
+    ],
+    "assessmentPrompt": "Can {{name}} tell you how people get money, and name a couple of jobs people do to earn it?",
+    "standards": []
+  },
+  {
+    "id": "mt_NjoDli4Zbo",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "What each coin is worth",
+    "description": "Knows the value of each coin in cents, and that value comes from the coin, not its size: a dime is worth more than a nickel.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Says a penny is 1 cent, a nickel 5, a dime 10, and a quarter 25",
+      "Picks the dime over the nickel when asked which is worth more",
+      "Trades coins fairly in play, like five pennies for a nickel"
+    ],
+    "assessmentPrompt": "Does {{name}} know how many cents each coin is worth, including that the small dime beats the bigger nickel?",
+    "standards": []
+  },
+  {
+    "id": "mt_YT19JCiDP0",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Goods and services",
+    "description": "Tells the difference between goods, things you can buy and hold, and services, work someone does for you, like a haircut or a car repair.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Sorts examples into goods and services, like apples versus a dentist visit",
+      "Names a service your family pays for",
+      "Explains that both goods and services cost money"
+    ],
+    "assessmentPrompt": "Could {{name}} explain the difference between buying a thing, like shoes, and paying for help, like a haircut?",
+    "standards": []
+  },
+  {
+    "id": "mt_Vm1vS6eL7U",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Counting coins that match",
+    "description": "Counts a handful of the same coin, pennies, nickels, or dimes, by ones, fives, or tens to find the total.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Skip counts a stack of nickels by fives to reach the total",
+      "Counts dimes by tens up to a dollar",
+      "Says the total in cents, like 'that is 45 cents'"
+    ],
+    "assessmentPrompt": "If you gave {{name}} a small pile of nickels, could they count by fives and tell you the total?",
+    "standards": []
+  },
+  {
+    "id": "mt_Vsg4SrEX3e",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Choosing to spend or save",
+    "description": "Knows the difference between spending money now and saving it for later, and can make that choice with their own money.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains spending as using money now and saving as keeping it for later",
+      "Sometimes chooses to put money aside instead of spending it right away",
+      "Gives a reason people save, like a bigger goal later"
+    ],
+    "assessmentPrompt": "When {{name}} gets a little money, do they understand they can spend it now or save it, and sometimes choose to save?",
+    "standards": []
+  },
+  {
+    "id": "mt_tUZ9qVwpc1",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Reading and comparing prices",
+    "description": "Finds the price of an item on a tag or shelf label and says which of two items costs more.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Points to the price on a tag or shelf label",
+      "Compares two prices and says which item costs more",
+      "Reads a dollars-and-cents price like $3.49 out loud correctly"
+    ],
+    "assessmentPrompt": "At the store, could {{name}} find the price of an item and tell you which of two things costs more?",
+    "standards": []
+  },
+  {
+    "id": "mt_iyz7Owv1Fd",
+    "type": "PROCEDURAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Counting mixed coins",
+    "description": "Finds the total of a mixed handful of pennies, nickels, dimes, and quarters, up to a dollar or two.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Sorts mixed coins, starts with the biggest values, and counts up to the total",
+      "Gets the same total twice on a recount",
+      "Puts together a requested amount, like 67 cents, from a coin jar"
+    ],
+    "assessmentPrompt": "Could {{name}} count out a mixed handful of coins and tell you the total?",
+    "standards": []
+  },
+  {
+    "id": "mt_SYDdoGtNKI",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Barter, trading, and why money helps",
+    "description": "Understands trading things directly, called barter, and can explain why money makes trading easier.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Describes a trade where no money changes hands, like swapping snacks",
+      "Explains a problem with barter, like when the other person does not want what you have",
+      "Says how money fixes that, because everyone accepts it"
+    ],
+    "assessmentPrompt": "Could {{name}} explain why paying with money is easier than swapping things?",
+    "standards": []
+  },
+  {
+    "id": "mt_Ee6QfjPjxO",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Producers and consumers",
+    "description": "Knows that producers make or grow things and consumers buy and use them, and that one person can be both.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Labels who is producing and who is consuming in everyday scenes",
+      "Names something your family produces and something it consumes",
+      "Explains how one person can be both, like a baker who buys flour"
+    ],
+    "assessmentPrompt": "Could {{name}} tell you who the producer is and who the consumer is when you buy bread from a baker?",
+    "standards": []
+  },
+  {
+    "id": "mt_vG9mp3COMp",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Saving up for a small goal",
+    "description": "Picks something small to save for, keeps money aside for days or weeks, and watches the total grow until they can buy it.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Names the thing they are saving for and about how much it costs",
+      "Adds money to a jar or envelope over several days without spending it early",
+      "Counts progress and says how much more is needed"
+    ],
+    "assessmentPrompt": "Has {{name}} saved money across days or weeks for something they wanted, and followed the total as it grew?",
+    "standards": []
+  },
+  {
+    "id": "mt_j3wZzCW5Ko",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Making change",
+    "description": "Figures out the change owed from a simple purchase, like paying a dollar for something that costs 65 cents.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Counts up from the price to the amount paid to find the change",
+      "Says what change is owed from a dollar for a small item",
+      "Checks change received at a store or in play and notices when it is off"
+    ],
+    "assessmentPrompt": "If {{name}} paid a dollar for something that cost 65 cents, could they figure out the change?",
+    "standards": []
+  },
+  {
+    "id": "mt_Fp8EzqEeX6",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "What banks do",
+    "description": "Explains that a bank keeps money safe, that a deposit puts money in and a withdrawal takes it out, and why people use banks.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Says what a bank does in their own words",
+      "Uses deposit and withdrawal correctly, or explains both ideas in plain words",
+      "Gives a reason money is safer in a bank than in a drawer at home"
+    ],
+    "assessmentPrompt": "Could {{name}} explain what a bank is for, and what putting money in and taking it out are called?",
+    "standards": []
+  },
+  {
+    "id": "mt_d8fRdLDnkI",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Trade-offs and what you give up",
+    "description": "Understands that every choice gives something up, and can name what they gave up when they chose, the beginning of opportunity cost.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Names what they gave up after making a choice, like the movie skipped for the pool trip",
+      "Weighs two options out loud before deciding",
+      "Uses the idea with money: buying this now means not buying that later"
+    ],
+    "assessmentPrompt": "After {{name}} makes a choice, can they tell you what they gave up by choosing it?",
+    "standards": []
+  },
+  {
+    "id": "mt_HdGbXYUDYA",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Specializing and trading",
+    "description": "Explains that people and places do the work they are best at and trade for the rest, and why that helps everyone.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Gives an example of specializing, like a farmer growing food and a builder building houses",
+      "Explains why the farmer and the builder trade instead of each doing everything",
+      "Names something your family buys because making it yourselves would be hard"
+    ],
+    "assessmentPrompt": "Could {{name}} explain why a farmer sells food and buys shoes instead of making everything alone?",
+    "standards": []
+  },
+  {
+    "id": "mt_Qk0GwFMslu",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Comparison shopping",
+    "description": "Compares two or more options by price and what you get before buying, and notices when an ad is trying to influence the choice.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Compares prices of the same item in two places or package sizes before choosing",
+      "Talks about size or quality, not just price, when comparing",
+      "Points out that an ad is trying to get people to buy"
+    ],
+    "assessmentPrompt": "Before a purchase, does {{name}} compare options, looking at both price and what you actually get?",
+    "standards": []
+  },
+  {
+    "id": "mt_q3tt86QEtw",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Budgeting an allowance",
+    "description": "Splits their money into spending, saving, and sharing, and keeps the plan going for a few weeks.",
+    "ageRangeStart": 9,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Divides allowance or gift money into two or three purposes on a plan of their own",
+      "Tells you how much is in each part when asked",
+      "Keeps the plan going for several weeks and adjusts it when something changes"
+    ],
+    "assessmentPrompt": "Does {{name}} split their money into saving, spending, and maybe sharing, and mostly keep track of it?",
+    "standards": []
+  },
+  {
+    "id": "mt_0MjgnAoI3v",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Economics & Money",
+    "name": "Borrowing and paying back",
+    "description": "Understands that borrowed money or things must be paid back, and that borrowing sometimes costs extra, called interest.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 11,
+    "centrality": 0.01,
+    "evidence": [
+      "Remembers and repays a small loan from a family member",
+      "Explains that borrowing means the money still has to be paid back later",
+      "Says in simple words what interest is: a little extra for borrowing"
+    ],
+    "assessmentPrompt": "If {{name}} borrowed a few dollars from you, would they understand it needs to be paid back, maybe with a little extra?",
     "standards": []
   }
 ]
