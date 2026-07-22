@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { readEnvValue, replaceEnvValue } from "./refresh-oidc-token.mjs";
+import {
+  definesEnvKey,
+  readEnvValue,
+  removeEnvKey,
+  replaceEnvValue,
+} from "./refresh-oidc-token.mjs";
 
 const KEY = "VERCEL_OIDC_TOKEN";
 
@@ -72,5 +77,52 @@ describe("replaceEnvValue", () => {
       replaceEnvValue(before, KEY, "new"),
       `# a note\n\n${KEY}=new\n\n# trailing note\n`,
     );
+  });
+});
+
+describe("definesEnvKey / removeEnvKey", () => {
+  // 2026-07-22: .env.development.local picked up a stray VERCEL_OIDC_TOKEN
+  // from an earlier `vercel env pull` mistake, and Next's real precedence
+  // is that file OVER .env.local. Every later `pnpm dev:token` refresh was
+  // silently shadowed by it: a two-child onboarding walk refused to start
+  // hours later on a token that had expired at the exact minute it was
+  // last refreshed. These two functions are what let the refresh script
+  // find and remove that shadow copy instead of leaving a trap for the
+  // next person who runs it.
+
+  it("detects the key regardless of quoting", () => {
+    assert.equal(definesEnvKey(`${KEY}=abc\n`, KEY), true);
+    assert.equal(definesEnvKey(`${KEY}="abc"\n`, KEY), true);
+    assert.equal(definesEnvKey("A=1\n", KEY), false);
+  });
+
+  it("does not fire on a key that merely ends with the name", () => {
+    assert.equal(definesEnvKey(`MY_${KEY}=abc\n`, KEY), false);
+  });
+
+  it("strips every assignment of the key and leaves everything else", () => {
+    const before = [
+      "# Chat-first onboarding, local only",
+      `${KEY}="stale"`,
+      "HOMA_CHAT_ONBOARDING=1",
+      "HOMA_DEV_TEST_SESSIONS=1",
+      "",
+    ].join("\n");
+    const after = removeEnvKey(before, KEY);
+    assert.equal(
+      after,
+      [
+        "# Chat-first onboarding, local only",
+        "HOMA_CHAT_ONBOARDING=1",
+        "HOMA_DEV_TEST_SESSIONS=1",
+        "",
+      ].join("\n"),
+    );
+    assert.equal(definesEnvKey(after, KEY), false);
+  });
+
+  it("is a no-op on a file that never had the key", () => {
+    const before = "HOMA_CHAT_ONBOARDING=1\n";
+    assert.equal(removeEnvKey(before, KEY), before);
   });
 });

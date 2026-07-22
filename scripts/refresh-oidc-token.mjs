@@ -26,6 +26,18 @@ const KEY = "VERCEL_OIDC_TOKEN";
 const WEB_DIR = join("apps", "web");
 const TARGET = join(WEB_DIR, ".env.local");
 /**
+ * Next's real precedence is .env.development.local OVER .env.local, so
+ * a stray copy of this key there outranks whatever this script just
+ * wrote and the server keeps reading an old token forever. Happened on
+ * 2026-07-22: this file was appended with the branch's dev flags without
+ * removing the VERCEL_OIDC_TOKEN a wrong `vercel env pull` had left in
+ * it earlier, so every refresh from here on was silently shadowed. This
+ * script now removes the key from there rather than merely warning,
+ * because a warning is exactly the kind of line a founder mid-walk has
+ * no reason to read.
+ */
+const SHADOW_FILE = join(WEB_DIR, ".env.development.local");
+/**
  * The pull runs inside apps/web, and writes beside the file it is
  * feeding, because the CLI resolves the project from its own cwd and
  * refuses a path outside it. In a git worktree the repo root is NOT
@@ -68,6 +80,19 @@ export function replaceEnvValue(contents, key, value) {
   return next.join("\n");
 }
 
+/** True if the file assigns this key anywhere, regardless of value. */
+export function definesEnvKey(contents, key) {
+  return new RegExp(`^\\s*${key}\\s*=`, "mu").test(contents);
+}
+
+/** The file with every line assigning this key removed outright. */
+export function removeEnvKey(contents, key) {
+  return contents
+    .split("\n")
+    .filter((line) => !new RegExp(`^\\s*${key}\\s*=`, "u").test(line))
+    .join("\n");
+}
+
 function main() {
   if (!existsSync(TARGET)) {
     console.error(`\n  ${TARGET} does not exist. Nothing to refresh.\n`);
@@ -97,7 +122,19 @@ function main() {
 
     const before = readFileSync(TARGET, "utf8");
     writeFileSync(TARGET, replaceEnvValue(before, KEY, token));
-    console.log(`\n  ${KEY} refreshed in ${TARGET}. Nothing else was touched.\n`);
+
+    let shadowNote = "";
+    if (existsSync(SHADOW_FILE)) {
+      const shadowBefore = readFileSync(SHADOW_FILE, "utf8");
+      if (definesEnvKey(shadowBefore, KEY)) {
+        writeFileSync(SHADOW_FILE, removeEnvKey(shadowBefore, KEY));
+        shadowNote = `\n  Also removed a stray ${KEY} from ${SHADOW_FILE}: that\n  file outranks .env.local, so leaving it would have shadowed this\n  refresh right back to the token it just replaced.\n`;
+      }
+    }
+
+    console.log(
+      `\n  ${KEY} refreshed in ${TARGET}. Nothing else was touched.\n${shadowNote}`,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n  Could not refresh the token: ${message}\n`);
