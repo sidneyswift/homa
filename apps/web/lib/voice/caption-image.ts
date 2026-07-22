@@ -33,7 +33,9 @@ with ONE plain factual sentence naming what the photo shows: the main
 objects, any readable text, and the child's work when that is what it
 is. Examples: "An over-range microwave with a loose door handle." or
 "A handwriting practice page with the letter O traced in pencil." No
-preamble, no guesses about people's names, no commentary.`;
+preamble, no guesses about people's names, no commentary. Never guess
+whether a person is a boy or a girl, a man or a woman: write
+"they/them/their" or describe by role.`;
 
 export function captionsEnabled(): boolean {
   return process.env.HOMA_MEDIA_CAPTIONS !== "off";
