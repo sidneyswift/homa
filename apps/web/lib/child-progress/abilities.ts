@@ -58,6 +58,13 @@ export interface ReadyNextAbility {
   statement: string;
   subjectId: string;
   typicalMonths: number;
+  /**
+   * The confirmed abilities that opened this one: the receipts. A
+   * suggestion a parent cannot trace back to her own child's evidence
+   * is just an ad, so ready-next always shows its work.
+   */
+  becauseOf: string[];
+  becauseOfStatements: string[];
 }
 
 export interface SubjectAbilityMap {
@@ -84,6 +91,8 @@ export interface AbilityEvidenceInput {
 
 /** Ready-next stays a short, warm list, never a queue of obligations. */
 const READY_NEXT_LIMIT = 5;
+/** Two receipts is enough to feel earned; more reads as a proof. */
+const RECEIPT_LIMIT = 2;
 
 function stateForAnswer(answer: ProgressEvidenceAnswer): AbilityState {
   switch (answer) {
@@ -201,11 +210,23 @@ export function deriveAbilityMap(
     // new subject's first step belongs to check-ins and lessons, not a
     // wall of suggestions.
     if (!subject) continue;
+    // Receipts come from the graph's own satisfiedBy edges, limited to
+    // prerequisites this child actually confirmed and that resolve in
+    // the catalog, so every line is checkable.
+    const becauseOf = ready.satisfiedBy
+      .map((edge) => edge.prerequisiteId)
+      .filter((itemId) => confirmed.has(itemId))
+      .slice(0, RECEIPT_LIMIT);
     subject.readyNext.push({
       itemId: ready.topic.id,
       statement: found.item.statement,
       subjectId: found.subject.id,
       typicalMonths: found.item.typicalMonths,
+      becauseOf,
+      becauseOfStatements: becauseOf.flatMap((itemId) => {
+        const prerequisite = getScorableItem(itemId);
+        return prerequisite ? [prerequisite.item.statement] : [];
+      }),
     });
   }
   for (const subject of bySubject.values()) {
