@@ -11,6 +11,9 @@
  * writes `*(waits silently while the card is on her screen)*` and
  * considers the instruction satisfied. That is a stage direction, and a
  * parent reading it sees Homa describing herself in the third person.
+ * It does the same thing unwrapped ("I'll continue once she replies."),
+ * which is worse: there is no punctuation to tip her off that she is
+ * reading narration rather than being spoken to.
  *
  * Both are handled here rather than in a prompt, because a prompt is
  * probabilistic and this is the kind of thing a parent notices
@@ -49,6 +52,32 @@ export function isStageDirection(text: string): boolean {
 }
 
 /**
+ * The same narration without the asterisks.
+ *
+ * Seen live on the opening turn: "I'll continue once she replies."
+ * Nothing wrapped it, so the rule above let it through, and it reached a
+ * parent as Homa discussing her in the third person to nobody. Its
+ * sibling, "I'll wait here while you fill that in", is addressed to her
+ * but is still only a description of Homa doing nothing.
+ *
+ * Narrow by construction. It has to be the WHOLE part, one short
+ * sentence, and it has to open by announcing that Homa is about to wait
+ * or carry on. A real reply never consists solely of that: when Homa has
+ * something to say she says it, and when she does not she should be
+ * silent rather than announcing the silence.
+ */
+const NARRATED_PAUSE =
+  /^i(?:'|\u2019)?(?:ll|m| will| am)?\s*(?:going to\s+)?(?:wait|continue|carry on|hold (?:on|off)|pause|stand by|stay (?:here|quiet|put)|be here|let her|leave (?:her|it))\b/;
+
+export function isNarratedPause(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length === 0 || trimmed.length > 140) return false;
+  // One sentence. Two means she said something real alongside it.
+  if (trimmed.split(/[.!?]\s+\S/).length > 1) return false;
+  return NARRATED_PAUSE.test(trimmed.toLowerCase());
+}
+
+/**
  * visibleAssistantTexts(texts): the text parts of one assistant message
  * that should actually render, in order.
  *
@@ -62,6 +91,7 @@ export function visibleAssistantTexts(texts: readonly string[]): string[] {
     const trimmed = text.trim();
     if (trimmed.length === 0) continue;
     if (isStageDirection(trimmed)) continue;
+    if (isNarratedPause(trimmed)) continue;
     const key = trimmed.replace(/\s+/g, " ");
     if (seen.has(key)) continue;
     seen.add(key);

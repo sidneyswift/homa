@@ -2,8 +2,9 @@
 
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { Logo } from "../../components/brand/Logo";
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
-import { isStageDirection } from "./assistant-text";
+import { isNarratedPause, isStageDirection } from "./assistant-text";
 import { isHiddenDirective } from "../../lib/onboarding/directives";
 import {
   AttachmentReceiptChips,
@@ -175,8 +176,13 @@ function assistantItems(message: EveMessage): AssistantItem[] {
     if (part.type === "text") {
       const trimmed = part.text.trim();
       if (trimmed.length === 0) continue;
-      // Homa narrating her own silence is not something to show a parent.
-      if (isStageDirection(trimmed)) continue;
+      // Homa narrating her own silence is not something to show a
+      // parent, wrapped in asterisks or not. Both checks live here
+      // rather than behind visibleAssistantTexts because this loop needs
+      // the part index; keeping the predicates shared is what stops the
+      // two paths from drifting, and the drift is exactly how
+      // "I'll continue once she replies." reached a real screen.
+      if (isStageDirection(trimmed) || isNarratedPause(trimmed)) continue;
       const key = trimmed.replace(/\s+/g, " ");
       if (shownText.has(key)) continue;
       shownText.add(key);
@@ -583,7 +589,19 @@ export function MessageView({
   const steps = workedForSteps(message);
   if (items.length === 0 && steps.length === 0) return null;
   return (
-    <div className="flex flex-col items-start gap-3">
+    // The mark stays. It bobs through the wait and then settles here, in
+    // the same size and the same place, so the one thing on screen that
+    // is visibly HER does not disappear at the exact moment she starts
+    // speaking. Before this it vanished on arrival, which read as the
+    // logo going away rather than as a reply landing.
+    <div className="flex w-full items-start gap-2.5">
+      <span
+        aria-hidden="true"
+        className="mt-0.5 inline-flex shrink-0 opacity-70"
+      >
+        <Logo size={20} variant="mark" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
       <WorkedForLine steps={steps} seconds={workedForSeconds} />
       {items.map((item, index) => (
         <AssistantItemView
@@ -612,6 +630,7 @@ export function MessageView({
           dockedDetailPartKey={dockedDetailPartKey}
         />
       ))}
+      </div>
     </div>
   );
 }

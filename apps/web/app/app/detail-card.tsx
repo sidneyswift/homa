@@ -161,16 +161,25 @@ export function DetailCard({
 
   // Spent: the settled receipt every other finished card uses. Her
   // answers stay readable; nothing here is pressable.
-  if (saved !== null || !active) {
+  //
+  // Only a card that actually saved gets one. Deriving the receipt from
+  // "not active" instead put a green "Saved" chip on a card nobody had
+  // filled in, purely because a turn was running: a receipt claiming an
+  // effect that never happened, which is the one thing a receipt may
+  // never do.
+  if (saved !== null) {
     return (
       <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
         <span className="font-semibold text-sage">
           {isBasics ? "Saved" : "Added"}
         </span>
-        {saved ? <span className="truncate text-body">{saved}</span> : null}
+        <span className="truncate text-body">{saved}</span>
       </p>
     );
   }
+  // Superseded without ever being filled: she moved on and the card is
+  // stale. Say nothing rather than leave a dead form in scrollback.
+  if (!active) return null;
 
   return (
     <section

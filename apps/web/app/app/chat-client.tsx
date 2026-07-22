@@ -1093,9 +1093,14 @@ export function ChatClient({
   // during the map, which the React Compiler rejects and which breaks
   // silently the moment the list is rendered twice.
   const firstMessageIndex = transcript.findIndex((item) => item.kind === "message");
-  // The one facts card still taking answers. Inert while a turn runs,
-  // same as every other live card.
-  const activeDetail = busy ? null : latestDetailRequest(agent.data.messages);
+  // The one facts card still taking answers.
+  //
+  // NOT gated on busy, unlike the snap and question cards. Those go
+  // inert during a turn because their answers travel through the model,
+  // so taking one mid-turn would race it. This card posts to its own
+  // route and saves itself, so there is nothing to race: she can keep
+  // filling it in while Homa works, which is what she will try to do.
+  const activeDetail = latestDetailRequest(agent.data.messages);
   const dockedDetail = activeDetail;
   // The composer appears when there is something to reply to. Before
   // Homa has said anything there is not, and while a card is docked the
