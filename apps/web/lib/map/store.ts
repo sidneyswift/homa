@@ -41,6 +41,7 @@ import {
   type SubjectLessonSummaryCandidate,
 } from "../subject-lessons/summary-filter";
 import type { SubjectLessonSummary } from "../subject-lessons/types";
+import { purgeChildBlobs } from "./child-blobs";
 import { mapDb, type DbJson } from "./db";
 import { applyPlanEdits, describePlanEdits, type PlanEdit } from "./plan-edits";
 import {
@@ -391,31 +392,65 @@ export async function addChild(
  * answers, report, and plans (the "delete anytime" promise, kept). The
  * where clause carries the tenancy re-scope: a childId belonging to a
  * different family deletes nothing.
+ *
+ * The child's BYTES go too, and that half has to happen here because
+ * this is the only moment it is still possible. The cascade destroys
+ * `lesson_recordings` and with it every `lesson_segments.blob_url`, so
+ * the lesson ids are read inside the transaction, before the delete;
+ * afterwards nothing in the database can say where that audio lives and
+ * the 30-day TTL sweep can never reach it again. See lib/map/child-blobs.
+ *
+ * The purge runs after the commit and never blocks it. The row delete is
+ * the promise a parent can verify, so a Blob hiccup must not roll it
+ * back; it leaves a logged orphan instead of leaving the child.
  */
 export async function removeChild(
   familyId: string,
   childId: string,
   sql: MapDatabase = mapDb(),
+  /** Seam for the ordering test, which must not reach Vercel Blob. The
+   *  ordering is the entire fix, so it is worth being able to assert. */
+  purge: typeof purgeChildBlobs = purgeChildBlobs,
 ): Promise<boolean> {
-  return sql.begin(async (tx) => {
+  const outcome = await sql.begin(async (tx) => {
     await tx`
       select pg_advisory_xact_lock_shared(
         ${CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY}::bigint
       )
+    `;
+    // Read before the delete: the cascade is what makes these unfindable.
+    const lessons = await tx<{ id: string }[]>`
+      select id from public.lesson_recordings
+      where child_id = ${childId} and family_id = ${familyId}
     `;
     const rows = await tx<{ id: string }[]>`
       delete from public.children
       where id = ${childId} and family_id = ${familyId}
       returning id
     `;
-    if (rows.length === 0) return false;
+    if (rows.length === 0) return { removed: false, lessonIds: [] as string[] };
     await tx`
       update public.families
       set updated_at = now()
       where id = ${familyId}
     `;
-    return true;
+    return { removed: true, lessonIds: lessons.map((lesson) => lesson.id) };
   });
+
+  if (!outcome.removed) return false;
+  // The row is committed by here. Anything the purge does or fails to
+  // do must not turn a delete that already happened into a 502 for the
+  // parent who asked for it. purgeChildBlobs swallows its own errors;
+  // this belt is so that stays true if it ever stops being.
+  try {
+    await purge({ familyId, childId, lessonIds: outcome.lessonIds });
+  } catch (error) {
+    console.error(
+      `child blob purge threw for child ${childId}:`,
+      error instanceof Error ? error.message : "unknown",
+    );
+  }
+  return true;
 }
 
 /** True when the child exists and belongs to this family. */
