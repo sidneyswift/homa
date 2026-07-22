@@ -42,7 +42,7 @@ const addChildInput = z.object({
 
 export default defineTool({
   description:
-    "Add one child to this family, with their name and real birthday. Use when the parent introduces a child Homa does not have yet. Do not use to edit a child who already exists; that is update_child_profile.",
+    "Add one child to this family, with their name and real birthday. Use when the parent introduces a child Homa does not have yet, including when she names two or three in a single message: call this once per child rather than sending her back through a card for facts she already typed. Do not use to edit a child who already exists; that is update_child_profile.",
   inputSchema: addChildInput,
   async execute(input, ctx) {
     let access;
