@@ -33,7 +33,7 @@ const NO_CARD_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job", "subj
 
 const askForDetails = defineTool({
   description:
-    "Put up a small card of fields for facts you need exactly right, instead of asking for them in a paragraph. Use 'family_basics' once, early, for what to call her and which state she is in. Use 'child' when she mentions a child Homa does not have yet. She fills it in and it saves itself; you will hear what she entered. Do not ask for the same facts in text as well, and do not use this for anything you can simply ask about in conversation.",
+    "Put up a small card of fields for facts you need exactly right, instead of asking for them in a paragraph. Use 'family_basics' once, early, for what to call her and which state she is in. Use 'child' for one child Homa does not have yet, whether she brought the child up or you are turning to her kids for the first time. Say who the card is about in your own words BEFORE you call it: the card asks one question at a time and carries no heading, so a child card sent cold asks about a person nobody has named. She fills it in and it saves itself; you will hear what she entered. Do not ask for the same facts in text as well, and do not use this for anything you can simply ask about in conversation.",
   inputSchema: z.object({
     kind: z
       .enum(["family_basics", "child"])
@@ -45,7 +45,7 @@ const askForDetails = defineTool({
       .max(120)
       .optional()
       .describe(
-        "One short line above the fields, in your voice, if it genuinely helps. Usually leave it out: the fields speak for themselves and narrating them reads as a form.",
+        "One short line above the fields, in your voice. Leave it out for family_basics, where the fields speak for themselves and narrating them reads as a form. For a child, use it whenever your own words did not already say which child this is, because the fields alone cannot: they ask 'What is their name?' and 'their' has to point at somebody.",
       ),
   }),
   async execute(input) {
