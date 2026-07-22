@@ -3,6 +3,59 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Founder's first full walk: dead button root-caused, one-ask rule enforced, five-lens review
+
+Founder walked the whole flow (Sid, DC, child Story) and reported two
+things verbatim: "it wont let me click 'start the questions'" and "there
+should not be a start questions card AND a text input card (confusing)."
+
+**The dead button** (`8bdb3e0`): `.flow-step-in` animated a transform
+with fill-mode `both`; a fill that never ends keeps the transform
+applied forever, and a transformed element is the containing block for
+every `position:fixed` descendant, so the checklist takeover mounted at
+375x0. Proved with getBoundingClientRect, fixed twice over (fill mode
+`backwards` plus a portal to document.body), verified live on the
+founder's own stuck family. A five-lens review workflow independently
+reached the same diagnosis and falsified the first theory (a stale kids
+prop; the click path never reads it).
+
+**One ask per screen** (`8bdb3e0`, `2c0aa65`): the checklist invite now
+docks into the composer slot exactly as the facts card does, and the
+suggestion rail is gated out of onboarding and out of any card's turn
+at both the render and the generation layer. Riders: the dev toolbar
+sat at z-[60] OVER the takeover, putting the family-deleting "Restart
+onboarding" button on top of "Back to chat" (now z-40); the spent pill
+claimed "Questions started" before any answer existed (now "Questions
+ready"); the takeover's blank loading frame pulses; both exits say
+"back to chat"; the state code in her bubble became the state's name.
+
+**Voice leaks, fixed at source** (`3a6f461`): the fifth narrated-wait
+variant rode as paragraph two of a real reply, so filtering is now
+paragraph-level for trailing narration; "she can stop anywhere" reached
+the parent because the skill's own beat 5 said those words about her,
+and the model parroted the register; "anything I make her" traced to an
+instruction parenthetical that permitted guessing a child's pronouns.
+All three sources rewritten.
+
+**Escalated, not decided: requireFamily identity precedence.** The map
+resume cookie beats the authenticated session in lib/map/session.ts, so
+a signed-in parent carrying a stale anonymous cookie resolves to the
+wrong family, which is how a takeover can fail to find the child. The
+reviewer proposed session-first; that has its own wrong-family mode (a
+shared computer with one parent signed in hijacks another's anonymous
+walk INTO the signed-in family, writing rather than erring). Both
+orders misroute someone. Which one loses is policy: founder call,
+flagged in the session report, nothing changed.
+
+**Still open from the review, ranked but unbuilt:** the 33s and 44s
+opening turns (skill-load order and streaming are the levers; rendering
+the near-scripted opener instantly would reverse the no-deterministic-
+welcome ruling, founder call); a spent checklist pill is unclickable, so
+an interrupted parent has no path back to the questions; start_checklist
+writes "started" into the funnel record at invite time; bare "Worked on
+it" eyebrows over filtered turns; save_family_basics and
+save_homeschool_profile produce no receipt chips.
+
 ## 2026-07-22 · "whos name?" and the rule that guaranteed it
 
 Founder walked onboarding and asked, of the card's first child question,
