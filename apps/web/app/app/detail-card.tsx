@@ -23,6 +23,13 @@ import { Logo } from "../../components/brand/Logo";
  * The error state follows the copy kit's order: name it plainly, settle
  * the nerves, offer the next step. Never danger red, which is reserved
  * for account-level failure.
+ *
+ * ONE INPUT PER QUESTION (founder rule, 2026-07-22). Any card that asks
+ * for more than one thing asks for them one at a time. Two fields on
+ * screen at once is a form, and a form is the thing this whole rebuild
+ * exists to stop being. It applies to every card that collects, not just
+ * these two, so a new card kind adds entries to FIELDS rather than a
+ * second field to a step.
  */
 
 export type DetailCardKind = "family_basics" | "child";
@@ -77,7 +84,6 @@ export function latestDetailRequest(
 
 const FIELD_CLASS =
   "mt-1 w-full rounded-md border border-border bg-card px-3 py-2.5 text-base text-strong transition-colors placeholder:text-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
-const LABEL_CLASS = "text-sm font-medium text-strong";
 
 function browserTimeZone(): string | undefined {
   try {
@@ -86,6 +92,60 @@ function browserTimeZone(): string | undefined {
     return undefined;
   }
 }
+
+/**
+ * A date the way a parent would say it, for the bubble her answer becomes.
+ *
+ * Built from the string's own parts rather than through `new Date(iso)`,
+ * which reads a bare date as UTC midnight and then renders it a day early
+ * anywhere west of Greenwich. A birthday is the one date a parent will
+ * notice being wrong.
+ */
+export function spokenDate(iso: string | undefined): string {
+  if (!iso) return "";
+  const [year, month, day] = iso.split("-").map(Number);
+  if (!year || !month || !day) return iso;
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+/** One question, one input. Order is the order she is asked. */
+export interface DetailField {
+  key: string;
+  label: string;
+  hint?: string;
+  kind: "text" | "state" | "date";
+  autoComplete?: string;
+}
+
+export const FIELDS: Record<DetailCardKind, DetailField[]> = {
+  family_basics: [
+    {
+      key: "callMeName",
+      label: "What should I call you?",
+      kind: "text",
+      autoComplete: "given-name",
+    },
+    {
+      key: "usState",
+      label: "Which state are you in?",
+      hint: "This decides which homeschool rules I follow for you.",
+      kind: "state",
+    },
+  ],
+  child: [
+    { key: "childName", label: "What is their name?", kind: "text" },
+    {
+      key: "birthDate",
+      label: "When were they born?",
+      hint: "The real date, so the questions match their age in months.",
+      kind: "date",
+    },
+  ],
+};
 
 export function DetailCard({
   card,
@@ -104,21 +164,25 @@ export function DetailCard({
   /** Hands the conversation back, with what she actually entered. */
   onSaved?: (summary: string) => void;
 }) {
-  const [callMeName, setCallMeName] = useState("");
-  const [usState, setUsState] = useState("");
-  const [childName, setChildName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [stepIndex, setStepIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isBasics = card.kind === "family_basics";
-  const ready = isBasics
-    ? callMeName.trim().length > 0 && usState.length === 2
-    : childName.trim().length > 0 && birthDate.length === 10;
+  const fields = FIELDS[card.kind];
+  const field = fields[Math.min(stepIndex, fields.length - 1)];
+  const value = values[field.key] ?? "";
+  const isLast = stepIndex === fields.length - 1;
+  const ready =
+    field.kind === "state"
+      ? value.length === 2
+      : field.kind === "date"
+        ? value.length === 10
+        : value.trim().length > 0;
 
-  async function submit(): Promise<void> {
-    if (!ready || saving) return;
+  async function save(all: Record<string, string>): Promise<void> {
     setSaving(true);
     setError(null);
     try {
@@ -127,8 +191,8 @@ export function DetailCard({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              callMeName: callMeName.trim(),
-              usState,
+              callMeName: all.callMeName?.trim(),
+              usState: all.usState,
               timeZone: browserTimeZone(),
             }),
           })
@@ -136,27 +200,39 @@ export function DetailCard({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              name: childName.trim(),
-              birthDate,
+              name: all.childName?.trim(),
+              birthDate: all.birthDate,
               interests: [],
             }),
           });
       const data = (await response.json()) as { ok?: boolean };
       if (!response.ok || !data.ok) throw new Error("save failed");
       const summary = isBasics
-        ? `${callMeName.trim()}, ${usState}`
-        : `${childName.trim()}, born ${birthDate}`;
+        ? `${all.callMeName?.trim()}, ${all.usState}`
+        : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
       setSaved(summary);
       onSaved?.(summary);
     } catch {
-      setError(
-        isBasics
-          ? "That did not save. Nothing is lost, you can try again."
-          : "That did not save. Nothing is lost, you can try again.",
-      );
+      setError("That did not save. Nothing is lost, you can try again.");
+      // Back to the last question so the button she just pressed is the
+      // one that retries, rather than stranding her on a finished card.
+      setStepIndex(fields.length - 1);
     } finally {
       setSaving(false);
     }
+  }
+
+  function advance(): void {
+    if (!ready || saving) return;
+    if (!isLast) {
+      setStepIndex(stepIndex + 1);
+      return;
+    }
+    void save(values);
+  }
+
+  function setValue(next: string): void {
+    setValues((current) => ({ ...current, [field.key]: next }));
   }
 
   // Spent: the settled receipt every other finished card uses. Her
@@ -200,76 +276,84 @@ export function DetailCard({
         <p className={`text-sm text-muted ${docked ? "" : "mt-2"}`}>{card.intro}</p>
       ) : null}
 
-      <div className={`flex flex-col gap-3 ${docked ? "" : "mt-3.5"}`}>
-        {isBasics ? (
-          <>
-            <label className="block">
-              <span className={LABEL_CLASS}>What should I call you?</span>
-              <input
-                className={FIELD_CLASS}
-                value={callMeName}
-                onChange={(event) => setCallMeName(event.target.value)}
-                autoComplete="given-name"
-                maxLength={60}
-              />
-            </label>
-            <label className="block">
-              <span className={LABEL_CLASS}>Your state</span>
-              <select
-                className={FIELD_CLASS}
-                value={usState}
-                onChange={(event) => setUsState(event.target.value)}
-              >
-                <option value="">Pick one</option>
-                {US_STATES.map((state) => (
-                  <option key={state.code} value={state.code}>
-                    {state.name}
-                  </option>
-                ))}
-              </select>
-              <span className="mt-1 block text-xs text-subtle">
-                This decides which homeschool rules I follow for you.
-              </span>
-            </label>
-          </>
-        ) : (
-          <>
-            <label className="block">
-              <span className={LABEL_CLASS}>Their name</span>
-              <input
-                className={FIELD_CLASS}
-                value={childName}
-                onChange={(event) => setChildName(event.target.value)}
-                maxLength={60}
-              />
-            </label>
-            <label className="block">
-              <span className={LABEL_CLASS}>Their birthday</span>
-              <input
-                className={FIELD_CLASS}
-                type="date"
-                value={birthDate}
-                max={new Date().toISOString().slice(0, 10)}
-                onChange={(event) => setBirthDate(event.target.value)}
-              />
-              <span className="mt-1 block text-xs text-subtle">
-                The real date, so the questions match their age in months.
-              </span>
-            </label>
-          </>
-        )}
+      {/* One question, one input (founder rule, 2026-07-22). Two fields
+          at once is a form; one is a question. The container holds a
+          fixed height so swapping the field never moves the button out
+          from under her thumb, the same no-jump rule the checklist card
+          settled on. */}
+      <div
+        className={`flex min-h-[5.5rem] flex-col justify-center ${docked ? "" : "mt-3.5"}`}
+      >
+        <label className="block" key={field.key}>
+          <span className="text-sm font-medium text-strong">{field.label}</span>
+          {field.kind === "state" ? (
+            <select
+              autoFocus
+              className={FIELD_CLASS}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+            >
+              <option value="">Pick one</option>
+              {US_STATES.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              autoFocus
+              className={FIELD_CLASS}
+              type={field.kind === "date" ? "date" : "text"}
+              value={value}
+              maxLength={field.kind === "date" ? undefined : 60}
+              max={field.kind === "date" ? new Date().toISOString().slice(0, 10) : undefined}
+              autoComplete={field.autoComplete}
+              onChange={(event) => setValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") return;
+                event.preventDefault();
+                advance();
+              }}
+            />
+          )}
+          {field.hint ? (
+            <span className="mt-1 block text-xs text-subtle">{field.hint}</span>
+          ) : null}
+        </label>
       </div>
 
-      {error ? <p className="mt-3 text-sm text-body">{error}</p> : null}
+      {error ? <p className="mt-1 text-sm text-body">{error}</p> : null}
 
       <button
         type="button"
         disabled={!ready || saving || onSaved === undefined}
-        onClick={() => void submit()}
-        className="mt-4 flex min-h-12 w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={advance}
+        className="mt-3 flex min-h-12 w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? "Saving…" : isBasics ? "That's me" : "Add them"}
+        {saving ? "Saving…" : isLast ? (isBasics ? "That's me" : "Add them") : "Next"}
       </button>
+
+      {fields.length > 1 ? (
+        // Where she is, without a count. "2 of 2" turns two questions
+        // into a form with a length; two dots just say there is one more.
+        <div className="mt-3 flex justify-center gap-1.5" aria-hidden="true">
+          {fields.map((entry, index) => (
+            <span
+              key={entry.key}
+              // bg-border, not bg-border-subtle: subtle is the track
+              // colour for a progress bar, where a filled portion sits on
+              // top of it and gives it its edge. A lone dot has no such
+              // help, and at stone-200 on a white card it disappeared
+              // entirely, which turned "you are on the second of two" back
+              // into "there is one question".
+              className={`h-1.5 w-1.5 rounded-pill transition-colors duration-(--dur-base) ${
+                index === stepIndex ? "bg-brand" : "bg-border"
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

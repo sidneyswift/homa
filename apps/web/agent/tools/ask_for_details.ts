@@ -13,6 +13,11 @@ import { z } from "zod";
  * every one of them a chance to answer half. The card takes them in one
  * pass, saves as she fills it, and costs no model turn to do it.
  *
+ * One input per question (founder rule, 2026-07-22): the card asks for
+ * one thing at a time, whatever it is collecting. So a card is never
+ * "the form for X", it is a short run of single questions, and the
+ * number of them is not something to mention to her.
+ *
  * It is a UI contract and nothing else. No family data is read, nothing
  * is written, and no familyId is touched here: the card posts to its own
  * authenticated route, exactly as the checklist's taps already do. Same
